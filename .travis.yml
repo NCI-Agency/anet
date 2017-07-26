@@ -22,21 +22,20 @@ cache:
     - client/node_modules
 
 before_install:
-  - docker run --name mssql-server -v ${PWD}:/hostdata -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=P@ssw0rd' -p 1433:1433 -d microsoft/mssql-server-linux bin/sh -c "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y curl && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server.list | tee /etc/apt/sources.list.d/mssql-server.list && apt-get update && apt-get install -y mssql-server-fts && /opt/mssql/bin/sqlservr"
+  - docker run --name mssql-server -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=P@ssw0rd" -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=P@ssw0rd" -d -p 1433:1433 docker pull ncia/anet-mssql-linux
   - nvm install node
   - nvm use node
   - cd client
   - npm install
   - npm run build
   - cd ..
-  - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P P@ssw0rd -Q "CREATE DATABASE testanet"
   - touch localSettings.gradle
   - echo "run.environment(\"DB_DRIVER\",\"sqlserver\")" >> localSettings.gradle
   - echo "run.environment(\"ANET_DB_SERVER\",\"localhost\")"  >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_NAME\",\"testanet\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_USERNAME\",\"SA\")" >> localSettings.gradle
+  - echo "run.environment(\"ANET_DB_NAME\",\"testAnet\")" >> localSettings.gradle
+  - echo "run.environment(\"ANET_DB_USERNAME\",\"anetUser\")" >> localSettings.gradle
   - echo "run.environment(\"ANET_DB_PASSWORD\",\"P@ssw0rd\")" >> localSettings.gradle
   - ./gradlew dbMigrate
-  - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P P@ssw0rd -d testanet -i /hostdata/insertBaseData.sql
+  - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P P@ssw0rd -d testAnet -i /hostdata/insertBaseData.sql
 
 
