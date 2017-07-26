@@ -22,7 +22,7 @@ cache:
     - client/node_modules
 
 before_install:
-  - docker run --name mssql-server -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=P@ssw0rd" -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=P@ssw0rd" -d -p 1433:1433 docker pull ncia/anet-mssql-linux
+  - docker run --name mssql-server -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=P@ssw0rd" -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=P@ssw0rd" -d -p 1433:1433 ncia/anet-mssql-linux
   - nvm install node
   - nvm use node
   - cd client
