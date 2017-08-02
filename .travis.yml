@@ -27,12 +27,12 @@ before_install:
   - nvm use node
   - |
     cat <<EOF > localSettings.gradle
-      run.environment("DB_DRIVER","sqlserver")
-      run.environment("ANET_DB_SERVER","localhost")
-      run.environment("ANET_DB_NAME","testAnet")
-      run.environment("ANET_DB_USERNAME","sa")
-      run.environment("ANET_DB_PASSWORD","P@ssw0rd")
-    EOF
+    run.environment("DB_DRIVER","sqlserver")
+    run.environment("ANET_DB_SERVER","localhost")
+    run.environment("ANET_DB_NAME","testAnet")
+    run.environment("ANET_DB_USERNAME","sa")
+    run.environment("ANET_DB_PASSWORD","P@ssw0rd")
+  EOF
 
 #By default travis runs gradle assemble in install. This is too early as we don't want to build yet
 install:
