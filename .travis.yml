@@ -25,10 +25,6 @@ before_install:
   - docker run --name mssql-server -v ${PWD}:/hostdata -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=P@ssw0rd" -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=P@ssw0rd" -d -p 1433:1433 ncia/anet-mssql-linux
   - nvm install node
   - nvm use node
-  - cd client
-  - npm install
-  - npm run build
-  - cd ..
   - |
     cat <<EOF > localSettings.gradle
       run.environment("DB_DRIVER","sqlserver")
@@ -38,7 +34,16 @@ before_install:
       run.environment("ANET_DB_PASSWORD","P@ssw0rd")
     EOF
 
+#By default travis runs gradle assemble in install. This is too early as we don't want to build yet
+install:
+  - cd client
+  - npm install
+  - cd ..
+
 script:
+  - cd client
+  - npm run build
+  - cd ..
   - ./gradlew dbMigrate
   - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P P@ssw0rd -d testAnet -i /hostdata/insertBaseData.sql
   - ./gradlew check
