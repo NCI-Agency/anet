@@ -33,12 +33,14 @@ script:
   - cd client
   - npm run build
   - cd ..
-  - touch localSettings.gradle
-  - echo "run.environment(\"DB_DRIVER\",\"sqlserver\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_SERVER\",\"localhost\")"  >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_NAME\",\"testAnet\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_USERNAME\",\"sa\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_PASSWORD\",\"P@ssw0rd\")" >> localSettings.gradle
+  - |
+    cat <<EOF > localSettings.gradle
+      run.environment("DB_DRIVER","sqlserver")
+      run.environment("ANET_DB_SERVER","localhost")
+      run.environment("ANET_DB_NAME","testAnet")
+      run.environment("ANET_DB_USERNAME","sa")
+      run.environment("ANET_DB_PASSWORD","P@ssw0rd")
+    EOF
   - ./gradlew dbMigrate
   - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P P@ssw0rd -d testAnet -i /hostdata/insertBaseData.sql
   - ./gradlew check
