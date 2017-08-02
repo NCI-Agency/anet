@@ -38,5 +38,5 @@ before_install:
   - ./gradlew dbMigrate
   - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P P@ssw0rd -d testAnet -i /hostdata/insertBaseData.sql
 
-after_failure:
+after_script:
   - docker logs mssql-server
