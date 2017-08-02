@@ -27,10 +27,6 @@ before_install:
   - nvm use node
   - cd client
   - npm install
-  - cd ..
-
-script:
-  - cd client
   - npm run build
   - cd ..
   - |
@@ -41,6 +37,8 @@ script:
       run.environment("ANET_DB_USERNAME","sa")
       run.environment("ANET_DB_PASSWORD","P@ssw0rd")
     EOF
+
+script:
   - ./gradlew dbMigrate
   - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P P@ssw0rd -d testAnet -i /hostdata/insertBaseData.sql
   - ./gradlew check
