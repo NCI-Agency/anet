@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$ACCEPT_EULA" -ne "Y" ]; then
+if [ "$ACCEPT_EULA" != "y" ] && [ "$ACCEPT_EULA" != "Y" ]; then
     echo "Need to accept MS SQL's EULA and set ACCEPT_EULA to Y"
     exit 1
 fi  
