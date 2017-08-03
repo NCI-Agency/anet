@@ -28,6 +28,7 @@ before_install:
   - echo "run.environment(\"DB_DRIVER\",\"sqlserver\")" > localSettings.gradle
   - echo "run.environment(\"ANET_DB_SERVER\",\"localhost\")"  >> localSettings.gradle
   - echo "run.environment(\"ANET_DB_NAME\",\"testAnet\")" >> localSettings.gradle
+# @vassil fixme using sa account due to race condition with delayed user account creation in docker image.
   - echo "run.environment(\"ANET_DB_USERNAME\",\"sa\")" >> localSettings.gradle
   - echo "run.environment(\"ANET_DB_PASSWORD\",\"P@ssw0rd\")" >> localSettings.gradle
 
