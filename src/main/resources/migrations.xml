@@ -652,4 +652,10 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="36" author="evdhoudt" dbms="mssql" >
+		<sql dbms="mssql">
+			INSERT INTO adminSettings ([key], value) VALUES ('GENERAL_BANNER_TEXT', '');
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
