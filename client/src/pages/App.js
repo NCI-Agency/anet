@@ -3,6 +3,7 @@ import Page from 'components/Page'
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import SecurityBanner from 'components/SecurityBanner'
+import GeneralBanner from 'components/GeneralBanner'
 import Header from 'components/Header'
 import Nav from 'components/Nav'
 import NoPositionBanner from 'components/NoPositionBanner'
@@ -13,6 +14,8 @@ import API from 'api'
 import {Person, Organization} from 'models'
 
 import dictionary from 'resources/dictionary.json'
+
+const GENERAL_BANNER_TEXT = 'GENERAL_BANNER_TEXT'
 
 export default class App extends Page {
 	static PagePropTypes = {
@@ -107,16 +110,20 @@ export default class App extends Page {
 	render() {
 		let pageProps = this.props.children.type.pageProps || {}
 		let currentUser = this.state.currentUser
+		let banner = {
+			message: this.state.settings[GENERAL_BANNER_TEXT],
+			statusColor: 'alert-info'
+		}
 
 		return (
 			<div className="anet">
 				<SecurityBanner location={this.props.location} />
-
 				<Header minimalHeader={pageProps.minimalHeader} />
 
 				{currentUser && currentUser.position && currentUser.position.id === 0 && !currentUser.isNewUser() && <NoPositionBanner />}
 
 				<Grid componentClass="section" bsClass={pageProps.fluidContainer ? 'container-fluid' : 'container'}>
+					<Row><Col xs={12}><GeneralBanner banner={banner} /></Col></Row>
 					{pageProps.useNavigation === false
 						? <Row><Col xs={12}>{this.props.children}</Col></Row>
 						: <Row>
