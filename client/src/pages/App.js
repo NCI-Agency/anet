@@ -4,7 +4,6 @@ import {Grid, Row, Col} from 'react-bootstrap'
 
 import TopBar from 'components/TopBar'
 import Nav from 'components/Nav'
-import NoPositionBanner from 'components/NoPositionBanner'
 import History from 'components/History'
 import dict from 'dictionary'
 
@@ -107,7 +106,6 @@ export default class App extends Page {
 
 	render() {
 		let pageProps = this.props.children.type.pageProps || {}
-		let currentUser = this.state.currentUser
 		
 		let bannerOptions = {
 			message: this.state.settings[GENERAL_BANNER_TEXT],
@@ -120,8 +118,6 @@ export default class App extends Page {
 					banner={bannerOptions}
 					minimalHeader={pageProps.minimalHeader}
 					location={this.props.location} />
-
-				{currentUser && currentUser.position && currentUser.position.id === 0 && !currentUser.isNewUser() && <NoPositionBanner />}
 
 				<Grid componentClass="section" bsClass={pageProps.fluidContainer ? 'container-fluid' : 'container'}>
 					{pageProps.useNavigation === false
