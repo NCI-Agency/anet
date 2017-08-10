@@ -1,6 +1,5 @@
 body {
 	background: #f2f2f2;
-	margin-top: 152px;
 }
 
 body.no-position {
@@ -198,9 +197,6 @@ fieldset.danger {
 
 .banner {
 	color: #fff;
-	position: fixed;
-	top: 0;
-	left: 0;
 	width: 100%;
 	font-size: 18px;
 	text-align: center;
@@ -627,6 +623,12 @@ header.searchPagination {
 }
 .only-show-for-print {
 	display: none;
+}
+
+.alert.general-banner {
+	padding: 7px;
+	border-radius: 0;
+	margin-bottom: 0;
 }
 
 @media print {
