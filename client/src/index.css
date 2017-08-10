@@ -2,10 +2,6 @@ body {
 	background: #f2f2f2;
 }
 
-body.no-position {
-	margin-top: 178px;
-}
-
 /* this makes jump links work correctly with the header overlaying content */
 *[data-jumptarget]:before {
   display: block;
