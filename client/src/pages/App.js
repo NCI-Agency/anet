@@ -12,8 +12,6 @@ import {Person, Organization} from 'models'
 
 import dictionary from 'resources/dictionary.json'
 
-const GENERAL_BANNER_TEXT = 'GENERAL_BANNER_TEXT'
-
 export default class App extends Page {
 	static PagePropTypes = {
 		useNavigation: PropTypes.bool,
@@ -106,16 +104,9 @@ export default class App extends Page {
 
 	render() {
 		let pageProps = this.props.children.type.pageProps || {}
-		
-		let bannerOptions = {
-			message: this.state.settings[GENERAL_BANNER_TEXT],
-			statusColor: 'alert-info'
-		} || {}
-
 		return (
 			<div className="anet">
 				<TopBar
-					banner={bannerOptions}
 					minimalHeader={pageProps.minimalHeader}
 					location={this.props.location} />
 
