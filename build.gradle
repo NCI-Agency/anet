@@ -14,8 +14,11 @@ apply plugin: 'idea'
 apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'org.kordamp.markdown.convert'
+apply plugin: 'com.bmuschko.docker-java-application'
 
 apply from: 'localSettings.gradle'
+
+sourceCompatibility = 1.8
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -56,6 +59,7 @@ dependencies {
 def proc = "git describe".execute(null, projectDir);
 proc.waitFor();
 project.version = proc.text.trim();
+project.group = "ncia"
 
 mainClassName = "mil.dds.anet.AnetApplication"
 
@@ -149,7 +153,20 @@ buildscript {
   }
   dependencies {
     classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
+	classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
  }
+}
+
+docker {
+    javaApplication {
+        baseImage = 'openjdk:8-jre'
+        maintainer = 'Vassil Iordanov "vassil.iordanov@gmail.com"'
+        ports = [80, 443]
+        tag = 'ncia/anet-app-server'
+		exec {
+            entryPoint "/$project.name-$project.version/bin/anet server anet.yaml"
+        }
+    }
 }
 
 startScripts {
