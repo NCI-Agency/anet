@@ -17,6 +17,7 @@ RUN export DEBIAN_FRONTEND=noninteractive ACCEPT_EULA=Y && \
     
 
 ADD entrypoint.sh /opt/
+ADD waitTillServiceStarted.sh /opt/
 
 EXPOSE 1433
 
