@@ -13,7 +13,12 @@ fi
 mkdir -p /var/opt/mssql
 /opt/mssql/bin/sqlservr &
 
-./waitTillServiceStarted.sh
+for i in {60..0}; do
+  if /opt/mssql-tools/bin/sqlcmd -U SA -P "$SA_PASSWORD" -Q 'SELECT 1;' &> /dev/null; then
+    break
+  fi
+  sleep 1
+done
 
 if [ -z "$DB_NAME" ]; then
     echo "Need to set DB_NAME"

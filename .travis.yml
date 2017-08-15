@@ -41,7 +41,7 @@ script:
   - cd client
   - npm run build
   - cd ..
-  - docker exec -ti mssql-server -e "SA_PASSWORD=P@ssw0rd" /var/opt/mssql/waitTillServiceStarted.sh
+  - docker exec -ti -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=P@ssw0rd" mssql-server /var/opt/mssql/waitTillServiceStarted.sh
   - ./gradlew dbMigrate
   - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P P@ssw0rd -d testAnet -i /hostdata/insertBaseData.sql
   - ./gradlew check
