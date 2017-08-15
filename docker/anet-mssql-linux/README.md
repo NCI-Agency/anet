@@ -31,7 +31,7 @@ docker exec -ti \
       -e "DB_NAME=dbName" \
       -e "DB_USER=dbUserName" \
       -e "DB_USER_PASSWORD=password" \
-      mssql-server /var/opt/mssql/waitTillServiceStarted.sh
+      mssql-server /opt/waitTillServiceStarted.sh
 ```
 
 
