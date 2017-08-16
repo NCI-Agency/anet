@@ -15,6 +15,7 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'org.kordamp.markdown.convert'
 apply plugin: 'com.bmuschko.docker-java-application'
+apply plugin: "se.bjurr.gitchangelog.git-changelog-gradle-plugin"
 
 apply from: 'localSettings.gradle'
 
@@ -154,6 +155,11 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	targetContainerId { "anet-mssql-server" }
 }
 
+task changelog (type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
+ 	file = new File("${buildDir}/resources/main/assets/client/changelog.html");
+ 	templateContent = file('docs/changelog.mustache').getText('UTF-8');
+}
+
 //Configure the Java Checkstyle settings.  Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('gradle/checkstyle.xml')
@@ -185,6 +191,7 @@ buildscript {
   dependencies {
     classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
 	classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
+	classpath "gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.50"
  }
 }
 
