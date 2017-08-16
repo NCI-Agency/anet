@@ -27,7 +27,7 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-	// The production code uses the SLF4J logging API at compile time
+	// The production code uses the SLF4J logging API at compile t	e
 	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.0.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-jdbi', version: '1.0.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.0.2'
@@ -121,6 +121,37 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	environment(run.environment)
 	main = 'mil.dds.anet.AnetApplication'
 	args = ["db","drop-all","--confirm-delete-everything","anet.yml"]
+}
+
+task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	repository = "ncia/anet-mssql-linux"
+	description = "Pulls a docker image for the ANET DB from " + repository
+	tag = "latest"
+}
+
+task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	imageId = dockerPullDB.getImageId()
+	containerName = "anet-mssql-server"
+	description = "Creates an ANET MS SQL DB container named " + containerName
+	binds = [projectDir:"/hostdata"] 
+	println env
+	portBindings = ["1433:"+run.environment["ANET_DB_PORT"]]
+}
+
+// need to make this invoke dbCreateContainer if there is no anet-mssql-server and possibly get newer image if available
+task dockerStartDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	description = "Starts anet-mssql-server container"
+	targetContainerId { "anet-mssql-server" }
+}
+
+task dockerStopDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	description = "Stops anet-mssql-server container"
+	targetContainerId { "anet-mssql-server" }
+}
+
+task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	description = "Removes anet-mssql-server container"
+	targetContainerId { "anet-mssql-server" }
 }
 
 //Configure the Java Checkstyle settings.  Run with ./gradlew check
