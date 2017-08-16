@@ -27,7 +27,7 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-	// The production code uses the SLF4J logging API at compile t	e
+	// The production code uses the SLF4J logging API at compile time
 	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.0.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-jdbi', version: '1.0.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.0.2'
