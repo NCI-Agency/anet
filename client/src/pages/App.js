@@ -107,6 +107,8 @@ export default class App extends Page {
 		return (
 			<div className="anet">
 				<TopBar
+					currentUser={this.state.currentUser}
+					settings={this.state.settings}
 					minimalHeader={pageProps.minimalHeader}
 					location={this.props.location} />
 
