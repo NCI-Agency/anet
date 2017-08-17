@@ -15,6 +15,19 @@ run.environment("ANET_DB_PASSWORD", "P@ssw0rd")
 run.environment("ANET_DB_PORT", 1433)
   ```
 
+Optionally, if you wish to mount additional volumes in the container
+(e.g. to persist the database outside the container), add a line:
+
+  ```java
+run.environment("DOCKER_MOUNTS", ["/files/mssql": "/var/opt/mssql", "/files/home": "/home"])
+  ```
+
+The value of the `DOCKER_MOUNTS` property is a key-value map: a comma-separated
+list of colon-separated volume mounts `"/source": "/destination"`, with
+`/source` a local directory on your system, and `/destination` the mount point
+inside the container.
+Note that these are only applied at container creation time!
+
 
 ## ANET app container manipulations
 
@@ -43,16 +56,6 @@ To create a db container from the latest mssql image:
   ```sh
 ./gradlew dockerCreateDB
   ```
-
-If you wish to mount additional volumes in the container (e.g. to persist the
-database outside the container), specify them at creation time like so:
-  ```sh
-./gradlew dockerCreateDB -Pmounts=/files/mssql:/var/opt/mssql,/files/home:/home
-  ```
-
-The value of the `mounts` property is a comma-separated list of colon-separated
-volume mounts `/source:/destination`, with `/source` a local directory on your
-system, and `/destination` the mount point inside the container.
 
 ### Start the db container
 
