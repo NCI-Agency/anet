@@ -36,6 +36,7 @@ install:
   - ./gradlew npmInstall
 
 script:
+  - docker exec -ti -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=Test-P@ssw0rd" anet-mssql-server /opt/waitTillServiceStarted.sh
   - ./gradlew dbMigrate
   - docker exec -ti anet-mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P 'Test-P@ssw0rd' -d testAnet -i /hostdata/insertBaseData.sql
   - ./gradlew check
