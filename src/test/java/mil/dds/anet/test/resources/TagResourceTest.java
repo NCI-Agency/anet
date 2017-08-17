@@ -3,6 +3,8 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
@@ -65,8 +67,20 @@ public class TagResourceTest extends AbstractResourceTest {
 	@Test
 	public void tagListTest() throws UnsupportedEncodingException {
 		// All
-		final TagList tagList = httpQuery(String.format("/api/tags/"), admin).get(TagList.class);
+		final TagList tagList = httpQuery("/api/tags/", admin).get(TagList.class);
 		assertThat(tagList).isNotNull();
+	}
+
+	@Test
+	public void tagSearchTest() throws UnsupportedEncodingException {
+		// Search for a tag from the initial data
+		final TagList tagList  = httpQuery(String.format("/api/tags/search?text=%s",
+				URLEncoder.encode("bribery", "UTF-8")), admin)
+				.get(TagList.class);
+		assertThat(tagList).isNotNull();
+		final List<Tag> tags = tagList.getList();
+		assertThat(tags).isNotNull();
+		assertThat(tags.size()).isGreaterThan(0);
 	}
 
 }

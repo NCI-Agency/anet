@@ -60,7 +60,13 @@ export default class AdvancedSearch extends Component {
 				Atmosphere: <SelectSearchFilter
 					queryKey="atmosphere"
 					values={["POSITIVE","NEUTRAL","NEGATIVE"]}
-				/>
+				/>,
+				Tag: <AutocompleteFilter
+					queryKey="tagId"
+					valueKey="name"
+					placeholder="Filter reports by tag..."
+					url="/api/tags/search"
+				/>,
 			}
 		}
 

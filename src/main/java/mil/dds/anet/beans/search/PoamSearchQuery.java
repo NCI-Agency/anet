@@ -2,28 +2,12 @@ package mil.dds.anet.beans.search;
 
 import mil.dds.anet.beans.Poam.PoamStatus;
 
-public class PoamSearchQuery implements ISearchQuery {
+public class PoamSearchQuery extends AbstractSearchQuery {
 
-	String text;
 	Integer responsibleOrgId;
 	Boolean includeChildrenOrgs;
 	String category;
 	PoamStatus status;
-	int pageNum;
-	int pageSize;
-	
-	public PoamSearchQuery() { 
-		this.pageNum = 0;
-		this.pageSize = 10;
-	}
-	
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
 
 	public Integer getResponsibleOrgId() {
 		return responsibleOrgId;
@@ -57,27 +41,6 @@ public class PoamSearchQuery implements ISearchQuery {
 		this.status = status;
 	}
 
-	@Override
-	public int getPageNum() {
-		return pageNum;
-	}
-	
-	@Override
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
-	}
-	
-	@Override
-	public int getPageSize() {
-		return pageSize;
-	}
-	
-	@Override
-	public void setPageSize(int pageSize) {
-		if (pageSize == 0) { return; } // that makes no sense. 
-		this.pageSize = pageSize;
-	}
-	
 	public static PoamSearchQuery withText(String text, int pageNum, int pageSize) {
 		PoamSearchQuery query = new PoamSearchQuery();
 		query.setText(text);

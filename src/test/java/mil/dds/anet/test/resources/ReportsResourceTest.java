@@ -824,4 +824,19 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		int endCt = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(authurOrgId)).findFirst().get().getReleased();
 		assertThat(startCt).isEqualTo(endCt - 1);
 	}
+
+	@Test
+	public void testTagSearch() {
+		final ReportSearchQuery tagQuery = new ReportSearchQuery();
+		tagQuery.setText("bribery");
+		final ReportList taggedReportList = httpQuery("/api/reports/search", admin).post(Entity.json(tagQuery), ReportList.class);
+		assertThat(taggedReportList).isNotNull();
+		final List<Report> taggedReports = taggedReportList.getList();
+		for (Report rpt : taggedReports) {
+			rpt.loadTags();
+			assertThat(rpt.getTags()).isNotNull();
+			assertThat(rpt.getTags().stream().filter(o -> o.getName().equals("bribery"))).isNotEmpty();
+		}
+	}
+
 }

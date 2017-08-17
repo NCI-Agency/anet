@@ -8,12 +8,11 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 
-public class ReportSearchQuery implements ISearchQuery {
+public class ReportSearchQuery extends AbstractSearchQuery {
 
 	public enum ReportSearchSortBy { CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT } 
-	
+
 	Integer authorId;
-	String text;
 	DateTime engagementDateStart;
 	DateTime engagementDateEnd;
 	DateTime createdAtStart;
@@ -38,16 +37,13 @@ public class ReportSearchQuery implements ISearchQuery {
 	Integer pendingApprovalOf;
 	List<ReportState> state;
 	ReportCancelledReason cancelledReason;
+	private Integer tagId;
 
 	ReportSearchSortBy sortBy;
 	SortOrder sortOrder;
-	
-	int pageNum;
-	int pageSize;
-	
-	public ReportSearchQuery() { 
-		this.pageNum = 0;
-		this.pageSize = 10;
+
+	public ReportSearchQuery() {
+		super();
 		this.sortBy = ReportSearchSortBy.CREATED_AT;
 		this.sortOrder = SortOrder.DESC;
 	}
@@ -58,14 +54,6 @@ public class ReportSearchQuery implements ISearchQuery {
 
 	public void setAuthorId(Integer authorId) {
 		this.authorId = authorId;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
 	}
 
 	public DateTime getEngagementDateStart() {
@@ -220,6 +208,14 @@ public class ReportSearchQuery implements ISearchQuery {
 		this.cancelledReason = cancelledReason;
 	}
 
+	public Integer getTagId() {
+		return tagId;
+	}
+
+	public void setTagId(Integer tagId) {
+		this.tagId = tagId;
+	}
+
 	public ReportSearchSortBy getSortBy() {
 		return sortBy;
 	}
@@ -236,27 +232,6 @@ public class ReportSearchQuery implements ISearchQuery {
 		this.sortOrder = sortOrder;
 	}
 
-	@Override
-	public int getPageNum() {
-		return pageNum;
-	}
-	
-	@Override
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
-	}
-	
-	@Override
-	public int getPageSize() {
-		return pageSize;
-	}
-	
-	@Override
-	public void setPageSize(int pageSize) {
-		if (pageSize == 0) { return; } // that makes no sense. 
-		this.pageSize = pageSize;
-	}
-	
 	public static ReportSearchQuery withText(String text, int pageNum, int pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setText(text);
@@ -264,5 +239,5 @@ public class ReportSearchQuery implements ISearchQuery {
 		query.setPageSize(pageSize);
 		return query;
 	}
-	
+
 }

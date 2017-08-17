@@ -31,9 +31,13 @@ public class MssqlReportSearcher implements IReportSearcher {
 	
 	public ReportList runSearch(ReportSearchQuery query, Handle dbHandle, Person user) { 
 		StringBuffer sql = new StringBuffer();
-		sql.append("/* MssqlReportSearch */ SELECT " + ReportDao.REPORT_FIELDS + "," + PersonDao.PERSON_FIELDS);
+		sql.append("/* MssqlReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS + "," + PersonDao.PERSON_FIELDS);
 		sql.append(", count(*) OVER() AS totalCount "
-				+ "FROM reports, people WHERE reports.authorId = people.id "
+				+ "FROM reports "
+				+ "LEFT JOIN reportTags ON reportTags.reportId = reports.id "
+				+ "LEFT JOIN tags ON reportTags.tagId = tags.id "
+				+ ", people "
+				+ "WHERE reports.authorId = people.id "
 				+ "AND ");
 		
 		String commonTableExpression = null;
@@ -53,7 +57,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 		if (text != null && text.trim().length() > 0) {
 			String cleanText = Utils.getSqlServerFullTextQuery(text);
 			whereClauses.add("(CONTAINS ((text, intent, keyOutcomes, nextSteps), :containsQuery) "
-					+ "OR FREETEXT((text, intent, keyOutcomes, nextSteps), :freetextQuery))");
+					+ "OR FREETEXT((text, intent, keyOutcomes, nextSteps), :freetextQuery) "
+					+ "OR CONTAINS ((tags.name, tags.description), :containsQuery) "
+					+ "OR FREETEXT((tags.name, tags.description), :freetextQuery))");
 			args.put("containsQuery", cleanText);
 			args.put("freetextQuery", query.getText());
 		}
@@ -181,7 +187,12 @@ public class MssqlReportSearcher implements IReportSearcher {
 			whereClauses.add("reports.cancelledReason = :cancelledReason");
 			args.put("cancelledReason", DaoUtils.getEnumId(query.getCancelledReason()));
 		}
-		
+
+		if (query.getTagId() != null) {
+			whereClauses.add("reports.id IN (SELECT reportId from reportTags where tagId = :tagId)");
+			args.put("tagId", query.getTagId());
+		}
+
 		if (whereClauses.size() == 0) { return results; }
 		
 		//Apply a filter to restrict access to other's draft reports

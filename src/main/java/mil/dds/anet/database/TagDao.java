@@ -10,8 +10,10 @@ import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.utils.DaoUtils;
 
@@ -77,6 +79,11 @@ public class TagDao implements IAnetDao<Tag> {
 				.bind("description", t.getDescription())
 				.bind("updatedAt", DateTime.now())
 				.execute();
+	}
+
+	public TagList search(TagSearchQuery query) {
+		return AnetObjectEngine.getInstance().getSearcher()
+				.getTagSearcher().runSearch(query, dbHandle);
 	}
 
 }

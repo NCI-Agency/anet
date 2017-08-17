@@ -2,6 +2,7 @@ package mil.dds.anet.resources;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -10,6 +11,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -19,10 +21,13 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.graphql.GraphQLFetcher;
+import mil.dds.anet.graphql.GraphQLParam;
 import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.ResponseUtils;
 
 @Path("/api/tags")
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,6 +56,19 @@ public class TagResource implements IGraphQLResource {
 			throw new WebApplicationException(Status.NOT_FOUND);
 		}
 		return t;
+	}
+
+	@POST
+	@GraphQLFetcher
+	@Path("/search")
+	public TagList search(@GraphQLParam("query") TagSearchQuery query) {
+		return dao.search(query);
+	}
+
+	@GET
+	@Path("/search")
+	public TagList search(@Context HttpServletRequest request) {
+		return search(ResponseUtils.convertParamsToBean(request, TagSearchQuery.class));
 	}
 
 	@POST
