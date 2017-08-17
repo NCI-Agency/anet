@@ -52,6 +52,6 @@ EOSQL
 
 #trap 
 while [ "$END" == '' ]; do
-			sleep 1
-			trap "/opt/mssql/bin/sqlservr stop && END=1" INT TERM
+    sleep 1
+    trap "/opt/mssql/bin/sqlservr stop && END=1" INT TERM
 done
