@@ -4,13 +4,13 @@ This document assumes you have a complete development environment set up and wor
 
 Linux/Mac:
 ```
-./gradlew check # Runs checkstyle test and unit tests
+./gradlew check    # Runs checkstyle test and unit tests
 ./gradlew distZip  # Builds the client, server, and all dependencies into a single .zip file 
 ```
 
 Windows:
 ```
-./gradlew check # Runs checkstyle test and unit tests
+gradlew.bat check    # Runs checkstyle test and unit tests
 gradlew.bat distZip  # Builds the client, server, and all dependencies into a single .zip file 
 ```
 

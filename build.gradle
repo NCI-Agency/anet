@@ -86,8 +86,8 @@ run.args = ["server","anet.yml"]
 
 
 task buildClient(type: NpmTask) {
-    outputs.upToDateWhen { false };
-    args = ['run', 'build']
+	outputs.upToDateWhen { false };
+	args = ['run', 'build']
 }
 
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
