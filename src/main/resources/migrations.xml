@@ -663,4 +663,15 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet  id="37" author="evdhoudt">
+		<sql>
+			INSERT INTO adminSettings ([key], value) VALUES ('GENERAL_BANNER_LEVEL', 'notice');
+		</sql>
+		<rollback>
+			<delete tableName="adminSettings">
+				<where>[key] = 'GENERAL_BANNER_LEVEL'</where>
+			</delete>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
