@@ -167,7 +167,8 @@ task changelog (type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
 	templateContent = file('docs/changelog.mustache').getText('UTF-8');
 }
 
-classes.dependsOn buildClient
+jar.dependsOn buildClient
+jar.dependsOn changelog
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
