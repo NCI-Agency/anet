@@ -16,6 +16,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'org.kordamp.markdown.convert'
 apply plugin: 'com.bmuschko.docker-java-application'
 apply plugin: "se.bjurr.gitchangelog.git-changelog-gradle-plugin"
+apply plugin: 'com.moowork.node'
 
 apply from: 'localSettings.gradle'
 
@@ -82,6 +83,12 @@ if (dbDriver == "sqlserver") {
 test.environment = run.environment
 
 run.args = ["server","anet.yml"]
+
+
+task buildClient(type: NpmTask) {
+    outputs.upToDateWhen { false };
+    args = ['run', 'build']
+}
 
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
@@ -160,6 +167,8 @@ task changelog (type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
 	templateContent = file('docs/changelog.mustache').getText('UTF-8');
 }
 
+classes.dependsOn buildClient
+
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('gradle/checkstyle.xml')
@@ -192,6 +201,7 @@ buildscript {
 		classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
 		classpath "gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.50"
+		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }
 
@@ -221,3 +231,7 @@ allprojects {
 	markdownToHtml.hardwraps = true
 }
 
+node {
+
+	nodeModulesDir = file("${project.projectDir}/client")
+}
