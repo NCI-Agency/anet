@@ -44,6 +44,16 @@ To create a db container from the latest mssql image:
 ./gradlew dockerCreateDB
   ```
 
+If you wish to mount additional volumes in the container (e.g. to persist the
+database outside the container), specify them at creation time like so:
+  ```sh
+./gradlew dockerCreateDB -Pmounts=/files/mssql:/var/opt/mssql,/files/home:/home
+  ```
+
+The value of the `mounts` property is a comma-separated list of colon-separated
+volume mounts `/source:/destination`, with `/source` a local directory on your
+system, and `/destination` the mount point inside the container.
+
 ### Start the db container
 
 To start a db container
