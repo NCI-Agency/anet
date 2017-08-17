@@ -6,15 +6,15 @@ TODO: Make this better and integrate it in the main documentation
 
 Content of localSettings.gradle
 required:
+  ```java
+run.environment("DB_DRIVER", "sqlserver")
+run.environment("ANET_DB_SERVER", "localhost")
+run.environment("ANET_DB_NAME", "testAnet")
+run.environment("ANET_DB_USERNAME", "anetUser")
+run.environment("ANET_DB_PASSWORD", "P@ssw0rd")
+run.environment("ANET_DB_PORT", 1433)
   ```
-run.environment("DB_DRIVER","sqlserver")
-run.environment("ANET_DB_SERVER","localhost")
-run.environment("ANET_DB_NAME","testAnet")
-run.environment("ANET_DB_USERNAME","anetUser")
-run.environment("ANET_DB_PASSWORD","P@ssw0rd")
-run.environment("ANET_DB_PORT",1433)
-  ```
-  
+
 
 ## ANET app container manipulations
 

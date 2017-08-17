@@ -15,18 +15,15 @@
 <h2> {{name}} </h2>
   {{/hasIssue}}
 
-
-   {{#commits}}
+  {{#commits}}
 <a href="https://github.com/NCI-Agency/anet/commit/{{hash}}">{{hash}}</a> {{authorName}} <i>{{commitTime}}</i>
 <p>
 <h3>{{{messageTitle}}}</h3>
 
-{{#messageBodyItems}}
- <li> {{.}}</li> 
-{{/messageBodyItems}}
+   {{#messageBodyItems}}
+ <li> {{.}}</li>
+   {{/messageBodyItems}}
 </p>
-
-
   {{/commits}}
 
  {{/issues}}

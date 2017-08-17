@@ -84,14 +84,14 @@ test.environment = run.environment
 run.args = ["server","anet.yml"]
 
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
-	classpath =  sourceSets.main.runtimeClasspath
+	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = 'mil.dds.anet.AnetApplication'
 	args = ["db","status","anet.yml"]
 }
 
 task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
-	classpath =  sourceSets.main.runtimeClasspath
+	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = 'mil.dds.anet.AnetApplication'
 	args = ["db","migrate","anet.yml"]
@@ -101,14 +101,14 @@ task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task dbTest(dependsOn: 'compileJava', type: JavaExec) {
-	classpath =  sourceSets.main.runtimeClasspath
+	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = 'mil.dds.anet.AnetApplication'
 	args = ["db","test","anet.yml"]
 }
 
 task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
-	classpath =  sourceSets.main.runtimeClasspath
+	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = 'mil.dds.anet.AnetApplication'
 	args = ["db","rollback","anet.yml","--count","1"]
@@ -118,7 +118,7 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
-	classpath =  sourceSets.main.runtimeClasspath
+	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = 'mil.dds.anet.AnetApplication'
 	args = ["db","drop-all","--confirm-delete-everything","anet.yml"]
@@ -134,7 +134,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	imageId = dockerPullDB.getImageId()
 	containerName = "anet-mssql-server"
 	description = "Creates an ANET MS SQL DB container named " + containerName
-	binds = ["${projectDir}":"/hostdata"] 
+	binds = ["${projectDir}":"/hostdata"]
 	env = ["ACCEPT_EULA=Y","SA_PASSWORD="+run.environment["ANET_SA_PASSWORD"],"DB_NAME="+run.environment["ANET_DB_NAME"],"DB_USER="+run.environment["ANET_DB_USERNAME"],"DB_USER_PASSWORD="+run.environment["ANET_DB_PASSWORD"]]
 	portBindings = ["1433:"+run.environment["ANET_DB_PORT"]]
 }
@@ -156,11 +156,11 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 }
 
 task changelog (type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
- 	file = new File("${buildDir}/resources/main/assets/client/changelog.html");
- 	templateContent = file('docs/changelog.mustache').getText('UTF-8');
+	file = new File("${buildDir}/resources/main/assets/client/changelog.html");
+	templateContent = file('docs/changelog.mustache').getText('UTF-8');
 }
 
-//Configure the Java Checkstyle settings.  Run with ./gradlew check
+//Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
 	configFile = rootProject.file('gradle/checkstyle.xml')
 	toolVersion = '7.5'
@@ -183,28 +183,28 @@ distributions {
 
 //Add gradle plugin repos
 buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
-	classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
-	classpath "gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.50"
- }
+	repositories {
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+	dependencies {
+		classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
+		classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
+		classpath "gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.50"
+	}
 }
 
 docker {
-    javaApplication {
-        baseImage = 'openjdk:8-jre'
-        maintainer = 'Vassil Iordanov "vassil.iordanov@gmail.com"'
-        ports = [80, 443]
-        tag = 'ncia/anet-app-server'
+	javaApplication {
+		baseImage = 'openjdk:8-jre'
+		maintainer = 'Vassil Iordanov "vassil.iordanov@gmail.com"'
+		ports = [80, 443]
+		tag = 'ncia/anet-app-server'
 		exec {
-            entryPoint "/$project.name-$project.version/bin/anet server anet.yaml"
-        }
-    }
+			entryPoint "/$project.name-$project.version/bin/anet server anet.yaml"
+		}
+	}
 }
 
 startScripts {
@@ -216,8 +216,8 @@ startScripts {
 
 //Configure Markdown plugin
 allprojects {
-  markdownToHtml.sourceDir = file("docs")
-  markdownToHtml.outputDir = file("$buildDir/documentation")
-  markdownToHtml.hardwraps = true
+	markdownToHtml.sourceDir = file("docs")
+	markdownToHtml.outputDir = file("$buildDir/documentation")
+	markdownToHtml.hardwraps = true
 }
 
