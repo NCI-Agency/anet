@@ -5,7 +5,7 @@ import GeneralBanner from 'components/GeneralBanner'
 import SecurityBanner from 'components/SecurityBanner'
 import Header from 'components/Header'
 
-// const GENERAL_BANNER_LEVEL = 'alert-info'
+const GENERAL_BANNER_LEVEL = 'GENERAL_BANNER_LEVEL'
 const GENERAL_BANNER_TEXT = 'GENERAL_BANNER_TEXT'
 // const GENERAL_BANNER_TITLE = 'Announcement'
 
@@ -50,9 +50,9 @@ export default class TopBar extends Component {
         let {settings} = app.state
         
         let banner = {
+            level: settings[GENERAL_BANNER_LEVEL],
             message: settings[GENERAL_BANNER_TEXT],
-            title: 'Announcement',
-            level: 'notice'
+            title: 'Announcement'
         } || {}
 
         return (
