@@ -5,7 +5,7 @@ import GeneralBanner from 'components/GeneralBanner'
 import SecurityBanner from 'components/SecurityBanner'
 import Header from 'components/Header'
 
-// const GENERAL_BANNER_COLOR = 'alert-info'
+// const GENERAL_BANNER_LEVEL = 'alert-info'
 const GENERAL_BANNER_TEXT = 'GENERAL_BANNER_TEXT'
 // const GENERAL_BANNER_TITLE = 'Announcement'
 
@@ -44,24 +44,24 @@ export default class TopBar extends Component {
         }
     }
 
-	render() {
+    render() {
         let currentUser = this.state.currentUser
         let app = this.context.app
         let {settings} = app.state
         
         let banner = {
-			message: settings[GENERAL_BANNER_TEXT],
-			title: 'Announcement',
-			color: 'alert-info'
-		} || {}
+            message: settings[GENERAL_BANNER_TEXT],
+            title: 'Announcement',
+            level: 'notice'
+        } || {}
 
-		return (
-			<div id="topbar" className="navbar navbar-fixed-top">
+        return (
+            <div id="topbar" className="navbar navbar-fixed-top">
                 {currentUser && currentUser.position && currentUser.position.id === 0 && !currentUser.isNewUser() && <NoPositionBanner />}
-				{banner.message && <GeneralBanner banner={banner} />}
+                {banner.message && <GeneralBanner banner={banner} />}
                 <SecurityBanner location={this.props.location} />
-			    <Header minimalHeader={this.props.minimalHeader} />
+                <Header minimalHeader={this.props.minimalHeader} />
             </div>
-		)
-	}
+        )
+    }
 }
