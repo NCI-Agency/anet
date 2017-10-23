@@ -216,7 +216,7 @@ docker {
 		ports = [80, 443]
 		tag = 'ncia/anet-app-server'
 		exec {
-			entryPoint "/$project.name-$project.version/bin/anet server anet.yaml"
+			 entryPoint "/$project.name-$project.version/bin/anet","server","/hostdata/anet.yml"
 		}
 	}
 }
