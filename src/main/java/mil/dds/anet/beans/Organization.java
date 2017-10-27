@@ -12,6 +12,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.graphql.GraphQLParam;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Organization extends AbstractAnetBean {
@@ -35,7 +36,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	public void setShortName(String shortName) {
-		this.shortName = shortName;
+		this.shortName = Utils.trimStringReturnNull(shortName);
 	}
 
 	public String getLongName() { 
@@ -43,7 +44,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	public void setLongName(String longName) { 
-		this.longName = longName;
+		this.longName = Utils.trimStringReturnNull(longName);
 	}
 	
 	@GraphQLFetcher("parentOrg")

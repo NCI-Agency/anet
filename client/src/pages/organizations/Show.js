@@ -20,6 +20,9 @@ import OrganizationApprovals from './Approvals'
 import {Organization} from 'models'
 import GQL from 'graphqlapi'
 
+const PENDING_APPROVAL = 'PENDING_APPROVAL'
+const NO_REPORT_FILTER = 'NO_FILTER'
+
 export default class OrganizationShow extends Page {
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
@@ -34,11 +37,13 @@ export default class OrganizationShow extends Page {
 			organization: new Organization({id: props.params.id}),
 			reports: null,
 			poams: null,
+			reportsFilter: NO_REPORT_FILTER,
 			action: props.params.action
 		}
 
 		this.reportsPageNum = 0
 		this.poamsPageNum = 0
+		this.togglePendingApprovalFilter = this.togglePendingApprovalFilter.bind(this)
 		setMessages(props,this.state)
 	}
 
@@ -52,11 +57,19 @@ export default class OrganizationShow extends Page {
 		}
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+		if(prevState.reportsFilter !== this.state.reportsFilter){
+			let reports = this.getReportQueryPart(this.props.params.id)
+			this.runGQLReports([reports])
+		}
+	}
+
 	getReportQueryPart(orgId) {
 		let reportQuery = {
 			pageNum: this.reportsPageNum,
 			pageSize: 10,
-			orgId: orgId
+			orgId: orgId,
+			state: (this.reportsFilterIsSet()) ? this.state.reportsFilter : null
 		}
 		let reportsPart = new GQL.Part(/* GraphQL */`
 			reports: reportList(query:$reportQuery) {
@@ -106,13 +119,35 @@ export default class OrganizationShow extends Page {
 		let reportsPart = this.getReportQueryPart(props.params.id)
 		let poamsPart = this.getPoamQueryPart(props.params.id)
 
-		GQL.run([orgPart, reportsPart, poamsPart]).then(data =>
+		this.runGQL([orgPart, reportsPart, poamsPart])
+	}
+
+	runGQL(queries) {
+		GQL.run(queries).then(data =>
 			this.setState({
 				organization: new Organization(data.organization),
 				reports: data.reports,
 				poams: data.poams
 			})
 		)
+	}
+
+	runGQLReports(reports){
+		GQL.run(reports).then( data => this.setState({ reports: data.reports }) )
+	}
+
+	reportsFilterIsSet() {
+		return (this.state.reportsFilter !== NO_REPORT_FILTER)
+	}
+
+	togglePendingApprovalFilter() {
+		let toggleToFilter = this.state.reportsFilter
+		if(toggleToFilter === PENDING_APPROVAL){
+			toggleToFilter = NO_REPORT_FILTER
+		}else{
+			toggleToFilter = PENDING_APPROVAL
+		}
+		this.setState({ reportsFilter: toggleToFilter })
 	}
 
 	render() {
@@ -156,7 +191,7 @@ export default class OrganizationShow extends Page {
 							{org.humanNameOfType()}
 						</Form.Field>
 
-						<Form.Field id="longName" label="Description"/>
+						<Form.Field id="longName" label={org.type === "PRINCIPAL_ORG" ? "Official Organization Name" : "Description"}/>
 
 						{org.parentOrg && org.parentOrg.id &&
 							<Form.Field id="parentOrg" label="Parent organization">
@@ -198,6 +233,9 @@ export default class OrganizationShow extends Page {
 						<ReportCollection
 							paginatedReports={reports}
 							goToPage={this.goToReportsPage}
+							setReportsFilter={this.togglePendingApprovalFilter}
+							filterIsSet={this.reportsFilterIsSet()}
+							isSuperUser={isSuperUser}
 						/>
 					</Fieldset>
 				</Form>

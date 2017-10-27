@@ -61,7 +61,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
-				<Form.Field id="longName" label="Description" placeholder="e.g. Force Sustainment" />
+				<Form.Field id="longName" label={organization.type === "PRINCIPAL_ORG" ? "Official Organization Name" : "Description"} placeholder="e.g. Force Sustainment" />
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>

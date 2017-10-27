@@ -157,7 +157,7 @@ export default class FormField extends Component {
 
 			children = <div>
 				{formControl}
-				<HelpBlock className={validationState === 'error' || validationState === 'warning' ? '' : 'hidden'} >
+				<HelpBlock className={validationState === 'error' || validationState === 'warning' ? '' : 'hidden'}>
 					{this.props.humanName} is required
 				</HelpBlock>
 			</div>
@@ -271,6 +271,9 @@ export default class FormField extends Component {
 
 	@autobind
 	onUserTouchedField(event) {
+		let id = this.props.id
+		let value = this.sanitizeInput(this.getEventValue(event))
+		this.setFormContextWith(id, value)
 		this.setState({
 			isValid: event && event.target ? event.target.checkValidity() : null,
 			userHasTouchedField: true
@@ -289,15 +292,12 @@ export default class FormField extends Component {
 		}
 
 		let id = this.props.id
-		let value = event && event.target ? event.target.value : event
+		let value = this.getEventValue(event)
+		this.setFormContextWith(id, value)
 
 		if (this.props.maxCharacters && value.length > this.props.maxCharacters) {
 			return
 		}
-
-		let formContext = this.context.formFor
-		if (formContext)
-			formContext[id] = value
 
 		let form = this.context.form
 		if (form && form.props.onChange) {
@@ -314,6 +314,24 @@ export default class FormField extends Component {
 		if (element && element.focus) {
 			element.focus()
 		}
+	}
+
+	getEventValue(event) {
+		return event && event.target ? event.target.value : event
+	}
+
+	setFormContextWith(id, value) {
+		let formContext = this.context.formFor
+		if (formContext)
+			formContext[id] = value
+		return formContext
+	}
+
+	sanitizeInput(value) {
+		if (typeof value === 'string' || value instanceof String) {
+			return value.trim()
+		}
+		return value
 	}
 }
 

@@ -5,11 +5,10 @@ import java.util.List;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 
-public class PersonSearchQuery implements ISearchQuery {
+public class PersonSearchQuery extends AbstractSearchQuery {
 
 	public enum PersonSearchSortBy { CREATED_AT, NAME, RANK }
-	
-	String text;
+
 	Integer orgId;
 	Role role;
 	List<PersonStatus> status;
@@ -27,22 +26,6 @@ public class PersonSearchQuery implements ISearchQuery {
 	
 	PersonSearchSortBy sortBy;
 	SortOrder sortOrder;
-	
-	int pageNum;
-	int pageSize;
-	
-	public PersonSearchQuery() { 
-		this.pageNum = 0;
-		this.pageSize = 100;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
 
 	public Integer getOrgId() {
 		return orgId;
@@ -124,27 +107,6 @@ public class PersonSearchQuery implements ISearchQuery {
 		this.sortOrder = sortOrder;
 	}
 
-	@Override
-	public int getPageNum() {
-		return pageNum;
-	}
-	
-	@Override
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
-	}
-	
-	@Override
-	public int getPageSize() {
-		return pageSize;
-	}
-	
-	@Override
-	public void setPageSize(int pageSize) {
-		if (pageSize == 0) { return; } // that makes no sense. 
-		this.pageSize = pageSize;
-	}
-	
 	public static PersonSearchQuery withText(String text, int pageNum, int pageSize) {
 		PersonSearchQuery query = new PersonSearchQuery();
 		query.setText(text);
@@ -152,5 +114,5 @@ public class PersonSearchQuery implements ISearchQuery {
 		query.setPageSize(pageSize);
 		return query;
 	}
-	
+
 }

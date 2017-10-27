@@ -1,6 +1,7 @@
 package mil.dds.anet.auth;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.security.Principal;
 import java.util.List;
 
@@ -11,8 +12,8 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.dropwizard.auth.Authorizer;
 import mil.dds.anet.AnetObjectEngine;
@@ -25,8 +26,9 @@ import mil.dds.anet.beans.Position.PositionType;
 @Priority(1500) //Run After Authentication, but before Authorization
 public class AnetAuthenticationFilter implements ContainerRequestFilter, Authorizer<Person> {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	AnetObjectEngine engine;
-	private static Logger log = Log.getLogger(AnetAuthenticationFilter.class);
 	
 	public AnetAuthenticationFilter(AnetObjectEngine engine) { 
 		this.engine = engine;
@@ -50,11 +52,6 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
 				person = engine.getPersonDao().insert(person);
 			} else { 
 				person = matches.get(0);
-				if (person.getStatus().equals(PersonStatus.INACTIVE)) { 
-					//An Inactive person just logged in, make them active. 
-					person.setStatus(PersonStatus.ACTIVE);
-					AnetObjectEngine.getInstance().getPersonDao().update(person);
-				}
 			}
 			
 			final Person user = person;
@@ -93,24 +90,24 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
 	public static boolean checkAuthorization(Person principal, String role) { 
 		Position position = principal.loadPosition();
 		if (position == null) {
-			log.debug("Authorizing {} for role {} FAILED due to null position", principal.getDomainUsername(), role);
+			logger.debug("Authorizing {} for role {} FAILED due to null position", principal.getDomainUsername(), role);
 			return false; 
 		}
 		
 		//Administrators can do anything
 		if (position.getType() == PositionType.ADMINISTRATOR) {
-			log.debug("Authorizing {} for role {} SUCCESS", principal.getDomainUsername(), role);
+			logger.debug("Authorizing {} for role {} SUCCESS", principal.getDomainUsername(), role);
 			return true; 
 		} 
 		
 		//Verify the user is a super user. 
 		if (PositionType.SUPER_USER.toString().equals(role)) { 
 			if (position.getType() == PositionType.SUPER_USER) { 
-				log.debug("Authorizing {} for role {} SUCCESS", principal.getDomainUsername(), role);
+				logger.debug("Authorizing {} for role {} SUCCESS", principal.getDomainUsername(), role);
 				return true;
 			}
 		}
-		log.debug("Authorizing {} for role {} FAILED", principal.getDomainUsername(), role);
+		logger.debug("Authorizing {} for role {} FAILED", principal.getDomainUsername(), role);
 		return false;
 	}
 

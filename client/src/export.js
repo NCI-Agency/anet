@@ -81,8 +81,7 @@ export class CSVExport {
 
 	getSearchAll(type, query) {
 //		query = Object.without(query, 'type')
-		query.pageSize = 100000
-		query.pageNum = 0
+		query.pageSize = 0  // retrieve all the filtered reports
 
 		let config = this.search_config[type]
 		let part = new GQL.Part(/* GraphQL */`

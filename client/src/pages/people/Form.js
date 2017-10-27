@@ -17,6 +17,9 @@ import {Person} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 
+const ADVISOR = 'ADVISOR'
+const PRINCIPAL = 'PRINCIPAL'
+
 export default class PersonForm extends ValidatableFormWrapper {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
@@ -27,13 +30,36 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
+		currentUser: PropTypes.object.isRequired,
 	}
 
 	constructor(props) {
 		super(props)
 		this.state = {
-			error: null
+			error: null,
+			originalStatus: props.person.status
 		}
+	}
+
+	countries = person => {
+		switch(person.role) {
+			case ADVISOR:
+				return this.lookupCountries('countries')
+			case PRINCIPAL:
+				return this.lookupCountries('principal_countries')
+			default:
+				return []
+		}
+	}
+
+	lookupCountries = key => {
+		return dict.lookup(key) || []
+	}
+
+	renderCountrySelectOptions = (countries) => {
+		return countries.map(country =>
+			<option key={country} value={country}>{country}</option>
+		)
 	}
 
 	render() {
@@ -44,10 +70,15 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		let willAutoKickPosition = person.status === 'INACTIVE' && person.position && !!person.position.id
+		let warnDomainUsername = person.status === 'INACTIVE' && person.domainUsername
 		let ranks = dict.lookup('ranks') || []
+
+		const countries = this.countries(person)
+		const nationalityDefaultValue = countries.length === 1 ? countries[0] : ''
 
 		let currentUser = this.context.currentUser
 		let isAdmin = currentUser && currentUser.isAdmin()
+		let disableStatusChange = this.state.originalStatus === 'INACTIVE' || Person.isEqual(currentUser, person)
 
 		return <ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
 			submitText={this.props.saveText || 'Save person'}>
@@ -68,20 +99,26 @@ export default class PersonForm extends ValidatableFormWrapper {
 					</Form.Field>
 				}
 
-				{person.isNewUser() ?
-					<Form.Field type="static" id="status" value="New user" />
+				{disableStatusChange ?
+					<Form.Field type="static" id="status" value={person.humanNameOfStatus()} />
 					:
-					<Form.Field id="status" >
-						<ButtonToggleGroup>
-							<Button id="statusActiveButton" value="ACTIVE">Active</Button>
-							<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
-						</ButtonToggleGroup>
+					person.isNewUser() ?
+						<Form.Field type="static" id="status" value="New user" />
+						:
+						<Form.Field id="status" >
+							<ButtonToggleGroup>
+								<Button id="statusActiveButton" value="ACTIVE">Active</Button>
+								<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
+							</ButtonToggleGroup>
 
-						{willAutoKickPosition && <HelpBlock>
-							<span className="text-danger">Setting this person to inactive will automatically remove them from the <strong>{person.position.name}</strong> position.</span>
-						</HelpBlock> }
+							{willAutoKickPosition && <HelpBlock>
+								<span className="text-danger">Setting this person to inactive will automatically remove them from the <strong>{person.position.name}</strong> position.</span>
+							</HelpBlock> }
 
-					</Form.Field>
+							{warnDomainUsername && <HelpBlock>
+								<span className="text-danger">Setting this person to inactive means the next person to logon with the user name <strong>{person.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
+							</HelpBlock> }
+						</Form.Field>
 				}
 
 				{!edit && person.role === 'ADVISOR' &&
@@ -95,7 +132,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 				<RequiredField id="emailAddress" label="Email" required={isAdvisor}
 					humanName="Valid email address"
 					type="email" />
-				<Form.Field id="phoneNumber" label="Phone Number" />
+				<Form.Field id="phoneNumber" label="Phone" />
 				<RequiredField id="rank"  componentClass="select"
 					required={isAdvisor}>
 
@@ -112,13 +149,14 @@ export default class PersonForm extends ValidatableFormWrapper {
 					<option value="FEMALE" >Female</option>
 				</RequiredField>
 
-				<RequiredField id="country" componentClass="select"
+				<RequiredField id="country" label="Nationality" componentClass="select"
+					value={nationalityDefaultValue}
 					required={isAdvisor}>
 					<option />
-					{Person.COUNTRIES.map(country => <option key={country} value={country}>{country}</option>)}
+					{this.renderCountrySelectOptions(countries)}
 				</RequiredField>
 
-				<Form.Field id="endOfTourDate" addon={CALENDAR_ICON}>
+				<Form.Field id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON}>
 					<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
 				</Form.Field>
 

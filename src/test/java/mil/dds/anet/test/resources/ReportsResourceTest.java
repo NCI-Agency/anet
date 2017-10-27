@@ -2,6 +2,7 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -52,6 +55,8 @@ import mil.dds.anet.test.beans.PersonTest;
 
 public class ReportsResourceTest extends AbstractResourceTest {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	public ReportsResourceTest() {
 		if (client == null) {
 			config.setConnectionRequestTimeout(Duration.seconds(30L));
@@ -65,7 +70,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	public void createReport() {
 		//Create a report writer
 		final Person author = getJackJackson();
-		final Person admin = getArthurDmin();
 
 		//Create a principal for the report
 		ReportPerson principal = PersonTest.personToReportPerson(getSteveSteveson());
@@ -194,8 +198,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		Report returned = httpQuery(String.format("/api/reports/%d", created.getId()), author).get(Report.class);
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
-		System.out.println(String.format("Expecting report %d in step %d because of org %d on author %d",
-				returned.getId(), approval.getId(), advisorOrg.getId(), author.getId()));
+		logger.debug("Expecting report {} in step {} because of org {} on author {}",
+				new Object[] { returned.getId(), approval.getId(), advisorOrg.getId(), author.getId() });
 		assertThat(returned.getApprovalStep().getId()).isEqualTo(approval.getId());
 
 		//verify the location on this report
@@ -334,7 +338,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	@Test
 	public void testDefaultApprovalFlow() {
 		final Person jack = getJackJackson();
-		final Person admin = getArthurDmin();
 		final Person roger = getRogerRogwell();
 
 		//Create a Person who isn't in a Billet
@@ -616,7 +619,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setState(ImmutableList.of(ReportState.CANCELLED));
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
-		int numCancelled = searchResults.getTotalCount();
+		final int numCancelled = searchResults.getTotalCount();
 		
 		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.RELEASED));
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
@@ -771,55 +774,69 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	
 	@Test
 	public void dailyRollupGraphTest() { 
-		Person authur = getArthurDmin();
 		Person steve = getSteveSteveson();
 		
 		Report r = new Report();
-		r.setAuthor(authur);
+		r.setAuthor(admin);
 		r.setIntent("Test the Daily rollup graph");
 		r.setNextSteps("Check for a change in the rollup graph");
 		r.setKeyOutcomes("Foobar the bazbiz");
-		r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(authur), PersonTest.personToPrimaryReportPerson(steve)));
-		r = httpQuery("/api/reports/new", authur).post(Entity.json(r), Report.class);
+		r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(admin), PersonTest.personToPrimaryReportPerson(steve)));
+		r = httpQuery("/api/reports/new", admin).post(Entity.json(r), Report.class);
 		
 		//Pull the daily rollup graph
 		DateTime startDate = DateTime.now().minusDays(1);
 		DateTime endDate = DateTime.now().plusDays(1);
-		List<RollupGraph> startGraph = httpQuery(
-				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), authur)
+		final List<RollupGraph> startGraph = httpQuery(
+				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), admin)
 				.get(new GenericType<List<RollupGraph>>() {});
 		
 		//Submit the report
-		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", authur).post(null);
+		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 		
 		//Oops set the engagementDate.
 		r.setEngagementDate(DateTime.now());
-		resp = httpQuery("/api/reports/update", authur).post(Entity.json(r));
+		resp = httpQuery("/api/reports/update", admin).post(Entity.json(r));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Re-submit the report, it should work. 
-		resp = httpQuery("/api/reports/" + r.getId() + "/submit", authur).post(null);
+		resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Authur can approve his own reports. 
-		resp = httpQuery("/api/reports/" + r.getId() + "/approve", authur).post(null);
+		resp = httpQuery("/api/reports/" + r.getId() + "/approve", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Verify report is in RELEASED state. 
-		r = httpQuery("/api/reports/" + r.getId(), authur).get(Report.class);
+		r = httpQuery("/api/reports/" + r.getId(), admin).get(Report.class);
 		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
 	
 		//Check on the daily rollup graph now. 
 		List<RollupGraph> endGraph = httpQuery(
-				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), authur)
+				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), admin)
 				.get(new GenericType<List<RollupGraph>>() {});
 		
 		//Authur's organization should have one more report RELEASED!
-		int authurOrgId = authur.loadPosition().loadOrganization().getId();
+		int authurOrgId = admin.loadPosition().loadOrganization().getId();
 		Optional<RollupGraph> adminOrg = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(authurOrgId)).findFirst();
 		int startCt = adminOrg.isPresent() ? (adminOrg.get().getReleased()) : 0;
 		int endCt = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(authurOrgId)).findFirst().get().getReleased();
 		assertThat(startCt).isEqualTo(endCt - 1);
 	}
+
+	@Test
+	public void testTagSearch() {
+		final ReportSearchQuery tagQuery = new ReportSearchQuery();
+		tagQuery.setText("bribery");
+		final ReportList taggedReportList = httpQuery("/api/reports/search", admin).post(Entity.json(tagQuery), ReportList.class);
+		assertThat(taggedReportList).isNotNull();
+		final List<Report> taggedReports = taggedReportList.getList();
+		for (Report rpt : taggedReports) {
+			rpt.loadTags();
+			assertThat(rpt.getTags()).isNotNull();
+			assertThat(rpt.getTags().stream().filter(o -> o.getName().equals("bribery"))).isNotEmpty();
+		}
+	}
+
 }

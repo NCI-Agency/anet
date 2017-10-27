@@ -18,16 +18,21 @@ public class AdminDao {
 		MAP_LAYERS,
 		HELP_LINK_URL,
 		CONTACT_EMAIL,
-		DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
+		DAILY_ROLLUP_MAX_REPORT_AGE_DAYS,
+		EXTERNAL_DOCUMENTATION_LINK_URL,
+		EXTERNAL_DOCUMENTATION_LINK_TEXT,		
+		GENERAL_BANNER_LEVEL,
+		GENERAL_BANNER_TEXT,
+		GENERAL_BANNER_VISIBILITY,
 	}
-	
+
 	private Handle dbHandle;
 	private Map<String,String> cachedSettings = null;
 	
 	public AdminDao(Handle db) { 
 		this.dbHandle = db;
 	}
-	
+
 	private void initCache() { 
 		cachedSettings = new HashMap<String,String>();
 		List<AdminSetting> settings = getAllSettings();

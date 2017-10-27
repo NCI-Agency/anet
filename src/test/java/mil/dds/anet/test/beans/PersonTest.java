@@ -160,21 +160,21 @@ public class PersonTest extends BeanTester<Person> {
 			System.out.println(String.format("Unequal because ids %d != %d", a.getId(), b.getId()));
 		} else if (!Objects.equals(a.getName(), b.getName())) { 
 			System.out.println(String.format("Unequal because names %s != %s", a.getName(), b.getName()));
-		} else if (!Objects.equals(a.getStatus(), b.getStatus()) ) {
+		} else if (!Objects.equals(a.getStatus(), b.getStatus())) {
 			System.out.println(String.format("Unequal because status %s != %s", a.getStatus(), b.getStatus()));
-		} else if (!Objects.equals(a.getRole(), b.getRole()) ) {
+		} else if (!Objects.equals(a.getRole(), b.getRole())) {
 			System.out.println(String.format("Unequal because role %s != %s", a.getRole(), b.getRole()));
-		} else if (!Objects.equals(a.getEmailAddress(), b.getEmailAddress()) ) {
+		} else if (!Objects.equals(a.getEmailAddress(), b.getEmailAddress())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getEmailAddress(), b.getEmailAddress()));
-		} else if (!Objects.equals(a.getPhoneNumber(), b.getPhoneNumber()) ) {
+		} else if (!Objects.equals(a.getPhoneNumber(), b.getPhoneNumber())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getPhoneNumber(), b.getPhoneNumber()));
-		} else if (!Objects.equals(a.getRank(), b.getRank()) ) {
+		} else if (!Objects.equals(a.getRank(), b.getRank())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getRank(), b.getRank()));
-		} else if (!Objects.equals(a.getBiography(), b.getBiography()) ) {
+		} else if (!Objects.equals(a.getBiography(), b.getBiography())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getBiography(), b.getBiography()));
-		} else if (!Objects.equals(a.getPendingVerification(), b.getPendingVerification()) ) {
+		} else if (!Objects.equals(a.getPendingVerification(), b.getPendingVerification())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getPendingVerification(), b.getPendingVerification()));
-		} else if (!Objects.equals(a.getCreatedAt(), b.getCreatedAt()) ) {
+		} else if (!Objects.equals(a.getCreatedAt(), b.getCreatedAt())) {
 			System.out.println(String.format("Unequal because createdAt %s != %s", a.getCreatedAt(), b.getCreatedAt()));
 		} else if (!Objects.equals(a.getUpdatedAt(), b.getUpdatedAt())) {
 			System.out.println(String.format("Unequal because updatedAt %s != %s", a.getUpdatedAt(), b.getCreatedAt()));

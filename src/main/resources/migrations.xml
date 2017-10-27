@@ -646,4 +646,121 @@
 		</sql>
 	</changeSet>
 
+	<changeSet id="35" author="evdhoudt" dbms="mssql" >
+		<sql dbms="">
+			INSERT INTO adminSettings ([key], value) VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
+		</sql>
+	</changeSet>
+
+	<changeSet id="add_tags" author="gjvoosten">
+		<createTable tableName="tags">
+		   <column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="name" type="nvarchar(100)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="description" type="nvarchar(512)" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_report_tags" author="gjvoosten">
+		<createTable tableName="reportTags">
+			<column name="reportId" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="tagId" type="int">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_report_tags_constraints" author="gjvoosten" dbms="mssql">
+		<addUniqueConstraint tableName="reportTags" columnNames="reportId, tagId" constraintName="uniqueReportTag" />
+		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportTags"
+			constraintName="fk_reportTags_report" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="reports" />
+		<addForeignKeyConstraint baseColumnNames="tagId" baseTableName="reportTags"
+			constraintName="fk_reportTags_tag" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="tags" />
+	</changeSet>
+
+	<changeSet id="add-banner-text" author="evdhoudt">
+		<insert tableName="adminSettings">
+			<column name="key" value="GENERAL_BANNER_TEXT" />
+		</insert>
+		<rollback>
+			<delete tableName="adminSettings">
+				<where>[key] = 'GENERAL_BANNER_TEXT'</where>
+			</delete>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add-banner-text" author="evdhoudt">
+		<insert tableName="adminSettings">
+			<column name="key" value="GENERAL_BANNER_TEXT" />
+		</insert>
+		<rollback>
+			<delete tableName="adminSettings">
+				<where>[key] = 'GENERAL_BANNER_TEXT'</where>
+			</delete>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add-banner-level" author="evdhoudt">
+		<insert tableName="adminSettings">
+			<column name="key" value="GENERAL_BANNER_LEVEL" />
+			<column name="value" value="notice" />
+		</insert>
+		<rollback>
+			<delete tableName="adminSettings">
+				<where>[key] = 'GENERAL_BANNER_LEVEL'</where>
+			</delete>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add-banner-visibility" author="evdhoudt">
+		<insert tableName="adminSettings">
+			<column name="key" value="GENERAL_BANNER_VISIBILITY" />
+			<column name="value" value="1" />
+		</insert>
+		<rollback>
+			<delete tableName="adminSettings">
+				<where>[key] = 'GENERAL_BANNER_VISIBILITY'</where>
+			</delete>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add_external_documentation_link_text" author="evdhoudt">
+		<insert tableName="adminSettings">
+			<column name="key" value="EXTERNAL_DOCUMENTATION_LINK_TEXT" />
+			<column name="value" value="External documentation" />
+		</insert>
+		<rollback>
+			<delete tableName="adminSettings">
+				<where>[key] = 'EXTERNAL_DOCUMENTATION_LINK_URL'</where>
+			</delete>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add_tags_fulltext_index" author="maradragan" dbms="mssql" runInTransaction="false">
+		<sql>
+			CREATE FULLTEXT INDEX ON tags(name, description) KEY INDEX PK_TAGS;
+		</sql>
+		<rollback>
+			DROP FULLTEXT INDEX ON tags;
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add_tags_fulltext_index" author="maradragan" dbms="mssql" runInTransaction="false">
+		<sql>
+			CREATE FULLTEXT INDEX ON tags(name, description) KEY INDEX PK_TAGS;
+		</sql>
+		<rollback>
+			DROP FULLTEXT INDEX ON tags;
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

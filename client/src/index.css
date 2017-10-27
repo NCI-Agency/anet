@@ -1,10 +1,5 @@
 body {
 	background: #f2f2f2;
-	margin-top: 152px;
-}
-
-body.no-position {
-	margin-top: 178px;
 }
 
 /* this makes jump links work correctly with the header overlaying content */
@@ -198,9 +193,6 @@ fieldset.danger {
 
 .banner {
 	color: #fff;
-	position: fixed;
-	top: 0;
-	left: 0;
 	width: 100%;
 	font-size: 18px;
 	text-align: center;
@@ -368,6 +360,11 @@ a.home-tile {
 	margin-left: 5px;
 	color: #555;
 	font-size: 1.4rem;
+}
+
+.report-summary h2 {
+	font-size: 14px;
+	font-weight: bold;
 }
 
 .not-found section.container {
@@ -561,6 +558,22 @@ table hr.attendee-divider {
 	width: 130px;
 }
 
+/* Specific styling for report tags in edit mode */
+.reportTag {
+	margin-right: 0.5em;
+}
+.reportTag::before {
+	content: "#";
+}
+.reportTagRemove {
+	margin-left: 0.25em;
+	color: white;
+    cursor: pointer;
+}
+.reportTagRemove, .reportTagRemove:hover {
+    text-decoration: none;
+}
+
 .form-control-static {
 	/* The design calls for 18px of separation between static form rows.
 		The form row already has padding-top: 7px and padding-bottom: 7px,
@@ -627,6 +640,39 @@ header.searchPagination {
 }
 .only-show-for-print {
 	display: none;
+}
+
+.general-banner {
+	padding: 7px;
+	margin-bottom: 0;	
+	border-radius: 0;
+	border: 1px solid transparent;
+	animation: flash 1s forwards ease-in 0.5s 3 normal;
+}
+
+.general-banner.alert-info {
+	background-color: #359aef;
+	color:#fff;
+}
+.general-banner.alert-success {
+	background-color: #85e160;
+}
+.general-banner.alert-warning {
+	background-color: #fce469;
+}
+.general-banner.alert-danger {
+	background-color: #f22a2a;
+	color: #fff;
+}
+
+.reports-filter {
+	padding-top: 18px;
+}
+
+@keyframes flash {
+	50% {
+		background: #fff;
+	}
 }
 
 @media print {

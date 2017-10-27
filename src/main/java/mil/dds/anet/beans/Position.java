@@ -7,6 +7,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Position extends AbstractAnetBean {
@@ -38,7 +39,7 @@ public class Position extends AbstractAnetBean {
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+		this.name = Utils.trimStringReturnNull(name);
 	}
 	
 	public String getCode() {
@@ -46,7 +47,7 @@ public class Position extends AbstractAnetBean {
 	}
 
 	public void setCode(String code) {
-		this.code = code;
+		this.code = Utils.trimStringReturnNull(code);
 	}
 
 	public PositionType getType() {

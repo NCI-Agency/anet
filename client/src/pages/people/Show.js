@@ -160,7 +160,7 @@ export default class PersonShow extends Page {
 							<a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
 						</Form.Field>
 
-						<Form.Field id="country" />
+						<Form.Field label="Nationality" id="country" />
 						<Form.Field id="gender" />
 
 						<Form.Field label="End of tour" id="endOfTourDate" value={person.endOfTourDate && moment(person.endOfTourDate).format('D MMM YYYY')} />

@@ -1,5 +1,8 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
@@ -21,21 +24,16 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 			return result;
 		}
 		
-		Query<Location> sqlQuery = dbHandle.createQuery("/* MssqlLocationSearch */ SELECT *, count(*) over() as totalCount "
-				+ "FROM locations WHERE CONTAINS (name, :name) "
-				+ "ORDER BY name ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY")
-			.bind("name", Utils.getSqlServerFullTextQuery(query.getText()))
-			.bind("offset", query.getPageSize() * query.getPageNum())
-			.bind("limit", query.getPageSize())
+		final Map<String,Object> args = new HashMap<String,Object>();
+		final StringBuilder sql = new StringBuilder(
+				"/* MssqlLocationSearch */ SELECT *, count(*) over() as totalCount "
+						+ "FROM locations WHERE CONTAINS (name, :name) "
+						+ "ORDER BY name ASC, id ASC");
+		args.put("name", Utils.getSqlServerFullTextQuery(query.getText()));
+
+		final Query<Location> map = MssqlSearcher.addPagination(query, dbHandle, sql, args)
 			.map(new LocationMapper());
-		
-		result.setList(sqlQuery.list());
-		if (result.getList().size() > 0) { 
-			result.setTotalCount((Integer) sqlQuery.getContext().getAttribute("totalCount"));
-		} else { 
-			result.setTotalCount(0);
-		}
-		return result;
+		return LocationList.fromQuery(map, query.getPageNum(), query.getPageSize());
 	}
 
 }

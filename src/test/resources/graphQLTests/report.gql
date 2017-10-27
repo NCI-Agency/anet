@@ -48,4 +48,6 @@ report(id:${reportId}) {
 
     approvalStep { name, approvers { id } }
 
+    tags { id, name, description }
+
 }

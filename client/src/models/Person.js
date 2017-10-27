@@ -7,57 +7,10 @@ import dict from 'dictionary'
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
-const COUNTRIES = [
-	"Afghanistan",
-	"Albania",
-	"Armenia",
-	"Australia",
-	"Austria",
-	"Azerbaijan",
-	"Belgium",
-	"Bosnia-Herzegovina",
-	"Bulgaria",
-	"Canada",
-	"Croatia",
-	"Czech Republic",
-	"Denmark",
-	"Estonia",
-	"Finland",
-	"France",
-	"Georgia",
-	"Germany",
-	"Greece",
-	"Hungary",
-	"Iceland",
-	"Italy",
-	"Latvia",
-	"Lithuania",
-	"Luxembourg",
-	"Macedonia",
-	"Mongolia",
-	"Montenegro",
-	"Netherlands",
-	"New Zealand",
-	"Norway",
-	"Poland",
-	"Portugal",
-	"Romania",
-	"Sweden",
-	"Slovakia",
-	"Slovenia",
-	"Spain",
-	"Turkey",
-	"Ukraine",
-	"United Kingdom",
-	"United States of America",
-
-]
 
 export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
-
-	static COUNTRIES = COUNTRIES
 
 	static schema = {
 		name: '',

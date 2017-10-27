@@ -31,7 +31,6 @@ public class ApprovalStepResourceTest extends AbstractResourceTest {
 	public void approvalTest() {
 		final Person jack = getJackJackson(); //Get an authenticated user. 
 		final Person liz = getElizabethElizawell();
-		Person admin = getArthurDmin();
 		
 		//Create an Advisor Organization
 		Organization org = httpQuery("/api/organizations/new", admin)

@@ -5,11 +5,10 @@ import java.util.List;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 
-public class PositionSearchQuery implements ISearchQuery {
+public class PositionSearchQuery extends AbstractSearchQuery {
 
 	public enum PositionSearchSortBy { NAME, CODE, CREATED_AT }
-	
-	String text;
+
 	Boolean matchPersonName;
 	Integer organizationId;
 	Boolean includeChildrenOrgs;
@@ -21,23 +20,11 @@ public class PositionSearchQuery implements ISearchQuery {
 	PositionSearchSortBy sortBy;
 	SortOrder sortOrder;
 
-	int pageNum;
-	int pageSize;
-	
-	public PositionSearchQuery() { 
-		this.pageNum = 0;
-		this.pageSize = 10;
+	public PositionSearchQuery() {
+		super();
 		this.matchPersonName = false;
 	}
-	
-	public String getText() {
-		return text;
-	}
-	
-	public void setText(String text) {
-		this.text = text;
-	}
-	
+
 	public Boolean getMatchPersonName() {
 		return matchPersonName == null ? false : matchPersonName;
 	}
@@ -109,28 +96,7 @@ public class PositionSearchQuery implements ISearchQuery {
 	public void setSortOrder(SortOrder sortOrder) {
 		this.sortOrder = sortOrder;
 	}
-	
-	@Override
-	public int getPageNum() {
-		return pageNum;
-	}
-	
-	@Override
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
-	}
-	
-	@Override
-	public int getPageSize() {
-		return pageSize;
-	}
-	
-	@Override
-	public void setPageSize(int pageSize) {
-		if (pageSize == 0) { return; } // that makes no sense. 
-		this.pageSize = pageSize;
-	}
-	
+
 	public static PositionSearchQuery withText(String text, int pageNum, int pageSize) {
 		PositionSearchQuery query = new PositionSearchQuery();
 		query.setText(text);
@@ -138,5 +104,5 @@ public class PositionSearchQuery implements ISearchQuery {
 		query.setPageSize(pageSize);
 		return query;
 	}
-	
+
 }

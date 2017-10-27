@@ -2,6 +2,8 @@ import React, {PropTypes} from 'react'
 import {Checkbox, Table, Button, Collapse, HelpBlock} from 'react-bootstrap'
 import DatePicker from 'react-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
+import { WithContext as ReactTags } from 'react-tag-input'
+import 'components/reactTags.css'
 
 import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
@@ -37,6 +39,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 				locations: [],
 				poams: [],
 			},
+			tagList: [],
+			suggestionList: [],
 
 			showReportText: false,
 			isCancelled: (props.report.cancelledReason ? true : false),
@@ -47,6 +51,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 			timeoutId: null,
 			showAutoSaveBanner: false,
 		}
+		this.handleTagDelete = this.handleTagDelete.bind(this)
+		this.handleTagAddition = this.handleTagAddition.bind(this)
 	}
 
 	componentDidMount() {
@@ -60,6 +66,9 @@ export default class ReportForm extends ValidatableFormWrapper {
 			poamList(f:recents, maxResults:6) {
 				list { id, shortName, longName }
 			}
+			tagList(f:getAll) {
+				list { id, name, description }
+			}
 		`).then(data => {
 			let newState = {
 				recents: {
@@ -67,6 +76,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 					persons: data.personList.list,
 					poams: data.poamList.list,
 				},
+				tagList: data.tagList.list,
+				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
 			}
 			this.setState(newState)
 		})
@@ -88,9 +99,20 @@ export default class ReportForm extends ValidatableFormWrapper {
 		this.setState({showReportText: !!report.reportText})
 	}
 
+    handleTagDelete(i) {
+        let {tags} = this.props.report
+        tags.splice(i, 1)
+    }
+
+    handleTagAddition(tag) {
+        let newTag = this.state.tagList.find(function (t) { return t.name === tag })
+        let {tags} = this.props.report
+        tags.push(newTag)
+    }
+
 	render() {
 		let {report, onDelete} = this.props
-		let {recents, errors, isCancelled, showAutoSaveBanner} = this.state
+		let {recents, suggestionList, errors, isCancelled, showAutoSaveBanner} = this.state
 
 		let hasErrors = Object.keys(errors).length > 0
 		let isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
@@ -175,6 +197,21 @@ export default class ReportForm extends ValidatableFormWrapper {
 							<option value="CANCELLED_DUE_TO_THREAT">Cancelled due to Threat</option>
 						</Form.Field>
 					}
+
+					<Form.Field id="tags" label="Tags">
+						<ReactTags tags={report.tags}
+							suggestions={suggestionList}
+							labelField={'name'}
+							classNames={{
+								tag: 'reportTag label label-info',
+								remove: 'reportTagRemove label-info',
+							}}
+							minQueryLength={1}
+							autocomplete={true}
+							autofocus={false}
+							handleDelete={this.handleTagDelete}
+							handleAddition={this.handleTagAddition} />
+					</Form.Field>
 				</Fieldset>
 
 				<Fieldset title={!isCancelled ? "Meeting attendance" : "Planned attendance"} id="attendance-fieldset">

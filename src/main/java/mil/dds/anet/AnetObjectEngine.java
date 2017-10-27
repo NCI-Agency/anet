@@ -27,6 +27,7 @@ import mil.dds.anet.database.PoamDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.SavedSearchDao;
+import mil.dds.anet.database.TagDao;
 import mil.dds.anet.database.TestingDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.mssql.MssqlSearcher;
@@ -48,6 +49,7 @@ public class AnetObjectEngine {
 	CommentDao commentDao;
 	AdminDao adminDao;
 	SavedSearchDao savedSearchDao;
+	private final TagDao tagDao;
 
 	ISearcher searcher;
 	
@@ -69,6 +71,7 @@ public class AnetObjectEngine {
 		commentDao = new CommentDao(dbHandle);
 		adminDao = new AdminDao(dbHandle);
 		savedSearchDao = new SavedSearchDao(dbHandle);
+		tagDao = new TagDao(dbHandle);
 		
 		instance = this;
 		
@@ -123,7 +126,11 @@ public class AnetObjectEngine {
 	public SavedSearchDao getSavedSearchDao() { 
 		return savedSearchDao;
 	}
-	
+
+	public TagDao getTagDao() {
+		return tagDao;
+	}
+
 	public ISearcher getSearcher() {
 		return searcher;
 	}

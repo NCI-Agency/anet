@@ -30,6 +30,7 @@ export default class OrganizationFilter extends Component {
 		this.state = {
 			value: props.value || {},
 			includeChildOrgs: props.value.includeChildOrgs || false,
+			queryParams: props.queryParams || {},
 		}
 
 		this.updateFilter()
@@ -40,7 +41,7 @@ export default class OrganizationFilter extends Component {
 	}
 
 	render() {
-		let autocompleteProps = Object.without(this.props, 'value', 'queryKey', 'queryIncludeChildOrgsKey')
+		let autocompleteProps = Object.without(this.props, 'value', 'queryKey', 'queryIncludeChildOrgsKey', 'queryParams')
 
 		return <div>
 			<Autocomplete
@@ -48,6 +49,7 @@ export default class OrganizationFilter extends Component {
 				valueKey="shortName"
 				url="/api/organizations/search"
 				placeholder="Filter by organization..."
+				queryParams={this.state.queryParams}
 				{...autocompleteProps}
 				onChange={this.onAutocomplete}
 				value={this.state.value}

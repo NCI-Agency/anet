@@ -43,9 +43,10 @@ public class PositionResourceTest extends AbstractResourceTest {
 	
 	@Test
 	public void positionTest() { 
-		Person jack = getJackJackson();
-		Person admin = getArthurDmin();
+		final Person jack = getJackJackson();
 		assertThat(jack.getId()).isNotNull();
+		assertThat(jack.getPosition()).isNotNull();
+		final Position jacksOldPosition = jack.getPosition();
 		
 		//Create Position
 		Position test = new Position();
@@ -181,13 +182,19 @@ public class PositionResourceTest extends AbstractResourceTest {
 	
 		resp = httpQuery(String.format("/api/positions/%d",tashkil.getId()), jack).get();
 		assertThat(resp.getStatus()).isEqualTo(Status.NOT_FOUND.getStatusCode());
+
+		//Put jack back in his old position
+		resp = httpQuery(String.format("/api/positions/%d/person", jacksOldPosition.getId()), admin).post(Entity.json(jack));
+		assertThat(resp.getStatus()).isEqualTo(200);
+
+		curr = httpQuery(String.format("/api/positions/%d/person", jacksOldPosition.getId()), admin).get(Person.class);
+		assertThat(curr.getId()).isEqualTo(jack.getId());
 	}
 		
 	
 	@Test
 	public void tashkilTest() {
 		final Person jack = getJackJackson();
-		final Person admin = getArthurDmin();
 		
 		//Create Position
 		Position test = PositionTest.getTestPosition();
@@ -345,18 +352,16 @@ public class PositionResourceTest extends AbstractResourceTest {
 	
 	@Test
 	public void createPositionTest() {
-		Person authur = getArthurDmin();
-		
 		//Create a new position and designate the person upfront
 		Person newb = new Person();
 		newb.setName("PositionTest Person");
 		newb.setRole(Role.PRINCIPAL);
 		newb.setStatus(PersonStatus.ACTIVE);
 		
-		newb = httpQuery("/api/people/new", authur).post(Entity.json(newb), Person.class);
+		newb = httpQuery("/api/people/new", admin).post(Entity.json(newb), Person.class);
 		assertThat(newb.getId()).isNotNull();
 		
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", authur)
+		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
 				.get(OrganizationList.class);
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		
@@ -367,11 +372,11 @@ public class PositionResourceTest extends AbstractResourceTest {
 		newbPosition.setStatus(PositionStatus.ACTIVE);
 		newbPosition.setPerson(newb);
 		
-		newbPosition = httpQuery("/api/positions/new", authur).post(Entity.json(newbPosition), Position.class);
+		newbPosition = httpQuery("/api/positions/new", admin).post(Entity.json(newbPosition), Position.class);
 		assertThat(newbPosition.getId()).isNotNull();
 		
 		//Ensure that the position contains the person
-		Position returned = httpQuery("/api/positions/" + newbPosition.getId(), authur).get(Position.class);
+		Position returned = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
 		assertThat(returned.getId()).isNotNull();
 		assertThat(returned.loadPerson()).isNotNull();
 		assertThat(returned.loadPerson().getId()).isEqualTo(newb.getId());
@@ -384,22 +389,22 @@ public class PositionResourceTest extends AbstractResourceTest {
 		Person prin2 = new Person();
 		prin2.setName("2nd Principal in PrincipalTest");
 		prin2.setRole(Role.PRINCIPAL);
-		prin2 = httpQuery("/api/people/new", authur).post(Entity.json(prin2),Person.class);
+		prin2 = httpQuery("/api/people/new", admin).post(Entity.json(prin2),Person.class);
 		assertThat(prin2.getId()).isNotNull();
 		assertThat(prin2.loadPosition()).isNull();
 		
 		prin2.setPosition(Position.createWithId(newbPosition.getId()));
-		Response resp = httpQuery("/api/people/update", authur).post(Entity.json(prin2));
+		Response resp = httpQuery("/api/people/update", admin).post(Entity.json(prin2));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Reload this person to check their position was set. 
-		prin2 = httpQuery("/api/people/" + prin2.getId(), authur).get(Person.class);
+		prin2 = httpQuery("/api/people/" + prin2.getId(), admin).get(Person.class);
 		assertThat(prin2).isNotNull();
 		assertThat(prin2.loadPosition()).isNotNull();
 		assertThat(prin2.loadPosition().getId()).isEqualTo(newbPosition.getId());
 		
 		//Check with a different API endpoint. 
-		Person currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", authur).get(Person.class);
+		Person currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
 		assertThat(currHolder).isNotNull();
 		assertThat(currHolder.getId()).isEqualTo(prin2.getId());
 		
@@ -416,21 +421,21 @@ public class PositionResourceTest extends AbstractResourceTest {
 		pos2.setStatus(PositionStatus.ACTIVE);
 		pos2.setPerson(Person.createWithId(prin2.getId()));
 		
-		pos2 = httpQuery("/api/positions/new", authur).post(Entity.json(pos2), Position.class);
+		pos2 = httpQuery("/api/positions/new", admin).post(Entity.json(pos2), Position.class);
 		assertThat(pos2.getId()).isNotNull();
 		
-		returned = httpQuery("/api/positions/" + pos2.getId(), authur).get(Position.class);
+		returned = httpQuery("/api/positions/" + pos2.getId(), admin).get(Position.class);
 		assertThat(returned).isNotNull();
 		assertThat(returned.getName()).isEqualTo(pos2.getName());
 		assertThat(returned.loadPerson()).isNotNull();
 		assertThat(returned.loadPerson().getId()).isEqualTo(prin2.getId());
 		
 		//Make sure prin2 got moved out of newbPosition
-		currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", authur).get(Person.class);
+		currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
 		assertThat(currHolder).isNull();
 		
 		//Pull the history of newbPosition
-		newbPosition = httpQuery("/api/positions/" + newbPosition.getId(), authur).get(Position.class);
+		newbPosition = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
 		List<PersonPositionHistory> history = newbPosition.loadPreviousPeople();
 		assertThat(history.size()).isEqualTo(2);
 		assertThat(history.get(0).getPerson().getId()).isEqualTo(newb.getId());

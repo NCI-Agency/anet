@@ -5,6 +5,7 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE positionRelationships;
 --DROP TABLE reportPoams;
 --DROP TABLE reportPeople;
+--DROP TABLE reportTags;
 --DROP TABLE peoplePositions;
 --DROP TABLE savedSearches;
 --DROP TABLE positions;
@@ -17,6 +18,7 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE organizations;
 --DROP TABLE adminSettings;
 --DROP TABLE pendingEmails;
+--DROP TABLE tags;
 --DROP TABLE DATABASECHANGELOG;
 --DROP TABLE DATABASECHANGELOGLOCK;
 
@@ -26,6 +28,7 @@ TRUNCATE TABLE approvalActions;
 TRUNCATE TABLE positionRelationships;
 TRUNCATE TABLE reportPoams;
 TRUNCATE TABLE reportPeople;
+TRUNCATE TABLE reportTags;
 TRUNCATE TABLE comments;
 TRUNCATE TABLE savedSearches;
 DELETE FROM positions;
@@ -37,6 +40,7 @@ DELETE FROM approvalSteps;
 DELETE FROM locations;
 DELETE FROM organizations;
 DELETE FROM adminSettings;
+DELETE FROM tags;
 
 --Advisors
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
@@ -575,3 +579,47 @@ INSERT INTO adminSettings ([key], value) VALUES ('MAP_LAYERS', '[{"name":"OSM","
 INSERT INTO adminSettings ([key], value) VALUES ('HELP_LINK_URL', 'http://google.com');
 INSERT INTO adminSettings ([key], value) VALUES ('CONTACT_EMAIL', 'team-anet@dds.mil');
 INSERT INTO adminsettings ([key], value) VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
+INSERT INTO adminsettings ([key], value) VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
+INSERT INTO adminsettings ([key], value) VALUES ('GENERAL_BANNER_TEXT', '');
+INSERT INTO adminsettings ([key], value) VALUES ('GENERAL_BANNER_LEVEL', 'notice');
+INSERT INTO adminsettings ([key], value) VALUES ('GENERAL_BANNER_VISIBILITY', '1');
+
+-- Tags
+INSERT INTO tags (name, description, createdAt, updatedAt) VALUES
+  ('bribery', 'Giving/Promising money or something valuable to corrupt the behavior of a public official', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('clientelism', 'Exhange of goods or services for political support; involves quid-pro-quo', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('collusion', 'A secret agreement that involves fraud', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('embezzlement', 'Steal or misappropriate money from the organization the person works for', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('extortion', 'Using force or threats to obtain money or a service', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('fraud', 'Criminal deception resulting in financial personal gain', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('grand corruption', 'Abuse of high level power that benefits a few people at the expense of many', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('nepotism', 'Leaders favoring relatives or friends usually by giving them jobs', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('patronage', 'Leaders illegally appointing someone to a position', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('state capture', 'Private interests that significantly influence a decision-making process for private gain', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('petty corruption', 'Every day abuse of entrusted power by low- to mid-level public officials', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+  ('facilitation payment', 'Payment made to a government official that acts as an incentive to complete an action quickly', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Tag some reports
+INSERT INTO reportTags (reportId, tagId)
+  SELECT r.id, t.id
+  FROM reports r, tags t
+  WHERE r.id % 2 = 0
+  AND t.name = 'bribery';
+
+INSERT INTO reportTags (reportId, tagId)
+  SELECT r.id, t.id
+  FROM reports r, tags t
+  WHERE r.id % 3 = 0
+  AND t.name = 'embezzlement';
+
+INSERT INTO reportTags (reportId, tagId)
+  SELECT r.id, t.id
+  FROM reports r, tags t
+  WHERE r.id % 2 = 1
+  AND t.name = 'patronage';
+
+INSERT INTO reportTags (reportId, tagId)
+  SELECT r.id, t.id
+  FROM reports r, tags t
+  WHERE r.id % 3 = 1
+  AND t.name = 'facilitation payment';

@@ -199,7 +199,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     )   
     t.is(await $meetingGoalInput.getAttribute('value'), '', `Meeting goal field starts blank`)
 
-    await verifyFieldIsRequired($meetingGoal, $meetingGoalInput, 'has-warning', 'Meeting group')
+    await verifyFieldIsRequired($meetingGoal, $meetingGoalInput, 'has-warning', 'Meeting goal')
 
     let $engagementDate = await $('#engagementDate')
     t.is(await $engagementDate.getAttribute('value'), '', 'Engagement date field starts blank')

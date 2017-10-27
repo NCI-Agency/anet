@@ -25,9 +25,14 @@ class Nav extends Component {
 		let organizations = appData.organizations || []
 		let path = this.context.app.props.location.pathname
 
+		let {settings} = appData || {}
+		let externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
+		let externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
+
 		let inAdmin = path.indexOf('/admin') === 0
 		let inOrg = path.indexOf('/organizations') === 0
 		let inMyReports = path.indexOf('/reports/mine') === 0
+		let inInsights = path.indexOf('/insights') === 0
 
 		let myOrg = currentUser.position.organization
 		let orgId, myOrgId
@@ -41,8 +46,6 @@ class Nav extends Component {
 			<SubNav
 				componentClass={Scrollspy}
 				className="nav"
-				items={['info', 'laydown', 'approvals', 'poams', 'reports']}
-				currentClassName="active"
 				offset={-152}
 			>
 				<AnchorLink scrollTo="info">Info</AnchorLink>
@@ -67,8 +70,6 @@ class Nav extends Component {
 					<SubNav
 						componentClass={Scrollspy}
 						className="nav"
-						items={['draft-reports', 'pending-approval', 'published-reports']}
-						currentClassName="active"
 						offset={-152}
 					>
 						<AnchorLink scrollTo="draft-reports">Draft reports</AnchorLink>
@@ -115,11 +116,35 @@ class Nav extends Component {
 						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
 					</SubNav>
 				}
+				
+				{externalDocumentationUrl && externalDocumentationUrlText &&
+					<li role="presentation">
+						<a href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</a>
+					</li>
+				}
 
 				<Link to="/help">
 					<NavItem>Help</NavItem>
 				</Link>
-			</BSNav>
+
+        {(currentUser.isAdmin() || currentUser.isSuperUser()) &&
+          <Link to="/insights">
+            <NavItem>Insights</NavItem>
+          </Link>
+        }
+        {(currentUser.isAdmin() || currentUser.isSuperUser()) && inInsights &&
+          <SubNav
+            componentClass={Scrollspy}
+            className="nav"
+            offset={-152}
+          >
+            <AnchorLink scrollTo="not-approved-reports">Not approved reports</AnchorLink>
+            <AnchorLink scrollTo="cancelled-reports">Cancelled reports</AnchorLink>
+            <AnchorLink scrollTo="advisor-reports">Advisor reports</AnchorLink>
+          </SubNav>
+        }
+
+				</BSNav>
 		)
 	}
 }

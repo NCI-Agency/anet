@@ -1,7 +1,7 @@
 package mil.dds.anet.beans;
 
 import java.util.Objects;
-
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Location extends AbstractAnetBean {
@@ -15,7 +15,7 @@ public class Location extends AbstractAnetBean {
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+		this.name = Utils.trimStringReturnNull(name);
 	}
 	
 	public Double getLat() {

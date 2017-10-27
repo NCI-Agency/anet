@@ -16,8 +16,8 @@ import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.Poam.PoamStatus;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Poam.PoamStatus;
 import mil.dds.anet.beans.Poam;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
@@ -36,7 +36,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 	@Test
 	public void createAO() {
 		Organization ao = OrganizationTest.getTestAO();
-		final Person admin = getArthurDmin(); //get an authenticated user
 		final Person jack = getJackJackson();
 
 		//Create a new AO
@@ -180,7 +179,23 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		
 		
 	}
-	
+
+	@Test
+	public void searchNoPaginationTest() {
+		final OrganizationSearchQuery query = new OrganizationSearchQuery();
+		query.setText("EF");
+		query.setPageSize(1);
+		final OrganizationList list1 = httpQuery("/api/organizations/search", admin).post(Entity.json(query), OrganizationList.class);
+		assertThat(list1).isNotNull();
+		assertThat(list1.getTotalCount()).isGreaterThan(1);
+
+		query.setPageSize(0);
+		final OrganizationList listAll = httpQuery("/api/organizations/search", admin).post(Entity.json(query), OrganizationList.class);
+		assertThat(listAll).isNotNull();
+		assertThat(listAll.getTotalCount()).isEqualTo(list1.getTotalCount());
+		assertThat(listAll.getTotalCount()).isEqualTo(listAll.getList().size());
+	}
+
 	@Test
 	public void getAllOrgsTest() { 
 		Person jack = getJackJackson();

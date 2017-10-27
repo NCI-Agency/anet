@@ -7,7 +7,7 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class SavedSearch extends AbstractAnetBean {
 
-	public enum SearchObjectType { REPORTS, PEOPLE, POAMS, POSITIONS, ORGANIZATIONS }
+	public enum SearchObjectType { REPORTS, PEOPLE, POAMS, POSITIONS, ORGANIZATIONS, LOCATIONS }
 	
 	String name;
 	Person owner;

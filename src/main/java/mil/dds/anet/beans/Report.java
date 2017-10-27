@@ -18,6 +18,7 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Report extends AbstractAnetBean {
@@ -58,6 +59,7 @@ public class Report extends AbstractAnetBean {
 	ReportPerson primaryPrincipal;
 
 	List<Comment> comments;
+	private List<Tag> tags;
 
 	@GraphQLIgnore
 	public ApprovalStep getApprovalStep() {
@@ -130,7 +132,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setExsum(String exsum) {
-		this.exsum = exsum;
+		this.exsum = Utils.trimStringReturnNull(exsum);
 	}
 
 	public Atmosphere getAtmosphere() {
@@ -146,7 +148,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setAtmosphereDetails(String atmosphereDetails) {
-		this.atmosphereDetails = atmosphereDetails;
+		this.atmosphereDetails = Utils.trimStringReturnNull(atmosphereDetails);
 	}
 
 	public ReportCancelledReason getCancelledReason() {
@@ -158,7 +160,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setIntent(String intent) {
-		this.intent = intent;
+		this.intent = Utils.trimStringReturnNull(intent);
 	}
 
 	public void loadAll() {
@@ -241,7 +243,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setKeyOutcomes(String keyOutcomes) {
-		this.keyOutcomes = keyOutcomes;
+		this.keyOutcomes = Utils.trimStringReturnNull(keyOutcomes);
 	}
 
 	public String getReportText() {
@@ -249,7 +251,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setReportText(String reportText) {
-		this.reportText = reportText;
+		this.reportText = Utils.trimStringReturnNull(reportText);
 	}
 
 	public String getNextSteps() {
@@ -257,7 +259,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setNextSteps(String nextSteps) {
-		this.nextSteps = nextSteps;
+		this.nextSteps = Utils.trimStringReturnNull(nextSteps);
 	}
 
 	@GraphQLFetcher("author")
@@ -402,7 +404,24 @@ public class Report extends AbstractAnetBean {
 		}
 		return workflow;
 	}
-	
+
+	@GraphQLFetcher("tags")
+	public List<Tag> loadTags() {
+		if (tags == null && id != null) {
+			tags = AnetObjectEngine.getInstance().getReportDao().getTagsForReport(id);
+		}
+		return tags;
+	}
+
+	@GraphQLIgnore
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+
 	@Override
 	public boolean equals(Object other) { 
 		if (other == null || other.getClass() != Report.class) { 
@@ -425,14 +444,16 @@ public class Report extends AbstractAnetBean {
 				&& Objects.equals(r.getReportText(), reportText)
 				&& Objects.equals(r.getNextSteps(), nextSteps)
 				&& idEqual(r.getAuthor(), author)
-				&& Objects.equals(r.getComments(), comments);
+				&& Objects.equals(r.getComments(), comments)
+				&& Objects.equals(r.getTags(), tags);
 	}
 	
 	@Override
 	public int hashCode() { 
 		return Objects.hash(id, state, approvalStep, createdAt, updatedAt, 
 			location, intent, exsum, attendees, poams, reportText, 
-			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate);
+			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate,
+			tags);
 	}
 
 	public static Report createWithId(Integer id) {

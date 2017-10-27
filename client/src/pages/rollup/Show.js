@@ -102,6 +102,7 @@ export default class RollupShow extends Page {
 			sortBy: "ENGAGEMENT_DATE",
 			sortOrder: "DESC",
 			pageNum: this.state.reportsPageNum,
+			pageSize: 10,
 		}
 
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
@@ -229,7 +230,9 @@ export default class RollupShow extends Page {
 		const BAR_HEIGHT = 24
 		const BAR_PADDING = 8
 		const MARGIN = {top: 0, right: 10, bottom: 20, left: 150}
-		let width = this.graph.clientWidth - MARGIN.left - MARGIN.right
+		let box = this.graph.getBoundingClientRect()
+		let boxWidth = box.right - box.left
+		let width = boxWidth - MARGIN.left - MARGIN.right
 		let height = (BAR_HEIGHT + BAR_PADDING) * graphData.length - BAR_PADDING
 
 		let maxNumberOfReports = Math.max.apply(Math, graphData.map(d => d.released + d.cancelled))

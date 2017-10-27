@@ -76,5 +76,14 @@
 		"updatedAt": null,
 		"text": "I really like this report, it's awesome!!!",
 		"reportId" : null
+	}],
+	"tags": [{
+		"id": null,
+		"name": "name1",
+		"description": "desc1"
+	}, {
+		"id": null,
+		"name": "name2",
+		"description": "desc2"
 	}]
 }
