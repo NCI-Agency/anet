@@ -10,6 +10,7 @@ import autobind from 'autobind-decorator'
 import moment from 'moment'
 
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
+import FutureEngagementInsights from 'components/FutureEngagementInsights'
 
 
 const calendarButtonCss = {
@@ -95,6 +96,14 @@ export default class InsightsShow extends Page {
           </span>
           }>
           <FilterableAdvisorReportsTable />
+        </Fieldset>
+
+        <Fieldset id="future-engagements" data-jumptarget title={
+          <span>
+            Future Engagements
+          </span>
+          }>
+          <FutureEngagementInsights />
         </Fieldset>
       </div>
     )
