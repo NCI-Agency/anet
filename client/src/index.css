@@ -269,7 +269,7 @@ a.home-tile {
 	background: #dae3ee;
 }
 
-.person-icon {
+.person-icon, .position-icon {
 	margin-right: 4px;
 }
 

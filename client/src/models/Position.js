@@ -1,3 +1,5 @@
+import React from 'react'
+
 import Model from 'components/Model'
 import dict from 'dictionary'
 
@@ -24,6 +26,15 @@ export default class Position extends Model {
 		organization: {},
 		person: {},
 		location: {},
+	}
+
+	static autocompleteQuery = "id, code, type, name"
+
+	static autocompleteTemplate(position) {
+		return <span>
+			<img src={(new Position(position)).iconUrl()} alt={position.type} height={20} className="position-icon" />
+			{position.name}
+		</span>
 	}
 
 	humanNameOfType() {

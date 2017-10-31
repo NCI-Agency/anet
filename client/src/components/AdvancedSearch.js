@@ -49,6 +49,15 @@ export default class AdvancedSearch extends Component {
 					template={Person.autocompleteTemplate}
 					placeholder="Filter reports by attendee..."
 				/>,
+				"Author Position": <AutocompleteFilter
+					queryKey="authorPositionId"
+					objectType={Position}
+					valueKey="name"
+					fields={Position.autocompleteQuery}
+					template={Position.autocompleteTemplate}
+					queryParams={{type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]}}
+					placeholder="Filter reports by author position..."
+				/>,
 				Organization: <OrganizationFilter
 					queryKey="orgId"
 					queryIncludeChildOrgsKey="includeOrgChildren"
