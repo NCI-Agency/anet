@@ -3,6 +3,7 @@ import Page from 'components/Page'
 import NotApprovedReports from 'components/NotApprovedReports'
 import CancelledReports from 'components/CancelledReports'
 import ReportsByPoam from 'components/ReportsByPoam'
+import FutureEngagementsByLocation from 'components/FutureEngagementsByLocation'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import Fieldset from 'components/Fieldset'
@@ -28,6 +29,11 @@ const insightDetails = {
     component: ReportsByPoam,
     title: 'Reports by PoAM',
     help: 'Number of reports by PoAM'
+  },
+  'future-engagements-by-location': {
+    component: FutureEngagementsByLocation,
+    title: 'Future Engagements by Location',
+    help: 'Number of future engagements by location'
   },
 }
 const calendarButtonCss = {
