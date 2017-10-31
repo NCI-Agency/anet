@@ -141,7 +141,10 @@ class Nav extends Component {
 						<Link to="/insights/future-engagements-by-location">
 							<MenuItem>Future engagements by location</MenuItem>
 						</Link>
-				</NavDropdown>
+						<Link to="/insights/advisor-reports">
+							<MenuItem>Advisor reports</MenuItem>
+						</Link>
+					</NavDropdown>
 				}
 			</BSNav>
 		)
