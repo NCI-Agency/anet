@@ -221,6 +221,19 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("authorPositionId", query.getAuthorPositionId());
 		}
 
+		if (query.getAttendeePositionId() != null) {
+			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
+							+ "JOIN reportPeople rp ON rp.reportId = r.id "
+							+ "JOIN peoplePositions pp ON pp.personId = rp.personId "
+							+ "  AND pp.createdAt <= r.engagementDate "
+							+ "LEFT JOIN peoplePositions maxPp ON maxPp.positionId = pp.positionId "
+							+ "  AND maxPp.createdAt > pp.createdAt "
+							+ "  AND maxPp.createdAt <= r.engagementDate "
+							+ "WHERE pp.positionId = :attendeePositionId "
+							+ "  AND maxPp.createdAt IS NULL )");
+			args.put("attendeePositionId", query.getAttendeePositionId());
+		}
+
 		if (whereClauses.size() == 0) { return results; }
 		
 		//Apply a filter to restrict access to other's draft reports
