@@ -13,7 +13,7 @@ import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 
-import {Person, Poam} from 'models'
+import {Person, Poam, Position} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -131,7 +131,7 @@ export default class AdvancedSearch extends Component {
 			filters: {
 				"Position type": <SelectSearchFilter
 					queryKey="type"
-					values={["ADVISOR", "PRINCIPAL"]}
+					values={[Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL]}
 					labels={[dict.lookup('ADVISOR_POSITION_NAME'), dict.lookup('PRINCIPAL_POSITION_NAME')]}
 				/>,
 				Organization: <OrganizationFilter
@@ -335,9 +335,9 @@ class SearchFilter extends Component {
 			let organizationFilter = this.props.organizationFilter
 			if (organizationFilter) {
 				let positionType = filter.value.value || ""
-				if (positionType === "PRINCIPAL") {
+				if (positionType === Position.TYPE.PRINCIPAL) {
 					organizationFilter.setState({queryParams: {type: "PRINCIPAL_ORG"}})
-				} else if (positionType === "ADVISOR") {
+				} else if (positionType === Position.TYPE.ADVISOR) {
 					organizationFilter.setState({queryParams: {type: "ADVISOR_ORG"}})
 				} else {
 					organizationFilter.setState({queryParams: {}})

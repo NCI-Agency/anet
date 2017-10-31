@@ -105,7 +105,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 						pos.code && components.push(pos.code)
 						return <span>{components.join(' - ')}</span>
 					}}
-					queryParams={{type: ['ADVISOR', 'SUPER_USER', 'ADMINISTRATOR'], matchPersonName: true}}
+					queryParams={{type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
 					onChange={this.addApprover.bind(this, index)}
 					clearOnSelect={true} />
 

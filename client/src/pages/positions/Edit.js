@@ -40,8 +40,8 @@ export default class PositionEdit extends Page {
 				//need to set type to either ADVISOR or PRINCIPAL and add permissions property.
 				//This is undone in the onSubmit method in the Form.
 				position.permissions = position.type
-				if (position.type === "SUPER_USER" || position.type === "ADMINISTRATOR") {
-					position.type = "ADVISOR"
+				if (position.type === Position.TYPE.SUPER_USER || position.type === Position.TYPE.ADMINISTRATOR) {
+					position.type = Position.TYPE.ADVISOR
 				}
 				return position
 			}

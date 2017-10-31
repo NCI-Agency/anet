@@ -8,6 +8,13 @@ export default class Position extends Model {
 	static resourceName = 'Position'
 	static listName = 'positionList'
 
+	static TYPE = {
+		ADVISOR: 'ADVISOR',
+		PRINCIPAL: 'PRINCIPAL',
+		SUPER_USER: 'SUPER_USER',
+		ADMINISTRATOR: 'ADMINISTRATOR'
+	}
+
 	static schema = {
 		name: '',
 		type: '',
@@ -20,19 +27,19 @@ export default class Position extends Model {
 	}
 
 	humanNameOfType() {
-		if (this.type === 'PRINCIPAL') {
+		if (this.type === Position.TYPE.PRINCIPAL) {
 			return dict.lookup('PRINCIPAL_POSITION_NAME')
-		} else if (this.type === 'ADVISOR') {
+		} else if (this.type === Position.TYPE.ADVISOR) {
 			return dict.lookup('ADVISOR_POSITION_TYPE_TITLE')
-		} else if (this.type === 'SUPER_USER') {
+		} else if (this.type === Position.TYPE.SUPER_USER) {
 			return dict.lookup('SUPER_USER_POSITION_TYPE_TITLE')
-		} else if (this.type === 'ADMINISTRATOR') {
+		} else if (this.type === Position.TYPE.ADMINISTRATOR) {
 			return dict.lookup('ADMINISTRATOR_POSITION_TYPE_TITLE')
 		}
 	}
 
 	isPrincipal() {
-		return this.type === 'PRINCIPAL'
+		return this.type === Position.TYPE.PRINCIPAL
 	}
 
 	toString() {
@@ -40,7 +47,7 @@ export default class Position extends Model {
 	}
 
 	iconUrl() {
-		if (this.type === 'PRINCIPAL') {
+		if (this.type === Position.TYPE.PRINCIPAL) {
 			return AFG_ICON
 		}
 

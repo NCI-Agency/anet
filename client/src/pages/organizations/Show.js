@@ -17,7 +17,7 @@ import OrganizationPoams from './Poams'
 import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
-import {Organization} from 'models'
+import {Organization, Position} from 'models'
 import GQL from 'graphqlapi'
 
 const PENDING_APPROVAL = 'PENDING_APPROVAL'
@@ -159,7 +159,7 @@ export default class OrganizationShow extends Page {
 		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 		let isAdmin = currentUser && currentUser.isAdmin()
 
-		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === 'SUPER_USER' || pos.type === 'ADMINISTRATOR'))
+		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
 
 		return (
 			<div>

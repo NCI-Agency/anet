@@ -18,8 +18,8 @@ export default class PositionNew extends Page {
 		super(props)
 
 		this.state = {
-			position: setDefaultPermissions(new Position( {type: 'ADVISOR'})),
-			originalPosition: setDefaultPermissions(new Position( {type: 'ADVISOR'})),
+			position: setDefaultPermissions(new Position( {type: Position.TYPE.ADVISOR})),
+			originalPosition: setDefaultPermissions(new Position( {type: Position.TYPE.ADVISOR})),
 		}
 	}
 
@@ -35,7 +35,7 @@ export default class PositionNew extends Page {
 				function getPositionFromData() {
 					let organization = new Organization(data.organization)
 					return setDefaultPermissions(new Position({
-						type: organization.isAdvisorOrg() ? 'ADVISOR' : 'PRINCIPAL',
+						type: organization.isAdvisorOrg() ? Position.TYPE.ADVISOR : Position.TYPE.PRINCIPAL,
 						organization,
 					}))
 				}

@@ -4,6 +4,8 @@ import Model from 'components/Model'
 import utils from 'utils'
 import dict from 'dictionary'
 
+import {Position} from 'models'
+
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
@@ -72,13 +74,13 @@ export default class Person extends Model {
 	}
 
 	isAdmin() {
-		return this.position && this.position.type === 'ADMINISTRATOR'
+		return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
 	}
 
 	isSuperUser() {
 		return this.position && (
-			this.position.type === 'SUPER_USER' ||
-			this.position.type === 'ADMINISTRATOR'
+			this.position.type === Position.TYPE.SUPER_USER ||
+			this.position.type === Position.TYPE.ADMINISTRATOR
 		)
 	}
 
@@ -94,8 +96,8 @@ export default class Person extends Model {
 	// - A super user for this orgs parents.
 	isSuperUserForOrg(org) {
 		if (!org) { return false }
-		if (this.position && this.position.type === 'ADMINISTRATOR') { return true }
-		if (this.position && this.position.type !== 'SUPER_USER') { return false }
+		if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) { return true }
+		if (this.position && this.position.type !== Position.TYPE.SUPER_USER) { return false }
 		if (org.type === 'PRINCIPAL_ORG') { return true }
 
 		if (!this.position || !this.position.organization) { return false }
