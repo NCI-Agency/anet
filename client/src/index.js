@@ -114,9 +114,11 @@ ReactDOM.render((
 
 				<Route path="help" component={Help} />
 
-        <Route path="insights" component={InsightsShow} />
+				<Route path="insights">
+					<Route path=":insight" component={InsightsShow} />
+				</Route>
 
-        <Route path="*" component={PageMissing} />
+				<Route path="*" component={PageMissing} />
 			</Route>
 		</Router>
 	</InjectablesProvider>

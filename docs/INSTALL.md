@@ -64,7 +64,7 @@ Create a folder for the application, for example: c:\anet. In that location:
 	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
 	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator.  We recommend using something like `ANET Administrators`.
 	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator.  We recommend `ANET Administrator`.
-	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumabely are.
+	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
 	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are).  For production situations this will be your windows domain username.   If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
 8. Launch the ANET Server: `bin/anet.bat server anet.yml`

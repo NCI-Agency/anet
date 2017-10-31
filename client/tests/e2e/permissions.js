@@ -8,14 +8,14 @@ test('checking super user permissions', async t => {
     await t.context.get('/', 'rebecca')
     await t.context.pageHelpers.clickMyOrgLink()
 
-    let $rebeccaLink = await findSuperUserLink(t, 'CTR Rebecca Beccabon')
+    let $rebeccaLink = await findSuperUserLink(t, 'CTR BECCABON, Rebecca')
     await $rebeccaLink.click()
 
     await validateUserCanEditUserForCurrentPage(t)
     await editAndSavePositionFromCurrentUserPage(t)
 
     await t.context.pageHelpers.clickMyOrgLink()
-    let $jacobLink = await findSuperUserLink(t, 'CIV Jacob Jacobson')
+    let $jacobLink = await findSuperUserLink(t, 'CIV JACOBSON, Jacob')
 
     await $jacobLink.click()
     await validateUserCanEditUserForCurrentPage(t)
@@ -25,7 +25,7 @@ test('checking super user permissions', async t => {
 
 validateUserCannotEditOtherUser(
     'super user cannot edit administrator', 'rebecca',
-    'arthur', 'CIV Arthur Dmin', 'ANET Administrator'
+    'arthur', 'CIV DMIN, Arthur', 'ANET Administrator'
 )
 
 test('checking regular user permissions', async t => {
@@ -35,7 +35,7 @@ test('checking regular user permissions', async t => {
 
     await t.context.get('/', 'jack')
     await t.context.pageHelpers.clickMyOrgLink()
-    await pageHelpers.clickPersonNameFromSupportedPositionsFieldset('OF-9 Jack Jackson')
+    await pageHelpers.clickPersonNameFromSupportedPositionsFieldset('OF-9 JACKSON, Jack')
 
     await validateUserCanEditUserForCurrentPage(t)
 
@@ -46,11 +46,11 @@ test('checking regular user permissions', async t => {
 
 validateUserCannotEditOtherUser(
     'Regular user cannot edit super user people or positions', 'jack', 'rebecca',
-    'CTR Rebecca Beccabon', 'EF 2.2 Final Reviewer'
+    'CTR BECCABON, Rebecca', 'EF 2.2 Final Reviewer'
 )
 
 validateUserCannotEditOtherUser(
-    'Regular user cannot edit admin people or positions', 'jack', 'arthur', 'CIV Arthur Dmin', 'ANET Administrator'
+    'Regular user cannot edit admin people or positions', 'jack', 'arthur', 'CIV DMIN, Arthur', 'ANET Administrator'
 )
 
 test('checking admin permissions', async t => {
@@ -58,7 +58,7 @@ test('checking admin permissions', async t => {
 
     await t.context.get('/', 'arthur')
     await t.context.pageHelpers.clickMyOrgLink()
-    let $arthurLink = await findSuperUserLink(t, 'CIV Arthur Dmin')
+    let $arthurLink = await findSuperUserLink(t, 'CIV DMIN, Arthur')
     await $arthurLink.click()
 
     await validateUserCanEditUserForCurrentPage(t)
@@ -71,12 +71,12 @@ test('admins can edit superusers and their positions', async t => {
     await t.context.get('/', 'arthur')
 
     let [$rebeccaPersonLink] =
-        await getUserPersonAndPositionFromSearchResults(t, 'rebecca', 'CTR Rebecca Beccabon', 'EF 2.2 Final Reviewer')
+        await getUserPersonAndPositionFromSearchResults(t, 'rebecca', 'CTR BECCABON, Rebecca', 'EF 2.2 Final Reviewer')
     await $rebeccaPersonLink.click()
     await validateUserCanEditUserForCurrentPage(t)
 
     let $rebeccaPositionLink =
-        (await getUserPersonAndPositionFromSearchResults(t, 'rebecca', 'CTR Rebecca Beccabon', 'EF 2.2 Final Reviewer'))[1]
+        (await getUserPersonAndPositionFromSearchResults(t, 'rebecca', 'CTR BECCABON, Rebecca', 'EF 2.2 Final Reviewer'))[1]
     await $rebeccaPositionLink.click()
     await validatePositionCanBeEditedOnCurrentPage(t)
 })

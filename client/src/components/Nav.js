@@ -127,25 +127,23 @@ class Nav extends Component {
 					<NavItem>Help</NavItem>
 				</Link>
 
-        {(currentUser.isAdmin() || currentUser.isSuperUser()) &&
-          <Link to="/insights">
-            <NavItem>Insights</NavItem>
-          </Link>
-        }
-        {(currentUser.isAdmin() || currentUser.isSuperUser()) && inInsights &&
-          <SubNav
-            componentClass={Scrollspy}
-            className="nav"
-            offset={-152}
-          >
-            <AnchorLink scrollTo="not-approved-reports">Not approved reports</AnchorLink>
-            <AnchorLink scrollTo="cancelled-reports">Cancelled reports</AnchorLink>
-            <AnchorLink scrollTo="advisor-reports">Advisor reports</AnchorLink>
-			<AnchorLink scrollTo="future-engagements">Future engagements</AnchorLink>
-          </SubNav>
-        }
-
-				</BSNav>
+				{(currentUser.isAdmin() || currentUser.isSuperUser()) &&
+					<NavDropdown title="Insights" id="insights" active={inInsights}>
+						<Link to="/insights/not-approved-reports">
+							<MenuItem>Not approved reports</MenuItem>
+						</Link>
+						<Link to="/insights/cancelled-reports">
+							<MenuItem>Cancelled reports</MenuItem>
+						</Link>
+						<Link to="/insights/reports-by-poam">
+							<MenuItem>Reports by PoAM</MenuItem>
+						</Link>
+						<Link to="/insights/future-engagements-by-location">
+							<MenuItem>Future engagements by location</MenuItem>
+						</Link>
+				</NavDropdown>
+				}
+			</BSNav>
 		)
 	}
 }

@@ -15,7 +15,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getJackJacksonStub() { 
 		final Person person = new Person();
-		person.setName("Jack Jackson");
+		person.setName("JACKSON, Jack");
 		person.setEmailAddress("hunter+foobar@dds.mil");
 		person.setPhoneNumber("123-456-78960");
 		person.setRank("OF-9");
@@ -31,7 +31,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getSteveStevesonStub() {
 		Person person = new Person();
-		person.setName("Steve Steveson");
+		person.setName("STEVESON, Steve");
 		person.setEmailAddress("hunter+steve@dds.mil");
 		person.setPhoneNumber("+011-258-32895");
 		person.setRank("LtCol");
@@ -55,7 +55,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getRogerRogwell() {
 		Person person = new Person();
-		person.setName("Roger Rogwell");
+		person.setName("ROGWELL, Roger");
 		person.setEmailAddress("hunter+roger@dds.mil");
 		person.setPhoneNumber("+1-412-543-2839");
 		person.setRank("Maj");
@@ -69,7 +69,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getElizabethElizawell() {
 		Person person = new Person();
-		person.setName("Elizabeth Elizawell");
+		person.setName("ELIZAWELL, Elizabeth");
 		person.setEmailAddress("hunter+liz@dds.mil");
 		person.setPhoneNumber("+1-777-7777");
 		person.setRank("Capt");
@@ -85,7 +85,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getNickNicholson() { 
 		Person p = new Person();
-		p.setName("Nick Nicholson");
+		p.setName("NICHOLSON, Nick");
 		p.setEmailAddress("hunter+nick@dds.mil");
 		p.setPhoneNumber("+1-202-7324");
 		p.setRank("CIV");
@@ -101,7 +101,7 @@ public class PersonTest extends BeanTester<Person> {
 	
 	public static Person getBobBobtown() { 
 		Person p = new Person();
-		p.setName("Bob Bobtown");
+		p.setName("BOBTOWN, Bob");
 		p.setEmailAddress("hunter+bob@dds.mil");
 		p.setPhoneNumber("+1-444-7324");
 		p.setRank("CIV");
@@ -143,7 +143,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getArthurDmin() {
 		Person p = new Person();
-		p.setName("Arthur Dmin");
+		p.setName("DMIN, Arthur");
 		p.setEmailAddress("hunter+arthur@dds.mil");
 		p.setStatus(PersonStatus.ACTIVE);
 		p.setRole(Role.ADVISOR);

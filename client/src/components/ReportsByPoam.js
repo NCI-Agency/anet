@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
 import API from 'api'
-import dict from 'dictionary'
 import autobind from 'autobind-decorator'
 import {Button} from 'react-bootstrap'
 
@@ -14,15 +13,13 @@ const colors = {
   barColor: '#F5CA8D',
   selectedBarColor: '#EC971F'
 }
-const chartId = 'not_approved_reports_chart'
+const chartByPoamId = 'reports_by_poam'
 
 
 /*
- * Component displaying reports submitted for approval up to the given date but
- * which have not been approved yet. They are displayed in different
- * presentation forms: chart, summary, table and map.
+ * Component displaying a chart with number of reports per PoAM.
  */
-export default class NotApprovedReports extends Component {
+export default class ReportsByPoam extends Component {
   static propTypes = {
     date: React.PropTypes.object,
   }
@@ -32,42 +29,40 @@ export default class NotApprovedReports extends Component {
 
     this.state = {
       date: props.date,
-      graphData: [],
-      reports: {list: []},
-      reportsPageNum: 0,
-      focusedOrg: '',
+      graphDataByPoam: [],
+      focusedPoam: '',
       updateChart: true  // whether the chart needs to be updated
     }
   }
 
   get queryParams() {
     return {
-      state: ['PENDING_APPROVAL'],
-      updatedAtEnd: this.state.date.valueOf(),
+      state: ['RELEASED'],
+      releasedAtStart: this.state.date.valueOf(),
     }
   }
 
   render() {
-    let chartPart = ''
-    if (this.state.graphData.length) {
-      chartPart = <BarChart
-        chartId={chartId}
-        data={this.state.graphData}
-        xProp='advisorOrg.id'
-        yProp='notApproved'
-        xLabel='advisorOrg.shortName'
-        onBarClick={this.goToOrg}
+    let chartByPoam = ''
+    if (this.state.graphDataByPoam.length) {
+      chartByPoam = <BarChart
+        chartId={chartByPoamId}
+        data={this.state.graphDataByPoam}
+        xProp='poam.id'
+        yProp='reportsCount'
+        xLabel='poam.shortName'
+        onBarClick={this.goToPoam}
         barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
-    let focusDetails = this.focusDetails
+    let focusDetails = this.getFocusDetails()
     return (
       <div>
-        {chartPart}
+        {chartByPoam}
         <Fieldset
-            title={`Not Approved Reports ${focusDetails.titleSuffix}`}
-            id='not-approved-reports-details'
+            title={`Reports by PoAM ${focusDetails.titleSuffix}`}
+            id='cancelled-reports-details'
             action={!focusDetails.resetFnc
               ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
             }
@@ -78,14 +73,14 @@ export default class NotApprovedReports extends Component {
     )
   }
 
-  get focusDetails() {
+  getFocusDetails() {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
-    if (this.state.focusedOrg) {
-      titleSuffix = `for ${this.state.focusedOrg.shortName}`
-      resetFnc = 'goToOrg'
-      resetButtonLabel = 'All organizations'
+    if (this.state.focusedPoam) {
+      titleSuffix = `for ${this.state.focusedPoam.shortName}`
+      resetFnc = 'goToPoam'
+      resetButtonLabel = 'All PoAMs'
     }
     return {
       titleSuffix: titleSuffix,
@@ -95,7 +90,6 @@ export default class NotApprovedReports extends Component {
   }
 
   fetchData() {
-    let pinned_ORGs = dict.lookup('pinned_ORGs')
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.queryParams)
     Object.assign(chartQueryParams, {
@@ -110,30 +104,32 @@ export default class NotApprovedReports extends Component {
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
     Promise.all([chartQuery]).then(values => {
+      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, poams: d.poams.map(p => p.id)}})
+      let poams = values[0].reportList.list.map(d => d.poams)
+      poams = [].concat.apply([], poams)
+        .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
+        .sort((a, b) => a.shortName.localeCompare(b.shortName))
+      // add No PoAM item, in order to relate to reports without PoAMs
+      poams.push({id: null, shortName: 'No PoAM', longName: 'No PoAM'})
       this.setState({
         updateChart: true,  // update chart after fetching the data
-        graphData: values[0].reportList.list
-          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-          .map(d => {d.notApproved = values[0].reportList.list.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
-          .sort((a, b) => {
-            let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
-            let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
-            if (a_index < 0)
-              return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
-            else
-              return (b_index < 0) ? -1 : a_index-b_index
-          })
+        graphDataByPoam: poams
+          .map(d => {
+            let r = {}
+            r.poam = d
+            r.reportsCount = (d.id ? simplifiedValues.filter(item => item.poams.indexOf(d.id) > -1).length : simplifiedValues.filter(item => item.poams.length === 0).length)
+            return r}),
       })
     })
-    this.fetchOrgData()
+    this.fetchPoamData()
   }
 
-  fetchOrgData() {
+  fetchPoamData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
     Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
-    if (this.state.focusedOrg) {
-      Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
+    if (this.state.focusedPoam) {
+      Object.assign(reportsQueryParams, {poamId: this.state.focusedPoam.id})
     }
     // Query used by the reports collection
     let reportsQuery = API.query(/* GraphQL */`
@@ -153,29 +149,29 @@ export default class NotApprovedReports extends Component {
 
   @autobind
   goToReportsPage(newPage) {
-    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchOrgData())
+    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchPoamData())
   }
 
-  resetChartSelection() {
+  resetChartSelection(chartId) {
     d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
   }
 
   @autobind
-  goToOrg(item) {
-    // Note: we set updateChart to false as we do not want to rerender the chart
-    // when changing the focus organization.
-    this.setState({updateChart: false, reportsPageNum: 0, focusedOrg: (item ? item.advisorOrg : '')}, () => this.fetchOrgData())
+  goToPoam(item) {
+    // Note: we set updateChart to false as we do not want to re-render the chart
+    // when changing the focus poam.
+    this.setState({updateChart: false, reportsPageNum: 0, focusedPoam: (item ? item.poam : '')}, () => this.fetchPoamData())
     // remove highlighting of the bars
-    this.resetChartSelection()
+    this.resetChartSelection(chartByPoamId)
     if (item) {
-      // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartId + ' #bar_' + item.advisorOrg.id).attr('fill', colors.selectedBarColor)
+      // highlight the bar corresponding to the selected poam
+      d3.select('#' + chartByPoamId + ' #bar_' + item.poam.id).attr('fill', colors.selectedBarColor)
     }
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedOrg: ''})  // reset focus when changing the date
+      this.setState({date: nextProps.date, focusedPoam: ''})  // reset focus when changing the date
     }
   }
 
@@ -188,5 +184,4 @@ export default class NotApprovedReports extends Component {
       this.fetchData()
     }
   }
-
 }

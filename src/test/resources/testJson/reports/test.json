@@ -14,7 +14,7 @@
 	"intent": "Check up with Steve",
 	"attendees": [{
 		"id": null,
-		"name": "Steve Steveson",
+		"name": "STEVESON, Steve",
 		"status": "ACTIVE",
 		"role" : "PRINCIPAL",
 		"emailAddress": "hunter+steve@dds.mil",
@@ -44,7 +44,7 @@
 	"nextSteps": "Go for a boat ride with Steve tomorrow",
 	"author": {
 		"id": null,
-		"name": "Jack Jackson",
+		"name": "JACKSON, Jack",
 		"status": "ACTIVE",
 		"role" : "ADVISOR",
 		"emailAddress": "hunter+foobar@dds.mil",
@@ -60,7 +60,7 @@
 		"id": null,
 		"author": {
 			"id": null,
-			"name": "Jack Jackson",
+			"name": "JACKSON, Jack",
 			"status": "ACTIVE",
 			"role" : "ADVISOR",
 			"emailAddress": "hunter+foobar@dds.mil",

@@ -98,7 +98,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		System.out.println("... Position " + adminPos.getId() + " Saved!");
 		
 		//Create First User
-		System.out.print("Your Name >>");
+		System.out.print("Your Name [LAST NAME, First name(s)] >>");
 		Person admin = new Person();
 		admin.setName(scanner.nextLine());
 		System.out.print("Your Domain Username >>");

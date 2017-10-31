@@ -141,7 +141,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
 		PersonList searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 		assertThat(searchResults.getTotalCount()).isGreaterThan(0);
-		assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("Bob Bobtown")).findFirst()).isNotEmpty();
+		assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob")).findFirst()).isNotEmpty();
 
 		OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%201&type=ADVISOR_ORG", jack).get(OrganizationList.class);
 		assertThat(orgs.getList().size()).isGreaterThan(0);
@@ -196,18 +196,18 @@ public class PersonResourceTest extends AbstractResourceTest {
 			prevName = p.getName();
 		}
 		
-		//Search for a person with the name "A Divisor"
+		//Search for a person with the name "A Dvisor"
 		query = new PersonSearchQuery();
 		query.setText("A Dvisor");
 		query.setRole(Role.ADVISOR);
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
-		long matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("A Dvisor")).count();
+		long matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		//Search for same person from an autocomplete box. 
 		query.setText("A Dvisor*");
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
-		matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("A Dvisor")).count();
+		matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		

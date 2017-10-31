@@ -16,7 +16,7 @@ To log in for the first time, you’ll need to log onto a computer with access A
 ANET logs you in with your existing credentials, so as long as you can log into your computer, you should be able to access ANET and already be logged in to your account. 
 
 *Checking your information*
-The first time you visit, you’ll first be taken to a page that shows your profile information. Please make sure that your name, rank, position, and other information is correct. You’ll need be associated with a position in order to see your organization’s reports and have your reports approved by your Super User. 
+The first time you visit, you’ll first be taken to a page that shows your profile information. Please make sure that your name (in canonical form: LAST NAME, First name(s)), rank, position, and other information is correct. You’ll need be associated with a position in order to see your organization’s reports and have your reports approved by your Super User.
 
 You can add a position to your profile by typing the position into the field next to the word “Position”. As you type, we’ll search the existing positions to find what you’re typing in. If we don’t find your position, you’ll need to ask your Super User to create the position for you. Your Super User can also add you to a position once they’ve created the position.
 

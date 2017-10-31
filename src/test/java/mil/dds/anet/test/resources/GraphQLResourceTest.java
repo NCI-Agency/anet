@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
-import com.sun.jna.platform.win32.WinUser.INPUT;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Person;

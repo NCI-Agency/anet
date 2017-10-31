@@ -40,6 +40,13 @@ export default class CancelledReports extends Component {
     }
   }
 
+  get queryParams() {
+    return {
+      state: ['CANCELLED'],
+      releasedAtStart: this.state.date.valueOf(),
+    }
+  }
+
   render() {
     let chartByOrg = ''
     let chartByReason = ''
@@ -71,7 +78,7 @@ export default class CancelledReports extends Component {
         {chartByOrg}
         {chartByReason}
         <Fieldset
-            title={`Cancelled reports ${focusDetails.titlePrefix}`}
+            title={`Cancelled Reports ${focusDetails.titleSuffix}`}
             id='cancelled-reports-details'
             action={!focusDetails.resetFnc
               ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
@@ -91,21 +98,21 @@ export default class CancelledReports extends Component {
   }
 
   getFocusDetails() {
-    let titlePrefix = ''
+    let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
     if (this.state.focusedOrg) {
-      titlePrefix = `for ${this.state.focusedOrg.shortName}`
+      titleSuffix = `for ${this.state.focusedOrg.shortName}`
       resetFnc = 'goToOrg'
-      resetButtonLabel = 'All organisations'
+      resetButtonLabel = 'All organizations'
     }
     else if (this.state.focusedReason) {
-      titlePrefix = `by ${this.getReasonDisplayName(this.state.focusedReason)}`
+      titleSuffix = `by ${this.getReasonDisplayName(this.state.focusedReason)}`
       resetFnc = 'goToReason'
       resetButtonLabel = 'All reasons'
     }
     return {
-      titlePrefix: titlePrefix,
+      titleSuffix: titleSuffix,
       resetFnc: resetFnc,
       resetButtonLabel: resetButtonLabel
     }
@@ -113,12 +120,8 @@ export default class CancelledReports extends Component {
 
   fetchData() {
     let pinned_ORGs = dict.lookup('pinned_ORGs')
-    const commonQueryParams = {
-      state: ['CANCELLED'],
-      releasedAtStart: this.state.date.valueOf(),
-    }
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, commonQueryParams)
+    Object.assign(chartQueryParams, this.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -157,12 +160,8 @@ export default class CancelledReports extends Component {
   }
 
   fetchOrgData() {
-    const commonQueryParams = {
-      state: ['CANCELLED'],
-      releasedAtStart: this.state.date.valueOf(),
-    }
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, commonQueryParams)
+    Object.assign(reportsQueryParams, this.queryParams)
     Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
     if (this.state.focusedOrg) {
       Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
@@ -184,12 +183,8 @@ export default class CancelledReports extends Component {
   }
 
   fetchReasonData() {
-    const commonQueryParams = {
-      state: ['CANCELLED'],
-      releasedAtStart: this.state.date.valueOf(),
-    }
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, commonQueryParams)
+    Object.assign(reportsQueryParams, this.queryParams)
     Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
     if (this.state.focusedReason) {
       Object.assign(reportsQueryParams, {cancelledReason: this.state.focusedReason})
@@ -221,13 +216,13 @@ export default class CancelledReports extends Component {
   @autobind
   goToOrg(item) {
     // Note: we set updateChart to false as we do not want to re-render the chart
-    // when changing the focus organisation.
+    // when changing the focus organization.
     this.setState({updateChart: false, reportsPageNum: 0, focusedReason: '', focusedOrg: (item ? item.advisorOrg : '')}, () => this.fetchOrgData())
     // remove highlighting of the bars
     this.resetChartSelection(chartByReasonId)
     this.resetChartSelection(chartByOrgId)
     if (item) {
-      // highlight the bar corresponding to the selected organisation
+      // highlight the bar corresponding to the selected organization
       d3.select('#' + chartByOrgId + ' #bar_' + item.advisorOrg.id).attr('fill', colors.selectedBarColor)
     }
   }
@@ -241,7 +236,7 @@ export default class CancelledReports extends Component {
     this.resetChartSelection(chartByReasonId)
     this.resetChartSelection(chartByOrgId)
     if (item) {
-      // highlight the bar corresponding to the selected organisation
+      // highlight the bar corresponding to the selected organization
       d3.select('#' + chartByReasonId + ' #bar_' + item.cancelledReason).attr('fill', colors.selectedBarColor)
     }
   }
