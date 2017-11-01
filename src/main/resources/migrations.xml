@@ -478,7 +478,7 @@
 
 	<changeSet id="19" author="hpitelka" >
 		<createTable tableName="savedSearches">
-		   <column name="id" type="int" autoIncrement="true">
+			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
 			</column>
 			<column name="name" type="varchar(512)" />
@@ -654,7 +654,7 @@
 
 	<changeSet id="add_tags" author="gjvoosten">
 		<createTable tableName="tags">
-		   <column name="id" type="int" autoIncrement="true">
+			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
 			</column>
 			<column name="name" type="nvarchar(100)">
@@ -742,15 +742,6 @@
 			<delete tableName="adminSettings">
 				<where>[key] = 'EXTERNAL_DOCUMENTATION_LINK_URL'</where>
 			</delete>
-		</rollback>
-	</changeSet>
-
-	<changeSet id="add_tags_fulltext_index" author="maradragan" dbms="mssql" runInTransaction="false">
-		<sql>
-			CREATE FULLTEXT INDEX ON tags(name, description) KEY INDEX PK_TAGS;
-		</sql>
-		<rollback>
-			DROP FULLTEXT INDEX ON tags;
 		</rollback>
 	</changeSet>
 
