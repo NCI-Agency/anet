@@ -754,4 +754,32 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="add_organizations_identificationCode" author="gjvoosten">
+		<addColumn tableName="organizations">
+			<column name="identificationCode" type="nvarchar(100)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add_organizations_identificationCode_constraints" author="gjvoosten" dbms="mssql">
+		<!-- Use SQL because we want to allow NULLs while still requiring non-NULL and non-empty columns to be unique -->
+		<sql>
+			CREATE UNIQUE NONCLUSTERED INDEX uniqueOrganizationIdentificationCode
+			ON organizations ( identificationCode )
+			WHERE identificationCode IS NOT NULL
+			AND identificationCode != '';
+		</sql>
+		<rollback>
+			DROP INDEX uniqueOrganizationIdentificationCode ON organizations;
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add_organizations_identificationCode_to_fulltext_index" author="gjvoosten" dbms="mssql">
+		<sql>
+			ALTER FULLTEXT INDEX ON organizations ADD ( identificationCode );
+		</sql>
+		<rollback>
+			ALTER FULLTEXT INDEX ON organizations DROP ( identificationCode );
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
