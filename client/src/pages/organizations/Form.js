@@ -24,6 +24,10 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		edit: PropTypes.bool,
 	}
 
+	static contextTypes = {
+		currentUser: PropTypes.object.isRequired,
+	}
+
 	constructor(props) {
 		super(props)
 		this.state = {
@@ -34,6 +38,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 	render() {
 		let {organization, edit} = this.props
 		let {approvalSteps} = organization
+		let currentUser = this.context.currentUser
+		let isAdmin = currentUser && currentUser.isAdmin()
 		const {ValidatableForm, RequiredField} = this
 		let [labelLongName, placeholderLongName, labelIdentificationCode, placeholderIdentificationCode] = (organization.type === "PRINCIPAL_ORG")
 			? [dict.lookup('PRINCIPAL_ORG_LABEL_LONGNAME'),
@@ -71,8 +77,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
 				<Form.Field id="longName" label={labelLongName} placeholder={placeholderLongName} />
-				{/* TODO: only editable by admin */}
-				<Form.Field id="identificationCode" label={labelIdentificationCode} placeholder={placeholderIdentificationCode} />
+				<Form.Field id="identificationCode" disabled={!isAdmin} label={labelIdentificationCode} placeholder={placeholderIdentificationCode} />
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>
