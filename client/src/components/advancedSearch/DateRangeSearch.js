@@ -29,8 +29,7 @@ export default class DateRangeSearch extends Component {
 
 	render() {
 		let {value} = this.state
-		console.log(value)
-		return <div>
+		return <div style={this.props.style}>
 			<Row>
 			<Col md={3}>
 				<select value={value.relative} onChange={this.onChangeRelative} >

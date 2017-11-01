@@ -43,11 +43,32 @@ export default class PersonForm extends ValidatableFormWrapper {
 		}
 	}
 
+	countries = person => {
+		switch(person.role) {
+			case Person.ROLE.ADVISOR:
+				return this.lookupCountries('countries')
+			case Person.ROLE.PRINCIPAL:
+				return this.lookupCountries('principal_countries')
+			default:
+				return []
+		}
+	}
+
+	lookupCountries = key => {
+		return dict.lookup(key) || []
+	}
+
+	renderCountrySelectOptions = (countries) => {
+		return countries.map(country =>
+			<option key={country} value={country}>{country}</option>
+		)
+	}
+
 	render() {
 		if (this.state.person === null) return null
 		const { person } = this.state
 		const { edit } = this.props
-		const isAdvisor = person.role === 'ADVISOR'
+		const isAdvisor = person.isAdvisor()
 		const legendText = this.props.legendText || (edit ? `Edit Person ${person.name}` : 'Create a new Person')
 
 		const {ValidatableForm, RequiredField} = this
@@ -55,7 +76,9 @@ export default class PersonForm extends ValidatableFormWrapper {
 		let willAutoKickPosition = person.status === 'INACTIVE' && person.position && !!person.position.id
 		let warnDomainUsername = person.status === 'INACTIVE' && person.domainUsername
 		let ranks = dict.lookup('ranks') || []
-		let countries = dict.lookup('countries') || []
+
+		const countries = this.countries(person)
+		const nationalityDefaultValue = countries.length === 1 ? countries[0] : ''
 
 		let currentUser = this.context.currentUser
 		let isAdmin = currentUser && currentUser.isAdmin()
@@ -99,8 +122,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 					:
 					<Form.Field id="role">
 						<ButtonToggleGroup>
-							<Button id="roleAdvisorButton" disabled={!isAdmin} value="ADVISOR">{dict.lookup('ADVISOR_PERSON_TITLE')}</Button>
-							<Button id="rolePrincipalButton" value="PRINCIPAL">{dict.lookup('PRINCIPAL_PERSON_TITLE')}</Button>
+							<Button id="roleAdvisorButton" disabled={!isAdmin} value={Person.ROLE.ADVISOR}>{dict.lookup('ADVISOR_PERSON_TITLE')}</Button>
+							<Button id="rolePrincipalButton" value={Person.ROLE.PRINCIPAL}>{dict.lookup('PRINCIPAL_PERSON_TITLE')}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>
 				}
@@ -127,7 +150,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 						</Form.Field>
 				}
 
-				{!edit && person.role === 'ADVISOR' &&
+				{!edit && isAdvisor &&
 					<Alert bsStyle="warning">
 						Creating a {dict.lookup('ADVISOR_PERSON_TITLE')} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
 					</Alert>
@@ -157,11 +180,10 @@ export default class PersonForm extends ValidatableFormWrapper {
 				</RequiredField>
 
 				<RequiredField id="country" label="Nationality" componentClass="select"
+					value={nationalityDefaultValue}
 					required={isAdvisor}>
 					<option />
-					{countries.map(country =>
-						<option key={country} value={country}>{country}</option>
-					)}
+					{this.renderCountrySelectOptions(countries)}
 				</RequiredField>
 
 				<Form.Field id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON}>

@@ -141,6 +141,9 @@ class Nav extends Component {
 						<Link to="/insights/future-engagements-by-location">
 							<MenuItem>Future engagements by location</MenuItem>
 						</Link>
+						<Link to="/insights/reports-by-day-of-week">
+							<MenuItem>Reports by day of the week</MenuItem>
+						</Link>
 						<Link to="/insights/advisor-reports">
 							<MenuItem>Advisor reports</MenuItem>
 						</Link>

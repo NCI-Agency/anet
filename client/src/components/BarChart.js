@@ -99,7 +99,8 @@ export default class BarChart extends Component {
     let marginBottom = maxXLabelWidth
 
     let chart = d3.select(this.node)
-    let chartWidth = chart.property('width').baseVal.value
+    let chartBox = this.node.getBoundingClientRect()
+    let chartWidth = chartBox.right - chartBox.left
     let chartHeight = 0.7 * chartWidth
     let xWidth = chartWidth - marginLeft - MARGIN.right
     let yHeight = chartHeight - MARGIN.top - marginBottom

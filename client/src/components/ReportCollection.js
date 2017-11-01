@@ -33,6 +33,7 @@ const GQL_REPORT_FIELDS =  /* GraphQL */`
 		},
 		person { id, name, rank}
 	}
+	engagementDayOfWeek
 `
 
 

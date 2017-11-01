@@ -12,6 +12,11 @@ export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
 
+	static ROLE = {
+		ADVISOR: 'ADVISOR',
+		PRINCIPAL: 'PRINCIPAL'
+	}
+
 	static schema = {
 		name: '',
 		status: 'ACTIVE',
@@ -35,10 +40,10 @@ export default class Person extends Model {
 	}
 
 	static humanNameOfRole(role) {
-		if (role === 'ADVISOR') {
+		if (role === Person.ROLE.ADVISOR) {
 			return dict.lookup('ADVISOR_PERSON_TITLE')
 		}
-		if (role === 'PRINCIPAL') {
+		if (role === Person.ROLE.PRINCIPAL) {
 			return dict.lookup('PRINCIPAL_PERSON_TITLE')
 		}
 
@@ -59,7 +64,11 @@ export default class Person extends Model {
 	}
 
 	isAdvisor() {
-		return this.role === 'ADVISOR'
+		return this.role === Person.ROLE.ADVISOR
+	}
+
+	isPrincipal() {
+		return this.role === Person.ROLE.PRINCIPAL
 	}
 
 	isAdmin() {
@@ -98,9 +107,9 @@ export default class Person extends Model {
 	}
 
 	iconUrl() {
-		if (this.role === 'ADVISOR') {
+		if (this.isAdvisor()) {
 			return RS_ICON
-		} else if (this.role === 'PRINCIPAL') {
+		} else if (this.isPrincipal()) {
 			return AFG_ICON
 		}
 

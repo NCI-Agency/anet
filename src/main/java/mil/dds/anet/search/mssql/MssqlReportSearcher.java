@@ -33,6 +33,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* MssqlReportSearch */ SELECT *, count(*) OVER() AS totalCount FROM ( ");
 		sql.append("SELECT DISTINCT " + ReportDao.REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS + " ");
+		if (query.getIncludeEngagementDayOfWeek()) {
+			sql.append(", DATEPART(dw, reports.engagementDate) as engagementDayOfWeek ");
+		}
 		sql.append("FROM reports "
 				+ "LEFT JOIN reportTags ON reportTags.reportId = reports.id "
 				+ "LEFT JOIN tags ON reportTags.tagId = tags.id "
@@ -71,6 +74,10 @@ public class MssqlReportSearcher implements IReportSearcher {
 		if (query.getEngagementDateEnd() != null) { 
 			whereClauses.add("reports.engagementDate <= :endDate");
 			args.put("endDate", Utils.handleRelativeDate(query.getEngagementDateEnd()));	
+		}
+		if (query.getEngagementDayOfWeek() != null) {
+			whereClauses.add("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
+			args.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
 		}
 		
 		if (query.getCreatedAtStart() != null) { 
