@@ -52,7 +52,8 @@ const insightDetails = {
   'future-engagements-by-location': {
     component: FutureEngagementsByLocation,
     title: 'Future Engagements by Location',
-    help: 'Number of future engagements by location'
+    help: 'Number of future engagements by location',
+    dateRange: true,
   },
 }
 
@@ -171,7 +172,7 @@ export default class InsightsShow extends Page {
         {this.state.referenceDate &&
           <Fieldset id={this.state.insight} data-jumptarget title={
             <span>
-              {insightTitle} - {this.referenceDateLongStr}
+              {insightTitle}
               {this.getFilters()}
             </span>
             }>
