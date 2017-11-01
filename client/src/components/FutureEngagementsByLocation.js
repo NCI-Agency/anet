@@ -7,7 +7,7 @@ import {Button} from 'react-bootstrap'
 import HorizontalBarChart from 'components/HorizontalBarChart'
 import Fieldset from 'components/Fieldset'
 import ReportCollection from 'components/ReportCollection'
-
+import moment from 'moment'
 
 const d3 = require('d3')
 const colors = {
@@ -32,14 +32,25 @@ export default class FutureEngagementsByLocation extends Component {
     this.state = {
       graphDataByPoam: [],
       focusedPoam: '',
-      updateChart: true  // whether the chart needs to be updated
+      updateChart: true,  // whether the chart needs to be updated
+      useDefaultDates: true,
     }
+  }
+
+  get startDate() {
+    const defaultStartDate = moment().subtract(1, 'days').startOf('day')
+    return (this.state.useDefaultDates) ? defaultStartDate : this.props.startDate
+  }
+
+  get endDate() {
+    const defaultEndDate = moment().add(14, 'days')
+    return (this.state.useDefaultDates) ? defaultEndDate : this.props.endDate
   }
 
   get queryParams() {
     return {
-      releasedAtStart: this.props.startDate.valueOf(),
-      releasedAtEnd: this.props.endDate.valueOf(),
+      releasedAtStart: this.startDate.valueOf(),
+      releasedAtEnd: this.endDate.valueOf(),
     }
   }
 
@@ -170,14 +181,11 @@ export default class FutureEngagementsByLocation extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    // if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-    //   this.setState({date: nextProps.date, focusedPoam: ''})  // reset focus when changing the date
-    // }
-  }
-
   componentDidMount() {
     this.fetchData()
+    if (this.state.useDefaultDates) {
+      this.setState({ useDefaultDates: false })
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {

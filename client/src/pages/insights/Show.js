@@ -68,8 +68,6 @@ const dateRangeFilterCss = {
   marginTop: '20px'
 }
 
-const insight = insightDetails[this.state.insight]
-
 export default class InsightsShow extends Page {
   static contextTypes = {
     app: PropTypes.object.isRequired,
@@ -98,6 +96,7 @@ export default class InsightsShow extends Page {
   }
 
   getFilters = () => {
+    const insight = insightDetails[this.state.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
     const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value="" onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     return <span>{dateRangeFilter}{calenderFilter}</span>
