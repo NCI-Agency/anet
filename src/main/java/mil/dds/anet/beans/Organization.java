@@ -21,6 +21,7 @@ public class Organization extends AbstractAnetBean {
 	
 	String shortName;
 	String longName;
+	private String identificationCode;
 	Organization parentOrg;
 	OrganizationType type;
 	
@@ -47,6 +48,14 @@ public class Organization extends AbstractAnetBean {
 		this.longName = Utils.trimStringReturnNull(longName);
 	}
 	
+	public String getIdentificationCode() {
+		return identificationCode;
+	}
+
+	public void setIdentificationCode(String identificationCode) {
+		this.identificationCode = Utils.trimStringReturnNull(identificationCode);
+	}
+
 	@GraphQLFetcher("parentOrg")
 	public Organization loadParentOrg() { 
 		if (parentOrg == null || parentOrg.getLoadLevel() == null) { return parentOrg; }
@@ -194,16 +203,17 @@ public class Organization extends AbstractAnetBean {
 		return Objects.equals(other.getId(), id) 
 				&& Objects.equals(other.getShortName(), shortName) 
 				&& Objects.equals(other.getLongName(), longName) 
+				&& Objects.equals(other.getIdentificationCode(), identificationCode)
 				&& Objects.equals(other.getType(), type);
 	}
 	
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, shortName, longName, type, createdAt, updatedAt);
+		return Objects.hash(id, shortName, longName, identificationCode, type, createdAt, updatedAt);
 	}
 	
 	@Override
 	public String toString() { 
-		return String.format("[id:%d shortName:%s longName:%s type:%s]", id, shortName, longName, type);
+		return String.format("[id:%d shortName:%s longName:%s identificationCode:%s type:%s]", id, shortName, longName, identificationCode, type);
 	}
 }

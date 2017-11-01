@@ -122,7 +122,7 @@ public class OrganizationResource implements IGraphQLResource {
 	
 	/**
 	 * Primary endpoint to update all aspects of an Organization.
-	 * - Organization shortName and longName
+	 * - Organization (shortName, longName, identificationCode)
 	 * - Poams
 	 * - Approvers
 	 */

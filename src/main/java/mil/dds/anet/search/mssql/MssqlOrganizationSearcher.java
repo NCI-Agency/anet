@@ -36,7 +36,7 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 		
 		String text = query.getText();
 		if (text != null && text.trim().length() > 0) {
-			whereClauses.add("(CONTAINS(longName, :text) OR  shortName LIKE :likeQuery)");
+			whereClauses.add("(CONTAINS(longName, :text) OR identificationCode LIKE :likeQuery OR shortName LIKE :likeQuery)");
 			sqlArgs.put("text", Utils.getSqlServerFullTextQuery(text));
 			sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
@@ -66,7 +66,7 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 		}
 		
 		sql.append(Joiner.on(" AND ").join(whereClauses));
-		sql.append(" ORDER BY shortName ASC, longName ASC, id ASC");
+		sql.append(" ORDER BY shortName ASC, longName ASC, identificationCode ASC, id ASC");
 		
 		if (commonTableExpression != null) { 
 			sql.insert(0, commonTableExpression);
