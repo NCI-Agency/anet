@@ -256,7 +256,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		
 		//Assign to an AO
 		Organization ao = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO()), Organization.class);
+				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
 		test.setOrganization(Organization.createWithId(ao.getId()));
 
 		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);

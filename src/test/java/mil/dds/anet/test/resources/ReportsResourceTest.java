@@ -83,7 +83,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Create an Advising Organization for the report writer
 		final Organization advisorOrg = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO()), Organization.class);
+				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
 
 		//Create leadership people in the AO who can approve this report
 		Person approver1 = new Person();
