@@ -17,6 +17,7 @@ apply plugin: 'org.kordamp.markdown.convert'
 apply plugin: 'com.bmuschko.docker-java-application'
 apply plugin: "se.bjurr.gitchangelog.git-changelog-gradle-plugin"
 apply plugin: 'com.moowork.node'
+apply plugin: "org.sonarqube"
 
 apply from: 'localSettings.gradle'
 
@@ -213,6 +214,7 @@ buildscript {
 		classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
 		classpath "gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.50"
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5"
 	}
 }
 
