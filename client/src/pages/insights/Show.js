@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import Page from 'components/Page'
 import NotApprovedReports from 'components/NotApprovedReports'
 import CancelledReports from 'components/CancelledReports'
@@ -54,6 +55,7 @@ const insightDetails = {
     title: 'Future Engagements by Location',
     help: 'Number of future engagements by location',
     dateRange: true,
+    onlyShowBetween: true,
   },
 }
 
@@ -65,6 +67,8 @@ const calendarButtonCss = {
 const dateRangeFilterCss = {
   marginTop: '20px'
 }
+
+const insight = insightDetails[this.state.insight]
 
 export default class InsightsShow extends Page {
   static contextTypes = {
@@ -94,9 +98,8 @@ export default class InsightsShow extends Page {
   }
 
   getFilters = () => {
-    const insight = insightDetails[this.state.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
-    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value="" onChange={this.handleChangeDateRange} style={dateRangeFilterCss} /> : null
+    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value="" onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     return <span>{dateRangeFilter}{calenderFilter}</span>
   }
 

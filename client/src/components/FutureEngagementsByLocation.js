@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 import API from 'api'
 import autobind from 'autobind-decorator'
 import {Button} from 'react-bootstrap'
@@ -21,14 +22,14 @@ const chartByPoamId = 'future_engagements_by_location'
  */
 export default class FutureEngagementsByLocation extends Component {
   static propTypes = {
-    date: React.PropTypes.object,
+    startDate: PropTypes.object.isRequired,
+    endDate: PropTypes.object.isRequired,
   }
 
   constructor(props) {
     super(props)
 
     this.state = {
-      date: props.date,
       graphDataByPoam: [],
       focusedPoam: '',
       updateChart: true  // whether the chart needs to be updated
@@ -37,7 +38,8 @@ export default class FutureEngagementsByLocation extends Component {
 
   get queryParams() {
     return {
-      releasedAtStart: this.state.date.valueOf(),
+      releasedAtStart: this.props.startDate.valueOf(),
+      releasedAtEnd: this.props.endDate.valueOf(),
     }
   }
 
@@ -169,9 +171,9 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedPoam: ''})  // reset focus when changing the date
-    }
+    // if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
+    //   this.setState({date: nextProps.date, focusedPoam: ''})  // reset focus when changing the date
+    // }
   }
 
   componentDidMount() {
@@ -179,7 +181,10 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+    const startDateChanged = prevProps.startDate.valueOf() !== this.props.startDate.valueOf()
+    const endDateChanged = prevProps.endDate.valueOf() !== this.props.endDate.valueOf()
+
+    if (startDateChanged || endDateChanged) {
       this.fetchData()
     }
   }

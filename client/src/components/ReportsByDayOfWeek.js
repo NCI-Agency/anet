@@ -23,8 +23,8 @@ const chartByDayOfWeekId = 'reports_by_day_of_week'
  */
 export default class ReportsByDayOfWeek extends Component {
   static propTypes = {
-    startDate: PropTypes.object,
-    endDate: PropTypes.object
+    startDate: PropTypes.object.isRequired,
+    endDate: PropTypes.object.isRequired,
   }
 
   constructor(props) {
