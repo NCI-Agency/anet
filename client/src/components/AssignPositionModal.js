@@ -74,7 +74,7 @@ export default class AssignPositionModal extends Component {
 								<Autocomplete valueKey="name"
 									placeholder="Select a position for this person"
 									objectType={Position}
-									fields={'id, name, code, type, organization { id, shortName, longName}, person { id, name }'}
+									fields={'id, name, code, type, organization { id, shortName, longName, identificationCode}, person { id, name }'}
 									template={pos =>
 										<span>{[pos.name, pos.code].join(' - ')}</span>
 									}

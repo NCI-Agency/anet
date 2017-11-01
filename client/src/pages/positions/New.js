@@ -29,7 +29,7 @@ export default class PositionNew extends Page {
 			// then look that org up and pre-populate the field.
 			API.query(/* GraphQL */`
 				organization(id:${props.location.query.organizationId}) {
-					id, shortName, longName, type
+					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
 				function getPositionFromData() {

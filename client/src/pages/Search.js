@@ -67,7 +67,7 @@ const SEARCH_CONFIG = {
 	organizations : {
 		listName: 'organizations: organizationList',
 		variableType: 'OrganizationSearchQuery',
-		fields: 'id, shortName, longName, type'
+		fields: 'id, shortName, longName, identificationCode, type'
 	}
 }
 

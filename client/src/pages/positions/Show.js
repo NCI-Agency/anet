@@ -48,7 +48,7 @@ export default class PositionShow extends Page {
 		API.query(/* GraphQL */`
 			position(id:${props.params.id}) {
 				id, name, type, status, code,
-				organization { id, shortName, longName },
+				organization { id, shortName, longName, identificationCode },
 				person { id, name, rank },
 				associatedPositions {
 					id, name,

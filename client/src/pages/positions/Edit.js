@@ -31,7 +31,7 @@ export default class PositionEdit extends Page {
 				id, name, code, status, type
 				location { id, name },
 				associatedPositions { id, name, person { id, name, rank } },
-				organization {id, shortName, longName, type},
+				organization {id, shortName, longName, identificationCode, type},
 				person { id, name}
 			}
 		`).then(data => {

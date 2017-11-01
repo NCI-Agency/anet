@@ -62,7 +62,7 @@ export default class EditAssociatedPositionsModal extends Component {
 					<Autocomplete
 						placeholder={'Start typing to search for a ' + assignedRole + ' position...'}
 						objectType={Position}
-						fields={'id, name, code, type, person { id, name, rank }, organization { id, shortName, longName}'}
+						fields={'id, name, code, type, person { id, name, rank }, organization { id, shortName, longName, identificationCode}'}
 						template={pos => {
 							let components = []
 							pos.person && components.push(pos.person.name)

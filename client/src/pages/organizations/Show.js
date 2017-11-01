@@ -101,9 +101,9 @@ export default class OrganizationShow extends Page {
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
 			organization(id:${props.params.id}) {
-				id, shortName, longName, type
-				parentOrg { id, shortName, longName }
-				childrenOrgs { id, shortName, longName },
+				id, shortName, longName, identificationCode, type
+				parentOrg { id, shortName, longName, identificationCode }
+				childrenOrgs { id, shortName, longName, identificationCode },
 				positions {
 					id, name, code, status, type,
 					person { id, name, status, rank }

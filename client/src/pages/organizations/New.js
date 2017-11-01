@@ -26,7 +26,7 @@ export default class OrganizationNew extends Page {
 		if (props.location.query.parentOrgId) {
 			API.query(/* GraphQL */`
 				organization(id: ${props.location.query.parentOrgId}) {
-					id, shortName, longName, type
+					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
 				let {organization, originalOrganization} = this.state

@@ -53,7 +53,7 @@ export default class PoamShow extends Page {
 		let poamQuery = new GQL.Part(/* GraphQL */`
 			poam(id:${props.params.id}) {
 				id, shortName, longName, status,
-				responsibleOrg {id, shortName, longName}
+				responsibleOrg {id, shortName, longName, identificationCode}
 			}
 		`)
 

@@ -49,7 +49,7 @@ export default class ReportShow extends Page {
 					id, name, rank,
 					position {
 						organization {
-							shortName, longName
+							shortName, longName, identificationCode
 							approvalSteps {
 								id, name,
 								approvers {
@@ -75,8 +75,8 @@ export default class ReportShow extends Page {
 					author { id, name, rank }
 				}
 
-				principalOrg { id, shortName, longName }
-				advisorOrg { id, shortName, longName }
+				principalOrg { id, shortName, longName, identificationCode }
+				advisorOrg { id, shortName, longName, identificationCode }
 
 				approvalStatus {
 					type, createdAt
