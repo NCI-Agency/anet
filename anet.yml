@@ -155,6 +155,14 @@ dictionary:
   POAM_LONG_NAME: Plan of Action and Milestones / Pillars
   POAM_SHORT_NAME: PoAM
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
+  PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
+  PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense
+  ADVISOR_ORG_LABEL_LONGNAME: Description
+  ADVISOR_ORG_PLACEHOLDER_LONGNAME: e.g. Force Sustainment
+  PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE: Identification Code
+  PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE: optional
+  ADVISOR_ORG_LABEL_IDENTIFICATIONCODE: UIC
+  ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE: the six character code
   pinned_ORGs:
     - Key Leader Engagement
   non_reporting_ORGs:

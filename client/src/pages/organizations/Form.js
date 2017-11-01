@@ -35,6 +35,15 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		let {organization, edit} = this.props
 		let {approvalSteps} = organization
 		const {ValidatableForm, RequiredField} = this
+		let [labelLongName, placeholderLongName, labelIdentificationCode, placeholderIdentificationCode] = (organization.type === "PRINCIPAL_ORG")
+			? [dict.lookup('PRINCIPAL_ORG_LABEL_LONGNAME'),
+			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_LONGNAME'),
+			   dict.lookup('PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE'),
+			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
+			: [dict.lookup('ADVISOR_ORG_LABEL_LONGNAME'),
+			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_LONGNAME'),
+			   dict.lookup('ADVISOR_ORG_LABEL_IDENTIFICATIONCODE'),
+			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
 
 		return <ValidatableForm formFor={organization}
 			onChange={this.onChange}
@@ -61,7 +70,9 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
-				<Form.Field id="longName" label={organization.type === "PRINCIPAL_ORG" ? "Official Organization Name" : "Description"} placeholder="e.g. Force Sustainment" />
+				<Form.Field id="longName" label={labelLongName} placeholder={placeholderLongName} />
+				{/* TODO: only editable by admin */}
+				<Form.Field id="identificationCode" label={labelIdentificationCode} placeholder={placeholderIdentificationCode} />
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>
