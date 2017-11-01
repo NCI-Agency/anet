@@ -8,6 +8,7 @@ export default class Organization extends Model {
 	static schema = {
 		shortName: '',
 		longName: '',
+		identificationCode: null,
 		type: '',
 		parentOrg: null,
 		childrenOrgs: [],
@@ -29,6 +30,6 @@ export default class Organization extends Model {
 	}
 
 	toString() {
-		return this.shortName || this.longName
+		return this.shortName || this.longName || this.identificationCode
 	}
 }
