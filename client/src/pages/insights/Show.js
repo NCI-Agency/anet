@@ -33,7 +33,7 @@ const insightDetails = {
   'reports-by-poam': {
     component: ReportsByPoam,
     title: 'Reports by PoAM',
-    help: 'Number of reports by PoAM',
+    help: 'Number of reports by PoAM since',
     dateRange: false,
     showCalendar: true
   },
@@ -161,24 +161,23 @@ export default class InsightsShow extends Page {
   }
 
   render() {
-    let InsightComponent = insightDetails[this.state.insight].component
-    let insightTitle = insightDetails[this.state.insight].title
-    let insightPath = '/insights/' + this.state.insight
+    const insightConfig = insightDetails[this.state.insight]
+    const InsightComponent = insightConfig.component
+    const insightPath = '/insights/' + this.state.insight
 
-    const help = insightDetails[this.state.insight].help
     return (
       <div>
-        <Breadcrumbs items={[['Insights ' + insightTitle, insightPath]]} />
+        <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
           <Fieldset id={this.state.insight} data-jumptarget title={
             <span>
-              {insightTitle}
+              {insightConfig.title}
               {this.getFilters()}
             </span>
             }>
-              <p className="help-text">{help} {this.referenceDateLongStr}</p>
+              <p className="help-text">{insightConfig.help} {insightConfig.showCalendar && this.referenceDateLongStr}</p>
               <InsightComponent
                 date={this.state.referenceDate.clone().startOf('day')}
                 startDate={this.state.startDate}
