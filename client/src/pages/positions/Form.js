@@ -83,8 +83,8 @@ export default class PositionForm extends ValidatableFormWrapper {
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
-							fields="id, longName, shortName"
-							template={org => <span>{org.shortName} - {org.longName}</span>}
+							fields="id, longName, shortName, identificationCode"
+							template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
 						/>

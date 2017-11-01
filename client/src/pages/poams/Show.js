@@ -101,7 +101,7 @@ export default class PoamShow extends Page {
 		return (
 			<Form.Field id="responsibleOrg" label="Responsible Organization" >
 				<LinkTo organization={responsibleOrg}>
-					{responsibleOrg.shortName} {responsibleOrg.longName}
+					{responsibleOrg.shortName} {responsibleOrg.longName} {responsibleOrg.identificationCode}
 				</LinkTo>
 			</Form.Field>
 		)
