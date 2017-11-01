@@ -210,6 +210,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getAuthorPositionId() != null) {
+			// Search for reports authored by people serving in that position at the report's creation date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
 							+ "JOIN peoplePositions pp ON pp.personId = r.authorId "
 							+ "  AND pp.createdAt <= r.createdAt "
@@ -222,6 +223,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getAttendeePositionId() != null) {
+			// Search for reports attended by people serving in that position at the engagement date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
 							+ "JOIN reportPeople rp ON rp.reportId = r.id "
 							+ "JOIN peoplePositions pp ON pp.personId = rp.personId "
