@@ -245,6 +245,11 @@ allprojects {
 }
 
 node {
-
 	nodeModulesDir = file("${project.projectDir}/client")
+}
+
+sonarqube {
+    properties {
+        property "sonar.sources", "src/main/java,client/src"
+    }
 }
