@@ -18,7 +18,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+
 import com.codahale.metrics.annotation.Timed;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
@@ -89,8 +92,14 @@ public class OrganizationResource implements IGraphQLResource {
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
 	public Organization createNewOrganization(Organization org, @Auth Person user) {
-		AuthUtils.assertAdministrator(user); 
-		Organization created = dao.insert(org);
+		AuthUtils.assertAdministrator(user);
+		final Organization created;
+		try {
+			created = dao.insert(org);
+		}
+		catch (UnableToExecuteStatementException e) {
+			throw handleSqlException(e);
+		}
 		
 		if (org.getPoams() != null) { 
 			//Assign all of these poams to this organization. 
@@ -133,9 +142,14 @@ public class OrganizationResource implements IGraphQLResource {
 	public Response updateOrganization(Organization org, @Auth Person user) { 
 		//Verify correct Organization 
 		AuthUtils.assertSuperUserForOrg(user, org);
-		
-		int numRows = dao.update(org);
-		
+		final int numRows;
+		try {
+			numRows = dao.update(org);
+		}
+		catch (UnableToExecuteStatementException e) {
+			throw handleSqlException(e);
+		}
+
 		if (org.getPoams() != null || org.getApprovalSteps() != null) {
 			//Load the existing org, so we can check for differences. 
 			Organization existing = dao.getById(org.getId());
@@ -198,5 +212,17 @@ public class OrganizationResource implements IGraphQLResource {
 	@Path("/{id}/poams")
 	public PoamList getPoams(@PathParam("id") Integer orgId) { 
 		return new PoamList(AnetObjectEngine.getInstance().getPoamDao().getPoamsByOrganizationId(orgId));
+	}
+
+	private WebApplicationException handleSqlException(UnableToExecuteStatementException e) {
+		// FIXME: Ugly way to handle the unique index on identificationCode
+		final Throwable cause = e.getCause();
+		if (cause != null && cause instanceof SQLServerException) {
+			final String message = cause.getMessage();
+			if (message != null && message.contains(" duplicate ")) {
+				return new WebApplicationException("Duplicate identification code", Status.CONFLICT);
+			}
+		}
+		return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 	}
 }
