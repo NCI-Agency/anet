@@ -23,6 +23,7 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
     - client/node_modules
 
 before_install:
@@ -43,7 +44,7 @@ install:
 script:
   - docker exec -ti -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=Test-P@ssw0rd" anet-mssql-server /opt/waitTillServiceStarted.sh
   - ./gradlew dbMigrate dockerLoadDB
-  - ./gradlew check
+  - ./gradlew check sonarqube
 
 after_script:
   - docker logs anet-mssql-server
@@ -57,3 +58,10 @@ addons:
     build_command_prepend: "./gradlew clean"
     build_command:   "./gradlew build -x test"
     branch_pattern: candidate
+  sonarcloud:
+    organization: "nci-agency-github"
+    token:
+      secure: "ICZTls70jFc6JIZV6cicKUpAKr2sDt9LKWnFzgGm92uDq/2J1Od7oewUAAEjykKa2qw42BZYaG1z3LX5UFtLhp9b/NFibf392U0V4I7jmeb4HDjOv855hTPosm5N7K9YQ3MUsSDLxVe+5DhrmwYQ3PSkG0lXKj0NRdAu7dpaBqMntBpTtdO5nQDKyxQ9UCrVSRjdU0YqHT8q4EWpii/MqWH6SRVUslvvKXTan2d6JnT+QaWuW8bTR0zhgpyxl5y8kOe0JBQ45M5vKO6yTcVj4UdolB0y+CZlblk/59iZK1bn/Is0qijWmHKh1Z3OORdlesXumUAveCX3VCMvvuPUz95a3nc+6S4I6iNIOcA8tzJ2AFP5oBuPIrl8o3S0BKxHTBssBzomo1e7tzDqXJF141tJOm0yUIB5Lmb9LV9KcWa1gAB2pk9ToX8e0NH4OLIqUUlLrNAkHX1sKHXO4AM3odHf1bTlOp7dOUszD2/E1umPjEWT3NH94LQStPubg+d2Kai2rQppxHlVKwAIVcBkP/d2nVtIwJsuRKmPbUIgAds7fYrxZpdDoM7AxjNLrCk3OPR1tYWwlUyProrAIJXDy7LlP14a4oM8dtaXGAnQar6nXtuqxiS4KMojPhW4rWXvRbCiBhYmLvuMMjW+kN1ITOy/h6x4Q7ZBLf+pU5C3Va0="
+    branches:
+      - master
+      - candidate
