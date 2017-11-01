@@ -38,7 +38,7 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   get startDate() {
-    const defaultStartDate = moment().subtract(1, 'days').startOf('day')
+    const defaultStartDate = moment().startOf('day')
     return (this.state.useDefaultDates) ? defaultStartDate : this.props.startDate
   }
 
