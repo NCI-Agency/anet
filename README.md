@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/NCI-Agency/anet.svg?branch=candidate)](https://travis-ci.org/NCI-Agency/anet)
 [![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)](https://www.browserstack.com/automate/public-build/SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/14060/badge.svg)](https://scan.coverity.com/projects/nci-agency-anet)
+[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=ncia%3Aanet)](https://sonarcloud.io/dashboard?id=ncia%3Aanet)
 
 ## What is ANET?
 
