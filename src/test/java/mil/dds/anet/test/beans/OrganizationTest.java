@@ -11,6 +11,10 @@ public class OrganizationTest extends BeanTester<Organization> {
 		Organization ao = new Organization();
 		ao.setShortName("TBAE");
 		ao.setLongName("The Best Advisors Ever");
+		// TODO: Should really do so something here, but the tests create
+		//       multiple instances of this organization in the database,
+		//       and the identificationCode must be unique (or NULL)
+		//ao.setIdentificationCode("UIC#1");
 		ao.setType(OrganizationType.ADVISOR_ORG);
 		return ao;
 	}

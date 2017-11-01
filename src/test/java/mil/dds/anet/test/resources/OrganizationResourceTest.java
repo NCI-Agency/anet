@@ -43,6 +43,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 			.post(Entity.json(ao), Organization.class);
 		assertThat(ao.getShortName()).isEqualTo(created.getShortName());
 		assertThat(ao.getLongName()).isEqualTo(created.getLongName());
+		assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
 
 		//update name of the AO
 		created.setLongName("Ao McAoFace");
