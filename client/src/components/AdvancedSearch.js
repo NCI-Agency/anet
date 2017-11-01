@@ -104,7 +104,7 @@ export default class AdvancedSearch extends Component {
 			/>
 
 
-		let countries = dict.lookup('countries')
+		let countries = dict.lookup('countries') || []
 		filters.People = {
 			filters: {
 				Organization: <OrganizationFilter
