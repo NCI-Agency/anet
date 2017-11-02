@@ -35,7 +35,7 @@ export default class HorizontalBarChart extends Component {
   */
   static propTypes = {
     chartId: PropTypes.string,
-    data: PropTypes.array,
+    data: PropTypes.object,
     onBarClick: PropTypes.func,
     updateChart: PropTypes.bool
   }
@@ -64,7 +64,9 @@ export default class HorizontalBarChart extends Component {
     const MARGIN = {top: 20, right: 20}  // left and bottom MARGINs are dynamic
     let box = this.node.getBoundingClientRect()
     let chartWidth = box.right - box.left
-    let chartData = this.props.data
+    let chartData = this.props.data.data
+    let categoryLabels = this.props.data.categoryLabels
+    let leavesLabels = this.props.data.leavesLabels
     let onBarClick = this.props.onBarClick
     let chart = d3.select(this.node)
 
@@ -75,7 +77,7 @@ export default class HorizontalBarChart extends Component {
           return d.values.map(d => d.value)
         })
     )
-    let yLabels = chartData.map(d => d.key)
+    let yLabels = Object.values(categoryLabels)
 
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
@@ -173,7 +175,7 @@ export default class HorizontalBarChart extends Component {
         return 'translate(1,' + yCategoryScale((d.cummulative * yScale.bandwidth())) + ')'
       })
 
-    let categoryLabel = categoryGroup.selectAll('.category-label')
+    categoryGroup.selectAll('.category-label')
       .data(function(d) { return [d] })
       .enter()
       .append('text')
@@ -184,7 +186,7 @@ export default class HorizontalBarChart extends Component {
           BAR_PADDING) / 2)
         return 'translate(' + x + ',' + y + ')'
       })
-      .text(d => d.key)
+      .text(d => categoryLabels[d.key])
       .attr('text-anchor', 'end')
 
     let barsGroup = categoryGroup.selectAll('.category-bars-group')
@@ -197,29 +199,34 @@ export default class HorizontalBarChart extends Component {
       })
 
     let bars = barsGroup.selectAll('.bar')
-     .data(function(d) {
-       return [d]
-     })
-    .enter()
-    .append('rect')
-    .attr('class', 'bar')
-    .attr('x', 0)
-    .attr('y', yCategoryScale(BAR_PADDING))
-    .attr('width', d => xScale(d.value))
-    .attr('height', yCategoryScale(yScale.bandwidth() - BAR_PADDING))
+      .data(function(d) {
+        return [d]
+      })
+      .enter()
+      .append('rect')
+      .attr('class', 'bar')
+      .attr('x', 0)
+      .attr('y', yCategoryScale(BAR_PADDING))
+      .attr('width', d => xScale(d.value))
+      .attr('height', yCategoryScale(yScale.bandwidth() - BAR_PADDING))
+    if (onBarClick) {
+      bars.on('click', function(d) {
+        onBarClick(d)
+      })
+    }
 
-    let barLabels = barsGroup.selectAll('.bar-label')
-    .data(function(d) { return [d] })
-    .enter()
-    .append('text')
-    .attr('class', 'bar-label')
-    .attr('transform', function(d) {
-      let x = 3
-      let y = yCategoryScale((yScale.bandwidth() + BAR_PADDING) / 2)
-      return 'translate(' + x + ',' + y + ')'
-    })
-    .text(d => d.key)
-    .attr('text-anchor', 'start')
+    barsGroup.selectAll('.bar-label')
+      .data(function(d) { return [d] })
+      .enter()
+      .append('text')
+      .attr('class', 'bar-label')
+      .attr('transform', function(d) {
+        let x = 3
+        let y = yCategoryScale((yScale.bandwidth() + BAR_PADDING) / 2)
+        return 'translate(' + x + ',' + y + ')'
+      })
+      .text(d => leavesLabels[d.key])
+      .attr('text-anchor', 'start')
   }
 
   render() {

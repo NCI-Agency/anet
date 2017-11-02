@@ -60,10 +60,6 @@ export default class FutureEngagementsByLocation extends Component {
       chartByPoam = <HorizontalBarChart
         chartId={chartByPoamId}
         data={this.state.graphDataByPoam}
-        xProp='reportsCount'
-        yProp='location'
-        yLabel='location'
-//        yDomain={this.state.graphDataByPoam.groupBy}
         onBarClick={this.goToPoam}
         barColor={colors.barColor}
         updateChart={this.state.updateChart}
@@ -117,55 +113,28 @@ export default class FutureEngagementsByLocation extends Component {
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
     Promise.all([chartQuery]).then(values => {
-      let graphData = [{
-        key: '25 Oct 2017',
-        values: [{
-          key: 'Location 1',
-          value: 11
-        }, {
-          key: 'Location 2',
-          value: 8
-        }, {
-          key: 'Location 3',
-          value: 3
-        }]
-      }, {
-        key: '26 Oct 2017',
-        values: [{
-          key: 'Location 1',
-          value: 19
-        }, {
-          key: 'Location 2',
-          value: 12
-        }, {
-          key: 'Location 4',
-          value: 11
-        }, {
-          key: 'Location 5',
-          value: 3
-        }, {
-          key: 'Location 6',
-          value: 2
-         }]
-      }, {
-        key: '27 Oct 2017',
-        values: [{
-          key: '',
-          value: 0
-        }]
-      }, {
-        key: '28 Oct 2017',
-        values: [{
-          key: 'Location 2',
-          value: 4
-        }, {
-          key: 'Location 4',
-          value: 3
-        }, {
-          key: 'Location 7',
-          value: 1
-        }]
-      }];
+      let reportsList = values[0].reportList.list
+      let groupedData = d3.nest()
+        .key(function(d) { return d.engagementDate })
+        .key(function(d) { return d.location.id })
+        .rollup(function(leaves) { return leaves.length })
+        .entries(reportsList)
+      let graphData = {}
+      graphData.data = groupedData
+      graphData.categoryLabels = reportsList.reduce(
+        function(prev, curr) {
+          prev[curr.engagementDate] = moment(curr.engagementDate).format('D MMM YYYY')
+          return prev
+        },
+        {}
+      )
+      graphData.leavesLabels = reportsList.reduce(
+        function(prev, curr) {
+          prev[curr.location.id] = curr.location.name
+          return prev
+        },
+        {}
+      )
       this.setState({
         updateChart: true,  // update chart after fetching the data
         graphDataByPoam: graphData
