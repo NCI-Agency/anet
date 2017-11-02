@@ -30,7 +30,7 @@ export default class FutureEngagementsByLocation extends Component {
     super(props)
 
     this.state = {
-      graphDataByPoam: [],
+      graphDataByPoam: null,
       focusedPoam: '',
       updateChart: true,  // whether the chart needs to be updated
       useDefaultDates: true,
@@ -56,13 +56,14 @@ export default class FutureEngagementsByLocation extends Component {
 
   render() {
     let chartByPoam = ''
-    if (this.state.graphDataByPoam.length) {
+    if (this.state.graphDataByPoam) {
       chartByPoam = <HorizontalBarChart
         chartId={chartByPoamId}
         data={this.state.graphDataByPoam}
         xProp='reportsCount'
-        yProp='poam.id'
-        yLabel='poam.shortName'
+        yProp='location'
+        yLabel='location'
+//        yDomain={this.state.graphDataByPoam.groupBy}
         onBarClick={this.goToPoam}
         barColor={colors.barColor}
         updateChart={this.state.updateChart}
@@ -116,21 +117,58 @@ export default class FutureEngagementsByLocation extends Component {
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
     Promise.all([chartQuery]).then(values => {
-      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, poams: d.poams.map(p => p.id)}})
-      let poams = values[0].reportList.list.map(d => d.poams)
-      poams = [].concat.apply([], poams)
-        .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
-        .sort((a, b) => a.shortName.localeCompare(b.shortName))
-      // add No PoAM item, in order to relate to reports without PoAMs
-      poams.push({id: null, shortName: 'No PoAM', longName: 'No PoAM'})
+      let graphData = [{
+        key: '25 Oct 2017',
+        values: [{
+          key: 'Location 1',
+          value: 11
+        }, {
+          key: 'Location 2',
+          value: 8
+        }, {
+          key: 'Location 3',
+          value: 3
+        }]
+      }, {
+        key: '26 Oct 2017',
+        values: [{
+          key: 'Location 1',
+          value: 19
+        }, {
+          key: 'Location 2',
+          value: 12
+        }, {
+          key: 'Location 4',
+          value: 11
+        }, {
+          key: 'Location 5',
+          value: 3
+        }, {
+          key: 'Location 6',
+          value: 2
+         }]
+      }, {
+        key: '27 Oct 2017',
+        values: [{
+          key: '',
+          value: 0
+        }]
+      }, {
+        key: '28 Oct 2017',
+        values: [{
+          key: 'Location 2',
+          value: 4
+        }, {
+          key: 'Location 4',
+          value: 3
+        }, {
+          key: 'Location 7',
+          value: 1
+        }]
+      }];
       this.setState({
         updateChart: true,  // update chart after fetching the data
-        graphDataByPoam: poams
-          .map(d => {
-            let r = {}
-            r.poam = d
-            r.reportsCount = (d.id ? simplifiedValues.filter(item => item.poams.indexOf(d.id) > -1).length : simplifiedValues.filter(item => item.poams.length === 0).length)
-            return r}),
+        graphDataByPoam: graphData
       })
     })
     this.fetchPoamData()
