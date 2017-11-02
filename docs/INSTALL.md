@@ -172,6 +172,14 @@ dictionary:
   POAM_LONG_NAME: Plan of Action and Milestones / Pillars
   POAM_SHORT_NAME: PoAM
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
+  PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
+  PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense
+  ADVISOR_ORG_LABEL_LONGNAME: Description
+  ADVISOR_ORG_PLACEHOLDER_LONGNAME: e.g. Force Sustainment
+  PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE: Identification Code
+  PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE: optional
+  ADVISOR_ORG_LABEL_IDENTIFICATIONCODE: UIC
+  ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE: the six character code
   pinned_ORGs:
     - Key Leader Engagement
   non_reporting_ORGs:
@@ -217,6 +225,8 @@ dictionary:
     - Ukraine
     - United Kingdom
     - United States of America
+  principal_countries:
+    - Afghanistan
   ranks:
     - CIV
     - CTR
@@ -245,7 +255,7 @@ dictionary:
     - OF-9
     - OF-10
 ```
-As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries` and `ranks` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
+As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries` and `ranks` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 
 # How to enable SSL
 Below is a subset from the complete Dropwizard Documentation that can be found here: http://www.dropwizard.io/1.0.5/docs/manual/core.html#ssl
