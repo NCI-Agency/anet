@@ -14,11 +14,12 @@ const colors = {
   barColor: '#F5CA8D',
   selectedBarColor: '#EC971F'
 }
-const chartByPoamId = 'future_engagements_by_location'
+const chartId = 'future_engagements_by_location'
 
 
 /*
- * Component displaying a chart with number of reports per PoAM.
+ * Component displaying a chart with number of future engagements per date and
+ * location. Locations are grouper per date.
  */
 export default class FutureEngagementsByLocation extends Component {
   static propTypes = {
@@ -30,8 +31,9 @@ export default class FutureEngagementsByLocation extends Component {
     super(props)
 
     this.state = {
-      graphDataByPoam: null,
-      focusedPoam: '',
+      graphData: null,
+      focusedDate: '',
+      focusedLocation: '',
       updateChart: true,  // whether the chart needs to be updated
       useDefaultDates: true,
     }
@@ -55,12 +57,12 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   render() {
-    let chartByPoam = ''
-    if (this.state.graphDataByPoam) {
-      chartByPoam = <HorizontalBarChart
-        chartId={chartByPoamId}
-        data={this.state.graphDataByPoam}
-        onBarClick={this.goToPoam}
+    let chart = ''
+    if (this.state.graphData) {
+      chart = <HorizontalBarChart
+        chartId={chartId}
+        data={this.state.graphData}
+        onBarClick={this.goToSelection}
         barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
@@ -68,9 +70,9 @@ export default class FutureEngagementsByLocation extends Component {
     let focusDetails = this.getFocusDetails()
     return (
       <div>
-        {chartByPoam}
+        {chart}
         <Fieldset
-            title={`Reports by PoAM ${focusDetails.titleSuffix}`}
+            title={`Future Engagements ${focusDetails.titleSuffix}`}
             id='cancelled-reports-details'
             action={!focusDetails.resetFnc
               ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
@@ -86,10 +88,10 @@ export default class FutureEngagementsByLocation extends Component {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
-    if (this.state.focusedPoam) {
-      titleSuffix = `for ${this.state.focusedPoam.shortName}`
-      resetFnc = 'goToPoam'
-      resetButtonLabel = 'All PoAMs'
+    if (this.state.focusedLocation && this.state.focusedDate) {
+      titleSuffix = `for ${this.state.focusedLocation.label} on ${this.state.focusedDate}`
+      resetFnc = 'goToSelection'
+      resetButtonLabel = 'All locations'
     }
     return {
       titleSuffix: titleSuffix,
@@ -115,15 +117,15 @@ export default class FutureEngagementsByLocation extends Component {
     Promise.all([chartQuery]).then(values => {
       let reportsList = values[0].reportList.list
       let groupedData = d3.nest()
-        .key(function(d) { return d.engagementDate })
+        .key(function(d) { return new Date(d.engagementDate) })
         .key(function(d) { return d.location.id })
         .rollup(function(leaves) { return leaves.length })
         .entries(reportsList)
       let graphData = {}
       graphData.data = groupedData
-      graphData.categoryLabels = reportsList.reduce(
+      graphData.categoryLabels = groupedData.reduce(
         function(prev, curr) {
-          prev[curr.engagementDate] = moment(curr.engagementDate).format('D MMM YYYY')
+          prev[curr.key] = moment(curr.key).format('D MMM YYYY')
           return prev
         },
         {}
@@ -137,18 +139,28 @@ export default class FutureEngagementsByLocation extends Component {
       )
       this.setState({
         updateChart: true,  // update chart after fetching the data
-        graphDataByPoam: graphData
+        graphData: graphData
       })
     })
-    this.fetchPoamData()
+    this.fetchFocusData()
   }
 
-  fetchPoamData() {
+  fetchFocusData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
     Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
-    if (this.state.focusedPoam) {
-      Object.assign(reportsQueryParams, {poamId: this.state.focusedPoam.id})
+    if (this.state.focusedDate) {
+      Object.assign(reportsQueryParams, {
+        // TODO: Use here the start and end of a date in order to make sure the
+        // fetch is independen of the engagementDate time value
+        engagementDateStart: moment(this.state.focusedDate).valueOf(),
+        engagementDateEnd: moment(this.state.focusedDate).valueOf()
+      })
+    }
+    if (this.state.focusedLocation) {
+      Object.assign(reportsQueryParams, {
+        locationId: this.state.focusedLocation.key
+      })
     }
     // Query used by the reports collection
     let reportsQuery = API.query(/* GraphQL */`
@@ -168,7 +180,7 @@ export default class FutureEngagementsByLocation extends Component {
 
   @autobind
   goToReportsPage(newPage) {
-    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchPoamData())
+    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchFocusData())
   }
 
   resetChartSelection(chartId) {
@@ -176,15 +188,23 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   @autobind
-  goToPoam(item) {
+  goToSelection(item) {
     // Note: we set updateChart to false as we do not want to re-render the chart
-    // when changing the focus poam.
-    this.setState({updateChart: false, reportsPageNum: 0, focusedPoam: (item ? item.poam : '')}, () => this.fetchPoamData())
+    // when changing the focus bar
+    this.setState(
+      {
+        updateChart: false,
+        reportsPageNum: 0,
+        focusedDate: (item ? item.parentKey : ''),
+        focusedLocation: (item ? {key: item.key, label: this.state.graphData.leavesLabels[item.key]} : '')
+      },
+      () => this.fetchFocusData()
+    )
     // remove highlighting of the bars
-    this.resetChartSelection(chartByPoamId)
+    this.resetChartSelection(chartId)
     if (item) {
-      // highlight the bar corresponding to the selected poam
-      d3.select('#' + chartByPoamId + ' #bar_' + item.poam.id).attr('fill', colors.selectedBarColor)
+      // highlight the selected bar
+      d3.select('#' + chartId + ' #bar_' + item.key + item.parentKey).attr('fill', colors.selectedBarColor)
     }
   }
 

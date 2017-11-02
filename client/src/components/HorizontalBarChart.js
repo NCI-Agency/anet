@@ -69,7 +69,6 @@ export default class HorizontalBarChart extends Component {
     let leavesLabels = this.props.data.leavesLabels
     let onBarClick = this.props.onBarClick
     let chart = d3.select(this.node)
-
     let xLabels = [].concat.apply(
       [],
       chartData.map(
@@ -205,6 +204,7 @@ export default class HorizontalBarChart extends Component {
       .enter()
       .append('rect')
       .attr('class', 'bar')
+      .attr('id', function(d, i) { return 'bar_' + d.key + d.parentKey })
       .attr('x', 0)
       .attr('y', yCategoryScale(BAR_PADDING))
       .attr('width', d => xScale(d.value))
