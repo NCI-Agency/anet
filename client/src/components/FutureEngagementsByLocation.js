@@ -53,7 +53,7 @@ export default class FutureEngagementsByLocation extends Component {
     let currentDate = (this.state.useDefaultDates) ? DEFAULT_START_DATE.clone() : this.props.startDate.clone()
     let endDate = (this.state.useDefaultDates) ? DEFAULT_END_DATE : this.props.endDate
     while (currentDate <= endDate) {
-      dateArray.push(currentDate.clone())
+      dateArray.push(currentDate.clone().startOf('day'))
       currentDate = currentDate.add(1, 'days')
     }
     return dateArray
@@ -111,12 +111,12 @@ export default class FutureEngagementsByLocation extends Component {
       // add days without data as we want to display them in the chart
       let allCategories = this.engagementDateRangeArray.map(function(d) {
         return {
-          key: d.format('LL'),
+          key: d.valueOf(),
           values: [{key: -1, value: 0}]
         }
       })
       let categoriesWithData = d3.nest()
-        .key(function(d) { return moment(d.engagementDate).format('LL') })
+        .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
         .key(function(d) { return d.location.id })
         .rollup(function(leaves) { return leaves.length })
         .entries(reportsList)
@@ -128,7 +128,7 @@ export default class FutureEngagementsByLocation extends Component {
       graphData.data = groupedData
       graphData.categoryLabels = allCategories.reduce(
         function(prev, curr) {
-          prev[curr.key] = moment(curr.key).format('D MMM YYYY') // FIX string to ISO or RFC2822 format
+          prev[curr.key] = moment(curr.key).format('D MMM YYYY')
           return prev
         },
         {}
