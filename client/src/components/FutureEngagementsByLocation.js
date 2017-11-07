@@ -48,6 +48,17 @@ export default class FutureEngagementsByLocation extends Component {
     }
   }
 
+  get engagementDateRangeArray() {
+    var dateArray = []
+    var currentDate = moment(this.props.startDate.valueOf()).clone().startOf('day');
+
+    while (currentDate <= moment(this.props.endDate.valueOf()).clone()) {
+      dateArray.push(currentDate)
+      currentDate = currentDate.clone().add(1, 'days')
+    }
+    return dateArray
+  }
+
   render() {
     let chart = ''
     if (this.state.graphData) {
@@ -97,14 +108,25 @@ export default class FutureEngagementsByLocation extends Component {
     const chartQuery = this.runChartQuery(this.chartQueryParams())
     Promise.all([chartQuery]).then(values => {
       let reportsList = values[0].reportList.list
-      let groupedData = d3.nest()
-        .key(function(d) { return new Date(d.engagementDate) })
+      // add days without data as we want to display them in the chart
+      let allCategories = this.engagementDateRangeArray.map(function(d) {
+        return {
+          key: d.format('LL'),
+          values: [{key: -1, value: 0}]
+        }
+      })
+      let categoriesWithData = d3.nest()
+        .key(function(d) { return moment(d.engagementDate).format('LL') })
         .key(function(d) { return d.location.id })
         .rollup(function(leaves) { return leaves.length })
         .entries(reportsList)
+      let groupedData = allCategories.map((d)=> {
+        let categData = categoriesWithData.find((x) => { return x.key == d.key })
+        return Object.assign({}, d, categData)
+      })
       let graphData = {}
       graphData.data = groupedData
-      graphData.categoryLabels = groupedData.reduce(
+      graphData.categoryLabels = allCategories.reduce(
         function(prev, curr) {
           prev[curr.key] = moment(curr.key).format('D MMM YYYY') // FIX string to ISO or RFC2822 format
           return prev
@@ -228,7 +250,6 @@ export default class FutureEngagementsByLocation extends Component {
   componentDidUpdate(prevProps, prevState) {
     const startDateChanged = prevProps.startDate.valueOf() !== this.props.startDate.valueOf()
     const endDateChanged = prevProps.endDate.valueOf() !== this.props.endDate.valueOf()
-
     if (startDateChanged || endDateChanged) {
       this.fetchData()
     }
