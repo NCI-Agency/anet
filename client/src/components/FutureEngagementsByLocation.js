@@ -49,12 +49,12 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   get engagementDateRangeArray() {
-    var dateArray = []
-    var currentDate = moment(this.props.startDate.valueOf()).clone().startOf('day');
-
-    while (currentDate <= moment(this.props.endDate.valueOf()).clone()) {
-      dateArray.push(currentDate)
-      currentDate = currentDate.clone().add(1, 'days')
+    let dateArray = []
+    let currentDate = (this.state.useDefaultDates) ? DEFAULT_START_DATE.clone() : this.props.startDate.clone()
+    let endDate = (this.state.useDefaultDates) ? DEFAULT_END_DATE : this.props.endDate
+    while (currentDate <= endDate) {
+      dateArray.push(currentDate.clone())
+      currentDate = currentDate.add(1, 'days')
     }
     return dateArray
   }
@@ -144,8 +144,13 @@ export default class FutureEngagementsByLocation extends Component {
         updateChart: true,  // update chart after fetching the data
         graphData: graphData
       })
+      // FIXME: default dates should be set as props of the DateRangeSearch
+      if (this.state.useDefaultDates) {
+        this.setState({ useDefaultDates: false })
+      }
     })
     this.fetchFocusData()
+
   }
 
   fetchFocusData() {
@@ -242,9 +247,6 @@ export default class FutureEngagementsByLocation extends Component {
 
   componentDidMount() {
     this.fetchData()
-    if (this.state.useDefaultDates) {
-      this.setState({ useDefaultDates: false })
-    }
   }
 
   componentDidUpdate(prevProps, prevState) {
