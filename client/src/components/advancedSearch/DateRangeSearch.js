@@ -46,7 +46,7 @@ export default class DateRangeSearch extends Component {
 		this.updateFilter()
 	}
 
-	selectMenu = (value, onlyBetween) => {
+	selectMenu = (onlyBetween) => {
 		const betweenOption = <option key={ _uniqueId('dateRange_') } value={0} >Between</option>
 		const remainingOptions =
 			[
@@ -59,7 +59,7 @@ export default class DateRangeSearch extends Component {
 		return(
 			<select
 				disabled={onlyBetween}
-				value={value.relative}
+				value={this.state.value.relative}
 				onChange={this.onChangeRelative}>{options}</select>
 		)
 	}
@@ -69,7 +69,7 @@ export default class DateRangeSearch extends Component {
 		return <div style={this.props.style}>
 			<Row>
 			<Col md={3}>
-				{this.selectMenu(value.relative, this.props.onlyBetween)}
+				{this.selectMenu(this.props.onlyBetween)}
 			</Col>
 			{value.relative === "0" &&
 				<Col md={4}>
