@@ -13,8 +13,8 @@ const LAST_MONTH = LAST_DAY * 30
 
 const dateRangeValue = PropTypes.shape({
 	relative: PropTypes.string,
-	start: PropTypes.object,
-	end: PropTypes.object
+	start: PropTypes.string,
+	end: PropTypes.string
 })
 
 export default class DateRangeSearch extends Component {
@@ -90,6 +90,12 @@ export default class DateRangeSearch extends Component {
 			</Row>
 		</div>
 	}
+
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.value !== this.state.value) {
+			this.setState({value: nextProps.value})
+		}
+	  }
 
 	@autobind
 	onChangeStart(newDate) {
