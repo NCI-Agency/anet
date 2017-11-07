@@ -22,6 +22,10 @@
   fill: #ffc107;
 }
 
+.selected {
+  fill: #EC971F;
+}
+
 .category-label, .bar-label {
   fill: #000;
 }

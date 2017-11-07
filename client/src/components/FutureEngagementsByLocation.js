@@ -10,10 +10,6 @@ import ReportCollection from 'components/ReportCollection'
 import moment from 'moment'
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartId = 'future_engagements_by_location'
 
 const DEFAULT_START_DATE = moment().startOf('day')
@@ -66,7 +62,6 @@ export default class FutureEngagementsByLocation extends Component {
         chartId={chartId}
         data={this.state.graphData}
         onBarClick={this.goToSelection}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -159,14 +154,10 @@ export default class FutureEngagementsByLocation extends Component {
     Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
     if (this.state.focusedDate) {
       Object.assign(reportsQueryParams, {
-        // TODO: Use here the start and end of a date in order to make sure the
+        // Use here the start and end of a date in order to make sure the
         // fetch is independent of the engagementDate time value
-        engagementDateStart: moment(this.state.focusedDate).valueOf(),
-        engagementDateEnd: moment(this.state.focusedDate).valueOf()
-      })
-    }
-    if (this.state.focusedLocation) {
-      Object.assign(reportsQueryParams, {
+        engagementDateStart: moment(this.state.focusedDate).startOf('day').valueOf(),
+        engagementDateEnd: moment(this.state.focusedDate).endOf('day').valueOf(),
         locationId: this.state.focusedLocation.key
       })
     }
@@ -221,7 +212,7 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -232,7 +223,7 @@ export default class FutureEngagementsByLocation extends Component {
       {
         updateChart: false,
         reportsPageNum: 0,
-        focusedDate: (item ? item.parentKey : ''),
+        focusedDate: (item ? parseInt(item.parentKey) : ''),
         focusedLocation: (item ? {key: item.key, label: this.state.graphData.leavesLabels[item.key]} : '')
       },
       () => this.fetchFocusData()
@@ -241,7 +232,7 @@ export default class FutureEngagementsByLocation extends Component {
     this.resetChartSelection(chartId)
     if (item) {
       // highlight the selected bar
-      d3.select('#' + chartId + ' #bar_' + item.key + item.parentKey).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartId + ' #bar_' + item.key + item.parentKey).attr('class', 'selected')
     }
   }
 
