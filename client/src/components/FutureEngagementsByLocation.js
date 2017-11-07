@@ -12,9 +12,6 @@ import moment from 'moment'
 const d3 = require('d3')
 const chartId = 'future_engagements_by_location'
 
-const DEFAULT_START_DATE = moment().startOf('day')
-const DEFAULT_END_DATE = moment().add(14, 'days').endOf('day')
-
 /*
  * Component displaying a chart with number of future engagements per date and
  * location. Locations are grouped per date.
@@ -33,21 +30,20 @@ export default class FutureEngagementsByLocation extends Component {
       focusedDate: '',
       focusedLocation: '',
       updateChart: true,  // whether the chart needs to be updated
-      useDefaultDates: true,
     }
   }
 
   get queryParams() {
     return {
-      engagementDateStart: this.props.startDate.valueOf(),
+      engagementDateStart: this.props.startDate.startOf('day').valueOf(),
       engagementDateEnd: this.props.endDate.valueOf(),
     }
   }
 
   get engagementDateRangeArray() {
     let dateArray = []
-    let currentDate = (this.state.useDefaultDates) ? DEFAULT_START_DATE.clone() : this.props.startDate.clone()
-    let endDate = (this.state.useDefaultDates) ? DEFAULT_END_DATE : this.props.endDate
+    let currentDate = this.props.startDate.clone()
+    let endDate = this.props.endDate
     while (currentDate <= endDate) {
       dateArray.push(currentDate.clone().startOf('day'))
       currentDate = currentDate.add(1, 'days')
@@ -139,10 +135,6 @@ export default class FutureEngagementsByLocation extends Component {
         updateChart: true,  // update chart after fetching the data
         graphData: graphData
       })
-      // FIXME: default dates should be set as props of the DateRangeSearch
-      if (this.state.useDefaultDates) {
-        this.setState({ useDefaultDates: false })
-      }
     })
     this.fetchFocusData()
 
@@ -179,21 +171,12 @@ export default class FutureEngagementsByLocation extends Component {
 
   chartQueryParams = () => {
     const chartQueryParams = {}
-    const queryParams = (this.state.useDefaultDates) ? this.defaultQueryParams() : this.queryParams
+    const queryParams = this.queryParams
     Object.assign(chartQueryParams, queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
     return chartQueryParams
-  }
-
-  defaultQueryParams = () => {
-    if (DEFAULT_START_DATE && DEFAULT_END_DATE) {
-      return {
-        engagementDateStart: DEFAULT_START_DATE.valueOf(),
-        engagementDateEnd: DEFAULT_END_DATE.valueOf(),
-      }
-    }
   }
 
   runChartQuery = (chartQueryParams) => {
