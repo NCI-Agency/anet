@@ -180,7 +180,7 @@ export default class InsightsShow extends Page {
               <p className="help-text">{insightConfig.help} {insightConfig.showCalendar && this.referenceDateLongStr}</p>
               <InsightComponent
                 date={this.state.referenceDate.clone().startOf('day')}
-                startDate={this.state.startDate}
+                startDate={this.state.startDate.clone().startOf('day')}
                 endDate={this.state.endDate.clone().endOf('day')} />
           </Fieldset>
         }
