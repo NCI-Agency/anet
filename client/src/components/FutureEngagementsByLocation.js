@@ -21,7 +21,7 @@ const DEFAULT_END_DATE = moment().add(14, 'days').endOf('day')
 
 /*
  * Component displaying a chart with number of future engagements per date and
- * location. Locations are grouper per date.
+ * location. Locations are grouped per date.
  */
 export default class FutureEngagementsByLocation extends Component {
   static propTypes = {
@@ -160,7 +160,7 @@ export default class FutureEngagementsByLocation extends Component {
     if (this.state.focusedDate) {
       Object.assign(reportsQueryParams, {
         // TODO: Use here the start and end of a date in order to make sure the
-        // fetch is independen of the engagementDate time value
+        // fetch is independent of the engagementDate time value
         engagementDateStart: moment(this.state.focusedDate).valueOf(),
         engagementDateEnd: moment(this.state.focusedDate).valueOf()
       })
