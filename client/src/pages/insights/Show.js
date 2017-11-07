@@ -181,7 +181,7 @@ export default class InsightsShow extends Page {
               <InsightComponent
                 date={this.state.referenceDate.clone().startOf('day')}
                 startDate={this.state.startDate}
-                endDate={this.state.endDate.clone().startOf('day')} />
+                endDate={this.state.endDate.clone().endOf('day')} />
           </Fieldset>
         }
       </div>

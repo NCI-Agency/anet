@@ -16,6 +16,8 @@ const colors = {
 }
 const chartId = 'future_engagements_by_location'
 
+const DEFAULT_START_DATE = moment().startOf('day')
+const DEFAULT_END_DATE = moment().add(14, 'days').endOf('day')
 
 /*
  * Component displaying a chart with number of future engagements per date and
@@ -39,20 +41,10 @@ export default class FutureEngagementsByLocation extends Component {
     }
   }
 
-  get startDate() {
-    const defaultStartDate = moment().startOf('day')
-    return (this.state.useDefaultDates) ? defaultStartDate : this.props.startDate
-  }
-
-  get endDate() {
-    const defaultEndDate = moment().add(14, 'days')
-    return (this.state.useDefaultDates) ? defaultEndDate : this.props.endDate
-  }
-
   get queryParams() {
     return {
-      releasedAtStart: this.startDate.valueOf(),
-      releasedAtEnd: this.endDate.valueOf(),
+      engagementDateStart: this.props.startDate.valueOf(),
+      engagementDateEnd: this.props.endDate.valueOf(),
     }
   }
 
@@ -101,19 +93,8 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   fetchData() {
-    const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
-    Object.assign(chartQueryParams, {
-      pageSize: 0,  // retrieve all the filtered reports
-    })
     // Query used by the chart
-    let chartQuery = API.query(/* GraphQL */`
-        reportList(f:search, query:$chartQueryParams) {
-          totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
-          }
-        }
-      `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+    const chartQuery = this.runChartQuery(this.chartQueryParams())
     Promise.all([chartQuery]).then(values => {
       let reportsList = values[0].reportList.list
       let groupedData = d3.nest()
@@ -125,7 +106,7 @@ export default class FutureEngagementsByLocation extends Component {
       graphData.data = groupedData
       graphData.categoryLabels = groupedData.reduce(
         function(prev, curr) {
-          prev[curr.key] = moment(curr.key).format('D MMM YYYY')
+          prev[curr.key] = moment(curr.key).format('D MMM YYYY') // FIX string to ISO or RFC2822 format
           return prev
         },
         {}
@@ -176,6 +157,35 @@ export default class FutureEngagementsByLocation extends Component {
         reports: values[0].reportList
       })
     })
+  }
+
+  chartQueryParams = () => {
+    const chartQueryParams = {}
+    const queryParams = (this.state.useDefaultDates) ? this.defaultQueryParams() : this.queryParams
+    Object.assign(chartQueryParams, queryParams)
+    Object.assign(chartQueryParams, {
+      pageSize: 0,  // retrieve all the filtered reports
+    })
+    return chartQueryParams
+  }
+
+  defaultQueryParams = () => {
+    if (DEFAULT_START_DATE && DEFAULT_END_DATE) {
+      return {
+        engagementDateStart: DEFAULT_START_DATE.valueOf(),
+        engagementDateEnd: DEFAULT_END_DATE.valueOf(),
+      }
+    }
+  }
+
+  runChartQuery = (chartQueryParams) => {
+    return API.query(/* GraphQL */`
+    reportList(f:search, query:$chartQueryParams) {
+      totalCount, list {
+        ${ReportCollection.GQL_REPORT_FIELDS}
+      }
+    }
+  `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
   }
 
   @autobind
