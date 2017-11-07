@@ -206,7 +206,7 @@ export default class FutureEngagementsByLocation extends Component {
       {
         updateChart: false,
         reportsPageNum: 0,
-        focusedDate: (item ? parseInt(item.parentKey) : ''),
+        focusedDate: (item ? parseInt(item.parentKey, 10) : ''),
         focusedLocation: (item ? {key: item.key, label: this.state.graphData.leavesLabels[item.key]} : '')
       },
       () => this.fetchFocusData()
