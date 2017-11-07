@@ -33,7 +33,7 @@ export default class FutureEngagementsByLocation extends Component {
     super(props)
 
     this.state = {
-      graphData: null,
+      graphData: {data: []},
       focusedDate: '',
       focusedLocation: '',
       updateChart: true,  // whether the chart needs to be updated
@@ -61,7 +61,7 @@ export default class FutureEngagementsByLocation extends Component {
 
   render() {
     let chart = ''
-    if (this.state.graphData) {
+    if (this.state.graphData.data.length) {
       chart = <HorizontalBarChart
         chartId={chartId}
         data={this.state.graphData}
