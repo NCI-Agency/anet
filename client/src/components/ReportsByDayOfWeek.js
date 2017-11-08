@@ -187,9 +187,17 @@ export default class ReportsByDayOfWeek extends Component {
     this.fetchData()
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.datePropsChanged(nextProps)) {
+      this.setState({
+        focusedDayOfWeek: ''
+      })
+    }
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (this.datePropsChanged(prevProps)) {
-      this.resetFocusedStateAndFetchData()
+      this.fetchData()
     }
   }
 
@@ -197,11 +205,5 @@ export default class ReportsByDayOfWeek extends Component {
     const startDateChanged = otherProps.startDate.valueOf() !== this.props.startDate.valueOf()
     const endDateChanged = otherProps.endDate.valueOf() !== this.props.endDate.valueOf()
     return startDateChanged || endDateChanged
-  }
-
-  resetFocusedStateAndFetchData = () => {
-    this.setState({
-      focusedDayOfWeek: '',
-    }, () => this.fetchData())
   }
 }

@@ -230,9 +230,18 @@ export default class FutureEngagementsByLocation extends Component {
     this.fetchData()
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.datePropsChanged(nextProps)) {
+      this.setState({
+        focusedDate: '',
+        focusedLocation: ''
+      })
+    }
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (this.datePropsChanged(prevProps)) {
-      this.resetFocusedStateAndFetchData()
+      this.fetchData()
     }
   }
 
@@ -240,12 +249,5 @@ export default class FutureEngagementsByLocation extends Component {
     const startDateChanged = otherProps.startDate.valueOf() !== this.props.startDate.valueOf()
     const endDateChanged = otherProps.endDate.valueOf() !== this.props.endDate.valueOf()
     return startDateChanged || endDateChanged
-  }
-
-  resetFocusedStateAndFetchData = () => {
-    this.setState({
-      focusedDate: '',
-      focusedLocation: ''
-    }, () => this.fetchData())
   }
 }
