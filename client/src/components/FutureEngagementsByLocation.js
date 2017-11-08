@@ -35,7 +35,7 @@ export default class FutureEngagementsByLocation extends Component {
 
   get queryParams() {
     return {
-      engagementDateStart: this.props.startDate.startOf('day').valueOf(),
+      engagementDateStart: this.props.startDate.clone().startOf('day').valueOf(),
       engagementDateEnd: this.props.endDate.valueOf(),
     }
   }
