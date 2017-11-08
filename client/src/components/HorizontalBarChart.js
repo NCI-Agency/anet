@@ -196,7 +196,7 @@ export default class HorizontalBarChart extends Component {
         return 'translate(0,' + yCategoryScale((i * yScale.bandwidth())) + ')'
       })
 
-    let bars = barsGroup.selectAll('.bar')
+    barsGroup.selectAll('.bar')
       .data(function(d) {
         return [d]
       })
@@ -208,11 +208,6 @@ export default class HorizontalBarChart extends Component {
       .attr('y', yCategoryScale(BAR_PADDING))
       .attr('width', d => xScale(d.value))
       .attr('height', yCategoryScale(yScale.bandwidth() - BAR_PADDING))
-    if (onBarClick) {
-      bars.on('click', function(d) {
-        onBarClick(d)
-      })
-    }
 
     barsGroup.selectAll('.bar-label')
       .data(function(d) { return [d] })
@@ -226,6 +221,16 @@ export default class HorizontalBarChart extends Component {
       })
       .text(d => leavesLabels[d.key])
       .attr('text-anchor', 'start')
+
+    this.bindElementOnClick(barsGroup, onBarClick)
+  }
+
+  bindElementOnClick(element, onClickHandler) {
+    if (onClickHandler) {
+      element.on('click', function(d) {
+        onClickHandler(d)
+      })
+    }
   }
 
   render() {
