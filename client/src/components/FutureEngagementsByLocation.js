@@ -82,8 +82,9 @@ export default class FutureEngagementsByLocation extends Component {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
+    const focusDate = moment(this.state.focusedDate).format('D MMMM YYYY')
     if (this.state.focusedLocation && this.state.focusedDate) {
-      titleSuffix = `for ${this.state.focusedLocation.label} on ${this.state.focusedDate}`
+      titleSuffix = `for ${this.state.focusedLocation.label} on ${focusDate}`
       resetFnc = 'goToSelection'
       resetButtonLabel = 'All locations'
     }
