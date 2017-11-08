@@ -31,5 +31,10 @@
 }
 
 .bars-group {
+  cursor: pointer;
   fill: #F5CA8D;
+}
+
+g.category-bars-group {
+  cursor: pointer;
 }
