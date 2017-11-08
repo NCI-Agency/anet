@@ -10,10 +10,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartId = 'not_approved_reports_chart'
 
 
@@ -57,7 +53,6 @@ export default class NotApprovedReports extends Component {
         yProp='notApproved'
         xLabel='advisorOrg.shortName'
         onBarClick={this.goToOrg}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -157,7 +152,7 @@ export default class NotApprovedReports extends Component {
   }
 
   resetChartSelection() {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -169,7 +164,7 @@ export default class NotApprovedReports extends Component {
     this.resetChartSelection()
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartId + ' #bar_' + item.advisorOrg.id).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartId + ' #bar_' + item.advisorOrg.id).attr('class', 'selected-bar')
     }
   }
 

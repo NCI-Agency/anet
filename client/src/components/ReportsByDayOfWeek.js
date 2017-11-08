@@ -10,10 +10,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartByDayOfWeekId = 'reports_by_day_of_week'
 
 
@@ -56,7 +52,6 @@ export default class ReportsByDayOfWeek extends Component {
         yProp='reportsCount'
         xLabel='dayOfWeekString'
         onBarClick={this.goToDayOfWeek}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -172,7 +167,7 @@ export default class ReportsByDayOfWeek extends Component {
   }
 
   resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -184,7 +179,7 @@ export default class ReportsByDayOfWeek extends Component {
     this.resetChartSelection(chartByDayOfWeekId)
     if (item) {
       // highlight the bar corresponding to the selected day of the week
-      d3.select('#' + chartByDayOfWeekId + ' #bar_' + item.dayOfWeekInt).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByDayOfWeekId + ' #bar_' + item.dayOfWeekInt).attr('class', 'seleted-bar')
     }
   }
 

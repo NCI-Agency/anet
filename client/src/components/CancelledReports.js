@@ -10,10 +10,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartByOrgId = 'cancelled_reports_by_org'
 const chartByReasonId = 'cancelled_reports_by_reason'
 
@@ -58,7 +54,6 @@ export default class CancelledReports extends Component {
         yProp='cancelledByOrg'
         xLabel='advisorOrg.shortName'
         onBarClick={this.goToOrg}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
       chartByReason = <BarChart
@@ -68,7 +63,6 @@ export default class CancelledReports extends Component {
         yProp='cancelledByReason'
         xLabel='reason'
         onBarClick={this.goToReason}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -210,7 +204,7 @@ export default class CancelledReports extends Component {
   }
 
   resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -223,7 +217,7 @@ export default class CancelledReports extends Component {
     this.resetChartSelection(chartByOrgId)
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartByOrgId + ' #bar_' + item.advisorOrg.id).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByOrgId + ' #bar_' + item.advisorOrg.id).attr('class', 'selected-bar')
     }
   }
 
@@ -237,7 +231,7 @@ export default class CancelledReports extends Component {
     this.resetChartSelection(chartByOrgId)
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartByReasonId + ' #bar_' + item.cancelledReason).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByReasonId + ' #bar_' + item.cancelledReason).attr('class', 'selected-bar')
     }
   }
 

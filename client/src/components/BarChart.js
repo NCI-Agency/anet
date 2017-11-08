@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import './BarChart.css'
 
 var d3 = require('d3')
 
@@ -25,13 +26,13 @@ export default class BarChart extends Component {
     xProp: PropTypes.string.isRequired,
     yProp: PropTypes.string.isRequired,
     xLabel: PropTypes.string,
-    barColor: PropTypes.string,
+    barClass: PropTypes.string,
     onBarClick: PropTypes.func,
     updateChart: PropTypes.bool
   }
 
   static defaultProps = {
-    barColor: '#F5CA8D',
+    barClass: 'bar',
     updateChart: true
   }
 
@@ -130,7 +131,6 @@ export default class BarChart extends Component {
 
     chart.append('g')
       .call(yAxis)
-    let barColor = this.props.barColor
     let bar = chart.selectAll('.bar')
       .data(chartData)
       .enter()
@@ -142,7 +142,6 @@ export default class BarChart extends Component {
       .attr('y', function(d) { return yScale(getPropValue(d, yProp)) })
       .attr('width', xScale.bandwidth())
       .attr('height', function(d) { return yHeight - yScale(getPropValue(d, yProp)) })
-      .attr('fill', barColor)
     if (onBarClick) {
       bar.on('click', function(d) {
         onBarClick(d)

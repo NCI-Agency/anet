@@ -1,0 +1,28 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+/* do not display tick marks on y-axis */
+.y.axis line {
+  display: none;
+}
+
+/* do not display tick labels on y-axis */
+.y.axis text {
+  fill: none;
+}
+
+.bar {
+  fill: #F5CA8D;
+}
+
+.selected-bar {
+  fill: #EC971F;
+}
+
+.category-label, .bar-label {
+  fill: #000;
+}

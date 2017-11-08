@@ -41,7 +41,6 @@ export default class HorizontalBarChart extends Component {
   }
 
   static defaultProps = {
-    barColor: '#F5CA8D',
     updateChart: true
   }
 

@@ -9,10 +9,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartByPoamId = 'reports_by_poam'
 
 
@@ -52,7 +48,6 @@ export default class ReportsByPoam extends Component {
         yProp='reportsCount'
         xLabel='poam.shortName'
         onBarClick={this.goToPoam}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -153,7 +148,7 @@ export default class ReportsByPoam extends Component {
   }
 
   resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -165,7 +160,7 @@ export default class ReportsByPoam extends Component {
     this.resetChartSelection(chartByPoamId)
     if (item) {
       // highlight the bar corresponding to the selected poam
-      d3.select('#' + chartByPoamId + ' #bar_' + item.poam.id).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByPoamId + ' #bar_' + item.poam.id).attr('class', 'selected-bar')
     }
   }
 
