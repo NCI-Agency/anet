@@ -149,7 +149,10 @@ export default class FutureEngagementsByLocation extends Component {
   fetchFocusData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedDate) {
       Object.assign(reportsQueryParams, {
         // Use here the start and end of a date in order to make sure the
@@ -232,6 +235,7 @@ export default class FutureEngagementsByLocation extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.datePropsChanged(nextProps)) {
       this.setState({
+        reportsPageNum: 0,
         focusedDate: '',
         focusedLocation: ''
       })

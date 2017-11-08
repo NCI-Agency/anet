@@ -122,7 +122,10 @@ export default class ReportsByPoam extends Component {
   fetchPoamData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedPoam) {
       Object.assign(reportsQueryParams, {poamId: this.state.focusedPoam.id})
     }
@@ -166,7 +169,10 @@ export default class ReportsByPoam extends Component {
 
   componentWillReceiveProps(nextProps, nextContext) {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedPoam: ''})  // reset focus when changing the date
+      this.setState({
+        reportsPageNum: 0,
+        date: nextProps.date,
+        focusedPoam: ''})  // reset focus when changing the date
     }
   }
 

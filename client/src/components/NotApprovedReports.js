@@ -126,7 +126,10 @@ export default class NotApprovedReports extends Component {
   fetchOrgData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedOrg) {
       Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
     }
@@ -170,7 +173,11 @@ export default class NotApprovedReports extends Component {
 
   componentWillReceiveProps(nextProps, nextContext) {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedOrg: ''})  // reset focus when changing the date
+      this.setState({
+        reportsPageNum: 0,
+        date: nextProps.date,
+        focusedOrg: ''
+      })  // reset focus when changing the date
     }
   }
 

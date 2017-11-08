@@ -156,7 +156,10 @@ export default class CancelledReports extends Component {
   fetchOrgData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedOrg) {
       Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
     }
@@ -179,7 +182,10 @@ export default class CancelledReports extends Component {
   fetchReasonData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedReason) {
       Object.assign(reportsQueryParams, {cancelledReason: this.state.focusedReason})
     }
@@ -237,7 +243,12 @@ export default class CancelledReports extends Component {
 
   componentWillReceiveProps(nextProps, nextContext) {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedReason: '', focusedOrg: ''})  // reset focus when changing the date
+      this.setState({
+        reportsPageNum: 0,
+        date: nextProps.date,
+        focusedReason: '',
+        focusedOrg: ''
+      })  // reset focus when changing the date
     }
   }
 

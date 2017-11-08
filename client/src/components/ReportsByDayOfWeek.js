@@ -145,7 +145,10 @@ export default class ReportsByDayOfWeek extends Component {
   reportsQueryParams = () => {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedDayOfWeek) {
       Object.assign(reportsQueryParams, {engagementDayOfWeek: this.state.focusedDayOfWeek.dayOfWeekInt})
     }
@@ -190,6 +193,7 @@ export default class ReportsByDayOfWeek extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.datePropsChanged(nextProps)) {
       this.setState({
+        reportsPageNum: 0,
         focusedDayOfWeek: ''
       })
     }
