@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import './HorizontalBarChart.css'
+import './BarChart.css'
 
 let d3 = require('d3')
 

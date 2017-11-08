@@ -179,7 +179,7 @@ export default class ReportsByDayOfWeek extends Component {
     this.resetChartSelection(chartByDayOfWeekId)
     if (item) {
       // highlight the bar corresponding to the selected day of the week
-      d3.select('#' + chartByDayOfWeekId + ' #bar_' + item.dayOfWeekInt).attr('class', 'seleted-bar')
+      d3.select('#' + chartByDayOfWeekId + ' #bar_' + item.dayOfWeekInt).attr('class', 'selected-bar')
     }
   }
 

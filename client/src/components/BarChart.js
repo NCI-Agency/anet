@@ -131,11 +131,12 @@ export default class BarChart extends Component {
 
     chart.append('g')
       .call(yAxis)
+
     let bar = chart.selectAll('.bar')
       .data(chartData)
       .enter()
       .append('g')
-      .classed('bar', true)
+      .classed('bars-group', true)
       .append('rect')
       .attr('id', function(d, i) { return 'bar_' + getPropValue(d, xProp) })
       .attr('x', function(d) { return xScale(getPropValue(d, xProp)) })

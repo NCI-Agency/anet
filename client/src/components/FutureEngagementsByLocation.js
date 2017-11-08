@@ -221,7 +221,7 @@ export default class FutureEngagementsByLocation extends Component {
     this.resetChartSelection(chartId)
     if (item) {
       // highlight the selected bar
-      d3.select('#' + chartId + ' #bar_' + item.key + item.parentKey).attr('class', 'selected')
+      d3.select('#' + chartId + ' #bar_' + item.key + item.parentKey).attr('class', 'selected-bar')
     }
   }
 

@@ -15,8 +15,11 @@
   fill: none;
 }
 
-.bar {
-  fill: #F5CA8D;
+.category-0 {
+  fill: #689f38;
+}
+.category-1 {
+  fill: #ffc107;
 }
 
 .selected-bar {
@@ -25,4 +28,8 @@
 
 .category-label, .bar-label {
   fill: #000;
+}
+
+.bars-group {
+  fill: #F5CA8D;
 }
