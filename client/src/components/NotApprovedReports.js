@@ -27,7 +27,6 @@ export default class NotApprovedReports extends Component {
     super(props)
 
     this.state = {
-      date: props.date,
       graphData: [],
       reports: {list: []},
       reportsPageNum: 0,
@@ -39,7 +38,7 @@ export default class NotApprovedReports extends Component {
   get queryParams() {
     return {
       state: ['PENDING_APPROVAL'],
-      updatedAtEnd: this.state.date.valueOf(),
+      updatedAtEnd: this.props.date.valueOf(),
     }
   }
 
@@ -175,7 +174,6 @@ export default class NotApprovedReports extends Component {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
       this.setState({
         reportsPageNum: 0,
-        date: nextProps.date,
         focusedOrg: ''
       })  // reset focus when changing the date
     }
@@ -186,7 +184,7 @@ export default class NotApprovedReports extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
       this.fetchData()
     }
   }

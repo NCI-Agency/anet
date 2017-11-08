@@ -27,7 +27,6 @@ export default class CancelledReports extends Component {
     super(props)
 
     this.state = {
-      date: props.date,
       graphDataByOrg: [],
       graphDataByReason: [],
       focusedOrg: '',
@@ -39,7 +38,7 @@ export default class CancelledReports extends Component {
   get queryParams() {
     return {
       state: ['CANCELLED'],
-      releasedAtStart: this.state.date.valueOf(),
+      releasedAtStart: this.props.date.valueOf(),
     }
   }
 
@@ -245,7 +244,6 @@ export default class CancelledReports extends Component {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
       this.setState({
         reportsPageNum: 0,
-        date: nextProps.date,
         focusedReason: '',
         focusedOrg: ''
       })  // reset focus when changing the date
@@ -257,7 +255,7 @@ export default class CancelledReports extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
       this.fetchData()
     }
   }

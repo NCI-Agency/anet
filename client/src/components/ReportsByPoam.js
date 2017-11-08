@@ -24,7 +24,6 @@ export default class ReportsByPoam extends Component {
     super(props)
 
     this.state = {
-      date: props.date,
       graphDataByPoam: [],
       focusedPoam: '',
       updateChart: true  // whether the chart needs to be updated
@@ -34,7 +33,7 @@ export default class ReportsByPoam extends Component {
   get queryParams() {
     return {
       state: ['RELEASED'],
-      releasedAtStart: this.state.date.valueOf(),
+      releasedAtStart: this.props.date.valueOf(),
     }
   }
 
@@ -171,7 +170,6 @@ export default class ReportsByPoam extends Component {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
       this.setState({
         reportsPageNum: 0,
-        date: nextProps.date,
         focusedPoam: ''})  // reset focus when changing the date
     }
   }
@@ -181,7 +179,7 @@ export default class ReportsByPoam extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
       this.fetchData()
     }
   }
