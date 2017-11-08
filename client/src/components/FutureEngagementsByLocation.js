@@ -100,7 +100,6 @@ export default class FutureEngagementsByLocation extends Component {
     const chartQuery = this.runChartQuery(this.chartQueryParams())
     Promise.all([chartQuery]).then(values => {
       let reportsList = values[0].reportList.list
-      console.log(reportsList)
       // add days without data as we want to display them in the chart
       let allCategories = this.engagementDateRangeArray.map(function(d) {
         return {
