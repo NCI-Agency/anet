@@ -10,10 +10,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartId = 'not_approved_reports_chart'
 
 
@@ -31,7 +27,6 @@ export default class NotApprovedReports extends Component {
     super(props)
 
     this.state = {
-      date: props.date,
       graphData: [],
       reports: {list: []},
       reportsPageNum: 0,
@@ -43,7 +38,7 @@ export default class NotApprovedReports extends Component {
   get queryParams() {
     return {
       state: ['PENDING_APPROVAL'],
-      updatedAtEnd: this.state.date.valueOf(),
+      updatedAtEnd: this.props.date.valueOf(),
     }
   }
 
@@ -57,7 +52,6 @@ export default class NotApprovedReports extends Component {
         yProp='notApproved'
         xLabel='advisorOrg.shortName'
         onBarClick={this.goToOrg}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -109,12 +103,19 @@ export default class NotApprovedReports extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+    const noAdvisorOrg = {
+      id: -1,
+      shortName: 'No advisor organization'
+    }
     Promise.all([chartQuery]).then(values => {
+      let reportsList = values[0].reportList.list
+      reportsList = reportsList
+        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
       this.setState({
         updateChart: true,  // update chart after fetching the data
-        graphData: values[0].reportList.list
+        graphData: reportsList
           .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-          .map(d => {d.notApproved = values[0].reportList.list.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+          .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
           .sort((a, b) => {
             let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
             let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
@@ -131,7 +132,10 @@ export default class NotApprovedReports extends Component {
   fetchOrgData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedOrg) {
       Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
     }
@@ -157,7 +161,7 @@ export default class NotApprovedReports extends Component {
   }
 
   resetChartSelection() {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -169,13 +173,16 @@ export default class NotApprovedReports extends Component {
     this.resetChartSelection()
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartId + ' #bar_' + item.advisorOrg.id).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartId + ' #bar_' + item.advisorOrg.id).attr('class', 'selected-bar')
     }
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedOrg: ''})  // reset focus when changing the date
+      this.setState({
+        reportsPageNum: 0,
+        focusedOrg: ''
+      })  // reset focus when changing the date
     }
   }
 
@@ -184,7 +191,7 @@ export default class NotApprovedReports extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
       this.fetchData()
     }
   }

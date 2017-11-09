@@ -1,8 +1,12 @@
-import React, {PropTypes} from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import Page from 'components/Page'
 import NotApprovedReports from 'components/NotApprovedReports'
 import CancelledReports from 'components/CancelledReports'
+import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 import ReportsByPoam from 'components/ReportsByPoam'
+import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
+import FutureEngagementsByLocation from 'components/FutureEngagementsByLocation'
 import ReportsByDayOfWeek from 'components/ReportsByDayOfWeek'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
@@ -10,9 +14,6 @@ import Fieldset from 'components/Fieldset'
 import CalendarButton from 'components/CalendarButton'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
-
-import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
-import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
 const insightDetails = {
   'not-approved-reports': {
@@ -32,7 +33,7 @@ const insightDetails = {
   'reports-by-poam': {
     component: ReportsByPoam,
     title: 'Reports by PoAM',
-    help: 'Number of reports by PoAM',
+    help: 'Number of reports by PoAM since',
     dateRange: false,
     showCalendar: true
   },
@@ -49,7 +50,16 @@ const insightDetails = {
     dateRange: false,
     showCalendar: false
   },
+  'future-engagements-by-location': {
+    component: FutureEngagementsByLocation,
+    title: 'Future Engagements by Location',
+    help: 'Number of future engagements by location',
+    dateRange: true,
+    onlyShowBetween: true,
+  },
 }
+
+const PREFIX_FUTURE = 'future'
 
 const calendarButtonCss = {
   marginLeft: '20px',
@@ -66,13 +76,13 @@ export default class InsightsShow extends Page {
   }
 
   get currentDateTime() {
-    return moment()
+    return moment().clone()
   }
 
   get cutoffDate() {
     let settings = this.context.app.state.settings
     let maxReportAge = 1 + (parseInt(settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
-    return moment().subtract(maxReportAge, 'days')
+    return moment().subtract(maxReportAge, 'days').clone()
   }
 
   get referenceDateLongStr() { return this.state.referenceDate.format('DD MMMM YYYY') }
@@ -84,29 +94,59 @@ export default class InsightsShow extends Page {
       referenceDate: null,
       startDate: null,
       endDate: null,
+      date: {relative: "0", start: null, end: null}
+    }
+  }
+
+ get defaultDates() {
+    return {
+      relative: "0",
+      start: this.state.startDate.toISOString(),
+      end: this.state.endDate.toISOString()
     }
   }
 
   getFilters = () => {
     const insight = insightDetails[this.state.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
-    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value="" onChange={this.handleChangeDateRange} style={dateRangeFilterCss} /> : null
+    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     return <span>{dateRangeFilter}{calenderFilter}</span>
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.params.insight !== this.state.insight) {
-      this.setState({insight: nextProps.params.insight, referenceDate: this.cutoffDate})
+      this.setState({insight: nextProps.params.insight})
+      this.setStateDefaultDates(nextProps.params.insight)
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
+    this.setStateDefaultDates(this.state.insight)
+  }
 
+  setStateDefaultDates = (insight) => {
+    const prefix = insight.split('-', 1).pop()
+    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
+      this.setStateDefaultFutureDates()
+    } else {
+      this.setStateDefaultPastDates()
+    }
+  }
+
+  setStateDefaultPastDates = () => {
     this.setState({
       referenceDate: this.cutoffDate,
       startDate: this.cutoffDate,
-      endDate: this.currentDateTime
+      endDate: this.currentDateTime.endOf('day')
+    })
+  }
+
+  setStateDefaultFutureDates = () => {
+    this.setState({
+      referenceDate: this.currentDateTime,
+      startDate: this.currentDateTime,
+      endDate: this.currentDateTime.add(14, 'days').endOf('day')
     })
   }
 
@@ -132,7 +172,7 @@ export default class InsightsShow extends Page {
     }
 
     if (value.end !== null) {
-      this.updateDate("endDate", moment(value.end))
+      this.updateDate("endDate", moment(value.end).endOf('day'))
     }
   }
 
@@ -153,28 +193,27 @@ export default class InsightsShow extends Page {
   }
 
   render() {
-    let InsightComponent = insightDetails[this.state.insight].component
-    let insightTitle = insightDetails[this.state.insight].title
-    let insightPath = '/insights/' + this.state.insight
+    const insightConfig = insightDetails[this.state.insight]
+    const InsightComponent = insightConfig.component
+    const insightPath = '/insights/' + this.state.insight
 
-    const help = insightDetails[this.state.insight].help
     return (
       <div>
-        <Breadcrumbs items={[['Insights ' + insightTitle, insightPath]]} />
+        <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
           <Fieldset id={this.state.insight} data-jumptarget title={
             <span>
-              {insightTitle} - {this.referenceDateLongStr}
+              {insightConfig.title}
               {this.getFilters()}
             </span>
             }>
-              <p className="help-text">{help} {this.referenceDateLongStr}</p>
+              <p className="help-text">{insightConfig.help} {insightConfig.showCalendar && this.referenceDateLongStr}</p>
               <InsightComponent
-                date={this.state.referenceDate.clone().startOf('day')}
-                startDate={this.state.startDate}
-                endDate={this.state.endDate.clone().startOf('day')} />
+                date={this.state.referenceDate.clone()}
+                startDate={this.state.startDate.clone()}
+                endDate={this.state.endDate.clone()} />
           </Fieldset>
         }
       </div>

@@ -10,10 +10,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartByOrgId = 'cancelled_reports_by_org'
 const chartByReasonId = 'cancelled_reports_by_reason'
 
@@ -31,7 +27,6 @@ export default class CancelledReports extends Component {
     super(props)
 
     this.state = {
-      date: props.date,
       graphDataByOrg: [],
       graphDataByReason: [],
       focusedOrg: '',
@@ -43,7 +38,7 @@ export default class CancelledReports extends Component {
   get queryParams() {
     return {
       state: ['CANCELLED'],
-      releasedAtStart: this.state.date.valueOf(),
+      releasedAtStart: this.props.date.valueOf(),
     }
   }
 
@@ -58,7 +53,6 @@ export default class CancelledReports extends Component {
         yProp='cancelledByOrg'
         xLabel='advisorOrg.shortName'
         onBarClick={this.goToOrg}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
       chartByReason = <BarChart
@@ -68,7 +62,6 @@ export default class CancelledReports extends Component {
         yProp='cancelledByReason'
         xLabel='reason'
         onBarClick={this.goToReason}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -133,23 +126,30 @@ export default class CancelledReports extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+    const noAdvisorOrg = {
+      id: -1,
+      shortName: 'No advisor organization'
+    }
     Promise.all([chartQuery]).then(values => {
+      let reportsList = values[0].reportList.list
+      reportsList = reportsList
+        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
       this.setState({
         updateChart: true,  // update chart after fetching the data
-        graphDataByOrg: values[0].reportList.list
-        .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-        .map(d => {d.cancelledByOrg = values[0].reportList.list.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
-        .sort((a, b) => {
-          let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
-          let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
-          if (a_index < 0)
-            return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
-          else
-            return (b_index < 0) ? -1 : a_index-b_index
-        }),
-        graphDataByReason: values[0].reportList.list
+        graphDataByOrg: reportsList
+          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
+          .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+          .sort((a, b) => {
+            let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
+            let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
+            if (a_index < 0)
+              return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
+            else
+              return (b_index < 0) ? -1 : a_index-b_index
+          }),
+        graphDataByReason: reportsList
           .filter((item, index, d) => d.findIndex(t => {return t.cancelledReason === item.cancelledReason }) === index)
-          .map(d => {d.cancelledByReason = values[0].reportList.list.filter(item => item.cancelledReason === d.cancelledReason).length; return d})
+          .map(d => {d.cancelledByReason = reportsList.filter(item => item.cancelledReason === d.cancelledReason).length; return d})
           .map(d => {d.reason = this.getReasonDisplayName(d.cancelledReason); return d})
           .sort((a, b) => {
             return a.reason.localeCompare(b.reason)
@@ -162,7 +162,10 @@ export default class CancelledReports extends Component {
   fetchOrgData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedOrg) {
       Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
     }
@@ -185,7 +188,10 @@ export default class CancelledReports extends Component {
   fetchReasonData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedReason) {
       Object.assign(reportsQueryParams, {cancelledReason: this.state.focusedReason})
     }
@@ -210,7 +216,7 @@ export default class CancelledReports extends Component {
   }
 
   resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -223,7 +229,7 @@ export default class CancelledReports extends Component {
     this.resetChartSelection(chartByOrgId)
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartByOrgId + ' #bar_' + item.advisorOrg.id).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByOrgId + ' #bar_' + item.advisorOrg.id).attr('class', 'selected-bar')
     }
   }
 
@@ -237,13 +243,17 @@ export default class CancelledReports extends Component {
     this.resetChartSelection(chartByOrgId)
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartByReasonId + ' #bar_' + item.cancelledReason).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByReasonId + ' #bar_' + item.cancelledReason).attr('class', 'selected-bar')
     }
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedReason: '', focusedOrg: ''})  // reset focus when changing the date
+      this.setState({
+        reportsPageNum: 0,
+        focusedReason: '',
+        focusedOrg: ''
+      })  // reset focus when changing the date
     }
   }
 
@@ -252,7 +262,7 @@ export default class CancelledReports extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
       this.fetchData()
     }
   }

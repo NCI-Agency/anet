@@ -10,10 +10,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartByDayOfWeekId = 'reports_by_day_of_week'
 
 
@@ -23,8 +19,8 @@ const chartByDayOfWeekId = 'reports_by_day_of_week'
  */
 export default class ReportsByDayOfWeek extends Component {
   static propTypes = {
-    startDate: PropTypes.object,
-    endDate: PropTypes.object
+    startDate: PropTypes.object.isRequired,
+    endDate: PropTypes.object.isRequired,
   }
 
   constructor(props) {
@@ -56,7 +52,6 @@ export default class ReportsByDayOfWeek extends Component {
         yProp='reportsCount'
         xLabel='dayOfWeekString'
         onBarClick={this.goToDayOfWeek}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -150,7 +145,10 @@ export default class ReportsByDayOfWeek extends Component {
   reportsQueryParams = () => {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedDayOfWeek) {
       Object.assign(reportsQueryParams, {engagementDayOfWeek: this.state.focusedDayOfWeek.dayOfWeekInt})
     }
@@ -172,7 +170,7 @@ export default class ReportsByDayOfWeek extends Component {
   }
 
   resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -184,7 +182,7 @@ export default class ReportsByDayOfWeek extends Component {
     this.resetChartSelection(chartByDayOfWeekId)
     if (item) {
       // highlight the bar corresponding to the selected day of the week
-      d3.select('#' + chartByDayOfWeekId + ' #bar_' + item.dayOfWeekInt).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByDayOfWeekId + ' #bar_' + item.dayOfWeekInt).attr('class', 'selected-bar')
     }
   }
 
@@ -192,12 +190,24 @@ export default class ReportsByDayOfWeek extends Component {
     this.fetchData()
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const startDateChanged = prevProps.startDate.valueOf() !== this.props.startDate.valueOf()
-    const endDateChanged = prevProps.endDate.valueOf() !== this.props.endDate.valueOf()
+  componentWillReceiveProps(nextProps) {
+    if (this.datePropsChanged(nextProps)) {
+      this.setState({
+        reportsPageNum: 0,
+        focusedDayOfWeek: ''
+      })
+    }
+  }
 
-    if (startDateChanged || endDateChanged) {
+  componentDidUpdate(prevProps, prevState) {
+    if (this.datePropsChanged(prevProps)) {
       this.fetchData()
     }
+  }
+
+  datePropsChanged = (otherProps) => {
+    const startDateChanged = otherProps.startDate.valueOf() !== this.props.startDate.valueOf()
+    const endDateChanged = otherProps.endDate.valueOf() !== this.props.endDate.valueOf()
+    return startDateChanged || endDateChanged
   }
 }

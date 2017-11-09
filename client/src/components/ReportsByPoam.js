@@ -9,10 +9,6 @@ import ReportCollection from 'components/ReportCollection'
 
 
 const d3 = require('d3')
-const colors = {
-  barColor: '#F5CA8D',
-  selectedBarColor: '#EC971F'
-}
 const chartByPoamId = 'reports_by_poam'
 
 
@@ -28,7 +24,6 @@ export default class ReportsByPoam extends Component {
     super(props)
 
     this.state = {
-      date: props.date,
       graphDataByPoam: [],
       focusedPoam: '',
       updateChart: true  // whether the chart needs to be updated
@@ -38,7 +33,7 @@ export default class ReportsByPoam extends Component {
   get queryParams() {
     return {
       state: ['RELEASED'],
-      releasedAtStart: this.state.date.valueOf(),
+      releasedAtStart: this.props.date.valueOf(),
     }
   }
 
@@ -52,7 +47,6 @@ export default class ReportsByPoam extends Component {
         yProp='reportsCount'
         xLabel='poam.shortName'
         onBarClick={this.goToPoam}
-        barColor={colors.barColor}
         updateChart={this.state.updateChart}
       />
     }
@@ -103,6 +97,11 @@ export default class ReportsByPoam extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+    const noPoam = {
+      id: -1,
+      shortName: 'No PoAM',
+      longName: 'No PoAM'
+    }
     Promise.all([chartQuery]).then(values => {
       let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, poams: d.poams.map(p => p.id)}})
       let poams = values[0].reportList.list.map(d => d.poams)
@@ -110,7 +109,7 @@ export default class ReportsByPoam extends Component {
         .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
         .sort((a, b) => a.shortName.localeCompare(b.shortName))
       // add No PoAM item, in order to relate to reports without PoAMs
-      poams.push({id: null, shortName: 'No PoAM', longName: 'No PoAM'})
+      poams.push(noPoam)
       this.setState({
         updateChart: true,  // update chart after fetching the data
         graphDataByPoam: poams
@@ -127,7 +126,10 @@ export default class ReportsByPoam extends Component {
   fetchPoamData() {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.queryParams)
-    Object.assign(reportsQueryParams, {pageNum: this.state.reportsPageNum})
+    Object.assign(reportsQueryParams, {
+      pageNum: this.state.reportsPageNum,
+      pageSize: 10
+    })
     if (this.state.focusedPoam) {
       Object.assign(reportsQueryParams, {poamId: this.state.focusedPoam.id})
     }
@@ -153,7 +155,7 @@ export default class ReportsByPoam extends Component {
   }
 
   resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('fill', colors.barColor)
+    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
@@ -165,13 +167,15 @@ export default class ReportsByPoam extends Component {
     this.resetChartSelection(chartByPoamId)
     if (item) {
       // highlight the bar corresponding to the selected poam
-      d3.select('#' + chartByPoamId + ' #bar_' + item.poam.id).attr('fill', colors.selectedBarColor)
+      d3.select('#' + chartByPoamId + ' #bar_' + item.poam.id).attr('class', 'selected-bar')
     }
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
     if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({date: nextProps.date, focusedPoam: ''})  // reset focus when changing the date
+      this.setState({
+        reportsPageNum: 0,
+        focusedPoam: ''})  // reset focus when changing the date
     }
   }
 
@@ -180,7 +184,7 @@ export default class ReportsByPoam extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
       this.fetchData()
     }
   }

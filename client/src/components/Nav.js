@@ -138,6 +138,9 @@ class Nav extends Component {
 						<Link to="/insights/reports-by-poam">
 							<MenuItem>Reports by PoAM</MenuItem>
 						</Link>
+						<Link to="/insights/future-engagements-by-location">
+							<MenuItem>Future engagements by location</MenuItem>
+						</Link>
 						<Link to="/insights/reports-by-day-of-week">
 							<MenuItem>Reports by day of the week</MenuItem>
 						</Link>
