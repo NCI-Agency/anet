@@ -98,8 +98,14 @@ export default class FutureEngagementsByLocation extends Component {
   fetchData() {
     // Query used by the chart
     const chartQuery = this.runChartQuery(this.chartQueryParams())
+    const noLocation = {
+      id: -1,
+      name: 'No location allocated'
+    }
     Promise.all([chartQuery]).then(values => {
       let reportsList = values[0].reportList.list
+      reportsList = reportsList
+        .map(d => { if (!d.location) d.location = noLocation; return d })
       // add days without data as we want to display them in the chart
       let allCategories = this.engagementDateRangeArray.map(function(d) {
         return {
@@ -109,7 +115,7 @@ export default class FutureEngagementsByLocation extends Component {
       })
       let categoriesWithData = d3.nest()
         .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
-        .key(function(d) { return (d.location) ? d.location.id : -1 })
+        .key(function(d) { return d.location.id })
         .rollup(function(leaves) { return leaves.length })
         .entries(reportsList)
       let groupedData = allCategories.map((d)=> {
@@ -127,12 +133,7 @@ export default class FutureEngagementsByLocation extends Component {
       )
       graphData.leavesLabels = reportsList.reduce(
         function(prev, curr) {
-          if (curr.location) {
-            prev[curr.location.id] = curr.location.name
-          }
-          else {
-            prev[-1] = 'No location allocated'
-          }
+          prev[curr.location.id] = curr.location.name
           return prev
         },
         {}

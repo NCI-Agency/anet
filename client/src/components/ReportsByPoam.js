@@ -97,6 +97,11 @@ export default class ReportsByPoam extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+    const noPoam = {
+      id: -1,
+      shortName: 'No PoAM',
+      longName: 'No PoAM'
+    }
     Promise.all([chartQuery]).then(values => {
       let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, poams: d.poams.map(p => p.id)}})
       let poams = values[0].reportList.list.map(d => d.poams)
@@ -104,7 +109,7 @@ export default class ReportsByPoam extends Component {
         .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
         .sort((a, b) => a.shortName.localeCompare(b.shortName))
       // add No PoAM item, in order to relate to reports without PoAMs
-      poams.push({id: null, shortName: 'No PoAM', longName: 'No PoAM'})
+      poams.push(noPoam)
       this.setState({
         updateChart: true,  // update chart after fetching the data
         graphDataByPoam: poams

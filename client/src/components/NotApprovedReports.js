@@ -103,12 +103,19 @@ export default class NotApprovedReports extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+    const noAdvisorOrg = {
+      id: -1,
+      shortName: 'No advisor organization'
+    }
     Promise.all([chartQuery]).then(values => {
+      let reportsList = values[0].reportList.list
+      reportsList = reportsList
+        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
       this.setState({
         updateChart: true,  // update chart after fetching the data
-        graphData: values[0].reportList.list
+        graphData: reportsList
           .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-          .map(d => {d.notApproved = values[0].reportList.list.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+          .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
           .sort((a, b) => {
             let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
             let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
