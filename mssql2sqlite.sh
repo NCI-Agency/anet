@@ -15,7 +15,9 @@ function dtg_mac {
 
 while read input
 do
-	if [[ "$OSTYPE" == "darwin"* ]]; then
+	if [[ "$input" == "SET "* ]]; then
+		echo "-- $input" # comment out any mssql-specific session-modifying commands
+	elif [[ "$OSTYPE" == "darwin"* ]]; then
 		time=`dtg_mac`;
 		echo ${input} | sed "s/CURRENT_TIMESTAMP/'${time}'/g" | sed -E "s/'([0-9]{4}-[0-9]{2}-[0-9]{2})'/date('\1 00:00:00.000 -0000')/g" | sed "s/TRUNCATE TABLE/DELETE FROM/"
 	else
