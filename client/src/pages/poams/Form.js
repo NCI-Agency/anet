@@ -13,7 +13,7 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
 import dict from 'dictionary'
 import API from 'api'
-import {Poam} from 'models'
+import {Poam, Position} from 'models'
 
 export default class PoamForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -32,7 +32,7 @@ export default class PoamForm extends ValidatableFormWrapper {
 
 		let orgSearchQuery = {}
 		orgSearchQuery.type = 'ADVISOR_ORG'
-		if (currentUser && currentUser.position && currentUser.position.type === 'SUPER_USER') {
+		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
 			orgSearchQuery.parentOrgId = currentUser.position.organization.id
 			orgSearchQuery.parentOrgRecursively = true
 		}

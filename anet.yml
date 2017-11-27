@@ -30,6 +30,7 @@ smtp:
   username: ${ANET_SMTP_USERNAME}
   password: ${ANET_SMTP_PASSWORD}
   startTls: true
+  disabled: true
 
 # The email address that all automated emails should come from. 
 # ex: "ANET <anet@example.com>"
@@ -140,3 +141,105 @@ logging:
       currentLogFilename: ./logs/anet.log
       archivedLogFilenamePattern: ./logs/anet-%d.log.zip
       archivedFileCount: 2
+
+dictionary:
+  PRINCIPAL_PERSON_TITLE: Afghan Partner
+  ADVISOR_PERSON_TITLE: NATO Member
+  PRINCIPAL_POSITION_NAME: Afghan Tashkil
+  ADVISOR_POSITION_NAME: NATO Billet
+  ADVISOR_POSITION_TYPE_TITLE: NATO Advisor
+  SUPER_USER_POSITION_TYPE_TITLE: ANET Super User
+  ADMINISTRATOR_POSITION_TYPE_TITLE: ANET Administrator
+  PRINCIPAL_ORG_NAME: Afghan Government Organization
+  ADVISOR_ORG_NAME: Advisor Organization
+  POAM_LONG_NAME: Plan of Action and Milestones / Pillars
+  POAM_SHORT_NAME: PoAM
+  NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
+  PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
+  PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense
+  ADVISOR_ORG_LABEL_LONGNAME: Description
+  ADVISOR_ORG_PLACEHOLDER_LONGNAME: e.g. Force Sustainment
+  PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE: Identification Code
+  PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE: optional
+  ADVISOR_ORG_LABEL_IDENTIFICATIONCODE: UIC
+  ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE: the six character code
+  supportEmailAddr: support@example.com
+  pinned_ORGs:
+    - Key Leader Engagement
+  non_reporting_ORGs:
+    - ANET Administrators
+  countries:
+    - Afghanistan
+    - Albania
+    - Armenia
+    - Australia
+    - Austria
+    - Azerbaijan
+    - Belgium
+    - Bosnia-Herzegovina
+    - Bulgaria
+    - Croatia
+    - Czech Republic
+    - Denmark
+    - Estonia
+    - Finland
+    - Georgia
+    - Germany
+    - Greece
+    - Hungary
+    - Iceland
+    - Italy
+    - Latvia
+    - Lithuania
+    - Luxembourg
+    - Macedonia
+    - Mongolia
+    - Montenegro
+    - Netherlands
+    - New Zealand
+    - Norway
+    - Poland
+    - Portugal
+    - Romania
+    - Slovakia
+    - Slovenia
+    - Spain
+    - Sweden
+    - Turkey
+    - Ukraine
+    - United Kingdom
+    - United States of America
+  principal_countries:
+    - Afghanistan
+  ranks:
+    - CIV
+    - CTR
+    - OR-1
+    - OR-2
+    - OR-3
+    - OR-4
+    - OR-5
+    - OR-6
+    - OR-7
+    - OR-8
+    - OR-9
+    - WO-1
+    - WO-2
+    - WO-3
+    - WO-4
+    - WO-5
+    - OF-1
+    - OF-2
+    - OF-3
+    - OF-4
+    - OF-5
+    - OF-6
+    - OF-7
+    - OF-8
+    - OF-9
+    - OF-10
+  domainNames:
+    - cmil.mil
+    - mission.ita
+    - nato.int
+    - "*.isaf.nato.int"

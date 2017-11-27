@@ -13,6 +13,7 @@ import org.skife.jdbi.v2.TransactionStatus;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
@@ -91,7 +92,8 @@ public class PersonDao implements IAnetDao<Person> {
 				+ "SET name = :name, status = :status, role = :role, "
 				+ "gender = :gender, country = :country,  emailAddress = :emailAddress, "
 				+ "phoneNumber = :phoneNumber, rank = :rank, biography = :biography, "
-				+ "pendingVerification = :pendingVerification, updatedAt = :updatedAt, ");
+				+ "pendingVerification = :pendingVerification, domainUsername = :domainUsername, "
+				+ "updatedAt = :updatedAt, ");
 		if (DaoUtils.isMsSql(dbHandle)) {
 			//MsSql requires an explicit CAST when datetime2 might be NULL. 
 			sql.append("endOfTourDate = CAST(:endOfTourDate AS datetime2) ");
@@ -138,8 +140,10 @@ public class PersonDao implements IAnetDao<Person> {
 	public List<Person> findByDomainUsername(String domainUsername) {
 		return dbHandle.createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITIONS_FIELDS 
 				+ "FROM people LEFT JOIN positions ON people.id = positions.currentPersonId "
-				+ "WHERE people.domainUsername = :domainUsername")
+				+ "WHERE people.domainUsername = :domainUsername "
+				+ "AND people.status != :inactiveStatus")
 			.bind("domainUsername", domainUsername)
+			.bind("inactiveStatus", DaoUtils.getEnumId(PersonStatus.INACTIVE))
 			.map(new PersonMapper())
 			.list();
 	}
@@ -152,6 +156,7 @@ public class PersonDao implements IAnetDao<Person> {
 					+ "SELECT top(:maxResults) reportPeople.personId "
 					+ "FROM reports JOIN reportPeople ON reports.id = reportPeople.reportId "
 					+ "WHERE authorId = :authorId "
+					+ "AND personId != :authorId "
 					+ "GROUP BY personId "
 					+ "ORDER BY MAX(reports.createdAt) DESC"
 				+ ")";
@@ -161,6 +166,7 @@ public class PersonDao implements IAnetDao<Person> {
 					+ "SELECT reportPeople.personId "
 					+ "FROM reports JOIN reportPeople ON reports.id = reportPeople.reportId "
 					+ "WHERE authorId = :authorId "
+					+ "AND personId != :authorId "
 					+ "GROUP BY personId "
 					+ "ORDER BY MAX(reports.createdAt) DESC "
 					+ "LIMIT :maxResults"

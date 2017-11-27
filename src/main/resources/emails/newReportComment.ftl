@@ -25,10 +25,12 @@ Hi, ${report.author.name},
 
 <p><i>"${comment.text}"</i></p>
 
-You can <a href="${serverUrl}/reports/${report.id?c}">view or reply to this comment by using this link</a>
+<p>You can <a href="${serverUrl}/reports/${report.id?c}">view or reply to this comment by using this link</a>.</p>
 
-Thank you,<br>
-The ANET Team
+ANET Support Team
+<#if SUPPORT_EMAIL_ADDR??>
+  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
+</#if>
 
 </body>
 </html>

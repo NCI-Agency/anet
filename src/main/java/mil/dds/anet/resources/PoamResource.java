@@ -121,8 +121,8 @@ public class PoamResource implements IGraphQLResource {
 			Poam existing = dao.getById(p.getId());
 			AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrg());
 			
-			//If changing the Responsible ORganiation, Super Users must also have super user privelages over the next org. 
-			if (Objects.equals(DaoUtils.getId(existing.getResponsibleOrg()), p.getResponsibleOrg()) == false) { 
+			//If changing the Responsible Organization, Super Users must also have super user privileges over the next org.
+			if (!Objects.equals(DaoUtils.getId(existing.getResponsibleOrg()), DaoUtils.getId(p.getResponsibleOrg()))) {
 				if (DaoUtils.getId(p.getResponsibleOrg()) == null) { 
 					throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 				}

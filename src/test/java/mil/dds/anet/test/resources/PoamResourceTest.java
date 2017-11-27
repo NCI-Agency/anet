@@ -29,7 +29,6 @@ public class PoamResourceTest extends AbstractResourceTest {
 	@Test
 	public void poamTest() { 
 		final Person jack = getJackJackson();
-		final Person admin = getArthurDmin();
 
 		Poam a = httpQuery("/api/poams/new", admin)
 			.post(Entity.json(Poam.create("TestF1", "Do a thing with a person", "Test-EF")), Poam.class);

@@ -19,6 +19,7 @@ public class OrganizationMapper implements ResultSetMapper<Organization> {
 		org.setId(r.getInt("organizations_id"));
 		org.setShortName(r.getString("organizations_shortName"));
 		org.setLongName(r.getString("organizations_longName"));
+		org.setIdentificationCode(r.getString("organizations_identificationCode"));
 		org.setType(MapperUtils.getEnumIdx(r, "organizations_type", OrganizationType.class));
 		
 		Integer parentOrgId = MapperUtils.getInteger(r, "organizations_parentOrgId");

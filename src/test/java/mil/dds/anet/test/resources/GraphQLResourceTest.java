@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +26,7 @@ import mil.dds.anet.beans.Person;
 
 public class GraphQLResourceTest extends AbstractResourceTest {
 
-	private Logger logger = LoggerFactory.getLogger(GraphQLResourceTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public GraphQLResourceTest() { 
 		if (client == null) { 
@@ -35,11 +36,10 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 	
 	@Test
 	public void test() {
-		Person arthur = getArthurDmin();
-		Person jack = getJackJackson();
-		Person steve = getSteveSteveson();
+		final Person jack = getJackJackson();
+		final Person steve = getSteveSteveson();
 		File testDir = new File("src/test/resources/graphQLTests/");
-		testDir.getAbsolutePath();
+		assertThat(testDir.getAbsolutePath()).isNotNull();
 		assertThat(testDir.isDirectory()).isTrue();
 		
 		Map<String,Object> variables = new HashMap<String,Object>();
@@ -53,10 +53,13 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 		variables.put("maxResults", 6);
 		logger.info("Using variables {}", variables);
 		
-		for (File f : testDir.listFiles()) { 
-			if (f.isFile()) { 
+		final File[] fileList = testDir.listFiles();
+		assertThat(fileList).isNotNull();
+		for (File f : fileList) {
+			if (f.isFile()) {
 				try { 
-					String raw = IOUtils.toString(new FileInputStream(f));
+					final FileInputStream  input = new FileInputStream(f);
+					String raw = IOUtils.toString(input);
 					Map<String,Object> query = new HashMap<String,Object>();
 					for (Map.Entry<String, Object> entry : variables.entrySet()) { 
 						raw = raw.replace("${" + entry.getKey() + "}", entry.getValue().toString());
@@ -66,17 +69,53 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 					logger.info("Processing file {}", f);
 
 					// Test POST request
-					Map<String,Object> respPost = httpQuery("/graphql", arthur)
+					Map<String,Object> respPost = httpQuery("/graphql", admin)
 							.post(Entity.json(query), new GenericType<Map<String,Object>>() {});
 					doAsserts(f, respPost);
 
 					// Test GET request
-					Map<String,Object> respGet = httpQuery("/graphql?query=" + URLEncoder.encode("{" + raw + "}", "UTF-8"), arthur)
+					Map<String,Object> respGet = httpQuery("/graphql?query=" + URLEncoder.encode("{" + raw + "}", "UTF-8"), admin)
 							.get(new GenericType<Map<String,Object>>() {});
 					doAsserts(f, respGet);
 
 					// POST and GET responses should be equal
 					assertThat(respPost.get("data")).isEqualTo(respGet.get("data"));
+
+					// Test GET request over XML
+					String respGetXml = httpQuery("/graphql?output=xml&query=" + URLEncoder.encode("{" + raw + "}", "UTF-8"), admin)
+							.get(new GenericType<String>() {});
+					assertThat(respGetXml).isNotNull();
+					int len = respGetXml.length();
+					assertThat(len).isGreaterThan(0);
+					assertThat(respGetXml.substring(0, 1)).isEqualTo("<");
+					String xmlHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+					assertThat(respGetXml.substring(0, xmlHeader.length())).isEqualTo(xmlHeader);
+					assertThat(respGetXml.substring(len - 2 , len)).isEqualTo(">\n");
+
+					// Test POST request over XML
+					query.put("output", "xml");
+					final String respPostXml = httpQuery("/graphql", admin)
+							.post(Entity.json(query), new GenericType<String>() {});
+
+					// POST and GET responses over XML should be equal
+					assertThat(respPostXml).isEqualTo(respGetXml);
+
+					// Test GET request over XLSX
+					// Note: getting the resulting XLSX as String is a quick & easy hack
+					final String respGetXlsx = httpQuery("/graphql?output=xlsx&query=" + URLEncoder.encode("{" + raw + "}", "UTF-8"), admin)
+							.get(new GenericType<String>() {});
+					assertThat(respGetXlsx).isNotNull();
+					assertThat(respGetXlsx.length()).isGreaterThan(0);
+
+					// Test POST request over XLSX
+					query.put("output", "xlsx");
+					final String respPostXlsx = httpQuery("/graphql", admin)
+							.post(Entity.json(query), new GenericType<String>() {});
+					assertThat(respPostXlsx).isNotNull();
+					assertThat(respPostXlsx.length()).isGreaterThan(0);
+					// Note: can't compare respGetXlsx and respPostXlsx directly, as they will be different, unfortunately
+
+					input.close();
 				} catch (IOException e) { 
 					Assertions.fail("Unable to read file ", e);
 				}

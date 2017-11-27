@@ -66,18 +66,14 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 		if (whereClauses.size() == 0) { return result; }
 		
 		sql.append(Joiner.on(" AND ").join(whereClauses));
-		sql.append(" ORDER BY shortName ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
-		
+		sql.append(" ORDER BY shortName ASC, longName ASC, id ASC");
+
 		if (commonTableExpression != null) { 
 			sql.insert(0, commonTableExpression);
 		}
-		
-		Query<Poam> sqlQuery = dbHandle.createQuery(sql.toString())
-			.bindFromMap(args)
-			.bind("offset", query.getPageSize() * query.getPageNum())
-			.bind("limit", query.getPageSize())
+
+		final Query<Poam> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
 			.map(new PoamMapper());
-		
 		return PoamList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
 	}
 	

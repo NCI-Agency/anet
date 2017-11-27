@@ -31,17 +31,11 @@ export default class SavedSearchTable extends Component {
 	@autobind
 	runSearch(search) {
 		let query = JSON.parse(search.query)
+		let fields = ReportCollection.GQL_REPORT_FIELDS
 		API.query(/*GraphQL */`
 			reports: reportList(f:search, query: $query) {
 				pageNum, pageSize, totalCount, list {
-					id, intent, engagementDate, keyOutcomes, nextSteps, state, cancelledReason
-					primaryAdvisor { id, name, role, position { organization { id, shortName}}},
-					primaryPrincipal { id, name, role, position { organization { id, shortName}}},
-					author{ id, name},
-					advisorOrg { id, shortName},
-					principalOrg { id, shortName},
-					location { id, name, lat, lng},
-					poams {id, shortName, longName}
+					${fields}
 				}
 			}
 		`, {query}, '($query: ReportSearchQuery)').then(data =>

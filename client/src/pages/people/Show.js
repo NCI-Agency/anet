@@ -113,7 +113,7 @@ export default class PersonShow extends Page {
 		let position = person.position
 
 		// The position for this person's counterparts
-		let assignedRole = position.type === 'PRINCIPAL' ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
+		let assignedRole = position.type === Position.TYPE.PRINCIPAL ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
 
 		//User can always edit themselves
 		//Admins can always edit anybody
@@ -160,7 +160,7 @@ export default class PersonShow extends Page {
 							<a href={`mailto:${person.emailAddress}`}>{person.emailAddress}</a>
 						</Form.Field>
 
-						<Form.Field id="country" />
+						<Form.Field label="Nationality" id="country" />
 						<Form.Field id="gender" />
 
 						<Form.Field label="End of tour" id="endOfTourDate" value={person.endOfTourDate && moment(person.endOfTourDate).format('D MMM YYYY')} />
@@ -242,7 +242,7 @@ export default class PersonShow extends Page {
 	}
 
 	renderCounterparts(position) {
-		let assocTitle = position.type === 'PRINCIPAL' ? 'Is advised by' : 'Advises'
+		let assocTitle = position.type === Position.TYPE.PRINCIPAL ? 'Is advised by' : 'Advises'
 		return <FormGroup controlId="counterparts">
 			<Col sm={2} componentClass={ControlLabel}>{assocTitle}</Col>
 			<Col sm={9}>

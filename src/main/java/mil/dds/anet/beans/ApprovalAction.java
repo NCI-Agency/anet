@@ -93,7 +93,7 @@ public class ApprovalAction extends AbstractAnetBean {
 	
 	@Override
 	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != ApprovalAction.class) { 
+		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		ApprovalAction other = (ApprovalAction) o;

@@ -32,7 +32,7 @@ export default class OnboardingEdit extends Page {
 			person(id:${this.context.currentUser.id}) {
 				id,
 				name, rank, role, emailAddress, phoneNumber, status
-				biography, country, gender, endOfTourDate,
+				biography, country, gender, endOfTourDate, domainUsername
 				position {
 					id, name
 				}

@@ -102,6 +102,7 @@ export default class RollupShow extends Page {
 			sortBy: "ENGAGEMENT_DATE",
 			sortOrder: "DESC",
 			pageNum: this.state.reportsPageNum,
+			pageSize: 10,
 		}
 
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
@@ -139,10 +140,13 @@ export default class RollupShow extends Page {
 					.sort((a, b) => {
 						let a_index = pinned_ORGs.indexOf(a.org.shortName)
 						let b_index = pinned_ORGs.indexOf(b.org.shortName)
-						if (a_index<0)
-							return (b_index<0) ?  a.org.shortName.localeCompare(b.org.shortName) : 1
-						else
+						if (a_index<0) {
+							let nameOrder = a.org.shortName.localeCompare(b.org.shortName)
+							return (b_index<0) ?  (nameOrder === 0 ? a.org.id - b.org.id : nameOrder)  : 1
+						}
+						else {
 							return (b_index<0) ? -1 : a_index-b_index
+						}
 					})
 			})
 		})
@@ -229,7 +233,9 @@ export default class RollupShow extends Page {
 		const BAR_HEIGHT = 24
 		const BAR_PADDING = 8
 		const MARGIN = {top: 0, right: 10, bottom: 20, left: 150}
-		let width = this.graph.clientWidth - MARGIN.left - MARGIN.right
+		let box = this.graph.getBoundingClientRect()
+		let boxWidth = box.right - box.left
+		let width = boxWidth - MARGIN.left - MARGIN.right
 		let height = (BAR_HEIGHT + BAR_PADDING) * graphData.length - BAR_PADDING
 
 		let maxNumberOfReports = Math.max.apply(Math, graphData.map(d => d.released + d.cancelled))
@@ -238,8 +244,12 @@ export default class RollupShow extends Page {
 						.domain([0, maxNumberOfReports])
 						.range([0, width])
 
+		let yLabels = {}
 		let yScale = d3.scaleBand()
-						.domain(graphData.map(d => d.org.shortName))
+						.domain(graphData.map(function(d) {
+							yLabels[d.org.id] = d.org.shortName
+							return d.org.id
+						}))
 						.range([0, height])
 
 		let graph = d3.select(this.graph)
@@ -252,6 +262,9 @@ export default class RollupShow extends Page {
 
 		let xAxis = d3.axisBottom(xScale).ticks(Math.min(maxNumberOfReports, 10), 'd')
 		let yAxis = d3.axisLeft(yScale)
+						.tickFormat(function(d) {
+							return yLabels[d]
+						})
 
 		graph.append('g').call(yAxis)
 		graph.append('g')

@@ -17,8 +17,10 @@ import API from 'api'
 import dict from 'dictionary'
 import GQL from 'graphqlapi'
 import {Person, Organization, Position, Poam} from 'models'
-import Export from "export"
 
+import FileSaver from 'file-saver'
+
+import DOWNLOAD_ICON from 'resources/download.png'
 import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
@@ -67,7 +69,7 @@ const SEARCH_CONFIG = {
 	organizations : {
 		listName: 'organizations: organizationList',
 		variableType: 'OrganizationSearchQuery',
-		fields: 'id, shortName, longName, type'
+		fields: 'id, shortName, longName, identificationCode, type'
 	}
 }
 
@@ -114,9 +116,9 @@ export default class Search extends Page {
 		}
 	}
 
-	getSearchPart(type, query) {
+	getSearchPart(type, query, pageSize) {
 //		query = Object.without(query, 'type')
-		query.pageSize = 10
+		query.pageSize = (pageSize === undefined) ? 10 : pageSize
 		query.pageNum = this.state.pageNum[type]
 
 		let config = SEARCH_CONFIG[type]
@@ -149,38 +151,45 @@ export default class Search extends Page {
 		return query
 	}
 
-
-	fetchData(props) {
+	@autobind
+	_dataFetcher(queryDef, callback, pageSize) {
 		let {advancedSearch} = this.state
 
 		if (advancedSearch) {
 			let query = this.getAdvancedSearchQuery()
-			let part = this.getSearchPart(advancedSearch.objectType.toLowerCase(), query)
-			GQL.run([part]).then(data => {
-				this.setState({results: data})
-			})
+			let part = this.getSearchPart(advancedSearch.objectType.toLowerCase(), query, pageSize)
+			callback([part])
 
 			return
 		}
 
-		let {type, text, ...advQuery} = props.location.query
+		let {type, text, ...advQuery} = queryDef
 		//Any query with a field other than 'text' and 'type' is an advanced query.
 		let isAdvQuery = Object.keys(advQuery).length
 		advQuery.text = text
 
 		let parts = []
 		if (isAdvQuery) {
-			parts.push(this.getSearchPart(type, advQuery))
+			parts.push(this.getSearchPart(type, advQuery, pageSize))
 		} else {
 			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, advQuery))
+				parts.push(this.getSearchPart(key, advQuery, pageSize))
 			})
 		}
+		callback(parts)
+	}
+
+	@autobind
+	_fetchDataCallback(parts) {
 		GQL.run(parts).then(data => {
 			this.setState({results: data})
 		}).catch(response =>
 			this.setState({error: response})
 		)
+	}
+
+	fetchData(props) {
+		this._dataFetcher(props.location.query, this._fetchDataCallback)
 	}
 
 	render() {
@@ -211,6 +220,11 @@ export default class Search extends Page {
 		return (
 			<div>
 				<div className="pull-right">
+					{!noResults &&
+						<Button onClick={this.exportSearchResults} id="exportSearchResultsButton" style={{marginRight: 12}} title="Export search results">
+							<img src={DOWNLOAD_ICON} height={16} alt="Export search results" />
+						</Button>
+					}
 					<Button onClick={this.showSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
 					{!this.state.advancedSearch && <Button onClick={this.showAdvancedSearch}>Advanced search</Button>}
 				</div>
@@ -304,10 +318,9 @@ export default class Search extends Page {
 						{this.renderLocations()}
 					</Fieldset>
 				}
-
 				{numReports > 0 && (queryType === 'everything' || queryType === 'reports') &&
 					<Fieldset title="Reports">
-						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports') } downloadAll={ ((progressfn) => {return this.downloadAll('reports',progressfn) }) }/>
+						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} />
 					</Fieldset>
 				}
 
@@ -319,7 +332,7 @@ export default class Search extends Page {
 	@autobind
 	paginationFor(type) {
 		let {pageSize, pageNum, totalCount} = this.state.results[type]
-		let numPages = Math.ceil(totalCount / pageSize)
+		let numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
 		return <header className="searchPagination" ><Pagination
 			className="pull-right"
@@ -347,12 +360,6 @@ export default class Search extends Page {
 		}).catch(response =>
 			this.setState({error: response})
 		)
-	}
-
-	@autobind
-	downloadAll(type,progressfn) {
-		let query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.query, 'type')
-		Export.csvExport.export(type,query,progressfn)
 	}
 
 	@autobind
@@ -400,6 +407,7 @@ export default class Search extends Page {
 					<tr>
 						<th>Name</th>
 						<th>Description</th>
+						<th>Code</th>
 						<th>Type</th>
 					</tr>
 				</thead>
@@ -408,6 +416,7 @@ export default class Search extends Page {
 						<tr key={org.id}>
 							<td><LinkTo organization={org} /></td>
 							<td>{org.longName}</td>
+							<td>{org.identificationCode}</td>
 							<td>{org.humanNameOfType()}</td>
 						</tr>
 					)}
@@ -517,7 +526,6 @@ export default class Search extends Page {
 			search.objectType = this.state.advancedSearch.objectType.toUpperCase()
 		} else {
 			search.query = JSON.stringify({text: this.props.location.query.text })
-			search.objectType = 'REPORTS' //right now we only support saving searches for reports.
 		}
 
 		API.send('/api/savedSearches/new', search, {disableSubmits: true})
@@ -540,6 +548,20 @@ export default class Search extends Page {
 	@autobind
 	showSaveModal() {
 		this.setState({saveSearch: {show: true, name: ''}})
+	}
+
+	@autobind
+	_exportSearchResultsCallback(parts) {
+		GQL.runExport(parts, "xlsx").then(blob => {
+			FileSaver.saveAs(blob, "anet_export.xlsx")
+		}).catch(response =>
+			this.setState({error: response})
+		)
+	}
+
+	@autobind
+	exportSearchResults() {
+		this._dataFetcher(this.props.location.query, this._exportSearchResultsCallback, 0)
 	}
 
 	@autobind

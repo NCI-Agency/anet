@@ -1,5 +1,6 @@
 package mil.dds.anet.threads;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,9 +19,9 @@ import mil.dds.anet.utils.DaoUtils;
 
 public class FutureEngagementWorker implements Runnable {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
 	Handle handle;
-	
-	private Logger logger = LoggerFactory.getLogger(FutureEngagementWorker.class);
 	
 	public FutureEngagementWorker(Handle dbHandle) { 
 		this.handle = dbHandle;
@@ -33,7 +34,7 @@ public class FutureEngagementWorker implements Runnable {
 			runInternal();
 		} catch (Throwable e) { 
 			//CAnnot let this thread die. Otherwise ANET will stop checking for future engagements. 
-			e.printStackTrace();
+			logger.error("Exception in run()", e);
 		}
 	}
 	
@@ -59,7 +60,7 @@ public class FutureEngagementWorker implements Runnable {
 				handle.execute("/* UpdateFutureEngagement */ UPDATE reports SET state = ? "
 						+ "WHERE id = ?", DaoUtils.getEnumId(ReportState.DRAFT), r.getId());
 			} catch (Exception e) { 
-				e.printStackTrace();
+				logger.error("Exception when updating", e);
 			}
 		}
 		

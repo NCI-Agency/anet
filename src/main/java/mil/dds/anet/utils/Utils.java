@@ -1,9 +1,12 @@
 package mil.dds.anet.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -163,5 +166,95 @@ public class Utils {
 		return input;
 	}
 	
-	
+	public static String trimStringReturnNull(String input) {
+		if (input == null) { return null; }
+		return input.trim();
+	}
+
+	/**
+	 * @param s string
+	 * @return true if string is null or empty
+	 */
+	public static boolean isEmptyOrNull(String s) {
+		return s == null || s.isEmpty();
+	}
+
+	/**
+	 * @param c collection
+	 * @return true if collection is null or empty
+	 */
+	public static boolean isEmptyOrNull(Collection<?> c) {
+		return c == null || c.isEmpty();
+	}
+
+	/**
+	 * Transform a result list from a database query by grouping. For example,
+	 * given a result list:
+	 * <code>
+	 * [{"id": 3, "name": "alice", "someprop": "x", "week": 39, "nrdone": 2, "nrtodo": 0},
+	 *  {"id": 3, "name": "alice", "someprop": "x", "week": 40, "nrdone": 1, "nrtodo": 3},
+	 *  {"id": 3, "name": "alice", "someprop": "x", "week": 41, "nrdone": 0, "nrtodo": 5},
+	 *  {"id": 5, "name": "bob",   "someprop": "y", "week": 39, "nrdone": 8, "nrtodo": 2},
+	 *  {"id": 5, "name": "bob",   "someprop": "y", "week": 41, "nrdone": 3, "nrtodo": 0},
+	 *  {"id": 6, "name": "eve",   "someprop": "z", "week": 39, "nrdone": 6, "nrtodo": 1}]
+	 * </code>
+	 * then transforming it like so:
+	 * <code>
+	 * final Set&lt;String&gt; tlf = Stream.of("name", "someprop").collect(Collectors.toSet());
+	 * return resultGrouper(list, "stats", "id", tlf);
+	 * </code>
+	 * will return the list:
+	 * <code>
+	 * [{"id": 3, "name": "alice", "someprop": "x",
+	 *    "stats": [{"week": 39, "nrdone": 2, "nrtodo": 0},
+	 *                    {"week": 40, "nrdone": 1, "nrtodo": 3},
+	 *                    {"week": 41, "nrdone": 0, "nrtodo": 5}]},
+	 *  {"id": 5, "name": "bob",   "someprop": "y",
+	 *    "stats": [{"week": 39, "nrdone": 8, "nrtodo": 2},
+	 *                    {"week": 41, "nrdone": 3, "nrtodo": 0}]},
+	 *  {"id": 6, "name": "eve",   "someprop": "z",
+	 *     "stats": [{"week": 39, "nrdone": 6, "nrtodo": 1}]}]
+	 * </code>
+	 *
+	 * @param results a result list from a database query
+	 * @param groupName the name of the group in the resulting list elements
+	 * @param groupingField the key field on which to group
+	 * @param topLevelFields the fields to appear in the top-level object (i.e. not in the group)
+	 * @return the grouped results from the query
+	 */
+	public static List<Map<String, Object>> resultGrouper(
+			List<Map<String, Object>> results, String groupName,
+			String groupingField, Set<String> topLevelFields) {
+		final List<Map<String, Object>> groupedResults = new ArrayList<>();
+		final Map<Object, Map<String, Object>> seenResults = new HashMap<>();
+		for (final Map<String, Object> result : results) {
+			final Map<String, Object> topLevelObject;
+			final Object groupingKey = result.get(groupingField);
+			if (seenResults.containsKey(groupingKey)) {
+				topLevelObject = seenResults.get(groupingKey);
+			} else {
+				topLevelObject = new HashMap<>();
+				topLevelObject.put(groupingField, groupingKey);
+				topLevelObject.put(groupName, new ArrayList<>());
+				groupedResults.add(topLevelObject);
+				seenResults.put(groupingKey, topLevelObject);
+			}
+
+			@SuppressWarnings("unchecked")
+			final List<Map<String, Object>> groupList = (List<Map<String, Object>>) topLevelObject.get(groupName);
+			final Map<String, Object> group = new HashMap<>();
+			groupList.add(group);
+
+			for (final Map.Entry<String, Object> entry : result.entrySet()) {
+				if (groupingField.equals(entry.getKey())) {
+					// already present
+				} else if (topLevelFields.contains(entry.getKey())) {
+					topLevelObject.put(entry.getKey(), entry.getValue());
+				} else {
+					group.put(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+		return groupedResults;
+	}
 }

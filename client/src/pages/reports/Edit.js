@@ -44,6 +44,8 @@ export default class ReportEdit extends Page {
 					position { id, name }
 				}
 				poams { id, shortName, longName, responsibleOrg { id, shortName} }
+				tags { id, name, description }
+				reportSensitiveInformation { id, text }
 			}
 		`).then(data => {
 			function getReportFromData() {

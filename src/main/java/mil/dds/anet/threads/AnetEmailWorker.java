@@ -2,6 +2,7 @@ package mil.dds.anet.threads;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,6 +49,10 @@ import mil.dds.anet.emails.AnetEmailAction;
 
 public class AnetEmailWorker implements Runnable {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+	private static AnetEmailWorker instance;
+
 	private Handle handle;
 	private ObjectMapper mapper;
 	private AnetEmailMapper emailMapper;
@@ -57,9 +62,8 @@ public class AnetEmailWorker implements Runnable {
 	private String serverUrl;
 	private Configuration freemarkerConfig;
 	private ScheduledExecutorService scheduler;
-	
-	private static AnetEmailWorker instance;
-	private Logger logger = LoggerFactory.getLogger(AnetEmailWorker.class);
+	private final String supportEmailAddr;
+	private final boolean disabled;
 	
 	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) { 
 		this.handle = dbHandle;
@@ -70,6 +74,7 @@ public class AnetEmailWorker implements Runnable {
 		this.emailMapper = new AnetEmailMapper();
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
+		this.supportEmailAddr = (String) config.getDictionary().get("supportEmailAddr");
 		instance = this;
 		
 		SmtpConfiguration smtpConfig = config.getSmtp();
@@ -87,7 +92,9 @@ public class AnetEmailWorker implements Runnable {
 				}
 			};
 		}
-		
+
+		disabled = smtpConfig.isDisabled();
+
 		freemarkerConfig = new Configuration(Configuration.getVersion());
 		freemarkerConfig.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.getVersion()).build());
 		freemarkerConfig.loadBuiltInEncodingMap();
@@ -103,7 +110,7 @@ public class AnetEmailWorker implements Runnable {
 			runInternal();
 		} catch (Throwable e) {
 			//Cannot let this thread die, otherwise ANET will stop sending emails until you reboot the server :(
-			e.printStackTrace();
+			logger.error("Exception in run()", e);
 		}
 	}
 	
@@ -117,12 +124,15 @@ public class AnetEmailWorker implements Runnable {
 		List<Integer> sentEmails = new LinkedList<Integer>();
 		for (AnetEmail email : emails) { 
 			try {
-				logger.info("Sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
-				sendEmail(email);
+				if (disabled) {
+					logger.info("Disabled, not sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+				} else {
+					logger.info("Sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+					sendEmail(email);
+				}
 				sentEmails.add(email.getId());
 			} catch (Exception e) { 
 				logger.error("Error sending email", e);
-				e.printStackTrace();
 			}
 		}
 		
@@ -147,7 +157,7 @@ public class AnetEmailWorker implements Runnable {
 			context = email.getAction().execute();
 		} catch (Throwable t) { 
 			//This email will never complete, just kill it. 
-			t.printStackTrace();
+			logger.error("Error execution action", t);
 			return;
 		}
 		
@@ -158,12 +168,13 @@ public class AnetEmailWorker implements Runnable {
 			context.put("serverUrl", serverUrl);
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
 			
 			temp.process(context, writer);
 		} catch (Exception e) { 
 			//Exceptions thrown while processing the template are unlikely to ever get fixed, so we just log this and drop the email. 
-			e.printStackTrace();
+			logger.error("Error when processing template", e);
 			return;
 		}
 		
@@ -180,7 +191,7 @@ public class AnetEmailWorker implements Runnable {
 			Transport.send(message);
 		} catch (SendFailedException e) { 
 			//The server rejected this... we'll log it and then not try again. 
-			e.printStackTrace();
+			logger.error("Send failed", e);
 			return;
 		}
 		//Other errors are intentially thrown, as we want ANET to try again. 
@@ -280,7 +291,7 @@ public class AnetEmailWorker implements Runnable {
 				email.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 				return email;
 			} catch (Exception e) { 
-				e.printStackTrace();
+				logger.error("Error mapping email", e);
 			}
 			return null;			
 		} 

@@ -8,6 +8,7 @@ import utils from 'utils'
 import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
+import Tag from 'components/Tag'
 
 import API from 'api'
 import {Report, Person, Poam} from 'models'
@@ -41,7 +42,7 @@ export default class ReportMinimal extends Page {
 					id, name
 					position {
 						organization {
-							shortName, longName
+							shortName, longName, identificationCode
 							approvalSteps {
 								id, name,
 								approvers {
@@ -67,8 +68,8 @@ export default class ReportMinimal extends Page {
 					author { id, name, rank }
 				}
 
-				principalOrg { id, shortName, longName }
-				advisorOrg { id, shortName, longName }
+				principalOrg { id, shortName, longName, identificationCode }
+				advisorOrg { id, shortName, longName, identificationCode }
 
 				approvalStatus {
 					type, createdAt
@@ -79,6 +80,9 @@ export default class ReportMinimal extends Page {
 				}
 
 				approvalStep { name, approvers { id } }
+
+				tags { id, name, description }
+				reportSensitiveInformation { id, text }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -145,6 +149,9 @@ export default class ReportMinimal extends Page {
 								{utils.sentenceCase(report.cancelledReason)}
 							</Form.Field>
 						}
+						<Form.Field id="tags" label="Tags">
+							{report.tags && report.tags.map((tag,i) => <Tag key={tag.id} tag={tag} />)}
+						</Form.Field>
 						<Form.Field id="author" label="Report author">
 							<span>{report.author && report.author.name}</span>
 						</Form.Field>
@@ -201,6 +208,12 @@ export default class ReportMinimal extends Page {
 					<Fieldset title="Meeting discussion">
 						<div dangerouslySetInnerHTML={{__html: report.reportText}} />
 					</Fieldset>
+
+					{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
+						<Fieldset title="Sensitive information">
+							<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
+						</Fieldset>
+					}
 
 					{report.isPending() && this.renderApprovals()}
 

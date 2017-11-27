@@ -51,6 +51,8 @@ import GraphiQL from 'pages/GraphiQL'
 import OnboardingShow from 'pages/onboarding/Show'
 import OnboardingEdit from 'pages/onboarding/Edit'
 
+import InsightsShow from  'pages/insights/Show'
+
 import Help from 'pages/Help'
 
 ReactDOM.render((
@@ -111,6 +113,10 @@ ReactDOM.render((
 				</Route>
 
 				<Route path="help" component={Help} />
+
+				<Route path="insights">
+					<Route path=":insight" component={InsightsShow} />
+				</Route>
 
 				<Route path="*" component={PageMissing} />
 			</Route>

@@ -164,8 +164,14 @@ public class PersonResource implements IGraphQLResource {
 				AnetAuditLogger.log("Person {} removed from position   by {}", p, user);
 			}
 		}
-		
-		//Automatically remove peopple from a position if they are inactive.  
+
+		// If person changed to inactive, clear out the domainUsername
+		if (PersonStatus.INACTIVE.equals(p.getStatus()) && !PersonStatus.INACTIVE.equals(existing.getStatus())) {
+			AnetAuditLogger.log("Person {} domainUsername '{}' cleared by {} because they are now inactive", p, existing.getDomainUsername(), user);
+			p.setDomainUsername(null);
+		}
+
+		//Automatically remove people from a position if they are inactive.
 		if (PersonStatus.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
 			Position existingPos = existing.loadPosition();
 			if (existingPos != null) { 

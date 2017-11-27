@@ -17,8 +17,12 @@ import OrganizationPoams from './Poams'
 import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
-import {Organization} from 'models'
+import dict from 'dictionary'
+import {Organization, Position} from 'models'
 import GQL from 'graphqlapi'
+
+const PENDING_APPROVAL = 'PENDING_APPROVAL'
+const NO_REPORT_FILTER = 'NO_FILTER'
 
 export default class OrganizationShow extends Page {
 	static contextTypes = {
@@ -34,11 +38,13 @@ export default class OrganizationShow extends Page {
 			organization: new Organization({id: props.params.id}),
 			reports: null,
 			poams: null,
+			reportsFilter: NO_REPORT_FILTER,
 			action: props.params.action
 		}
 
 		this.reportsPageNum = 0
 		this.poamsPageNum = 0
+		this.togglePendingApprovalFilter = this.togglePendingApprovalFilter.bind(this)
 		setMessages(props,this.state)
 	}
 
@@ -52,11 +58,19 @@ export default class OrganizationShow extends Page {
 		}
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+		if(prevState.reportsFilter !== this.state.reportsFilter){
+			let reports = this.getReportQueryPart(this.props.params.id)
+			this.runGQLReports([reports])
+		}
+	}
+
 	getReportQueryPart(orgId) {
 		let reportQuery = {
 			pageNum: this.reportsPageNum,
 			pageSize: 10,
-			orgId: orgId
+			orgId: orgId,
+			state: (this.reportsFilterIsSet()) ? this.state.reportsFilter : null
 		}
 		let reportsPart = new GQL.Part(/* GraphQL */`
 			reports: reportList(query:$reportQuery) {
@@ -88,9 +102,9 @@ export default class OrganizationShow extends Page {
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
 			organization(id:${props.params.id}) {
-				id, shortName, longName, type
-				parentOrg { id, shortName, longName }
-				childrenOrgs { id, shortName, longName },
+				id, shortName, longName, identificationCode, type
+				parentOrg { id, shortName, longName, identificationCode }
+				childrenOrgs { id, shortName, longName, identificationCode },
 				positions {
 					id, name, code, status, type,
 					person { id, name, status, rank }
@@ -106,13 +120,35 @@ export default class OrganizationShow extends Page {
 		let reportsPart = this.getReportQueryPart(props.params.id)
 		let poamsPart = this.getPoamQueryPart(props.params.id)
 
-		GQL.run([orgPart, reportsPart, poamsPart]).then(data =>
+		this.runGQL([orgPart, reportsPart, poamsPart])
+	}
+
+	runGQL(queries) {
+		GQL.run(queries).then(data =>
 			this.setState({
 				organization: new Organization(data.organization),
 				reports: data.reports,
 				poams: data.poams
 			})
 		)
+	}
+
+	runGQLReports(reports){
+		GQL.run(reports).then( data => this.setState({ reports: data.reports }) )
+	}
+
+	reportsFilterIsSet() {
+		return (this.state.reportsFilter !== NO_REPORT_FILTER)
+	}
+
+	togglePendingApprovalFilter() {
+		let toggleToFilter = this.state.reportsFilter
+		if(toggleToFilter === PENDING_APPROVAL){
+			toggleToFilter = NO_REPORT_FILTER
+		}else{
+			toggleToFilter = PENDING_APPROVAL
+		}
+		this.setState({ reportsFilter: toggleToFilter })
 	}
 
 	render() {
@@ -124,7 +160,12 @@ export default class OrganizationShow extends Page {
 		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 		let isAdmin = currentUser && currentUser.isAdmin()
 
-		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === 'SUPER_USER' || pos.type === 'ADMINISTRATOR'))
+		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
+		let [labelLongName, labelIdentificationCode] = (org.type === "PRINCIPAL_ORG")
+			? [dict.lookup('PRINCIPAL_ORG_LABEL_LONGNAME'),
+			   dict.lookup('PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE')]
+			: [dict.lookup('ADVISOR_ORG_LABEL_LONGNAME'),
+			   dict.lookup('ADVISOR_ORG_LABEL_IDENTIFICATIONCODE')]
 
 		return (
 			<div>
@@ -156,11 +197,13 @@ export default class OrganizationShow extends Page {
 							{org.humanNameOfType()}
 						</Form.Field>
 
-						<Form.Field id="longName" label="Description"/>
+						<Form.Field id="longName" label={labelLongName} />
+
+						<Form.Field id="identificationCode" label={labelIdentificationCode} />
 
 						{org.parentOrg && org.parentOrg.id &&
 							<Form.Field id="parentOrg" label="Parent organization">
-								<LinkTo organization={org.parentOrg} >{org.parentOrg.shortName} {org.parentOrg.longName}</LinkTo>
+								<LinkTo organization={org.parentOrg} >{org.parentOrg.shortName} {org.parentOrg.longName} {org.parentOrg.identificationCode}</LinkTo>
 							</Form.Field>
 						}
 
@@ -183,7 +226,7 @@ export default class OrganizationShow extends Page {
 							<ListGroup>
 								{org.childrenOrgs.map(org =>
 									<ListGroupItem key={org.id} >
-										<LinkTo organization={org} >{org.shortName} {org.longName}</LinkTo>
+										<LinkTo organization={org} >{org.shortName} {org.longName} {org.identificationCode}</LinkTo>
 									</ListGroupItem>
 								)}
 							</ListGroup>
@@ -198,6 +241,9 @@ export default class OrganizationShow extends Page {
 						<ReportCollection
 							paginatedReports={reports}
 							goToPage={this.goToReportsPage}
+							setReportsFilter={this.togglePendingApprovalFilter}
+							filterIsSet={this.reportsFilterIsSet()}
+							isSuperUser={isSuperUser}
 						/>
 					</Fieldset>
 				</Form>

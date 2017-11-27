@@ -46,6 +46,9 @@ public class DaoUtils {
 	
 	public static Integer getGeneratedId(GeneratedKeys<Map<String,Object>> keys) { 
 		Map<String,Object> r = keys.first();
+		if (r == null) {
+			return null;
+		}
 		Object id = null;
 		if (r.containsKey("last_insert_rowid()")) { 
 			id = r.get("last_insert_rowid()");

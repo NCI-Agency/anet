@@ -19,7 +19,7 @@ class GraphQLPart {
 
 const GQL = {
 	// Pass a variable number of GraphQLQuery to run
-	run(parts) {
+	_runCommon(parts, apiCall, output) {
 		let query = parts.map(p => p.queryString).join(',\n')
 		let variables = {}
 		let variableDefs = []
@@ -32,7 +32,15 @@ const GQL = {
 
 		let variableDef = '(' + variableDefs.join(', ') + ')'
 
-		return API.query(query, variables, variableDef)
+		return apiCall(query, variables, variableDef, output)
+	},
+
+	run(parts) {
+		return this._runCommon(parts, API.query)
+	},
+
+	runExport(parts, output) {
+		return this._runCommon(parts, API.queryExport, output)
 	},
 
 	Part: GraphQLPart

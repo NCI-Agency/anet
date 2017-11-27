@@ -6,6 +6,7 @@ import moment from 'moment'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
+import History from 'components/History'
 import Messages from 'components/Messages'
 import Breadcrumbs from 'components/Breadcrumbs'
 import SavedSearchTable from 'components/SavedSearchTable'
@@ -195,6 +196,9 @@ export default class Home extends Page {
 					{this.state.selectedSearch &&
 						<div>
 							<div className="pull-right">
+								<Button style={{marginRight: 12}} onClick={this.showSearch} >
+									Show Search
+								</Button>
 								<Button bsStyle="danger" bsSize="small" onClick={this.deleteSearch} >
 									Delete Search
 								</Button>
@@ -212,6 +216,18 @@ export default class Home extends Page {
 		let id = event && event.target ? event.target.value : event
 		let search = this.state.savedSearches.find(el => Number(el.id) === Number(id))
 		this.setState({selectedSearch: search})
+	}
+
+	@autobind
+	showSearch() {
+		let search = this.state.selectedSearch
+		if (search) {
+			let query = JSON.parse(search.query)
+			if (search.objectType) {
+				query.type = search.objectType.toLowerCase()
+			}
+			History.push({pathname: '/search', query: query})
+		}
 	}
 
 	@autobind

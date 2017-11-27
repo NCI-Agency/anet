@@ -78,6 +78,9 @@ public class ReportMapper implements ResultSetMapper<Report> {
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
 			ctx.setAttribute("totalCount", rs.getInt("totalCount"));
 		}
+		if (MapperUtils.containsColumnNamed(rs, "engagementDayOfWeek")) {
+			r.setEngagementDayOfWeek(rs.getInt("engagementDayOfWeek"));
+		}
 		
 		return r;
 	}

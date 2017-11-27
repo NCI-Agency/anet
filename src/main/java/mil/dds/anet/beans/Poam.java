@@ -7,6 +7,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Poam extends AbstractAnetBean {
@@ -28,7 +29,7 @@ public class Poam extends AbstractAnetBean {
 	}
 	
 	public void setShortName(String shortName) {
-		this.shortName = shortName;
+		this.shortName = Utils.trimStringReturnNull(shortName);
 	}
 	
 	public String getLongName() {
@@ -36,7 +37,7 @@ public class Poam extends AbstractAnetBean {
 	}
 	
 	public void setLongName(String longName) {
-		this.longName = longName;
+		this.longName = Utils.trimStringReturnNull(longName);
 	}
 	
 	public String getCategory() {
@@ -44,7 +45,7 @@ public class Poam extends AbstractAnetBean {
 	}
 	
 	public void setCategory(String category) {
-		this.category = category;
+		this.category = Utils.trimStringReturnNull(category);
 	}
 	
 	@GraphQLFetcher("parentPoam")

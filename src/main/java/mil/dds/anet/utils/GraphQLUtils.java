@@ -1,5 +1,6 @@
 package mil.dds.anet.utils;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
@@ -12,6 +13,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import graphql.Scalars;
 import graphql.schema.DataFetchingEnvironment;
@@ -33,6 +36,8 @@ import mil.dds.anet.graphql.IGraphQLBean;
 import mil.dds.anet.graphql.PropertyDataFetcherWithArgs;
 
 public class GraphQLUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static GraphQLFieldDefinition buildField(String name, Type type) {		
 		return buildField(name, GraphQLUtils.getGraphQLTypeForJavaType(type));		
@@ -117,7 +122,7 @@ public class GraphQLUtils {
 	
 	public static String lowerCaseFirstLetter(String str) { 
 		if (str.length() < 1) { 
-			System.out.println("wtf bbq");
+			logger.info("wtf bbq");
 		}
 		return str.substring(0, 1).toLowerCase() + str.substring(1);
 	}

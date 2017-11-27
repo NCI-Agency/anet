@@ -10,6 +10,7 @@ import javax.ws.rs.WebApplicationException;
 
 import org.joda.time.DateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 import mil.dds.anet.AnetObjectEngine;
@@ -18,6 +19,7 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Report extends AbstractAnetBean {
@@ -36,6 +38,7 @@ public class Report extends AbstractAnetBean {
 	DateTime releasedAt;
 	
 	DateTime engagementDate;
+	private Integer engagementDayOfWeek;
 	Location location;
 	String intent;
 	String exsum; //can be null to autogenerate
@@ -58,6 +61,10 @@ public class Report extends AbstractAnetBean {
 	ReportPerson primaryPrincipal;
 
 	List<Comment> comments;
+	private List<Tag> tags;
+	private ReportSensitiveInformation reportSensitiveInformation;
+	// The user who instantiated this; needed to determine access to sensitive information
+	private Person user;
 
 	@GraphQLIgnore
 	public ApprovalStep getApprovalStep() {
@@ -102,6 +109,20 @@ public class Report extends AbstractAnetBean {
 		this.engagementDate = engagementDate;
 	}
 
+	/**
+	 * Returns an Integer value from the set (1,2,3,4,5,6,7) in accordance with
+	 * week days [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday].
+	 *
+	 * @return Integer engagement day of week
+	 */
+	public Integer getEngagementDayOfWeek() {
+		return engagementDayOfWeek;
+	}
+
+	public void setEngagementDayOfWeek(Integer engagementDayOfWeek) {
+		this.engagementDayOfWeek = engagementDayOfWeek;
+	}
+
 	@GraphQLFetcher("location")
 	public Location loadLocation() {
 		if (location == null || location.getLoadLevel() == null) { return location; } 
@@ -130,7 +151,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setExsum(String exsum) {
-		this.exsum = exsum;
+		this.exsum = Utils.trimStringReturnNull(exsum);
 	}
 
 	public Atmosphere getAtmosphere() {
@@ -146,7 +167,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setAtmosphereDetails(String atmosphereDetails) {
-		this.atmosphereDetails = atmosphereDetails;
+		this.atmosphereDetails = Utils.trimStringReturnNull(atmosphereDetails);
 	}
 
 	public ReportCancelledReason getCancelledReason() {
@@ -158,7 +179,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setIntent(String intent) {
-		this.intent = intent;
+		this.intent = Utils.trimStringReturnNull(intent);
 	}
 
 	public void loadAll() {
@@ -241,7 +262,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setKeyOutcomes(String keyOutcomes) {
-		this.keyOutcomes = keyOutcomes;
+		this.keyOutcomes = Utils.trimStringReturnNull(keyOutcomes);
 	}
 
 	public String getReportText() {
@@ -249,7 +270,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setReportText(String reportText) {
-		this.reportText = reportText;
+		this.reportText = Utils.trimStringReturnNull(reportText);
 	}
 
 	public String getNextSteps() {
@@ -257,7 +278,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	public void setNextSteps(String nextSteps) {
-		this.nextSteps = nextSteps;
+		this.nextSteps = Utils.trimStringReturnNull(nextSteps);
 	}
 
 	@GraphQLFetcher("author")
@@ -402,10 +423,56 @@ public class Report extends AbstractAnetBean {
 		}
 		return workflow;
 	}
-	
+
+	@GraphQLFetcher("tags")
+	public List<Tag> loadTags() {
+		if (tags == null && id != null) {
+			tags = AnetObjectEngine.getInstance().getReportDao().getTagsForReport(id);
+		}
+		return tags;
+	}
+
+	@GraphQLIgnore
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+
+	@GraphQLFetcher("reportSensitiveInformation")
+	public ReportSensitiveInformation loadReportSensitiveInformation() {
+		if (reportSensitiveInformation == null && id != null) {
+			reportSensitiveInformation = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().getForReport(this, user);
+		}
+		return reportSensitiveInformation;
+	}
+
+	@GraphQLIgnore
+	public ReportSensitiveInformation getReportSensitiveInformation() {
+		return reportSensitiveInformation;
+	}
+
+	public void setReportSensitiveInformation(ReportSensitiveInformation reportSensitiveInformation) {
+		this.reportSensitiveInformation = reportSensitiveInformation;
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public Person getUser() {
+		return user;
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setUser(Person user) {
+		this.user = user;
+	}
+
 	@Override
 	public boolean equals(Object other) { 
-		if (other == null || other.getClass() != Report.class) { 
+		if (other == null || other.getClass() != this.getClass()) {
 			return false;
 		}
 		Report r = (Report) other;
@@ -425,14 +492,17 @@ public class Report extends AbstractAnetBean {
 				&& Objects.equals(r.getReportText(), reportText)
 				&& Objects.equals(r.getNextSteps(), nextSteps)
 				&& idEqual(r.getAuthor(), author)
-				&& Objects.equals(r.getComments(), comments);
+				&& Objects.equals(r.getComments(), comments)
+				&& Objects.equals(r.getTags(), tags)
+				&& Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation);
 	}
 	
 	@Override
 	public int hashCode() { 
 		return Objects.hash(id, state, approvalStep, createdAt, updatedAt, 
 			location, intent, exsum, attendees, poams, reportText, 
-			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate);
+			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate,
+			tags, reportSensitiveInformation);
 	}
 
 	public static Report createWithId(Integer id) {

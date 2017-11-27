@@ -24,6 +24,10 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		edit: PropTypes.bool,
 	}
 
+	static contextTypes = {
+		currentUser: PropTypes.object.isRequired,
+	}
+
 	constructor(props) {
 		super(props)
 		this.state = {
@@ -34,7 +38,18 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 	render() {
 		let {organization, edit} = this.props
 		let {approvalSteps} = organization
+		let currentUser = this.context.currentUser
+		let isAdmin = currentUser && currentUser.isAdmin()
 		const {ValidatableForm, RequiredField} = this
+		let [labelLongName, placeholderLongName, labelIdentificationCode, placeholderIdentificationCode] = (organization.type === "PRINCIPAL_ORG")
+			? [dict.lookup('PRINCIPAL_ORG_LABEL_LONGNAME'),
+			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_LONGNAME'),
+			   dict.lookup('PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE'),
+			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
+			: [dict.lookup('ADVISOR_ORG_LABEL_LONGNAME'),
+			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_LONGNAME'),
+			   dict.lookup('ADVISOR_ORG_LABEL_IDENTIFICATIONCODE'),
+			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
 
 		return <ValidatableForm formFor={organization}
 			onChange={this.onChange}
@@ -61,7 +76,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
-				<Form.Field id="longName" label="Description" placeholder="e.g. Force Sustainment" />
+				<Form.Field id="longName" label={labelLongName} placeholder={placeholderLongName} />
+				<Form.Field id="identificationCode" disabled={!isAdmin} label={labelIdentificationCode} placeholder={placeholderIdentificationCode} />
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>
@@ -81,14 +97,15 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 	}
 
 	renderApprovalStep(step, index) {
-		let approvers = step.approvers
+		const approvers = step.approvers
+		const { RequiredField } = this
 
 		return <Fieldset title={`Step ${index + 1}`} key={index}>
 			<Button className="pull-right" onClick={this.removeApprovalStep.bind(this, index)}>
 				X
 			</Button>
 
-			<Form.Field id="name"
+			<RequiredField id="approvalStepName"
 				label="Step name"
 				value={step.name}
 				onChange={(event) => this.setStepName(index, event)} />
@@ -105,7 +122,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 						pos.code && components.push(pos.code)
 						return <span>{components.join(' - ')}</span>
 					}}
-					queryParams={{type: ['ADVISOR', 'SUPER_USER', 'ADMINISTRATOR'], matchPersonName: true}}
+					queryParams={{type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
 					onChange={this.addApprover.bind(this, index)}
 					clearOnSelect={true} />
 
@@ -192,7 +209,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
-		let organization = Object.without(this.props.organization, 'childrenOrgs', 'positions')
+		let organization = Object.without(this.props.organization, 'childrenOrgs', 'positions', 'approvalStepName')
 		if (organization.parentOrg) {
 			organization.parentOrg = {id: organization.parentOrg.id}
 		}

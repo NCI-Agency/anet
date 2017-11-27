@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react'
-import {Button, HelpBlock} from 'react-bootstrap'
+import {Button, Checkbox, HelpBlock} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -27,19 +27,33 @@ export default class PositionForm extends ValidatableFormWrapper {
 		currentUser: PropTypes.object.isRequired,
 	}
 
+	constructor(props) {
+		super(props)
+
+		this.state = {
+			authorized: false,
+		}
+	}
+
+	componentWillReceiveProps(nextProps) {
+		let position = nextProps.position
+		this.setState({authorized: position.authorized})
+	}
+
 	render() {
 		let {position, error, success, edit} = this.props
 
 		error = this.props.error || (this.state && this.state.error)
 
 		let currentUser = this.context.currentUser
+		let isAdmin = currentUser && currentUser.isAdmin()
 
 		let orgSearchQuery = {}
 		if (position.isPrincipal()) {
 			orgSearchQuery.type = 'PRINCIPAL_ORG'
 		} else {
 			orgSearchQuery.type = 'ADVISOR_ORG'
-			if (currentUser && currentUser.position && currentUser.position.type === 'SUPER_USER') {
+			if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
 				orgSearchQuery.parentOrgId = currentUser.position.organization.id
 				orgSearchQuery.parentOrgRecursively = true
 			}
@@ -63,8 +77,8 @@ export default class PositionForm extends ValidatableFormWrapper {
 				<Fieldset title={edit ? `Edit Position ${position.name}` : "Create a new Position"}>
 					<Form.Field id="type" disabled={this.props.edit}>
 						<ButtonToggleGroup>
-							<Button id="typeAdvisorButton" value="ADVISOR">{dict.lookup('ADVISOR_POSITION_NAME')}</Button>
-							<Button id="typePrincipalButton" value="PRINCIPAL">{dict.lookup('PRINCIPAL_POSITION_NAME')}</Button>
+							<Button id="typeAdvisorButton" value={Position.TYPE.ADVISOR}>{dict.lookup('ADVISOR_POSITION_NAME')}</Button>
+							<Button id="typePrincipalButton" value={Position.TYPE.PRINCIPAL}>{dict.lookup('PRINCIPAL_POSITION_NAME')}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>
 
@@ -79,30 +93,34 @@ export default class PositionForm extends ValidatableFormWrapper {
 						</HelpBlock> }
 					</Form.Field>
 
+					<Form.Field id="authorized">
+						<Checkbox disabled={!isAdmin} onChange={this.toggleAuthorized} checked={!!this.state.authorized} className="authorized-checkbox" />
+					</Form.Field>
+
 					<Form.Field id="organization">
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
-							fields="id, longName, shortName"
-							template={org => <span>{org.shortName} - {org.longName}</span>}
+							fields="id, longName, shortName, identificationCode"
+							template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
 						/>
 					</Form.Field>
 
 					<Form.Field id="code"
-						label={position.type === 'PRINCIPAL' ? dict.lookup('PRINCIPAL_POSITION_CODE_NAME') : dict.lookup('ADVISOR_POSITION_CODE_NAME')}
+						label={position.type === Position.TYPE.PRINCIPAL ? dict.lookup('PRINCIPAL_POSITION_CODE_NAME') : dict.lookup('ADVISOR_POSITION_CODE_NAME')}
 						placeholder="Postion ID or Number" />
 
 					<RequiredField id="name" label="Position Name" placeholder="Name/Description of Position"/>
 
-					{position.type !== 'PRINCIPAL' &&
+					{position.type !== Position.TYPE.PRINCIPAL &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
-								<Button id="permsAdvisorButton" value="ADVISOR">{dict.lookup('ADVISOR_POSITION_TYPE_TITLE')}</Button>
-								<Button id="permsSuperUserButton" value="SUPER_USER">{dict.lookup('SUPER_USER_POSITION_TYPE_TITLE')}</Button>
-								{currentUser && currentUser.isAdmin() &&
-									<Button id="permsAdminButton" value="ADMINISTRATOR">{dict.lookup('ADMINISTRATOR_POSITION_TYPE_TITLE')}</Button>
+								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{dict.lookup('ADVISOR_POSITION_TYPE_TITLE')}</Button>
+								<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{dict.lookup('SUPER_USER_POSITION_TYPE_TITLE')}</Button>
+								{isAdmin &&
+									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{dict.lookup('ADMINISTRATOR_POSITION_TYPE_TITLE')}</Button>
 								}
 							</ButtonToggleGroup>
 						</Form.Field>
@@ -130,8 +148,8 @@ export default class PositionForm extends ValidatableFormWrapper {
 		let {position, edit} = this.props
 		position = Object.assign({}, position)
 
-		if (position.type !== 'PRINCIPAL') {
-			position.type = position.permissions || 'ADVISOR'
+		if (position.type !== Position.TYPE.PRINCIPAL) {
+			position.type = position.permissions || Position.TYPE.ADVISOR
 		}
 		delete position.permissions
 		position.organization = {id: position.organization.id}
@@ -151,5 +169,12 @@ export default class PositionForm extends ValidatableFormWrapper {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
 			})
+	}
+
+	@autobind
+	toggleAuthorized() {
+		let authorized = !this.state.authorized
+		this.props.position.authorized = authorized
+		this.setState({authorized: authorized})
 	}
 }

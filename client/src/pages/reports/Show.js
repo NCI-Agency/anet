@@ -11,6 +11,8 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import LinkTo from 'components/LinkTo'
+import ReportApprovals from 'components/ReportApprovals'
+import Tag from 'components/Tag'
 
 import API from 'api'
 import dict from 'dictionary'
@@ -47,7 +49,7 @@ export default class ReportShow extends Page {
 					id, name, rank,
 					position {
 						organization {
-							shortName, longName
+							shortName, longName, identificationCode
 							approvalSteps {
 								id, name,
 								approvers {
@@ -73,8 +75,8 @@ export default class ReportShow extends Page {
 					author { id, name, rank }
 				}
 
-				principalOrg { id, shortName, longName }
-				advisorOrg { id, shortName, longName }
+				principalOrg { id, shortName, longName, identificationCode }
+				advisorOrg { id, shortName, longName, identificationCode }
 
 				approvalStatus {
 					type, createdAt
@@ -85,32 +87,34 @@ export default class ReportShow extends Page {
 				}
 
 				approvalStep { name, approvers { id }, nextStepId }
+
+				tags { id, name, description }
+				reportSensitiveInformation { id, text }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
 		})
 	}
 
+	renderNoPositionAssignedText() {
+		return <p>Notice: This report cannot be submitted because you do not have an assigned position.<br /> -- Please contact your administrator --</p>
+	}
+
 	render() {
-		let {report} = this.state
-		let {currentUser} = this.context
+		const {report} = this.state
+		const {currentUser} = this.context
 
-		let canApprove = report.isPending() && currentUser.position &&
+		const canApprove = report.isPending() && currentUser.position &&
 			report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
-
-		if (canApprove && this.props.location.query.autoApprove) {
-			this.props.location.query.autoApprove = false
-			this.approveReport()
-			return <h1>Loading..</h1>
-		}
 
 		//Authors can edit in draft mode, rejected mode, or Pending Mode
 		let canEdit = (report.isDraft() || report.isPending() || report.isRejected() || report.isFuture()) && Person.isEqual(currentUser, report.author)
 		//Approvers can edit.
 		canEdit = canEdit || canApprove
 
-		//Only the author can submit when report is in Draft or rejected
-		let canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author)
+		//Only the author can submit when report is in Draft or rejected AND author has a position
+		const hasAssignedPosition = currentUser.hasAssignedPosition()
+		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasAssignedPosition
 
 		//Anbody can email a report as long as it's not in draft.
 		let canEmail = !report.isDraft()
@@ -136,6 +140,9 @@ export default class ReportShow extends Page {
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This is a DRAFT report and hasn't been submitted.</h4>
 						<p>You can review the draft below to make sure all the details are correct.</p>
+						{!hasAssignedPosition &&
+							this.renderNoPositionAssignedText()
+						}
 						<div style={{textAlign: 'left'}}>
 							{errors && errors.length > 0 &&
 								this.renderValidationErrors(errors)
@@ -196,6 +203,9 @@ export default class ReportShow extends Page {
 								{utils.sentenceCase(report.cancelledReason)}
 							</Form.Field>
 						}
+						<Form.Field id="tags" label="Tags">
+							{report.tags && report.tags.map((tag,i) => <Tag key={tag.id} tag={tag} />)}
+						</Form.Field>
 						<Form.Field id="author" label="Report author">
 							<LinkTo person={report.author} />
 						</Form.Field>
@@ -255,7 +265,15 @@ export default class ReportShow extends Page {
 						</Fieldset>
 					}
 
-					{report.isPending() && this.renderApprovals()}
+					{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
+						<Fieldset title="Sensitive information">
+							<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
+						</Fieldset>
+					}
+
+					{report.isPending() &&
+						<ReportApprovals report={report} fullReport={true} />
+					}
 
 					{canSubmit &&
 						<Fieldset>
@@ -337,16 +355,6 @@ export default class ReportShow extends Page {
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
 				<Button bsStyle="primary" onClick={this.approveReport} className="approve-button"><strong>Approve</strong></Button>
 			</div>
-		</Fieldset>
-	}
-
-	@autobind
-	renderApprovals(canApprove) {
-		let report = this.state.report
-		return <Fieldset id="approvals" title="Approvals">
-			{report.approvalStatus.map(action =>
-				this.renderApprovalAction(action)
-			)}
 		</Fieldset>
 	}
 
@@ -507,32 +515,6 @@ export default class ReportShow extends Page {
 		window.scrollTo(0, 0)
 	}
 
-	@autobind
-	renderApprovalAction(action) {
-		let step = action.step
-		return <div key={step.id}>
-			<Button onClick={this.showApproversModal.bind(this, step)}>
-				{step.name}
-			</Button>
-			<Modal show={step.showModal} onHide={this.closeApproversModal.bind(this, step)}>
-				<Modal.Header closeButton>
-					<Modal.Title>Approvers for {step.name}</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<ul>
-					{step.approvers.map(p =>
-						<li key={p.id}>{p.name} - {p.person && p.person.name}</li>
-					)}
-					</ul>
-				</Modal.Body>
-			</Modal>
-	 	{action.type ?
-				<span> {action.type} by {action.person.name} <small>{moment(action.createdAt).format('D MMM YYYY')}</small></span>
-				:
-				<span className="text-danger"> Pending</span>
-			}
-		</div>
-	}
 
 	renderValidationErrors(errors) {
 		let warning = this.state.report.isFuture() ?
@@ -550,17 +532,6 @@ export default class ReportShow extends Page {
 		</Alert>
 	}
 
-	@autobind
-	showApproversModal(step) {
-		step.showModal = true
-		this.setState(this.state)
-	}
-
-	@autobind
-	closeApproversModal(step) {
-		step.showModal = false
-		this.setState(this.state)
-	}
 
 	@autobind
 	deleteReport() {

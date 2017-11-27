@@ -2,6 +2,7 @@ package mil.dds.anet.beans;
 
 import java.util.Objects;
 
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Comment extends AbstractAnetBean {
@@ -32,13 +33,13 @@ public class Comment extends AbstractAnetBean {
 	}
 
 	public void setText(String text) {
-		this.text = text;
+		this.text = Utils.trimStringReturnNull(text);
 	}
 	
 	
 	@Override
 	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != Comment.class) { 
+		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		Comment c = (Comment) o;

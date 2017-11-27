@@ -15,7 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.beans.search.SavedSearch.SearchObjectType;
@@ -60,5 +62,38 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		mine = httpQuery("/api/savedSearches/mine", jack).get(new GenericType<List<SavedSearch>>() {});
 		assertThat(mine).doesNotContain(created);
 		
+	}
+
+	@Test
+	public void testSavedLocationSearch() throws IOException {
+		Person jack = getJackJackson();
+
+		//Create a new saved search and save it.
+		SavedSearch ss = new SavedSearch();
+		ss.setName("Test Saved Search created by SavedSearchResourceTest");
+		ss.setObjectType(SearchObjectType.LOCATIONS);
+		ss.setQuery("{\"text\" : \"kabul\"}");
+
+		SavedSearch created = httpQuery("/api/savedSearches/new", jack).post(Entity.json(ss), SavedSearch.class);
+		assertThat(created.getId()).isNotNull();
+		assertThat(created.getQuery()).isEqualTo(ss.getQuery());
+
+		//Fetch a list of all of my saved searches
+		List<SavedSearch> mine = httpQuery("/api/savedSearches/mine", jack).get(new GenericType<List<SavedSearch>>() {});
+		assertThat(mine).contains(created);
+
+		//Run a saved search and get results.
+		ObjectMapper mapper = new ObjectMapper();
+
+		LocationSearchQuery query = mapper.readValue(created.getQuery(), LocationSearchQuery.class);
+		LocationList results = httpQuery("/api/locations/search", jack).post(Entity.json(query), LocationList.class);
+		assertThat(results.getList()).isNotEmpty();
+
+		//Delete it
+		Response resp = httpQuery("/api/savedSearches/" + created.getId(), jack).delete();
+		assertThat(resp.getStatus()).isEqualTo(200);
+
+		mine = httpQuery("/api/savedSearches/mine", jack).get(new GenericType<List<SavedSearch>>() {});
+		assertThat(mine).doesNotContain(created);
 	}
 }

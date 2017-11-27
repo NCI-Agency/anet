@@ -1,0 +1,40 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+/* do not display tick marks on y-axis */
+.y.axis line {
+  display: none;
+}
+
+/* do not display tick labels on y-axis */
+.y.axis text {
+  fill: none;
+}
+
+.category-0 {
+  fill: #689f38;
+}
+.category-1 {
+  fill: #ffc107;
+}
+
+.selected-bar {
+  fill: #EC971F;
+}
+
+.category-label, .bar-label {
+  fill: #000;
+}
+
+.bars-group {
+  cursor: pointer;
+  fill: #F5CA8D;
+}
+
+g.category-bars-group {
+  cursor: pointer;
+}
