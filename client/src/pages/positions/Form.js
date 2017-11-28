@@ -59,6 +59,11 @@ export default class PositionForm extends ValidatableFormWrapper {
 			}
 		}
 
+		// Reset the organization property when changing the organization type
+		if (position.organization && position.organization.type && (position.organization.type !== orgSearchQuery.type)) {
+			position.organization = ''
+		}
+
 		const {ValidatableForm, RequiredField} = this
 
 		let willAutoKickPerson = position.status === 'INACTIVE' && position.person && position.person.id
@@ -101,7 +106,7 @@ export default class PositionForm extends ValidatableFormWrapper {
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
-							fields="id, longName, shortName, identificationCode"
+							fields="id, longName, shortName, identificationCode, type"
 							template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
