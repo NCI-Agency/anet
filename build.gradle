@@ -18,8 +18,11 @@ apply plugin: 'com.bmuschko.docker-java-application'
 apply plugin: "se.bjurr.gitchangelog.git-changelog-gradle-plugin"
 apply plugin: 'com.moowork.node'
 apply plugin: "org.sonarqube"
+apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 
-apply from: 'localSettings.gradle'
+if (file('localSettings.gradle').exists()) {
+	apply from: 'localSettings.gradle'
+}
 
 sourceCompatibility = 1.8
 
