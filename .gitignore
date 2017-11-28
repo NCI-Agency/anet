@@ -35,6 +35,9 @@ build/
 bin/
 localSettings.gradle
 
+#webdriver-io local test files
+errorShots/
+
 .metadata/
 
 .DS_Store
