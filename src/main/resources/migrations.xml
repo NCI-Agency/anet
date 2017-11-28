@@ -614,9 +614,16 @@
 		</sql>
 	</changeSet>
 
+	<!-- partial unique index syntax varies by database (if available) -->
 	<changeSet id="30" author="hpitelka" dbms="mssql" >
-		<sql dbms="mssql">
+		<sql>
 			CREATE UNIQUE NONCLUSTERED INDEX UniqueCurrentPersonInPosition ON positions (currentPersonId) WHERE currentPersonId IS NOT NULL;
+		</sql>
+	</changeSet>
+	<changeSet id="30p" author="bwarfield" dbms="postgresql" >
+		<comment>Create a unique index for "positions.currentPersonId", excluding nulls.</comment>
+		<sql>
+			CREATE UNIQUE INDEX "UniqueCurrentPersonInPosition" ON positions ("currentPersonId") WHERE "currentPersonId" IS NOT NULL;
 		</sql>
 	</changeSet>
 
@@ -645,9 +652,16 @@
 		</addColumn>
 	</changeSet>
 
+	<!-- partial unique index syntax varies by database (if available) -->
 	<changeSet id="34" author="hpitelka" dbms="mssql" >
-		<sql dbms="mssql">
+		<sql>
 			CREATE UNIQUE NONCLUSTERED INDEX UniquePositionCodes ON positions (code) WHERE code IS NOT NULL;
+		</sql>
+	</changeSet>
+	<changeSet id="34p" author="bwarfield" dbms="postgresql">
+		<comment>Create a unique index for "positions.currentPersonId", excluding nulls.</comment>
+		<sql>
+			CREATE UNIQUE INDEX "UniquePositionCodes" ON positions(code) WHERE code IS NOT NULL;
 		</sql>
 	</changeSet>
 
