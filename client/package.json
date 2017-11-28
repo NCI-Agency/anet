@@ -117,7 +117,7 @@
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "prepublish": "./node_modules/.bin/selenium-standalone install",
     "test": "npm run lint && node --harmony-async-await $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
-    "wdio": "wdio"
+    "wdio": "wdio ./config/wdio.config.js"
   },
   "jest": {
     "moduleFileExtensions": [
