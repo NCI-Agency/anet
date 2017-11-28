@@ -266,7 +266,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="8" author="hpitelka" dbms="mssql" >
+	<changeSet id="8" author="hpitelka" dbms="!sqlite" >
 		<!-- Groups -->
 		<addUniqueConstraint tableName="groupMemberships" columnNames="groupId, personId" constraintName="uniqueGroupMembership" />
 		<addNotNullConstraint tableName="groups" columnName="name" columnDataType="varchar(512)" />
@@ -380,7 +380,7 @@
 			<column name="value" type="text" />
 		</createTable>
 	</changeSet>
-	<changeSet id="10" author="hpitelka" dbms="mssql" >
+	<changeSet id="10" author="hpitelka" dbms="!sqlite" >
 		<addUniqueConstraint tableName="adminSettings" columnNames="key" constraintName="adminSettingKey" />
 	</changeSet>
 
@@ -460,7 +460,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="17" author="hpitelka" dbms="mssql" >
+	<changeSet id="17" author="hpitelka" dbms="!sqlite" >
 		<renameColumn 
 			columnDataType="varchar(255)" 
 			oldColumnName="name" 
@@ -489,7 +489,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="20" author="hpitelka"  dbms="mssql" >
+	<changeSet id="20" author="hpitelka"  dbms="!sqlite" >
 		<addForeignKeyConstraint baseColumnNames="ownerId" baseTableName="savedSearches"
 			constraintName="fk_savedSearch_owner" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="people" />
@@ -502,7 +502,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="22" author="hpitelka" dbms="mssql" >
+	<changeSet id="22" author="hpitelka" dbms="!sqlite" >
 		<dropForeignKeyConstraint baseTableName="groupMemberships" constraintName="fk_groupMember_group" />
 		<dropForeignKeyConstraint baseTableName="groupMemberships" constraintName="fk_groupMember_person" />
 		<dropForeignKeyConstraint baseTableName="approvalSteps" constraintName="fk_approvalSteps_group" />
@@ -521,7 +521,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="24" author="hpitelka" dbms="mssql" >
+	<changeSet id="24" author="hpitelka" dbms="!sqlite" >
 		<addForeignKeyConstraint baseColumnNames="approvalStepId" baseTableName="approvers"
 			constraintName="fk_approvers_step" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="approvalSteps" />
@@ -627,7 +627,8 @@
 	</changeSet>
 
 	<changeSet id="32" author="hpitelka" >
-		<sql>
+		<!-- this syntax works in MSSQL and SQLite, but not postgresql -->
+		<sql dbms="mssql,sqlite">
 			INSERT INTO adminSettings ([key], value) VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
 		</sql>
 	</changeSet>
@@ -810,6 +811,20 @@
 				<constraints nullable="false" />
 			</column>
 		</addColumn>
+	</changeSet>
+
+	<changeSet id="36" author="bwarfield" >
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<dbms type="mssql" />
+				<dbms type="sqlite" />
+			</not>
+		</preConditions>
+		<comment>This is a repeat of migrations 32 and 35, with a postgresql-friendly syntax.</comment>
+		<sql>
+			INSERT INTO "adminSettings" ("key", "value") VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
+                        INSERT INTO "adminSettings" ("key", "value") VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
+		</sql>
 	</changeSet>
 
 </databaseChangeLog>
