@@ -48,6 +48,8 @@ const SEARCH_CONFIG = {
 	},
 	people : {
 		listName : 'people: personList',
+		sortBy: 'NAME',
+		sortOrder: 'ASC',
 		variableType: 'PersonSearchQuery',
 		fields: 'id, name, rank, emailAddress, role , position { id, name, organization { id, shortName} }'
 	},
@@ -117,16 +119,22 @@ export default class Search extends Page {
 	}
 
 	getSearchPart(type, query, pageSize) {
-//		query = Object.without(query, 'type')
-		query.pageSize = (pageSize === undefined) ? 10 : pageSize
-		query.pageNum = this.state.pageNum[type]
+		let subQuery = Object.assign({}, query)
+		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
+		subQuery.pageNum = this.state.pageNum[type]
 
 		let config = SEARCH_CONFIG[type]
+		if (config.sortBy) {
+			subQuery.sortBy = config.sortBy
+		}
+		if (config.sortOrder) {
+			subQuery.sortOrder = config.sortOrder
+		}
 		let part = new GQL.Part(/* GraphQL */`
 			${config.listName} (f:search, query:$${type}Query) {
 				pageNum, pageSize, totalCount, list { ${config.fields} }
 			}
-			`).addVariable(type + "Query", config.variableType, query)
+			`).addVariable(type + "Query", config.variableType, subQuery)
 		return part
 	}
 
