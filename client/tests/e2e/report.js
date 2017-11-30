@@ -286,15 +286,12 @@ test('Verify that validation and other reports/new interactions work', async t =
     await assertElementText(t, $advisorPosition, 'EF 2.2 Advisor D')
     await assertElementText(t, $advisorOrg, 'EF 2.2')
 
-    // We expect to see two shortcut buttons. One will be the current user's name.
-    // Clicking on that button will have no effect, because the current user is already an attendee. The other will
-    // be a principal's name. That's the button we want. Most of the time, that button appears to be last, but sometimes
-    // it is not. To work around this, we'll click ALL the buttons.
-    // If we fixed https://github.com/deptofdefense/anet/issues/527, we would not have this problem.
+    $attendeesRows = await $$('#attendeesTable tbody tr')
     let $addAttendeeShortcutButtons = await $$('#attendance-fieldset .shortcut-list button')
+    // Add all recent attendees
     await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
 
-    t.is((await $$('#attendeesTable tbody tr')).length, 3, 'Clicking the shortcut button adds a row to the table')
+    t.is((await $$('#attendeesTable tbody tr')).length, $attendeesRows.length + $addAttendeeShortcutButtons.length, 'Clicking the shortcut buttons adds rows to the table')
 
     let $submitButton = await $('#formBottomSubmit')
     await $submitButton.click()
