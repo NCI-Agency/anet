@@ -49,7 +49,7 @@ export default class Page extends Component {
 
 			let promise = API.inProgress
 
-			if (promise && promise instanceof Promise) {
+			if (promise && promise.then instanceof Function) {
 				NProgress.set(0.5)
 				promise.then(this.doneLoading, this.doneLoading)
 			} else {
