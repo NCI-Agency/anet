@@ -37,7 +37,7 @@ export default class ReportApprovals extends Component {
             case REJECT:
                 return {text: 'Rejected', cssClass: 'btn-danger rejected'}
             default:
-                return {text: 'Unknown', cssClass: 'default'}
+                return {text: 'Unknown', cssClass: 'btn-pending default'}
         }
     }
 
@@ -108,10 +108,10 @@ export default class ReportApprovals extends Component {
     }
 
     renderApprovalButton(action) {
-        let step = action.step
-        let buttonColor = (action.type) ? 'btn-success ' : 'btn-pending '
+        const step = action.step
+        const approvalTypeCss =  this.approvalType(action.type).cssClass
         return (
-            <Button className={buttonColor + 'btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
+            <Button className={approvalTypeCss + ' btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
                 <span>{step.name}</span>
             </Button>
         )
