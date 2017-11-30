@@ -123,11 +123,19 @@ export default class ReportShow extends Page {
 
 		let isCancelled = report.cancelledReason ? true : false
 
+		const formattedReportReleasedAt = moment(report.getReportReleasedAt()).format('D MMM YYYY, [at] h:mm a')
+
 		return (
 			<div className="report-show">
 				<Breadcrumbs items={[['Report #' + report.id, Report.pathFor(report)]]} />
-
 				<Messages error={this.state.error} success={this.state.success} />
+
+				{report.isReleased() &&
+					<Fieldset style={{textAlign: 'center' }}>
+						<h4 className="text-danger">This report is RELEASED.</h4>
+						<p>This report has been approved and released to the ANET community on {formattedReportReleasedAt}</p>
+					</Fieldset>
+				}
 
 				{report.isRejected() &&
 					<Fieldset style={{textAlign: 'center' }}>

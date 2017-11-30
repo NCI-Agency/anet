@@ -31,6 +31,10 @@ export default class Report extends Model {
 		return this.state === 'PENDING_APPROVAL'
 	}
 
+	isReleased() {
+		return this.state === 'RELEASED'
+	}
+
 	isRejected() {
 		return this.state === 'REJECTED'
 	}
@@ -104,6 +108,16 @@ export default class Report extends Model {
 		return this.attendees.find( el =>
 			el.role === 'ADVISOR' && el.primary
 		)
+	}
+
+	getReportReleasedAt() {
+		if (this.approvalStatus) {
+			const approvalSteps = Object.assign([], this.approvalStatus)
+			const lastApprovalStep = approvalSteps.pop()
+			return lastApprovalStep.createdAt
+		} else {
+			return
+		}
 	}
 
 	addAttendee(newAttendee) {
