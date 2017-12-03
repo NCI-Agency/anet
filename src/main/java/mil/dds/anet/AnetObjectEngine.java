@@ -30,8 +30,7 @@ import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.search.ISearcher;
-import mil.dds.anet.search.mssql.MssqlSearcher;
-import mil.dds.anet.search.sqlite.SqliteSearcher;
+import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
@@ -73,15 +72,9 @@ public class AnetObjectEngine {
 		savedSearchDao = new SavedSearchDao(dbHandle);
 		tagDao = new TagDao(dbHandle);
 		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
+		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
 		
 		instance = this;
-		
-		//TODO: maybe do this differently!
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			searcher = new MssqlSearcher();
-		} else { 
-			searcher = new SqliteSearcher();
-		}
 	}
 	
 	public PersonDao getPersonDao() { 

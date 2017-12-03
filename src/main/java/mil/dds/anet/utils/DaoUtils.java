@@ -10,6 +10,8 @@ import javax.ws.rs.WebApplicationException;
 
 import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 
@@ -17,7 +19,26 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class DaoUtils {
 
-	public static String MSSQL_SERVER_NAME = "Microsoft SQL Server";
+	public enum DbType {
+		MSSQL("sqlserver"), SQLITE("sqlite"), POSTGRESQL("postgresql");
+
+		private String jdbcTag;
+
+		private DbType(String tag) {
+			jdbcTag = tag;
+		}
+
+		public static DbType fromTag(String tag) {
+			for (DbType t : DbType.values()) {
+				if (t.jdbcTag.equalsIgnoreCase(tag)) {
+					return t;
+				}
+			}
+			throw new IllegalArgumentException("No database type found for JDBC tag " + tag);
+		}
+	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DaoUtils.class);
 	
 	public static Integer getId(AbstractAnetBean obj) { 
 		if (obj == null) { return null; }
@@ -29,19 +50,26 @@ public class DaoUtils {
 		return o.ordinal();
 	}
 
-	
 	/*This never changes during execution, so statically cache it. */
-	public static Boolean isMsSql = null;
-	
-	public static boolean isMsSql(Handle dbHandle) {
-		if (isMsSql == null) { 
+	private static DbType DB_TYPE = null;
+
+	public static DbType getDbType(Handle dbHandle) {
+		// No locking because this operation is idempotent and safe
+		if (DB_TYPE == null) {
 			try { 
-				isMsSql =  dbHandle.getConnection().getMetaData().getDatabaseProductName().equals(DaoUtils.MSSQL_SERVER_NAME);
+				String databaseUrl = dbHandle.getConnection().getMetaData().getURL();
+				String driverType = databaseUrl.split(":", 3)[1].toLowerCase();
+				DB_TYPE = DbType.fromTag(driverType);
+				LOGGER.info("Detected and cached database type as {}", DB_TYPE);
 			} catch (SQLException e) { 
-				throw new RuntimeException("Error fetching Database Product Name", e);
+				throw new RuntimeException("Error determining database type", e);
 			}
 		}
-		return isMsSql;
+		return DB_TYPE;
+	}
+
+	public static boolean isMsSql(Handle dbHandle) {
+		return getDbType(dbHandle) == DbType.MSSQL;
 	}
 	
 	public static Integer getGeneratedId(GeneratedKeys<Map<String,Object>> keys) { 
@@ -50,10 +78,13 @@ public class DaoUtils {
 			return null;
 		}
 		Object id = null;
+		// NOTE: this could probably be a switch on DB_TYPE instead, with modest care
 		if (r.containsKey("last_insert_rowid()")) { 
 			id = r.get("last_insert_rowid()");
 		} else if (r.containsKey("generated_keys")) { 
 			id = r.get("generated_keys");
+		} else if (r.containsKey("id")) {
+			id = r.get("id");
 		}
 		if (id == null) { return null; } 
 		if (id instanceof Integer) { 

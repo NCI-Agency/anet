@@ -24,29 +24,44 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.IReportSearcher;
+import mil.dds.anet.search.ReportSearchBuilder;
+import mil.dds.anet.search.ReportSearchBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class SqliteReportSearcher implements IReportSearcher {
 
-	public static DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+	public static final DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+	private String dateComparisonFormat;
+	private DateTimeFormatter dateTimeFormatter;
+
+	public SqliteReportSearcher(String dateComparisonFormat, DateTimeFormatter dateTimeFormatter) {
+		this.dateComparisonFormat = dateComparisonFormat;
+		this.dateTimeFormatter = dateTimeFormatter;
+	}
 	
+	public SqliteReportSearcher() {
+		this("reports.\"%s\" %s DateTime(:%s)", sqlitePattern);
+	}
+
 	public ReportList runSearch(ReportSearchQuery query, Handle dbHandle, Person user) { 
 		StringBuffer sql = new StringBuffer();
 		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS + "," + PersonDao.PERSON_FIELDS);
 		sql.append(" FROM reports ");
-		sql.append("LEFT JOIN reportTags ON reportTags.reportId = reports.id ");
-		sql.append("LEFT JOIN tags ON reportTags.tagId = tags.id ");
+		sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportId\" = reports.id ");
+		sql.append("LEFT JOIN tags ON \"reportTags\".\"tagId\" = tags.id ");
 		sql.append(", people ");
-		sql.append("WHERE reports.authorId = people.id ");
+		sql.append("WHERE reports.\"authorId\" = people.id ");
 		sql.append("AND reports.id IN ( SELECT reports.id FROM reports ");
 		
 		String commonTableExpression = null;
 		Map<String,Object> args = new HashMap<String,Object>();
 		List<String> whereClauses = new LinkedList<String>();
-		
+		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses,
+				this.dateComparisonFormat, this.dateTimeFormatter);
 		if (query.getAuthorId() != null) { 
-			whereClauses.add("reports.authorId = :authorId");
+			whereClauses.add("reports.\"authorId\" = :authorId");
 			args.put("authorId", query.getAuthorId());
 		}
 		
@@ -54,44 +69,23 @@ public class SqliteReportSearcher implements IReportSearcher {
 		if (text != null && text.trim().length() > 0) {
 			whereClauses.add("(text LIKE '%' || :text || '%' OR "
 					+ "intent LIKE '%' || :text || '%' OR "
-					+ "keyOutcomes LIKE '%' || :text || '%' OR "
-					+ "nextSteps LIKE '%' || :text || '%' OR "
+					+ "\"keyOutcomes\" LIKE '%' || :text || '%' OR "
+					+ "\"nextSteps\" LIKE '%' || :text || '%'"
 					+ "tags.name LIKE '%' || :text || '%' OR "
 					+ "tags.description LIKE '%' || :text || '%'"
 					+ ")");
 			args.put("text", Utils.getSqliteFullTextQuery(text));
 		}
 		
-		
-		if (query.getEngagementDateStart() != null) { 
-			whereClauses.add("reports.engagementDate >= DateTime(:startDate)");
-			args.put("startDate", sqlitePattern.print(Utils.handleRelativeDate(query.getEngagementDateStart())));
-		}
-		if (query.getEngagementDateEnd() != null) { 
-			whereClauses.add("reports.engagementDate <= DateTime(:endDate)");
-			args.put("endDate", sqlitePattern.print(Utils.handleRelativeDate(query.getEngagementDateEnd())));
-		}
-		
-		if (query.getCreatedAtStart() != null) { 
-			whereClauses.add("reports.createdAt >= DateTime(:startCreatedAt)");
-			args.put("startCreatedAt", sqlitePattern.print(Utils.handleRelativeDate(query.getCreatedAtStart())));
-		}
-		if (query.getCreatedAtEnd() != null) { 
-			whereClauses.add("reports.createdAt <= DateTime(:endCreatedAt)");
-			args.put("endCreatedAt", sqlitePattern.print(Utils.handleRelativeDate(query.getCreatedAtEnd())));
-		}
-		
-		if (query.getReleasedAtStart() != null) { 
-			whereClauses.add("reports.releasedAt >= DateTime(:releasedAtStart)");
-			args.put("releasedAtStart", sqlitePattern.print(Utils.handleRelativeDate(query.getReleasedAtStart())));
-		}
-		if (query.getReleasedAtEnd() != null) { 
-			whereClauses.add("reports.releasedAt <= DateTime(:releasedAtEnd)");
-			args.put("releasedAtEnd", sqlitePattern.print(Utils.handleRelativeDate(query.getReleasedAtEnd())));
-		}
-		
+		searchBuilder.addDateClause(query.getEngagementDateStart(), Comparison.AFTER, "engagementDate", "startDate");
+		searchBuilder.addDateClause(query.getEngagementDateEnd(), Comparison.BEFORE, "engagementDate", "endDate");
+		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.AFTER, "createdAt", "startCreatedAt");
+		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.BEFORE	, "createdAt", "endCreatedAt");
+		searchBuilder.addDateClause(query.getReleasedAtStart(), Comparison.AFTER, "releasedAt", "releasedAtStart");
+		searchBuilder.addDateClause(query.getReleasedAtEnd(), Comparison.BEFORE, "releasedAt", "releasedAtEnd");
+
 		if (query.getAttendeeId() != null) { 
-			whereClauses.add("reports.id IN (SELECT reportId from reportPeople where personId = :attendeeId)");
+			whereClauses.add("reports.id IN (SELECT \"reportId\" from \"reportPeople\" where \"personId\" = :attendeeId)");
 			args.put("attendeeId", query.getAttendeeId());
 		}
 		
@@ -101,7 +95,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getPoamId() != null) { 
-			whereClauses.add("reports.id IN (SELECT reportId from reportPoams where poamId = :poamId)");
+			whereClauses.add("reports.id IN (SELECT \"reportId\" from \"reportPoams\" where \"poamId\" = :poamId)");
 			args.put("poamId", query.getPoamId());
 		}
 		
@@ -113,57 +107,57 @@ public class SqliteReportSearcher implements IReportSearcher {
 				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
 					+ ")";
-				whereClauses.add("(reports.advisorOrganizationId IN (SELECT id from parent_orgs) "
-						+ "OR reports.principalOrganizationId IN (SELECT id from parent_orgs))");
+				whereClauses.add("(reports.\"advisorOrganizationId\" IN (SELECT id from parent_orgs) "
+						+ "OR reports.\"principalOrganizationId\" IN (SELECT id from parent_orgs))");
 			} else { 
-				whereClauses.add("(reports.advisorOrganizationId = :orgId OR reports.principalOrganizationId = :orgId)");
+				whereClauses.add("(reports.\"advisorOrganizationId\" = :orgId OR reports.\"principalOrganizationId\" = :orgId)");
 			}
 			args.put("orgId", query.getOrgId());
 		}
 		
 		if (query.getAdvisorOrgId() != null) { 
 			if (query.getAdvisorOrgId() == -1) { 
-				whereClauses.add("reports.advisorOrganizationId IS NULL");
+				whereClauses.add("reports.\"advisorOrganizationId\" IS NULL");
 			} else if (query.getIncludeAdvisorOrgChildren()) { 
 				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :advisorOrgId "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
 					+ ") ";
-				whereClauses.add("reports.advisorOrganizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add("reports.\"advisorOrganizationId\" IN (SELECT id from parent_orgs)");
 			} else { 
-				whereClauses.add("reports.advisorOrganizationId = :advisorOrgId");
+				whereClauses.add("reports.\"advisorOrganizationId\" = :advisorOrgId");
 			}
 			args.put("advisorOrgId", query.getAdvisorOrgId());
 		}
 		
 		if (query.getPrincipalOrgId() != null) { 
 			if (query.getPrincipalOrgId() == -1) { 
-				whereClauses.add("reports.principalOrganizationId IS NULL");
+				whereClauses.add("reports.\"principalOrganizationId\" IS NULL");
 			} else if (query.getIncludePrincipalOrgChildren()) { 
 				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :principalOrgId "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
 					+ ")";
-				whereClauses.add("reports.principalOrganizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add("reports.\"principalOrganizationId\" IN (SELECT id from parent_orgs)");
 			} else { 
-				whereClauses.add("reports.principalOrganizationId = :principalOrgId");
+				whereClauses.add("reports.\"principalOrganizationId\" = :principalOrgId");
 			}
 			args.put("principalOrgId", query.getAdvisorOrgId());
 		}
 		
 		if (query.getLocationId() != null) { 
-			whereClauses.add("locationId = :locationId");
+			whereClauses.add("\"locationId\" = :locationId");
 			args.put("locationId", query.getLocationId());
 		}
 		
 		if (query.getPendingApprovalOf() != null) { 
-			whereClauses.add("reports.approvalStepId IN "
-				+ "(SELECT approvalStepId from approvers where positionId IN "
-				+ "(SELECT id FROM positions where currentPersonId = :approverId))");
+			whereClauses.add("reports.\"approvalStepId\" IN "
+				+ "(SELECT \"approvalStepId\" from approvers where \"positionId\" IN "
+				+ "(SELECT id FROM positions where \"currentPersonId\" = :approverId))");
 			args.put("approverId", query.getPendingApprovalOf());
 		}
 		
@@ -182,7 +176,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getCancelledReason() != null) { 
-			whereClauses.add("reports.cancelledReason = :cancelledReason");
+			whereClauses.add("reports.\"cancelledReason\" = :cancelledReason");
 			args.put("cancelledReason", DaoUtils.getEnumId(query.getCancelledReason()));
 		}
 		
@@ -196,7 +190,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
 		} else { 
-			whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.authorId = :userId))");
+			whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorId\" = :userId))");
 			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
 			args.put("userId", user.getId());
@@ -210,14 +204,14 @@ public class SqliteReportSearcher implements IReportSearcher {
 		if (query.getSortBy() == null) { query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE); }
 		switch (query.getSortBy()) {
 			case ENGAGEMENT_DATE:
-				sql.append("reports.engagementDate");
+				sql.append("reports.\"engagementDate\"");
 				break;
 			case RELEASED_AT:
-				sql.append("reports.releasedAt");
+				sql.append("reports.\"releasedAt\"");
 				break;
 			case CREATED_AT:
 			default:
-				sql.append("reports.createdAt");
+				sql.append("reports.\"createdAt\"");
 				break;
 		}
 
