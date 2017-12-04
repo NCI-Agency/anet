@@ -19,16 +19,7 @@ class CreatePerson extends Page {
     get submitButton()          { return browser.element('form .form-top-submit > button[type="submit"]') }
 
     open() {
-        super.open(Page_URL, 'arthur')
-    }
-
-    waitForFormToLoad() {
-        if(!this.form.isVisible() ) {
-            this.form.waitForExist()
-            this.form.waitForVisible()
-            console.log('form loaded')
-        }
-        console.log('form visible', this.form.isVisible())
+        super.openAsSuperUser(Page_URL, 'arthur')
     }
 
     waitForAlertSuccessToLoad() {

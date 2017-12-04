@@ -47,7 +47,8 @@ exports.config = {
         browserName: 'chrome',
         chromeOptions: {
             //run in incognito mode
-            args: ['--incognito'],
+            //args: ['--incognito'],
+            args: ['--headless', '--disable-gpu', '--window-size=1280,800']
        },
     }],
     //

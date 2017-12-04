@@ -1,6 +1,4 @@
 import Home from '../pages/home.page'
-import CreatePerson from '../pages/createNewPerson.page'
-
 import { expect } from 'chai'
 
 describe('Anet user login', () => {
@@ -19,15 +17,4 @@ describe('Anet user login', () => {
 		const securityText = Home.securityBanner.getText()
 		expect(securityText).to.equal('DEMO USE ONLY || DMIN, Arthur (edit)')
 	})
-
-	it('Super user Arthur is logged in"', () => {
-		Home.openAsSuperUser()
-		Home.searchBar.waitForExist()
-		Home.searchBar.waitForVisible()
-		Home.searchBar.setValue('report')
-		Home.submitSearch.click()
-		// const securityText = Home.searchBar.getText()
-		// expect(securityText).to.equal('DEMO USE ONLY || DMIN, Arthur (edit)')
-	})
-
 })

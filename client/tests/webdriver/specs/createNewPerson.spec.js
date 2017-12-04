@@ -9,19 +9,17 @@ describe('Create new Person form page', () => {
 
     beforeEach('On the create a new user page...', () => {
         CreatePerson.open()
-        CreatePerson.waitForFormToLoad()
     })
 
     describe('When creating a Principle user', () => {
         it('Should save a principle with only a last name', () => {
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
-            CreatePerson.savePerson()
+            CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
             expect(alertMessage).to.equal('Person saved successfully')
         })
         it('Should not save a principle without a valid email address', () => {
-            CreatePerson.openAsSuperUser()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
             CreatePerson.emailAddress.setValue('notValidEmail@')
             CreatePerson.submitForm()
@@ -32,9 +30,9 @@ describe('Create new Person form page', () => {
 
             // perform submit form to prevent warning dialog
             CreatePerson.emailAddress.clearElement()
-            CreatePerson.emailAddress.setValue('valid@example.com')
+            CreatePerson.lastName.click()
             CreatePerson.submitForm()
-            CreatePerson.waitForAlertSuccess()
+            CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
             expect(alertMessage).to.equal('Person saved successfully')
         })
@@ -48,7 +46,6 @@ describe('Create new Person form page', () => {
             warningMessage.waitForExist(5000)
             warningMessage.waitForVisible()
             expect(warningMessage.getText()).to.equal('Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.')
-
         })
     })
 })
