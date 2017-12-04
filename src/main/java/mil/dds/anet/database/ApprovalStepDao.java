@@ -116,7 +116,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 		//ensure there is nothing currently on this step
 		List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepId\" = ?", id);
 		Map<String,Object> result = rs.get(0);
-		int count = (Integer) result.get("ct");
+		int count = ((Number) result.get("ct")).intValue();
 		if (count != 0) {
 			throw new WebApplicationException(ResponseUtils.withMsg("Reports are currently pending at this step", Status.NOT_ACCEPTABLE));
 		}

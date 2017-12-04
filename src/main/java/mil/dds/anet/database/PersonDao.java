@@ -37,13 +37,7 @@ public class PersonDao implements IAnetDao<Person> {
 	}
 	
 	public PersonList getAll(int pageNum, int pageSize) {
-		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql = "/* personGetAll */ SELECT " + PERSON_FIELDS + ", count(*) over() as totalCount "
-					+ "FROM people ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-		} else { 
-			sql = "/* personGetAll */ SELECT " + PERSON_FIELDS + "FROM people ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
-		}
+		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle), "Person", tableName, PERSON_FIELDS);
 		Query<Person> query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum)

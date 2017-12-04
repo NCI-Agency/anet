@@ -47,7 +47,7 @@ public class AdminDao {
 	}
 	
 	public List<AdminSetting> getAllSettings() { 
-		return dbHandle.createQuery("/* getAllAdminSettings */ SELECT * FROM adminSettings")
+		return dbHandle.createQuery("/* getAllAdminSettings */ SELECT * FROM \"adminSettings\"")
 				.map(new AdminSettingMapper())
 				.list();
 	}

@@ -29,21 +29,15 @@ public class OrganizationDao implements IAnetDao<Organization> {
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 	
 	Handle dbHandle;
+	String getAllSql;
 	
 	public OrganizationDao(Handle dbHandle) { 
 		this.dbHandle = dbHandle;
+		this.getAllSql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle), "Orgs", tableName, ORGANIZATION_FIELDS);
 	}
 	
 	public OrganizationList getAll(int pageNum, int pageSize) {
-		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql = "/* getAllOrgs */ SELECT " + ORGANIZATION_FIELDS + ", count(*) over() AS totalCount "
-					+ "FROM organizations ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-		} else { 
-			sql = "/* getAllOrgs */ SELECT " + ORGANIZATION_FIELDS + " from organizations ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
-		}
-		
-		Query<Organization> query = dbHandle.createQuery(sql)
+		Query<Organization> query = dbHandle.createQuery(getAllSql)
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum)
 			.map(new OrganizationMapper());

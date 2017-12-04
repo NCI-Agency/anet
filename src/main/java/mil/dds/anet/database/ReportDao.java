@@ -69,18 +69,9 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public ReportList getAll(int pageNum, int pageSize, Person user) {
-		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getAllReports */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-					+ ", COUNT(*) OVER() AS totalCount FROM reports, people "
-					+ "WHERE reports.\"authorId\" = people.id "
-					+ "ORDER BY reports.\"createdAt\" DESC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-		} else {
-			sql = "/* getAllReports */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-					+ "FROM reports, people "
-					+ "WHERE reports.\"authorId\" = people.id "
-					+ "ORDER BY reports.\"createdAt\" DESC LIMIT :limit OFFSET :offset";
-		}
+		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle),
+				"Reports", "reports join people on reports.\"authorId\" = people.id", REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS,
+				"reports.\"createdAt\"");
 		Query<Report> query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum)
@@ -545,14 +536,15 @@ public class ReportDao implements IAnetDao<Report> {
 			OrganizationType orgType, 
 			List<Organization> orgs, 
 			boolean missingOrgReports) { 
-		String orgColumn = orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationId" : "principalOrganizationId";
+		String orgColumn = String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationId" : "principalOrganizationId");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* RollupQuery */ SELECT " + orgColumn + " as orgId, state, count(*) AS count ");
 		sql.append("FROM reports WHERE ");
-		
-		if (DaoUtils.isMsSql(dbHandle)) { 
+
+		// NOTE: more date-comparison work here that might be worth abstracting, but might not
+		if (DaoUtils.getDbType(dbHandle) != DaoUtils.DbType.SQLITE) {
 			sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" <= :endDate "
 					+ "AND \"engagementDate\" > :engagementDateStart ");
 			sqlArgs.put("startDate", start);
@@ -601,7 +593,7 @@ public class ReportDao implements IAnetDao<Report> {
 				// Skip non-reporting organizations
 				continue;
 			}
-			Integer count = (Integer) result.get("count");
+			Integer count = ((Number) result.get("count")).intValue();
 			ReportState state = ReportState.values()[(Integer) result.get("state")];
 		
 			Integer parentOrgId = DaoUtils.getId(orgMap.get(orgId));

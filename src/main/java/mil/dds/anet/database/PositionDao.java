@@ -44,13 +44,7 @@ public class PositionDao implements IAnetDao<Position> {
 	}
 	
 	public PositionList getAll(int pageNum, int pageSize) {
-		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql = "/* positionGetAll */ SELECT " + POSITIONS_FIELDS + ", COUNT(*) OVER() AS totalCount "
-					+ "FROM positions ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
-		} else { 
-			sql = "/* positionGetAll */ SELECT " + POSITIONS_FIELDS + " from positions ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
-		}
+		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle), "positions", tableName, POSITIONS_FIELDS);
 		Query<Position> query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum)
@@ -366,12 +360,12 @@ public class PositionDao implements IAnetDao<Position> {
 	}
 
 	public Boolean getIsApprover(Position position) {
-		Integer count = (Integer) dbHandle.createQuery("/* getIsApprover */ SELECT count(*) as ct from approvers where \"positionId\" = :positionId")
+		Number count = (Number) dbHandle.createQuery("/* getIsApprover */ SELECT count(*) as ct from approvers where \"positionId\" = :positionId")
 			.bind("positionId", position.getId())
 			.first()
 			.get("ct");
 		
-		return count > 0;
+		return count.longValue() > 0;
 	}
 
 	public Integer deletePosition(final Position p) {

@@ -98,7 +98,7 @@ public class LocationDao implements IAnetDao<Location> {
 			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE id IN ( "
 					+ "SELECT reports.\"locationId\" "
 					+ "FROM reports "
-					+ "WHERE authorid = :authorId "
+					+ "WHERE \"authorId\" = :authorId "
 					+ "GROUP BY \"locationId\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"

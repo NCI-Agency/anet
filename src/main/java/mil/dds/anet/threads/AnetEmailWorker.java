@@ -64,6 +64,7 @@ public class AnetEmailWorker implements Runnable {
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
 	private final boolean disabled;
+	private boolean noEmailConfiguration;
 	
 	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) { 
 		this.handle = dbHandle;
@@ -76,14 +77,15 @@ public class AnetEmailWorker implements Runnable {
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionary().get("SUPPORT_EMAIL_ADDR");
 		instance = this;
-		
+
 		SmtpConfiguration smtpConfig = config.getSmtp();
 		props = new Properties();
 		props.put("mail.smtp.starttls.enable", smtpConfig.getStartTls().toString());
 		props.put("mail.smtp.host", smtpConfig.getHostname());
 		props.put("mail.smtp.port", smtpConfig.getPort().toString());
 		auth = null;
-		
+		this.noEmailConfiguration = config.isDevelopmentMode() && smtpConfig.getHostname().startsWith("${");
+
 		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) { 
 			props.put("mail.smtp.auth", "true");
 			auth = new javax.mail.Authenticator() {
@@ -116,7 +118,7 @@ public class AnetEmailWorker implements Runnable {
 	
 	private void runInternal() {
 		//check the database for any emails we need to send. 
-		List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM pendingEmails ORDER BY createdAt ASC")
+		List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM \"pendingEmails\" ORDER BY \"createdAt\" ASC")
 				.map(emailMapper)
 				.list();
 		
@@ -139,11 +141,14 @@ public class AnetEmailWorker implements Runnable {
 		//Update the database.
 		if (sentEmails.size() > 0) {
 			String emailIds = Joiner.on(", ").join(sentEmails);
-			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM pendingEmails WHERE id IN (" + emailIds + ")").execute();
+			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN (" + emailIds + ")").execute();
 		}
 	}
 
 	private void sendEmail(AnetEmail email) throws MessagingException, IOException, TemplateException {
+		if (this.noEmailConfiguration) {
+			return;
+		}
 		//Remove any null email addresses
 		email.getToAddresses().removeIf(s -> Objects.equals(s, null));
 		if (email.getToAddresses().size() == 0) { 
@@ -206,7 +211,7 @@ public class AnetEmailWorker implements Runnable {
 		//Insert the job spec into the database.
 		try { 
 			String jobSpec = mapper.writeValueAsString(email);
-			handle.createStatement("/* SendEmailAsync */ INSERT INTO pendingEmails (jobSpec, createdAt) VALUES (:jobSpec, :createdAt)")
+			handle.createStatement("/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")
 				.bind("jobSpec", jobSpec)
 				.bind("createdAt", new DateTime())
 				.execute();
