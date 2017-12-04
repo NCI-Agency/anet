@@ -71,8 +71,7 @@ export default class PoamShow extends Page {
 		let currentUser = this.context.currentUser
 		let poamShortName = dict.lookup("POAM_SHORT_NAME")
 
-		let canEdit = currentUser.isAdmin() ||
-			(poam.responsibleOrg && currentUser.isSuperUserForOrg(poam.responsibleOrg))
+		let canEdit = currentUser.isAdmin()
 
 		return (
 			<div>
