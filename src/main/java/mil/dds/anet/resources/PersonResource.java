@@ -351,7 +351,7 @@ public class PersonResource implements IGraphQLResource {
 			.filter(domain -> String.valueOf(domain.charAt(0)).equals(WILDCARD))
 			.collect((Collectors.toList()));
 
-		final Boolean isWhitelistedEmail = from.length() > 0 && whitelistDomainNames.indexOf(domainName) > 0;
+		final Boolean isWhitelistedEmail = from.length() > 0 && whitelistDomainNames.indexOf(domainName) >= 0;
 		final Boolean isValidWildcardDomain = wildcardDomainNames.stream()
 			.anyMatch(wildcardDomain ->
 				domainName.charAt(0) != '.' &&
