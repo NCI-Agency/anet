@@ -28,7 +28,7 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 		String commonTableExpression = null;
 		
 		if (query.getMatchPersonName() != null && query.getMatchPersonName()) { 
-			sql.append(" LEFT JOIN people ON positions.currentPersonId = people.id ");
+			sql.append(" LEFT JOIN people ON positions.\"currentPersonId\" = people.id ");
 		}
 		
 		sql.append(" WHERE ");
@@ -64,25 +64,25 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
 					+ ") ";
-				whereClauses.add(" positions.organizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add(" positions.\"organizationId\" IN (SELECT id from parent_orgs)");
 			} else { 
-				whereClauses.add("positions.organizationId = :orgId");
+				whereClauses.add("positions.\"organizationId\" = :orgId");
 			}
 			sqlArgs.put("orgId", query.getOrganizationId());
 		}
 		
 		if (query.getIsFilled() != null) {
 			if (query.getIsFilled()) { 
-				whereClauses.add("positions.currentPersonId IS NOT NULL");
+				whereClauses.add("positions.\"currentPersonId\" IS NOT NULL");
 			} else { 
-				whereClauses.add("positions.currentPersonId IS NULL");
+				whereClauses.add("positions.\"currentPersonId\" IS NULL");
 			}
 		}
 		
 		if (query.getLocationId() != null) { 
-			whereClauses.add("positions.locationId = :locationId");
+			whereClauses.add("positions.\"locationId\" = :locationId");
 			sqlArgs.put("locationId", query.getLocationId());
 		}
 		

@@ -31,7 +31,7 @@ public class SqlitePoamSearcher implements IPoamSearcher {
 		
 		String text = query.getText();
 		if (text != null && text.trim().length() > 0) { 
-			whereClauses.add("(longName LIKE '%' || :text || '%' OR shortName LIKE '%' || :text || '%')");
+			whereClauses.add("(\"longName\" LIKE '%' || :text || '%' OR \"shortName\" LIKE '%' || :text || '%')");
 			args.put("text", Utils.getSqliteFullTextQuery(text));
 		}
 		
@@ -40,11 +40,11 @@ public class SqlitePoamSearcher implements IPoamSearcher {
 				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
 					+ ") ";
-				whereClauses.add(" organizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add(" \"organizationId\" IN (SELECT id from parent_orgs)");
 			} else { 
-				whereClauses.add("organizationId = :orgId");
+				whereClauses.add("\"organizationId\" = :orgId");
 			}
 			args.put("orgId", query.getResponsibleOrgId());
 		}
@@ -62,7 +62,7 @@ public class SqlitePoamSearcher implements IPoamSearcher {
 		if (whereClauses.size() == 0) { return result; }
 		
 		sql.append(Joiner.on(" AND ").join(whereClauses));
-		sql.append(" ORDER BY shortName ASC LIMIT :limit OFFSET :offset");
+		sql.append(" ORDER BY \"shortName\" ASC LIMIT :limit OFFSET :offset");
 		
 		if (commonTableExpression != null) { 
 			sql.insert(0, commonTableExpression);
