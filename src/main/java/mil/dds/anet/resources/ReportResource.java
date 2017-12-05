@@ -33,6 +33,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.skife.jdbi.v2.Handle;
+import org.skife.jdbi.v2.TransactionCallback;
+import org.skife.jdbi.v2.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -415,55 +418,57 @@ public class ReportResource implements IGraphQLResource {
 	@Timed
 	@Path("/{id}/approve")
 	public Report approveReport(@Auth Person approver, @PathParam("id") int id, Comment comment) {
-		final Report r = dao.getById(id, approver);
-		if (r == null) {
-			throw new WebApplicationException("Report not found", Status.NOT_FOUND);
-		}
-		if (r.getApprovalStep() == null) {
-			logger.info("Report ID {} does not currently need an approval", r.getId());
-			throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
-		}
-		ApprovalStep step = r.loadApprovalStep();
+		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+		return dbHandle.inTransaction(new TransactionCallback<Report>() {
+			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				final Report r = dao.getById(id, approver);
+				if (r == null) {
+					throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+				}
+				final ApprovalStep step = r.loadApprovalStep();
+				if (step == null) {
+					logger.info("Report ID {} does not currently need an approval", r.getId());
+					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+				}
 
-		//Verify that this user can approve for this step.
+				//Verify that this user can approve for this step.
+				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				if (canApprove == false) {
+					logger.info("User ID {} cannot approve report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
+				}
 
-		boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
-		if (canApprove == false) {
-			logger.info("User ID {} cannot approve report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
-			throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
-		}
+				//Write the approval
+				ApprovalAction approval = new ApprovalAction();
+				approval.setReport(r);
+				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setPerson(approver);
+				approval.setType(ApprovalType.APPROVE);
+				engine.getApprovalActionDao().insert(approval);
 
-		//Write the approval
-		//TODO: this should be in a transaction....
-		ApprovalAction approval = new ApprovalAction();
-		approval.setReport(r);
-		approval.setStep(ApprovalStep.createWithId(step.getId()));
-		approval.setPerson(approver);
-		approval.setType(ApprovalType.APPROVE);
-		engine.getApprovalActionDao().insert(approval);
+				//Update the report
+				r.setApprovalStep(ApprovalStep.createWithId(step.getNextStepId()));
+				if (step.getNextStepId() == null) {
+					//Done with approvals, move to released (or cancelled) state!
+					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
+					r.setReleasedAt(DateTime.now());
+					sendReportReleasedEmail(r);
+				} else {
+					sendApprovalNeededEmail(r);
+				}
+				dao.update(r, approver);
 
-		//Update the report
-		r.setApprovalStep(ApprovalStep.createWithId(step.getNextStepId()));
-		if (step.getNextStepId() == null) {
-			//Done with approvals, move to released (or cancelled) state! 
-			r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
-			r.setReleasedAt(DateTime.now());
-			sendReportReleasedEmail(r);
-		} else {
-			sendApprovalNeededEmail(r);
-		}
-		dao.update(r, approver);
-		
-		//Add the comment
-		if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
-			comment.setReportId(r.getId());
-			comment.setAuthor(approver);
-			engine.getCommentDao().insert(comment);
-		}
-		//TODO: close the transaction.
+				//Add the comment
+				if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
+					comment.setReportId(r.getId());
+					comment.setAuthor(approver);
+					engine.getCommentDao().insert(comment);
+				}
 
-		AnetAuditLogger.log("report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
-		return r;
+				AnetAuditLogger.log("report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				return r;
+			}
+		});
 	}
 
 	private void sendReportReleasedEmail(Report r) {
@@ -485,45 +490,47 @@ public class ReportResource implements IGraphQLResource {
 	@Timed
 	@Path("/{id}/reject")
 	public Report rejectReport(@Auth Person approver, @PathParam("id") int id, Comment reason) {
-		final Report r = dao.getById(id, approver);
-		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
-		ApprovalStep step = r.loadApprovalStep();
-		if (step == null) {
-			logger.info("Report ID {} does not currently need an approval", r.getId());
-			throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST); 
-		} 
+		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+		return dbHandle.inTransaction(new TransactionCallback<Report>() {
+			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				final Report r = dao.getById(id, approver);
+				if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
+				final ApprovalStep step = r.loadApprovalStep();
+				if (step == null) {
+					logger.info("Report ID {} does not currently need an approval", r.getId());
+					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+				}
 
-		//Verify that this user can reject for this step.
-		boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
-		if (canApprove == false) {
-			logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
-			throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
-		}
+				//Verify that this user can reject for this step.
+				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				if (canApprove == false) {
+					logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
+				}
 
-		//Write the rejection
-		//TODO: This should be in a transaction
-		ApprovalAction approval = new ApprovalAction();
-		approval.setReport(r);
-		approval.setStep(ApprovalStep.createWithId(step.getId()));
-		approval.setPerson(approver);
-		approval.setType(ApprovalType.REJECT);
-		engine.getApprovalActionDao().insert(approval);
+				//Write the rejection
+				ApprovalAction approval = new ApprovalAction();
+				approval.setReport(r);
+				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setPerson(approver);
+				approval.setType(ApprovalType.REJECT);
+				engine.getApprovalActionDao().insert(approval);
 
-		//Update the report
-		r.setApprovalStep(null);
-		r.setState(ReportState.REJECTED);
-		dao.update(r, approver);
+				//Update the report
+				r.setApprovalStep(null);
+				r.setState(ReportState.REJECTED);
+				dao.update(r, approver);
 
-		//Add the comment
-		reason.setReportId(r.getId());
-		reason.setAuthor(approver);
-		engine.getCommentDao().insert(reason);
+				//Add the comment
+				reason.setReportId(r.getId());
+				reason.setAuthor(approver);
+				engine.getCommentDao().insert(reason);
 
-		//TODO: close the transaction.
-		
-		sendReportRejectEmail(r, approver, reason);
-		AnetAuditLogger.log("report {} rejected by {} (id: {})", r.getId(), approver.getName(), approver.getId());
-		return r;
+				sendReportRejectEmail(r, approver, reason);
+				AnetAuditLogger.log("report {} rejected by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				return r;
+			}
+		});
 	}
 
 	private void sendReportRejectEmail(Report r, Person rejector, Comment rejectionComment) {
