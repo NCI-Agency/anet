@@ -575,10 +575,15 @@ public class ReportResource implements IGraphQLResource {
 	@DELETE
 	@Timed
 	@Path("/{id}/comments/{commentId}")
-	public Response deleteComment(@PathParam("commentId") int commentId) {
-		//TODO: user validation on /who/ is allowed to delete a comment.
+	public Response deleteComment(@Auth Person user, @PathParam("commentId") int commentId) {
+		// For now, only admins are allowed to delete a comment
+		// (even though there's no action for it in the front-end).
+		AuthUtils.assertAdministrator(user);
 		int numRows = engine.getCommentDao().delete(commentId);
-		return (numRows == 1) ? Response.ok().build() : ResponseUtils.withMsg("Unable to delete comment", Status.NOT_FOUND);
+		if (numRows != 1) {
+			throw new WebApplicationException("Unable to delete comment", Status.NOT_FOUND);
+		}
+		return Response.ok().build();
 	}
 
 	@POST
