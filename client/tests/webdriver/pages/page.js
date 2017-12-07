@@ -7,7 +7,7 @@ class Page {
 	}
 
 	openAsSuperUser(pathName = '/') {
-		const credentials = 'arthur'
+		const credentials = DEFAULT_CREDENTIALS.superUser
 		const urlToGet = `${browser.options.baseUrl}${pathName}?user=${credentials}&pass=${credentials}`
 		browser.url(urlToGet)
 	}

@@ -2,7 +2,7 @@ import Home from '../pages/home.page'
 import { expect } from 'chai'
 
 describe('Anet user login', () => {
-	it('Default user Erin is logged in"', () => {
+	it('Default user is logged in"', () => {
 		Home.open()
 		Home.securityBanner.waitForExist()
 		Home.securityBanner.waitForVisible()
@@ -10,7 +10,7 @@ describe('Anet user login', () => {
 		expect(securityText).to.equal('DEMO USE ONLY || ERINSON, Erin (edit)')
 	})
 
-	it('Super user Arthur is logged in"', () => {
+	it('Super user is logged in"', () => {
 		Home.openAsSuperUser()
 		Home.securityBanner.waitForExist()
 		Home.securityBanner.waitForVisible()
