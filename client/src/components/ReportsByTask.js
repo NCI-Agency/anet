@@ -84,7 +84,7 @@ export default class ReportsByTask extends Component {
     if (this.state.focusedTask) {
       titleSuffix = `for ${this.state.focusedTask.shortName}`
       resetFnc = 'goToTask'
-      resetButtonLabel = 'All PoAMs'
+      resetButtonLabel = 'All tasks'
     }
     return {
       titleSuffix: titleSuffix,
