@@ -21,72 +21,74 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlPositionSearcher implements IPositionSearcher {
-	
+
 	@Override
 	public PositionList runSearch(PositionSearchQuery query, Handle dbHandle) {
-		StringBuilder sql = new StringBuilder("/* MssqlPositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS
-				+ ", count(*) OVER() AS totalCount "
-				+ " FROM positions ");
-		Map<String,Object> sqlArgs = new HashMap<String,Object>();
-		String commonTableExpression = null;
-		
-		if (query.getMatchPersonName()) { 
-			sql.append(" LEFT JOIN people ON positions.currentPersonId = people.id ");
+		final List<String> whereClauses = new LinkedList<String>();
+		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final StringBuilder sql = new StringBuilder("/* MssqlPositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS);
+
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		sql.append(", count(*) OVER() AS totalCount FROM positions ");
+
+		if (query.getMatchPersonName()) {
+			sql.append(" LEFT JOIN people ON positions.currentPersonId = people.id");
 		}
-		
-		sql.append(" WHERE ");
-		List<String> whereClauses = new LinkedList<String>();
-		PositionList result = new PositionList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) {
-			if (query.getMatchPersonName() != null && query.getMatchPersonName()) { 
-				whereClauses.add("(CONTAINS((positions.name, positions.code), :text) OR (CONTAINS(people.name, :text)))");
-			} else { 
-				whereClauses.add("CONTAINS((name, code), :text)");
+
+		if (doFullTextSearch) {
+			sql.append(" LEFT JOIN CONTAINSTABLE (positions, (name, code), :containsQuery) c_positions"
+					+ " ON positions.id = c_positions.[Key]");
+			final StringBuilder whereRank = new StringBuilder("("
+					+ "c_positions.rank IS NOT NULL");
+			if (query.getMatchPersonName() != null && query.getMatchPersonName()) {
+				sql.append(" LEFT JOIN CONTAINSTABLE(people, (name), :containsQuery) c_people"
+						+ " ON people.id = c_people.[Key]");
+				whereRank.append(" OR c_people.rank IS NOT NULL");
 			}
-			sqlArgs.put("text", Utils.getSqlServerFullTextQuery(text));
+			whereRank.append(")");
+			whereClauses.add(whereRank.toString());
+			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 		}
-		
-		if (query.getType() != null) { 
+
+		if (query.getType() != null) {
 			List<String> argNames = new LinkedList<String>();
-			for (int i = 0;i < query.getType().size();i++) { 
+			for (int i = 0;i < query.getType().size();i++) {
 				argNames.add(":state" + i);
 				sqlArgs.put("state" + i, DaoUtils.getEnumId(query.getType().get(i)));
 			}
 			whereClauses.add("positions.type IN (" + Joiner.on(", ").join(argNames) + ")");
 		}
-		
-		if (query.getOrganizationId() != null) { 
-			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) { 
+
+		String commonTableExpression = null;
+		if (query.getOrganizationId() != null) {
+			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
 				commonTableExpression = "WITH parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
 					+ "UNION ALL "
 						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
 					+ ") ";
 				whereClauses.add(" positions.organizationId IN (SELECT id from parent_orgs)");
-			} else { 
+			} else {
 				whereClauses.add("positions.organizationId = :orgId");
 			}
 			sqlArgs.put("orgId", query.getOrganizationId());
 		}
-		
+
 		if (query.getIsFilled() != null) {
-			if (query.getIsFilled()) { 
+			if (query.getIsFilled()) {
 				whereClauses.add("positions.currentPersonId IS NOT NULL");
-			} else { 
+			} else {
 				whereClauses.add("positions.currentPersonId IS NULL");
 			}
 		}
-		
-		if (query.getLocationId() != null) { 
+
+		if (query.getLocationId() != null) {
 			whereClauses.add("positions.locationId = :locationId");
 			sqlArgs.put("locationId", query.getLocationId());
 		}
-		
-		if (query.getStatus() != null) { 
+
+		if (query.getStatus() != null) {
 			whereClauses.add("positions.status = :status");
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
@@ -99,10 +101,17 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 		}
 
 		
-		if (whereClauses.size() == 0) { return result; }
-		
+		final PositionList result = new PositionList();
+		result.setPageNum(query.getPageNum());
+		result.setPageSize(query.getPageSize());
+
+		if (whereClauses.isEmpty()) {
+			return result;
+		}
+
+		sql.append(" WHERE ");
 		sql.append(Joiner.on(" AND ").join(whereClauses));
-		
+
 		//Sort Ordering
 		sql.append(" ORDER BY ");
 		if (query.getSortBy() == null) { query.setSortBy(PositionSearchSortBy.NAME); }
@@ -118,7 +127,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 				sql.append("positions.name");
 				break;
 		}
-		
+
 		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
 		switch (query.getSortOrder()) {
 			case ASC:
@@ -131,7 +140,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 		}
 		sql.append(", positions.id ASC ");
 
-		if (commonTableExpression != null) { 
+		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);
 		}
 
@@ -139,5 +148,5 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			.map(new PositionMapper());
 		return PositionList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
 	}
-	
+
 }

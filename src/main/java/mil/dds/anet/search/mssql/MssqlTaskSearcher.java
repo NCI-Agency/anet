@@ -21,25 +21,24 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 
 	@Override
 	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
-		StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*, COUNT(*) OVER() AS totalCount FROM tasks");
-		Map<String,Object> args = new HashMap<String,Object>();
+		final List<String> whereClauses = new LinkedList<String>();
+		final Map<String,Object> args = new HashMap<String,Object>();
+		final StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*");
 
-		sql.append(" WHERE ");
-		List<String> whereClauses = new LinkedList<String>();
-		String commonTableExpression = null;
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		sql.append(", COUNT(*) OVER() AS totalCount FROM tasks");
 
-		TaskList result =  new TaskList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) {
-			whereClauses.add("(CONTAINS((longName, customField), :text) OR shortName LIKE :likeQuery)");
-			args.put("text", Utils.getSqlServerFullTextQuery(text));
+		if (doFullTextSearch) {
+			sql.append(" LEFT JOIN CONTAINSTABLE (tasks, (longName), :containsQuery) c_tasks"
+					+ " ON tasks.id = c_tasks.[Key]");
+			whereClauses.add("(c_tasks.rank IS NOT NULL"
+					+ " OR tasks.shortName LIKE :likeQuery)");
+			args.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			args.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
-			args.put("text", Utils.getSqlServerFullTextQuery(text));
 		}
 
+		String commonTableExpression = null;
 		if (query.getResponsibleOrgId() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
 				commonTableExpression = "WITH parent_orgs(id) AS ( "
@@ -94,10 +93,17 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			args.put("customField", Utils.prepForLikeQuery(query.getCustomField()) + "%");
 		}
 
-		if (whereClauses.size() == 0) { return result; }
+		final TaskList result =  new TaskList();
+		result.setPageNum(query.getPageNum());
+		result.setPageSize(query.getPageSize());
 
+		if (whereClauses.isEmpty()) {
+			return result;
+		}
+
+		sql.append(" WHERE ");
 		sql.append(Joiner.on(" AND ").join(whereClauses));
-		sql.append(" ORDER BY shortName ASC, longName ASC, id ASC");
+		sql.append(" ORDER BY poams.shortName ASC, poams.longName ASC, poams.id ASC");
 
 		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);
