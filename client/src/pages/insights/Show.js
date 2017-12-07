@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Page from 'components/Page'
 import PendingApprovalReports from 'components/PendingApprovalReports'
 import CancelledEngagementReports from 'components/CancelledEngagementReports'
-import ReportsByPoam from 'components/ReportsByPoam'
+import ReportsByTask from 'components/ReportsByTask'
 import ReportsByDayOfWeek from 'components/ReportsByDayOfWeek'
 import FutureEngagementsByLocation from 'components/FutureEngagementsByLocation'
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -30,8 +30,8 @@ const insightDetails = {
     showCalendar: true
   },
   'reports-by-poam': {
-    component: ReportsByPoam,
-    title: 'Reports by PoAM',
+    component: ReportsByTask,
+    title: 'Reports by Task',
     help: '',
     dateRange: false,
     showCalendar: true
