@@ -8,6 +8,7 @@ import dict from 'dictionary'
 import {Table, Button, HelpBlock} from 'react-bootstrap'
 
 import {Task} from 'models'
+import Poam from 'models/Poam' //FIXME refactor when graphql is updated to use tasks
 
 import REMOVE_ICON from 'resources/delete.png'
 import WARNING_ICON from 'resources/warning.png'
@@ -35,7 +36,7 @@ export default class TasksSelector extends Component {
 		return <Fieldset title={taskLong} action={optional && "(Optional)"} className="tasks-selector">
 			<Form.Field id="tasks" label={taskShort} validationState={validationState} >
 				<Autocomplete
-					objectType={Task}
+					objectType={Poam}
 					fields={Task.autocompleteQuery}
 					queryParams={{status: 'ACTIVE'}}
 					placeholder={`Start typing to search for ${taskShort}...`}
