@@ -27,13 +27,13 @@ test('People 404', async t => {
     await assertElementText(t, await $('.not-found-text'), 'User #555 not found.')
 })
 
-test('PoAMs 404', async t => {
+test('Tasks 404', async t => {
     t.plan(1)
 
     let {assertElementText, $} = t.context
 
-    await t.context.get('/poams/555')
-    await assertElementText(t, await $('.not-found-text'), 'PoAM #555 not found.')
+    await t.context.get('/tasks/555')
+    await assertElementText(t, await $('.not-found-text'), 'Task #555 not found.')
 })
 
 test('Positions 404', async t => {
