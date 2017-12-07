@@ -10,7 +10,7 @@ import Form from 'components/Form'
 import TextEditor from 'components/TextEditor'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import PoamsSelector from 'components/PoamsSelector'
+import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
 import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -41,7 +41,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			recents: {
 				persons: [],
 				locations: [],
-				poams: [],
+				tasks: [],
 			},
 			tagList: [],
 			suggestionList: [],
@@ -78,7 +78,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 				recents: {
 					locations: data.locationList.list,
 					persons: data.personList.list,
-					poams: data.poamList.list,
+					tasks: data.poamList.list,
 				},
 				tagList: data.tagList.list,
 				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
@@ -274,11 +274,11 @@ export default class ReportForm extends ValidatableFormWrapper {
 				</Fieldset>
 
 				{!isCancelled &&
-					<PoamsSelector poams={report.poams}
-						shortcuts={recents.poams}
+					<TaskSelector tasks={report.poams}
+						shortcuts={recents.tasks}
 						onChange={this.onChange}
-						onErrorChange={this.onPoamError}
-						validationState={errors.poams}
+						onErrorChange={this.onTaskError}
+						validationState={errors.tasks}
 						optional={true} />
 				}
 
@@ -383,12 +383,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 
 	@autobind
-	onPoamError(isError, message) {
+	onTaskError(isError, message) {
 		let errors = this.state.errors
 		if (isError) {
-			errors.poams = 'error'
+			errors.tasks = 'error'
 		} else {
-			delete errors.poams
+			delete errors.tasks
 		}
 		this.setState({errors})
 	}
