@@ -19,7 +19,7 @@ class CreatePerson extends Page {
     get submitButton()          { return browser.element('form .form-top-submit > button[type="submit"]') }
 
     open() {
-        super.openAsSuperUser(Page_URL, 'arthur')
+        super.openAsSuperUser(Page_URL)
     }
 
     waitForAlertSuccessToLoad() {
