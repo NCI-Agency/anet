@@ -29,7 +29,7 @@ const insightDetails = {
     dateRange: false,
     showCalendar: true
   },
-  'reports-by-poam': {
+  'reports-by-task': {
     component: ReportsByTask,
     title: 'Reports by Task',
     help: '',
