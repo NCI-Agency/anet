@@ -98,7 +98,7 @@ let superUserTour = (currentUser) => { return {
 }}
 
 let reportTour = (currentUser) => {
-	let poamShortTitle = dict.lookup("POAM_SHORT_NAME")
+	let taskShortTitle = dict.lookup("POAM_SHORT_NAME")
 	return {
 	id: 'report',
 	steps: [
@@ -135,7 +135,7 @@ let reportTour = (currentUser) => {
 		},
 			{
 			title: 'Recents',
-			content: "If you've written reports in the past, your recent selections of attendees, " + poamShortTitle + "s, and locations will display to the right in a section called \"Recents\". You can click on one of the shortcuts to quickly add it to your report.",
+			content: "If you've written reports in the past, your recent selections of attendees, " + taskShortTitle + "s, and locations will display to the right in a section called \"Recents\". You can click on one of the shortcuts to quickly add it to your report.",
 			target: '#attendees',
 			placement: 'bottom',
 		},
@@ -146,9 +146,9 @@ let reportTour = (currentUser) => {
 			placement: 'bottom',
 		},
 		{
-			title: poamShortTitle + 's',
-			content: 'Search for the ' + poamShortTitle + 's that apply to this engagement. You can search for ' + poamShortTitle + 's in any organization, including your organization and its sub-organizations. ' + poamShortTitle + 's are not required.',
-			target: '#poams',
+			title: taskShortTitle + 's',
+			content: 'Search for the ' + taskShortTitle + 's that apply to this engagement. You can search for ' + taskShortTitle + 's in any organization, including your organization and its sub-organizations. ' + taskShortTitle + 's are not required.',
+			target: '#tasks',
 			placement: 'right',
 		},
 		{
@@ -185,7 +185,7 @@ let reportTour = (currentUser) => {
 }}
 
 let orgTour = (currentUser) => {
-	let poamShortTitle = dict.lookup("POAM_SHORT_NAME")
+	let taskShortTitle = dict.lookup("POAM_SHORT_NAME")
 	return {
 	id: 'org',
 	steps: [
@@ -220,9 +220,9 @@ let orgTour = (currentUser) => {
 			placement: 'top',
 		},
 		{
-			title: poamShortTitle + 's',
-			content: 'The ' + dict.lookup('POAM_LONG_NAME') + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + poamShortTitle + 's change, you can update that information by clicking on the ' + poamShortTitle + '.',
-			target: '#poams h2',
+			title: taskShortTitle + 's',
+			content: 'The ' + dict.lookup('POAM_LONG_NAME') + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortTitle + 's change, you can update that information by clicking on the ' + taskShortTitle + '.',
+			target: '#tasks h2',
 			placement: 'top',
 		},
 		{
@@ -247,7 +247,7 @@ let orgTour = (currentUser) => {
 }}
 
 let positionTour = (currentUser) => {
-	let poamShortTitle = dict.lookup("POAM_SHORT_NAME")
+	let taskShortTitle = dict.lookup("POAM_SHORT_NAME")
 	return {
 		id: 'position',
 		steps: [
@@ -259,7 +259,7 @@ let positionTour = (currentUser) => {
 			},
 			{
 				title: "Type of user",
-				content: "There are three types of users: user, super user, and administrator. Super users can give other positions either user or super user privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Super users are able to edit positions, people, and " + poamShortTitle + "s in their organization, as well as locations. This section isn't visible if you're looking at a tashkil position.",
+				content: "There are three types of users: user, super user, and administrator. Super users can give other positions either user or super user privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Super users are able to edit positions, people, and " + taskShortTitle + "s in their organization, as well as locations. This section isn't visible if you're looking at a tashkil position.",
 				target: '#type',
 				placement: 'bottom',
 			},
