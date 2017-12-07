@@ -22,11 +22,11 @@ export default class OrganizationPoams extends Component {
 		}
 
 		let poams = this.props.poams.list || []
-		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
+		let isAdminUser = currentUser && currentUser.isAdmin()
 		let poamShortName = dict.lookup('POAM_SHORT_NAME')
 
 		return <Fieldset id="poams" title={poamShortName} action={
-			isSuperUser && <LinkTo poam={Poam.pathForNew({responsibleOrgId: org.id})} button>Create {poamShortName}</LinkTo>
+			isAdminUser && <LinkTo poam={Poam.pathForNew({responsibleOrgId: org.id})} button>Create {poamShortName}</LinkTo>
 		}>
 			{this.pagination()}
 			<Table>

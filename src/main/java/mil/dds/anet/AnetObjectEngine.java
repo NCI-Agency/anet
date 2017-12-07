@@ -55,7 +55,7 @@ public class AnetObjectEngine {
 	
 	private static AnetObjectEngine instance; 
 	
-	Handle dbHandle;
+	private final Handle dbHandle;
 	
 	public AnetObjectEngine(DBI jdbi) { 
 		dbHandle = jdbi.open();
@@ -83,7 +83,11 @@ public class AnetObjectEngine {
 			searcher = new SqliteSearcher();
 		}
 	}
-	
+
+	public Handle getDbHandle() {
+		return dbHandle;
+	}
+
 	public PersonDao getPersonDao() { 
 		return personDao;
 	}
