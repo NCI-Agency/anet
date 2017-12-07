@@ -21,17 +21,21 @@ public class MssqlTagSearcher implements ITagSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		final String text = query.getText();
-		if (text == null || text.trim().length() == 0) {
+		if (text == null || text.trim().isEmpty()) {
 			return result;
 		}
 
-		final StringBuilder sql = new StringBuilder(
-				"/* MssqlTagSearch */ SELECT *, count(*) over() as totalCount "
-						+ "FROM tags "
-						+ "WHERE CONTAINS((name, description), :containsQuery) "
-						+ "OR FREETEXT((name, description), :freetextQuery) "
-						+ "ORDER BY name ASC, id ASC");
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final StringBuilder sql = new StringBuilder(
+				"/* MssqlTagSearch */ SELECT tags.*"
+						+ ", count(*) over() as totalCount FROM tags"
+						+ " LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
+						+ " ON tags.id = c_tags.[Key]"
+						+ " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
+						+ " ON tags.id = f_tags.[Key]"
+						+ " WHERE (c_tags.rank IS NOT NULL"
+						+ " OR f_tags.rank IS NOT NULL)"
+						+ " ORDER BY tags.name ASC, tags.id ASC");
 		sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 		sqlArgs.put("freetextQuery", text);
 

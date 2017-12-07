@@ -21,25 +21,25 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 
 	@Override
 	public PoamList runSearch(PoamSearchQuery query, Handle dbHandle) {
-		StringBuilder sql = new StringBuilder("/* MssqlPoamSearch */ SELECT poams.*, COUNT(*) OVER() AS totalCount FROM poams");
-		Map<String,Object> args = new HashMap<String,Object>();
-		
-		sql.append(" WHERE ");
-		List<String> whereClauses = new LinkedList<String>();
-		String commonTableExpression = null;
+		final List<String> whereClauses = new LinkedList<String>();
+		final Map<String,Object> args = new HashMap<String,Object>();
+		final StringBuilder sql = new StringBuilder("/* MssqlPoamSearch */ SELECT poams.*");
 
-		PoamList result =  new PoamList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) { 
-			whereClauses.add("(CONTAINS((longName), :text) OR shortName LIKE :likeQuery)");
-			args.put("text", Utils.getSqlServerFullTextQuery(text));
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		sql.append(", COUNT(*) OVER() AS totalCount FROM poams");
+
+		if (doFullTextSearch) {
+			sql.append(" LEFT JOIN CONTAINSTABLE (poams, (longName), :containsQuery) c_poams"
+					+ " ON poams.id = c_poams.[Key]");
+			whereClauses.add("(c_poams.rank IS NOT NULL"
+					+ " OR poams.shortName LIKE :likeQuery)");
+			args.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			args.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
-		
-		if (query.getResponsibleOrgId() != null) { 
+
+		String commonTableExpression = null;
+		if (query.getResponsibleOrgId() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
 				commonTableExpression = "WITH parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
@@ -47,28 +47,35 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
 					+ ") ";
 				whereClauses.add(" organizationId IN (SELECT id from parent_orgs)");
-			} else { 
+			} else {
 				whereClauses.add("organizationId = :orgId");
 			}
 			args.put("orgId", query.getResponsibleOrgId());
 		}
-		
-		if (query.getCategory() != null) { 
-			whereClauses.add("category = :category");
+
+		if (query.getCategory() != null) {
+			whereClauses.add("poams.category = :category");
 			args.put("category", query.getCategory());
 		}
-		
-		if (query.getStatus() != null) { 
-			whereClauses.add("status = :status");
+
+		if (query.getStatus() != null) {
+			whereClauses.add("poams.status = :status");
 			args.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
-		
-		if (whereClauses.size() == 0) { return result; }
-		
-		sql.append(Joiner.on(" AND ").join(whereClauses));
-		sql.append(" ORDER BY shortName ASC, longName ASC, id ASC");
 
-		if (commonTableExpression != null) { 
+		final PoamList result =  new PoamList();
+		result.setPageNum(query.getPageNum());
+		result.setPageSize(query.getPageSize());
+
+		if (whereClauses.isEmpty()) {
+			return result;
+		}
+
+		sql.append(" WHERE ");
+		sql.append(Joiner.on(" AND ").join(whereClauses));
+		sql.append(" ORDER BY poams.shortName ASC, poams.longName ASC, poams.id ASC");
+
+		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);
 		}
 
@@ -76,5 +83,5 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 			.map(new PoamMapper());
 		return PoamList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
 	}
-	
+
 }
