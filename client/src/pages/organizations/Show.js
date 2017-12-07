@@ -13,7 +13,7 @@ import ReportCollection from 'components/ReportCollection'
 import GuidedTour from 'components/GuidedTour'
 import {orgTour} from 'pages/HopscotchTour'
 
-import OrganizationPoams from './Poams'
+import OrganizationTasks from './OrganizationTasks'
 import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
@@ -37,13 +37,13 @@ export default class OrganizationShow extends Page {
 		this.state = {
 			organization: new Organization({id: props.params.id}),
 			reports: null,
-			poams: null,
+			tasks: null,
 			reportsFilter: NO_REPORT_FILTER,
 			action: props.params.action
 		}
 
 		this.reportsPageNum = 0
-		this.poamsPageNum = 0
+		this.tasksPageNum = 0
 		this.togglePendingApprovalFilter = this.togglePendingApprovalFilter.bind(this)
 		setMessages(props,this.state)
 	}
@@ -82,21 +82,21 @@ export default class OrganizationShow extends Page {
 		return reportsPart
 	}
 
-	getPoamQueryPart(orgId) {
-		let poamQuery = {
-			pageNum: this.poamsPageNum,
+	gettaskQueryPart(orgId) {
+		let taskQuery = {
+			pageNum: this.tasksPageNum,
 			status: 'ACTIVE',
 			pageSize: 10,
 			responsibleOrgId: orgId
 		}
-		let poamsPart = new GQL.Part(/* GraphQL */`
+		let taskPart = new GQL.Part(/* GraphQL */`
 			poams: poamList(query:$poamQuery) {
 				pageNum, pageSize, totalCount, list {
 					id, shortName, longName
 				}
 			}`)
-			.addVariable("poamQuery", "PoamSearchQuery", poamQuery)
-		return poamsPart
+			.addVariable("poamQuery", "PoamSearchQuery", taskQuery)
+		return taskPart
 	}
 
 	fetchData(props) {
@@ -118,9 +118,9 @@ export default class OrganizationShow extends Page {
 				}
 			}`)
 		let reportsPart = this.getReportQueryPart(props.params.id)
-		let poamsPart = this.getPoamQueryPart(props.params.id)
+		let tasksPart = this.gettaskQueryPart(props.params.id)
 
-		this.runGQL([orgPart, reportsPart, poamsPart])
+		this.runGQL([orgPart, reportsPart, tasksPart])
 	}
 
 	runGQL(queries) {
@@ -128,7 +128,7 @@ export default class OrganizationShow extends Page {
 			this.setState({
 				organization: new Organization(data.organization),
 				reports: data.reports,
-				poams: data.poams
+				tasks: data.poams
 			})
 		)
 	}
@@ -154,7 +154,7 @@ export default class OrganizationShow extends Page {
 	render() {
 		let org = this.state.organization
 		let reports = this.state.reports
-		let poams = this.state.poams
+		let tasks = this.state.tasks
 
 		let currentUser = this.context.currentUser
 		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
@@ -235,7 +235,7 @@ export default class OrganizationShow extends Page {
 
 					<OrganizationLaydown organization={org} />
 					<OrganizationApprovals organization={org} />
-					<OrganizationPoams organization={org} poams={poams} goToPage={this.goToPoamsPage}/>
+					<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
 
 					<Fieldset id="reports" title={`Reports from ${org.shortName}`}>
 						<ReportCollection
@@ -261,11 +261,11 @@ export default class OrganizationShow extends Page {
 	}
 
 	@autobind
-	goToPoamsPage(pageNum) {
-		this.poamsPageNum = pageNum
-		let poamQueryPart = this.getPoamQueryPart(this.state.organization.id)
-		GQL.run([poamQueryPart]).then(data =>
-			this.setState({poams: data.poams})
+	goTotasksPage(pageNum) {
+		this.tasksPageNum = pageNum
+		let taskQueryPart = this.gettaskQueryPart(this.state.organization.id)
+		GQL.run([taskQueryPart]).then(data =>
+			this.setState({tasks: data.poams})
 		)
 	}
 
