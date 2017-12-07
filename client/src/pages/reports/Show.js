@@ -16,7 +16,7 @@ import Tag from 'components/Tag'
 
 import API from 'api'
 import dict from 'dictionary'
-import {Report, Person, Poam, Comment, Position} from 'models'
+import {Report, Person, Task, Comment, Position} from 'models'
 
 export default class ReportShow extends Page {
 	static contextTypes = {
@@ -257,10 +257,11 @@ export default class ReportShow extends Page {
 							</thead>
 
 							<tbody>
-								{Poam.map(report.poams, (poam, idx) =>
-									<tr key={poam.id} id={"poam_" + idx}>
-										<td className="poamName" ><LinkTo poam={poam} >{poam.shortName} - {poam.longName}</LinkTo></td>
-										<td className="poamOrg" ><LinkTo organization={poam.responsibleOrg} /></td>
+								{console.log(report.poams)}
+								{Task.map(report.poams, (task, idx) =>
+									<tr key={task.id} id={"task_" + idx}>
+										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
+										<td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>
 									</tr>
 								)}
 							</tbody>
