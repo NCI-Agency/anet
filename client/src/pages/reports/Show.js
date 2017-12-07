@@ -257,7 +257,6 @@ export default class ReportShow extends Page {
 							</thead>
 
 							<tbody>
-								{console.log(report.poams)}
 								{Task.map(report.poams, (task, idx) =>
 									<tr key={task.id} id={"task_" + idx}>
 										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
