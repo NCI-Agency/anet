@@ -25,7 +25,7 @@ import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
 import LOCATIONS_ICON from 'resources/locations.png'
-import POAMS_ICON from 'resources/poams.png'
+import POAMS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
