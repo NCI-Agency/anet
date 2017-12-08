@@ -6,6 +6,8 @@ import mil.dds.anet.beans.Task.TaskStatus;
 
 public class TaskSearchQuery extends AbstractSearchQuery {
 
+	public enum TaskSearchSortBy { CREATED_AT, NAME, CATEGORY }
+
 	Integer responsibleOrgId;
 	Boolean includeChildrenOrgs;
 	String category;
@@ -16,6 +18,9 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 	private DateTime projectedCompletionStart;
 	private String projectStatus;
 	private String customField;
+
+	private TaskSearchSortBy sortBy;
+	private SortOrder sortOrder;
 
 	public Integer getResponsibleOrgId() {
 		return responsibleOrgId;
@@ -95,6 +100,22 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 
 	public void setCustomField(String customField) {
 		this.customField = customField;
+	}
+
+	public TaskSearchSortBy getSortBy() {
+		return sortBy;
+	}
+
+	public void setSortBy(TaskSearchSortBy sortBy) {
+		this.sortBy = sortBy;
+	}
+
+	public SortOrder getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
 	}
 
 	public static TaskSearchQuery withText(String text, int pageNum, int pageSize) {

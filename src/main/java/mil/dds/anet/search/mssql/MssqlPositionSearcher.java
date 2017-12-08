@@ -30,9 +30,20 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
+			// If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
+			// so we can sort on it (show the most relevant hits at the top).
+			// Note that summing up independent ranks is not ideal, but it's the best we can do now.
+			// See https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
+			sql.append(", ISNULL(c_positions.rank, 0)");
+			if (Boolean.TRUE.equals(query.getMatchPersonName())) {
+				sql.append(" + ISNULL(c_people.rank, 0)");
+			}
+			sql.append(" AS search_rank");
+		}
 		sql.append(", count(*) OVER() AS totalCount FROM positions ");
 
-		if (query.getMatchPersonName()) {
+		if (Boolean.TRUE.equals(query.getMatchPersonName())) {
 			sql.append(" LEFT JOIN people ON positions.currentPersonId = people.id");
 		}
 
@@ -41,7 +52,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 					+ " ON positions.id = c_positions.[Key]");
 			final StringBuilder whereRank = new StringBuilder("("
 					+ "c_positions.rank IS NOT NULL");
-			if (query.getMatchPersonName() != null && query.getMatchPersonName()) {
+			if (Boolean.TRUE.equals(query.getMatchPersonName())) {
 				sql.append(" LEFT JOIN CONTAINSTABLE(people, (name), :containsQuery) c_people"
 						+ " ON people.id = c_people.[Key]");
 				whereRank.append(" OR c_people.rank IS NOT NULL");
@@ -113,32 +124,30 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 
 		//Sort Ordering
-		sql.append(" ORDER BY ");
+		final List<String> orderByClauses = new LinkedList<>();
+		if (doFullTextSearch && query.getSortBy() == null) {
+			// We're doing a full-text search without an explicit sort order,
+			// so sort first on the search pseudo-rank.
+			orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+		}
+
 		if (query.getSortBy() == null) { query.setSortBy(PositionSearchSortBy.NAME); }
+		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
 		switch (query.getSortBy()) {
-			case CODE:
-				sql.append("positions.code");
-				break;
 			case CREATED_AT:
-				sql.append("positions.createdAt");
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "positions", "createdAt"));
+				break;
+			case CODE:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "positions", "code"));
 				break;
 			case NAME:
 			default:
-				sql.append("positions.name");
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "positions", "name"));
 				break;
 		}
-
-		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
-		switch (query.getSortOrder()) {
-			case ASC:
-				sql.append(" ASC ");
-				break;
-			case DESC:
-			default:
-				sql.append(" DESC ");
-				break;
-		}
-		sql.append(", positions.id ASC ");
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "positions", "id"));
+		sql.append(" ORDER BY ");
+		sql.append(Joiner.on(", ").join(orderByClauses));
 
 		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);

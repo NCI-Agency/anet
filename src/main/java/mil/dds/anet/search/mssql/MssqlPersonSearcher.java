@@ -33,7 +33,7 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 		if (doFullTextSearch) {
 			// If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
 			// so we can sort on it (show the most relevant hits at the top).
-			// Note that summing up two or three independent ranks is not ideal, but it's the best we can do now.
+			// Note that summing up independent ranks is not ideal, but it's the best we can do now.
 			// See https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
 			sql.append(", ISNULL(c_people.rank, 0) + ISNULL(f_people.rank, 0)");
 			if (query.getMatchPositionName()) {
@@ -127,38 +127,30 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 
 		//Sort Ordering
-		sql.append(" ORDER BY ");
+		final List<String> orderByClauses = new LinkedList<>();
 		if (doFullTextSearch && query.getSortBy() == null) {
 			// We're doing a full-text search without an explicit sort order,
 			// so sort first on the search pseudo-rank.
-			sql.append("search_rank DESC, ");
+			orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
 		}
 
 		if (query.getSortBy() == null) { query.setSortBy(PersonSearchSortBy.NAME); }
+		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
 		switch (query.getSortBy()) {
-			case RANK:
-				sql.append("people.rank");
-				break;
 			case CREATED_AT:
-				sql.append("people.createdAt");
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "people", "createdAt"));
+				break;
+			case RANK:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "people", "rank"));
 				break;
 			case NAME:
 			default:
-				sql.append("people.name");
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "people", "name"));
 				break;
 		}
-
-		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
-		switch (query.getSortOrder()) {
-			case ASC:
-				sql.append(" ASC ");
-				break;
-			case DESC:
-			default:
-				sql.append(" DESC ");
-				break;
-		}
-		sql.append(", people.id ASC ");
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "people", "id"));
+		sql.append(" ORDER BY ");
+		sql.append(Joiner.on(", ").join(orderByClauses));
 
 		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);
