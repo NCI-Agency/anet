@@ -17,6 +17,7 @@ import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Utils {
@@ -97,6 +98,14 @@ public class Utils {
 	 */
 	public static String prepForLikeQuery(String text) {
 		return text.trim().replaceAll("[\"*]", "");
+	}
+
+	public static List<String> addOrderBy(SortOrder sortOrder, String table, String... columns) {
+		final List<String> clauses = new ArrayList<>();
+		for (final String column : columns) {
+			clauses.add(String.format("%1$s.%2$s %3$s", table, column, sortOrder));
+		}
+		return clauses;
 	}
 
 	/**
