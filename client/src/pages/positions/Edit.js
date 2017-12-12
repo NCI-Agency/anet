@@ -37,10 +37,12 @@ export default class PositionEdit extends Page {
 		`).then(data => {
 			function getPositionFromData() {
 				let position = new Position(data.position)
-				//need to set type to either ADVISOR or PRINCIPAL and add permissions property.
-				//This is undone in the onSubmit method in the Form.
-				position.permissions = position.type
-				if (position.type === Position.TYPE.SUPER_USER || position.type === Position.TYPE.ADMINISTRATOR) {
+				if (position.type === Position.TYPE.ADVISOR || position.type === Position.TYPE.SUPER_USER || position.type === Position.TYPE.ADMINISTRATOR) {
+					// For advisor types of positions, set the type to ADVISOR and add
+					// permissions property. The permissions property allows selecting a
+					// specific advisor type and is removed in the onSubmit method in the
+					// Form.js.
+					position.permissions = position.type
 					position.type = Position.TYPE.ADVISOR
 				}
 				return position
