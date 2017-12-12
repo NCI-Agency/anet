@@ -103,7 +103,12 @@ public class Utils {
 	public static List<String> addOrderBy(SortOrder sortOrder, String table, String... columns) {
 		final List<String> clauses = new ArrayList<>();
 		for (final String column : columns) {
-			clauses.add(String.format("%1$s.%2$s %3$s", table, column, sortOrder));
+			if (table == null) {
+				clauses.add(String.format("%1$s %2$s", column, sortOrder));
+			}
+			else {
+				clauses.add(String.format("%1$s.%2$s %3$s", table, column, sortOrder));
+			}
 		}
 		return clauses;
 	}
