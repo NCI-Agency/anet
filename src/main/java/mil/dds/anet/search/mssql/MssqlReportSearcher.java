@@ -38,6 +38,15 @@ public class MssqlReportSearcher implements IReportSearcher {
 
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
+			// If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
+			// so we can sort on it (show the most relevant hits at the top).
+			// Note that summing up independent ranks is not ideal, but it's the best we can do now.
+			// See https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
+			sql.append(", ISNULL(c_reports.rank, 0) + ISNULL(f_reports.rank, 0)"
+					+ " + ISNULL(c_tags.rank, 0) + ISNULL(f_tags.rank, 0)");
+			sql.append(" AS search_rank");
+		}
 		if (query.getIncludeEngagementDayOfWeek()) {
 			sql.append(", DATEPART(dw, reports.engagementDate) as engagementDayOfWeek");
 		}
@@ -265,33 +274,31 @@ public class MssqlReportSearcher implements IReportSearcher {
 		sql.append(" ) l");
 
 		//Sort Ordering
-		sql.append(" ORDER BY ");
-		if (query.getSortBy() == null) { query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE); }
-		// Beware of the sort field names, they have to match what's in the selected fields!
-		switch (query.getSortBy()) {
-			case ENGAGEMENT_DATE:
-				sql.append("reports_engagementDate");
-				break;
-			case RELEASED_AT:
-				sql.append("reports_releasedAt");
-				break;
-			case CREATED_AT:
-			default:
-				sql.append("reports_createdAt");
-				break;
+		final List<String> orderByClauses = new LinkedList<>();
+		if (doFullTextSearch && query.getSortBy() == null) {
+			// We're doing a full-text search without an explicit sort order,
+			// so sort first on the search pseudo-rank.
+			orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
 		}
 
+		if (query.getSortBy() == null) { query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE); }
 		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.DESC); }
-		switch (query.getSortOrder()) {
-			case ASC:
-				sql.append(" ASC ");
+		// Beware of the sort field names, they have to match what's in the selected fields!
+		switch (query.getSortBy()) {
+			case CREATED_AT:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_createdAt"));
 				break;
-			case DESC:
+			case RELEASED_AT:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_releasedAt"));
+				break;
+			case ENGAGEMENT_DATE:
 			default:
-				sql.append(" DESC ");
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_engagementDate"));
 				break;
 		}
-		sql.append(", reports_id DESC ");
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "reports_id"));
+		sql.append(" ORDER BY ");
+		sql.append(Joiner.on(", ").join(orderByClauses));
 
 		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);

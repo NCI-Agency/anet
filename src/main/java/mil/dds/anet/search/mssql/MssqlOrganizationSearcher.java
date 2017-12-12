@@ -11,7 +11,9 @@ import org.skife.jdbi.v2.Query;
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.OrganizationSearchQuery.OrganizationSearchSortBy;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.search.IOrganizationSearcher;
@@ -28,6 +30,14 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
+			// If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest possible score)
+			// so we can sort on it (show the most relevant hits at the top).
+			sql.append(", ISNULL(c_organizations.rank, 0)"
+					+ " + CASE WHEN organizations.shortName LIKE :likeQuery THEN 1000 ELSE 0 END"
+					+ " + CASE WHEN organizations.identificationCode LIKE :likeQuery THEN 1000 ELSE 0 END");
+			sql.append(" AS search_rank");
+		}
 		sql.append(", count(*) OVER() AS totalCount FROM organizations");
 
 		if (doFullTextSearch) {
@@ -71,7 +81,32 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 
 		sql.append(" WHERE ");
 		sql.append(Joiner.on(" AND ").join(whereClauses));
-		sql.append(" ORDER BY organizations.shortName ASC, organizations.longName ASC, organizations.identificationCode ASC, organizations.id ASC");
+
+		//Sort Ordering
+		final List<String> orderByClauses = new LinkedList<>();
+		if (doFullTextSearch && query.getSortBy() == null) {
+			// We're doing a full-text search without an explicit sort order,
+			// so sort first on the search pseudo-rank.
+			orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+		}
+
+		if (query.getSortBy() == null) { query.setSortBy(OrganizationSearchSortBy.NAME); }
+		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
+		switch (query.getSortBy()) {
+			case CREATED_AT:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "organizations", "createdAt"));
+				break;
+			case TYPE:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "organizations", "type"));
+				break;
+			case NAME:
+			default:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "organizations", "shortName", "longName", "identificationCode"));
+				break;
+		}
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "organizations", "id"));
+		sql.append(" ORDER BY ");
+		sql.append(Joiner.on(", ").join(orderByClauses));
 
 		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);

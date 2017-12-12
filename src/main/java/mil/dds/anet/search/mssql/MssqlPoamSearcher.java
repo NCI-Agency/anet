@@ -11,7 +11,9 @@ import org.skife.jdbi.v2.Query;
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Poam;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PoamSearchQuery;
+import mil.dds.anet.beans.search.PoamSearchQuery.PoamSearchSortBy;
 import mil.dds.anet.database.mappers.PoamMapper;
 import mil.dds.anet.search.IPoamSearcher;
 import mil.dds.anet.utils.DaoUtils;
@@ -27,6 +29,13 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
+			// If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest possible score)
+			// so we can sort on it (show the most relevant hits at the top).
+			sql.append(", ISNULL(c_poams.rank, 0)"
+					+ " + CASE WHEN poams.shortName LIKE :likeQuery THEN 1000 ELSE 0 END");
+			sql.append(" AS search_rank");
+		}
 		sql.append(", COUNT(*) OVER() AS totalCount FROM poams");
 
 		if (doFullTextSearch) {
@@ -73,7 +82,31 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 
 		sql.append(" WHERE ");
 		sql.append(Joiner.on(" AND ").join(whereClauses));
-		sql.append(" ORDER BY poams.shortName ASC, poams.longName ASC, poams.id ASC");
+		//Sort Ordering
+		final List<String> orderByClauses = new LinkedList<>();
+		if (doFullTextSearch && query.getSortBy() == null) {
+			// We're doing a full-text search without an explicit sort order,
+			// so sort first on the search pseudo-rank.
+			orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
+		}
+
+		if (query.getSortBy() == null) { query.setSortBy(PoamSearchSortBy.NAME); }
+		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
+		switch (query.getSortBy()) {
+			case CREATED_AT:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "poams", "createdAt"));
+				break;
+			case CATEGORY:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "poams", "category"));
+				break;
+			case NAME:
+			default:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "poams", "shortName", "longName"));
+				break;
+		}
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "poams", "id"));
+		sql.append(" ORDER BY ");
+		sql.append(Joiner.on(", ").join(orderByClauses));
 
 		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);
