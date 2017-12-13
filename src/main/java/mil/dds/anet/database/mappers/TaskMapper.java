@@ -8,23 +8,23 @@ import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Poam;
-import mil.dds.anet.beans.Poam.PoamStatus;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Task.TaskStatus;
 
-public class PoamMapper implements ResultSetMapper<Poam> {
+public class TaskMapper implements ResultSetMapper<Task> {
 
 	@Override
-	public Poam map(int index, ResultSet r, StatementContext ctx) throws SQLException {
-		Poam p = new Poam();
+	public Task map(int index, ResultSet r, StatementContext ctx) throws SQLException {
+		Task p = new Task();
 		p.setId(r.getInt("id"));
 		p.setLongName(r.getString("longName"));
 		p.setShortName(r.getString("shortName"));
 		p.setCategory(r.getString("category"));
-		p.setStatus(MapperUtils.getEnumIdx(r, "status", PoamStatus.class));
+		p.setStatus(MapperUtils.getEnumIdx(r, "status", TaskStatus.class));
 		
 		Integer parentPoamId = MapperUtils.getInteger(r, "parentPoamId");
 		if (parentPoamId != null) { 
-			p.setParentPoam(Poam.createWithId(parentPoamId));
+			p.setParentTask(Task.createWithId(parentPoamId));
 		}
 		
 		Integer responsibleOrgId = MapperUtils.getInteger(r, "organizationId");

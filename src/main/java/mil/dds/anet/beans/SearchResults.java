@@ -13,7 +13,7 @@ public class SearchResults implements IGraphQLBean {
 	PersonList people;
 	ReportList reports;
 	PositionList positions;
-	TaskList poams;
+	TaskList tasks;
 	LocationList locations;
 	OrganizationList organizations;
 	
@@ -42,11 +42,11 @@ public class SearchResults implements IGraphQLBean {
 	}
 	
 	public TaskList getPoams() {
-		return poams;
+		return tasks;
 	}
 	
-	public void setPoams(TaskList poams) {
-		this.poams = poams;
+	public void setTasks(TaskList tasks) {
+		this.tasks = tasks;
 	}
 	
 	public LocationList getLocations() {

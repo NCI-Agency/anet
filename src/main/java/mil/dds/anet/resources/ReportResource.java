@@ -54,7 +54,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.Role;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -250,20 +250,20 @@ public class ReportResource implements IGraphQLResource {
 			}
 		}
 
-		//Update Poams:
-		if (r.getPoams() != null) { 
-			List<Poam> existingPoams = dao.getPoamsForReport(r);
-			List<Integer> existingPoamIds = existingPoams.stream().map(p -> p.getId()).collect(Collectors.toList());
-			for (Poam p : r.getPoams()) {
-				int idx = existingPoamIds.indexOf(p.getId());
+		//Update Tasks:
+		if (r.getTasks() != null) { 
+			List<Task> existingTasks = dao.getTasksForReport(r);
+			List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
+			for (Task p : r.getTasks()) {
+				int idx = existingTaskIds.indexOf(p.getId());
 				if (idx == -1) { 
-					dao.addPoamToReport(p, r); 
+					dao.addTaskToReport(p, r); 
 				} else {
-					existingPoamIds.remove(idx); 
+					existingTaskIds.remove(idx); 
 				}
 			}
-			for (Integer id : existingPoamIds) {
-				dao.removePoamFromReport(Poam.createWithId(id), r);
+			for (Integer id : existingTaskIds) {
+				dao.removeTaskFromReport(Task.createWithId(id), r);
 			}
 		}
 

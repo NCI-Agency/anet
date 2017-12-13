@@ -7,7 +7,7 @@ import org.skife.jdbi.v2.Query;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Tag;
@@ -181,28 +181,28 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 		}
 	}
 	
-	public static class TaskList extends AbstractAnetBeanList<Poam> {
+	public static class TaskList extends AbstractAnetBeanList<Task> {
 		public TaskList() { /*Serialization Constructor */ } 
 		
-		public TaskList(Integer pageNum, Integer pageSize, List<Poam> list) {
+		public TaskList(Integer pageNum, Integer pageSize, List<Task> list) {
 			super(pageNum, pageSize, list);
 		}
 		
-		public TaskList(List<Poam> list) { 
+		public TaskList(List<Task> list) { 
 			super(list);
 		}
 		
-		public List<Poam> getList() {
+		public List<Task> getList() {
 			return list;
 		}
 		
-		public static TaskList fromQuery(Query<Poam> query, int pageNum, int pageSize) { 
+		public static TaskList fromQuery(Query<Task> query, int pageNum, int pageSize) { 
 			TaskList results = new TaskList(pageNum, pageSize, query.list());
 			results.setList(query.list());
 			if (results.getList().size() == 0) { 
 				results.setTotalCount(0);
 			} else {
-				//This value gets set by the PoamMapper on each row.
+				//This value gets set by the TaskMapper on each row.
 				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
 			}
 			return results;

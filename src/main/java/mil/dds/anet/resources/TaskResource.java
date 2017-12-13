@@ -28,10 +28,10 @@ import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
-import mil.dds.anet.beans.search.PoamSearchQuery;
-import mil.dds.anet.database.PoamDao;
+import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLParam;
 import mil.dds.anet.graphql.IGraphQLResource;
@@ -45,15 +45,15 @@ import mil.dds.anet.utils.ResponseUtils;
 @PermitAll
 public class TaskResource implements IGraphQLResource {
 
-	PoamDao dao;
+	TaskDao dao;
 	
 	public TaskResource(AnetObjectEngine engine) {
-		this.dao = engine.getPoamDao();
+		this.dao = engine.getTaskDao();
 	}
 	
 	@Override
-	public Class<Poam> getBeanClass() {
-		return Poam.class;
+	public Class<Task> getBeanClass() {
+		return Task.class;
 	}
 	
 	public Class<TaskList> getBeanListClass() {
@@ -78,8 +78,8 @@ public class TaskResource implements IGraphQLResource {
 	@GET
 	@GraphQLFetcher
 	@Path("/{id}")
-	public Poam getById(@PathParam("id") int id) {
-		Poam p =  dao.getById(id);
+	public Task getById(@PathParam("id") int id) {
+		Task p =  dao.getById(id);
 		if (p == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
 		return p;
 	}
@@ -87,7 +87,7 @@ public class TaskResource implements IGraphQLResource {
 	@GET
 	@Path("/{id}/children")
 	public TaskList getChildren(@PathParam("id") int id, @QueryParam("cat") String category) {
-		List<Poam> p = dao.getPoamAndChildren(id);
+		List<Task> p = dao.getTaskAndChildren(id);
 		if (category != null) { 
 			p = p.stream().filter(el -> el.getCategory().equalsIgnoreCase(category))
 				.collect(Collectors.toList());
@@ -98,27 +98,27 @@ public class TaskResource implements IGraphQLResource {
 	@POST
 	@Path("/new")
 	@RolesAllowed("ADMIN")
-	public Poam createNewPoam(@Auth Person user, Poam p) {
+	public Task createNewTask(@Auth Person user, Task p) {
 		if (AuthUtils.isAdmin(user) == false) { 
 			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getId() == null) { 
 				throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 			}
-			//Admin Users can only create poams within their organization.
+			//Admin Users can only create tasks within their organization.
 			AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrg());
 		}
 		p = dao.insert(p);
-		AnetAuditLogger.log("Poam {} created by {}", p, user);
+		AnetAuditLogger.log("Task {} created by {}", p, user);
 		return p;
 	}
 	
-	/* Updates shortName, longName, category, and parentPoamId */
+	/* Updates shortName, longName, category, and parentTaskId */
 	@POST
 	@Path("/update")
 	@RolesAllowed("ADMIN")
-	public Response updatePoam(@Auth Person user, Poam p) { 
-		//Admins can edit all Poams, SuperUsers can edit poams within their EF. 
+	public Response updateTask(@Auth Person user, Task p) { 
+		//Admins can edit all Tasks, SuperUsers can edit tasks within their EF. 
 		if (AuthUtils.isAdmin(user) == false) { 
-			Poam existing = dao.getById(p.getId());
+			Task existing = dao.getById(p.getId());
 			AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrg());
 			
 			//If changing the Responsible Organization, Super Users must also have super user privileges over the next org.
@@ -134,43 +134,43 @@ public class TaskResource implements IGraphQLResource {
 		if (numRows == 0) { 
 			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
 		}
-		AnetAuditLogger.log("Poam {} updatedby {}", p, user);
+		AnetAuditLogger.log("Task {} updatedby {}", p, user);
 		return Response.ok().build();
 	}
 	
 	@GET
 	@Path("/byParentId")
-	public TaskList getPoamsByParentId(@QueryParam("id") int parentId) {
-		return new TaskList(dao.getPoamsByParentId(parentId));
+	public TaskList getTasksByParentId(@QueryParam("id") int parentId) {
+		return new TaskList(dao.getTasksByParentId(parentId));
 	}
 	
 	@GET
 	@GraphQLFetcher
 	@Path("/tree")
-	public TaskList getFullPoamTree() { 
-		List<Poam> poams = dao.getAll(0, Integer.MAX_VALUE).getList();
+	public TaskList getFullTaskTree() { 
+		List<Task> tasks = dao.getAll(0, Integer.MAX_VALUE).getList();
 		
-		Map<Integer,Poam> poamById = new HashMap<Integer,Poam>();
-		List<Poam> topPoams = new LinkedList<Poam>();
-		for (Poam p : poams) {
-			p.setChildrenPoams(new LinkedList<Poam>());
-			poamById.put(p.getId(), p);
+		Map<Integer,Task> taskById = new HashMap<Integer,Task>();
+		List<Task> topTasks = new LinkedList<Task>();
+		for (Task p : tasks) {
+			p.setChildrenTasks(new LinkedList<Task>());
+			taskById.put(p.getId(), p);
 		}
-		for (Poam p : poams) { 
-			if (p.getParentPoam() != null) { 
-				Poam parent = poamById.get(p.getParentPoam().getId());
-				parent.getChildrenPoams().add(p);
+		for (Task p : tasks) { 
+			if (p.getParentTask() != null) { 
+				Task parent = taskById.get(p.getParentTask().getId());
+				parent.getChildrenTasks().add(p);
 			} else { 
-				topPoams.add(p);
+				topTasks.add(p);
 			}
 		}
-		return new TaskList(topPoams);
+		return new TaskList(topTasks);
 	}
 	
 	@POST
 	@GraphQLFetcher
 	@Path("/search")
-	public TaskList search(@GraphQLParam("query") PoamSearchQuery query) {
+	public TaskList search(@GraphQLParam("query") TaskSearchQuery query) {
 		return dao.search(query);
 	}
 	
@@ -178,7 +178,7 @@ public class TaskResource implements IGraphQLResource {
 	@Path("/search")
 	public TaskList search(@Context HttpServletRequest request) {
 		try { 
-			return search(ResponseUtils.convertParamsToBean(request, PoamSearchQuery.class));
+			return search(ResponseUtils.convertParamsToBean(request, TaskSearchQuery.class));
 		} catch (IllegalArgumentException e) { 
 			throw new WebApplicationException(e.getMessage(), e.getCause(), Status.BAD_REQUEST);
 		}
@@ -193,6 +193,6 @@ public class TaskResource implements IGraphQLResource {
 	@Path("/recents")
 	public TaskList recents(@Auth Person user,
 			@DefaultValue("3") @QueryParam("maxResults") int maxResults) {
-		return new TaskList(dao.getRecentPoams(user, maxResults));
+		return new TaskList(dao.getRecentTasks(user, maxResults));
 	}
 }

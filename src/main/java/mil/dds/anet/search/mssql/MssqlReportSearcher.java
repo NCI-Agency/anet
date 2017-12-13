@@ -117,9 +117,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("atmosphere", DaoUtils.getEnumId(query.getAtmosphere()));
 		}
 		
-		if (query.getPoamId() != null) { 
+		if (query.getTaskId() != null) { 
 			whereClauses.add("reports.id IN (SELECT reportId from reportPoams where poamId = :poamId)");
-			args.put("poamId", query.getPoamId());
+			args.put("poamId", query.getTaskId());
 		}
 		
 		if (query.getOrgId() != null) { 

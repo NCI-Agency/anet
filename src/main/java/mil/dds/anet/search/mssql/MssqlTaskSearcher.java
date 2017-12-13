@@ -9,18 +9,18 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
-import mil.dds.anet.beans.search.PoamSearchQuery;
-import mil.dds.anet.database.mappers.PoamMapper;
-import mil.dds.anet.search.IPoamSearcher;
+import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class MssqlPoamSearcher implements IPoamSearcher {
+public class MssqlTaskSearcher implements ITaskSearcher {
 
 	@Override
-	public TaskList runSearch(PoamSearchQuery query, Handle dbHandle) {
+	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* MssqlPoamSearch */ SELECT poams.*, COUNT(*) OVER() AS totalCount FROM poams");
 		Map<String,Object> args = new HashMap<String,Object>();
 		
@@ -72,8 +72,8 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Poam> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
-			.map(new PoamMapper());
+		final Query<Task> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
+			.map(new TaskMapper());
 		return TaskList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
 	}
 	

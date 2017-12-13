@@ -9,16 +9,16 @@ import org.skife.jdbi.v2.Handle;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
-import mil.dds.anet.beans.search.PoamSearchQuery;
-import mil.dds.anet.database.mappers.PoamMapper;
-import mil.dds.anet.search.IPoamSearcher;
+import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class SqlitePoamSearcher implements IPoamSearcher {
+public class SqliteTaskSearcher implements ITaskSearcher {
 
 	@Override
-	public TaskList runSearch(PoamSearchQuery query, Handle dbHandle) {
+	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqlitePoamSearch */ SELECT poams.* FROM poams");
 		Map<String,Object> args = new HashMap<String,Object>();
 		
@@ -72,7 +72,7 @@ public class SqlitePoamSearcher implements IPoamSearcher {
 			.bindFromMap(args)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())
-			.map(new PoamMapper())
+			.map(new TaskMapper())
 			.list());
 		result.setTotalCount(result.getList().size()); // Sqlite cannot do true total counts, so this is a crutch.
 		return result;

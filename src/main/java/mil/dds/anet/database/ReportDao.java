@@ -26,7 +26,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -38,7 +38,7 @@ import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.database.mappers.PoamMapper;
+import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
@@ -141,8 +141,8 @@ public class ReportDao implements IAnetDao<Report> {
 					r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getId(), rp));
 					rb.insertReportAttendees(r.getId(), new ArrayList<ReportPerson>(attendeeMap.values()));
 				}
-				if (r.getPoams() != null) {
-					rb.insertReportPoams(r.getId(), r.getPoams());
+				if (r.getTasks() != null) {
+					rb.insertReportTasks(r.getId(), r.getTasks());
 				}
 				if (r.getTags() != null) {
 					rb.insertReportTags(r.getId(), r.getTags());
@@ -158,8 +158,8 @@ public class ReportDao implements IAnetDao<Report> {
 				@BindBean List<ReportPerson> reportPeople);
 
 		@SqlBatch("INSERT INTO reportPoams (reportId, poamId) VALUES (:reportId, :id)")
-		void insertReportPoams(@Bind("reportId") Integer reportId,
-				@BindBean List<Poam> poams);
+		void insertReportTasks(@Bind("reportId") Integer reportId,
+				@BindBean List<Task> tasks);
 
 		@SqlBatch("INSERT INTO reportTags (reportId, tagId) VALUES (:reportId, :id)")
 		void insertReportTags(@Bind("reportId") Integer reportId,
@@ -257,19 +257,19 @@ public class ReportDao implements IAnetDao<Report> {
 			.execute();
 	}
 
-	public int addPoamToReport(Poam p, Report r) {
+	public int addTaskToReport(Task p, Report r) {
 		return dbHandle.createStatement("/* addPoamToReport */ INSERT INTO reportPoams (poamId, reportId) "
-				+ "VALUES (:poamId, :reportId)")
+				+ "VALUES (:taskId, :reportId)")
 			.bind("reportId", r.getId())
-			.bind("poamId", p.getId())
+			.bind("taskId", p.getId())
 			.execute();
 	}
 
-	public int removePoamFromReport(Poam p, Report r) {
+	public int removeTaskFromReport(Task p, Report r) {
 		return dbHandle.createStatement("/* removePoamFromReport*/ DELETE FROM reportPoams "
-				+ "WHERE reportId = :reportId AND poamId = :poamId")
+				+ "WHERE reportId = :reportId AND poamId = :taskId")
 				.bind("reportId", r.getId())
-				.bind("poamId", p.getId())
+				.bind("taskId", p.getId())
 				.execute();
 	}
 
@@ -299,12 +299,12 @@ public class ReportDao implements IAnetDao<Report> {
 			.list();
 	}
 
-	public List<Poam> getPoamsForReport(Report report) {
+	public List<Task> getTasksForReport(Report report) {
 		return dbHandle.createQuery("/* getPoamsForReport */ SELECT * FROM poams, reportPoams "
 				+ "WHERE reportPoams.reportId = :reportId "
 				+ "AND reportPoams.poamId = poams.id")
 				.bind("reportId", report.getId())
-				.map(new PoamMapper())
+				.map(new TaskMapper())
 				.list();
 	}
 
