@@ -181,14 +181,14 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 		}
 	}
 	
-	public static class PoamList extends AbstractAnetBeanList<Poam> {
-		public PoamList() { /*Serialization Constructor */ } 
+	public static class TaskList extends AbstractAnetBeanList<Poam> {
+		public TaskList() { /*Serialization Constructor */ } 
 		
-		public PoamList(Integer pageNum, Integer pageSize, List<Poam> list) {
+		public TaskList(Integer pageNum, Integer pageSize, List<Poam> list) {
 			super(pageNum, pageSize, list);
 		}
 		
-		public PoamList(List<Poam> list) { 
+		public TaskList(List<Poam> list) { 
 			super(list);
 		}
 		
@@ -196,8 +196,8 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			return list;
 		}
 		
-		public static PoamList fromQuery(Query<Poam> query, int pageNum, int pageSize) { 
-			PoamList results = new PoamList(pageNum, pageSize, query.list());
+		public static TaskList fromQuery(Query<Poam> query, int pageNum, int pageSize) { 
+			TaskList results = new TaskList(pageNum, pageSize, query.list());
 			results.setList(query.list());
 			if (results.getList().size() == 0) { 
 				results.setTotalCount(0);

@@ -34,7 +34,7 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Poam;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.graphql.GraphQLFetcher;
@@ -220,8 +220,8 @@ public class OrganizationResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@Path("/{id}/poams")
-	public PoamList getPoams(@PathParam("id") Integer orgId) { 
-		return new PoamList(AnetObjectEngine.getInstance().getPoamDao().getPoamsByOrganizationId(orgId));
+	public TaskList getPoams(@PathParam("id") Integer orgId) { 
+		return new TaskList(AnetObjectEngine.getInstance().getPoamDao().getPoamsByOrganizationId(orgId));
 	}
 
 	private WebApplicationException handleSqlException(UnableToExecuteStatementException e) {

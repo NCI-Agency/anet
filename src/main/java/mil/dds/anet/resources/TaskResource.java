@@ -29,7 +29,7 @@ import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Poam;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.PoamSearchQuery;
 import mil.dds.anet.database.PoamDao;
 import mil.dds.anet.graphql.GraphQLFetcher;
@@ -56,8 +56,8 @@ public class TaskResource implements IGraphQLResource {
 		return Poam.class;
 	}
 	
-	public Class<PoamList> getBeanListClass() {
-		return PoamList.class;
+	public Class<TaskList> getBeanListClass() {
+		return TaskList.class;
 	}
 	
 	@Override
@@ -69,7 +69,7 @@ public class TaskResource implements IGraphQLResource {
 	@Timed
 	@GraphQLFetcher
 	@Path("/")
-	public PoamList getAll(@Auth Person p, 
+	public TaskList getAll(@Auth Person p, 
 			@DefaultValue("0") @QueryParam("pageNum") Integer pageNum, 
 			@DefaultValue("100") @QueryParam("pageSize") Integer pageSize) {
 		return dao.getAll(pageNum, pageSize);
@@ -86,13 +86,13 @@ public class TaskResource implements IGraphQLResource {
 	
 	@GET
 	@Path("/{id}/children")
-	public PoamList getChildren(@PathParam("id") int id, @QueryParam("cat") String category) {
+	public TaskList getChildren(@PathParam("id") int id, @QueryParam("cat") String category) {
 		List<Poam> p = dao.getPoamAndChildren(id);
 		if (category != null) { 
 			p = p.stream().filter(el -> el.getCategory().equalsIgnoreCase(category))
 				.collect(Collectors.toList());
 		}
-		return new PoamList(p);
+		return new TaskList(p);
 	}
 	
 	@POST
@@ -140,14 +140,14 @@ public class TaskResource implements IGraphQLResource {
 	
 	@GET
 	@Path("/byParentId")
-	public PoamList getPoamsByParentId(@QueryParam("id") int parentId) {
-		return new PoamList(dao.getPoamsByParentId(parentId));
+	public TaskList getPoamsByParentId(@QueryParam("id") int parentId) {
+		return new TaskList(dao.getPoamsByParentId(parentId));
 	}
 	
 	@GET
 	@GraphQLFetcher
 	@Path("/tree")
-	public PoamList getFullPoamTree() { 
+	public TaskList getFullPoamTree() { 
 		List<Poam> poams = dao.getAll(0, Integer.MAX_VALUE).getList();
 		
 		Map<Integer,Poam> poamById = new HashMap<Integer,Poam>();
@@ -164,19 +164,19 @@ public class TaskResource implements IGraphQLResource {
 				topPoams.add(p);
 			}
 		}
-		return new PoamList(topPoams);
+		return new TaskList(topPoams);
 	}
 	
 	@POST
 	@GraphQLFetcher
 	@Path("/search")
-	public PoamList search(@GraphQLParam("query") PoamSearchQuery query) {
+	public TaskList search(@GraphQLParam("query") PoamSearchQuery query) {
 		return dao.search(query);
 	}
 	
 	@GET
 	@Path("/search")
-	public PoamList search(@Context HttpServletRequest request) {
+	public TaskList search(@Context HttpServletRequest request) {
 		try { 
 			return search(ResponseUtils.convertParamsToBean(request, PoamSearchQuery.class));
 		} catch (IllegalArgumentException e) { 
@@ -191,8 +191,8 @@ public class TaskResource implements IGraphQLResource {
 	@GET
 	@GraphQLFetcher
 	@Path("/recents")
-	public PoamList recents(@Auth Person user,
+	public TaskList recents(@Auth Person user,
 			@DefaultValue("3") @QueryParam("maxResults") int maxResults) {
-		return new PoamList(dao.getRecentPoams(user, maxResults));
+		return new TaskList(dao.getRecentPoams(user, maxResults));
 	}
 }

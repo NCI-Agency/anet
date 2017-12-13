@@ -13,7 +13,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Poam;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.PoamSearchQuery;
 import mil.dds.anet.database.mappers.PoamMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -27,7 +27,7 @@ public class PoamDao implements IAnetDao<Poam> {
 		this.dbHandle = h; 
 	}
 	
-	public PoamList getAll(int pageNum, int pageSize) { 
+	public TaskList getAll(int pageNum, int pageSize) { 
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getAllPoams */ SELECT poams.*, COUNT(*) OVER() AS totalCount "
@@ -39,7 +39,7 @@ public class PoamDao implements IAnetDao<Poam> {
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum)
 				.map(new PoamMapper());
-		return PoamList.fromQuery(query, pageNum, pageSize);
+		return TaskList.fromQuery(query, pageNum, pageSize);
 	}
 	
 	@Override
@@ -127,7 +127,7 @@ public class PoamDao implements IAnetDao<Poam> {
 			.list();
 	}
 
-	public PoamList search(PoamSearchQuery query) { 
+	public TaskList search(PoamSearchQuery query) { 
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPoamSearcher().runSearch(query, dbHandle);
 	}

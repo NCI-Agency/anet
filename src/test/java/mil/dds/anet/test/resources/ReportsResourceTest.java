@@ -47,7 +47,7 @@ import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -167,10 +167,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Ensure the approver is an approver
 		assertThat(approver1Pos.loadIsApprover()).isTrue();
 		
-		//Create some poams for this organization
-		Poam top = httpQuery("/api/poams/new", admin)
+		//Create some tasks for this organization
+		Poam top = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(Poam.create("test-1", "Test Top Poam", "TOP", null, advisorOrg, PoamStatus.ACTIVE)), Poam.class);
-		Poam action = httpQuery("/api/poams/new", admin)
+		Poam action = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(Poam.create("test-1-1", "Test Poam Action", "Action", top, null, PoamStatus.ACTIVE)), Poam.class);
 
 		//Create a Location that this Report was written at
@@ -214,7 +214,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.loadAttendees()).contains(principal);
 		returned.setAttendees(null); //Annoying, but required to make future .equals checks pass, because we just caused a lazy load.
 
-		//verify the poams on this report
+		//verify the tasks on this report
 		assertThat(returned.loadPoams()).contains(action);
 		returned.setPoams(null);
 
@@ -318,7 +318,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		List<Person> recentPeople = httpQuery("/api/people/recents", author).get(PersonList.class).getList();
 		assertThat(recentPeople).contains(principal);
 		
-		List<Poam> recentPoams = httpQuery("/api/poams/recents", author).get(PoamList.class).getList();
+		List<Poam> recentPoams = httpQuery("/api/tasks/recents", author).get(TaskList.class).getList();
 		assertThat(recentPoams).contains(action);
 		
 		List<Location> recentLocations = httpQuery("/api/locations/recents", author).get(LocationList.class).getList();
@@ -446,8 +446,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(locSearchResults.size()).isGreaterThan(0);
 		final Location loc = locSearchResults.get(0);
 
-		PoamList poamSearchResults = httpQuery("/api/poams/search?text=Budgeting", elizabeth)
-				.get(PoamList.class);
+		TaskList poamSearchResults = httpQuery("/api/tasks/search?text=Budgeting", elizabeth)
+				.get(TaskList.class);
 		assertThat(poamSearchResults.getTotalCount()).isGreaterThan(2);
 
 		Report r = new Report();
@@ -555,7 +555,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				(rp.getId().equals(steve.getId()))
 			))).hasSameSizeAs(searchResults.getList());
 
-		List<Poam> poamResults = httpQuery("/api/poams/search?text=1.1.A", jack).get(PoamList.class).getList();
+		List<Poam> poamResults = httpQuery("/api/tasks/search?text=1.1.A", jack).get(TaskList.class).getList();
 		assertThat(poamResults).isNotEmpty();
 		Poam poam = poamResults.get(0);
 

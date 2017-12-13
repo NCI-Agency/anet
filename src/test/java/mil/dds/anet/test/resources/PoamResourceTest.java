@@ -15,7 +15,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Poam;
 import mil.dds.anet.beans.Poam.PoamStatus;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.PoamSearchQuery;
 
 public class PoamResourceTest extends AbstractResourceTest {
@@ -30,36 +30,36 @@ public class PoamResourceTest extends AbstractResourceTest {
 	public void poamTest() { 
 		final Person jack = getJackJackson();
 
-		Poam a = httpQuery("/api/poams/new", admin)
+		Poam a = httpQuery("/api/tasks/new", admin)
 			.post(Entity.json(Poam.create("TestF1", "Do a thing with a person", "Test-EF")), Poam.class);
 		assertThat(a.getId()).isNotNull();
 				
-		Poam b = httpQuery("/api/poams/new", admin)
+		Poam b = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(Poam.create("TestM1", "Teach a person how to fish", "Test-Milestone", a, null, PoamStatus.ACTIVE)), Poam.class);
 		assertThat(b.getId()).isNotNull();
 		
-		Poam c = httpQuery("/api/poams/new", admin)
+		Poam c = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(Poam.create("TestM2", "Watch the person fishing", "Test-Milestone", a, null, PoamStatus.ACTIVE)), Poam.class);
 		assertThat(c.getId()).isNotNull();
 		
-		Poam d = httpQuery("/api/poams/new", admin)
+		Poam d = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(Poam.create("TestM3", "Have the person go fishing without you", "Test-Milestone", a, null, PoamStatus.ACTIVE)), Poam.class);
 		assertThat(d.getId()).isNotNull();
 		
-		Poam e = httpQuery("/api/poams/new", admin)
+		Poam e = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(Poam.create("TestF2", "Be a thing in a test case", "Test-EF", null, null, PoamStatus.ACTIVE)), Poam.class);
 		assertThat(e.getId()).isNotNull();
 		
-		Poam returned = httpQuery("/api/poams/" + a.getId(), admin).get(Poam.class);
+		Poam returned = httpQuery("/api/tasks/" + a.getId(), admin).get(Poam.class);
 		assertThat(returned).isEqualTo(a);
-		returned = httpQuery("/api/poams/" + b.getId(), admin).get(Poam.class);
+		returned = httpQuery("/api/tasks/" + b.getId(), admin).get(Poam.class);
 		assertThat(returned).isEqualTo(b);		
 		
-		List<Poam> children = httpQuery("/api/poams/" + a.getId() + "/children", jack).get(PoamList.class).getList();
+		List<Poam> children = httpQuery("/api/tasks/" + a.getId() + "/children", jack).get(TaskList.class).getList();
 		assertThat(children).contains(b, c, d);
 		assertThat(children).doesNotContain(e);
 		
-		List<Poam> tree = httpQuery("/api/poams/tree", jack).get(PoamList.class).getList();
+		List<Poam> tree = httpQuery("/api/tasks/tree", jack).get(TaskList.class).getList();
 		assertThat(tree).contains(a, e);
 		assertThat(tree).doesNotContain(b);
 		for (Poam p : tree) { 
@@ -70,9 +70,9 @@ public class PoamResourceTest extends AbstractResourceTest {
 		
 		//modify a poam. 
 		a.setLongName("Do a thing with a person modified");
-		Response resp = httpQuery("/api/poams/update", admin).post(Entity.json(a));
+		Response resp = httpQuery("/api/tasks/update", admin).post(Entity.json(a));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		returned = httpQuery("/api/poams/" + a.getId(), jack).get(Poam.class);
+		returned = httpQuery("/api/tasks/" + a.getId(), jack).get(Poam.class);
 		assertThat(returned.getLongName()).isEqualTo(a.getLongName());
 
 		//Assign the POAMs to the AO
@@ -81,22 +81,22 @@ public class PoamResourceTest extends AbstractResourceTest {
 		assertThat(ef8).isNotNull();
 		
 		a.setResponsibleOrg(ef8);
-		resp = httpQuery("/api/poams/update", admin).post(Entity.json(a));
+		resp = httpQuery("/api/tasks/update", admin).post(Entity.json(a));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		returned = httpQuery("/api/poams/" + a.getId(), jack).get(Poam.class);
+		returned = httpQuery("/api/tasks/" + a.getId(), jack).get(Poam.class);
 		assertThat(returned.getResponsibleOrg().getId()).isEqualTo(ef8.getId());
 		
-		//Fetch the poams off the organization
-		List<Poam> poams = httpQuery("/api/organizations/" + ef8.getId() + "/poams", jack).get(PoamList.class).getList();
-		assertThat(poams).contains(a);
+		//Fetch the tasks off the organization
+		List<Poam> tasks = httpQuery("/api/organizations/" + ef8.getId() + "/tasks", jack).get(TaskList.class).getList();
+		assertThat(tasks).contains(a);
 		
 		//Search for the poam: 
 		
 		//set poam to inactive
 		a.setStatus(PoamStatus.INACTIVE);
-		resp = httpQuery("/api/poams/update", admin).post(Entity.json(a));
+		resp = httpQuery("/api/tasks/update", admin).post(Entity.json(a));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		returned = httpQuery("/api/poams/" + a.getId(), jack).get(Poam.class);
+		returned = httpQuery("/api/tasks/" + a.getId(), jack).get(Poam.class);
 		assertThat(returned.getStatus()).isEqualTo(PoamStatus.INACTIVE);
 	}
 	
@@ -106,7 +106,7 @@ public class PoamResourceTest extends AbstractResourceTest {
 		
 		PoamSearchQuery query = new PoamSearchQuery();
 		query.setText("Budget");
-		List<Poam> searchResults = httpQuery("/api/poams/search", jack).post(Entity.json(query), PoamList.class).getList();
+		List<Poam> searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream()
 				.filter(p -> p.getLongName().toLowerCase().contains("budget"))
@@ -120,7 +120,7 @@ public class PoamResourceTest extends AbstractResourceTest {
 		
 		query.setText(null);
 		query.setResponsibleOrgId(ef2.getId());
-		searchResults = httpQuery("/api/poams/search", jack).post(Entity.json(query), PoamList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream()
 				.filter(p -> p.getResponsibleOrg().getId().equals(ef2.getId()))
@@ -131,19 +131,19 @@ public class PoamResourceTest extends AbstractResourceTest {
 		query.setResponsibleOrgId(null);
 		query.setText("expenses");
 		query.setCategory("Milestone");
-		searchResults = httpQuery("/api/poams/search", jack).post(Entity.json(query), PoamList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		//Autocomplete
 		query = new PoamSearchQuery();
 		query.setText("1.1*");
-		searchResults = httpQuery("/api/poams/search", jack).post(Entity.json(query), PoamList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1")).count()).isEqualTo(1);
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1.A")).count()).isEqualTo(1);
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1.B")).count()).isEqualTo(1);
 		
 		query.setText("1.1.A*");
-		searchResults = httpQuery("/api/poams/search", jack).post(Entity.json(query), PoamList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1.A")).count()).isEqualTo(1);
 	}
 	
@@ -151,7 +151,7 @@ public class PoamResourceTest extends AbstractResourceTest {
 	public void getAllPoamsTest() { 
 		Person jack = getJackJackson();
 		
-		PoamList list = httpQuery("/api/poams/", jack).get(PoamList.class);
+		TaskList list = httpQuery("/api/tasks/", jack).get(TaskList.class);
 		assertThat(list).isNotNull();
 		assertThat(list.getList()).isNotEmpty();
 	}
