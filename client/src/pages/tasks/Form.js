@@ -89,7 +89,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 		if (task.responsibleOrg && task.responsibleOrg.id) {
 			task.responsibleOrg = {id: task.responsibleOrg.id}
 		}
-		let url = `/api/poams/${edit ? 'update' : 'new'}`
+		let url = `/api/tasks/${edit ? 'update' : 'new'}`
 		API.send(url, task, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {

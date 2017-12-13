@@ -40,14 +40,14 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/poams")
+@Path("/api/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class PoamResource implements IGraphQLResource {
+public class TaskResource implements IGraphQLResource {
 
 	PoamDao dao;
 	
-	public PoamResource(AnetObjectEngine engine) {
+	public TaskResource(AnetObjectEngine engine) {
 		this.dao = engine.getPoamDao();
 	}
 	
@@ -62,7 +62,7 @@ public class PoamResource implements IGraphQLResource {
 	
 	@Override
 	public String getDescription() {
-		return "Poams";
+		return "Tasks";
 	}
 	
 	@GET
