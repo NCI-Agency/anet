@@ -9,6 +9,8 @@ describe('Create new Person form page', () => {
 
     beforeEach('On the create a new user page...', () => {
         CreatePerson.open()
+        CreatePerson.form.waitForExist()
+        CreatePerson.form.waitForVisible()
     })
 
     describe('When creating a Principle user', () => {
