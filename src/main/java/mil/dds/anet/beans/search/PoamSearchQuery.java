@@ -4,10 +4,15 @@ import mil.dds.anet.beans.Poam.PoamStatus;
 
 public class PoamSearchQuery extends AbstractSearchQuery {
 
+	public enum PoamSearchSortBy { CREATED_AT, NAME, CATEGORY }
+
 	Integer responsibleOrgId;
 	Boolean includeChildrenOrgs;
 	String category;
 	PoamStatus status;
+
+	private PoamSearchSortBy sortBy;
+	private SortOrder sortOrder;
 
 	public Integer getResponsibleOrgId() {
 		return responsibleOrgId;
@@ -39,6 +44,22 @@ public class PoamSearchQuery extends AbstractSearchQuery {
 
 	public void setStatus(PoamStatus status) {
 		this.status = status;
+	}
+
+	public PoamSearchSortBy getSortBy() {
+		return sortBy;
+	}
+
+	public void setSortBy(PoamSearchSortBy sortBy) {
+		this.sortBy = sortBy;
+	}
+
+	public SortOrder getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
 	}
 
 	public static PoamSearchQuery withText(String text, int pageNum, int pageSize) {
