@@ -21,7 +21,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 
 	@Override
 	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
-		StringBuilder sql = new StringBuilder("/* MssqlPoamSearch */ SELECT poams.*, COUNT(*) OVER() AS totalCount FROM poams");
+		StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*, COUNT(*) OVER() AS totalCount FROM tasks");
 		Map<String,Object> args = new HashMap<String,Object>();
 		
 		sql.append(" WHERE ");

@@ -30,10 +30,10 @@ public class TaskDao implements IAnetDao<Task> {
 	public TaskList getAll(int pageNum, int pageSize) { 
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql = "/* getAllTasks */ SELECT poams.*, COUNT(*) OVER() AS totalCount "
-					+ "FROM poams ORDER BY createdAt ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+			sql = "/* getAllTasks */ SELECT tasks.*, COUNT(*) OVER() AS totalCount "
+					+ "FROM tasks ORDER BY createdAt ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else { 
-			sql = "/* getAllTasks */ SELECT * from poams ORDER BY createdAt ASC LIMIT :limit OFFSET :offset";
+			sql = "/* getAllTasks */ SELECT * from tasks ORDER BY createdAt ASC LIMIT :limit OFFSET :offset";
 		}
 		Query<Task> query = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
@@ -44,7 +44,7 @@ public class TaskDao implements IAnetDao<Task> {
 	
 	@Override
 	public Task getById(int id) { 
-		Query<Task> query = dbHandle.createQuery("/* getTaskById */ SELECT * from poams where id = :id")
+		Query<Task> query = dbHandle.createQuery("/* getTaskById */ SELECT * from tasks where id = :id")
 			.bind("id",id)
 			.map(new TaskMapper());
 		List<Task> results = query.list();
@@ -56,8 +56,8 @@ public class TaskDao implements IAnetDao<Task> {
 	public Task insert(Task p) {
 		p.setCreatedAt(DateTime.now());
 		p.setUpdatedAt(DateTime.now());
-		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* inserTask */ INSERT INTO poams "
-				+ "(longName, shortName, category, parentPoamId, organizationId, createdAt, updatedAt, status) " 
+		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* inserTask */ INSERT INTO tasks "
+				+ "(longName, shortName, category, parentTaskId, organizationId, createdAt, updatedAt, status) " 
 				+ "VALUES (:longName, :shortName, :category, :parentTaskId, :organizationId, :createdAt, :updatedAt, :status)")
 			.bindFromProperties(p)
 			.bind("parentTaskId", DaoUtils.getId(p.getParentTask()))
@@ -71,8 +71,8 @@ public class TaskDao implements IAnetDao<Task> {
 	@Override
 	public int update(Task p) { 
 		p.setUpdatedAt(DateTime.now());
-		return dbHandle.createStatement("/* updateTask */ UPDATE poams set longName = :longName, shortName = :shortName, "
-				+ "category = :category, parentPoamId = :parentTaskId, updatedAt = :updatedAt, "
+		return dbHandle.createStatement("/* updateTask */ UPDATE tasks set longName = :longName, shortName = :shortName, "
+				+ "category = :category, parentTaskId = :parentTaskId, updatedAt = :updatedAt, "
 				+ "organizationId = :organizationId, status = :status " 
 				+ "WHERE id = :id")
 			.bindFromProperties(p)
@@ -84,7 +84,7 @@ public class TaskDao implements IAnetDao<Task> {
 	
 	public int setResponsibleOrgForTask(Task p, Organization org) { 
 		p.setUpdatedAt(DateTime.now());
-		return dbHandle.createStatement("/* setReponsibleOrgForTask */ UPDATE poams "
+		return dbHandle.createStatement("/* setReponsibleOrgForTask */ UPDATE tasks "
 				+ "SET organizationId = :orgId, updatedAt = :updatedAt WHERE id = :id")
 			.bind("orgId", DaoUtils.getId(org))
 			.bind("id", p.getId())
@@ -93,13 +93,13 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 	
 	public List<Task> getTasksByParentId(int parentTaskId) { 
-		return dbHandle.createQuery("/* getTasksByParent */ SELECT * from poams where parentPoamId = :parentTaskId")
+		return dbHandle.createQuery("/* getTasksByParent */ SELECT * from tasks where parentTaskId = :parentTaskId")
 			.bind("parentTaskId", parentTaskId)
 			.map(new TaskMapper())
 			.list();
 	}
 	
-	/* Returns the poam and all tasks under this one (to all depths) */
+	/* Returns the task and all tasks under this one (to all depths) */
 	public List<Task> getTaskAndChildren(int taskId) {
 		StringBuilder sql = new StringBuilder("/* getTasksAndChildren */ ");
 		if (DaoUtils.isMsSql(dbHandle)) { 
@@ -107,14 +107,14 @@ public class TaskDao implements IAnetDao<Task> {
 		} else { 
 			sql.append("WITH RECURSIVE");
 		}
-		sql.append(" parent_poams(id, shortName, longName, category, parentPoamId, "
+		sql.append(" parent_tasks(id, shortName, longName, category, parentTaskId, "
 				+ "organizationId, createdAt, updatedAt, status) AS ("
-				+ "SELECT id, shortName, longName, category, parentPoamId, "
-				+ "organizationId, createdAt, updatedAt, status FROM poams WHERE id = :taskId "
+				+ "SELECT id, shortName, longName, category, parentTaskId, "
+				+ "organizationId, createdAt, updatedAt, status FROM tasks WHERE id = :taskId "
 			+ "UNION ALL "
-				+ "SELECT p.id, p.shortName, p.longName, p.category, p.parentPoamId, p.organizationId, p.createdAt, p.updatedAt, p.status "
-				+ "from parent_poams pp, poams p WHERE p.parentPoamId = pp.id "
-			+ ") SELECT * from parent_poams;");
+				+ "SELECT p.id, p.shortName, p.longName, p.category, p.parentTaskId, p.organizationId, p.createdAt, p.updatedAt, p.status "
+				+ "from parent_tasks pp, tasks p WHERE p.parentTaskId = pp.id "
+			+ ") SELECT * from parent_tasks;");
 		return dbHandle.createQuery(sql.toString())
 			.bind("taskId", taskId)
 			.map(new TaskMapper())
@@ -122,7 +122,7 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 
 	public List<Task> getTopLevelTasks() {
-		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM poams WHERE parentPoamId IS NULL")
+		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE parentTaskId IS NULL")
 			.map(new TaskMapper())
 			.list();
 	}
@@ -135,19 +135,19 @@ public class TaskDao implements IAnetDao<Task> {
 	public List<Task> getRecentTasks(Person author, int maxResults) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getRecentTasks */ SELECT poams.* FROM poams WHERE poams.id IN ("
-					+ "SELECT TOP(:maxResults) reportPoams.poamId "
-					+ "FROM reports JOIN reportPoams ON reports.id = reportPoams.reportId "
+			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.id IN ("
+					+ "SELECT TOP(:maxResults) reportTasks.taskId "
+					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
 					+ "WHERE authorId = :authorId "
-					+ "GROUP BY poamId "
+					+ "GROUP BY taskId "
 					+ "ORDER BY MAX(reports.createdAt) DESC"
 				+ ")";
 		} else {
-			sql =  "/* getRecentPoam */ SELECT poams.* FROM poams WHERE poams.id IN ("
-					+ "SELECT reportPoams.poamId "
-					+ "FROM reports JOIN reportPoams ON reports.id = reportPoams.reportId "
+			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.id IN ("
+					+ "SELECT reportTasks.taskId "
+					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
 					+ "WHERE authorId = :authorId "
-					+ "GROUP BY poamId "
+					+ "GROUP BY taskId "
 					+ "ORDER BY MAX(reports.createdAt) DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
@@ -160,7 +160,7 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 
 	public List<Task> getTasksByOrganizationId(Integer orgId) {
-		return dbHandle.createQuery("/* getTasksByOrg */ SELECT * from poams WHERE organizationId = :orgId")
+		return dbHandle.createQuery("/* getTasksByOrg */ SELECT * from tasks WHERE organizationId = :orgId")
 			.bind("orgId", orgId)
 			.map(new TaskMapper())
 			.list();

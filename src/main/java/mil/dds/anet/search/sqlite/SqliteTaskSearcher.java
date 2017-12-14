@@ -19,7 +19,7 @@ public class SqliteTaskSearcher implements ITaskSearcher {
 
 	@Override
 	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
-		StringBuilder sql = new StringBuilder("/* SqlitePoamSearch */ SELECT poams.* FROM poams");
+		StringBuilder sql = new StringBuilder("/* SqliteTaskSearch */ SELECT tasks.* FROM tasks");
 		Map<String,Object> args = new HashMap<String,Object>();
 		
 		sql.append(" WHERE ");

@@ -118,8 +118,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getTaskId() != null) { 
-			whereClauses.add("reports.id IN (SELECT reportId from reportPoams where poamId = :poamId)");
-			args.put("poamId", query.getTaskId());
+			whereClauses.add("reports.id IN (SELECT reportId from reportTasks where taskId = :taskId)");
+			args.put("taskId", query.getTaskId());
 		}
 		
 		if (query.getOrgId() != null) { 

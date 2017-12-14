@@ -22,9 +22,9 @@ public class TaskMapper implements ResultSetMapper<Task> {
 		p.setCategory(r.getString("category"));
 		p.setStatus(MapperUtils.getEnumIdx(r, "status", TaskStatus.class));
 		
-		Integer parentPoamId = MapperUtils.getInteger(r, "parentPoamId");
-		if (parentPoamId != null) { 
-			p.setParentTask(Task.createWithId(parentPoamId));
+		Integer parentTaskId = MapperUtils.getInteger(r, "parentTaskId");
+		if (parentTaskId != null) { 
+			p.setParentTask(Task.createWithId(parentTaskId));
 		}
 		
 		Integer responsibleOrgId = MapperUtils.getInteger(r, "organizationId");
