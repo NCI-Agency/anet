@@ -29,8 +29,8 @@ export default class TasksSelector extends Component {
 	render() {
 		let {tasks, shortcuts, validationState, optional} = this.props
 
-		let taskLong = dict.lookup('POAM_LONG_NAME')
-		let taskShort = dict.lookup("POAM_SHORT_NAME")
+		let taskLong = dict.lookup('TASK_LONG_NAME')
+		let taskShort = dict.lookup("TASK_SHORT_NAME")
 
 		return <Fieldset title={taskLong} action={optional && "(Optional)"} className="tasks-selector">
 			<Form.Field id="tasks" label={taskShort} validationState={validationState} >
@@ -81,7 +81,7 @@ export default class TasksSelector extends Component {
 
 	renderShortcuts() {
 		let shortcuts = this.props.shortcuts || []
-		let taskShortName = dict.lookup("POAM_SHORT_NAME")
+		let taskShortName = dict.lookup("TASK_SHORT_NAME")
 		return <Form.Field.ExtraCol className="shortcut-list">
 			<h5>Recent {taskShortName}</h5>
 			{shortcuts.map(task =>

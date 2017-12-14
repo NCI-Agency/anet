@@ -69,7 +69,7 @@ export default class TaskShow extends Page {
 		let {task, reports} = this.state
 		// Admins can edit tasks, or super users if this task is assigned to their org.
 		let currentUser = this.context.currentUser
-		let taskShortName = dict.lookup("POAM_SHORT_NAME")
+		let taskShortName = dict.lookup("TASK_SHORT_NAME")
 
 		let canEdit = currentUser.isAdmin()
 

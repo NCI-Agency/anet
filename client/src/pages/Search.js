@@ -219,7 +219,7 @@ export default class Search extends Page {
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
 		let queryType = this.state.queryType || query.type || 'everything'
 
-		let taskShortTitle = dict.lookup('POAM_SHORT_NAME')
+		let taskShortTitle = dict.lookup('TASK_SHORT_NAME')
 
 		if (typeof queryString === 'object') {
 			queryString = queryString[Object.keys(query)[1]]

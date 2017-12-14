@@ -98,7 +98,7 @@ let superUserTour = (currentUser) => { return {
 }}
 
 let reportTour = (currentUser) => {
-	let taskShortTitle = dict.lookup("POAM_SHORT_NAME")
+	let taskShortTitle = dict.lookup("TASK_SHORT_NAME")
 	return {
 	id: 'report',
 	steps: [
@@ -185,7 +185,7 @@ let reportTour = (currentUser) => {
 }}
 
 let orgTour = (currentUser) => {
-	let taskShortTitle = dict.lookup("POAM_SHORT_NAME")
+	let taskShortTitle = dict.lookup("TASK_SHORT_NAME")
 	return {
 	id: 'org',
 	steps: [
@@ -221,7 +221,7 @@ let orgTour = (currentUser) => {
 		},
 		{
 			title: taskShortTitle + 's',
-			content: 'The ' + dict.lookup('POAM_LONG_NAME') + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortTitle + 's change, you can update that information by clicking on the ' + taskShortTitle + '.',
+			content: 'The ' + dict.lookup('TASK_LONG_NAME') + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortTitle + 's change, you can update that information by clicking on the ' + taskShortTitle + '.',
 			target: '#tasks h2',
 			placement: 'top',
 		},
@@ -247,7 +247,7 @@ let orgTour = (currentUser) => {
 }}
 
 let positionTour = (currentUser) => {
-	let taskShortTitle = dict.lookup("POAM_SHORT_NAME")
+	let taskShortTitle = dict.lookup("TASK_SHORT_NAME")
 	return {
 		id: 'position',
 		steps: [

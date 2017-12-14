@@ -44,7 +44,7 @@ export default class TaskNew extends Page {
 
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new ' + dict.lookup('POAM_SHORT_NAME'), Task.pathForNew()]]} />
+				<Breadcrumbs items={[['Create new ' + dict.lookup('TASK_SHORT_NAME'), Task.pathForNew()]]} />
 
 				<NavigationWarning original={this.state.originalTask} current={task} />
 				<TaskForm task={task} />

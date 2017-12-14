@@ -247,7 +247,7 @@ export default class ReportShow extends Page {
 						</Table>
 					</Fieldset>
 
-					<Fieldset title={dict.lookup('POAM_LONG_NAME')} >
+					<Fieldset title={dict.lookup('TASK_LONG_NAME')} >
 						<Table>
 							<thead>
 								<tr>

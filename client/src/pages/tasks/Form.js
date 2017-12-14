@@ -28,7 +28,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 	render() {
 		let {task, edit} = this.props
 		let {currentUser} = this.context.app.state
-		let taskShortTitle = dict.lookup('POAM_SHORT_NAME')
+		let taskShortTitle = dict.lookup('TASK_SHORT_NAME')
 
 		let orgSearchQuery = {}
 		orgSearchQuery.type = 'ADVISOR_ORG'

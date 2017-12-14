@@ -92,7 +92,7 @@ export default class AdvancedSearch extends Component {
 			}
 		}
 
-		let taskShortName = dict.lookup('POAM_SHORT_NAME')
+		let taskShortName = dict.lookup('TASK_SHORT_NAME')
 		filters.Reports.filters[taskShortName] =
 			<AutocompleteFilter
 				queryKey="taskId"
