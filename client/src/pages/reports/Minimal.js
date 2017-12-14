@@ -61,7 +61,7 @@ export default class ReportMinimal extends Page {
 				primaryAdvisor { id }
 				primaryPrincipal { id }
 
-				poams { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 
 				comments {
 					id, text, createdAt, updatedAt
@@ -195,7 +195,7 @@ export default class ReportMinimal extends Page {
 							</thead>
 
 							<tbody>
-								{Task.map(report.poams, (task, idx) =>
+								{Task.map(report.tasks, (task, idx) =>
 									<tr key={task.id} id={"task_" + idx}>
 										<td className="taskName" >{task.shortName} - {task.longName}</td>
 										<td className="taskOrg" >{task.responsibleOrg && task.responsibleOrg.shortName }</td>

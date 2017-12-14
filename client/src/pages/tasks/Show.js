@@ -47,11 +47,11 @@ export default class TaskShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			poamId: props.params.id,
+			taskId: props.params.id,
 		})
 
 		let taskQuery = new GQL.Part(/* GraphQL */`
-			poam(id:${props.params.id}) {
+			task(id:${props.params.id}) {
 				id, shortName, longName, status,
 				responsibleOrg {id, shortName, longName, identificationCode}
 			}
@@ -59,7 +59,7 @@ export default class TaskShow extends Page {
 
 		GQL.run([reportsQuery, taskQuery]).then(data => {
             this.setState({
-                task: new Task(data.poam),
+                task: new Task(data.task),
 				reports: data.reports,
             })
         })

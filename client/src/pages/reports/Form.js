@@ -67,7 +67,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			personList(f:recents, maxResults:6) {
 				list { id, name, rank, role, position { id, name, organization {id, shortName}} }
 			}
-			poamList(f:recents, maxResults:6) {
+			taskList(f:recents, maxResults:6) {
 				list { id, shortName, longName }
 			}
 			tagList(f:getAll) {
@@ -78,7 +78,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 				recents: {
 					locations: data.locationList.list,
 					persons: data.personList.list,
-					tasks: data.poamList.list,
+					tasks: data.taskList.list,
 				},
 				tagList: data.tagList.list,
 				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
@@ -274,7 +274,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 				</Fieldset>
 
 				{!isCancelled &&
-					<TaskSelector tasks={report.poams}
+					<TaskSelector tasks={report.tasks}
 						shortcuts={recents.tasks}
 						onChange={this.onChange}
 						onErrorChange={this.onTaskError}

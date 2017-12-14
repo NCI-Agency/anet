@@ -92,7 +92,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 					)}
 				</Fieldset>
 
-				<TaskSelector tasks={organization.poams} onChange={this.onChange} />
+				<TaskSelector tasks={organization.tasks} onChange={this.onChange} />
 			</div>}
 		</ValidatableForm>
 	}

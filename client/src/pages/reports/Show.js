@@ -68,7 +68,7 @@ export default class ReportShow extends Page {
 				primaryAdvisor { id }
 				primaryPrincipal { id }
 
-				poams { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 
 				comments {
 					id, text, createdAt, updatedAt
@@ -257,7 +257,7 @@ export default class ReportShow extends Page {
 							</thead>
 
 							<tbody>
-								{Task.map(report.poams, (task, idx) =>
+								{Task.map(report.tasks, (task, idx) =>
 									<tr key={task.id} id={"task_" + idx}>
 										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
 										<td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>

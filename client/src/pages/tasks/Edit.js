@@ -30,12 +30,12 @@ export default class TaskEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			poam(id:${props.params.id}) {
+			task(id:${props.params.id}) {
 				id, shortName, longName, status,
 				responsibleOrg {id,shortName, longName, identificationCode}
 			}
 		`).then(data => {
-			this.setState({task: new Task(data.poam), originalTask: new Task(data.poam)})
+			this.setState({task: new Task(data.task), originalTask: new Task(data.task)})
 		})
 	}
 

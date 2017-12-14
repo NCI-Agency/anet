@@ -114,8 +114,8 @@ export default class ReportsByTask extends Component {
       longName: 'No Task'
     }
     Promise.all([chartQuery]).then(values => {
-      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.poams.map(p => p.id)}})
-      let tasks = values[0].reportList.list.map(d => d.poams)
+      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.tasks.map(p => p.id)}})
+      let tasks = values[0].reportList.list.map(d => d.tasks)
       tasks = [].concat.apply([], tasks)
         .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
         .sort((a, b) => a.shortName.localeCompare(b.shortName))

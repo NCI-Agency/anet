@@ -58,9 +58,9 @@ const SEARCH_CONFIG = {
 		variableType: 'PositionSearchQuery',
 		fields: 'id , name, type, organization { id, shortName}, person { id, name }'
 	},
-	poams : {
-		listName: 'poams: poamList',
-		variableType: 'PoamSearchQuery',
+	tasks : {
+		listName: 'tasks: taskList',
+		variableType: 'TaskSearchQuery',
 		fields: 'id, shortName, longName'
 	},
 	locations : {
@@ -89,7 +89,7 @@ export default class Search extends Page {
 				organizations: 0,
 				positions: 0,
 				locations: 0,
-				poams: 0,
+				tasks: 0,
 			},
 			saveSearch: {show: false},
 			results: {
@@ -98,7 +98,7 @@ export default class Search extends Page {
 				organizations: null,
 				positions: null,
 				locations: null,
-				poams: null,
+				tasks: null,
 			},
 			error: null,
 			success: null,
@@ -208,7 +208,7 @@ export default class Search extends Page {
 		let numReports = results.reports ? results.reports.totalCount : 0
 		let numPeople = results.people ? results.people.totalCount : 0
 		let numPositions = results.positions ? results.positions.totalCount : 0
-		let numTasks = results.poams ? results.poams.totalCount : 0
+		let numTasks = results.tasks ? results.tasks.totalCount : 0
 		let numLocations = results.locations ? results.locations.totalCount : 0
 		let numOrganizations = results.organizations ? results.organizations.totalCount : 0
 
@@ -264,7 +264,7 @@ export default class Search extends Page {
 								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
 							</NavItem>
 
-							<NavItem eventKey="poams" disabled={!numTasks}>
+							<NavItem eventKey="tasks" disabled={!numTasks}>
 								<img src={TASKS_ICON} role="presentation" /> {taskShortTitle}s
 								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
@@ -315,7 +315,7 @@ export default class Search extends Page {
 					</Fieldset>
 				}
 
-				{numTasks > 0 && (queryType === 'everything' || queryType === 'poams') &&
+				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
 					<Fieldset title={taskShortTitle + 's'}>
 						{this.renderTasks()}
 					</Fieldset>
@@ -482,7 +482,7 @@ export default class Search extends Page {
 
 	renderTasks() {
 		return <div>
-			{this.paginationFor('poams')}
+			{this.paginationFor('tasks')}
 			<Table responsive hover striped>
 				<thead>
 					<tr>
@@ -490,7 +490,7 @@ export default class Search extends Page {
 					</tr>
 				</thead>
 				<tbody>
-					{Task.map(this.state.results.poams.list, task =>
+					{Task.map(this.state.results.tasks.list, task =>
 						<tr key={task.id}>
 							<td><LinkTo task={task} >{task.shortName} {task.longName}</LinkTo></td>
 						</tr>

@@ -90,12 +90,12 @@ export default class OrganizationShow extends Page {
 			responsibleOrgId: orgId
 		}
 		let taskPart = new GQL.Part(/* GraphQL */`
-			poams: poamList(query:$poamQuery) {
+			tasks: taskList(query:$taskQuery) {
 				pageNum, pageSize, totalCount, list {
 					id, shortName, longName
 				}
 			}`)
-			.addVariable("poamQuery", "PoamSearchQuery", taskQuery)
+			.addVariable("taskQuery", "TaskSearchQuery", taskQuery)
 		return taskPart
 	}
 
@@ -128,7 +128,7 @@ export default class OrganizationShow extends Page {
 			this.setState({
 				organization: new Organization(data.organization),
 				reports: data.reports,
-				tasks: data.poams
+				tasks: data.tasks
 			})
 		)
 	}
@@ -265,7 +265,7 @@ export default class OrganizationShow extends Page {
 		this.tasksPageNum = pageNum
 		let taskQueryPart = this.gettaskQueryPart(this.state.organization.id)
 		GQL.run([taskQueryPart]).then(data =>
-			this.setState({tasks: data.poams})
+			this.setState({tasks: data.tasks})
 		)
 	}
 
