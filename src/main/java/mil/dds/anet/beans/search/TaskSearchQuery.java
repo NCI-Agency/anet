@@ -1,17 +1,17 @@
 package mil.dds.anet.beans.search;
 
-import mil.dds.anet.beans.Poam.PoamStatus;
+import mil.dds.anet.beans.Task.TaskStatus;
 
-public class PoamSearchQuery extends AbstractSearchQuery {
+public class TaskSearchQuery extends AbstractSearchQuery {
 
-	public enum PoamSearchSortBy { CREATED_AT, NAME, CATEGORY }
+	public enum TaskSearchSortBy { CREATED_AT, NAME, CATEGORY }
 
 	Integer responsibleOrgId;
 	Boolean includeChildrenOrgs;
 	String category;
-	PoamStatus status;
+	TaskStatus status;
 
-	private PoamSearchSortBy sortBy;
+	private TaskSearchSortBy sortBy;
 	private SortOrder sortOrder;
 
 	public Integer getResponsibleOrgId() {
@@ -38,19 +38,19 @@ public class PoamSearchQuery extends AbstractSearchQuery {
 		this.category = category;
 	}
 
-	public PoamStatus getStatus() {
+	public TaskStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(PoamStatus status) {
+	public void setStatus(TaskStatus status) {
 		this.status = status;
 	}
 
-	public PoamSearchSortBy getSortBy() {
+	public TaskSearchSortBy getSortBy() {
 		return sortBy;
 	}
 
-	public void setSortBy(PoamSearchSortBy sortBy) {
+	public void setSortBy(TaskSearchSortBy sortBy) {
 		this.sortBy = sortBy;
 	}
 
@@ -62,8 +62,8 @@ public class PoamSearchQuery extends AbstractSearchQuery {
 		this.sortOrder = sortOrder;
 	}
 
-	public static PoamSearchQuery withText(String text, int pageNum, int pageSize) {
-		PoamSearchQuery query = new PoamSearchQuery();
+	public static TaskSearchQuery withText(String text, int pageNum, int pageSize) {
+		TaskSearchQuery query = new TaskSearchQuery();
 		query.setText(text);
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);

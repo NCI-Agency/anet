@@ -11,7 +11,7 @@ import Messages from 'components/Messages'
 import Tag from 'components/Tag'
 
 import API from 'api'
-import {Report, Person, Poam} from 'models'
+import {Report, Person, Task} from 'models'
 
 export default class ReportMinimal extends Page {
 	static pageProps = {
@@ -61,7 +61,7 @@ export default class ReportMinimal extends Page {
 				primaryAdvisor { id }
 				primaryPrincipal { id }
 
-				poams { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 
 				comments {
 					id, text, createdAt, updatedAt
@@ -195,10 +195,10 @@ export default class ReportMinimal extends Page {
 							</thead>
 
 							<tbody>
-								{Poam.map(report.poams, (poam, idx) =>
-									<tr key={poam.id} id={"poam_" + idx}>
-										<td className="poamName" >{poam.shortName} - {poam.longName}</td>
-										<td className="poamOrg" >{poam.responsibleOrg && poam.responsibleOrg.shortName }</td>
+								{Task.map(report.tasks, (task, idx) =>
+									<tr key={task.id} id={"task_" + idx}>
+										<td className="taskName" >{task.shortName} - {task.longName}</td>
+										<td className="taskOrg" >{task.responsibleOrg && task.responsibleOrg.shortName }</td>
 									</tr>
 								)}
 							</tbody>

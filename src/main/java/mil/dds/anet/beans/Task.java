@@ -10,17 +10,17 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class Poam extends AbstractAnetBean {
+public class Task extends AbstractAnetBean {
 
-	public enum PoamStatus { ACTIVE, INACTIVE }
+	public enum TaskStatus { ACTIVE, INACTIVE }
 	
 	String shortName;
 	String longName;
 	String category;
-	Poam parentPoam;
-	List<Poam> childrenPoams;
+	Task parentTask;
+	List<Task> childrenTasks;
 	
-	PoamStatus status;
+	TaskStatus status;
 	
 	Organization responsibleOrg;
 
@@ -48,48 +48,48 @@ public class Poam extends AbstractAnetBean {
 		this.category = Utils.trimStringReturnNull(category);
 	}
 	
-	@GraphQLFetcher("parentPoam")
-	public Poam loadParentPoam() {
-		if (parentPoam == null || parentPoam.getLoadLevel() == null) { return parentPoam; }
-		if (parentPoam.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.parentPoam = AnetObjectEngine.getInstance()
-					.getPoamDao().getById(parentPoam.getId());
+	@GraphQLFetcher("parentTask")
+	public Task loadParentTask() {
+		if (parentTask == null || parentTask.getLoadLevel() == null) { return parentTask; }
+		if (parentTask.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
+			this.parentTask = AnetObjectEngine.getInstance()
+					.getTaskDao().getById(parentTask.getId());
 		}
-		return parentPoam;
+		return parentTask;
 	}
 	
-	public void setParentPoam(Poam parent) {
-		this.parentPoam = parent;
+	public void setParentTask(Task parent) {
+		this.parentTask = parent;
 	}
 	
 	@GraphQLIgnore
-	public Poam getParentPoam() { 
-		return this.parentPoam;
+	public Task getParentTask() { 
+		return this.parentTask;
 	}
 	
-	@GraphQLFetcher("childrenPoams")
-	public List<Poam> loadChildrenPoams() { 
-		if (childrenPoams == null) { 
-			childrenPoams = AnetObjectEngine.getInstance()
-					.getPoamDao().getPoamsByParentId(this.getId());
+	@GraphQLFetcher("childrenTasks")
+	public List<Task> loadChildrenTasks() { 
+		if (childrenTasks == null) { 
+			childrenTasks = AnetObjectEngine.getInstance()
+					.getTaskDao().getTasksByParentId(this.getId());
 		}
-		return childrenPoams;
+		return childrenTasks;
 	}
 	
 	@GraphQLIgnore
-	public List<Poam> getChildrenPoams() { 
-		return childrenPoams;
+	public List<Task> getChildrenTasks() { 
+		return childrenTasks;
 	}
 	
-	public void setChildrenPoams(List<Poam> childrenPoams) { 
-		this.childrenPoams = childrenPoams;
+	public void setChildrenTasks(List<Task> childrenTasks) { 
+		this.childrenTasks = childrenTasks;
 	}
 	
-	public PoamStatus getStatus() {
+	public TaskStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(PoamStatus status) {
+	public void setStatus(TaskStatus status) {
 		this.status = status;
 	}
 
@@ -112,23 +112,23 @@ public class Poam extends AbstractAnetBean {
 		return responsibleOrg;
 	}
 	
-	public static Poam create(String shortName, String longName, String category) { 
-		return create(shortName, longName, category, null, null, PoamStatus.ACTIVE);
+	public static Task create(String shortName, String longName, String category) { 
+		return create(shortName, longName, category, null, null, TaskStatus.ACTIVE);
 	}
 	
-	public static Poam create(String shortName, String longName, String category, Poam parent, Organization responsibleOrg, PoamStatus status) { 
-		Poam p = new Poam();
+	public static Task create(String shortName, String longName, String category, Task parent, Organization responsibleOrg, TaskStatus status) { 
+		Task p = new Task();
 		p.setShortName(shortName);
 		p.setLongName(longName);
 		p.setCategory(category);
-		p.setParentPoam(parent);
+		p.setParentTask(parent);
 		p.setResponsibleOrg(responsibleOrg);
 		p.setStatus(status);
 		return p;
 	}
 	
-	public static Poam createWithId(Integer id) { 
-		Poam p = new Poam();
+	public static Task createWithId(Integer id) { 
+		Task p = new Task();
 		p.setId(id);
 		p.setLoadLevel(LoadLevel.ID_ONLY);
 		return p;
@@ -139,22 +139,22 @@ public class Poam extends AbstractAnetBean {
 		if (o == null || o.getClass() != this.getClass()) { 
 			return false;
 		}
-		Poam other = (Poam) o;
+		Task other = (Task) o;
 		return Objects.equals(other.getId(), id) 
 				&& Objects.equals(other.getShortName(), shortName) 
 				&& Objects.equals(other.getLongName(), longName) 
 				&& Objects.equals(other.getCategory(), category) 
-				&& idEqual(other.getParentPoam(), parentPoam);
+				&& idEqual(other.getParentTask(), parentTask);
 	}
 	
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, shortName, longName, category, parentPoam);
+		return Objects.hash(id, shortName, longName, category, parentTask);
 	}
 	
 	@Override
 	public String toString() { 
-		return String.format("[id:%d shortName:%s category:%s parentPoam:%d]", id, shortName, category, DaoUtils.getId(parentPoam));
+		return String.format("[id:%d shortName:%s category:%s parentPoam:%d]", id, shortName, category, DaoUtils.getId(parentTask));
 	}
 	
 }

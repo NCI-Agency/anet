@@ -13,11 +13,11 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
 import dict from 'dictionary'
 import API from 'api'
-import {Poam, Position} from 'models'
+import {Task, Position} from 'models'
 
-export default class PoamForm extends ValidatableFormWrapper {
+export default class TaskForm extends ValidatableFormWrapper {
 	static propTypes = {
-		poam: PropTypes.object.isRequired,
+		task: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 	}
 
@@ -26,9 +26,9 @@ export default class PoamForm extends ValidatableFormWrapper {
 	}
 
 	render() {
-		let {poam, edit} = this.props
+		let {task, edit} = this.props
 		let {currentUser} = this.context.app.state
-		let poamShortTitle = dict.lookup('POAM_SHORT_NAME')
+		let taskShortTitle = dict.lookup('TASK_SHORT_NAME')
 
 		let orgSearchQuery = {}
 		orgSearchQuery.type = 'ADVISOR_ORG'
@@ -44,19 +44,19 @@ export default class PoamForm extends ValidatableFormWrapper {
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<ValidatableForm
-					formFor={poam}
+					formFor={task}
 					onChange={this.onChange}
 					onSubmit={this.onSubmit}
-					submitText={`Save ${poamShortTitle}`}
+					submitText={`Save ${taskShortTitle}`}
 					horizontal>
 
 					<Fieldset title={edit ?
-						`Edit ${poamShortTitle} ${poam.shortName}`
+						`Edit ${taskShortTitle} ${task.shortName}`
 						:
-						`Create a new ${poamShortTitle}`
+						`Create a new ${taskShortTitle}`
 					}>
-						<RequiredField id="shortName" label={`${poamShortTitle} number`} />
-						<RequiredField id="longName" label={`${poamShortTitle} description`} />
+						<RequiredField id="shortName" label={`${taskShortTitle} number`} />
+						<RequiredField id="longName" label={`${taskShortTitle} description`} />
 
 						<Form.Field id="status" >
 							<ButtonToggleGroup>
@@ -67,7 +67,7 @@ export default class PoamForm extends ValidatableFormWrapper {
 
 						<Form.Field id="responsibleOrg" label="Responsible organization">
 							<Autocomplete valueKey="shortName"
-								placeholder={`Select a responsible organization for this ${poamShortTitle}`}
+								placeholder={`Select a responsible organization for this ${taskShortTitle}`}
 								url="/api/organizations/search"
 								queryParams={orgSearchQuery}
 							/>
@@ -85,24 +85,23 @@ export default class PoamForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
-		let {poam, edit} = this.props
-		if (poam.responsibleOrg && poam.responsibleOrg.id) {
-			poam.responsibleOrg = {id: poam.responsibleOrg.id}
+		let {task, edit} = this.props
+		if (task.responsibleOrg && task.responsibleOrg.id) {
+			task.responsibleOrg = {id: task.responsibleOrg.id}
 		}
-
-		let url = `/api/poams/${edit ? 'update' : 'new'}`
-		API.send(url, poam, {disableSubmits: true})
+		let url = `/api/tasks/${edit ? 'update' : 'new'}`
+		API.send(url, task, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
 					throw response.code
 				}
 
 				if (response.id) {
-					poam.id = response.id
+					task.id = response.id
 				}
 
-				History.replace(Poam.pathForEdit(poam), false)
-				History.push(Poam.pathFor(poam), {success: 'Saved successfully', skipPageLeaveWarning: true})
+				History.replace(Task.pathForEdit(task), false)
+				History.push(Task.pathFor(task), {success: 'Saved successfully', skipPageLeaveWarning: true})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)

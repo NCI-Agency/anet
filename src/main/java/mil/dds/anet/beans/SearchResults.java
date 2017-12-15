@@ -3,7 +3,7 @@ package mil.dds.anet.beans;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.graphql.IGraphQLBean;
@@ -13,7 +13,7 @@ public class SearchResults implements IGraphQLBean {
 	PersonList people;
 	ReportList reports;
 	PositionList positions;
-	PoamList poams; 
+	TaskList tasks;
 	LocationList locations;
 	OrganizationList organizations;
 	
@@ -41,12 +41,12 @@ public class SearchResults implements IGraphQLBean {
 		this.positions = positions;
 	}
 	
-	public PoamList getPoams() {
-		return poams;
+	public TaskList getPoams() {
+		return tasks;
 	}
 	
-	public void setPoams(PoamList poams) {
-		this.poams = poams;
+	public void setTasks(TaskList tasks) {
+		this.tasks = tasks;
 	}
 	
 	public LocationList getLocations() {

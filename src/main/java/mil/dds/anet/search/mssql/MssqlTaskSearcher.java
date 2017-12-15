@@ -9,40 +9,40 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
-import mil.dds.anet.beans.Poam;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
-import mil.dds.anet.beans.search.PoamSearchQuery;
-import mil.dds.anet.beans.search.PoamSearchQuery.PoamSearchSortBy;
-import mil.dds.anet.database.mappers.PoamMapper;
-import mil.dds.anet.search.IPoamSearcher;
+import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery.TaskSearchSortBy;
+import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class MssqlPoamSearcher implements IPoamSearcher {
+public class MssqlTaskSearcher implements ITaskSearcher {
 
 	@Override
-	public PoamList runSearch(PoamSearchQuery query, Handle dbHandle) {
+	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
-		final StringBuilder sql = new StringBuilder("/* MssqlPoamSearch */ SELECT poams.*");
+		final StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*");
 
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
 		if (doFullTextSearch) {
 			// If we're doing a full-text search, add a pseudo-rank (giving LIKE matches the highest possible score)
 			// so we can sort on it (show the most relevant hits at the top).
-			sql.append(", ISNULL(c_poams.rank, 0)"
-					+ " + CASE WHEN poams.shortName LIKE :likeQuery THEN 1000 ELSE 0 END");
+			sql.append(", ISNULL(c_tasks.rank, 0)"
+					+ " + CASE WHEN tasks.shortName LIKE :likeQuery THEN 1000 ELSE 0 END");
 			sql.append(" AS search_rank");
 		}
-		sql.append(", COUNT(*) OVER() AS totalCount FROM poams");
+		sql.append(", COUNT(*) OVER() AS totalCount FROM tasks");
 
 		if (doFullTextSearch) {
-			sql.append(" LEFT JOIN CONTAINSTABLE (poams, (longName), :containsQuery) c_poams"
-					+ " ON poams.id = c_poams.[Key]");
-			whereClauses.add("(c_poams.rank IS NOT NULL"
-					+ " OR poams.shortName LIKE :likeQuery)");
+			sql.append(" LEFT JOIN CONTAINSTABLE (tasks, (longName), :containsQuery) c_tasks"
+					+ " ON tasks.id = c_tasks.[Key]");
+			whereClauses.add("(c_tasks.rank IS NOT NULL"
+					+ " OR tasks.shortName LIKE :likeQuery)");
 			args.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			args.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
@@ -63,16 +63,16 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 		}
 
 		if (query.getCategory() != null) {
-			whereClauses.add("poams.category = :category");
+			whereClauses.add("tasks.category = :category");
 			args.put("category", query.getCategory());
 		}
 
 		if (query.getStatus() != null) {
-			whereClauses.add("poams.status = :status");
+			whereClauses.add("tasks.status = :status");
 			args.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
-		final PoamList result =  new PoamList();
+		final TaskList result =  new TaskList();
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 
@@ -90,21 +90,21 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 			orderByClauses.addAll(Utils.addOrderBy(SortOrder.DESC, null, "search_rank"));
 		}
 
-		if (query.getSortBy() == null) { query.setSortBy(PoamSearchSortBy.NAME); }
+		if (query.getSortBy() == null) { query.setSortBy(TaskSearchSortBy.NAME); }
 		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
 		switch (query.getSortBy()) {
 			case CREATED_AT:
-				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "poams", "createdAt"));
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tasks", "createdAt"));
 				break;
 			case CATEGORY:
-				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "poams", "category"));
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tasks", "category"));
 				break;
 			case NAME:
 			default:
-				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "poams", "shortName", "longName"));
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tasks", "shortName", "longName"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "poams", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tasks", "id"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
@@ -112,9 +112,9 @@ public class MssqlPoamSearcher implements IPoamSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Poam> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
-			.map(new PoamMapper());
-		return PoamList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
+		final Query<Task> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
+			.map(new TaskMapper());
+		return TaskList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
 	}
 
 }

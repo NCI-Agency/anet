@@ -51,7 +51,7 @@ class Nav extends Component {
 				<AnchorLink scrollTo="info">Info</AnchorLink>
 				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
 				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="poams">{dict.lookup('POAM_SHORT_NAME')}s</AnchorLink>
+				<AnchorLink scrollTo="tasks">{dict.lookup('TASK_SHORT_NAME')}s</AnchorLink>
 				<AnchorLink scrollTo="reports">Reports</AnchorLink>
 			</SubNav>
 		)
@@ -135,8 +135,8 @@ class Nav extends Component {
 						<Link to="/insights/cancelled-reports">
 							<MenuItem>Cancelled engagement reports</MenuItem>
 						</Link>
-						<Link to="/insights/reports-by-poam">
-							<MenuItem>Reports by PoAM</MenuItem>
+						<Link to="/insights/reports-by-task">
+							<MenuItem>Reports by task</MenuItem>
 						</Link>
 						<Link to="/insights/future-engagements-by-location">
 							<MenuItem>Future engagements by location</MenuItem>

@@ -1,15 +1,15 @@
 import React from 'react'
 import Page from 'components/Page'
 
-import PoamForm from './Form'
+import TaskForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 import NavigationWarning from 'components/NavigationWarning'
 
 import API from 'api'
 import dict from 'dictionary'
-import {Poam,Organization} from 'models'
+import {Task,Organization} from 'models'
 
-export default class PoamNew extends Page {
+export default class TaskNew extends Page {
 	static pageProps = {
 		useNavigation: false
 	}
@@ -19,8 +19,8 @@ export default class PoamNew extends Page {
 		super(props)
 
 		this.state = {
-			poam: new Poam(),
-			originalPoam: new Poam()
+			task: new Task(),
+			originalTask: new Task()
 		}
 	}
 
@@ -31,23 +31,23 @@ export default class PoamNew extends Page {
 					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
-				let poam = this.state.poam
-				poam.responsibleOrg = new Organization(data.organization)
-				this.state.originalPoam.responsibleOrg = new Organization(data.organization)
-				this.setState({poam})
+				let task = this.state.task
+				task.responsibleOrg = new Organization(data.organization)
+				this.state.originalTask.responsibleOrg = new Organization(data.organization)
+				this.setState({task})
 			})
 		}
 	}
 
 	render() {
-		let poam = this.state.poam
+		let task = this.state.task
 
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new ' + dict.lookup('POAM_SHORT_NAME'), Poam.pathForNew()]]} />
+				<Breadcrumbs items={[['Create new ' + dict.lookup('TASK_SHORT_NAME'), Task.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalPoam} current={poam} />
-				<PoamForm poam={poam} />
+				<NavigationWarning original={this.state.originalTask} current={task} />
+				<TaskForm task={task} />
 			</div>
 		)
 	}

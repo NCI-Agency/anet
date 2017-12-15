@@ -37,7 +37,7 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 	Boolean includeOrgChildren;
 	
 	Integer locationId;
-	Integer poamId;
+	Integer taskId;
 	Integer pendingApprovalOf;
 	List<ReportState> state;
 	ReportCancelledReason cancelledReason;
@@ -214,12 +214,12 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.locationId = locationId;
 	}
 
-	public Integer getPoamId() {
-		return poamId;
+	public Integer getTaskId() {
+		return taskId;
 	}
 
-	public void setPoamId(Integer poamId) {
-		this.poamId = poamId;
+	public void setTaskId(Integer taskId) {
+		this.taskId = taskId;
 	}
 
 	public Integer getPendingApprovalOf() {

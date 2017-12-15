@@ -5,51 +5,51 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import NavigationWarning from 'components/NavigationWarning'
 
-import PoamForm from './Form'
+import TaskForm from './Form'
 
 import API from 'api'
 import dict from 'dictionary'
-import {Poam} from 'models'
+import {Task} from 'models'
 
-export default class PoamEdit extends Page {
+export default class TaskEdit extends Page {
 	static pageProps = {
 		useNavigation: false
 	}
 
 
-	static modelName = 'PoAM'
+	static modelName = 'Task'
 
 	constructor(props) {
 		super(props)
 
 		this.state = {
-			poam: new Poam(),
-			originalPoam: new Poam()
+			task: new Task(),
+			originalTask: new Task()
 		}
 	}
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			poam(id:${props.params.id}) {
+			task(id:${props.params.id}) {
 				id, shortName, longName, status,
 				responsibleOrg {id,shortName, longName, identificationCode}
 			}
 		`).then(data => {
-			this.setState({poam: new Poam(data.poam), originalPoam: new Poam(data.poam)})
+			this.setState({task: new Task(data.task), originalTask: new Task(data.task)})
 		})
 	}
 
 	render() {
-		let poam = this.state.poam
+		let task = this.state.task
 
 		return (
 			<div>
-				<Breadcrumbs items={[[`${dict.lookup('POAM_SHORT_NAME')} ${poam.shortName}`, Poam.pathFor(poam)], ["Edit", Poam.pathForEdit(poam)]]} />
+				<Breadcrumbs items={[[`${dict.lookup('TASK_SHORT_NAME')} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
 
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<NavigationWarning original={this.state.originalPoam} current={poam} />
-				<PoamForm poam={poam} edit />
+				<NavigationWarning original={this.state.originalTask} current={task} />
+				<TaskForm task={task} edit />
 			</div>
 		)
 	}

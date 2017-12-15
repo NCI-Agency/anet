@@ -30,7 +30,7 @@ public class Organization extends AbstractAnetBean {
 	List<ApprovalStep> approvalSteps; /*Approval process for this Org */
 	List<Organization> childrenOrgs; /* Immediate children */
 	List<Organization> descendants; /* All descendants (children of children..)*/
-	List<Poam> poams; 
+	List<Task> tasks; 
 	
 	public String getShortName() {
 		return shortName;
@@ -150,21 +150,21 @@ public class Organization extends AbstractAnetBean {
 		return descendants;
 	}
 	
-	@GraphQLFetcher("poams")
-	public List<Poam> loadPoams() { 
-		if (poams == null) { 
-			poams = AnetObjectEngine.getInstance().getPoamDao().getPoamsByOrganizationId(this.getId());
+	@GraphQLFetcher("tasks")
+	public List<Task> loadTasks() { 
+		if (tasks == null) { 
+			tasks = AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(this.getId());
 		}
-		return poams;
+		return tasks;
 	}
 	
 	@GraphQLIgnore
-	public List<Poam> getPoams() { 
-		return poams;
+	public List<Task> getTasks() { 
+		return tasks;
 	}
 	
-	public void setPoams(List<Poam> poams) { 
-		this.poams = poams;
+	public void setTasks(List<Task> tasks) { 
+		this.tasks = tasks;
 	}
 	
 	@GraphQLFetcher("reports")

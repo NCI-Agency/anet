@@ -5,7 +5,7 @@ reportList (f:search, query:{text:"${searchQuery}"}) {
         advisorOrg { id, shortName, longName},
         principalOrg { id, shortName, longName},
         location { id, name},
-        poams {id, shortName, longName}
+        tasks {id, shortName, longName}
 	}
 }
 
@@ -15,7 +15,7 @@ personList(f:search, query:{text:"${searchQuery}"}) {
 positionList (f:search, query:{text:"${searchQuery}"}) { 
 	totalCount, list { id, name, type, organization{ id, shortName} , person { id, name}}
 }
-poamList (f:search, query:{text:"${searchQuery}"}) { 
+taskList (f:search, query:{text:"${searchQuery}"}) { 
 	totalCount, list { id, shortName, longName}
 }
 locationList (f:search, query:{text:"${searchQuery}"}) { 
