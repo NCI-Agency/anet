@@ -861,4 +861,16 @@
 			referencedColumnNames="id" referencedTableName="organizations" />
 	</changeSet>
 
+	<changeSet id="add-extra-fields-to-Tasks" author="evdhoudt">
+		<addColumn tableName="tasks">
+			<column name="projectedCompletion" type="datetime" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="plannedCompletion" type="datetime" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="customField" type="text" />
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>
