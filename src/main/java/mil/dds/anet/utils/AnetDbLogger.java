@@ -55,7 +55,9 @@ public class AnetDbLogger extends FormattedLog {
 				.replace(PositionDao.POSITIONS_FIELDS, " <POSITION_FIELDS> ")
 				.replace(OrganizationDao.ORGANIZATION_FIELDS, " <ORGANIZATION_FIELDS> ")
 				.replace(ReportDao.REPORT_FIELDS, " <REPORT_FIELDS> ")
-				.replace(ReportSensitiveInformationDao.REPORTS_SENSITIVE_INFORMATION_FIELDS, " <REPORTS_SENSITIVE_INFORMATION_FIELDS> ");
+				.replace(ReportSensitiveInformationDao.REPORTS_SENSITIVE_INFORMATION_FIELDS, " <REPORTS_SENSITIVE_INFORMATION_FIELDS> ")
+				.replaceAll("LEFT JOIN (CONTAINS|FREETEXT)TABLE[^=]*= (\\S+)\\.\\[Key\\]", "<$1_$2>")
+				.replaceFirst("(ISNULL|CASE).* AS (search_rank)", "<$1>");
 		log.log(level, msg);
 	}
 }
