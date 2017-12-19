@@ -871,6 +871,9 @@
 		<addColumn tableName="tasks">
 			<column name="customField" type="text" />
 		</addColumn>
+		<addColumn tableName="tasks" >
+			<column name="customFieldEnum" type="text" />
+		</addColumn>
 	</changeSet>
 
 </databaseChangeLog>
