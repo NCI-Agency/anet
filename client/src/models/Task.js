@@ -10,7 +10,7 @@ export default class Task extends Model {
 
 	static resourceName = 'Task'
 	static displayName() {
-		return dict.lookup('POAM_SHORT_NAME')
+		return dict.lookup('TASK_SHORT_NAME')
 	}
 
 	static listName = 'taskList'
@@ -20,8 +20,12 @@ export default class Task extends Model {
 		longName: '',
 		category: '',
 		responsibleOrg: {},
-		parentPoam: {},
-		childrenPoams: [],
+		parentTask: {},
+		childrenTasks: [],
+		taskCustomEnum: '',
+		customField: '',
+		projectedCompletionDate: null,
+		plannedCompletionDate: null,
 	}
 
 	static autocompleteQuery = "id, shortName, longName"

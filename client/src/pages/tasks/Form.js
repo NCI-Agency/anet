@@ -2,6 +2,7 @@ import React, {PropTypes} from 'react'
 import autobind from 'autobind-decorator'
 
 import {Button} from 'react-bootstrap'
+import DatePicker from 'react-bootstrap-date-picker'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import Fieldset from 'components/Fieldset'
@@ -15,6 +16,19 @@ import dict from 'dictionary'
 import API from 'api'
 import {Task, Position} from 'models'
 
+import CALENDAR_ICON from 'resources/calendar.png'
+
+const customEnumButtons = (list) => {
+	let buttons = []
+	for (const key in list) {
+		if (list.hasOwnProperty(key)) {
+			let value = list[key]
+			buttons.push(<Button id="statusActiveButton" key={key} value={key}>{value}</Button>)
+		}
+	  }
+    return buttons
+}
+
 export default class TaskForm extends ValidatableFormWrapper {
 	static propTypes = {
 		task: PropTypes.object.isRequired,
@@ -26,17 +40,20 @@ export default class TaskForm extends ValidatableFormWrapper {
 	}
 
 	render() {
-		let {task, edit} = this.props
-		let {currentUser} = this.context.app.state
-		let taskShortTitle = dict.lookup('TASK_SHORT_NAME')
-
-		let orgSearchQuery = {}
+		const {task, edit} = this.props
+		const {currentUser} = this.context.app.state
+		const taskShortTitle = dict.lookup('TASK_SHORT_NAME')
+		const taskProjectedCompletion = dict.lookup('TASK_PROJECTED_COMPLETION')
+		const taskPlannedCompletion = dict.lookup('TASK_PLANNED_COMPLETION')
+		const taskCustomField = dict.lookup('TASK_CUSTOM_FIELD')
+		const taskCustomEnumLabel = dict.lookup('TASK_CUSTOM_ENUM_LABEL')
+		const taskCustomEnumObj = dict.lookup('taskCustomEnum')
+		const orgSearchQuery = {}
 		orgSearchQuery.type = 'ADVISOR_ORG'
 		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
 			orgSearchQuery.parentOrgId = currentUser.position.organization.id
 			orgSearchQuery.parentOrgRecursively = true
 		}
-
 
 		const {ValidatableForm, RequiredField} = this
 		return (
@@ -72,6 +89,31 @@ export default class TaskForm extends ValidatableFormWrapper {
 								queryParams={orgSearchQuery}
 							/>
 						</Form.Field>
+
+						{taskCustomEnumObj && taskCustomEnumLabel &&
+							<Form.Field id="taskCustomEnum" label={taskCustomEnumLabel} >
+								<ButtonToggleGroup>
+									{customEnumButtons(taskCustomEnumObj)}
+								</ButtonToggleGroup>
+							</Form.Field>
+						}
+
+						{taskProjectedCompletion &&
+							<Form.Field id="projectedCompletionDate" addon={CALENDAR_ICON} >
+								<DatePicker showTodayButton placeholder={`${taskProjectedCompletion}`} dateFormat="DD/MM/YYYY" showClearButton={false} />
+							</Form.Field>
+						}
+
+						{taskPlannedCompletion &&
+							<Form.Field id="plannedCompletionDate" addon={CALENDAR_ICON} >
+								<DatePicker showTodayButton placeholder={`${taskPlannedCompletion}`} dateFormat="DD/MM/YYYY" showClearButton={false} />
+							</Form.Field>
+						}
+
+						{taskCustomField &&
+							<Form.Field id="customField" label={`${taskCustomField}`} />
+						}
+
 					</Fieldset>
 				</ValidatableForm>
 			</div>
@@ -90,6 +132,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 			task.responsibleOrg = {id: task.responsibleOrg.id}
 		}
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
+		console.log(task)
 		API.send(url, task, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {

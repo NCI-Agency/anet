@@ -154,6 +154,10 @@ dictionary:
   ADVISOR_ORG_NAME: Advisor Organization
   TASK_LONG_NAME: Plan of Action and Milestones / Pillars
   TASK_SHORT_NAME: Task
+  TASK_PROJECTED_COMPLETION: 'Fill in the projected completion date'
+  TASK_PLANNED_COMPLETION: 'Fill in the planned completion date'
+  TASK_CUSTOM_ENUM_LABEL: 'Project status'
+  TASK_CUSTOM_FIELD: 'Custom field'
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
   PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
   PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense
@@ -244,3 +248,6 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
+  'taskCustomEnum':
+    OPEN: Open
+    CLOSED: Closed
