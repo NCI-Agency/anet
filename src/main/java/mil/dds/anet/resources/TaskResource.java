@@ -185,7 +185,7 @@ public class TaskResource implements IGraphQLResource {
 	}
 	
 	/**
-	 * Returns the most recent PoAMs that this user listed in reports.
+	 * Returns the most recent Tasks that this user listed in reports.
 	 * @param maxResults maximum number of results to return, defaults to 3
 	 */
 	@GET

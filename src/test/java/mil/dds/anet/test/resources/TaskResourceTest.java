@@ -63,8 +63,8 @@ public class TaskResourceTest extends AbstractResourceTest {
 		List<Task> tree = httpQuery("/api/tasks/tree", jack).get(TaskList.class).getList();
 		assertThat(tree).contains(a, e);
 		assertThat(tree).doesNotContain(b);
-		for (Task p : tree) { 
-			if (p.getId() == a.getId()) { 
+		for (Task p : tree) {
+			if (p.getId() == a.getId()) {
 				assertThat(p.getChildrenTasks()).contains(b, c, d);
 			}
 		}
@@ -76,7 +76,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		returned = httpQuery("/api/tasks/" + a.getId(), jack).get(Task.class);
 		assertThat(returned.getLongName()).isEqualTo(a.getLongName());
 
-		//Assign the POAMs to the AO
+		//Assign the Task to the AO
 		List<Organization> orgs = httpQuery("/api/organizations/search?text=EF8", jack).get(OrganizationList.class).getList();
 		Organization ef8 = orgs.stream().filter(o -> o.getShortName().equals("EF8")).findFirst().get();
 		assertThat(ef8).isNotNull();

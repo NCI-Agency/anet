@@ -51,7 +51,7 @@ test('Draft and submit a report', async t => {
     t.is(
         await $tasksAutocomplete.getAttribute('value'), 
         '', 
-        'Clicking a PoAM autocomplete suggestion empties the autocomplete field.'
+        'Clicking a Task autocomplete suggestion empties the autocomplete field.'
     )
 
     let $newTaskRow = await $('.tasks-selector table tbody tr td')

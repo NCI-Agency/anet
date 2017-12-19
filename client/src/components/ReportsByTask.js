@@ -45,7 +45,7 @@ export default class ReportsByTask extends Component {
 
   render() {
     const focusDetails = this.getFocusDetails()
-    const taskShortTitle = dict.lookup('POAM_SHORT_NAME')
+    const taskShortTitle = dict.lookup('TASK_SHORT_NAME')
     return (
       <div>
         <p className="help-text">{`Number of published reports since ${this.referenceDateLongStr}, grouped by ${taskShortTitle}`}</p>

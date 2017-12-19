@@ -41,7 +41,7 @@ public class SearchResults implements IGraphQLBean {
 		this.positions = positions;
 	}
 	
-	public TaskList getPoams() {
+	public TaskList getTasks() {
 		return tasks;
 	}
 	
