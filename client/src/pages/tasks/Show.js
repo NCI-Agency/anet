@@ -13,6 +13,8 @@ import dict from 'dictionary'
 import GQL from 'graphqlapi'
 import {Task} from 'models'
 
+import moment from 'moment'
+
 export default class TaskShow extends Page {
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
@@ -53,6 +55,8 @@ export default class TaskShow extends Page {
 		let taskQuery = new GQL.Part(/* GraphQL */`
 			task(id:${props.params.id}) {
 				id, shortName, longName, status,
+				customField, customFieldEnum,
+				plannedCompletion, projectedCompletion,
 				responsibleOrg {id, shortName, longName, identificationCode}
 			}
 		`)
@@ -71,6 +75,9 @@ export default class TaskShow extends Page {
 		let currentUser = this.context.currentUser
 		let taskShortName = dict.lookup("TASK_SHORT_NAME")
 
+		const customField = dict.lookup("TASK_CUSTOM_FIELD")
+		const customEnumLabel = dict.lookup("TASK_CUSTOM_ENUM_LABEL")
+
 		let canEdit = currentUser.isAdmin()
 
 		return (
@@ -84,6 +91,10 @@ export default class TaskShow extends Page {
 						<Form.Field id="longName" label={`${taskShortName} description`} />
 						<Form.Field id="status" />
 						{task.responsibleOrg && task.responsibleOrg.id && this.renderOrg()}
+						<Form.Field id="customFieldEnum" label={`${customEnumLabel}`} />
+						<Form.Field label="Planned completion" id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
+						<Form.Field label="Projected completion" id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
+						<Form.Field id="customField" />
 					</Fieldset>
 				</Form>
 

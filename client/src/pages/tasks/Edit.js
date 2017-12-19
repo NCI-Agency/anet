@@ -1,5 +1,6 @@
 import React from 'react'
 import Page from 'components/Page'
+import moment from 'moment'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
@@ -32,9 +33,17 @@ export default class TaskEdit extends Page {
 		API.query(/* GraphQL */`
 			task(id:${props.params.id}) {
 				id, shortName, longName, status,
+				customField, customFieldEnum,
+				plannedCompletion, projectedCompletion,
 				responsibleOrg {id,shortName, longName, identificationCode}
 			}
 		`).then(data => {
+			if (data.task.plannedCompletion) {
+				data.task.plannedCompletion = moment(data.task.plannedCompletion).format()
+			}
+			if (data.task.projectedCompletion) {
+				data.task.projectedCompletion = moment(data.task.projectedCompletion).format()
+			}
 			this.setState({task: new Task(data.task), originalTask: new Task(data.task)})
 		})
 	}

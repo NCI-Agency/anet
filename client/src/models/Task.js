@@ -22,10 +22,10 @@ export default class Task extends Model {
 		responsibleOrg: {},
 		parentTask: {},
 		childrenTasks: [],
-		taskCustomEnum: '',
+		customFieldEnum: '',
 		customField: '',
-		projectedCompletionDate: null,
-		plannedCompletionDate: null,
+		projectedCompletion: null,
+		plannedCompletion: null,
 	}
 
 	static autocompleteQuery = "id, shortName, longName"

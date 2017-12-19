@@ -54,7 +54,6 @@ export default class TaskForm extends ValidatableFormWrapper {
 			orgSearchQuery.parentOrgId = currentUser.position.organization.id
 			orgSearchQuery.parentOrgRecursively = true
 		}
-
 		const {ValidatableForm, RequiredField} = this
 		return (
 			<div>
@@ -75,12 +74,12 @@ export default class TaskForm extends ValidatableFormWrapper {
 						<RequiredField id="shortName" label={`${taskShortTitle} number`} />
 						<RequiredField id="longName" label={`${taskShortTitle} description`} />
 
-						<Form.Field id="status" >
+						<RequiredField id="status" >
 							<ButtonToggleGroup>
 								<Button id="statusActiveButton" value="ACTIVE">Active</Button>
 								<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
 							</ButtonToggleGroup>
-						</Form.Field>
+						</RequiredField>
 
 						<Form.Field id="responsibleOrg" label="Responsible organization">
 							<Autocomplete valueKey="shortName"
@@ -91,7 +90,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 						</Form.Field>
 
 						{taskCustomEnumObj && taskCustomEnumLabel &&
-							<Form.Field id="taskCustomEnum" label={taskCustomEnumLabel} >
+							<Form.Field id="customFieldEnum" label={taskCustomEnumLabel} >
 								<ButtonToggleGroup>
 									{customEnumButtons(taskCustomEnumObj)}
 								</ButtonToggleGroup>
@@ -99,13 +98,13 @@ export default class TaskForm extends ValidatableFormWrapper {
 						}
 
 						{taskProjectedCompletion &&
-							<Form.Field id="projectedCompletionDate" addon={CALENDAR_ICON} >
+							<Form.Field id="projectedCompletion" addon={CALENDAR_ICON} >
 								<DatePicker showTodayButton placeholder={`${taskProjectedCompletion}`} dateFormat="DD/MM/YYYY" showClearButton={false} />
 							</Form.Field>
 						}
 
 						{taskPlannedCompletion &&
-							<Form.Field id="plannedCompletionDate" addon={CALENDAR_ICON} >
+							<Form.Field id="plannedCompletion" addon={CALENDAR_ICON} >
 								<DatePicker showTodayButton placeholder={`${taskPlannedCompletion}`} dateFormat="DD/MM/YYYY" showClearButton={false} />
 							</Form.Field>
 						}
@@ -132,7 +131,6 @@ export default class TaskForm extends ValidatableFormWrapper {
 			task.responsibleOrg = {id: task.responsibleOrg.id}
 		}
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
-		console.log(task)
 		API.send(url, task, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
