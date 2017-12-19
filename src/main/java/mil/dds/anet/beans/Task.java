@@ -45,7 +45,7 @@ public class Task extends AbstractAnetBean {
 	}
 
 	public DateTime getProjectedCompletion() {
-		return plannedCompletion;
+		return projectedCompletion;
 	}
 
 	public String getShortName() {
