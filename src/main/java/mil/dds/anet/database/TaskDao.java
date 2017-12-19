@@ -57,8 +57,10 @@ public class TaskDao implements IAnetDao<Task> {
 		p.setCreatedAt(DateTime.now());
 		p.setUpdatedAt(DateTime.now());
 		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* inserTask */ INSERT INTO tasks "
-				+ "(longName, shortName, category, parentTaskId, organizationId, createdAt, updatedAt, status) " 
-				+ "VALUES (:longName, :shortName, :category, :parentTaskId, :organizationId, :createdAt, :updatedAt, :status)")
+				+ "(longName, shortName, category, parentTaskId, organizationId, createdAt, updatedAt, status, "
+				+ "customField, customFieldEnum, plannedCompletion, projectedCompletion) "
+				+ "VALUES (:longName, :shortName, :category, :parentTaskId, :organizationId, :createdAt, :updatedAt, :status, "
+				+ ":customField, :customFieldEnum, :plannedCompletion, :projectedCompletion)")
 			.bindFromProperties(p)
 			.bind("parentTaskId", DaoUtils.getId(p.getParentTask()))
 			.bind("organizationId", DaoUtils.getId(p.getResponsibleOrg()))
@@ -73,7 +75,9 @@ public class TaskDao implements IAnetDao<Task> {
 		p.setUpdatedAt(DateTime.now());
 		return dbHandle.createStatement("/* updateTask */ UPDATE tasks set longName = :longName, shortName = :shortName, "
 				+ "category = :category, parentTaskId = :parentTaskId, updatedAt = :updatedAt, "
-				+ "organizationId = :organizationId, status = :status " 
+				+ "organizationId = :organizationId, status = :status, "
+				+ "customField = :customField, customFieldEnum = :customFieldEnum, "
+				+ "plannedCompletion = :plannedCompletion, projectedCompletion = :projectedCompletion "
 				+ "WHERE id = :id")
 			.bindFromProperties(p)
 			.bind("parentTaskId", DaoUtils.getId(p.getParentTask()))
@@ -108,12 +112,17 @@ public class TaskDao implements IAnetDao<Task> {
 			sql.append("WITH RECURSIVE");
 		}
 		sql.append(" parent_tasks(id, shortName, longName, category, parentTaskId, "
-				+ "organizationId, createdAt, updatedAt, status) AS ("
+				+ "organizationId, createdAt, updatedAt, status,"
+				+ "customField, customFieldEnum, plannedCompletion, projectedCompletion) AS ("
 				+ "SELECT id, shortName, longName, category, parentTaskId, "
-				+ "organizationId, createdAt, updatedAt, status FROM tasks WHERE id = :taskId "
+				+ "organizationId, createdAt, updatedAt, status, "
+				+ "customField, customFieldEnum, plannedCompletion, projectedCompletion "
+				+ "FROM tasks WHERE id = :taskId "
 			+ "UNION ALL "
-				+ "SELECT p.id, p.shortName, p.longName, p.category, p.parentTaskId, p.organizationId, p.createdAt, p.updatedAt, p.status "
-				+ "from parent_tasks pp, tasks p WHERE p.parentTaskId = pp.id "
+				+ "SELECT p.id, p.shortName, p.longName, p.category, p.parentTaskId, "
+				+ "p.organizationId, p.createdAt, p.updatedAt, p.status, "
+				+ "p.customField, p.customFieldEnum, p.plannedCompletion, p.projectedCompletion "
+				+ "FROM parent_tasks pp, tasks p WHERE p.parentTaskId = pp.id "
 			+ ") SELECT * from parent_tasks;");
 		return dbHandle.createQuery(sql.toString())
 			.bind("taskId", taskId)
