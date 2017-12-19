@@ -16,6 +16,8 @@ import API from 'api'
 import dict from 'dictionary'
 import {Position, Organization} from 'models'
 
+import DictionaryLabelField from '../../HOC/DictionaryLabelField'
+
 import REMOVE_ICON from 'resources/delete.png'
 
 export default class OrganizationForm extends ValidatableFormWrapper {
@@ -52,6 +54,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 			   dict.lookup('ADVISOR_ORG_LABEL_IDENTIFICATIONCODE'),
 			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
 
+		const IdentificationCodeFieldWithLabel = DictionaryLabelField(labelIdentificationCode)(Form.Field)
 		return <ValidatableForm formFor={organization}
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
@@ -78,7 +81,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
 				<Form.Field id="longName" disabled={isPrincipalOrg && !isAdmin} label={labelLongName} placeholder={placeholderLongName} />
-				<Form.Field id="identificationCode" disabled={!isAdmin} label={labelIdentificationCode} placeholder={placeholderIdentificationCode} />
+				 <IdentificationCodeFieldWithLabel id="identificationCode" disabled={!isAdmin} placeholder={placeholderIdentificationCode} />
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>
