@@ -374,11 +374,7 @@ public class ReportResource implements IGraphQLResource {
 				Integer.parseInt(engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION)));
 		}
 		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(org);
-		if (steps == null || steps.size() == 0) {
-			//Missing approval steps for this organization
-			steps = engine.getApprovalStepsForOrg(
-					Organization.createWithId(Integer.parseInt(engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION))));
-		}
+		throwExceptionNoApprovalSteps(steps);
 
 		//Push the report into the first step of this workflow
 		r.setApprovalStep(steps.get(0));
@@ -394,6 +390,18 @@ public class ReportResource implements IGraphQLResource {
 
 		AnetAuditLogger.log("report {} submitted by author {} (id: {})", r.getId(), r.getAuthor().getName(), r.getAuthor().getId());
 		return r;
+	}
+
+	/***
+	 * Throws a WebApplicationException when the report does not have an approval chain belonging to the advisor organization
+	 */
+	private void throwExceptionNoApprovalSteps(List<ApprovalStep> steps) {
+		if (Utils.isEmptyOrNull(steps)) {
+			final String supportEmailAddr = (String)this.config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+			final String messageBody = "Advisor organization is missing a report approval chain. In order to have an approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
+			final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody : String.format("%s at %s", messageBody, supportEmailAddr);
+			throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
+		}
 	}
 
 	private void sendApprovalNeededEmail(Report r) {
