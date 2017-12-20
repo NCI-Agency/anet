@@ -4,8 +4,6 @@ import mil.dds.anet.beans.Organization.OrganizationType;
 
 public class OrganizationSearchQuery extends AbstractSearchQuery {
 
-	public enum OrganizationSearchSortBy { CREATED_AT, NAME, TYPE }
-
 	OrganizationType type;
 	
 	//Search for organizations with a specific parent Org. 
@@ -14,10 +12,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
 	//If true will include all orgs in the tree of the parentOrg
 	// Including the parent Org. 
 	Boolean parentOrgRecursively;
-
-	private OrganizationSearchSortBy sortBy;
-	private SortOrder sortOrder;
-
+	
 	public OrganizationType getType() {
 		return type;
 	}
@@ -40,22 +35,6 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
 
 	public void setParentOrgRecursively(Boolean parentOrgRecursively) {
 		this.parentOrgRecursively = parentOrgRecursively;
-	}
-
-	public OrganizationSearchSortBy getSortBy() {
-		return sortBy;
-	}
-
-	public void setSortBy(OrganizationSearchSortBy sortBy) {
-		this.sortBy = sortBy;
-	}
-
-	public SortOrder getSortOrder() {
-		return sortOrder;
-	}
-
-	public void setSortOrder(SortOrder sortOrder) {
-		this.sortOrder = sortOrder;
 	}
 
 	public static OrganizationSearchQuery withText(String text, int pageNum, int pageSize) {
