@@ -32,7 +32,7 @@ export default class PoamEdit extends Page {
 		API.query(/* GraphQL */`
 			poam(id:${props.params.id}) {
 				id, shortName, longName, status,
-				responsibleOrg {id,shortName, longName}
+				responsibleOrg {id,shortName, longName, identificationCode}
 			}
 		`).then(data => {
 			this.setState({poam: new Poam(data.poam), originalPoam: new Poam(data.poam)})

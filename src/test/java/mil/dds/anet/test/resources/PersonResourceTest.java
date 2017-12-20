@@ -39,7 +39,6 @@ public class PersonResourceTest extends AbstractResourceTest {
 	@Test
 	public void testCreatePerson() {
 		final Person jack = getJackJackson();
-		final Person admin = getArthurDmin();
 
 		Person retPerson = httpQuery(String.format("/api/people/%d", jack.getId()), jack).get(Person.class);
 		assertThat(retPerson).isEqualTo(jack);
@@ -142,7 +141,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
 		PersonList searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 		assertThat(searchResults.getTotalCount()).isGreaterThan(0);
-		assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("Bob Bobtown")).findFirst()).isNotEmpty();
+		assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob")).findFirst()).isNotEmpty();
 
 		OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%201&type=ADVISOR_ORG", jack).get(OrganizationList.class);
 		assertThat(orgs.getList().size()).isGreaterThan(0);
@@ -157,7 +156,8 @@ public class PersonResourceTest extends AbstractResourceTest {
 		query.setStatus(ImmutableList.of(PersonStatus.INACTIVE));
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
-		assertThat(searchResults.getList().stream().filter(p -> p.getStatus()== PersonStatus.INACTIVE).count()).isEqualTo(searchResults.getList().size());
+		assertThat(searchResults.getList().stream().filter(p -> p.getStatus() == PersonStatus.INACTIVE).count())
+			.isEqualTo(searchResults.getList().size());
 		
 		//Search with children orgs
 		org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1")).findFirst().get();
@@ -196,18 +196,18 @@ public class PersonResourceTest extends AbstractResourceTest {
 			prevName = p.getName();
 		}
 		
-		//Search for a person with the name "A Divisor"
+		//Search for a person with the name "A Dvisor"
 		query = new PersonSearchQuery();
 		query.setText("A Dvisor");
 		query.setRole(Role.ADVISOR);
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
-		long matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("A Dvisor")).count();
+		long matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		//Search for same person from an autocomplete box. 
 		query.setText("A Dvisor*");
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
-		matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("A Dvisor")).count();
+		matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		
@@ -242,8 +242,6 @@ public class PersonResourceTest extends AbstractResourceTest {
 	
 	@Test
 	public void mergePeopleTest() { 
-		final Person admin = getArthurDmin();
-
 		//Create a person
 		Person loser = new Person();
 		loser.setRole(Role.ADVISOR);
@@ -258,7 +256,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		
 		//Assign to an AO
 		Organization ao = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO()), Organization.class);
+				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
 		test.setOrganization(Organization.createWithId(ao.getId()));
 
 		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);
@@ -305,5 +303,40 @@ public class PersonResourceTest extends AbstractResourceTest {
 		assertThat(curr).isEqualTo(winner);
 		
 		
+	}
+
+	@Test
+	public void testInactivatePerson() {
+		final Person jack = getJackJackson();
+		final OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(OrganizationList.class);
+		assertThat(orgs.getList().size()).isGreaterThan(0);
+		final Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
+		assertThat(org.getId()).isNotNull();
+
+		final Position newPos = new Position();
+		newPos.setType(PositionType.ADVISOR);
+		newPos.setName("Test Position");
+		newPos.setOrganization(org);
+		newPos.setStatus(PositionStatus.ACTIVE);
+		final Position retPos = httpQuery("/api/positions/new", admin).post(Entity.json(newPos), Position.class);
+		assertThat(retPos.getId()).isNotNull();
+
+		final Person newPerson = new Person();
+		newPerson.setName("Namey McNameface");
+		newPerson.setRole(Role.ADVISOR);
+		newPerson.setStatus(PersonStatus.ACTIVE);
+		newPerson.setDomainUsername("namey_" + DateTime.now().getMillis());
+		newPerson.setPosition(newPos);
+		final Person retPerson = httpQuery("/api/people/new", admin).post(Entity.json(newPerson), Person.class);
+		assertThat(retPerson.getId()).isNotNull();
+		assertThat(retPerson.getPosition()).isNotNull();
+
+		retPerson.setStatus(PersonStatus.INACTIVE);
+		final Response resp = httpQuery("/api/people/update", admin).post(Entity.json(retPerson));
+		assertThat(resp.getStatus()).isEqualTo(200);
+
+		final Person retPerson2 = httpQuery(String.format("/api/people/%d", retPerson.getId()), admin).get(Person.class);
+		assertThat(retPerson2.getDomainUsername()).isNull();
+		assertThat(retPerson2.getPosition()).isNull();
 	}
 }

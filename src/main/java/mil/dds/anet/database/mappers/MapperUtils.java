@@ -1,12 +1,18 @@
 package mil.dds.anet.database.mappers;
 
+import java.lang.invoke.MethodHandles;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MapperUtils {
 
-	/* Utilitiy function to check for NULL values in the column
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+	/* Utility function to check for NULL values in the column
 	 * Because .getInt returns 0 if the column is null.  Boooo 
 	 */
 	public static Integer getInteger(ResultSet rs, String columnName) throws SQLException {
@@ -30,7 +36,7 @@ public class MapperUtils {
 			T[] values = (T[]) clazz.getMethod("values").invoke(null);
 			return values[idx];
 		} catch (Exception e) { 
-			e.printStackTrace();
+			logger.error("failed to get/invoke method", e);
 			return null;
 		}
 	}

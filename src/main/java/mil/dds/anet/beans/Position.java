@@ -7,6 +7,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Position extends AbstractAnetBean {
@@ -18,6 +19,7 @@ public class Position extends AbstractAnetBean {
 	String code;
 	PositionType type;
 	PositionStatus status;
+	private boolean authorized;
 		
 	//Lazy Loaded
 	Organization organization;
@@ -38,7 +40,7 @@ public class Position extends AbstractAnetBean {
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+		this.name = Utils.trimStringReturnNull(name);
 	}
 	
 	public String getCode() {
@@ -46,7 +48,7 @@ public class Position extends AbstractAnetBean {
 	}
 
 	public void setCode(String code) {
-		this.code = code;
+		this.code = Utils.trimStringReturnNull(code);
 	}
 
 	public PositionType getType() {
@@ -63,6 +65,14 @@ public class Position extends AbstractAnetBean {
 
 	public void setStatus(PositionStatus status) {
 		this.status = status;
+	}
+
+	public boolean getAuthorized() {
+		return authorized;
+	}
+
+	public void setAuthorized(boolean authorized) {
+		this.authorized = authorized;
 	}
 
 	@GraphQLFetcher("organization")
@@ -160,7 +170,7 @@ public class Position extends AbstractAnetBean {
 	
 	@Override
 	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != Position.class) { 
+		if (o == null || o.getClass() != this.getClass()) {
 			return false; 
 		}
 		Position other = (Position) o;
@@ -168,12 +178,13 @@ public class Position extends AbstractAnetBean {
 			&& Objects.equals(name, other.getName()) 
 			&& Objects.equals(code,  other.getCode()) 
 			&& Objects.equals(type, other.getType()) 
-			&& idEqual(organization, other.getOrganization());
+			&& idEqual(organization, other.getOrganization())
+			&& Objects.equals(authorized, other.getAuthorized());
 	}
 	
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, name, code, type, organization);
+		return Objects.hash(id, name, code, type, organization, authorized);
 	}
 	
 	@Override

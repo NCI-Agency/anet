@@ -2,7 +2,9 @@ package mil.dds.anet.test.beans;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
@@ -15,6 +17,8 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
+import mil.dds.anet.beans.ReportSensitiveInformation;
+import mil.dds.anet.beans.Tag;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportTest extends BeanTester<Report> {
@@ -62,7 +66,22 @@ public class ReportTest extends BeanTester<Report> {
 		LinkedList<Comment> comments = new LinkedList<Comment>();
 		comments.add(c);
 		r.setComments(comments);
-		
+
+		final List<Tag> tags = new ArrayList<Tag>();
+		final Tag t1 = new Tag();
+		t1.setName("name1");
+		t1.setDescription("desc1");
+		tags.add(t1);
+		final Tag t2 = new Tag();
+		t2.setName("name2");
+		t2.setDescription("desc2");
+		tags.add(t2);
+		r.setTags(tags);
+
+		final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
+		rsi.setText("For your eyes only");
+		r.setReportSensitiveInformation(rsi);
+
 		return r;
 	}
 	

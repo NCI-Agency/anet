@@ -31,17 +31,14 @@ export default class SavedSearchTable extends Component {
 	@autobind
 	runSearch(search) {
 		let query = JSON.parse(search.query)
+		// Add default sorting (if not specified/saved in the query); see SEARCH_CONFIG in pages/Search.js
+		query.sortBy = query.sortBy || 'ENGAGEMENT_DATE'
+		query.sortOrder = query.sortOrder || 'DESC'
+		let fields = ReportCollection.GQL_REPORT_FIELDS
 		API.query(/*GraphQL */`
 			reports: reportList(f:search, query: $query) {
 				pageNum, pageSize, totalCount, list {
-					id, intent, engagementDate, keyOutcomes, nextSteps, state, cancelledReason
-					primaryAdvisor { id, name, role, position { organization { id, shortName}}},
-					primaryPrincipal { id, name, role, position { organization { id, shortName}}},
-					author{ id, name},
-					advisorOrg { id, shortName},
-					principalOrg { id, shortName},
-					location { id, name, lat, lng},
-					poams {id, shortName, longName}
+					${fields}
 				}
 			}
 		`, {query}, '($query: ReportSearchQuery)').then(data =>

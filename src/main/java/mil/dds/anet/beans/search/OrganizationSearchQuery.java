@@ -2,9 +2,10 @@ package mil.dds.anet.beans.search;
 
 import mil.dds.anet.beans.Organization.OrganizationType;
 
-public class OrganizationSearchQuery implements ISearchQuery {
+public class OrganizationSearchQuery extends AbstractSearchQuery {
 
-	String text;
+	public enum OrganizationSearchSortBy { CREATED_AT, NAME, TYPE }
+
 	OrganizationType type;
 	
 	//Search for organizations with a specific parent Org. 
@@ -13,23 +14,10 @@ public class OrganizationSearchQuery implements ISearchQuery {
 	//If true will include all orgs in the tree of the parentOrg
 	// Including the parent Org. 
 	Boolean parentOrgRecursively;
-	
-	int pageNum;
-	int pageSize;
-	
-	public OrganizationSearchQuery() { 
-		this.pageNum = 0;
-		this.pageSize = 10;
-	}
-	
-	public String getText() {
-		return text;
-	}
-	
-	public void setText(String text) {
-		this.text = text;
-	}
-	
+
+	private OrganizationSearchSortBy sortBy;
+	private SortOrder sortOrder;
+
 	public OrganizationType getType() {
 		return type;
 	}
@@ -54,27 +42,22 @@ public class OrganizationSearchQuery implements ISearchQuery {
 		this.parentOrgRecursively = parentOrgRecursively;
 	}
 
-	@Override
-	public int getPageNum() {
-		return pageNum;
+	public OrganizationSearchSortBy getSortBy() {
+		return sortBy;
 	}
-	
-	@Override
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
+
+	public void setSortBy(OrganizationSearchSortBy sortBy) {
+		this.sortBy = sortBy;
 	}
-	
-	@Override
-	public int getPageSize() {
-		return pageSize;
+
+	public SortOrder getSortOrder() {
+		return sortOrder;
 	}
-	
-	@Override
-	public void setPageSize(int pageSize) {
-		if (pageSize == 0) { return; } // that makes no sense. 
-		this.pageSize = pageSize;
+
+	public void setSortOrder(SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
 	}
-	
+
 	public static OrganizationSearchQuery withText(String text, int pageNum, int pageSize) {
 		OrganizationSearchQuery query = new OrganizationSearchQuery();
 		query.setText(text);
@@ -82,5 +65,5 @@ public class OrganizationSearchQuery implements ISearchQuery {
 		query.setPageSize(pageSize);
 		return query;
 	}
-	
+
 }

@@ -2,7 +2,10 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.client.Entity;
@@ -12,6 +15,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -37,6 +42,7 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
+import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
@@ -44,13 +50,17 @@ import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportsResourceTest extends AbstractResourceTest {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public ReportsResourceTest() {
 		if (client == null) {
@@ -65,7 +75,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	public void createReport() {
 		//Create a report writer
 		final Person author = getJackJackson();
-		final Person admin = getArthurDmin();
 
 		//Create a principal for the report
 		ReportPerson principal = PersonTest.personToReportPerson(getSteveSteveson());
@@ -77,7 +86,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Create an Advising Organization for the report writer
 		final Organization advisorOrg = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO()), Organization.class);
+				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
 
 		//Create leadership people in the AO who can approve this report
 		Person approver1 = new Person();
@@ -194,8 +203,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		Report returned = httpQuery(String.format("/api/reports/%d", created.getId()), author).get(Report.class);
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
-		System.out.println(String.format("Expecting report %d in step %d because of org %d on author %d",
-				returned.getId(), approval.getId(), advisorOrg.getId(), author.getId()));
+		logger.debug("Expecting report {} in step {} because of org {} on author {}",
+				new Object[] { returned.getId(), approval.getId(), advisorOrg.getId(), author.getId() });
 		assertThat(returned.getApprovalStep().getId()).isEqualTo(approval.getId());
 
 		//verify the location on this report
@@ -215,7 +224,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		ReportList pending = httpQuery("/api/reports/search", approver1).post(Entity.json(pendingQuery), ReportList.class);
 		int id = returned.getId();
 		Report expected = pending.getList().stream().filter(re -> re.getId().equals(id)).findFirst().get();
-		expected.equals(returned);
+		assertThat(expected).isEqualTo(returned);
 		assertThat(pending.getList()).contains(returned);
 
 		//Run a search for this users pending approvals
@@ -334,7 +343,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	@Test
 	public void testDefaultApprovalFlow() {
 		final Person jack = getJackJackson();
-		final Person admin = getArthurDmin();
 		final Person roger = getRogerRogwell();
 
 		//Create a Person who isn't in a Billet
@@ -343,7 +351,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		author.setRole(Role.ADVISOR);
 		author.setStatus(PersonStatus.ACTIVE);
 		author.setDomainUsername("newGuy");
-		author.setEmailAddress("newGuy@example.com");
+		author.setEmailAddress("newGuy@dds.mil");
 		author = httpQuery("/api/people/new", admin).post(Entity.json(author), Person.class);
 		assertThat(author.getId()).isNotNull();
 
@@ -616,7 +624,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setState(ImmutableList.of(ReportState.CANCELLED));
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
-		int numCancelled = searchResults.getTotalCount();
+		final int numCancelled = searchResults.getTotalCount();
 		
 		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.RELEASED));
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
@@ -695,6 +703,64 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
+	public void searchUpdatedAtStartAndEndTest() {
+		// insertBaseData has 1 report that is updatedAt 2 days before current timestamp
+		final ReportSearchQuery query = new ReportSearchQuery();
+		final DateTime startDate = DateTime.now().minusDays(3);
+		final DateTime endDate = DateTime.now().minusDays(1);
+
+		// Greater than startDate and smaller than endDate
+		query.setUpdatedAtStart(startDate);
+		query.setUpdatedAtEnd(endDate);
+		query.setPageSize(0);
+		ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(results.getList().size()).isEqualTo(1);
+
+		// Greater than startDate and equal to endDate
+		query.setUpdatedAtStart(startDate);
+		query.setUpdatedAtEnd(endDate.minusDays(1));
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(results.getList().size()).isEqualTo(1);
+
+		// Equal to startDate and smaller than endDate
+		query.setUpdatedAtStart(startDate.plusDays(1));
+		query.setUpdatedAtEnd(endDate);
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(results.getList().size()).isEqualTo(0);
+
+		// Equal to startDate and equal to endDate
+		query.setUpdatedAtStart(startDate.plusDays(1));
+		query.setUpdatedAtEnd(startDate.plusDays(1));
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(results.getList().size()).isEqualTo(0);
+	}
+
+	@Test
+	public void searchByAuthorPosition() {
+		final ReportSearchQuery query = new ReportSearchQuery();
+		final Position adminPos = admin.loadPosition();
+		query.setAuthorPositionId(adminPos.getId());
+
+		//Search by author position
+		final ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(results).isNotNull();
+		assertThat(results.getList().size()).isGreaterThan(0);
+	}
+
+
+	@Test
+	public void searchAttendeePosition() {
+		final ReportSearchQuery query = new ReportSearchQuery();
+		final Position adminPos = admin.loadPosition();
+		query.setAttendeePositionId(adminPos.getId());
+
+		//Search by attendee position
+		final ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(results).isNotNull();
+		assertThat(results.getList().size()).isGreaterThan(0);
+	}
+
+	@Test
 	public void reportDeleteTest() {
 		final Person jack = getJackJackson();
 		final Person liz = getElizabethElizawell();
@@ -768,58 +834,294 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report returned2 = httpQuery("/api/reports/" + saved.getId(), liz).get(Report.class);
 		assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
 	}
-	
+
 	@Test
-	public void dailyRollupGraphTest() { 
-		Person authur = getArthurDmin();
+	public void dailyRollupGraphNonReportingTest() {
 		Person steve = getSteveSteveson();
 		
 		Report r = new Report();
-		r.setAuthor(authur);
+		r.setAuthor(admin);
 		r.setIntent("Test the Daily rollup graph");
 		r.setNextSteps("Check for a change in the rollup graph");
 		r.setKeyOutcomes("Foobar the bazbiz");
-		r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(authur), PersonTest.personToPrimaryReportPerson(steve)));
-		r = httpQuery("/api/reports/new", authur).post(Entity.json(r), Report.class);
+		r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(admin), PersonTest.personToPrimaryReportPerson(steve)));
+		r = httpQuery("/api/reports/new", admin).post(Entity.json(r), Report.class);
 		
 		//Pull the daily rollup graph
 		DateTime startDate = DateTime.now().minusDays(1);
 		DateTime endDate = DateTime.now().plusDays(1);
-		List<RollupGraph> startGraph = httpQuery(
-				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), authur)
+		final List<RollupGraph> startGraph = httpQuery(
+				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), admin)
 				.get(new GenericType<List<RollupGraph>>() {});
 		
 		//Submit the report
-		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", authur).post(null);
+		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 		
 		//Oops set the engagementDate.
 		r.setEngagementDate(DateTime.now());
-		resp = httpQuery("/api/reports/update", authur).post(Entity.json(r));
+		resp = httpQuery("/api/reports/update", admin).post(Entity.json(r));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Re-submit the report, it should work. 
-		resp = httpQuery("/api/reports/" + r.getId() + "/submit", authur).post(null);
+		resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		//Authur can approve his own reports. 
-		resp = httpQuery("/api/reports/" + r.getId() + "/approve", authur).post(null);
+		//Admin can approve his own reports.
+		resp = httpQuery("/api/reports/" + r.getId() + "/approve", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Verify report is in RELEASED state. 
-		r = httpQuery("/api/reports/" + r.getId(), authur).get(Report.class);
+		r = httpQuery("/api/reports/" + r.getId(), admin).get(Report.class);
 		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
 	
 		//Check on the daily rollup graph now. 
 		List<RollupGraph> endGraph = httpQuery(
-				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), authur)
+				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), admin)
 				.get(new GenericType<List<RollupGraph>>() {});
 		
-		//Authur's organization should have one more report RELEASED!
-		int authurOrgId = authur.loadPosition().loadOrganization().getId();
-		Optional<RollupGraph> adminOrg = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(authurOrgId)).findFirst();
-		int startCt = adminOrg.isPresent() ? (adminOrg.get().getReleased()) : 0;
-		int endCt = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(authurOrgId)).findFirst().get().getReleased();
-		assertThat(startCt).isEqualTo(endCt - 1);
+		final Position pos = admin.loadPosition();
+		pos.getOrganization().setLoadLevel(LoadLevel.ID_ONLY);
+		final Organization org = pos.loadOrganization();
+		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
+		@SuppressWarnings("unchecked")
+		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
+		//Admin's organization should have one more report RELEASED only if it is not in the non-reporting orgs
+		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
+		final int orgId = org.getId();
+		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
+		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
+		assertThat(startCt).isEqualTo(endCt - diff);
+	}
+
+	@Test
+	public void dailyRollupGraphReportingTest() {
+		final Person elizabeth = getElizabethElizawell();
+		final Person bob = getBobBobtown();
+		Person steve = getSteveSteveson();
+
+		Report r = new Report();
+		r.setAuthor(elizabeth);
+		r.setIntent("Test the Daily rollup graph");
+		r.setNextSteps("Check for a change in the rollup graph");
+		r.setKeyOutcomes("Foobar the bazbiz");
+		r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(elizabeth), PersonTest.personToPrimaryReportPerson(steve)));
+		r = httpQuery("/api/reports/new", elizabeth).post(Entity.json(r), Report.class);
+
+		//Pull the daily rollup graph
+		DateTime startDate = DateTime.now().minusDays(1);
+		DateTime endDate = DateTime.now().plusDays(1);
+		final List<RollupGraph> startGraph = httpQuery(
+				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), elizabeth)
+				.get(new GenericType<List<RollupGraph>>() {});
+
+		//Submit the report
+		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", elizabeth).post(null);
+		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+
+		//Oops set the engagementDate.
+		r.setEngagementDate(DateTime.now());
+		resp = httpQuery("/api/reports/update", elizabeth).post(Entity.json(r));
+		assertThat(resp.getStatus()).isEqualTo(200);
+
+		//Re-submit the report, it should work.
+		resp = httpQuery("/api/reports/" + r.getId() + "/submit", elizabeth).post(null);
+		assertThat(resp.getStatus()).isEqualTo(200);
+
+		//Approve report.
+		resp = httpQuery("/api/reports/" + r.getId() + "/approve", bob).post(null);
+		assertThat(resp.getStatus()).isEqualTo(200);
+
+		//Verify report is in RELEASED state.
+		r = httpQuery("/api/reports/" + r.getId(), elizabeth).get(Report.class);
+		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
+
+		//Check on the daily rollup graph now.
+		List<RollupGraph> endGraph = httpQuery(
+				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), elizabeth)
+				.get(new GenericType<List<RollupGraph>>() {});
+
+		final Position pos = elizabeth.loadPosition();
+		pos.getOrganization().setLoadLevel(LoadLevel.ID_ONLY);
+		final Organization org = pos.loadOrganization();
+		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
+		@SuppressWarnings("unchecked")
+		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
+		//Elizabeth's organization should have one more report RELEASED only if it is not in the non-reporting orgs
+		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
+		final int orgId = org.loadParentOrg().getId();
+		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
+		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
+		assertThat(startCt).isEqualTo(endCt - diff);
+	}
+
+	@Test
+	public void testTagSearch() {
+		final ReportSearchQuery tagQuery = new ReportSearchQuery();
+		tagQuery.setText("bribery");
+		final ReportList taggedReportList = httpQuery("/api/reports/search", admin).post(Entity.json(tagQuery), ReportList.class);
+		assertThat(taggedReportList).isNotNull();
+		final List<Report> taggedReports = taggedReportList.getList();
+		for (Report rpt : taggedReports) {
+			rpt.loadTags();
+			assertThat(rpt.getTags()).isNotNull();
+			assertThat(rpt.getTags().stream().filter(o -> o.getName().equals("bribery"))).isNotEmpty();
+		}
+	}
+
+	@Test
+	public void testSensitiveInformationByAuthor() {
+		final Person elizabeth = getElizabethElizawell();
+		final Report r = new Report();
+		r.setAuthor(elizabeth);
+		r.setReportText("This reportTest was generated by ReportsResourceTest#testSensitiveInformation");
+		final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
+		rsi.setText("This sensitiveInformation was generated by ReportsResourceTest#testSensitiveInformation");
+		r.setReportSensitiveInformation(rsi);
+		final Report returned = httpQuery("/api/reports/new", elizabeth).post(Entity.json(r), Report.class);
+		assertThat(returned.getId()).isNotNull();
+		// elizabeth should be allowed to see it returned, as she's the author
+		assertThat(returned.getReportSensitiveInformation()).isNotNull();
+		assertThat(returned.getReportSensitiveInformation().getText()).isEqualTo(rsi.getText());
+
+		final Report returned2 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
+		// elizabeth should be allowed to see it
+		returned2.setUser(elizabeth);
+		assertThat(returned2.loadReportSensitiveInformation()).isNotNull();
+		assertThat(returned2.getReportSensitiveInformation().getText()).isEqualTo(rsi.getText());
+
+		final Person jack = getJackJackson();
+		final Report returned3 = httpQuery("/api/reports/" + returned.getId(), jack).get(Report.class);
+		// jack should not be allowed to see it
+		returned3.setUser(jack);
+		assertThat(returned3.loadReportSensitiveInformation()).isNull();
+	}
+
+	@Test
+	public void testSensitiveInformationByAuthorizedPosition() {
+		final PersonSearchQuery erinQuery = new PersonSearchQuery();
+		erinQuery.setText("erin");
+		final PersonList erinSearchResults = httpQuery("/api/people/search", admin).post(Entity.json(erinQuery), PersonList.class);
+		assertThat(erinSearchResults.getTotalCount()).isGreaterThan(0);
+		final Optional<Person> erinResult = erinSearchResults.getList().stream().filter(p -> p.getName().equals("ERINSON, Erin")).findFirst();
+		assertThat(erinResult).isNotEmpty();
+		final Person erin = erinResult.get();
+
+		final ReportSearchQuery reportQuery = new ReportSearchQuery();
+		reportQuery.setText("Test Cases are good");
+		final ReportList reportSearchResults = httpQuery("/api/reports/search", erin).post(Entity.json(reportQuery), ReportList.class);
+		assertThat(reportSearchResults.getTotalCount()).isGreaterThan(0);
+		final Optional<Report> reportResult = reportSearchResults.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
+		assertThat(reportResult).isNotEmpty();
+		final Report report = reportResult.get();
+		report.setUser(erin);
+		// erin is the author, so should be able to see the sensitive information
+		assertThat(report.loadReportSensitiveInformation()).isNotNull();
+		assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
+
+		final PersonSearchQuery reinaQuery = new PersonSearchQuery();
+		reinaQuery.setText("reina");
+		final PersonList searchResults = httpQuery("/api/people/search", admin).post(Entity.json(reinaQuery), PersonList.class);
+		assertThat(searchResults.getTotalCount()).isGreaterThan(0);
+		final Optional<Person> reinaResult = searchResults.getList().stream().filter(p -> p.getName().equals("REINTON, Reina")).findFirst();
+		assertThat(reinaResult).isNotEmpty();
+		final Person reina = reinaResult.get();
+
+		final ReportList reportSearchResults2 = httpQuery("/api/reports/search", reina).post(Entity.json(reportQuery), ReportList.class);
+		assertThat(reportSearchResults2.getTotalCount()).isGreaterThan(0);
+		final Optional<Report> reportResult2 = reportSearchResults2.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
+		assertThat(reportResult2).isNotEmpty();
+		final Report report2 = reportResult2.get();
+		report2.setUser(reina);
+		// reina is not authorized, so should not be able to see the sensitive information
+		assertThat(report2.loadReportSensitiveInformation()).isNull();
+
+		final PersonSearchQuery rebeccaQuery = new PersonSearchQuery();
+		rebeccaQuery.setText("rebecca");
+		final PersonList searchResults3 = httpQuery("/api/people/search", admin).post(Entity.json(rebeccaQuery), PersonList.class);
+		assertThat(searchResults3.getTotalCount()).isGreaterThan(0);
+		final Optional<Person> reinaResult3 = searchResults3.getList().stream().filter(p -> p.getName().equals("BECCABON, Rebecca")).findFirst();
+		assertThat(reinaResult3).isNotEmpty();
+		final Person rebecca = reinaResult3.get();
+
+		final ReportList reportSearchResults3 = httpQuery("/api/reports/search", rebecca).post(Entity.json(reportQuery), ReportList.class);
+		assertThat(reportSearchResults3.getTotalCount()).isGreaterThan(0);
+		final Optional<Report> reportResult3 = reportSearchResults3.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
+		assertThat(reportResult3).isNotEmpty();
+		final Report report3 = reportResult3.get();
+		report3.setUser(rebecca);
+		// rebecca is authorized, so should be able to see the sensitive information
+		assertThat(report.loadReportSensitiveInformation()).isNotNull();
+		assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
+	}
+
+	private ReportSearchQuery setupQueryEngagementDayOfWeek() {
+		final ReportSearchQuery query = new ReportSearchQuery();
+		query.setState(ImmutableList.of(ReportState.RELEASED));
+		return query;
+	}
+
+	private ReportList runSearchQuery(ReportSearchQuery query) {
+		return httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+	}
+
+	@Test
+	public void testEngagementDayOfWeekNotIncludedInResults() {
+		final ReportSearchQuery query = setupQueryEngagementDayOfWeek();
+		final ReportList reportResults = runSearchQuery(query);
+
+		assertThat(reportResults).isNotNull();
+
+		final List<Report> reports = reportResults.getList();
+		for (Report rpt : reports) {
+			assertThat(rpt.getEngagementDayOfWeek()).isNull();
+		}
+	}
+
+	@Test
+	public void testEngagementDayOfWeekIncludedInResults() {
+		final ReportSearchQuery query = setupQueryEngagementDayOfWeek();
+		query.setIncludeEngagementDayOfWeek(true);
+
+		final ReportList reportResults = runSearchQuery(query);
+		assertThat(reportResults).isNotNull();
+
+		final List<Integer> daysOfWeek = Arrays.asList(1,2,3,4,5,6,7);
+		final List<Report> reports = reportResults.getList();
+		for (Report rpt : reports) {
+			assertThat(rpt.getEngagementDayOfWeek()).isIn(daysOfWeek);
+		}
+	}
+
+	@Test
+	public void testSetEngagementDayOfWeek() {
+		final ReportSearchQuery query = setupQueryEngagementDayOfWeek();
+		query.setEngagementDayOfWeek(1);
+		query.setIncludeEngagementDayOfWeek(true);
+
+		final ReportList reportResults = runSearchQuery(query);
+		assertThat(reportResults).isNotNull();
+
+		final List<Report> reports = reportResults.getList();
+		for (Report rpt : reports) {
+			assertThat(rpt.getEngagementDayOfWeek()).isEqualTo(1);
+		}
+	}
+
+	@Test
+	public void testSetEngagementDayOfWeekOutsideWeekRange() {
+		final ReportSearchQuery query = setupQueryEngagementDayOfWeek();
+		query.setEngagementDayOfWeek(0);
+		query.setIncludeEngagementDayOfWeek(true);
+
+		final ReportList reportResults = runSearchQuery(query);
+		assertThat(reportResults).isNotNull();
+
+		final List<Report> reports = reportResults.getList();
+		assertThat(reports.size()).isEqualTo(0);
 	}
 }

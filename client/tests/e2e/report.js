@@ -42,7 +42,7 @@ test('Draft and submit a report', async t => {
         'on', 
         'Principal primary attendee checkbox should be checked'
     )
-    await assertElementText(t, $principalName, 'Christopf Topferness')
+    await assertElementText(t, $principalName, 'TOPFERNESS, Christopf')
     await assertElementText(t, $principalPosition, 'Planning Captain')
     await assertElementText(t, $principalOrg, 'MoD')
 
@@ -184,6 +184,7 @@ test('Verify that validation and other reports/new interactions work', async t =
         )
 
         await $input.sendKeys('user input')
+        await $input.sendKeys(t.context.Key.TAB) // fire blur event
         t.false(
             _includes(await $fieldGroup.getAttribute('class'), warningClass), 
             `After typing in ${fieldName} field, warning state goes away`
@@ -199,7 +200,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     )   
     t.is(await $meetingGoalInput.getAttribute('value'), '', `Meeting goal field starts blank`)
 
-    await verifyFieldIsRequired($meetingGoal, $meetingGoalInput, 'has-warning', 'Meeting group')
+    await verifyFieldIsRequired($meetingGoal, $meetingGoalInput, 'has-warning', 'Meeting goal')
 
     let $engagementDate = await $('#engagementDate')
     t.is(await $engagementDate.getAttribute('value'), '', 'Engagement date field starts blank')
@@ -281,19 +282,16 @@ test('Verify that validation and other reports/new interactions work', async t =
         'on', 
         'Advisor primary attendee checkbox should be checked'
     )
-    await assertElementText(t, $advisorName, 'Erin Erinson CIV')
+    await assertElementText(t, $advisorName, 'ERINSON, Erin CIV')
     await assertElementText(t, $advisorPosition, 'EF 2.2 Advisor D')
     await assertElementText(t, $advisorOrg, 'EF 2.2')
 
-    // We expect to see two shortcut buttons. One will be the current user's name.
-    // Clicking on that button will have no effect, because the current user is already an attendee. The other will
-    // be a principal's name. That's the button we want. Most of the time, that button appears to be last, but sometimes
-    // it is not. To work around this, we'll click ALL the buttons.
-    // If we fixed https://github.com/deptofdefense/anet/issues/527, we would not have this problem.
+    $attendeesRows = await $$('#attendeesTable tbody tr')
     let $addAttendeeShortcutButtons = await $$('#attendance-fieldset .shortcut-list button')
+    // Add all recent attendees
     await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
 
-    t.is((await $$('#attendeesTable tbody tr')).length, 3, 'Clicking the shortcut button adds a row to the table')
+    t.is((await $$('#attendeesTable tbody tr')).length, $attendeesRows.length + $addAttendeeShortcutButtons.length, 'Clicking the shortcut buttons adds rows to the table')
 
     let $submitButton = await $('#formBottomSubmit')
     await $submitButton.click()

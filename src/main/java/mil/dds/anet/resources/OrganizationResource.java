@@ -18,7 +18,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.skife.jdbi.v2.Handle;
+import org.skife.jdbi.v2.TransactionCallback;
+import org.skife.jdbi.v2.TransactionStatus;
+import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+
 import com.codahale.metrics.annotation.Timed;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
@@ -89,8 +95,13 @@ public class OrganizationResource implements IGraphQLResource {
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
 	public Organization createNewOrganization(Organization org, @Auth Person user) {
-		AuthUtils.assertAdministrator(user); 
-		Organization created = dao.insert(org);
+		AuthUtils.assertAdministrator(user);
+		final Organization created;
+		try {
+			created = dao.insert(org);
+		} catch (UnableToExecuteStatementException e) {
+			throw handleSqlException(e);
+		}
 		
 		if (org.getPoams() != null) { 
 			//Assign all of these poams to this organization. 
@@ -101,6 +112,7 @@ public class OrganizationResource implements IGraphQLResource {
 		if (org.getApprovalSteps() != null) { 
 			//Create the approval steps 
 			for (ApprovalStep step : org.getApprovalSteps()) { 
+				validateApprovalStep(step);
 				step.setAdvisorOrganizationId(created.getId());
 				engine.getApprovalStepDao().insertAtEnd(step);
 			}
@@ -122,7 +134,7 @@ public class OrganizationResource implements IGraphQLResource {
 	
 	/**
 	 * Primary endpoint to update all aspects of an Organization.
-	 * - Organization shortName and longName
+	 * - Organization (shortName, longName, identificationCode)
 	 * - Poams
 	 * - Approvers
 	 */
@@ -131,47 +143,59 @@ public class OrganizationResource implements IGraphQLResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateOrganization(Organization org, @Auth Person user) { 
-		//Verify correct Organization 
-		AuthUtils.assertSuperUserForOrg(user, org);
-		
-		int numRows = dao.update(org);
-		
-		if (org.getPoams() != null || org.getApprovalSteps() != null) {
-			//Load the existing org, so we can check for differences. 
-			Organization existing = dao.getById(org.getId());
-			
-			if (org.getPoams() != null) {
-				Utils.addRemoveElementsById(existing.loadPoams(), org.getPoams(), 
-						newPoam -> engine.getPoamDao().setResponsibleOrgForPoam(newPoam, existing), 
-						oldPoamId -> engine.getPoamDao().setResponsibleOrgForPoam(Poam.createWithId(oldPoamId), null));
-			}
-			
-			if (org.getApprovalSteps() != null) {
-				org.getApprovalSteps().stream().forEach(step -> step.setAdvisorOrganizationId(org.getId()));
-				List<ApprovalStep> existingSteps = existing.loadApprovalSteps();
-				
-				Utils.addRemoveElementsById(existingSteps, org.getApprovalSteps(), 
-						newStep -> engine.getApprovalStepDao().insert(newStep),
-						oldStepId -> engine.getApprovalStepDao().deleteStep(oldStepId));
-				
-				for (int i = 0;i < org.getApprovalSteps().size();i++) { 
-					ApprovalStep curr = org.getApprovalSteps().get(i);
-					ApprovalStep next = (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
-					curr.setNextStepId(DaoUtils.getId(next));
-					ApprovalStep existingStep = Utils.getById(existingSteps, curr.getId());
-					//If this step didn't exist before, we still need to set the nextStepId on it, but don't need to do a deep update. 
-					if (existingStep == null) { 
-						engine.getApprovalStepDao().update(curr);
-					} else {
-						//Check for updates to name, nextStepId and approvers. 
-						ApprovalStepResource.updateStep(curr, existingStep);
+		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+		return dbHandle.inTransaction(new TransactionCallback<Response>() {
+			public Response inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				//Verify correct Organization
+				AuthUtils.assertSuperUserForOrg(user, org);
+				final int numRows;
+				try {
+					numRows = dao.update(org);
+				} catch (UnableToExecuteStatementException e) {
+					throw handleSqlException(e);
+				}
+
+				if (org.getPoams() != null || org.getApprovalSteps() != null) {
+					//Load the existing org, so we can check for differences.
+					Organization existing = dao.getById(org.getId());
+
+					if (org.getPoams() != null) {
+						Utils.addRemoveElementsById(existing.loadPoams(), org.getPoams(),
+								newPoam -> engine.getPoamDao().setResponsibleOrgForPoam(newPoam, existing),
+								oldPoamId -> engine.getPoamDao().setResponsibleOrgForPoam(Poam.createWithId(oldPoamId), null));
+					}
+
+					if (org.getApprovalSteps() != null) {
+						for (ApprovalStep step : org.getApprovalSteps()) {
+							validateApprovalStep(step);
+							step.setAdvisorOrganizationId(org.getId());
+						}
+						List<ApprovalStep> existingSteps = existing.loadApprovalSteps();
+
+						Utils.addRemoveElementsById(existingSteps, org.getApprovalSteps(),
+								newStep -> engine.getApprovalStepDao().insert(newStep),
+								oldStepId -> engine.getApprovalStepDao().deleteStep(oldStepId));
+
+						for (int i = 0;i < org.getApprovalSteps().size();i++) {
+							ApprovalStep curr = org.getApprovalSteps().get(i);
+							ApprovalStep next = (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
+							curr.setNextStepId(DaoUtils.getId(next));
+							ApprovalStep existingStep = Utils.getById(existingSteps, curr.getId());
+							//If this step didn't exist before, we still need to set the nextStepId on it, but don't need to do a deep update.
+							if (existingStep == null) {
+								engine.getApprovalStepDao().update(curr);
+							} else {
+								//Check for updates to name, nextStepId and approvers.
+								ApprovalStepResource.updateStep(curr, existingStep);
+							}
+						}
 					}
 				}
+
+				AnetAuditLogger.log("Organization {} edited by {}", org, user);
+				return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
 			}
-		}
-		
-		AnetAuditLogger.log("Organization {} edited by {}", org, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+		});
 	}
 	
 	@POST
@@ -198,5 +222,26 @@ public class OrganizationResource implements IGraphQLResource {
 	@Path("/{id}/poams")
 	public PoamList getPoams(@PathParam("id") Integer orgId) { 
 		return new PoamList(AnetObjectEngine.getInstance().getPoamDao().getPoamsByOrganizationId(orgId));
+	}
+
+	private WebApplicationException handleSqlException(UnableToExecuteStatementException e) {
+		// FIXME: Ugly way to handle the unique index on identificationCode
+		final Throwable cause = e.getCause();
+		if (cause != null && cause instanceof SQLServerException) {
+			final String message = cause.getMessage();
+			if (message != null && message.contains(" duplicate ")) {
+				return new WebApplicationException("Duplicate identification code", Status.CONFLICT);
+			}
+		}
+		return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
+	}
+
+	private void validateApprovalStep(ApprovalStep step) {
+		if (Utils.isEmptyOrNull(step.getName())) {
+			throw new WebApplicationException("A name is required for every approval step", Status.BAD_REQUEST);
+		}
+		if (Utils.isEmptyOrNull(step.loadApprovers())) {
+			throw new WebApplicationException("An approver is required for every approval step", Status.BAD_REQUEST);
+		}
 	}
 }

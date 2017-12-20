@@ -1,0 +1,3 @@
+tagList(f:getAll) {
+	totalCount, list { id, name, description }
+}

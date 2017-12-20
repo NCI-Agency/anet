@@ -7,6 +7,7 @@ import mil.dds.anet.search.IPoamSearcher;
 import mil.dds.anet.search.IPositionSearcher;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ISearcher;
+import mil.dds.anet.search.ITagSearcher;
 
 public class SqliteSearcher implements ISearcher {
 
@@ -16,7 +17,8 @@ public class SqliteSearcher implements ISearcher {
 	SqlitePositionSearcher positionSearcher;
 	SqlitePoamSearcher poamSearcher;
 	SqliteLocationSearcher locationSearcher;
-	
+	private final SqliteTagSearcher tagSearcher;
+
 	public SqliteSearcher() { 
 		this.reportSearcher = new SqliteReportSearcher();
 		this.personSearcher = new SqlitePersonSearcher();
@@ -24,6 +26,7 @@ public class SqliteSearcher implements ISearcher {
 		this.positionSearcher = new SqlitePositionSearcher();
 		this.poamSearcher = new SqlitePoamSearcher();
 		this.locationSearcher = new SqliteLocationSearcher();
+		this.tagSearcher = new SqliteTagSearcher();
 	}
 	
 	@Override
@@ -54,6 +57,11 @@ public class SqliteSearcher implements ISearcher {
 	@Override
 	public ILocationSearcher getLocationSearcher() {
 		return locationSearcher;
+	}
+
+	@Override
+	public ITagSearcher getTagSearcher() {
+		return tagSearcher;
 	}
 
 }

@@ -2,14 +2,11 @@ import React, {Component, PropTypes} from 'react'
 import {Button, Pagination} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
-import LongActionModal from 'components/LongActionModal'
 import ReportSummary from 'components/ReportSummary'
 import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Leaflet from 'components/Leaflet'
 import _get from 'lodash.get'
-
-import DOWNLOAD_ICON from 'resources/download.png'
 
 const FORMAT_SUMMARY = 'summary'
 const FORMAT_TABLE = 'table'
@@ -24,7 +21,16 @@ const GQL_REPORT_FIELDS =  /* GraphQL */`
 	advisorOrg { id, shortName},
 	principalOrg { id, shortName},
 	location { id, name, lat, lng},
-	poams {id, shortName, longName}
+	poams {id, shortName, longName},
+	tags {id, name, description}
+	approvalStatus {
+		type, createdAt
+		step { id , name
+			approvers { id, name, person { id, name, rank } }
+		},
+		person { id, name, rank}
+	}
+	engagementDayOfWeek
 `
 
 
@@ -38,7 +44,6 @@ export default class ReportCollection extends Component {
 			list: PropTypes.array.isRequired,
 		}),
 		goToPage: PropTypes.func,
-		downloadAll: PropTypes.func
 	}
 
 	constructor(props) {
@@ -46,9 +51,6 @@ export default class ReportCollection extends Component {
 
 		this.state = {
 			viewFormat: 'summary',
-			showCSVExportModal: false,
-			current: 0,
-			total: 1
 		}
 	}
 
@@ -57,7 +59,7 @@ export default class ReportCollection extends Component {
 
 		if (this.props.paginatedReports) {
 			var {pageSize, pageNum, totalCount} = this.props.paginatedReports
-			var numPages = Math.ceil(totalCount / pageSize)
+			var numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 			reports = this.props.paginatedReports.list
 			pageNum++
 		} else {
@@ -89,16 +91,11 @@ export default class ReportCollection extends Component {
 							/>
 						}
 
-						{
-							this.props.downloadAll &&
-							<div className="pull-right">
-
-								<Button  onClick={this.startCSVExportModal}><img src={DOWNLOAD_ICON} height={16} alt="Export" /></Button>
-								<LongActionModal showModal={this.state.showCSVExportModal && (this.state.current < this.state.total - 1)} onCancel={this.cancelCSVExportModal} current={this.state.current} total={this.state.total} ></LongActionModal>
-
+						{this.props.isSuperUser &&
+							<div className="reports-filter">
+								Filter: {this.renderToggleFilterButton(this.props)}
 							</div>
 						}
-
 					</header>
 
 					<div>
@@ -111,6 +108,14 @@ export default class ReportCollection extends Component {
 				<em>No reports found</em>
 			}
 		</div>
+	}
+
+	renderToggleFilterButton(props) {
+		let showAll = 'Show all reports'
+		let showPendingApproval = 'Show pending approval'
+		let buttonText = (props.filterIsSet) ? showAll: showPendingApproval
+		let button = <Button value="toggle-filter" className="btn btn-sm" onClick={props.setReportsFilter}>{buttonText}</Button>
+		return button
 	}
 
 	renderTable(reports) {
@@ -138,23 +143,6 @@ export default class ReportCollection extends Component {
 	@autobind
 	changeViewFormat(value) {
 		this.setState({viewFormat: value})
-	}
-
-	@autobind
-	startCSVExportModal() {
-		this.setState({showCSVExportModal: true})
-		let that = this;
-		this.props.downloadAll(
-			(current,total) => {
-				that.setState({current: current,
-					total : total})
-			}
-		 )
-	}
-
-	@autobind
-	cancelCSVExportModal(success) {
-		this.setState({showCSVExportModal: false})
 	}
 
 }

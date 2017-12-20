@@ -31,11 +31,10 @@ public class ApprovalStepResourceTest extends AbstractResourceTest {
 	public void approvalTest() {
 		final Person jack = getJackJackson(); //Get an authenticated user. 
 		final Person liz = getElizabethElizawell();
-		Person admin = getArthurDmin();
 		
 		//Create an Advisor Organization
 		Organization org = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO()), Organization.class);
+				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
 		assertThat(org.getId()).isNotNull();
 	
 		//Create 3 steps in order for this AO

@@ -25,9 +25,14 @@ class Nav extends Component {
 		let organizations = appData.organizations || []
 		let path = this.context.app.props.location.pathname
 
+		let {settings} = appData || {}
+		let externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
+		let externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
+
 		let inAdmin = path.indexOf('/admin') === 0
 		let inOrg = path.indexOf('/organizations') === 0
 		let inMyReports = path.indexOf('/reports/mine') === 0
+		let inInsights = path.indexOf('/insights') === 0
 
 		let myOrg = currentUser.position.organization
 		let orgId, myOrgId
@@ -41,8 +46,6 @@ class Nav extends Component {
 			<SubNav
 				componentClass={Scrollspy}
 				className="nav"
-				items={['info', 'laydown', 'approvals', 'poams', 'reports']}
-				currentClassName="active"
 				offset={-152}
 			>
 				<AnchorLink scrollTo="info">Info</AnchorLink>
@@ -67,8 +70,6 @@ class Nav extends Component {
 					<SubNav
 						componentClass={Scrollspy}
 						className="nav"
-						items={['draft-reports', 'pending-approval', 'published-reports']}
-						currentClassName="active"
 						offset={-152}
 					>
 						<AnchorLink scrollTo="draft-reports">Draft reports</AnchorLink>
@@ -115,10 +116,39 @@ class Nav extends Component {
 						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
 					</SubNav>
 				}
+				
+				{externalDocumentationUrl && externalDocumentationUrlText &&
+					<li role="presentation">
+						<a href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</a>
+					</li>
+				}
 
 				<Link to="/help">
 					<NavItem>Help</NavItem>
 				</Link>
+
+				{(currentUser.isAdmin() || currentUser.isSuperUser()) &&
+					<NavDropdown title="Insights" id="insights" active={inInsights}>
+						<Link to="/insights/not-approved-reports">
+							<MenuItem>Pending approval reports</MenuItem>
+						</Link>
+						<Link to="/insights/cancelled-reports">
+							<MenuItem>Cancelled engagement reports</MenuItem>
+						</Link>
+						<Link to="/insights/reports-by-poam">
+							<MenuItem>Reports by PoAM</MenuItem>
+						</Link>
+						<Link to="/insights/future-engagements-by-location">
+							<MenuItem>Future engagements by location</MenuItem>
+						</Link>
+						<Link to="/insights/reports-by-day-of-week">
+							<MenuItem>Reports by day of the week</MenuItem>
+						</Link>
+						<Link to="/insights/advisor-reports">
+							<MenuItem>Advisor reports</MenuItem>
+						</Link>
+					</NavDropdown>
+				}
 			</BSNav>
 		)
 	}

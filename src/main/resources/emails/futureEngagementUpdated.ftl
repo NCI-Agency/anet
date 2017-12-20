@@ -25,7 +25,10 @@ Hi ${(report.author.name)!},<br><br>
 into a draft engagement report. You can find and edit it by going to the "My drafts" on the "My reports" page, 
 or by clicking here: <a href="${serverUrl}/reports/${report.id?c}">${serverUrl}/reports/${report.id?c}</a>.</p>
 
-Thanks!<br>
-The ANET team
+ANET Support Team
+<#if SUPPORT_EMAIL_ADDR??>
+  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
+</#if>
+
 </body>
 </html>

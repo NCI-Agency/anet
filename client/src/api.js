@@ -81,11 +81,20 @@ const API = {
 		return promise
 	},
 
-	query(query, variables, variableDef) {
+	_queryCommon(query, variables, variableDef, output) {
 		variables = variables || {}
 		variableDef = variableDef || ''
 		query = 'query ' + variableDef + ' { ' + query + ' }'
-		return API.send('/graphql', {query, variables}).then(json => json.data)
+		output = output || ''
+		return API.send('/graphql', {query, variables, output})
+	},
+
+	query(query, variables, variableDef) {
+		return API._queryCommon(query, variables, variableDef).then(json => json.data)
+	},
+
+	queryExport(query, variables, variableDef, output) {
+		return API._queryCommon(query, variables, variableDef, output).then(response => response.blob())
 	},
 }
 

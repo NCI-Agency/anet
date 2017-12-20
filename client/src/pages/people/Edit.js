@@ -32,7 +32,7 @@ export default class PersonEdit extends Page {
 		API.query(/*GraphQL*/ `
 			person(id:${props.params.id}) {
 				id,
-				name, rank, role, emailAddress, phoneNumber, status
+				name, rank, role, emailAddress, phoneNumber, status, domainUsername,
 				biography, country, gender, endOfTourDate,
 				position {
 					id, name

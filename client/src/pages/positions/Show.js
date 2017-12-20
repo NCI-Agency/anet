@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import Page from 'components/Page'
 import {Link} from 'react-router'
-import {Table, Button} from 'react-bootstrap'
+import {Table, Button, Checkbox} from 'react-bootstrap'
 import moment from 'moment'
 
 import Fieldset from 'components/Fieldset'
@@ -47,8 +47,8 @@ export default class PositionShow extends Page {
 	fetchData(props) {
 		API.query(/* GraphQL */`
 			position(id:${props.params.id}) {
-				id, name, type, status, code,
-				organization { id, shortName, longName },
+				id, name, type, status, authorized, code,
+				organization { id, shortName, longName, identificationCode },
 				person { id, name, rank },
 				associatedPositions {
 					id, name,
@@ -62,12 +62,12 @@ export default class PositionShow extends Page {
 
 	render() {
 		let position = this.state.position
-		let assignedRole = position.type === 'PRINCIPAL' ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
+		let assignedRole = position.type === Position.TYPE.PRINCIPAL ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
 
 		let currentUser = this.context.currentUser
 		let canEdit =
 			//Super Users can edit any Principal
-			(currentUser.isSuperUser() && position.type === 'PRINCIPAL') ||
+			(currentUser.isSuperUser() && position.type === Position.TYPE.PRINCIPAL) ||
 			//Admins can edit anybody
 			(currentUser.isAdmin()) ||
 			//Super users can edit positions within their own organization
@@ -102,9 +102,13 @@ export default class PositionShow extends Page {
 
 						<Form.Field id="status" />
 
+						<Form.Field id="authorized">
+							<Checkbox readOnly disabled checked={!!this.state.position.authorized} className="authorized-checkbox" />
+						</Form.Field>
+
 						{position.organization && <Form.Field id="organization" label="Organization" value={position.organization && position.organization.shortName} >
 							<Link to={Organization.pathFor(position.organization)}>
-								{position.organization.shortName} {position.organization.longName}
+								{position.organization.shortName} {position.organization.longName} {position.organization.identificationCode}
 							</Link>
 						</Form.Field>}
 

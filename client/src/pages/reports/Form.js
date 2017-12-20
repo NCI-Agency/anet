@@ -2,6 +2,8 @@ import React, {PropTypes} from 'react'
 import {Checkbox, Table, Button, Collapse, HelpBlock} from 'react-bootstrap'
 import DatePicker from 'react-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
+import { WithContext as ReactTags } from 'react-tag-input'
+import 'components/reactTags.css'
 
 import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
@@ -28,6 +30,10 @@ export default class ReportForm extends ValidatableFormWrapper {
 		edit: PropTypes.bool
 	}
 
+	static contextTypes = {
+		currentUser: PropTypes.object,
+	}
+
 	constructor(props) {
 		super(props)
 
@@ -37,6 +43,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 				locations: [],
 				poams: [],
 			},
+			tagList: [],
+			suggestionList: [],
 
 			showReportText: false,
 			isCancelled: (props.report.cancelledReason ? true : false),
@@ -47,6 +55,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 			timeoutId: null,
 			showAutoSaveBanner: false,
 		}
+		this.handleTagDelete = this.handleTagDelete.bind(this)
+		this.handleTagAddition = this.handleTagAddition.bind(this)
 	}
 
 	componentDidMount() {
@@ -60,6 +70,9 @@ export default class ReportForm extends ValidatableFormWrapper {
 			poamList(f:recents, maxResults:6) {
 				list { id, shortName, longName }
 			}
+			tagList(f:getAll) {
+				list { id, name, description }
+			}
 		`).then(data => {
 			let newState = {
 				recents: {
@@ -67,6 +80,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 					persons: data.personList.list,
 					poams: data.poamList.list,
 				},
+				tagList: data.tagList.list,
+				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
 			}
 			this.setState(newState)
 		})
@@ -85,12 +100,25 @@ export default class ReportForm extends ValidatableFormWrapper {
 		if (report.cancelledReason) {
 			this.setState({isCancelled: true})
 		}
-		this.setState({showReportText: !!report.reportText})
+		this.setState({showReportText: !!report.reportText || !!report.reportSensitiveInformation})
 	}
 
+    handleTagDelete(i) {
+        let {tags} = this.props.report
+        tags.splice(i, 1)
+    }
+
+    handleTagAddition(tag) {
+        let newTag = this.state.tagList.find(function (t) { return t.name === tag })
+        let {tags} = this.props.report
+        tags.push(newTag)
+    }
+
 	render() {
+		const { currentUser } = this.context
 		let {report, onDelete} = this.props
-		let {recents, errors, isCancelled, showAutoSaveBanner} = this.state
+		const { edit } = this.props
+		let {recents, suggestionList, errors, isCancelled, showAutoSaveBanner} = this.state
 
 		let hasErrors = Object.keys(errors).length > 0
 		let isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
@@ -106,6 +134,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
+		const submitText = currentUser.hasAssignedPosition() ? 'Preview and submit' : 'Save draft'
+
 		return <div className="report-form">
 			<Collapse in={showAutoSaveBanner}>
 				<div className="banner" style={{top:132, background: '#DFF0D8', color: '#3c763d'}}>
@@ -115,7 +145,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 			<ValidatableForm formFor={report} horizontal onSubmit={this.onSubmit} onChange={this.onChange}
 				onDelete={onDelete} deleteText="Delete this report"
-				submitDisabled={hasErrors} submitText="Preview and submit"
+				submitDisabled={hasErrors} submitText={submitText}
 				bottomAccessory={this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format('hh:mm:ss')}</div>}
 			>
 
@@ -175,6 +205,21 @@ export default class ReportForm extends ValidatableFormWrapper {
 							<option value="CANCELLED_DUE_TO_THREAT">Cancelled due to Threat</option>
 						</Form.Field>
 					}
+
+					<Form.Field id="tags" label="Tags">
+						<ReactTags tags={report.tags}
+							suggestions={suggestionList}
+							labelField={'name'}
+							classNames={{
+								tag: 'reportTag label label-info',
+								remove: 'reportTagRemove label-info',
+							}}
+							minQueryLength={1}
+							autocomplete={true}
+							autofocus={false}
+							handleDelete={this.handleTagDelete}
+							handleAddition={this.handleTagAddition} />
+					</Form.Field>
 				</Fieldset>
 
 				<Fieldset title={!isCancelled ? "Meeting attendance" : "Planned attendance"} id="attendance-fieldset">
@@ -257,11 +302,27 @@ export default class ReportForm extends ValidatableFormWrapper {
 					</Button>
 
 					<Collapse in={this.state.showReportText}>
-						<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
+						<div>
+							<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
+
+							{(report.reportSensitiveInformation || !edit) &&
+								<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
+									value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
+									onChange={this.updateReportSensitiveInformation} />
+							}
+						</div>
 					</Collapse>
 				</Fieldset>
 			</ValidatableForm>
 		</div>
+	}
+
+	updateReportSensitiveInformation = (value) => {
+		if (!this.props.report.reportSensitiveInformation) {
+			this.props.report.reportSensitiveInformation = {}
+		}
+		this.props.report.reportSensitiveInformation.text = value
+		this.onChange()
 	}
 
 	@autobind
@@ -388,7 +449,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	saveReport(disableSubmits) {
-		let report = new Report(this.props.report)
+		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText'))
 		let isCancelled = this.state.isCancelled
 		let edit = !!report.id
 		if(report.primaryAdvisor) { report.attendees.find(a => a.id === report.primaryAdvisor.id).isPrimary = true }
@@ -445,6 +506,9 @@ export default class ReportForm extends ValidatableFormWrapper {
 			.then(response => {
 				if (response.id) {
 					this.props.report.id = response.id
+				}
+				if (response.reportSensitiveInformation) {
+					this.props.report.reportSensitiveInformation = response.reportSensitiveInformation
 				}
 
 				//Reset the reportchanged state, yes this could drop a few keystrokes that

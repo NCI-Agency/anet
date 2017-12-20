@@ -15,7 +15,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getJackJacksonStub() { 
 		final Person person = new Person();
-		person.setName("Jack Jackson");
+		person.setName("JACKSON, Jack");
 		person.setEmailAddress("hunter+foobar@dds.mil");
 		person.setPhoneNumber("123-456-78960");
 		person.setRank("OF-9");
@@ -31,7 +31,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getSteveStevesonStub() {
 		Person person = new Person();
-		person.setName("Steve Steveson");
+		person.setName("STEVESON, Steve");
 		person.setEmailAddress("hunter+steve@dds.mil");
 		person.setPhoneNumber("+011-258-32895");
 		person.setRank("LtCol");
@@ -55,7 +55,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getRogerRogwell() {
 		Person person = new Person();
-		person.setName("Roger Rogwell");
+		person.setName("ROGWELL, Roger");
 		person.setEmailAddress("hunter+roger@dds.mil");
 		person.setPhoneNumber("+1-412-543-2839");
 		person.setRank("Maj");
@@ -69,7 +69,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getElizabethElizawell() {
 		Person person = new Person();
-		person.setName("Elizabeth Elizawell");
+		person.setName("ELIZAWELL, Elizabeth");
 		person.setEmailAddress("hunter+liz@dds.mil");
 		person.setPhoneNumber("+1-777-7777");
 		person.setRank("Capt");
@@ -85,7 +85,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getNickNicholson() { 
 		Person p = new Person();
-		p.setName("Nick Nicholson");
+		p.setName("NICHOLSON, Nick");
 		p.setEmailAddress("hunter+nick@dds.mil");
 		p.setPhoneNumber("+1-202-7324");
 		p.setRank("CIV");
@@ -101,7 +101,7 @@ public class PersonTest extends BeanTester<Person> {
 	
 	public static Person getBobBobtown() { 
 		Person p = new Person();
-		p.setName("Bob Bobtown");
+		p.setName("BOBTOWN, Bob");
 		p.setEmailAddress("hunter+bob@dds.mil");
 		p.setPhoneNumber("+1-444-7324");
 		p.setRank("CIV");
@@ -143,7 +143,7 @@ public class PersonTest extends BeanTester<Person> {
 
 	public static Person getArthurDmin() {
 		Person p = new Person();
-		p.setName("Arthur Dmin");
+		p.setName("DMIN, Arthur");
 		p.setEmailAddress("hunter+arthur@dds.mil");
 		p.setStatus(PersonStatus.ACTIVE);
 		p.setRole(Role.ADVISOR);
@@ -160,21 +160,21 @@ public class PersonTest extends BeanTester<Person> {
 			System.out.println(String.format("Unequal because ids %d != %d", a.getId(), b.getId()));
 		} else if (!Objects.equals(a.getName(), b.getName())) { 
 			System.out.println(String.format("Unequal because names %s != %s", a.getName(), b.getName()));
-		} else if (!Objects.equals(a.getStatus(), b.getStatus()) ) {
+		} else if (!Objects.equals(a.getStatus(), b.getStatus())) {
 			System.out.println(String.format("Unequal because status %s != %s", a.getStatus(), b.getStatus()));
-		} else if (!Objects.equals(a.getRole(), b.getRole()) ) {
+		} else if (!Objects.equals(a.getRole(), b.getRole())) {
 			System.out.println(String.format("Unequal because role %s != %s", a.getRole(), b.getRole()));
-		} else if (!Objects.equals(a.getEmailAddress(), b.getEmailAddress()) ) {
+		} else if (!Objects.equals(a.getEmailAddress(), b.getEmailAddress())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getEmailAddress(), b.getEmailAddress()));
-		} else if (!Objects.equals(a.getPhoneNumber(), b.getPhoneNumber()) ) {
+		} else if (!Objects.equals(a.getPhoneNumber(), b.getPhoneNumber())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getPhoneNumber(), b.getPhoneNumber()));
-		} else if (!Objects.equals(a.getRank(), b.getRank()) ) {
+		} else if (!Objects.equals(a.getRank(), b.getRank())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getRank(), b.getRank()));
-		} else if (!Objects.equals(a.getBiography(), b.getBiography()) ) {
+		} else if (!Objects.equals(a.getBiography(), b.getBiography())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getBiography(), b.getBiography()));
-		} else if (!Objects.equals(a.getPendingVerification(), b.getPendingVerification()) ) {
+		} else if (!Objects.equals(a.getPendingVerification(), b.getPendingVerification())) {
 			System.out.println(String.format("Unequal because %s != %s", a.getPendingVerification(), b.getPendingVerification()));
-		} else if (!Objects.equals(a.getCreatedAt(), b.getCreatedAt()) ) {
+		} else if (!Objects.equals(a.getCreatedAt(), b.getCreatedAt())) {
 			System.out.println(String.format("Unequal because createdAt %s != %s", a.getCreatedAt(), b.getCreatedAt()));
 		} else if (!Objects.equals(a.getUpdatedAt(), b.getUpdatedAt())) {
 			System.out.println(String.format("Unequal because updatedAt %s != %s", a.getUpdatedAt(), b.getCreatedAt()));

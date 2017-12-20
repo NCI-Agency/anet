@@ -22,6 +22,8 @@ public class AnetConfiguration extends Configuration {
 	private String emailFromAddr;
 	private String serverUrl;
 
+	private Map<String, Object> dictionary;
+
 	@NotNull
 	private Map<String,String> waffleConfig = new HashMap<String,String>();
 
@@ -104,12 +106,21 @@ public class AnetConfiguration extends Configuration {
 		this.serverUrl = serverUrl;
 	}
 
+	public Map<String, Object> getDictionary() {
+		return dictionary;
+	}
+
+	public void setDictionary(Map<String, Object> dictionary) {
+		this.dictionary = dictionary;
+	}
+
 	public static class SmtpConfiguration {
 		private String hostname;
 		private Integer port = 587;
 		private String username;
 		private String password;
 		private Boolean startTls = true;
+		private boolean disabled = false;
 		
 		public String getHostname() {
 			return hostname;
@@ -149,6 +160,14 @@ public class AnetConfiguration extends Configuration {
 		
 		public void setStartTls(Boolean startTls) {
 			this.startTls = startTls;
+		}
+
+		public boolean isDisabled() {
+			return disabled;
+		}
+
+		public void setDisabled(boolean disabled) {
+			this.disabled = disabled;
 		}
 	}
 

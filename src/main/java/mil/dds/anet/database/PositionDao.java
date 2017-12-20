@@ -33,7 +33,7 @@ public class PositionDao implements IAnetDao<Position> {
 
 	private static String[] fields = {"id", "name", "code", "createdAt", 
 			"updatedAt", "organizationId", "currentPersonId", "type", 
-			"status", "locationId" };
+			"status", "authorized", "locationId" };
 	private static String tableName = "positions";
 	public static String POSITIONS_FIELDS  = DaoUtils.buildFieldAliases(tableName, fields);
 	
@@ -67,8 +67,8 @@ public class PositionDao implements IAnetDao<Position> {
 		try { 
 			GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
 					"/* positionInsert */ INSERT INTO positions (name, code, type, "
-					+ "status, organizationId, locationId, createdAt, updatedAt) " 
-					+ "VALUES (:name, :code, :type, :status, :organizationId, :locationId, :createdAt, :updatedAt)")
+					+ "status, authorized, organizationId, locationId, createdAt, updatedAt) "
+					+ "VALUES (:name, :code, :type, :status, :authorized, :organizationId, :locationId, :createdAt, :updatedAt)")
 				.bindFromProperties(p)
 				.bind("type", DaoUtils.getEnumId(p.getType()))
 				.bind("organizationId", DaoUtils.getId(p.getOrganization()))
@@ -120,7 +120,7 @@ public class PositionDao implements IAnetDao<Position> {
 		try {
 			return dbHandle.createStatement("/* positionUpdate */ UPDATE positions SET name = :name, "
 					+ "code = :code, organizationId = :organizationId, type = :type, status = :status, "
-					+ "locationId = :locationId, updatedAt = :updatedAt WHERE id = :id")
+					+ "authorized = :authorized, locationId = :locationId, updatedAt = :updatedAt WHERE id = :id")
 				.bindFromProperties(p)
 				.bind("type", DaoUtils.getEnumId(p.getType()))
 				.bind("organizationId", DaoUtils.getId(p.getOrganization()))

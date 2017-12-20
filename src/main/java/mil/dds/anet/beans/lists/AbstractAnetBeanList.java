@@ -10,6 +10,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Poam;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Tag;
 import mil.dds.anet.graphql.IGraphQLBean;
 
 public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IGraphQLBean {
@@ -82,13 +83,17 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			return list; 
 		}
 
-		public static ReportList fromQuery(Query<Report> query, int pageNum, int pageSize) {
+		public static ReportList fromQuery(Person user, Query<Report> query, int pageNum, int pageSize) {
 			ReportList results = new ReportList(pageNum, pageSize, query.list()); 
 			if (results.getList().size() == 0) { 
 				results.setTotalCount(0);
 			} else {
-				//This value gets set by the ReportMapper on each row. 
+				//This value gets set by the ReportMapper on each row.
 				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
+			}
+			// Record the user who instantiated these
+			for (final Report report : results.getList()) {
+				report.setUser(user);
 			}
 			return results;
 		}
@@ -169,7 +174,7 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			if (results.getList().size() == 0) { 
 				results.setTotalCount(0);
 			} else {
-				//This value gets set by the ReportMapper on each row. 
+				//This value gets set by the PositionMapper on each row.
 				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
 			}
 			return results;
@@ -197,7 +202,7 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			if (results.getList().size() == 0) { 
 				results.setTotalCount(0);
 			} else {
-				//This value gets set by the ReportMapper on each row. 
+				//This value gets set by the PoamMapper on each row.
 				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
 			}
 			return results;
@@ -225,12 +230,39 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			if (results.getList().size() == 0) { 
 				results.setTotalCount(0);
 			} else {
-				//This value gets set by the ReportMapper on each row. 
+				//This value gets set by the LocationMapper on each row.
 				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
 			}
 			return results;
 		}
 	}
-	
-	
+
+	public static class TagList extends AbstractAnetBeanList<Tag> {
+		public TagList() { /*Serialization Constructor */ }
+
+		public TagList(Integer pageNum, Integer pageSize, List<Tag> list) {
+			super(pageNum, pageSize, list);
+		}
+
+		public TagList(List<Tag> list) {
+			super(list);
+		}
+
+		public List<Tag> getList() {
+			return list;
+		}
+
+		public static TagList fromQuery(Query<Tag> query, int pageNum, int pageSize) {
+			final TagList results = new TagList(pageNum, pageSize, query.list());
+			results.setList(query.list());
+			if (results.getList().size() == 0) {
+				results.setTotalCount(0);
+			} else {
+				// This value gets set by the TagMapper on each row.
+				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
+			}
+			return results;
+		}
+	}
+
 }

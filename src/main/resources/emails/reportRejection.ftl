@@ -26,7 +26,10 @@ Hi, ${report.author.name},
 
 <p>You can edit and re-submit your report by <a href="${serverUrl}/reports/${report.id?c}">clicking here</a>.</p>
 
-Thanks!<br>
-The ANET team
+ANET Support Team
+<#if SUPPORT_EMAIL_ADDR??>
+  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
+</#if>
+
 </body>
 </html>

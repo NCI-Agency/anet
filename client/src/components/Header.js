@@ -8,10 +8,6 @@ import CreateButton from 'components/CreateButton'
 import logo from 'resources/logo.png'
 
 const backgroundCss = {
-	position: 'fixed',
-	top: 0,
-	left: 0,
-	right: 0,
 	background: '#fff',
 	paddingTop: '58px',
 	height: '132px',

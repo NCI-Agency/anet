@@ -2,28 +2,17 @@ package mil.dds.anet.beans.search;
 
 import mil.dds.anet.beans.Poam.PoamStatus;
 
-public class PoamSearchQuery implements ISearchQuery {
+public class PoamSearchQuery extends AbstractSearchQuery {
 
-	String text;
+	public enum PoamSearchSortBy { CREATED_AT, NAME, CATEGORY }
+
 	Integer responsibleOrgId;
 	Boolean includeChildrenOrgs;
 	String category;
 	PoamStatus status;
-	int pageNum;
-	int pageSize;
-	
-	public PoamSearchQuery() { 
-		this.pageNum = 0;
-		this.pageSize = 10;
-	}
-	
-	public String getText() {
-		return text;
-	}
 
-	public void setText(String text) {
-		this.text = text;
-	}
+	private PoamSearchSortBy sortBy;
+	private SortOrder sortOrder;
 
 	public Integer getResponsibleOrgId() {
 		return responsibleOrgId;
@@ -34,7 +23,7 @@ public class PoamSearchQuery implements ISearchQuery {
 	}
 
 	public Boolean getIncludeChildrenOrgs() {
-		return includeChildrenOrgs == null ? false : includeChildrenOrgs;
+		return Boolean.TRUE.equals(includeChildrenOrgs);
 	}
 
 	public void setIncludeChildrenOrgs(Boolean includeChildrenOrgs) {
@@ -57,27 +46,22 @@ public class PoamSearchQuery implements ISearchQuery {
 		this.status = status;
 	}
 
-	@Override
-	public int getPageNum() {
-		return pageNum;
+	public PoamSearchSortBy getSortBy() {
+		return sortBy;
 	}
-	
-	@Override
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
+
+	public void setSortBy(PoamSearchSortBy sortBy) {
+		this.sortBy = sortBy;
 	}
-	
-	@Override
-	public int getPageSize() {
-		return pageSize;
+
+	public SortOrder getSortOrder() {
+		return sortOrder;
 	}
-	
-	@Override
-	public void setPageSize(int pageSize) {
-		if (pageSize == 0) { return; } // that makes no sense. 
-		this.pageSize = pageSize;
+
+	public void setSortOrder(SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
 	}
-	
+
 	public static PoamSearchQuery withText(String text, int pageNum, int pageSize) {
 		PoamSearchQuery query = new PoamSearchQuery();
 		query.setText(text);

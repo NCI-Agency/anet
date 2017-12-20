@@ -1,29 +1,66 @@
+env:
+  global:
+    - secure: "RhX0c51DkTgr4ub347If+KsjWJU+zGt3dshGknnmgrCOCuDkuBN0vjD4gLNMVH1K8Z+tmC8ESyW4duBuRkY4B/t2PRmEddCo7+t6gfmylq659LhGa3KUEEQd9vOuI+cN5NEGSN6GP6ckU11tiCmiomzTApLnNxWgqDBI7CQkezZl1DpNQ7cShhmYjPSBtFfQcfepZvOM7pY7oYvijvPsBmy0GsYu6RixxkBS42LgSY7FtBL7N2sdG80e+E9A1GThMUHJMAMpprpxPtd7BV2mQ3PwRcyWp11pZt+wCUFNDSnYb/h+5MI45JKIzzwvnOHZr4/rUByi6Qiw0RSh5k0sGZtNw+NcOjrtlS1g1XVxYBD5bzNxn7BgIg3nqNGiHYti/uIIG/AdwzHCG964Yqlww2jZ1UoyxNSb6ms1gKM8Rwx/gDO46pM0l750hwAjR25yDSW+w5xyW0YC+WKyHAoweSY1wsfzqchwJ9bP8qk5cwPrqGgiXsKU5N9SKfqJM4TKDE2DCDAE1NEWwglqnZTuQNjloCdl6KmctdSAHvF6o/t8sIcpIWs0zfhBoRAj3yZh/W7gQbXstyT1NGAswIMl1Rf9SspIm0noOUOObDMLkUhJWvxA/7zMoe3DaXgTAiSh1Xdm0FxdhmRkZFvGm74s9mGpyUvH6ePjwRNTM4CdfvI="
+
 language: java
 
 jdk:
   - oraclejdk8
 
-sudo: required
+sudo: false
 
 services:
   - docker
 
+notifications:
+    slack: nci-agency:TvRV22whtaRGflaCPPfv2G1v
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
+    - client/node_modules
+
 before_install:
-  - docker run --name mssql-server -v ${PWD}:/hostdata -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=P@ssw0rd' -p 1433:1433 -d microsoft/mssql-server-linux bin/sh -c "export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y curl && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server.list | tee /etc/apt/sources.list.d/mssql-server.list && apt-get update && apt-get install -y mssql-server-fts && /opt/mssql/bin/sqlservr"
-  - nvm install node
-  - nvm use node
-  - cd client
-  - npm install
-  - npm run build
-  - cd ..
-  - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P P@ssw0rd -Q "CREATE DATABASE testanet"
-  - touch localSettings.gradle
-  - echo "run.environment(\"DB_DRIVER\",\"sqlserver\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_SERVER\",\"localhost\")"  >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_NAME\",\"testanet\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_USERNAME\",\"SA\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_PASSWORD\",\"P@ssw0rd\")" >> localSettings.gradle
-  - ./gradlew dbMigrate
-  - docker exec -ti mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P P@ssw0rd -d testanet -i /hostdata/insertBaseData.sql
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-  
+  - echo "run.environment(\"DB_DRIVER\", \"sqlserver\")" > localSettings.gradle
+  - echo "run.environment(\"ANET_SA_PASSWORD\", \"SA-P@ssw0rd\")" >> localSettings.gradle
+  - echo "run.environment(\"ANET_DB_SERVER\", \"localhost\")"  >> localSettings.gradle
+  - echo "run.environment(\"ANET_DB_NAME\", \"testAnet\")" >> localSettings.gradle
+  - echo "run.environment(\"ANET_DB_USERNAME\", \"anetUser\")" >> localSettings.gradle
+  - echo "run.environment(\"ANET_DB_PASSWORD\", \"Test-P@ssw0rd\")" >> localSettings.gradle
+  - echo "run.environment(\"ANET_DB_PORT\", 1433)" >> localSettings.gradle
+  - ./gradlew dockerCreateDB dockerStartDB
 
+#By default travis runs gradle assemble in install. This is too early as we don't want to build yet
+install:
+  - ./gradlew npmInstall
 
+script:
+  - docker exec -ti -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=Test-P@ssw0rd" anet-mssql-server /opt/waitTillServiceStarted.sh
+  - ./gradlew dbMigrate dockerLoadDB
+  - ./gradlew check sonarqube
+
+after_script:
+  - docker logs anet-mssql-server
+
+addons:
+  coverity_scan:
+    project:
+      name: "NCI-Agency/anet"
+    notification_email: vassil.iordanov@gmail.com
+    build_command_prepend: "COV_BUILD_OPTIONS='--fs-capture-search src --fs-capture-search client' && ./gradlew clean"
+    build_command:   "./gradlew build -x test"
+    branch_pattern: candidate_scan
+  sonarcloud:
+    organization: "nci-agency-github"
+    token:
+      secure: "ICZTls70jFc6JIZV6cicKUpAKr2sDt9LKWnFzgGm92uDq/2J1Od7oewUAAEjykKa2qw42BZYaG1z3LX5UFtLhp9b/NFibf392U0V4I7jmeb4HDjOv855hTPosm5N7K9YQ3MUsSDLxVe+5DhrmwYQ3PSkG0lXKj0NRdAu7dpaBqMntBpTtdO5nQDKyxQ9UCrVSRjdU0YqHT8q4EWpii/MqWH6SRVUslvvKXTan2d6JnT+QaWuW8bTR0zhgpyxl5y8kOe0JBQ45M5vKO6yTcVj4UdolB0y+CZlblk/59iZK1bn/Is0qijWmHKh1Z3OORdlesXumUAveCX3VCMvvuPUz95a3nc+6S4I6iNIOcA8tzJ2AFP5oBuPIrl8o3S0BKxHTBssBzomo1e7tzDqXJF141tJOm0yUIB5Lmb9LV9KcWa1gAB2pk9ToX8e0NH4OLIqUUlLrNAkHX1sKHXO4AM3odHf1bTlOp7dOUszD2/E1umPjEWT3NH94LQStPubg+d2Kai2rQppxHlVKwAIVcBkP/d2nVtIwJsuRKmPbUIgAds7fYrxZpdDoM7AxjNLrCk3OPR1tYWwlUyProrAIJXDy7LlP14a4oM8dtaXGAnQar6nXtuqxiS4KMojPhW4rWXvRbCiBhYmLvuMMjW+kN1ITOy/h6x4Q7ZBLf+pU5C3Va0="
+    branches:
+      - master
+      - candidate

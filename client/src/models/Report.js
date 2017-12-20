@@ -19,6 +19,8 @@ export default class Report extends Model {
 		reportText: '',
 		nextSteps: '',
 		keyOutcomes: '',
+		tags: [],
+		reportSensitiveInformation: null,
 	}
 
 	isDraft() {
@@ -29,12 +31,20 @@ export default class Report extends Model {
 		return this.state === 'PENDING_APPROVAL'
 	}
 
+	isReleased() {
+		return this.state === 'RELEASED'
+	}
+
 	isRejected() {
 		return this.state === 'REJECTED'
 	}
 
 	isFuture() {
 		return this.state === 'FUTURE'
+	}
+
+	showApprovals() {
+		return this.state && !this.isDraft() && !this.isFuture()
 	}
 
 	toString() {
@@ -64,12 +74,14 @@ export default class Report extends Model {
 		let primaryAdvisor = this.getPrimaryAdvisor()
 		if (!primaryPrincipal) {
 			errors.push('You must provide the primary Principal for the Engagement')
+		} else if (!primaryPrincipal.position) {
+			errors.push('The primary Principal - ' + primaryPrincipal.name + ' - needs to be assigned to a position')
 		}
-		if (!primaryPrincipal.position) {
-			errors.push('The primary Principal needs to be assigned to a position')
-		}
+
 		if (!primaryAdvisor) {
 			errors.push('You must provide the primary Advisor for the Engagement')
+		} else if (!primaryAdvisor.position) {
+			errors.push('The primary Advisor - ' + primaryAdvisor.name + ' - needs to be assigned to a position')
 		}
 
 		if (!this.intent) {
@@ -79,6 +91,7 @@ export default class Report extends Model {
 		if (!this.nextSteps) {
 			errors.push('You must provide a brief summary of the Next Steps')
 		}
+
 		if (!isCancelled && !this.keyOutcomes) {
 			errors.push('You must provide a brief summary of the Key Outcomes')
 		}
@@ -95,6 +108,16 @@ export default class Report extends Model {
 		return this.attendees.find( el =>
 			el.role === 'ADVISOR' && el.primary
 		)
+	}
+
+	getReportReleasedAt() {
+		if (this.approvalStatus) {
+			const approvalSteps = Object.assign([], this.approvalStatus)
+			const lastApprovalStep = approvalSteps.pop()
+			return !lastApprovalStep ? '' : lastApprovalStep.createdAt
+		} else {
+			return
+		}
 	}
 
 	addAttendee(newAttendee) {

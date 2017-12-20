@@ -8,8 +8,41 @@ let test = require('ava'),
     path = require('path'),
     chalk = require('chalk')
 
-// This gives us access to send Chrome commands.
-require('chromedriver')
+let capabilities = {},
+    testEnv = process.env.TEST_ENV || 'local'
+if (testEnv === 'local') {
+    // This gives us access to send Chrome commands.
+    require('chromedriver')
+} else {
+    // Set capabilities for BrowserStack
+    require('./keep-alive.js')
+    let config = require('config')
+    capabilities = {
+        browserName: 'Chrome',   // or 'IE'
+        browser_version: '61.0', // or '11.0'
+        os: 'Windows',
+        os_version: '7',
+        resolution: '2048x1536',
+        project: 'ANET',
+        build: require("git-describe").gitDescribeSync(".", {match: '[0-9]*'}).semverString,
+        // Will be replaced for each test:
+        name: 'frontend tests',
+        // Credentials for BrowserStack, get from config:
+        'browserstack.user': config.get('browserstack_user'),
+        'browserstack.key': config.get('browserstack_key'),
+        // This requires that BrowserStackLocal is running!
+        'browserstack.local': 'true'
+    }
+    if (config.has('browserstack_debug')) {
+        capabilities['browserstack.debug'] = config.get('browserstack_debug')
+    }
+    let util = require('util')
+    capabilities.build = util.format(capabilities.build,
+                                     capabilities.os,
+                                     capabilities.os_version,
+                                     capabilities.browserName,
+                                     capabilities.browser_version)
+}
 
 // Webdriver's promise manager only made sense before Node had async/await support.
 // Now it's a deprecated legacy feature, so we should use the simpler native Node support instead.
@@ -29,9 +62,17 @@ let shortWaitMs = moment.duration(.5, 'seconds').asMilliseconds()
 
 // We use the before hook to put helpers on t.context and set up test scaffolding.
 test.beforeEach(t => {
-    t.context.driver = new webdriver.Builder()
-        .forBrowser('chrome')
-        .build()
+    let builder = new webdriver.Builder()
+    if (testEnv === 'local') {
+        builder = builder
+            .forBrowser('chrome')
+    } else {
+        capabilities.name = t.title.replace(/^beforeEach for /, '')
+        builder = builder
+            .usingServer('http://hub-cloud.browserstack.com/wd/hub')
+            .withCapabilities(capabilities)
+    }
+    t.context.driver = builder.build()
 
     t.context.By = By
     t.context.until = until
@@ -98,7 +139,7 @@ test.beforeEach(t => {
         return t.context.driver.findElements(locator)
     }
 
-    // A helper function to combine waiting for an element to have rendered and then asserting on its contents.
+    // A helper method to combine waiting for an element to have rendered and then asserting on its contents.
     t.context.assertElementText = async (t, $elem, expectedText, message) => {
         try {
             let untilCondition = _isRegExp(expectedText) ?
@@ -149,6 +190,36 @@ test.beforeEach(t => {
             }
         }
         t.pass(message || 'Element was not present')
+    }
+
+    // A helper method to combine waiting for an element to have rendered and then asserting on its enabled status
+    t.context.assertElementEnabled = async (t, cssSelector, message, timeoutMs) => {
+      let waitTimeoutMs = timeoutMs || longWaitMs
+      try {
+         var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      } catch (e) {
+        // If we got a TimeoutError because the element did not load, just swallow it here
+        // and let the assertion on blow up instead. That will produce a clearer error message.
+        if (e.name !== 'TimeoutError') {
+            throw e
+        }
+      }
+      t.is(await elem.isEnabled(), true, message)
+    }
+
+    // A helper method to combine waiting for an element to have rendered and then asserting it's disabled status
+    t.context.assertElementDisabled = async (t, cssSelector, message, timeoutMs) => {
+      let waitTimeoutMs = timeoutMs || longWaitMs
+      try {
+         var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      } catch (e) {
+        // If we got a TimeoutError because the element did not load, just swallow it here
+        // and let the assertion on blow up instead. That will produce a clearer error message.
+        if (e.name !== 'TimeoutError') {
+            throw e
+        }
+      }
+      t.is(await elem.isEnabled(), false, message)
     }
 
     t.context.getCurrentPathname = async () => {

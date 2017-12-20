@@ -1,0 +1,25 @@
+.advisor-reports-form {
+    margin-bottom: 15px;
+}
+
+.advisor-reports-form input {
+    margin-bottom: 15px;
+}
+
+.organization-advisors-table .table-responsive table {
+    overflow-y: scroll;
+}
+
+.organization-advisors-table .table-responsive table td {
+    padding: 15px 10px;
+    vertical-align: middle;
+}
+
+.organization-advisors-table .table-responsive table .checkbox{
+    text-align: center;
+}
+
+.organization-advisors-table .nothing-found{
+    text-align: center;
+    padding: 25px;
+}

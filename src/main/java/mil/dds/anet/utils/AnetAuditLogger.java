@@ -1,12 +1,14 @@
 package mil.dds.anet.utils;
 
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
+import java.lang.invoke.MethodHandles;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AnetAuditLogger {
-	private static Logger log = Log.getLogger(AnetAuditLogger.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static void log(String message, Object... args) {
-		log.info(message, args);
+		logger.info(message, args);
 	}
 }

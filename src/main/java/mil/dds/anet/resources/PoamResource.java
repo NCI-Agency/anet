@@ -97,13 +97,13 @@ public class PoamResource implements IGraphQLResource {
 	
 	@POST
 	@Path("/new")
-	@RolesAllowed("SUPER_USER")
+	@RolesAllowed("ADMIN")
 	public Poam createNewPoam(@Auth Person user, Poam p) {
 		if (AuthUtils.isAdmin(user) == false) { 
 			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getId() == null) { 
 				throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 			}
-			//Super Users can only create poams within their organization. 
+			//Admin Users can only create poams within their organization.
 			AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrg());
 		}
 		p = dao.insert(p);
@@ -114,15 +114,15 @@ public class PoamResource implements IGraphQLResource {
 	/* Updates shortName, longName, category, and parentPoamId */
 	@POST
 	@Path("/update")
-	@RolesAllowed("SUPER_USER")
+	@RolesAllowed("ADMIN")
 	public Response updatePoam(@Auth Person user, Poam p) { 
 		//Admins can edit all Poams, SuperUsers can edit poams within their EF. 
 		if (AuthUtils.isAdmin(user) == false) { 
 			Poam existing = dao.getById(p.getId());
 			AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrg());
 			
-			//If changing the Responsible ORganiation, Super Users must also have super user privelages over the next org. 
-			if (Objects.equals(DaoUtils.getId(existing.getResponsibleOrg()), p.getResponsibleOrg()) == false) { 
+			//If changing the Responsible Organization, Super Users must also have super user privileges over the next org.
+			if (!Objects.equals(DaoUtils.getId(existing.getResponsibleOrg()), DaoUtils.getId(p.getResponsibleOrg()))) {
 				if (DaoUtils.getId(p.getResponsibleOrg()) == null) { 
 					throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 				}

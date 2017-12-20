@@ -1,7 +1,6 @@
 package mil.dds.anet.beans;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -10,12 +9,12 @@ import org.joda.time.DateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.graphql.GraphQLParam;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 @JsonIgnoreProperties({ "_loaded" })
@@ -50,7 +49,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+		this.name = Utils.trimStringReturnNull(name);
 	}
 	
 	public PersonStatus getStatus() {
@@ -82,7 +81,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 	
 	public void setEmailAddress(String emailAddress) {
-		this.emailAddress = emailAddress;
+		this.emailAddress = Utils.trimStringReturnNull(emailAddress);
 	}
 	
 	public String getPhoneNumber() {
@@ -90,7 +89,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 	
 	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
+		this.phoneNumber = Utils.trimStringReturnNull(phoneNumber);
 	}
 	
 	public String getGender() {
@@ -98,7 +97,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 
 	public void setGender(String gender) {
-		this.gender = gender;
+		this.gender = Utils.trimStringReturnNull(gender);
 	}
 
 	public String getCountry() {
@@ -106,7 +105,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 
 	public void setCountry(String country) {
-		this.country = country;
+		this.country = Utils.trimStringReturnNull(country);
 	}
 
 	public DateTime getEndOfTourDate() {
@@ -122,7 +121,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 	
 	public void setRank(String rank) {
-		this.rank = rank;
+		this.rank = Utils.trimStringReturnNull(rank);
 	}
 	
 	public String getBiography() {
@@ -130,7 +129,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 	
 	public void setBiography(String biography) {
-		this.biography = biography;
+		this.biography = Utils.trimStringReturnNull(biography);
 	}
 
 	public String getDomainUsername() {

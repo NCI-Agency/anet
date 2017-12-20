@@ -53,7 +53,7 @@ export default class PoamShow extends Page {
 		let poamQuery = new GQL.Part(/* GraphQL */`
 			poam(id:${props.params.id}) {
 				id, shortName, longName, status,
-				responsibleOrg {id, shortName, longName}
+				responsibleOrg {id, shortName, longName, identificationCode}
 			}
 		`)
 
@@ -71,8 +71,7 @@ export default class PoamShow extends Page {
 		let currentUser = this.context.currentUser
 		let poamShortName = dict.lookup("POAM_SHORT_NAME")
 
-		let canEdit = currentUser.isAdmin() ||
-			(poam.responsibleOrg && currentUser.isSuperUserForOrg(poam.responsibleOrg))
+		let canEdit = currentUser.isAdmin()
 
 		return (
 			<div>
@@ -101,7 +100,7 @@ export default class PoamShow extends Page {
 		return (
 			<Form.Field id="responsibleOrg" label="Responsible Organization" >
 				<LinkTo organization={responsibleOrg}>
-					{responsibleOrg.shortName} {responsibleOrg.longName}
+					{responsibleOrg.shortName} {responsibleOrg.longName} {responsibleOrg.identificationCode}
 				</LinkTo>
 			</Form.Field>
 		)

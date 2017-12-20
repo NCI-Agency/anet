@@ -64,7 +64,7 @@ Create a folder for the application, for example: c:\anet. In that location:
 	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
 	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator.  We recommend using something like `ANET Administrators`.
 	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator.  We recommend `ANET Administrator`.
-	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumabely are.
+	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
 	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are).  For production situations this will be your windows domain username.   If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
 8. Launch the ANET Server: `bin/anet.bat server anet.yml`
@@ -116,6 +116,7 @@ ANET is configured primarily through the `anet.yml` file.  This file follows the
 	- **username**: If your SMTP server requires authentication, provide the username here. Otherwise leave blank.
 	- **password**: Your password to your SMTP server.
 	- **startTLS**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
+	- **disabled**: Set to true to disable sending email completely; most useful in development context.
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
 - **database**: The configuration for your database. ANET supports either sqlite for development, or Microsoft SQL Server for production.  Additonal Instructions can be found here instructions here: http://www.dropwizard.io/1.0.6/docs/manual/jdbi.html for avaiable configuration options for the database connection. 
@@ -155,6 +156,112 @@ If needed, see https://github.com/Waffle/waffle/blob/master/Docs/ServletSingleSi
 
 - **logging**: See the Dropwizard documentation for all the details of how to use this section.  This controls the classes that you want to collect logs from and where to send them.  Set the `currentLogFilename` paramters to the location that you want the logs to appear.  
 
+Finally, you can define a deployment-specific dictionary inside the `anet.yml` file.
+Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
+```
+dictionary:
+  PRINCIPAL_PERSON_TITLE: Afghan Partner
+  ADVISOR_PERSON_TITLE: NATO Member
+  PRINCIPAL_POSITION_NAME: Afghan Tashkil
+  ADVISOR_POSITION_NAME: NATO Billet
+  ADVISOR_POSITION_TYPE_TITLE: NATO Advisor
+  SUPER_USER_POSITION_TYPE_TITLE: ANET Super User
+  ADMINISTRATOR_POSITION_TYPE_TITLE: ANET Administrator
+  PRINCIPAL_ORG_NAME: Afghan Government Organization
+  ADVISOR_ORG_NAME: Advisor Organization
+  POAM_LONG_NAME: Plan of Action and Milestones / Pillars
+  POAM_SHORT_NAME: PoAM
+  NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
+  PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
+  PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense
+  ADVISOR_ORG_LABEL_LONGNAME: Description
+  ADVISOR_ORG_PLACEHOLDER_LONGNAME: e.g. Force Sustainment
+  PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE: Identification Code
+  PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE: optional
+  ADVISOR_ORG_LABEL_IDENTIFICATIONCODE: UIC
+  ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE: the six character code
+  supportEmailAddr: support@example.com
+  pinned_ORGs:
+    - Key Leader Engagement
+  non_reporting_ORGs:
+    - ANET Administrators
+  countries:
+    - Afghanistan
+    - Albania
+    - Armenia
+    - Australia
+    - Austria
+    - Azerbaijan
+    - Belgium
+    - Bosnia-Herzegovina
+    - Bulgaria
+    - Croatia
+    - Czech Republic
+    - Denmark
+    - Estonia
+    - Finland
+    - Georgia
+    - Germany
+    - Greece
+    - Hungary
+    - Iceland
+    - Italy
+    - Latvia
+    - Lithuania
+    - Luxembourg
+    - Macedonia
+    - Mongolia
+    - Montenegro
+    - Netherlands
+    - New Zealand
+    - Norway
+    - Poland
+    - Portugal
+    - Romania
+    - Slovakia
+    - Slovenia
+    - Spain
+    - Sweden
+    - Turkey
+    - Ukraine
+    - United Kingdom
+    - United States of America
+  principal_countries:
+    - Afghanistan
+  ranks:
+    - CIV
+    - CTR
+    - OR-1
+    - OR-2
+    - OR-3
+    - OR-4
+    - OR-5
+    - OR-6
+    - OR-7
+    - OR-8
+    - OR-9
+    - WO-1
+    - WO-2
+    - WO-3
+    - WO-4
+    - WO-5
+    - OF-1
+    - OF-2
+    - OF-3
+    - OF-4
+    - OF-5
+    - OF-6
+    - OF-7
+    - OF-8
+    - OF-9
+    - OF-10
+  domainNames:
+    - cmil.mil
+    - mission.ita
+    - nato.int
+    - "*.isaf.nato.int"
+```
+As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 
 # How to enable SSL
 Below is a subset from the complete Dropwizard Documentation that can be found here: http://www.dropwizard.io/1.0.5/docs/manual/core.html#ssl

@@ -38,18 +38,18 @@ export default class EditAssociatedPositionsModal extends Component {
 		let {position} = this.props
 		let {associatedPositions} = this.state
 		let currentUser = this.context.currentUser
-		let assignedRole = position.type === 'PRINCIPAL' ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
+		let assignedRole = position.type === Position.TYPE.PRINCIPAL ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
 
 		let positionSearchQuery = {matchPersonName: true}
-		if (position.type === 'PRINCIPAL') {
-			positionSearchQuery.type = ['ADVISOR', 'SUPER_USER', 'ADMINISTRATOR']
+		if (position.type === Position.TYPE.PRINCIPAL) {
+			positionSearchQuery.type = [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]
 			if (currentUser.isAdmin() === false) {
 				//Super Users can only assign a position in their organization!
 				positionSearchQuery.organizationId = currentUser.position.organization.id
 				positionSearchQuery.includeChildrenOrgs = true
 			}
 		} else {
-			positionSearchQuery.type = ['PRINCIPAL']
+			positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
 		}
 
 		return (
@@ -62,7 +62,7 @@ export default class EditAssociatedPositionsModal extends Component {
 					<Autocomplete
 						placeholder={'Start typing to search for a ' + assignedRole + ' position...'}
 						objectType={Position}
-						fields={'id, name, code, type, person { id, name, rank }, organization { id, shortName, longName}'}
+						fields={'id, name, code, type, person { id, name, rank }, organization { id, shortName, longName, identificationCode}'}
 						template={pos => {
 							let components = []
 							pos.person && components.push(pos.person.name)

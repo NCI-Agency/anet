@@ -4,60 +4,20 @@ import Model from 'components/Model'
 import utils from 'utils'
 import dict from 'dictionary'
 
+import {Position} from 'models'
+
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
-const COUNTRIES = [
-	"Afghanistan",
-	"Albania",
-	"Armenia",
-	"Australia",
-	"Austria",
-	"Azerbaijan",
-	"Belgium",
-	"Bosnia-Herzegovina",
-	"Bulgaria",
-	"Canada",
-	"Croatia",
-	"Czech Republic",
-	"Denmark",
-	"Estonia",
-	"Finland",
-	"France",
-	"Georgia",
-	"Germany",
-	"Greece",
-	"Hungary",
-	"Iceland",
-	"Italy",
-	"Latvia",
-	"Lithuania",
-	"Luxembourg",
-	"Macedonia",
-	"Mongolia",
-	"Montenegro",
-	"Netherlands",
-	"New Zealand",
-	"Norway",
-	"Poland",
-	"Portugal",
-	"Romania",
-	"Sweden",
-	"Slovakia",
-	"Slovenia",
-	"Spain",
-	"Turkey",
-	"Ukraine",
-	"United Kingdom",
-	"United States of America",
-
-]
 
 export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
 
-	static COUNTRIES = COUNTRIES
+	static ROLE = {
+		ADVISOR: 'ADVISOR',
+		PRINCIPAL: 'PRINCIPAL'
+	}
 
 	static schema = {
 		name: '',
@@ -82,10 +42,10 @@ export default class Person extends Model {
 	}
 
 	static humanNameOfRole(role) {
-		if (role === 'ADVISOR') {
+		if (role === Person.ROLE.ADVISOR) {
 			return dict.lookup('ADVISOR_PERSON_TITLE')
 		}
-		if (role === 'PRINCIPAL') {
+		if (role === Person.ROLE.PRINCIPAL) {
 			return dict.lookup('PRINCIPAL_PERSON_TITLE')
 		}
 
@@ -106,18 +66,26 @@ export default class Person extends Model {
 	}
 
 	isAdvisor() {
-		return this.role === 'ADVISOR'
+		return this.role === Person.ROLE.ADVISOR
+	}
+
+	isPrincipal() {
+		return this.role === Person.ROLE.PRINCIPAL
 	}
 
 	isAdmin() {
-		return this.position && this.position.type === 'ADMINISTRATOR'
+		return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
 	}
 
 	isSuperUser() {
 		return this.position && (
-			this.position.type === 'SUPER_USER' ||
-			this.position.type === 'ADMINISTRATOR'
+			this.position.type === Position.TYPE.SUPER_USER ||
+			this.position.type === Position.TYPE.ADMINISTRATOR
 		)
+	}
+
+	hasAssignedPosition() {
+		return  typeof this.position !== 'undefined' && this.position !== {}
 	}
 
 	//Checks if this user is a valid super user for a particular organization
@@ -128,8 +96,8 @@ export default class Person extends Model {
 	// - A super user for this orgs parents.
 	isSuperUserForOrg(org) {
 		if (!org) { return false }
-		if (this.position && this.position.type === 'ADMINISTRATOR') { return true }
-		if (this.position && this.position.type !== 'SUPER_USER') { return false }
+		if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) { return true }
+		if (this.position && this.position.type !== Position.TYPE.SUPER_USER) { return false }
 		if (org.type === 'PRINCIPAL_ORG') { return true }
 
 		if (!this.position || !this.position.organization) { return false }
@@ -141,9 +109,9 @@ export default class Person extends Model {
 	}
 
 	iconUrl() {
-		if (this.role === 'ADVISOR') {
+		if (this.isAdvisor()) {
 			return RS_ICON
-		} else if (this.role === 'PRINCIPAL') {
+		} else if (this.isPrincipal()) {
 			return AFG_ICON
 		}
 
