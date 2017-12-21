@@ -24,8 +24,8 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 	//Find people who are pending verification
 	Boolean pendingVerification;
 	
-	private PersonSearchSortBy sortBy;
-	private SortOrder sortOrder;
+	PersonSearchSortBy sortBy;
+	SortOrder sortOrder;
 
 	public Integer getOrgId() {
 		return orgId;
