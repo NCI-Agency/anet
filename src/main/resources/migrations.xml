@@ -812,4 +812,30 @@
 		</addColumn>
 	</changeSet>
 
+    <changeSet id="add_authorization_groups" author="maradragan">
+        <createTable tableName="authorizationGroups">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="nvarchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="nvarchar(512)" />
+            <column name="createdAt" type="datetime" />
+            <column name="updatedAt" type="datetime" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_authorization_group_positions" author="maradragan">
+        <createTable tableName="authorizationGroupPositions">
+            <column name="authorizationGroupId" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="positionId" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
+    </changeSet>
+
 </databaseChangeLog>
