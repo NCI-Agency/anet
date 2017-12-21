@@ -838,4 +838,25 @@
         <addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
     </changeSet>
 
+    <changeSet id="add_report_authorization_groups" author="maradragan">
+        <createTable tableName="reportAuthorizationGroups">
+            <column name="reportId" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authorizationGroupId" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="mssql">
+        <addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
+        <addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
+            constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
+            referencedColumnNames="id" referencedTableName="reports" />
+        <addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="reportAuthorizationGroups"
+            constraintName="fk_reportAuthorizationGroups_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+            referencedColumnNames="id" referencedTableName="authorizationGroups" />
+    </changeSet>
+
 </databaseChangeLog>

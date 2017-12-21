@@ -19,6 +19,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Tag;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportTest extends BeanTester<Report> {
@@ -81,6 +82,10 @@ public class ReportTest extends BeanTester<Report> {
 		final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
 		rsi.setText("For your eyes only");
 		r.setReportSensitiveInformation(rsi);
+
+		LinkedList<AuthorizationGroup> authorizationGroups = new LinkedList<AuthorizationGroup>();
+		authorizationGroups.add(AuthorizationGroupTest.getTestAuthorizationGroup());
+		r.setAuthorizationGroups(authorizationGroups);
 
 		return r;
 	}
