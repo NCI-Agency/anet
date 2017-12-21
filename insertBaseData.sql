@@ -19,6 +19,8 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE adminSettings;
 --DROP TABLE pendingEmails;
 --DROP TABLE tags;
+--DROP TABLE authorizationGroupPositions;
+--DROP TABLE authorizationGroups;
 --DROP TABLE DATABASECHANGELOG;
 --DROP TABLE DATABASECHANGELOGLOCK;
 
@@ -31,6 +33,7 @@ TRUNCATE TABLE reportPeople;
 TRUNCATE TABLE reportTags;
 TRUNCATE TABLE comments;
 TRUNCATE TABLE savedSearches;
+TRUNCATE TABLE authorizationGroupPositions;
 DELETE FROM positions;
 DELETE FROM poams WHERE parentPoamId IS NOT NULL;
 DELETE FROM poams WHERE parentPoamId IS NULL;
@@ -41,6 +44,7 @@ DELETE FROM locations;
 DELETE FROM organizations;
 DELETE FROM adminSettings;
 DELETE FROM tags;
+DELETE FROM authorizationGroups;
 
 --Advisors
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
@@ -639,3 +643,25 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+steve@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
+
+-- Authorization groups
+INSERT INTO authorizationGroups (name, description) VALUES ('EF 1.1 positions', 'All positions related to EF 1.1');
+INSERT INTO authorizationGroups (name, description) VALUES ('EF 2.1 positions', 'All positions related to EF 2.1');
+INSERT INTO authorizationGroups (name, description) VALUES ('EF 2.2 positions', 'All positions related to EF 2.2');
+
+-- Authorization group positions
+INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+  SELECT a.id, p.id
+  FROM authorizationGroups a, positions p
+  WHERE a.name LIKE 'EF 1.1%'
+  AND p.name LIKE 'EF 1.1%';
+INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+  SELECT a.id, p.id
+  FROM authorizationGroups a, positions p
+  WHERE a.name LIKE 'EF 2.1%'
+  AND p.name LIKE 'EF 2.1%';
+INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+  SELECT a.id, p.id
+  FROM authorizationGroups a, positions p
+  WHERE a.name LIKE 'EF 2.2%'
+  AND p.name LIKE 'EF 2.2%';
