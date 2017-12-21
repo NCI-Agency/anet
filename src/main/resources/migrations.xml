@@ -836,6 +836,14 @@
             </column>
         </createTable>
         <addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
+
+        <addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
+            constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+            referencedColumnNames="id" referencedTableName="authorizationGroups" />
+
+        <addForeignKeyConstraint baseColumnNames="positionId" baseTableName="authorizationGroupPositions"
+            constraintName="fk_authorizationGroupPositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+            referencedColumnNames="id" referencedTableName="positions" />
     </changeSet>
 
     <changeSet id="add_report_authorization_groups" author="maradragan">
