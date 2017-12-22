@@ -31,9 +31,9 @@ public class PoamDao implements IAnetDao<Poam> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getAllPoams */ SELECT poams.*, COUNT(*) OVER() AS totalCount "
-					+ "FROM poams ORDER BY createdAt ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+					+ "FROM poams ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else { 
-			sql = "/* getAllPoams */ SELECT * from poams ORDER BY createdAt ASC LIMIT :limit OFFSET :offset";
+			sql = "/* getAllPoams */ SELECT * from poams ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		Query<Poam> query = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
@@ -57,7 +57,7 @@ public class PoamDao implements IAnetDao<Poam> {
 		p.setCreatedAt(DateTime.now());
 		p.setUpdatedAt(DateTime.now());
 		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* inserPoam */ INSERT INTO poams "
-				+ "(longName, shortName, category, parentPoamId, organizationId, createdAt, updatedAt, status) " 
+				+ "(\"longName\", \"shortName\", category, \"parentPoamId\", \"organizationId\", \"createdAt\", \"updatedAt\", status) " 
 				+ "VALUES (:longName, :shortName, :category, :parentPoamId, :organizationId, :createdAt, :updatedAt, :status)")
 			.bindFromProperties(p)
 			.bind("parentPoamId", DaoUtils.getId(p.getParentPoam()))
@@ -71,9 +71,9 @@ public class PoamDao implements IAnetDao<Poam> {
 	@Override
 	public int update(Poam p) { 
 		p.setUpdatedAt(DateTime.now());
-		return dbHandle.createStatement("/* updatePoam */ UPDATE poams set longName = :longName, shortName = :shortName, "
-				+ "category = :category, parentPoamId = :parentPoamId, updatedAt = :updatedAt, "
-				+ "organizationId = :organizationId, status = :status " 
+		return dbHandle.createStatement("/* updatePoam */ UPDATE poams set \"longName\" = :longName, \"shortName\" = :shortName, "
+				+ "category = :category, \"parentPoamId\" = :parentPoamId, \"updatedAt\" = :updatedAt, "
+				+ "\"organizationId\" = :organizationId, status = :status " 
 				+ "WHERE id = :id")
 			.bindFromProperties(p)
 			.bind("parentPoamId", DaoUtils.getId(p.getParentPoam()))
@@ -85,7 +85,7 @@ public class PoamDao implements IAnetDao<Poam> {
 	public int setResponsibleOrgForPoam(Poam p, Organization org) { 
 		p.setUpdatedAt(DateTime.now());
 		return dbHandle.createStatement("/* setReponsibleOrgForPoam */ UPDATE poams "
-				+ "SET organizationId = :orgId, updatedAt = :updatedAt WHERE id = :id")
+				+ "SET \"organizationId\" = :orgId, \"updatedAt\" = :updatedAt WHERE id = :id")
 			.bind("orgId", DaoUtils.getId(org))
 			.bind("id", p.getId())
 			.bind("updatedAt", p.getUpdatedAt())
@@ -93,7 +93,7 @@ public class PoamDao implements IAnetDao<Poam> {
 	}
 	
 	public List<Poam> getPoamsByParentId(int parentPoamId) { 
-		return dbHandle.createQuery("/* getPoamsByParent */ SELECT * from poams where parentPoamId = :parentPoamId")
+		return dbHandle.createQuery("/* getPoamsByParent */ SELECT * from poams where \"parentPoamId\" = :parentPoamId")
 			.bind("parentPoamId", parentPoamId)
 			.map(new PoamMapper())
 			.list();
@@ -107,13 +107,13 @@ public class PoamDao implements IAnetDao<Poam> {
 		} else { 
 			sql.append("WITH RECURSIVE");
 		}
-		sql.append(" parent_poams(id, shortName, longName, category, parentPoamId, "
-				+ "organizationId, createdAt, updatedAt, status) AS ("
-				+ "SELECT id, shortName, longName, category, parentPoamId, "
-				+ "organizationId, createdAt, updatedAt, status FROM poams WHERE id = :poamId "
+		sql.append(" parent_poams(id, \"shortName\", \"longName\", category, \"parentPoamId\", "
+				+ "\"organizationId\", \"createdAt\", \"updatedAt\", status) AS ("
+				+ "SELECT id, \"shortName\", \"longName\", category, \"parentPoamId\", "
+				+ "\"organizationId\", \"createdAt\", \"updatedAt\", status FROM poams WHERE id = :poamId "
 			+ "UNION ALL "
-				+ "SELECT p.id, p.shortName, p.longName, p.category, p.parentPoamId, p.organizationId, p.createdAt, p.updatedAt, p.status "
-				+ "from parent_poams pp, poams p WHERE p.parentPoamId = pp.id "
+				+ "SELECT p.id, p.\"shortName\", p.\"longName\", p.category, p.\"parentPoamId\", p.\"organizationId\", p.\"createdAt\", p.\"updatedAt\", p.status "
+				+ "from parent_poams pp, poams p WHERE p.\"parentPoamId\" = pp.id "
 			+ ") SELECT * from parent_poams;");
 		return dbHandle.createQuery(sql.toString())
 			.bind("poamId", poamId)
@@ -122,7 +122,7 @@ public class PoamDao implements IAnetDao<Poam> {
 	}
 
 	public List<Poam> getTopLevelPoams() {
-		return dbHandle.createQuery("/* getTopPoams */ SELECT * FROM poams WHERE parentPoamId IS NULL")
+		return dbHandle.createQuery("/* getTopPoams */ SELECT * FROM poams WHERE \"parentPoamId\" IS NULL")
 			.map(new PoamMapper())
 			.list();
 	}
@@ -136,19 +136,19 @@ public class PoamDao implements IAnetDao<Poam> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getRecentPoams */ SELECT poams.* FROM poams WHERE poams.id IN ("
-					+ "SELECT TOP(:maxResults) reportPoams.poamId "
-					+ "FROM reports JOIN reportPoams ON reports.id = reportPoams.reportId "
-					+ "WHERE authorId = :authorId "
-					+ "GROUP BY poamId "
-					+ "ORDER BY MAX(reports.createdAt) DESC"
+					+ "SELECT TOP(:maxResults) \"reportPoams\".\"poamId\" "
+					+ "FROM reports JOIN \"reportPoams\" ON reports.id = \"reportPoams\".\"reportId\" "
+					+ "WHERE \"authorId\" = :authorId "
+					+ "GROUP BY \"poamId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
 			sql =  "/* getRecentPoams */ SELECT poams.* FROM poams WHERE poams.id IN ("
-					+ "SELECT reportPoams.poamId "
-					+ "FROM reports JOIN reportPoams ON reports.id = reportPoams.reportId "
-					+ "WHERE authorId = :authorId "
-					+ "GROUP BY poamId "
-					+ "ORDER BY MAX(reports.createdAt) DESC "
+					+ "SELECT \"reportPoams\".\"poamId\" "
+					+ "FROM reports JOIN \"reportPoams\" ON reports.id = \"reportPoams\".\"reportId\" "
+					+ "WHERE \"authorId\" = :authorId "
+					+ "GROUP BY \"poamId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
@@ -160,7 +160,7 @@ public class PoamDao implements IAnetDao<Poam> {
 	}
 
 	public List<Poam> getPoamsByOrganizationId(Integer orgId) {
-		return dbHandle.createQuery("/* getPoamsByOrg */ SELECT * from poams WHERE organizationId = :orgId")
+		return dbHandle.createQuery("/* getPoamsByOrg */ SELECT * from poams WHERE \"organizationId\" = :orgId")
 			.bind("orgId", orgId)
 			.map(new PoamMapper())
 			.list();

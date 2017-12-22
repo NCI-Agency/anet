@@ -40,9 +40,9 @@ public class PersonDao implements IAnetDao<Person> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* personGetAll */ SELECT " + PERSON_FIELDS + ", count(*) over() as totalCount "
-					+ "FROM people ORDER BY createdAt ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+					+ "FROM people ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else { 
-			sql = "/* personGetAll */ SELECT " + PERSON_FIELDS + "FROM people ORDER BY createdAt ASC LIMIT :limit OFFSET :offset";
+			sql = "/* personGetAll */ SELECT " + PERSON_FIELDS + "FROM people ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		Query<Person> query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
@@ -65,8 +65,8 @@ public class PersonDao implements IAnetDao<Person> {
 		p.setUpdatedAt(DateTime.now());
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* personInsert */ INSERT INTO people " 
-				+ "(name, status, role, emailAddress, phoneNumber, rank, pendingVerification, "
-				+ "gender, country, endOfTourDate, biography, domainUsername, createdAt, updatedAt) " 
+				+ "(name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
+				+ "gender, country, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") " 
 				+ "VALUES (:name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
 				+ ":gender, :country, ");
 		if (DaoUtils.isMsSql(dbHandle)) {
@@ -90,15 +90,15 @@ public class PersonDao implements IAnetDao<Person> {
 		p.setUpdatedAt(DateTime.now());
 		StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
 				+ "SET name = :name, status = :status, role = :role, "
-				+ "gender = :gender, country = :country,  emailAddress = :emailAddress, "
-				+ "phoneNumber = :phoneNumber, rank = :rank, biography = :biography, "
-				+ "pendingVerification = :pendingVerification, domainUsername = :domainUsername, "
-				+ "updatedAt = :updatedAt, ");
+				+ "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
+				+ "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
+				+ "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
+				+ "\"updatedAt\" = :updatedAt, ");
 		if (DaoUtils.isMsSql(dbHandle)) {
 			//MsSql requires an explicit CAST when datetime2 might be NULL. 
-			sql.append("endOfTourDate = CAST(:endOfTourDate AS datetime2) ");
+			sql.append("\"endOfTourDate\" = CAST(:endOfTourDate AS datetime2) ");
 		} else {
-			sql.append("endOfTourDate = :endOfTourDate ");
+			sql.append("\"endOfTourDate\" = :endOfTourDate ");
 		}
 		sql.append("WHERE id = :id");
 		return dbHandle.createStatement(sql.toString())
@@ -117,16 +117,16 @@ public class PersonDao implements IAnetDao<Person> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getOrganizationForPerson */ SELECT TOP(1) " + OrganizationDao.ORGANIZATION_FIELDS 
-					+ "FROM organizations, positions, peoplePositions WHERE "
-					+ "peoplePositions.personId = :personId AND peoplePositions.positionId = positions.id "
-					+ "AND positions.organizationId = organizations.id "
-					+ "ORDER BY peoplePositions.createdAt DESC";
+					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
+					+ "\"peoplePositions\".\"personId\" = :personId AND \"peoplePositions\".\"positionId\" = positions.id "
+					+ "AND positions.\"organizationId\" = organizations.id "
+					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC";
 		} else { 
 			sql = "/* getOrganizationForPerson */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, peoplePositions WHERE "
-					+ "peoplePositions.personId = :personId AND peoplePositions.positionId = positions.id "
-					+ "AND positions.organizationId = organizations.id " 
-					+ "ORDER BY peoplePositions.createdAt DESC LIMIT 1";
+					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
+					+ "\"peoplePositions\".\"personId\" = :personId AND \"peoplePositions\".\"positionId\" = positions.id "
+					+ "AND positions.\"organizationId\" = organizations.id " 
+					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
 		}
 		
 		Query<Organization> query = dbHandle.createQuery(sql)
@@ -139,8 +139,8 @@ public class PersonDao implements IAnetDao<Person> {
 
 	public List<Person> findByDomainUsername(String domainUsername) {
 		return dbHandle.createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITIONS_FIELDS 
-				+ "FROM people LEFT JOIN positions ON people.id = positions.currentPersonId "
-				+ "WHERE people.domainUsername = :domainUsername "
+				+ "FROM people LEFT JOIN positions ON people.id = positions.\"currentPersonId\" "
+				+ "WHERE people.\"domainUsername\" = :domainUsername "
 				+ "AND people.status != :inactiveStatus")
 			.bind("domainUsername", domainUsername)
 			.bind("inactiveStatus", DaoUtils.getEnumId(PersonStatus.INACTIVE))
@@ -153,22 +153,22 @@ public class PersonDao implements IAnetDao<Person> {
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
 				+ "FROM people WHERE people.id IN ( "
-					+ "SELECT top(:maxResults) reportPeople.personId "
-					+ "FROM reports JOIN reportPeople ON reports.id = reportPeople.reportId "
-					+ "WHERE authorId = :authorId "
-					+ "AND personId != :authorId "
-					+ "GROUP BY personId "
-					+ "ORDER BY MAX(reports.createdAt) DESC"
+					+ "SELECT top(:maxResults) \"reportPeople\".\"personId\" "
+					+ "FROM reports JOIN \"reportPeople\" ON reports.id = \"reportPeople\".\"reportId\" "
+					+ "WHERE \"authorId\" = :authorId "
+					+ "AND \"personId\" != :authorId "
+					+ "GROUP BY \"personId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
 			sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
 				+ "FROM people WHERE people.id IN ( "
-					+ "SELECT reportPeople.personId "
-					+ "FROM reports JOIN reportPeople ON reports.id = reportPeople.reportId "
-					+ "WHERE authorId = :authorId "
-					+ "AND personId != :authorId "
-					+ "GROUP BY personId "
-					+ "ORDER BY MAX(reports.createdAt) DESC "
+					+ "SELECT \"reportPeople\".\"personId\" "
+					+ "FROM reports JOIN \"reportPeople\" ON reports.id = \"reportPeople\".\"reportId\" "
+					+ "WHERE \"authorId\" = :authorId "
+					+ "AND \"personId\" != :authorId "
+					+ "GROUP BY \"personId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
@@ -183,31 +183,31 @@ public class PersonDao implements IAnetDao<Person> {
 		dbHandle.inTransaction(new TransactionCallback<Void>() {
 			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//update report attendence
-				dbHandle.createStatement("UPDATE reportPeople SET personId = :winnerId WHERE personId = :loserId")
+				dbHandle.createStatement("UPDATE \"reportPeople\" SET \"personId\" = :winnerId WHERE \"personId\" = :loserId")
 					.bind("winnerId", winner.getId())
 					.bind("loserId", loser.getId())
 					.execute();
 				
 				// update approvals this person might have done
-				dbHandle.createStatement("UPDATE approvalActions SET personId = :winnerId WHERE personId = :loserId")
+				dbHandle.createStatement("UPDATE \"approvalActions\" SET \"personId\" = :winnerId WHERE \"personId\" = :loserId")
 					.bind("winnerId", winner.getId())
 					.bind("loserId", loser.getId())
 					.execute();
 				
 				// report author update
-				dbHandle.createStatement("UPDATE reports SET authorId = :winnerId WHERE authorId = :loserId")
+				dbHandle.createStatement("UPDATE reports SET \"authorId\" = :winnerId WHERE \"authorId\" = :loserId")
 					.bind("winnerId", winner.getId())
 					.bind("loserId", loser.getId())
 					.execute();
 			
 				// comment author update
-				dbHandle.createStatement("UPDATE comments SET authorId = :winnerId WHERE authorId = :loserId")
+				dbHandle.createStatement("UPDATE comments SET \"authorId\" = :winnerId WHERE \"authorId\" = :loserId")
 					.bind("winnerId", winner.getId())
 					.bind("loserId", loser.getId())
 					.execute();
 				
 				// update position history
-				dbHandle.createStatement("UPDATE peoplePositions SET personId = :winnerId WHERE personId = :loserId")
+				dbHandle.createStatement("UPDATE \"peoplePositions\" SET \"personId\" = :winnerId WHERE \"personId\" = :loserId")
 					.bind("winnerId", winner.getId())
 					.bind("loserId", loser.getId())
 					.execute();

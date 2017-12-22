@@ -28,14 +28,14 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 	
 	@Override
 	public SavedSearch getById(int id) { 
-		return dbHandle.createQuery("/* getSavedSearchById */ SELECT * from savedSearches where id = :id")
+		return dbHandle.createQuery("/* getSavedSearchById */ SELECT * from \"savedSearches\" where id = :id")
 				.bind("id", id)
 				.map(new SavedSearchMapper())
 				.first();
 	}
 
 	public List<SavedSearch> getSearchesByOwner(Person owner) { 
-		return dbHandle.createQuery("/* getSavedSearchByOwner */ SELECT * FROM savedSearches WHERE ownerId = :ownerId")
+		return dbHandle.createQuery("/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerId\" = :ownerId")
 			.bind("ownerId", owner.getId())
 			.map(new SavedSearchMapper())
 			.list();
@@ -44,8 +44,8 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 	@Override
 	public SavedSearch insert(SavedSearch obj) {
 		obj.setCreatedAt(DateTime.now());
-		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* insertSavedSearch */ INSERT INTO savedSearches "
-				+ "(ownerId, name, objectType, query) "
+		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
+				+ "(\"ownerId\", name, \"objectType\", query) "
 				+ "VALUES (:ownerId, :name, :objectType, :query)")
 			.bindFromProperties(obj)
 			.bind("ownerId", obj.getOwner().getId())
@@ -57,16 +57,16 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 
 	@Override
 	public int update(SavedSearch obj) {
-		return dbHandle.createStatement("/* updateSavedSearch */ UPDATE savedSearches "
-				+ "SET name = :name, objectType = :objectType, query = :query "
+		return dbHandle.createStatement("/* updateSavedSearch */ UPDATE \"savedSearches\" "
+				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
 				+ "WHERE id = :id")
 			.bindFromProperties(obj)
 			.execute();
 	}
 
 	public int deleteSavedSearch(Integer id, Person owner) {
-		return dbHandle.createStatement("/* deleteSavedSearch */ DELETE FROM savedSearches " 
-				+ "WHERE id = :id AND ownerId = :ownerId")
+		return dbHandle.createStatement("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" " 
+				+ "WHERE id = :id AND \"ownerId\" = :ownerId")
 			.bind("id", id)
 			.bind("ownerId", owner.getId())
 			.execute();

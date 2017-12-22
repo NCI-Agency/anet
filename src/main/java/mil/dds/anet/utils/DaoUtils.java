@@ -68,7 +68,7 @@ public class DaoUtils {
 	public static String buildFieldAliases(String tableName, String[] fields) { 
 		List<String> fieldAliases = new LinkedList<String>();
 		for (String field : fields) { 
-			fieldAliases.add(String.format("%s.%s AS %s_%s", tableName, field, tableName, field));
+			fieldAliases.add(String.format("\"%s\".\"%s\" AS %s_%s", tableName, field, tableName, field));
 		}
 		return " " + Joiner.on(", ").join(fieldAliases) + " ";
 	}

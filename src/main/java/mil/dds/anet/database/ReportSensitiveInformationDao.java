@@ -57,7 +57,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		rsi.setUpdatedAt(DateTime.now());
 		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
 				"/* insertReportsSensitiveInformation */ INSERT INTO " + tableName
-					+ " (text, reportId, createdAt, updatedAt) "
+					+ " (text, \"reportId\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:text, :reportId, :createdAt, :updatedAt)")
 				.bind("text", rsi.getText())
 				.bind("reportId", rsi.getReportId())
@@ -78,10 +78,10 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return 0;
 		}
-		// Do not allow the reportId to be updated!
+		// Do not allow the \"reportId\" to be updated!
 		final int numRows = dbHandle.createStatement(
 				"/* updateReportsSensitiveInformation */ UPDATE " + tableName
-					+ " SET text = :text, updatedAt = :updatedAt WHERE id = :id")
+					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bind("id", rsi.getId())
 				.bind("text", rsi.getText())
 				.bind("updatedAt", DateTime.now())
@@ -103,7 +103,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		final Query<ReportSensitiveInformation> query = dbHandle.createQuery(
 				"/* getReportSensitiveInformationByReportId */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
 					+ " FROM " + tableName
-					+ " WHERE reportId = :reportId")
+					+ " WHERE \"reportId\" = :reportId")
 			.bind("reportId", report.getId())
 			.map(new ReportSensitiveInformationMapper());
 		final List<ReportSensitiveInformation> results = query.list();

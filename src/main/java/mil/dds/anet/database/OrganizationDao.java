@@ -38,9 +38,9 @@ public class OrganizationDao implements IAnetDao<Organization> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getAllOrgs */ SELECT " + ORGANIZATION_FIELDS + ", count(*) over() AS totalCount "
-					+ "FROM organizations ORDER BY createdAt ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+					+ "FROM organizations ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else { 
-			sql = "/* getAllOrgs */ SELECT " + ORGANIZATION_FIELDS + " from organizations ORDER BY createdAt ASC LIMIT :limit OFFSET :offset";
+			sql = "/* getAllOrgs */ SELECT " + ORGANIZATION_FIELDS + " from organizations ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		
 		Query<Organization> query = dbHandle.createQuery(sql)
@@ -62,7 +62,7 @@ public class OrganizationDao implements IAnetDao<Organization> {
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
 		return dbHandle.createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS
 				+ " FROM organizations "
-				+ "WHERE parentOrgId IS NULL "
+				+ "WHERE \"parentOrgId\" IS NULL "
 				+ "AND type = :type")
 			.bind("type", DaoUtils.getEnumId(type))
 			.map(new OrganizationMapper())
@@ -73,14 +73,14 @@ public class OrganizationDao implements IAnetDao<Organization> {
 	public interface OrgListQueries {
 		@Mapper(OrganizationMapper.class)
 		@SqlQuery("SELECT id AS organizations_id"
-				+ ", shortName AS organizations_shortName"
-				+ ", longName AS organizations_longName"
-				+ ", identificationCode AS organizations_identificationCode"
+				+ ", \"shortName\" AS organizations_shortName"
+				+ ", \"longName\" AS organizations_longName"
+				+ ", \"identificationCode\" AS organizations_identificationCode"
 				+ ", type AS organizations_type"
-				+ ", parentOrgId AS organizations_parentOrgId"
-				+ ", createdAt AS organizations_createdAt"
-				+ ", updatedAt AS organizations_updatedAt"
-				+ " FROM organizations WHERE shortName IN ( <shortNames> )")
+				+ ", \"parentOrgId\" AS organizations_parentOrgId"
+				+ ", \"createdAt\" AS organizations_createdAt"
+				+ ", \"updatedAt\" AS organizations_updatedAt"
+				+ " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
 		public List<Organization> getOrgsByShortNames(@BindIn("shortNames") List<String> shortNames);
 	}
 
@@ -96,7 +96,7 @@ public class OrganizationDao implements IAnetDao<Organization> {
 		org.setUpdatedAt(org.getCreatedAt());
 		
 		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* insertOrg */ INSERT INTO organizations (shortName, longName, identificationCode, type, createdAt, updatedAt, parentOrgId) "
+				"/* insertOrg */ INSERT INTO organizations (\"shortName\", \"longName\", \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgId\") "
 				+ "VALUES (:shortName, :longName, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgId)")
 			.bindFromProperties(org)
 			.bind("type", DaoUtils.getEnumId(org.getType()))
@@ -110,8 +110,8 @@ public class OrganizationDao implements IAnetDao<Organization> {
 	public int update(Organization org) {
 		org.setUpdatedAt(DateTime.now());
 		int numRows = dbHandle.createStatement("/* updateOrg */ UPDATE organizations "
-				+ "SET shortName = :shortName, longName = :longName, identificationCode = :identificationCode, type = :type, "
-				+ "updatedAt = :updatedAt, parentOrgid = :parentOrgId where id = :id")
+				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, \"identificationCode\" = :identificationCode, type = :type, "
+				+ "\"updatedAt\" = :updatedAt, parentOrgid = :parentOrgId where id = :id")
 				.bindFromProperties(org)
 				.bind("type", DaoUtils.getEnumId(org.getType()))
 				.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))

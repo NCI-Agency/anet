@@ -73,13 +73,13 @@ public class ReportDao implements IAnetDao<Report> {
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getAllReports */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 					+ ", COUNT(*) OVER() AS totalCount FROM reports, people "
-					+ "WHERE reports.authorId = people.id "
-					+ "ORDER BY reports.createdAt DESC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+					+ "WHERE reports.\"authorId\" = people.id "
+					+ "ORDER BY reports.\"createdAt\" DESC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else {
 			sql = "/* getAllReports */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 					+ "FROM reports, people "
-					+ "WHERE reports.authorId = people.id "
-					+ "ORDER BY reports.createdAt DESC LIMIT :limit OFFSET :offset";
+					+ "WHERE reports.\"authorId\" = people.id "
+					+ "ORDER BY reports.\"createdAt\" DESC LIMIT :limit OFFSET :offset";
 		}
 		Query<Report> query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
@@ -103,11 +103,11 @@ public class ReportDao implements IAnetDao<Report> {
 
 				//MSSQL requires explicit CAST when a datetime2 might be NULL.
 				StringBuilder sql = new StringBuilder("/* insertReport */ INSERT INTO reports "
-						+ "(state, createdAt, updatedAt, locationId, intent, exsum, "
-						+ "text, keyOutcomes, nextSteps, authorId, "
-						+ "engagementDate, releasedAt, atmosphere, cancelledReason, "
-						+ "atmosphereDetails, advisorOrganizationId, "
-						+ "principalOrganizationId) VALUES "
+						+ "(state, \"createdAt\", \"updatedAt\", \"locationId\", intent, exsum, "
+						+ "text, \"keyOutcomes\", \"nextSteps\", \"authorId\", "
+						+ "\"engagementDate\", \"releasedAt\", atmosphere, \"cancelledReason\", "
+						+ "\"atmosphereDetails\", \"advisorOrganizationId\", "
+						+ "\"principalOrganizationId\") VALUES "
 						+ "(:state, :createdAt, :updatedAt, :locationId, :intent, "
 						+ ":exsum, :reportText, :keyOutcomes, "
 						+ ":nextSteps, :authorId, ");
@@ -153,15 +153,15 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public interface ReportBatch {
-		@SqlBatch("INSERT INTO reportPeople (reportId, personId, isPrimary) VALUES (:reportId, :id, :primary)")
+		@SqlBatch("INSERT INTO \"reportPeople\" (\"reportId\", \"personId\", \"isPrimary\") VALUES (:reportId, :id, :primary)")
 		void insertReportAttendees(@Bind("reportId") Integer reportId,
 				@BindBean List<ReportPerson> reportPeople);
 
-		@SqlBatch("INSERT INTO reportPoams (reportId, poamId) VALUES (:reportId, :id)")
+		@SqlBatch("INSERT INTO \"reportPoams\" (\"reportId\", \"poamId\") VALUES (:reportId, :id)")
 		void insertReportPoams(@Bind("reportId") Integer reportId,
 				@BindBean List<Poam> poams);
 
-		@SqlBatch("INSERT INTO reportTags (reportId, tagId) VALUES (:reportId, :id)")
+		@SqlBatch("INSERT INTO reportTags (\"reportId\", tagId) VALUES (:reportId, :id)")
 		void insertReportTags(@Bind("reportId") Integer reportId,
 				@BindBean List<Tag> tags);
 	}
@@ -176,7 +176,7 @@ public class ReportDao implements IAnetDao<Report> {
 		Query<Report> query = dbHandle.createQuery("/* getReportById */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM reports, people "
 				+ "WHERE reports.id = :id "
-				+ "AND reports.authorId = people.id")
+				+ "AND reports.\"authorId\" = people.id")
 				.bind("id", id)
 				.map(new ReportMapper());
 		List<Report> results = query.list();
@@ -202,18 +202,18 @@ public class ReportDao implements IAnetDao<Report> {
 				r.setUpdatedAt(DateTime.now());
 
 				StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
-						+ "state = :state, updatedAt = :updatedAt, locationId = :locationId, "
+						+ "state = :state, \"updatedAt\" = :updatedAt, \"locationId\" = :locationId, "
 						+ "intent = :intent, exsum = :exsum, text = :reportText, "
-						+ "keyOutcomes = :keyOutcomes, nextSteps = :nextSteps, "
-						+ "approvalStepId = :approvalStepId, ");
+						+ "\"keyOutcomes\" = :keyOutcomes, \"nextSteps\" = :nextSteps, "
+						+ "\"approvalStepId\" = :approvalStepId, ");
 				if (DaoUtils.isMsSql(dbHandle)) {
-					sql.append("engagementDate = CAST(:engagementDate AS datetime2), releasedAt = CAST(:releasedAt AS datetime2), ");
+					sql.append("\"engagementDate\" = CAST(:engagementDate AS datetime2), \"releasedAt\" = CAST(:releasedAt AS datetime2), ");
 				} else {
-					sql.append("engagementDate = :engagementDate, releasedAt = :releasedAt, ");
+					sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
 				}
-				sql.append("atmosphere = :atmosphere, atmosphereDetails = :atmosphereDetails, "
-						+ "cancelledReason = :cancelledReason, "
-						+ "principalOrganizationId = :principalOrgId, advisorOrganizationId = :advisorOrgId "
+				sql.append("atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
+						+ "\"cancelledReason\" = :cancelledReason, "
+						+ "\"principalOrganizationId\" = :principalOrgId, \"advisorOrganizationId\" = :advisorOrgId "
 						+ "WHERE id = :id");
 
 				return dbHandle.createStatement(sql.toString())
@@ -232,8 +232,8 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int addAttendeeToReport(ReportPerson rp, Report r) {
-		return dbHandle.createStatement("/* addReportAttendee */ INSERT INTO reportPeople "
-				+ "(personId, reportId, isPrimary) VALUES (:personId, :reportId, :isPrimary)")
+		return dbHandle.createStatement("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
+				+ "(\"personId\", \"reportId\", \"isPrimary\") VALUES (:personId, :reportId, :isPrimary)")
 			.bind("personId", rp.getId())
 			.bind("reportId", r.getId())
 			.bind("isPrimary", rp.isPrimary())
@@ -241,16 +241,16 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removeAttendeeFromReport(Person p, Report r) {
-		return dbHandle.createStatement("/* deleteReportAttendee */ DELETE FROM reportPeople "
-				+ "WHERE reportId = :reportId AND personId = :personId")
+		return dbHandle.createStatement("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
+				+ "WHERE \"reportId\" = :reportId AND \"personId\" = :personId")
 			.bind("reportId", r.getId())
 			.bind("personId", p.getId())
 			.execute();
 	}
 
 	public int updateAttendeeOnReport(ReportPerson rp, Report r) {
-		return dbHandle.createStatement("/* updateAttendeeOnReport*/ UPDATE reportPeople "
-				+ "SET isPrimary = :isPrimary WHERE reportId = :reportId AND personId = :personId")
+		return dbHandle.createStatement("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
+				+ "SET \"isPrimary\" = :isPrimary WHERE \"reportId\" = :reportId AND \"personId\" = :personId")
 			.bind("reportId", r.getId())
 			.bind("personId", rp.getId())
 			.bind("isPrimary", rp.isPrimary())
@@ -258,7 +258,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int addPoamToReport(Poam p, Report r) {
-		return dbHandle.createStatement("/* addPoamToReport */ INSERT INTO reportPoams (poamId, reportId) "
+		return dbHandle.createStatement("/* addPoamToReport */ INSERT INTO \"reportPoams\" (\"poamId\", \"reportId\") "
 				+ "VALUES (:poamId, :reportId)")
 			.bind("reportId", r.getId())
 			.bind("poamId", p.getId())
@@ -266,15 +266,15 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removePoamFromReport(Poam p, Report r) {
-		return dbHandle.createStatement("/* removePoamFromReport*/ DELETE FROM reportPoams "
-				+ "WHERE reportId = :reportId AND poamId = :poamId")
+		return dbHandle.createStatement("/* removePoamFromReport*/ DELETE FROM \"reportPoams\" "
+				+ "WHERE \"reportId\" = :reportId AND \"poamId\" = :poamId")
 				.bind("reportId", r.getId())
 				.bind("poamId", p.getId())
 				.execute();
 	}
 
 	public int addTagToReport(Tag t, Report r) {
-		return dbHandle.createStatement("/* addTagToReport */ INSERT INTO reportTags (reportId, tagId) "
+		return dbHandle.createStatement("/* addTagToReport */ INSERT INTO reportTags (\"reportId\", tagId) "
 				+ "VALUES (:reportId, :tagId)")
 			.bind("reportId", r.getId())
 			.bind("tagId", t.getId())
@@ -283,7 +283,7 @@ public class ReportDao implements IAnetDao<Report> {
 
 	public int removeTagFromReport(Tag t, Report r) {
 		return dbHandle.createStatement("/* removeTagFromReport */ DELETE FROM reportTags "
-				+ "WHERE reportId = :reportId AND tagId = :tagId")
+				+ "WHERE \"reportId\" = :reportId AND tagId = :tagId")
 				.bind("reportId", r.getId())
 				.bind("tagId", t.getId())
 				.execute();
@@ -291,18 +291,18 @@ public class ReportDao implements IAnetDao<Report> {
 
 	public List<ReportPerson> getAttendeesForReport(int reportId) {
 		return dbHandle.createQuery("/* getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS 
-				+ ", reportPeople.isPrimary FROM reportPeople "
-				+ "LEFT JOIN people ON reportPeople.personId = people.id "
-				+ "WHERE reportPeople.reportId = :reportId")
+				+ ", \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
+				+ "LEFT JOIN people ON \"reportPeople\".\"personId\" = people.id "
+				+ "WHERE \"reportPeople\".\"reportId\" = :reportId")
 			.bind("reportId", reportId)
 			.map(new ReportPersonMapper())
 			.list();
 	}
 
 	public List<Poam> getPoamsForReport(Report report) {
-		return dbHandle.createQuery("/* getPoamsForReport */ SELECT * FROM poams, reportPoams "
-				+ "WHERE reportPoams.reportId = :reportId "
-				+ "AND reportPoams.poamId = poams.id")
+		return dbHandle.createQuery("/* getPoamsForReport */ SELECT * FROM poams, \"reportPoams\" "
+				+ "WHERE \"reportPoams\".\"reportId\" = :reportId "
+				+ "AND \"reportPoams\".\"poamId\" = poams.id")
 				.bind("reportId", report.getId())
 				.map(new PoamMapper())
 				.list();
@@ -311,7 +311,7 @@ public class ReportDao implements IAnetDao<Report> {
 	public List<Tag> getTagsForReport(int reportId) {
 		return dbHandle.createQuery("/* getTagsForReport */ SELECT * FROM reportTags "
 				+ "INNER JOIN tags ON reportTags.tagId = tags.id "
-				+ "WHERE reportTags.reportId = :reportId "
+				+ "WHERE reportTags.\"reportId\" = :reportId "
 				+ "ORDER BY tags.name")
 			.bind("reportId", reportId)
 			.map(new TagMapper())
@@ -336,19 +336,19 @@ public class ReportDao implements IAnetDao<Report> {
 		dbHandle.inTransaction(new TransactionCallback<Void>() {
 			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				// Delete tags
-				dbHandle.execute("/* deleteReport.tags */ DELETE FROM reportTags where reportId = ?", report.getId());
+				dbHandle.execute("/* deleteReport.tags */ DELETE FROM reportTags where \"reportId\" = ?", report.getId());
 
 				//Delete poams
-				dbHandle.execute("/* deleteReport.poams */ DELETE FROM reportPoams where reportId = ?", report.getId());
+				dbHandle.execute("/* deleteReport.poams */ DELETE FROM \"reportPoams\" where \"reportId\" = ?", report.getId());
 				
 				//Delete attendees
-				dbHandle.execute("/* deleteReport.attendees */ DELETE FROM reportPeople where reportId = ?", report.getId());
+				dbHandle.execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportId\" = ?", report.getId());
 				
 				//Delete comments
-				dbHandle.execute("/* deleteReport.comments */ DELETE FROM comments where reportId = ?", report.getId());
+				dbHandle.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportId\" = ?", report.getId());
 				
-				//Delete approvalActions
-				dbHandle.execute("/* deleteReport.actions */ DELETE FROM approvalActions where reportId = ?", report.getId());
+				//Delete \"approvalActions\"
+				dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportId\" = ?", report.getId());
 				
 				//Delete report
 				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where id = ?", report.getId());
@@ -408,7 +408,7 @@ public class ReportDao implements IAnetDao<Report> {
 
 		sql.append("/* AdvisorReportInsightsQuery */");
 		sql.append("SELECT ");
-		sql.append("CASE WHEN a.organizationId IS NULL THEN b.organizationId ELSE a.organizationId END AS organizationId,");
+		sql.append("CASE WHEN a.\"organizationId\" IS NULL THEN b.\"organizationId\" ELSE a.\"organizationId\" END AS \"organizationId\",");
 		sql.append("CASE WHEN a.organizationShortName IS NULL THEN b.organizationShortName ELSE a.organizationShortName END AS organizationShortName,");
 		sql.append("%1$s");
 		sql.append("%2$s");
@@ -419,12 +419,12 @@ public class ReportDao implements IAnetDao<Report> {
 		sql.append(" FROM (");
 
 			sql.append("SELECT ");
-			sql.append("organizations.id AS organizationId,");
-			sql.append("organizations.shortName AS organizationShortName,");
+			sql.append("organizations.id AS \"organizationId\",");
+			sql.append("organizations.\"shortName\" AS organizationShortName,");
 			sql.append("%3$s");
 			sql.append("%4$s");
-			sql.append("DATEPART(week, reports.createdAt) AS week,");
-			sql.append("COUNT(reports.authorId) AS nrReportsSubmitted");
+			sql.append("DATEPART(week, reports.\"createdAt\") AS week,");
+			sql.append("COUNT(reports.\"authorId\") AS nrReportsSubmitted");
 
 			sql.append(" FROM ");
 			sql.append("positions,");
@@ -432,57 +432,57 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("%5$s");
 			sql.append("organizations");
 
-			sql.append(" WHERE positions.currentPersonId = reports.authorId");
+			sql.append(" WHERE positions.\"currentPersonId\" = reports.authorId");
 			sql.append(" %6$s");
-			sql.append(" AND reports.advisorOrganizationId = organizations.id");
+			sql.append(" AND reports.\"advisorOrganizationId\" = organizations.id");
 			sql.append(" AND positions.type = :positionAdvisor");
 			sql.append(" AND reports.state IN ( :reportReleased, :reportPending, :reportDraft )");
-			sql.append(" AND reports.createdAt BETWEEN :startDate and :endDate");
+			sql.append(" AND reports.\"createdAt\" BETWEEN :startDate and :endDate");
 			sql.append(" %11$s");
 
 			sql.append(" GROUP BY ");
 			sql.append("organizations.id,");
-			sql.append("organizations.shortName,");
+			sql.append("organizations.\"shortName\",");
 			sql.append("%7$s");
 			sql.append("%8$s");
-			sql.append("DATEPART(week, reports.createdAt)");
+			sql.append("DATEPART(week, reports.\"createdAt\")");
 		sql.append(") a");
 
 		sql.append(" FULL OUTER JOIN (");
 			sql.append("SELECT ");
-			sql.append("organizations.id AS organizationId,");
-			sql.append("organizations.shortName AS organizationShortName,");
+			sql.append("organizations.id AS \"organizationId\",");
+			sql.append("organizations.\"shortName\" AS organizationShortName,");
 			sql.append("%3$s");
 			sql.append("%4$s");
-			sql.append("DATEPART(week, reports.engagementDate) AS week,");
-			sql.append("COUNT(reportPeople.personId) AS nrEngagementsAttended");
+			sql.append("DATEPART(week, reports.\"engagementDate\") AS week,");
+			sql.append("COUNT(\"reportPeople\".\"personId\") AS nrEngagementsAttended");
 
 			sql.append(" FROM ");
 			sql.append("positions,");
 			sql.append("%5$s");
 			sql.append("reports,");
-			sql.append("reportPeople,");
+			sql.append("\"reportPeople\",");
 			sql.append("organizations");
 
-			sql.append(" WHERE positions.currentPersonId = reportPeople.personId");
+			sql.append(" WHERE positions.\"currentPersonId\" = \"reportPeople\".personId");
 			sql.append(" %6$s");
-			sql.append(" AND reportPeople.reportId = reports.id");
-			sql.append(" AND reports.advisorOrganizationId = organizations.id");
+			sql.append(" AND \"reportPeople\".\"reportId\" = reports.id");
+			sql.append(" AND reports.\"advisorOrganizationId\" = organizations.id");
 			sql.append(" AND positions.type = :positionAdvisor");
 			sql.append(" AND reports.state IN ( :reportReleased, :reportPending, :reportDraft )");
-			sql.append(" AND reports.engagementDate BETWEEN :startDate and :endDate");
+			sql.append(" AND reports.\"engagementDate\" BETWEEN :startDate and :endDate");
 			sql.append(" %11$s");
 
 			sql.append(" GROUP BY ");
 			sql.append("organizations.id,");
-			sql.append("organizations.shortName,");
+			sql.append("organizations.\"shortName\",");
 			sql.append("%7$s");
 			sql.append("%8$s");
-			sql.append("DATEPART(week, reports.engagementDate)");
+			sql.append("DATEPART(week, reports.\"engagementDate\")");
 		sql.append(") b");
 
 		sql.append(" ON ");
-		sql.append(" a.organizationId = b.organizationId");
+		sql.append(" a.\"organizationId\" = b.organizationId");
 		sql.append(" %9$s");
 		sql.append(" AND a.week = b.week");
 
@@ -495,15 +495,15 @@ public class ReportDao implements IAnetDao<Report> {
 		if (orgId > -1) {
 			String selectOrg = " AND organizations.id = " + orgId;
 			fmtArgs = new String[] {
-					"CASE WHEN a.personId IS NULL THEN b.personId ELSE a.personId END AS personId,",
+					"CASE WHEN a.\"personId\" IS NULL THEN b.\"personId\" ELSE a.\"personId\" END AS \"personId\",",
 					"CASE WHEN a.name IS NULL THEN b.name ELSE a.name END AS name,",
-					"people.id AS personId,",
+					"people.id AS \"personId\",",
 					"people.name AS name,",
 					"people,",
-					"AND positions.currentPersonId = people.id",
+					"AND positions.\"currentPersonId\" = people.id",
 					"people.id,",
 					"people.name,",
-					"AND a.personId = b.personId",
+					"AND a.\"personId\" = b.personId",
 					"name,",
 					selectOrg};
 		} else {
@@ -553,14 +553,14 @@ public class ReportDao implements IAnetDao<Report> {
 		sql.append("FROM reports WHERE ");
 		
 		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql.append("releasedAt >= :startDate and releasedAt <= :endDate "
-					+ "AND engagementDate > :engagementDateStart ");
+			sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" <= :endDate "
+					+ "AND \"engagementDate\" > :engagementDateStart ");
 			sqlArgs.put("startDate", start);
 			sqlArgs.put("endDate", end);
 			sqlArgs.put("engagementDateStart", getRollupEngagmentStart(start));
 		} else { 
-			sql.append("releasedAt  >= DateTime(:startDate) AND releasedAt <= DateTime(:endDate) " 
-					+ "AND engagementDate > DateTime(:engagementDateStart) ");
+			sql.append("\"releasedAt\"  >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) " 
+					+ "AND \"engagementDate\" > DateTime(:engagementDateStart) ");
 			sqlArgs.put("startDate", SqliteReportSearcher.sqlitePattern.print(start));
 			sqlArgs.put("endDate", SqliteReportSearcher.sqlitePattern.print(end));
 			sqlArgs.put("engagementDateStart", SqliteReportSearcher.sqlitePattern.print(getRollupEngagmentStart(start)));
