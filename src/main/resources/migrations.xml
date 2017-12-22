@@ -787,12 +787,29 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="add_reports_sensitive_information" author="gjvoosten">
+	<changeSet id="add_reports_sensitive_information" author="gjvoosten" dbms="mssql">
 		<createTable tableName="reportsSensitiveInformation">
 			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false" />
 			</column>
 			<column name="text" type="nvarchar(max)" />
+			<column name="reportId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<!-- a better way to do this would be to have a single migration using a modifySql
+	     tag: http://www.liquibase.org/documentation/modify_sql.html (but that would change the
+		 checksum, so we can't do it with an already-run migration) -->
+	<changeSet id="add_reports_sensitive_information_no_nvarchar" author="bwarfield" dbms="!mssql">
+		<createTable tableName="reportsSensitiveInformation">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="text" type="text" />
 			<column name="reportId" type="int">
 				<constraints nullable="false" />
 			</column>
