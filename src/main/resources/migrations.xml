@@ -627,8 +627,12 @@
 	</changeSet>
 
 	<changeSet id="32" author="hpitelka" >
-		<!-- this syntax works in MSSQL and SQLite, but not postgresql -->
-		<sql dbms="mssql,sqlite">
+		<!-- this syntax works in SQL Server and SQLite, but not postgresql. Since we already have
+		     to add a catch-up migration, restricting this to mssql only (which could cause problems
+			 for anybody with a long-running installation using sqlite, but that seems like an unlikely
+			 contingency).
+		-->
+		<sql dbms="mssql">
 			INSERT INTO adminSettings ([key], value) VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
 		</sql>
 	</changeSet>
@@ -813,17 +817,11 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="36" author="bwarfield" >
-		<preConditions onFail="MARK_RAN">
-			<not>
-				<dbms type="mssql" />
-				<dbms type="sqlite" />
-			</not>
-		</preConditions>
-		<comment>This is a repeat of migrations 32 and 35, with a postgresql-friendly syntax.</comment>
+	<changeSet id="36" author="bwarfield" dbms="!mssql">
+		<comment>This is a repeat of migrations 32 and 35, with a more generic syntax.</comment>
 		<sql>
 			INSERT INTO "adminSettings" ("key", "value") VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
-                        INSERT INTO "adminSettings" ("key", "value") VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
+			INSERT INTO "adminSettings" ("key", "value") VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
 		</sql>
 	</changeSet>
 
