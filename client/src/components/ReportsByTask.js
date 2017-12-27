@@ -66,7 +66,7 @@ export default class ReportsByTask extends Component {
           isLoading={this.state.isLoading}
         />
         <Fieldset
-          title={`Reports by Task ${focusDetails.titleSuffix}`}
+          title={`Reports by ${taskShortTitle} ${focusDetails.titleSuffix}`}
           id='cancelled-reports-details'
           action={!focusDetails.resetFnc
             ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
@@ -81,10 +81,12 @@ export default class ReportsByTask extends Component {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
+    const allTasks = `All ${dict.lookup('TASK_SHORT_NAME')}s`
+
     if (this.state.focusedTask) {
       titleSuffix = `for ${this.state.focusedTask.shortName}`
       resetFnc = 'goToTask'
-      resetButtonLabel = 'All tasks'
+      resetButtonLabel = allTasks
     }
     return {
       titleSuffix: titleSuffix,
@@ -108,10 +110,11 @@ export default class ReportsByTask extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+    const noTaskMessage = `No ${dict.lookup('TASK_SHORT_NAME')}`
     const noTask = {
       id: -1,
-      shortName: 'No Task',
-      longName: 'No Task'
+      shortName: noTaskMessage,
+      longName: noTaskMessage
     }
     Promise.all([chartQuery]).then(values => {
       let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.tasks.map(p => p.id)}})
