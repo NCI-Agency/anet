@@ -815,8 +815,8 @@
 	<changeSet id="renamePoams-to-Tasks" author="evdhoudt">
 		<!-- Tasks -->
 		<renameTable
-				newTableName="tasks"
-				oldTableName="poams" />
+			newTableName="tasks"
+			oldTableName="poams" />
 		<renameColumn
 			columnDataType="int"
 			oldColumnName="parentPoamId"
