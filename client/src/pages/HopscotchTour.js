@@ -271,7 +271,7 @@ let positionTour = (currentUser) => {
 			},
 			{
 				title: "Current assigned person",
-				content: "This section shows you who is currently assigned to this position. For billet positions, you'll see the NATO member in this position. For taskhil positions, you'll see the current Afghan principal in that position. You can click the \"Change assigned person\" button to quickly change who is in this position.",
+				content: "This section shows you who is currently assigned to this position. For billet positions, you'll see the NATO member in this position. For tashkil positions, you'll see the current Afghan principal in that position. You can click the \"Change assigned person\" button to quickly change who is in this position.",
 				target: '#assigned-advisor h2',
 				placement: 'top',
 			},

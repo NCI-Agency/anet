@@ -4,15 +4,10 @@ import mil.dds.anet.beans.Task.TaskStatus;
 
 public class TaskSearchQuery extends AbstractSearchQuery {
 
-	public enum TaskSearchSortBy { CREATED_AT, NAME, CATEGORY }
-
 	Integer responsibleOrgId;
 	Boolean includeChildrenOrgs;
 	String category;
 	TaskStatus status;
-
-	private TaskSearchSortBy sortBy;
-	private SortOrder sortOrder;
 
 	public Integer getResponsibleOrgId() {
 		return responsibleOrgId;
@@ -44,22 +39,6 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 
 	public void setStatus(TaskStatus status) {
 		this.status = status;
-	}
-
-	public TaskSearchSortBy getSortBy() {
-		return sortBy;
-	}
-
-	public void setSortBy(TaskSearchSortBy sortBy) {
-		this.sortBy = sortBy;
-	}
-
-	public SortOrder getSortOrder() {
-		return sortOrder;
-	}
-
-	public void setSortOrder(SortOrder sortOrder) {
-		this.sortOrder = sortOrder;
 	}
 
 	public static TaskSearchQuery withText(String text, int pageNum, int pageSize) {

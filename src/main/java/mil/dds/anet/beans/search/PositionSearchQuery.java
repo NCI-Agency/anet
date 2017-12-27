@@ -7,7 +7,7 @@ import mil.dds.anet.beans.Position.PositionType;
 
 public class PositionSearchQuery extends AbstractSearchQuery {
 
-	public enum PositionSearchSortBy { CREATED_AT, NAME, CODE }
+	public enum PositionSearchSortBy { NAME, CODE, CREATED_AT }
 
 	Boolean matchPersonName;
 	Integer organizationId;
@@ -17,8 +17,8 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 	Integer locationId;
 	PositionStatus status;
 	
-	private PositionSearchSortBy sortBy;
-	private SortOrder sortOrder;
+	PositionSearchSortBy sortBy;
+	SortOrder sortOrder;
 
 	public PositionSearchQuery() {
 		super();

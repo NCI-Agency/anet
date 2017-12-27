@@ -13,6 +13,7 @@ import Form from 'components/Form'
 import Messages from 'components/Messages'
 import AdvancedSearch from 'components/AdvancedSearch'
 
+import utils from 'utils'
 import API from 'api'
 import dict from 'dictionary'
 import GQL from 'graphqlapi'
@@ -43,8 +44,6 @@ const QUERY_STRINGS = {
 const SEARCH_CONFIG = {
 	reports : {
 		listName : 'reports: reportList',
-		sortBy: 'ENGAGEMENT_DATE',
-		sortOrder: 'DESC',
 		variableType: 'ReportSearchQuery',
 		fields : ReportCollection.GQL_REPORT_FIELDS
 	},
@@ -57,29 +56,21 @@ const SEARCH_CONFIG = {
 	},
 	positions : {
 		listName: 'positions: positionList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
 		variableType: 'PositionSearchQuery',
-		fields: 'id , name, type, organization { id, shortName}, person { id, name }'
+		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
 		variableType: 'TaskSearchQuery',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
 		fields: 'id, shortName, longName'
 	},
 	locations : {
 		listName: 'locations: locationList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
 		variableType: 'LocationSearchQuery',
 		fields : 'id, name, lat, lng'
 	},
 	organizations : {
 		listName: 'organizations: organizationList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
 		variableType: 'OrganizationSearchQuery',
 		fields: 'id, shortName, longName, identificationCode, type'
 	}
@@ -452,18 +443,24 @@ export default class Search extends Page {
 						<th>Name</th>
 						<th>Org</th>
 						<th>Current Occupant</th>
+						<th>Status</th>
 					</tr>
 				</thead>
 				<tbody>
-					{Position.map(this.state.results.positions.list, pos =>
-						<tr key={pos.id}>
-							<td>
-								<img src={pos.iconUrl()} alt={pos.type} height={20} className="person-icon" />
-								<LinkTo position={pos} >{pos.code} {pos.name}</LinkTo>
-							</td>
-							<td>{pos.organization && <LinkTo organization={pos.organization} />}</td>
-							<td>{pos.person && <LinkTo person={pos.person} />}</td>
-						</tr>
+					{Position.map(this.state.results.positions.list, pos => {
+						let nameComponents =  []
+						pos.name && nameComponents.push(pos.name)
+						pos.code && nameComponents.push(pos.code)
+						return <tr key={pos.id}>
+								<td>
+									<img src={pos.iconUrl()} alt={pos.type} height={20} className="person-icon" />
+									<LinkTo position={pos} >{nameComponents.join(' - ')}</LinkTo>
+								</td>
+								<td>{pos.organization && <LinkTo organization={pos.organization} />}</td>
+								<td>{pos.person && <LinkTo person={pos.person} />}</td>
+								<td>{utils.sentenceCase(pos.status)}</td>
+							</tr>
+						}
 					)}
 				</tbody>
 			</Table>
