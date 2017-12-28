@@ -9,6 +9,9 @@ import {Position} from 'models'
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
+import _isEmpty from 'lodash.isempty'
+
+const ACTIVE = 'ACTIVE'
 
 export default class Person extends Model {
 	static resourceName = 'Person'
@@ -21,7 +24,7 @@ export default class Person extends Model {
 
 	static schema = {
 		name: '',
-		status: 'ACTIVE',
+		status: ACTIVE,
 		country: '',
 		rank: '',
 		gender: 'MALE',
@@ -85,7 +88,11 @@ export default class Person extends Model {
 	}
 
 	hasAssignedPosition() {
-		return  typeof this.position !== 'undefined' && this.position !== {}
+		return !_isEmpty(this.position)
+	}
+
+	hasActivePosition() {
+		return this.hasAssignedPosition() && this.position.status === ACTIVE
 	}
 
 	//Checks if this user is a valid super user for a particular organization

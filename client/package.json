@@ -86,6 +86,7 @@
     "lodash.debounce": "4.0.8",
     "lodash.get": "4.4.2",
     "lodash.includes": "4.3.0",
+    "lodash.isempty": "^4.4.0",
     "lodash.isequal": "4.5.0",
     "lodash.last": "3.0.0",
     "lodash.mapvalues": "4.6.0",
