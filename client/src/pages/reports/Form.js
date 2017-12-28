@@ -148,7 +148,6 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const submitText = currentUser.hasAssignedPosition() ? 'Preview and submit' : 'Save draft'
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 
-
 		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
 		const supportEmailMessage = supportEmail ? `(at ${supportEmail})` : ''
 		const warningMessageNoPosition = `You do not have an active position and therefore cannot create a report, please contact the support team ${supportEmailMessage} and request them to set your position status to active`
