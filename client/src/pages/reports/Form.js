@@ -14,9 +14,12 @@ import PoamsSelector from 'components/PoamsSelector'
 import LinkTo from 'components/LinkTo'
 import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
+
 import moment from 'moment'
+import _isEmpty from 'lodash.isempty'
 
 import API from 'api'
+import dict from 'dictionary'
 import {Report, Person} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
@@ -49,6 +52,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 			showReportText: false,
 			isCancelled: (props.report.cancelledReason ? true : false),
 			errors: {},
+
+			showActivePositionWarning: false,
 
 			//State for auto-saving reports
 			reportChanged: false, //Flag to determine if we need to auto-save.
@@ -96,6 +101,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 
 	componentWillReceiveProps(nextProps) {
+		const { currentUser } = this.context
+
+		if (currentUser.hasAssignedPosition()) {
+			this.setState({showActivePositionWarning: !currentUser.hasActivePosition()})
+		}
+
 		let report = nextProps.report
 		if (report.cancelledReason) {
 			this.setState({isCancelled: true})
@@ -116,12 +127,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	render() {
 		const { currentUser } = this.context
-		let {report, onDelete} = this.props
+		const {report, onDelete} = this.props
 		const { edit } = this.props
-		let {recents, suggestionList, errors, isCancelled, showAutoSaveBanner} = this.state
+		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, showActivePositionWarning} = this.state
 
-		let hasErrors = Object.keys(errors).length > 0
-		let isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
+		const hasErrors = Object.keys(errors).length > 0 || showActivePositionWarning
+		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
 
 		const invalidInputWarningMessage = <HelpBlock><b>
 			<img src={WARNING_ICON} role="presentation" height="20px" />
@@ -135,11 +146,23 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		const submitText = currentUser.hasAssignedPosition() ? 'Preview and submit' : 'Save draft'
+		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 
+
+		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
+		const supportEmailMessage = supportEmail ? `(at ${supportEmail})` : ''
+		const warningMessageNoPosition = `You do not have an active position and therefore cannot create a report, please contact the support team ${supportEmailMessage} and request them to set your position status to active`
 		return <div className="report-form">
+
 			<Collapse in={showAutoSaveBanner}>
-				<div className="banner" style={{top:132, background: '#DFF0D8', color: '#3c763d'}}>
+				<div className="alert alert-success" style={alertStyle}>
 					Your report has been automatically saved
+				</div>
+			</Collapse>
+
+			<Collapse in={showActivePositionWarning}>
+				<div className="alert alert-danger" style={alertStyle}>
+					{warningMessageNoPosition}
 				</div>
 			</Collapse>
 
