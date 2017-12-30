@@ -152,7 +152,7 @@ public class ReportDao implements IAnetDao<Report> {
 		void insertReportPoams(@Bind("reportId") Integer reportId,
 				@BindBean List<Poam> poams);
 
-		@SqlBatch("INSERT INTO reportTags (\"reportId\", tagId) VALUES (:reportId, :id)")
+		@SqlBatch("INSERT INTO \"reportTags\" (\"reportId\", \"tagId\") VALUES (:reportId, :id)")
 		void insertReportTags(@Bind("reportId") Integer reportId,
 				@BindBean List<Tag> tags);
 	}
@@ -265,7 +265,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int addTagToReport(Tag t, Report r) {
-		return dbHandle.createStatement("/* addTagToReport */ INSERT INTO reportTags (\"reportId\", tagId) "
+		return dbHandle.createStatement("/* addTagToReport */ INSERT INTO \"reportTags\" (\"reportId\", \"tagId\") "
 				+ "VALUES (:reportId, :tagId)")
 			.bind("reportId", r.getId())
 			.bind("tagId", t.getId())
@@ -273,8 +273,8 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removeTagFromReport(Tag t, Report r) {
-		return dbHandle.createStatement("/* removeTagFromReport */ DELETE FROM reportTags "
-				+ "WHERE \"reportId\" = :reportId AND tagId = :tagId")
+		return dbHandle.createStatement("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
+				+ "WHERE \"reportId\" = :reportId AND \"tagId\" = :tagId")
 				.bind("reportId", r.getId())
 				.bind("tagId", t.getId())
 				.execute();
@@ -300,9 +300,9 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public List<Tag> getTagsForReport(int reportId) {
-		return dbHandle.createQuery("/* getTagsForReport */ SELECT * FROM reportTags "
-				+ "INNER JOIN tags ON reportTags.tagId = tags.id "
-				+ "WHERE reportTags.\"reportId\" = :reportId "
+		return dbHandle.createQuery("/* getTagsForReport */ SELECT * FROM \"reportTags\" "
+				+ "INNER JOIN tags ON \"reportTags\".\"tagId\" = tags.id "
+				+ "WHERE \"reportTags\".\"reportId\" = :reportId "
 				+ "ORDER BY tags.name")
 			.bind("reportId", reportId)
 			.map(new TagMapper())
@@ -327,7 +327,7 @@ public class ReportDao implements IAnetDao<Report> {
 		dbHandle.inTransaction(new TransactionCallback<Void>() {
 			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				// Delete tags
-				dbHandle.execute("/* deleteReport.tags */ DELETE FROM reportTags where \"reportId\" = ?", report.getId());
+				dbHandle.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportId\" = ?", report.getId());
 
 				//Delete poams
 				dbHandle.execute("/* deleteReport.poams */ DELETE FROM \"reportPoams\" where \"reportId\" = ?", report.getId());
