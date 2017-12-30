@@ -51,8 +51,10 @@ my $identifiers = qr/
   | reportId
   | reportPeople
   | reportPoams
+  | reportTags
   | savedSearches
   | shortName
+  | tagId
   | updatedAt
  )\b
  (?!") # this should allow us to skip field lists without missing anything else
