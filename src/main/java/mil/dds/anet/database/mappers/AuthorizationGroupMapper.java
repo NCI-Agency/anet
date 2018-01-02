@@ -21,12 +21,12 @@ public class AuthorizationGroupMapper implements ResultSetMapper<AuthorizationGr
 		a.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 		a.setUpdatedAt(new DateTime(rs.getTimestamp("updatedAt")));
 		a.setLoadLevel(LoadLevel.PROPERTIES);
-		
-		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
+
+		if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
 			ctx.setAttribute("totalCount", rs.getInt("totalCount"));
 		}
-		
+
 		return a;
 	}
-	
+
 }

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import org.junit.Test;
 
 import mil.dds.anet.beans.AuthorizationGroup;
-import mil.dds.anet.beans.Poam;
 import mil.dds.anet.beans.Position;
 
 public class AuthorizationGroupTest extends BeanTester<AuthorizationGroup> {
