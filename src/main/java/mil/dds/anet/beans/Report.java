@@ -191,8 +191,7 @@ public class Report extends AbstractAnetBean {
 		this.loadPrimaryAdvisor();
 		this.loadPrimaryPrincipal();
 		this.loadPoams();
-		// FIXME: fix the method first
-		//		this.loadAuthorizationGroups();
+		this.loadAuthorizationGroups();
 	}
 
 	@GraphQLFetcher("attendees")
@@ -474,14 +473,13 @@ public class Report extends AbstractAnetBean {
 		this.user = user;
 	}
 
-	// FIXME: fix the method, it now gives a NullPointer exception
-//	@GraphQLFetcher("authorizationGroups")
-//	public List<AuthorizationGroup> loadAuthorizationGroups() {
-//		if (authorizationGroups == null) {
-//			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(this);
-//		}
-//		return authorizationGroups;
-//	}
+	@GraphQLFetcher("authorizationGroups")
+	public List<AuthorizationGroup> loadAuthorizationGroups() {
+		if (authorizationGroups == null) {
+			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(this);
+		}
+		return authorizationGroups;
+	}
 
 	public void setAuthorizationGroups(List<AuthorizationGroup> authorizationGroups) {
 		this.authorizationGroups = authorizationGroups;
