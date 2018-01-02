@@ -1037,26 +1037,26 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(reportResult2).isNotEmpty();
 		final Report report2 = reportResult2.get();
 		report2.setUser(reina);
-		// reina is not authorized, so should not be able to see the sensitive information
-		assertThat(report2.loadReportSensitiveInformation()).isNull();
+		// reina is authorized, so should be able to see the sensitive information
+		assertThat(report2.loadReportSensitiveInformation()).isNotNull();
+		assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
 
-		final PersonSearchQuery rebeccaQuery = new PersonSearchQuery();
-		rebeccaQuery.setText("rebecca");
-		final PersonList searchResults3 = httpQuery("/api/people/search", admin).post(Entity.json(rebeccaQuery), PersonList.class);
+		final PersonSearchQuery elizabethQuery = new PersonSearchQuery();
+		elizabethQuery.setText("elizabeth");
+		final PersonList searchResults3 = httpQuery("/api/people/search", admin).post(Entity.json(elizabethQuery), PersonList.class);
 		assertThat(searchResults3.getTotalCount()).isGreaterThan(0);
-		final Optional<Person> reinaResult3 = searchResults3.getList().stream().filter(p -> p.getName().equals("BECCABON, Rebecca")).findFirst();
-		assertThat(reinaResult3).isNotEmpty();
-		final Person rebecca = reinaResult3.get();
+		final Optional<Person> elizabethResult3 = searchResults3.getList().stream().filter(p -> p.getName().equals("ELIZAWELL, Elizabeth")).findFirst();
+		assertThat(elizabethResult3).isNotEmpty();
+		final Person elizabeth = elizabethResult3.get();
 
-		final ReportList reportSearchResults3 = httpQuery("/api/reports/search", rebecca).post(Entity.json(reportQuery), ReportList.class);
+		final ReportList reportSearchResults3 = httpQuery("/api/reports/search", elizabeth).post(Entity.json(reportQuery), ReportList.class);
 		assertThat(reportSearchResults3.getTotalCount()).isGreaterThan(0);
 		final Optional<Report> reportResult3 = reportSearchResults3.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
 		assertThat(reportResult3).isNotEmpty();
 		final Report report3 = reportResult3.get();
-		report3.setUser(rebecca);
-		// rebecca is authorized, so should be able to see the sensitive information
-		assertThat(report.loadReportSensitiveInformation()).isNotNull();
-		assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
+		report3.setUser(elizabeth);
+		// elizabeth is not authorized, so should not be able to see the sensitive information
+		assertThat(report3.loadReportSensitiveInformation()).isNull();
 	}
 
 	private ReportSearchQuery setupQueryEngagementDayOfWeek() {
