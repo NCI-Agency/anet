@@ -54,6 +54,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			errors: {},
 
 			showActivePositionWarning: false,
+			disableOnSubmit: false,
 
 			//State for auto-saving reports
 			reportChanged: false, //Flag to determine if we need to auto-save.
@@ -487,6 +488,10 @@ export default class ReportForm extends ValidatableFormWrapper {
 			delete report.cancelledReason
 		}
 
+		if (disableSubmits) {
+			this.setState({disableOnSubmit: disableSubmits})
+		}
+
 		let url = `/api/reports/${edit ? 'update' : 'new'}?sendEditEmail=${disableSubmits}`
 		return API.send(url, report, {disableSubmits})
 	}
@@ -511,7 +516,10 @@ export default class ReportForm extends ValidatableFormWrapper {
 				})
 			})
 			.catch(response => {
-				this.setState({error: {message: response.message || response.error}})
+				this.setState({
+					error: {message: response.message || response.error},
+					disableOnSubmit: false
+				})
 				window.scrollTo(0, 0)
 			})
 	}
