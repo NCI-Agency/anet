@@ -49,11 +49,11 @@ public class SqliteReportSearcher implements IReportSearcher {
 		StringBuffer sql = new StringBuffer();
 		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS + "," + PersonDao.PERSON_FIELDS);
 		sql.append(" FROM reports ");
-		sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportId\" = reports.id ");
-		sql.append("LEFT JOIN tags ON \"reportTags\".\"tagId\" = tags.id ");
 		sql.append(", people ");
 		sql.append("WHERE reports.\"authorId\" = people.id ");
 		sql.append("AND reports.id IN ( SELECT reports.id FROM reports ");
+		sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportId\" = reports.id ");
+		sql.append("LEFT JOIN tags ON \"reportTags\".\"tagId\" = tags.id ");
 		
 		String commonTableExpression = null;
 		Map<String,Object> args = new HashMap<String,Object>();
@@ -70,7 +70,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 			whereClauses.add("(text LIKE '%' || :text || '%' OR "
 					+ "intent LIKE '%' || :text || '%' OR "
 					+ "\"keyOutcomes\" LIKE '%' || :text || '%' OR "
-					+ "\"nextSteps\" LIKE '%' || :text || '%'"
+					+ "\"nextSteps\" LIKE '%' || :text || '%' OR "
 					+ "tags.name LIKE '%' || :text || '%' OR "
 					+ "tags.description LIKE '%' || :text || '%'"
 					+ ")");
