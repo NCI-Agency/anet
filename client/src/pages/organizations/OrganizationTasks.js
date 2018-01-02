@@ -25,7 +25,7 @@ export default class OrganizationTasks extends Component {
 		let isAdminUser = currentUser && currentUser.isAdmin()
 		let taskShortName = dict.lookup('TASK_SHORT_NAME')
 
-		return <Fieldset id="tasks" title={taskShortName} action={
+		return <Fieldset id="tasks" title={`${taskShortName}s`} action={
 			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortName}</LinkTo>
 		}>
 			{this.pagination()}
