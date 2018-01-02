@@ -21,6 +21,7 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE tags;
 --DROP TABLE authorizationGroupPositions;
 --DROP TABLE authorizationGroups;
+--DROP TABLE reportAuthorizationGroups;
 --DROP TABLE DATABASECHANGELOG;
 --DROP TABLE DATABASECHANGELOGLOCK;
 
@@ -34,6 +35,7 @@ TRUNCATE TABLE reportTags;
 TRUNCATE TABLE comments;
 TRUNCATE TABLE savedSearches;
 TRUNCATE TABLE authorizationGroupPositions;
+TRUNCATE TABLE reportAuthorizationGroups;
 DELETE FROM positions;
 DELETE FROM poams WHERE parentPoamId IS NOT NULL;
 DELETE FROM poams WHERE parentPoamId IS NULL;
@@ -665,3 +667,18 @@ INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
   FROM authorizationGroups a, positions p
   WHERE a.name LIKE 'EF 2.2%'
   AND p.name LIKE 'EF 2.2%';
+
+-- Report authorization groups
+INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId)
+  SELECT DISTINCT rp.reportId, agp.authorizationGroupId
+  FROM reportPeople rp
+  JOIN people p ON p.id = rp.personId AND rp.isPrimary = 1
+  JOIN peoplePositions pp on pp.personId = p.id,
+  authorizationGroupPositions agp
+  WHERE pp.positionId = agp.positionId
+  AND NOT EXISTS (
+    SELECT *
+    FROM reportAuthorizationGroups rap
+    WHERE rap.reportId = rp.reportId
+    AND rap.authorizationGroupId = agp.authorizationGroupId
+  );
