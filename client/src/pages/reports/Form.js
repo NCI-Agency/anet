@@ -159,11 +159,11 @@ export default class ReportForm extends ValidatableFormWrapper {
 				</div>
 			</Collapse>
 
-			<Collapse in={showActivePositionWarning}>
+			{showActivePositionWarning &&
 				<div className="alert alert-danger" style={alertStyle}>
 					{warningMessageNoPosition}
 				</div>
-			</Collapse>
+			}
 
 			<ValidatableForm formFor={report} horizontal onSubmit={this.onSubmit} onChange={this.onChange}
 				onDelete={onDelete} deleteText="Delete this report"
@@ -488,7 +488,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		}
 
 		let url = `/api/reports/${edit ? 'update' : 'new'}?sendEditEmail=${disableSubmits}`
-		return API.send(url, report, {disableSubmits: disableSubmits})
+		return API.send(url, report, {disableSubmits})
 	}
 
 	@autobind
