@@ -31,6 +31,14 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		this.description = Utils.trimStringReturnNull(description);
 	}
 
+	@GraphQLFetcher("positions")
+	public List<Position> loadPositions() {
+		if (positions == null) {
+			positions = AnetObjectEngine.getInstance().getAuthorizationGroupDao().getPositionsForAuthorizationGroup(this);
+		}
+		return positions;
+	}
+
 	@GraphQLIgnore
 	public List<Position> getPositions() {
 		return positions;

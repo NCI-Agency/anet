@@ -16,7 +16,6 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
@@ -124,7 +123,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public List<Position> getPositionsForAuthorizationGroup(AuthorizationGroup a) {
-		return dbHandle.createQuery("/* getPositionsForAuthorizationGroup */ SELECT * FROM positions, authorizationGroupPositions "
+		return dbHandle.createQuery("/* getPositionsForAuthorizationGroup */ SELECT " + PositionDao.POSITIONS_FIELDS + " FROM positions, authorizationGroupPositions "
 				+ "WHERE authorizationGroupPositions.authorizationGroupId = :authorizationGroupId "
 				+ "AND authorizationGroupPositions.positionId = positions.id")
 				.bind("authorizationGroupId", a.getId())

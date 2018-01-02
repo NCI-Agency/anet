@@ -10,7 +10,7 @@ import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
-import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
@@ -19,6 +19,7 @@ import mil.dds.anet.beans.lists.AbstractAnetBeanList;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 
 @RegisterMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
@@ -120,7 +121,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	/**
 	 * A user is allowed to access a report's sensitive information if either of the following holds true:
 	 * • the user is the author of the report;
-	 * • the user holds an authorized position in the advisorOrg of the report.
+	 * • the user holds an authorized position for the report.
 	 *
 	 * @param user the user executing the request
 	 * @param report the report
@@ -141,22 +142,19 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 
 		// Check authorization
 		final Position userPosition = user.loadPosition();
-		if (userPosition == null || !userPosition.getAuthorized()) {
-			// User has no position or is not authorized
-			return false;
-		}
-		// Check the organization for which the user is authorized
-		final Organization userOrg = userPosition.loadOrganization();
-		final Organization advisorOrg = report.loadAdvisorOrg();
-		if (userOrg == null || advisorOrg == null) {
-			// No organization
-			return false;
-		}
-		final Integer userOrgId = DaoUtils.getId(userOrg);
-		final Integer advisorOrgId = DaoUtils.getId(advisorOrg);
-		if (userOrgId != null && userOrgId.equals(advisorOrgId)) {
-			// User holds an authorized position in the advisorOrg of the report
-			return true;
+		final List<AuthorizationGroup> authorizationGroups = report.loadAuthorizationGroups();
+		if (userPosition != null && authorizationGroups != null) {
+			for (final AuthorizationGroup authorizationGroup : authorizationGroups) {
+				final List<Position> positions = authorizationGroup.loadPositions();
+				if (positions != null) {
+					for (final Position position : positions) {
+						if (Utils.idEqual(position, userPosition)) {
+							// User holds an authorized position for the report
+							return true;
+						}
+					}
+				}
+			}
 		}
 
 		return false;
