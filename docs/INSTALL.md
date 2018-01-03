@@ -117,6 +117,7 @@ ANET is configured primarily through the `anet.yml` file.  This file follows the
 	- **password**: Your password to your SMTP server.
 	- **startTLS**: Set to true if your SMTP server requires or provides TLS (Transport Level Security) encryption.
 	- **disabled**: Set to true to disable sending email completely; most useful in development context.
+	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
 - **database**: The configuration for your database. ANET supports either sqlite for development, or Microsoft SQL Server for production.  Additonal Instructions can be found here instructions here: http://www.dropwizard.io/1.0.6/docs/manual/jdbi.html for avaiable configuration options for the database connection. 

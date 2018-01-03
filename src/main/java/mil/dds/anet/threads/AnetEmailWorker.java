@@ -63,6 +63,7 @@ public class AnetEmailWorker implements Runnable {
 	private Configuration freemarkerConfig;
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
+	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
 	
 	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) { 
@@ -83,7 +84,9 @@ public class AnetEmailWorker implements Runnable {
 		props.put("mail.smtp.host", smtpConfig.getHostname());
 		props.put("mail.smtp.port", smtpConfig.getPort().toString());
 		auth = null;
-		
+
+		this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
+
 		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) { 
 			props.put("mail.smtp.auth", "true");
 			auth = new javax.mail.Authenticator() {
@@ -121,24 +124,30 @@ public class AnetEmailWorker implements Runnable {
 				.list();
 		
 		//Send the emails!
-		List<Integer> sentEmails = new LinkedList<Integer>();
+		List<Integer> processedEmails = new LinkedList<Integer>();
 		for (AnetEmail email : emails) { 
-			try {
-				if (disabled) {
-					logger.info("Disabled, not sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
-				} else {
-					logger.info("Sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
-					sendEmail(email);
+			if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(DateTime.now().minusHours(nbOfHoursForStaleEmails))) {
+				logger.info("Purging stale email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+				processedEmails.add(email.getId());
+			}
+			else {
+				try {
+					if (disabled) {
+						logger.info("Disabled, not sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+					} else {
+						logger.info("Sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+						sendEmail(email);
+					}
+					processedEmails.add(email.getId());
+				} catch (Exception e) {
+					logger.error("Error sending email", e);
 				}
-				sentEmails.add(email.getId());
-			} catch (Exception e) { 
-				logger.error("Error sending email", e);
 			}
 		}
 		
 		//Update the database.
-		if (sentEmails.size() > 0) {
-			String emailIds = Joiner.on(", ").join(sentEmails);
+		if (processedEmails.size() > 0) {
+			String emailIds = Joiner.on(", ").join(processedEmails);
 			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM pendingEmails WHERE id IN (" + emailIds + ")").execute();
 		}
 	}

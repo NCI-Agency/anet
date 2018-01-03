@@ -21,6 +21,7 @@ smtp:
 #  password:
 #  startTls: true
 #  disabled: false
+  nbOfHoursForStaleEmails: 72
 
 # The email address that all automated emails should come from. 
 emailFromAddr: "Anet-Mail <anet-mail@m068.nato.int>"
