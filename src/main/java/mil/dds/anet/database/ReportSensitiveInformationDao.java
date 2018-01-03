@@ -56,7 +56,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		rsi.setCreatedAt(DateTime.now());
 		rsi.setUpdatedAt(DateTime.now());
 		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* insertReportsSensitiveInformation */ INSERT INTO " + tableName
+				"/* insertReportsSensitiveInformation */ INSERT INTO \"" + tableName + "\" "
 					+ " (text, \"reportId\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:text, :reportId, :createdAt, :updatedAt)")
 				.bind("text", rsi.getText())
@@ -80,7 +80,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		}
 		// Do not allow the \"reportId\" to be updated!
 		final int numRows = dbHandle.createStatement(
-				"/* updateReportsSensitiveInformation */ UPDATE " + tableName
+				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
 					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bind("id", rsi.getId())
 				.bind("text", rsi.getText())
@@ -102,7 +102,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		}
 		final Query<ReportSensitiveInformation> query = dbHandle.createQuery(
 				"/* getReportSensitiveInformationByReportId */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
-					+ " FROM " + tableName
+					+ " FROM \"" + tableName + "\""
 					+ " WHERE \"reportId\" = :reportId")
 			.bind("reportId", report.getId())
 			.map(new ReportSensitiveInformationMapper());

@@ -105,7 +105,7 @@ public class OrganizationDao implements IAnetDao<Organization> {
 		org.setUpdatedAt(DateTime.now());
 		int numRows = dbHandle.createStatement("/* updateOrg */ UPDATE organizations "
 				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, \"identificationCode\" = :identificationCode, type = :type, "
-				+ "\"updatedAt\" = :updatedAt, parentOrgid = :parentOrgId where id = :id")
+				+ "\"updatedAt\" = :updatedAt, \"parentOrgId\" = :parentOrgId where id = :id")
 				.bindFromProperties(org)
 				.bind("type", DaoUtils.getEnumId(org.getType()))
 				.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))
