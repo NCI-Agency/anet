@@ -7,7 +7,7 @@ This document covers the steps required to deploy ANET to a server environment.
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
 	- 1x Windows Application Server (300GB HDD, 64 GB RAM, 8x CPU Cores)
-	- 1x Microsoft SQL Server (2014 or greater) Database Server. 
+	- 1x Microsoft SQL Server (2012 or greater) Database Server. 
 - **Software**: Software requirements: 
 	- Java JRE 1.8 installed on the Application Server
 	- Administration Privileges to run processes on restricted ports (80/443)
