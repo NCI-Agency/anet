@@ -178,7 +178,6 @@ public class AnetConfiguration extends Configuration {
 		public void setNbOfHoursForStaleEmails(Integer hours) {
 			this.nbOfHoursForStaleEmails = hours;
 		}
-
 	}
 
 

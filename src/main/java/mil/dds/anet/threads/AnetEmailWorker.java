@@ -84,7 +84,6 @@ public class AnetEmailWorker implements Runnable {
 		props.put("mail.smtp.host", smtpConfig.getHostname());
 		props.put("mail.smtp.port", smtpConfig.getPort().toString());
 		auth = null;
-
 		this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
 
 		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) { 
