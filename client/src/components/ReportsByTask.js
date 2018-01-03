@@ -45,15 +45,15 @@ export default class ReportsByTask extends Component {
 
   render() {
     const focusDetails = this.getFocusDetails()
-    const taskShortTitle = dict.lookup('TASK_SHORT_NAME')
+    const taskShortLabel = dict.lookup('TASK').shortLabel
     return (
       <div>
-        <p className="help-text">{`Number of published reports since ${this.referenceDateLongStr}, grouped by ${taskShortTitle}`}</p>
+        <p className="help-text">{`Number of published reports since ${this.referenceDateLongStr}, grouped by ${taskShortLabel}`}</p>
         <p className="chart-description">
           {`Displays the number of published reports which have been released
             since ${this.referenceDateLongStr}. The reports are grouped by
-            ${taskShortTitle}. In order to see the list of published reports for a ${taskShortTitle},
-            click on the bar corresponding to the ${taskShortTitle}.`}
+            ${taskShortLabel}. In order to see the list of published reports for a ${taskShortLabel},
+            click on the bar corresponding to the ${taskShortLabel}.`}
         </p>
         <BarChartWithLoader
           chartId={chartByTaskId}
@@ -66,7 +66,7 @@ export default class ReportsByTask extends Component {
           isLoading={this.state.isLoading}
         />
         <Fieldset
-          title={`Reports by ${taskShortTitle} ${focusDetails.titleSuffix}`}
+          title={`Reports by ${taskShortLabel} ${focusDetails.titleSuffix}`}
           id='cancelled-reports-details'
           action={!focusDetails.resetFnc
             ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
@@ -81,7 +81,7 @@ export default class ReportsByTask extends Component {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
-    const allTasks = `All ${dict.lookup('TASK_SHORT_NAME')}s`
+    const allTasks = `All ${dict.lookup('TASK').shortLabel}s`
 
     if (this.state.focusedTask) {
       titleSuffix = `for ${this.state.focusedTask.shortName}`
@@ -110,7 +110,7 @@ export default class ReportsByTask extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
-    const noTaskMessage = `No ${dict.lookup('TASK_SHORT_NAME')}`
+    const noTaskMessage = `No ${dict.lookup('TASK').shortLabel}`
     const noTask = {
       id: -1,
       shortName: noTaskMessage,

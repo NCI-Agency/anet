@@ -92,15 +92,15 @@ export default class AdvancedSearch extends Component {
 			}
 		}
 
-		let taskShortName = dict.lookup('TASK_SHORT_NAME')
-		filters.Reports.filters[taskShortName] =
+		let taskShortLabel = dict.lookup('TASK').shortLabel
+		filters.Reports.filters[taskShortLabel] =
 			<AutocompleteFilter
 				queryKey="taskId"
 				objectType={Task}
 				fields={Task.autocompleteQuery}
 				template={Task.autocompleteTemplate}
 				valueKey="shortName"
-				placeholder={`Filter reports by ${taskShortName}...`}
+				placeholder={`Filter reports by ${taskShortLabel}...`}
 			/>
 
 
@@ -178,7 +178,7 @@ export default class AdvancedSearch extends Component {
 		filters.Locations = {filters: {}}
 
 		//Task filters
-		filters[taskShortName + 's'] = {
+		filters[taskShortLabel + 's'] = {
 			filters: {
 				Organization: <OrganizationFilter
 					queryKey="responsibleOrgId"

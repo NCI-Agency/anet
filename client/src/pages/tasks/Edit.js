@@ -53,7 +53,7 @@ export default class TaskEdit extends Page {
 
 		return (
 			<div>
-				<Breadcrumbs items={[[`${dict.lookup('TASK_SHORT_NAME')} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
+				<Breadcrumbs items={[[`${dict.lookup('TASK').shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
 
 				<Messages error={this.state.error} success={this.state.success} />
 

@@ -51,7 +51,7 @@ class Nav extends Component {
 				<AnchorLink scrollTo="info">Info</AnchorLink>
 				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
 				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="tasks">{dict.lookup('TASK_SHORT_NAME')}s</AnchorLink>
+				<AnchorLink scrollTo="tasks">{dict.lookup('TASK').shortLabel}s</AnchorLink>
 				<AnchorLink scrollTo="reports">Reports</AnchorLink>
 			</SubNav>
 		)

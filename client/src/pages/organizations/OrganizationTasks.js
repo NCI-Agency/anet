@@ -23,10 +23,10 @@ export default class OrganizationTasks extends Component {
 
 		let tasks = this.props.tasks.list || []
 		let isAdminUser = currentUser && currentUser.isAdmin()
-		let taskShortName = dict.lookup('TASK_SHORT_NAME')
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
-		return <Fieldset id="tasks" title={`${taskShortName}s`} action={
-			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortName}</LinkTo>
+		return <Fieldset id="tasks" title={`${taskShortLabel}s`} action={
+			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortLabel}</LinkTo>
 		}>
 			{this.pagination()}
 			<Table>
@@ -47,7 +47,7 @@ export default class OrganizationTasks extends Component {
 				</tbody>
 			</Table>
 
-			{tasks.length === 0 && <em>This organization doesn't have any {taskShortName}s</em>}
+			{tasks.length === 0 && <em>This organization doesn't have any {taskShortLabel}s</em>}
 		</Fieldset>
 	}
 

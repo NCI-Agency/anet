@@ -42,7 +42,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 	render() {
 		const {task, edit} = this.props
 		const {currentUser} = this.context.app.state
-		const taskShortTitle = dict.lookup('TASK_SHORT_NAME')
+		const taskShortLabel = dict.lookup('TASK').shortLabel
 		const taskProjectedCompletion = dict.lookup('TASK_PROJECTED_COMPLETION')
 		const taskPlannedCompletion = dict.lookup('TASK_PLANNED_COMPLETION')
 		const taskCustomField = dict.lookup('TASK_CUSTOM_FIELD')
@@ -63,16 +63,16 @@ export default class TaskForm extends ValidatableFormWrapper {
 					formFor={task}
 					onChange={this.onChange}
 					onSubmit={this.onSubmit}
-					submitText={`Save ${taskShortTitle}`}
+					submitText={`Save ${taskShortLabel}`}
 					horizontal>
 
 					<Fieldset title={edit ?
-						`Edit ${taskShortTitle} ${task.shortName}`
+						`Edit ${taskShortLabel} ${task.shortName}`
 						:
-						`Create a new ${taskShortTitle}`
+						`Create a new ${taskShortLabel}`
 					}>
-						<RequiredField id="shortName" label={`${taskShortTitle} number`} />
-						<RequiredField id="longName" label={`${taskShortTitle} description`} />
+						<RequiredField id="shortName" label={`${taskShortLabel} number`} />
+						<RequiredField id="longName" label={`${taskShortLabel} description`} />
 
 						<RequiredField id="status" >
 							<ButtonToggleGroup>
@@ -83,7 +83,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 
 						<Form.Field id="responsibleOrg" label="Responsible organization">
 							<Autocomplete valueKey="shortName"
-								placeholder={`Select a responsible organization for this ${taskShortTitle}`}
+								placeholder={`Select a responsible organization for this ${taskShortLabel}`}
 								url="/api/organizations/search"
 								queryParams={orgSearchQuery}
 							/>

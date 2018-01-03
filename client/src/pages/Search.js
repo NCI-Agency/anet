@@ -220,7 +220,7 @@ export default class Search extends Page {
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
 		let queryType = this.state.queryType || query.type || 'everything'
 
-		let taskShortTitle = dict.lookup('TASK_SHORT_NAME')
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
 		if (typeof queryString === 'object') {
 			queryString = queryString[Object.keys(query)[1]]
@@ -266,7 +266,7 @@ export default class Search extends Page {
 							</NavItem>
 
 							<NavItem eventKey="tasks" disabled={!numTasks}>
-								<img src={TASKS_ICON} role="presentation" /> {taskShortTitle}s
+								<img src={TASKS_ICON} role="presentation" /> {taskShortLabel}s
 								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
 
@@ -317,7 +317,7 @@ export default class Search extends Page {
 				}
 
 				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
-					<Fieldset title={taskShortTitle + 's'}>
+					<Fieldset title={taskShortLabel + 's'}>
 						{this.renderTasks()}
 					</Fieldset>
 				}

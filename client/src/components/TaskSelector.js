@@ -29,16 +29,16 @@ export default class TasksSelector extends Component {
 	render() {
 		let {tasks, shortcuts, validationState, optional} = this.props
 
-		let taskLong = dict.lookup('TASK_LONG_NAME')
-		let taskShort = dict.lookup("TASK_SHORT_NAME")
+		let taskLongLabel = dict.lookup('TASK').longLabel
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
-		return <Fieldset title={taskLong} action={optional && "(Optional)"} className="tasks-selector">
-			<Form.Field id="tasks" label={taskShort} validationState={validationState} >
+		return <Fieldset title={taskLongLabel} action={optional && "(Optional)"} className="tasks-selector">
+			<Form.Field id="tasks" label={taskShortLabel} validationState={validationState} >
 				<Autocomplete
 					objectType={Task}
 					fields={Task.autocompleteQuery}
 					queryParams={{status: 'ACTIVE'}}
-					placeholder={`Start typing to search for ${taskShort}...`}
+					placeholder={`Start typing to search for ${taskShortLabel}...`}
 					template={Task.autocompleteTemplate}
 					onChange={this.addTask}
 					onErrorChange={this.props.onErrorChange}
@@ -46,7 +46,7 @@ export default class TasksSelector extends Component {
 
 				{validationState && <HelpBlock>
 					<img src={WARNING_ICON} role="presentation" height="20px" />
-					{taskShort} not found in Database
+					{taskShortLabel} not found in Database
 				</HelpBlock>}
 
 				<Table hover striped>
@@ -69,8 +69,8 @@ export default class TasksSelector extends Component {
 				</Table>
 
 				{tasks.length === 0 && <p style={{textAlign: 'center'}}><em>
-					No {taskShort} selected
-					{this.props.optional && ' (this is fine if no ' + taskShort + 's were discussed)'}
+					No {taskShortLabel} selected
+					{this.props.optional && ' (this is fine if no ' + taskShortLabel + 's were discussed)'}
 					.
 				</em></p>}
 
@@ -81,9 +81,9 @@ export default class TasksSelector extends Component {
 
 	renderShortcuts() {
 		let shortcuts = this.props.shortcuts || []
-		let taskShortName = dict.lookup("TASK_SHORT_NAME")
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 		return <Form.Field.ExtraCol className="shortcut-list">
-			<h5>Recent {taskShortName}</h5>
+			<h5>Recent {taskShortLabel}</h5>
 			{shortcuts.map(task =>
 				<Button key={task.id} bsStyle="link" onClick={this.addTask.bind(this, task)}>Add "{task.shortName} {task.longName.substr(0,80)}{task.longName.length > 80 ? '...' : ''}"</Button>
 			)}

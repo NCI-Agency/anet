@@ -10,7 +10,7 @@ export default class Task extends Model {
 
 	static resourceName = 'Task'
 	static displayName() {
-		return dict.lookup('TASK_SHORT_NAME')
+		return dict.lookup('TASK').shortLabel
 	}
 
 	static listName = 'taskList'

@@ -152,8 +152,9 @@ dictionary:
   ADMINISTRATOR_POSITION_TYPE_TITLE: ANET Administrator
   PRINCIPAL_ORG_NAME: Afghan Government Organization
   ADVISOR_ORG_NAME: Advisor Organization
-  TASK_LONG_NAME: Plan of Action and Milestones / Pillars
-  TASK_SHORT_NAME: Task
+  TASK:
+    shortLabel: Task
+    longLabel: Tasks and Milestones
   TASK_PROJECTED_COMPLETION: 'Fill in the projected completion date'
   TASK_PLANNED_COMPLETION: 'Fill in the planned completion date'
   TASK_CUSTOM_ENUM_LABEL: 'Project status'

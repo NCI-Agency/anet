@@ -73,7 +73,7 @@ export default class TaskShow extends Page {
 		let {task, reports} = this.state
 		// Admins can edit tasks, or super users if this task is assigned to their org.
 		let currentUser = this.context.currentUser
-		let taskShortName = dict.lookup("TASK_SHORT_NAME")
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
 		const customField = dict.lookup("TASK_CUSTOM_FIELD")
 		const customEnumLabel = dict.lookup("TASK_CUSTOM_ENUM_LABEL")
@@ -82,13 +82,13 @@ export default class TaskShow extends Page {
 
 		return (
 			<div>
-				<Breadcrumbs items={[[`${taskShortName} ${task.shortName}`, Task.pathFor(task)]]} />
+				<Breadcrumbs items={[[`${taskShortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
 				<Form static formFor={task} horizontal>
-					<Fieldset title={`${taskShortName} ${task.shortName}`} action={canEdit && <LinkTo task={task} edit button="primary">Edit</LinkTo>}>
-						<Form.Field id="shortName" label={`${taskShortName} number`} />
-						<Form.Field id="longName" label={`${taskShortName} description`} />
+					<Fieldset title={`${taskShortLabel} ${task.shortName}`} action={canEdit && <LinkTo task={task} edit button="primary">Edit</LinkTo>}>
+						<Form.Field id="shortName" label={`${taskShortLabel} number`} />
+						<Form.Field id="longName" label={`${taskShortLabel} description`} />
 						<Form.Field id="status" />
 						{task.responsibleOrg && task.responsibleOrg.id && this.renderOrg()}
 						<Form.Field id="customFieldEnum" label={`${customEnumLabel}`} />
@@ -98,7 +98,7 @@ export default class TaskShow extends Page {
 					</Fieldset>
 				</Form>
 
-				<Fieldset title={`Reports for this ${taskShortName}`}>
+				<Fieldset title={`Reports for this ${taskShortLabel}`}>
 					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
 				</Fieldset>
 			</div>
