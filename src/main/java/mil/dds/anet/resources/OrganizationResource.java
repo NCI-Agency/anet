@@ -19,9 +19,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.annotation.Timed;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
@@ -47,6 +48,8 @@ import mil.dds.anet.utils.Utils;
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class OrganizationResource implements IGraphQLResource {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationResource.class);
 
 	private OrganizationDao dao;
 	private AnetObjectEngine engine;
@@ -114,7 +117,6 @@ public class OrganizationResource implements IGraphQLResource {
 				engine.getApprovalStepDao().insertAtEnd(step);
 			}
 		}
-		
 		AnetAuditLogger.log("Organization {} created by {}", org, user);
 		return created; 
 	}
@@ -154,12 +156,14 @@ public class OrganizationResource implements IGraphQLResource {
 			Organization existing = dao.getById(org.getId());
 			
 			if (org.getPoams() != null) {
+				LOGGER.debug("Editing POAMS for {}", org);
 				Utils.addRemoveElementsById(existing.loadPoams(), org.getPoams(), 
 						newPoam -> engine.getPoamDao().setResponsibleOrgForPoam(newPoam, existing), 
 						oldPoamId -> engine.getPoamDao().setResponsibleOrgForPoam(Poam.createWithId(oldPoamId), null));
 			}
 			
 			if (org.getApprovalSteps() != null) {
+				LOGGER.debug("Editing approval steps for {}", org);
 				for (ApprovalStep step : org.getApprovalSteps()) {
 					validateApprovalStep(step);
 					step.setAdvisorOrganizationId(org.getId());
@@ -219,12 +223,13 @@ public class OrganizationResource implements IGraphQLResource {
 	private WebApplicationException handleSqlException(UnableToExecuteStatementException e) {
 		// FIXME: Ugly way to handle the unique index on identificationCode
 		final Throwable cause = e.getCause();
-		if (cause != null && cause instanceof SQLServerException) {
+		if (cause != null) {
 			final String message = cause.getMessage();
-			if (message != null && message.contains(" duplicate ")) {
+			if (message != null && (message.contains(" duplicate ") || message.contains(" UNIQUE constraint "))) {
 				return new WebApplicationException("Duplicate identification code", Status.CONFLICT);
 			}
 		}
+		LOGGER.error("Unexpected SQL exception raised", e);
 		return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 	}
 

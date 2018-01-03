@@ -42,7 +42,7 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.0.2'
 	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1'
 
-	compile 'org.xerial:sqlite-jdbc:3.14.2.1' //If using SQLite
+	compile 'org.xerial:sqlite-jdbc:3.20.1' //If using SQLite
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
 
 	compile 'javax.mail:mail:1.4.7'
@@ -100,7 +100,7 @@ if (dbDriver == "sqlserver") {
 	run.environment("ANET_DB_URL", "jdbc:postgresql://${dbLoc}/${dbName}")
 } else if (dbDriver == "sqlite") {
 	run.environment("ANET_DB_DRIVER", "org.sqlite.JDBC")
-	run.environment("ANET_DB_URL", "jdbc:sqlite:development.db")
+	run.environment("ANET_DB_URL", "jdbc:sqlite:development.db?foreign_keys=on")
 	run.environment("ANET_DB_DATE_STRING_FORMAT", "yyyy-MM-dd hh:mm:ss.SSS Z")
 	run.environment("ANET_DB_DATE_CLASS", "text")
 } else {

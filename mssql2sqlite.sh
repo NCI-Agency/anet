@@ -13,6 +13,9 @@ function dtg_mac {
 	echo "${a}${b}${c}"
 }
 
+# Start by turning on foreign keys for this connection
+echo "PRAGMA foreign_keys = ON;"
+
 while read input
 do
 	# First, handle special cases cheaply

@@ -31,6 +31,7 @@ TRUNCATE TABLE reportPeople;
 TRUNCATE TABLE reportTags;
 TRUNCATE TABLE comments;
 TRUNCATE TABLE savedSearches;
+TRUNCATE TABLE reportsSensitiveInformation;
 DELETE FROM positions;
 DELETE FROM poams WHERE parentPoamId IS NOT NULL;
 DELETE FROM poams WHERE parentPoamId IS NULL;
