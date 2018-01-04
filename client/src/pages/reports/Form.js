@@ -43,6 +43,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 				persons: [],
 				locations: [],
 				poams: [],
+				authorizationGroups: [],
 			},
 			tagList: [],
 			suggestionList: [],
@@ -71,6 +72,9 @@ export default class ReportForm extends ValidatableFormWrapper {
 			poamList(f:recents, maxResults:6) {
 				list { id, shortName, longName }
 			}
+			authorizationGroupList(f:recents, maxResults:6) {
+				list { id, name, description }
+			}
 			tagList(f:getAll) {
 				list { id, name, description }
 			}
@@ -80,6 +84,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 					locations: data.locationList.list,
 					persons: data.personList.list,
 					poams: data.poamList.list,
+					authorizationGroups: data.authorizationGroupList.list,
 				},
 				tagList: data.tagList.list,
 				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),

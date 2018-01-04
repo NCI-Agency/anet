@@ -16,6 +16,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
@@ -136,6 +137,33 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	public AuthorizationGroupList search(AuthorizationGroupSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getAuthorizationGroupSearcher().runSearch(query, dbHandle);
+	}
+
+	public List<AuthorizationGroup> getRecentAuthorizationGroups(Person author, int maxResults) {
+		final String sql;
+		if (DaoUtils.isMsSql(dbHandle)) {
+			sql = "/* getRecentAuthorizationGroups */ SELECT authorizationGroups.* FROM authorizationGroups WHERE authorizationGroups.id IN ("
+					+ "SELECT TOP(:maxResults) reportAuthorizationGroups.authorizationGroupId "
+					+ "FROM reports JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
+					+ "WHERE authorId = :authorId "
+					+ "GROUP BY authorizationGroupId "
+					+ "ORDER BY MAX(reports.createdAt) DESC"
+				+ ")";
+		} else {
+			sql =  "/* getRecentAuthorizationGroups */ SELECT authorizationGroups.* FROM authorizationGroups WHERE authorizationGroups.id IN ("
+					+ "SELECT reportAuthorizationGroups.authorizationGroupId "
+					+ "FROM reports JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
+					+ "WHERE authorId = :authorId "
+					+ "GROUP BY authorizationGroupId "
+					+ "ORDER BY MAX(reports.createdAt) DESC "
+					+ "LIMIT :maxResults"
+				+ ")";
+		}
+		return dbHandle.createQuery(sql)
+				.bind("authorId", author.getId())
+				.bind("maxResults", maxResults)
+				.map(new AuthorizationGroupMapper())
+				.list();
 	}
 
 }

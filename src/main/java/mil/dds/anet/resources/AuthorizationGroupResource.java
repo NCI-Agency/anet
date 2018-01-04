@@ -108,4 +108,16 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 		return AuthorizationGroupList.class;
 	}
 
+	/**
+	 * Returns the most recent authorization groups that this user used in reports.
+	 * @param maxResults maximum number of results to return, defaults to 3
+	 */
+	@GET
+	@GraphQLFetcher
+	@Path("/recents")
+	public AuthorizationGroupList recents(@Auth Person user,
+			@DefaultValue("3") @QueryParam("maxResults") int maxResults) {
+		return new AuthorizationGroupList(dao.getRecentAuthorizationGroups(user, maxResults));
+	}
+
 }
