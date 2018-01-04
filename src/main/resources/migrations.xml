@@ -812,61 +812,64 @@
 		</addColumn>
 	</changeSet>
 
-    <changeSet id="add_authorization_groups" author="maradragan">
-        <createTable tableName="authorizationGroups">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false" />
-            </column>
-            <column name="name" type="nvarchar(100)">
-                <constraints nullable="false" />
-            </column>
-            <column name="description" type="nvarchar(512)" />
-            <column name="createdAt" type="datetime" />
-            <column name="updatedAt" type="datetime" />
-        </createTable>
-    </changeSet>
+	<changeSet id="add_authorization_groups" author="maradragan">
+		<createTable tableName="authorizationGroups">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="nvarchar(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="nvarchar(512)" />
+			<column name="status" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
 
-    <changeSet id="add_authorization_group_positions" author="maradragan">
-        <createTable tableName="authorizationGroupPositions">
-            <column name="authorizationGroupId" type="int">
-                <constraints nullable="false" />
-            </column>
-            <column name="positionId" type="int">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-    </changeSet>
+	<changeSet id="add_authorization_group_positions" author="maradragan">
+		<createTable tableName="authorizationGroupPositions">
+			<column name="authorizationGroupId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="positionId" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
 
-    <changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="mssql">
-        <addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
-        <addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
-            constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
-            referencedColumnNames="id" referencedTableName="authorizationGroups" />
-        <addForeignKeyConstraint baseColumnNames="positionId" baseTableName="authorizationGroupPositions"
-            constraintName="fk_authorizationGroupPositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
-            referencedColumnNames="id" referencedTableName="positions" />
-    </changeSet>
+	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="mssql">
+		<addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
+		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
+			constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="authorizationGroups" />
+		<addForeignKeyConstraint baseColumnNames="positionId" baseTableName="authorizationGroupPositions"
+			constraintName="fk_authorizationGroupPositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="positions" />
+	</changeSet>
 
-    <changeSet id="add_report_authorization_groups" author="maradragan">
-        <createTable tableName="reportAuthorizationGroups">
-            <column name="reportId" type="int">
-                <constraints nullable="false" />
-            </column>
-            <column name="authorizationGroupId" type="int">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-    </changeSet>
+	<changeSet id="add_report_authorization_groups" author="maradragan">
+		<createTable tableName="reportAuthorizationGroups">
+			<column name="reportId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="authorizationGroupId" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
 
-    <changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="mssql">
-        <addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
-        <addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
-            constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
-            referencedColumnNames="id" referencedTableName="reports" />
-        <addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="reportAuthorizationGroups"
-            constraintName="fk_reportAuthorizationGroups_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
-            referencedColumnNames="id" referencedTableName="authorizationGroups" />
-    </changeSet>
+	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="mssql">
+		<addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
+		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
+			constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="reports" />
+		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="reportAuthorizationGroups"
+			constraintName="fk_reportAuthorizationGroups_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="authorizationGroups" />
+	</changeSet>
 
 	<changeSet id="add_authorizationGroups_fulltext_index" author="gjvoosten" dbms="mssql" runInTransaction="false">
 		<sql>
