@@ -90,6 +90,7 @@ export default class ReportShow extends Page {
 
 				tags { id, name, description }
 				reportSensitiveInformation { id, text }
+				authorizationGroups { id, name, description }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -276,6 +277,31 @@ export default class ReportShow extends Page {
 					{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
 						<Fieldset title="Sensitive information">
 							<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
+							{(report.authorizationGroups && report.authorizationGroups.length > 0 &&
+								<div>
+									<h5>Authorized groups:</h5>
+									<Table>
+										<thead>
+											<tr>
+												<th>Name</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											{report.authorizationGroups.map(ag => {
+												return (
+													<tr key={ag.id}>
+														<td>{ag.name}</td>
+														<td>{ag.description}</td>
+													</tr>
+												)}
+											)}
+										</tbody>
+									</Table>
+								</div>
+							) || (
+								<h5>No groups are authorized!</h5>
+							)}
 						</Fieldset>
 					}
 
