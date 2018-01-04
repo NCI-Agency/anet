@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {Button, DropdownButton, MenuItem, Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import _isequal from 'lodash.isequal'
+import _isequal from 'lodash/isEqual'
 import dict from 'dictionary'
 
 import ButtonToggleGroup from 'components/ButtonToggleGroup'

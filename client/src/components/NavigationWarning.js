@@ -1,7 +1,7 @@
 import {Component} from 'react'
-import _isEqual from 'lodash.isequal'
-import _last from 'lodash.last'
-import _get from 'lodash.get'
+import _isEqual from 'lodash/isEqual'
+import _last from 'lodash/last'
+import _get from 'lodash/get'
 import autobind from 'autobind-decorator'
 import {withRouter} from 'react-router'
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Checkbox from 'components/Checkbox'
-import _uniqueId from 'lodash.uniqueid'
+import _uniqueId from 'lodash/uniqueId'
 
 const _advisorStats = (columnGroups, statistics) => {
     let stats = []
