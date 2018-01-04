@@ -31,6 +31,7 @@ smtp:
   password: ${ANET_SMTP_PASSWORD}
   startTls: true
   disabled: true
+  nbOfHoursForStaleEmails: 72
 
 # The email address that all automated emails should come from. 
 # ex: "ANET <anet@example.com>"
