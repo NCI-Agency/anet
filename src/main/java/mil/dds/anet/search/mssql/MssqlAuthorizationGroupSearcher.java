@@ -17,6 +17,7 @@ import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery.AuthorizationGroupSearchSortBy;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.search.IAuthorizationGroupSearcher;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearcher {
@@ -47,6 +48,11 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 			whereClauses.add("c_authorizationGroups.rank IS NOT NULL");
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			sqlArgs.put("freetextQuery", text);
+		}
+
+		if (query.getStatus() != null) {
+			whereClauses.add("authorizationGroups.status = :status");
+			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
 		final AuthorizationGroupList result = new AuthorizationGroupList();

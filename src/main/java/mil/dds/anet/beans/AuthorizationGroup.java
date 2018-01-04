@@ -11,9 +11,12 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class AuthorizationGroup extends AbstractAnetBean {
 
+	public static enum AuthorizationGroupStatus { ACTIVE, INACTIVE }
+
 	private String name;
 	private String description;
 	private List<Position> positions;
+	private AuthorizationGroupStatus status;
 
 	public String getName() {
 		return name;
@@ -48,6 +51,14 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		this.positions = positions;
 	}
 
+	public AuthorizationGroupStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(AuthorizationGroupStatus status) {
+		this.status = status;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
@@ -57,12 +68,13 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		return Objects.equals(a.getId(), id)
 				&& Objects.equals(a.getName(), name)
 				&& Objects.equals(a.getDescription(), description)
-				&& Objects.equals(a.getPositions(), positions);
+				&& Objects.equals(a.getPositions(), positions)
+				&& Objects.equals(a.getStatus(), status);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, description, positions);
+		return Objects.hash(id, name, description, positions, status);
 	}
 
 	@Override

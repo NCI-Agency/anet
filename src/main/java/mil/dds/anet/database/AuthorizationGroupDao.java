@@ -16,6 +16,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
@@ -144,17 +145,23 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getRecentAuthorizationGroups */ SELECT authorizationGroups.* FROM authorizationGroups WHERE authorizationGroups.id IN ("
 					+ "SELECT TOP(:maxResults) reportAuthorizationGroups.authorizationGroupId "
-					+ "FROM reports JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
-					+ "WHERE authorId = :authorId "
-					+ "GROUP BY authorizationGroupId "
+					+ "FROM reports "
+					+ "JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
+					+ "JOIN authorizationGroups ON authorizationGroups.id = reportAuthorizationGroups.authorizationGroupId "
+					+ "WHERE reports.authorId = :authorId "
+					+ "AND authorizationGroups.status = :activeStatus "
+					+ "GROUP BY reportAuthorizationGroups.authorizationGroupId "
 					+ "ORDER BY MAX(reports.createdAt) DESC"
 				+ ")";
 		} else {
 			sql =  "/* getRecentAuthorizationGroups */ SELECT authorizationGroups.* FROM authorizationGroups WHERE authorizationGroups.id IN ("
 					+ "SELECT reportAuthorizationGroups.authorizationGroupId "
-					+ "FROM reports JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
-					+ "WHERE authorId = :authorId "
-					+ "GROUP BY authorizationGroupId "
+					+ "FROM reports "
+					+ "JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
+					+ "JOIN authorizationGroups ON authorizationGroups.id = reportAuthorizationGroups.authorizationGroupId "
+					+ "WHERE reports.authorId = :authorId "
+					+ "AND authorizationGroups.status = :activeStatus "
+					+ "GROUP BY reportAuthorizationGroups.authorizationGroupId "
 					+ "ORDER BY MAX(reports.createdAt) DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
@@ -162,6 +169,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 		return dbHandle.createQuery(sql)
 				.bind("authorId", author.getId())
 				.bind("maxResults", maxResults)
+				.bind("activeStatus", DaoUtils.getEnumId(AuthorizationGroupStatus.ACTIVE))
 				.map(new AuthorizationGroupMapper())
 				.list();
 	}

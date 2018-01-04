@@ -1,11 +1,22 @@
 package mil.dds.anet.beans.search;
 
+import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
+
 public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 
 	public enum AuthorizationGroupSearchSortBy { CREATED_AT, NAME }
 
+	private AuthorizationGroupStatus status;
 	private AuthorizationGroupSearchSortBy sortBy;
 	private SortOrder sortOrder;
+
+	public AuthorizationGroupStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(AuthorizationGroupStatus status) {
+		this.status = status;
+	}
 
 	public AuthorizationGroupSearchSortBy getSortBy() {
 		return sortBy;
