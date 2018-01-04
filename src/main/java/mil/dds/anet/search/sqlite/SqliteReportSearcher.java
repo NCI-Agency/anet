@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response.Status;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.skife.jdbi.v2.Handle;
+import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
@@ -34,20 +35,33 @@ public class SqliteReportSearcher implements IReportSearcher {
 	public static final DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
 	private String dateComparisonFormat;
+	private String isoDowFormat;
+	private String isoDowComparison;
 	private DateTimeFormatter dateTimeFormatter;
 
-	public SqliteReportSearcher(String dateComparisonFormat, DateTimeFormatter dateTimeFormatter) {
+
+	public SqliteReportSearcher(String dateComparisonFormat, String isoDowFormat, DateTimeFormatter dateTimeFormatter) {
 		this.dateComparisonFormat = dateComparisonFormat;
+		this.isoDowFormat = isoDowFormat;
 		this.dateTimeFormatter = dateTimeFormatter;
+		this.isoDowComparison = "(" + this.isoDowFormat + ") = :%s";
 	}
 	
 	public SqliteReportSearcher() {
-		this("reports.\"%s\" %s DateTime(:%s)", sqlitePattern);
+		this(
+			"reports.\"%s\" %s DateTime(:%s)",
+			"strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1", 	// %w day of week 0-6 with Sunday==0
+			sqlitePattern);
 	}
 
 	public ReportList runSearch(ReportSearchQuery query, Handle dbHandle, Person user) { 
 		StringBuffer sql = new StringBuffer();
 		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS + "," + PersonDao.PERSON_FIELDS);
+		if (query.getIncludeEngagementDayOfWeek()) {
+			sql.append(", ");
+			sql.append(String.format(this.isoDowFormat, "engagementDate"));
+			sql.append(" as \"engagementDayOfWeek\" ");
+		}
 		sql.append(" FROM reports ");
 		sql.append(", people ");
 		sql.append("WHERE reports.\"authorId\" = people.id ");
@@ -81,8 +95,15 @@ public class SqliteReportSearcher implements IReportSearcher {
 		searchBuilder.addDateClause(query.getEngagementDateEnd(), Comparison.BEFORE, "engagementDate", "endDate");
 		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.AFTER, "createdAt", "startCreatedAt");
 		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.BEFORE	, "createdAt", "endCreatedAt");
+		searchBuilder.addDateClause(query.getUpdatedAtStart(), Comparison.AFTER, "updatedAt", "updatedAtStart");
+		searchBuilder.addDateClause(query.getUpdatedAtEnd(), Comparison.BEFORE, "updatedAt", "updatedAtEnd");
 		searchBuilder.addDateClause(query.getReleasedAtStart(), Comparison.AFTER, "releasedAt", "releasedAtStart");
 		searchBuilder.addDateClause(query.getReleasedAtEnd(), Comparison.BEFORE, "releasedAt", "releasedAtEnd");
+
+		if (query.getEngagementDayOfWeek() != null) {
+			whereClauses.add(String.format(this.isoDowComparison, "engagementDate", "engagementDayOfWeek"));
+			args.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
+		}
 
 		if (query.getAttendeeId() != null) { 
 			whereClauses.add("reports.id IN (SELECT \"reportId\" from \"reportPeople\" where \"personId\" = :attendeeId)");
@@ -232,17 +253,13 @@ public class SqliteReportSearcher implements IReportSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 		
-		List<Report> list =  dbHandle.createQuery(sql.toString())
+		Query<Report> dbQuery = dbHandle.createQuery(sql.toString())
 				.bindFromMap(args)
 				.bind("offset", query.getPageSize() * query.getPageNum())
 				.bind("limit", query.getPageSize())
-				.map(new ReportMapper())
-				.list();
-		ReportList reportList = new ReportList();
-		reportList.setList(list);
-		reportList.setPageSize(query.getPageSize());
-		reportList.setPageNum(query.getPageNum());
-		reportList.setTotalCount(list.size()); // Sqlite cannot do true total counts, so this is a crutch. 
+				.map(new ReportMapper());
+		ReportList reportList = ReportList.fromQuery(user, dbQuery, query.getPageNum(), query.getPageSize());
+		reportList.setTotalCount(reportList.getList().size());
 		return reportList;
 	}
 	

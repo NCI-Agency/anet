@@ -74,8 +74,15 @@ public class MssqlReportSearcher implements IReportSearcher {
 		searchBuilder.addDateClause(query.getEngagementDateEnd(), Comparison.BEFORE, "engagementDate", "endDate");
 		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.AFTER, "createdAt", "startCreatedAt");
 		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.BEFORE	, "createdAt", "endCreatedAt");
+		searchBuilder.addDateClause(query.getUpdatedAtStart(), Comparison.AFTER, "updatedAt", "updatedAtStart");
+		searchBuilder.addDateClause(query.getUpdatedAtEnd(), Comparison.BEFORE, "updatedAt", "updatedAtEnd");
 		searchBuilder.addDateClause(query.getReleasedAtStart(), Comparison.AFTER, "releasedAt", "releasedAtStart");
 		searchBuilder.addDateClause(query.getReleasedAtEnd(), Comparison.BEFORE, "releasedAt", "releasedAtEnd");
+
+		if (query.getEngagementDayOfWeek() != null) {
+			whereClauses.add("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
+			args.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
+		}
 
 		if (query.getAttendeeId() != null) { 
 			whereClauses.add("reports.id IN (SELECT reportId from reportPeople where personId = :attendeeId)");

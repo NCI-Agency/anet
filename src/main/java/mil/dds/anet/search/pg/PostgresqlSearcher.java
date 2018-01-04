@@ -12,7 +12,10 @@ import mil.dds.anet.search.sqlite.SqliteTagSearcher;
 public class PostgresqlSearcher extends Searcher {
 
 	public PostgresqlSearcher() {
-		super(new SqliteReportSearcher("reports.\"%s\" %s :%s", null), new SqlitePersonSearcher(), new SqliteOrganizationSearcher(),
-				new SqlitePositionSearcher(), new SqlitePoamSearcher(), new SqliteLocationSearcher(), new SqliteTagSearcher());
+		super(
+			new SqliteReportSearcher("reports.\"%s\" %s :%s", "EXTRACT(ISODOW FROM reports.\"%s\")", null),
+			new SqlitePersonSearcher(), new SqliteOrganizationSearcher(), new SqlitePositionSearcher(),
+			new SqlitePoamSearcher(), new SqliteLocationSearcher(), new SqliteTagSearcher()
+		);
 	}
 }
