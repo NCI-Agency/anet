@@ -42,7 +42,7 @@ test('Draft and submit a report', async t => {
         'on', 
         'Principal primary attendee checkbox should be checked'
     )
-    await assertElementText(t, $principalName, 'TOPFERNESS, Christopf')
+    await assertElementText(t, $principalName, 'TOPFERNESS, Christopf CIV')
     await assertElementText(t, $principalPosition, 'Planning Captain')
     await assertElementText(t, $principalOrg, 'MoD')
 
