@@ -16,4 +16,6 @@ public interface ISearcher {
 	
 	public ITagSearcher getTagSearcher();
 
+	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher();
+
 }

@@ -57,7 +57,6 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.beans.ApprovalAction;
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -172,10 +171,6 @@ public class GraphQLResource {
 		queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
 				.type(buildTypeFromBean("reportSensitiveInformation", ReportSensitiveInformation.class))
 				.name("reportSensitiveInformation")
-				.build());
-		queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
-				.type(buildTypeFromBean("authorizationGroup", AuthorizationGroup.class))
-				.name("authorizationGroup")
 				.build());
 
 		GraphQLObjectType queryType = queryTypeBuilder.build();

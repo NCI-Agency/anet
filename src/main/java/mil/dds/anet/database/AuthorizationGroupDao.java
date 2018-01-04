@@ -14,9 +14,11 @@ import org.skife.jdbi.v2.sqlobject.BindBean;
 import org.skife.jdbi.v2.sqlobject.SqlBatch;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
+import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -129,6 +131,11 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				.bind("authorizationGroupId", a.getId())
 				.map(new PositionMapper())
 				.list();
+	}
+
+	public AuthorizationGroupList search(AuthorizationGroupSearchQuery query) {
+		return AnetObjectEngine.getInstance().getSearcher()
+				.getAuthorizationGroupSearcher().runSearch(query, dbHandle);
 	}
 
 }
