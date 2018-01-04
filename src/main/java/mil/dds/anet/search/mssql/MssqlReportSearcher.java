@@ -21,6 +21,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.IReportSearcher;
@@ -189,27 +190,19 @@ public class MssqlReportSearcher implements IReportSearcher {
 		if (query.getAuthorPositionId() != null) {
 			// Search for reports authored by people serving in that position at the report's creation date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
-							+ "JOIN peoplePositions pp ON pp.personId = r.authorId "
-							+ "  AND pp.createdAt <= r.createdAt "
-							+ "LEFT JOIN peoplePositions maxPp ON maxPp.positionId = pp.positionId "
-							+ "  AND maxPp.createdAt > pp.createdAt "
-							+ "  AND maxPp.createdAt <= r.createdAt "
-							+ "WHERE pp.positionId = :authorPositionId "
-							+ "  AND maxPp.createdAt IS NULL )");
+				+ PositionDao.generateCurrentPositionFilter("r.\"authorId\"", "r.\"createdAt\"", "authorPositionId")
+				+ ")"
+			);
 			args.put("authorPositionId", query.getAuthorPositionId());
 		}
 
 		if (query.getAttendeePositionId() != null) {
 			// Search for reports attended by people serving in that position at the engagement date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
-							+ "JOIN reportPeople rp ON rp.reportId = r.id "
-							+ "JOIN peoplePositions pp ON pp.personId = rp.personId "
-							+ "  AND pp.createdAt <= r.engagementDate "
-							+ "LEFT JOIN peoplePositions maxPp ON maxPp.positionId = pp.positionId "
-							+ "  AND maxPp.createdAt > pp.createdAt "
-							+ "  AND maxPp.createdAt <= r.engagementDate "
-							+ "WHERE pp.positionId = :attendeePositionId "
-							+ "  AND maxPp.createdAt IS NULL )");
+				+ "JOIN \"reportPeople\" rp ON rp.\"reportId\" = r.id "
+				+ PositionDao.generateCurrentPositionFilter("rp.\"personId\"", "r.\"engagementDate\"", "attendeePositionId")
+				+ ")"
+			);
 			args.put("attendeePositionId", query.getAttendeePositionId());
 		}
 

@@ -22,6 +22,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.IReportSearcher;
@@ -109,7 +110,26 @@ public class SqliteReportSearcher implements IReportSearcher {
 			whereClauses.add("reports.id IN (SELECT \"reportId\" from \"reportPeople\" where \"personId\" = :attendeeId)");
 			args.put("attendeeId", query.getAttendeeId());
 		}
-		
+
+		if (query.getAuthorPositionId() != null) {
+			// Search for reports authored by people serving in that position at the report's creation date
+			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
+				+ PositionDao.generateCurrentPositionFilter("r.\"authorId\"", "r.\"createdAt\"", "authorPositionId")
+				+ ")"
+			);
+			args.put("authorPositionId", query.getAuthorPositionId());
+		}
+
+		if (query.getAttendeePositionId() != null) {
+			// Search for reports attended by people serving in that position at the engagement date
+			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
+				+ "JOIN \"reportPeople\" rp ON rp.\"reportId\" = r.id "
+				+ PositionDao.generateCurrentPositionFilter("rp.\"personId\"", "r.\"engagementDate\"", "attendeePositionId")
+				+ ")"
+			);
+			args.put("attendeePositionId", query.getAttendeePositionId());
+		}
+
 		if (query.getAtmosphere() != null) { 
 			whereClauses.add("reports.atmosphere = :atmosphere");
 			args.put("atmosphere", DaoUtils.getEnumId(query.getAtmosphere()));
