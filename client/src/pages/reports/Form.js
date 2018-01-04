@@ -8,6 +8,7 @@ import 'components/reactTags.css'
 import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import TextEditor from 'components/TextEditor'
+import AuthorizationGroupsSelector from 'components/AuthorizationGroupsSelector'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import PoamsSelector from 'components/PoamsSelector'
@@ -306,9 +307,17 @@ export default class ReportForm extends ValidatableFormWrapper {
 							<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
 
 							{(report.reportSensitiveInformation || !edit) &&
-								<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
-									value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
-									onChange={this.updateReportSensitiveInformation} />
+								<div>
+									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
+										value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
+										onChange={this.updateReportSensitiveInformation} />
+									<AuthorizationGroupsSelector
+										groups={report.authorizationGroups}
+										shortcuts={recents.authorizationGroups}
+										onChange={this.onChange}
+										onErrorChange={this.onAuthorizationGroupError}
+										validationState={errors.authorizationGroups} />
+								</div>
 							}
 						</div>
 					</Collapse>
@@ -426,6 +435,17 @@ export default class ReportForm extends ValidatableFormWrapper {
 		})
 
 		this.onChange()
+	}
+
+	@autobind
+	onAuthorizationGroupError(isError, message) {
+		let errors = this.state.errors
+		if (isError) {
+			errors.authorizationGroups = 'error'
+		} else {
+			delete errors.authorizationGroups
+		}
+		this.setState({errors})
 	}
 
 	@autobind
