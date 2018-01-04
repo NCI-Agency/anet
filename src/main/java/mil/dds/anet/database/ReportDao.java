@@ -324,11 +324,11 @@ public class ReportDao implements IAnetDao<Report> {
 			.list();
 	}
 
-	public List<AuthorizationGroup> getAuthorizationGroupsForReport(Report report) {
+	public List<AuthorizationGroup> getAuthorizationGroupsForReport(int reportId) {
 		return dbHandle.createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM authorizationGroups, reportAuthorizationGroups "
 				+ "WHERE reportAuthorizationGroups.reportId = :reportId "
 				+ "AND reportAuthorizationGroups.authorizationGroupId = authorizationGroups.id")
-				.bind("reportId", report.getId())
+				.bind("reportId", reportId)
 				.map(new AuthorizationGroupMapper())
 				.list();
 	}

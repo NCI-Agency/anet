@@ -475,8 +475,8 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLFetcher("authorizationGroups")
 	public List<AuthorizationGroup> loadAuthorizationGroups() {
-		if (authorizationGroups == null) {
-			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(this);
+		if (authorizationGroups == null && id != null) {
+			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(id);
 		}
 		return authorizationGroups;
 	}
