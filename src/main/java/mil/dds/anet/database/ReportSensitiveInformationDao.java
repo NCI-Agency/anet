@@ -10,16 +10,13 @@ import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
-import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.Utils;
 
 @RegisterMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
@@ -129,35 +126,28 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	 */
 	private boolean isAuthorized(Person user, Report report) {
 		final Integer userId = DaoUtils.getId(user);
-		if (userId == null || DaoUtils.getId(report) == null) {
-			// No user and no report
+		final Integer reportId = DaoUtils.getId(report);
+		if (userId == null || reportId == null) {
+			// No user or no report
 			return false;
 		}
 
-		final Integer authorId = DaoUtils.getId(report.getAuthor());
-		if (userId.equals(authorId)) {
-			// User is author of the report
-			return true;
-		}
-
-		// Check authorization
-		final Position userPosition = user.loadPosition();
-		final List<AuthorizationGroup> authorizationGroups = report.loadAuthorizationGroups();
-		if (userPosition != null && authorizationGroups != null) {
-			for (final AuthorizationGroup authorizationGroup : authorizationGroups) {
-				final List<Position> positions = authorizationGroup.loadPositions();
-				if (positions != null) {
-					for (final Position position : positions) {
-						if (Utils.idEqual(position, userPosition)) {
-							// User holds an authorized position for the report
-							return true;
-						}
-					}
-				}
-			}
-		}
-
-		return false;
+		// Check authorization in a single query
+		final Query<Map<String, Object>> query = dbHandle.createQuery(
+				"/* checkReportAuthorization */ SELECT r.id"
+					+ " FROM reports r"
+					+ " LEFT JOIN reportAuthorizationGroups rag ON rag.reportId = r.id"
+					+ " LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupId = rag.authorizationGroupId"
+					+ " LEFT JOIN positions p ON p.id = agp.positionId"
+					+ " WHERE r.id = :reportId"
+					+ " AND ("
+					+ "   (r.authorId = :userId)"
+					+ "   OR"
+					+ "   (p.currentPersonId = :userId)"
+					+ " )")
+			.bind("reportId", reportId)
+			.bind("userId", userId);
+		return (query.list().size() > 0);
 	}
 
 }
