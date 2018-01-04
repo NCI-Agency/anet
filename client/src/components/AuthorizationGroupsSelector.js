@@ -30,6 +30,7 @@ export default class AuthorizationGroupsSelector extends Component {
 			<Autocomplete
 				objectType={AuthorizationGroup}
 				fields={AuthorizationGroup.autocompleteQuery}
+				queryParams={{status: 'ACTIVE'}}
 				placeholder="Start typing to search for a group..."
 				template={AuthorizationGroup.autocompleteTemplate}
 				onChange={this.addAuthorizationGroup}
