@@ -132,7 +132,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const { edit } = this.props
 		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, showActivePositionWarning} = this.state
 
-		const hasErrors = Object.keys(errors).length > 0 || showActivePositionWarning
+		const hasErrors = Object.keys(errors).length > 0
 		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
 
 		const invalidInputWarningMessage = <HelpBlock><b>
@@ -145,13 +145,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 		</HelpBlock>
 
 		const {ValidatableForm, RequiredField} = this
-
-		const submitText = currentUser.hasAssignedPosition() ? 'Preview and submit' : 'Save draft'
+		const submitText = currentUser.hasActivePosition() ? 'Preview and submit' : 'Save draft'
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 
 		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
-		const supportEmailMessage = supportEmail ? `(at ${supportEmail})` : ''
-		const warningMessageNoPosition = `You do not have an active position and therefore cannot create a report, please contact the support team ${supportEmailMessage} and request them to set your position status to active`
+		const supportEmailMessage = supportEmail ? `(${supportEmail})` : ''
+		const warningMessageNoPosition = `You do not have an active position and cannot submit a report, please contact the support team ${supportEmailMessage} and request them to set your position status to active`
 		return <div className="report-form">
 
 			<Collapse in={showAutoSaveBanner}>
@@ -161,7 +160,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			</Collapse>
 
 			{showActivePositionWarning &&
-				<div className="alert alert-danger" style={alertStyle}>
+				<div className="alert alert-warning" style={alertStyle}>
 					{warningMessageNoPosition}
 				</div>
 			}
