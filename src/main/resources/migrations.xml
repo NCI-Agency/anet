@@ -868,4 +868,13 @@
             referencedColumnNames="id" referencedTableName="authorizationGroups" />
     </changeSet>
 
+	<changeSet id="add_authorizationGroups_fulltext_index" author="gjvoosten" dbms="mssql" runInTransaction="false">
+		<sql>
+			CREATE FULLTEXT INDEX ON authorizationGroups(name, description) KEY INDEX PK_AUTHORIZATIONGROUPS;
+		</sql>
+		<rollback>
+			DROP FULLTEXT INDEX ON authorizationGroups;
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
