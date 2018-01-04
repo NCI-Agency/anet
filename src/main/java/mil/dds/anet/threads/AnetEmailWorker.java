@@ -118,23 +118,23 @@ public class AnetEmailWorker implements Runnable {
 	
 	private void runInternal() {
 		//check the database for any emails we need to send. 
-		List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM pendingEmails ORDER BY createdAt ASC")
+		final List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM pendingEmails ORDER BY createdAt ASC")
 				.map(emailMapper)
 				.list();
 		
 		//Send the emails!
-		List<Integer> processedEmails = new LinkedList<Integer>();
-		for (AnetEmail email : emails) { 
+		final List<Integer> processedEmails = new LinkedList<Integer>();
+		for (final AnetEmail email : emails) {
 			if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(DateTime.now().minusHours(nbOfHoursForStaleEmails))) {
-				logger.info("Purging stale email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+				logger.info("Purging stale email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
 				processedEmails.add(email.getId());
 			}
 			else {
 				try {
 					if (disabled) {
-						logger.info("Disabled, not sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+						logger.info("Disabled, not sending email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
 					} else {
-						logger.info("Sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
+						logger.info("Sending email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
 						sendEmail(email);
 					}
 					processedEmails.add(email.getId());
@@ -145,8 +145,8 @@ public class AnetEmailWorker implements Runnable {
 		}
 		
 		//Update the database.
-		if (processedEmails.size() > 0) {
-			String emailIds = Joiner.on(", ").join(processedEmails);
+		if (!processedEmails.isEmpty()) {
+			final String emailIds = Joiner.on(", ").join(processedEmails);
 			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM pendingEmails WHERE id IN (" + emailIds + ")").execute();
 		}
 	}

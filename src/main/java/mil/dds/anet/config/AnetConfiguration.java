@@ -121,7 +121,7 @@ public class AnetConfiguration extends Configuration {
 		private String password;
 		private Boolean startTls = true;
 		private boolean disabled = false;
-		private Integer nbOfHoursForStaleEmails = null;
+		private Integer nbOfHoursForStaleEmails;
 		
 		public String getHostname() {
 			return hostname;
