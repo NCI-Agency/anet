@@ -880,4 +880,43 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="migrated_authorized_positions" author="gjvoosten" dbms="mssql">
+		<sql>
+			INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+				SELECT
+					CONCAT('Authorized positions for ', o.shortName),
+					CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']'),
+					0,
+					CURRENT_TIMESTAMP,
+					CURRENT_TIMESTAMP
+				FROM organizations o
+				WHERE EXISTS (
+					SELECT p.id
+					FROM positions p
+					WHERE p.organizationId = o.id
+					AND p.authorized = 1
+				)
+			;
+
+			INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+				SELECT DISTINCT ag.id, p.id
+				FROM authorizationGroups ag,
+				positions p
+				JOIN organizations o ON o.id = p.organizationId
+				WHERE ag.description = CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']')
+				AND p.authorized = 1
+			;
+
+			INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId)
+				SELECT DISTINCT r.id, ag.id
+				FROM reports r
+				JOIN organizations o ON o.id = r.advisorOrganizationId
+				JOIN reportsSensitiveInformation rsi ON rsi.reportId = r.id,
+				authorizationGroups ag
+				WHERE ag.description = CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']')
+			;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
 </databaseChangeLog>
