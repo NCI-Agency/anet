@@ -150,21 +150,23 @@ dictionary:
   ADVISOR_POSITION_TYPE_TITLE: NATO Advisor
   SUPER_USER_POSITION_TYPE_TITLE: ANET Super User
   ADMINISTRATOR_POSITION_TYPE_TITLE: ANET Administrator
-  PRINCIPAL_ORG_NAME: Afghan Government Organization
-  ADVISOR_ORG_NAME: Advisor Organization
   POAM_LONG_NAME: Plan of Action and Milestones / Pillars
   POAM_SHORT_NAME: PoAM
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
-  PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense
-  ADVISOR_ORG_PLACEHOLDER_LONGNAME: e.g. Force Sustainment
-  PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE: optional
-  ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE: the six character code
   SUPPORT_EMAIL_ADDR: support@example.com
-  field_labels:
-    ADVISOR_ORG_LABEL_LONGNAME: Description
-    PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE: Identification Code
-    PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
-    ADVISOR_ORG_LABEL_IDENTIFICATIONCODE: UIC
+  fields:
+    ADVISOR_ORG:
+      label_longname: Description
+      label_identificationcode: UIC
+      name: Advisor Organization
+      placeholder_identificationcode:  the six character code
+      placeholder_longname: e.g. Force Sustainment
+    PRINCIPAL_ORG:
+      label_longname: Official Organization Name
+      label_identificationcode: Identification Code
+      name: Afghan Government Organization
+      placeholder_identificationcode: optional
+      placeholder_longname: e.g. Afghan Ministry of Defense
   pinned_ORGs:
     - Key Leader Engagement
   non_reporting_ORGs:

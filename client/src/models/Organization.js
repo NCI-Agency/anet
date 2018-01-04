@@ -22,10 +22,12 @@ export default class Organization extends Model {
 	}
 
 	humanNameOfType() {
+		const dictFields = dict.lookup('fields')
+
 		if (this.type === 'PRINCIPAL_ORG') {
-			return dict.lookup('PRINCIPAL_ORG_NAME')
+			return dictFields ? dictFields.PRINCIPAL_ORG.name : ''
 		} else {
-			return dict.lookup('ADVISOR_ORG_NAME')
+			return dictFields ? dictFields.ADVISOR_ORG.name : ''
 		}
 	}
 

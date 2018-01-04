@@ -139,7 +139,7 @@ export default class AdvancedSearch extends Component {
 				"Organization type": <SelectSearchFilter
 					queryKey="type"
 					values={["ADVISOR_ORG", "PRINCIPAL_ORG"]}
-					labels={[dict.lookup('ADVISOR_ORG_NAME'), dict.lookup('PRINCIPAL_ORG_NAME')]}
+					labels={[dict.lookup('fields').ADVISOR_ORG.name, dict.lookup('fields').PRINCIPAL_ORG.name]}
 				  />,
 			}
 		}

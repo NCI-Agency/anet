@@ -44,15 +44,20 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		let isAdmin = currentUser && currentUser.isAdmin()
 		let isPrincipalOrg = (organization.type === "PRINCIPAL_ORG")
 		const {ValidatableForm, RequiredField} = this
+
+		const dictFields = dict.lookup('fields')
+		const ADVISOR_ORG = dictFields ? dictFields.ADVISOR_ORG : ''
+		const PRINCIPAL_ORG = dictFields ? dictFields.PRINCIPAL_ORG : ''
+
 		const [labelLongName, placeholderLongName, labelIdentificationCode, placeholderIdentificationCode] = isPrincipalOrg
-			? [dict.lookup('field_labels').PRINCIPAL_ORG_LABEL_LONGNAME,
-			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_LONGNAME'),
-			   dict.lookup('field_labels').PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE,
-			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
-			: [dict.lookup('field_labels').ADVISOR_ORG_LABEL_LONGNAME,
-			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_LONGNAME'),
-			   dict.lookup('field_labels').ADVISOR_ORG_LABEL_IDENTIFICATIONCODE,
-			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
+			? [PRINCIPAL_ORG.label_longname,
+			   PRINCIPAL_ORG.placeholder_longname,
+			   PRINCIPAL_ORG.label_identificationcode,
+			   PRINCIPAL_ORG.placeholder_identificationcode]
+			: [ADVISOR_ORG.label_longname,
+			   ADVISOR_ORG.placeholder_longname,
+			   ADVISOR_ORG.label_identificationcode,
+			   ADVISOR_ORG.placeholder_identificationcode]
 
 		const IdentificationCodeFieldWithLabel = DictionaryLabelField(labelIdentificationCode)(Form.Field)
 		const LongNameWithLabel = DictionaryLabelField(labelLongName)(Form.Field)
@@ -61,15 +66,15 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
 			submitText="Save organization"
-				   horizontal>
+			horizontal>
 
 			<Messages error={this.state.error} />
 
 			<Fieldset title={edit ? `Edit Organization ${organization.shortName}` : "Create a new Organization"}>
 				<Form.Field id="type">
 					<ButtonToggleGroup>
-						<Button id="advisorOrgButton" disabled={!isAdmin} value="ADVISOR_ORG">{dict.lookup('ADVISOR_ORG_NAME')}</Button>
-						<Button id="principalOrgButton" disabled={!isAdmin} value="PRINCIPAL_ORG">{dict.lookup('PRINCIPAL_ORG_NAME')}</Button>
+						<Button id="advisorOrgButton" disabled={!isAdmin} value="ADVISOR_ORG">{ADVISOR_ORG.name}</Button>
+						<Button id="principalOrgButton" disabled={!isAdmin} value="PRINCIPAL_ORG">{PRINCIPAL_ORG.name}</Button>
 					</ButtonToggleGroup>
 				</Form.Field>
 

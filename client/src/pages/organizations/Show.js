@@ -159,13 +159,18 @@ export default class OrganizationShow extends Page {
 		let currentUser = this.context.currentUser
 		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 		let isAdmin = currentUser && currentUser.isAdmin()
+		const isPrincipalOrg = org.type === "PRINCIPAL_ORG"
+
+		const dictFields = dict.lookup('fields')
+		const ADVISOR_ORG = dictFields ? dictFields.ADVISOR_ORG : ''
+		const PRINCIPAL_ORG = dictFields ? dictFields.PRINCIPAL_ORG : ''
 
 		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
-		let [labelLongName, labelIdentificationCode] = (org.type === "PRINCIPAL_ORG")
-			? [dict.lookup('PRINCIPAL_ORG_LABEL_LONGNAME'),
-			   dict.lookup('PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE')]
-			: [dict.lookup('ADVISOR_ORG_LABEL_LONGNAME'),
-			   dict.lookup('ADVISOR_ORG_LABEL_IDENTIFICATIONCODE')]
+		let [labelLongName, labelIdentificationCode] = isPrincipalOrg
+			? [PRINCIPAL_ORG.label_longname,
+				PRINCIPAL_ORG.label_identificationcode]
+			: [ADVISOR_ORG.label_longname,
+				ADVISOR_ORG.label_identificationcode]
 
 		return (
 			<div>
