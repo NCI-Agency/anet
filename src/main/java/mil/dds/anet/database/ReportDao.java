@@ -383,12 +383,12 @@ public class ReportDao implements IAnetDao<Report> {
 				
 				//Delete approvalActions
 				dbHandle.execute("/* deleteReport.actions */ DELETE FROM approvalActions where reportId = ?", report.getId());
-				
-				//Delete report
-				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where id = ?", report.getId());
-				
+
 				//Delete relation to authorization groups
 				dbHandle.execute("/* deleteReport.authorizationGroups */ DELETE FROM reportAuthorizationGroups where reportId = ?", report.getId());
+
+				//Delete report
+				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where id = ?", report.getId());
 
 				return null;
 			}
