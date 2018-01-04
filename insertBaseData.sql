@@ -647,10 +647,14 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
 
 -- Authorization groups
-INSERT INTO authorizationGroups (name, description, status) VALUES ('EF 1.1 positions', 'All positions related to EF 1.1', 0);
-INSERT INTO authorizationGroups (name, description, status) VALUES ('EF 2.1 positions', 'All positions related to EF 2.1', 0);
-INSERT INTO authorizationGroups (name, description, status) VALUES ('EF 2.2 positions', 'All positions related to EF 2.2', 0);
-INSERT INTO authorizationGroups (name, description, status) VALUES ('Inactive positions', 'Inactive positions', 1);
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('EF 1.1 positions', 'All positions related to EF 1.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('EF 2.1 positions', 'All positions related to EF 2.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('EF 2.2 positions', 'All positions related to EF 2.2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Authorization group positions
 INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
