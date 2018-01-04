@@ -1,6 +1,5 @@
 package mil.dds.anet.utils;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,9 +88,10 @@ public class DaoUtils {
 		if (id == null) { return null; } 
 		if (id instanceof Integer) { 
 			return (Integer) id;
-		} else if (id instanceof BigDecimal) { 
-			return ((BigDecimal) id).intValue();
-		} else { 
+		} else if (id instanceof Number) {
+			return ((Number) id).intValue();
+		} else {
+			LOGGER.error("Database returned an ID of type {} (not a Number or Integer)", id.getClass());
 			throw new WebApplicationException("Unexpected id type returned from database");
 		}
 	}
@@ -105,11 +105,12 @@ public class DaoUtils {
 	}
 
 	public static String buildPagedGetAllSql(DbType databaseType, String entityTag, String tableName, String fieldList) {
-		return buildPagedGetAllSql(databaseType, entityTag, tableName, fieldList, "\"createdAt\"");
+		return buildPagedGetAllSql(databaseType, entityTag, tableName, fieldList, null);
 	}
 
 	public static String buildPagedGetAllSql(DbType databaseType, String entityTag,
 			String tableName, String fieldList, String orderBy) {
+		if (orderBy == null) { orderBy = "\"createdAt\""; }
 		StringBuilder sb = new StringBuilder("/* getAll%s */ SELECT %s ");
 		switch (databaseType) {
 		case MSSQL:
@@ -130,4 +131,7 @@ public class DaoUtils {
 		return String.format(sb.toString(), entityTag, fieldList, tableName, orderBy);
 	}
 
+	public static String buildCountAllSql(String entityTag, String tableName) {
+		return String.format("/* countAll%s */ SELECT COUNT(1) from \"%s\"", entityTag, tableName);
+	}
 }

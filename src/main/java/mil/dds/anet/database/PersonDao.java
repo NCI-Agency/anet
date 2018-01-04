@@ -20,7 +20,7 @@ import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-public class PersonDao implements IAnetDao<Person> {
+public class PersonDao extends AnetBaseDao<Person> {
 
 	private static String[] fields = {"id","name","status","role",
 			"emailAddress","phoneNumber","rank","biography",
@@ -30,19 +30,14 @@ public class PersonDao implements IAnetDao<Person> {
 	private static String tableName = "people";
 	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 	
-	Handle dbHandle;
-	
 	public PersonDao(Handle h) { 
-		this.dbHandle = h;
+		super(h, "Person", tableName, PERSON_FIELDS, null);
 	}
 	
 	public PersonList getAll(int pageNum, int pageSize) {
-		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle), "Person", tableName, PERSON_FIELDS);
-		Query<Person> query = dbHandle.createQuery(sql)
-			.bind("limit", pageSize)
-			.bind("offset", pageSize * pageNum)
-			.map(new PersonMapper());
-		return PersonList.fromQuery(query, pageNum, pageSize);
+		Query<Person> query = getPagedQuery(pageNum, pageSize, new PersonMapper());
+		Long manualCount = getSqliteRowCount();
+		return PersonList.fromQuery(query, pageNum, pageSize, manualCount);
 	}
 
 	public Person getById(int id) { 

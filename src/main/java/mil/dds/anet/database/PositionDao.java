@@ -29,7 +29,7 @@ import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-public class PositionDao implements IAnetDao<Position> {
+public class PositionDao extends AnetBaseDao<Position> {
 
 	private static String[] fields = {"id", "name", "code", "createdAt", 
 			"updatedAt", "organizationId", "currentPersonId", "type", 
@@ -37,19 +37,14 @@ public class PositionDao implements IAnetDao<Position> {
 	private static String tableName = "positions";
 	public static String POSITIONS_FIELDS  = DaoUtils.buildFieldAliases(tableName, fields);
 	
-	Handle dbHandle;
-	
 	public PositionDao(Handle h) { 
-		this.dbHandle = h;
+		super(h, "positions", tableName, POSITIONS_FIELDS, null);
 	}
 	
 	public PositionList getAll(int pageNum, int pageSize) {
-		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle), "positions", tableName, POSITIONS_FIELDS);
-		Query<Position> query = dbHandle.createQuery(sql)
-			.bind("limit", pageSize)
-			.bind("offset", pageSize * pageNum)
-			.map(new PositionMapper());
-		return PositionList.fromQuery(query, pageNum, pageSize);
+		Query<Position> query = getPagedQuery(pageNum, pageSize, new PositionMapper());
+		Long manualRowCount = getSqliteRowCount();
+		return PositionList.fromQuery(query, pageNum, pageSize, manualRowCount);
 	}
 	
 	public Position insert(Position p) {

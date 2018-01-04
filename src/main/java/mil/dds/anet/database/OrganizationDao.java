@@ -22,26 +22,20 @@ import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class OrganizationDao implements IAnetDao<Organization> {
+public class OrganizationDao extends AnetBaseDao<Organization> {
 
 	private static String[] fields = {"id", "shortName", "longName", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgId"};
 	private static String tableName = "organizations";
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 	
-	Handle dbHandle;
-	String getAllSql;
-	
 	public OrganizationDao(Handle dbHandle) { 
-		this.dbHandle = dbHandle;
-		this.getAllSql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle), "Orgs", tableName, ORGANIZATION_FIELDS);
+		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
 	}
 	
 	public OrganizationList getAll(int pageNum, int pageSize) {
-		Query<Organization> query = dbHandle.createQuery(getAllSql)
-			.bind("limit", pageSize)
-			.bind("offset", pageSize * pageNum)
-			.map(new OrganizationMapper());
-		return OrganizationList.fromQuery(query, pageNum, pageSize);
+		Query<Organization> query = getPagedQuery(pageNum, pageSize, new OrganizationMapper());
+		Long manualRowCount = getSqliteRowCount();
+		return OrganizationList.fromQuery(query, pageNum, pageSize, manualRowCount);
 	}
 	
 	public Organization getById(int id) { 
