@@ -168,9 +168,9 @@ export default class OrganizationShow extends Page {
 		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
 		let [labelLongName, labelIdentificationCode] = isPrincipalOrg
 			? [PRINCIPAL_ORG.label_longname,
-				PRINCIPAL_ORG.label_identificationcode]
+			   PRINCIPAL_ORG.label_identificationcode]
 			: [ADVISOR_ORG.label_longname,
-				ADVISOR_ORG.label_identificationcode]
+			   ADVISOR_ORG.label_identificationcode]
 
 		return (
 			<div>
