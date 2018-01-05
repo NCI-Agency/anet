@@ -118,7 +118,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	/**
 	 * A user is allowed to access a report's sensitive information if either of the following holds true:
 	 * • the user is the author of the report;
-	 * • the user holds an authorized position for the report.
+	 * • the user is in an authorization group for the report.
 	 *
 	 * @param user the user executing the request
 	 * @param report the report

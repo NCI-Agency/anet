@@ -1002,7 +1002,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void testSensitiveInformationByAuthorizedPosition() {
+	public void testSensitiveInformationByAuthorizationGroup() {
 		final PersonSearchQuery erinQuery = new PersonSearchQuery();
 		erinQuery.setText("erin");
 		final PersonList erinSearchResults = httpQuery("/api/people/search", admin).post(Entity.json(erinQuery), PersonList.class);
@@ -1037,7 +1037,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(reportResult2).isNotEmpty();
 		final Report report2 = reportResult2.get();
 		report2.setUser(reina);
-		// reina is authorized, so should be able to see the sensitive information
+		// reina is in the authorization group, so should be able to see the sensitive information
 		assertThat(report2.loadReportSensitiveInformation()).isNotNull();
 		assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
 
@@ -1055,7 +1055,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(reportResult3).isNotEmpty();
 		final Report report3 = reportResult3.get();
 		report3.setUser(elizabeth);
-		// elizabeth is not authorized, so should not be able to see the sensitive information
+		// elizabeth is not in the authorization group, so should not be able to see the sensitive information
 		assertThat(report3.loadReportSensitiveInformation()).isNull();
 	}
 
