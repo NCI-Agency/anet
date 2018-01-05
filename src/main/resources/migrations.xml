@@ -919,4 +919,13 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
+	<changeSet id="drop_positions_authorized" author="gjvoosten">
+	    <!-- Some magic to make sure any auto-generated database constraints are dropped -->
+		<dropNotNullConstraint tableName="positions" columnName="authorized" columnDataType="boolean" />
+		<dropDefaultValue tableName="positions" columnName="authorized" columnDataType="boolean" />
+		<!-- Then drop the column itself -->
+		<dropColumn tableName="positions" columnName="authorized" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
 </databaseChangeLog>

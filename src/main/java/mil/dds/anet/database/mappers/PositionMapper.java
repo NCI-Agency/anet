@@ -40,7 +40,6 @@ public class PositionMapper implements ResultSetMapper<Position> {
 		p.setCode(rs.getString("positions_code"));
 		p.setType(MapperUtils.getEnumIdx(rs, "positions_type", PositionType.class));
 		p.setStatus(MapperUtils.getEnumIdx(rs, "positions_status", PositionStatus.class));
-		p.setAuthorized(rs.getBoolean("positions_authorized"));
 
 		Integer orgId = MapperUtils.getInteger(rs, "positions_organizationId");
 		if (orgId != null) { 
