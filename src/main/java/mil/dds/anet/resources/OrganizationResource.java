@@ -32,9 +32,9 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PoamList;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.graphql.GraphQLFetcher;
@@ -103,10 +103,10 @@ public class OrganizationResource implements IGraphQLResource {
 			throw handleSqlException(e);
 		}
 		
-		if (org.getPoams() != null) { 
-			//Assign all of these poams to this organization. 
-			for (Poam p : org.getPoams()) { 
-				engine.getPoamDao().setResponsibleOrgForPoam(p, created);
+		if (org.getTasks() != null) { 
+			//Assign all of these tasks to this organization. 
+			for (Task p : org.getTasks()) { 
+				engine.getTaskDao().setResponsibleOrgForTask(p, created);
 			}
 		}
 		if (org.getApprovalSteps() != null) { 
@@ -135,7 +135,7 @@ public class OrganizationResource implements IGraphQLResource {
 	/**
 	 * Primary endpoint to update all aspects of an Organization.
 	 * - Organization (shortName, longName, identificationCode)
-	 * - Poams
+	 * - Tasks
 	 * - Approvers
 	 */
 	@POST
@@ -155,14 +155,14 @@ public class OrganizationResource implements IGraphQLResource {
 					throw handleSqlException(e);
 				}
 
-				if (org.getPoams() != null || org.getApprovalSteps() != null) {
+				if (org.getTasks() != null || org.getApprovalSteps() != null) {
 					//Load the existing org, so we can check for differences.
 					Organization existing = dao.getById(org.getId());
 
-					if (org.getPoams() != null) {
-						Utils.addRemoveElementsById(existing.loadPoams(), org.getPoams(),
-								newPoam -> engine.getPoamDao().setResponsibleOrgForPoam(newPoam, existing),
-								oldPoamId -> engine.getPoamDao().setResponsibleOrgForPoam(Poam.createWithId(oldPoamId), null));
+					if (org.getTasks() != null) {
+						Utils.addRemoveElementsById(existing.loadTasks(), org.getTasks(),
+								newTask -> engine.getTaskDao().setResponsibleOrgForTask(newTask, existing),
+								oldTaskId -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithId(oldTaskId), null));
 					}
 
 					if (org.getApprovalSteps() != null) {
@@ -219,9 +219,9 @@ public class OrganizationResource implements IGraphQLResource {
 	
 	@GET
 	@Timed
-	@Path("/{id}/poams")
-	public PoamList getPoams(@PathParam("id") Integer orgId) { 
-		return new PoamList(AnetObjectEngine.getInstance().getPoamDao().getPoamsByOrganizationId(orgId));
+	@Path("/{id}/tasks")
+	public TaskList getTasks(@PathParam("id") Integer orgId) { 
+		return new TaskList(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
 	}
 
 	private WebApplicationException handleSqlException(UnableToExecuteStatementException e) {

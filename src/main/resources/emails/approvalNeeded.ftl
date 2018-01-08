@@ -118,12 +118,12 @@ Dear ${approvalStepName},
   <strong>Engagement date and location:</strong> ${(report.engagementDate.toString('dd MMM yyyy'))!} @ ${(report.loadLocation().name)!}
 </div>
 
-<#assign poams = report.loadPoams()>
-<#list poams as poam>
+<#assign tasks = report.loadTasks()>
+<#list tasks as task>
 <div class="row">
   <div class="col-xs-12">
-    <#-- <a href="${serverUrl}/poams/${poam.id}"> -->
-    <strong>PoAM:</strong> ${(poam.longName)!}
+    <#-- <a href="${serverUrl}/tasks/${task.id}"> -->
+    <strong>Task:</strong> ${(task.longName)!}
     <#-- </a> -->
   </div>
 </div>

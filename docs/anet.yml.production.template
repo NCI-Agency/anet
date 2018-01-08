@@ -144,8 +144,9 @@ dictionary:
   ADMINISTRATOR_POSITION_TYPE_TITLE: ANET Administrator
   PRINCIPAL_ORG_NAME: Afghan Government Organization
   ADVISOR_ORG_NAME: Advisor Organization
-  POAM_LONG_NAME: Plan of Action and Milestones / Pillars
-  POAM_SHORT_NAME: PoAM
+  TASK:
+    shortLabel: Task
+    longLabel: Tasks and Milestones
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
   PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
   PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense

@@ -3,13 +3,13 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE approvers;
 --DROP TABLE approvalActions;
 --DROP TABLE positionRelationships;
---DROP TABLE reportPoams;
+--DROP TABLE reportTasks;
 --DROP TABLE reportPeople;
 --DROP TABLE reportTags;
 --DROP TABLE peoplePositions;
 --DROP TABLE savedSearches;
 --DROP TABLE positions;
---DROP TABLE poams;
+--DROP TABLE tasks;
 --DROP TABLE comments;
 --DROP TABLE reports;
 --DROP TABLE people;
@@ -26,14 +26,14 @@ TRUNCATE TABLE peoplePositions;
 TRUNCATE TABLE approvers;
 TRUNCATE TABLE approvalActions;
 TRUNCATE TABLE positionRelationships;
-TRUNCATE TABLE reportPoams;
+TRUNCATE TABLE reportTasks;
 TRUNCATE TABLE reportPeople;
 TRUNCATE TABLE reportTags;
 TRUNCATE TABLE comments;
 TRUNCATE TABLE savedSearches;
 DELETE FROM positions;
-DELETE FROM poams WHERE parentPoamId IS NOT NULL;
-DELETE FROM poams WHERE parentPoamId IS NULL;
+DELETE FROM tasks WHERE parentTaskId IS NOT NULL;
+DELETE FROM tasks WHERE parentTaskId IS NULL;
 DELETE FROM reports;
 DELETE FROM people;
 DELETE FROM approvalSteps;
@@ -227,81 +227,81 @@ INSERT INTO approvers (approvalStepId, positionId) VALUES
 INSERT INTO approvers (approvalStepId, positionId) VALUES
 	((SELECT id from approvalSteps WHERE name='EF 2.2 Secondary Reviewers'), (SELECT id from positions where name = 'EF 2.2 Final Reviewer'));
 
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt)	VALUES ('EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId)
-	VALUES ('1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.1.A', 'Milestone the First in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.1.B', 'Milestone the Second in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.1.C', 'Milestone the Third in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)	VALUES ('EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId)
+	VALUES ('1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.1.A', 'Milestone the First in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.1.B', 'Milestone the Second in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.1.C', 'Milestone the Third in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
 
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1'), (SELECT id from organizations WHERE shortName='EF 1.2'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'), (SELECT id from organizations WHERE shortName='EF 1.2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
 
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1'), (SELECT id FROM organizations WHERE shortName='EF 1.3'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.3.B', 'Tracking your expenses', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('1.3.C', 'Knowing when you run out of money', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'), (SELECT id FROM organizations WHERE shortName='EF 1.3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.3.B', 'Tracking your expenses', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('1.3.C', 'Knowing when you run out of money', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
 
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, organizationId)
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, organizationId)
 	VALUES ('EF 2', 'Transparency, Accountability, O (TAO)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from organizations where shortName='EF 2'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('2.A', 'This is the first Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('2.B', 'This is the second Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('2.C', 'This is the third Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('2.D', 'Keep track of the petty cash drawer', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('2.A', 'This is the first Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('2.B', 'This is the second Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('2.C', 'This is the third Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('2.D', 'Keep track of the petty cash drawer', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
 
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 3', 'Rule of Law', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('3.a', 'Get some Lawyers to read a book', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('3.b', 'Get some Lawyers to wear a suit to court', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('3.c', 'Get some Lawyers to cross-examine witnesses in a non-hostile fashion', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 3', 'Rule of Law', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('3.a', 'Get some Lawyers to read a book', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('3.b', 'Get some Lawyers to wear a suit to court', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('3.c', 'Get some Lawyers to cross-examine witnesses in a non-hostile fashion', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
 
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 4', 'Force Gen (Training)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.a', 'Get a website for people to apply on', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.b', 'Hire People', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.b.1', 'Get an HR team', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.b.2', 'Review resumes for hiring', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.b.3', 'Invite people to come interview', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.b.4', 'Interview candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.b.5', 'Extend Job Offers to successful candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt, parentPoamId, organizationId)
-	VALUES ('4.c', 'Onboard new Employees', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from poams where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 5', 'Force Sustainment (Logistics)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('EF6', 'C2 Operations', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('EF7', 'Intelligence', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('EF8', 'Stratcom', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-N', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-S', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-E', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-W', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-C', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO poams (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 4', 'Force Gen (Training)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.a', 'Get a website for people to apply on', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.b', 'Hire People', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.b.1', 'Get an HR team', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.b.2', 'Review resumes for hiring', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.b.3', 'Invite people to come interview', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.b.4', 'Interview candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.b.5', 'Extend Job Offers to successful candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+	VALUES ('4.c', 'Onboard new Employees', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 5', 'Force Sustainment (Logistics)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF6', 'C2 Operations', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF7', 'Intelligence', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF8', 'Stratcom', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-N', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-S', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-E', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-W', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-C', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO locations (name, lat, lng, createdAt, updatedAt) VALUES('St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (name, lat, lng, createdAt, updatedAt) VALUES('Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -410,8 +410,8 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+roger@dds.mil'), (SELECT max(id) from reports), 0);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.A'), (SELECT max(id) from reports));
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.B'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.A'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.B'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, keyOutcomes, nextSteps, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select id from locations where name='Kabul Hospital'), 'Looked at Hospital usage of Drugs',
@@ -423,11 +423,11 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+steve@dds.mil'), (SELECT max(id) from reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.C'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.C'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, keyOutcomes, nextSteps, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select id from locations where name='Kabul Hospital'), 'discuss enagement of Doctors with Patients',
-	'Met with Nobody in this engagement and discussed no poams, what a waste of time',
+	'Met with Nobody in this engagement and discussed no tasks, what a waste of time',
 	'None',
 	'Head over to the MoD Headquarters buildling for the next engagement', (SELECT id FROM people where domainUsername='jack'), 2, '2016-06-10', 0,
 	(SELECT id FROM organizations where shortName = 'EF 2.1'), (SELECT id FROM organizations WHERE longName LIKE 'Ministry of Defense'));
@@ -435,7 +435,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+steve@dds.mil'), (SELECT max(id) from reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.A'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.A'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, authorId, state, releasedAt, engagementDate, atmosphere, atmosphereDetails, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select id from locations where name='MoD Headquarters Kabul'), 'Meet with Leadership regarding monthly status update',
@@ -448,7 +448,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+bob@dds.mil'), (SELECT max(id) from reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.B'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.B'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, keyOutcomes, nextSteps, authorId, state, releasedAt, engagementDate, atmosphere, atmosphereDetails, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select id from locations where name='Fort Amherst'), 'Inspect Ft Amherst Medical Budgeting Facility?',
@@ -460,7 +460,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+roger@dds.mil'), (SELECT max(id) from reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.A'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.A'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (select id from locations where name='Cabot Tower'), 'Inspect Cabot Tower Budgeting Facility',
@@ -471,7 +471,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+steve@dds.mil'), (SELECT max(id) from reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.C'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.C'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from locations where name='General Hospital'), 'Discuss discrepancies in monthly budgets',
@@ -482,7 +482,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+steve@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.A'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.A'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from locations where name='St Johns Airport'), 'Inspect Air Operations Capabilities',
@@ -493,7 +493,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+roger@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+liz@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '2.A'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '2.A'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from locations where name='St Johns Airport'), 'Inspect Helicopter Capabilities',
@@ -504,7 +504,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+roger@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+liz@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '2.A'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '2.A'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, keyOutcomes, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from locations where name='General Hospital'), 'Look for Budget Controls',
@@ -517,7 +517,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+erin@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+reina@dds.mil'), (SELECT max(id) FROM reports), 0);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.B'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.B'), (SELECT max(id) from reports));
 INSERT INTO reportsSensitiveInformation (createdAt, updatedAt, text, reportId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Need to know only', (SELECT max(id) from reports));
 
@@ -530,7 +530,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+christopf@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+erin@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.B'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.B'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, keyOutcomes, authorId, state, engagementDate, atmosphere, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from locations where name='General Hospital'), 'Talk to the Interior about things',
@@ -541,7 +541,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+christopf@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+erin@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.B'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.B'), (SELECT max(id) from reports));
 
 INSERT INTO reports (createdAt, updatedAt, locationId, intent, text, nextSteps, keyOutcomes, authorId, state, engagementDate, atmosphere, cancelledReason, advisorOrganizationId, principalOrganizationId) VALUES
 	(CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from locations where name='General Hospital'), 'Weekly Checkin with MG Somebody',
@@ -559,7 +559,7 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+arthur@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+shardul@dds.mil'), (SELECT max(id) FROM reports), 1);
-INSERT INTO reportPoams (poamId, reportId) VALUES ((SELECT id from poams where shortName = '1.1.B'), (SELECT max(id) from reports));
+INSERT INTO reportTasks (taskId, reportId) VALUES ((SELECT id from tasks where shortName = '1.1.B'), (SELECT max(id) from reports));
 
 
 -- Release all of the reports right now, so they show up in the rollup. 

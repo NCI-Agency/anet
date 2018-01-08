@@ -83,12 +83,12 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td></td>
 </tr>
 <tr>
 	<td>sendKeys</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td>budge</td>
 </tr>
 <tr>

@@ -26,7 +26,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -38,7 +38,7 @@ import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.database.mappers.PoamMapper;
+import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
@@ -141,8 +141,8 @@ public class ReportDao implements IAnetDao<Report> {
 					r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getId(), rp));
 					rb.insertReportAttendees(r.getId(), new ArrayList<ReportPerson>(attendeeMap.values()));
 				}
-				if (r.getPoams() != null) {
-					rb.insertReportPoams(r.getId(), r.getPoams());
+				if (r.getTasks() != null) {
+					rb.insertReportTasks(r.getId(), r.getTasks());
 				}
 				if (r.getTags() != null) {
 					rb.insertReportTags(r.getId(), r.getTags());
@@ -157,9 +157,9 @@ public class ReportDao implements IAnetDao<Report> {
 		void insertReportAttendees(@Bind("reportId") Integer reportId,
 				@BindBean List<ReportPerson> reportPeople);
 
-		@SqlBatch("INSERT INTO reportPoams (reportId, poamId) VALUES (:reportId, :id)")
-		void insertReportPoams(@Bind("reportId") Integer reportId,
-				@BindBean List<Poam> poams);
+		@SqlBatch("INSERT INTO reportTasks (reportId, taskId) VALUES (:reportId, :id)")
+		void insertReportTasks(@Bind("reportId") Integer reportId,
+				@BindBean List<Task> tasks);
 
 		@SqlBatch("INSERT INTO reportTags (reportId, tagId) VALUES (:reportId, :id)")
 		void insertReportTags(@Bind("reportId") Integer reportId,
@@ -257,19 +257,19 @@ public class ReportDao implements IAnetDao<Report> {
 			.execute();
 	}
 
-	public int addPoamToReport(Poam p, Report r) {
-		return dbHandle.createStatement("/* addPoamToReport */ INSERT INTO reportPoams (poamId, reportId) "
-				+ "VALUES (:poamId, :reportId)")
+	public int addTaskToReport(Task p, Report r) {
+		return dbHandle.createStatement("/* addTaskToReport */ INSERT INTO reportTasks (taskId, reportId) "
+				+ "VALUES (:taskId, :reportId)")
 			.bind("reportId", r.getId())
-			.bind("poamId", p.getId())
+			.bind("taskId", p.getId())
 			.execute();
 	}
 
-	public int removePoamFromReport(Poam p, Report r) {
-		return dbHandle.createStatement("/* removePoamFromReport*/ DELETE FROM reportPoams "
-				+ "WHERE reportId = :reportId AND poamId = :poamId")
+	public int removeTaskFromReport(Task p, Report r) {
+		return dbHandle.createStatement("/* removeTaskFromReport*/ DELETE FROM reportTasks "
+				+ "WHERE reportId = :reportId AND taskId = :taskId")
 				.bind("reportId", r.getId())
-				.bind("poamId", p.getId())
+				.bind("taskId", p.getId())
 				.execute();
 	}
 
@@ -299,12 +299,12 @@ public class ReportDao implements IAnetDao<Report> {
 			.list();
 	}
 
-	public List<Poam> getPoamsForReport(Report report) {
-		return dbHandle.createQuery("/* getPoamsForReport */ SELECT * FROM poams, reportPoams "
-				+ "WHERE reportPoams.reportId = :reportId "
-				+ "AND reportPoams.poamId = poams.id")
+	public List<Task> getTasksForReport(Report report) {
+		return dbHandle.createQuery("/* getTasksForReport */ SELECT * FROM tasks, reportTasks "
+				+ "WHERE reportTasks.reportId = :reportId "
+				+ "AND reportTasks.taskId = tasks.id")
 				.bind("reportId", report.getId())
-				.map(new PoamMapper())
+				.map(new TaskMapper())
 				.list();
 	}
 
@@ -338,8 +338,8 @@ public class ReportDao implements IAnetDao<Report> {
 				// Delete tags
 				dbHandle.execute("/* deleteReport.tags */ DELETE FROM reportTags where reportId = ?", report.getId());
 
-				//Delete poams
-				dbHandle.execute("/* deleteReport.poams */ DELETE FROM reportPoams where reportId = ?", report.getId());
+				//Delete tasks
+				dbHandle.execute("/* deleteReport.tasks */ DELETE FROM reportTasks where reportId = ?", report.getId());
 				
 				//Delete attendees
 				dbHandle.execute("/* deleteReport.attendees */ DELETE FROM reportPeople where reportId = ?", report.getId());

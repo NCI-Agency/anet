@@ -32,7 +32,7 @@ export default class OrganizationEdit extends Page {
 				approvalSteps { id, name
 					approvers { id, name, person { id, name}}
 				},
-				poams { id, shortName, longName}
+				tasks { id, shortName, longName}
 			}
 		`).then(data => {
 			this.setState({
