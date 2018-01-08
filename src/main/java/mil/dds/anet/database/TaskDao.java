@@ -147,7 +147,7 @@ public class TaskDao implements IAnetDao<Task> {
 			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.id IN ("
 					+ "SELECT TOP(:maxResults) reportTasks.taskId "
 					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
-					+ "WHERE authorId = :authorId "
+					+ "WHERE authorId = :authorId AND status = 0 " // TODO: convert to a safe check for status = active
 					+ "GROUP BY taskId "
 					+ "ORDER BY MAX(reports.createdAt) DESC"
 				+ ")";
@@ -155,7 +155,7 @@ public class TaskDao implements IAnetDao<Task> {
 			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.id IN ("
 					+ "SELECT reportTasks.taskId "
 					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
-					+ "WHERE authorId = :authorId "
+					+ "WHERE authorId = :authorId AND status = 0 " // TODO: convert to a safe check for status = active
 					+ "GROUP BY taskId "
 					+ "ORDER BY MAX(reports.createdAt) DESC "
 					+ "LIMIT :maxResults"
