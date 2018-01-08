@@ -144,18 +144,18 @@ public class TaskDao implements IAnetDao<Task> {
 	public List<Task> getRecentTasks(Person author, int maxResults) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.id IN ("
+			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = 0 AND tasks.id IN (" // TODO: convert to a safe check for status = active
 					+ "SELECT TOP(:maxResults) reportTasks.taskId "
 					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
-					+ "WHERE authorId = :authorId AND status = 0 " // TODO: convert to a safe check for status = active
+					+ "WHERE authorId = :authorId " 
 					+ "GROUP BY taskId "
 					+ "ORDER BY MAX(reports.createdAt) DESC"
 				+ ")";
 		} else {
-			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.id IN ("
+			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = 0 AND tasks.id IN (" // TODO: convert to a safe check for status = active
 					+ "SELECT reportTasks.taskId "
 					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
-					+ "WHERE authorId = :authorId AND status = 0 " // TODO: convert to a safe check for status = active
+					+ "WHERE authorId = :authorId "
 					+ "GROUP BY taskId "
 					+ "ORDER BY MAX(reports.createdAt) DESC "
 					+ "LIMIT :maxResults"
