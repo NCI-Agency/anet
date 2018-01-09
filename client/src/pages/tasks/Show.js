@@ -98,7 +98,7 @@ export default class TaskShow extends Page {
 						}
 						
 						{taskCustomEnumLabel &&
-						<Form.Field id="customFieldEnum" label={taskCustomEnumLabel} />
+							<Form.Field id="customFieldEnum" label={taskCustomEnumLabel} />
 						}
 
 						{taskPlannedCompletion &&
