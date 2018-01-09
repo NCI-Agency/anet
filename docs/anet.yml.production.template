@@ -84,8 +84,10 @@ server:
         currentLogFilename: ./logs/access.log
         archivedLogFilenamePattern: ./logs/access-%d.log.zip
         archivedFileCount: 5
+        logFormat: '[%t{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %h %l %u "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D'
       - type: console
         target: stdout
+        logFormat: '[%t{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %h %l %u "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D'
 
 # Configuration for the Freemarker templating library
 views:
@@ -104,6 +106,7 @@ logging:
           currentLogFilename: ./logs/dbLog.log
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
+          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     "org.sqlite.JDBC" : INFO
     "io.dropwizard.assets.AssetsBundle" : INFO
     "io.dropwizard.assets.*" : INFO
@@ -117,6 +120,7 @@ logging:
           currentLogFilename: ./logs/testingLogger.log
           archivedLogFilenamePattern: ./logs/testingLogger-%d.log.zip
           archivedFileCount: 2
+          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     "mil.dds.anet.utils.AnetAuditLogger" :
       level: INFO
       appenders:
@@ -124,15 +128,18 @@ logging:
           currentLogFilename: ./logs/auditLogger.log
           archivedLogFilenamePattern: ./logs/auditLogger-%d.log.zip
           archivedFileCount: 2
+          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
   appenders:
     - type: console
       threshold: INFO
       target: stdout
+      logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     - type: file
       threshold: INFO
       currentLogFilename: ./logs/anet.log
       archivedLogFilenamePattern: ./logs/anet-%d.log.zip
       archivedFileCount: 2
+      logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
 
 dictionary:
   PRINCIPAL_PERSON_TITLE: Afghan Partner
