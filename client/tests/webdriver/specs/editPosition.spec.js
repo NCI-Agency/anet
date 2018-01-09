@@ -10,17 +10,17 @@ describe('Edit position page', () => {
     EditPosition.open()
   })
 
-  describe('When changing the position type from principal to advisor and saving', () => {
+  describe('When changing the position type from principal to advisor, saving, and putting back', () => {
     it('Should update the position type to advisor and back to principal', () => {
         EditPosition.typeAdvisorButton.waitForVisible()
         expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.not.include('active')
         expect(EditPosition.typePrincipalButton.getAttribute('class')).to.include('active')
-        let org = EditPosition.organization.getValue()
-        expect(org).to.not.equal('')
+        const principalOrg = EditPosition.organization.getValue()
+        expect(principalOrg).to.not.equal('')
         EditPosition.typeAdvisorButton.click()
         expect(EditPosition.organization.getValue()).to.equal('')
 
-        EditPosition.organization.setValue(org)
+        EditPosition.organization.setValue(principalOrg)
         EditPosition.orgAutocomplete.waitForExist()
         expect(EditPosition.orgAutocomplete.getText()).to.include('No suggestions found')
         EditPosition.orgAutocomplete.click()
@@ -37,6 +37,7 @@ describe('Edit position page', () => {
         EditPosition.waitForAlertSuccessToLoad()
         const alertMessage = EditPosition.alertSuccess.getText()
         expect(alertMessage).to.equal('Saved Position')
+
         EditPosition.open()
         EditPosition.typeAdvisorButton.waitForVisible()
         expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.include('active')
@@ -44,10 +45,11 @@ describe('Edit position page', () => {
         expect(EditPosition.typePrincipalButton.getAttribute('class')).to.not.include('active')
         expect(EditPosition.organization.getValue()).to.equal(ADVISOR_ORG)
 
-         // clean up database by restoring advisor role to principal
+        // clean up database by restoring advisor role to principal
         EditPosition.typePrincipalButton.click()
-        EditPosition.organization.setValue(PRINCIPAL_ORG)
+        EditPosition.organization.setValue(principalOrg)
         EditPosition.orgAutocomplete.waitForExist()
+        expect(EditPosition.orgAutocomplete.getText()).to.include(principalOrg)
         EditPosition.orgAutocomplete.click()
         EditPosition.submitForm()
         EditPosition.waitForAlertSuccessToLoad()

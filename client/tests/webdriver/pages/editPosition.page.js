@@ -11,7 +11,7 @@ class EditPosition extends Page {
     get organization()          { return browser.element('#organization') }
     get orgAutocomplete()       { return browser.element('#react-autowhatever-1--item-0') }
     get alertSuccess()          { return browser.element('.alert-success') }
-    get submitButton()          { return browser.element('form .form-top-submit > button[type="submit"]') }
+    get submitButton()          { return browser.element('#formBottomSubmit') }
 
     open() {
         super.openAsSuperUser(Page_URL)
