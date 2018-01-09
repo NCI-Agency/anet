@@ -8,6 +8,8 @@ describe('Edit position page', () => {
 
   beforeEach('Open the edit position page', () => {
     EditPosition.open()
+    EditPosition.form.waitForExist()
+    EditPosition.form.waitForVisible()
   })
 
   describe('When changing the position type from principal to advisor, saving, and putting back', () => {
