@@ -4,9 +4,9 @@ import autobind from 'autobind-decorator'
 
 import utils from 'utils'
 
-import _some from 'lodash.some'
-import _values from 'lodash.values'
-import _get from 'lodash.get'
+import _some from 'lodash/some'
+import _values from 'lodash/values'
+import _get from 'lodash/get'
 
 export default class ValidatableFormWrapper extends Component {
 	constructor() {

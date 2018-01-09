@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import _get from 'lodash.get'
+import _get from 'lodash/get'
 import autobind from 'autobind-decorator'
 
 import NotFound from 'components/NotFound'
