@@ -5,7 +5,7 @@ import autobind from 'autobind-decorator'
 import DatePicker from 'react-bootstrap-date-picker'
 import {Row, Col} from 'react-bootstrap'
 import moment from 'moment'
-import _uniqueId from 'lodash.uniqueid'
+import _uniqueId from 'lodash/uniqueId'
 
 const LAST_DAY = -1 * 1000 * 60 * 60 * 24
 const LAST_WEEK = LAST_DAY * 7

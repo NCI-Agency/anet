@@ -21,8 +21,8 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam.PoamStatus;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -109,24 +109,24 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(returnedSteps.size()).isEqualTo(1);
 		assertThat(returnedSteps.get(0).loadApprovers()).contains(b1);
 		
-		//Give this org a Poam
-		Poam poam = new Poam();
-		poam.setShortName("TST POM1");
-		poam.setLongName("Verify that you can update Poams on a Organization");
-		poam.setStatus(PoamStatus.ACTIVE);
-		poam = httpQuery("/api/poams/new", admin).post(Entity.json(poam), Poam.class);
-		assertThat(poam.getId()).isNotNull();
+		//Give this org a Task
+		Task task = new Task();
+		task.setShortName("TST POM1");
+		task.setLongName("Verify that you can update Tasks on a Organization");
+		task.setStatus(TaskStatus.ACTIVE);
+		task = httpQuery("/api/tasks/new", admin).post(Entity.json(task), Task.class);
+		assertThat(task.getId()).isNotNull();
 		
-		child.setPoams(ImmutableList.of(poam));
+		child.setTasks(ImmutableList.of(task));
 		child.setApprovalSteps(null);
 		resp = httpQuery("/api/organizations/update/", admin).post(Entity.json(child));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		//Verify poam was saved. 
+		//Verify task was saved. 
 		updated = httpQuery(String.format("/api/organizations/%d",child.getId()), jack).get(Organization.class);
-		assertThat(updated.loadPoams()).isNotNull();
-		assertThat(updated.loadPoams().size()).isEqualTo(1);
-		assertThat(updated.loadPoams().get(0).getId()).isEqualTo(poam.getId());
+		assertThat(updated.loadTasks()).isNotNull();
+		assertThat(updated.loadTasks().size()).isEqualTo(1);
+		assertThat(updated.loadTasks().get(0).getId()).isEqualTo(task.getId());
 		
 		//Change the approval steps. 
 		step1.setApprovers(ImmutableList.of(admin.loadPosition()));
@@ -134,7 +134,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		step2.setName("Final Reviewers");
 		step2.setApprovers(ImmutableList.of(b1));
 		child.setApprovalSteps(ImmutableList.of(step1, step2));
-		child.setPoams(null);
+		child.setTasks(null);
 		resp = httpQuery("/api/organizations/update/", admin).post(Entity.json(child));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		

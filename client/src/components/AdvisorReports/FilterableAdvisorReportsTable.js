@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import OrganizationAdvisorsTable from 'components/AdvisorReports/OrganizationAdvisorsTable'
 import Toolbar from 'components/AdvisorReports/Toolbar'
-import _debounce from 'lodash.debounce'
+import _debounce from 'lodash/debounce'
 import moment from 'moment'
 
 import API from 'api'

@@ -179,7 +179,7 @@ public class PositionDao implements IAnetDao<Position> {
 		dbHandle.inTransaction(new TransactionCallback<Void>() {
 			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
-				dbHandle.createStatement("/*positionRemovePerson.update */ UPDATE positions "
+				dbHandle.createStatement("/* positionRemovePerson.update */ UPDATE positions "
 						+ "SET currentPersonId = :personId, updatedAt = :updatedAt "
 						+ "WHERE id = :positionId")
 					.bind("personId", (Integer) null)
@@ -189,14 +189,14 @@ public class PositionDao implements IAnetDao<Position> {
 					
 				String sql;
 				if (DaoUtils.isMsSql(dbHandle)) { 
-					sql = "/*positionRemovePerson.insert1 */INSERT INTO peoplePositions "
+					sql = "/* positionRemovePerson.insert1 */ INSERT INTO peoplePositions "
 						+ "(positionId, personId, createdAt) "
 						+ "VALUES(null, " 
 							+ "(SELECT TOP(1)personId FROM peoplePositions "
 							+ "WHERE positionId = :positionId ORDER BY createdAt DESC), "
 						+ ":createdAt)";
 				} else { 
-					sql = "/*positionRemovePerson.insert1 */INSERT INTO peoplePositions "
+					sql = "/* positionRemovePerson.insert1 */ INSERT INTO peoplePositions "
 							+ "(positionId, personId, createdAt) "
 						+ "VALUES(null, " 
 							+ "(SELECT personId FROM peoplePositions WHERE positionId = :positionId "
@@ -208,7 +208,7 @@ public class PositionDao implements IAnetDao<Position> {
 					.bind("createdAt", now)
 					.execute();
 			
-				dbHandle.createStatement("/*positionRemovePerson.insert2 */ INSERT INTO peoplePositions "
+				dbHandle.createStatement("/* positionRemovePerson.insert2 */ INSERT INTO peoplePositions "
 						+ "(positionId, personId, createdAt) "
 						+ "VALUES (:positionId, null, :createdAt)")
 					.bind("positionId", position.getId())
@@ -221,7 +221,7 @@ public class PositionDao implements IAnetDao<Position> {
 	
 	public Person getPersonInPositionNow(Position p) { 
 		if (p.getPerson() == null) { return null; } //No person currently in position.
-		List<Person> people = dbHandle.createQuery("/*positionFindCurrentPerson */ SELECT " + PersonDao.PERSON_FIELDS 
+		List<Person> people = dbHandle.createQuery("/* positionFindCurrentPerson */ SELECT " + PersonDao.PERSON_FIELDS
 				+ " FROM people WHERE id = :personId")
 			.bind("personId", p.getPerson().getId())
 			.map(new PersonMapper())
@@ -233,13 +233,13 @@ public class PositionDao implements IAnetDao<Position> {
 	public Person getPersonInPosition(Position b, DateTime dtg) { 
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/*positionFindPerson */ SELECT TOP(1) " + PersonDao.PERSON_FIELDS + " FROM peoplePositions "
+			sql = "/* positionFindPerson */ SELECT TOP(1) " + PersonDao.PERSON_FIELDS + " FROM peoplePositions "
 				+ " LEFT JOIN people ON people.id = peoplePositions.personId "
 				+ "WHERE peoplePositions.positionId = :positionId "
 				+ "AND peoplePositions.createdAt < :dtg "
 				+ "ORDER BY peoplePositions.createdAt DESC";
 		} else {
-			sql = "/*positionFindPerson */ SELECT " + PersonDao.PERSON_FIELDS + " FROM peoplePositions "
+			sql = "/* positionFindPerson */ SELECT " + PersonDao.PERSON_FIELDS + " FROM peoplePositions "
 				+ " LEFT JOIN people ON people.id = peoplePositions.personId "
 				+ "WHERE peoplePositions.positionId = :positionId "
 				+ "AND peoplePositions.createdAt < :dtg "
@@ -255,7 +255,7 @@ public class PositionDao implements IAnetDao<Position> {
 	}
 
 	public List<Person> getPeoplePreviouslyInPosition(Position p) { 
-		List<Person> people = dbHandle.createQuery("/*positionFindPreviousPeople */SELECT " + PersonDao.PERSON_FIELDS 
+		List<Person> people = dbHandle.createQuery("/* positionFindPreviousPeople */ SELECT " + PersonDao.PERSON_FIELDS
 				+ "FROM peoplePositions "
 				+ "LEFT JOIN people ON peoplePositions.personId = people.id "
 				+ "WHERE peoplePositions.positionId = :positionId " 

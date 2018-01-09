@@ -32,7 +32,7 @@ export default class Person extends Model {
 		position: {},
 	}
 
-	static autocompleteQuery = "id, name, role, position { id, name, organization { id, shortName } }"
+	static autocompleteQuery = "id, name, role, rank, position { id, name, organization { id, shortName } }"
 
 	static autocompleteTemplate(person) {
 		return <span>

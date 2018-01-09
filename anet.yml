@@ -31,6 +31,7 @@ smtp:
   password: ${ANET_SMTP_PASSWORD}
   startTls: true
   disabled: true
+  nbOfHoursForStaleEmails: 72
 
 # The email address that all automated emails should come from. 
 # ex: "ANET <anet@example.com>"
@@ -150,8 +151,15 @@ dictionary:
   ADVISOR_POSITION_TYPE_TITLE: NATO Advisor
   SUPER_USER_POSITION_TYPE_TITLE: ANET Super User
   ADMINISTRATOR_POSITION_TYPE_TITLE: ANET Administrator
-  POAM_LONG_NAME: Plan of Action and Milestones / Pillars
-  POAM_SHORT_NAME: PoAM
+  PRINCIPAL_ORG_NAME: Afghan Government Organization
+  ADVISOR_ORG_NAME: Advisor Organization
+  TASK:
+    shortLabel: Task
+    longLabel: Tasks and Milestones
+  TASK_PROJECTED_COMPLETION: 'Fill in the projected completion date'
+  TASK_PLANNED_COMPLETION: 'Fill in the planned completion date'
+  TASK_CUSTOM_ENUM_LABEL: 'Project status'
+  TASK_CUSTOM_FIELD: 'Custom field'
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
   SUPPORT_EMAIL_ADDR: support@example.com
   fields:
@@ -247,3 +255,6 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
+  'taskCustomEnum':
+    OPEN: Open
+    CLOSED: Closed

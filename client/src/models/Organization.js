@@ -14,7 +14,7 @@ export default class Organization extends Model {
 		childrenOrgs: [],
 		approvalSteps: [],
 		positions: [],
-		poams: []
+		tasks: []
 	}
 
 	isAdvisorOrg() {

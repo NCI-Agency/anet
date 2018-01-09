@@ -7,7 +7,7 @@ import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Autocomplete from 'components/Autocomplete'
-import PoamsSelector from 'components/PoamsSelector'
+import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
 import History from 'components/History'
 import Messages from 'components/Messages'
@@ -102,7 +102,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 					)}
 				</Fieldset>
 
-				<PoamsSelector poams={organization.poams} onChange={this.onChange} />
+				<TaskSelector tasks={organization.tasks} onChange={this.onChange} />
 			</div>}
 		</ValidatableForm>
 	}

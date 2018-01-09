@@ -797,7 +797,7 @@
 	</changeSet>
 
 	<changeSet id="add_reports_sensitive_information_constraints" author="gjvoosten" dbms="mssql">
-	    <!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
+		<!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
 		<addUniqueConstraint tableName="reportsSensitiveInformation" columnNames="reportId" constraintName="uniqueReport" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportsSensitiveInformation"
 			constraintName="fk_reportsSensitiveInformation_report" onDelete="CASCADE" onUpdate="CASCADE"
@@ -809,6 +809,70 @@
 			<column name="authorized" type="boolean" defaultValue="false">
 				<constraints nullable="false" />
 			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="renamePoams-to-Tasks" author="evdhoudt">
+		<!-- Tasks -->
+		<renameTable
+			newTableName="tasks"
+			oldTableName="poams" />
+		<renameColumn
+			columnDataType="int"
+			oldColumnName="parentPoamId"
+			newColumnName="parentTaskId"
+			tableName="tasks" />
+
+		<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_poams_parent"/>
+		<addForeignKeyConstraint baseColumnNames="parentTaskId" baseTableName="tasks"
+			constraintName="fk_tasks_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="tasks" />
+	</changeSet>
+
+	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt">
+		<!-- Report Tasks -->
+		<renameTable
+			newTableName="reportTasks"
+			oldTableName="reportPoams" />
+		<renameColumn
+			columnDataType="int"
+			oldColumnName="poamId"
+			newColumnName="taskId"
+			tableName="reportTasks" />
+	</changeSet>
+
+	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt">
+		<dropUniqueConstraint tableName="reportTasks" constraintName="uniqueReportPoam"/>
+		<addUniqueConstraint tableName="reportTasks" columnNames="taskId, reportId" constraintName="uniqueReportTask" />
+
+		<dropForeignKeyConstraint baseTableName="reportTasks" constraintName="fk_reportPoams_poam"/>
+		<addForeignKeyConstraint baseColumnNames="taskId" baseTableName="reportTasks"
+			constraintName="fk_reportTasks_poam" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="tasks" />
+
+		<dropForeignKeyConstraint baseTableName="reportTasks" constraintName="fk_reportPoams_report"/>
+		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportTasks"
+			constraintName="fk_reportTasks_report" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="reports" />
+
+		<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_poams_org"/>
+		<addForeignKeyConstraint baseColumnNames="organizationId" baseTableName="tasks"
+			constraintName="fk_tasks_org" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="organizations" />
+	</changeSet>
+
+	<changeSet id="add-extra-fields-to-Tasks" author="evdhoudt">
+		<addColumn tableName="tasks">
+			<column name="projectedCompletion" type="datetime" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="plannedCompletion" type="datetime" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="customField" type="text" />
+		</addColumn>
+		<addColumn tableName="tasks" >
+			<column name="customFieldEnum" type="text" />
 		</addColumn>
 	</changeSet>
 
