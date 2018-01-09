@@ -27,7 +27,6 @@ describe('Edit position page', () => {
         expect(EditPosition.organization.getValue()).to.equal('')
 
         EditPosition.organization.setValue(ADVISOR_ORG)
-        EditPosition.orgAutocomplete.waitForExist()
         EditPosition.waitForOrgAutoCompleteToChange()
         expect(EditPosition.orgAutocomplete.getText()).to.include(ADVISOR_ORG)
         EditPosition.orgAutocomplete.click()

@@ -25,9 +25,10 @@ class EditPosition extends Page {
     }
 
     waitForOrgAutoCompleteToChange() {
+        this.orgAutocomplete.waitForExist()
         return browser.waitUntil( () => {
-            return this.orgAutocomplete.getText() ===  ADVISOR_ORG
-          }, 5000, 'Expected autocomplete to containt the advisor org after 5s')
+            return this.orgAutocomplete.getText() === ADVISOR_ORG
+          }, 5000, 'Expected autocomplete to contain "' + ADVISOR_ORG +'" after 5s')
     }
 
     submitForm() {
