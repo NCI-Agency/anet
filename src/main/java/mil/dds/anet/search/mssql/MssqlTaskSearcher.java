@@ -39,7 +39,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			args.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
 		
-		if (query.getResponsibleOrgId() != null) { 
+		if (query.getResponsibleOrgId() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
 				commonTableExpression = "WITH parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
@@ -53,22 +53,52 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			args.put("orgId", query.getResponsibleOrgId());
 		}
 		
-		if (query.getCategory() != null) { 
+		if (query.getCategory() != null) {
 			whereClauses.add("category = :category");
 			args.put("category", query.getCategory());
 		}
 		
-		if (query.getStatus() != null) { 
+		if (query.getStatus() != null) {
 			whereClauses.add("status = :status");
 			args.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
+
+		if (query.getProjectStatus() != null) {
+			whereClauses.add("projectStatus = :projectStatus");
+			args.put("projectStatus", query.getProjectStatus());
+		}
 		
+		if (query.getPlannedCompletionStart() != null) {
+			whereClauses.add("plannedCompletionStart = :plannedCompletionStart");
+			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionStart()));
+		}
+
+		if (query.getPlannedCompletionEnd() != null) {
+			whereClauses.add("plannedCompletionStart = :plannedCompletionStart");
+			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionEnd()));
+		}
+
+		if (query.getProjectedCompletionStart() != null) {
+			whereClauses.add("projectedCompletionStart = :projectedCompletionStart");
+			args.put("projectedCompletionStart", Utils.handleRelativeDate(query.getProjectedCompletionStart()));
+		}
+
+		if (query.getProjectedCompletionEnd() != null) {
+			whereClauses.add("projectedCompletionEnd = :projectedCompletionEnd");
+			args.put("projectedCompletionEnd", Utils.handleRelativeDate(query.getProjectedCompletionEnd()));
+		}
+
+		if (query.getCustomField() != null) {
+			whereClauses.add("customField = :customField");
+			args.put("customField", query.getCustomField());
+		}
+
 		if (whereClauses.size() == 0) { return result; }
 		
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		sql.append(" ORDER BY shortName ASC, longName ASC, id ASC");
 
-		if (commonTableExpression != null) { 
+		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);
 		}
 
