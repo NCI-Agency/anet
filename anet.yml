@@ -163,20 +163,24 @@ dictionary:
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
   SUPPORT_EMAIL_ADDR: support@example.com
   fields:
-    ADVISOR_ORG:
-      label_longname: Description
-      name: Advisor Organization
-      placeholder_longname: e.g. Force Sustainment
-      IDENTIFICATION_CODE:
-        label: UIC
-        placeholder: the six character code
-    PRINCIPAL_ORG:
-      label_longname: Official Organization Name
-      name: Afghan Government Organization
-      placeholder_longname: e.g. Afghan Ministry of Defense
-      IDENTIFICATION_CODE:
-        label: UIC
-        placeholder: the six character code
+    advisor:
+      org:
+        name: Advisor Organization
+        longName:
+          label: Description
+          placeholder: e.g. Force Sustainment
+        identificationCode:
+          label: UIC
+          placeholder: the six character code
+    principal:
+      org:
+        name: Afghan Government Organization
+        longName:
+          label: Official Organization Name
+          placeholder: e.g. Afghan Ministry of Defense
+        identificationCode:
+          label: UIC
+          placeholder: the six character code
   pinned_ORGs:
     - Key Leader Engagement
   non_reporting_ORGs:

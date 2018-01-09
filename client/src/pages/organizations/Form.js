@@ -16,7 +16,6 @@ import API from 'api'
 import settings from 'settings'
 import {Position, Organization} from 'models'
 
-import DictionaryLabelField from '../../HOC/DictionaryLabelField'
 import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
@@ -41,25 +40,15 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 	render() {
 		let {organization, edit} = this.props
 		let {approvalSteps} = organization
-		let currentUser = this.context.currentUser
+		let currentUser = this.context.currentUser 
 		let isAdmin = currentUser && currentUser.isAdmin()
 		let isPrincipalOrg = (organization.type === "PRINCIPAL_ORG")
 		const {ValidatableForm, RequiredField} = this
 
-		const dictFields = settings.fields
-		const ADVISOR_ORG = dictFields ? dictFields.ADVISOR_ORG : ''
-		const PRINCIPAL_ORG = dictFields ? dictFields.PRINCIPAL_ORG : ''
+		const orgSettings = isPrincipalOrg ? settings.fields.principal.org : settings.fields.advisor.org
 
-		const [labelLongName, placeholderLongName, IDENTIFICATION_CODE] = isPrincipalOrg
-			? [PRINCIPAL_ORG.label_longname,
-			   PRINCIPAL_ORG.placeholder_longname,
-			   PRINCIPAL_ORG.IDENTIFICATION_CODE]
-			: [ADVISOR_ORG.label_longname,
-			   ADVISOR_ORG.placeholder_longname,
-			   ADVISOR_ORG.IDENTIFICATION_CODE]
-
-		const IdentificationCodeFieldWithLabel = DictionaryField(IDENTIFICATION_CODE)(Form.Field)
-		const LongNameWithLabel = DictionaryLabelField(labelLongName)(Form.Field)
+		const IdentificationCodeFieldWithLabel = DictionaryField(orgSettings.identificationCode)(Form.Field)
+		const LongNameWithLabel = DictionaryField(orgSettings.longName)(Form.Field)
 
 		return <ValidatableForm formFor={organization}
 			onChange={this.onChange}
@@ -72,8 +61,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 			<Fieldset title={edit ? `Edit Organization ${organization.shortName}` : "Create a new Organization"}>
 				<Form.Field id="type">
 					<ButtonToggleGroup>
-						<Button id="advisorOrgButton" disabled={!isAdmin} value="ADVISOR_ORG">{ADVISOR_ORG.name}</Button>
-						<Button id="principalOrgButton" disabled={!isAdmin} value="PRINCIPAL_ORG">{PRINCIPAL_ORG.name}</Button>
+						<Button id="advisorOrgButton" disabled={!isAdmin} value="ADVISOR_ORG">{settings.fields.advisor.org.name}</Button>
+						<Button id="principalOrgButton" disabled={!isAdmin} value="PRINCIPAL_ORG">{settings.fields.principal.org.name}</Button>
 					</ButtonToggleGroup>
 				</Form.Field>
 
@@ -86,7 +75,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
-				<LongNameWithLabel id="longName" disabled={isPrincipalOrg && !isAdmin} label={labelLongName} placeholder={placeholderLongName} />
+				<LongNameWithLabel id="longName" disabled={isPrincipalOrg && !isAdmin} />
 				<IdentificationCodeFieldWithLabel id="identificationCode" disabled={!isAdmin}/>
 			</Fieldset>
 
