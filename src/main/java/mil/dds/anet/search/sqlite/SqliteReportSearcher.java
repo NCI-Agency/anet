@@ -33,7 +33,7 @@ import mil.dds.anet.utils.Utils;
 
 public class SqliteReportSearcher implements IReportSearcher {
 
-	public static final DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+	public static final DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS Z");
 
 	private String dateComparisonFormat;
 	private String isoDowFormat;
@@ -267,7 +267,12 @@ public class SqliteReportSearcher implements IReportSearcher {
 				break;
 		}
 		
-		sql.append(" LIMIT :limit OFFSET :offset)");
+		if (query.getPageSize() != 0) {
+			sql.append(" LIMIT :limit OFFSET :offset");
+			args.put("offset", query.getPageSize() * query.getPageNum());
+			args.put("limit", query.getPageSize());
+		}
+		sql.append(")");
 		
 		if (commonTableExpression != null) { 
 			sql.insert(0, commonTableExpression);
@@ -275,8 +280,6 @@ public class SqliteReportSearcher implements IReportSearcher {
 		
 		Query<Report> dbQuery = dbHandle.createQuery(sql.toString())
 				.bindFromMap(args)
-				.bind("offset", query.getPageSize() * query.getPageNum())
-				.bind("limit", query.getPageSize())
 				.map(new ReportMapper());
 		ReportList reportList = ReportList.fromQuery(user, dbQuery, query.getPageNum(), query.getPageSize());
 		reportList.setTotalCount(reportList.getList().size());

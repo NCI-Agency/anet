@@ -1,16 +1,17 @@
 
+# sqlite time zone string: requires colon, disallows spaces
+zonestring=`date +\ %z`
+
 function dtg_linux {
 	a=`date +%Y-%m-%d\ %H:%M:%S.`
 	b=`date +%N | cut -c1,2,3`
-	c=`date +\ %z`
-	echo "${a}${b}${c}"
+	echo "${a}${b}${zonestring}"
 }
 
 function dtg_mac {
 	a=`date +%Y-%m-%d\ %H:%M:%S.`
 	b=`perl -MTime::HiRes -e 'printf("%.0f\n",Time::HiRes::time()*1000)' | cut -c11,12,13`
-	c=`date +\ %z`
-	echo "${a}${b}${c}"
+	echo "${a}${b}${zonestring}"
 }
 
 # Start by turning on foreign keys for this connection
@@ -35,7 +36,7 @@ do
 	fi
 	# Handle one more time-related special case...
 	if [[ "$input" == *"DATEADD"* ]]; then
-		input=`echo $input | sed "s/DATEADD (day, -2, CURRENT_TIMESTAMP)/DATETIME('${time}', '-2 days')/g"`
+		input=`echo $input | sed "s/DATEADD (day, -2, CURRENT_TIMESTAMP)/STRFTIME('%Y-%m-%d %H:%M:%f${zonestring}', substr('${time}', 1, 22), '-2 days')/g"`
 	fi
 	# And sub in the actual time for remaining CURRENT_TIMESTAMP instances
 	if [[ "$OSTYPE" == "darwin"* ]]; then

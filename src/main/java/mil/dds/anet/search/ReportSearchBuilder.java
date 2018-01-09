@@ -6,13 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.utils.Utils;
 
 public class ReportSearchBuilder {
 
 	private static final String DEFAULT_WHERE_FORMAT = "reports.\"%s\" %s :%s";
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReportSearchBuilder.class);
 
 	private String whereClauseFormat;
 	private DateTimeFormatter dateFormatter;
@@ -47,10 +51,12 @@ public class ReportSearchBuilder {
 
 	public void addDateClause(DateTime queryDate, Comparison comp, String fieldName, String parameterName) {
 		if (queryDate != null) {
-			DateTime realQueryDate = Utils.handleRelativeDate(queryDate);
+			DateTime realQueryDate = Utils.handleRelativeDate(queryDate).toDateTime(DateTimeZone.getDefault());
 			String whereClause = String.format(whereClauseFormat, fieldName, comp.getOperator(), parameterName);
 			whereClauses.add(whereClause);
-			args.put(parameterName, dateFormatter == null ? realQueryDate : dateFormatter.print(queryDate));
+			Object dateArg = dateFormatter == null ? realQueryDate : dateFormatter.print(realQueryDate);
+			args.put(parameterName, dateArg);
+			LOGGER.debug("Specifying that {} is {} {}", fieldName, comp, dateArg);
 		}
 	}
 }
