@@ -744,7 +744,7 @@ public class ReportResource implements IGraphQLResource {
 		Map<String,Object> context = action.execute();
 
 		@SuppressWarnings("unchecked")
-		Map<String,Object> task = (Map<String, Object>) config.getDictionary().get("TASK");
+		final Map<String,Object> task = (Map<String, Object>) config.getDictionary().get("TASK");
 
 		context.put("serverUrl", config.getServerUrl());
 		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
