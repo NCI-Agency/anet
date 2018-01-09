@@ -45,6 +45,7 @@ import RollupShow from 'pages/rollup/Show'
 
 import AdminIndex from 'pages/admin/Index'
 import MergePeople from 'pages/admin/MergePeople'
+import AuthorizationGroups from 'pages/admin/AuthorizationGroups'
 
 import GraphiQL from 'pages/GraphiQL'
 
@@ -105,6 +106,7 @@ ReactDOM.render((
 				<Route path="graphiql" component={GraphiQL} />
 
 				<Route path="admin/mergePeople" component={MergePeople} />
+				<Route path="admin/authorizationGroups" component={AuthorizationGroups} />
 				<Route path="admin" component={AdminIndex} />
 
 				<Route path="onboarding">

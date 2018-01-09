@@ -13,6 +13,8 @@ export default class AuthorizationGroup extends Model {
 	static schema = {
 		name: '',
 		description: '',
+		positions: [],
+		status: ''
 	}
 
 	static autocompleteQuery = "id, name, description"
