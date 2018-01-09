@@ -165,16 +165,18 @@ dictionary:
   fields:
     ADVISOR_ORG:
       label_longname: Description
-      label_identificationcode: UIC
       name: Advisor Organization
-      placeholder_identificationcode:  the six character code
       placeholder_longname: e.g. Force Sustainment
+      IDENTIFICATION_CODE:
+        label: UIC
+        placeholder: the six character code
     PRINCIPAL_ORG:
       label_longname: Official Organization Name
-      label_identificationcode: Identification Code
       name: Afghan Government Organization
-      placeholder_identificationcode: optional
       placeholder_longname: e.g. Afghan Ministry of Defense
+      IDENTIFICATION_CODE:
+        label: UIC
+        placeholder: the six character code
   pinned_ORGs:
     - Key Leader Engagement
   non_reporting_ORGs:

@@ -13,10 +13,11 @@ import History from 'components/History'
 import Messages from 'components/Messages'
 
 import API from 'api'
-import dict from 'dictionary'
+import settings from 'settings'
 import {Position, Organization} from 'models'
 
 import DictionaryLabelField from '../../HOC/DictionaryLabelField'
+import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -45,21 +46,19 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		let isPrincipalOrg = (organization.type === "PRINCIPAL_ORG")
 		const {ValidatableForm, RequiredField} = this
 
-		const dictFields = dict.lookup('fields')
+		const dictFields = settings.fields
 		const ADVISOR_ORG = dictFields ? dictFields.ADVISOR_ORG : ''
 		const PRINCIPAL_ORG = dictFields ? dictFields.PRINCIPAL_ORG : ''
 
-		const [labelLongName, placeholderLongName, labelIdentificationCode, placeholderIdentificationCode] = isPrincipalOrg
+		const [labelLongName, placeholderLongName, IDENTIFICATION_CODE] = isPrincipalOrg
 			? [PRINCIPAL_ORG.label_longname,
 			   PRINCIPAL_ORG.placeholder_longname,
-			   PRINCIPAL_ORG.label_identificationcode,
-			   PRINCIPAL_ORG.placeholder_identificationcode]
+			   PRINCIPAL_ORG.IDENTIFICATION_CODE]
 			: [ADVISOR_ORG.label_longname,
 			   ADVISOR_ORG.placeholder_longname,
-			   ADVISOR_ORG.label_identificationcode,
-			   ADVISOR_ORG.placeholder_identificationcode]
+			   ADVISOR_ORG.IDENTIFICATION_CODE]
 
-		const IdentificationCodeFieldWithLabel = DictionaryLabelField(labelIdentificationCode)(Form.Field)
+		const IdentificationCodeFieldWithLabel = DictionaryField(IDENTIFICATION_CODE)(Form.Field)
 		const LongNameWithLabel = DictionaryLabelField(labelLongName)(Form.Field)
 
 		return <ValidatableForm formFor={organization}
@@ -88,7 +87,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
 				<LongNameWithLabel id="longName" disabled={isPrincipalOrg && !isAdmin} label={labelLongName} placeholder={placeholderLongName} />
-				<IdentificationCodeFieldWithLabel id="identificationCode" disabled={!isAdmin} placeholder={placeholderIdentificationCode} />
+				<IdentificationCodeFieldWithLabel id="identificationCode" disabled={!isAdmin}/>
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>
