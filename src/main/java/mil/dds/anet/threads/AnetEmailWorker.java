@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ public class AnetEmailWorker implements Runnable {
 	private Authenticator auth;
 	private String fromAddr;
 	private String serverUrl;
+	private Map<String, Object> task;
 	private Configuration freemarkerConfig;
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
@@ -76,6 +78,7 @@ public class AnetEmailWorker implements Runnable {
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+		this.task = (Map<String, Object>) config.getDictionary().get("TASK");
 		instance = this;
 		
 		SmtpConfiguration smtpConfig = config.getSmtp();
@@ -177,6 +180,7 @@ public class AnetEmailWorker implements Runnable {
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
+			context.put("TASK_SHORT_LABEL", task.get("shortLabel"));
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
 			
 			temp.process(context, writer);
