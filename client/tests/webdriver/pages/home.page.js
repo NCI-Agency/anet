@@ -8,7 +8,7 @@ class Home extends Page {
 
     waitForSecurityBannerValue(value) {
         this.securityBanner.waitForExist()
-		this.securityBanner.waitForVisible()
+        this.securityBanner.waitForVisible()
         return browser.waitUntil( () => {
             return this.securityBanner.getText() ===  value
           }, 5000, 'Expected different banner text after 5s')
