@@ -150,7 +150,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
 		const supportEmailMessage = supportEmail ? `(${supportEmail})` : ''
-		const warningMessageNoPosition = `You do not have an active position and cannot submit a report, please contact the support team ${supportEmailMessage} and request them to set your position status to active`
+		const warningMessageNoPosition = `You cannot submit a report. Your assigned advisor position has an inactive status. Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage}`
 		return <div className="report-form">
 
 			<Collapse in={showAutoSaveBanner}>

@@ -99,7 +99,7 @@ export default class ReportShow extends Page {
 	renderNoPositionAssignedText() {
 		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
-		return <div className="alert alert-warning">Notice: This report cannot be submitted because you do not have an assigned or active position.<br /> -- please contact the support team {supportEmailMessage} --</div>
+		return <div className="alert alert-warning">You cannot submit a report. Your assigned advisor position has an inactive status.<br /> -- Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage} --</div>
 	}
 
 	render() {
