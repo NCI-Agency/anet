@@ -14,9 +14,12 @@ import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
 import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
+
 import moment from 'moment'
+import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
+import dict from 'dictionary'
 import {Report, Person} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
@@ -49,6 +52,9 @@ export default class ReportForm extends ValidatableFormWrapper {
 			showReportText: false,
 			isCancelled: (props.report.cancelledReason ? true : false),
 			errors: {},
+
+			showActivePositionWarning: false,
+			disableOnSubmit: false,
 
 			//State for auto-saving reports
 			reportChanged: false, //Flag to determine if we need to auto-save.
@@ -96,6 +102,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 
 	componentWillReceiveProps(nextProps) {
+		const { currentUser } = this.context
+
+		if (currentUser.hasAssignedPosition()) {
+			this.setState({showActivePositionWarning: !currentUser.hasActivePosition()})
+		}
+
 		let report = nextProps.report
 		if (report.cancelledReason) {
 			this.setState({isCancelled: true})
@@ -116,12 +128,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	render() {
 		const { currentUser } = this.context
-		let {report, onDelete} = this.props
+		const {report, onDelete} = this.props
 		const { edit } = this.props
-		let {recents, suggestionList, errors, isCancelled, showAutoSaveBanner} = this.state
+		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, showActivePositionWarning} = this.state
 
-		let hasErrors = Object.keys(errors).length > 0
-		let isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
+		const hasErrors = Object.keys(errors).length > 0
+		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
 
 		const invalidInputWarningMessage = <HelpBlock><b>
 			<img src={WARNING_ICON} role="presentation" height="20px" />
@@ -133,15 +145,25 @@ export default class ReportForm extends ValidatableFormWrapper {
 		</HelpBlock>
 
 		const {ValidatableForm, RequiredField} = this
+		const submitText = currentUser.hasActivePosition() ? 'Preview and submit' : 'Save draft'
+		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 
-		const submitText = currentUser.hasAssignedPosition() ? 'Preview and submit' : 'Save draft'
-
+		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
+		const supportEmailMessage = supportEmail ? `(${supportEmail})` : ''
+		const warningMessageNoPosition = `You cannot submit a report. Your assigned advisor position has an inactive status. Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage}`
 		return <div className="report-form">
+
 			<Collapse in={showAutoSaveBanner}>
-				<div className="banner" style={{top:132, background: '#DFF0D8', color: '#3c763d'}}>
+				<div className="alert alert-success" style={alertStyle}>
 					Your report has been automatically saved
 				</div>
 			</Collapse>
+
+			{showActivePositionWarning &&
+				<div className="alert alert-warning" style={alertStyle}>
+					{warningMessageNoPosition}
+				</div>
+			}
 
 			<ValidatableForm formFor={report} horizontal onSubmit={this.onSubmit} onChange={this.onChange}
 				onDelete={onDelete} deleteText="Delete this report"
@@ -465,8 +487,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 			delete report.cancelledReason
 		}
 
+		if (disableSubmits) {
+			this.setState({disableOnSubmit: disableSubmits})
+		}
+
 		let url = `/api/reports/${edit ? 'update' : 'new'}?sendEditEmail=${disableSubmits}`
-		return API.send(url, report, {disableSubmits: disableSubmits})
+		return API.send(url, report, {disableSubmits})
 	}
 
 	@autobind
@@ -489,7 +515,10 @@ export default class ReportForm extends ValidatableFormWrapper {
 				})
 			})
 			.catch(response => {
-				this.setState({error: {message: response.message || response.error}})
+				this.setState({
+					error: {message: response.message || response.error},
+					disableOnSubmit: false
+				})
 				window.scrollTo(0, 0)
 			})
 	}
