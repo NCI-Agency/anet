@@ -31,9 +31,9 @@ public class TaskDao implements IAnetDao<Task> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getAllTasks */ SELECT tasks.*, COUNT(*) OVER() AS totalCount "
-					+ "FROM tasks ORDER BY createdAt ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
+					+ "FROM tasks ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else { 
-			sql = "/* getAllTasks */ SELECT * from tasks ORDER BY createdAt ASC LIMIT :limit OFFSET :offset";
+			sql = "/* getAllTasks */ SELECT * from tasks ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		Query<Task> query = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
@@ -57,8 +57,8 @@ public class TaskDao implements IAnetDao<Task> {
 		p.setCreatedAt(DateTime.now());
 		p.setUpdatedAt(DateTime.now());
 		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* inserTask */ INSERT INTO tasks "
-				+ "(longName, shortName, category, parentTaskId, organizationId, createdAt, updatedAt, status, "
-				+ "customField, customFieldEnum, plannedCompletion, projectedCompletion) "
+				+ "(\"longName\", \"shortName\", category, \"parentTaskId\", \"organizationId\", \"createdAt\", \"updatedAt\", status, "
+				+ "\"customField\", \"customFieldEnum\", \"plannedCompletion\", \"projectedCompletion\") "
 				+ "VALUES (:longName, :shortName, :category, :parentTaskId, :organizationId, :createdAt, :updatedAt, :status, "
 				+ ":customField, :customFieldEnum, :plannedCompletion, :projectedCompletion)")
 			.bindFromProperties(p)
@@ -73,11 +73,11 @@ public class TaskDao implements IAnetDao<Task> {
 	@Override
 	public int update(Task p) { 
 		p.setUpdatedAt(DateTime.now());
-		return dbHandle.createStatement("/* updateTask */ UPDATE tasks set longName = :longName, shortName = :shortName, "
-				+ "category = :category, parentTaskId = :parentTaskId, updatedAt = :updatedAt, "
-				+ "organizationId = :organizationId, status = :status, "
-				+ "customField = :customField, customFieldEnum = :customFieldEnum, "
-				+ "plannedCompletion = :plannedCompletion, projectedCompletion = :projectedCompletion "
+		return dbHandle.createStatement("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
+				+ "category = :category, \"parentTaskId\" = :parentTaskId, \"updatedAt\" = :updatedAt, "
+				+ "\"organizationId\" = :organizationId, status = :status, "
+				+ "\"customField\" = :customField, \"customFieldEnum\" = :customFieldEnum, "
+				+ "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion "
 				+ "WHERE id = :id")
 			.bindFromProperties(p)
 			.bind("parentTaskId", DaoUtils.getId(p.getParentTask()))
@@ -89,7 +89,7 @@ public class TaskDao implements IAnetDao<Task> {
 	public int setResponsibleOrgForTask(Task p, Organization org) { 
 		p.setUpdatedAt(DateTime.now());
 		return dbHandle.createStatement("/* setReponsibleOrgForTask */ UPDATE tasks "
-				+ "SET organizationId = :orgId, updatedAt = :updatedAt WHERE id = :id")
+				+ "SET \"organizationId\" = :orgId, \"updatedAt\" = :updatedAt WHERE id = :id")
 			.bind("orgId", DaoUtils.getId(org))
 			.bind("id", p.getId())
 			.bind("updatedAt", p.getUpdatedAt())
@@ -97,7 +97,7 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 	
 	public List<Task> getTasksByParentId(int parentTaskId) { 
-		return dbHandle.createQuery("/* getTasksByParent */ SELECT * from tasks where parentTaskId = :parentTaskId")
+		return dbHandle.createQuery("/* getTasksByParent */ SELECT * from tasks where \"parentTaskId\" = :parentTaskId")
 			.bind("parentTaskId", parentTaskId)
 			.map(new TaskMapper())
 			.list();
@@ -111,18 +111,18 @@ public class TaskDao implements IAnetDao<Task> {
 		} else { 
 			sql.append("WITH RECURSIVE");
 		}
-		sql.append(" parent_tasks(id, shortName, longName, category, parentTaskId, "
-				+ "organizationId, createdAt, updatedAt, status,"
-				+ "customField, customFieldEnum, plannedCompletion, projectedCompletion) AS ("
-				+ "SELECT id, shortName, longName, category, parentTaskId, "
-				+ "organizationId, createdAt, updatedAt, status, "
-				+ "customField, customFieldEnum, plannedCompletion, projectedCompletion "
+		sql.append(" parent_tasks(id, \"shortName\", \"longName\", category, \"parentTaskId\", "
+				+ "\"organizationId\", \"createdAt\", \"updatedAt\", status,"
+				+ "\"customField\", \"customFieldEnum\", \"plannedCompletion\", \"projectedCompletion\") AS ("
+				+ "SELECT id, \"shortName\", \"longName\", category, \"parentTaskId\", "
+				+ "\"organizationId\", \"createdAt\", \"updatedAt\", status, "
+				+ "\"customField\", \"customFieldEnum\", \"plannedCompletion\", \"projectedCompletion\" "
 				+ "FROM tasks WHERE id = :taskId "
 			+ "UNION ALL "
-				+ "SELECT p.id, p.shortName, p.longName, p.category, p.parentTaskId, "
-				+ "p.organizationId, p.createdAt, p.updatedAt, p.status, "
-				+ "p.customField, p.customFieldEnum, p.plannedCompletion, p.projectedCompletion "
-				+ "FROM parent_tasks pp, tasks p WHERE p.parentTaskId = pp.id "
+				+ "SELECT p.id, p.\"shortName\", p.\"longName\", p.category, p.\"parentTaskId\", "
+				+ "p.\"organizationId\", p.\"createdAt\", p.\"updatedAt\", p.status, "
+				+ "p.\"customField\", p.\"customFieldEnum\", p.\"plannedCompletion\", p.\"projectedCompletion\" "
+				+ "FROM parent_tasks pp, tasks p WHERE p.\"parentTaskId\" = pp.id "
 			+ ") SELECT * from parent_tasks;");
 		return dbHandle.createQuery(sql.toString())
 			.bind("taskId", taskId)
@@ -131,7 +131,7 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 
 	public List<Task> getTopLevelTasks() {
-		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE parentTaskId IS NULL")
+		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"parentTaskId\" IS NULL")
 			.map(new TaskMapper())
 			.list();
 	}
@@ -145,19 +145,19 @@ public class TaskDao implements IAnetDao<Task> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = 0 AND tasks.id IN (" // TODO: convert to a safe check for status = active
-					+ "SELECT TOP(:maxResults) reportTasks.taskId "
-					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
-					+ "WHERE authorId = :authorId " 
-					+ "GROUP BY taskId "
-					+ "ORDER BY MAX(reports.createdAt) DESC"
+					+ "SELECT TOP(:maxResults) \"reportTasks\".\"taskId\" "
+					+ "FROM reports JOIN \"reportTasks\" ON reports.id = \"reportTasks\".\"reportId\" "
+					+ "WHERE \"authorId\" = :authorId "
+					+ "GROUP BY \"taskId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
 			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = 0 AND tasks.id IN (" // TODO: convert to a safe check for status = active
-					+ "SELECT reportTasks.taskId "
-					+ "FROM reports JOIN reportTasks ON reports.id = reportTasks.reportId "
-					+ "WHERE authorId = :authorId "
-					+ "GROUP BY taskId "
-					+ "ORDER BY MAX(reports.createdAt) DESC "
+					+ "SELECT \"reportTasks\".\"taskId\" "
+					+ "FROM reports JOIN \"reportTasks\" ON reports.id = \"reportTasks\".\"reportId\" "
+					+ "WHERE \"authorId\" = :authorId "
+					+ "GROUP BY \"taskId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
@@ -169,7 +169,7 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 
 	public List<Task> getTasksByOrganizationId(Integer orgId) {
-		return dbHandle.createQuery("/* getTasksByOrg */ SELECT * from tasks WHERE organizationId = :orgId")
+		return dbHandle.createQuery("/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationId\" = :orgId")
 			.bind("orgId", orgId)
 			.map(new TaskMapper())
 			.list();

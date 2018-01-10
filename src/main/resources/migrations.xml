@@ -424,7 +424,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="14" author="hpitelka"  dbms="mssql" >
+	<changeSet id="14" author="hpitelka"  dbms="!sqlite" >
 		<addForeignKeyConstraint baseColumnNames="organizationId" baseTableName="poams"
 			constraintName="fk_poams_org" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="organizations" />
@@ -893,6 +893,22 @@
 		<addForeignKeyConstraint baseColumnNames="parentTaskId" baseTableName="tasks"
 			constraintName="fk_tasks_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="tasks" />
+		<rollback>
+			<!-- sadly, 'dropforeignkeyconstraint' does not have an auto-rollback, so we have to do a manual rollback for everything -->
+			<renameColumn
+				columnDataType="int"
+				newColumnName="parentPoamId"
+				oldColumnName="parentTaskId"
+				tableName="tasks" />
+			<renameTable
+				newTableName="poams"
+				oldTableName="tasks" />
+			<dropForeignKeyConstraint baseTableName="poams" constraintName="fk_tasks_parent"/>
+			<addForeignKeyConstraint baseColumnNames="parentPoamId" baseTableName="poams"
+				constraintName="fk_poams_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
+				referencedColumnNames="id" referencedTableName="poams" />
+
+		</rollback>
 	</changeSet>
 
 	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt">

@@ -19,6 +19,8 @@ my $identifiers = qr/
   | cancelledReason
   | createdAt
   | currentPersonId
+  | customField
+  | customFieldEnum
   | domainUsername
   | emailAddress
   | endOfTourDate
@@ -35,26 +37,28 @@ my $identifiers = qr/
   | organizationId
   | ownerId
   | parentOrgId
-  | parentPoamId
+  | parentTaskId
   | pendingEmails
   | pendingVerification
   | peoplePositions
   | personId
   | phoneNumber
-  | poamId
+  | plannedCompletion
   | positionId
   | positionId_a
   | positionId_b
   | positionRelationships
   | principalOrganizationId
+  | projectedCompletion
   | releasedAt
   | reportId
   | reportPeople
-  | reportPoams
+  | reportTasks
   | reportTags
   | savedSearches
   | shortName
   | tagId
+  | taskId
   | updatedAt
  )\b
  (?!") # this should allow us to skip field lists without missing anything else
