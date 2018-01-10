@@ -878,7 +878,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="renamePoams-to-Tasks" author="evdhoudt">
+	<changeSet id="renamePoams-to-Tasks" author="evdhoudt" dbms="!sqlite">
 		<!-- Tasks -->
 		<renameTable
 			newTableName="tasks"
@@ -911,7 +911,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt">
+	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt" dbms="!sqlite">
 		<!-- Report Tasks -->
 		<renameTable
 			newTableName="reportTasks"
@@ -923,7 +923,33 @@
 			tableName="reportTasks" />
 	</changeSet>
 
-	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt">
+	<changeSet id="renamePoams-to-Tasks-sqlite-combined-tables" author="bwarfield" dbms="sqlite">
+		<comment>Rename poams and taskPoams, and add new columns.</comment>
+		<!-- Tasks -->
+		<renameTable
+			newTableName="tasks"
+			oldTableName="poams" />
+		<!-- reportTasks -->
+		<renameTable
+			newTableName="reportTasks"
+			oldTableName="reportPoams" />
+	</changeSet>
+
+	<changeSet id="renamePoams-to-Tasks-sqlite-combined-columns" author="bwarfield" dbms="sqlite">
+		<comment>Create and populate new task ID columns, but leave the old ones in place because sqlite does not support dropping columns.</comment>
+		<sql>
+			ALTER TABLE tasks add column parentTaskId int;
+			ALTER TABLE reportTasks add column taskId int;
+			UPDATE tasks set parentTaskId = parentPoamId;
+			UPDATE reportTasks set taskId = poamId;
+		</sql>
+		<rollback>
+			UPDATE tasks set parentPoamId = parentTaskId;
+			UPDATE reportTasks set poamId = taskId;
+		</rollback>
+	</changeSet>
+
+	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt" dbms="!sqlite">
 		<dropUniqueConstraint tableName="reportTasks" constraintName="uniqueReportPoam"/>
 		<addUniqueConstraint tableName="reportTasks" columnNames="taskId, reportId" constraintName="uniqueReportTask" />
 
