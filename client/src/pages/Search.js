@@ -2,6 +2,7 @@ import React from 'react'
 import Page from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge, Pagination} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
+import pluralize from 'pluralize'
 
 import Fieldset from 'components/Fieldset'
 import {ContentForNav} from 'components/Nav'
@@ -266,7 +267,7 @@ export default class Search extends Page {
 							</NavItem>
 
 							<NavItem eventKey="tasks" disabled={!numTasks}>
-								<img src={TASKS_ICON} role="presentation" /> {taskShortLabel}s
+								<img src={TASKS_ICON} role="presentation" /> {pluralize(taskShortLabel)}
 								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
 
@@ -317,7 +318,7 @@ export default class Search extends Page {
 				}
 
 				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
-					<Fieldset title={taskShortLabel + 's'}>
+					<Fieldset title={pluralize(taskShortLabel)}>
 						{this.renderTasks()}
 					</Fieldset>
 				}

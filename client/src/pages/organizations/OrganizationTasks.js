@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {Table, Pagination} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
+import pluralize from 'pluralize'
 
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
@@ -25,7 +26,7 @@ export default class OrganizationTasks extends Component {
 		const isAdminUser = currentUser && currentUser.isAdmin()
 		const taskShortLabel = Settings.TASK.shortLabel
 
-		return <Fieldset id="tasks" title={`${taskShortLabel}s`} action={
+		return <Fieldset id="tasks" title={pluralize(taskShortLabel)} action={
 			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortLabel}</LinkTo>
 		}>
 			{this.pagination()}
@@ -47,7 +48,7 @@ export default class OrganizationTasks extends Component {
 				</tbody>
 			</Table>
 
-			{tasks.length === 0 && <em>This organization doesn't have any {taskShortLabel}s</em>}
+			{tasks.length === 0 && <em>This organization doesn't have any {pluralize(taskShortLabel)}</em>}
 		</Fieldset>
 	}
 

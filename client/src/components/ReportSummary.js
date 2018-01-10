@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {Grid, Row, Col, Label} from 'react-bootstrap'
 import utils from 'utils'
+import pluralize from 'pluralize'
 
 import LinkTo from 'components/LinkTo'
 import ReportApprovals from 'components/ReportApprovals'
@@ -114,7 +115,7 @@ export default class ReportSummary extends Component {
 			</Row>
 			<Row>
 				<Col md={12}>
-					{report.tasks.length > 0 && <span><strong>{Settings.TASK.shortLabel}s:</strong> {report.tasks.map((task,i) =>
+					{report.tasks.length > 0 && <span><strong>{pluralize(Settings.TASK.shortLabel)}:</strong> {report.tasks.map((task,i) =>
     {return task.shortName + (i < report.tasks.length - 1 ? ", " : "")})}</span> }
 				</Col>
 			</Row>

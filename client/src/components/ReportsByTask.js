@@ -10,6 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 import LoaderHOC from '../HOC/LoaderHOC'
 import Settings from 'Settings'
 
+import pluralize from 'pluralize'
+
 const d3 = require('d3')
 const chartByTaskId = 'reports_by_task'
 
@@ -81,7 +83,7 @@ export default class ReportsByTask extends Component {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
-    const allTasks = `All ${Settings.TASK.shortLabel}s`
+    const allTasks = `All ${pluralize(Settings.TASK.shortLabel)}`
 
     if (this.state.focusedTask) {
       titleSuffix = `for ${this.state.focusedTask.shortName}`

@@ -5,6 +5,7 @@ import {Injectable, Injector} from 'react-injectables'
 import {Scrollspy} from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
+import pluralize from 'pluralize'
 
 import {Organization} from 'models'
 
@@ -50,7 +51,7 @@ class Nav extends Component {
 				<AnchorLink scrollTo="info">Info</AnchorLink>
 				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
 				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="tasks">{Settings.TASK.shortLabel}s</AnchorLink>
+				<AnchorLink scrollTo="tasks">{pluralize(Settings.TASK.shortLabel)}</AnchorLink>
 				<AnchorLink scrollTo="reports">Reports</AnchorLink>
 			</SubNav>
 		)

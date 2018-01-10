@@ -1,6 +1,7 @@
 import History from 'components/History'
 import {Organization} from 'models'
 import Settings from 'Settings'
+import pluralize from 'pluralize'
 
 const userTour = (currentUser) => { return {
 	id: 'home',
@@ -146,7 +147,7 @@ const reportTour = (currentUser) => {
 			placement: 'bottom',
 		},
 		{
-			title: taskShortLabel + 's',
+			title: pluralize(taskShortLabel),
 			content: 'Search for the ' + taskShortLabel + 's that apply to this engagement. You can search for ' + taskShortLabel + 's in any organization, including your organization and its sub-organizations. ' + taskShortLabel + 's are not required.',
 			target: '#tasks',
 			placement: 'right',
@@ -220,7 +221,7 @@ const orgTour = (currentUser) => {
 			placement: 'top',
 		},
 		{
-			title: taskShortLabel + 's',
+			title: pluralize(taskShortLabel),
 			content: 'The ' + Settings.TASK.longLabel + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortLabel + 's change, you can update that information by clicking on the ' + taskShortLabel + '.',
 			target: '#tasks h2',
 			placement: 'top',

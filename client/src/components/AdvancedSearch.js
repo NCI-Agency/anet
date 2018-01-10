@@ -2,8 +2,9 @@ import React, {Component, PropTypes} from 'react'
 import {Button, DropdownButton, MenuItem, Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import _isequal from 'lodash/isEqual'
-import Settings from 'Settings'
+import pluralize from 'pluralize'
 
+import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import History from 'components/History'
 
@@ -178,7 +179,7 @@ export default class AdvancedSearch extends Component {
 		filters.Locations = {filters: {}}
 
 		//Task filters
-		filters[taskShortLabel + 's'] = {
+		filters[pluralize(taskShortLabel)] = {
 			filters: {
 				Organization: <OrganizationFilter
 					queryKey="responsibleOrgId"
