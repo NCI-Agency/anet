@@ -4,6 +4,10 @@ logs/*
 *.sqp
 *.swp
 
+# Ignore all hidden but itself
+.*
+!/.gitignore
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
