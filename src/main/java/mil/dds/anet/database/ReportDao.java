@@ -397,7 +397,7 @@ public class ReportDao implements IAnetDao<Report> {
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		StringBuilder sql = new StringBuilder();
 
-		sql.append("/* AdvisorReportInsightsQuery */");
+		sql.append("/* AdvisorReportInsightsQuery */ ");
 		sql.append("SELECT ");
 		sql.append("CASE WHEN a.\"organizationId\" IS NULL THEN b.\"organizationId\" ELSE a.\"organizationId\" END AS \"organizationId\",");
 		sql.append("CASE WHEN a.organizationShortName IS NULL THEN b.organizationShortName ELSE a.organizationShortName END AS organizationShortName,");

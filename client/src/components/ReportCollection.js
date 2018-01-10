@@ -6,7 +6,7 @@ import ReportSummary from 'components/ReportSummary'
 import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Leaflet from 'components/Leaflet'
-import _get from 'lodash.get'
+import _get from 'lodash/get'
 
 const FORMAT_SUMMARY = 'summary'
 const FORMAT_TABLE = 'table'

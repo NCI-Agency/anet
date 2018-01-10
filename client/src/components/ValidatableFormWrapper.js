@@ -4,9 +4,9 @@ import autobind from 'autobind-decorator'
 
 import utils from 'utils'
 
-import _some from 'lodash.some'
-import _values from 'lodash.values'
-import _get from 'lodash.get'
+import _some from 'lodash/some'
+import _values from 'lodash/values'
+import _get from 'lodash/get'
 
 export default class ValidatableFormWrapper extends Component {
 	constructor() {
@@ -20,7 +20,8 @@ export default class ValidatableFormWrapper extends Component {
 			const formErrors = _values(this.state.formErrors)
 			// see notes below about three levels of error states. here we just check that
 			// it's actually an error that we want to block.
-			return !props.canSubmitWithError && _some(formErrors, value => value >= 2)
+			const disableSubmit = this.state.disableOnSubmit || props.submitDisabled
+			return disableSubmit || (!props.canSubmitWithError && _some(formErrors, value => value >= 2))
 		}
 
 		const onSubmit = () => {

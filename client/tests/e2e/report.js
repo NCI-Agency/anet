@@ -1,6 +1,6 @@
 let test = require('../util/test'),
     moment = require('moment'),
-    _includes = require('lodash.includes')
+    _includes = require('lodash/includes')
 
 test('Draft and submit a report', async t => {
     t.plan(16)

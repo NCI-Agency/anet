@@ -60,7 +60,7 @@ dependencies {
 	// Used for converting GraphQL GET request output to XML:
 	compile 'org.json:json:20170516'
 
-	compile files('lib/sqljdbc42.jar') // This contains the com.microsoft.sqlserver.jdbc driver package
+	compile "com.microsoft.sqlserver:mssql-jdbc:6.2.2.jre8"
 	
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '3.17'
