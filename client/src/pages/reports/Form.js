@@ -10,13 +10,13 @@ import Form from 'components/Form'
 import TextEditor from 'components/TextEditor'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import PoamsSelector from 'components/PoamsSelector'
+import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
 import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 
 import moment from 'moment'
-import _isEmpty from 'lodash.isempty'
+import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
 import dict from 'dictionary'
@@ -44,7 +44,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			recents: {
 				persons: [],
 				locations: [],
-				poams: [],
+				tasks: [],
 			},
 			tagList: [],
 			suggestionList: [],
@@ -73,7 +73,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			personList(f:recents, maxResults:6) {
 				list { id, name, rank, role, position { id, name, organization {id, shortName}} }
 			}
-			poamList(f:recents, maxResults:6) {
+			taskList(f:recents, maxResults:6) {
 				list { id, shortName, longName }
 			}
 			tagList(f:getAll) {
@@ -84,7 +84,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 				recents: {
 					locations: data.locationList.list,
 					persons: data.personList.list,
-					poams: data.poamList.list,
+					tasks: data.taskList.list,
 				},
 				tagList: data.tagList.list,
 				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
@@ -288,7 +288,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 							<Form.Field.ExtraCol className="shortcut-list">
 								<h5>Recent attendees</h5>
 								{Person.map(recents.persons, person =>
-									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add {person.name}</Button>
+									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add {person.name} {person.rank}</Button>
 								)}
 							</Form.Field.ExtraCol>
 						}
@@ -296,11 +296,11 @@ export default class ReportForm extends ValidatableFormWrapper {
 				</Fieldset>
 
 				{!isCancelled &&
-					<PoamsSelector poams={report.poams}
-						shortcuts={recents.poams}
+					<TaskSelector tasks={report.tasks}
+						shortcuts={recents.tasks}
 						onChange={this.onChange}
-						onErrorChange={this.onPoamError}
-						validationState={errors.poams}
+						onErrorChange={this.onTaskError}
+						validationState={errors.tasks}
 						optional={true} />
 				}
 
@@ -405,12 +405,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 
 	@autobind
-	onPoamError(isError, message) {
+	onTaskError(isError, message) {
 		let errors = this.state.errors
 		if (isError) {
-			errors.poams = 'error'
+			errors.tasks = 'error'
 		} else {
-			delete errors.poams
+			delete errors.tasks
 		}
 		this.setState({errors})
 	}

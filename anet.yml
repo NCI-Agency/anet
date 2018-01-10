@@ -31,6 +31,7 @@ smtp:
   password: ${ANET_SMTP_PASSWORD}
   startTls: true
   disabled: true
+  nbOfHoursForStaleEmails: 72
 
 # The email address that all automated emails should come from. 
 # ex: "ANET <anet@example.com>"
@@ -91,8 +92,10 @@ server:
         currentLogFilename: ./logs/access.log
         archivedLogFilenamePattern: ./logs/access-%d.log.zip
         archivedFileCount: 5
+        logFormat: '[%t{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %h %l %u "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D'
       - type: console
         target: stdout
+        logFormat: '[%t{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %h %l %u "%r" %s %b "%i{Referer}" "%i{User-Agent}" %D'
 
 # Configuration for the Freemarker templating library
 views:
@@ -111,6 +114,7 @@ logging:
           currentLogFilename: ./logs/dbLog.log
           archivedLogFilenamePattern: ./logs/dbLog-%d.log.zip
           archivedFileCount: 2
+          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     "org.sqlite.JDBC" : INFO
     "io.dropwizard.assets.AssetsBundle" : TRACE
     "io.dropwizard.assets.*" : TRACE
@@ -125,6 +129,7 @@ logging:
           currentLogFilename: ./logs/testingLogger.log
           archivedLogFilenamePattern: ./logs/testingLogger-%d.log.zip
           archivedFileCount: 2
+          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     "mil.dds.anet.utils.AnetAuditLogger" :
       level: INFO
       appenders:
@@ -132,15 +137,18 @@ logging:
           currentLogFilename: ./logs/auditLogger.log
           archivedLogFilenamePattern: ./logs/auditLogger-%d.log.zip
           archivedFileCount: 2
+          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
   appenders:
     - type: console
       threshold: TRACE
       target: stdout
+      logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     - type: file
       threshold: INFO
       currentLogFilename: ./logs/anet.log
       archivedLogFilenamePattern: ./logs/anet-%d.log.zip
       archivedFileCount: 2
+      logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
 
 dictionary:
   PRINCIPAL_PERSON_TITLE: Afghan Partner
@@ -152,8 +160,13 @@ dictionary:
   ADMINISTRATOR_POSITION_TYPE_TITLE: ANET Administrator
   PRINCIPAL_ORG_NAME: Afghan Government Organization
   ADVISOR_ORG_NAME: Advisor Organization
-  POAM_LONG_NAME: Plan of Action and Milestones / Pillars
-  POAM_SHORT_NAME: PoAM
+  TASK:
+    shortLabel: Task
+    longLabel: Tasks and Milestones
+  TASK_PROJECTED_COMPLETION: 'Fill in the projected completion date'
+  TASK_PLANNED_COMPLETION: 'Fill in the planned completion date'
+  TASK_CUSTOM_ENUM_LABEL: 'Project status'
+  TASK_CUSTOM_FIELD: 'Custom field'
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
   PRINCIPAL_ORG_LABEL_LONGNAME: Official Organization Name
   PRINCIPAL_ORG_PLACEHOLDER_LONGNAME: e.g. Afghan Ministry of Defense
@@ -244,3 +257,6 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
+  'taskCustomEnum':
+    OPEN: Open
+    CLOSED: Closed

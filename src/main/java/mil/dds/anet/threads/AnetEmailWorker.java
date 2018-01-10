@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -60,9 +61,11 @@ public class AnetEmailWorker implements Runnable {
 	private Authenticator auth;
 	private String fromAddr;
 	private String serverUrl;
+	private Map<String, Object> task;
 	private Configuration freemarkerConfig;
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
+	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
 	
 	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) { 
@@ -75,6 +78,7 @@ public class AnetEmailWorker implements Runnable {
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+		this.task = (Map<String, Object>) config.getDictionary().get("TASK");
 		instance = this;
 		
 		SmtpConfiguration smtpConfig = config.getSmtp();
@@ -83,7 +87,8 @@ public class AnetEmailWorker implements Runnable {
 		props.put("mail.smtp.host", smtpConfig.getHostname());
 		props.put("mail.smtp.port", smtpConfig.getPort().toString());
 		auth = null;
-		
+		this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
+
 		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) { 
 			props.put("mail.smtp.auth", "true");
 			auth = new javax.mail.Authenticator() {
@@ -116,29 +121,35 @@ public class AnetEmailWorker implements Runnable {
 	
 	private void runInternal() {
 		//check the database for any emails we need to send. 
-		List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM pendingEmails ORDER BY createdAt ASC")
+		final List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM pendingEmails ORDER BY createdAt ASC")
 				.map(emailMapper)
 				.list();
 		
 		//Send the emails!
-		List<Integer> sentEmails = new LinkedList<Integer>();
-		for (AnetEmail email : emails) { 
-			try {
-				if (disabled) {
-					logger.info("Disabled, not sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
-				} else {
-					logger.info("Sending email to {} re: {}",email.getToAddresses(), email.getAction().getSubject());
-					sendEmail(email);
+		final List<Integer> processedEmails = new LinkedList<Integer>();
+		for (final AnetEmail email : emails) {
+			if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(DateTime.now().minusHours(nbOfHoursForStaleEmails))) {
+				logger.info("Purging stale email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
+				processedEmails.add(email.getId());
+			}
+			else {
+				try {
+					if (disabled) {
+						logger.info("Disabled, not sending email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
+					} else {
+						logger.info("Sending email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
+						sendEmail(email);
+					}
+					processedEmails.add(email.getId());
+				} catch (Exception e) {
+					logger.error("Error sending email", e);
 				}
-				sentEmails.add(email.getId());
-			} catch (Exception e) { 
-				logger.error("Error sending email", e);
 			}
 		}
 		
 		//Update the database.
-		if (sentEmails.size() > 0) {
-			String emailIds = Joiner.on(", ").join(sentEmails);
+		if (!processedEmails.isEmpty()) {
+			final String emailIds = Joiner.on(", ").join(processedEmails);
 			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM pendingEmails WHERE id IN (" + emailIds + ")").execute();
 		}
 	}
@@ -169,6 +180,7 @@ public class AnetEmailWorker implements Runnable {
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
+			context.put("TASK_SHORT_LABEL", task.get("shortLabel"));
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
 			
 			temp.process(context, writer);

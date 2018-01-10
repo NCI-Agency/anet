@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {Button, DropdownButton, MenuItem, Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import _isequal from 'lodash.isequal'
+import _isequal from 'lodash/isEqual'
 import dict from 'dictionary'
 
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
@@ -13,7 +13,7 @@ import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 
-import {Person, Poam, Position} from 'models'
+import {Person, Task, Position} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -92,15 +92,15 @@ export default class AdvancedSearch extends Component {
 			}
 		}
 
-		let poamShortName = dict.lookup('POAM_SHORT_NAME')
-		filters.Reports.filters[poamShortName] =
+		let taskShortLabel = dict.lookup('TASK').shortLabel
+		filters.Reports.filters[taskShortLabel] =
 			<AutocompleteFilter
-				queryKey="poamId"
-				objectType={Poam}
-				fields={Poam.autocompleteQuery}
-				template={Poam.autocompleteTemplate}
+				queryKey="taskId"
+				objectType={Task}
+				fields={Task.autocompleteQuery}
+				template={Task.autocompleteTemplate}
 				valueKey="shortName"
-				placeholder={`Filter reports by ${poamShortName}...`}
+				placeholder={`Filter reports by ${taskShortLabel}...`}
 			/>
 
 
@@ -177,8 +177,8 @@ export default class AdvancedSearch extends Component {
 		//No filters on Location
 		filters.Locations = {filters: {}}
 
-		//Poam filters
-		filters[poamShortName + 's'] = {
+		//Task filters
+		filters[taskShortLabel + 's'] = {
 			filters: {
 				Organization: <OrganizationFilter
 					queryKey="responsibleOrgId"

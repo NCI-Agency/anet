@@ -1,6 +1,6 @@
 let test = require('../util/test'),
     moment = require('moment'),
-    _includes = require('lodash.includes')
+    _includes = require('lodash/includes')
 
 test('Draft and submit a report', async t => {
     t.plan(16)
@@ -42,20 +42,20 @@ test('Draft and submit a report', async t => {
         'on', 
         'Principal primary attendee checkbox should be checked'
     )
-    await assertElementText(t, $principalName, 'TOPFERNESS, Christopf')
+    await assertElementText(t, $principalName, 'TOPFERNESS, Christopf CIV')
     await assertElementText(t, $principalPosition, 'Planning Captain')
     await assertElementText(t, $principalOrg, 'MoD')
 
-    let $poamsAutocomplete = await pageHelpers.chooseAutocompleteOption('#poams', '1.1.B')
+    let $tasksAutocomplete = await pageHelpers.chooseAutocompleteOption('#tasks', '1.1.B')
 
     t.is(
-        await $poamsAutocomplete.getAttribute('value'), 
+        await $tasksAutocomplete.getAttribute('value'), 
         '', 
-        'Clicking a PoAM autocomplete suggestion empties the autocomplete field.'
+        'Clicking a Task autocomplete suggestion empties the autocomplete field.'
     )
 
-    let $newPoamRow = await $('.poams-selector table tbody tr td')
-    await assertElementText(t, $newPoamRow, '1.1.B - Milestone the Second in EF 1.1')
+    let $newTaskRow = await $('.tasks-selector table tbody tr td')
+    await assertElementText(t, $newTaskRow, '1.1.B - Milestone the Second in EF 1.1')
 
     await pageHelpers.writeInForm('#keyOutcomes', 'key outcomes')
     await pageHelpers.writeInForm('#nextSteps', 'next steps')

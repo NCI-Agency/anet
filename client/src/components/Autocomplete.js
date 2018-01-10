@@ -2,7 +2,7 @@ import React, {Component, PropTypes} from 'react'
 import {FormControl} from 'react-bootstrap'
 import Autosuggest from 'react-autosuggest-ie11-compatible'
 import autobind from 'autobind-decorator'
-import _debounce from 'lodash.debounce'
+import _debounce from 'lodash/debounce'
 
 import API from 'api'
 import utils from 'utils'

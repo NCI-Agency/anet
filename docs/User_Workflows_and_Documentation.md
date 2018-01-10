@@ -32,14 +32,14 @@ You have a couple of options for when you create your reports. If you create a d
 Here’s how you draft and submit a report:
 
 1. From the home page, find the “New Report” button. It’ll be towards the top right of the page. If you’re a Super User or Administrator, you’ll need to click onto the “Create” button and select “New Report” from the options. 
-2. This button will take you to a page called “Create a new report”. You’ll enter information in the fields on the page. Some fields are required, while others (like PoAMs) are optional. 
+2. This button will take you to a page called “Create a new report”. You’ll enter information in the fields on the page. Some fields are required, while others (like Tasks) are optional. 
 3. Meeting Goal: First, fill out what the goal of the meeting was. This field will be used to populate the executive summary used in the daily rollup, so it’s best to complete the sentence “The goal of the is meeting is to”. 
 4. Engagement date: Next you’ll select the engagement date. When you click into the field, a calendar will display showing the current month. You can press the “today” button at the bottom to easily select the current day, or select another date.
 5. Location: As you being to type the location where the engagement happened, results that match what you’ve typed will begin to appear. You can keep typing, or select one of the options from the dropdown. If what you’ve entered has no matches, the box will turn red. If you’ve typed in your location properly and it does not appear, ask your Super User to add that location to ANET. 
 6. Cancelled engagements: If your engagement was cancelled, select the checkbox next to “This engagement was cancelled”. When you select that option, you’ll be prompted to select the reason for why the engagement was cancelled. Some fields on the form will no longer be visible. You’ll only need to fill out meeting attendance and next steps after this point. You can add detailed comments if you’d like. 
 7. Atmosphere: You can record the engagement’s atmosphere, by selecting the thumbs up icon for a positive atmosphere during your engagement, the neutral face for engagements that were neither positive nor negative, and the thumbs down icon for negative engagement. If you select either neutral or negative icons, you’ll be prompted to add details explaining why it was not positive.
 8. Meeting Attendance: In this section, you can add the advisors and principals who attended your engagements. By default, you will be listed in this section. People you have added in recent reports will appear in the “Shortcuts” section on the right-hand side of Attendees. To add one of them, just click on their name. For others, start typing their name into the text field next to “Attendees” and select their name from among the results. If you don’t see the person you are trying to add, ask your Super User to add them to ANET. In this section, you can also select who the primary advisor and principal in the meeting were. By default, the first advisor and principal added will be selected as the primary. To select someone else, just select the check mark to the left of their name.
-9. PoAMs: If your meeting related to one of your advising organization’s PoAMs or Pillars, you can select it by searching for it in the text field to the right of “PoAMs”. If your meeting did not relate to a PoAM, it’s okay to leave this part blank. 
+9. Tasks: If your meeting related to one of your advising organization’s Tasks or Pillars, you can select it by searching for it in the text field to the right of "Tasks". If your meeting did not relate to a task, it’s okay to leave this part blank. 
 10. Key outcomes: In the field next to “Key outcomes”, you have 250 characters to provide a summary of the most important points of the engagement. This will appear in your report’s executive summary, so make sure it’s the most impactful information for leadership and other advisors to see. 
 11. Next Steps: In the next steps field, you have 250 characters to describe the next steps you’ll be taking on this issue or with this principal. This will appear in the executive summary. 
 12. Add detailed comments: If you feel that there is more information to include in your report, click on the “Add detailed comments” button. When you click on it, an open text field will appear where you can write as much as you’d like. 
@@ -74,7 +74,7 @@ This section displays how many future engagements you have created. Future engag
 
 Searching in ANET is the best way to quickly find information. At the top of the home page, there’s a search button where you can enter a keyword. Keywords are things like people’s names, locations, topics, and others.
 
-Once you’ve entered your search, you’ll be taken to a page of search results. These results will show you any reports, people, positions, locations, PoAMs, or organizations that contain that keyword.
+Once you’ve entered your search, you’ll be taken to a page of search results. These results will show you any reports, people, positions, locations, tasks, or organizations that contain that keyword.
 
 **Saved Search**
 
@@ -199,20 +199,20 @@ To create a new organization:
 6. Enter a description of the organization in the “Description” field. 
 7. Finally, click “Save organization” on the bottom of the page. 
 
-**Creating a new PoAM / Pillar**
+**Creating a new Task / Pillar**
 
-To create a new PoAM / Pillar:
+To create a new Task / Pillar:
 
 1. Click on the “Create” button on the right-hand side of the home page. 
-2. Then, select “New PoAM” from the options. 
-3. In the “Short name” field, enter the short name of the PoAM. 
-4. In the “Long name” field, enter the long name of the PoAM. 
-5. In the “Responsible org” field, search for the organization or suborganization that will use this PoAM. 
-6. Finally, click the “Save PoAM” button on the bottom of the page. 
+2. Then, select “New Task" from the options. 
+3. In the “Short name” field, enter the short name of the task. 
+4. In the “Long name” field, enter the long name of the task. 
+5. In the “Responsible org” field, search for the organization or suborganization that will use this task. 
+6. Finally, click the “Save task” button on the bottom of the page. 
 
-**Editing people, positions, locations, organizations, and PoAMs**
+**Editing people, positions, locations, organizations, and Tasks**
 
-There are several ways to find the person, position, locations, organizations, or PoAMs that you’d like to edit. In most cases, the easiest way to find this information is to search for it by name, using the search bar at the top of the home page. For example, if you want to search for the person “John Smith”, just enter that name in the top search bar, and look through the results for the person you’re hoping to edit. 
+There are several ways to find the person, position, locations, organizations, or tasks that you’d like to edit. In most cases, the easiest way to find this information is to search for it by name, using the search bar at the top of the home page. For example, if you want to search for the person “John Smith”, just enter that name in the top search bar, and look through the results for the person you’re hoping to edit. 
 
 Once you find what you’re hoping to edit by searching, click on it from the search results page. You will be taken to a page that lets you view the detailed information about that person, place, or object. When you’re there, click on the “Actions” button on the top right-hand side of the page, and select the “Edit” option. You’ll then be able to make and save changes. 
 
