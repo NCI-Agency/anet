@@ -73,10 +73,13 @@ export default class TaskShow extends Page {
 		let {task, reports} = this.state
 		// Admins can edit tasks, or super users if this task is assigned to their org.
 		let currentUser = this.context.currentUser
-		const taskShortLabel = Settings.fields.task.shortLabel
 
-		const customField = Settings.TASK_CUSTOM_FIELD
-		const customEnumLabel = Settings.TASK_CUSTOM_ENUM_LABEL
+		const taskShortLabel = Settings.fields.TASK.shortLabel
+		const taskProjectedCompletion = Settings.fields.TASK_PROJECTED_COMPLETION
+		const taskPlannedCompletion = Settings.fields.TASK_PLANNED_COMPLETION
+		const taskCustomField = Settings.fields.TASK_CUSTOM_FIELD
+		const taskCustomEnumLabel = Settings.fields.TASK_CUSTOM_ENUM_LABEL
+		const taskCustomEnumObj = Settings.fields.taskCustomEnum
 
 		let canEdit = currentUser.isAdmin()
 
@@ -90,11 +93,27 @@ export default class TaskShow extends Page {
 						<Form.Field id="shortName" label={`${taskShortLabel} number`} />
 						<Form.Field id="longName" label={`${taskShortLabel} description`} />
 						<Form.Field id="status" />
-						{task.responsibleOrg && task.responsibleOrg.id && this.renderOrg()}
-						<Form.Field id="customFieldEnum" label={`${customEnumLabel}`} />
-						<Form.Field label="Planned completion" id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
-						<Form.Field label="Projected completion" id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
-						<Form.Field id="customField" label={`${customField}`} />
+
+						{task.responsibleOrg && task.responsibleOrg.id && 
+							this.renderOrg()
+						}
+						
+						{taskCustomEnumLabel &&
+							<Form.Field id="customFieldEnum" label={taskCustomEnumLabel} />
+						}
+
+						{taskPlannedCompletion &&
+							<Form.Field id="plannedCompletion" label={taskPlannedCompletion} value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
+						}
+
+						{taskProjectedCompletion &&
+							<Form.Field id="projectedCompletion" label={taskProjectedCompletion} value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
+						}
+
+						{taskCustomField &&
+							<Form.Field id="customField" label={taskCustomField}/>
+						}
+
 					</Fieldset>
 				</Form>
 
