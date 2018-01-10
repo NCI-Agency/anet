@@ -11,7 +11,7 @@ public abstract class Searcher implements ISearcher {
 	private IPersonSearcher personSearcher;
 	private IOrganizationSearcher orgSearcher;
 	private IPositionSearcher positionSearcher;
-	private IPoamSearcher poamSearcher;
+	private ITaskSearcher taskSearcher;
 	private ILocationSearcher locationSearcher;
 	private ITagSearcher tagSearcher;
 
@@ -25,13 +25,13 @@ public abstract class Searcher implements ISearcher {
 	}
 
 	protected Searcher(IReportSearcher reportSearcher, IPersonSearcher personSearcher, IOrganizationSearcher orgSearcher,
-			IPositionSearcher positionSearcher, IPoamSearcher poamSearcher, ILocationSearcher locationSearcher, ITagSearcher tagSearcher) {
+			IPositionSearcher positionSearcher, ITaskSearcher taskSearcher, ILocationSearcher locationSearcher, ITagSearcher tagSearcher) {
 		super();
 		this.reportSearcher = reportSearcher;
 		this.personSearcher = personSearcher;
 		this.orgSearcher = orgSearcher;
 		this.positionSearcher = positionSearcher;
-		this.poamSearcher = poamSearcher;
+		this.taskSearcher = taskSearcher;
 		this.locationSearcher = locationSearcher;
 		this.tagSearcher = tagSearcher;
 	}
@@ -57,8 +57,8 @@ public abstract class Searcher implements ISearcher {
 	}
 
 	@Override
-	public IPoamSearcher getPoamSearcher() {
-		return poamSearcher;
+	public ITaskSearcher getTaskSearcher() {
+		return taskSearcher;
 	}
 
 	@Override

@@ -13,10 +13,11 @@ import Form from 'components/Form'
 import Messages from 'components/Messages'
 import AdvancedSearch from 'components/AdvancedSearch'
 
+import utils from 'utils'
 import API from 'api'
 import dict from 'dictionary'
 import GQL from 'graphqlapi'
-import {Person, Organization, Position, Poam} from 'models'
+import {Person, Organization, Position, Task} from 'models'
 
 import FileSaver from 'file-saver'
 
@@ -25,7 +26,7 @@ import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
 import LOCATIONS_ICON from 'resources/locations.png'
-import POAMS_ICON from 'resources/poams.png'
+import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
@@ -48,17 +49,19 @@ const SEARCH_CONFIG = {
 	},
 	people : {
 		listName : 'people: personList',
+		sortBy: 'NAME',
+		sortOrder: 'ASC',
 		variableType: 'PersonSearchQuery',
 		fields: 'id, name, rank, emailAddress, role , position { id, name, organization { id, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		variableType: 'PositionSearchQuery',
-		fields: 'id , name, type, organization { id, shortName}, person { id, name }'
+		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name }'
 	},
-	poams : {
-		listName: 'poams: poamList',
-		variableType: 'PoamSearchQuery',
+	tasks : {
+		listName: 'tasks: taskList',
+		variableType: 'TaskSearchQuery',
 		fields: 'id, shortName, longName'
 	},
 	locations : {
@@ -87,7 +90,7 @@ export default class Search extends Page {
 				organizations: 0,
 				positions: 0,
 				locations: 0,
-				poams: 0,
+				tasks: 0,
 			},
 			saveSearch: {show: false},
 			results: {
@@ -96,7 +99,7 @@ export default class Search extends Page {
 				organizations: null,
 				positions: null,
 				locations: null,
-				poams: null,
+				tasks: null,
 			},
 			error: null,
 			success: null,
@@ -117,16 +120,22 @@ export default class Search extends Page {
 	}
 
 	getSearchPart(type, query, pageSize) {
-//		query = Object.without(query, 'type')
-		query.pageSize = (pageSize === undefined) ? 10 : pageSize
-		query.pageNum = this.state.pageNum[type]
+		let subQuery = Object.assign({}, query)
+		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
+		subQuery.pageNum = this.state.pageNum[type]
 
 		let config = SEARCH_CONFIG[type]
+		if (config.sortBy) {
+			subQuery.sortBy = config.sortBy
+		}
+		if (config.sortOrder) {
+			subQuery.sortOrder = config.sortOrder
+		}
 		let part = new GQL.Part(/* GraphQL */`
 			${config.listName} (f:search, query:$${type}Query) {
 				pageNum, pageSize, totalCount, list { ${config.fields} }
 			}
-			`).addVariable(type + "Query", config.variableType, query)
+			`).addVariable(type + "Query", config.variableType, subQuery)
 		return part
 	}
 
@@ -200,18 +209,18 @@ export default class Search extends Page {
 		let numReports = results.reports ? results.reports.totalCount : 0
 		let numPeople = results.people ? results.people.totalCount : 0
 		let numPositions = results.positions ? results.positions.totalCount : 0
-		let numPoams = results.poams ? results.poams.totalCount : 0
+		let numTasks = results.tasks ? results.tasks.totalCount : 0
 		let numLocations = results.locations ? results.locations.totalCount : 0
 		let numOrganizations = results.organizations ? results.organizations.totalCount : 0
 
-		let numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numPoams
+		let numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
 		let noResults = numResults === 0
 
 		let query = this.props.location.query
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
 		let queryType = this.state.queryType || query.type || 'everything'
 
-		let poamShortTitle = dict.lookup('POAM_SHORT_NAME')
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
 		if (typeof queryString === 'object') {
 			queryString = queryString[Object.keys(query)[1]]
@@ -256,9 +265,9 @@ export default class Search extends Page {
 								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
 							</NavItem>
 
-							<NavItem eventKey="poams" disabled={!numPoams}>
-								<img src={POAMS_ICON} role="presentation" /> {poamShortTitle}s
-								{numPoams > 0 && <Badge pullRight>{numPoams}</Badge>}
+							<NavItem eventKey="tasks" disabled={!numTasks}>
+								<img src={TASKS_ICON} role="presentation" /> {taskShortLabel}s
+								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="locations" disabled={!numLocations}>
@@ -307,9 +316,9 @@ export default class Search extends Page {
 					</Fieldset>
 				}
 
-				{numPoams > 0 && (queryType === 'everything' || queryType === 'poams') &&
-					<Fieldset title={poamShortTitle + 's'}>
-						{this.renderPoams()}
+				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
+					<Fieldset title={taskShortLabel + 's'}>
+						{this.renderTasks()}
 					</Fieldset>
 				}
 
@@ -434,18 +443,24 @@ export default class Search extends Page {
 						<th>Name</th>
 						<th>Org</th>
 						<th>Current Occupant</th>
+						<th>Status</th>
 					</tr>
 				</thead>
 				<tbody>
-					{Position.map(this.state.results.positions.list, pos =>
-						<tr key={pos.id}>
-							<td>
-								<img src={pos.iconUrl()} alt={pos.type} height={20} className="person-icon" />
-								<LinkTo position={pos} >{pos.code} {pos.name}</LinkTo>
-							</td>
-							<td>{pos.organization && <LinkTo organization={pos.organization} />}</td>
-							<td>{pos.person && <LinkTo person={pos.person} />}</td>
-						</tr>
+					{Position.map(this.state.results.positions.list, pos => {
+						let nameComponents =  []
+						pos.name && nameComponents.push(pos.name)
+						pos.code && nameComponents.push(pos.code)
+						return <tr key={pos.id}>
+								<td>
+									<img src={pos.iconUrl()} alt={pos.type} height={20} className="person-icon" />
+									<LinkTo position={pos} >{nameComponents.join(' - ')}</LinkTo>
+								</td>
+								<td>{pos.organization && <LinkTo organization={pos.organization} />}</td>
+								<td>{pos.person && <LinkTo person={pos.person} />}</td>
+								<td>{utils.sentenceCase(pos.status)}</td>
+							</tr>
+						}
 					)}
 				</tbody>
 			</Table>
@@ -472,9 +487,9 @@ export default class Search extends Page {
 		</div>
 	}
 
-	renderPoams() {
+	renderTasks() {
 		return <div>
-			{this.paginationFor('poams')}
+			{this.paginationFor('tasks')}
 			<Table responsive hover striped>
 				<thead>
 					<tr>
@@ -482,9 +497,9 @@ export default class Search extends Page {
 					</tr>
 				</thead>
 				<tbody>
-					{Poam.map(this.state.results.poams.list, poam =>
-						<tr key={poam.id}>
-							<td><LinkTo poam={poam} >{poam.shortName} {poam.longName}</LinkTo></td>
+					{Task.map(this.state.results.tasks.list, task =>
+						<tr key={task.id}>
+							<td><LinkTo task={task} >{task.shortName} {task.longName}</LinkTo></td>
 						</tr>
 					)}
 				</tbody>

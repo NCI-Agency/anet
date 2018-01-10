@@ -12,7 +12,7 @@ public class MssqlSearcher extends Searcher {
 
 	public MssqlSearcher() { 
 		super(new MssqlReportSearcher(), new MssqlPersonSearcher(), new MssqlOrganizationSearcher(),
-				new MssqlPositionSearcher(), new MssqlPoamSearcher(), new MssqlLocationSearcher(), new MssqlTagSearcher());
+				new MssqlPositionSearcher(), new MssqlTaskSearcher(), new MssqlLocationSearcher(), new MssqlTagSearcher());
 	}
 
 	protected static Query<Map<String, Object>> addPagination(AbstractSearchQuery query,

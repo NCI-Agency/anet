@@ -14,7 +14,7 @@ export default class Report extends Model {
 		atmosphereDetails: '',
 		location: {},
 		attendees: [],
-		poams: [],
+		tasks: [],
 		comments: [],
 		reportText: '',
 		nextSteps: '',
@@ -29,6 +29,10 @@ export default class Report extends Model {
 
 	isPending() {
 		return this.state === 'PENDING_APPROVAL'
+	}
+
+	isReleased() {
+		return this.state === 'RELEASED'
 	}
 
 	isRejected() {
@@ -104,6 +108,16 @@ export default class Report extends Model {
 		return this.attendees.find( el =>
 			el.role === 'ADVISOR' && el.primary
 		)
+	}
+
+	getReportReleasedAt() {
+		if (this.approvalStatus) {
+			const approvalSteps = Object.assign([], this.approvalStatus)
+			const lastApprovalStep = approvalSteps.pop()
+			return !lastApprovalStep ? '' : lastApprovalStep.createdAt
+		} else {
+			return
+		}
 	}
 
 	addAttendee(newAttendee) {

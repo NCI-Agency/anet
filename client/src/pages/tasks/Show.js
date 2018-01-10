@@ -11,21 +11,23 @@ import ReportCollection from 'components/ReportCollection'
 
 import dict from 'dictionary'
 import GQL from 'graphqlapi'
-import {Poam} from 'models'
+import {Task} from 'models'
 
-export default class PoamShow extends Page {
+import moment from 'moment'
+
+export default class TaskShow extends Page {
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 		app: PropTypes.object.isRequired,
 	}
 
-	static modelName = 'PoAM'
+	static modelName = 'Task'
 
 	constructor(props) {
 		super(props)
 
 		this.state = {
-			poam: new Poam({
+			task: new Task({
 				id: props.params.id,
 				shortName: props.params.shorName,
 				longName: props.params.longName,
@@ -47,48 +49,56 @@ export default class PoamShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			poamId: props.params.id,
+			taskId: props.params.id,
 		})
 
-		let poamQuery = new GQL.Part(/* GraphQL */`
-			poam(id:${props.params.id}) {
+		let taskQuery = new GQL.Part(/* GraphQL */`
+			task(id:${props.params.id}) {
 				id, shortName, longName, status,
+				customField, customFieldEnum,
+				plannedCompletion, projectedCompletion,
 				responsibleOrg {id, shortName, longName, identificationCode}
 			}
 		`)
 
-		GQL.run([reportsQuery, poamQuery]).then(data => {
+		GQL.run([reportsQuery, taskQuery]).then(data => {
             this.setState({
-                poam: new Poam(data.poam),
+                task: new Task(data.task),
 				reports: data.reports,
             })
         })
 	}
 
 	render() {
-		let {poam, reports} = this.state
-		// Admins can edit poams, or super users if this poam is assigned to their org.
+		let {task, reports} = this.state
+		// Admins can edit tasks, or super users if this task is assigned to their org.
 		let currentUser = this.context.currentUser
-		let poamShortName = dict.lookup("POAM_SHORT_NAME")
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
-		let canEdit = currentUser.isAdmin() ||
-			(poam.responsibleOrg && currentUser.isSuperUserForOrg(poam.responsibleOrg))
+		const customField = dict.lookup("TASK_CUSTOM_FIELD")
+		const customEnumLabel = dict.lookup("TASK_CUSTOM_ENUM_LABEL")
+
+		let canEdit = currentUser.isAdmin()
 
 		return (
 			<div>
-				<Breadcrumbs items={[[`${poamShortName} ${poam.shortName}`, Poam.pathFor(poam)]]} />
+				<Breadcrumbs items={[[`${taskShortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<Form static formFor={poam} horizontal>
-					<Fieldset title={`${poamShortName} ${poam.shortName}`} action={canEdit && <LinkTo poam={poam} edit button="primary">Edit</LinkTo>}>
-						<Form.Field id="shortName" label={`${poamShortName} number`} />
-						<Form.Field id="longName" label={`${poamShortName} description`} />
+				<Form static formFor={task} horizontal>
+					<Fieldset title={`${taskShortLabel} ${task.shortName}`} action={canEdit && <LinkTo task={task} edit button="primary">Edit</LinkTo>}>
+						<Form.Field id="shortName" label={`${taskShortLabel} number`} />
+						<Form.Field id="longName" label={`${taskShortLabel} description`} />
 						<Form.Field id="status" />
-						{poam.responsibleOrg && poam.responsibleOrg.id && this.renderOrg()}
+						{task.responsibleOrg && task.responsibleOrg.id && this.renderOrg()}
+						<Form.Field id="customFieldEnum" label={`${customEnumLabel}`} />
+						<Form.Field label="Planned completion" id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
+						<Form.Field label="Projected completion" id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
+						<Form.Field id="customField" />
 					</Fieldset>
 				</Form>
 
-				<Fieldset title={`Reports for this ${poamShortName}`}>
+				<Fieldset title={`Reports for this ${taskShortLabel}`}>
 					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
 				</Fieldset>
 			</div>
@@ -97,7 +107,7 @@ export default class PoamShow extends Page {
 
     @autobind
     renderOrg() {
-		let responsibleOrg = this.state.poam.responsibleOrg
+		let responsibleOrg = this.state.task.responsibleOrg
 		return (
 			<Form.Field id="responsibleOrg" label="Responsible Organization" >
 				<LinkTo organization={responsibleOrg}>

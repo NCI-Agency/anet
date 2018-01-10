@@ -1,7 +1,7 @@
 organization(id:${orgId}) {
 	id, shortName, longName, type
 	parentOrg { id, shortName, longName }
-	poams { id, longName, shortName }
+	tasks { id, longName, shortName }
 	childrenOrgs { id, shortName, longName },
 	positions {
 		id, name, code

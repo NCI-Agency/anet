@@ -24,36 +24,49 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 
 	@Override
 	public PersonList runSearch(PersonSearchQuery query, Handle dbHandle) { 
-		StringBuilder sql = new StringBuilder("/* MssqlPersonSearch */ SELECT " + PersonDao.PERSON_FIELDS 
-				+ ", count(*) over() as totalCount "
-				+ "FROM people ");
-		Map<String,Object> sqlArgs = new HashMap<String,Object>();
-		String commonTableExpression = null;
+		final List<String> whereClauses = new LinkedList<String>();
+		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final StringBuilder sql = new StringBuilder("/* MssqlPersonSearch */ SELECT " + PersonDao.PERSON_FIELDS);
+
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
+			// If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
+			// so we can sort on it (show the most relevant hits at the top).
+			// Note that summing up two or three independent ranks is not ideal, but it's the best we can do now.
+			// See https://docs.microsoft.com/en-us/sql/relational-databases/search/limit-search-results-with-rank
+			sql.append(", ISNULL(c_people.rank, 0) + ISNULL(f_people.rank, 0)");
+			if (query.getMatchPositionName()) {
+				sql.append(" + ISNULL(c_positions.rank, 0)");
+			}
+			sql.append(" AS search_rank");
+		}
+		sql.append(", count(*) over() as totalCount FROM people ");
 		
 		if (query.getOrgId() != null || query.getLocationId() != null || query.getMatchPositionName()) { 
 			sql.append(" LEFT JOIN positions ON people.id = positions.currentPersonId ");
 		}
 		
-		sql.append(" WHERE ");
-		List<String> whereClauses = new LinkedList<String>();
-		PersonList result = new PersonList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) {
+		if (doFullTextSearch) {
+			sql.append(" LEFT JOIN CONTAINSTABLE (people, (name, emailAddress, biography), :containsQuery) c_people"
+					+ " ON people.id = c_people.[Key]"
+					+ " LEFT JOIN FREETEXTTABLE(people, (name, biography), :freetextQuery) f_people"
+					+ " ON people.id = f_people.[Key]");
+			final StringBuilder whereRank = new StringBuilder("("
+					+ "c_people.rank IS NOT NULL"
+					+ " OR f_people.rank IS NOT NULL");
 			if (query.getMatchPositionName()) { 
-				whereClauses.add("(CONTAINS ((people.name, emailAddress, biography), :containsQuery) "
-						+ "OR FREETEXT((people.name, biography), :freetextQuery) "
-						+ "OR CONTAINS((positions.name, positions.code), :containsQuery))");
-			} else { 
-				whereClauses.add("(CONTAINS ((people.name, people.emailAddress, people.biography), :containsQuery) "
-						+ "OR FREETEXT((people.name, people.biography), :freetextQuery))");
+				sql.append(" LEFT JOIN CONTAINSTABLE(positions, (name, code), :containsQuery) c_positions"
+						+ " ON positions.id = c_positions.[Key]");
+				whereRank.append(" OR c_positions.rank IS NOT NULL");
 			}
-			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(query.getText()));
-			sqlArgs.put("freetextQuery", query.getText());
+			whereRank.append(")");
+			whereClauses.add(whereRank.toString());
+			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
+			sqlArgs.put("freetextQuery", text);
 		}
 		
+		sql.append(" WHERE ");
 		if (query.getRole() != null) { 
 			whereClauses.add(" people.role = :role ");
 			sqlArgs.put("role", DaoUtils.getEnumId(query.getRole()));
@@ -83,6 +96,7 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 			sqlArgs.put("pendingVerification", query.getPendingVerification());
 		}
 		
+		String commonTableExpression = null;
 		if (query.getOrgId() != null) { 
 			if (query.getIncludeChildOrgs() != null && query.getIncludeChildOrgs()) {
 				commonTableExpression = "WITH parent_orgs(id) AS ( "
@@ -102,12 +116,22 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 			sqlArgs.put("locationId", query.getLocationId());
 		}
 		
+		final PersonList result = new PersonList();
+		result.setPageNum(query.getPageNum());
+		result.setPageSize(query.getPageSize());
+
 		if (whereClauses.size() == 0) { return result; }
 		
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		
 		//Sort Ordering
 		sql.append(" ORDER BY ");
+		if (doFullTextSearch && query.getSortBy() == null) {
+			// We're doing a full-text search without an explicit sort order,
+			// so sort first on the search pseudo-rank.
+			sql.append("search_rank DESC, ");
+		}
+
 		if (query.getSortBy() == null) { query.setSortBy(PersonSearchSortBy.NAME); }
 		switch (query.getSortBy()) {
 			case RANK:

@@ -1,6 +1,6 @@
 export Organization from 'models/Organization'
 export Person from 'models/Person'
-export Poam from 'models/Poam'
+export Task from 'models/Task'
 export Position from 'models/Position'
 export Report from 'models/Report'
 export Location from 'models/Location'

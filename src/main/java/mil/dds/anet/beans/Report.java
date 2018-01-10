@@ -47,7 +47,7 @@ public class Report extends AbstractAnetBean {
 	ReportCancelledReason cancelledReason;
 	
 	List<ReportPerson> attendees;
-	List<Poam> poams;
+	List<Task> tasks;
 
 	String keyOutcomes;
 	String nextSteps;
@@ -188,7 +188,7 @@ public class Report extends AbstractAnetBean {
 		this.loadLocation();
 		this.loadPrimaryAdvisor();
 		this.loadPrimaryPrincipal();
-		this.loadPoams();
+		this.loadTasks();
 	}
 
 	@GraphQLFetcher("attendees")
@@ -240,21 +240,21 @@ public class Report extends AbstractAnetBean {
 		return primaryPrincipal;
 	}
 	
-	@GraphQLFetcher("poams")
-	public List<Poam> loadPoams() {
-		if (poams == null) { 
-			poams = AnetObjectEngine.getInstance().getReportDao().getPoamsForReport(this);
+	@GraphQLFetcher("tasks")
+	public List<Task> loadTasks() {
+		if (tasks == null) { 
+			tasks = AnetObjectEngine.getInstance().getReportDao().getTasksForReport(this);
 		}
-		return poams;
+		return tasks;
 	}
 
-	public void setPoams(List<Poam> poams) {
-		this.poams = poams;
+	public void setTasks(List<Task> tasks) {
+		this.tasks = tasks;
 	}
 	
 	@GraphQLIgnore
-	public List<Poam> getPoams() { 
-		return poams;
+	public List<Task> getTasks() { 
+		return tasks;
 	}
 
 	public String getKeyOutcomes() {
@@ -488,7 +488,7 @@ public class Report extends AbstractAnetBean {
 				&& Objects.equals(r.getAtmosphere(), atmosphere)
 				&& Objects.equals(r.getAtmosphereDetails(), atmosphereDetails)
 				&& Objects.equals(r.getAttendees(), attendees)
-				&& Objects.equals(r.getPoams(), poams)
+				&& Objects.equals(r.getTasks(), tasks)
 				&& Objects.equals(r.getReportText(), reportText)
 				&& Objects.equals(r.getNextSteps(), nextSteps)
 				&& idEqual(r.getAuthor(), author)
@@ -500,7 +500,7 @@ public class Report extends AbstractAnetBean {
 	@Override
 	public int hashCode() { 
 		return Objects.hash(id, state, approvalStep, createdAt, updatedAt, 
-			location, intent, exsum, attendees, poams, reportText, 
+			location, intent, exsum, attendees, tasks, reportText, 
 			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate,
 			tags, reportSensitiveInformation);
 	}

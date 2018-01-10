@@ -28,7 +28,7 @@ report(id:${reportId}) {
     primaryAdvisor { id }
     primaryPrincipal { id }
 
-    poams { id, shortName, longName, responsibleOrg { id, shortName} }
+    tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 
     comments {
         id, text, createdAt, updatedAt

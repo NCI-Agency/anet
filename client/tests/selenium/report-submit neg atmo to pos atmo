@@ -118,12 +118,12 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td></td>
 </tr>
 <tr>
 	<td>sendKeys</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td>budg</td>
 </tr>
 <tr>
@@ -138,17 +138,17 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>id=poamDelete_0</td>
+	<td>id=taskDelete_0</td>
 	<td></td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td></td>
 </tr>
 <tr>
 	<td>sendKeys</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td>mil</td>
 </tr>
 <tr>
@@ -213,7 +213,7 @@
 </tr>
 <tr>
 	<td>verifyText</td>
-	<td>//tr[@id='poam_0']/td</td>
+	<td>//tr[@id='task_0']/td</td>
 	<td>This is the first Milestone in EF2</td>
 </tr>
 <tr>

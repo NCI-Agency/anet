@@ -6,8 +6,10 @@
 **Signed-off-by:**
 
 Copyright 2016-2017 U.S. Federal Government (in countries where recognized) contact@dds.mil \
-Copyright 2017 NATO Communications and Information Agency anet.support@ncia.nato.int \
-Copyright 2017 Brad Hards bradh@frogmouth.net
+Copyright 2017 Vassil Iordanov vassil.iordanov@ncia.nato.int \
+Copyright 2017 NATO Communications and Information Agency (including direct NATO hires and West IT Solutions employees) anet.support@ncia.nato.int \
+Copyright 2017 Brad Hards bradh@frogmouth.net \
+Copyright 2017 Benjamin Warfield ben.warfield@hq.dhs.gov
 
 **Note for U.S. Federal Employees**
 

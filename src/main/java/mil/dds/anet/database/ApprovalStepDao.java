@@ -19,7 +19,6 @@ import mil.dds.anet.beans.lists.AbstractAnetBeanList;
 import mil.dds.anet.database.mappers.ApprovalStepMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.ResponseUtils;
 
 public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 
@@ -113,32 +112,33 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	 * Will patch up the Approval Process list after the removal. 
 	 */
 	public boolean deleteStep(int id) {
-		//ensure there is nothing currently on this step
-		List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepId\" = ?", id);
-		Map<String,Object> result = rs.get(0);
-		int count = ((Number) result.get("ct")).intValue();
-		if (count != 0) {
-			throw new WebApplicationException(ResponseUtils.withMsg("Reports are currently pending at this step", Status.NOT_ACCEPTABLE));
-		}
+		return dbHandle.inTransaction(new TransactionCallback<Boolean>() {
+			public Boolean inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				//ensure there is nothing currently on this step
+				List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepId\" = ?", id);
+				Map<String,Object> result = rs.get(0);
+				int count = ((Number) result.get("ct")).intValue();
+				if (count != 0) {
+					throw new WebApplicationException("Reports are currently pending at this step", Status.NOT_ACCEPTABLE);
+				}
 
-		dbHandle.begin();
-		
-		//fix up the linked list. 
-		dbHandle.createStatement("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
-				+ "SET \"nextStepId\" = (SELECT \"nextStepId\" from \"approvalSteps\" where id = :stepToDeleteId) "
-				+ "WHERE \"nextStepId\" = :stepToDeleteId") 	
-			.bind("stepToDeleteId", id)
-			.execute();
-		
-		//Remove all approvers from this step
-		dbHandle.execute("/* deleteApproval.delete1 */ DELETE FROM approvers where \"approvalStepId\" = ?", id);
-		
-		//Update any approvals that happened at this step
-		dbHandle.execute("/* deleteApproval.updateActions */ UPDATE \"approvalActions\" SET \"approvalStepId\" = ? WHERE \"approvalStepId\" = ?", null, id);
-		
-		dbHandle.execute("/* deleteApproval.delete2 */ DELETE FROM \"approvalSteps\" where id = ?", id);
-		dbHandle.commit();
-		return true;
+				//fix up the linked list.
+				dbHandle.createStatement("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
+						+ "SET \"nextStepId\" = (SELECT \"nextStepId\" from \"approvalSteps\" where id = :stepToDeleteId) "
+						+ "WHERE \"nextStepId\" = :stepToDeleteId") 	
+					.bind("stepToDeleteId", id)
+					.execute();
+
+				//Remove all approvers from this step
+				dbHandle.execute("/* deleteApproval.delete1 */ DELETE FROM approvers where \"approvalStepId\" = ?", id);
+
+				//Update any approvals that happened at this step
+				dbHandle.execute("/* deleteApproval.updateActions */ UPDATE \"approvalActions\" SET \"approvalStepId\" = ? WHERE \"approvalStepId\" = ?", null, id);
+
+				dbHandle.execute("/* deleteApproval.delete2 */ DELETE FROM \"approvalSteps\" where id = ?", id);
+				return true;
+			}
+		});
 	}
 
 	/**

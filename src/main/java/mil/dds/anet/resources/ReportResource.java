@@ -33,6 +33,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.skife.jdbi.v2.Handle;
+import org.skife.jdbi.v2.TransactionCallback;
+import org.skife.jdbi.v2.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +54,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.Role;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -247,20 +250,20 @@ public class ReportResource implements IGraphQLResource {
 			}
 		}
 
-		//Update Poams:
-		if (r.getPoams() != null) { 
-			List<Poam> existingPoams = dao.getPoamsForReport(r);
-			List<Integer> existingPoamIds = existingPoams.stream().map(p -> p.getId()).collect(Collectors.toList());
-			for (Poam p : r.getPoams()) {
-				int idx = existingPoamIds.indexOf(p.getId());
+		//Update Tasks:
+		if (r.getTasks() != null) { 
+			List<Task> existingTasks = dao.getTasksForReport(r);
+			List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
+			for (Task p : r.getTasks()) {
+				int idx = existingTaskIds.indexOf(p.getId());
 				if (idx == -1) { 
-					dao.addPoamToReport(p, r); 
+					dao.addTaskToReport(p, r); 
 				} else {
-					existingPoamIds.remove(idx); 
+					existingTaskIds.remove(idx); 
 				}
 			}
-			for (Integer id : existingPoamIds) {
-				dao.removePoamFromReport(Poam.createWithId(id), r);
+			for (Integer id : existingTaskIds) {
+				dao.removeTaskFromReport(Task.createWithId(id), r);
 			}
 		}
 
@@ -371,11 +374,7 @@ public class ReportResource implements IGraphQLResource {
 				Integer.parseInt(engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION)));
 		}
 		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(org);
-		if (steps == null || steps.size() == 0) {
-			//Missing approval steps for this organization
-			steps = engine.getApprovalStepsForOrg(
-					Organization.createWithId(Integer.parseInt(engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION))));
-		}
+		throwExceptionNoApprovalSteps(steps);
 
 		//Push the report into the first step of this workflow
 		r.setApprovalStep(steps.get(0));
@@ -391,6 +390,18 @@ public class ReportResource implements IGraphQLResource {
 
 		AnetAuditLogger.log("report {} submitted by author {} (id: {})", r.getId(), r.getAuthor().getName(), r.getAuthor().getId());
 		return r;
+	}
+
+	/***
+	 * Throws a WebApplicationException when the report does not have an approval chain belonging to the advisor organization
+	 */
+	private void throwExceptionNoApprovalSteps(List<ApprovalStep> steps) {
+		if (Utils.isEmptyOrNull(steps)) {
+			final String supportEmailAddr = (String)this.config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+			final String messageBody = "Advisor organization is missing a report approval chain. In order to have an approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
+			final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody : String.format("%s at %s", messageBody, supportEmailAddr);
+			throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
+		}
 	}
 
 	private void sendApprovalNeededEmail(Report r) {
@@ -415,55 +426,57 @@ public class ReportResource implements IGraphQLResource {
 	@Timed
 	@Path("/{id}/approve")
 	public Report approveReport(@Auth Person approver, @PathParam("id") int id, Comment comment) {
-		final Report r = dao.getById(id, approver);
-		if (r == null) {
-			throw new WebApplicationException("Report not found", Status.NOT_FOUND);
-		}
-		if (r.getApprovalStep() == null) {
-			logger.info("Report ID {} does not currently need an approval", r.getId());
-			throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
-		}
-		ApprovalStep step = r.loadApprovalStep();
+		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+		return dbHandle.inTransaction(new TransactionCallback<Report>() {
+			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				final Report r = dao.getById(id, approver);
+				if (r == null) {
+					throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+				}
+				final ApprovalStep step = r.loadApprovalStep();
+				if (step == null) {
+					logger.info("Report ID {} does not currently need an approval", r.getId());
+					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+				}
 
-		//Verify that this user can approve for this step.
+				//Verify that this user can approve for this step.
+				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				if (canApprove == false) {
+					logger.info("User ID {} cannot approve report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
+				}
 
-		boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
-		if (canApprove == false) {
-			logger.info("User ID {} cannot approve report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
-			throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
-		}
+				//Write the approval
+				ApprovalAction approval = new ApprovalAction();
+				approval.setReport(r);
+				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setPerson(approver);
+				approval.setType(ApprovalType.APPROVE);
+				engine.getApprovalActionDao().insert(approval);
 
-		//Write the approval
-		//TODO: this should be in a transaction....
-		ApprovalAction approval = new ApprovalAction();
-		approval.setReport(r);
-		approval.setStep(ApprovalStep.createWithId(step.getId()));
-		approval.setPerson(approver);
-		approval.setType(ApprovalType.APPROVE);
-		engine.getApprovalActionDao().insert(approval);
+				//Update the report
+				r.setApprovalStep(ApprovalStep.createWithId(step.getNextStepId()));
+				if (step.getNextStepId() == null) {
+					//Done with approvals, move to released (or cancelled) state!
+					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
+					r.setReleasedAt(DateTime.now());
+					sendReportReleasedEmail(r);
+				} else {
+					sendApprovalNeededEmail(r);
+				}
+				dao.update(r, approver);
 
-		//Update the report
-		r.setApprovalStep(ApprovalStep.createWithId(step.getNextStepId()));
-		if (step.getNextStepId() == null) {
-			//Done with approvals, move to released (or cancelled) state! 
-			r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
-			r.setReleasedAt(DateTime.now());
-			sendReportReleasedEmail(r);
-		} else {
-			sendApprovalNeededEmail(r);
-		}
-		dao.update(r, approver);
-		
-		//Add the comment
-		if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
-			comment.setReportId(r.getId());
-			comment.setAuthor(approver);
-			engine.getCommentDao().insert(comment);
-		}
-		//TODO: close the transaction.
+				//Add the comment
+				if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
+					comment.setReportId(r.getId());
+					comment.setAuthor(approver);
+					engine.getCommentDao().insert(comment);
+				}
 
-		AnetAuditLogger.log("report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
-		return r;
+				AnetAuditLogger.log("report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				return r;
+			}
+		});
 	}
 
 	private void sendReportReleasedEmail(Report r) {
@@ -485,45 +498,47 @@ public class ReportResource implements IGraphQLResource {
 	@Timed
 	@Path("/{id}/reject")
 	public Report rejectReport(@Auth Person approver, @PathParam("id") int id, Comment reason) {
-		final Report r = dao.getById(id, approver);
-		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
-		ApprovalStep step = r.loadApprovalStep();
-		if (step == null) {
-			logger.info("Report ID {} does not currently need an approval", r.getId());
-			throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST); 
-		} 
+		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+		return dbHandle.inTransaction(new TransactionCallback<Report>() {
+			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				final Report r = dao.getById(id, approver);
+				if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
+				final ApprovalStep step = r.loadApprovalStep();
+				if (step == null) {
+					logger.info("Report ID {} does not currently need an approval", r.getId());
+					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+				}
 
-		//Verify that this user can reject for this step.
-		boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
-		if (canApprove == false) {
-			logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
-			throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
-		}
+				//Verify that this user can reject for this step.
+				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				if (canApprove == false) {
+					logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
+				}
 
-		//Write the rejection
-		//TODO: This should be in a transaction
-		ApprovalAction approval = new ApprovalAction();
-		approval.setReport(r);
-		approval.setStep(ApprovalStep.createWithId(step.getId()));
-		approval.setPerson(approver);
-		approval.setType(ApprovalType.REJECT);
-		engine.getApprovalActionDao().insert(approval);
+				//Write the rejection
+				ApprovalAction approval = new ApprovalAction();
+				approval.setReport(r);
+				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setPerson(approver);
+				approval.setType(ApprovalType.REJECT);
+				engine.getApprovalActionDao().insert(approval);
 
-		//Update the report
-		r.setApprovalStep(null);
-		r.setState(ReportState.REJECTED);
-		dao.update(r, approver);
+				//Update the report
+				r.setApprovalStep(null);
+				r.setState(ReportState.REJECTED);
+				dao.update(r, approver);
 
-		//Add the comment
-		reason.setReportId(r.getId());
-		reason.setAuthor(approver);
-		engine.getCommentDao().insert(reason);
+				//Add the comment
+				reason.setReportId(r.getId());
+				reason.setAuthor(approver);
+				engine.getCommentDao().insert(reason);
 
-		//TODO: close the transaction.
-		
-		sendReportRejectEmail(r, approver, reason);
-		AnetAuditLogger.log("report {} rejected by {} (id: {})", r.getId(), approver.getName(), approver.getId());
-		return r;
+				sendReportRejectEmail(r, approver, reason);
+				AnetAuditLogger.log("report {} rejected by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				return r;
+			}
+		});
 	}
 
 	private void sendReportRejectEmail(Report r, Person rejector, Comment rejectionComment) {
@@ -568,10 +583,15 @@ public class ReportResource implements IGraphQLResource {
 	@DELETE
 	@Timed
 	@Path("/{id}/comments/{commentId}")
-	public Response deleteComment(@PathParam("commentId") int commentId) {
-		//TODO: user validation on /who/ is allowed to delete a comment.
+	public Response deleteComment(@Auth Person user, @PathParam("commentId") int commentId) {
+		// For now, only admins are allowed to delete a comment
+		// (even though there's no action for it in the front-end).
+		AuthUtils.assertAdministrator(user);
 		int numRows = engine.getCommentDao().delete(commentId);
-		return (numRows == 1) ? Response.ok().build() : ResponseUtils.withMsg("Unable to delete comment", Status.NOT_FOUND);
+		if (numRows != 1) {
+			throw new WebApplicationException("Unable to delete comment", Status.NOT_FOUND);
+		}
+		return Response.ok().build();
 	}
 
 	@POST

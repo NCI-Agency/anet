@@ -6,9 +6,9 @@ import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
 import dict from 'dictionary'
 
-import {Poam} from 'models'
+import {Task} from 'models'
 
-export default class OrganizationPoams extends Component {
+export default class OrganizationTasks extends Component {
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
 	}
@@ -21,12 +21,12 @@ export default class OrganizationPoams extends Component {
 			return <div></div>
 		}
 
-		let poams = this.props.poams.list || []
-		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
-		let poamShortName = dict.lookup('POAM_SHORT_NAME')
+		let tasks = this.props.tasks.list || []
+		let isAdminUser = currentUser && currentUser.isAdmin()
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
-		return <Fieldset id="poams" title={poamShortName} action={
-			isSuperUser && <LinkTo poam={Poam.pathForNew({responsibleOrgId: org.id})} button>Create {poamShortName}</LinkTo>
+		return <Fieldset id="tasks" title={`${taskShortLabel}s`} action={
+			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortLabel}</LinkTo>
 		}>
 			{this.pagination()}
 			<Table>
@@ -38,23 +38,23 @@ export default class OrganizationPoams extends Component {
 				</thead>
 
 				<tbody>
-					{Poam.map(poams, (poam, idx) =>
-						<tr key={poam.id} id={`poam_${idx}`} >
-							<td><LinkTo poam={poam} >{poam.shortName}</LinkTo></td>
-							<td>{poam.longName}</td>
+					{Task.map(tasks, (task, idx) =>
+						<tr key={task.id} id={`task_${idx}`} >
+							<td><LinkTo task={task} >{task.shortName}</LinkTo></td>
+							<td>{task.longName}</td>
 						</tr>
 					)}
 				</tbody>
 			</Table>
 
-			{poams.length === 0 && <em>This organization doesn't have any {poamShortName}s</em>}
+			{tasks.length === 0 && <em>This organization doesn't have any {taskShortLabel}s</em>}
 		</Fieldset>
 	}
 
 	@autobind
 	pagination() {
 		let goToPage = this.props.goToPage
-		let {pageSize, pageNum, totalCount} = this.props.poams
+		let {pageSize, pageNum, totalCount} = this.props.tasks
 		let numPages = Math.ceil(totalCount / pageSize)
 		if (numPages < 2 ) { return }
 		return <header className="searchPagination" ><Pagination

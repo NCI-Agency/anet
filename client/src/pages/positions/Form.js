@@ -42,7 +42,6 @@ export default class PositionForm extends ValidatableFormWrapper {
 
 	render() {
 		let {position, error, success, edit} = this.props
-
 		error = this.props.error || (this.state && this.state.error)
 
 		let currentUser = this.context.currentUser
@@ -57,6 +56,11 @@ export default class PositionForm extends ValidatableFormWrapper {
 				orgSearchQuery.parentOrgId = currentUser.position.organization.id
 				orgSearchQuery.parentOrgRecursively = true
 			}
+		}
+
+		// Reset the organization property when changing the organization type
+		if (position.organization && position.organization.type && (position.organization.type !== orgSearchQuery.type)) {
+			position.organization = ''
 		}
 
 		const {ValidatableForm, RequiredField} = this
@@ -101,7 +105,7 @@ export default class PositionForm extends ValidatableFormWrapper {
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
-							fields="id, longName, shortName, identificationCode"
+							fields="id, longName, shortName, identificationCode, type"
 							template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
@@ -147,10 +151,11 @@ export default class PositionForm extends ValidatableFormWrapper {
 	onSubmit(event) {
 		let {position, edit} = this.props
 		position = Object.assign({}, position)
-
 		if (position.type !== Position.TYPE.PRINCIPAL) {
 			position.type = position.permissions || Position.TYPE.ADVISOR
 		}
+		// Remove permissions property, was added temporarily in order to be able
+		// to select a specific advisor type.
 		delete position.permissions
 		position.organization = {id: position.organization.id}
 		position.person = (position.person && position.person.id) ? {id: position.person.id} : {}
@@ -177,4 +182,5 @@ export default class PositionForm extends ValidatableFormWrapper {
 		this.props.position.authorized = authorized
 		this.setState({authorized: authorized})
 	}
+
 }
