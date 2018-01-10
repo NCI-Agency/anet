@@ -38,7 +38,7 @@ export default class AdvancedSearch extends Component {
 					valueKey="name"
 					fields={Person.autocompleteQuery}
 					template={Person.autocompleteTemplate}
-					queryParams={{role: 'ADVISOR'}}
+					queryParams={{role: Person.ROLE.ADVISOR}}
 					placeholder="Filter reports by author..."
 				/>,
 				Attendee: <AutocompleteFilter
@@ -113,7 +113,7 @@ export default class AdvancedSearch extends Component {
 				/>,
 				Role: <SelectSearchFilter
 					queryKey="role"
-					values={["ADVISOR","PRINCIPAL"]}
+					values={[Person.ROLE.ADVISOR,Person.ROLE.PRINCIPAL]}
 					labels={[Settings.ADVISOR_PERSON_TITLE, Settings.PRINCIPAL_PERSON_TITLE]}
 				/>,
 				Status: <SelectSearchFilter

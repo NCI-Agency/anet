@@ -100,13 +100,13 @@ export default class Report extends Model {
 
 	getPrimaryPrincipal() {
 		return this.attendees.find( el =>
-			el.role === 'PRINCIPAL' && el.primary
+			el.role === Person.ROLE.PRINCIPAL && el.primary
 		)
 	}
 
 	getPrimaryAdvisor() {
 		return this.attendees.find( el =>
-			el.role === 'ADVISOR' && el.primary
+			el.role === Person.ROLE.ADVISOR && el.primary
 		)
 	}
 

@@ -124,11 +124,11 @@ export default class PersonShow extends Page {
 			currentUser.isAdmin() ||
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
 			(!hasPosition && currentUser.isSuperUser()) ||
-			(person.role === 'PRINCIPAL' && currentUser.isSuperUser())
+			(person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 		const canChangePosition = currentUser.isAdmin() ||
 			(!hasPosition && currentUser.isSuperUser()) ||
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
-			(person.role === 'PRINCIPAL' && currentUser.isSuperUser())
+			(person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 
 		return (
 			<div>

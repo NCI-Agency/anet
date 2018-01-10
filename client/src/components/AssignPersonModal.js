@@ -31,9 +31,9 @@ export default class AssignPersonModal extends Component {
 
 		let personSearchQuery = {}
 		if (position.type === Position.TYPE.PRINCIPAL) {
-			personSearchQuery.role = 'PRINCIPAL'
+			personSearchQuery.role = Person.ROLE.PRINCIPAL
 		} else  {
-			personSearchQuery.role = 'ADVISOR'
+			personSearchQuery.role = Person.ROLE.ADVISOR
 		}
 
 		return (
