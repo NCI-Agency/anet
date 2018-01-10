@@ -9,7 +9,7 @@ import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
 
-import dict from 'dictionary'
+import Settings from 'Settings'
 import GQL from 'graphqlapi'
 import {Task} from 'models'
 
@@ -73,10 +73,10 @@ export default class TaskShow extends Page {
 		let {task, reports} = this.state
 		// Admins can edit tasks, or super users if this task is assigned to their org.
 		let currentUser = this.context.currentUser
-		let taskShortLabel = dict.lookup('TASK').shortLabel
+		const taskShortLabel = Settings.TASK.shortLabel
 
-		const customField = dict.lookup("TASK_CUSTOM_FIELD")
-		const customEnumLabel = dict.lookup("TASK_CUSTOM_ENUM_LABEL")
+		const customField = Settings.TASK_CUSTOM_FIELD
+		const customEnumLabel = Settings.TASK_CUSTOM_ENUM_LABEL
 
 		let canEdit = currentUser.isAdmin()
 
@@ -94,7 +94,7 @@ export default class TaskShow extends Page {
 						<Form.Field id="customFieldEnum" label={`${customEnumLabel}`} />
 						<Form.Field label="Planned completion" id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
 						<Form.Field label="Projected completion" id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
-						<Form.Field id="customField" />
+						<Form.Field id="customField" label={`${customField}`} />
 					</Fieldset>
 				</Form>
 

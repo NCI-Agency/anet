@@ -9,6 +9,7 @@ import Form from 'components/Form'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
+import DictionaryField from '../../HOC/DictionaryField'
 
 import GuidedTour from 'components/GuidedTour'
 import {orgTour} from 'pages/HopscotchTour'
@@ -17,7 +18,7 @@ import OrganizationTasks from './OrganizationTasks'
 import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Organization, Position} from 'models'
 import GQL from 'graphqlapi'
 
@@ -152,25 +153,19 @@ export default class OrganizationShow extends Page {
 	}
 
 	render() {
-		let org = this.state.organization
-		let reports = this.state.reports
-		let tasks = this.state.tasks
+		const org = this.state.organization
+		const reports = this.state.reports
+		const tasks = this.state.tasks
 
-		let currentUser = this.context.currentUser
-		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
-		let isAdmin = currentUser && currentUser.isAdmin()
-		const isPrincipalOrg = org.type === "PRINCIPAL_ORG"
+		const currentUser = this.context.currentUser
+		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
+		const isAdmin = currentUser && currentUser.isAdmin()
+		const isPrincipalOrg = org.type === Organization.TYPE.PRINCIPAL_ORG
 
-		const dictFields = dict.lookup('fields')
-		const ADVISOR_ORG = dictFields ? dictFields.ADVISOR_ORG : ''
-		const PRINCIPAL_ORG = dictFields ? dictFields.PRINCIPAL_ORG : ''
-
-		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
-		let [labelLongName, labelIdentificationCode] = isPrincipalOrg
-			? [PRINCIPAL_ORG.label_longname,
-			   PRINCIPAL_ORG.label_identificationcode]
-			: [ADVISOR_ORG.label_longname,
-			   ADVISOR_ORG.label_identificationcode]
+		const superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
+		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
+		const IdentificationCodeFieldWithLabel = DictionaryField(orgSettings.identificationCode)(Form.Field)
+		const LongNameWithLabel = DictionaryField(orgSettings.longName)(Form.Field)
 
 		return (
 			<div>
@@ -202,10 +197,10 @@ export default class OrganizationShow extends Page {
 							{org.humanNameOfType()}
 						</Form.Field>
 
-						<Form.Field id="longName" label={labelLongName} />
+						<LongNameWithLabel id="longName"/>
 
-						<Form.Field id="identificationCode" label={labelIdentificationCode} />
-
+						<IdentificationCodeFieldWithLabel id="identificationCode"/>
+		
 						{org.parentOrg && org.parentOrg.id &&
 							<Form.Field id="parentOrg" label="Parent organization">
 								<LinkTo organization={org.parentOrg} >{org.parentOrg.shortName} {org.parentOrg.longName} {org.parentOrg.identificationCode}</LinkTo>

@@ -13,7 +13,7 @@ import History from 'components/History'
 import Messages from 'components/Messages'
 
 import API from 'api'
-import settings from 'settings'
+import Settings from 'Settings'
 import {Position, Organization} from 'models'
 
 import DictionaryField from '../../HOC/DictionaryField'
@@ -42,10 +42,10 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		let {approvalSteps} = organization
 		let currentUser = this.context.currentUser 
 		let isAdmin = currentUser && currentUser.isAdmin()
-		let isPrincipalOrg = (organization.type === "PRINCIPAL_ORG")
+		let isPrincipalOrg = (organization.type === Organization.TYPE.PRINCIPAL_ORG)
 		const {ValidatableForm, RequiredField} = this
 
-		const orgSettings = isPrincipalOrg ? settings.fields.principal.org : settings.fields.advisor.org
+		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
 
 		const IdentificationCodeFieldWithLabel = DictionaryField(orgSettings.identificationCode)(Form.Field)
 		const LongNameWithLabel = DictionaryField(orgSettings.longName)(Form.Field)
@@ -61,8 +61,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 			<Fieldset title={edit ? `Edit Organization ${organization.shortName}` : "Create a new Organization"}>
 				<Form.Field id="type">
 					<ButtonToggleGroup>
-						<Button id="advisorOrgButton" disabled={!isAdmin} value="ADVISOR_ORG">{settings.fields.advisor.org.name}</Button>
-						<Button id="principalOrgButton" disabled={!isAdmin} value="PRINCIPAL_ORG">{settings.fields.principal.org.name}</Button>
+						<Button id="advisorOrgButton" disabled={!isAdmin} value={Organization.TYPE.ADVISOR_ORG}>{Settings.fields.advisor.org.name}</Button>
+						<Button id="principalOrgButton" disabled={!isAdmin} value={Organization.TYPE.PRINCIPAL_ORG}>{Settings.fields.principal.org.name}</Button>
 					</ButtonToggleGroup>
 				</Form.Field>
 

@@ -3,8 +3,7 @@ import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
 import {Injectable, Injector} from 'react-injectables'
 import {Scrollspy} from 'react-scrollspy'
-import dict from 'dictionary'
-
+import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 
 import {Organization} from 'models'
@@ -15,26 +14,26 @@ class Nav extends Component {
 	}
 
 	render() {
-		let injections = this.props.injections
+		const injections = this.props.injections
 		if (injections && injections.length) {
 			return <div>{injections}</div>
 		}
 
-		let appData = this.context.app.state
-		let currentUser = appData.currentUser
-		let organizations = appData.organizations || []
+		const appData = this.context.app.state
+		const currentUser = appData.currentUser
+		const organizations = appData.organizations || []
 		let path = this.context.app.props.location.pathname
 
-		let {settings} = appData || {}
-		let externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
-		let externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
+		const {settings} = appData || {}
+		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
+		const externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
-		let inAdmin = path.indexOf('/admin') === 0
-		let inOrg = path.indexOf('/organizations') === 0
-		let inMyReports = path.indexOf('/reports/mine') === 0
-		let inInsights = path.indexOf('/insights') === 0
+		const inAdmin = path.indexOf('/admin') === 0
+		const inOrg = path.indexOf('/organizations') === 0
+		const inMyReports = path.indexOf('/reports/mine') === 0
+		const inInsights = path.indexOf('/insights') === 0
 
-		let myOrg = currentUser.position.organization
+		const myOrg = currentUser.position.organization
 		let orgId, myOrgId
 		if (inOrg) {
 			orgId = +this.context.app.props.params.id
@@ -42,7 +41,7 @@ class Nav extends Component {
 			path = `/organizations/${orgId}`
 		}
 
-		let orgSubNav = (
+		const orgSubNav = (
 			<SubNav
 				componentClass={Scrollspy}
 				className="nav"
@@ -51,7 +50,7 @@ class Nav extends Component {
 				<AnchorLink scrollTo="info">Info</AnchorLink>
 				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
 				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="tasks">{dict.lookup('TASK').shortLabel}s</AnchorLink>
+				<AnchorLink scrollTo="tasks">{Settings.TASK.shortLabel}s</AnchorLink>
 				<AnchorLink scrollTo="reports">Reports</AnchorLink>
 			</SubNav>
 		)
@@ -85,7 +84,7 @@ class Nav extends Component {
 
 				{inOrg && orgId === myOrgId && orgSubNav}
 
-				<NavDropdown title={dict.lookup('NAV_BAR_ALL_ADVISOR_ORGS')} id="organizations" active={inOrg && orgId !== myOrgId}>
+				<NavDropdown title={Settings.NAV_BAR_ALL_ADVISOR_ORGS} id="organizations" active={inOrg && orgId !== myOrgId}>
 					{Organization.map(organizations, org =>
 						<LinkTo organization={org} componentClass={Link} key={org.id}>
 							<MenuItem>{org.shortName}</MenuItem>

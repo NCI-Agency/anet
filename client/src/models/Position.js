@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Model from 'components/Model'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
@@ -38,16 +38,20 @@ export default class Position extends Model {
 		</span>
 	}
 
-	humanNameOfType() {
-		if (this.type === Position.TYPE.PRINCIPAL) {
-			return dict.lookup('PRINCIPAL_POSITION_NAME')
-		} else if (this.type === Position.TYPE.ADVISOR) {
-			return dict.lookup('ADVISOR_POSITION_TYPE_TITLE')
-		} else if (this.type === Position.TYPE.SUPER_USER) {
-			return dict.lookup('SUPER_USER_POSITION_TYPE_TITLE')
-		} else if (this.type === Position.TYPE.ADMINISTRATOR) {
-			return dict.lookup('ADMINISTRATOR_POSITION_TYPE_TITLE')
+	static humanNameOfType(type) {
+		if (type === Position.TYPE.PRINCIPAL) {
+			return Settings.PRINCIPAL_POSITION_NAME
+		} else if (type === Position.TYPE.ADVISOR) {
+			return Settings.ADVISOR_POSITION_TYPE_TITLE
+		} else if (type === Position.TYPE.SUPER_USER) {
+			return Settings.SUPER_USER_POSITION_TYPE_TITLE
+		} else if (type === Position.TYPE.ADMINISTRATOR) {
+			return Settings.ADMINISTRATOR_POSITION_TYPE_TITLE
 		}
+	}
+
+	humanNameOfType() {
+		return Position.humanNameOfType(this.type)
 	}
 
 	isPrincipal() {

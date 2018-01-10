@@ -2,7 +2,7 @@ import React, {Component, PropTypes} from 'react'
 import {Button, DropdownButton, MenuItem, Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import _isequal from 'lodash/isEqual'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import History from 'components/History'
@@ -13,7 +13,7 @@ import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 
-import {Person, Task, Position} from 'models'
+import {Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -29,7 +29,7 @@ export default class AdvancedSearch extends Component {
 
 	@autobind
 	getFilters(context) {
-		let filters = {}
+		const filters = {}
 		filters.Reports = {
 			filters: {
 				Author: <AutocompleteFilter
@@ -92,7 +92,7 @@ export default class AdvancedSearch extends Component {
 			}
 		}
 
-		let taskShortLabel = dict.lookup('TASK').shortLabel
+		const taskShortLabel = Settings.TASK.shortLabel
 		filters.Reports.filters[taskShortLabel] =
 			<AutocompleteFilter
 				queryKey="taskId"
@@ -104,7 +104,7 @@ export default class AdvancedSearch extends Component {
 			/>
 
 
-		let countries = dict.lookup('countries') || []
+		const countries = Settings.countries || []
 		filters.People = {
 			filters: {
 				Organization: <OrganizationFilter
@@ -114,7 +114,7 @@ export default class AdvancedSearch extends Component {
 				Role: <SelectSearchFilter
 					queryKey="role"
 					values={["ADVISOR","PRINCIPAL"]}
-					labels={[dict.lookup('ADVISOR_PERSON_TITLE'), dict.lookup('PRINCIPAL_PERSON_TITLE')]}
+					labels={[Settings.ADVISOR_PERSON_TITLE, Settings.PRINCIPAL_PERSON_TITLE]}
 				/>,
 				Status: <SelectSearchFilter
 					queryKey="status"
@@ -138,8 +138,8 @@ export default class AdvancedSearch extends Component {
 			filters: {
 				"Organization type": <SelectSearchFilter
 					queryKey="type"
-					values={["ADVISOR_ORG", "PRINCIPAL_ORG"]}
-					labels={[dict.lookup('fields').ADVISOR_ORG.name, dict.lookup('fields').PRINCIPAL_ORG.name]}
+					values={[Organization.TYPE.ADVISOR_ORG, Organization.TYPE.PRINCIPAL_ORG]}
+					labels={[Settings.fields.advisor.org.name, Settings.fields.principal.org.name]}
 				  />,
 			}
 		}
@@ -149,7 +149,7 @@ export default class AdvancedSearch extends Component {
 				"Position type": <SelectSearchFilter
 					queryKey="type"
 					values={[Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL]}
-					labels={[dict.lookup('ADVISOR_POSITION_NAME'), dict.lookup('PRINCIPAL_POSITION_NAME')]}
+					labels={[Settings.ADVISOR_POSITION_NAME, Settings.PRINCIPAL_POSITION_NAME]}
 				/>,
 				Organization: <OrganizationFilter
 					queryKey="organizationId"
@@ -197,7 +197,7 @@ export default class AdvancedSearch extends Component {
 	constructor(props, context) {
 		super(props, context)
 
-		let query = props || {}
+		const query = props || {}
 		this.ALL_FILTERS = this.getFilters(context)
 		this.state = {
 			objectType: query.objectType || "Reports",
@@ -216,11 +216,11 @@ export default class AdvancedSearch extends Component {
 	}
 
 	render() {
-		let {objectType, text, filters} = this.state
+		const {objectType, text, filters} = this.state
 		//console.log("RENDER AdvancedSearch", objectType, text, filters)
-		let filterDefs = this.ALL_FILTERS[this.state.objectType].filters
-		let existingKeys = filters.map(f => f.key)
-		let moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
+		const filterDefs = this.ALL_FILTERS[this.state.objectType].filters
+		const existingKeys = filters.map(f => f.key)
+		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
 
 		return <div className="advanced-search form-horizontal">
 			<FormGroup style={{textAlign: "center"}}>
@@ -353,9 +353,9 @@ class SearchFilter extends Component {
 			if (organizationFilter) {
 				let positionType = filter.value.value || ""
 				if (positionType === Position.TYPE.PRINCIPAL) {
-					organizationFilter.setState({queryParams: {type: "PRINCIPAL_ORG"}})
+					organizationFilter.setState({queryParams: {type: Organization.TYPE.PRINCIPAL_ORG}})
 				} else if (positionType === Position.TYPE.ADVISOR) {
-					organizationFilter.setState({queryParams: {type: "ADVISOR_ORG"}})
+					organizationFilter.setState({queryParams: {type: Organization.TYPE.ADVISOR_ORG}})
 				} else {
 					organizationFilter.setState({queryParams: {}})
 				}

@@ -11,7 +11,7 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import History from 'components/History'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Position, Organization} from 'models'
 
 
@@ -44,14 +44,14 @@ export default class PositionForm extends ValidatableFormWrapper {
 		let {position, error, success, edit} = this.props
 		error = this.props.error || (this.state && this.state.error)
 
-		let currentUser = this.context.currentUser
-		let isAdmin = currentUser && currentUser.isAdmin()
+		const currentUser = this.context.currentUser
+		const isAdmin = currentUser && currentUser.isAdmin()
 
 		let orgSearchQuery = {}
 		if (position.isPrincipal()) {
-			orgSearchQuery.type = 'PRINCIPAL_ORG'
+			orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
 		} else {
-			orgSearchQuery.type = 'ADVISOR_ORG'
+			orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 			if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
 				orgSearchQuery.parentOrgId = currentUser.position.organization.id
 				orgSearchQuery.parentOrgRecursively = true
@@ -81,8 +81,8 @@ export default class PositionForm extends ValidatableFormWrapper {
 				<Fieldset title={edit ? `Edit Position ${position.name}` : "Create a new Position"}>
 					<Form.Field id="type" disabled={this.props.edit}>
 						<ButtonToggleGroup>
-							<Button id="typeAdvisorButton" value={Position.TYPE.ADVISOR}>{dict.lookup('ADVISOR_POSITION_NAME')}</Button>
-							<Button id="typePrincipalButton" value={Position.TYPE.PRINCIPAL}>{dict.lookup('PRINCIPAL_POSITION_NAME')}</Button>
+							<Button id="typeAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.ADVISOR_POSITION_NAME}</Button>
+							<Button id="typePrincipalButton" value={Position.TYPE.PRINCIPAL}>{Settings.PRINCIPAL_POSITION_NAME}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>
 
@@ -113,7 +113,7 @@ export default class PositionForm extends ValidatableFormWrapper {
 					</Form.Field>
 
 					<Form.Field id="code"
-						label={position.type === Position.TYPE.PRINCIPAL ? dict.lookup('PRINCIPAL_POSITION_CODE_NAME') : dict.lookup('ADVISOR_POSITION_CODE_NAME')}
+						label={position.type === Position.TYPE.PRINCIPAL ? Settings.PRINCIPAL_POSITION_CODE_NAME : Settings.ADVISOR_POSITION_CODE_NAME}
 						placeholder="Postion ID or Number" />
 
 					<RequiredField id="name" label="Position Name" placeholder="Name/Description of Position"/>
@@ -121,10 +121,10 @@ export default class PositionForm extends ValidatableFormWrapper {
 					{position.type !== Position.TYPE.PRINCIPAL &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
-								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{dict.lookup('ADVISOR_POSITION_TYPE_TITLE')}</Button>
-								<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{dict.lookup('SUPER_USER_POSITION_TYPE_TITLE')}</Button>
+								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.ADVISOR_POSITION_TYPE_TITLE}</Button>
+								<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.SUPER_USER_POSITION_TYPE_TITLE}</Button>
 								{isAdmin &&
-									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{dict.lookup('ADMINISTRATOR_POSITION_TYPE_TITLE')}</Button>
+									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.ADMINISTRATOR_POSITION_TYPE_TITLE}</Button>
 								}
 							</ButtonToggleGroup>
 						</Form.Field>

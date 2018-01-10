@@ -18,7 +18,7 @@ import {personTour} from 'pages/HopscotchTour'
 import {Person, Position} from 'models'
 import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 export default class PersonShow extends Page {
 	static contextTypes = {
@@ -109,23 +109,23 @@ export default class PersonShow extends Page {
 	}
 
 	render() {
-		let {person,attendedReports,authoredReports} = this.state
-		let position = person.position
+		const {person,attendedReports,authoredReports} = this.state
+		const position = person.position
 
 		// The position for this person's counterparts
-		let assignedRole = position.type === Position.TYPE.PRINCIPAL ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.ADVISOR_PERSON_TITLE : Settings.PRINCIPAL_PERSON_TITLE
 
 		//User can always edit themselves
 		//Admins can always edit anybody
 		//SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
-		let currentUser = this.context.currentUser
-		let hasPosition = position && position.id
-		let canEdit = Person.isEqual(currentUser, person) ||
+		const currentUser = this.context.currentUser
+		const hasPosition = position && position.id
+		const canEdit = Person.isEqual(currentUser, person) ||
 			currentUser.isAdmin() ||
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
 			(!hasPosition && currentUser.isSuperUser()) ||
 			(person.role === 'PRINCIPAL' && currentUser.isSuperUser())
-		let canChangePosition = currentUser.isAdmin() ||
+		const canChangePosition = currentUser.isAdmin() ||
 			(!hasPosition && currentUser.isSuperUser()) ||
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
 			(person.role === 'PRINCIPAL' && currentUser.isSuperUser())

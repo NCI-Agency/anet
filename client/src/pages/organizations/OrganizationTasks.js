@@ -4,7 +4,7 @@ import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 import {Task} from 'models'
 
@@ -14,16 +14,16 @@ export default class OrganizationTasks extends Component {
 	}
 
 	render() {
-		let currentUser = this.context.app.state.currentUser
+		const currentUser = this.context.app.state.currentUser
+		const org = this.props.organization
 
-		let org = this.props.organization
 		if (!org.isAdvisorOrg()) {
 			return <div></div>
 		}
 
-		let tasks = this.props.tasks.list || []
-		let isAdminUser = currentUser && currentUser.isAdmin()
-		let taskShortLabel = dict.lookup('TASK').shortLabel
+		const tasks = this.props.tasks.list || []
+		const isAdminUser = currentUser && currentUser.isAdmin()
+		const taskShortLabel = Settings.TASK.shortLabel
 
 		return <Fieldset id="tasks" title={`${taskShortLabel}s`} action={
 			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortLabel}</LinkTo>

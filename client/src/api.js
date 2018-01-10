@@ -105,13 +105,12 @@ const API = {
 			xmlhttp.overrideMimeType(mimeType)
 			}
 		}
-		xmlhttp.send();
-		if (xmlhttp.status==200)
-		{
+		xmlhttp.send()
+		if (xmlhttp.status===200) {
 			return xmlhttp.responseText
 		}
 		else {
-			throw "unable to load " + filePath
+			throw new Error("unable to load " + filePath)
 		}
 	},
 }

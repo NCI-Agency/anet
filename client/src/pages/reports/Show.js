@@ -15,7 +15,7 @@ import ReportApprovals from 'components/ReportApprovals'
 import Tag from 'components/Tag'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Report, Person, Task, Comment, Position} from 'models'
 
 export default class ReportShow extends Page {
@@ -217,10 +217,10 @@ export default class ReportShow extends Page {
 						<Form.Field id="author" label="Report author">
 							<LinkTo person={report.author} />
 						</Form.Field>
-						<Form.Field id="advisorOrg" label={dict.lookup('fields').ADVISOR_ORG.name}>
+						<Form.Field id="advisorOrg" label={Settings.fields.ADVISOR_ORG.name}>
 							<LinkTo organization={report.advisorOrg} />
 						</Form.Field>
-						<Form.Field id="principalOrg" label={dict.lookup('fields').PRINCIPAL_ORG.name}>
+						<Form.Field id="principalOrg" label={Settings.fields.principal.org.name}>
 							<LinkTo organization={report.principalOrg} />
 						</Form.Field>
 					</Fieldset>
@@ -247,7 +247,7 @@ export default class ReportShow extends Page {
 						</Table>
 					</Fieldset>
 
-					<Fieldset title={dict.lookup('TASK').longLabel} >
+					<Fieldset title={Settings.TASK.longLabel} >
 						<Table>
 							<thead>
 								<tr>

@@ -12,9 +12,9 @@ import History from 'components/History'
 import Messages from'components/Messages'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
-import dict from 'dictionary'
+import Settings from 'Settings'
 import API from 'api'
-import {Task, Position} from 'models'
+import {Task, Position, Organization} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 
@@ -42,14 +42,14 @@ export default class TaskForm extends ValidatableFormWrapper {
 	render() {
 		const {task, edit} = this.props
 		const {currentUser} = this.context.app.state
-		const taskShortLabel = dict.lookup('TASK').shortLabel
-		const taskProjectedCompletion = dict.lookup('TASK_PROJECTED_COMPLETION')
-		const taskPlannedCompletion = dict.lookup('TASK_PLANNED_COMPLETION')
-		const taskCustomField = dict.lookup('TASK_CUSTOM_FIELD')
-		const taskCustomEnumLabel = dict.lookup('TASK_CUSTOM_ENUM_LABEL')
-		const taskCustomEnumObj = dict.lookup('taskCustomEnum')
+		const taskShortLabel = Settings.TASK.shortLabel
+		const taskProjectedCompletion = Settings.TASK_PROJECTED_COMPLETION
+		const taskPlannedCompletion = Settings.TASK_PLANNED_COMPLETION
+		const taskCustomField = Settings.TASK_CUSTOM_FIELD
+		const taskCustomEnumLabel = Settings.TASK_CUSTOM_ENUM_LABEL
+		const taskCustomEnumObj = Settings.TASK_CUSTOM_ENUM
 		const orgSearchQuery = {}
-		orgSearchQuery.type = 'ADVISOR_ORG'
+		orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
 			orgSearchQuery.parentOrgId = currentUser.position.organization.id
 			orgSearchQuery.parentOrgRecursively = true

@@ -8,7 +8,7 @@ import Fieldset from 'components/Fieldset'
 import ReportCollection from 'components/ReportCollection'
 
 import LoaderHOC from '../HOC/LoaderHOC'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 const d3 = require('d3')
 const chartByTaskId = 'reports_by_task'
@@ -45,7 +45,7 @@ export default class ReportsByTask extends Component {
 
   render() {
     const focusDetails = this.getFocusDetails()
-    const taskShortLabel = dict.lookup('TASK').shortLabel
+    const taskShortLabel = Settings.TASK.shortLabel
     return (
       <div>
         <p className="help-text">{`Number of published reports since ${this.referenceDateLongStr}, grouped by ${taskShortLabel}`}</p>
@@ -81,7 +81,7 @@ export default class ReportsByTask extends Component {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
-    const allTasks = `All ${dict.lookup('TASK').shortLabel}s`
+    const allTasks = `All ${Settings.TASK.shortLabel}s`
 
     if (this.state.focusedTask) {
       titleSuffix = `for ${this.state.focusedTask.shortName}`
@@ -103,14 +103,14 @@ export default class ReportsByTask extends Component {
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart
-    let chartQuery = API.query(/* GraphQL */`
+    const chartQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$chartQueryParams) {
           totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
-    const noTaskMessage = `No ${dict.lookup('TASK').shortLabel}`
+    const noTaskMessage = `No ${Settings.TASK.shortLabel}`
     const noTask = {
       id: -1,
       shortName: noTaskMessage,
@@ -149,7 +149,7 @@ export default class ReportsByTask extends Component {
       Object.assign(reportsQueryParams, {taskId: this.state.focusedTask.id})
     }
     // Query used by the reports collection
-    let reportsQuery = API.query(/* GraphQL */`
+    const reportsQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$reportsQueryParams) {
           pageNum, pageSize, totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}

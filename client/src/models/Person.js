@@ -2,9 +2,9 @@ import React from 'react'
 
 import Model from 'components/Model'
 import utils from 'utils'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
-import {Position} from 'models'
+import {Position, Organization} from 'models'
 
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
@@ -43,13 +43,11 @@ export default class Person extends Model {
 
 	static humanNameOfRole(role) {
 		if (role === Person.ROLE.ADVISOR) {
-			return dict.lookup('ADVISOR_PERSON_TITLE')
+			return Settings.ADVISOR_PERSON_TITLE
 		}
 		if (role === Person.ROLE.PRINCIPAL) {
-			return dict.lookup('PRINCIPAL_PERSON_TITLE')
+			return Settings.PRINCIPAL_PERSON_TITLE
 		}
-
-
 		throw new Error(`Unrecognized role: ${role}`)
 	}
 
@@ -98,7 +96,7 @@ export default class Person extends Model {
 		if (!org) { return false }
 		if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) { return true }
 		if (this.position && this.position.type !== Position.TYPE.SUPER_USER) { return false }
-		if (org.type === 'PRINCIPAL_ORG') { return true }
+		if (org.type === Organization.TYPE.PRINCIPAL_ORG) { return true }
 
 		if (!this.position || !this.position.organization) { return false }
 		let orgs = this.position.organization.allDescendantOrgs || []

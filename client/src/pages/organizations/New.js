@@ -17,8 +17,8 @@ export default class OrganizationNew extends Page {
 		super(props)
 
 		this.state = {
-			originalOrganization: new Organization({type: 'ADVISOR_ORG'}),
-			organization: new Organization({type: 'ADVISOR_ORG'}),
+			originalOrganization: new Organization({type: Organization.TYPE.ADVISOR_ORG}),
+			organization: new Organization({type: Organization.TYPE.ADVISOR_ORG}),
 		}
 	}
 

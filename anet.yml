@@ -159,6 +159,9 @@ dictionary:
   TASK_PROJECTED_COMPLETION: 'Fill in the projected completion date'
   TASK_PLANNED_COMPLETION: 'Fill in the planned completion date'
   TASK_CUSTOM_ENUM_LABEL: 'Project status'
+  TASK_CUSTOM_ENUM:
+    OPEN: Open
+    CLOSED: Closed
   TASK_CUSTOM_FIELD: 'Custom field'
   NAV_BAR_ALL_ADVISOR_ORGS: All EFs / AOs
   SUPPORT_EMAIL_ADDR: support@example.com
@@ -261,6 +264,4 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
-  'taskCustomEnum':
-    OPEN: Open
-    CLOSED: Closed
+  
