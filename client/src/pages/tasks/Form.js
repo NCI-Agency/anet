@@ -44,9 +44,9 @@ export default class TaskForm extends ValidatableFormWrapper {
 		const {task, edit} = this.props
 		const {currentUser} = this.context.app.state
 		const taskShortLabel = Settings.fields.task.shortLabel
-		const projectedCompletion = Settings.fields.task.projectedCompletion
-		const plannedCompletion = Settings.fields.task.plannedCompletion
 		const customFieldEnum = Settings.fields.task.customFieldEnum
+		const plannedCompletion = Settings.fields.task.plannedCompletion
+		const projectedCompletion = Settings.fields.task.projectedCompletion
 		const orgSearchQuery = {}
 		const TaskCustomField = DictionaryField(Settings.fields.task.customField)(Form.Field)
 
@@ -90,11 +90,11 @@ export default class TaskForm extends ValidatableFormWrapper {
 							/>
 						</Form.Field>
 
-						{customFieldEnum &&
-							<Form.Field id="customFieldEnum" label={customFieldEnum.label} >
-								<ButtonToggleGroup>
-									{customEnumButtons(customFieldEnum.enum)}
-								</ButtonToggleGroup>
+						<TaskCustomField id="customField"/>
+						
+						{plannedCompletion &&
+							<Form.Field id="plannedCompletion" label={plannedCompletion.label} addon={CALENDAR_ICON} >
+								<DatePicker showTodayButton placeholder={plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
 							</Form.Field>
 						}
 
@@ -104,14 +104,13 @@ export default class TaskForm extends ValidatableFormWrapper {
 							</Form.Field>
 						}
 
-						{plannedCompletion &&
-							<Form.Field id="plannedCompletion" label={plannedCompletion.label} addon={CALENDAR_ICON} >
-								<DatePicker showTodayButton placeholder={plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
+						{customFieldEnum &&
+							<Form.Field id="customFieldEnum" label={customFieldEnum.label} >
+								<ButtonToggleGroup>
+									{customEnumButtons(customFieldEnum.enum)}
+								</ButtonToggleGroup>
 							</Form.Field>
 						}
-
-						<TaskCustomField id="customField"/>
-						
 
 					</Fieldset>
 				</ValidatableForm>

@@ -166,7 +166,7 @@ dictionary:
         label: 'Custom field'
         placeholder: 'Fill in the custom field'
       customFieldEnum:
-        labrl: 'Project status'
+        label: 'Project status'
         enum:
           OPEN: Open
           CLOSED: Closed
