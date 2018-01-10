@@ -46,9 +46,9 @@ export default class PersonForm extends ValidatableFormWrapper {
 	countries = person => {
 		switch(person.role) {
 			case Person.ROLE.ADVISOR:
-				return Settings.countries
+				return Settings.fields.advisor.person.countries
 			case Person.ROLE.PRINCIPAL:
-				return Settings.principal_countries
+				return Settings.fields.principal.person.countries
 			default:
 				return []
 		}
@@ -71,7 +71,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 		const willAutoKickPosition = person.status === 'INACTIVE' && person.position && !!person.position.id
 		const warnDomainUsername = person.status === 'INACTIVE' && person.domainUsername
-		const ranks = Settings.ranks || []
+		const ranks = Settings.fields.person.ranks || []
 
 		const countries = this.countries(person)
 		const nationalityDefaultValue = countries.length === 1 ? countries[0] : ''
@@ -123,8 +123,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 					:
 					<Form.Field id="role">
 						<ButtonToggleGroup>
-							<Button id="roleAdvisorButton" disabled={!isAdmin} value={Person.ROLE.ADVISOR}>{Settings.ADVISOR_PERSON_TITLE}</Button>
-							<Button id="rolePrincipalButton" value={Person.ROLE.PRINCIPAL}>{Settings.PRINCIPAL_PERSON_TITLE}</Button>
+							<Button id="roleAdvisorButton" disabled={!isAdmin} value={Person.ROLE.ADVISOR}>{Settings.fields.advisor.person.name}</Button>
+							<Button id="rolePrincipalButton" value={Person.ROLE.PRINCIPAL}>{Settings.fields.principal.person.name}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>
 				}
@@ -153,7 +153,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 				{!edit && isAdvisor &&
 					<Alert bsStyle="warning">
-						Creating a {Settings.ADVISOR_PERSON_TITLE} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
+						Creating a {Settings.fields.advisor.person.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
 					</Alert>
 				}
 			</Fieldset>

@@ -81,8 +81,8 @@ export default class PositionForm extends ValidatableFormWrapper {
 				<Fieldset title={edit ? `Edit Position ${position.name}` : "Create a new Position"}>
 					<Form.Field id="type" disabled={this.props.edit}>
 						<ButtonToggleGroup>
-							<Button id="typeAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.ADVISOR_POSITION_NAME}</Button>
-							<Button id="typePrincipalButton" value={Position.TYPE.PRINCIPAL}>{Settings.PRINCIPAL_POSITION_NAME}</Button>
+							<Button id="typeAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.name}</Button>
+							<Button id="typePrincipalButton" value={Position.TYPE.PRINCIPAL}>{Settings.fields.principal.position.name}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>
 
@@ -121,10 +121,10 @@ export default class PositionForm extends ValidatableFormWrapper {
 					{position.type !== Position.TYPE.PRINCIPAL &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
-								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.ADVISOR_POSITION_TYPE_TITLE}</Button>
-								<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.SUPER_USER_POSITION_TYPE_TITLE}</Button>
+								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.name}</Button>
+								<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.name}</Button>
 								{isAdmin &&
-									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.ADMINISTRATOR_POSITION_TYPE_TITLE}</Button>
+									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.name}</Button>
 								}
 							</ButtonToggleGroup>
 						</Form.Field>

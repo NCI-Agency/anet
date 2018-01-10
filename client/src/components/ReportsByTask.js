@@ -47,7 +47,7 @@ export default class ReportsByTask extends Component {
 
   render() {
     const focusDetails = this.getFocusDetails()
-    const taskShortLabel = Settings.TASK.shortLabel
+    const taskShortLabel = Settings.fields.task.shortLabel
     return (
       <div>
         <p className="help-text">{`Number of published reports since ${this.referenceDateLongStr}, grouped by ${taskShortLabel}`}</p>
@@ -83,7 +83,7 @@ export default class ReportsByTask extends Component {
     let titleSuffix = ''
     let resetFnc = ''
     let resetButtonLabel = ''
-    const allTasks = `All ${pluralize(Settings.TASK.shortLabel)}`
+    const allTasks = `All ${pluralize(Settings.fields.task.shortLabel)}`
 
     if (this.state.focusedTask) {
       titleSuffix = `for ${this.state.focusedTask.shortName}`
@@ -112,7 +112,7 @@ export default class ReportsByTask extends Component {
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
-    const noTaskMessage = `No ${Settings.TASK.shortLabel}`
+    const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
     const noTask = {
       id: -1,
       shortName: noTaskMessage,

@@ -29,8 +29,8 @@ export default class TasksSelector extends Component {
 	render() {
 		const {tasks, shortcuts, validationState, optional} = this.props
 
-		const taskLongLabel = Settings.TASK.longLabel
-		const taskShortLabel = Settings.TASK.shortLabel
+		const taskLongLabel = Settings.fields.task.longLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 
 		return <Fieldset title={taskLongLabel} action={optional && "(Optional)"} className="tasks-selector">
 			<Form.Field id="tasks" label={taskShortLabel} validationState={validationState} >
@@ -81,7 +81,7 @@ export default class TasksSelector extends Component {
 
 	renderShortcuts() {
 		const shortcuts = this.props.shortcuts || []
-		const taskShortLabel = Settings.TASK.shortLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 		return <Form.Field.ExtraCol className="shortcut-list">
 			<h5>Recent {taskShortLabel}</h5>
 			{shortcuts.map(task =>

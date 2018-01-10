@@ -10,7 +10,7 @@ export default class Task extends Model {
 
 	static resourceName = 'Task'
 	static displayName() {
-		return Settings.TASK.shortLabel
+		return Settings.fields.task.shortLabel
 	}
 
 	static listName = 'taskList'

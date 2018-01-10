@@ -99,7 +99,7 @@ const superUserTour = (currentUser) => { return {
 }}
 
 const reportTour = (currentUser) => {
-	const taskShortLabel = Settings.TASK.shortLabel
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'report',
 	steps: [
@@ -186,7 +186,7 @@ const reportTour = (currentUser) => {
 }}
 
 const orgTour = (currentUser) => {
-	const taskShortLabel = Settings.TASK.shortLabel
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'org',
 	steps: [
@@ -222,7 +222,7 @@ const orgTour = (currentUser) => {
 		},
 		{
 			title: pluralize(taskShortLabel),
-			content: 'The ' + Settings.TASK.longLabel + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortLabel + 's change, you can update that information by clicking on the ' + taskShortLabel + '.',
+			content: 'The ' + Settings.fields.task.longLabel + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortLabel + 's change, you can update that information by clicking on the ' + taskShortLabel + '.',
 			target: '#tasks h2',
 			placement: 'top',
 		},
@@ -248,7 +248,7 @@ const orgTour = (currentUser) => {
 }}
 
 const positionTour = (currentUser) => {
-	const taskShortLabel = Settings.TASK.shortLabel
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 		id: 'position',
 		steps: [

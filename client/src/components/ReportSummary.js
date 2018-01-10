@@ -115,7 +115,7 @@ export default class ReportSummary extends Component {
 			</Row>
 			<Row>
 				<Col md={12}>
-					{report.tasks.length > 0 && <span><strong>{pluralize(Settings.TASK.shortLabel)}:</strong> {report.tasks.map((task,i) =>
+					{report.tasks.length > 0 && <span><strong>{pluralize(Settings.fields.task.shortLabel)}:</strong> {report.tasks.map((task,i) =>
     {return task.shortName + (i < report.tasks.length - 1 ? ", " : "")})}</span> }
 				</Col>
 			</Row>

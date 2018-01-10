@@ -113,7 +113,7 @@ export default class PersonShow extends Page {
 		const position = person.position
 
 		// The position for this person's counterparts
-		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.ADVISOR_PERSON_TITLE : Settings.PRINCIPAL_PERSON_TITLE
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
 		//User can always edit themselves
 		//Admins can always edit anybody

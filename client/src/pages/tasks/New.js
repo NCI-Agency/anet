@@ -44,7 +44,7 @@ export default class TaskNew extends Page {
 
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new ' + Settings.TASK.shortLabel, Task.pathForNew()]]} />
+				<Breadcrumbs items={[['Create new ' + Settings.fields.task.shortLabel, Task.pathForNew()]]} />
 
 				<NavigationWarning original={this.state.originalTask} current={task} />
 				<TaskForm task={task} />

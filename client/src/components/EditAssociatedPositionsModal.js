@@ -38,7 +38,7 @@ export default class EditAssociatedPositionsModal extends Component {
 		const {position} = this.props
 		const {associatedPositions} = this.state
 		const currentUser = this.context.currentUser
-		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.ADVISOR_PERSON_TITLE : Settings.PRINCIPAL_PERSON_TITLE
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
 		const positionSearchQuery = {matchPersonName: true}
 		if (position.type === Position.TYPE.PRINCIPAL) {

@@ -73,7 +73,7 @@ export default class TaskShow extends Page {
 		let {task, reports} = this.state
 		// Admins can edit tasks, or super users if this task is assigned to their org.
 		let currentUser = this.context.currentUser
-		const taskShortLabel = Settings.TASK.shortLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 
 		const customField = Settings.TASK_CUSTOM_FIELD
 		const customEnumLabel = Settings.TASK_CUSTOM_ENUM_LABEL

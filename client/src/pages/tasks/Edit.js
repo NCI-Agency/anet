@@ -53,7 +53,7 @@ export default class TaskEdit extends Page {
 
 		return (
 			<div>
-				<Breadcrumbs items={[[`${Settings.TASK.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
+				<Breadcrumbs items={[[`${Settings.fields.task.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
 
 				<Messages error={this.state.error} success={this.state.success} />
 

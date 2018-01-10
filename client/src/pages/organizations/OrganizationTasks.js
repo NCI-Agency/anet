@@ -24,7 +24,7 @@ export default class OrganizationTasks extends Component {
 
 		const tasks = this.props.tasks.list || []
 		const isAdminUser = currentUser && currentUser.isAdmin()
-		const taskShortLabel = Settings.TASK.shortLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 
 		return <Fieldset id="tasks" title={pluralize(taskShortLabel)} action={
 			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortLabel}</LinkTo>

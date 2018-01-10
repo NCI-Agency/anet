@@ -43,10 +43,10 @@ export default class Person extends Model {
 
 	static humanNameOfRole(role) {
 		if (role === Person.ROLE.ADVISOR) {
-			return Settings.ADVISOR_PERSON_TITLE
+			return Settings.fields.advisor.person.name
 		}
 		if (role === Person.ROLE.PRINCIPAL) {
-			return Settings.PRINCIPAL_PERSON_TITLE
+			return Settings.fields.principal.person.name
 		}
 		throw new Error(`Unrecognized role: ${role}`)
 	}

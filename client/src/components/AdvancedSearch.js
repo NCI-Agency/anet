@@ -93,7 +93,7 @@ export default class AdvancedSearch extends Component {
 			}
 		}
 
-		const taskShortLabel = Settings.TASK.shortLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 		filters.Reports.filters[taskShortLabel] =
 			<AutocompleteFilter
 				queryKey="taskId"
@@ -105,7 +105,7 @@ export default class AdvancedSearch extends Component {
 			/>
 
 
-		const countries = Settings.countries || []
+		const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
 		filters.People = {
 			filters: {
 				Organization: <OrganizationFilter
@@ -115,7 +115,7 @@ export default class AdvancedSearch extends Component {
 				Role: <SelectSearchFilter
 					queryKey="role"
 					values={[Person.ROLE.ADVISOR,Person.ROLE.PRINCIPAL]}
-					labels={[Settings.ADVISOR_PERSON_TITLE, Settings.PRINCIPAL_PERSON_TITLE]}
+					labels={[Settings.fields.advisor.person.name, Settings.fields.principal.person.name]}
 				/>,
 				Status: <SelectSearchFilter
 					queryKey="status"
@@ -150,7 +150,7 @@ export default class AdvancedSearch extends Component {
 				"Position type": <SelectSearchFilter
 					queryKey="type"
 					values={[Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL]}
-					labels={[Settings.ADVISOR_POSITION_NAME, Settings.PRINCIPAL_POSITION_NAME]}
+					labels={[Settings.fields.advisor.position.name, Settings.fields.principal.position.name]}
 				/>,
 				Organization: <OrganizationFilter
 					queryKey="organizationId"

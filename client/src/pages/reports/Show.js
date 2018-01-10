@@ -247,7 +247,7 @@ export default class ReportShow extends Page {
 						</Table>
 					</Fieldset>
 
-					<Fieldset title={Settings.TASK.longLabel} >
+					<Fieldset title={Settings.fields.task.longLabel} >
 						<Table>
 							<thead>
 								<tr>

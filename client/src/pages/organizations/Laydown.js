@@ -62,15 +62,15 @@ export default class OrganizationLaydown extends Component {
 		const org = this.props.organization
 		let posNameHeader, posPersonHeader, otherNameHeader, otherPersonHeader
 		if (org.isAdvisorOrg()) {
-			posNameHeader = Settings.ADVISOR_POSITION_NAME
-			posPersonHeader = Settings.ADVISOR_PERSON_TITLE
-			otherNameHeader = Settings.PRINCIPAL_POSITION_NAME
-			otherPersonHeader = Settings.PRINCIPAL_PERSON_TITLE
+			posNameHeader = Settings.fields.advisor.position.name
+			posPersonHeader = Settings.fields.advisor.person.name
+			otherNameHeader = Settings.fields.principal.position.name
+			otherPersonHeader = Settings.fields.principal.person.name
 		} else {
-			otherNameHeader = Settings.ADVISOR_POSITION_NAME
-			otherPersonHeader = Settings.ADVISOR_PERSON_TITLE
-			posNameHeader = Settings.PRINCIPAL_POSITION_NAME
-			posPersonHeader = Settings.PRINCIPAL_PERSON_TITLE
+			otherNameHeader = Settings.fields.advisor.position.name
+			otherPersonHeader = Settings.fields.advisor.person.name
+			posNameHeader = Settings.fields.principal.position.name
+			posPersonHeader = Settings.fields.principal.person.name
 		}
 		return <Table>
 			<thead>

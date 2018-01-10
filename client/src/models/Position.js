@@ -40,13 +40,13 @@ export default class Position extends Model {
 
 	static humanNameOfType(type) {
 		if (type === Position.TYPE.PRINCIPAL) {
-			return Settings.PRINCIPAL_POSITION_NAME
+			return Settings.fields.principal.position.name
 		} else if (type === Position.TYPE.ADVISOR) {
-			return Settings.ADVISOR_POSITION_TYPE_TITLE
+			return Settings.fields.advisor.position.name
 		} else if (type === Position.TYPE.SUPER_USER) {
-			return Settings.SUPER_USER_POSITION_TYPE_TITLE
+			return Settings.fields.superUser.position.name
 		} else if (type === Position.TYPE.ADMINISTRATOR) {
-			return Settings.ADMINISTRATOR_POSITION_TYPE_TITLE
+			return Settings.fields.administrator.position.name
 		}
 	}
 

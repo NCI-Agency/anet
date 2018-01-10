@@ -51,7 +51,7 @@ class Nav extends Component {
 				<AnchorLink scrollTo="info">Info</AnchorLink>
 				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
 				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="tasks">{pluralize(Settings.TASK.shortLabel)}</AnchorLink>
+				<AnchorLink scrollTo="tasks">{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
 				<AnchorLink scrollTo="reports">Reports</AnchorLink>
 			</SubNav>
 		)
@@ -85,7 +85,7 @@ class Nav extends Component {
 
 				{inOrg && orgId === myOrgId && orgSubNav}
 
-				<NavDropdown title={Settings.NAV_BAR_ALL_ADVISOR_ORGS} id="organizations" active={inOrg && orgId !== myOrgId}>
+				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="organizations" active={inOrg && orgId !== myOrgId}>
 					{Organization.map(organizations, org =>
 						<LinkTo organization={org} componentClass={Link} key={org.id}>
 							<MenuItem>{org.shortName}</MenuItem>

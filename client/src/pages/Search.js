@@ -221,7 +221,7 @@ export default class Search extends Page {
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
 		const queryType = this.state.queryType || query.type || 'everything'
 
-		const taskShortLabel = Settings.TASK.shortLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 
 		if (typeof queryString === 'object') {
 			queryString = queryString[Object.keys(query)[1]]
