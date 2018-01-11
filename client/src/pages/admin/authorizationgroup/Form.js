@@ -8,6 +8,7 @@ import Form from 'components/Form'
 import Messages from 'components/Messages'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import PositionsSelector from 'components/PositionsSelector'
 
 import API from 'api'
 import {AuthorizationGroup} from 'models'
@@ -18,7 +19,16 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 		edit: PropTypes.bool
 	}
 
+	constructor(props) {
+		super(props)
+
+		this.state = {
+			errors: {},
+		}
+	}
+
 	render() {
+		let {errors} = this.state
 		let authorizationGroup = this.props.authorizationGroup
 		let edit = this.props.edit
 
@@ -43,10 +53,25 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 								<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
 							</ButtonToggleGroup>
 						</Form.Field>
+						<PositionsSelector
+							positions={authorizationGroup.positions}
+							onChange={this.onChange}
+							onErrorChange={this.onPositonError}
+							validationState={errors.positions} />
 					</Fieldset>
 				</ValidatableForm>
 			</div>
 		)
+	}
+	@autobind
+	onPositonError(isError, message) {
+		let errors = this.state.errors
+		if (isError) {
+			errors.positions = 'error'
+		} else {
+			delete errors.positions
+		}
+		this.setState({errors})
 	}
 
 	@autobind

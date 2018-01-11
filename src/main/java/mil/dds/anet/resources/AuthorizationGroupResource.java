@@ -1,5 +1,8 @@
 package mil.dds.anet.resources;
 
+import java.util.List;
+import java.util.Optional;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +21,9 @@ import javax.ws.rs.core.Response.Status;
 
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
@@ -89,6 +93,21 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	@RolesAllowed("ADMINISTRATOR")
 	public Response updateAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
 		int numRows = dao.update(t);
+		// Update positions:
+		if (t.getPositions() != null) {
+			final List<Position> existingPositions = dao.getPositionsForAuthorizationGroup(t);
+			for (final Position p : t.getPositions()) {
+				Optional<Position> existingPosition = existingPositions.stream().filter(el -> el.getId().equals(p.getId())).findFirst();
+				if (existingPosition.isPresent()) {
+					existingPositions.remove(existingPosition.get());
+				} else {
+					dao.addPositionToAuthorizationGroup(p, t);
+				}
+			}
+			for (final Position p : existingPositions) {
+				dao.removePositionFromAuthorizationGroup(p, t);
+			}
+		}
 		AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);
 		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
 	}
