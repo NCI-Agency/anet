@@ -1,4 +1,6 @@
 import React from 'react'
+
+import Breadcrumbs from 'components/Breadcrumbs'
 import Page from 'components/Page'
 import Fieldset from 'components/Fieldset'
 import AuthorizationGroupTable from 'components/AuthorizationGroupTable'
@@ -13,7 +15,7 @@ export default class AuthorizationGroups extends Page {
 		}
 	}
 
-	componentDidMount() {
+	fetchData() {
 		API.query(/* GraphQL */`
 			authorizationGroupList(f:getAll) {
 				list { id, name, description, positions { id, name, type }, status }
@@ -26,6 +28,7 @@ export default class AuthorizationGroups extends Page {
 	render() {
 		return (
 			<div>
+				<Breadcrumbs items={[['Authorization Groups', '/admin/authorizationGroups']]} />
 				<Fieldset title='Authorization groups' id='12'>
 					<AuthorizationGroupTable authorizationGroups={this.state.authorizationGroups} />
 				</Fieldset>
