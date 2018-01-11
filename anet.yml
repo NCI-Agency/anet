@@ -200,7 +200,7 @@ dictionary:
         - OF-10
     advisor:
       person:
-        name: NATO Member      
+        name: NATO Member
         countries:
           - Albania
           - Armenia
@@ -283,4 +283,3 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
-  

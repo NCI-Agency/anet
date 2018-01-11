@@ -210,7 +210,7 @@ dictionary:
         - OF-10
     advisor:
       person:
-        name: NATO Member      
+        name: NATO Member
         countries:
           - Albania
           - Armenia
