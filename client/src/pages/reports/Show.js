@@ -217,7 +217,7 @@ export default class ReportShow extends Page {
 						<Form.Field id="author" label="Report author">
 							<LinkTo person={report.author} />
 						</Form.Field>
-						<Form.Field id="advisorOrg" label={Settings.fields.ADVISOR_ORG.name}>
+						<Form.Field id="advisorOrg" label={Settings.fields.advisor.org.name}>
 							<LinkTo organization={report.advisorOrg} />
 						</Form.Field>
 						<Form.Field id="principalOrg" label={Settings.fields.principal.org.name}>
