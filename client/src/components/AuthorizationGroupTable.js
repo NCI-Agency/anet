@@ -2,6 +2,7 @@ import React, {Component, PropTypes} from 'react'
 import {Table} from 'react-bootstrap'
 
 import {AuthorizationGroup} from 'models'
+import LinkTo from 'components/LinkTo'
 
 export default class AuthorizationGroupTable extends Component {
 	static propTypes = {
@@ -23,10 +24,10 @@ export default class AuthorizationGroupTable extends Component {
 			<tbody>
 				{authorizationGroups.map(authorizationGroup =>
 					<tr key={authorizationGroup.id}>
-						<td>{authorizationGroup.name}</td>
+						<td>{<LinkTo authorizationGroup={authorizationGroup} />}</td>
 						<td>{authorizationGroup.description}</td>
-						<td>{authorizationGroup.positions.map(position => <div key={position.id}>{position.name}</div>)}</td>
-						<td>{authorizationGroup.status} </td>
+						<td>{authorizationGroup.positions.map(position => <div key={position.id}><LinkTo position={position} /></div>)}</td>
+						<td>{authorizationGroup.humanNameOfStatus()} </td>
 					</tr>
 				)}
 			</tbody>

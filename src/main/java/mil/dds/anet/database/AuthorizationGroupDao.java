@@ -53,7 +53,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	@Override
-	public AuthorizationGroup getById(@Bind("id") int id) {
+	public AuthorizationGroup getById(int id) {
 		final Query<AuthorizationGroup> query = dbHandle.createQuery("/* getAuthorizationGroupById */ SELECT * from authorizationGroups where id = :id")
 			.bind("id", id)
 			.map(new AuthorizationGroupMapper());
@@ -70,12 +70,13 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				a.setCreatedAt(DateTime.now());
 				a.setUpdatedAt(DateTime.now());
 				final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-						"/* authorizationGroupInsert */ INSERT INTO authorizationGroups (name, description, createdAt, updatedAt) "
-							+ "VALUES (:name, :description, :createdAt, :updatedAt)")
+						"/* authorizationGroupInsert */ INSERT INTO authorizationGroups (name, description, createdAt, updatedAt, status) "
+							+ "VALUES (:name, :description, :createdAt, :updatedAt, :status)")
 					.bind("name", a.getName())
 					.bind("description", a.getDescription())
 					.bind("createdAt", a.getCreatedAt())
 					.bind("updatedAt", a.getUpdatedAt())
+					.bind("status", DaoUtils.getEnumId(a.getStatus()))
 					.executeAndReturnGeneratedKeys();
 				a.setId(DaoUtils.getGeneratedId(keys));
 		
@@ -100,11 +101,12 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 			@Override
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				return dbHandle.createStatement("/* updateAuthorizationGroup */ UPDATE authorizationGroups "
-							+ "SET name = :name, description = :description, updatedAt = :updatedAt WHERE id = :id")
+							+ "SET name = :name, description = :description, updatedAt = :updatedAt, status = :status  WHERE id = :id")
 						.bind("id", a.getId())
 						.bind("name", a.getName())
 						.bind("description", a.getDescription())
 						.bind("updatedAt", DateTime.now())
+						.bind("status", DaoUtils.getEnumId(a.getStatus()))
 						.execute();
 			}
 		});

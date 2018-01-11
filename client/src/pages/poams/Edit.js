@@ -45,10 +45,9 @@ export default class PoamEdit extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[[`${dict.lookup('POAM_SHORT_NAME')} ${poam.shortName}`, Poam.pathFor(poam)], ["Edit", Poam.pathForEdit(poam)]]} />
-
 				<Messages error={this.state.error} success={this.state.success} />
-
 				<NavigationWarning original={this.state.originalPoam} current={poam} />
+
 				<PoamForm poam={poam} edit />
 			</div>
 		)

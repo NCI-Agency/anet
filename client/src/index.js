@@ -54,6 +54,10 @@ import OnboardingEdit from 'pages/onboarding/Edit'
 
 import InsightsShow from  'pages/insights/Show'
 
+import AuthorizationGroupShow from 'pages/admin/authorizationgroup/Show'
+import AuthorizationGroupEdit from 'pages/admin/authorizationgroup/Edit'
+import AuthorizationGroupNew from 'pages/admin/authorizationgroup/New'
+
 import Help from 'pages/Help'
 
 ReactDOM.render((
@@ -107,6 +111,9 @@ ReactDOM.render((
 
 				<Route path="admin/mergePeople" component={MergePeople} />
 				<Route path="admin/authorizationGroups" component={AuthorizationGroups} />
+				<Route path="admin/authorizationGroups/new" component={AuthorizationGroupNew} />
+				<Route path="admin/authorizationGroups(/:id)/edit" component={AuthorizationGroupEdit} />
+				<Route path="admin/authorizationGroups(/:id)" component={AuthorizationGroupShow} />
 				<Route path="admin" component={AdminIndex} />
 
 				<Route path="onboarding">
