@@ -3,11 +3,11 @@ import autobind from 'autobind-decorator'
 
 import Autocomplete from 'components/Autocomplete'
 import Form from 'components/Form'
-import {Table, Button, HelpBlock} from 'react-bootstrap'
+import PositionTable from 'components/PositionTable'
+import {Button, HelpBlock} from 'react-bootstrap'
 
 import {Position} from 'models'
 
-import REMOVE_ICON from 'resources/delete.png'
 import WARNING_ICON from 'resources/warning.png'
 
 export default class PositionsSelector extends Component {
@@ -41,27 +41,11 @@ export default class PositionsSelector extends Component {
 				<img src={WARNING_ICON} role="presentation" height="20px" />
 				Position not found in Database
 			</HelpBlock>}
-
-			<Table condensed id="positionsTable" className="borderless">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Description</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{positions.map((ag, idx) =>
-						<tr key={ag.id}>
-							<td>{ag.name}</td>
-							<td>{ag.description}</td>
-							<td onClick={this.removePosition.bind(this, ag)} id={'positionDelete_' + idx} >
-								<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove position" /></span>
-							</td>
-						</tr>
-					)}
-				</tbody>
-			</Table>
+			<PositionTable
+				positions={positions}
+				showDelete={true}
+				onDelete={this.removePosition}
+			/>
 
 			{ shortcuts && shortcuts.length > 0 && this.renderShortcuts() }
 		</Form.Field>
@@ -78,24 +62,24 @@ export default class PositionsSelector extends Component {
 	}
 
 	@autobind
-	addPosition(newGroup) {
-		if (!newGroup || !newGroup.id) {
+	addPosition(newPosition) {
+		if (!newPosition || !newPosition.id) {
 			return
 		}
 
 		let positions = this.props.positions
 
-		if (!positions.find(position => position.id === newGroup.id)) {
-			positions.push(newGroup)
+		if (!positions.find(position => position.id === newPosition.id)) {
+			positions.push(newPosition)
 		}
 
 		this.props.onChange()
 	}
 
 	@autobind
-	removePosition(oldGroup) {
+	removePosition(oldPosition) {
 		let positions = this.props.positions
-		let index = positions.findIndex(position => position.id === oldGroup.id)
+		let index = positions.findIndex(position => position.id === oldPosition.id)
 
 		if (index !== -1) {
 			positions.splice(index, 1)

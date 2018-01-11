@@ -6,6 +6,7 @@ import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import LinkTo from 'components/LinkTo'
+import PositionTable from 'components/PositionTable'
 
 import API from 'api'
 import {AuthorizationGroup} from 'models'
@@ -26,7 +27,9 @@ export default class AuthorizationGroupShow extends Page {
 	fetchData(props) {
 		API.query(/* GraphQL */`
 			authorizationGroup(id:${props.params.id}) {
-				id, name, description, positions { id, name, type }, status 
+				id, name, description
+				positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
+				status
 			}
 		`).then(data => {
 			this.setState({
@@ -47,10 +50,10 @@ export default class AuthorizationGroupShow extends Page {
 				<Form static formFor={authorizationGroup} horizontal >
 					<Fieldset title={authorizationGroup.name} action={currentUser.isSuperUser() && <LinkTo authorizationGroup={authorizationGroup} edit button="primary">Edit</LinkTo>}>
 						<Form.Field id="description" />
-						<Form.Field id="positions">
-							{authorizationGroup.positions.map(position => <div key={position.id}><LinkTo position={position} /></div>)}
-						</Form.Field>
 						<Form.Field id="status">{authorizationGroup.humanNameOfStatus()}</Form.Field>
+					</Fieldset>
+					<Fieldset title="Positions">
+							<PositionTable positions={authorizationGroup.positions} />
 					</Fieldset>
 				</Form>
 			</div>
