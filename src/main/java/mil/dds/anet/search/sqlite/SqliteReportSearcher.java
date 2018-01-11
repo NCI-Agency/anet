@@ -35,14 +35,12 @@ public class SqliteReportSearcher implements IReportSearcher {
 
 	public static final DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS Z");
 
-	private String dateComparisonFormat;
 	private String isoDowFormat;
 	private String isoDowComparison;
 	private DateTimeFormatter dateTimeFormatter;
 
 
-	public SqliteReportSearcher(String dateComparisonFormat, String isoDowFormat, DateTimeFormatter dateTimeFormatter) {
-		this.dateComparisonFormat = dateComparisonFormat;
+	public SqliteReportSearcher(String isoDowFormat, DateTimeFormatter dateTimeFormatter) {
 		this.isoDowFormat = isoDowFormat;
 		this.dateTimeFormatter = dateTimeFormatter;
 		this.isoDowComparison = "(" + this.isoDowFormat + ") = :%s";
@@ -50,7 +48,6 @@ public class SqliteReportSearcher implements IReportSearcher {
 	
 	public SqliteReportSearcher() {
 		this(
-			"reports.\"%s\" %s DateTime(:%s)",
 			"strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1", 	// %w day of week 0-6 with Sunday==0
 			sqlitePattern);
 	}
@@ -73,8 +70,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		String commonTableExpression = null;
 		Map<String,Object> args = new HashMap<String,Object>();
 		List<String> whereClauses = new LinkedList<String>();
-		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses,
-				this.dateComparisonFormat, this.dateTimeFormatter);
+		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses, this.dateTimeFormatter);
 		if (query.getAuthorId() != null) { 
 			whereClauses.add("reports.\"authorId\" = :authorId");
 			args.put("authorId", query.getAuthorId());

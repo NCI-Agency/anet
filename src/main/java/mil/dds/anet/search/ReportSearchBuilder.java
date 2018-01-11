@@ -18,7 +18,6 @@ public class ReportSearchBuilder {
 	private static final String DEFAULT_WHERE_FORMAT = "reports.\"%s\" %s :%s";
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportSearchBuilder.class);
 
-	private String whereClauseFormat;
 	private DateTimeFormatter dateFormatter;
 	private Map<String, Object> args = new HashMap<>();
 	private List<String> whereClauses = new ArrayList<>();
@@ -35,26 +34,21 @@ public class ReportSearchBuilder {
 		}
 	}
 
-	public ReportSearchBuilder(Map<String, Object> args, List<String> whereClauses, String whereClauseFormat,
+	public ReportSearchBuilder(Map<String, Object> args, List<String> whereClauses,
 			DateTimeFormatter dateFormatter) {
 		this.args = args;
 		this.whereClauses = whereClauses;
-		if (null != whereClauseFormat) {
-			this.whereClauseFormat = whereClauseFormat;
-		} else {
-			this.whereClauseFormat = DEFAULT_WHERE_FORMAT;
-		}
 		this.dateFormatter = dateFormatter;
 	}
 
 	public ReportSearchBuilder(Map<String, Object> args, List<String> whereClauses) {
-		this(args, whereClauses, null, null);
+		this(args, whereClauses, null);
 	}
 
 	public void addDateClause(DateTime queryDate, Comparison comp, String fieldName, String parameterName) {
 		if (queryDate != null) {
 			DateTime realQueryDate = Utils.handleRelativeDate(queryDate).toDateTime(DateTimeZone.getDefault());
-			String whereClause = String.format(whereClauseFormat, fieldName, comp.getOperator(), parameterName);
+			String whereClause = String.format(DEFAULT_WHERE_FORMAT, fieldName, comp.getOperator(), parameterName);
 			whereClauses.add(whereClause);
 			Object dateArg = dateFormatter == null ? realQueryDate : dateFormatter.print(realQueryDate);
 			args.put(parameterName, dateArg);

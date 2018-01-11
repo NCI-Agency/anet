@@ -12,8 +12,8 @@ import mil.dds.anet.search.sqlite.SqliteTaskSearcher;
 public class PostgresqlSearcher extends Searcher {
 
 	public PostgresqlSearcher() {
-		super(
-			new SqliteReportSearcher("reports.\"%s\" %s :%s", "EXTRACT(ISODOW FROM reports.\"%s\")", null),
+		 super(
+			new SqliteReportSearcher("EXTRACT(ISODOW FROM reports.\"%s\")", null),
 			new SqlitePersonSearcher(), new SqliteOrganizationSearcher(), new SqlitePositionSearcher(),
 			new SqliteTaskSearcher(), new SqliteLocationSearcher(), new SqliteTagSearcher()
 		);
