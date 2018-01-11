@@ -22,14 +22,16 @@ public class DaoUtilsTest {
 			.contains("/* getAllFakery */")
 			.contains("SELECT " + fakeFieldList + " FROM " +  fakeTableName)
 			.doesNotContain("OVER ()")
+			.contains(" ORDER BY ")
 			.contains("LIMIT :limit OFFSET :offset")
 			;
 		String pgSql = DaoUtils.buildPagedGetAllSql(DbType.POSTGRESQL, "Fakery", fakeTableName, fakeFieldList, orderBy);
 		assertThat(pgSql).as("Generated SQL for Posgresql")
 			.contains("/* getAllFakery */")
-			.contains(" SELECT " + fakeFieldList)
-			.contains(" FROM " +  fakeTableName)
-			.contains("over() AS \"totalCount\"")
+			.contains(" SELECT " + fakeFieldList + " ")
+			.contains(" FROM " +  fakeTableName + " ")
+			.contains(" over() AS \"totalCount\" ")
+			.contains(" ORDER BY ")
 			.contains("LIMIT :limit OFFSET :offset")
 			;
 		String mssqlSql = DaoUtils.buildPagedGetAllSql(DbType.MSSQL, "Fakery", fakeTableName, fakeFieldList, orderBy);
@@ -37,8 +39,9 @@ public class DaoUtilsTest {
 			.contains("/* getAllFakery */")
 			.contains("SELECT " + fakeFieldList)
 			.contains(" FROM " +  fakeTableName)
-			.contains("over() AS \"totalCount\"")
-			.contains("OFFSET :offset")
+			.contains(" over() AS \"totalCount\" ")
+			.contains(" OFFSET :offset ")
+			.contains(" ORDER BY ")
 			.contains("FETCH NEXT :limit ROWS ONLY")
 			;
 	}

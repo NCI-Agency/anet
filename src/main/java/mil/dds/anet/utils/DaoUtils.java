@@ -114,7 +114,7 @@ public class DaoUtils {
 		StringBuilder sb = new StringBuilder("/* getAll%s */ SELECT %s ");
 		switch (databaseType) {
 		case MSSQL:
-			sb.append(", count(*) over() AS \"totalCount\" FROM %s")
+			sb.append(", count(*) over() AS \"totalCount\" FROM %s ")
 			  .append("ORDER BY %s ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
 			break;
 		case SQLITE:
