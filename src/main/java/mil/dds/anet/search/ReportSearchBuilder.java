@@ -40,6 +40,8 @@ public class ReportSearchBuilder {
 		this.args = args;
 		this.whereClauses = whereClauses;
 		if (null != whereClauseFormat) {
+			this.whereClauseFormat = whereClauseFormat;
+		} else {
 			this.whereClauseFormat = DEFAULT_WHERE_FORMAT;
 		}
 		this.dateFormatter = dateFormatter;
