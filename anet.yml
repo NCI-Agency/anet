@@ -160,7 +160,7 @@ dictionary:
         label: Projected Completion
         placeholder: 'Fill in the projected completion date'
       plannedCompletion:
-        label: 'Planned comletion'
+        label: 'Planned completion'
         placeholder: 'Fill in the planned completion date'
       customField:
         label: 'Custom field'
