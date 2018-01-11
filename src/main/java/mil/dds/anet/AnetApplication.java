@@ -1,5 +1,7 @@
 package mil.dds.anet;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.EnumSet;
 import java.util.Map;
@@ -14,8 +16,12 @@ import javax.servlet.FilterRegistration;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +120,12 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		final DBIFactory factory = new DBIFactory();
 		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
 
-		logger.info("dictionary: {}", new JSONObject(configuration.getDictionary()).toString(2));
+		final JSONObject dictionary = getDictionary(configuration);
+		if (dictionary == null) {
+			// Can't continue without a dictionary
+			System.exit(1);
+		}
+		logger.info("dictionary: {}", dictionary.toString(2));
 		
 		//We want to use our own custom DB logger in order to clean up the logs a bit. 
 		jdbi.setSQLLog(new AnetDbLogger());
@@ -202,6 +213,31 @@ public class AnetApplication extends Application<AnetConfiguration> {
 				orgResource, asResource, taskResource,
 				adminResource, savedSearchResource, tagResource),
 			configuration.isDevelopmentMode()));
+	}
+
+	private JSONObject getDictionary(AnetConfiguration configuration) {
+		try (final InputStream inputStream = getClass().getResourceAsStream("/anet-schema.json")) {
+			if (inputStream == null) {
+				logger.error("ANET schema not found");
+				return null;
+			}
+			final JSONObject rawSchema = new JSONObject(new JSONTokener(inputStream));
+			final Schema schema = SchemaLoader.load(rawSchema);
+			final JSONObject dictionary = new JSONObject(configuration.getDictionary());
+			schema.validate(dictionary);
+			return dictionary;
+		} catch (IOException e) {
+			logger.error("Error closing ANET schema", e);
+		} catch (ValidationException e) {
+			logger.error("Dictionary invalid against ANET schema:");
+			logValidationErrors(e);
+		}
+		return null;
+	}
+
+	private void logValidationErrors(ValidationException e) {
+		logger.error(e.getMessage());
+		e.getCausingExceptions().stream().forEach(this::logValidationErrors);
 	}
 
 	/*
