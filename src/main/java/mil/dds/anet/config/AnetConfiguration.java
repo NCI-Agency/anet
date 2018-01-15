@@ -121,6 +121,7 @@ public class AnetConfiguration extends Configuration {
 		private String password;
 		private Boolean startTls = true;
 		private boolean disabled = false;
+		private Integer nbOfHoursForStaleEmails;
 		
 		public String getHostname() {
 			return hostname;
@@ -168,6 +169,14 @@ public class AnetConfiguration extends Configuration {
 
 		public void setDisabled(boolean disabled) {
 			this.disabled = disabled;
+		}
+
+		public Integer getNbOfHoursForStaleEmails() {
+			return nbOfHoursForStaleEmails;
+		}
+
+		public void setNbOfHoursForStaleEmails(Integer hours) {
+			this.nbOfHoursForStaleEmails = hours;
 		}
 	}
 

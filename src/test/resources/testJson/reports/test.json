@@ -25,18 +25,18 @@
 		"country" : "Afghanistan",
 		"primary" : true
 	}],
-	"poams": [{
+	"tasks": [{
 		"id": null,
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
-		"parentPoam": null
+		"parentTask": null
 	}, {
 		"id": null,
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
-		"parentPoam": null
+		"parentTask": null
 	}],
 	"atmosphere" : "POSITIVE",
 	"atmosphereDetails" : "This was a great meeting!!!",

@@ -14,7 +14,7 @@ export default class Report extends Model {
 		atmosphereDetails: '',
 		location: {},
 		attendees: [],
-		poams: [],
+		tasks: [],
 		comments: [],
 		reportText: '',
 		nextSteps: '',

@@ -17,7 +17,7 @@ import PositionTable from 'components/PositionTable'
 import API from 'api'
 import dict from 'dictionary'
 import GQL from 'graphqlapi'
-import {Person, Organization, Poam} from 'models'
+import {Person, Organization, Task} from 'models'
 
 import FileSaver from 'file-saver'
 
@@ -26,7 +26,7 @@ import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
 import LOCATIONS_ICON from 'resources/locations.png'
-import POAMS_ICON from 'resources/poams.png'
+import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
@@ -44,8 +44,6 @@ const QUERY_STRINGS = {
 const SEARCH_CONFIG = {
 	reports : {
 		listName : 'reports: reportList',
-		sortBy: 'ENGAGEMENT_DATE',
-		sortOrder: 'DESC',
 		variableType: 'ReportSearchQuery',
 		fields : ReportCollection.GQL_REPORT_FIELDS
 	},
@@ -58,29 +56,21 @@ const SEARCH_CONFIG = {
 	},
 	positions : {
 		listName: 'positions: positionList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
 		variableType: 'PositionSearchQuery',
 		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name }'
 	},
-	poams : {
-		listName: 'poams: poamList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
-		variableType: 'PoamSearchQuery',
+	tasks : {
+		listName: 'tasks: taskList',
+		variableType: 'TaskSearchQuery',
 		fields: 'id, shortName, longName'
 	},
 	locations : {
 		listName: 'locations: locationList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
 		variableType: 'LocationSearchQuery',
 		fields : 'id, name, lat, lng'
 	},
 	organizations : {
 		listName: 'organizations: organizationList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
 		variableType: 'OrganizationSearchQuery',
 		fields: 'id, shortName, longName, identificationCode, type'
 	}
@@ -100,7 +90,7 @@ export default class Search extends Page {
 				organizations: 0,
 				positions: 0,
 				locations: 0,
-				poams: 0,
+				tasks: 0,
 			},
 			saveSearch: {show: false},
 			results: {
@@ -109,7 +99,7 @@ export default class Search extends Page {
 				organizations: null,
 				positions: null,
 				locations: null,
-				poams: null,
+				tasks: null,
 			},
 			error: null,
 			success: null,
@@ -219,18 +209,18 @@ export default class Search extends Page {
 		let numReports = results.reports ? results.reports.totalCount : 0
 		let numPeople = results.people ? results.people.totalCount : 0
 		let numPositions = results.positions ? results.positions.totalCount : 0
-		let numPoams = results.poams ? results.poams.totalCount : 0
+		let numTasks = results.tasks ? results.tasks.totalCount : 0
 		let numLocations = results.locations ? results.locations.totalCount : 0
 		let numOrganizations = results.organizations ? results.organizations.totalCount : 0
 
-		let numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numPoams
+		let numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
 		let noResults = numResults === 0
 
 		let query = this.props.location.query
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
 		let queryType = this.state.queryType || query.type || 'everything'
 
-		let poamShortTitle = dict.lookup('POAM_SHORT_NAME')
+		let taskShortLabel = dict.lookup('TASK').shortLabel
 
 		if (typeof queryString === 'object') {
 			queryString = queryString[Object.keys(query)[1]]
@@ -275,9 +265,9 @@ export default class Search extends Page {
 								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
 							</NavItem>
 
-							<NavItem eventKey="poams" disabled={!numPoams}>
-								<img src={POAMS_ICON} role="presentation" /> {poamShortTitle}s
-								{numPoams > 0 && <Badge pullRight>{numPoams}</Badge>}
+							<NavItem eventKey="tasks" disabled={!numTasks}>
+								<img src={TASKS_ICON} role="presentation" /> {taskShortLabel}s
+								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="locations" disabled={!numLocations}>
@@ -326,9 +316,9 @@ export default class Search extends Page {
 					</Fieldset>
 				}
 
-				{numPoams > 0 && (queryType === 'everything' || queryType === 'poams') &&
-					<Fieldset title={poamShortTitle + 's'}>
-						{this.renderPoams()}
+				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
+					<Fieldset title={taskShortLabel + 's'}>
+						{this.renderTasks()}
 					</Fieldset>
 				}
 
@@ -471,9 +461,9 @@ export default class Search extends Page {
 		</div>
 	}
 
-	renderPoams() {
+	renderTasks() {
 		return <div>
-			{this.paginationFor('poams')}
+			{this.paginationFor('tasks')}
 			<Table responsive hover striped>
 				<thead>
 					<tr>
@@ -481,9 +471,9 @@ export default class Search extends Page {
 					</tr>
 				</thead>
 				<tbody>
-					{Poam.map(this.state.results.poams.list, poam =>
-						<tr key={poam.id}>
-							<td><LinkTo poam={poam} >{poam.shortName} {poam.longName}</LinkTo></td>
+					{Task.map(this.state.results.tasks.list, task =>
+						<tr key={task.id}>
+							<td><LinkTo task={task} >{task.shortName} {task.longName}</LinkTo></td>
 						</tr>
 					)}
 				</tbody>

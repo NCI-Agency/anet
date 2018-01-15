@@ -6,7 +6,7 @@ import ReportSummary from 'components/ReportSummary'
 import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Leaflet from 'components/Leaflet'
-import _get from 'lodash.get'
+import _get from 'lodash/get'
 
 const FORMAT_SUMMARY = 'summary'
 const FORMAT_TABLE = 'table'
@@ -21,7 +21,7 @@ const GQL_REPORT_FIELDS =  /* GraphQL */`
 	advisorOrg { id, shortName},
 	principalOrg { id, shortName},
 	location { id, name, lat, lng},
-	poams {id, shortName, longName},
+	tasks {id, shortName, longName},
 	tags {id, name, description}
 	approvalStatus {
 		type, createdAt

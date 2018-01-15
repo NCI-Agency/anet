@@ -47,7 +47,7 @@ import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.resources.LocationResource;
 import mil.dds.anet.resources.OrganizationResource;
 import mil.dds.anet.resources.PersonResource;
-import mil.dds.anet.resources.PoamResource;
+import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.resources.PositionResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
@@ -173,7 +173,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		
 		//Create all of the HTTP Resources.  
 		PersonResource personResource = new PersonResource(engine, configuration);
-		PoamResource poamResource =  new PoamResource(engine);
+		TaskResource taskResource =  new TaskResource(engine);
 		LocationResource locationResource = new LocationResource(engine);
 		OrganizationResource orgResource = new OrganizationResource(engine);
 		PositionResource positionResource = new PositionResource(engine);
@@ -187,7 +187,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
 		//Register all of the HTTP Resources
 		environment.jersey().register(personResource);
-		environment.jersey().register(poamResource);
+		environment.jersey().register(taskResource);
 		environment.jersey().register(locationResource);
 		environment.jersey().register(orgResource);
 		environment.jersey().register(positionResource);
@@ -202,7 +202,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		environment.jersey().register(new GraphQLResource(
 			ImmutableList.of(reportResource, personResource,
 				positionResource, locationResource,
-				orgResource, asResource, poamResource,
+				orgResource, asResource, taskResource,
 				adminResource, savedSearchResource, tagResource, authorizationGroupResource),
 			configuration.isDevelopmentMode()));
 	}

@@ -3,31 +3,35 @@ import React, {PropTypes} from 'react'
 import Model from 'components/Model'
 import dict from 'dictionary'
 
-export default class Poam extends Model {
+export default class Task extends Model {
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
 	}
 
-	static resourceName = 'Poam'
+	static resourceName = 'Task'
 	static displayName() {
-		return dict.lookup('POAM_SHORT_NAME')
+		return dict.lookup('TASK').shortLabel
 	}
 
-	static listName = 'poamList'
+	static listName = 'taskList'
 
 	static schema = {
 		shortName: '',
 		longName: '',
 		category: '',
 		responsibleOrg: {},
-		parentPoam: {},
-		childrenPoams: [],
+		parentTask: {},
+		childrenTasks: [],
+		customFieldEnum: '',
+		customField: '',
+		projectedCompletion: null,
+		plannedCompletion: null,
 	}
 
 	static autocompleteQuery = "id, shortName, longName"
 
-	static autocompleteTemplate(poam) {
-		return <span>{[poam.shortName, poam.longName].join(' - ')}</span>
+	static autocompleteTemplate(task) {
+		return <span>{[task.shortName, task.longName].join(' - ')}</span>
 	}
 
 	toString() {

@@ -16,7 +16,7 @@ import Tag from 'components/Tag'
 
 import API from 'api'
 import dict from 'dictionary'
-import {Report, Person, Poam, Comment, Position} from 'models'
+import {Report, Person, Task, Comment, Position} from 'models'
 
 export default class ReportShow extends Page {
 	static contextTypes = {
@@ -68,7 +68,7 @@ export default class ReportShow extends Page {
 				primaryAdvisor { id }
 				primaryPrincipal { id }
 
-				poams { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 
 				comments {
 					id, text, createdAt, updatedAt
@@ -98,7 +98,9 @@ export default class ReportShow extends Page {
 	}
 
 	renderNoPositionAssignedText() {
-		return <p>Notice: This report cannot be submitted because you do not have an assigned position.<br /> -- Please contact your administrator --</p>
+		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
+		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
+		return <div className="alert alert-warning">You cannot submit a report. Your assigned advisor position has an inactive status.<br /> -- Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage} --</div>
 	}
 
 	render() {
@@ -114,8 +116,8 @@ export default class ReportShow extends Page {
 		canEdit = canEdit || canApprove
 
 		//Only the author can submit when report is in Draft or rejected AND author has a position
-		const hasAssignedPosition = currentUser.hasAssignedPosition()
-		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasAssignedPosition
+		const hasActivePosition = currentUser.hasActivePosition()
+		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
 
 		//Anbody can email a report as long as it's not in draft.
 		let canEmail = !report.isDraft()
@@ -149,7 +151,7 @@ export default class ReportShow extends Page {
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This is a DRAFT report and hasn't been submitted.</h4>
 						<p>You can review the draft below to make sure all the details are correct.</p>
-						{!hasAssignedPosition &&
+						{!hasActivePosition &&
 							this.renderNoPositionAssignedText()
 						}
 						<div style={{textAlign: 'left'}}>
@@ -248,7 +250,7 @@ export default class ReportShow extends Page {
 						</Table>
 					</Fieldset>
 
-					<Fieldset title={dict.lookup('POAM_LONG_NAME')} >
+					<Fieldset title={dict.lookup('TASK').longLabel} >
 						<Table>
 							<thead>
 								<tr>
@@ -258,10 +260,10 @@ export default class ReportShow extends Page {
 							</thead>
 
 							<tbody>
-								{Poam.map(report.poams, (poam, idx) =>
-									<tr key={poam.id} id={"poam_" + idx}>
-										<td className="poamName" ><LinkTo poam={poam} >{poam.shortName} - {poam.longName}</LinkTo></td>
-										<td className="poamOrg" ><LinkTo organization={poam.responsibleOrg} /></td>
+								{Task.map(report.tasks, (task, idx) =>
+									<tr key={task.id} id={"task_" + idx}>
+										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
+										<td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>
 									</tr>
 								)}
 							</tbody>

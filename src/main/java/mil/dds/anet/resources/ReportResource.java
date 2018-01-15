@@ -55,7 +55,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.Role;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -251,20 +251,20 @@ public class ReportResource implements IGraphQLResource {
 			}
 		}
 
-		//Update Poams:
-		if (r.getPoams() != null) { 
-			List<Poam> existingPoams = dao.getPoamsForReport(r);
-			List<Integer> existingPoamIds = existingPoams.stream().map(p -> p.getId()).collect(Collectors.toList());
-			for (Poam p : r.getPoams()) {
-				int idx = existingPoamIds.indexOf(p.getId());
+		//Update Tasks:
+		if (r.getTasks() != null) { 
+			List<Task> existingTasks = dao.getTasksForReport(r);
+			List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
+			for (Task p : r.getTasks()) {
+				int idx = existingTaskIds.indexOf(p.getId());
 				if (idx == -1) { 
-					dao.addPoamToReport(p, r); 
+					dao.addTaskToReport(p, r); 
 				} else {
-					existingPoamIds.remove(idx); 
+					existingTaskIds.remove(idx); 
 				}
 			}
-			for (Integer id : existingPoamIds) {
-				dao.removePoamFromReport(Poam.createWithId(id), r);
+			for (Integer id : existingTaskIds) {
+				dao.removeTaskFromReport(Task.createWithId(id), r);
 			}
 		}
 
@@ -759,10 +759,15 @@ public class ReportResource implements IGraphQLResource {
 		action.setPrincipalOrganizationId(principalOrgId);
 		
 		Map<String,Object> context = action.execute();
+
+		@SuppressWarnings("unchecked")
+		final Map<String,Object> task = (Map<String, Object>) config.getDictionary().get("TASK");
+
 		context.put("serverUrl", config.getServerUrl());
 		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 		context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
+		context.put("TASK_SHORT_LABEL", task.get("shortLabel"));
 		
 		try { 
 			Configuration freemarkerConfig = new Configuration(Configuration.getVersion());

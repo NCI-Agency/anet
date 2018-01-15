@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportState;
@@ -39,10 +39,10 @@ public class ReportTest extends BeanTester<Report> {
 		
 		r.setAuthor(PersonTest.getJackJacksonStub());
 		
-		LinkedList<Poam> poams = new LinkedList<Poam>();
-		poams.add(PoamTest.getTestPoam());
-		poams.add(PoamTest.getTestPoam());
-		r.setPoams(poams);
+		LinkedList<Task> tasks = new LinkedList<Task>();
+		tasks.add(TaskTest.getTestTask());
+		tasks.add(TaskTest.getTestTask());
+		r.setTasks(tasks);
 		
 		LinkedList<ReportPerson> principals = new LinkedList<ReportPerson>();
 		ReportPerson principal = PersonTest.personToReportPerson(PersonTest.getSteveStevesonStub());

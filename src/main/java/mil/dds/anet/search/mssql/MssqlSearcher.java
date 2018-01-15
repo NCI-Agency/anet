@@ -10,7 +10,7 @@ import mil.dds.anet.search.IAuthorizationGroupSearcher;
 import mil.dds.anet.search.ILocationSearcher;
 import mil.dds.anet.search.IOrganizationSearcher;
 import mil.dds.anet.search.IPersonSearcher;
-import mil.dds.anet.search.IPoamSearcher;
+import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.search.IPositionSearcher;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ISearcher;
@@ -22,7 +22,7 @@ public class MssqlSearcher implements ISearcher {
 	MssqlPersonSearcher personSearcher;
 	MssqlOrganizationSearcher orgSearcher;
 	MssqlPositionSearcher positionSearcher;
-	MssqlPoamSearcher poamSearcher;
+	MssqlTaskSearcher taskSearcher;
 	MssqlLocationSearcher locationSearcher;
 	private final MssqlTagSearcher tagSearcher;
 	private final MssqlAuthorizationGroupSearcher authorizationGroupSearcher;
@@ -32,7 +32,7 @@ public class MssqlSearcher implements ISearcher {
 		this.personSearcher = new MssqlPersonSearcher();
 		this.orgSearcher = new MssqlOrganizationSearcher();
 		this.positionSearcher = new MssqlPositionSearcher();
-		this.poamSearcher = new MssqlPoamSearcher();
+		this.taskSearcher = new MssqlTaskSearcher();
 		this.locationSearcher = new MssqlLocationSearcher();
 		this.tagSearcher = new MssqlTagSearcher();
 		this.authorizationGroupSearcher = new MssqlAuthorizationGroupSearcher();
@@ -59,8 +59,8 @@ public class MssqlSearcher implements ISearcher {
 	}
 
 	@Override
-	public IPoamSearcher getPoamSearcher() {
-		return poamSearcher;
+	public ITaskSearcher getTaskSearcher() {
+		return taskSearcher;
 	}
 
 	@Override

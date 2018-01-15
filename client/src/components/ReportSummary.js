@@ -114,8 +114,8 @@ export default class ReportSummary extends Component {
 			</Row>
 			<Row>
 				<Col md={12}>
-					{report.poams.length > 0 && <span><strong>{dict.lookup('POAM_SHORT_NAME')}s:</strong> {report.poams.map((poam,i) =>
-    {return poam.shortName + (i < report.poams.length - 1 ? ", " : "")})}</span> }
+					{report.tasks.length > 0 && <span><strong>{dict.lookup('TASK').shortLabel}s:</strong> {report.tasks.map((task,i) =>
+    {return task.shortName + (i < report.tasks.length - 1 ? ", " : "")})}</span> }
 				</Col>
 			</Row>
 			<Row>

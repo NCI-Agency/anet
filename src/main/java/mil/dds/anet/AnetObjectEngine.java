@@ -24,7 +24,7 @@ import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.PoamDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.ReportSensitiveInformationDao;
@@ -39,7 +39,7 @@ import mil.dds.anet.utils.Utils;
 public class AnetObjectEngine {
 
 	PersonDao personDao;
-	PoamDao poamDao;
+	TaskDao taskDao;
 	LocationDao locationDao;
 	OrganizationDao orgDao;
 	PositionDao positionDao;
@@ -63,7 +63,7 @@ public class AnetObjectEngine {
 		dbHandle = jdbi.open();
 		
 		personDao = new PersonDao(dbHandle);
-		poamDao = new PoamDao(dbHandle);
+		taskDao = new TaskDao(dbHandle);
 		locationDao =  new LocationDao(dbHandle);
 		orgDao = new OrganizationDao(dbHandle);
 		positionDao = new PositionDao(dbHandle);
@@ -95,8 +95,8 @@ public class AnetObjectEngine {
 		return personDao;
 	}
 	
-	public PoamDao getPoamDao() { 
-		return poamDao;
+	public TaskDao getTaskDao() { 
+		return taskDao;
 	}
 
 	public LocationDao getLocationDao() {

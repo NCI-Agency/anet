@@ -10,12 +10,12 @@ Throughout the next several sections, we were refer to the *core ANET object typ
 - Positions
 - Organizations
 - Reports
-- Poams
+- Tasks
 - Locations
 
 The Java Application Server is composed of 5 major pieces:
 
-- **Beans**: Serializable Java objects that represent the major types in ANET (Person, Position, Organization, Report, Poam, etc).  They are comprised of private fields typically representing the columns in the database, getters and setters for those fields, and `load*()` methods for the various relationships between object types (e.g. on the Person bean, there is a `loadPosition()` method).
+- **Beans**: Serializable Java objects that represent the major types in ANET (Person, Position, Organization, Report, Task, etc).  They are comprised of private fields typically representing the columns in the database, getters and setters for those fields, and `load*()` methods for the various relationships between object types (e.g. on the Person bean, there is a `loadPosition()` method).
 - **DAOs** (Data Access Objects):  These objects are the relationship between the beans and the SQL database.  They contain all of the actual SQL statements to do the `INSERT`, `SELECT`, and `UPDATE` calls on a given object.  There is one DAO per Bean (e.g. `PersonDao`, `PositionDao`, `OrganizationDao`, etc), and that DAO returns objects (or Lists of Objects) of that particular type.  So if you are looking for a Database Query that returns Reports, look in `ReportDao`.
 - **Mappers**:  These are classes that store the logic on how to take a `ResultSet` from a SQL query and turn it into a Bean.  They should be fairly straightforward and basic.  There is one per Bean type.
 - **Resources**: These are classes that store all of the REST endpoints for a given object type.  These methods are expected to take in an HTTP call from a user, and provide the correct response.  In general, if you are trying to get an object of a particular type, you should be calling that Resource (e.g. `ReportResource` returns Reports, `PersonResource` returns People). These methods can also be called by the GraphQL API if they are appropiately annotated.
@@ -29,7 +29,7 @@ Here's a quick rundown of where to find each of these pieces:
 | Positions | Positions.java | PositionDao.java | PositionMapper.java | PositionResource.java | PositionSearchQuery.java |
 | Organizations | Organizations.java | OrganizationDao.java | OrganizationMapper.java | OrganizationResource.java | OrganizationSearchQuery.java |
 | Reports | Reports.java | ReportDao.java | ReportMapper.java | ReportResource.java | ReportSearchQuery.java |
-| Poams | Poams.java  | PoamDao.java | PoamMapper.java | PoamResource.java | PoamSearchQuery.java |
+| Tasks | Tasks.java  | TaskDao.java | TaskMapper.java | TaskResource.java | TaskSearchQuery.java |
 | Locations | Locations.java | LocationDao.java | LocationMapper.java | LocationResource.java | LocationSearchQuery.java |
 
 # How the backend works
@@ -77,7 +77,7 @@ GraphQL is the mechanism by which most data is fetched to be displayed in the we
   - "The Anet Graph" is the term we'll use to describe all of the data within ANET and the relationships between the different object types. e.g.: A Person with id 123 has a Position which belongs to an Organization... and so on.
   - You can always pass the `f:` argument (f is for Function) to call a Resource method, this will use either the value passed to the `@GraphQLFetcher`, or the name of the method if no value is passed.
 1. Once you have an object that was returned from a Resource (these are the Beans), you can call any of the 'get' methods on that object to fetch fields.  To put this all together, the query `person(id:123) { id, name}` will look for a method on PersonResource that takes a parameter of name `id`, and then when it gets the `Person` object back, it will call the `getId()` and `getName()` methods on that Person object to fetch those fields.
-1. Each of the primary objects within ANET (The Beans, or Person, Position, Organization, Report, Poam), knows about its relationships to other objects.  Similar to the above example, if you query graphql with `person(id:123) { postion {name }}` it will find the person with id 123, and then call the `getPosition()` method on the Person object to fetch that relationship.
+1. Each of the primary objects within ANET (The Beans, or Person, Position, Organization, Report, Task), knows about its relationships to other objects.  Similar to the above example, if you query graphql with `person(id:123) { postion {name }}` it will find the person with id 123, and then call the `getPosition()` method on the Person object to fetch that relationship.
   - This is an example of how GraphQL saves us a round-trip to the server versus using a strict REST api, where the client would have to call '/people/123' and then '/positions/XXX'.
 1. For any method where arguments are required, the GraphQLResource scans all of the methods in Resources and Bean classes to look for what arguments are required and then will look for those arguments passed via the GraphQL query.
   - In a REST Resource, we use the existing `@PathParam` and `@QueryParam` annotations to pull the name of the parameters.

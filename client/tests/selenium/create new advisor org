@@ -63,12 +63,12 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td></td>
 </tr>
 <tr>
 	<td>sendKeys</td>
-	<td>id=poams</td>
+	<td>id=tasks</td>
 	<td>know</td>
 </tr>
 <tr>
@@ -189,7 +189,7 @@
 </tr>
 <tr>
 	<td>assertText</td>
-	<td>//tr[@id='poam_0']/td[2]</td>
+	<td>//tr[@id='task_0']/td[2]</td>
 	<td>Knowing when you run out of money</td>
 </tr>
 <tr>

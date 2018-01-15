@@ -8,57 +8,53 @@ describe('Edit position page', () => {
 
   beforeEach('Open the edit position page', () => {
     EditPosition.open()
+    EditPosition.form.waitForExist()
+    EditPosition.form.waitForVisible()
   })
 
-  describe('When changing the position type from principal to advisor', () => {
-    it('Should reset the organization field', () => {
+  describe('When changing the position type from principal to advisor, saving, and putting back', () => {
+    it('Should update the position type to advisor and back to principal', () => {
+        EditPosition.typeAdvisorButton.waitForVisible()
         expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.not.include('active')
         expect(EditPosition.typePrincipalButton.getAttribute('class')).to.include('active')
-        expect(EditPosition.organization.getValue()).to.not.equal('')
+        const principalOrg = EditPosition.organization.getValue()
+        expect(principalOrg).to.not.equal('')
         EditPosition.typeAdvisorButton.click()
-        expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.include('active')
-        expect(EditPosition.typePrincipalButton.getAttribute('class')).to.not.include('active')
         expect(EditPosition.organization.getValue()).to.equal('')
-    })
-  })
 
-  describe('When changing the position type from principal to advisor and saving', () => {
-    it('Should update the position type to advisor', () => {
-        expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.not.include('active')
-        expect(EditPosition.typePrincipalButton.getAttribute('class')).to.include('active')
-        expect(EditPosition.organization.getValue()).to.not.equal('')
-        EditPosition.typeAdvisorButton.click()
+        EditPosition.organization.setValue(principalOrg)
+        EditPosition.orgAutocomplete.waitForExist()
+        expect(EditPosition.orgAutocomplete.getText()).to.include('No suggestions found')
+        EditPosition.orgAutocomplete.click()
+        expect(EditPosition.organization.getValue()).to.equal('')
+
         EditPosition.organization.setValue(ADVISOR_ORG)
-        EditPosition.organizationAutocomplete.waitForExist(5000)
-        EditPosition.organizationAutocomplete.click()
+        EditPosition.waitForOrgAutoCompleteToChange()
+        expect(EditPosition.orgAutocomplete.getText()).to.include(ADVISOR_ORG)
+        EditPosition.orgAutocomplete.click()
+        expect(EditPosition.organization.getValue()).to.equal(ADVISOR_ORG)
+
         EditPosition.submitForm()
         EditPosition.waitForAlertSuccessToLoad()
         const alertMessage = EditPosition.alertSuccess.getText()
         expect(alertMessage).to.equal('Saved Position')
+
         EditPosition.open()
+        EditPosition.typeAdvisorButton.waitForVisible()
         expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.include('active')
+        EditPosition.typePrincipalButton.waitForVisible()
         expect(EditPosition.typePrincipalButton.getAttribute('class')).to.not.include('active')
         expect(EditPosition.organization.getValue()).to.equal(ADVISOR_ORG)
-    })
-  })
 
-  describe('When changing the position type from advisor to principal and saving', () => {
-    it('Should update the position type to principal', () => {
-        expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.include('active')
-        expect(EditPosition.typePrincipalButton.getAttribute('class')).to.not.include('active')
-        expect(EditPosition.organization.getValue()).to.not.equal('')
+        // clean up database by restoring advisor role to principal
         EditPosition.typePrincipalButton.click()
-        EditPosition.organization.setValue(PRINCIPAL_ORG)
-        EditPosition.organizationAutocomplete.waitForExist(5000)
-        EditPosition.organizationAutocomplete.click()
+        EditPosition.organization.setValue(principalOrg)
+        EditPosition.orgAutocomplete.waitForExist()
+        expect(EditPosition.orgAutocomplete.getText()).to.include(principalOrg)
+        EditPosition.orgAutocomplete.click()
         EditPosition.submitForm()
         EditPosition.waitForAlertSuccessToLoad()
-        const alertMessage = EditPosition.alertSuccess.getText()
-        expect(alertMessage).to.equal('Saved Position')
-        EditPosition.open()
-        expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.not.include('active')
-        expect(EditPosition.typePrincipalButton.getAttribute('class')).to.include('active')
-        expect(EditPosition.organization.getValue()).to.equal(PRINCIPAL_ORG)
+        expect(EditPosition.alertSuccess.getText()).to.equal('Saved Position')
     })
   })
 

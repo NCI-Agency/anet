@@ -56,7 +56,7 @@ export default class App extends Page {
 			person(f:me) {
 				id, name, role, emailAddress, rank, status
 				position {
-					id, name, type, isApprover
+					id, name, type, status, isApprover
 					organization { id, shortName , allDescendantOrgs { id }}
 				}
 			}

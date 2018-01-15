@@ -15,7 +15,7 @@ const SUPER_USER_ACTIONS = [
 
 const ADMIN_ACTIONS = [
 	Models.Organization,
-	Models.Poam,
+	Models.Task,
 	Models.AuthorizationGroup
 ]
 

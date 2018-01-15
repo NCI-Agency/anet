@@ -2,8 +2,8 @@ let test = require('ava'),
     webdriver = require('selenium-webdriver'),
     {By, until, Key} = webdriver,
     moment = require('moment'),
-    _includes = require('lodash.includes'),
-    _isRegExp = require('lodash.isregexp'),
+    _includes = require('lodash/includes'),
+    _isRegExp = require('lodash/isRegExp'),
     url = require('url'),
     path = require('path'),
     chalk = require('chalk')
@@ -18,8 +18,8 @@ if (testEnv === 'local') {
     require('./keep-alive.js')
     let config = require('config')
     capabilities = {
-        browserName: 'Chrome',   // or 'IE'
-        browser_version: '61.0', // or '11.0'
+        browserName: 'IE',   // or 'Chrome'
+        browser_version: '11.0', // or '61.0'
         os: 'Windows',
         os_version: '7',
         resolution: '2048x1536',
