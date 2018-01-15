@@ -29,7 +29,7 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 		final StringBuilder sql = new StringBuilder(
 				"/* MssqlAuthorizationGroupSearch */ SELECT *, count(*) over() as totalCount "
 						+ "FROM authorizationGroups WHERE CONTAINS (name, :name) "
-						+ (query.getStatus() != null ? "status = :status " : "")
+						+ (query.getStatus() != null ? "AND status = :status " : "")
 						+ "ORDER BY name ASC, id ASC");
 		args.put("name", Utils.getSqlServerFullTextQuery(query.getText()));
 
