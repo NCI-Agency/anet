@@ -22,6 +22,8 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +69,8 @@ import waffle.servlet.NegotiateSecurityFilter;
 public class AnetApplication extends Application<AnetConfiguration> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+	private static final ObjectMapper jsonMapper = new ObjectMapper();
 
 	public static void main(String[] args) throws Exception {
 		new AnetApplication().run(args);
@@ -216,12 +220,13 @@ public class AnetApplication extends Application<AnetConfiguration> {
 	}
 
 	private JSONObject getDictionary(AnetConfiguration configuration) {
-		try (final InputStream inputStream = getClass().getResourceAsStream("/anet-schema.json")) {
+		try (final InputStream inputStream = getClass().getResourceAsStream("/anet-schema.yml")) {
 			if (inputStream == null) {
-				logger.error("ANET schema not found");
+				logger.error("ANET schema [anet-schema.yml] not found");
 				return null;
 			}
-			final JSONObject rawSchema = new JSONObject(new JSONTokener(inputStream));
+			final Object obj = yamlMapper.readValue(inputStream, Object.class);
+			final JSONObject rawSchema = new JSONObject(new JSONTokener(jsonMapper.writeValueAsString(obj)));
 			final Schema schema = SchemaLoader.load(rawSchema);
 			final JSONObject dictionary = new JSONObject(configuration.getDictionary());
 			schema.validate(dictionary);
