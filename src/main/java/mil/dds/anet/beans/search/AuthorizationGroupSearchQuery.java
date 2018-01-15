@@ -4,11 +4,7 @@ import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
 
 public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 
-	public enum AuthorizationGroupSearchSortBy { CREATED_AT, NAME }
-
 	private AuthorizationGroupStatus status;
-	private AuthorizationGroupSearchSortBy sortBy;
-	private SortOrder sortOrder;
 
 	public AuthorizationGroupStatus getStatus() {
 		return status;
@@ -16,22 +12,6 @@ public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 
 	public void setStatus(AuthorizationGroupStatus status) {
 		this.status = status;
-	}
-
-	public AuthorizationGroupSearchSortBy getSortBy() {
-		return sortBy;
-	}
-
-	public void setSortBy(AuthorizationGroupSearchSortBy sortBy) {
-		this.sortBy = sortBy;
-	}
-
-	public SortOrder getSortOrder() {
-		return sortOrder;
-	}
-
-	public void setSortOrder(SortOrder sortOrder) {
-		this.sortOrder = sortOrder;
 	}
 
 	public static AuthorizationGroupSearchQuery withText(String text, int pageNum, int pageSize) {
