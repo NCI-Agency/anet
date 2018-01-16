@@ -35,6 +35,7 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
@@ -82,6 +83,12 @@ public class AnetApplication extends Application<AnetConfiguration> {
 	}
 
 	@Override
+	protected void addDefaultCommands(Bootstrap<AnetConfiguration> bootstrap) {
+		bootstrap.addCommand(new ServerCommand<>(this));
+		bootstrap.addCommand(new AnetCheckCommand(this));
+	}
+
+	@Override
 	public void initialize(Bootstrap<AnetConfiguration> bootstrap) {
 		//Allow the anet.yml configuration to pull from Environment Variables. 
 		bootstrap.setConfigurationSourceProvider(
@@ -124,11 +131,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		final DBIFactory factory = new DBIFactory();
 		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
 
+		// Check the dictionary
 		final JSONObject dictionary = getDictionary(configuration);
-		if (dictionary == null) {
-			// Can't continue without a dictionary
-			System.exit(1);
-		}
 		logger.info("dictionary: {}", dictionary.toString(2));
 		
 		//We want to use our own custom DB logger in order to clean up the logs a bit. 
@@ -219,30 +223,32 @@ public class AnetApplication extends Application<AnetConfiguration> {
 			configuration.isDevelopmentMode()));
 	}
 
-	private JSONObject getDictionary(AnetConfiguration configuration) {
-		try (final InputStream inputStream = getClass().getResourceAsStream("/anet-schema.yml")) {
+	protected static JSONObject getDictionary(AnetConfiguration configuration)
+			throws IllegalArgumentException {
+		try (final InputStream inputStream = AnetApplication.class.getResourceAsStream("/anet-schema.yml")) {
 			if (inputStream == null) {
 				logger.error("ANET schema [anet-schema.yml] not found");
-				return null;
 			}
-			final Object obj = yamlMapper.readValue(inputStream, Object.class);
-			final JSONObject rawSchema = new JSONObject(new JSONTokener(jsonMapper.writeValueAsString(obj)));
-			final Schema schema = SchemaLoader.load(rawSchema);
-			final JSONObject dictionary = new JSONObject(configuration.getDictionary());
-			schema.validate(dictionary);
-			return dictionary;
+			else {
+				final Object obj = yamlMapper.readValue(inputStream, Object.class);
+				final JSONObject rawSchema = new JSONObject(new JSONTokener(jsonMapper.writeValueAsString(obj)));
+				final Schema schema = SchemaLoader.load(rawSchema);
+				final JSONObject dictionary = new JSONObject(configuration.getDictionary());
+				schema.validate(dictionary);
+				return dictionary;
+			}
 		} catch (IOException e) {
 			logger.error("Error closing ANET schema", e);
 		} catch (ValidationException e) {
 			logger.error("Dictionary invalid against ANET schema:");
 			logValidationErrors(e);
 		}
-		return null;
+		throw new IllegalArgumentException("Missing or invalid dictionary in the configuration");
 	}
 
-	private void logValidationErrors(ValidationException e) {
+	private static void logValidationErrors(ValidationException e) {
 		logger.error(e.getMessage());
-		e.getCausingExceptions().stream().forEach(this::logValidationErrors);
+		e.getCausingExceptions().stream().forEach(AnetApplication::logValidationErrors);
 	}
 
 	/*
