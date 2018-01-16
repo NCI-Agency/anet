@@ -19,10 +19,12 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 @RegisterMapper(AuthorizationGroupMapper.class)
@@ -173,6 +175,17 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				.bind("maxResults", maxResults)
 				.bind("activeStatus", DaoUtils.getEnumId(AuthorizationGroupStatus.ACTIVE))
 				.map(new AuthorizationGroupMapper())
+				.list();
+	}
+
+	public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
+		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS  + ", " + PersonDao.PERSON_FIELDS
+				+ " FROM reports, people, reportAuthorizationGroups "
+				+ "WHERE reports.authorId = people.id "
+				+ "AND reportAuthorizationGroups.authorizationGroupId = :authorizationGroupId "
+				+ "AND reportAuthorizationGroups.reportId = reports.id")
+				.bind("authorizationGroupId", a.getId())
+				.map(new ReportMapper())
 				.list();
 	}
 

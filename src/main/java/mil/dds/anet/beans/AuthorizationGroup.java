@@ -16,6 +16,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 	private String name;
 	private String description;
 	private List<Position> positions;
+	private List<Report> reports;
 	private AuthorizationGroupStatus status;
 
 	public String getName() {
@@ -49,6 +50,22 @@ public class AuthorizationGroup extends AbstractAnetBean {
 
 	public void setPositions(List<Position> positions) {
 		this.positions = positions;
+	}
+
+	@GraphQLFetcher("reports")
+	public List<Report> loadReports() {
+		if (reports == null) {
+			reports = AnetObjectEngine.getInstance().getAuthorizationGroupDao().getReportsForAuthorizationGroup(this);
+		}
+		return reports;
+	}
+
+	public List<Report> getReports() {
+		return reports;
+	}
+
+	public void setReports(List<Report> reports) {
+		this.reports = reports;
 	}
 
 	public AuthorizationGroupStatus getStatus() {

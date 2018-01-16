@@ -7,6 +7,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
+import ReportCollection from 'components/ReportCollection'
 
 import API from 'api'
 import {AuthorizationGroup} from 'models'
@@ -29,6 +30,7 @@ export default class AuthorizationGroupShow extends Page {
 			authorizationGroup(id:${props.params.id}) {
 				id, name, description
 				positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
+				reports { ${ReportCollection.GQL_REPORT_FIELDS} }
 				status
 			}
 		`).then(data => {
@@ -54,6 +56,9 @@ export default class AuthorizationGroupShow extends Page {
 					</Fieldset>
 					<Fieldset title="Positions">
 							<PositionTable positions={authorizationGroup.positions} />
+					</Fieldset>
+					<Fieldset title="Reports">
+							<ReportCollection reports={authorizationGroup.reports} />
 					</Fieldset>
 				</Form>
 			</div>
