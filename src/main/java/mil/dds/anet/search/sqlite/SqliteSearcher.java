@@ -1,5 +1,6 @@
 package mil.dds.anet.search.sqlite;
 
+import mil.dds.anet.search.IAuthorizationGroupSearcher;
 import mil.dds.anet.search.ILocationSearcher;
 import mil.dds.anet.search.IOrganizationSearcher;
 import mil.dds.anet.search.IPersonSearcher;
@@ -62,6 +63,11 @@ public class SqliteSearcher implements ISearcher {
 	@Override
 	public ITagSearcher getTagSearcher() {
 		return tagSearcher;
+	}
+
+	@Override
+	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
+		throw new UnsupportedOperationException();
 	}
 
 }

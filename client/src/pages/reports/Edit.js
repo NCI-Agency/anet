@@ -46,6 +46,7 @@ export default class ReportEdit extends Page {
 				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 				tags { id, name, description }
 				reportSensitiveInformation { id, text }
+				authorizationGroups { id, name, description }
 			}
 		`).then(data => {
 			function getReportFromData() {

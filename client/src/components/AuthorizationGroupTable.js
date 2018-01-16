@@ -1,0 +1,36 @@
+import React, {Component, PropTypes} from 'react'
+import {Table} from 'react-bootstrap'
+
+import {AuthorizationGroup} from 'models'
+import LinkTo from 'components/LinkTo'
+
+export default class AuthorizationGroupTable extends Component {
+	static propTypes = {
+		authorizationGroups: PropTypes.array.isRequired,
+	}
+
+	render() {
+		let authorizationGroups = AuthorizationGroup.fromArray(this.props.authorizationGroups)
+		return <Table striped>
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Positions</th>
+					<th>Status</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				{authorizationGroups.map(authorizationGroup =>
+					<tr key={authorizationGroup.id}>
+						<td>{<LinkTo authorizationGroup={authorizationGroup} />}</td>
+						<td>{authorizationGroup.description}</td>
+						<td>{authorizationGroup.positions.map(position => <div key={position.id}><LinkTo position={position} /></div>)}</td>
+						<td>{authorizationGroup.humanNameOfStatus()} </td>
+					</tr>
+				)}
+			</tbody>
+		</Table>
+	}
+}

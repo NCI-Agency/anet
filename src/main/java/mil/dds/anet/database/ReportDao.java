@@ -23,6 +23,7 @@ import org.skife.jdbi.v2.sqlobject.SqlBatch;
 import com.google.common.base.Joiner;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -38,6 +39,7 @@ import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
@@ -141,6 +143,10 @@ public class ReportDao implements IAnetDao<Report> {
 					r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getId(), rp));
 					rb.insertReportAttendees(r.getId(), new ArrayList<ReportPerson>(attendeeMap.values()));
 				}
+
+				if (r.getAuthorizationGroups() != null) {
+					rb.insertReportAuthorizationGroups(r.getId(), r.getAuthorizationGroups());
+				}
 				if (r.getTasks() != null) {
 					rb.insertReportTasks(r.getId(), r.getTasks());
 				}
@@ -156,6 +162,10 @@ public class ReportDao implements IAnetDao<Report> {
 		@SqlBatch("INSERT INTO reportPeople (reportId, personId, isPrimary) VALUES (:reportId, :id, :primary)")
 		void insertReportAttendees(@Bind("reportId") Integer reportId,
 				@BindBean List<ReportPerson> reportPeople);
+
+		@SqlBatch("INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId) VALUES (:reportId, :id)")
+		void insertReportAuthorizationGroups(@Bind("reportId") Integer reportId,
+				@BindBean List<AuthorizationGroup> authorizationGroups);
 
 		@SqlBatch("INSERT INTO reportTasks (reportId, taskId) VALUES (:reportId, :id)")
 		void insertReportTasks(@Bind("reportId") Integer reportId,
@@ -257,6 +267,23 @@ public class ReportDao implements IAnetDao<Report> {
 			.execute();
 	}
 
+
+	public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
+		return dbHandle.createStatement("/* addAuthorizationGroupToReport */ INSERT INTO reportAuthorizationGroups (authorizationGroupId, reportId) "
+				+ "VALUES (:authorizationGroupId, :reportId)")
+			.bind("reportId", r.getId())
+			.bind("authorizationGroupId", a.getId())
+			.execute();
+	}
+
+	public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
+		return dbHandle.createStatement("/* removeAuthorizationGroupFromReport*/ DELETE FROM reportAuthorizationGroups "
+				+ "WHERE reportId = :reportId AND authorizationGroupId = :authorizationGroupId")
+				.bind("reportId", r.getId())
+				.bind("authorizationGroupId", a.getId())
+				.execute();
+	}
+
 	public int addTaskToReport(Task p, Report r) {
 		return dbHandle.createStatement("/* addTaskToReport */ INSERT INTO reportTasks (taskId, reportId) "
 				+ "VALUES (:taskId, :reportId)")
@@ -297,6 +324,16 @@ public class ReportDao implements IAnetDao<Report> {
 			.bind("reportId", reportId)
 			.map(new ReportPersonMapper())
 			.list();
+	}
+
+
+	public List<AuthorizationGroup> getAuthorizationGroupsForReport(int reportId) {
+		return dbHandle.createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM authorizationGroups, reportAuthorizationGroups "
+				+ "WHERE reportAuthorizationGroups.reportId = :reportId "
+				+ "AND reportAuthorizationGroups.authorizationGroupId = authorizationGroups.id")
+				.bind("reportId", reportId)
+				.map(new AuthorizationGroupMapper())
+				.list();
 	}
 
 	public List<Task> getTasksForReport(Report report) {
@@ -349,10 +386,13 @@ public class ReportDao implements IAnetDao<Report> {
 				
 				//Delete approvalActions
 				dbHandle.execute("/* deleteReport.actions */ DELETE FROM approvalActions where reportId = ?", report.getId());
-				
+
+				//Delete relation to authorization groups
+				dbHandle.execute("/* deleteReport.authorizationGroups */ DELETE FROM reportAuthorizationGroups where reportId = ?", report.getId());
+
 				//Delete report
 				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where id = ?", report.getId());
-				
+
 				return null;
 			}
 		});
