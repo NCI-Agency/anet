@@ -4,8 +4,12 @@ import java.util.List;
 import java.util.Objects;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
+import mil.dds.anet.graphql.GraphQLParam;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -16,7 +20,6 @@ public class AuthorizationGroup extends AbstractAnetBean {
 	private String name;
 	private String description;
 	private List<Position> positions;
-	private List<Report> reports;
 	private AuthorizationGroupStatus status;
 
 	public String getName() {
@@ -52,28 +55,21 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		this.positions = positions;
 	}
 
-	@GraphQLFetcher("reports")
-	public List<Report> loadReports() {
-		if (reports == null) {
-			reports = AnetObjectEngine.getInstance().getAuthorizationGroupDao().getReportsForAuthorizationGroup(this);
-		}
-		return reports;
-	}
-
-	public List<Report> getReports() {
-		return reports;
-	}
-
-	public void setReports(List<Report> reports) {
-		this.reports = reports;
-	}
-
 	public AuthorizationGroupStatus getStatus() {
 		return status;
 	}
 
 	public void setStatus(AuthorizationGroupStatus status) {
 		this.status = status;
+	}
+
+	@GraphQLFetcher("reports")
+	public ReportList fetchReports(@GraphQLParam("pageNum") int pageNum, @GraphQLParam("pageSize") int pageSize) {
+		ReportSearchQuery query = new ReportSearchQuery();
+		query.setPageNum(pageNum);
+		query.setPageSize(pageSize);
+		query.setAuthorizationGroupId(id);
+		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 
 	@Override

@@ -11,6 +11,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import API from 'api'
 import {AuthorizationGroup} from 'models'
+import GQL from 'graphqlapi'
+import autobind from 'autobind-decorator'
 
 export default class AuthorizationGroupShow extends Page {
 	static contextTypes = {
@@ -25,23 +27,45 @@ export default class AuthorizationGroupShow extends Page {
 		setMessages(props,this.state)
 	}
 
+	getReportQueryPart(authGroupId) {
+		let reportQuery = {
+			pageNum: this.reportsPageNum,
+			pageSize: 10,
+			authorizationGroupId: authGroupId
+		}
+		let reportsPart = new GQL.Part(/* GraphQL */`
+			reports: reportList(query:$reportQuery) {
+				pageNum, pageSize, totalCount, list {
+					${ReportCollection.GQL_REPORT_FIELDS}
+				}
+			}`)
+			.addVariable("reportQuery", "ReportSearchQuery", reportQuery)
+		return reportsPart
+	}
+
 	fetchData(props) {
-		API.query(/* GraphQL */`
-			authorizationGroup(id:${props.params.id}) {
-				id, name, description
-				positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
-				reports { ${ReportCollection.GQL_REPORT_FIELDS} }
-				status
-			}
-		`).then(data => {
+		let authGroupPart = new GQL.Part(/* GraphQL */`
+				authorizationGroup(id:${props.params.id}) {
+			id, name, description
+			positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
+			status
+		}` )
+		let reportsPart = this.getReportQueryPart(props.params.id)
+		this.runGQL([authGroupPart, reportsPart])
+	}
+
+	runGQL(queries) {
+		GQL.run(queries).then(data =>
 			this.setState({
-				authorizationGroup: new AuthorizationGroup(data.authorizationGroup)
+				authorizationGroup: new AuthorizationGroup(data.authorizationGroup),
+				reports: data.reports
 			})
-		})
+		)
 	}
 
 	render() {
-		let {authorizationGroup} = this.state
+		let authorizationGroup = this.state.authorizationGroup
+		let reports = this.state.reports
 		let currentUser = this.context.currentUser
 
 		return (
@@ -58,10 +82,23 @@ export default class AuthorizationGroupShow extends Page {
 							<PositionTable positions={authorizationGroup.positions} />
 					</Fieldset>
 					<Fieldset title="Reports">
-							<ReportCollection reports={authorizationGroup.reports} />
+						<ReportCollection
+							paginatedReports={reports}
+							goToPage={this.goToReportsPage}
+						/>
 					</Fieldset>
 				</Form>
 			</div>
 		)
 	}
+
+	@autobind
+	goToReportsPage(pageNum) {
+		this.reportsPageNum = pageNum
+		let reportQueryPart = this.getReportQueryPart(this.state.authorizationGroup.id)
+		GQL.run([reportQueryPart]).then(data =>
+			this.setState({reports: data.reports})
+		)
+	}
+
 }
