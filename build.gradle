@@ -76,6 +76,7 @@ project.version = proc.text.trim();
 project.group = "ncia"
 
 mainClassName = "mil.dds.anet.AnetApplication"
+String anetConfig = "anet.yml"
 
 applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
 
@@ -94,8 +95,15 @@ if (dbDriver == "sqlserver") {
 
 test.environment = run.environment
 
-run.args = ["server","anet.yml"]
+run.args = ["server", anetConfig]
 
+
+task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	args = ["check", anetConfig]
+}
 
 task buildClient(type: NpmTask) {
 	outputs.upToDateWhen { false };
@@ -105,15 +113,15 @@ task buildClient(type: NpmTask) {
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","status","anet.yml"]
+	main = mainClassName
+	args = ["db", "status", anetConfig]
 }
 
 task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","migrate","anet.yml"]
+	main = mainClassName
+	args = ["db", "migrate", anetConfig]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
 	}
@@ -122,15 +130,15 @@ task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
 task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","test","anet.yml"]
+	main = mainClassName
+	args = ["db", "test", anetConfig]
 }
 
 task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","rollback","anet.yml","--count","1"]
+	main = mainClassName
+	args = ["db", "rollback", anetConfig, "--count", "1"]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
 	}
@@ -139,8 +147,8 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","drop-all","--confirm-delete-everything","anet.yml"]
+	main = mainClassName
+	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
