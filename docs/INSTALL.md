@@ -83,21 +83,15 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 		* Start in: `c:\anet`
 
 # ANET Upgrade Documentation
-The steps to upgrade ANET across a minor version change are much simpler: 
-To build the new anet.jar: 
-- In the `client` directory run `npm run build` to build the ANET client package. 
-- run `./gradlew.bat jar` to build the ANET server
-- Find `anet.jar` in the `build/libs/` directory. 
-
 On the ANET server: 
-- Stop the `anet.bat server` process. 
+- Stop the `anet.bat server` process. This is typically done by killing the java process from the task manager
 - Take a complete backup of your SQL Database
-- Backup the `anet.jar` file from the libs/ directory. 
-- Copy the new `anet.jar` file into the libs/ directory. 
-- Make any required changes or upgrades to your `anet.yml` file. 
-- If Database Migrations are required, run `bin/anet.bat db migrate anet.yml` to migrate your database. 
-- Start the server with `anet.bat server anet.yml`
-- Run through verification testing to ensure there are no issues. 
+- Move the `bin`, `lib` and `doc` directory to a backup directory. Make sure that `anet.yml` remain intact
+- Unzip the provided ANET distribution zip. Copy the `bin`, `lib` and `doc` from the distribution into the anet application folder, typically `c:\anet`
+- Make any required changes or upgrades to your `anet.yml` file
+- Run `bin/anet.bat db migrate anet.yml` to migrate your database
+- Start the server
+- Run through verification testing to ensure there are no issues
 
 # ANET Configuration
 ANET is configured primarily through the `anet.yml` file.  This file follows the Dropwizard configuration format ( http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration ).  Here is a description of the configuration options custom to ANET:
@@ -279,7 +273,12 @@ server:
       validateCerts: false
 ```
 
-Administrator should request certificates. If needed, self-signed certificates can be created and used as follows:
+Administrator should request certificates. 
+
+## 
+
+## Self signed certificates
+If needed, self-signed certificates can be created and used as follows:
 
 1. Open a command line in c:\anet
 2. run "c:\Program Files\Java\jre1.8.0_121\bin\"keytool.exe -genkey -alias anetkey -keyalg RSA -keystore keystore.jks -keysize 2048.
