@@ -738,6 +738,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setUpdatedAtEnd(actualReportDate);
 		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
 		assertThat(results.getList().size()).isEqualTo(1);
+
+		// A day before the startDate and startDate (no results expected)
+		query.setUpdatedAtStart(startDate.minusDays(1));
+		query.setUpdatedAtEnd(startDate);
+		query.setPageSize(0);
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(results.getList().size()).isEqualTo(0);
 	}
 
 	@Test
