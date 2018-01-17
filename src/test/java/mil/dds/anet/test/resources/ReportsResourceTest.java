@@ -136,6 +136,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Set this author in this billet
 		resp = httpQuery(String.format("/api/positions/%d/person", authorBillet.getId()), admin).post(Entity.json(author));
 		assertThat(resp.getStatus()).isEqualTo(200);
+		Person checkit = httpQuery(String.format("/api/positions/%d/person", authorBillet.getId()), admin).get(Person.class);
+		assertThat(checkit).isEqualTo(author);
 
 		//Create Approval workflow for Advising Organization
 		ApprovalStep approval = new ApprovalStep();
@@ -196,6 +198,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				.post(Entity.json(r), Report.class);
 		assertThat(created.getId()).isNotNull();
 		assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
+		assertThat(created.getAdvisorOrg()).isEqualTo(advisorOrg);
+		assertThat(created.getPrincipalOrg()).isEqualTo(principalOrg);
 
 		//Have the author submit the report
 		resp = httpQuery(String.format("/api/reports/%d/submit", created.getId()), author).post(null);
@@ -715,24 +719,25 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setPageSize(0);
 		ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
 		assertThat(results.getList().size()).isEqualTo(1);
+		DateTime actualReportDate = results.getList().get(0).getUpdatedAt();
 
 		// Greater than startDate and equal to endDate
 		query.setUpdatedAtStart(startDate);
-		query.setUpdatedAtEnd(endDate.minusDays(1));
+		query.setUpdatedAtEnd(actualReportDate);
 		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
 		assertThat(results.getList().size()).isEqualTo(1);
 
 		// Equal to startDate and smaller than endDate
-		query.setUpdatedAtStart(startDate.plusDays(1));
+		query.setUpdatedAtStart(actualReportDate);
 		query.setUpdatedAtEnd(endDate);
 		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
-		assertThat(results.getList().size()).isEqualTo(0);
+		assertThat(results.getList().size()).isEqualTo(1);
 
 		// Equal to startDate and equal to endDate
-		query.setUpdatedAtStart(startDate.plusDays(1));
-		query.setUpdatedAtEnd(startDate.plusDays(1));
+		query.setUpdatedAtStart(actualReportDate);
+		query.setUpdatedAtEnd(actualReportDate);
 		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
-		assertThat(results.getList().size()).isEqualTo(0);
+		assertThat(results.getList().size()).isEqualTo(1);
 	}
 
 	@Test
@@ -1013,6 +1018,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		final ReportSearchQuery reportQuery = new ReportSearchQuery();
 		reportQuery.setText("Test Cases are good");
+		reportQuery.setSortOrder(SortOrder.ASC); // otherwise test-case-created data can crowd the actual report we want out of the first page
 		final ReportList reportSearchResults = httpQuery("/api/reports/search", erin).post(Entity.json(reportQuery), ReportList.class);
 		assertThat(reportSearchResults.getTotalCount()).isGreaterThan(0);
 		final Optional<Report> reportResult = reportSearchResults.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
