@@ -297,7 +297,13 @@ ANET uses Leaflet as a map viewer.  You can use any tile sources that work with 
 [{"name":"OSM","default" : true, "url":"http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", "type":"osm"}]
 ```
 
-For offline deployments of ANET, you can configure a local imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
+For both offline and online installations, to configure ANET with a WMS server, use the following format:
+```
+[{"name":"WMS Service","default" : true, "url":"http://wmsURL", "type":"wms", "format":"image/png", "layer":"layerName"}]
+```
+_hint:_ In a browser you can inspect the results of http://wmsURL?request=GetCapabilities&service=WMS to determine the desired format and layerName
+
+If desired, you can alse configure a local imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
 
 1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `maps`. Inside that, create a directory called `imagery`. 
 1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `maps/imagery/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
