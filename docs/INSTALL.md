@@ -69,7 +69,7 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are).  For production situations this will be your windows domain username.   If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
 8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
-9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen.
+9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
 10. Add a strart-up task for ANET:
 	* Open Task Scheduler
 	* Create task
