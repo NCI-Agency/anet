@@ -31,17 +31,15 @@ do
 	# regenerate the current time down to the millisecond, so that things don't have identical timestamps
 	if [[ "$OSTYPE" == "darwin"* ]]; then
 		time=`dtg_mac`;
+		sed_flag="-E"
 	else
 		time=`dtg_linux`;
+		sed_flag="-r"
 	fi
 	# Handle one more time-related special case...
 	if [[ "$input" == *"DATEADD"* ]]; then
 		input=`echo $input | sed "s/DATEADD (day, -2, CURRENT_TIMESTAMP)/STRFTIME('%Y-%m-%d %H:%M:%f${zonestring}', substr('${time}', 1, 22), '-2 days')/g"`
 	fi
 	# And sub in the actual time for remaining CURRENT_TIMESTAMP instances
-	if [[ "$OSTYPE" == "darwin"* ]]; then
-		echo ${input} | sed "s/CURRENT_TIMESTAMP/'${time}'/g" | sed -E "s/'([0-9]{4}-[0-9]{2}-[0-9]{2})'/date('\1 00:00:00.000 -0000')/g"
-	else
-		echo ${input} | sed "s/CURRENT_TIMESTAMP/'${time}'/g" | sed -r "s/'([0-9]{4}-[0-9]{2}-[0-9]{2})'/'\1 00:00:00.000 -0000'/g"
-	fi
+	echo ${input} | sed "s/CURRENT_TIMESTAMP/'${time}'/g" | sed $sed_flag "s/'([0-9]{4}-[0-9]{2}-[0-9]{2})'/'\1 00:00:00.000 -0000'/g"
 done
