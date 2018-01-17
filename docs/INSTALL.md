@@ -13,16 +13,17 @@ This document covers the steps required to deploy ANET to a server environment.
 	- Administration Privileges to run processes on restricted ports (80/443)
 	- Optional: A valid SSL certificate for the domain name of the application server. 
 	- Microsoft SQL Server 2012 or greater. The MS SQL database should be configured to:
-		- allow connections on a static TCP/IP port 1433	
+		- allow connections on a static TCP/IP port `1433`	
 		- fulltext module should be installed. This can be done by:
 			1. Open the Programs and Features control panel.
-			2. Select Microsoft SQL Server 2012 and click Change.
-			3. When prompted to Add/Repair/Remove, select Add.
-			4. Advance through the wizard until the Feature Selection screen. Then select Full-Text Search. 
+			2. Select `Microsoft SQL Server 2012` and click `Change`.
+			3. When prompted to `Add/Repair/Remove`, select `Add` and provide intallation media.
+			4. Advance through the wizard until the Feature Selection screen. Then select `Full-Text
+and Semantic Extractions for Search`.
 	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, or IE version 11 or greater)
 - **Network Accessibility**
-	- Users will acccess the Application Server over HTTP/HTTPS (80/443)
-	- The Application Server will access the SQL Server over port 1433 (or whatever port you have SQL configured to)
+	- Users will acccess the Application Server over HTTP/HTTPS (`80`/`443`)
+	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
 	- The Application Server will need to access an Active Directory server for authentication
 	- The Application Server will need to access an SMTP server for email sending. 
 - **Service Accounts**
@@ -49,17 +50,17 @@ You should have the following information on hand for the installation:
 - **Information about who will Administer** your ANET instance. 
 
 ## Server Installation Procedures
-Create a folder for the application, for example: c:\anet. In that location: 
+Create a folder for the application, for example: `c:\anet`. In that location: 
 
 1. Unzip anet.zip. You'll find three folders directly under the application folder:
 	* _bin_: This contains the startup scripts to start/stop the ANET server. 
 	* _lib_: This contains all of the dependencies and compiled resources. All of the ANET specific files are bundled in `lib/anet.jar`.
 	* _docs_: This is a copy of the docs folder from the git repository, so you'll have a copy of these docuemnts during installation!
-2. Add an anet.yml file with appropiate settings to the application folder.  Descriptions of each of the settings in anet.yml can be found in the ANET Configuration section below.  Templates of that file can be found in the docs directory. anet.yml.productionTemplate has been tested on a production set-up.
+2. Add an anet.yml file with appropiate settings to the application folder (i.e. `c:\anet`).  Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below.  Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
 3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section
-4. Verify that your configuration file is valid with `bin/anet.bat check anet.yml`
-5. Install Database Schema: Run `bin/anet.bat db migrate anet.yml`
-6. Seed the Database: Run `bin/anet.bat init anet.yml`.  This will ask you the following questions:
+4. Verify that your configuration file is valid with ```"bin/anet.bat" check anet.yml```
+5. Install Database Schema: Run ```"bin/anet.bat" db migrate anet.yml```
+6. Seed the Database: Run ```"bin/anet.bat" init anet.yml```.  This will ask you the following questions:
 	* _Classification String_: This is the message that will appear in the top security banner on the screen. For demo instances you should use `FOR DEMO USE ONLY`.
 	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
 	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator.  We recommend using something like `ANET Administrators`.
@@ -67,8 +68,9 @@ Create a folder for the application, for example: c:\anet. In that location:
 	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
 	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are).  For production situations this will be your windows domain username.   If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
-8. Launch the ANET Server: `bin/anet.bat server anet.yml`
-9. Add a strart-up task for ANET:
+8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
+9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen.
+10. Add a strart-up task for ANET:
 	* Open Task Scheduler
 	* Create task
 	* Name it "ANET"
@@ -76,10 +78,9 @@ Create a folder for the application, for example: c:\anet. In that location:
 	* Under Security Options, check "run when user is logged on or not"
 	* Add a new trigger: "at startup"
 	* Add a new "Start a Program" Action:
-		* Start a program/script: "c:\anet\bin\anet.bat'
-		* Add arguments: "server anet.yml"
-		* Start in: "c:\anet"
-
+		* Start a program/script: `c:\anet\bin\anet.bat`
+		* Add arguments: `server anet.yml`
+		* Start in: `c:\anet`
 
 # ANET Upgrade Documentation
 The steps to upgrade ANET across a minor version change are much simpler: 
@@ -98,10 +99,7 @@ On the ANET server:
 - Start the server with `anet.bat server anet.yml`
 - Run through verification testing to ensure there are no issues. 
 
-# How to Rollback an ANET Upgrade. 
-
-
-## ANET Configuration
+# ANET Configuration
 ANET is configured primarily through the `anet.yml` file.  This file follows the Dropwizard configuration format ( http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration ).  Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
