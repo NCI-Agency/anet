@@ -135,7 +135,7 @@ export default class FutureEngagementsByLocation extends Component {
         .rollup(function(leaves) { return leaves.length })
         .entries(reportsList)
       let groupedData = allCategories.map((d)=> {
-        let categData = categoriesWithData.find((x) => { return x.key == d.key })
+        let categData = categoriesWithData.find((x) => { return x.key === d.key })
         return Object.assign({}, d, categData)
       })
       let graphData = {}

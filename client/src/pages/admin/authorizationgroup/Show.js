@@ -9,7 +9,6 @@ import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
 import ReportCollection from 'components/ReportCollection'
 
-import API from 'api'
 import {AuthorizationGroup} from 'models'
 import GQL from 'graphqlapi'
 import autobind from 'autobind-decorator'
