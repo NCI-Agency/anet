@@ -4,7 +4,7 @@ import autobind from 'autobind-decorator'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import Form from 'components/Form'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Table, Button, HelpBlock} from 'react-bootstrap'
 
 import { Task } from 'models'
@@ -27,10 +27,10 @@ export default class TasksSelector extends Component {
 	}
 
 	render() {
-		let {tasks, shortcuts, validationState, optional} = this.props
+		const {tasks, shortcuts, validationState, optional} = this.props
 
-		let taskLongLabel = dict.lookup('TASK').longLabel
-		let taskShortLabel = dict.lookup('TASK').shortLabel
+		const taskLongLabel = Settings.fields.task.longLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 
 		return <Fieldset title={taskLongLabel} action={optional && "(Optional)"} className="tasks-selector">
 			<Form.Field id="tasks" label={taskShortLabel} validationState={validationState} >
@@ -80,8 +80,8 @@ export default class TasksSelector extends Component {
 	}
 
 	renderShortcuts() {
-		let shortcuts = this.props.shortcuts || []
-		let taskShortLabel = dict.lookup('TASK').shortLabel
+		const shortcuts = this.props.shortcuts || []
+		const taskShortLabel = Settings.fields.task.shortLabel
 		return <Form.Field.ExtraCol className="shortcut-list">
 			<h5>Recent {taskShortLabel}</h5>
 			{shortcuts.map(task =>

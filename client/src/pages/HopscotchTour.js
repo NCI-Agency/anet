@@ -1,8 +1,9 @@
 import History from 'components/History'
 import {Organization} from 'models'
-import dict from 'dictionary'
+import Settings from 'Settings'
+import pluralize from 'pluralize'
 
-let userTour = (currentUser) => { return {
+const userTour = (currentUser) => { return {
 	id: 'home',
 	steps: [
 		{
@@ -48,7 +49,7 @@ let userTour = (currentUser) => { return {
 	]
 }}
 
-let superUserTour = (currentUser) => { return {
+const superUserTour = (currentUser) => { return {
 	id: 'home',
 	steps: [
 		{
@@ -97,8 +98,8 @@ let superUserTour = (currentUser) => { return {
 	]
 }}
 
-let reportTour = (currentUser) => {
-	let taskShortLabel = dict.lookup('TASK').shortLabel
+const reportTour = (currentUser) => {
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'report',
 	steps: [
@@ -146,7 +147,7 @@ let reportTour = (currentUser) => {
 			placement: 'bottom',
 		},
 		{
-			title: taskShortLabel + 's',
+			title: pluralize(taskShortLabel),
 			content: 'Search for the ' + taskShortLabel + 's that apply to this engagement. You can search for ' + taskShortLabel + 's in any organization, including your organization and its sub-organizations. ' + taskShortLabel + 's are not required.',
 			target: '#tasks',
 			placement: 'right',
@@ -184,8 +185,8 @@ let reportTour = (currentUser) => {
 	]
 }}
 
-let orgTour = (currentUser) => {
-	let taskShortLabel = dict.lookup('TASK').shortLabel
+const orgTour = (currentUser) => {
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'org',
 	steps: [
@@ -220,8 +221,8 @@ let orgTour = (currentUser) => {
 			placement: 'top',
 		},
 		{
-			title: taskShortLabel + 's',
-			content: 'The ' + dict.lookup('TASK').longLabel + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortLabel + 's change, you can update that information by clicking on the ' + taskShortLabel + '.',
+			title: pluralize(taskShortLabel),
+			content: 'The ' + Settings.fields.task.longLabel + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortLabel + 's change, you can update that information by clicking on the ' + taskShortLabel + '.',
 			target: '#tasks h2',
 			placement: 'top',
 		},
@@ -246,8 +247,8 @@ let orgTour = (currentUser) => {
 	]
 }}
 
-let positionTour = (currentUser) => {
-	let taskShortLabel = dict.lookup('TASK').shortLabel
+const positionTour = (currentUser) => {
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 		id: 'position',
 		steps: [
@@ -297,7 +298,7 @@ let positionTour = (currentUser) => {
 	}
 }
 
-let personTour = (currentUser) => { return {
+const personTour = (currentUser) => { return {
 	id: 'person',
 	steps: [
 		{

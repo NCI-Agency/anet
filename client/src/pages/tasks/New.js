@@ -6,7 +6,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import NavigationWarning from 'components/NavigationWarning'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Task,Organization} from 'models'
 
 export default class TaskNew extends Page {
@@ -44,7 +44,7 @@ export default class TaskNew extends Page {
 
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new ' + dict.lookup('TASK').shortLabel, Task.pathForNew()]]} />
+				<Breadcrumbs items={[['Create new ' + Settings.fields.task.shortLabel, Task.pathForNew()]]} />
 
 				<NavigationWarning original={this.state.originalTask} current={task} />
 				<TaskForm task={task} />

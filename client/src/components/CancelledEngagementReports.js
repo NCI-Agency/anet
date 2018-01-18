@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import autobind from 'autobind-decorator'
 import {Button} from 'react-bootstrap'
 
@@ -126,14 +126,14 @@ export default class CancelledEngagementReports extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
-    let pinned_ORGs = dict.lookup('pinned_ORGs')
+    const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart
-    let chartQuery = API.query(/* GraphQL */`
+    const chartQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$chartQueryParams) {
           totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
@@ -185,7 +185,7 @@ export default class CancelledEngagementReports extends Component {
       Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
     }
     // Query used by the reports collection
-    let reportsQuery = API.query(/* GraphQL */`
+    const reportsQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$reportsQueryParams) {
           pageNum, pageSize, totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
@@ -211,7 +211,7 @@ export default class CancelledEngagementReports extends Component {
       Object.assign(reportsQueryParams, {cancelledReason: this.state.focusedReason})
     }
     // Query used by the reports collection
-    let reportsQuery = API.query(/* GraphQL */`
+    const reportsQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$reportsQueryParams) {
           pageNum, pageSize, totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}

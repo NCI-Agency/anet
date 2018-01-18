@@ -278,13 +278,13 @@ export default class ReportForm extends ValidatableFormWrapper {
 								</tr>
 							</thead>
 							<tbody>
-								{Person.map(report.attendees.filter(p => p.role === "ADVISOR"), (person, idx) =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
 								)}
 
 								<tr className="attendee-divider-row"><td colSpan={5}><hr /></td></tr>
 
-								{Person.map(report.attendees.filter(p => p.role === "PRINCIPAL"), (person, idx) =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
 								)}
 							</tbody>

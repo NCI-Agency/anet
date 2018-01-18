@@ -12,7 +12,7 @@ import History from 'components/History'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Person} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
@@ -46,16 +46,12 @@ export default class PersonForm extends ValidatableFormWrapper {
 	countries = person => {
 		switch(person.role) {
 			case Person.ROLE.ADVISOR:
-				return this.lookupCountries('countries')
+				return Settings.fields.advisor.person.countries
 			case Person.ROLE.PRINCIPAL:
-				return this.lookupCountries('principal_countries')
+				return Settings.fields.principal.person.countries
 			default:
 				return []
 		}
-	}
-
-	lookupCountries = key => {
-		return dict.lookup(key) || []
 	}
 
 	renderCountrySelectOptions = (countries) => {
@@ -73,9 +69,9 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		let willAutoKickPosition = person.status === 'INACTIVE' && person.position && !!person.position.id
-		let warnDomainUsername = person.status === 'INACTIVE' && person.domainUsername
-		let ranks = dict.lookup('ranks') || []
+		const willAutoKickPosition = person.status === 'INACTIVE' && person.position && !!person.position.id
+		const warnDomainUsername = person.status === 'INACTIVE' && person.domainUsername
+		const ranks = Settings.fields.person.ranks || []
 
 		const countries = this.countries(person)
 		const nationalityDefaultValue = countries.length === 1 ? countries[0] : ''
@@ -87,9 +83,9 @@ export default class PersonForm extends ValidatableFormWrapper {
 			onChange: this.handleOnChangeFirstName
 		}
 
-		let currentUser = this.context.currentUser
-		let isAdmin = currentUser && currentUser.isAdmin()
-		let disableStatusChange = this.state.originalStatus === 'INACTIVE' || Person.isEqual(currentUser, person)
+		const currentUser = this.context.currentUser
+		const isAdmin = currentUser && currentUser.isAdmin()
+		const disableStatusChange = this.state.originalStatus === 'INACTIVE' || Person.isEqual(currentUser, person)
 
 		return <ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
 			submitText={this.props.saveText || 'Save person'}>
@@ -127,8 +123,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 					:
 					<Form.Field id="role">
 						<ButtonToggleGroup>
-							<Button id="roleAdvisorButton" disabled={!isAdmin} value={Person.ROLE.ADVISOR}>{dict.lookup('ADVISOR_PERSON_TITLE')}</Button>
-							<Button id="rolePrincipalButton" value={Person.ROLE.PRINCIPAL}>{dict.lookup('PRINCIPAL_PERSON_TITLE')}</Button>
+							<Button id="roleAdvisorButton" disabled={!isAdmin} value={Person.ROLE.ADVISOR}>{Settings.fields.advisor.person.name}</Button>
+							<Button id="rolePrincipalButton" value={Person.ROLE.PRINCIPAL}>{Settings.fields.principal.person.name}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>
 				}
@@ -146,18 +142,18 @@ export default class PersonForm extends ValidatableFormWrapper {
 							</ButtonToggleGroup>
 
 							{willAutoKickPosition && <HelpBlock>
-								<span className="text-danger">Setting this person to inactive will automatically remove them from the <strong>{person.position.name}</strong> position.</span>
+								<span className="text-danger">Settings this person to inactive will automatically remove them from the <strong>{person.position.name}</strong> position.</span>
 							</HelpBlock> }
 
 							{warnDomainUsername && <HelpBlock>
-								<span className="text-danger">Setting this person to inactive means the next person to logon with the user name <strong>{person.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
+								<span className="text-danger">Settings this person to inactive means the next person to logon with the user name <strong>{person.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
 							</HelpBlock> }
 						</Form.Field>
 				}
 
 				{!edit && isAdvisor &&
 					<Alert bsStyle="warning">
-						Creating a {dict.lookup('ADVISOR_PERSON_TITLE')} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
+						Creating a {Settings.fields.advisor.person.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
 					</Alert>
 				}
 			</Fieldset>
@@ -281,7 +277,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 	@autobind
 	handleEmailValidation(value) {
-		let domainNames = dict.lookup('domainNames')
+		const domainNames = Settings.domainNames
 		if (!this.props.person.isAdvisor() || domainNames.length === 0) {
 			return { isValid: null, message: 'No custom validator is set' }
 		}
@@ -324,7 +320,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 	}
 
 	emailErrorMessage(validDomainNames) {
-		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const emailMessage = supportEmail ? ` at ${supportEmail}`: ''
 		const errorMessage = `Only the following email domain names are allowed. If your email domain name is not in the list, please contact the support team${emailMessage}.`
 		const items = validDomainNames.map(name => [

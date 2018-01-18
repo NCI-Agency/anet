@@ -15,7 +15,7 @@ import ReportApprovals from 'components/ReportApprovals'
 import Tag from 'components/Tag'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Report, Person, Task, Comment, Position} from 'models'
 
 export default class ReportShow extends Page {
@@ -220,10 +220,10 @@ export default class ReportShow extends Page {
 						<Form.Field id="author" label="Report author">
 							<LinkTo person={report.author} />
 						</Form.Field>
-						<Form.Field id="advisorOrg" label={dict.lookup('ADVISOR_ORG_NAME')}>
+						<Form.Field id="advisorOrg" label={Settings.fields.advisor.org.name}>
 							<LinkTo organization={report.advisorOrg} />
 						</Form.Field>
-						<Form.Field id="principalOrg" label={dict.lookup('PRINCIPAL_ORG_NAME')}>
+						<Form.Field id="principalOrg" label={Settings.fields.principal.org.name}>
 							<LinkTo organization={report.principalOrg} />
 						</Form.Field>
 					</Fieldset>
@@ -239,18 +239,18 @@ export default class ReportShow extends Page {
 							</thead>
 
 							<tbody>
-								{Person.map(report.attendees.filter(p => p.role === "ADVISOR"), person =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
 								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
-								{Person.map(report.attendees.filter(p => p.role === "PRINCIPAL"), person =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
 							</tbody>
 						</Table>
 					</Fieldset>
 
-					<Fieldset title={dict.lookup('TASK').longLabel} >
+					<Fieldset title={Settings.fields.task.longLabel} >
 						<Table>
 							<thead>
 								<tr>

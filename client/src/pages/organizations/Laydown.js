@@ -4,7 +4,7 @@ import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 import {Position, Person} from 'models'
 
@@ -26,15 +26,15 @@ export default class OrganizationLaydown extends Component {
 	}
 
 	render() {
-		let currentUser = this.context.currentUser
-		let org = this.props.organization
-		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
+		const currentUser = this.context.currentUser
+		const org = this.props.organization
+		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 
-		let showInactivePositions = this.state.showInactivePositions
-		let numInactivePos = org.positions.filter(p => p.status === 'INACTIVE').length
+		const showInactivePositions = this.state.showInactivePositions
+		const numInactivePos = org.positions.filter(p => p.status === 'INACTIVE').length
 
-		let positionsNeedingAttention = org.positions.filter(position => !position.person )
-		let supportedPositions = org.positions.filter(position => positionsNeedingAttention.indexOf(position) === -1)
+		const positionsNeedingAttention = org.positions.filter(position => !position.person )
+		const supportedPositions = org.positions.filter(position => positionsNeedingAttention.indexOf(position) === -1)
 
 		return <div id="laydown" data-jumptarget>
 			<Fieldset id="supportedPositions" title="Supported positions" action={<div>
@@ -59,18 +59,18 @@ export default class OrganizationLaydown extends Component {
 	}
 
 	renderPositionTable(positions) {
-		let org = this.props.organization
+		const org = this.props.organization
 		let posNameHeader, posPersonHeader, otherNameHeader, otherPersonHeader
 		if (org.isAdvisorOrg()) {
-			posNameHeader = dict.lookup('ADVISOR_POSITION_NAME')
-			posPersonHeader = dict.lookup('ADVISOR_PERSON_TITLE')
-			otherNameHeader = dict.lookup('PRINCIPAL_POSITION_NAME')
-			otherPersonHeader = dict.lookup('PRINCIPAL_PERSON_TITLE')
+			posNameHeader = Settings.fields.advisor.position.name
+			posPersonHeader = Settings.fields.advisor.person.name
+			otherNameHeader = Settings.fields.principal.position.name
+			otherPersonHeader = Settings.fields.principal.person.name
 		} else {
-			otherNameHeader = dict.lookup('ADVISOR_POSITION_NAME')
-			otherPersonHeader = dict.lookup('ADVISOR_PERSON_TITLE')
-			posNameHeader = dict.lookup('PRINCIPAL_POSITION_NAME')
-			posPersonHeader = dict.lookup('PRINCIPAL_PERSON_TITLE')
+			otherNameHeader = Settings.fields.advisor.position.name
+			otherPersonHeader = Settings.fields.advisor.person.name
+			posNameHeader = Settings.fields.principal.position.name
+			posPersonHeader = Settings.fields.principal.person.name
 		}
 		return <Table>
 			<thead>
