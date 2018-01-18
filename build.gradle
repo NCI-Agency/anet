@@ -15,7 +15,6 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'org.kordamp.markdown.convert'
 apply plugin: 'com.bmuschko.docker-java-application'
-apply plugin: "se.bjurr.gitchangelog.git-changelog-gradle-plugin"
 apply plugin: 'com.moowork.node'
 apply plugin: "org.sonarqube"
 
@@ -177,12 +176,6 @@ task dockerLoadDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecCon
 	cmd = ["/opt/mssql-tools/bin/sqlcmd", "-S", run.environment["ANET_DB_SERVER"], "-U", run.environment["ANET_DB_USERNAME"], "-P", run.environment["ANET_DB_PASSWORD"], "-d", run.environment["ANET_DB_NAME"], "-a", "32767", "-i", "/hostdata/insertBaseData.sql"]
 }
 
-task changelog (type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
-	file = new File("${buildDir}/resources/main/assets/client/changelog.html");
-	templateContent = file('docs/changelog.mustache').getText('UTF-8');
-}
-
-processResources.dependsOn changelog
 jar.dependsOn buildClient
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
@@ -216,7 +209,6 @@ buildscript {
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
-		classpath "gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.50"
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
 	}
