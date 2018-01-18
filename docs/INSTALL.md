@@ -84,7 +84,7 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 
 # ANET Upgrade Documentation
 On the ANET server: 
-- Stop the `anet.bat server` process. This is typically done by killing the java process from the task manager
+- Stop the `"bin/anet" server anet.yml` process. This is typically done by killing the java process from the task manager
 - Take a complete backup of your SQL Database
 - Move the `bin`, `lib` and `doc` directory to a backup directory. Make sure that `anet.yml` remain intact
 - Unzip the provided ANET distribution zip. Copy the `bin`, `lib` and `doc` from the distribution into the anet application folder, typically `c:\anet`
