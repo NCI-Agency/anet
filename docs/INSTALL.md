@@ -1,7 +1,7 @@
 # ANET Installation Documentation
 
 ## Scope
-This document covers the steps required to deploy ANET to a server environment.  
+This document covers the steps required to deploy ANET to a server environment.
 
 ## Environment
 
@@ -11,9 +11,9 @@ This document covers the steps required to deploy ANET to a server environment.
 - **Software**: Software requirements: 
 	- Java JRE 1.8 installed on the Application Server
 	- Administration Privileges to run processes on restricted ports (80/443)
-	- Optional: A valid SSL certificate for the domain name of the application server. 
+	- Optional: A valid SSL certificate for the domain name of the application server.
 	- Microsoft SQL Server 2012 or greater. The MS SQL database should be configured to:
-		- allow connections on a static TCP/IP port `1433`	
+		- allow connections on a static TCP/IP port `1433`
 		- fulltext module should be installed. This can be done by:
 			1. Open the Programs and Features control panel.
 			2. Select `Microsoft SQL Server 2012` and click `Change`.
@@ -29,7 +29,7 @@ and Semantic Extractions for Search`.
 - **Service Accounts**
 	- It is recommended to have a single service account with the following priviliges:
 		- Administrator of the Application Server VMs. All scheduled tasks are to be performed under this account.
-		- DB ownder of the ANET database. It is recommended to use Windows Authentication for this access.	
+		- DB ownder of the ANET database. It is recommended to use Windows Authentication for this access.
 
 ## Installation Prerequisites
 
@@ -38,7 +38,7 @@ There is no software to install on client computers, only a modern web browser (
 You should have the following information on hand for the installation:
 
 - **A Build of ANET**. This comes in the form of a `.zip` file. See BUILD.md for details on how to create this file. 
-- **Microsoft SQL Server**:  Your Database Administrator should be able to provide you with these settings.  Just ask for an empty database. If you have access to your SQL Server directly, the command to create an empty database is `CREATE DATABASE database_name_here`. Alternatively, a database can be created using the SQL Management tool. 300Mb can be used as an initial database and logs size
+- **Microsoft SQL Server**: Your Database Administrator should be able to provide you with these settings. Just ask for an empty database. If you have access to your SQL Server directly, the command to create an empty database is `CREATE DATABASE database_name_here`. Alternatively, a database can be created using the SQL Management tool. 300Mb can be used as an initial database and logs size
 	- hostname
 	- username / password
 	- database name
@@ -56,17 +56,17 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 	* _bin_: This contains the startup scripts to start/stop the ANET server. 
 	* _lib_: This contains all of the dependencies and compiled resources. All of the ANET specific files are bundled in `lib/anet.jar`.
 	* _docs_: This is a copy of the docs folder from the git repository, so you'll have a copy of these docuemnts during installation!
-2. Add an anet.yml file with appropiate settings to the application folder (i.e. `c:\anet`).  Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below.  Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
+2. Add an anet.yml file with appropiate settings to the application folder (i.e. `c:\anet`). Descriptions of each of the settings in `anet.yml` can be found in the ANET Configuration section below. Templates of that file can be found in the docs directory. `anet.yml.productionTemplate` has been tested on a production set-up.
 3. Modify anet.yml following the ANET Configuration section below. If SSL is required, follow the "How to enable SSL" section
 4. Verify that your configuration file is valid with ```"bin/anet.bat" check anet.yml```
 5. Install Database Schema: Run ```"bin/anet.bat" db migrate anet.yml```
-6. Seed the Database: Run ```"bin/anet.bat" init anet.yml```.  This will ask you the following questions:
+6. Seed the Database: Run ```"bin/anet.bat" init anet.yml```. This will ask you the following questions:
 	* _Classification String_: This is the message that will appear in the top security banner on the screen. For demo instances you should use `FOR DEMO USE ONLY`.
 	* _Classification Color_ : This is the color of the top security banner on the screen. For demo instances you should use `green`.
-	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator.  We recommend using something like `ANET Administrators`.
-	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator.  We recommend `ANET Administrator`.
+	* _Name of Administrator Organization_: This is the name of the Organization that will be created for the Administrator. We recommend using something like `ANET Administrators`.
+	* _Name of Administrator Position_: This is the name of the position that will be created for the Administrator. We recommend `ANET Administrator`.
 	* _Your Name_: This is the name that will be given to the ANET Administrator, who you presumably are; please use the canonical form of your name: LAST NAME, First name(s)
-	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are).  For production situations this will be your windows domain username.   If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
+	* _Your Domain Username_: This is the domain username that will be set on the ANET Administrator (who you presumabely are). For production situations this will be your windows domain username. If you get this wrong here, when you first log in to ANET it will create a new user for you. You can either run this database init command again, or do manual SQL commands to fix the `people` table.
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
 8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
@@ -94,14 +94,14 @@ On the ANET server:
 - Run through verification testing to ensure there are no issues
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file.  This file follows the Dropwizard configuration format ( http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration ).  Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `anet.yml` file. This file follows the Dropwizard configuration format ( http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration ). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
-	- Authentication: When development mode is `true`, ANET will use basic Authentication checking only that the username provided is equal to the `domainUsername` column of a valid user in the database.  In the event that there is not a matching user, but the provided password is equal to the username, ANET will simulate the first-time log in of a new user (ie a user who passes windows authentication but has never logged into ANET before).
+	- Authentication: When development mode is `true`, ANET will use basic Authentication checking only that the username provided is equal to the `domainUsername` column of a valid user in the database. In the event that there is not a matching user, but the provided password is equal to the username, ANET will simulate the first-time log in of a new user (ie a user who passes windows authentication but has never logged into ANET before).
 		- ex: To Log in as `Jack Jackson` from the development data set, just type in a username of `jack` when prompted.
 		- ex: To simulate a new user type in the same name for both the username and password when prompted (ie un: `hunter`, pw: `hunter` will create a new user with Domain Username of `hunter`).
 	- GraphQL: When development mode is `true`, ANET will re-compute the GraphQL graph on every API call, this allows you to rapidly develop on changes without restarting the server.
-- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS.  You must also configure the application to listen on an HTTP connection (ie port 80). 
+- **redirectToHttps**: If true, ANET will redirect all HTTP traffic to HTTPS. You must also configure the application to listen on an HTTP connection (ie port 80). 
 - **smtp**: This section controls the configuration for how ANET sends emails.
 	- **hostname**: The Fully Qualified Domain Name of your SMTP Server
 	- **port**: The port to connect to your SMTP server on (default: 25)
