@@ -154,7 +154,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		//Schedule any tasks that need to run on an ongoing basis. 
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 		AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration, scheduler);
-		FutureEngagementWorker futureWorker = new FutureEngagementWorker(jdbi.open());
+		FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
 		
 		//Check for any emails that need to be sent every 5 minutes. 
 		//And run once in 5 seconds from boot-up. (give the server time to boot up).   

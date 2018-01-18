@@ -224,6 +224,11 @@ public class ReportDao implements IAnetDao<Report> {
 			.execute();
 	}
 
+	public void updateToDraftState(Report r) {
+		dbHandle.execute("/* UpdateFutureEngagement */ UPDATE reports SET state = ? "
+				+ "WHERE id = ?", DaoUtils.getEnumId(ReportState.DRAFT), r.getId());
+	}
+
 	public int addAttendeeToReport(ReportPerson rp, Report r) {
 		return dbHandle.createStatement("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
 				+ "(\"personId\", \"reportId\", \"isPrimary\") VALUES (:personId, :reportId, :isPrimary)")
