@@ -78,7 +78,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final Person author = getJackJackson();
 
 		//Create a principal for the report
-		ReportPerson principal = PersonTest.personToReportPerson(getSteveSteveson());
+		final Person principalPerson = getSteveSteveson();
+		final ReportPerson principal = PersonTest.personToReportPerson(principalPerson);
 		principal.setPrimary(true);
 		Position principalPosition = principal.loadPosition();
 		assertThat(principalPosition).isNotNull();
@@ -321,7 +322,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		
 		//Pull recent People, Tasks, and Locations and verify that the records from the last report are there. 
 		List<Person> recentPeople = httpQuery("/api/people/recents", author).get(PersonList.class).getList();
-		assertThat(recentPeople).contains(principal);
+		assertThat(recentPeople).contains(principalPerson);
 		
 		List<Task> recentTasks = httpQuery("/api/tasks/recents", author).get(TaskList.class).getList();
 		assertThat(recentTasks).contains(action);

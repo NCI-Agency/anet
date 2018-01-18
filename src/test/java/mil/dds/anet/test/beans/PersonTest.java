@@ -128,6 +128,7 @@ public class PersonTest extends BeanTester<Person> {
 		rp.setPhoneNumber(p.getPhoneNumber());
 		rp.setEmailAddress(p.getEmailAddress());
 		rp.setBiography(p.getBiography());
+		rp.setDomainUsername(p.getDomainUsername());
 		rp.setLoadLevel(p.getLoadLevel());
 		rp.setCreatedAt(p.getCreatedAt());
 		rp.setUpdatedAt(p.getUpdatedAt());
