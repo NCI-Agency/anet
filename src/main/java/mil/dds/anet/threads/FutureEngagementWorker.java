@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.emails.FutureEngagementUpdated;
-import mil.dds.anet.threads.AnetEmailWorker.AnetEmail;
 import mil.dds.anet.utils.DaoUtils;
 
 public class FutureEngagementWorker implements Runnable {

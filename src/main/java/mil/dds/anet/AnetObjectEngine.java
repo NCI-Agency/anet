@@ -26,6 +26,7 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ApprovalActionDao;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.CommentDao;
+import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
@@ -55,6 +56,7 @@ public class AnetObjectEngine {
 	CommentDao commentDao;
 	AdminDao adminDao;
 	SavedSearchDao savedSearchDao;
+	private EmailDao emailDao;
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 
@@ -80,6 +82,7 @@ public class AnetObjectEngine {
 		savedSearchDao = new SavedSearchDao(dbHandle);
 		tagDao = new TagDao(dbHandle);
 		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
+		emailDao = new EmailDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
 		
 		instance = this;
@@ -139,6 +142,10 @@ public class AnetObjectEngine {
 
 	public ReportSensitiveInformationDao getReportSensitiveInformationDao() {
 		return reportSensitiveInformationDao;
+	}
+
+	public EmailDao getEmailDao() {
+		return emailDao;
 	}
 
 	public ISearcher getSearcher() {

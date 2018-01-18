@@ -112,7 +112,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		//Get the Database connection up and running
 		logger.info("datasource url: {}", configuration.getDataSourceFactory().getUrl());
 		final DBIFactory factory = new DBIFactory();
-		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
+		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "anet-data-layer");
 
 		logger.info("dictionary: {}", new JSONObject(configuration.getDictionary()).toString(2));
 		
@@ -153,7 +153,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
 		//Schedule any tasks that need to run on an ongoing basis. 
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-		AnetEmailWorker emailWorker = new AnetEmailWorker(jdbi.open(), configuration, scheduler);
+		AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration, scheduler);
 		FutureEngagementWorker futureWorker = new FutureEngagementWorker(jdbi.open());
 		
 		//Check for any emails that need to be sent every 5 minutes. 
