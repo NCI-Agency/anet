@@ -228,7 +228,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.savePersonWithFullName(person, { lastName: value.toUpperCase() })
+		this.savePersonWithFullName(person, { lastName: value })
 	}
 
 	handleOnChangeFirstName = (event) => {
@@ -236,20 +236,24 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const target = event.target
 		const value = target.value
 
-		if (value[0] === ',') target.value = ''
+		target.value = value.replace(/,/, '')
 		this.savePersonWithFullName(person, { firstName: value })
 	}
 
 	fullName = (person) => {
 		if (person.lastName && person.firstName) {
-			return(`${person.lastName.trim()}, ${person.firstName.trim()}`)
+			return(`${this.formattedLastName(person.lastName)}, ${person.firstName.trim()}`)
 		}
 		else if (person.lastName) {
-			return person.lastName.trim()
+			return this.formattedLastName(person.lastName)
 		}
 		else {
 			return ''
 		}
+	}
+
+	formattedLastName = (lastName) => {
+		return lastName.toUpperCase().trim()
 	}
 
 	parseFullName = (name) => {
