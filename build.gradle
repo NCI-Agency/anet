@@ -170,6 +170,12 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	targetContainerId { "anet-mssql-server" }
 }
 
+task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	description = "Waiting until the DB server has started"
+	targetContainerId { "anet-mssql-server" }
+	cmd = ["/opt/waitTillServiceStarted.sh"]
+}
+
 task dockerLoadDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	description = "Loads default data into anet-mssql-server container"
 	targetContainerId { "anet-mssql-server" }
