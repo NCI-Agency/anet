@@ -17,6 +17,7 @@ import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.test.TestData;
 
 public class TaskResourceTest extends AbstractResourceTest {
 
@@ -31,24 +32,23 @@ public class TaskResourceTest extends AbstractResourceTest {
 		final Person jack = getJackJackson();
 
 		Task a = httpQuery("/api/tasks/new", admin)
-			.post(Entity.json(Task.create("TestF1", "Do a thing with a person", "Test-EF")), Task.class);
+			.post(Entity.json(TestData.createTask("TestF1", "Do a thing with a person", "Test-EF")), Task.class);
 		assertThat(a.getId()).isNotNull();
 				
 		Task b = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("TestM1", "Teach a person how to fish", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("TestM1", "Teach a person how to fish", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
 		assertThat(b.getId()).isNotNull();
-		System.out.println(Entity.json(Task.create("TestM1", "Teach a person how to fish", "Test-Milestone", a, null, TaskStatus.ACTIVE)));
 		
 		Task c = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("TestM2", "Watch the person fishing", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("TestM2", "Watch the person fishing", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
 		assertThat(c.getId()).isNotNull();
 		
 		Task d = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("TestM3", "Have the person go fishing without you", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("TestM3", "Have the person go fishing without you", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
 		assertThat(d.getId()).isNotNull();
 		
 		Task e = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("TestF2", "Be a thing in a test case", "Test-EF", null, null, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("TestF2", "Be a thing in a test case", "Test-EF", null, null, TaskStatus.ACTIVE)), Task.class);
 		assertThat(e.getId()).isNotNull();
 		
 		Task returned = httpQuery("/api/tasks/" + a.getId(), admin).get(Task.class);
