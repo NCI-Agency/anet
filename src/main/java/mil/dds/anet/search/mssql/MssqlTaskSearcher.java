@@ -34,9 +34,10 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		
 		String text = query.getText();
 		if (text != null && text.trim().length() > 0) { 
-			whereClauses.add("(CONTAINS((longName), :text) OR shortName LIKE :likeQuery)");
+			whereClauses.add("(CONTAINS((longName), :text) OR CONTAINS((customField), :text) OR shortName LIKE :likeQuery)");
 			args.put("text", Utils.getSqlServerFullTextQuery(text));
 			args.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
+			args.put("text", Utils.getSqlServerFullTextQuery(text));
 		}
 		
 		if (query.getResponsibleOrgId() != null) {
@@ -64,32 +65,32 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		}
 
 		if (query.getProjectStatus() != null) {
-			whereClauses.add("projectStatus = :projectStatus");
+			whereClauses.add("[customFieldEnum] LIKE :projectStatus");
 			args.put("projectStatus", query.getProjectStatus());
 		}
 		
 		if (query.getPlannedCompletionStart() != null) {
-			whereClauses.add("plannedCompletionStart = :plannedCompletionStart");
+			whereClauses.add("plannedCompletion >= :plannedCompletionStart");
 			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionStart()));
 		}
 
 		if (query.getPlannedCompletionEnd() != null) {
-			whereClauses.add("plannedCompletionStart = :plannedCompletionStart");
+			whereClauses.add("plannedCompletion <= :plannedCompletionStart");
 			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionEnd()));
 		}
 
 		if (query.getProjectedCompletionStart() != null) {
-			whereClauses.add("projectedCompletionStart = :projectedCompletionStart");
+			whereClauses.add("projectedCompletion >= :projectedCompletionStart");
 			args.put("projectedCompletionStart", Utils.handleRelativeDate(query.getProjectedCompletionStart()));
 		}
 
 		if (query.getProjectedCompletionEnd() != null) {
-			whereClauses.add("projectedCompletionEnd = :projectedCompletionEnd");
+			whereClauses.add("projectedCompletion <= :projectedCompletionEnd");
 			args.put("projectedCompletionEnd", Utils.handleRelativeDate(query.getProjectedCompletionEnd()));
 		}
 
 		if (query.getCustomField() != null) {
-			whereClauses.add("customField = :customField");
+			whereClauses.add("[customField] LIKE :customField");
 			args.put("customField", query.getCustomField());
 		}
 

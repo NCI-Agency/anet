@@ -869,10 +869,10 @@
 			<column name="plannedCompletion" type="datetime" />
 		</addColumn>
 		<addColumn tableName="tasks">
-			<column name="customField" type="text" />
+			<column name="customField" type="nvarchar(max)" />
 		</addColumn>
 		<addColumn tableName="tasks" >
-			<column name="customFieldEnum" type="text" />
+			<column name="customFieldEnum" type="nvarchar(255)" />
 		</addColumn>
 	</changeSet>
 
@@ -992,4 +992,14 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 	
+	<changeSet id="add_tasks_customField_to_fulltext_index" author="evdhoudt" dbms="mssql">
+		<sql>
+			ALTER FULLTEXT INDEX ON tasks ADD ( customField );
+		</sql>
+		<rollback>
+			ALTER FULLTEXT INDEX ON tasks DROP ( customField );
+		</rollback>
+	</changeSet>
+
+
 </databaseChangeLog>

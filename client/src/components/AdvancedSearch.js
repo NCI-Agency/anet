@@ -39,13 +39,6 @@ const taskFilters = props => {
 		'Projected completion': <DateRangeSearch queryKey="projectedCompletion" />,
 		'Planned completion': <DateRangeSearch queryKey="plannedCompletion" />
 	}
-	taskFiltersObj[customField] =
-		<AutocompleteFilter
-			queryKey="customField"
-			valueKey={customField}
-			placeholder={placeholder}
-			url="/api/locations/search"
-		/>
 	return taskFiltersObj
 
 }
