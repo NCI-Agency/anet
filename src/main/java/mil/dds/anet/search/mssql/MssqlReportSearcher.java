@@ -72,8 +72,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("startDate", Utils.handleRelativeDate(query.getEngagementDateStart()));	
 		}
 		if (query.getEngagementDateEnd() != null) { 
-			whereClauses.add("reports.engagementDate <= :endDate");
-			args.put("endDate", Utils.handleRelativeDate(query.getEngagementDateEnd()));	
+			whereClauses.add("reports.engagementDate < :endDate");
+			args.put("endDate", Utils.handleRelativeDate(query.getEngagementDateEnd()).plusMillis(1));
 		}
 		if (query.getEngagementDayOfWeek() != null) {
 			whereClauses.add("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
@@ -85,8 +85,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("startCreatedAt", Utils.handleRelativeDate(query.getCreatedAtStart()));
 		}
 		if (query.getCreatedAtEnd() != null) { 
-			whereClauses.add("reports.createdAt <= :endCreatedAt");
-			args.put("endCreatedAt", Utils.handleRelativeDate(query.getCreatedAtEnd()));
+			whereClauses.add("reports.createdAt < :endCreatedAt");
+			args.put("endCreatedAt", Utils.handleRelativeDate(query.getCreatedAtEnd()).plusMillis(1));
 		}
 		
 		if (query.getUpdatedAtStart() != null) {
@@ -94,8 +94,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("updatedAtStart", Utils.handleRelativeDate(query.getUpdatedAtStart()));
 		}
 		if (query.getUpdatedAtEnd() != null) {
-			whereClauses.add("reports.updatedAt <= :updatedAtEnd");
-			args.put("updatedAtEnd", Utils.handleRelativeDate(query.getUpdatedAtEnd()));
+			whereClauses.add("reports.updatedAt < :updatedAtEnd");
+			args.put("updatedAtEnd", Utils.handleRelativeDate(query.getUpdatedAtEnd()).plusMillis(1));
 		}
 
 		if (query.getReleasedAtStart() != null) { 
@@ -103,8 +103,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("releasedAtStart", Utils.handleRelativeDate(query.getReleasedAtStart()));
 		}
 		if (query.getReleasedAtEnd() != null) { 
-			whereClauses.add("reports.releasedAt <= :releasedAtEnd");
-			args.put("releasedAtEnd", Utils.handleRelativeDate(query.getReleasedAtEnd()));
+			whereClauses.add("reports.releasedAt < :releasedAtEnd");
+			args.put("releasedAtEnd", Utils.handleRelativeDate(query.getReleasedAtEnd()).plusMillis(1));
 		}
 
 		if (query.getAttendeeId() != null) { 
