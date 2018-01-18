@@ -16,7 +16,8 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 	Boolean isFilled;
 	Integer locationId;
 	PositionStatus status;
-	
+	private Integer authorizationGroupId;
+
 	PositionSearchSortBy sortBy;
 	SortOrder sortOrder;
 
@@ -79,6 +80,14 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 
 	public void setStatus(PositionStatus status) {
 		this.status = status;
+	}
+
+	public Integer getAuthorizationGroupId() {
+		return authorizationGroupId;
+	}
+
+	public void setAuthorizationGroupId(Integer authorizationGroupId) {
+		this.authorizationGroupId = authorizationGroupId;
 	}
 
 	public PositionSearchSortBy getSortBy() {
