@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import Page from 'components/Page'
 import {Link} from 'react-router'
-import {Table, Button, Checkbox} from 'react-bootstrap'
+import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
 
 import Fieldset from 'components/Fieldset'
@@ -47,7 +47,7 @@ export default class PositionShow extends Page {
 	fetchData(props) {
 		API.query(/* GraphQL */`
 			position(id:${props.params.id}) {
-				id, name, type, status, authorized, code,
+				id, name, type, status, code,
 				organization { id, shortName, longName, identificationCode },
 				person { id, name, rank },
 				associatedPositions {
@@ -101,10 +101,6 @@ export default class PositionShow extends Page {
 						</Form.Field>
 
 						<Form.Field id="status" />
-
-						<Form.Field id="authorized">
-							<Checkbox readOnly disabled checked={!!this.state.position.authorized} className="authorized-checkbox" />
-						</Form.Field>
 
 						{position.organization && <Form.Field id="organization" label="Organization" value={position.organization && position.organization.shortName} >
 							<Link to={Organization.pathFor(position.organization)}>

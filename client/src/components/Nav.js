@@ -114,6 +114,7 @@ class Nav extends Component {
 				{inAdmin &&
 					<SubNav>
 						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
+						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
 					</SubNav>
 				}
 				

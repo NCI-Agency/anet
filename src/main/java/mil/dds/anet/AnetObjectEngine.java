@@ -19,6 +19,7 @@ import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ApprovalActionDao;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
@@ -50,6 +51,7 @@ public class AnetObjectEngine {
 	SavedSearchDao savedSearchDao;
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
+	private final AuthorizationGroupDao authorizationGroupDao;
 
 	ISearcher searcher;
 	
@@ -73,7 +75,8 @@ public class AnetObjectEngine {
 		savedSearchDao = new SavedSearchDao(dbHandle);
 		tagDao = new TagDao(dbHandle);
 		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
-		
+		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
+
 		instance = this;
 		
 		//TODO: maybe do this differently!
@@ -138,6 +141,10 @@ public class AnetObjectEngine {
 
 	public ReportSensitiveInformationDao getReportSensitiveInformationDao() {
 		return reportSensitiveInformationDao;
+	}
+
+	public AuthorizationGroupDao getAuthorizationGroupDao() {
+		return authorizationGroupDao;
 	}
 
 	public ISearcher getSearcher() {

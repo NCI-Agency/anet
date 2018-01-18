@@ -102,9 +102,6 @@ public class PositionResource implements IGraphQLResource {
 			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST); 
 		}
 		if (p.getType() == PositionType.ADMINISTRATOR) { AuthUtils.assertAdministrator(user); } 
-		if (p.getAuthorized()) {
-			AuthUtils.assertAdministrator(user);
-		}
 		
 		AuthUtils.assertSuperUserForOrg(user, p.getOrganization());
 
@@ -121,7 +118,7 @@ public class PositionResource implements IGraphQLResource {
 			}
 		}
 
-		AnetAuditLogger.log("Position {} created by {}; authorized={}", p, user, p.getAuthorized());
+		AnetAuditLogger.log("Position {} created by {}", p, user);
 		return created;
 	}
 
@@ -130,10 +127,6 @@ public class PositionResource implements IGraphQLResource {
 	@RolesAllowed("SUPER_USER")
 	public Response updatePosition(@Auth Person user, Position pos) {
 		if (pos.getType() == PositionType.ADMINISTRATOR) { AuthUtils.assertAdministrator(user); } 
-		final Position origPos = dao.getById(pos.getId());
-		if (origPos.getAuthorized() != pos.getAuthorized()) {
-			AuthUtils.assertAdministrator(user);
-		}
 		if (DaoUtils.getId(pos.getOrganization()) == null) { 
 			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST); 
 		}
@@ -176,11 +169,7 @@ public class PositionResource implements IGraphQLResource {
 			}
 		}
 
-		if (origPos.getAuthorized() != pos.getAuthorized()) {
-			AnetAuditLogger.log("Position {} edited by {}; authorized changed from {} to {}", pos, user, origPos.getAuthorized(), pos.getAuthorized());
-		} else {
-			AnetAuditLogger.log("Position {} edited by {}", pos, user);
-		}
+		AnetAuditLogger.log("Position {} edited by {}", pos, user);
 		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
 	}
 

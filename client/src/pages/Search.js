@@ -13,12 +13,12 @@ import ReportCollection from 'components/ReportCollection'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import AdvancedSearch from 'components/AdvancedSearch'
+import PositionTable from 'components/PositionTable'
 
-import utils from 'utils'
 import API from 'api'
 import Settings from 'Settings'
 import GQL from 'graphqlapi'
-import {Person, Organization, Position, Task} from 'models'
+import {Person, Organization, Task} from 'models'
 
 import FileSaver from 'file-saver'
 
@@ -437,34 +437,8 @@ export default class Search extends Page {
 
 	renderPositions() {
 		return <div>
-			{this.paginationFor('positions')}
-			<Table responsive hover striped>
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Org</th>
-						<th>Current Occupant</th>
-						<th>Status</th>
-					</tr>
-				</thead>
-				<tbody>
-					{Position.map(this.state.results.positions.list, pos => {
-						let nameComponents =  []
-						pos.name && nameComponents.push(pos.name)
-						pos.code && nameComponents.push(pos.code)
-						return <tr key={pos.id}>
-								<td>
-									<img src={pos.iconUrl()} alt={pos.type} height={20} className="person-icon" />
-									<LinkTo position={pos} >{nameComponents.join(' - ')}</LinkTo>
-								</td>
-								<td>{pos.organization && <LinkTo organization={pos.organization} />}</td>
-								<td>{pos.person && <LinkTo person={pos.person} />}</td>
-								<td>{utils.sentenceCase(pos.status)}</td>
-							</tr>
-						}
-					)}
-				</tbody>
-			</Table>
+		{this.paginationFor('positions')}
+		<PositionTable positions={this.state.results.positions.list} />
 		</div>
 	}
 

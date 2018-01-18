@@ -49,6 +49,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.ApprovalAction.ApprovalType;
 import mil.dds.anet.beans.ApprovalStep;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -282,7 +283,23 @@ public class ReportResource implements IGraphQLResource {
 				dao.removeTagFromReport(t, r);
 			}
 		}
-		
+
+		// Update AuthorizationGroups:
+		if (r.getAuthorizationGroups() != null) {
+			final List<AuthorizationGroup> existingAuthorizationGroups = dao.getAuthorizationGroupsForReport(r.getId());
+			for (final AuthorizationGroup t : r.getAuthorizationGroups()) {
+				Optional<AuthorizationGroup> existingAuthorizationGroup = existingAuthorizationGroups.stream().filter(el -> el.getId().equals(t.getId())).findFirst();
+				if (existingAuthorizationGroup.isPresent()) {
+					existingAuthorizationGroups.remove(existingAuthorizationGroup.get());
+				} else {
+					dao.addAuthorizationGroupToReport(t, r);
+				}
+			}
+			for (final AuthorizationGroup t : existingAuthorizationGroups) {
+				dao.removeAuthorizationGroupFromReport(t, r);
+			}
+		}
+
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
 			boolean canApprove = engine.canUserApproveStep(editor.getId(), existing.getApprovalStep().getId());
 			if (canApprove) { 

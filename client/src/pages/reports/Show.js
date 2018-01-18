@@ -90,6 +90,7 @@ export default class ReportShow extends Page {
 
 				tags { id, name, description }
 				reportSensitiveInformation { id, text }
+				authorizationGroups { id, name, description }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -97,7 +98,9 @@ export default class ReportShow extends Page {
 	}
 
 	renderNoPositionAssignedText() {
-		return <p>Notice: This report cannot be submitted because you do not have an assigned position.<br /> -- Please contact your administrator --</p>
+		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
+		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
+		return <div className="alert alert-warning">You cannot submit a report. Your assigned advisor position has an inactive status.<br /> -- Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage} --</div>
 	}
 
 	render() {
@@ -113,8 +116,8 @@ export default class ReportShow extends Page {
 		canEdit = canEdit || canApprove
 
 		//Only the author can submit when report is in Draft or rejected AND author has a position
-		const hasAssignedPosition = currentUser.hasAssignedPosition()
-		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasAssignedPosition
+		const hasActivePosition = currentUser.hasActivePosition()
+		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
 
 		//Anbody can email a report as long as it's not in draft.
 		let canEmail = !report.isDraft()
@@ -148,7 +151,7 @@ export default class ReportShow extends Page {
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This is a DRAFT report and hasn't been submitted.</h4>
 						<p>You can review the draft below to make sure all the details are correct.</p>
-						{!hasAssignedPosition &&
+						{!hasActivePosition &&
 							this.renderNoPositionAssignedText()
 						}
 						<div style={{textAlign: 'left'}}>
@@ -276,6 +279,31 @@ export default class ReportShow extends Page {
 					{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
 						<Fieldset title="Sensitive information">
 							<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
+							{(report.authorizationGroups && report.authorizationGroups.length > 0 &&
+								<div>
+									<h5>Authorized groups:</h5>
+									<Table>
+										<thead>
+											<tr>
+												<th>Name</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											{report.authorizationGroups.map(ag => {
+												return (
+													<tr key={ag.id}>
+														<td>{ag.name}</td>
+														<td>{ag.description}</td>
+													</tr>
+												)}
+											)}
+										</tbody>
+									</Table>
+								</div>
+							) || (
+								<h5>No groups are authorized!</h5>
+							)}
 						</Fieldset>
 					}
 

@@ -21,6 +21,7 @@ export default class Report extends Model {
 		keyOutcomes: '',
 		tags: [],
 		reportSensitiveInformation: null,
+		authorizationGroups: [],
 	}
 
 	isDraft() {

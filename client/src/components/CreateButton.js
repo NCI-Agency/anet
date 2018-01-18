@@ -16,6 +16,7 @@ const SUPER_USER_ACTIONS = [
 const ADMIN_ACTIONS = [
 	Models.Organization,
 	Models.Task,
+	Models.AuthorizationGroup
 ]
 
 export default class CreateButton extends Component {

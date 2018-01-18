@@ -10,9 +10,7 @@ import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList;
@@ -120,7 +118,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	/**
 	 * A user is allowed to access a report's sensitive information if either of the following holds true:
 	 * • the user is the author of the report;
-	 * • the user holds an authorized position in the advisorOrg of the report.
+	 * • the user is in an authorization group for the report.
 	 *
 	 * @param user the user executing the request
 	 * @param report the report
@@ -128,38 +126,28 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	 */
 	private boolean isAuthorized(Person user, Report report) {
 		final Integer userId = DaoUtils.getId(user);
-		if (userId == null || DaoUtils.getId(report) == null) {
-			// No user and no report
+		final Integer reportId = DaoUtils.getId(report);
+		if (userId == null || reportId == null) {
+			// No user or no report
 			return false;
 		}
 
-		final Integer authorId = DaoUtils.getId(report.getAuthor());
-		if (userId.equals(authorId)) {
-			// User is author of the report
-			return true;
-		}
-
-		// Check authorization
-		final Position userPosition = user.loadPosition();
-		if (userPosition == null || !userPosition.getAuthorized()) {
-			// User has no position or is not authorized
-			return false;
-		}
-		// Check the organization for which the user is authorized
-		final Organization userOrg = userPosition.loadOrganization();
-		final Organization advisorOrg = report.loadAdvisorOrg();
-		if (userOrg == null || advisorOrg == null) {
-			// No organization
-			return false;
-		}
-		final Integer userOrgId = DaoUtils.getId(userOrg);
-		final Integer advisorOrgId = DaoUtils.getId(advisorOrg);
-		if (userOrgId != null && userOrgId.equals(advisorOrgId)) {
-			// User holds an authorized position in the advisorOrg of the report
-			return true;
-		}
-
-		return false;
+		// Check authorization in a single query
+		final Query<Map<String, Object>> query = dbHandle.createQuery(
+				"/* checkReportAuthorization */ SELECT r.id"
+					+ " FROM reports r"
+					+ " LEFT JOIN reportAuthorizationGroups rag ON rag.reportId = r.id"
+					+ " LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupId = rag.authorizationGroupId"
+					+ " LEFT JOIN positions p ON p.id = agp.positionId"
+					+ " WHERE r.id = :reportId"
+					+ " AND ("
+					+ "   (r.authorId = :userId)"
+					+ "   OR"
+					+ "   (p.currentPersonId = :userId)"
+					+ " )")
+			.bind("reportId", reportId)
+			.bind("userId", userId);
+		return (query.list().size() > 0);
 	}
 
 }

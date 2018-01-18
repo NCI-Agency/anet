@@ -50,6 +50,7 @@ fieldset {
 
 h2.legend {
 	font-size: 2rem;
+	margin-top: 1rem;
 }
 
 .legend small {
@@ -67,8 +68,7 @@ h2.legend {
 }
 
 .form-top-submit {
-	float: right;
-	margin-bottom: -42px;
+	margin-bottom: 1rem;
 }
 
 fieldset .pagination {
@@ -284,10 +284,6 @@ a.home-tile {
 	padding: 0;
 	margin: 0;
 	text-align: center;
-}
-
-.authorized-checkbox input[type=checkbox][readonly] {
-	margin-top: -4px;
 }
 
 .loading .anet section {

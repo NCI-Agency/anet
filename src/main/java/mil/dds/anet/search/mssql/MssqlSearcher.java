@@ -6,6 +6,7 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.search.IAuthorizationGroupSearcher;
 import mil.dds.anet.search.ILocationSearcher;
 import mil.dds.anet.search.IOrganizationSearcher;
 import mil.dds.anet.search.IPersonSearcher;
@@ -24,6 +25,7 @@ public class MssqlSearcher implements ISearcher {
 	MssqlTaskSearcher taskSearcher;
 	MssqlLocationSearcher locationSearcher;
 	private final MssqlTagSearcher tagSearcher;
+	private final MssqlAuthorizationGroupSearcher authorizationGroupSearcher;
 
 	public MssqlSearcher() { 
 		this.reportSearcher = new MssqlReportSearcher();
@@ -33,6 +35,7 @@ public class MssqlSearcher implements ISearcher {
 		this.taskSearcher = new MssqlTaskSearcher();
 		this.locationSearcher = new MssqlLocationSearcher();
 		this.tagSearcher = new MssqlTagSearcher();
+		this.authorizationGroupSearcher = new MssqlAuthorizationGroupSearcher();
 	}
 	
 	@Override
@@ -68,6 +71,11 @@ public class MssqlSearcher implements ISearcher {
 	@Override
 	public ITagSearcher getTagSearcher() {
 		return tagSearcher;
+	}
+
+	@Override
+	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
+		return authorizationGroupSearcher;
 	}
 
 	protected static Query<Map<String, Object>> addPagination(AbstractSearchQuery query,
