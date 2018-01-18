@@ -593,10 +593,10 @@ public class ReportDao implements IAnetDao<Report> {
 		sql.append("FROM reports WHERE ");
 		
 		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql.append("releasedAt >= :startDate and releasedAt <= :endDate "
+			sql.append("releasedAt >= :startDate and releasedAt < :endDate "
 					+ "AND engagementDate > :engagementDateStart ");
 			sqlArgs.put("startDate", start);
-			sqlArgs.put("endDate", end);
+			sqlArgs.put("endDate", end.plusMillis(1));
 			sqlArgs.put("engagementDateStart", getRollupEngagmentStart(start));
 		} else { 
 			sql.append("releasedAt  >= DateTime(:startDate) AND releasedAt <= DateTime(:endDate) " 
