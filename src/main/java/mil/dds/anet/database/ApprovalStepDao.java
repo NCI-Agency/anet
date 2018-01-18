@@ -48,36 +48,31 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 		if (results.size() == 0) { return null; }
 		return results.get(0);
 	}
-	
+
 	@Override
 	public ApprovalStep insert(ApprovalStep as) { 
-		return dbHandle.inTransaction(new TransactionCallback<ApprovalStep>() {
-			public ApprovalStep inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement(
-						"/* insertApprovalStep */ INSERT into \"approvalSteps\" (name, \"nextStepId\", \"advisorOrganizationId\") "
-						+ "VALUES (:name, :nextStepId, :advisorOrganizationId)")
-					.bindFromProperties(as)
-					.executeAndReturnGeneratedKeys();
-				
-				as.setId(DaoUtils.getGeneratedId(keys));
-				
-				if (as.getApprovers() != null) { 
-					for (Position approver : as.getApprovers()) {
-						if (approver.getId() == null) { 
-							throw new WebApplicationException("Invalid Position ID of Null for Approver");
-						}
-						dbHandle.createStatement("/* insertApprovalStep.approvers */ "
-								+ "INSERT INTO approvers (\"positionId\", \"approvalStepId\") VALUES (:positionId, :stepId)")
-							.bind("positionId", approver.getId())
-							.bind("stepId", as.getId())
-							.execute();
-					}
+		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement(
+				"/* insertApprovalStep */ INSERT into \"approvalSteps\" (name, \"nextStepId\", \"advisorOrganizationId\") "
+				+ "VALUES (:name, :nextStepId, :advisorOrganizationId)")
+			.bindFromProperties(as)
+			.executeAndReturnGeneratedKeys();
+
+		as.setId(DaoUtils.getGeneratedId(keys));
+
+		if (as.getApprovers() != null) {
+			for (Position approver : as.getApprovers()) {
+				if (approver.getId() == null) {
+					throw new WebApplicationException("Invalid Position ID of Null for Approver");
 				}
-				
-				return as;
+				dbHandle.createStatement("/* insertApprovalStep.approvers */ "
+						+ "INSERT INTO approvers (\"positionId\", \"approvalStepId\") VALUES (:positionId, :stepId)")
+					.bind("positionId", approver.getId())
+					.bind("stepId", as.getId())
+					.execute();
 			}
-		});
+		}
 		
+		return as;
 	}
 	
 	/**
@@ -112,33 +107,29 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	 * Will patch up the Approval Process list after the removal. 
 	 */
 	public boolean deleteStep(int id) {
-		return dbHandle.inTransaction(new TransactionCallback<Boolean>() {
-			public Boolean inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				//ensure there is nothing currently on this step
-				List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepId\" = ?", id);
-				Map<String,Object> result = rs.get(0);
-				int count = ((Number) result.get("ct")).intValue();
-				if (count != 0) {
-					throw new WebApplicationException("Reports are currently pending at this step", Status.NOT_ACCEPTABLE);
-				}
+		//ensure there is nothing currently on this step
+		List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepId\" = ?", id);
+		Map<String,Object> result = rs.get(0);
+		int count = ((Number) result.get("ct")).intValue();
+		if (count != 0) {
+			throw new WebApplicationException("Reports are currently pending at this step", Status.NOT_ACCEPTABLE);
+		}
 
-				//fix up the linked list.
-				dbHandle.createStatement("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
-						+ "SET \"nextStepId\" = (SELECT \"nextStepId\" from \"approvalSteps\" where id = :stepToDeleteId) "
-						+ "WHERE \"nextStepId\" = :stepToDeleteId") 	
-					.bind("stepToDeleteId", id)
-					.execute();
+		//fix up the linked list.
+		dbHandle.createStatement("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
+				+ "SET \"nextStepId\" = (SELECT \"nextStepId\" from \"approvalSteps\" where id = :stepToDeleteId) "
+				+ "WHERE \"nextStepId\" = :stepToDeleteId")
+			.bind("stepToDeleteId", id)
+			.execute();
 
-				//Remove all approvers from this step
-				dbHandle.execute("/* deleteApproval.delete1 */ DELETE FROM approvers where \"approvalStepId\" = ?", id);
+		//Remove all approvers from this step
+		dbHandle.execute("/* deleteApproval.delete1 */ DELETE FROM approvers where \"approvalStepId\" = ?", id);
 
-				//Update any approvals that happened at this step
-				dbHandle.execute("/* deleteApproval.updateActions */ UPDATE \"approvalActions\" SET \"approvalStepId\" = ? WHERE \"approvalStepId\" = ?", null, id);
+		//Update any approvals that happened at this step
+		dbHandle.execute("/* deleteApproval.updateActions */ UPDATE \"approvalActions\" SET \"approvalStepId\" = ? WHERE \"approvalStepId\" = ?", null, id);
 
-				dbHandle.execute("/* deleteApproval.delete2 */ DELETE FROM \"approvalSteps\" where id = ?", id);
-				return true;
-			}
-		});
+		dbHandle.execute("/* deleteApproval.delete2 */ DELETE FROM \"approvalSteps\" where id = ?", id);
+		return true;
 	}
 
 	/**

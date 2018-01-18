@@ -16,6 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.skife.jdbi.v2.Handle;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
@@ -55,7 +57,7 @@ public class ApprovalStepResource implements IGraphQLResource {
 	@RolesAllowed("SUPER_USER")
 	public ApprovalStep createNewStep(@Auth Person user, ApprovalStep as) {
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(as.getAdvisorOrganizationId()));
-		return dao.insertAtEnd(as);
+		return engine.executeInTransaction(dao::insertAtEnd, as);
 	}
 	
 	@POST
@@ -93,12 +95,10 @@ public class ApprovalStepResource implements IGraphQLResource {
 	public Response deleteStep(@Auth Person user, @PathParam("id") int id) {
 		ApprovalStep step = dao.getById(id);
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(step.getAdvisorOrganizationId()));
-		
-		boolean success = dao.deleteStep(id);
+		boolean success =  engine.executeInTransaction(dao::deleteStep, id);
 		return (success) ? Response.ok().build() : Response.status(Status.NOT_ACCEPTABLE).build();
 	}
-	
-	
+
 	@Override
 	public Class<ApprovalStep> getBeanClass() {
 		return ApprovalStep.class;

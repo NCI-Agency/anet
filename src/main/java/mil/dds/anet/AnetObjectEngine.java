@@ -5,9 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
+import org.skife.jdbi.v2.TransactionCallback;
+import org.skife.jdbi.v2.TransactionStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
@@ -35,6 +41,8 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class AnetObjectEngine {
+
+	private static final Logger logger = LoggerFactory.getLogger(AnetObjectEngine.class);
 
 	PersonDao personDao;
 	TaskDao taskDao;
@@ -141,11 +149,33 @@ public class AnetObjectEngine {
 		if (person == null) { return null; } 
 		return personDao.getOrganizationForPerson(person.getId());
 	}
-	
+
+	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
+		logger.debug("Wrapping a transaction around {}", processor);
+		return getDbHandle().inTransaction(new TransactionCallback<R>() {
+			@Override
+			public R inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				return processor.apply(input);
+			}
+		});
+	}
+
+	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
+		logger.debug("Wrapping a transaction around {}", processor);
+		return getDbHandle().inTransaction(new TransactionCallback<R>() {
+			@Override
+			public R inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				return processor.apply(arg1, arg2);
+			}
+		});
+	}
+
 	public List<ApprovalStep> getApprovalStepsForOrg(Organization ao) {
+		logger.debug("Fetching steps for {}", ao);
 		Collection<ApprovalStep> unordered = asDao.getByAdvisorOrganizationId(ao.getId());
 		
 		int numSteps = unordered.size();
+		logger.debug("Found total of {} steps", numSteps);
 		LinkedList<ApprovalStep> ordered = new LinkedList<ApprovalStep>();
 		Integer nextStep = null;
 		for (int i = 0;i < numSteps;i++) { 
