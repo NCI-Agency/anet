@@ -28,7 +28,7 @@ export default class PositionEdit extends Page {
 	fetchData(props) {
 		API.query(/* GraphQL */`
 			position(id:${props.params.id}) {
-				id, name, code, status, authorized, type
+				id, name, code, status, type
 				location { id, name },
 				associatedPositions { id, name, person { id, name, rank } },
 				organization {id, shortName, longName, identificationCode, type},

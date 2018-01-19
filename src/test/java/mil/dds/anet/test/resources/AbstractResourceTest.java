@@ -130,7 +130,7 @@ public abstract class AbstractResourceTest {
 			InputStream is = (InputStream) resp.getEntity();
 			return IOUtils.toString(is);
 		} catch (Exception e) {
-			logger.error("Exception getting repsonse entity", e);
+			logger.error("Exception getting response entity", e);
 			return null;
 		}
 	}

@@ -92,5 +92,18 @@
 		"reportId": null,
 		"createdAt": null,
 		"updatedAt": null
-	}
+	},
+	"authorizationGroups": [{
+		"id": null,
+		"name": "sensitive info positions group",
+		"description": "desc",
+		"positions": [{
+			"id": null,
+			"name": "Head of donut operations",
+			"code": "DNT-001",
+			"organization": null,
+			"type": "PRINCIPAL",
+			"status": "ACTIVE"
+		}]
+	}]
 }

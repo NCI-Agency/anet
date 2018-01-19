@@ -19,8 +19,6 @@ public class Position extends AbstractAnetBean {
 	String code;
 	PositionType type;
 	PositionStatus status;
-	private boolean authorized;
-		
 	//Lazy Loaded
 	Organization organization;
 	Person person; //The Current person.
@@ -65,14 +63,6 @@ public class Position extends AbstractAnetBean {
 
 	public void setStatus(PositionStatus status) {
 		this.status = status;
-	}
-
-	public boolean getAuthorized() {
-		return authorized;
-	}
-
-	public void setAuthorized(boolean authorized) {
-		this.authorized = authorized;
 	}
 
 	@GraphQLFetcher("organization")
@@ -178,13 +168,12 @@ public class Position extends AbstractAnetBean {
 			&& Objects.equals(name, other.getName()) 
 			&& Objects.equals(code,  other.getCode()) 
 			&& Objects.equals(type, other.getType()) 
-			&& idEqual(organization, other.getOrganization())
-			&& Objects.equals(authorized, other.getAuthorized());
+			&& idEqual(organization, other.getOrganization());
 	}
 	
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, name, code, type, organization, authorized);
+		return Objects.hash(id, name, code, type, organization);
 	}
 	
 	@Override

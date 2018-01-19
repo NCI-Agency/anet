@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person.Role;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
@@ -65,6 +66,7 @@ public class Report extends AbstractAnetBean {
 	private ReportSensitiveInformation reportSensitiveInformation;
 	// The user who instantiated this; needed to determine access to sensitive information
 	private Person user;
+	private List<AuthorizationGroup> authorizationGroups;
 
 	@GraphQLIgnore
 	public ApprovalStep getApprovalStep() {
@@ -189,6 +191,7 @@ public class Report extends AbstractAnetBean {
 		this.loadPrimaryAdvisor();
 		this.loadPrimaryPrincipal();
 		this.loadTasks();
+		this.loadAuthorizationGroups();
 	}
 
 	@GraphQLFetcher("attendees")
@@ -470,8 +473,25 @@ public class Report extends AbstractAnetBean {
 		this.user = user;
 	}
 
+	@GraphQLFetcher("authorizationGroups")
+	public List<AuthorizationGroup> loadAuthorizationGroups() {
+		if (authorizationGroups == null && id != null) {
+			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(id);
+		}
+		return authorizationGroups;
+	}
+
+	public void setAuthorizationGroups(List<AuthorizationGroup> authorizationGroups) {
+		this.authorizationGroups = authorizationGroups;
+	}
+
+	@GraphQLIgnore
+	public List<AuthorizationGroup> getAuthorizationGroups() {
+		return authorizationGroups;
+	}
+
 	@Override
-	public boolean equals(Object other) { 
+	public boolean equals(Object other) {
 		if (other == null || other.getClass() != this.getClass()) {
 			return false;
 		}
@@ -494,7 +514,8 @@ public class Report extends AbstractAnetBean {
 				&& idEqual(r.getAuthor(), author)
 				&& Objects.equals(r.getComments(), comments)
 				&& Objects.equals(r.getTags(), tags)
-				&& Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation);
+				&& Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
+				&& Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
 	}
 	
 	@Override
@@ -502,7 +523,7 @@ public class Report extends AbstractAnetBean {
 		return Objects.hash(id, state, approvalStep, createdAt, updatedAt, 
 			location, intent, exsum, attendees, tasks, reportText, 
 			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate,
-			tags, reportSensitiveInformation);
+			tags, reportSensitiveInformation, authorizationGroups);
 	}
 
 	public static Report createWithId(Integer id) {
