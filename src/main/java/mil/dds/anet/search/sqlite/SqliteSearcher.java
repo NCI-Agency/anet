@@ -10,9 +10,4 @@ public class SqliteSearcher extends Searcher {
 				new SqlitePositionSearcher(), new SqliteTaskSearcher(), new SqliteLocationSearcher(), new SqliteTagSearcher());
 	}
 
-	@Override
-	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
-		throw new UnsupportedOperationException();
-	}
-
 }
