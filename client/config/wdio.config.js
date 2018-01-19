@@ -48,7 +48,10 @@ exports.config = {
         chromeOptions: {
             //run in incognito mode
             //args: ['--incognito'],
-            args: ['--headless', '--disable-gpu', '--window-size=1280,800']
+            // Note: it is important to have a big window height as otherwise
+            // while scrolling some form fields might go under the header and
+            // therefore we would get failing tests related to these fields.
+            args: ['--headless', '--disable-gpu', '--window-size=1600,1200']
        },
     }],
     //

@@ -28,7 +28,7 @@ export default class Position extends Model {
 		location: {},
 	}
 
-	static autocompleteQuery = "id, code, type, name"
+	static autocompleteQuery = "id , name, code, type, status, organization { id, shortName}, person { id, name }"
 
 	static autocompleteTemplate(position) {
 		return <span>
