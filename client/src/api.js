@@ -76,6 +76,23 @@ const API = {
 	queryExport(query, variables, variableDef, output) {
 		return API._queryCommon(query, variables, variableDef, output).then(response => response.blob())
 	},
+
+	loadFileAjaxSync(filePath, mimeType) {
+		let xmlhttp=new XMLHttpRequest()
+		xmlhttp.open("GET",filePath,false)
+		if (mimeType != null) {
+			if (xmlhttp.overrideMimeType) {
+			xmlhttp.overrideMimeType(mimeType)
+			}
+		}
+		xmlhttp.send()
+		if (xmlhttp.status===200) {
+			return xmlhttp.responseText
+		}
+		else {
+			throw new Error("unable to load " + filePath)
+		}
+	},
 }
 
 export default API

@@ -1,9 +1,14 @@
 import Model from 'components/Model'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 export default class Organization extends Model {
 	static resourceName = 'Organization'
 	static listName = 'organizationList'
+
+	static TYPE = {
+		ADVISOR_ORG: 'ADVISOR_ORG',
+		PRINCIPAL_ORG: 'PRINCIPAL_ORG'
+	}
 
 	static schema = {
 		shortName: '',
@@ -18,15 +23,21 @@ export default class Organization extends Model {
 	}
 
 	isAdvisorOrg() {
-		return this.type === 'ADVISOR_ORG'
+		return this.type === Organization.TYPE.ADVISOR_ORG
 	}
 
-	humanNameOfType() {
-		if (this.type === 'PRINCIPAL_ORG') {
-			return dict.lookup('PRINCIPAL_ORG_NAME')
-		} else {
-			return dict.lookup('ADVISOR_ORG_NAME')
+	static humanNameOfType(type) {
+
+		if (type === Organization.TYPE.PRINCIPAL_ORG) {
+			return Settings.fields.advisor.org.name
 		}
+		else {
+			return Settings.fields.advisor.org.name
+		} // TODO do not assume that if not of type TYPE.PRINCIPAL_ORG it is an advisor
+	}
+
+	humanNameOfType(type) {
+		return Organization.humanNameOfType(this.type)
 	}
 
 	toString() {
