@@ -18,8 +18,12 @@ class CreatePerson extends Page {
     get biography()             { return browser.element('.biography .text-editor p') }
     get submitButton()          { return browser.element('#formBottomSubmit') }
 
-    open() {
+    openAsSuperUser() {
         super.openAsSuperUser(Page_URL)
+    }
+
+    openAsAdmin() {
+      super.openAsAdminUser(Page_URL)
     }
 
     waitForAlertSuccessToLoad() {
