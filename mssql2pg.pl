@@ -14,5 +14,8 @@ s/(?<=CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, )([10])(?=\s*\))/$1 ? 'TRUE' : 'FALS
 if (/^INSERT INTO positions.* authorized/) { # very very specific
     s/([10])(?=\s*,\s*NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP\))/$1 ? 'TRUE' : 'FALSE'/e;
 }
+# This one is for populating report authorization groups
+s/(?<=rp.\"isPrimary\")\s+=\s+([10])/"= " . ($1 ? 'TRUE' : 'FALSE')/e;
 # standard date-time math would be so nice...
 s/DATEADD\s*\(day,\s*-(\d+),\s*CURRENT_TIMESTAMP\)/CURRENT_TIMESTAMP - INTERVAL '$1 DAYS'/g;
+s/cast\((\S+) as datetime2\((\d+)\)\)/"date_trunc(" . ($2 eq '3' ? "'milliseconds'" : "'second'") . ", $1)"/ie
