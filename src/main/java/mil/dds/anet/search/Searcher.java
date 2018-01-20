@@ -70,4 +70,9 @@ public abstract class Searcher implements ISearcher {
 	public ITagSearcher getTagSearcher() {
 		return tagSearcher;
 	}
+
+	@Override
+	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
+		throw new UnsupportedOperationException();
+	}
 }

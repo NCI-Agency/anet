@@ -10,7 +10,7 @@ function dtg_linux {
 
 function dtg_mac {
 	a=`date +%Y-%m-%d\ %H:%M:%S.`
-	b=`perl -MTime::HiRes -e 'printf("%.0f\n",Time::HiRes::time()*1000)' | cut -c11,12,13`
+	b=`perl -MTime::HiRes -e 'printf "%03d", Time::HiRes::time * 1000 % 1000'`
 	echo "${a}${b}${zonestring}"
 }
 

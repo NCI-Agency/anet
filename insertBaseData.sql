@@ -19,6 +19,9 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE adminSettings;
 --DROP TABLE pendingEmails;
 --DROP TABLE tags;
+--DROP TABLE authorizationGroupPositions;
+--DROP TABLE authorizationGroups;
+--DROP TABLE reportAuthorizationGroups;
 --DROP TABLE DATABASECHANGELOG;
 --DROP TABLE DATABASECHANGELOGLOCK;
 
@@ -32,6 +35,8 @@ TRUNCATE TABLE reportTags;
 TRUNCATE TABLE comments;
 TRUNCATE TABLE savedSearches;
 TRUNCATE TABLE reportsSensitiveInformation;
+TRUNCATE TABLE authorizationGroupPositions;
+TRUNCATE TABLE reportAuthorizationGroups;
 DELETE FROM positions;
 DELETE FROM tasks WHERE parentTaskId IS NOT NULL;
 DELETE FROM tasks WHERE parentTaskId IS NULL;
@@ -42,6 +47,7 @@ DELETE FROM locations;
 DELETE FROM organizations;
 DELETE FROM adminSettings;
 DELETE FROM tags;
+DELETE FROM authorizationGroups;
 
 --Advisors
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
@@ -84,7 +90,7 @@ INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biograp
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, createdAt, updatedAt)
 	VALUES ('SHARTON, Shardul', 1, 1, 'hunter+shardul@dds.mil', '+99-9999-9999', 'CIV', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO positions (name, type, status, authorized, currentPersonId, createdAt, updatedAt) VALUES ('ANET Administrator', 3, 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('ANET Administrator', 3, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 1 Manager', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 1.1 Advisor A', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 1.1 Advisor B', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -103,12 +109,12 @@ INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.1 Advisor for Kites', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.1 SuperUser', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Advisor C', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (name, type, status, authorized, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Advisor D', 0, 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Advisor D', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Old and Inactive', 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Advisor Sewing Facilities', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Advisor Local Kebabs', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Super User', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO positions (name, type, status, authorized, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Final Reviewer', 2, 0, 1, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 2.2 Final Reviewer', 2, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 4.1 Advisor E', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 4.1 Advisor for Coffee', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO positions (name, type, status, currentPersonId, createdAt, updatedAt) VALUES ('EF 4.1 Advisor on Software Engineering', 0, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -640,3 +646,54 @@ INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+steve@dds.mil'), (SELECT max(id) FROM reports), 1);
 INSERT INTO reportPeople (personId, reportId, isPrimary) VALUES (
 	(SELECT id FROM people where emailAddress='hunter+jack@dds.mil'), (SELECT max(id) FROM reports), 1);
+
+-- Authorization groups
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('EF 1.1 positions', 'All positions related to EF 1.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('EF 2.1 positions', 'All positions related to EF 2.1', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('EF 2.2 positions', 'All positions related to EF 2.2', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+	VALUES ('Inactive positions', 'Inactive positions', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- Authorization group positions
+INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+  SELECT a.id, p.id
+  FROM authorizationGroups a, positions p
+  WHERE a.name LIKE 'EF 1.1%'
+  AND p.name LIKE 'EF 1.1%';
+INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+  SELECT a.id, p.id
+  FROM authorizationGroups a, positions p
+  WHERE a.name LIKE 'EF 2.1%'
+  AND p.name LIKE 'EF 2.1%';
+INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+  SELECT a.id, p.id
+  FROM authorizationGroups a, positions p
+  WHERE a.name LIKE 'EF 2.2%'
+  AND p.name LIKE 'EF 2.2%';
+
+-- Report authorization groups
+INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId)
+  SELECT DISTINCT rp.reportId, agp.authorizationGroupId
+  FROM reportPeople rp
+  JOIN people p ON p.id = rp.personId AND rp.isPrimary = 1
+  JOIN peoplePositions pp on pp.personId = p.id,
+  authorizationGroupPositions agp
+  WHERE pp.positionId = agp.positionId
+  AND NOT EXISTS (
+    SELECT *
+    FROM reportAuthorizationGroups rap
+    WHERE rap.reportId = rp.reportId
+    AND rap.authorizationGroupId = agp.authorizationGroupId
+  );
+
+-- LEAVE THIS AS LAST STATEMENT
+-- Truncate all the dates on reports to dates that could have been generated by
+-- Java (millisecond precision) rather than by the database itself (microsecond precision)
+UPDATE reports
+  SET createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3)),
+    engagementDate=cast(engagementDate as datetime2(0))
+  ;

@@ -6,6 +6,7 @@ import org.skife.jdbi.v2.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -264,6 +265,34 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 				results.setTotalCount(0);
 			} else {
 				// This value gets set by the TagMapper on each row.
+				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
+			}
+			return results;
+		}
+	}
+
+	public static class AuthorizationGroupList extends AbstractAnetBeanList<AuthorizationGroup> {
+		public AuthorizationGroupList() { /*Serialization Constructor */ }
+
+		public AuthorizationGroupList(Integer pageNum, Integer pageSize, List<AuthorizationGroup> list) {
+			super(pageNum, pageSize, list);
+		}
+
+		public AuthorizationGroupList(List<AuthorizationGroup> list) {
+			super(list);
+		}
+
+		public List<AuthorizationGroup> getList() {
+			return list;
+		}
+
+		public static AuthorizationGroupList fromQuery(Query<AuthorizationGroup> query, int pageNum, int pageSize) {
+			final AuthorizationGroupList results = new AuthorizationGroupList(pageNum, pageSize, query.list());
+			results.setList(query.list());
+			if (results.getList().size() == 0) {
+				results.setTotalCount(0);
+			} else {
+				// This value gets set by the AuthorizationGroupMapper on each row.
 				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
 			}
 			return results;

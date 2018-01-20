@@ -996,4 +996,120 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="add_authorization_groups" author="maradragan">
+		<createTable tableName="authorizationGroups">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="nvarchar(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="nvarchar(512)" />
+			<column name="status" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_authorization_group_positions" author="maradragan">
+		<createTable tableName="authorizationGroupPositions">
+			<column name="authorizationGroupId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="positionId" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="!sqlite">
+		<addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
+		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
+			constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="authorizationGroups" />
+		<addForeignKeyConstraint baseColumnNames="positionId" baseTableName="authorizationGroupPositions"
+			constraintName="fk_authorizationGroupPositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="positions" />
+	</changeSet>
+
+	<changeSet id="add_report_authorization_groups" author="maradragan">
+		<createTable tableName="reportAuthorizationGroups">
+			<column name="reportId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="authorizationGroupId" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="!sqlite">
+		<addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
+		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
+			constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="reports" />
+		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="reportAuthorizationGroups"
+			constraintName="fk_reportAuthorizationGroups_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="authorizationGroups" />
+	</changeSet>
+
+	<changeSet id="add_authorizationGroups_fulltext_index" author="gjvoosten" dbms="mssql" runInTransaction="false">
+		<sql>
+			CREATE FULLTEXT INDEX ON authorizationGroups(name, description) KEY INDEX PK_AUTHORIZATIONGROUPS;
+		</sql>
+		<rollback>
+			DROP FULLTEXT INDEX ON authorizationGroups;
+		</rollback>
+	</changeSet>
+
+	<changeSet id="migrated_authorized_positions" author="gjvoosten" dbms="mssql">
+		<sql>
+			INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+				SELECT
+					CONCAT('Authorized positions for ', o.shortName),
+					CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']'),
+					0,
+					CURRENT_TIMESTAMP,
+					CURRENT_TIMESTAMP
+				FROM organizations o
+				WHERE EXISTS (
+					SELECT p.id
+					FROM positions p
+					WHERE p.organizationId = o.id
+					AND p.authorized = 1
+				)
+			;
+
+			INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+				SELECT DISTINCT ag.id, p.id
+				FROM authorizationGroups ag,
+				positions p
+				JOIN organizations o ON o.id = p.organizationId
+				WHERE ag.description = CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']')
+				AND p.authorized = 1
+			;
+
+			INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId)
+				SELECT DISTINCT r.id, ag.id
+				FROM reports r
+				JOIN organizations o ON o.id = r.advisorOrganizationId
+				JOIN reportsSensitiveInformation rsi ON rsi.reportId = r.id,
+				authorizationGroups ag
+				WHERE ag.description = CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']')
+			;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop_positions_authorized" author="gjvoosten" dbms="!sqlite">
+	    <!-- Some magic to make sure any auto-generated database constraints are dropped -->
+		<dropNotNullConstraint tableName="positions" columnName="authorized" columnDataType="boolean" />
+		<dropDefaultValue tableName="positions" columnName="authorized" columnDataType="boolean" />
+		<!-- Then drop the column itself -->
+		<dropColumn tableName="positions" columnName="authorized" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+	
 </databaseChangeLog>

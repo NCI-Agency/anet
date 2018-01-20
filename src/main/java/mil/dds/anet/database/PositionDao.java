@@ -33,7 +33,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 
 	private static String[] fields = {"id", "name", "code", "createdAt", 
 			"updatedAt", "organizationId", "currentPersonId", "type", 
-			"status", "authorized", "locationId" };
+			"status", "locationId" };
 	private static String tableName = "positions";
 	public static String POSITIONS_FIELDS  = DaoUtils.buildFieldAliases(tableName, fields);
 	
@@ -56,8 +56,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 		try { 
 			GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
 					"/* positionInsert */ INSERT INTO positions (name, code, type, "
-					+ "status, authorized, \"organizationId\", \"locationId\", \"createdAt\", \"updatedAt\") "
-					+ "VALUES (:name, :code, :type, :status, :authorized, :organizationId, :locationId, :createdAt, :updatedAt)")
+					+ "status, \"organizationId\", \"locationId\", \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:name, :code, :type, :status, :organizationId, :locationId, :createdAt, :updatedAt)")
 				.bindFromProperties(p)
 				.bind("type", DaoUtils.getEnumId(p.getType()))
 				.bind("organizationId", DaoUtils.getId(p.getOrganization()))
@@ -109,7 +109,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 		try {
 			return dbHandle.createStatement("/* positionUpdate */ UPDATE positions SET name = :name, "
 					+ "code = :code, \"organizationId\" = :organizationId, type = :type, status = :status, "
-					+ "authorized = :authorized, \"locationId\" = :locationId, \"updatedAt\" = :updatedAt WHERE id = :id")
+					+ "\"locationId\" = :locationId, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bindFromProperties(p)
 				.bind("type", DaoUtils.getEnumId(p.getType()))
 				.bind("organizationId", DaoUtils.getId(p.getOrganization()))
@@ -178,7 +178,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 					
 				String sql;
 				if (DaoUtils.isMsSql(dbHandle)) { 
-					sql = "/* positionRemovePerson.insert1 */ INSERT INTO peoplePositions "
+					sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES(null, " 
 							+ "(SELECT TOP(1)\"personId\" FROM \"peoplePositions\" "

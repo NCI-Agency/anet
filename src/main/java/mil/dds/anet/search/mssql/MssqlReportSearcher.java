@@ -196,6 +196,13 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("authorPositionId", query.getAuthorPositionId());
 		}
 
+		if (query.getAuthorizationGroupId() != null) {
+			// Search for reports related to a given authorization group
+			whereClauses.add("reports.id IN ( SELECT ra.reportId FROM reportAuthorizationGroups ra "
+							+ "WHERE ra.authorizationGroupId = :authorizationGroupId) ");
+			args.put("authorizationGroupId", query.getAuthorizationGroupId());
+		}
+
 		if (query.getAttendeePositionId() != null) {
 			// Search for reports attended by people serving in that position at the engagement date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "

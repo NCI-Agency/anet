@@ -6,13 +6,22 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.search.AbstractSearchQuery;
+import mil.dds.anet.search.IAuthorizationGroupSearcher;
 import mil.dds.anet.search.Searcher;
 
 public class MssqlSearcher extends Searcher {
 
+	private final MssqlAuthorizationGroupSearcher authorizationGroupSearcher;
+	
 	public MssqlSearcher() { 
 		super(new MssqlReportSearcher(), new MssqlPersonSearcher(), new MssqlOrganizationSearcher(),
 				new MssqlPositionSearcher(), new MssqlTaskSearcher(), new MssqlLocationSearcher(), new MssqlTagSearcher());
+		this.authorizationGroupSearcher = new MssqlAuthorizationGroupSearcher();
+	}
+
+	@Override
+	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
+		return authorizationGroupSearcher;
 	}
 
 	protected static Query<Map<String, Object>> addPagination(AbstractSearchQuery query,
