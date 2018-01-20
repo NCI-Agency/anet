@@ -178,7 +178,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 					
 				String sql;
 				if (DaoUtils.isMsSql(dbHandle)) { 
-					sql = "/* positionRemovePerson.insert1 */ INSERT INTO peoplePositions "
+					sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES(null, " 
 							+ "(SELECT TOP(1)\"personId\" FROM \"peoplePositions\" "

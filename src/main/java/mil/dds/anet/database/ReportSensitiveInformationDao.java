@@ -136,14 +136,14 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		final Query<Map<String, Object>> query = dbHandle.createQuery(
 				"/* checkReportAuthorization */ SELECT r.id"
 					+ " FROM reports r"
-					+ " LEFT JOIN reportAuthorizationGroups rag ON rag.reportId = r.id"
-					+ " LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupId = rag.authorizationGroupId"
+					+ " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportId\" = r.id"
+					+ " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupId\" = rag.authorizationGroupId"
 					+ " LEFT JOIN positions p ON p.id = agp.positionId"
 					+ " WHERE r.id = :reportId"
 					+ " AND ("
-					+ "   (r.authorId = :userId)"
+					+ "   (r.\"authorId\" = :userId)"
 					+ "   OR"
-					+ "   (p.currentPersonId = :userId)"
+					+ "   (p.\"currentPersonId\" = :userId)"
 					+ " )")
 			.bind("reportId", reportId)
 			.bind("userId", userId);

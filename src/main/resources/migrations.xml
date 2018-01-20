@@ -1024,7 +1024,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="mssql">
+	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="!sqlite">
 		<addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
 		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
 			constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -1045,7 +1045,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="mssql">
+	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="!sqlite">
 		<addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
 			constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -1103,7 +1103,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="drop_positions_authorized" author="gjvoosten">
+	<changeSet id="drop_positions_authorized" author="gjvoosten" dbms="!sqlite">
 	    <!-- Some magic to make sure any auto-generated database constraints are dropped -->
 		<dropNotNullConstraint tableName="positions" columnName="authorized" columnDataType="boolean" />
 		<dropDefaultValue tableName="positions" columnName="authorized" columnDataType="boolean" />

@@ -8,6 +8,7 @@ my $identifiers = qr/
  (?<!\.(?:get|put)\()
  (?<!\.(?:contains)\()
  (?<!\.equals\()
+ (?<!\\") # don't do it twice!
  \b
  (  adminSettings
   | advisorOrganizationId
@@ -15,6 +16,9 @@ my $identifiers = qr/
   | approvalStepId
   | approvalSteps
   | atmosphereDetails
+  | authorizationGroups
+  | authorizationGroupId
+  | authorizationGroupPositions
   | authorId
   | cancelledReason
   | createdAt
@@ -51,6 +55,7 @@ my $identifiers = qr/
   | principalOrganizationId
   | projectedCompletion
   | releasedAt
+  | reportAuthorizationGroups
   | reportId
   | reportPeople
   | reportTasks
@@ -63,6 +68,7 @@ my $identifiers = qr/
  )\b
  (?!") # this should allow us to skip field lists without missing anything else
  (?!\.equals\() # a place where identically-named java identifiers are used
+ (?!\s+==\s+null) # another such place
 /x;
 
 # skip lines that are specifically annoying: method declarations, exception message

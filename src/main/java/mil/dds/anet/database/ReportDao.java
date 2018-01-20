@@ -154,7 +154,7 @@ public class ReportDao implements IAnetDao<Report> {
 		void insertReportAttendees(@Bind("reportId") Integer reportId,
 				@BindBean List<ReportPerson> reportPeople);
 
-		@SqlBatch("INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId) VALUES (:reportId, :id)")
+		@SqlBatch("INSERT INTO \"reportAuthorizationGroups\" (\"reportId\", \"authorizationGroupId\") VALUES (:reportId, :id)")
 		void insertReportAuthorizationGroups(@Bind("reportId") Integer reportId,
 				@BindBean List<AuthorizationGroup> authorizationGroups);
 
@@ -260,7 +260,7 @@ public class ReportDao implements IAnetDao<Report> {
 
 
 	public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
-		return dbHandle.createStatement("/* addAuthorizationGroupToReport */ INSERT INTO reportAuthorizationGroups (authorizationGroupId, reportId) "
+		return dbHandle.createStatement("/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupId\", \"reportId\") "
 				+ "VALUES (:authorizationGroupId, :reportId)")
 			.bind("reportId", r.getId())
 			.bind("authorizationGroupId", a.getId())
@@ -268,8 +268,8 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
-		return dbHandle.createStatement("/* removeAuthorizationGroupFromReport*/ DELETE FROM reportAuthorizationGroups "
-				+ "WHERE reportId = :reportId AND authorizationGroupId = :authorizationGroupId")
+		return dbHandle.createStatement("/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
+				+ "WHERE \"reportId\" = :reportId AND \"authorizationGroupId\" = :authorizationGroupId")
 				.bind("reportId", r.getId())
 				.bind("authorizationGroupId", a.getId())
 				.execute();
@@ -319,9 +319,9 @@ public class ReportDao implements IAnetDao<Report> {
 
 
 	public List<AuthorizationGroup> getAuthorizationGroupsForReport(int reportId) {
-		return dbHandle.createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM authorizationGroups, reportAuthorizationGroups "
-				+ "WHERE reportAuthorizationGroups.reportId = :reportId "
-				+ "AND reportAuthorizationGroups.authorizationGroupId = authorizationGroups.id")
+		return dbHandle.createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
+				+ "WHERE \"reportAuthorizationGroups\".\"reportId\" = :reportId "
+				+ "AND \"reportAuthorizationGroups\".\"authorizationGroupId\" = \"authorizationGroups\".id")
 				.bind("reportId", reportId)
 				.map(new AuthorizationGroupMapper())
 				.list();
@@ -375,11 +375,11 @@ public class ReportDao implements IAnetDao<Report> {
 				//Delete comments
 				dbHandle.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportId\" = ?", report.getId());
 				
-				//Delete approvalActions
+				//Delete \"approvalActions\"
 				dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportId\" = ?", report.getId());
 
 				//Delete relation to authorization groups
-				dbHandle.execute("/* deleteReport.authorizationGroups */ DELETE FROM reportAuthorizationGroups where reportId = ?", report.getId());
+				dbHandle.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportId\" = ?", report.getId());
 
 				//Delete report
 				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where id = ?", report.getId());
