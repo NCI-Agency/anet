@@ -16,7 +16,7 @@ import GuidedTour from 'components/GuidedTour'
 import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import History from 'components/History'
 import {Position, Organization} from 'models'
 import autobind from 'autobind-decorator'
@@ -61,18 +61,18 @@ export default class PositionShow extends Page {
 	}
 
 	render() {
-		let position = this.state.position
-		let assignedRole = position.type === Position.TYPE.PRINCIPAL ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
+		const position = this.state.position
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name // TODO: shouldn't this be Position.humanNameOfType instead of a person title?
 
-		let currentUser = this.context.currentUser
-		let canEdit =
+		const currentUser = this.context.currentUser
+		const canEdit =
 			//Super Users can edit any Principal
 			(currentUser.isSuperUser() && position.type === Position.TYPE.PRINCIPAL) ||
 			//Admins can edit anybody
 			(currentUser.isAdmin()) ||
 			//Super users can edit positions within their own organization
 			(position.organization && position.organization.id && currentUser.isSuperUserForOrg(position.organization))
-		let canDelete = (currentUser.isAdmin()) &&
+		const canDelete = (currentUser.isAdmin()) &&
 			position.status === 'INACTIVE' &&
 			(position.id && ((!position.person) || (!position.person.id)))
 

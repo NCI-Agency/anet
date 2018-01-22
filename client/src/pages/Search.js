@@ -2,6 +2,7 @@ import React from 'react'
 import Page from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge, Pagination} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
+import pluralize from 'pluralize'
 
 import Fieldset from 'components/Fieldset'
 import {ContentForNav} from 'components/Nav'
@@ -15,7 +16,7 @@ import AdvancedSearch from 'components/AdvancedSearch'
 import PositionTable from 'components/PositionTable'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import GQL from 'graphqlapi'
 import {Person, Organization, Task} from 'models'
 
@@ -202,25 +203,25 @@ export default class Search extends Page {
 	}
 
 	render() {
-		let results = this.state.results
-		let error = this.state.error
-		let success = this.state.success
+		const results = this.state.results
+		const error = this.state.error
+		const success = this.state.success
 
-		let numReports = results.reports ? results.reports.totalCount : 0
-		let numPeople = results.people ? results.people.totalCount : 0
-		let numPositions = results.positions ? results.positions.totalCount : 0
-		let numTasks = results.tasks ? results.tasks.totalCount : 0
-		let numLocations = results.locations ? results.locations.totalCount : 0
-		let numOrganizations = results.organizations ? results.organizations.totalCount : 0
+		const numReports = results.reports ? results.reports.totalCount : 0
+		const numPeople = results.people ? results.people.totalCount : 0
+		const numPositions = results.positions ? results.positions.totalCount : 0
+		const numTasks = results.tasks ? results.tasks.totalCount : 0
+		const numLocations = results.locations ? results.locations.totalCount : 0
+		const numOrganizations = results.organizations ? results.organizations.totalCount : 0
 
-		let numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
-		let noResults = numResults === 0
+		const numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
+		const noResults = numResults === 0
 
-		let query = this.props.location.query
+		const query = this.props.location.query
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
-		let queryType = this.state.queryType || query.type || 'everything'
+		const queryType = this.state.queryType || query.type || 'everything'
 
-		let taskShortLabel = dict.lookup('TASK').shortLabel
+		const taskShortLabel = Settings.fields.task.shortLabel
 
 		if (typeof queryString === 'object') {
 			queryString = queryString[Object.keys(query)[1]]
@@ -266,7 +267,7 @@ export default class Search extends Page {
 							</NavItem>
 
 							<NavItem eventKey="tasks" disabled={!numTasks}>
-								<img src={TASKS_ICON} role="presentation" /> {taskShortLabel}s
+								<img src={TASKS_ICON} role="presentation" /> {pluralize(taskShortLabel)}
 								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
 
@@ -317,7 +318,7 @@ export default class Search extends Page {
 				}
 
 				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
-					<Fieldset title={taskShortLabel + 's'}>
+					<Fieldset title={pluralize(taskShortLabel)}>
 						{this.renderTasks()}
 					</Fieldset>
 				}
@@ -340,8 +341,8 @@ export default class Search extends Page {
 
 	@autobind
 	paginationFor(type) {
-		let {pageSize, pageNum, totalCount} = this.state.results[type]
-		let numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
+		const {pageSize, pageNum, totalCount} = this.state.results[type]
+		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
 		return <header className="searchPagination" ><Pagination
 			className="pull-right"
@@ -357,11 +358,11 @@ export default class Search extends Page {
 
 	@autobind
 	goToPage(type, pageNum) {
-		let pageNums = this.state.pageNum
+		const pageNums = this.state.pageNum
 		pageNums[type] = pageNum
 
-		let query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.query, 'type')
-		let part = this.getSearchPart(type, query)
+		const query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.query, 'type')
+		const part = this.getSearchPart(type, query)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
@@ -509,7 +510,7 @@ export default class Search extends Page {
 		event.stopPropagation()
 		event.preventDefault()
 
-		let search = Object.without(this.state.saveSearch, 'show')
+		const search = Object.without(this.state.saveSearch, 'show')
 		if (this.state.advancedSearch) {
 			search.query = JSON.stringify(this.getAdvancedSearchQuery())
 			search.objectType = this.state.advancedSearch.objectType.toUpperCase()

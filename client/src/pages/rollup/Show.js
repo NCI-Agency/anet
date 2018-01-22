@@ -12,7 +12,9 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Form from 'components/Form'
 import History from 'components/History'
 import Messages from 'components/Messages'
-import dict from 'dictionary'
+import Settings from 'Settings'
+
+import {Organization} from 'models'
 
 import API from 'api'
 
@@ -60,7 +62,7 @@ export default class RollupShow extends Page {
 			email: {},
 			maxReportAge: null,
 			hoveredBar: {org: {}},
-			orgType: "ADVISOR_ORG",
+			orgType: Organization.TYPE.ADVISOR_ORG,
 		}
 	}
 
@@ -87,8 +89,8 @@ export default class RollupShow extends Page {
 	}
 
 	fetchData(props, context) {
-		let settings = context.app.state.settings
-		let maxReportAge = settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
+		const settings = context.app.state.settings
+		const maxReportAge = settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
 		if (!maxReportAge) {
 			//don't run the query unless we've loaded the rollup settings.
 			return
@@ -107,7 +109,7 @@ export default class RollupShow extends Page {
 
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
 		if (this.state.focusedOrg) {
-			if (this.state.orgType === 'PRINCIPAL_ORG') {
+			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
 				rollupQuery.principalOrgId = this.state.focusedOrg.id
 				rollupQuery.includePrincipalOrgChildren = true
 				graphQueryUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
@@ -130,7 +132,7 @@ export default class RollupShow extends Page {
 			}
 		`, {rollupQuery}, '($rollupQuery: ReportSearchQuery)')
 
-		let pinned_ORGs = dict.lookup('pinned_ORGs')
+		const pinned_ORGs = Settings.pinned_ORGs
 
 		Promise.all([reportQuery, graphQuery]).then(values => {
 			this.setState({
@@ -204,8 +206,8 @@ export default class RollupShow extends Page {
 					title={`Reports ${this.state.focusedOrg ? `for ${this.state.focusedOrg.shortName}` : ''}`}
 					action={!this.state.focusedOrg
 						? <ButtonToggleGroup value={this.state.orgType} onChange={this.changeOrgType}>
-							<Button value="ADVISOR_ORG">Advisor organizations</Button>
-							<Button value="PRINCIPAL_ORG">Principal organizations</Button>
+							<Button value={Organization.TYPE.ADVISOR_ORG}>Advisor organizations</Button>
+							<Button value={Organization.TYPE.PRINCIPAL_ORG}>Principal organizations</Button>
 						</ButtonToggleGroup>
 						: <Button onClick={() => this.goToOrg()}>All organizations</Button>
 					}
@@ -377,7 +379,7 @@ export default class RollupShow extends Page {
 		// principalOrganizationId or advisorOrganizationId drive drill down.
 		let rollupUrl = `/api/reports/rollup?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
 		if (this.state.focusedOrg) {
-			if (this.state.orgType === 'PRINCIPAL_ORG') {
+			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
 				rollupUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
 			} else {
 				rollupUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`
@@ -406,7 +408,7 @@ export default class RollupShow extends Page {
 
 		let emailUrl = `/api/reports/rollup/email?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
 		if (this.state.focusedOrg) {
-			if (this.state.orgType === 'PRINCIPAL_ORG') {
+			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
 				emailUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
 			} else {
 				emailUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`

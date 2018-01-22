@@ -7,14 +7,11 @@ const VALID_PERSON_PRINCIPAL = {
 
 describe('Create new Person form page', () => {
 
-    beforeEach('On the create a new user page...', () => {
-        CreatePerson.open()
-        CreatePerson.form.waitForExist()
-        CreatePerson.form.waitForVisible()
-    })
-
     describe('When creating a Principle user', () => {
         it('Should save a principle with only a last name', () => {
+            CreatePerson.openAsSuperUser()
+            CreatePerson.form.waitForExist()
+            CreatePerson.form.waitForVisible()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
@@ -22,6 +19,9 @@ describe('Create new Person form page', () => {
             expect(alertMessage).to.equal('Person saved successfully')
         })
         it('Should not save a principle without a valid email address', () => {
+            CreatePerson.openAsSuperUser()
+            CreatePerson.form.waitForExist()
+            CreatePerson.form.waitForVisible()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
             CreatePerson.emailAddress.setValue('notValidEmail@')
             CreatePerson.submitForm()
@@ -40,8 +40,12 @@ describe('Create new Person form page', () => {
         })
     })
 
-    context('When creating an Advisor user', () => {
+    describe('When creating an Advisor user', () => {
         it('Should display a warning message specific for duplicate accounts', () => {
+            // Only admin users can create an advisor user
+            CreatePerson.openAsAdmin()
+            CreatePerson.form.waitForExist()
+            CreatePerson.form.waitForVisible()
             CreatePerson.roleAdvisorButton.waitForExist()
             CreatePerson.roleAdvisorButton.click()
             const warningMessage = browser.element('.alert.alert-warning')

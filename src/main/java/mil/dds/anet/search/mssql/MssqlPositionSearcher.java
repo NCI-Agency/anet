@@ -90,6 +90,14 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			whereClauses.add("positions.status = :status");
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
+
+		if (query.getAuthorizationGroupId() != null) {
+			// Search for positions related to a given authorization group
+			whereClauses.add("positions.id IN ( SELECT ap.positionId FROM authorizationGroupPositions ap "
+							+ "WHERE ap.authorizationGroupId = :authorizationGroupId) ");
+			sqlArgs.put("authorizationGroupId", query.getAuthorizationGroupId());
+		}
+
 		
 		if (whereClauses.size() == 0) { return result; }
 		
