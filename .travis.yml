@@ -40,7 +40,7 @@ before_install:
 install: true
 
 script:
-  - ./gradlew dockerCreateDB dockerStartDB npmInstall jar dockerWaitForDB dbMigrate dockerLoadDB check sonarqube
+  - ./gradlew dockerCreateDB dockerStartDB npmInstall jar dockerWaitForDB dbMigrate dockerLoadDB check
 
 after_script:
   - docker logs anet-mssql-server
