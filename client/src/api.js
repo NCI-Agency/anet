@@ -80,9 +80,12 @@ const API = {
 	loadFileAjaxSync(filePath, mimeType) {
 		let xmlhttp=new XMLHttpRequest()
 		xmlhttp.open("GET",filePath,false)
+		if (process.env.NODE_ENV === 'development' && query.user && query.pass) {
+			xmlhttp.setRequestHeader('Authorization', 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64'))
+		}
 		if (mimeType != null) {
 			if (xmlhttp.overrideMimeType) {
-			xmlhttp.overrideMimeType(mimeType)
+				xmlhttp.overrideMimeType(mimeType)
 			}
 		}
 		xmlhttp.send()
