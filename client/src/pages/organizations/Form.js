@@ -13,8 +13,10 @@ import History from 'components/History'
 import Messages from 'components/Messages'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Position, Organization} from 'models'
+
+import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -38,33 +40,29 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 	render() {
 		let {organization, edit} = this.props
 		let {approvalSteps} = organization
-		let currentUser = this.context.currentUser
+		let currentUser = this.context.currentUser 
 		let isAdmin = currentUser && currentUser.isAdmin()
-		let isPrincipalOrg = (organization.type === "PRINCIPAL_ORG")
+		let isPrincipalOrg = (organization.type === Organization.TYPE.PRINCIPAL_ORG)
 		const {ValidatableForm, RequiredField} = this
-		let [labelLongName, placeholderLongName, labelIdentificationCode, placeholderIdentificationCode] = isPrincipalOrg
-			? [dict.lookup('PRINCIPAL_ORG_LABEL_LONGNAME'),
-			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_LONGNAME'),
-			   dict.lookup('PRINCIPAL_ORG_LABEL_IDENTIFICATIONCODE'),
-			   dict.lookup('PRINCIPAL_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
-			: [dict.lookup('ADVISOR_ORG_LABEL_LONGNAME'),
-			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_LONGNAME'),
-			   dict.lookup('ADVISOR_ORG_LABEL_IDENTIFICATIONCODE'),
-			   dict.lookup('ADVISOR_ORG_PLACEHOLDER_IDENTIFICATIONCODE')]
+
+		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
+
+		const IdentificationCodeFieldWithLabel = DictionaryField(orgSettings.identificationCode)(Form.Field)
+		const LongNameWithLabel = DictionaryField(orgSettings.longName)(Form.Field)
 
 		return <ValidatableForm formFor={organization}
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
 			submitText="Save organization"
-				   horizontal>
+			horizontal>
 
 			<Messages error={this.state.error} />
 
 			<Fieldset title={edit ? `Edit Organization ${organization.shortName}` : "Create a new Organization"}>
 				<Form.Field id="type">
 					<ButtonToggleGroup>
-						<Button id="advisorOrgButton" disabled={!isAdmin} value="ADVISOR_ORG">{dict.lookup('ADVISOR_ORG_NAME')}</Button>
-						<Button id="principalOrgButton" disabled={!isAdmin} value="PRINCIPAL_ORG">{dict.lookup('PRINCIPAL_ORG_NAME')}</Button>
+						<Button id="advisorOrgButton" disabled={!isAdmin} value={Organization.TYPE.ADVISOR_ORG}>{Settings.fields.advisor.org.name}</Button>
+						<Button id="principalOrgButton" disabled={!isAdmin} value={Organization.TYPE.PRINCIPAL_ORG}>{Settings.fields.principal.org.name}</Button>
 					</ButtonToggleGroup>
 				</Form.Field>
 
@@ -77,8 +75,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
-				<Form.Field id="longName" disabled={isPrincipalOrg && !isAdmin} label={labelLongName} placeholder={placeholderLongName} />
-				<Form.Field id="identificationCode" disabled={!isAdmin} label={labelIdentificationCode} placeholder={placeholderIdentificationCode} />
+				<LongNameWithLabel id="longName" disabled={isPrincipalOrg && !isAdmin} />
+				<IdentificationCodeFieldWithLabel id="identificationCode" disabled={!isAdmin}/>
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>

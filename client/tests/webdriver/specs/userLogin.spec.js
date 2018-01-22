@@ -15,10 +15,21 @@ describe('Anet default user login', () => {
 describe('Anet super user login', () => {
     it('Super user is logged in"', () => {
         Home.openAsSuperUser()
-        const superUserValue = 'DEMO USE ONLY || DMIN, Arthur (edit)'
+        const superUserValue = 'DEMO USE ONLY || BECCABON, Rebecca (edit)'
         Home.waitForSecurityBannerValue(superUserValue)
 
         const securityText = Home.securityBanner.getText()
         expect(securityText).to.equal(superUserValue)
+    })
+})
+
+describe('Anet admin user login', () => {
+    it('Admin user is logged in"', () => {
+        Home.openAsAdminUser()
+        const adminUserValue = 'DEMO USE ONLY || DMIN, Arthur (edit)'
+        Home.waitForSecurityBannerValue(adminUserValue)
+
+        const securityText = Home.securityBanner.getText()
+        expect(securityText).to.equal(adminUserValue)
     })
 })

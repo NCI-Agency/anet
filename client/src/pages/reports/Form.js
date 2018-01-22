@@ -20,7 +20,7 @@ import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import {Report, Person} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
@@ -154,7 +154,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const submitText = currentUser.hasActivePosition() ? 'Preview and submit' : 'Save draft'
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 
-		const supportEmail = dict.lookup('SUPPORT_EMAIL_ADDR')
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `(${supportEmail})` : ''
 		const warningMessageNoPosition = `You cannot submit a report. Your assigned advisor position has an inactive status. Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage}`
 		return <div className="report-form">
@@ -278,13 +278,13 @@ export default class ReportForm extends ValidatableFormWrapper {
 								</tr>
 							</thead>
 							<tbody>
-								{Person.map(report.attendees.filter(p => p.role === "ADVISOR"), (person, idx) =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
 								)}
 
 								<tr className="attendee-divider-row"><td colSpan={5}><hr /></td></tr>
 
-								{Person.map(report.attendees.filter(p => p.role === "PRINCIPAL"), (person, idx) =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
 								)}
 							</tbody>

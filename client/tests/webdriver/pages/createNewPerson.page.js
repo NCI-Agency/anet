@@ -16,10 +16,14 @@ class CreatePerson extends Page {
     get country()               { return browser.element('#country') }
     get endOfTourDate()         { return browser.element('#endOfTourDate') }
     get biography()             { return browser.element('.biography .text-editor p') }
-    get submitButton()          { return browser.element('form .form-top-submit > button[type="submit"]') }
+    get submitButton()          { return browser.element('#formBottomSubmit') }
 
-    open() {
+    openAsSuperUser() {
         super.openAsSuperUser(Page_URL)
+    }
+
+    openAsAdmin() {
+      super.openAsAdminUser(Page_URL)
     }
 
     waitForAlertSuccessToLoad() {

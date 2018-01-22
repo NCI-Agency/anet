@@ -1,0 +1,321 @@
+"$schema": http://json-schema.org/draft-06/schema#
+"$id": https://raw.githubusercontent.com/NCI-Agency/anet/master/src/main/resources/anet-schema.json
+
+#########################################################
+### definitions
+#########################################################
+definitions:
+
+# base definition for all Fields. Every field is assumed to have a label
+  labeledField:
+    type: object
+    additionalProperties: true
+    properties:
+      label:
+        type: string
+        title: The label for this field
+        description: Used in the UI where a label for the field is shown.
+    required:
+    - label
+
+# definition for fields that allow free-form entry
+  inputField:
+    allOf:
+    - "$ref": "#/definitions/labeledField"
+    - properties:
+        placeholder:
+          type: string
+          title: The placeholder for this field
+          description: Used in the UI where a placeholder for the field is shown (example input).
+
+# definition for fields that present a choice to be selected from
+  choiceField:
+    allOf:
+    - "$ref": "#/definitions/labeledField"
+    - properties:
+        enum:
+          type: object
+          title: The placeholder for this field
+          description: Used in the UI where a placeholder for the field is shown (example input).
+          additionalProperties:
+            type: string
+          examples: 
+            - black: Black
+              white: White
+      required:
+      - enum
+
+#########################################################
+### schema root
+#########################################################
+type: object
+additionalProperties: false
+properties:
+  SUPPORT_EMAIL_ADDR:
+    type: string
+    title: The support email address
+    description: The email address where support requests can be sent.
+    examples:
+    - support@example.com
+  fields:
+    type: object
+    additionalProperties: false
+    properties:
+      task:
+        type: object
+        additionalProperties: false
+        properties:
+          shortLabel:
+            type: string
+            title: The short label for this field
+            description: Used in the UI where a short label for tasks is shown.
+            examples:
+            - Task
+          longLabel:
+            type: string
+            title: The long label for this field
+            description: Used in the UI where a long label for tasks is shown.
+            examples:
+            - Tasks and Milestones
+          projectedCompletion: 
+            "$ref": "#/definitions/inputField"
+          plannedCompletion:
+            "$ref": "#/definitions/inputField"
+          customField:
+            "$ref": "#/definitions/inputField"
+          customFieldEnum:
+            "$ref": "#/definitions/choiceField"
+        required:
+        - shortLabel
+        - longLabel
+      person:
+        type: object
+        additionalProperties: false
+        properties:
+          ranks:
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
+              title: The list of possible ranks
+              description: Used in the UI where a rank can be selected for a person.
+              examples:
+              - CIV
+              - CTR
+              - OF-1
+              - OF-2
+              - OF-3
+        required:
+        - ranks
+      advisor:
+        type: object
+        additionalProperties: false
+        properties:
+          person:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where a person inside an advisor organization is shown.
+                examples:
+                - NATO Member
+              countries:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: The list of possible countries
+                  description: Used in the UI where a country can be selected for
+                    a person inside an advisor organization.
+                  examples:
+                  - Australia
+                  - Finland
+                  - Georgia
+                  - Greece
+                  - Sweden
+                  - Turkey
+            required:
+            - name
+            - countries
+          position:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where a position inside an advisor organization is shown.
+                examples:
+                - NATO Billet
+            required:
+            - name
+          org:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where an advisor organization is shown.
+                examples:
+                - Advisor Organization
+              allOrgName:
+                type: string
+                title: The name used to represent 'all organizations'
+                description: Used in the UI to refer to all organizations collectively.
+                examples:
+                - All EFs / AOs
+              longName:
+                "$ref": "#/definitions/inputField"
+              identificationCode:
+                "$ref": "#/definitions/inputField"
+            required:
+            - name
+            - allOrgName
+            - longName
+        required:
+        - person
+        - position
+        - org
+      principal:
+        type: object
+        additionalProperties: false
+        properties:
+          person:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where a person inside a principal organization is shown.
+                examples:
+                - Afghan Partner
+              countries:
+                type: array
+                uniqueItems: true
+                minItems: 1
+                items:
+                  type: string
+                  title: The list of possible countries
+                  description: Used in the UI where a country can be selected for a person inside a principal organization.
+                  examples:
+                  - Netherlands
+            required:
+            - name
+            - countries
+          position:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where a position inside a principal organization is shown.
+                examples:
+                - Afghan Tashkil
+            required:
+            - name
+          org:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: Used in the UI where a principal organization is shown.
+                examples:
+                - Afghan Government Organization
+              longName:
+                "$ref": "#/definitions/inputField"
+              identificationCode:
+                "$ref": "#/definitions/inputField"
+            required:
+            - name
+            - longName
+        required:
+        - person
+        - position
+        - org
+      superUser:
+        type: object
+        additionalProperties: false
+        properties:
+          position:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: The name of the super user role.
+                examples:
+                - ANET Super User
+            required:
+            - name
+        required:
+        - position
+      administrator:
+        type: object
+        additionalProperties: false
+        properties:
+          position:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+                title: The name of this field
+                description: The name of the administrator role.
+                examples:
+                - ANET Administrator
+            required:
+            - name
+        required:
+        - position
+    required:
+    - task
+    - person
+    - advisor
+    - principal
+    - superUser
+    - administrator
+  pinned_ORGs:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      title: The list of pinned organizations
+      description: A list of organization that are pinned at the top of insights (e.g. rollups).
+      examples:
+      - Key Leader Engagement
+  non_reporting_ORGs:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      title: The list of non-reporting organizations
+      description: A list of organizations that are considered non-reporting and as such will not be shown in insights.
+      examples:
+      - ANET Administrators
+  domainNames:
+    type: array
+    uniqueItems: true
+    minItems: 1
+    items:
+      type: string
+      title: The list of possible (email) domain names
+      description: Valid email domain names for this ANET instance; may contain wildcards.
+      examples:
+      - "*.nato.int"
+      - dds.mil
+required:
+- SUPPORT_EMAIL_ADDR
+- fields
+- pinned_ORGs
+- non_reporting_ORGs
+- domainNames

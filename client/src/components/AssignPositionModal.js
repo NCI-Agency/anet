@@ -2,7 +2,7 @@ import React, {Component, PropTypes} from 'react'
 import autobind from 'autobind-decorator'
 import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
-import {Position} from 'models'
+import {Position, Person} from 'models'
 import API from 'api'
 
 export default class AssignPositionModal extends Component {
@@ -35,7 +35,7 @@ export default class AssignPositionModal extends Component {
 		let currentUser = this.context.currentUser
 
 		let positionSearchQuery = {}
-		if (person.role === 'ADVISOR') {
+		if (person.role === Person.ROLE.ADVISOR) {
 			positionSearchQuery.type = [Position.TYPE.ADVISOR]
 			if (currentUser.isAdmin()) { //only admins can put people in admin billets.
 				positionSearchQuery.type.push(Position.TYPE.ADMINISTRATOR)
@@ -47,7 +47,7 @@ export default class AssignPositionModal extends Component {
 				positionSearchQuery.organizationId = currentUser.position.organization.id
 				positionSearchQuery.includeChildrenOrgs = true
 			}
-		} else if (person.role === 'PRINCIPAL') {
+		} else if (person.role === Person.ROLE.PRINCIPAL) {
 			positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
 		}
 

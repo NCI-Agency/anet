@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 
 import Model from 'components/Model'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 export default class Task extends Model {
 	static contextTypes = {
@@ -10,7 +10,7 @@ export default class Task extends Model {
 
 	static resourceName = 'Task'
 	static displayName() {
-		return dict.lookup('TASK').shortLabel
+		return Settings.fields.task.shortLabel
 	}
 
 	static listName = 'taskList'

@@ -1,12 +1,13 @@
 import React, {Component, PropTypes} from 'react'
 import {Grid, Row, Col, Label} from 'react-bootstrap'
 import utils from 'utils'
+import pluralize from 'pluralize'
 
 import LinkTo from 'components/LinkTo'
 import ReportApprovals from 'components/ReportApprovals'
 import Tag from 'components/Tag'
 import {Report} from 'models'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 import moment from 'moment'
 
@@ -114,7 +115,7 @@ export default class ReportSummary extends Component {
 			</Row>
 			<Row>
 				<Col md={12}>
-					{report.tasks.length > 0 && <span><strong>{dict.lookup('TASK').shortLabel}s:</strong> {report.tasks.map((task,i) =>
+					{report.tasks.length > 0 && <span><strong>{pluralize(Settings.fields.task.shortLabel)}:</strong> {report.tasks.map((task,i) =>
     {return task.shortName + (i < report.tasks.length - 1 ? ", " : "")})}</span> }
 				</Col>
 			</Row>

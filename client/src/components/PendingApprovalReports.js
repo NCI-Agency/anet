@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import autobind from 'autobind-decorator'
 import {Button} from 'react-bootstrap'
 
@@ -98,14 +98,14 @@ export default class PendingApprovalReports extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
-    let pinned_ORGs = dict.lookup('pinned_ORGs')
+    const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart
-    let chartQuery = API.query(/* GraphQL */`
+    const chartQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$chartQueryParams) {
           totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
