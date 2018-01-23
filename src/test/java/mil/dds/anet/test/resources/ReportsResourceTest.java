@@ -54,6 +54,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
@@ -77,7 +78,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final Person author = getJackJackson();
 
 		//Create a principal for the report
-		ReportPerson principal = PersonTest.personToReportPerson(getSteveSteveson());
+		final Person principalPerson = getSteveSteveson();
+		final ReportPerson principal = PersonTest.personToReportPerson(principalPerson);
 		principal.setPrimary(true);
 		Position principalPosition = principal.loadPosition();
 		assertThat(principalPosition).isNotNull();
@@ -171,13 +173,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		
 		//Create some tasks for this organization
 		Task top = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("test-1", "Test Top Task", "TOP", null, advisorOrg, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("test-1", "Test Top Task", "TOP", null, advisorOrg, TaskStatus.ACTIVE)), Task.class);
 		Task action = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("test-1-1", "Test Task Action", "Action", top, null, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("test-1-1", "Test Task Action", "Action", top, null, TaskStatus.ACTIVE)), Task.class);
 
 		//Create a Location that this Report was written at
 		Location loc = httpQuery("/api/locations/new", admin)
-				.post(Entity.json(Location.create("The Boat Dock", 1.23,4.56)), Location.class);
+				.post(Entity.json(TestData.createLocation("The Boat Dock", 1.23,4.56)), Location.class);
 
 		//Write a Report
 		Report r = new Report();
@@ -249,7 +251,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Reject the report
 		resp = httpQuery(String.format("/api/reports/%d/reject", created.getId()), approver1)
-				.post(Entity.json(Comment.withText("a test rejection")));
+				.post(Entity.json(TestData.createComment("a test rejection")));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Check on report status to verify it was rejected
@@ -320,7 +322,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		
 		//Pull recent People, Tasks, and Locations and verify that the records from the last report are there. 
 		List<Person> recentPeople = httpQuery("/api/people/recents", author).get(PersonList.class).getList();
-		assertThat(recentPeople).contains(principal);
+		assertThat(recentPeople).contains(principalPerson);
 		
 		List<Task> recentTasks = httpQuery("/api/tasks/recents", author).get(TaskList.class).getList();
 		assertThat(recentTasks).contains(action);

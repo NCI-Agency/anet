@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.PositionSearchQuery;

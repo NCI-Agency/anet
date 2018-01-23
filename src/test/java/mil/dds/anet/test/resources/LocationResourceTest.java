@@ -14,6 +14,7 @@ import org.junit.Test;
 import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
+import mil.dds.anet.test.TestData;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
@@ -26,7 +27,7 @@ public class LocationResourceTest extends AbstractResourceTest {
 	
 	@Test
 	public void locationTest() throws UnsupportedEncodingException {
-		Location l = Location.create("The Boat Dock", 12.34,-56.78);
+		Location l = TestData.createLocation("The Boat Dock", 12.34,-56.78);
 		
 		Location created = httpQuery("/api/locations/new", admin)
 				.post(Entity.json(l), Location.class);
