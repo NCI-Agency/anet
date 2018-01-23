@@ -66,8 +66,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 		}
 		this.handleTagDelete = this.handleTagDelete.bind(this)
 		this.handleTagAddition = this.handleTagAddition.bind(this)
-		this.defaultTimeout = 30 // seconds
-		this.autoSaveTimeout = this.defaultTimeout
+		this.defaultTimeout = moment.duration(30, 'seconds')
+		this.autoSaveTimeout = this.defaultTimeout.clone()
 	}
 
 	componentDidMount() {
@@ -101,7 +101,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 			this.setState(newState)
 		})
 
-		let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout * 1000)
+		// Schedule the auto-save timer
+		let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
 		this.setState({timeoutId})
 	}
 
@@ -561,9 +562,10 @@ export default class ReportForm extends ValidatableFormWrapper {
 	autoSave() {
 		// Only auto-save if the report has changed
 		if (this.state.reportChanged === false) {
-			this.autoSaveTimeout = this.defaultTimeout // reset to default
-		}
-		else {
+			// Just re-schedule the auto-save timer
+			let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
+			this.setState({timeoutId})
+		} else {
 			this.saveReport(false)
 				.then(response => {
 					if (response.id) {
@@ -573,17 +575,26 @@ export default class ReportForm extends ValidatableFormWrapper {
 						this.props.report.reportSensitiveInformation = response.reportSensitiveInformation
 					}
 
-					//Reset the reportChanged state, yes this could drop a few keystrokes that
+					// Reset the reportChanged state, yes this could drop a few keystrokes that
 					// the user made while we were saving, but that's not a huge deal.
+					this.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
 					this.setState({autoSavedAt: moment(), reportChanged: false, showAutoSaveBanner: true, autoSaveError: null})
+					// Hide the auto-save banner after a while
+					window.setTimeout(this.hideAutoSaveBanner, 5000)
+					// And re-schedule the auto-save timer
+					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
+					this.setState({timeoutId})
 				}).catch(response => {
-					this.autoSaveTimeout *= 2 // exponential back-off
-					this.setState({showAutoSaveBanner: true, autoSaveError: "There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout + " seconds"})
+					// Show an error message
+					this.autoSaveTimeout.add(this.autoSaveTimeout) // exponential back-off
+					this.setState({showAutoSaveBanner: true, autoSaveError: "There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout.humanize()})
+					// Hide the auto-save banner after a while
+					window.setTimeout(this.hideAutoSaveBanner, 5000)
+					// And re-schedule the auto-save timer
+					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
+					this.setState({timeoutId})
 				})
 		}
-		window.setTimeout(this.hideAutoSaveBanner, 5000)
-		let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout * 1000)
-		this.setState({timeoutId})
 	}
 
 	@autobind
