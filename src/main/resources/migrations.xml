@@ -56,13 +56,13 @@
 			<column name="id" type="int" autoIncrement="true" >
 				<constraints primaryKey="true" nullable="false" />
 			</column>
-			
+
 			<!-- the 1-2 character version (ie EF-5, or B) -->
-			<column name="shortName" type="varchar(100)" /> 
-			
+			<column name="shortName" type="varchar(100)" />
+
 			<!-- The Longer text ie (Rule of Law) or (Get the MoI to handle hiring of people) -->
-			<column name="longName" type="varchar(255)" /> 
-			
+			<column name="longName" type="varchar(255)" />
+
 			<!-- What type of POAM this is EF, Sub-EF, Milestone, Action, Sub-Action -->
 			<column name="category" type="varchar(255)" />
 
@@ -201,28 +201,28 @@
 			ALTER TABLE groups ALTER COLUMN createdAt datetime2;
 			ALTER TABLE organizations ALTER COLUMN createdAt datetime2;
 			ALTER TABLE organizations ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE poams ALTER COLUMN createdAt datetime2;
 			ALTER TABLE poams ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE positions ALTER COLUMN createdAt datetime2;
 			ALTER TABLE positions ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE peoplePositions ALTER COLUMN createdAt datetime2;
-			
+
 			ALTER TABLE positionRelationships ALTER COLUMN createdAt datetime2;
 			ALTER TABLE positionRelationships ALTER COLUMN updatedAt datetime2;
 
 			ALTER TABLE reports ALTER COLUMN createdAt datetime2;
 			ALTER TABLE reports ALTER COLUMN updatedAt datetime2;
 			ALTER TABLE reports ALTER COLUMN engagementDate datetime2;
-			
+
 			ALTER TABLE comments ALTER COLUMN createdAt datetime2;
 			ALTER TABLE comments ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE locations ALTER COLUMN createdAt datetime2;
 			ALTER TABLE locations ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE approvalActions ALTER COLUMN createdAt datetime2;
 		</sql>
 	</changeSet>
@@ -238,25 +238,25 @@
 			<!-- really frustrating that I didn't do the not-null constraint above in changeset 5
 			  but I didn't so it's here.  If we ever nuke the database, would be nice to clean this up -->
 			ALTER TABLE groups ALTER COLUMN createdAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE organizations ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE organizations ALTER COLUMN updatedAt datetime2 NOT NULL;
 
 			ALTER TABLE people ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE people ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE reports ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE reports ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE poams ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE poams ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE positions ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE positions ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE comments ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE comments ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE locations ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE locations ALTER COLUMN updatedAt datetime2 NOT NULL;
 
@@ -270,10 +270,10 @@
 		<!-- Groups -->
 		<addUniqueConstraint tableName="groupMemberships" columnNames="groupId, personId" constraintName="uniqueGroupMembership" />
 		<addNotNullConstraint tableName="groups" columnName="name" columnDataType="varchar(512)" />
-		<addForeignKeyConstraint baseColumnNames="groupId" baseTableName="groupMemberships" 
+		<addForeignKeyConstraint baseColumnNames="groupId" baseTableName="groupMemberships"
 			constraintName="fk_groupMember_group" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="groups" />
-		<addForeignKeyConstraint baseColumnNames="personId" baseTableName="groupMemberships" 
+		<addForeignKeyConstraint baseColumnNames="personId" baseTableName="groupMemberships"
 			constraintName="fk_groupMember_person" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="people" />
 
@@ -283,7 +283,7 @@
 			referencedColumnNames="id" referencedTableName="groups" />
 		<addForeignKeyConstraint baseColumnNames="advisorOrganizationId" baseTableName="approvalSteps"
 			constraintName="fk_approvalSteps_orgId" onDelete="NO ACTION" onUpdate="NO ACTION"
-			referencedColumnNames="id" referencedTableName="organizations" /> 
+			referencedColumnNames="id" referencedTableName="organizations" />
 
 		<!-- Approval Actions -->
 		<addForeignKeyConstraint baseColumnNames="approvalStepId" baseTableName="approvalActions"
@@ -323,7 +323,7 @@
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportPoams"
 			constraintName="fk_reportPoams_report" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="reports" />
-	
+
 		<!-- Poams -->
 		<addForeignKeyConstraint baseColumnNames="parentPoamId" baseTableName="poams"
 			constraintName="fk_poams_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -428,7 +428,7 @@
 		<addForeignKeyConstraint baseColumnNames="organizationId" baseTableName="poams"
 			constraintName="fk_poams_org" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="organizations" />
-		
+
 		<addForeignKeyConstraint baseColumnNames="advisorOrganizationId" baseTableName="reports"
 			constraintName="fk_reports_advisorOrg" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="organizations" />
@@ -461,10 +461,10 @@
 	</changeSet>
 
 	<changeSet id="17" author="hpitelka" dbms="mssql" >
-		<renameColumn 
-			columnDataType="varchar(255)" 
-			oldColumnName="name" 
-			newColumnName="shortName" 
+		<renameColumn
+			columnDataType="varchar(255)"
+			oldColumnName="name"
+			newColumnName="shortName"
 			tableName="organizations" />
 	</changeSet>
 
@@ -561,9 +561,9 @@
 		</addColumn>
 	</changeSet>
 
-	<!-- Found out that varchar and text don't support Unicode, so changing to nvarchar and ntext 
+	<!-- Found out that varchar and text don't support Unicode, so changing to nvarchar and ntext
 		Then found out that MSSQL is dropping support for text/ntext in favor of nvarchar(max)
-		And you can't modify columns that are in a fulltext index... so have to re-build those. 
+		And you can't modify columns that are in a fulltext index... so have to re-build those.
 	-->
 	<changeSet id="29" author="hpitelka" runInTransaction="false" >
 		<sql dbms="mssql">
@@ -577,7 +577,7 @@
 			ALTER TABLE organizations ALTER COLUMN longName nvarchar(255);
 			ALTER TABLE organizations ALTER COLUMN shortName nvarchar(255);
 			CREATE FULLTEXT INDEX ON organizations(longName, shortName) KEY INDEX PK_ORGANIZATIONS;
-			
+
 			DROP FULLTEXT INDEX ON poams;
 			ALTER TABLE poams ALTER COLUMN shortName nvarchar(255);
 			ALTER TABLE poams ALTER COLUMN longName nvarchar(max);
@@ -598,12 +598,12 @@
 			CREATE FULLTEXT INDEX ON reports(text, nextSteps, intent, atmosphereDetails, keyOutcomes) KEY INDEX PK_REPORTS;
 
 			ALTER TABLE comments ALTER COLUMN text nvarchar(max);
-			
+
 			DROP FULLTEXT INDEX ON locations;
 			ALTER TABLE locations ALTER COLUMN name nvarchar(512);
 			CREATE FULLTEXT INDEX ON locations(name) KEY INDEX PK_LOCATIONS;
-		
-			ALTER TABLE approvalSteps ALTER COLUMN name nvarchar(255); 
+
+			ALTER TABLE approvalSteps ALTER COLUMN name nvarchar(255);
 
 			ALTER TABLE adminSettings ALTER COLUMN value nvarchar(max);
 
@@ -869,10 +869,10 @@
 			<column name="plannedCompletion" type="datetime" />
 		</addColumn>
 		<addColumn tableName="tasks">
-			<column name="customField" type="nvarchar(max)" />
+			<column name="customField" type="text" />
 		</addColumn>
 		<addColumn tableName="tasks" >
-			<column name="customFieldEnum" type="nvarchar(255)" />
+			<column name="customFieldEnum" type="text" />
 		</addColumn>
 	</changeSet>
 
@@ -991,7 +991,7 @@
 		<dropColumn tableName="positions" columnName="authorized" />
 		<!-- Rolling back is not useful -->
 	</changeSet>
-	
+
 	<changeSet id="add_tasks_customField_to_fulltext_index" author="evdhoudt" dbms="mssql">
 		<sql>
 			ALTER FULLTEXT INDEX ON tasks ADD ( customField );
@@ -1001,5 +1001,9 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="update-extra-fields-to-Tasks" author="evdhoudt">
+		<modifyDataType columnName="customField" newDataType="nvarchar(max)" tableName="tasks"/>
+		<modifyDataType columnName="customFieldEnum" newDataType="nvarchar(max)" tableName="tasks"/>
+	</changeSet>
 
 </databaseChangeLog>
