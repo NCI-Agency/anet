@@ -19,27 +19,29 @@ import {Person, Task, Position, Organization} from 'models'
 import REMOVE_ICON from 'resources/delete.png'
 
 const taskFilters = props => {
-	const customEnum = Settings.fields.task.customFieldEnum.label
 	const taskFiltersObj = {
 		Organization: <OrganizationFilter
-			queryKey="responsibleOrgId"
-			queryIncludeChildOrgsKey="includeChildrenOrgs"
-		/>,
+						queryKey="responsibleOrgId"
+						queryIncludeChildOrgsKey="includeChildrenOrgs"/>,
 		Status: <SelectSearchFilter
-			queryKey="status"
-			values={["ACTIVE", "INACTIVE"]}
-			labels={["Active", "Inactive"]}
-		/>,
-		'Project status': <SelectSearchFilter
-			queryKey="projectStatus"
-			values={Object.keys(customEnum)}
-			labels={Object.values(customEnum)}
-		/>,
-		'Projected completion': <DateRangeSearch queryKey="projectedCompletion" />,
-		'Planned completion': <DateRangeSearch queryKey="plannedCompletion" />
+						queryKey="status"
+						values={["ACTIVE", "INACTIVE"]}
+						labels={["Active", "Inactive"]}/>,
+		'Projected completion': <DateRangeSearch queryKey="projectedCompletion"/>,
+		'Planned completion': <DateRangeSearch queryKey="plannedCompletion"/>
 	}
+	const customEnum = Settings.fields.task.customFieldEnum
+	if (customEnum) 
+		taskFiltersObj[customEnum.label] = <SelectSearchFilter
+			queryKey="projectStatus"
+			values={Object.keys(customEnum.enum)}
+			labels={Object.values(customEnum.enum)}/>
+	const customField = Settings.fields.task.customField
+	if (customField) 
+		taskFiltersObj[customField.label] = <SelectSearchFilter
+			queryKey="customField"
+			/>
 	return taskFiltersObj
-
 }
 
 export default class AdvancedSearch extends Component {
