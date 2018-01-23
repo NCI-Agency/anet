@@ -23,7 +23,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*, COUNT(*) OVER() AS totalCount FROM tasks");
 		Map<String,Object> args = new HashMap<String,Object>();
-		
+
 		sql.append(" WHERE ");
 		List<String> whereClauses = new LinkedList<String>();
 		String commonTableExpression = null;
@@ -31,15 +31,16 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		TaskList result =  new TaskList();
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
-		
+
 		String text = query.getText();
-		if (text != null && text.trim().length() > 0) { 
-			whereClauses.add("(CONTAINS((longName), :text) OR shortName LIKE :likeQuery)");
+		if (text != null && text.trim().length() > 0) {
+			whereClauses.add("(CONTAINS((longName, customField), :text) OR shortName LIKE :likeQuery)");
 			args.put("text", Utils.getSqlServerFullTextQuery(text));
 			args.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
+			args.put("text", Utils.getSqlServerFullTextQuery(text));
 		}
-		
-		if (query.getResponsibleOrgId() != null) { 
+
+		if (query.getResponsibleOrgId() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
 				commonTableExpression = "WITH parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
@@ -47,28 +48,58 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
 					+ ") ";
 				whereClauses.add(" organizationId IN (SELECT id from parent_orgs)");
-			} else { 
+			} else {
 				whereClauses.add("organizationId = :orgId");
 			}
 			args.put("orgId", query.getResponsibleOrgId());
 		}
-		
-		if (query.getCategory() != null) { 
+
+		if (query.getCategory() != null) {
 			whereClauses.add("category = :category");
 			args.put("category", query.getCategory());
 		}
-		
-		if (query.getStatus() != null) { 
+
+		if (query.getStatus() != null) {
 			whereClauses.add("status = :status");
 			args.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
-		
+
+		if (query.getProjectStatus() != null) {
+			whereClauses.add("customFieldEnum LIKE :projectStatus");
+			args.put("projectStatus", query.getProjectStatus());
+		}
+
+		if (query.getPlannedCompletionStart() != null) {
+			whereClauses.add("plannedCompletion >= :plannedCompletionStart");
+			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionStart()));
+		}
+
+		if (query.getPlannedCompletionEnd() != null) {
+			whereClauses.add("plannedCompletion <= :plannedCompletionStart");
+			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionEnd()));
+		}
+
+		if (query.getProjectedCompletionStart() != null) {
+			whereClauses.add("projectedCompletion >= :projectedCompletionStart");
+			args.put("projectedCompletionStart", Utils.handleRelativeDate(query.getProjectedCompletionStart()));
+		}
+
+		if (query.getProjectedCompletionEnd() != null) {
+			whereClauses.add("projectedCompletion <= :projectedCompletionEnd");
+			args.put("projectedCompletionEnd", Utils.handleRelativeDate(query.getProjectedCompletionEnd()));
+		}
+
+		if (query.getCustomField() != null) {
+			whereClauses.add("customField LIKE :customField");
+			args.put("customField", Utils.prepForLikeQuery(query.getCustomField()) + "%");
+		}
+
 		if (whereClauses.size() == 0) { return result; }
-		
+
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		sql.append(" ORDER BY shortName ASC, longName ASC, id ASC");
 
-		if (commonTableExpression != null) { 
+		if (commonTableExpression != null) {
 			sql.insert(0, commonTableExpression);
 		}
 
@@ -76,5 +107,5 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			.map(new TaskMapper());
 		return TaskList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
 	}
-	
+
 }

@@ -18,6 +18,32 @@ import {Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
 
+const taskFilters = props => {
+	const taskFiltersObj = {
+		Organization: <OrganizationFilter
+						queryKey="responsibleOrgId"
+						queryIncludeChildOrgsKey="includeChildrenOrgs"/>,
+		Status: <SelectSearchFilter
+						queryKey="status"
+						values={["ACTIVE", "INACTIVE"]}
+						labels={["Active", "Inactive"]}/>,
+		'Projected completion': <DateRangeSearch queryKey="projectedCompletion"/>,
+		'Planned completion': <DateRangeSearch queryKey="plannedCompletion"/>
+	}
+	const customEnum = Settings.fields.task.customFieldEnum
+	if (customEnum) 
+		taskFiltersObj[customEnum.label] = <SelectSearchFilter
+			queryKey="projectStatus"
+			values={Object.keys(customEnum.enum)}
+			labels={Object.values(customEnum.enum)}/>
+	const customField = Settings.fields.task.customField
+	if (customField) 
+		taskFiltersObj[customField.label] = <SelectSearchFilter
+			queryKey="customField"
+			/>
+	return taskFiltersObj
+}
+
 export default class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
@@ -180,17 +206,7 @@ export default class AdvancedSearch extends Component {
 
 		//Task filters
 		filters[pluralize(taskShortLabel)] = {
-			filters: {
-				Organization: <OrganizationFilter
-					queryKey="responsibleOrgId"
-					queryIncludeChildOrgsKey="includeChildrenOrgs"
-				/>,
-				Status: <SelectSearchFilter
-					queryKey="status"
-					values={["ACTIVE", "INACTIVE"]}
-					labels={["Active", "Inactive"]}
-				/>,
-			}
+			filters: taskFilters()
 		}
 		return filters
 	}
