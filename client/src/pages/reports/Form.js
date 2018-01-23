@@ -62,9 +62,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 			reportChanged: false, //Flag to determine if we need to auto-save.
 			timeoutId: null,
 			showAutoSaveBanner: false,
+			autoSaveError: null,
 		}
 		this.handleTagDelete = this.handleTagDelete.bind(this)
 		this.handleTagAddition = this.handleTagAddition.bind(this)
+		this.defaultTimeout = 30 // seconds
+		this.autoSaveTimeout = this.defaultTimeout
 	}
 
 	componentDidMount() {
@@ -98,7 +101,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			this.setState(newState)
 		})
 
-		let timeoutId = window.setTimeout(this.autoSave, 30000)
+		let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout * 1000)
 		this.setState({timeoutId})
 	}
 
@@ -136,7 +139,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const { currentUser } = this.context
 		const {report, onDelete} = this.props
 		const { edit } = this.props
-		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, showActivePositionWarning} = this.state
+		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, autoSaveError, showActivePositionWarning} = this.state
 
 		const hasErrors = Object.keys(errors).length > 0
 		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
@@ -160,9 +163,15 @@ export default class ReportForm extends ValidatableFormWrapper {
 		return <div className="report-form">
 
 			<Collapse in={showAutoSaveBanner}>
-				<div className="alert alert-success" style={alertStyle}>
-					Your report has been automatically saved
-				</div>
+				{(autoSaveError &&
+					<div className="alert alert-warning" style={alertStyle}>
+						{autoSaveError}
+					</div>
+				) || (
+					<div className="alert alert-success" style={alertStyle}>
+						Your report has been automatically saved
+					</div>
+				)}
 			</Collapse>
 
 			{showActivePositionWarning &&
@@ -550,28 +559,31 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	autoSave() {
-		let timeoutId = window.setTimeout(this.autoSave, 30000)
+		// Only auto-save if the report has changed
+		if (this.state.reportChanged === false) {
+			this.autoSaveTimeout = this.defaultTimeout // reset to default
+		}
+		else {
+			this.saveReport(false)
+				.then(response => {
+					if (response.id) {
+						this.props.report.id = response.id
+					}
+					if (response.reportSensitiveInformation) {
+						this.props.report.reportSensitiveInformation = response.reportSensitiveInformation
+					}
+
+					//Reset the reportChanged state, yes this could drop a few keystrokes that
+					// the user made while we were saving, but that's not a huge deal.
+					this.setState({autoSavedAt: moment(), reportChanged: false, showAutoSaveBanner: true, autoSaveError: null})
+				}).catch(response => {
+					this.autoSaveTimeout *= 2 // exponential back-off
+					this.setState({showAutoSaveBanner: true, autoSaveError: "There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout + " seconds"})
+				})
+		}
+		window.setTimeout(this.hideAutoSaveBanner, 5000)
+		let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout * 1000)
 		this.setState({timeoutId})
-
-		//If the report hasn't changed, don't save it.
-		if (this.state.reportChanged === false) { return }
-
-		this.saveReport(false)
-			.then(response => {
-				if (response.id) {
-					this.props.report.id = response.id
-				}
-				if (response.reportSensitiveInformation) {
-					this.props.report.reportSensitiveInformation = response.reportSensitiveInformation
-				}
-
-				//Reset the reportchanged state, yes this could drop a few keystrokes that
-				// the user made while we were saving, but that's not a huge deal.
-				this.setState({autoSavedAt: moment(), reportChanged: false, showAutoSaveBanner: true})
-				window.setTimeout(this.hideAutoSaveBanner, 5000)
-			}).catch(response =>
-				this.setState({error: "There was an error autosaving your report. We'll try again in a few seconds"})
-			)
 	}
 
 	@autobind
