@@ -90,7 +90,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		}
 
 		if (query.getCustomField() != null) {
-			whereClauses.add("[customField] LIKE :customField");
+			whereClauses.add("customField LIKE :customField");
 			args.put("customField", Utils.prepForLikeQuery(query.getCustomField()) + "%");
 		}
 
