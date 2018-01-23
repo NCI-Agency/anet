@@ -30,17 +30,18 @@ const taskFilters = props => {
 		'Projected completion': <DateRangeSearch queryKey="projectedCompletion"/>,
 		'Planned completion': <DateRangeSearch queryKey="plannedCompletion"/>
 	}
-	const customEnum = Settings.fields.task.customFieldEnum
-	if (customEnum) 
-		taskFiltersObj[customEnum.label] = <SelectSearchFilter
-			queryKey="projectStatus"
-			values={Object.keys(customEnum.enum)}
-			labels={Object.values(customEnum.enum)}/>
-	const customField = Settings.fields.task.customField
-	if (customField) 
-		taskFiltersObj[customField.label] = <SelectSearchFilter
-			queryKey="customField"
-			/>
+	// TODO: reenable custom fields
+	// const customEnum = Settings.fields.task.customFieldEnum
+	// if (customEnum)
+	// 	taskFiltersObj[customEnum.label] = <SelectSearchFilter
+	// 		queryKey="projectStatus"
+	// 		values={Object.keys(customEnum.enum)}
+	// 		labels={Object.values(customEnum.enum)}/>
+	// const customField = Settings.fields.task.customField
+	// if (customField)
+	// 	taskFiltersObj[customField.label] = <SelectSearchFilter
+	// 		queryKey="customField"
+	// 		/>
 	return taskFiltersObj
 }
 
