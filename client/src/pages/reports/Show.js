@@ -1,3 +1,4 @@
+/* eslint no-restricted-globals: ["off", "confirm"] */ //TODO remove this
 import React, {PropTypes} from 'react'
 import Page from 'components/Page'
 import {Alert, Table, Button, Col, Modal, Checkbox} from 'react-bootstrap'

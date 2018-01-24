@@ -10,12 +10,11 @@ process.env.NODE_ENV = 'development';
 
 module.exports = {
     entry: [
-        paths.appIndexJs, 
-        require.resolve('./polyfills')
+        require.resolve('./polyfills'),
+        paths.appIndexJs
     ],
     devtool: 'inline-source-map',
     output: {
-        filename: 'static/js/bundle.js',
         path: paths.appBuild,
         publicPath: publicPath
     },
@@ -28,7 +27,17 @@ module.exports = {
             {
                 test: /\.html$/,
                 use: 'html-loader'
-            }, {
+            }, 
+            {
+                enforce: "pre",
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: "eslint-loader",
+                options: {
+                    cache: true
+                }
+            },
+            {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: {

@@ -1,3 +1,4 @@
+/* eslint no-restricted-globals: ["off", "history"] */ //TODO remove this
 import {browserHistory} from 'react-router'
 import {createLocation} from 'history/lib/LocationUtils'
 import {createPath} from 'history/lib/PathUtils'

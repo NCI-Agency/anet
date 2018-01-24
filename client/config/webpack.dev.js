@@ -8,7 +8,11 @@ const publicPath = '/';
 const proxy = require(paths.appPackageJson).proxy;
 
 module.exports = merge(common, {
-    devtool: 'inline-source-map',
+    devtool: 'eval',
+    output: {
+        pathinfo: true,
+        filename: 'static/js/bundle.js'
+    },
     devServer: {
         contentBase: paths.appPublic,
         publicPath: publicPath,
