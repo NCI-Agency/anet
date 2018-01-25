@@ -64,6 +64,11 @@ export default class RollupShow extends Page {
 			hoveredBar: {org: {}},
 			orgType: Organization.TYPE.ADVISOR_ORG,
 		}
+		this.previewPlaceholderUrl = "/help"
+		if (process.env.NODE_ENV === 'development' && window.location.search) {
+			// Ugly way to get the credentials from the test to the preview window
+			this.previewPlaceholderUrl += window.location.search
+		}
 	}
 
 	componentWillReceiveProps(newProps, newContext) {
@@ -171,7 +176,7 @@ export default class RollupShow extends Page {
 					</span>
 				} action={
 					<div>
-						<Button href={this.emailPreviewUrl()} target="rollup">Print</Button>
+						<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.printPreview}>Print</Button>
 						<Button onClick={this.toggleEmailModal} bsStyle="primary">Email rollup</Button>
 					</div>
 				}>
@@ -356,7 +361,7 @@ export default class RollupShow extends Page {
 				</Modal.Body>
 
 				<Modal.Footer>
-					<a href={this.emailPreviewUrl()} target="rollup" className="btn">Preview</a>
+					<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.showPreview}>Preview</Button>
 					<Button bsStyle="primary" onClick={this.emailRollup}>Send email</Button>
 				</Modal.Footer>
 			</Form>
@@ -368,13 +373,8 @@ export default class RollupShow extends Page {
 		this.setState({showEmailModal: !this.state.showEmailModal})
 	}
 
-	//**NOTE**: This hits an endpoint that sits only on the backend dropwizard server
-	// In development mode when running the frontend out of Node, this link will not work
-	// but if you change the URL to the port of the backend server (ie 8080) rather than
-	// the port of the frontend server (ie 3000) then it should work.  NPM doesn't proxy this
-	// through for some reason. But it works in production when the frontend and backend
-	// are run out of the same server process.
-	emailPreviewUrl() {
+	@autobind
+	previewUrl() {
 		// orgType drives chart
 		// principalOrganizationId or advisorOrganizationId drive drill down.
 		let rollupUrl = `/api/reports/rollup?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
@@ -390,6 +390,28 @@ export default class RollupShow extends Page {
 		}
 
 		return rollupUrl
+	}
+
+	@autobind
+	printPreview() {
+		this.showPreview(true)
+	}
+
+	@autobind
+	showPreview(print) {
+		API.fetch(this.previewUrl(), {}, 'text/*').then(response => {
+			response.text().then(text => {
+				let rollupWindow = window.open("", "rollup")
+				let doc = rollupWindow.document
+				doc.clear()
+				doc.open()
+				doc.write(text)
+				doc.close()
+				if (print === true) {
+					rollupWindow.print()
+				}
+			})
+		})
 	}
 
 	@autobind

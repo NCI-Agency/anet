@@ -1,6 +1,14 @@
 import Home from '../pages/home.page'
 import { expect } from 'chai'
 
+describe('Anet home page', function() {
+    it('should have the right title', function () {
+        Home.open()
+        const title = browser.getTitle()
+        expect(title).to.equal('ANET')
+    })
+})
+
 describe('Anet default user login', () => {
     it('Default user is logged in"', () => {
         Home.open()
