@@ -31,7 +31,7 @@ export default class AuthorizationGroupShow extends Page {
 	getPositionQueryPart(authGroupId) {
 		let positionQuery = {
 			pageNum: this.positionsPageNum,
-			pageSize: 2,
+			pageSize: 10,
 			authorizationGroupId: authGroupId
 		}
 		let positionsPart = new GQL.Part(/* GraphQL */`
@@ -45,7 +45,7 @@ export default class AuthorizationGroupShow extends Page {
 	getReportQueryPart(authGroupId) {
 		let reportQuery = {
 			pageNum: this.reportsPageNum,
-			pageSize: 1,
+			pageSize: 10,
 			authorizationGroupId: authGroupId
 		}
 		let reportsPart = new GQL.Part(/* GraphQL */`
