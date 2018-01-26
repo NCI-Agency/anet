@@ -35,6 +35,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		this.state = {
 			error: null,
 		}
+		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
+		this.LongNameWithLabel = DictionaryField(Form.Field)
 	}
 
 	render() {
@@ -46,9 +48,6 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
-
-		const IdentificationCodeFieldWithLabel = DictionaryField(orgSettings.identificationCode)(Form.Field)
-		const LongNameWithLabel = DictionaryField(orgSettings.longName)(Form.Field)
 
 		return <ValidatableForm formFor={organization}
 			onChange={this.onChange}
@@ -75,8 +74,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
-				<LongNameWithLabel id="longName" disabled={isPrincipalOrg && !isAdmin} />
-				<IdentificationCodeFieldWithLabel id="identificationCode" disabled={!isAdmin}/>
+				<this.LongNameWithLabel dictProps={orgSettings.identificationCode} id="longName" disabled={isPrincipalOrg && !isAdmin} />
+				<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.longName} id="identificationCode" disabled={!isAdmin}/>
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>

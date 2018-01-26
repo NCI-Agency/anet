@@ -40,6 +40,11 @@ export default class TaskForm extends ValidatableFormWrapper {
 		app: PropTypes.object.isRequired,
 	}
 
+	constructor(props) {
+		super(props)
+		this.TaskCustomField = DictionaryField(Form.Field)
+	}
+
 	render() {
 		const {task, edit} = this.props
 		const {currentUser} = this.context.app.state
@@ -48,7 +53,6 @@ export default class TaskForm extends ValidatableFormWrapper {
 		const plannedCompletion = Settings.fields.task.plannedCompletion
 		const projectedCompletion = Settings.fields.task.projectedCompletion
 		const orgSearchQuery = {}
-		const TaskCustomField = DictionaryField(Settings.fields.task.customField)(Form.Field)
 
 		orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
@@ -90,8 +94,8 @@ export default class TaskForm extends ValidatableFormWrapper {
 							/>
 						</Form.Field>
 
-						<TaskCustomField id="customField"/>
-						
+						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
+
 						{plannedCompletion &&
 							<Form.Field id="plannedCompletion" label={plannedCompletion.label} addon={CALENDAR_ICON} >
 								<DatePicker showTodayButton placeholder={plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
