@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import _isEmpty from 'lodash/isEmpty'
 
-const DictionaryField = (propsArg) => (WrappedComponent) => {
+const DictionaryField = (WrappedComponent) => {
 	return class DictionaryField extends Component {
 		render() {
-			if (!_isEmpty(propsArg)) {
-				return <WrappedComponent {...Object.assign({},this.props,propsArg)} />
+			const { dictProps, ...otherProps } = this.props
+			// Only display field if the dictProps are defined
+			if (!_isEmpty(dictProps)) {
+				return <WrappedComponent {...Object.assign({}, otherProps, dictProps)} />
 			} else {
 				return null
 			}
