@@ -225,7 +225,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
+		classpath 'com.bmuschko:gradle-docker-plugin:3.2.3'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
 	}
@@ -236,9 +236,10 @@ docker {
 		baseImage = 'openjdk:8-jre'
 		maintainer = 'Vassil Iordanov "vassil.iordanov@gmail.com"'
 		ports = [80, 443]
-		tag = 'ncia/anet-app-server'
+		tag = 'ncia/anet-app-server:'+project.version
 		exec {
-			 entryPoint "/$project.name-$project.version/bin/anet","server","/hostdata/anet.yml"
+			defaultCommand "server","/home/anet/anet.yml"
+			entryPoint "/$project.name-$project.version/bin/anet"
 		}
 	}
 }
