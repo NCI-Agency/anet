@@ -14,7 +14,7 @@
 	"intent": "Check up with Steve",
 	"attendees": [{
 		"id": null,
-		"name": "Steve Steveson",
+		"name": "STEVESON, Steve",
 		"status": "ACTIVE",
 		"role" : "PRINCIPAL",
 		"emailAddress": "hunter+steve@dds.mil",
@@ -25,18 +25,18 @@
 		"country" : "Afghanistan",
 		"primary" : true
 	}],
-	"poams": [{
+	"tasks": [{
 		"id": null,
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
-		"parentPoam": null
+		"parentTask": null
 	}, {
 		"id": null,
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
-		"parentPoam": null
+		"parentTask": null
 	}],
 	"atmosphere" : "POSITIVE",
 	"atmosphereDetails" : "This was a great meeting!!!",
@@ -44,7 +44,7 @@
 	"nextSteps": "Go for a boat ride with Steve tomorrow",
 	"author": {
 		"id": null,
-		"name": "Jack Jackson",
+		"name": "JACKSON, Jack",
 		"status": "ACTIVE",
 		"role" : "ADVISOR",
 		"emailAddress": "hunter+foobar@dds.mil",
@@ -60,7 +60,7 @@
 		"id": null,
 		"author": {
 			"id": null,
-			"name": "Jack Jackson",
+			"name": "JACKSON, Jack",
 			"status": "ACTIVE",
 			"role" : "ADVISOR",
 			"emailAddress": "hunter+foobar@dds.mil",
@@ -85,5 +85,25 @@
 		"id": null,
 		"name": "name2",
 		"description": "desc2"
+	}],
+	"reportSensitiveInformation": {
+		"id": null,
+		"text": "For your eyes only",
+		"reportId": null,
+		"createdAt": null,
+		"updatedAt": null
+	},
+	"authorizationGroups": [{
+		"id": null,
+		"name": "sensitive info positions group",
+		"description": "desc",
+		"positions": [{
+			"id": null,
+			"name": "Head of donut operations",
+			"code": "DNT-001",
+			"organization": null,
+			"type": "PRINCIPAL",
+			"status": "ACTIVE"
+		}]
 	}]
 }

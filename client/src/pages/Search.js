@@ -2,6 +2,7 @@ import React from 'react'
 import Page from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge, Pagination} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
+import pluralize from 'pluralize'
 
 import Fieldset from 'components/Fieldset'
 import {ContentForNav} from 'components/Nav'
@@ -12,18 +13,21 @@ import ReportCollection from 'components/ReportCollection'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import AdvancedSearch from 'components/AdvancedSearch'
+import PositionTable from 'components/PositionTable'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import GQL from 'graphqlapi'
-import {Person, Organization, Position, Poam} from 'models'
-import Export from "export"
+import {Person, Organization, Task} from 'models'
 
+import FileSaver from 'file-saver'
+
+import DOWNLOAD_ICON from 'resources/download.png'
 import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
 import LOCATIONS_ICON from 'resources/locations.png'
-import POAMS_ICON from 'resources/poams.png'
+import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
@@ -46,17 +50,19 @@ const SEARCH_CONFIG = {
 	},
 	people : {
 		listName : 'people: personList',
+		sortBy: 'NAME',
+		sortOrder: 'ASC',
 		variableType: 'PersonSearchQuery',
 		fields: 'id, name, rank, emailAddress, role , position { id, name, organization { id, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		variableType: 'PositionSearchQuery',
-		fields: 'id , name, type, organization { id, shortName}, person { id, name }'
+		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name }'
 	},
-	poams : {
-		listName: 'poams: poamList',
-		variableType: 'PoamSearchQuery',
+	tasks : {
+		listName: 'tasks: taskList',
+		variableType: 'TaskSearchQuery',
 		fields: 'id, shortName, longName'
 	},
 	locations : {
@@ -67,7 +73,7 @@ const SEARCH_CONFIG = {
 	organizations : {
 		listName: 'organizations: organizationList',
 		variableType: 'OrganizationSearchQuery',
-		fields: 'id, shortName, longName, type'
+		fields: 'id, shortName, longName, identificationCode, type'
 	}
 }
 
@@ -85,7 +91,7 @@ export default class Search extends Page {
 				organizations: 0,
 				positions: 0,
 				locations: 0,
-				poams: 0,
+				tasks: 0,
 			},
 			saveSearch: {show: false},
 			results: {
@@ -94,7 +100,7 @@ export default class Search extends Page {
 				organizations: null,
 				positions: null,
 				locations: null,
-				poams: null,
+				tasks: null,
 			},
 			error: null,
 			success: null,
@@ -114,17 +120,23 @@ export default class Search extends Page {
 		}
 	}
 
-	getSearchPart(type, query) {
-//		query = Object.without(query, 'type')
-		query.pageSize = 10
-		query.pageNum = this.state.pageNum[type]
+	getSearchPart(type, query, pageSize) {
+		let subQuery = Object.assign({}, query)
+		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
+		subQuery.pageNum = this.state.pageNum[type]
 
 		let config = SEARCH_CONFIG[type]
+		if (config.sortBy) {
+			subQuery.sortBy = config.sortBy
+		}
+		if (config.sortOrder) {
+			subQuery.sortOrder = config.sortOrder
+		}
 		let part = new GQL.Part(/* GraphQL */`
 			${config.listName} (f:search, query:$${type}Query) {
 				pageNum, pageSize, totalCount, list { ${config.fields} }
 			}
-			`).addVariable(type + "Query", config.variableType, query)
+			`).addVariable(type + "Query", config.variableType, subQuery)
 		return part
 	}
 
@@ -149,33 +161,36 @@ export default class Search extends Page {
 		return query
 	}
 
-
-	fetchData(props) {
+	@autobind
+	_dataFetcher(queryDef, callback, pageSize) {
 		let {advancedSearch} = this.state
 
 		if (advancedSearch) {
 			let query = this.getAdvancedSearchQuery()
-			let part = this.getSearchPart(advancedSearch.objectType.toLowerCase(), query)
-			GQL.run([part]).then(data => {
-				this.setState({results: data})
-			})
+			let part = this.getSearchPart(advancedSearch.objectType.toLowerCase(), query, pageSize)
+			callback([part])
 
 			return
 		}
 
-		let {type, text, ...advQuery} = props.location.query
+		let {type, text, ...advQuery} = queryDef
 		//Any query with a field other than 'text' and 'type' is an advanced query.
 		let isAdvQuery = Object.keys(advQuery).length
 		advQuery.text = text
 
 		let parts = []
 		if (isAdvQuery) {
-			parts.push(this.getSearchPart(type, advQuery))
+			parts.push(this.getSearchPart(type, advQuery, pageSize))
 		} else {
 			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, advQuery))
+				parts.push(this.getSearchPart(key, advQuery, pageSize))
 			})
 		}
+		callback(parts)
+	}
+
+	@autobind
+	_fetchDataCallback(parts) {
 		GQL.run(parts).then(data => {
 			this.setState({results: data})
 		}).catch(response =>
@@ -183,26 +198,30 @@ export default class Search extends Page {
 		)
 	}
 
+	fetchData(props) {
+		this._dataFetcher(props.location.query, this._fetchDataCallback)
+	}
+
 	render() {
-		let results = this.state.results
-		let error = this.state.error
-		let success = this.state.success
+		const results = this.state.results
+		const error = this.state.error
+		const success = this.state.success
 
-		let numReports = results.reports ? results.reports.totalCount : 0
-		let numPeople = results.people ? results.people.totalCount : 0
-		let numPositions = results.positions ? results.positions.totalCount : 0
-		let numPoams = results.poams ? results.poams.totalCount : 0
-		let numLocations = results.locations ? results.locations.totalCount : 0
-		let numOrganizations = results.organizations ? results.organizations.totalCount : 0
+		const numReports = results.reports ? results.reports.totalCount : 0
+		const numPeople = results.people ? results.people.totalCount : 0
+		const numPositions = results.positions ? results.positions.totalCount : 0
+		const numTasks = results.tasks ? results.tasks.totalCount : 0
+		const numLocations = results.locations ? results.locations.totalCount : 0
+		const numOrganizations = results.organizations ? results.organizations.totalCount : 0
 
-		let numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numPoams
-		let noResults = numResults === 0
+		const numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
+		const noResults = numResults === 0
 
-		let query = this.props.location.query
+		const query = this.props.location.query
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
-		let queryType = this.state.queryType || query.type || 'everything'
+		const queryType = this.state.queryType || query.type || 'everything'
 
-		let poamShortTitle = dict.lookup('POAM_SHORT_NAME')
+		const taskShortLabel = Settings.fields.task.shortLabel
 
 		if (typeof queryString === 'object') {
 			queryString = queryString[Object.keys(query)[1]]
@@ -211,6 +230,11 @@ export default class Search extends Page {
 		return (
 			<div>
 				<div className="pull-right">
+					{!noResults &&
+						<Button onClick={this.exportSearchResults} id="exportSearchResultsButton" style={{marginRight: 12}} title="Export search results">
+							<img src={DOWNLOAD_ICON} height={16} alt="Export search results" />
+						</Button>
+					}
 					<Button onClick={this.showSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
 					{!this.state.advancedSearch && <Button onClick={this.showAdvancedSearch}>Advanced search</Button>}
 				</div>
@@ -242,9 +266,9 @@ export default class Search extends Page {
 								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
 							</NavItem>
 
-							<NavItem eventKey="poams" disabled={!numPoams}>
-								<img src={POAMS_ICON} role="presentation" /> {poamShortTitle}s
-								{numPoams > 0 && <Badge pullRight>{numPoams}</Badge>}
+							<NavItem eventKey="tasks" disabled={!numTasks}>
+								<img src={TASKS_ICON} role="presentation" /> {pluralize(taskShortLabel)}
+								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="locations" disabled={!numLocations}>
@@ -293,9 +317,9 @@ export default class Search extends Page {
 					</Fieldset>
 				}
 
-				{numPoams > 0 && (queryType === 'everything' || queryType === 'poams') &&
-					<Fieldset title={poamShortTitle + 's'}>
-						{this.renderPoams()}
+				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
+					<Fieldset title={pluralize(taskShortLabel)}>
+						{this.renderTasks()}
 					</Fieldset>
 				}
 
@@ -304,10 +328,9 @@ export default class Search extends Page {
 						{this.renderLocations()}
 					</Fieldset>
 				}
-
 				{numReports > 0 && (queryType === 'everything' || queryType === 'reports') &&
 					<Fieldset title="Reports">
-						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports') } downloadAll={ ((progressfn) => {return this.downloadAll('reports',progressfn) }) }/>
+						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} />
 					</Fieldset>
 				}
 
@@ -318,8 +341,8 @@ export default class Search extends Page {
 
 	@autobind
 	paginationFor(type) {
-		let {pageSize, pageNum, totalCount} = this.state.results[type]
-		let numPages = Math.ceil(totalCount / pageSize)
+		const {pageSize, pageNum, totalCount} = this.state.results[type]
+		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
 		return <header className="searchPagination" ><Pagination
 			className="pull-right"
@@ -335,11 +358,11 @@ export default class Search extends Page {
 
 	@autobind
 	goToPage(type, pageNum) {
-		let pageNums = this.state.pageNum
+		const pageNums = this.state.pageNum
 		pageNums[type] = pageNum
 
-		let query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.query, 'type')
-		let part = this.getSearchPart(type, query)
+		const query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.query, 'type')
+		const part = this.getSearchPart(type, query)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
@@ -347,12 +370,6 @@ export default class Search extends Page {
 		}).catch(response =>
 			this.setState({error: response})
 		)
-	}
-
-	@autobind
-	downloadAll(type,progressfn) {
-		let query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.query, 'type')
-		Export.csvExport.export(type,query,progressfn)
 	}
 
 	@autobind
@@ -395,11 +412,12 @@ export default class Search extends Page {
 	renderOrgs() {
 		return <div>
 			{this.paginationFor('organizations')}
-			<Table responsive hover striped>
+			<Table responsive hover striped id="organizations-search-results">
 				<thead>
 					<tr>
 						<th>Name</th>
 						<th>Description</th>
+						<th>Code</th>
 						<th>Type</th>
 					</tr>
 				</thead>
@@ -408,6 +426,7 @@ export default class Search extends Page {
 						<tr key={org.id}>
 							<td><LinkTo organization={org} /></td>
 							<td>{org.longName}</td>
+							<td>{org.identificationCode}</td>
 							<td>{org.humanNameOfType()}</td>
 						</tr>
 					)}
@@ -418,28 +437,8 @@ export default class Search extends Page {
 
 	renderPositions() {
 		return <div>
-			{this.paginationFor('positions')}
-			<Table responsive hover striped>
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Org</th>
-						<th>Current Occupant</th>
-					</tr>
-				</thead>
-				<tbody>
-					{Position.map(this.state.results.positions.list, pos =>
-						<tr key={pos.id}>
-							<td>
-								<img src={pos.iconUrl()} alt={pos.type} height={20} className="person-icon" />
-								<LinkTo position={pos} >{pos.code} {pos.name}</LinkTo>
-							</td>
-							<td>{pos.organization && <LinkTo organization={pos.organization} />}</td>
-							<td>{pos.person && <LinkTo person={pos.person} />}</td>
-						</tr>
-					)}
-				</tbody>
-			</Table>
+		{this.paginationFor('positions')}
+		<PositionTable positions={this.state.results.positions.list} />
 		</div>
 	}
 
@@ -463,9 +462,9 @@ export default class Search extends Page {
 		</div>
 	}
 
-	renderPoams() {
+	renderTasks() {
 		return <div>
-			{this.paginationFor('poams')}
+			{this.paginationFor('tasks')}
 			<Table responsive hover striped>
 				<thead>
 					<tr>
@@ -473,9 +472,9 @@ export default class Search extends Page {
 					</tr>
 				</thead>
 				<tbody>
-					{Poam.map(this.state.results.poams.list, poam =>
-						<tr key={poam.id}>
-							<td><LinkTo poam={poam} >{poam.shortName} {poam.longName}</LinkTo></td>
+					{Task.map(this.state.results.tasks.list, task =>
+						<tr key={task.id}>
+							<td><LinkTo task={task} >{task.shortName} {task.longName}</LinkTo></td>
 						</tr>
 					)}
 				</tbody>
@@ -511,7 +510,7 @@ export default class Search extends Page {
 		event.stopPropagation()
 		event.preventDefault()
 
-		let search = Object.without(this.state.saveSearch, 'show')
+		const search = Object.without(this.state.saveSearch, 'show')
 		if (this.state.advancedSearch) {
 			search.query = JSON.stringify(this.getAdvancedSearchQuery())
 			search.objectType = this.state.advancedSearch.objectType.toUpperCase()
@@ -539,6 +538,20 @@ export default class Search extends Page {
 	@autobind
 	showSaveModal() {
 		this.setState({saveSearch: {show: true, name: ''}})
+	}
+
+	@autobind
+	_exportSearchResultsCallback(parts) {
+		GQL.runExport(parts, "xlsx").then(blob => {
+			FileSaver.saveAs(blob, "anet_export.xlsx")
+		}).catch(response =>
+			this.setState({error: response})
+		)
+	}
+
+	@autobind
+	exportSearchResults() {
+		this._dataFetcher(this.props.location.query, this._exportSearchResultsCallback, 0)
 	}
 
 	@autobind

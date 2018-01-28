@@ -2,8 +2,8 @@ package mil.dds.anet.beans;
 
 import java.util.Objects;
 
-import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.AbstractAnetBean;
 
 public class Comment extends AbstractAnetBean {
 
@@ -39,7 +39,7 @@ public class Comment extends AbstractAnetBean {
 	
 	@Override
 	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != Comment.class) { 
+		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		Comment c = (Comment) o;
@@ -59,12 +59,6 @@ public class Comment extends AbstractAnetBean {
 	@Override
 	public String toString() { 
 		return String.format("[%d] - [Author:%d,Report:%d] - (%s)", id, author.getId(), reportId, text);
-	}
-
-	public static Comment withText(String text) {
-		Comment c = new Comment();
-		c.setText(text);
-		return c;
 	}
 
 	public static Comment createWithId(Integer id) {

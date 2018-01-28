@@ -1,5 +1,7 @@
 package mil.dds.anet;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.EnumSet;
 import java.util.Map;
@@ -14,8 +16,14 @@ import javax.servlet.FilterRegistration;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.everit.json.schema.Schema;
+import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.json.JSONObject;
+import org.json.JSONTokener;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +35,7 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
@@ -41,12 +50,13 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.ApprovalStepResource;
+import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.resources.LocationResource;
 import mil.dds.anet.resources.OrganizationResource;
 import mil.dds.anet.resources.PersonResource;
-import mil.dds.anet.resources.PoamResource;
+import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.resources.PositionResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
@@ -61,6 +71,8 @@ import waffle.servlet.NegotiateSecurityFilter;
 public class AnetApplication extends Application<AnetConfiguration> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+	private static final ObjectMapper jsonMapper = new ObjectMapper();
 
 	public static void main(String[] args) throws Exception {
 		new AnetApplication().run(args);
@@ -69,6 +81,12 @@ public class AnetApplication extends Application<AnetConfiguration> {
 	@Override
 	public String getName() {
 		return "anet";
+	}
+
+	@Override
+	protected void addDefaultCommands(Bootstrap<AnetConfiguration> bootstrap) {
+		bootstrap.addCommand(new ServerCommand<>(this));
+		bootstrap.addCommand(new AnetCheckCommand(this));
 	}
 
 	@Override
@@ -114,7 +132,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		final DBIFactory factory = new DBIFactory();
 		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
 
-		logger.info("dictionary: {}", new JSONObject(configuration.getDictionary()).toString(2));
+		// Check the dictionary
+		final JSONObject dictionary = getDictionary(configuration);
+		logger.info("dictionary: {}", dictionary.toString(2));
 		
 		//We want to use our own custom DB logger in order to clean up the logs a bit. 
 		jdbi.setSQLLog(new AnetDbLogger());
@@ -171,8 +191,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
 		
 		//Create all of the HTTP Resources.  
-		PersonResource personResource = new PersonResource(engine);
-		PoamResource poamResource =  new PoamResource(engine);
+		PersonResource personResource = new PersonResource(engine, configuration);
+		TaskResource taskResource =  new TaskResource(engine);
 		LocationResource locationResource = new LocationResource(engine);
 		OrganizationResource orgResource = new OrganizationResource(engine);
 		PositionResource positionResource = new PositionResource(engine);
@@ -182,10 +202,11 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		HomeResource homeResource = new HomeResource(engine);
 		SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
 		final TagResource tagResource = new TagResource(engine);
+		final AuthorizationGroupResource authorizationGroupResource = new AuthorizationGroupResource(engine);
 
 		//Register all of the HTTP Resources
 		environment.jersey().register(personResource);
-		environment.jersey().register(poamResource);
+		environment.jersey().register(taskResource);
 		environment.jersey().register(locationResource);
 		environment.jersey().register(orgResource);
 		environment.jersey().register(positionResource);
@@ -195,13 +216,42 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		environment.jersey().register(homeResource);
 		environment.jersey().register(savedSearchResource);
 		environment.jersey().register(tagResource);
+		environment.jersey().register(authorizationGroupResource);
 		environment.jersey().register(new ViewResponseFilter(configuration));
 		environment.jersey().register(new GraphQLResource(
 			ImmutableList.of(reportResource, personResource,
 				positionResource, locationResource,
-				orgResource, asResource, poamResource,
-				adminResource, savedSearchResource, tagResource),
+				orgResource, asResource, taskResource,
+				adminResource, savedSearchResource, tagResource, authorizationGroupResource),
 			configuration.isDevelopmentMode()));
+	}
+
+	protected static JSONObject getDictionary(AnetConfiguration configuration)
+			throws IllegalArgumentException {
+		try (final InputStream inputStream = AnetApplication.class.getResourceAsStream("/anet-schema.yml")) {
+			if (inputStream == null) {
+				logger.error("ANET schema [anet-schema.yml] not found");
+			}
+			else {
+				final Object obj = yamlMapper.readValue(inputStream, Object.class);
+				final JSONObject rawSchema = new JSONObject(new JSONTokener(jsonMapper.writeValueAsString(obj)));
+				final Schema schema = SchemaLoader.load(rawSchema);
+				final JSONObject dictionary = new JSONObject(configuration.getDictionary());
+				schema.validate(dictionary);
+				return dictionary;
+			}
+		} catch (IOException e) {
+			logger.error("Error closing ANET schema", e);
+		} catch (ValidationException e) {
+			logger.error("Dictionary invalid against ANET schema:");
+			logValidationErrors(e);
+		}
+		throw new IllegalArgumentException("Missing or invalid dictionary in the configuration");
+	}
+
+	private static void logValidationErrors(ValidationException e) {
+		logger.error(e.getMessage());
+		e.getCausingExceptions().stream().forEach(AnetApplication::logValidationErrors);
 	}
 
 	/*

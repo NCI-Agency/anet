@@ -6,7 +6,7 @@
  * For more details take a look at the Java Quickstart chapter in the Gradle
  * user guide available at https://docs.gradle.org/2.10/userguide/tutorial_java_projects.html
  */
-
+ 
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -15,8 +15,8 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'org.kordamp.markdown.convert'
 apply plugin: 'com.bmuschko.docker-java-application'
-apply plugin: "se.bjurr.gitchangelog.git-changelog-gradle-plugin"
 apply plugin: 'com.moowork.node'
+apply plugin: "org.sonarqube"
 
 apply from: 'localSettings.gradle'
 
@@ -25,6 +25,7 @@ sourceCompatibility = 1.8
 // In this section you declare where to find the dependencies of your project
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -36,6 +37,7 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.0.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.0.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.0.2'
+	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1'
 
 	compile 'org.xerial:sqlite-jdbc:3.14.2.1' //If using SQLite
 	compile 'javax.mail:mail:1.4.7'
@@ -52,8 +54,14 @@ dependencies {
 
 	// Used for converting GraphQL GET request output to XML:
 	compile 'org.json:json:20170516'
+	// For JSON schema validation
+	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.6.1'
 
-	compile files('lib/sqljdbc42.jar')
+	compile "com.microsoft.sqlserver:mssql-jdbc:6.2.2.jre8"
+	
+	// used for writing Excel documents
+	compile group: 'org.apache.poi', name: 'poi', version: '3.17'
+	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
 	
 	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.0.2'
 	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.0.2'
@@ -67,6 +75,7 @@ project.version = proc.text.trim();
 project.group = "ncia"
 
 mainClassName = "mil.dds.anet.AnetApplication"
+String anetConfig = "anet.yml"
 
 applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
 
@@ -85,8 +94,15 @@ if (dbDriver == "sqlserver") {
 
 test.environment = run.environment
 
-run.args = ["server","anet.yml"]
+run.args = ["server", anetConfig]
 
+
+task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	args = ["check", anetConfig]
+}
 
 task buildClient(type: NpmTask) {
 	outputs.upToDateWhen { false };
@@ -96,15 +112,15 @@ task buildClient(type: NpmTask) {
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","status","anet.yml"]
+	main = mainClassName
+	args = ["db", "status", anetConfig]
 }
 
 task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","migrate","anet.yml"]
+	main = mainClassName
+	args = ["db", "migrate", anetConfig]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
 	}
@@ -113,15 +129,15 @@ task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
 task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","test","anet.yml"]
+	main = mainClassName
+	args = ["db", "test", anetConfig]
 }
 
 task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","rollback","anet.yml","--count","1"]
+	main = mainClassName
+	args = ["db", "rollback", anetConfig, "--count", "1"]
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
 	}
@@ -130,8 +146,8 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
-	main = 'mil.dds.anet.AnetApplication'
-	args = ["db","drop-all","--confirm-delete-everything","anet.yml"]
+	main = mainClassName
+	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
@@ -165,12 +181,18 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 	targetContainerId { "anet-mssql-server" }
 }
 
-task changelog (type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
-	file = new File("${buildDir}/resources/main/assets/client/changelog.html");
-	templateContent = file('docs/changelog.mustache').getText('UTF-8');
+task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	description = "Waiting until the DB server has started"
+	targetContainerId { "anet-mssql-server" }
+	cmd = ["/opt/waitTillServiceStarted.sh"]
 }
 
-processResources.dependsOn changelog
+task dockerLoadDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	description = "Loads default data into anet-mssql-server container"
+	targetContainerId { "anet-mssql-server" }
+	cmd = ["/opt/mssql-tools/bin/sqlcmd", "-S", run.environment["ANET_DB_SERVER"], "-U", run.environment["ANET_DB_USERNAME"], "-P", run.environment["ANET_DB_PASSWORD"], "-d", run.environment["ANET_DB_NAME"], "-a", "32767", "-i", "/hostdata/insertBaseData.sql"]
+}
+
 jar.dependsOn buildClient
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
@@ -204,8 +226,8 @@ buildscript {
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
-		classpath "gradle.plugin.se.bjurr.gitchangelog:git-changelog-gradle-plugin:1.50"
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
 	}
 }
 
@@ -236,6 +258,12 @@ allprojects {
 }
 
 node {
-
 	nodeModulesDir = file("${project.projectDir}/client")
+}
+
+sonarqube {
+    properties {
+        property "sonar.sources", "src/main/java,client/src"
+        property "sonar.tests", "src/test/java,client/tests"
+    }
 }

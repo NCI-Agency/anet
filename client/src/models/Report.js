@@ -14,12 +14,14 @@ export default class Report extends Model {
 		atmosphereDetails: '',
 		location: {},
 		attendees: [],
-		poams: [],
+		tasks: [],
 		comments: [],
 		reportText: '',
 		nextSteps: '',
 		keyOutcomes: '',
 		tags: [],
+		reportSensitiveInformation: null,
+		authorizationGroups: [],
 	}
 
 	isDraft() {
@@ -30,12 +32,20 @@ export default class Report extends Model {
 		return this.state === 'PENDING_APPROVAL'
 	}
 
+	isReleased() {
+		return this.state === 'RELEASED'
+	}
+
 	isRejected() {
 		return this.state === 'REJECTED'
 	}
 
 	isFuture() {
 		return this.state === 'FUTURE'
+	}
+
+	showApprovals() {
+		return this.state && !this.isDraft() && !this.isFuture()
 	}
 
 	toString() {
@@ -91,14 +101,24 @@ export default class Report extends Model {
 
 	getPrimaryPrincipal() {
 		return this.attendees.find( el =>
-			el.role === 'PRINCIPAL' && el.primary
+			el.role === Person.ROLE.PRINCIPAL && el.primary
 		)
 	}
 
 	getPrimaryAdvisor() {
 		return this.attendees.find( el =>
-			el.role === 'ADVISOR' && el.primary
+			el.role === Person.ROLE.ADVISOR && el.primary
 		)
+	}
+
+	getReportReleasedAt() {
+		if (this.approvalStatus) {
+			const approvalSteps = Object.assign([], this.approvalStatus)
+			const lastApprovalStep = approvalSteps.pop()
+			return !lastApprovalStep ? '' : lastApprovalStep.createdAt
+		} else {
+			return
+		}
 	}
 
 	addAttendee(newAttendee) {

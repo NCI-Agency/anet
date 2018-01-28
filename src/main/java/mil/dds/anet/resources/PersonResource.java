@@ -1,5 +1,8 @@
 package mil.dds.anet.resources;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +30,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLParam;
@@ -42,9 +46,11 @@ import mil.dds.anet.utils.Utils;
 public class PersonResource implements IGraphQLResource {
 	
 	private PersonDao dao;
+	private AnetConfiguration config;
 	
-	public PersonResource(AnetObjectEngine engine) { 
+	public PersonResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.dao = engine.getPersonDao();
+		this.config = config;
 	}
 	
 	@Override
@@ -102,6 +108,10 @@ public class PersonResource implements IGraphQLResource {
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public Person createNewPerson(@Auth Person user, Person p) {
+		if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
+			validateEmail(p.getEmailAddress());
+		}
+
 		if (p.getPosition() != null && p.getPosition().getId() != null) { 
 			Position position = AnetObjectEngine.getInstance().getPositionDao().getById(p.getPosition().getId());
 			if (position == null) { 
@@ -141,6 +151,10 @@ public class PersonResource implements IGraphQLResource {
 		Person existing = dao.getById(p.getId());
 		if (canEditPerson(user, existing) == false) { 
 			throw new WebApplicationException("You do not have permissions to edit this person", Status.FORBIDDEN);
+		}
+
+		if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
+			validateEmail(p.getEmailAddress());
 		}
 		
 		//Swap the position first in order to do the authentication check. 
@@ -319,5 +333,39 @@ public class PersonResource implements IGraphQLResource {
 		
 		return Response.ok().build();
 	}
-	
+
+	private void validateEmail(String emailInput) {
+		if (Utils.isEmptyOrNull(emailInput)) {
+			throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
+		}
+
+		final String WILDCARD = "*";
+		final String[] splittedEmail = emailInput.split("@");
+		final String from = splittedEmail[0].trim();
+		final String domainName = splittedEmail[1];
+
+		@SuppressWarnings("unchecked")
+		final List<String> whitelistDomainNames = (List<String>)this.config.getDictionary().get("domainNames");
+
+		final List<String> wildcardDomainNames = whitelistDomainNames.stream()
+			.filter(domain -> String.valueOf(domain.charAt(0)).equals(WILDCARD))
+			.collect((Collectors.toList()));
+
+		final Boolean isWhitelistedEmail = from.length() > 0 && whitelistDomainNames.indexOf(domainName) >= 0;
+		final Boolean isValidWildcardDomain = wildcardDomainNames.stream()
+			.anyMatch(wildcardDomain ->
+				domainName.charAt(0) != '.' &&
+				domainName.endsWith(wildcardDomain.substring(2)));
+
+		if (!isWhitelistedEmail && !isValidWildcardDomain) {
+			throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
+		}
+	}
+
+	private String validateEmailErrorMessage() {
+		final String supportEmailAddr = (String)this.config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+		final String messageBody = "Only valid email domain names are allowed. If your email domain name is not in the list, please contact the support team";
+		final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody : String.format("%s at %s", messageBody, supportEmailAddr);
+		return errorMessage;
+	}
 }

@@ -34,7 +34,7 @@ public class ApprovalStepResourceTest extends AbstractResourceTest {
 		
 		//Create an Advisor Organization
 		Organization org = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO()), Organization.class);
+				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
 		assertThat(org.getId()).isNotNull();
 	
 		//Create 3 steps in order for this AO

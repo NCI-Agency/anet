@@ -1,9 +1,10 @@
 package mil.dds.anet.search.sqlite;
 
+import mil.dds.anet.search.IAuthorizationGroupSearcher;
 import mil.dds.anet.search.ILocationSearcher;
 import mil.dds.anet.search.IOrganizationSearcher;
 import mil.dds.anet.search.IPersonSearcher;
-import mil.dds.anet.search.IPoamSearcher;
+import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.search.IPositionSearcher;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ISearcher;
@@ -15,7 +16,7 @@ public class SqliteSearcher implements ISearcher {
 	SqlitePersonSearcher personSearcher;
 	SqliteOrganizationSearcher orgSearcher;
 	SqlitePositionSearcher positionSearcher;
-	SqlitePoamSearcher poamSearcher;
+	SqliteTaskSearcher taskSearcher;
 	SqliteLocationSearcher locationSearcher;
 	private final SqliteTagSearcher tagSearcher;
 
@@ -24,7 +25,7 @@ public class SqliteSearcher implements ISearcher {
 		this.personSearcher = new SqlitePersonSearcher();
 		this.orgSearcher = new SqliteOrganizationSearcher();
 		this.positionSearcher = new SqlitePositionSearcher();
-		this.poamSearcher = new SqlitePoamSearcher();
+		this.taskSearcher = new SqliteTaskSearcher();
 		this.locationSearcher = new SqliteLocationSearcher();
 		this.tagSearcher = new SqliteTagSearcher();
 	}
@@ -50,8 +51,8 @@ public class SqliteSearcher implements ISearcher {
 	}
 
 	@Override
-	public IPoamSearcher getPoamSearcher() {
-		return poamSearcher;
+	public ITaskSearcher getTaskSearcher() {
+		return taskSearcher;
 	}
 
 	@Override
@@ -62,6 +63,11 @@ public class SqliteSearcher implements ISearcher {
 	@Override
 	public ITagSearcher getTagSearcher() {
 		return tagSearcher;
+	}
+
+	@Override
+	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
+		throw new UnsupportedOperationException();
 	}
 
 }

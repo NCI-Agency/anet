@@ -17,8 +17,8 @@ export default class OrganizationNew extends Page {
 		super(props)
 
 		this.state = {
-			originalOrganization: new Organization({type: 'ADVISOR_ORG'}),
-			organization: new Organization({type: 'ADVISOR_ORG'}),
+			originalOrganization: new Organization({type: Organization.TYPE.ADVISOR_ORG}),
+			organization: new Organization({type: Organization.TYPE.ADVISOR_ORG}),
 		}
 	}
 
@@ -26,7 +26,7 @@ export default class OrganizationNew extends Page {
 		if (props.location.query.parentOrgId) {
 			API.query(/* GraphQL */`
 				organization(id: ${props.location.query.parentOrgId}) {
-					id, shortName, longName, type
+					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
 				let {organization, originalOrganization} = this.state

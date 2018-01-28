@@ -5,7 +5,6 @@ import {Grid, Row, Col} from 'react-bootstrap'
 import TopBar from 'components/TopBar'
 import Nav from 'components/Nav'
 import History from 'components/History'
-import dict from 'dictionary'
 
 import API from 'api'
 import {Person, Organization} from 'models'
@@ -56,7 +55,7 @@ export default class App extends Page {
 			person(f:me) {
 				id, name, role, emailAddress, rank, status
 				position {
-					id, name, type, isApprover
+					id, name, type, status, isApprover
 					organization { id, shortName , allDescendantOrgs { id }}
 				}
 			}
@@ -78,23 +77,18 @@ export default class App extends Page {
 			})
 		})
 
-		//Fetch the dictionary.
-		API.fetch('/api/admin/dictionary').then(dictionary =>
-			dict.setDictionary(dictionary)
-		)
 	}
 
 	processData(data) {
-		let currentUser = new Person(data.person)
+		const currentUser = new Person(data.person)
 		let organizations = (data.organizationList && data.organizationList.list) || []
 		organizations = Organization.fromArray(organizations)
 		organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
 
 		let settings = this.state.settings
 		data.adminSettings.forEach(setting => settings[setting.key] = setting.value)
-		let dictionary = this.state.dictionary
 
-		return {currentUser, settings, organizations, dictionary}
+		return {currentUser, settings, organizations}
 	}
 
 	render() {

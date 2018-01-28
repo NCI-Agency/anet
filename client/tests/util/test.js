@@ -2,8 +2,8 @@ let test = require('ava'),
     webdriver = require('selenium-webdriver'),
     {By, until, Key} = webdriver,
     moment = require('moment'),
-    _includes = require('lodash.includes'),
-    _isRegExp = require('lodash.isregexp'),
+    _includes = require('lodash/includes'),
+    _isRegExp = require('lodash/isRegExp'),
     url = require('url'),
     path = require('path'),
     chalk = require('chalk')
@@ -18,13 +18,13 @@ if (testEnv === 'local') {
     require('./keep-alive.js')
     let config = require('config')
     capabilities = {
-        browserName: 'Chrome',   // or 'IE'
-        browser_version: '61.0', // or '11.0'
+        browserName: 'IE',   // or 'Chrome'
+        browser_version: '11.0', // or '61.0'
         os: 'Windows',
         os_version: '7',
         resolution: '2048x1536',
         project: 'ANET',
-        build: '%s %s: %s %s',
+        build: require("git-describe").gitDescribeSync(".", {match: '[0-9]*'}).semverString,
         // Will be replaced for each test:
         name: 'frontend tests',
         // Credentials for BrowserStack, get from config:
@@ -190,6 +190,36 @@ test.beforeEach(t => {
             }
         }
         t.pass(message || 'Element was not present')
+    }
+
+    // A helper method to combine waiting for an element to have rendered and then asserting on its enabled status
+    t.context.assertElementEnabled = async (t, cssSelector, message, timeoutMs) => {
+      let waitTimeoutMs = timeoutMs || longWaitMs
+      try {
+         var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      } catch (e) {
+        // If we got a TimeoutError because the element did not load, just swallow it here
+        // and let the assertion on blow up instead. That will produce a clearer error message.
+        if (e.name !== 'TimeoutError') {
+            throw e
+        }
+      }
+      t.is(await elem.isEnabled(), true, message)
+    }
+
+    // A helper method to combine waiting for an element to have rendered and then asserting it's disabled status
+    t.context.assertElementDisabled = async (t, cssSelector, message, timeoutMs) => {
+      let waitTimeoutMs = timeoutMs || longWaitMs
+      try {
+         var elem = await t.context.$(cssSelector, waitTimeoutMs)
+      } catch (e) {
+        // If we got a TimeoutError because the element did not load, just swallow it here
+        // and let the assertion on blow up instead. That will produce a clearer error message.
+        if (e.name !== 'TimeoutError') {
+            throw e
+        }
+      }
+      t.is(await elem.isEnabled(), false, message)
     }
 
     t.context.getCurrentPathname = async () => {

@@ -37,7 +37,7 @@ export default class ReportApprovals extends Component {
             case REJECT:
                 return {text: 'Rejected', cssClass: 'btn-danger rejected'}
             default:
-                return {text: 'Unknown', cssClass: 'default'}
+                return {text: 'Unknown', cssClass: 'btn-pending default'}
         }
     }
 
@@ -93,7 +93,10 @@ export default class ReportApprovals extends Component {
             return(
                 <div className="approval-details">
                     <span>By {action.person.name}</span><br/>
-                    <small>On {moment(action.createdAt).format('D MMM YYYY')}</small>
+                    <small>
+                        On {moment(action.createdAt).format('D MMM YYYY')}<br/>
+                        At {moment(action.createdAt).format('h:mm a')}
+                    </small>
                 </div>
             )
         }
@@ -105,10 +108,10 @@ export default class ReportApprovals extends Component {
     }
 
     renderApprovalButton(action) {
-        let step = action.step
-        let buttonColor = (action.type) ? 'btn-success ' : 'btn-pending '
+        const step = action.step
+        const approvalTypeCss =  this.approvalType(action.type).cssClass
         return (
-            <Button className={buttonColor + 'btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
+            <Button className={approvalTypeCss + ' btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
                 <span>{step.name}</span>
             </Button>
         )
@@ -151,7 +154,7 @@ export default class ReportApprovals extends Component {
             let cssClass = 'label ' + approvalType.cssClass
             return (
                 <span className={cssClass}> {approvalType.text} by {action.person.name} on
-                    <small> {moment(action.createdAt).format('D MMM YYYY')}</small>
+                    <small> {moment(action.createdAt).format('D MMM YYYY, h:mm a')}</small>
                 </span>
             )
         }

@@ -10,10 +10,12 @@ import javax.ws.rs.WebApplicationException;
 
 import org.joda.time.DateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person.Role;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
@@ -37,6 +39,7 @@ public class Report extends AbstractAnetBean {
 	DateTime releasedAt;
 	
 	DateTime engagementDate;
+	private Integer engagementDayOfWeek;
 	Location location;
 	String intent;
 	String exsum; //can be null to autogenerate
@@ -45,7 +48,7 @@ public class Report extends AbstractAnetBean {
 	ReportCancelledReason cancelledReason;
 	
 	List<ReportPerson> attendees;
-	List<Poam> poams;
+	List<Task> tasks;
 
 	String keyOutcomes;
 	String nextSteps;
@@ -60,6 +63,10 @@ public class Report extends AbstractAnetBean {
 
 	List<Comment> comments;
 	private List<Tag> tags;
+	private ReportSensitiveInformation reportSensitiveInformation;
+	// The user who instantiated this; needed to determine access to sensitive information
+	private Person user;
+	private List<AuthorizationGroup> authorizationGroups;
 
 	@GraphQLIgnore
 	public ApprovalStep getApprovalStep() {
@@ -102,6 +109,20 @@ public class Report extends AbstractAnetBean {
 
 	public void setEngagementDate(DateTime engagementDate) {
 		this.engagementDate = engagementDate;
+	}
+
+	/**
+	 * Returns an Integer value from the set (1,2,3,4,5,6,7) in accordance with
+	 * week days [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday].
+	 *
+	 * @return Integer engagement day of week
+	 */
+	public Integer getEngagementDayOfWeek() {
+		return engagementDayOfWeek;
+	}
+
+	public void setEngagementDayOfWeek(Integer engagementDayOfWeek) {
+		this.engagementDayOfWeek = engagementDayOfWeek;
 	}
 
 	@GraphQLFetcher("location")
@@ -169,7 +190,8 @@ public class Report extends AbstractAnetBean {
 		this.loadLocation();
 		this.loadPrimaryAdvisor();
 		this.loadPrimaryPrincipal();
-		this.loadPoams();
+		this.loadTasks();
+		this.loadAuthorizationGroups();
 	}
 
 	@GraphQLFetcher("attendees")
@@ -221,21 +243,21 @@ public class Report extends AbstractAnetBean {
 		return primaryPrincipal;
 	}
 	
-	@GraphQLFetcher("poams")
-	public List<Poam> loadPoams() {
-		if (poams == null) { 
-			poams = AnetObjectEngine.getInstance().getReportDao().getPoamsForReport(this);
+	@GraphQLFetcher("tasks")
+	public List<Task> loadTasks() {
+		if (tasks == null) { 
+			tasks = AnetObjectEngine.getInstance().getReportDao().getTasksForReport(this);
 		}
-		return poams;
+		return tasks;
 	}
 
-	public void setPoams(List<Poam> poams) {
-		this.poams = poams;
+	public void setTasks(List<Task> tasks) {
+		this.tasks = tasks;
 	}
 	
 	@GraphQLIgnore
-	public List<Poam> getPoams() { 
-		return poams;
+	public List<Task> getTasks() { 
+		return tasks;
 	}
 
 	public String getKeyOutcomes() {
@@ -422,9 +444,55 @@ public class Report extends AbstractAnetBean {
 		this.tags = tags;
 	}
 
+	@GraphQLFetcher("reportSensitiveInformation")
+	public ReportSensitiveInformation loadReportSensitiveInformation() {
+		if (reportSensitiveInformation == null && id != null) {
+			reportSensitiveInformation = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().getForReport(this, user);
+		}
+		return reportSensitiveInformation;
+	}
+
+	@GraphQLIgnore
+	public ReportSensitiveInformation getReportSensitiveInformation() {
+		return reportSensitiveInformation;
+	}
+
+	public void setReportSensitiveInformation(ReportSensitiveInformation reportSensitiveInformation) {
+		this.reportSensitiveInformation = reportSensitiveInformation;
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public Person getUser() {
+		return user;
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setUser(Person user) {
+		this.user = user;
+	}
+
+	@GraphQLFetcher("authorizationGroups")
+	public List<AuthorizationGroup> loadAuthorizationGroups() {
+		if (authorizationGroups == null && id != null) {
+			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(id);
+		}
+		return authorizationGroups;
+	}
+
+	public void setAuthorizationGroups(List<AuthorizationGroup> authorizationGroups) {
+		this.authorizationGroups = authorizationGroups;
+	}
+
+	@GraphQLIgnore
+	public List<AuthorizationGroup> getAuthorizationGroups() {
+		return authorizationGroups;
+	}
+
 	@Override
-	public boolean equals(Object other) { 
-		if (other == null || other.getClass() != Report.class) { 
+	public boolean equals(Object other) {
+		if (other == null || other.getClass() != this.getClass()) {
 			return false;
 		}
 		Report r = (Report) other;
@@ -440,20 +508,22 @@ public class Report extends AbstractAnetBean {
 				&& Objects.equals(r.getAtmosphere(), atmosphere)
 				&& Objects.equals(r.getAtmosphereDetails(), atmosphereDetails)
 				&& Objects.equals(r.getAttendees(), attendees)
-				&& Objects.equals(r.getPoams(), poams)
+				&& Objects.equals(r.getTasks(), tasks)
 				&& Objects.equals(r.getReportText(), reportText)
 				&& Objects.equals(r.getNextSteps(), nextSteps)
 				&& idEqual(r.getAuthor(), author)
 				&& Objects.equals(r.getComments(), comments)
-				&& Objects.equals(r.getTags(), tags);
+				&& Objects.equals(r.getTags(), tags)
+				&& Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
+				&& Objects.equals(r.getAuthorizationGroups(), authorizationGroups);
 	}
 	
 	@Override
 	public int hashCode() { 
 		return Objects.hash(id, state, approvalStep, createdAt, updatedAt, 
-			location, intent, exsum, attendees, poams, reportText, 
+			location, intent, exsum, attendees, tasks, reportText, 
 			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate,
-			tags);
+			tags, reportSensitiveInformation, authorizationGroups);
 	}
 
 	public static Report createWithId(Integer id) {

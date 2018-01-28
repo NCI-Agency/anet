@@ -23,7 +23,10 @@ Hello ${report.author.name},
 
 <p>${editor.name} edited your report "${report.intent}". To review the changes, <a href="${serverUrl}/reports/${report.id?c}">click here</a>.</p>
 
-Danke!<br>
-The ANET Team
+ANET Support Team
+<#if SUPPORT_EMAIL_ADDR??>
+  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
+</#if>
+
 </body>
 </html>

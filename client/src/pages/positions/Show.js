@@ -16,7 +16,7 @@ import GuidedTour from 'components/GuidedTour'
 import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 import History from 'components/History'
 import {Position, Organization} from 'models'
 import autobind from 'autobind-decorator'
@@ -48,7 +48,7 @@ export default class PositionShow extends Page {
 		API.query(/* GraphQL */`
 			position(id:${props.params.id}) {
 				id, name, type, status, code,
-				organization { id, shortName, longName },
+				organization { id, shortName, longName, identificationCode },
 				person { id, name, rank },
 				associatedPositions {
 					id, name,
@@ -61,18 +61,18 @@ export default class PositionShow extends Page {
 	}
 
 	render() {
-		let position = this.state.position
-		let assignedRole = position.type === 'PRINCIPAL' ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
+		const position = this.state.position
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name // TODO: shouldn't this be Position.humanNameOfType instead of a person title?
 
-		let currentUser = this.context.currentUser
-		let canEdit =
+		const currentUser = this.context.currentUser
+		const canEdit =
 			//Super Users can edit any Principal
-			(currentUser.isSuperUser() && position.type === 'PRINCIPAL') ||
+			(currentUser.isSuperUser() && position.type === Position.TYPE.PRINCIPAL) ||
 			//Admins can edit anybody
 			(currentUser.isAdmin()) ||
 			//Super users can edit positions within their own organization
 			(position.organization && position.organization.id && currentUser.isSuperUserForOrg(position.organization))
-		let canDelete = (currentUser.isAdmin()) &&
+		const canDelete = (currentUser.isAdmin()) &&
 			position.status === 'INACTIVE' &&
 			(position.id && ((!position.person) || (!position.person.id)))
 
@@ -104,7 +104,7 @@ export default class PositionShow extends Page {
 
 						{position.organization && <Form.Field id="organization" label="Organization" value={position.organization && position.organization.shortName} >
 							<Link to={Organization.pathFor(position.organization)}>
-								{position.organization.shortName} {position.organization.longName}
+								{position.organization.shortName} {position.organization.longName} {position.organization.identificationCode}
 							</Link>
 						</Form.Field>}
 

@@ -4,11 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
@@ -17,8 +21,8 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam.PoamStatus;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -26,6 +30,9 @@ import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	public OrganizationResourceTest() {
 		if (client == null) {
@@ -35,7 +42,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 	@Test
 	public void createAO() {
-		Organization ao = OrganizationTest.getTestAO();
+		final Organization ao = OrganizationTest.getTestAO(true);
 		final Person jack = getJackJackson();
 
 		//Create a new AO
@@ -43,6 +50,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 			.post(Entity.json(ao), Organization.class);
 		assertThat(ao.getShortName()).isEqualTo(created.getShortName());
 		assertThat(ao.getLongName()).isEqualTo(created.getLongName());
+		assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
 
 		//update name of the AO
 		created.setLongName("Ao McAoFace");
@@ -83,7 +91,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 		OrganizationSearchQuery query = new OrganizationSearchQuery();
 		query.setParentOrgId(created.getId());
-		OrganizationList children = httpQuery(String.format("/api/organizations/search", created.getId()), admin)
+		OrganizationList children = httpQuery("/api/organizations/search", admin)
 			.post(Entity.json(query), OrganizationList.class);
 		assertThat(children.getList()).hasSize(1).contains(child);
 		
@@ -101,24 +109,24 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(returnedSteps.size()).isEqualTo(1);
 		assertThat(returnedSteps.get(0).loadApprovers()).contains(b1);
 		
-		//Give this org a Poam
-		Poam poam = new Poam();
-		poam.setShortName("TST POM1");
-		poam.setLongName("Verify that you can update Poams on a Organization");
-		poam.setStatus(PoamStatus.ACTIVE);
-		poam = httpQuery("/api/poams/new", admin).post(Entity.json(poam), Poam.class);
-		assertThat(poam.getId()).isNotNull();
+		//Give this org a Task
+		Task task = new Task();
+		task.setShortName("TST POM1");
+		task.setLongName("Verify that you can update Tasks on a Organization");
+		task.setStatus(TaskStatus.ACTIVE);
+		task = httpQuery("/api/tasks/new", admin).post(Entity.json(task), Task.class);
+		assertThat(task.getId()).isNotNull();
 		
-		child.setPoams(ImmutableList.of(poam));
+		child.setTasks(ImmutableList.of(task));
 		child.setApprovalSteps(null);
 		resp = httpQuery("/api/organizations/update/", admin).post(Entity.json(child));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		//Verify poam was saved. 
+		//Verify task was saved. 
 		updated = httpQuery(String.format("/api/organizations/%d",child.getId()), jack).get(Organization.class);
-		assertThat(updated.loadPoams()).isNotNull();
-		assertThat(updated.loadPoams().size()).isEqualTo(1);
-		assertThat(updated.loadPoams().get(0).getId()).isEqualTo(poam.getId());
+		assertThat(updated.loadTasks()).isNotNull();
+		assertThat(updated.loadTasks().size()).isEqualTo(1);
+		assertThat(updated.loadTasks().get(0).getId()).isEqualTo(task.getId());
 		
 		//Change the approval steps. 
 		step1.setApprovers(ImmutableList.of(admin.loadPosition()));
@@ -126,7 +134,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		step2.setName("Final Reviewers");
 		step2.setApprovers(ImmutableList.of(b1));
 		child.setApprovalSteps(ImmutableList.of(step1, step2));
-		child.setPoams(null);
+		child.setTasks(null);
 		resp = httpQuery("/api/organizations/update/", admin).post(Entity.json(child));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
@@ -139,7 +147,97 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(returnedSteps.get(1).loadApprovers()).containsExactly(b1);
 		
 	}
-	
+
+	@Test
+	public void createDuplicateAO() {
+		// Create a new AO
+		final Organization ao = OrganizationTest.getTestAO(true);
+		final Organization created = httpQuery("/api/organizations/new", admin)
+			.post(Entity.json(ao), Organization.class);
+		assertThat(ao.getShortName()).isEqualTo(created.getShortName());
+		assertThat(ao.getLongName()).isEqualTo(created.getLongName());
+		assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
+
+		// Trying to create another AO with the same identificationCode should fail
+		thrown.expect(ClientErrorException.class);
+		httpQuery("/api/organizations/new", admin).post(Entity.json(ao), Organization.class);
+	}
+
+	@Test
+	public void updateDuplicateAO() {
+		// Create a new AO
+		final Organization ao1 = OrganizationTest.getTestAO(true);
+		final Organization created1 = httpQuery("/api/organizations/new", admin)
+			.post(Entity.json(ao1), Organization.class);
+		assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
+		assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
+		assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
+
+		// Create another new AO
+		final Organization ao2 = OrganizationTest.getTestAO(true);
+		final Organization created2 = httpQuery("/api/organizations/new", admin)
+			.post(Entity.json(ao2), Organization.class);
+		assertThat(ao2.getShortName()).isEqualTo(created2.getShortName());
+		assertThat(ao2.getLongName()).isEqualTo(created2.getLongName());
+		assertThat(ao2.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
+
+		// Trying to update AO2 with the same identificationCode as AO1 should fail
+		created2.setIdentificationCode(ao1.getIdentificationCode());
+		final Response resp = httpQuery("/api/organizations/update", admin).post(Entity.json(created2));
+		assertThat(resp.getStatus()).isEqualTo(Status.CONFLICT.getStatusCode());
+	}
+
+	@Test
+	public void createEmptyDuplicateAO() {
+		// Create a new AO with NULL identificationCode
+		final Organization ao1 = OrganizationTest.getTestAO(false);
+		final Organization created1 = httpQuery("/api/organizations/new", admin)
+			.post(Entity.json(ao1), Organization.class);
+		assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
+		assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
+		assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
+
+		// Creating another AO with NULL identificationCode should succeed
+		final Organization created2 = httpQuery("/api/organizations/new", admin)
+				.post(Entity.json(ao1), Organization.class);
+		assertThat(ao1.getShortName()).isEqualTo(created2.getShortName());
+		assertThat(ao1.getLongName()).isEqualTo(created2.getLongName());
+		assertThat(ao1.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
+
+		// Creating an AO with empty identificationCode should succeed
+		ao1.setIdentificationCode("");
+		final Organization created3 = httpQuery("/api/organizations/new", admin)
+				.post(Entity.json(ao1), Organization.class);
+		assertThat(ao1.getShortName()).isEqualTo(created3.getShortName());
+		assertThat(ao1.getLongName()).isEqualTo(created3.getLongName());
+		assertThat(ao1.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
+
+		// Creating another AO with empty identificationCode should succeed
+		final Organization created4 = httpQuery("/api/organizations/new", admin)
+				.post(Entity.json(ao1), Organization.class);
+		assertThat(ao1.getShortName()).isEqualTo(created4.getShortName());
+		assertThat(ao1.getLongName()).isEqualTo(created4.getLongName());
+		assertThat(ao1.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
+
+		// Create a new AO with non-NULL identificationCode
+		final Organization ao2 = OrganizationTest.getTestAO(true);
+		final Organization created5 = httpQuery("/api/organizations/new", admin)
+			.post(Entity.json(ao2), Organization.class);
+		assertThat(ao2.getShortName()).isEqualTo(created5.getShortName());
+		assertThat(ao2.getLongName()).isEqualTo(created5.getLongName());
+		assertThat(ao2.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());
+
+		// Updating this AO with empty identificationCode should succeed
+		created5.setIdentificationCode("");
+		final Response resp1 = httpQuery("/api/organizations/update", admin).post(Entity.json(created5));
+		assertThat(resp1.getStatus()).isEqualTo(Status.OK.getStatusCode());
+
+		// Updating this AO with NULL  identificationCode should succeed
+		created5.setIdentificationCode(null);
+		final Response resp2 = httpQuery("/api/organizations/update", admin).post(Entity.json(created5));
+		assertThat(resp2.getStatus()).isEqualTo(Status.OK.getStatusCode());
+	}
+
 	@Test
 	public void searchTest() { 
 		Person jack = getJackJackson();

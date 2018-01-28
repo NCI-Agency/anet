@@ -27,12 +27,12 @@ export default class OrganizationEdit extends Page {
 	fetchData(props) {
 		API.query(/* GraphQL */`
 			organization(id:${props.params.id}) {
-				id, shortName, longName, type,
-				parentOrg { id, shortName, longName }
+				id, shortName, longName, identificationCode, type,
+				parentOrg { id, shortName, longName, identificationCode }
 				approvalSteps { id, name
 					approvers { id, name, person { id, name}}
 				},
-				poams { id, shortName, longName}
+				tasks { id, shortName, longName}
 			}
 		`).then(data => {
 			this.setState({

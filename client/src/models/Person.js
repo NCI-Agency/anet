@@ -2,19 +2,29 @@ import React from 'react'
 
 import Model from 'components/Model'
 import utils from 'utils'
-import dict from 'dictionary'
+import Settings from 'Settings'
+
+import {Position, Organization} from 'models'
 
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
+import _isEmpty from 'lodash/isEmpty'
+
+const ACTIVE = 'ACTIVE'
 
 export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
 
+	static ROLE = {
+		ADVISOR: 'ADVISOR',
+		PRINCIPAL: 'PRINCIPAL'
+	}
+
 	static schema = {
 		name: '',
-		status: 'ACTIVE',
+		status: ACTIVE,
 		country: '',
 		rank: '',
 		gender: 'MALE',
@@ -25,7 +35,7 @@ export default class Person extends Model {
 		position: {},
 	}
 
-	static autocompleteQuery = "id, name, role, position { id, name, organization { id, shortName } }"
+	static autocompleteQuery = "id, name, role, rank, position { id, name, organization { id, shortName } }"
 
 	static autocompleteTemplate(person) {
 		return <span>
@@ -35,14 +45,12 @@ export default class Person extends Model {
 	}
 
 	static humanNameOfRole(role) {
-		if (role === 'ADVISOR') {
-			return dict.lookup('ADVISOR_PERSON_TITLE')
+		if (role === Person.ROLE.ADVISOR) {
+			return Settings.fields.advisor.person.name
 		}
-		if (role === 'PRINCIPAL') {
-			return dict.lookup('PRINCIPAL_PERSON_TITLE')
+		if (role === Person.ROLE.PRINCIPAL) {
+			return Settings.fields.principal.person.name
 		}
-
-
 		throw new Error(`Unrecognized role: ${role}`)
 	}
 
@@ -59,18 +67,30 @@ export default class Person extends Model {
 	}
 
 	isAdvisor() {
-		return this.role === 'ADVISOR'
+		return this.role === Person.ROLE.ADVISOR
+	}
+
+	isPrincipal() {
+		return this.role === Person.ROLE.PRINCIPAL
 	}
 
 	isAdmin() {
-		return this.position && this.position.type === 'ADMINISTRATOR'
+		return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
 	}
 
 	isSuperUser() {
 		return this.position && (
-			this.position.type === 'SUPER_USER' ||
-			this.position.type === 'ADMINISTRATOR'
+			this.position.type === Position.TYPE.SUPER_USER ||
+			this.position.type === Position.TYPE.ADMINISTRATOR
 		)
+	}
+
+	hasAssignedPosition() {
+		return !_isEmpty(this.position)
+	}
+
+	hasActivePosition() {
+		return this.hasAssignedPosition() && this.position.status === ACTIVE
 	}
 
 	//Checks if this user is a valid super user for a particular organization
@@ -81,9 +101,9 @@ export default class Person extends Model {
 	// - A super user for this orgs parents.
 	isSuperUserForOrg(org) {
 		if (!org) { return false }
-		if (this.position && this.position.type === 'ADMINISTRATOR') { return true }
-		if (this.position && this.position.type !== 'SUPER_USER') { return false }
-		if (org.type === 'PRINCIPAL_ORG') { return true }
+		if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) { return true }
+		if (this.position && this.position.type !== Position.TYPE.SUPER_USER) { return false }
+		if (org.type === Organization.TYPE.PRINCIPAL_ORG) { return true }
 
 		if (!this.position || !this.position.organization) { return false }
 		let orgs = this.position.organization.allDescendantOrgs || []
@@ -94,9 +114,9 @@ export default class Person extends Model {
 	}
 
 	iconUrl() {
-		if (this.role === 'ADVISOR') {
+		if (this.isAdvisor()) {
 			return RS_ICON
-		} else if (this.role === 'PRINCIPAL') {
+		} else if (this.isPrincipal()) {
 			return AFG_ICON
 		}
 

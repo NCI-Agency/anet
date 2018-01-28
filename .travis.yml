@@ -1,12 +1,13 @@
-global:
-  - secure: "iY51eqiP95SXqekd7BA7NVwaManWVy+1x7+3TZev1JhiqjGyE9cOBRkjziL3TByTNsdYnXvsvaHMTLuF7UT79CX+iOpkeKaIPylmW+SADx/IbDswj6JRPxUkBkFfGaw4TcAe1MaSWSckSVgeJKqLqIf6bLwldumYVXo4RFpbCXPGCHIxxh2jBA38eb1QQtRLenjPF+eMkjHH8S3RTA1yf7dCrAjETKfCxWr6VI7pQLW0IoLLWGt7jj/NOrmHirKCcmFDZtpotAC999VzCeMbz7urKmLGg73gFYnc6WrOvmqIV5e4LgzbuY/V12JvhyYkMzyVfbckT6zvi2bvVUgJT4XVEYdgxDZV41nuEwcbSivC+26NsxnuXlJqnFRruqKR0qf5hHEkJxOO+KQm3JHmkIzTr5Wnf31ivtMbrL4hr4Ogkb1NqdckhAOM6gtMJ9DFM3IG5YBaL9nWQArUVz6ZyoBqTOPHtCTGcnuwWKY0YopgBGAtuKA4QAepaWO+47ibC5ZDOGWcIyEO55qE3soG02isaZc+uzRQOJm32sYViVHcRc6HbsQXGKgOlA5MqtBJ8vqXq255EUSo98Sgwz/Du5HL05m459nNcfHVPJ1FU1mvKVLm2lyLOTQMuz+2aOcS7Gkb4/mi1wrlTBjk6TrvC+P+SCddXVPmgczhUdBsS44="
+env:
+  global:
+    - secure: "RhX0c51DkTgr4ub347If+KsjWJU+zGt3dshGknnmgrCOCuDkuBN0vjD4gLNMVH1K8Z+tmC8ESyW4duBuRkY4B/t2PRmEddCo7+t6gfmylq659LhGa3KUEEQd9vOuI+cN5NEGSN6GP6ckU11tiCmiomzTApLnNxWgqDBI7CQkezZl1DpNQ7cShhmYjPSBtFfQcfepZvOM7pY7oYvijvPsBmy0GsYu6RixxkBS42LgSY7FtBL7N2sdG80e+E9A1GThMUHJMAMpprpxPtd7BV2mQ3PwRcyWp11pZt+wCUFNDSnYb/h+5MI45JKIzzwvnOHZr4/rUByi6Qiw0RSh5k0sGZtNw+NcOjrtlS1g1XVxYBD5bzNxn7BgIg3nqNGiHYti/uIIG/AdwzHCG964Yqlww2jZ1UoyxNSb6ms1gKM8Rwx/gDO46pM0l750hwAjR25yDSW+w5xyW0YC+WKyHAoweSY1wsfzqchwJ9bP8qk5cwPrqGgiXsKU5N9SKfqJM4TKDE2DCDAE1NEWwglqnZTuQNjloCdl6KmctdSAHvF6o/t8sIcpIWs0zfhBoRAj3yZh/W7gQbXstyT1NGAswIMl1Rf9SspIm0noOUOObDMLkUhJWvxA/7zMoe3DaXgTAiSh1Xdm0FxdhmRkZFvGm74s9mGpyUvH6ePjwRNTM4CdfvI="
 
 language: java
 
 jdk:
   - oraclejdk8
 
-sudo: required
+sudo: false
 
 services:
   - docker
@@ -22,6 +23,7 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.sonar/cache
     - client/node_modules
 
 before_install:
@@ -33,17 +35,12 @@ before_install:
   - echo "run.environment(\"ANET_DB_USERNAME\", \"anetUser\")" >> localSettings.gradle
   - echo "run.environment(\"ANET_DB_PASSWORD\", \"Test-P@ssw0rd\")" >> localSettings.gradle
   - echo "run.environment(\"ANET_DB_PORT\", 1433)" >> localSettings.gradle
-  - ./gradlew dockerCreateDB dockerStartDB
 
 #By default travis runs gradle assemble in install. This is too early as we don't want to build yet
-install:
-  - ./gradlew npmInstall
+install: true
 
 script:
-  - docker exec -ti -e "DB_NAME=testAnet" -e "DB_USER=anetUser" -e "DB_USER_PASSWORD=Test-P@ssw0rd" anet-mssql-server /opt/waitTillServiceStarted.sh
-  - ./gradlew dbMigrate
-  - docker exec -ti anet-mssql-server /opt/mssql-tools/bin/sqlcmd -S localhost -U anetUser -P 'Test-P@ssw0rd' -d testAnet -i /hostdata/insertBaseData.sql
-  - ./gradlew check
+  - ./gradlew dockerCreateDB dockerStartDB npmInstall jar dockerWaitForDB dbMigrate dockerLoadDB check sonarqube
 
 after_script:
   - docker logs anet-mssql-server
@@ -52,8 +49,14 @@ addons:
   coverity_scan:
     project:
       name: "NCI-Agency/anet"
-      description: "ANET Build from Travis CI"
     notification_email: vassil.iordanov@gmail.com
-    build_command_prepend: "./gradlew clean"
+    build_command_prepend: "COV_BUILD_OPTIONS='--fs-capture-search src --fs-capture-search client' && ./gradlew clean"
     build_command:   "./gradlew build -x test"
-    branch_pattern: candidate
+    branch_pattern: candidate_scan
+  sonarcloud:
+    organization: "nci-agency-github"
+    token:
+      secure: "ICZTls70jFc6JIZV6cicKUpAKr2sDt9LKWnFzgGm92uDq/2J1Od7oewUAAEjykKa2qw42BZYaG1z3LX5UFtLhp9b/NFibf392U0V4I7jmeb4HDjOv855hTPosm5N7K9YQ3MUsSDLxVe+5DhrmwYQ3PSkG0lXKj0NRdAu7dpaBqMntBpTtdO5nQDKyxQ9UCrVSRjdU0YqHT8q4EWpii/MqWH6SRVUslvvKXTan2d6JnT+QaWuW8bTR0zhgpyxl5y8kOe0JBQ45M5vKO6yTcVj4UdolB0y+CZlblk/59iZK1bn/Is0qijWmHKh1Z3OORdlesXumUAveCX3VCMvvuPUz95a3nc+6S4I6iNIOcA8tzJ2AFP5oBuPIrl8o3S0BKxHTBssBzomo1e7tzDqXJF141tJOm0yUIB5Lmb9LV9KcWa1gAB2pk9ToX8e0NH4OLIqUUlLrNAkHX1sKHXO4AM3odHf1bTlOp7dOUszD2/E1umPjEWT3NH94LQStPubg+d2Kai2rQppxHlVKwAIVcBkP/d2nVtIwJsuRKmPbUIgAds7fYrxZpdDoM7AxjNLrCk3OPR1tYWwlUyProrAIJXDy7LlP14a4oM8dtaXGAnQar6nXtuqxiS4KMojPhW4rWXvRbCiBhYmLvuMMjW+kN1ITOy/h6x4Q7ZBLf+pU5C3Va0="
+    branches:
+      - master
+      - candidate_scan

@@ -56,13 +56,13 @@
 			<column name="id" type="int" autoIncrement="true" >
 				<constraints primaryKey="true" nullable="false" />
 			</column>
-			
+
 			<!-- the 1-2 character version (ie EF-5, or B) -->
-			<column name="shortName" type="varchar(100)" /> 
-			
+			<column name="shortName" type="varchar(100)" />
+
 			<!-- The Longer text ie (Rule of Law) or (Get the MoI to handle hiring of people) -->
-			<column name="longName" type="varchar(255)" /> 
-			
+			<column name="longName" type="varchar(255)" />
+
 			<!-- What type of POAM this is EF, Sub-EF, Milestone, Action, Sub-Action -->
 			<column name="category" type="varchar(255)" />
 
@@ -201,28 +201,28 @@
 			ALTER TABLE groups ALTER COLUMN createdAt datetime2;
 			ALTER TABLE organizations ALTER COLUMN createdAt datetime2;
 			ALTER TABLE organizations ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE poams ALTER COLUMN createdAt datetime2;
 			ALTER TABLE poams ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE positions ALTER COLUMN createdAt datetime2;
 			ALTER TABLE positions ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE peoplePositions ALTER COLUMN createdAt datetime2;
-			
+
 			ALTER TABLE positionRelationships ALTER COLUMN createdAt datetime2;
 			ALTER TABLE positionRelationships ALTER COLUMN updatedAt datetime2;
 
 			ALTER TABLE reports ALTER COLUMN createdAt datetime2;
 			ALTER TABLE reports ALTER COLUMN updatedAt datetime2;
 			ALTER TABLE reports ALTER COLUMN engagementDate datetime2;
-			
+
 			ALTER TABLE comments ALTER COLUMN createdAt datetime2;
 			ALTER TABLE comments ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE locations ALTER COLUMN createdAt datetime2;
 			ALTER TABLE locations ALTER COLUMN updatedAt datetime2;
-			
+
 			ALTER TABLE approvalActions ALTER COLUMN createdAt datetime2;
 		</sql>
 	</changeSet>
@@ -238,25 +238,25 @@
 			<!-- really frustrating that I didn't do the not-null constraint above in changeset 5
 			  but I didn't so it's here.  If we ever nuke the database, would be nice to clean this up -->
 			ALTER TABLE groups ALTER COLUMN createdAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE organizations ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE organizations ALTER COLUMN updatedAt datetime2 NOT NULL;
 
 			ALTER TABLE people ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE people ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE reports ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE reports ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE poams ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE poams ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE positions ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE positions ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE comments ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE comments ALTER COLUMN updatedAt datetime2 NOT NULL;
-			
+
 			ALTER TABLE locations ALTER COLUMN createdAt datetime2 NOT NULL;
 			ALTER TABLE locations ALTER COLUMN updatedAt datetime2 NOT NULL;
 
@@ -270,10 +270,10 @@
 		<!-- Groups -->
 		<addUniqueConstraint tableName="groupMemberships" columnNames="groupId, personId" constraintName="uniqueGroupMembership" />
 		<addNotNullConstraint tableName="groups" columnName="name" columnDataType="varchar(512)" />
-		<addForeignKeyConstraint baseColumnNames="groupId" baseTableName="groupMemberships" 
+		<addForeignKeyConstraint baseColumnNames="groupId" baseTableName="groupMemberships"
 			constraintName="fk_groupMember_group" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="groups" />
-		<addForeignKeyConstraint baseColumnNames="personId" baseTableName="groupMemberships" 
+		<addForeignKeyConstraint baseColumnNames="personId" baseTableName="groupMemberships"
 			constraintName="fk_groupMember_person" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="people" />
 
@@ -283,7 +283,7 @@
 			referencedColumnNames="id" referencedTableName="groups" />
 		<addForeignKeyConstraint baseColumnNames="advisorOrganizationId" baseTableName="approvalSteps"
 			constraintName="fk_approvalSteps_orgId" onDelete="NO ACTION" onUpdate="NO ACTION"
-			referencedColumnNames="id" referencedTableName="organizations" /> 
+			referencedColumnNames="id" referencedTableName="organizations" />
 
 		<!-- Approval Actions -->
 		<addForeignKeyConstraint baseColumnNames="approvalStepId" baseTableName="approvalActions"
@@ -323,7 +323,7 @@
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportPoams"
 			constraintName="fk_reportPoams_report" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="reports" />
-	
+
 		<!-- Poams -->
 		<addForeignKeyConstraint baseColumnNames="parentPoamId" baseTableName="poams"
 			constraintName="fk_poams_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -428,7 +428,7 @@
 		<addForeignKeyConstraint baseColumnNames="organizationId" baseTableName="poams"
 			constraintName="fk_poams_org" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="organizations" />
-		
+
 		<addForeignKeyConstraint baseColumnNames="advisorOrganizationId" baseTableName="reports"
 			constraintName="fk_reports_advisorOrg" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="organizations" />
@@ -461,10 +461,10 @@
 	</changeSet>
 
 	<changeSet id="17" author="hpitelka" dbms="mssql" >
-		<renameColumn 
-			columnDataType="varchar(255)" 
-			oldColumnName="name" 
-			newColumnName="shortName" 
+		<renameColumn
+			columnDataType="varchar(255)"
+			oldColumnName="name"
+			newColumnName="shortName"
 			tableName="organizations" />
 	</changeSet>
 
@@ -478,7 +478,7 @@
 
 	<changeSet id="19" author="hpitelka" >
 		<createTable tableName="savedSearches">
-		   <column name="id" type="int" autoIncrement="true">
+			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
 			</column>
 			<column name="name" type="varchar(512)" />
@@ -561,9 +561,9 @@
 		</addColumn>
 	</changeSet>
 
-	<!-- Found out that varchar and text don't support Unicode, so changing to nvarchar and ntext 
+	<!-- Found out that varchar and text don't support Unicode, so changing to nvarchar and ntext
 		Then found out that MSSQL is dropping support for text/ntext in favor of nvarchar(max)
-		And you can't modify columns that are in a fulltext index... so have to re-build those. 
+		And you can't modify columns that are in a fulltext index... so have to re-build those.
 	-->
 	<changeSet id="29" author="hpitelka" runInTransaction="false" >
 		<sql dbms="mssql">
@@ -577,7 +577,7 @@
 			ALTER TABLE organizations ALTER COLUMN longName nvarchar(255);
 			ALTER TABLE organizations ALTER COLUMN shortName nvarchar(255);
 			CREATE FULLTEXT INDEX ON organizations(longName, shortName) KEY INDEX PK_ORGANIZATIONS;
-			
+
 			DROP FULLTEXT INDEX ON poams;
 			ALTER TABLE poams ALTER COLUMN shortName nvarchar(255);
 			ALTER TABLE poams ALTER COLUMN longName nvarchar(max);
@@ -598,12 +598,12 @@
 			CREATE FULLTEXT INDEX ON reports(text, nextSteps, intent, atmosphereDetails, keyOutcomes) KEY INDEX PK_REPORTS;
 
 			ALTER TABLE comments ALTER COLUMN text nvarchar(max);
-			
+
 			DROP FULLTEXT INDEX ON locations;
 			ALTER TABLE locations ALTER COLUMN name nvarchar(512);
 			CREATE FULLTEXT INDEX ON locations(name) KEY INDEX PK_LOCATIONS;
-		
-			ALTER TABLE approvalSteps ALTER COLUMN name nvarchar(255); 
+
+			ALTER TABLE approvalSteps ALTER COLUMN name nvarchar(255);
 
 			ALTER TABLE adminSettings ALTER COLUMN value nvarchar(max);
 
@@ -654,7 +654,7 @@
 
 	<changeSet id="add_tags" author="gjvoosten">
 		<createTable tableName="tags">
-		   <column name="id" type="int" autoIncrement="true">
+			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false"/>
 			</column>
 			<column name="name" type="nvarchar(100)">
@@ -754,12 +754,255 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="add_tags_fulltext_index" author="maradragan" dbms="mssql" runInTransaction="false">
+	<changeSet id="add_organizations_identificationCode" author="gjvoosten">
+		<addColumn tableName="organizations">
+			<column name="identificationCode" type="nvarchar(100)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add_organizations_identificationCode_constraints" author="gjvoosten" dbms="mssql">
+		<!-- Use SQL because we want to allow NULLs while still requiring non-NULL and non-empty columns to be unique -->
 		<sql>
-			CREATE FULLTEXT INDEX ON tags(name, description) KEY INDEX PK_TAGS;
+			CREATE UNIQUE NONCLUSTERED INDEX uniqueOrganizationIdentificationCode
+			ON organizations ( identificationCode )
+			WHERE identificationCode IS NOT NULL
+			AND identificationCode != '';
 		</sql>
 		<rollback>
-			DROP FULLTEXT INDEX ON tags;
+			DROP INDEX uniqueOrganizationIdentificationCode ON organizations;
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add_organizations_identificationCode_to_fulltext_index" author="gjvoosten" dbms="mssql">
+		<sql>
+			ALTER FULLTEXT INDEX ON organizations ADD ( identificationCode );
+		</sql>
+		<rollback>
+			ALTER FULLTEXT INDEX ON organizations DROP ( identificationCode );
+		</rollback>
+	</changeSet>
+
+	<changeSet id="add_reports_sensitive_information" author="gjvoosten">
+		<createTable tableName="reportsSensitiveInformation">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="text" type="nvarchar(max)" />
+			<column name="reportId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_reports_sensitive_information_constraints" author="gjvoosten" dbms="mssql">
+		<!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
+		<addUniqueConstraint tableName="reportsSensitiveInformation" columnNames="reportId" constraintName="uniqueReport" />
+		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportsSensitiveInformation"
+			constraintName="fk_reportsSensitiveInformation_report" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="reports" />
+	</changeSet>
+
+	<changeSet id="add_positions_authorized" author="gjvoosten">
+		<addColumn tableName="positions">
+			<column name="authorized" type="boolean" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="renamePoams-to-Tasks" author="evdhoudt">
+		<!-- Tasks -->
+		<renameTable
+			newTableName="tasks"
+			oldTableName="poams" />
+		<renameColumn
+			columnDataType="int"
+			oldColumnName="parentPoamId"
+			newColumnName="parentTaskId"
+			tableName="tasks" />
+
+		<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_poams_parent"/>
+		<addForeignKeyConstraint baseColumnNames="parentTaskId" baseTableName="tasks"
+			constraintName="fk_tasks_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="tasks" />
+	</changeSet>
+
+	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt">
+		<!-- Report Tasks -->
+		<renameTable
+			newTableName="reportTasks"
+			oldTableName="reportPoams" />
+		<renameColumn
+			columnDataType="int"
+			oldColumnName="poamId"
+			newColumnName="taskId"
+			tableName="reportTasks" />
+	</changeSet>
+
+	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt">
+		<dropUniqueConstraint tableName="reportTasks" constraintName="uniqueReportPoam"/>
+		<addUniqueConstraint tableName="reportTasks" columnNames="taskId, reportId" constraintName="uniqueReportTask" />
+
+		<dropForeignKeyConstraint baseTableName="reportTasks" constraintName="fk_reportPoams_poam"/>
+		<addForeignKeyConstraint baseColumnNames="taskId" baseTableName="reportTasks"
+			constraintName="fk_reportTasks_poam" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="tasks" />
+
+		<dropForeignKeyConstraint baseTableName="reportTasks" constraintName="fk_reportPoams_report"/>
+		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportTasks"
+			constraintName="fk_reportTasks_report" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="reports" />
+
+		<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_poams_org"/>
+		<addForeignKeyConstraint baseColumnNames="organizationId" baseTableName="tasks"
+			constraintName="fk_tasks_org" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="organizations" />
+	</changeSet>
+
+	<changeSet id="add-extra-fields-to-Tasks" author="evdhoudt">
+		<addColumn tableName="tasks">
+			<column name="projectedCompletion" type="datetime" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="plannedCompletion" type="datetime" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="customField" type="text" />
+		</addColumn>
+		<addColumn tableName="tasks" >
+			<column name="customFieldEnum" type="text" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add_authorization_groups" author="maradragan">
+		<createTable tableName="authorizationGroups">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="nvarchar(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="nvarchar(512)" />
+			<column name="status" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_authorization_group_positions" author="maradragan">
+		<createTable tableName="authorizationGroupPositions">
+			<column name="authorizationGroupId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="positionId" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="mssql">
+		<addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
+		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
+			constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="authorizationGroups" />
+		<addForeignKeyConstraint baseColumnNames="positionId" baseTableName="authorizationGroupPositions"
+			constraintName="fk_authorizationGroupPositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="positions" />
+	</changeSet>
+
+	<changeSet id="add_report_authorization_groups" author="maradragan">
+		<createTable tableName="reportAuthorizationGroups">
+			<column name="reportId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="authorizationGroupId" type="int">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="mssql">
+		<addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
+		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
+			constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="reports" />
+		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="reportAuthorizationGroups"
+			constraintName="fk_reportAuthorizationGroups_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="authorizationGroups" />
+	</changeSet>
+
+	<changeSet id="add_authorizationGroups_fulltext_index" author="gjvoosten" dbms="mssql" runInTransaction="false">
+		<sql>
+			CREATE FULLTEXT INDEX ON authorizationGroups(name, description) KEY INDEX PK_AUTHORIZATIONGROUPS;
+		</sql>
+		<rollback>
+			DROP FULLTEXT INDEX ON authorizationGroups;
+		</rollback>
+	</changeSet>
+
+	<changeSet id="migrated_authorized_positions" author="gjvoosten" dbms="mssql">
+		<sql>
+			INSERT INTO authorizationGroups (name, description, status, createdAt, updatedAt)
+				SELECT
+					CONCAT('Authorized positions for ', o.shortName),
+					CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']'),
+					0,
+					CURRENT_TIMESTAMP,
+					CURRENT_TIMESTAMP
+				FROM organizations o
+				WHERE EXISTS (
+					SELECT p.id
+					FROM positions p
+					WHERE p.organizationId = o.id
+					AND p.authorized = 1
+				)
+			;
+
+			INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId)
+				SELECT DISTINCT ag.id, p.id
+				FROM authorizationGroups ag,
+				positions p
+				JOIN organizations o ON o.id = p.organizationId
+				WHERE ag.description = CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']')
+				AND p.authorized = 1
+			;
+
+			INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId)
+				SELECT DISTINCT r.id, ag.id
+				FROM reports r
+				JOIN organizations o ON o.id = r.advisorOrganizationId
+				JOIN reportsSensitiveInformation rsi ON rsi.reportId = r.id,
+				authorizationGroups ag
+				WHERE ag.description = CONCAT('Automatically migrated authorized positions for ', o.shortName, ' [', o.id, ']')
+			;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop_positions_authorized" author="gjvoosten">
+	    <!-- Some magic to make sure any auto-generated database constraints are dropped -->
+		<dropNotNullConstraint tableName="positions" columnName="authorized" columnDataType="boolean" />
+		<dropDefaultValue tableName="positions" columnName="authorized" columnDataType="boolean" />
+		<!-- Then drop the column itself -->
+		<dropColumn tableName="positions" columnName="authorized" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="update-extra-fields-to-Tasks" author="evdhoudt">
+		<modifyDataType columnName="customField" newDataType="nvarchar(max)" tableName="tasks" />
+		<modifyDataType columnName="customFieldEnum" newDataType="nvarchar(max)" tableName="tasks" />
+	</changeSet>
+
+	<changeSet id="add_tasks_customField_to_fulltext_index" author="evdhoudt" dbms="mssql" runInTransaction="false">
+		<sql>
+			ALTER FULLTEXT INDEX ON tasks ADD ( customField );
+		</sql>
+		<rollback>
+			ALTER FULLTEXT INDEX ON tasks DROP ( customField );
 		</rollback>
 	</changeSet>
 

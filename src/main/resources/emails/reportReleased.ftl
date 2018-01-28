@@ -25,8 +25,10 @@ Hi, ${report.author.name},
 
 <p>You can view the daily rollup by <a href="${serverUrl}/rollup">clicking here</a>.</p>
 
-Grazie!<br>
-The ANET Team
+ANET Support Team
+<#if SUPPORT_EMAIL_ADDR??>
+  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
+</#if>
 
 </body>
 </html>

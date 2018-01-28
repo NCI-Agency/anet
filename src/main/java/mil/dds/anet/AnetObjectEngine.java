@@ -19,16 +19,17 @@ import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ApprovalActionDao;
 import mil.dds.anet.database.ApprovalStepDao;
+import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.LocationDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.database.PoamDao;
+import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
+import mil.dds.anet.database.ReportSensitiveInformationDao;
 import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.TagDao;
-import mil.dds.anet.database.TestingDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.mssql.MssqlSearcher;
 import mil.dds.anet.search.sqlite.SqliteSearcher;
@@ -37,9 +38,8 @@ import mil.dds.anet.utils.Utils;
 
 public class AnetObjectEngine {
 
-	TestingDao dao;
 	PersonDao personDao;
-	PoamDao poamDao;
+	TaskDao taskDao;
 	LocationDao locationDao;
 	OrganizationDao orgDao;
 	PositionDao positionDao;
@@ -50,18 +50,20 @@ public class AnetObjectEngine {
 	AdminDao adminDao;
 	SavedSearchDao savedSearchDao;
 	private final TagDao tagDao;
+	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
+	private final AuthorizationGroupDao authorizationGroupDao;
 
 	ISearcher searcher;
 	
 	private static AnetObjectEngine instance; 
 	
-	Handle dbHandle;
+	private final Handle dbHandle;
 	
 	public AnetObjectEngine(DBI jdbi) { 
 		dbHandle = jdbi.open();
 		
 		personDao = new PersonDao(dbHandle);
-		poamDao = new PoamDao(dbHandle);
+		taskDao = new TaskDao(dbHandle);
 		locationDao =  new LocationDao(dbHandle);
 		orgDao = new OrganizationDao(dbHandle);
 		positionDao = new PositionDao(dbHandle);
@@ -72,7 +74,9 @@ public class AnetObjectEngine {
 		adminDao = new AdminDao(dbHandle);
 		savedSearchDao = new SavedSearchDao(dbHandle);
 		tagDao = new TagDao(dbHandle);
-		
+		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
+		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
+
 		instance = this;
 		
 		//TODO: maybe do this differently!
@@ -82,13 +86,17 @@ public class AnetObjectEngine {
 			searcher = new SqliteSearcher();
 		}
 	}
-	
+
+	public Handle getDbHandle() {
+		return dbHandle;
+	}
+
 	public PersonDao getPersonDao() { 
 		return personDao;
 	}
 	
-	public PoamDao getPoamDao() { 
-		return poamDao;
+	public TaskDao getTaskDao() { 
+		return taskDao;
 	}
 
 	public LocationDao getLocationDao() {
@@ -129,6 +137,14 @@ public class AnetObjectEngine {
 
 	public TagDao getTagDao() {
 		return tagDao;
+	}
+
+	public ReportSensitiveInformationDao getReportSensitiveInformationDao() {
+		return reportSensitiveInformationDao;
+	}
+
+	public AuthorizationGroupDao getAuthorizationGroupDao() {
+		return authorizationGroupDao;
 	}
 
 	public ISearcher getSearcher() {

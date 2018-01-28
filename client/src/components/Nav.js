@@ -3,9 +3,9 @@ import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
 import {Injectable, Injector} from 'react-injectables'
 import {Scrollspy} from 'react-scrollspy'
-import dict from 'dictionary'
-
+import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
+import pluralize from 'pluralize'
 
 import {Organization} from 'models'
 
@@ -15,26 +15,26 @@ class Nav extends Component {
 	}
 
 	render() {
-		let injections = this.props.injections
+		const injections = this.props.injections
 		if (injections && injections.length) {
 			return <div>{injections}</div>
 		}
 
-		let appData = this.context.app.state
-		let currentUser = appData.currentUser
-		let organizations = appData.organizations || []
+		const appData = this.context.app.state
+		const currentUser = appData.currentUser
+		const organizations = appData.organizations || []
 		let path = this.context.app.props.location.pathname
 
-		let {settings} = appData || {}
-		let externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
-		let externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
+		const {settings} = appData || {}
+		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
+		const externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
-		let inAdmin = path.indexOf('/admin') === 0
-		let inOrg = path.indexOf('/organizations') === 0
-		let inMyReports = path.indexOf('/reports/mine') === 0
-		let inInsights = path.indexOf('/insights') === 0
+		const inAdmin = path.indexOf('/admin') === 0
+		const inOrg = path.indexOf('/organizations') === 0
+		const inMyReports = path.indexOf('/reports/mine') === 0
+		const inInsights = path.indexOf('/insights') === 0
 
-		let myOrg = currentUser.position.organization
+		const myOrg = currentUser.position.organization
 		let orgId, myOrgId
 		if (inOrg) {
 			orgId = +this.context.app.props.params.id
@@ -42,7 +42,7 @@ class Nav extends Component {
 			path = `/organizations/${orgId}`
 		}
 
-		let orgSubNav = (
+		const orgSubNav = (
 			<SubNav
 				componentClass={Scrollspy}
 				className="nav"
@@ -51,7 +51,7 @@ class Nav extends Component {
 				<AnchorLink scrollTo="info">Info</AnchorLink>
 				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
 				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="poams">{dict.lookup('POAM_SHORT_NAME')}s</AnchorLink>
+				<AnchorLink scrollTo="tasks">{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
 				<AnchorLink scrollTo="reports">Reports</AnchorLink>
 			</SubNav>
 		)
@@ -85,7 +85,7 @@ class Nav extends Component {
 
 				{inOrg && orgId === myOrgId && orgSubNav}
 
-				<NavDropdown title={dict.lookup('NAV_BAR_ALL_ADVISOR_ORGS')} id="organizations" active={inOrg && orgId !== myOrgId}>
+				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="organizations" active={inOrg && orgId !== myOrgId}>
 					{Organization.map(organizations, org =>
 						<LinkTo organization={org} componentClass={Link} key={org.id}>
 							<MenuItem>{org.shortName}</MenuItem>
@@ -114,6 +114,7 @@ class Nav extends Component {
 				{inAdmin &&
 					<SubNav>
 						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
+						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
 					</SubNav>
 				}
 				
@@ -127,24 +128,29 @@ class Nav extends Component {
 					<NavItem>Help</NavItem>
 				</Link>
 
-        {(currentUser.isAdmin() || currentUser.isSuperUser()) &&
-          <Link to="/insights">
-            <NavItem>Insights</NavItem>
-          </Link>
-        }
-        {(currentUser.isAdmin() || currentUser.isSuperUser()) && inInsights &&
-          <SubNav
-            componentClass={Scrollspy}
-            className="nav"
-            offset={-152}
-          >
-            <AnchorLink scrollTo="not-approved-reports">Not approved reports</AnchorLink>
-            <AnchorLink scrollTo="cancelled-reports">Cancelled reports</AnchorLink>
-            <AnchorLink scrollTo="advisor-reports">Advisor reports</AnchorLink>
-          </SubNav>
-        }
-
-				</BSNav>
+				{(currentUser.isAdmin() || currentUser.isSuperUser()) &&
+					<NavDropdown title="Insights" id="insights" active={inInsights}>
+						<Link to="/insights/not-approved-reports">
+							<MenuItem>Pending approval reports</MenuItem>
+						</Link>
+						<Link to="/insights/cancelled-reports">
+							<MenuItem>Cancelled engagement reports</MenuItem>
+						</Link>
+						<Link to="/insights/reports-by-task">
+							<MenuItem>Reports by task</MenuItem>
+						</Link>
+						<Link to="/insights/future-engagements-by-location">
+							<MenuItem>Future engagements by location</MenuItem>
+						</Link>
+						<Link to="/insights/reports-by-day-of-week">
+							<MenuItem>Reports by day of the week</MenuItem>
+						</Link>
+						<Link to="/insights/advisor-reports">
+							<MenuItem>Advisor reports</MenuItem>
+						</Link>
+					</NavDropdown>
+				}
+			</BSNav>
 		)
 	}
 }

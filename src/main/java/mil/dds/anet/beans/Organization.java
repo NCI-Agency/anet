@@ -21,6 +21,7 @@ public class Organization extends AbstractAnetBean {
 	
 	String shortName;
 	String longName;
+	private String identificationCode;
 	Organization parentOrg;
 	OrganizationType type;
 	
@@ -29,7 +30,7 @@ public class Organization extends AbstractAnetBean {
 	List<ApprovalStep> approvalSteps; /*Approval process for this Org */
 	List<Organization> childrenOrgs; /* Immediate children */
 	List<Organization> descendants; /* All descendants (children of children..)*/
-	List<Poam> poams; 
+	List<Task> tasks; 
 	
 	public String getShortName() {
 		return shortName;
@@ -47,6 +48,14 @@ public class Organization extends AbstractAnetBean {
 		this.longName = Utils.trimStringReturnNull(longName);
 	}
 	
+	public String getIdentificationCode() {
+		return identificationCode;
+	}
+
+	public void setIdentificationCode(String identificationCode) {
+		this.identificationCode = Utils.trimStringReturnNull(identificationCode);
+	}
+
 	@GraphQLFetcher("parentOrg")
 	public Organization loadParentOrg() { 
 		if (parentOrg == null || parentOrg.getLoadLevel() == null) { return parentOrg; }
@@ -141,21 +150,21 @@ public class Organization extends AbstractAnetBean {
 		return descendants;
 	}
 	
-	@GraphQLFetcher("poams")
-	public List<Poam> loadPoams() { 
-		if (poams == null) { 
-			poams = AnetObjectEngine.getInstance().getPoamDao().getPoamsByOrganizationId(this.getId());
+	@GraphQLFetcher("tasks")
+	public List<Task> loadTasks() { 
+		if (tasks == null) { 
+			tasks = AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(this.getId());
 		}
-		return poams;
+		return tasks;
 	}
 	
 	@GraphQLIgnore
-	public List<Poam> getPoams() { 
-		return poams;
+	public List<Task> getTasks() { 
+		return tasks;
 	}
 	
-	public void setPoams(List<Poam> poams) { 
-		this.poams = poams;
+	public void setTasks(List<Task> tasks) { 
+		this.tasks = tasks;
 	}
 	
 	@GraphQLFetcher("reports")
@@ -169,13 +178,6 @@ public class Organization extends AbstractAnetBean {
 			query.setPrincipalOrgId(id);
 		}
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
-	}
-	
-	public static Organization create(String shortName, OrganizationType type) { 
-		Organization org = new Organization();
-		org.setShortName(shortName);
-		org.setType(type);
-		return org;
 	}
 	
 	public static Organization createWithId(Integer id) { 
@@ -194,16 +196,17 @@ public class Organization extends AbstractAnetBean {
 		return Objects.equals(other.getId(), id) 
 				&& Objects.equals(other.getShortName(), shortName) 
 				&& Objects.equals(other.getLongName(), longName) 
+				&& Objects.equals(other.getIdentificationCode(), identificationCode)
 				&& Objects.equals(other.getType(), type);
 	}
 	
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, shortName, longName, type, createdAt, updatedAt);
+		return Objects.hash(id, shortName, longName, identificationCode, type, createdAt, updatedAt);
 	}
 	
 	@Override
 	public String toString() { 
-		return String.format("[id:%d shortName:%s longName:%s type:%s]", id, shortName, longName, type);
+		return String.format("[id:%d shortName:%s longName:%s identificationCode:%s type:%s]", id, shortName, longName, identificationCode, type);
 	}
 }

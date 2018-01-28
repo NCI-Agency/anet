@@ -15,8 +15,8 @@ import ReportApprovals from 'components/ReportApprovals'
 import Tag from 'components/Tag'
 
 import API from 'api'
-import dict from 'dictionary'
-import {Report, Person, Poam, Comment, Position} from 'models'
+import Settings from 'Settings'
+import {Report, Person, Task, Comment, Position} from 'models'
 
 export default class ReportShow extends Page {
 	static contextTypes = {
@@ -49,7 +49,7 @@ export default class ReportShow extends Page {
 					id, name, rank,
 					position {
 						organization {
-							shortName, longName
+							shortName, longName, identificationCode
 							approvalSteps {
 								id, name,
 								approvers {
@@ -68,15 +68,15 @@ export default class ReportShow extends Page {
 				primaryAdvisor { id }
 				primaryPrincipal { id }
 
-				poams { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 
 				comments {
 					id, text, createdAt, updatedAt
 					author { id, name, rank }
 				}
 
-				principalOrg { id, shortName, longName }
-				advisorOrg { id, shortName, longName }
+				principalOrg { id, shortName, longName, identificationCode }
+				advisorOrg { id, shortName, longName, identificationCode }
 
 				approvalStatus {
 					type, createdAt
@@ -89,32 +89,35 @@ export default class ReportShow extends Page {
 				approvalStep { name, approvers { id }, nextStepId }
 
 				tags { id, name, description }
+				reportSensitiveInformation { id, text }
+				authorizationGroups { id, name, description }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
 		})
 	}
 
+	renderNoPositionAssignedText() {
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
+		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
+		return <div className="alert alert-warning">You cannot submit a report. Your assigned advisor position has an inactive status.<br /> -- Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage} --</div>
+	}
+
 	render() {
-		let {report} = this.state
-		let {currentUser} = this.context
+		const {report} = this.state
+		const {currentUser} = this.context
 
-		let canApprove = report.isPending() && currentUser.position &&
+		const canApprove = report.isPending() && currentUser.position &&
 			report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
-
-		if (canApprove && this.props.location.query.autoApprove) {
-			this.props.location.query.autoApprove = false
-			this.approveReport()
-			return <h1>Loading..</h1>
-		}
 
 		//Authors can edit in draft mode, rejected mode, or Pending Mode
 		let canEdit = (report.isDraft() || report.isPending() || report.isRejected() || report.isFuture()) && Person.isEqual(currentUser, report.author)
 		//Approvers can edit.
 		canEdit = canEdit || canApprove
 
-		//Only the author can submit when report is in Draft or rejected
-		let canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author)
+		//Only the author can submit when report is in Draft or rejected AND author has a position
+		const hasActivePosition = currentUser.hasActivePosition()
+		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
 
 		//Anbody can email a report as long as it's not in draft.
 		let canEmail = !report.isDraft()
@@ -123,11 +126,19 @@ export default class ReportShow extends Page {
 
 		let isCancelled = report.cancelledReason ? true : false
 
+		const formattedReportReleasedAt = moment(report.getReportReleasedAt()).format('D MMM YYYY, [at] h:mm a')
+
 		return (
 			<div className="report-show">
 				<Breadcrumbs items={[['Report #' + report.id, Report.pathFor(report)]]} />
-
 				<Messages error={this.state.error} success={this.state.success} />
+
+				{report.isReleased() &&
+					<Fieldset style={{textAlign: 'center' }}>
+						<h4 className="text-danger">This report is RELEASED.</h4>
+						<p>This report has been approved and released to the ANET community on {formattedReportReleasedAt}</p>
+					</Fieldset>
+				}
 
 				{report.isRejected() &&
 					<Fieldset style={{textAlign: 'center' }}>
@@ -140,6 +151,9 @@ export default class ReportShow extends Page {
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This is a DRAFT report and hasn't been submitted.</h4>
 						<p>You can review the draft below to make sure all the details are correct.</p>
+						{!hasActivePosition &&
+							this.renderNoPositionAssignedText()
+						}
 						<div style={{textAlign: 'left'}}>
 							{errors && errors.length > 0 &&
 								this.renderValidationErrors(errors)
@@ -206,10 +220,10 @@ export default class ReportShow extends Page {
 						<Form.Field id="author" label="Report author">
 							<LinkTo person={report.author} />
 						</Form.Field>
-						<Form.Field id="advisorOrg" label={dict.lookup('ADVISOR_ORG_NAME')}>
+						<Form.Field id="advisorOrg" label={Settings.fields.advisor.org.name}>
 							<LinkTo organization={report.advisorOrg} />
 						</Form.Field>
-						<Form.Field id="principalOrg" label={dict.lookup('PRINCIPAL_ORG_NAME')}>
+						<Form.Field id="principalOrg" label={Settings.fields.principal.org.name}>
 							<LinkTo organization={report.principalOrg} />
 						</Form.Field>
 					</Fieldset>
@@ -225,18 +239,18 @@ export default class ReportShow extends Page {
 							</thead>
 
 							<tbody>
-								{Person.map(report.attendees.filter(p => p.role === "ADVISOR"), person =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
 								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
-								{Person.map(report.attendees.filter(p => p.role === "PRINCIPAL"), person =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
 							</tbody>
 						</Table>
 					</Fieldset>
 
-					<Fieldset title={dict.lookup('POAM_LONG_NAME')} >
+					<Fieldset title={Settings.fields.task.longLabel} >
 						<Table>
 							<thead>
 								<tr>
@@ -246,10 +260,10 @@ export default class ReportShow extends Page {
 							</thead>
 
 							<tbody>
-								{Poam.map(report.poams, (poam, idx) =>
-									<tr key={poam.id} id={"poam_" + idx}>
-										<td className="poamName" ><LinkTo poam={poam} >{poam.shortName} - {poam.longName}</LinkTo></td>
-										<td className="poamOrg" ><LinkTo organization={poam.responsibleOrg} /></td>
+								{Task.map(report.tasks, (task, idx) =>
+									<tr key={task.id} id={"task_" + idx}>
+										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
+										<td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>
 									</tr>
 								)}
 							</tbody>
@@ -262,7 +276,38 @@ export default class ReportShow extends Page {
 						</Fieldset>
 					}
 
-					{report.isPending() &&
+					{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
+						<Fieldset title="Sensitive information">
+							<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
+							{(report.authorizationGroups && report.authorizationGroups.length > 0 &&
+								<div>
+									<h5>Authorized groups:</h5>
+									<Table>
+										<thead>
+											<tr>
+												<th>Name</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											{report.authorizationGroups.map(ag => {
+												return (
+													<tr key={ag.id}>
+														<td>{ag.name}</td>
+														<td>{ag.description}</td>
+													</tr>
+												)}
+											)}
+										</tbody>
+									</Table>
+								</div>
+							) || (
+								<h5>No groups are authorized!</h5>
+							)}
+						</Fieldset>
+					}
+
+					{report.showApprovals() &&
 						<ReportApprovals report={report} fullReport={true} />
 					}
 

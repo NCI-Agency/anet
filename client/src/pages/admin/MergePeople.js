@@ -30,7 +30,7 @@ export default class MergePeople extends Page {
 		let errors = this.validate()
 
 		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status,
-			position { id, name, organization { id, shortName, longName }},
+			position { id, name, organization { id, shortName, longName, identificationCode }},
 			authoredReports(pageNum:0,pageSize:1) { totalCount }
 			attendedReports(pageNum:0,pageSize:1) { totalCount }`
 

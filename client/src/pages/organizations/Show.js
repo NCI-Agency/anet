@@ -9,15 +9,17 @@ import Form from 'components/Form'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
+import DictionaryField from '../../HOC/DictionaryField'
 
 import GuidedTour from 'components/GuidedTour'
 import {orgTour} from 'pages/HopscotchTour'
 
-import OrganizationPoams from './Poams'
+import OrganizationTasks from './OrganizationTasks'
 import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
-import {Organization} from 'models'
+import Settings from 'Settings'
+import {Organization, Position} from 'models'
 import GQL from 'graphqlapi'
 
 const PENDING_APPROVAL = 'PENDING_APPROVAL'
@@ -36,14 +38,17 @@ export default class OrganizationShow extends Page {
 		this.state = {
 			organization: new Organization({id: props.params.id}),
 			reports: null,
-			poams: null,
+			tasks: null,
 			reportsFilter: NO_REPORT_FILTER,
 			action: props.params.action
 		}
 
 		this.reportsPageNum = 0
-		this.poamsPageNum = 0
+		this.tasksPageNum = 0
 		this.togglePendingApprovalFilter = this.togglePendingApprovalFilter.bind(this)
+		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
+		this.LongNameWithLabel = DictionaryField(Form.Field)
+
 		setMessages(props,this.state)
 	}
 
@@ -81,29 +86,29 @@ export default class OrganizationShow extends Page {
 		return reportsPart
 	}
 
-	getPoamQueryPart(orgId) {
-		let poamQuery = {
-			pageNum: this.poamsPageNum,
+	gettaskQueryPart(orgId) {
+		let taskQuery = {
+			pageNum: this.tasksPageNum,
 			status: 'ACTIVE',
 			pageSize: 10,
 			responsibleOrgId: orgId
 		}
-		let poamsPart = new GQL.Part(/* GraphQL */`
-			poams: poamList(query:$poamQuery) {
+		let taskPart = new GQL.Part(/* GraphQL */`
+			tasks: taskList(query:$taskQuery) {
 				pageNum, pageSize, totalCount, list {
 					id, shortName, longName
 				}
 			}`)
-			.addVariable("poamQuery", "PoamSearchQuery", poamQuery)
-		return poamsPart
+			.addVariable("taskQuery", "TaskSearchQuery", taskQuery)
+		return taskPart
 	}
 
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
 			organization(id:${props.params.id}) {
-				id, shortName, longName, type
-				parentOrg { id, shortName, longName }
-				childrenOrgs { id, shortName, longName },
+				id, shortName, longName, identificationCode, type
+				parentOrg { id, shortName, longName, identificationCode }
+				childrenOrgs { id, shortName, longName, identificationCode },
 				positions {
 					id, name, code, status, type,
 					person { id, name, status, rank }
@@ -117,9 +122,9 @@ export default class OrganizationShow extends Page {
 				}
 			}`)
 		let reportsPart = this.getReportQueryPart(props.params.id)
-		let poamsPart = this.getPoamQueryPart(props.params.id)
+		let tasksPart = this.gettaskQueryPart(props.params.id)
 
-		this.runGQL([orgPart, reportsPart, poamsPart])
+		this.runGQL([orgPart, reportsPart, tasksPart])
 	}
 
 	runGQL(queries) {
@@ -127,7 +132,7 @@ export default class OrganizationShow extends Page {
 			this.setState({
 				organization: new Organization(data.organization),
 				reports: data.reports,
-				poams: data.poams
+				tasks: data.tasks
 			})
 		)
 	}
@@ -151,15 +156,17 @@ export default class OrganizationShow extends Page {
 	}
 
 	render() {
-		let org = this.state.organization
-		let reports = this.state.reports
-		let poams = this.state.poams
+		const org = this.state.organization
+		const reports = this.state.reports
+		const tasks = this.state.tasks
 
-		let currentUser = this.context.currentUser
-		let isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
-		let isAdmin = currentUser && currentUser.isAdmin()
+		const currentUser = this.context.currentUser
+		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
+		const isAdmin = currentUser && currentUser.isAdmin()
+		const isPrincipalOrg = org.type === Organization.TYPE.PRINCIPAL_ORG
 
-		let superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === 'SUPER_USER' || pos.type === 'ADMINISTRATOR'))
+		const superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
+		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
 
 		return (
 			<div>
@@ -191,11 +198,13 @@ export default class OrganizationShow extends Page {
 							{org.humanNameOfType()}
 						</Form.Field>
 
-						<Form.Field id="longName" label={org.type === "PRINCIPAL_ORG" ? "Official Organization Name" : "Description"}/>
+						<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName"/>
 
+						<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.identificationCode} id="identificationCode"/>
+		
 						{org.parentOrg && org.parentOrg.id &&
 							<Form.Field id="parentOrg" label="Parent organization">
-								<LinkTo organization={org.parentOrg} >{org.parentOrg.shortName} {org.parentOrg.longName}</LinkTo>
+								<LinkTo organization={org.parentOrg} >{org.parentOrg.shortName} {org.parentOrg.longName} {org.parentOrg.identificationCode}</LinkTo>
 							</Form.Field>
 						}
 
@@ -218,7 +227,7 @@ export default class OrganizationShow extends Page {
 							<ListGroup>
 								{org.childrenOrgs.map(org =>
 									<ListGroupItem key={org.id} >
-										<LinkTo organization={org} >{org.shortName} {org.longName}</LinkTo>
+										<LinkTo organization={org} >{org.shortName} {org.longName} {org.identificationCode}</LinkTo>
 									</ListGroupItem>
 								)}
 							</ListGroup>
@@ -227,7 +236,7 @@ export default class OrganizationShow extends Page {
 
 					<OrganizationLaydown organization={org} />
 					<OrganizationApprovals organization={org} />
-					<OrganizationPoams organization={org} poams={poams} goToPage={this.goToPoamsPage}/>
+					<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
 
 					<Fieldset id="reports" title={`Reports from ${org.shortName}`}>
 						<ReportCollection
@@ -253,11 +262,11 @@ export default class OrganizationShow extends Page {
 	}
 
 	@autobind
-	goToPoamsPage(pageNum) {
-		this.poamsPageNum = pageNum
-		let poamQueryPart = this.getPoamQueryPart(this.state.organization.id)
-		GQL.run([poamQueryPart]).then(data =>
-			this.setState({poams: data.poams})
+	goTotasksPage(pageNum) {
+		this.tasksPageNum = pageNum
+		let taskQueryPart = this.gettaskQueryPart(this.state.organization.id)
+		GQL.run([taskQueryPart]).then(data =>
+			this.setState({tasks: data.tasks})
 		)
 	}
 

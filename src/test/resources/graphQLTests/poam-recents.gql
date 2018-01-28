@@ -1,3 +1,0 @@
-poamList(f:recents) {
-	list { id, shortName, longName }
-}

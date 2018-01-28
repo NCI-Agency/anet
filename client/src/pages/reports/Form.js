@@ -8,15 +8,19 @@ import 'components/reactTags.css'
 import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import TextEditor from 'components/TextEditor'
+import AuthorizationGroupsSelector from 'components/AuthorizationGroupsSelector'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import PoamsSelector from 'components/PoamsSelector'
+import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
 import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
+
 import moment from 'moment'
+import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
+import Settings from 'Settings'
 import {Report, Person} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
@@ -30,6 +34,10 @@ export default class ReportForm extends ValidatableFormWrapper {
 		edit: PropTypes.bool
 	}
 
+	static contextTypes = {
+		currentUser: PropTypes.object,
+	}
+
 	constructor(props) {
 		super(props)
 
@@ -37,7 +45,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 			recents: {
 				persons: [],
 				locations: [],
-				poams: [],
+				tasks: [],
+				authorizationGroups: [],
 			},
 			tagList: [],
 			suggestionList: [],
@@ -46,13 +55,19 @@ export default class ReportForm extends ValidatableFormWrapper {
 			isCancelled: (props.report.cancelledReason ? true : false),
 			errors: {},
 
+			showActivePositionWarning: false,
+			disableOnSubmit: false,
+
 			//State for auto-saving reports
 			reportChanged: false, //Flag to determine if we need to auto-save.
 			timeoutId: null,
 			showAutoSaveBanner: false,
+			autoSaveError: null,
 		}
 		this.handleTagDelete = this.handleTagDelete.bind(this)
 		this.handleTagAddition = this.handleTagAddition.bind(this)
+		this.defaultTimeout = moment.duration(30, 'seconds')
+		this.autoSaveTimeout = this.defaultTimeout.clone()
 	}
 
 	componentDidMount() {
@@ -63,8 +78,11 @@ export default class ReportForm extends ValidatableFormWrapper {
 			personList(f:recents, maxResults:6) {
 				list { id, name, rank, role, position { id, name, organization {id, shortName}} }
 			}
-			poamList(f:recents, maxResults:6) {
+			taskList(f:recents, maxResults:6) {
 				list { id, shortName, longName }
+			}
+			authorizationGroupList(f:recents, maxResults:6) {
+				list { id, name, description }
 			}
 			tagList(f:getAll) {
 				list { id, name, description }
@@ -74,7 +92,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 				recents: {
 					locations: data.locationList.list,
 					persons: data.personList.list,
-					poams: data.poamList.list,
+					tasks: data.taskList.list,
+					authorizationGroups: data.authorizationGroupList.list,
 				},
 				tagList: data.tagList.list,
 				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
@@ -82,7 +101,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 			this.setState(newState)
 		})
 
-		let timeoutId = window.setTimeout(this.autoSave, 30000)
+		// Schedule the auto-save timer
+		let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
 		this.setState({timeoutId})
 	}
 
@@ -92,11 +112,17 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 
 	componentWillReceiveProps(nextProps) {
+		const { currentUser } = this.context
+
+		if (currentUser.hasAssignedPosition()) {
+			this.setState({showActivePositionWarning: !currentUser.hasActivePosition()})
+		}
+
 		let report = nextProps.report
 		if (report.cancelledReason) {
 			this.setState({isCancelled: true})
 		}
-		this.setState({showReportText: !!report.reportText})
+		this.setState({showReportText: !!report.reportText || !!report.reportSensitiveInformation})
 	}
 
     handleTagDelete(i) {
@@ -111,11 +137,13 @@ export default class ReportForm extends ValidatableFormWrapper {
     }
 
 	render() {
-		let {report, onDelete} = this.props
-		let {recents, suggestionList, errors, isCancelled, showAutoSaveBanner} = this.state
+		const { currentUser } = this.context
+		const {report, onDelete} = this.props
+		const { edit } = this.props
+		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, autoSaveError, showActivePositionWarning} = this.state
 
-		let hasErrors = Object.keys(errors).length > 0
-		let isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
+		const hasErrors = Object.keys(errors).length > 0
+		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
 
 		const invalidInputWarningMessage = <HelpBlock><b>
 			<img src={WARNING_ICON} role="presentation" height="20px" />
@@ -127,17 +155,35 @@ export default class ReportForm extends ValidatableFormWrapper {
 		</HelpBlock>
 
 		const {ValidatableForm, RequiredField} = this
+		const submitText = currentUser.hasActivePosition() ? 'Preview and submit' : 'Save draft'
+		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
+		const supportEmailMessage = supportEmail ? `(${supportEmail})` : ''
+		const warningMessageNoPosition = `You cannot submit a report. Your assigned advisor position has an inactive status. Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage}`
 		return <div className="report-form">
+
 			<Collapse in={showAutoSaveBanner}>
-				<div className="banner" style={{top:132, background: '#DFF0D8', color: '#3c763d'}}>
-					Your report has been automatically saved
-				</div>
+				{(autoSaveError &&
+					<div className="alert alert-warning" style={alertStyle}>
+						{autoSaveError}
+					</div>
+				) || (
+					<div className="alert alert-success" style={alertStyle}>
+						Your report has been automatically saved
+					</div>
+				)}
 			</Collapse>
+
+			{showActivePositionWarning &&
+				<div className="alert alert-warning" style={alertStyle}>
+					{warningMessageNoPosition}
+				</div>
+			}
 
 			<ValidatableForm formFor={report} horizontal onSubmit={this.onSubmit} onChange={this.onChange}
 				onDelete={onDelete} deleteText="Delete this report"
-				submitDisabled={hasErrors} submitText="Preview and submit"
+				submitDisabled={hasErrors} submitText={submitText}
 				bottomAccessory={this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format('hh:mm:ss')}</div>}
 			>
 
@@ -242,13 +288,13 @@ export default class ReportForm extends ValidatableFormWrapper {
 								</tr>
 							</thead>
 							<tbody>
-								{Person.map(report.attendees.filter(p => p.role === "ADVISOR"), (person, idx) =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
 								)}
 
 								<tr className="attendee-divider-row"><td colSpan={5}><hr /></td></tr>
 
-								{Person.map(report.attendees.filter(p => p.role === "PRINCIPAL"), (person, idx) =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
 								)}
 							</tbody>
@@ -258,7 +304,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 							<Form.Field.ExtraCol className="shortcut-list">
 								<h5>Recent attendees</h5>
 								{Person.map(recents.persons, person =>
-									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add {person.name}</Button>
+									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add {person.name} {person.rank}</Button>
 								)}
 							</Form.Field.ExtraCol>
 						}
@@ -266,11 +312,11 @@ export default class ReportForm extends ValidatableFormWrapper {
 				</Fieldset>
 
 				{!isCancelled &&
-					<PoamsSelector poams={report.poams}
-						shortcuts={recents.poams}
+					<TaskSelector tasks={report.tasks}
+						shortcuts={recents.tasks}
 						onChange={this.onChange}
-						onErrorChange={this.onPoamError}
-						validationState={errors.poams}
+						onErrorChange={this.onTaskError}
+						validationState={errors.tasks}
 						optional={true} />
 				}
 
@@ -294,11 +340,35 @@ export default class ReportForm extends ValidatableFormWrapper {
 					</Button>
 
 					<Collapse in={this.state.showReportText}>
-						<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
+						<div>
+							<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
+
+							{(report.reportSensitiveInformation || !edit) &&
+								<div>
+									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
+										value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
+										onChange={this.updateReportSensitiveInformation} />
+									<AuthorizationGroupsSelector
+										groups={report.authorizationGroups}
+										shortcuts={recents.authorizationGroups}
+										onChange={this.onChange}
+										onErrorChange={this.onAuthorizationGroupError}
+										validationState={errors.authorizationGroups} />
+								</div>
+							}
+						</div>
 					</Collapse>
 				</Fieldset>
 			</ValidatableForm>
 		</div>
+	}
+
+	updateReportSensitiveInformation = (value) => {
+		if (!this.props.report.reportSensitiveInformation) {
+			this.props.report.reportSensitiveInformation = {}
+		}
+		this.props.report.reportSensitiveInformation.text = value
+		this.onChange()
 	}
 
 	@autobind
@@ -359,12 +429,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 
 	@autobind
-	onPoamError(isError, message) {
+	onTaskError(isError, message) {
 		let errors = this.state.errors
 		if (isError) {
-			errors.poams = 'error'
+			errors.tasks = 'error'
 		} else {
-			delete errors.poams
+			delete errors.tasks
 		}
 		this.setState({errors})
 	}
@@ -405,6 +475,17 @@ export default class ReportForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
+	onAuthorizationGroupError(isError, message) {
+		let errors = this.state.errors
+		if (isError) {
+			errors.authorizationGroups = 'error'
+		} else {
+			delete errors.authorizationGroups
+		}
+		this.setState({errors})
+	}
+
+	@autobind
 	onChange() {
 		this.setState({errors : this.validateReport(), reportChanged: true})
 		this.forceUpdate()
@@ -425,7 +506,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	saveReport(disableSubmits) {
-		let report = new Report(this.props.report)
+		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText'))
 		let isCancelled = this.state.isCancelled
 		let edit = !!report.id
 		if(report.primaryAdvisor) { report.attendees.find(a => a.id === report.primaryAdvisor.id).isPrimary = true }
@@ -441,8 +522,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 			delete report.cancelledReason
 		}
 
+		if (disableSubmits) {
+			this.setState({disableOnSubmit: disableSubmits})
+		}
+
 		let url = `/api/reports/${edit ? 'update' : 'new'}?sendEditEmail=${disableSubmits}`
-		return API.send(url, report, {disableSubmits: disableSubmits})
+		return API.send(url, report, {disableSubmits})
 	}
 
 	@autobind
@@ -465,32 +550,51 @@ export default class ReportForm extends ValidatableFormWrapper {
 				})
 			})
 			.catch(response => {
-				this.setState({error: {message: response.message || response.error}})
+				this.setState({
+					error: {message: response.message || response.error},
+					disableOnSubmit: false
+				})
 				window.scrollTo(0, 0)
 			})
 	}
 
 	@autobind
 	autoSave() {
-		let timeoutId = window.setTimeout(this.autoSave, 30000)
-		this.setState({timeoutId})
+		// Only auto-save if the report has changed
+		if (this.state.reportChanged === false) {
+			// Just re-schedule the auto-save timer
+			let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
+			this.setState({timeoutId})
+		} else {
+			this.saveReport(false)
+				.then(response => {
+					if (response.id) {
+						this.props.report.id = response.id
+					}
+					if (response.reportSensitiveInformation) {
+						this.props.report.reportSensitiveInformation = response.reportSensitiveInformation
+					}
 
-		//If the report hasn't changed, don't save it.
-		if (this.state.reportChanged === false) { return }
-
-		this.saveReport(false)
-			.then(response => {
-				if (response.id) {
-					this.props.report.id = response.id
-				}
-
-				//Reset the reportchanged state, yes this could drop a few keystrokes that
-				// the user made while we were saving, but that's not a huge deal.
-				this.setState({autoSavedAt: moment(), reportChanged: false, showAutoSaveBanner: true})
-				window.setTimeout(this.hideAutoSaveBanner, 5000)
-			}).catch(response =>
-				this.setState({error: "There was an error autosaving your report. We'll try again in a few seconds"})
-			)
+					// Reset the reportChanged state, yes this could drop a few keystrokes that
+					// the user made while we were saving, but that's not a huge deal.
+					this.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
+					this.setState({autoSavedAt: moment(), reportChanged: false, showAutoSaveBanner: true, autoSaveError: null})
+					// Hide the auto-save banner after a while
+					window.setTimeout(this.hideAutoSaveBanner, 5000)
+					// And re-schedule the auto-save timer
+					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
+					this.setState({timeoutId})
+				}).catch(response => {
+					// Show an error message
+					this.autoSaveTimeout.add(this.autoSaveTimeout) // exponential back-off
+					this.setState({showAutoSaveBanner: true, autoSaveError: "There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout.humanize()})
+					// Hide the auto-save banner after a while
+					window.setTimeout(this.hideAutoSaveBanner, 5000)
+					// And re-schedule the auto-save timer
+					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
+					this.setState({timeoutId})
+				})
+		}
 	}
 
 	@autobind

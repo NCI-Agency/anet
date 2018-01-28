@@ -1,9 +1,10 @@
 import React, {Component, PropTypes} from 'react'
 import {Button, DropdownButton, MenuItem, Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import _isequal from 'lodash.isequal'
-import dict from 'dictionary'
+import _isequal from 'lodash/isEqual'
+import pluralize from 'pluralize'
 
+import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import History from 'components/History'
 
@@ -13,9 +14,36 @@ import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 
-import {Person, Poam} from 'models'
+import {Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
+
+const taskFilters = props => {
+	const taskFiltersObj = {
+		Organization: <OrganizationFilter
+						queryKey="responsibleOrgId"
+						queryIncludeChildOrgsKey="includeChildrenOrgs"/>,
+		Status: <SelectSearchFilter
+						queryKey="status"
+						values={["ACTIVE", "INACTIVE"]}
+						labels={["Active", "Inactive"]}/>,
+		'Projected completion': <DateRangeSearch queryKey="projectedCompletion"/>,
+		'Planned completion': <DateRangeSearch queryKey="plannedCompletion"/>
+	}
+	// TODO: reenable custom fields
+	// const customEnum = Settings.fields.task.customFieldEnum
+	// if (customEnum)
+	// 	taskFiltersObj[customEnum.label] = <SelectSearchFilter
+	// 		queryKey="projectStatus"
+	// 		values={Object.keys(customEnum.enum)}
+	// 		labels={Object.values(customEnum.enum)}/>
+	// const customField = Settings.fields.task.customField
+	// if (customField)
+	// 	taskFiltersObj[customField.label] = <SelectSearchFilter
+	// 		queryKey="customField"
+	// 		/>
+	return taskFiltersObj
+}
 
 export default class AdvancedSearch extends Component {
 	static propTypes = {
@@ -29,7 +57,7 @@ export default class AdvancedSearch extends Component {
 
 	@autobind
 	getFilters(context) {
-		let filters = {}
+		const filters = {}
 		filters.Reports = {
 			filters: {
 				Author: <AutocompleteFilter
@@ -38,7 +66,7 @@ export default class AdvancedSearch extends Component {
 					valueKey="name"
 					fields={Person.autocompleteQuery}
 					template={Person.autocompleteTemplate}
-					queryParams={{role: 'ADVISOR'}}
+					queryParams={{role: Person.ROLE.ADVISOR}}
 					placeholder="Filter reports by author..."
 				/>,
 				Attendee: <AutocompleteFilter
@@ -48,6 +76,23 @@ export default class AdvancedSearch extends Component {
 					fields={Person.autocompleteQuery}
 					template={Person.autocompleteTemplate}
 					placeholder="Filter reports by attendee..."
+				/>,
+				"Author Position": <AutocompleteFilter
+					queryKey="authorPositionId"
+					objectType={Position}
+					valueKey="name"
+					fields={Position.autocompleteQuery}
+					template={Position.autocompleteTemplate}
+					queryParams={{type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]}}
+					placeholder="Filter reports by author position..."
+				/>,
+				"Attendee Position": <AutocompleteFilter
+					queryKey="attendeePositionId"
+					objectType={Position}
+					valueKey="name"
+					fields={Position.autocompleteQuery}
+					template={Position.autocompleteTemplate}
+					placeholder="Filter reports by attendee position..."
 				/>,
 				Organization: <OrganizationFilter
 					queryKey="orgId"
@@ -75,19 +120,19 @@ export default class AdvancedSearch extends Component {
 			}
 		}
 
-		let poamShortName = dict.lookup('POAM_SHORT_NAME')
-		filters.Reports.filters[poamShortName] =
+		const taskShortLabel = Settings.fields.task.shortLabel
+		filters.Reports.filters[taskShortLabel] =
 			<AutocompleteFilter
-				queryKey="poamId"
-				objectType={Poam}
-				fields={Poam.autocompleteQuery}
-				template={Poam.autocompleteTemplate}
+				queryKey="taskId"
+				objectType={Task}
+				fields={Task.autocompleteQuery}
+				template={Task.autocompleteTemplate}
 				valueKey="shortName"
-				placeholder={`Filter reports by ${poamShortName}...`}
+				placeholder={`Filter reports by ${taskShortLabel}...`}
 			/>
 
 
-		let countries = dict.lookup('countries')
+		const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
 		filters.People = {
 			filters: {
 				Organization: <OrganizationFilter
@@ -96,8 +141,8 @@ export default class AdvancedSearch extends Component {
 				/>,
 				Role: <SelectSearchFilter
 					queryKey="role"
-					values={["ADVISOR","PRINCIPAL"]}
-					labels={[dict.lookup('ADVISOR_PERSON_TITLE'), dict.lookup('PRINCIPAL_PERSON_TITLE')]}
+					values={[Person.ROLE.ADVISOR,Person.ROLE.PRINCIPAL]}
+					labels={[Settings.fields.advisor.person.name, Settings.fields.principal.person.name]}
 				/>,
 				Status: <SelectSearchFilter
 					queryKey="status"
@@ -121,8 +166,8 @@ export default class AdvancedSearch extends Component {
 			filters: {
 				"Organization type": <SelectSearchFilter
 					queryKey="type"
-					values={["ADVISOR_ORG", "PRINCIPAL_ORG"]}
-					labels={[dict.lookup('ADVISOR_ORG_NAME'), dict.lookup('PRINCIPAL_ORG_NAME')]}
+					values={[Organization.TYPE.ADVISOR_ORG, Organization.TYPE.PRINCIPAL_ORG]}
+					labels={[Settings.fields.advisor.org.name, Settings.fields.principal.org.name]}
 				  />,
 			}
 		}
@@ -131,8 +176,8 @@ export default class AdvancedSearch extends Component {
 			filters: {
 				"Position type": <SelectSearchFilter
 					queryKey="type"
-					values={["ADVISOR", "PRINCIPAL"]}
-					labels={[dict.lookup('ADVISOR_POSITION_NAME'), dict.lookup('PRINCIPAL_POSITION_NAME')]}
+					values={[Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL]}
+					labels={[Settings.fields.advisor.position.name, Settings.fields.principal.position.name]}
 				/>,
 				Organization: <OrganizationFilter
 					queryKey="organizationId"
@@ -160,19 +205,9 @@ export default class AdvancedSearch extends Component {
 		//No filters on Location
 		filters.Locations = {filters: {}}
 
-		//Poam filters
-		filters[poamShortName + 's'] = {
-			filters: {
-				Organization: <OrganizationFilter
-					queryKey="responsibleOrgId"
-					queryIncludeChildOrgsKey="includeChildrenOrgs"
-				/>,
-				Status: <SelectSearchFilter
-					queryKey="status"
-					values={["ACTIVE", "INACTIVE"]}
-					labels={["Active", "Inactive"]}
-				/>,
-			}
+		//Task filters
+		filters[pluralize(taskShortLabel)] = {
+			filters: taskFilters()
 		}
 		return filters
 	}
@@ -180,7 +215,7 @@ export default class AdvancedSearch extends Component {
 	constructor(props, context) {
 		super(props, context)
 
-		let query = props || {}
+		const query = props || {}
 		this.ALL_FILTERS = this.getFilters(context)
 		this.state = {
 			objectType: query.objectType || "Reports",
@@ -199,11 +234,11 @@ export default class AdvancedSearch extends Component {
 	}
 
 	render() {
-		let {objectType, text, filters} = this.state
+		const {objectType, text, filters} = this.state
 		//console.log("RENDER AdvancedSearch", objectType, text, filters)
-		let filterDefs = this.ALL_FILTERS[this.state.objectType].filters
-		let existingKeys = filters.map(f => f.key)
-		let moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
+		const filterDefs = this.ALL_FILTERS[this.state.objectType].filters
+		const existingKeys = filters.map(f => f.key)
+		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
 
 		return <div className="advanced-search form-horizontal">
 			<FormGroup style={{textAlign: "center"}}>
@@ -335,10 +370,10 @@ class SearchFilter extends Component {
 			let organizationFilter = this.props.organizationFilter
 			if (organizationFilter) {
 				let positionType = filter.value.value || ""
-				if (positionType === "PRINCIPAL") {
-					organizationFilter.setState({queryParams: {type: "PRINCIPAL_ORG"}})
-				} else if (positionType === "ADVISOR") {
-					organizationFilter.setState({queryParams: {type: "ADVISOR_ORG"}})
+				if (positionType === Position.TYPE.PRINCIPAL) {
+					organizationFilter.setState({queryParams: {type: Organization.TYPE.PRINCIPAL_ORG}})
+				} else if (positionType === Position.TYPE.ADVISOR) {
+					organizationFilter.setState({queryParams: {type: Organization.TYPE.ADVISOR_ORG}})
 				} else {
 					organizationFilter.setState({queryParams: {}})
 				}

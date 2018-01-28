@@ -23,21 +23,24 @@ import org.skife.jdbi.v2.sqlobject.SqlBatch;
 import com.google.common.base.Joiner;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.Poam;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
+import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.database.mappers.PoamMapper;
+import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
+import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
@@ -47,13 +50,13 @@ import mil.dds.anet.utils.Utils;
 
 public class ReportDao implements IAnetDao<Report> {
 
-	private static String[] fields = { "id", "state", "createdAt", "updatedAt", "engagementDate",
+	private static final String[] fields = { "id", "state", "createdAt", "updatedAt", "engagementDate",
 			"locationId", "approvalStepId", "intent", "exsum", "atmosphere", "cancelledReason",
 			"advisorOrganizationId", "principalOrganizationId", "releasedAt",
 			"atmosphereDetails", "text", "keyOutcomes",
 			"nextSteps", "authorId"};
-	private static String tableName = "reports";
-	public static String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	private static final String tableName = "reports";
+	public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 
 	Handle dbHandle;
 
@@ -63,6 +66,11 @@ public class ReportDao implements IAnetDao<Report> {
 
 	@Override
 	public ReportList getAll(int pageNum, int pageSize) {
+		// Return the reports without sensitive information
+		return getAll(pageNum, pageSize, null);
+	}
+
+	public ReportList getAll(int pageNum, int pageSize, Person user) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getAllReports */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
@@ -79,11 +87,16 @@ public class ReportDao implements IAnetDao<Report> {
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum)
 			.map(new ReportMapper());
-		return ReportList.fromQuery(query, pageNum, pageSize);
+		return ReportList.fromQuery(user, query, pageNum, pageSize);
 	}
 
 	@Override
 	public Report insert(Report r) {
+		// Create a report without sensitive information
+		return insert(r, null);
+	}
+
+	public Report insert(Report r, Person user) {
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			@Override
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
@@ -119,6 +132,10 @@ public class ReportDao implements IAnetDao<Report> {
 					.executeAndReturnGeneratedKeys();
 				r.setId(DaoUtils.getGeneratedId(keys));
 
+				// Write sensitive information (if allowed)
+				final ReportSensitiveInformation rsi = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insert(r.getReportSensitiveInformation(), user, r);
+				r.setReportSensitiveInformation(rsi);
+
 				final ReportBatch rb = dbHandle.attach(ReportBatch.class);
 				if (r.getAttendees() != null) {
 					//Setify based on attendeeId to prevent violations of unique key constraint. 
@@ -126,8 +143,12 @@ public class ReportDao implements IAnetDao<Report> {
 					r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getId(), rp));
 					rb.insertReportAttendees(r.getId(), new ArrayList<ReportPerson>(attendeeMap.values()));
 				}
-				if (r.getPoams() != null) {
-					rb.insertReportPoams(r.getId(), r.getPoams());
+
+				if (r.getAuthorizationGroups() != null) {
+					rb.insertReportAuthorizationGroups(r.getId(), r.getAuthorizationGroups());
+				}
+				if (r.getTasks() != null) {
+					rb.insertReportTasks(r.getId(), r.getTasks());
 				}
 				if (r.getTags() != null) {
 					rb.insertReportTags(r.getId(), r.getTags());
@@ -142,9 +163,13 @@ public class ReportDao implements IAnetDao<Report> {
 		void insertReportAttendees(@Bind("reportId") Integer reportId,
 				@BindBean List<ReportPerson> reportPeople);
 
-		@SqlBatch("INSERT INTO reportPoams (reportId, poamId) VALUES (:reportId, :id)")
-		void insertReportPoams(@Bind("reportId") Integer reportId,
-				@BindBean List<Poam> poams);
+		@SqlBatch("INSERT INTO reportAuthorizationGroups (reportId, authorizationGroupId) VALUES (:reportId, :id)")
+		void insertReportAuthorizationGroups(@Bind("reportId") Integer reportId,
+				@BindBean List<AuthorizationGroup> authorizationGroups);
+
+		@SqlBatch("INSERT INTO reportTasks (reportId, taskId) VALUES (:reportId, :id)")
+		void insertReportTasks(@Bind("reportId") Integer reportId,
+				@BindBean List<Task> tasks);
 
 		@SqlBatch("INSERT INTO reportTags (reportId, tagId) VALUES (:reportId, :id)")
 		void insertReportTags(@Bind("reportId") Integer reportId,
@@ -153,6 +178,11 @@ public class ReportDao implements IAnetDao<Report> {
 
 	@Override
 	public Report getById(int id) {
+		// Return the report without sensitive information
+		return getById(id, null);
+	}
+
+	public Report getById(int id, Person user) {
 		Query<Report> query = dbHandle.createQuery("/* getReportById */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM reports, people "
 				+ "WHERE reports.id = :id "
@@ -162,39 +192,53 @@ public class ReportDao implements IAnetDao<Report> {
 		List<Report> results = query.list();
 		if (results.size() == 0) { return null; }
 		Report r = results.get(0);
+		r.setUser(user);
 		return r;
 	}
 
 	@Override
 	public int update(Report r) {
-		r.setUpdatedAt(DateTime.now());
+		// Update the report without sensitive information
+		return update(r, null);
+	}
 
-		StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
-				+ "state = :state, updatedAt = :updatedAt, locationId = :locationId, "
-				+ "intent = :intent, exsum = :exsum, text = :reportText, "
-				+ "keyOutcomes = :keyOutcomes, nextSteps = :nextSteps, "
-				+ "approvalStepId = :approvalStepId, ");
-		if (DaoUtils.isMsSql(dbHandle)) {
-			sql.append("engagementDate = CAST(:engagementDate AS datetime2), releasedAt = CAST(:releasedAt AS datetime2), ");
-		} else {
-			sql.append("engagementDate = :engagementDate, releasedAt = :releasedAt, ");
-		}
-		sql.append("atmosphere = :atmosphere, atmosphereDetails = :atmosphereDetails, "
-				+ "cancelledReason = :cancelledReason, " 
-				+ "principalOrganizationId = :principalOrgId, advisorOrganizationId = :advisorOrgId "
-				+ "WHERE id = :id");
+	public int update(Report r, Person user) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			@Override
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				// Write sensitive information (if allowed)
+				AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insertOrUpdate(r.getReportSensitiveInformation(), user, r);
 
-		return dbHandle.createStatement(sql.toString())
-			.bindFromProperties(r)
-			.bind("state", DaoUtils.getEnumId(r.getState()))
-			.bind("locationId", DaoUtils.getId(r.getLocation()))
-			.bind("authorId", DaoUtils.getId(r.getAuthor()))
-			.bind("approvalStepId", DaoUtils.getId(r.getApprovalStep()))
-			.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
-			.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
-			.bind("advisorOrgId", DaoUtils.getId(r.getAdvisorOrg()))
-			.bind("principalOrgId", DaoUtils.getId(r.getPrincipalOrg()))
-			.execute();
+				r.setUpdatedAt(DateTime.now());
+
+				StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
+						+ "state = :state, updatedAt = :updatedAt, locationId = :locationId, "
+						+ "intent = :intent, exsum = :exsum, text = :reportText, "
+						+ "keyOutcomes = :keyOutcomes, nextSteps = :nextSteps, "
+						+ "approvalStepId = :approvalStepId, ");
+				if (DaoUtils.isMsSql(dbHandle)) {
+					sql.append("engagementDate = CAST(:engagementDate AS datetime2), releasedAt = CAST(:releasedAt AS datetime2), ");
+				} else {
+					sql.append("engagementDate = :engagementDate, releasedAt = :releasedAt, ");
+				}
+				sql.append("atmosphere = :atmosphere, atmosphereDetails = :atmosphereDetails, "
+						+ "cancelledReason = :cancelledReason, "
+						+ "principalOrganizationId = :principalOrgId, advisorOrganizationId = :advisorOrgId "
+						+ "WHERE id = :id");
+
+				return dbHandle.createStatement(sql.toString())
+					.bindFromProperties(r)
+					.bind("state", DaoUtils.getEnumId(r.getState()))
+					.bind("locationId", DaoUtils.getId(r.getLocation()))
+					.bind("authorId", DaoUtils.getId(r.getAuthor()))
+					.bind("approvalStepId", DaoUtils.getId(r.getApprovalStep()))
+					.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
+					.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
+					.bind("advisorOrgId", DaoUtils.getId(r.getAdvisorOrg()))
+					.bind("principalOrgId", DaoUtils.getId(r.getPrincipalOrg()))
+					.execute();
+					}
+		});
 	}
 
 	public int addAttendeeToReport(ReportPerson rp, Report r) {
@@ -223,19 +267,36 @@ public class ReportDao implements IAnetDao<Report> {
 			.execute();
 	}
 
-	public int addPoamToReport(Poam p, Report r) {
-		return dbHandle.createStatement("/* addPoamToReport */ INSERT INTO reportPoams (poamId, reportId) "
-				+ "VALUES (:poamId, :reportId)")
+
+	public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
+		return dbHandle.createStatement("/* addAuthorizationGroupToReport */ INSERT INTO reportAuthorizationGroups (authorizationGroupId, reportId) "
+				+ "VALUES (:authorizationGroupId, :reportId)")
 			.bind("reportId", r.getId())
-			.bind("poamId", p.getId())
+			.bind("authorizationGroupId", a.getId())
 			.execute();
 	}
 
-	public int removePoamFromReport(Poam p, Report r) {
-		return dbHandle.createStatement("/* removePoamFromReport*/ DELETE FROM reportPoams "
-				+ "WHERE reportId = :reportId AND poamId = :poamId")
+	public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
+		return dbHandle.createStatement("/* removeAuthorizationGroupFromReport*/ DELETE FROM reportAuthorizationGroups "
+				+ "WHERE reportId = :reportId AND authorizationGroupId = :authorizationGroupId")
 				.bind("reportId", r.getId())
-				.bind("poamId", p.getId())
+				.bind("authorizationGroupId", a.getId())
+				.execute();
+	}
+
+	public int addTaskToReport(Task p, Report r) {
+		return dbHandle.createStatement("/* addTaskToReport */ INSERT INTO reportTasks (taskId, reportId) "
+				+ "VALUES (:taskId, :reportId)")
+			.bind("reportId", r.getId())
+			.bind("taskId", p.getId())
+			.execute();
+	}
+
+	public int removeTaskFromReport(Task p, Report r) {
+		return dbHandle.createStatement("/* removeTaskFromReport*/ DELETE FROM reportTasks "
+				+ "WHERE reportId = :reportId AND taskId = :taskId")
+				.bind("reportId", r.getId())
+				.bind("taskId", p.getId())
 				.execute();
 	}
 
@@ -265,12 +326,22 @@ public class ReportDao implements IAnetDao<Report> {
 			.list();
 	}
 
-	public List<Poam> getPoamsForReport(Report report) {
-		return dbHandle.createQuery("/* getPoamsForReport */ SELECT * FROM poams, reportPoams "
-				+ "WHERE reportPoams.reportId = :reportId "
-				+ "AND reportPoams.poamId = poams.id")
+
+	public List<AuthorizationGroup> getAuthorizationGroupsForReport(int reportId) {
+		return dbHandle.createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM authorizationGroups, reportAuthorizationGroups "
+				+ "WHERE reportAuthorizationGroups.reportId = :reportId "
+				+ "AND reportAuthorizationGroups.authorizationGroupId = authorizationGroups.id")
+				.bind("reportId", reportId)
+				.map(new AuthorizationGroupMapper())
+				.list();
+	}
+
+	public List<Task> getTasksForReport(Report report) {
+		return dbHandle.createQuery("/* getTasksForReport */ SELECT * FROM tasks, reportTasks "
+				+ "WHERE reportTasks.reportId = :reportId "
+				+ "AND reportTasks.taskId = tasks.id")
 				.bind("reportId", report.getId())
-				.map(new PoamMapper())
+				.map(new TaskMapper())
 				.list();
 	}
 
@@ -304,8 +375,8 @@ public class ReportDao implements IAnetDao<Report> {
 				// Delete tags
 				dbHandle.execute("/* deleteReport.tags */ DELETE FROM reportTags where reportId = ?", report.getId());
 
-				//Delete poams
-				dbHandle.execute("/* deleteReport.poams */ DELETE FROM reportPoams where reportId = ?", report.getId());
+				//Delete tasks
+				dbHandle.execute("/* deleteReport.tasks */ DELETE FROM reportTasks where reportId = ?", report.getId());
 				
 				//Delete attendees
 				dbHandle.execute("/* deleteReport.attendees */ DELETE FROM reportPeople where reportId = ?", report.getId());
@@ -315,10 +386,13 @@ public class ReportDao implements IAnetDao<Report> {
 				
 				//Delete approvalActions
 				dbHandle.execute("/* deleteReport.actions */ DELETE FROM approvalActions where reportId = ?", report.getId());
-				
+
+				//Delete relation to authorization groups
+				dbHandle.execute("/* deleteReport.authorizationGroups */ DELETE FROM reportAuthorizationGroups where reportId = ?", report.getId());
+
 				//Delete report
 				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where id = ?", report.getId());
-				
+
 				return null;
 			}
 		});
@@ -335,15 +409,15 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 	
 	/* Generates the Rollup Graph for a particular Organization Type, starting at the root of the org hierarchy */
-	public List<RollupGraph> getDailyRollupGraph(DateTime start, DateTime end, OrganizationType orgType) {
+	public List<RollupGraph> getDailyRollupGraph(DateTime start, DateTime end, OrganizationType orgType, Map<Integer, Organization> nonReportingOrgs) {
 		List<Map<String, Object>> results = rollupQuery(start, end, orgType, null, false);
 		Map<Integer,Organization> orgMap = AnetObjectEngine.getInstance().buildTopLevelOrgHash(orgType);
 		
-		return generateRollupGraphFromResults(results, orgMap);
+		return generateRollupGraphFromResults(results, orgMap, nonReportingOrgs);
 	}
 	
-	/* Generates a Rollup graph for a particular organiztaion.  Starting with a given parent Organization */
-	public List<RollupGraph> getDailyRollupGraph(DateTime start, DateTime end, Integer parentOrgId, OrganizationType orgType) {
+	/* Generates a Rollup graph for a particular organization.  Starting with a given parent Organization */
+	public List<RollupGraph> getDailyRollupGraph(DateTime start, DateTime end, Integer parentOrgId, OrganizationType orgType, Map<Integer, Organization> nonReportingOrgs) {
 		List<Organization> orgList = null;
 		Map<Integer,Organization> orgMap;
 		if (parentOrgId.equals(-1) == false) { // -1 is code for no parent org.  
@@ -364,15 +438,15 @@ public class ReportDao implements IAnetDao<Report> {
 		
 		List<Map<String,Object>> results = rollupQuery(start, end, orgType, orgList, parentOrgId.equals(-1));
 		
-		return generateRollupGraphFromResults(results, orgMap);
+		return generateRollupGraphFromResults(results, orgMap, nonReportingOrgs);
 	}
 
 	/* Generates Advisor Report Insights for Organizations */
 	public List<Map<String,Object>> getAdvisorReportInsights(DateTime start, DateTime end, int orgId) {
-		Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		StringBuilder sql = new StringBuilder();
 
-		sql.append("/* AdvisorReportInsightsQuery */");
+		sql.append("/* AdvisorReportInsightsQuery */ ");
 		sql.append("SELECT ");
 		sql.append("CASE WHEN a.organizationId IS NULL THEN b.organizationId ELSE a.organizationId END AS organizationId,");
 		sql.append("CASE WHEN a.organizationShortName IS NULL THEN b.organizationShortName ELSE a.organizationShortName END AS organizationShortName,");
@@ -472,8 +546,7 @@ public class ReportDao implements IAnetDao<Report> {
 					"AND a.personId = b.personId",
 					"name,",
 					selectOrg};
-		}
-		else {
+		} else {
 			fmtArgs = new String[] {
 					"",
 					"",
@@ -520,10 +593,10 @@ public class ReportDao implements IAnetDao<Report> {
 		sql.append("FROM reports WHERE ");
 		
 		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql.append("releasedAt >= :startDate and releasedAt <= :endDate "
+			sql.append("releasedAt >= :startDate and releasedAt < :endDate "
 					+ "AND engagementDate > :engagementDateStart ");
 			sqlArgs.put("startDate", start);
-			sqlArgs.put("endDate", end);
+			sqlArgs.put("endDate", end.plusMillis(1));
 			sqlArgs.put("engagementDateStart", getRollupEngagmentStart(start));
 		} else { 
 			sql.append("releasedAt  >= DateTime(:startDate) AND releasedAt <= DateTime(:endDate) " 
@@ -559,23 +632,43 @@ public class ReportDao implements IAnetDao<Report> {
 	 * And the map of each organization to the organization that their reports roll up to
 	 * this method returns the final rollup graph information. 
 	 */
-	private List<RollupGraph> generateRollupGraphFromResults(List<Map<String,Object>> dbResults, Map<Integer, Organization> orgMap) { 
+	private List<RollupGraph> generateRollupGraphFromResults(List<Map<String,Object>> dbResults, Map<Integer, Organization> orgMap, Map<Integer, Organization> nonReportingOrgs) {
 		Map<Integer,Map<ReportState,Integer>> rollup = new HashMap<Integer,Map<ReportState,Integer>>();
 		
 		for (Map<String,Object> result : dbResults) { 
 			Integer orgId = (Integer) result.get("orgId");
+			if (nonReportingOrgs.containsKey(orgId)) {
+				// Skip non-reporting organizations
+				continue;
+			}
 			Integer count = (Integer) result.get("count");
 			ReportState state = ReportState.values()[(Integer) result.get("state")];
 		
-			Integer parentOrgId = (orgId == null) ? null : DaoUtils.getId(orgMap.get(orgId));
+			Integer parentOrgId = DaoUtils.getId(orgMap.get(orgId));
 			Map<ReportState,Integer> orgBar = rollup.get(parentOrgId);
 			if (orgBar == null) { 
 				orgBar = new HashMap<ReportState,Integer>();
-				rollup.put(parentOrgId,  orgBar);
+				rollup.put(parentOrgId, orgBar);
 			}
 			orgBar.put(state,  Utils.orIfNull(orgBar.get(state), 0) + count);
 		}
-		
+
+		// Add all (top-level) organizations without any reports
+		for (final Map.Entry<Integer, Organization> entry : orgMap.entrySet()) {
+			final Integer orgId = entry.getKey();
+			if (nonReportingOrgs.containsKey(orgId)) {
+				// Skip non-reporting organizations
+				continue;
+			}
+			final Integer parentOrgId = DaoUtils.getId(orgMap.get(orgId));
+			if (!rollup.keySet().contains(parentOrgId)) {
+				final Map<ReportState, Integer> orgBar = new HashMap<ReportState, Integer>();
+				orgBar.put(ReportState.RELEASED, 0);
+				orgBar.put(ReportState.CANCELLED, 0);
+				rollup.put(parentOrgId, orgBar);
+			}
+		}
+
 		List<RollupGraph> result = new LinkedList<RollupGraph>();
 		for (Map.Entry<Integer, Map<ReportState,Integer>> entry : rollup.entrySet()) { 
 			Map<ReportState,Integer> values = entry.getValue();
@@ -588,5 +681,4 @@ public class ReportDao implements IAnetDao<Report> {
 		
 		return result;
 	}
-
 }

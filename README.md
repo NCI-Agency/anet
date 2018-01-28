@@ -1,3 +1,9 @@
+[![Build Status](https://travis-ci.org/NCI-Agency/anet.svg?branch=candidate)](https://travis-ci.org/NCI-Agency/anet)
+[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)](https://www.browserstack.com/automate/public-build/SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/14060/badge.svg)](https://scan.coverity.com/projects/nci-agency-anet)
+[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=ncia%3Aanet%3Acandidate)](https://sonarcloud.io/dashboard?id=ncia%3Aanet%3Acandidate)
+<a href="https://www.versioneye.com/user/projects/5a3bb1280fb24f7a580004a9"><img src="https://www.versioneye.com/user/projects/5a3bb1280fb24f7a580004a9/badge.svg?style=flat-square"></a>
+
 ## What is ANET?
 
 The Advisor Network ("ANET") is a tool to track relationships between advisors and advisees. ANET was initially built by the [Defense Digital Service](https://www.dds.mil/) in support of the USFOR-A and Resolute Support mission to train, advise, and assist the Afghan government. ANET is currently further developed by the [NATO Communication and Information Agency](https://www.ncia.nato.int/) and published over [here](https://github.com/NCI-Agency/anet). 
@@ -6,7 +12,6 @@ Although this tool was built in a very specific context, ANET has many potential
 
 In making this software available to the open source community, it is our hope that other groups are able to use ANET to meet their needs. We would also welcome contributions that help improve functionality, add features, and mature this work. 
 
-[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)](https://www.browserstack.com/automate/public-build/SHc2WTI5cFg2Z2h2NFVzMWlYbXVkM2xCYTdZMzVPV2FzRUhEVUpEL3NTUT0tLTdFVy9CWmlRa04yMGlCZldialMxc3c9PQ==--097d5f51f524d9e66cffde76b48cc2116bbe3372)
 
 ## Setting up your development environment
 This repository is structured in two main, disparate components: the frontend and the backend. The frontend is a react.js based JavaScript application that communicates with the backend via XMLHttpRequest (ajax). The backend is a Java application based the Dropwizard framework that runs on a JVM and utilizes Microsoft SQL Server for its database.
@@ -17,7 +22,7 @@ We recommend reading through the documentation in the following order:
 1. [Getting your Development Environment Set Up](./docs/dev-setup.md)
 1. [Working on the backend](./docs/backend-overview.md)
 1. [Working on the frontend](./docs/frontend-overview.md)
-1. See [DOCUMENTATION.md](./docs/DOCUMENTATION.md) and [INSTALL.md](./docs/INSTALL.md) for additional information.
+1. See [DOCUMENTATION.md](./docs/DOCUMENTATION.md), [INSTALL.md](./docs/INSTALL.md) and [TROUBLESHOOT.md](./docs/TROUBLESHOOT.md) for additional information.
 1. See [User Workflows](./docs/User_Workflows_and_Documentation.md) for details on user workflows. 
 
 

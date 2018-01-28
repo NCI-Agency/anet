@@ -4,7 +4,7 @@ import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Table} from 'react-bootstrap'
 import {Position,Person} from 'models'
 import API from 'api'
-import dict from 'dictionary'
+import Settings from 'Settings'
 
 import Messages from'components/Messages'
 
@@ -35,21 +35,21 @@ export default class EditAssociatedPositionsModal extends Component {
 	}
 
 	render() {
-		let {position} = this.props
-		let {associatedPositions} = this.state
-		let currentUser = this.context.currentUser
-		let assignedRole = position.type === 'PRINCIPAL' ? dict.lookup('ADVISOR_PERSON_TITLE') : dict.lookup('PRINCIPAL_PERSON_TITLE')
+		const {position} = this.props
+		const {associatedPositions} = this.state
+		const currentUser = this.context.currentUser
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
-		let positionSearchQuery = {matchPersonName: true}
-		if (position.type === 'PRINCIPAL') {
-			positionSearchQuery.type = ['ADVISOR', 'SUPER_USER', 'ADMINISTRATOR']
+		const positionSearchQuery = {matchPersonName: true}
+		if (position.type === Position.TYPE.PRINCIPAL) {
+			positionSearchQuery.type = [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]
 			if (currentUser.isAdmin() === false) {
 				//Super Users can only assign a position in their organization!
 				positionSearchQuery.organizationId = currentUser.position.organization.id
 				positionSearchQuery.includeChildrenOrgs = true
 			}
 		} else {
-			positionSearchQuery.type = ['PRINCIPAL']
+			positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
 		}
 
 		return (
@@ -62,7 +62,7 @@ export default class EditAssociatedPositionsModal extends Component {
 					<Autocomplete
 						placeholder={'Start typing to search for a ' + assignedRole + ' position...'}
 						objectType={Position}
-						fields={'id, name, code, type, person { id, name, rank }, organization { id, shortName, longName}'}
+						fields={'id, name, code, type, person { id, name, rank }, organization { id, shortName, longName, identificationCode}'}
 						template={pos => {
 							let components = []
 							pos.person && components.push(pos.person.name)

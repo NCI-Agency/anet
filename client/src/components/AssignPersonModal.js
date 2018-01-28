@@ -2,7 +2,7 @@ import React, {Component, PropTypes} from 'react'
 import autobind from 'autobind-decorator'
 import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
-import {Person} from 'models'
+import {Person, Position} from 'models'
 import API from 'api'
 
 export default class AssignPersonModal extends Component {
@@ -30,10 +30,10 @@ export default class AssignPersonModal extends Component {
 		let newPerson = this.state.person
 
 		let personSearchQuery = {}
-		if (position.type === 'PRINCIPAL') {
-			personSearchQuery.role = 'PRINCIPAL'
+		if (position.type === Position.TYPE.PRINCIPAL) {
+			personSearchQuery.role = Person.ROLE.PRINCIPAL
 		} else  {
-			personSearchQuery.role = 'ADVISOR'
+			personSearchQuery.role = Person.ROLE.ADVISOR
 		}
 
 		return (

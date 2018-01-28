@@ -76,7 +76,7 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 	}
 
 	public Boolean getMatchPositionName() {
-		return matchPositionName == null ? false : matchPositionName;
+		return Boolean.TRUE.equals(matchPositionName);
 	}
 
 	public void setMatchPositionName(Boolean matchPositionName) {

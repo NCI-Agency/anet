@@ -3,12 +3,12 @@ import querystring from 'querystring'
 const query = querystring.parse(window.location.search.slice(1))
 
 const API = {
-	fetch(pathName, params) {
+	fetch(pathName, params, accept) {
 		params = params || {}
 		params.credentials = 'same-origin'
 
 		params.headers = params.headers || {}
-		params.headers.Accept = 'application/json'
+		params.headers.Accept = accept || 'application/json'
 
 		if (process.env.NODE_ENV === 'development' && query.user && query.pass) {
 			params.headers.Authorization = 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64')
@@ -58,34 +58,43 @@ const API = {
 		params.headers = params.headers || {}
 		params.headers['Content-Type'] = 'application/json'
 
-		let promise = API.fetch(url, params)
-		let buttons = document.querySelectorAll('[type=submit]')
-		let toggleButtons =  function(onOff) {
-			for (let button of buttons) {
-				button.disabled = !onOff
-			}
-		}
-
-		if (params.disableSubmits) {
-			toggleButtons(false)
-
-			promise.then(response => {
-				toggleButtons(true)
-				return response
-			}, response => {
-				toggleButtons(true)
-				return response
-			})
-		}
-
-		return promise
+		return API.fetch(url, params)
 	},
 
-	query(query, variables, variableDef) {
+	_queryCommon(query, variables, variableDef, output) {
 		variables = variables || {}
 		variableDef = variableDef || ''
 		query = 'query ' + variableDef + ' { ' + query + ' }'
-		return API.send('/graphql', {query, variables}).then(json => json.data)
+		output = output || ''
+		return API.send('/graphql', {query, variables, output})
+	},
+
+	query(query, variables, variableDef) {
+		return API._queryCommon(query, variables, variableDef).then(json => json.data)
+	},
+
+	queryExport(query, variables, variableDef, output) {
+		return API._queryCommon(query, variables, variableDef, output).then(response => response.blob())
+	},
+
+	loadFileAjaxSync(filePath, mimeType) {
+		let xmlhttp=new XMLHttpRequest()
+		xmlhttp.open("GET",filePath,false)
+		if (process.env.NODE_ENV === 'development' && query.user && query.pass) {
+			xmlhttp.setRequestHeader('Authorization', 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64'))
+		}
+		if (mimeType != null) {
+			if (xmlhttp.overrideMimeType) {
+				xmlhttp.overrideMimeType(mimeType)
+			}
+		}
+		xmlhttp.send()
+		if (xmlhttp.status===200) {
+			return xmlhttp.responseText
+		}
+		else {
+			throw new Error("unable to load " + filePath)
+		}
 	},
 }
 

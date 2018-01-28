@@ -18,8 +18,8 @@ export default class PositionNew extends Page {
 		super(props)
 
 		this.state = {
-			position: setDefaultPermissions(new Position( {type: 'ADVISOR'})),
-			originalPosition: setDefaultPermissions(new Position( {type: 'ADVISOR'})),
+			position: setDefaultPermissions(new Position( {type: Position.TYPE.ADVISOR})),
+			originalPosition: setDefaultPermissions(new Position( {type: Position.TYPE.ADVISOR})),
 		}
 	}
 
@@ -29,13 +29,13 @@ export default class PositionNew extends Page {
 			// then look that org up and pre-populate the field.
 			API.query(/* GraphQL */`
 				organization(id:${props.location.query.organizationId}) {
-					id, shortName, longName, type
+					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
 				function getPositionFromData() {
 					let organization = new Organization(data.organization)
 					return setDefaultPermissions(new Position({
-						type: organization.isAdvisorOrg() ? 'ADVISOR' : 'PRINCIPAL',
+						type: organization.isAdvisorOrg() ? Position.TYPE.ADVISOR : Position.TYPE.PRINCIPAL,
 						organization,
 					}))
 				}

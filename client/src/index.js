@@ -25,9 +25,9 @@ import PersonShow from 'pages/people/Show'
 import PersonNew from 'pages/people/New'
 import PersonEdit from 'pages/people/Edit'
 
-import PoamShow from 'pages/poams/Show'
-import PoamNew from 'pages/poams/New'
-import PoamEdit from 'pages/poams/Edit'
+import TaskShow from 'pages/tasks/Show'
+import TaskNew from 'pages/tasks/New'
+import TaskEdit from 'pages/tasks/Edit'
 
 import OrganizationShow from 'pages/organizations/Show'
 import OrganizationNew from 'pages/organizations/New'
@@ -45,6 +45,7 @@ import RollupShow from 'pages/rollup/Show'
 
 import AdminIndex from 'pages/admin/Index'
 import MergePeople from 'pages/admin/MergePeople'
+import AuthorizationGroups from 'pages/admin/AuthorizationGroups'
 
 import GraphiQL from 'pages/GraphiQL'
 
@@ -52,6 +53,10 @@ import OnboardingShow from 'pages/onboarding/Show'
 import OnboardingEdit from 'pages/onboarding/Edit'
 
 import InsightsShow from  'pages/insights/Show'
+
+import AuthorizationGroupShow from 'pages/admin/authorizationgroup/Show'
+import AuthorizationGroupEdit from 'pages/admin/authorizationgroup/Edit'
+import AuthorizationGroupNew from 'pages/admin/authorizationgroup/New'
 
 import Help from 'pages/Help'
 
@@ -94,10 +99,10 @@ ReactDOM.render((
 					<Route path=":id" component={PositionShow} />
 				</Route>
 
-				<Route path="poams">
-					<Route path="new" component={PoamNew} />
-					<Route path=":id/edit" component={PoamEdit} />
-					<Route path=":id" component={PoamShow} />
+				<Route path="tasks">
+					<Route path="new" component={TaskNew} />
+					<Route path=":id/edit" component={TaskEdit} />
+					<Route path=":id" component={TaskShow} />
 				</Route>
 
 				<Route path="rollup" component={RollupShow} />
@@ -105,6 +110,10 @@ ReactDOM.render((
 				<Route path="graphiql" component={GraphiQL} />
 
 				<Route path="admin/mergePeople" component={MergePeople} />
+				<Route path="admin/authorizationGroups" component={AuthorizationGroups} />
+				<Route path="admin/authorizationGroups/new" component={AuthorizationGroupNew} />
+				<Route path="admin/authorizationGroups(/:id)/edit" component={AuthorizationGroupEdit} />
+				<Route path="admin/authorizationGroups(/:id)" component={AuthorizationGroupShow} />
 				<Route path="admin" component={AdminIndex} />
 
 				<Route path="onboarding">
@@ -114,9 +123,11 @@ ReactDOM.render((
 
 				<Route path="help" component={Help} />
 
-        <Route path="insights" component={InsightsShow} />
+				<Route path="insights">
+					<Route path=":insight" component={InsightsShow} />
+				</Route>
 
-        <Route path="*" component={PageMissing} />
+				<Route path="*" component={PageMissing} />
 			</Route>
 		</Router>
 	</InjectablesProvider>

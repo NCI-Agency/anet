@@ -19,7 +19,6 @@ public class Position extends AbstractAnetBean {
 	String code;
 	PositionType type;
 	PositionStatus status;
-		
 	//Lazy Loaded
 	Organization organization;
 	Person person; //The Current person.
@@ -161,7 +160,7 @@ public class Position extends AbstractAnetBean {
 	
 	@Override
 	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != Position.class) { 
+		if (o == null || o.getClass() != this.getClass()) {
 			return false; 
 		}
 		Position other = (Position) o;

@@ -8,9 +8,10 @@ import utils from 'utils'
 import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
+import Tag from 'components/Tag'
 
 import API from 'api'
-import {Report, Person, Poam} from 'models'
+import {Report, Person, Task} from 'models'
 
 export default class ReportMinimal extends Page {
 	static pageProps = {
@@ -41,7 +42,7 @@ export default class ReportMinimal extends Page {
 					id, name
 					position {
 						organization {
-							shortName, longName
+							shortName, longName, identificationCode
 							approvalSteps {
 								id, name,
 								approvers {
@@ -60,15 +61,15 @@ export default class ReportMinimal extends Page {
 				primaryAdvisor { id }
 				primaryPrincipal { id }
 
-				poams { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 
 				comments {
 					id, text, createdAt, updatedAt
 					author { id, name, rank }
 				}
 
-				principalOrg { id, shortName, longName }
-				advisorOrg { id, shortName, longName }
+				principalOrg { id, shortName, longName, identificationCode }
+				advisorOrg { id, shortName, longName, identificationCode }
 
 				approvalStatus {
 					type, createdAt
@@ -79,6 +80,9 @@ export default class ReportMinimal extends Page {
 				}
 
 				approvalStep { name, approvers { id } }
+
+				tags { id, name, description }
+				reportSensitiveInformation { id, text }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -145,6 +149,9 @@ export default class ReportMinimal extends Page {
 								{utils.sentenceCase(report.cancelledReason)}
 							</Form.Field>
 						}
+						<Form.Field id="tags" label="Tags">
+							{report.tags && report.tags.map((tag,i) => <Tag key={tag.id} tag={tag} />)}
+						</Form.Field>
 						<Form.Field id="author" label="Report author">
 							<span>{report.author && report.author.name}</span>
 						</Form.Field>
@@ -167,11 +174,11 @@ export default class ReportMinimal extends Page {
 							</thead>
 
 							<tbody>
-								{Person.map(report.attendees.filter(p => p.role === "ADVISOR"), person =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
 								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
-								{Person.map(report.attendees.filter(p => p.role === "PRINCIPAL"), person =>
+								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
 							</tbody>
@@ -188,10 +195,10 @@ export default class ReportMinimal extends Page {
 							</thead>
 
 							<tbody>
-								{Poam.map(report.poams, (poam, idx) =>
-									<tr key={poam.id} id={"poam_" + idx}>
-										<td className="poamName" >{poam.shortName} - {poam.longName}</td>
-										<td className="poamOrg" >{poam.responsibleOrg && poam.responsibleOrg.shortName }</td>
+								{Task.map(report.tasks, (task, idx) =>
+									<tr key={task.id} id={"task_" + idx}>
+										<td className="taskName" >{task.shortName} - {task.longName}</td>
+										<td className="taskOrg" >{task.responsibleOrg && task.responsibleOrg.shortName }</td>
 									</tr>
 								)}
 							</tbody>
@@ -201,6 +208,12 @@ export default class ReportMinimal extends Page {
 					<Fieldset title="Meeting discussion">
 						<div dangerouslySetInnerHTML={{__html: report.reportText}} />
 					</Fieldset>
+
+					{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
+						<Fieldset title="Sensitive information">
+							<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
+						</Fieldset>
+					}
 
 					{report.isPending() && this.renderApprovals()}
 

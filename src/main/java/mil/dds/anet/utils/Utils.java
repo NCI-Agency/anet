@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,9 +166,25 @@ public class Utils {
 		return input;
 	}
 	
-  public static String trimStringReturnNull(String input) {
+	public static String trimStringReturnNull(String input) {
 		if (input == null) { return null; }
 		return input.trim();
+	}
+
+	/**
+	 * @param s string
+	 * @return true if string is null or empty
+	 */
+	public static boolean isEmptyOrNull(String s) {
+		return s == null || s.isEmpty();
+	}
+
+	/**
+	 * @param c collection
+	 * @return true if collection is null or empty
+	 */
+	public static boolean isEmptyOrNull(Collection<?> c) {
+		return c == null || c.isEmpty();
 	}
 
 	/**
@@ -183,7 +200,7 @@ public class Utils {
 	 * </code>
 	 * then transforming it like so:
 	 * <code>
-	 * final Set<String> tlf = Stream.of("name", "someprop").collect(Collectors.toSet());
+	 * final Set&lt;String&gt; tlf = Stream.of("name", "someprop").collect(Collectors.toSet());
 	 * return resultGrouper(list, "stats", "id", tlf);
 	 * </code>
 	 * will return the list:

@@ -1,8 +1,9 @@
 import History from 'components/History'
 import {Organization} from 'models'
-import dict from 'dictionary'
+import Settings from 'Settings'
+import pluralize from 'pluralize'
 
-let userTour = (currentUser) => { return {
+const userTour = (currentUser) => { return {
 	id: 'home',
 	steps: [
 		{
@@ -48,7 +49,7 @@ let userTour = (currentUser) => { return {
 	]
 }}
 
-let superUserTour = (currentUser) => { return {
+const superUserTour = (currentUser) => { return {
 	id: 'home',
 	steps: [
 		{
@@ -97,8 +98,8 @@ let superUserTour = (currentUser) => { return {
 	]
 }}
 
-let reportTour = (currentUser) => {
-	let poamShortTitle = dict.lookup("POAM_SHORT_NAME")
+const reportTour = (currentUser) => {
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'report',
 	steps: [
@@ -135,7 +136,7 @@ let reportTour = (currentUser) => {
 		},
 			{
 			title: 'Recents',
-			content: "If you've written reports in the past, your recent selections of attendees, " + poamShortTitle + "s, and locations will display to the right in a section called \"Recents\". You can click on one of the shortcuts to quickly add it to your report.",
+			content: "If you've written reports in the past, your recent selections of attendees, " + taskShortLabel + "s, and locations will display to the right in a section called \"Recents\". You can click on one of the shortcuts to quickly add it to your report.",
 			target: '#attendees',
 			placement: 'bottom',
 		},
@@ -146,9 +147,9 @@ let reportTour = (currentUser) => {
 			placement: 'bottom',
 		},
 		{
-			title: poamShortTitle + 's',
-			content: 'Search for the ' + poamShortTitle + 's that apply to this engagement. You can search for ' + poamShortTitle + 's in any organization, including your organization and its sub-organizations. ' + poamShortTitle + 's are not required.',
-			target: '#poams',
+			title: pluralize(taskShortLabel),
+			content: 'Search for the ' + taskShortLabel + 's that apply to this engagement. You can search for ' + taskShortLabel + 's in any organization, including your organization and its sub-organizations. ' + taskShortLabel + 's are not required.',
+			target: '#tasks',
 			placement: 'right',
 		},
 		{
@@ -184,8 +185,8 @@ let reportTour = (currentUser) => {
 	]
 }}
 
-let orgTour = (currentUser) => {
-	let poamShortTitle = dict.lookup("POAM_SHORT_NAME")
+const orgTour = (currentUser) => {
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'org',
 	steps: [
@@ -220,9 +221,9 @@ let orgTour = (currentUser) => {
 			placement: 'top',
 		},
 		{
-			title: poamShortTitle + 's',
-			content: 'The ' + dict.lookup('POAM_LONG_NAME') + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + poamShortTitle + 's change, you can update that information by clicking on the ' + poamShortTitle + '.',
-			target: '#poams h2',
+			title: pluralize(taskShortLabel),
+			content: 'The ' + Settings.fields.task.longLabel + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortLabel + 's change, you can update that information by clicking on the ' + taskShortLabel + '.',
+			target: '#tasks h2',
 			placement: 'top',
 		},
 		{
@@ -246,8 +247,8 @@ let orgTour = (currentUser) => {
 	]
 }}
 
-let positionTour = (currentUser) => {
-	let poamShortTitle = dict.lookup("POAM_SHORT_NAME")
+const positionTour = (currentUser) => {
+	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 		id: 'position',
 		steps: [
@@ -259,7 +260,7 @@ let positionTour = (currentUser) => {
 			},
 			{
 				title: "Type of user",
-				content: "There are three types of users: user, super user, and administrator. Super users can give other positions either user or super user privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Super users are able to edit positions, people, and " + poamShortTitle + "s in their organization, as well as locations. This section isn't visible if you're looking at a tashkil position.",
+				content: "There are three types of users: user, super user, and administrator. Super users can give other positions either user or super user privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Super users are able to edit positions, people, and " + taskShortLabel + "s in their organization, as well as locations. This section isn't visible if you're looking at a tashkil position.",
 				target: '#type',
 				placement: 'bottom',
 			},
@@ -271,7 +272,7 @@ let positionTour = (currentUser) => {
 			},
 			{
 				title: "Current assigned person",
-				content: "This section shows you who is currently assigned to this position. For billet positions, you'll see the NATO member in this position. For taskhil positions, you'll see the current Afghan principal in that position. You can click the \"Change assigned person\" button to quickly change who is in this position.",
+				content: "This section shows you who is currently assigned to this position. For billet positions, you'll see the NATO member in this position. For tashkil positions, you'll see the current Afghan principal in that position. You can click the \"Change assigned person\" button to quickly change who is in this position.",
 				target: '#assigned-advisor h2',
 				placement: 'top',
 			},
@@ -297,7 +298,7 @@ let positionTour = (currentUser) => {
 	}
 }
 
-let personTour = (currentUser) => { return {
+const personTour = (currentUser) => { return {
 	id: 'person',
 	steps: [
 		{

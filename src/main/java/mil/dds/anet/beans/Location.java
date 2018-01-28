@@ -1,6 +1,7 @@
 package mil.dds.anet.beans;
 
 import java.util.Objects;
+
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -36,7 +37,7 @@ public class Location extends AbstractAnetBean {
 
 	@Override
 	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != Location.class) { 
+		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		Location l = (Location) o;
@@ -55,14 +56,6 @@ public class Location extends AbstractAnetBean {
 	@Override
 	public String toString() { 
 		return String.format("(%d) - %s [%f, %f]", id, name, lat, lng); 
-	}
-	
-	public static Location create(String name, Double lat, Double lng) {
-		Location l = new Location();
-		l.setName(name);
-		l.setLat(lat);
-		l.setLng(lng);
-		return l;
 	}
 	
 	public static Location createWithId(Integer id) {

@@ -50,6 +50,7 @@ fieldset {
 
 h2.legend {
 	font-size: 2rem;
+	margin-top: 1rem;
 }
 
 .legend small {
@@ -67,8 +68,7 @@ h2.legend {
 }
 
 .form-top-submit {
-	float: right;
-	margin-bottom: -42px;
+	margin-bottom: 1rem;
 }
 
 fieldset .pagination {
@@ -87,6 +87,13 @@ fieldset .help-text {
 	letter-spacing: 1px;
 	text-align: center;
 	margin-bottom: 24px;
+}
+
+fieldset .chart-description {
+	color: #777;
+	text-align: left;
+	padding-bottom: 8px;
+	padding-left: 8px;
 }
 
 fieldset.collapsable {
@@ -269,7 +276,7 @@ a.home-tile {
 	background: #dae3ee;
 }
 
-.person-icon {
+.person-icon, .position-icon {
 	margin-right: 4px;
 }
 

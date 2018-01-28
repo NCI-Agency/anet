@@ -60,11 +60,14 @@ The frontend is run with `npm`.  We recommend running the backend via `eclipse` 
       run.environment("ANET_DB_SERVER", "db server hostname")
       run.environment("ANET_DB_NAME","database name")
       ```
-1. Run `./gradlew dbMigrate` to build and migrate the database.
+1. Pull the MSSQL Docker image: `./gradlew dockerPullDB`
+1. Create the MSSQL Docker container and the initial database: `./gradlew dockerCreateDB`
+1. Start the MSSQL Docker container: `./gradlew dockerStartDB`
+1. Wait until the container is fully started, then run `./gradlew dbMigrate` to build and migrate the database.
    - The database schema is stored in `src/main/resources/migrations.xml`.
 1. Seed the initial data:
    - SQLite: `cat insertBaseData.sql | ./mssql2sqlite.sh | sqlite3 development.db`
-   - MSSQL: You'll need to manually connect to your sqlserver instance and run `insertBaseData.sql` through the GUI or run 'sqlcmd -S <servername> -U <username> -P <password> -d testanet -i insertBaseData.sql'
+   - MSSQL: If you're using the Docker container for the database (and you should), you can load the data with: `./gradlew dockerLoadDB`. Otherwise, you'll need to manually connect to your sqlserver instance and run `insertBaseData.sql` through the GUI or run 'sqlcmd -S <servername> -U <username> -P <password> -d <database name> -i insertBaseData.sql'
 1. Run `./gradlew build` to download all dependencies and build the project.
    - Some tests will fail if you are using SQLite, because it has a bad implementation of some timezone stuff. You'll need to use MSSQL to see all the tests passing.
 
@@ -104,7 +107,7 @@ To log in as one of the base data users, when prompted for a username and passwo
    - You can apply new migrations and test if they can be rolled back successfully with: `./gradlew dbTest`
    - You can try out rolling back the very last one of the successfully applied migrations with a dry-run: `./gradlew dbRollback -Pdry-run`; this shows you the SQL commands that would be executed
    - You can roll back the very last one of the applied migrations with: `./gradlew dbRollback`
-   - You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop` -- BE CAREFUL, this **will** drop your database unconditionally!
+   - You may need to occasionally destroy, re-migrate, and re-seed your database if it has fallen too far out of sync with master; you can do this with `./gradlew dbDrop dbMigrate dockerLoadDB` -- BE CAREFUL, this **will** drop and re-populate your database unconditionally!
 1. Run `./gradlew run` to run the server via Gradle, or hit Run in Eclipse
    - If you have set **smtp: disabled** to **true** in `anet.yml`, you're good to go; otherwise, you can ignore exceptions like the following, because the SMTP server is not necessary for local development:
     ```

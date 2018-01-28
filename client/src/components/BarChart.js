@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 
+import './BarChart.css'
+
 var d3 = require('d3')
 
 
@@ -18,20 +20,20 @@ function getPropValue(obj, prop) {
   })
 }
 
-export default class BarChart extends Component {
+class BarChart extends Component {
   static propTypes = {
     chartId: PropTypes.string,
     data: PropTypes.array,
     xProp: PropTypes.string.isRequired,
     yProp: PropTypes.string.isRequired,
     xLabel: PropTypes.string,
-    barColor: PropTypes.string,
+    barClass: PropTypes.string,
     onBarClick: PropTypes.func,
     updateChart: PropTypes.bool
   }
 
   static defaultProps = {
-    barColor: '#F5CA8D',
+    barClass: 'bar',
     updateChart: true
   }
 
@@ -99,7 +101,8 @@ export default class BarChart extends Component {
     let marginBottom = maxXLabelWidth
 
     let chart = d3.select(this.node)
-    let chartWidth = chart.property('width').baseVal.value
+    let chartBox = this.node.getBoundingClientRect()
+    let chartWidth = chartBox.right - chartBox.left
     let chartHeight = 0.7 * chartWidth
     let xWidth = chartWidth - marginLeft - MARGIN.right
     let yHeight = chartHeight - MARGIN.top - marginBottom
@@ -129,19 +132,18 @@ export default class BarChart extends Component {
 
     chart.append('g')
       .call(yAxis)
-    let barColor = this.props.barColor
+
     let bar = chart.selectAll('.bar')
       .data(chartData)
       .enter()
       .append('g')
-      .classed('bar', true)
+      .classed('bars-group', true)
       .append('rect')
       .attr('id', function(d, i) { return 'bar_' + getPropValue(d, xProp) })
       .attr('x', function(d) { return xScale(getPropValue(d, xProp)) })
       .attr('y', function(d) { return yScale(getPropValue(d, yProp)) })
       .attr('width', xScale.bandwidth())
       .attr('height', function(d) { return yHeight - yScale(getPropValue(d, yProp)) })
-      .attr('fill', barColor)
     if (onBarClick) {
       bar.on('click', function(d) {
         onBarClick(d)
@@ -164,3 +166,5 @@ export default class BarChart extends Component {
   }
 
 }
+
+export default BarChart

@@ -46,11 +46,9 @@ import mil.dds.anet.utils.Utils;
 public class PositionResource implements IGraphQLResource {
 
 	PositionDao dao;
-	AnetObjectEngine engine;
 
 	public PositionResource(AnetObjectEngine engine) {
 		this.dao = engine.getPositionDao();
-		this.engine = engine;
 	}
 
 	@Override
@@ -138,35 +136,36 @@ public class PositionResource implements IGraphQLResource {
 
 		if (pos.getPerson() != null || pos.getAssociatedPositions() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
 			Position current = dao.getById(pos.getId());
-			//Run the diff and see if anything changed and update.
-
-			if (pos.getPerson() != null) { 
-				if (current != null && pos.getPerson().getId() == null) { 
-					//Intentionally remove the person
-					dao.removePersonFromPosition(current);
-					AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPerson(), current, user);
-				} else if (Utils.idEqual(pos.getPerson(), current.getPerson()) == false) {
-					dao.setPersonInPosition(pos.getPerson(), pos);
-					AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPerson(), current, user);
+			if (current != null) {
+				//Run the diff and see if anything changed and update.
+				if (pos.getPerson() != null) {
+					if (pos.getPerson().getId() == null) {
+						//Intentionally remove the person
+						dao.removePersonFromPosition(current);
+						AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPerson(), current, user);
+					} else if (Utils.idEqual(pos.getPerson(), current.getPerson()) == false) {
+						dao.setPersonInPosition(pos.getPerson(), pos);
+						AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPerson(), current, user);
+					}
 				}
-			}
 
-			if (pos.getAssociatedPositions() != null) {
-				Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
-						newPosition -> { 
-							dao.associatePosition(newPosition, pos);
-						},
-						oldPositionId -> { 
-							dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
-						});
-				AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
-			}
-			
-			if (PositionStatus.INACTIVE.equals(pos.getStatus()) && current.getPerson() != null) { 
-				//Remove this person from this position. 
-				AnetAuditLogger.log("Person {} removed from position {} by {} because the position is now inactive", 
-						current.getPerson(), current, user);
-				dao.removePersonFromPosition(current);
+				if (pos.getAssociatedPositions() != null) {
+					Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
+							newPosition -> {
+								dao.associatePosition(newPosition, pos);
+							},
+							oldPositionId -> {
+								dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
+							});
+					AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
+				}
+
+				if (PositionStatus.INACTIVE.equals(pos.getStatus()) && current.getPerson() != null) {
+					//Remove this person from this position.
+					AnetAuditLogger.log("Person {} removed from position {} by {} because the position is now inactive",
+							current.getPerson(), current, user);
+					dao.removePersonFromPosition(current);
+				}
 			}
 		}
 

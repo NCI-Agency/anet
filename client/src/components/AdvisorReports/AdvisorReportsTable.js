@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Table } from 'react-bootstrap'
 import AdvisorReportsTableHead from 'components/AdvisorReports/AdvisorReportsTableHead'
 import AdvisorReportsRow from 'components/AdvisorReports/AdvisorReportsRow'
-import _uniqueId from 'lodash.uniqueid'
+import _uniqueId from 'lodash/uniqueId'
 
 const AdvisorReportsTable = (props) => {
     let rows = props.data.map( (advisor) => {

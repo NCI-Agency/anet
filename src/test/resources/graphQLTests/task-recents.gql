@@ -1,0 +1,3 @@
+taskList(f:recents) {
+	list { id, shortName, longName }
+}

@@ -33,6 +33,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* MssqlReportSearch */ SELECT *, count(*) OVER() AS totalCount FROM ( ");
 		sql.append("SELECT DISTINCT " + ReportDao.REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS + " ");
+		if (query.getIncludeEngagementDayOfWeek()) {
+			sql.append(", DATEPART(dw, reports.engagementDate) as engagementDayOfWeek ");
+		}
 		sql.append("FROM reports "
 				+ "LEFT JOIN reportTags ON reportTags.reportId = reports.id "
 				+ "LEFT JOIN tags ON reportTags.tagId = tags.id "
@@ -69,8 +72,12 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("startDate", Utils.handleRelativeDate(query.getEngagementDateStart()));	
 		}
 		if (query.getEngagementDateEnd() != null) { 
-			whereClauses.add("reports.engagementDate <= :endDate");
-			args.put("endDate", Utils.handleRelativeDate(query.getEngagementDateEnd()));	
+			whereClauses.add("reports.engagementDate < :endDate");
+			args.put("endDate", Utils.handleRelativeDate(query.getEngagementDateEnd()).plusMillis(1));
+		}
+		if (query.getEngagementDayOfWeek() != null) {
+			whereClauses.add("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
+			args.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
 		}
 		
 		if (query.getCreatedAtStart() != null) { 
@@ -78,8 +85,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("startCreatedAt", Utils.handleRelativeDate(query.getCreatedAtStart()));
 		}
 		if (query.getCreatedAtEnd() != null) { 
-			whereClauses.add("reports.createdAt <= :endCreatedAt");
-			args.put("endCreatedAt", Utils.handleRelativeDate(query.getCreatedAtEnd()));
+			whereClauses.add("reports.createdAt < :endCreatedAt");
+			args.put("endCreatedAt", Utils.handleRelativeDate(query.getCreatedAtEnd()).plusMillis(1));
 		}
 		
 		if (query.getUpdatedAtStart() != null) {
@@ -87,8 +94,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("updatedAtStart", Utils.handleRelativeDate(query.getUpdatedAtStart()));
 		}
 		if (query.getUpdatedAtEnd() != null) {
-			whereClauses.add("reports.updatedAt <= :updatedAtEnd");
-			args.put("updatedAtEnd", Utils.handleRelativeDate(query.getUpdatedAtEnd()));
+			whereClauses.add("reports.updatedAt < :updatedAtEnd");
+			args.put("updatedAtEnd", Utils.handleRelativeDate(query.getUpdatedAtEnd()).plusMillis(1));
 		}
 
 		if (query.getReleasedAtStart() != null) { 
@@ -96,8 +103,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("releasedAtStart", Utils.handleRelativeDate(query.getReleasedAtStart()));
 		}
 		if (query.getReleasedAtEnd() != null) { 
-			whereClauses.add("reports.releasedAt <= :releasedAtEnd");
-			args.put("releasedAtEnd", Utils.handleRelativeDate(query.getReleasedAtEnd()));
+			whereClauses.add("reports.releasedAt < :releasedAtEnd");
+			args.put("releasedAtEnd", Utils.handleRelativeDate(query.getReleasedAtEnd()).plusMillis(1));
 		}
 
 		if (query.getAttendeeId() != null) { 
@@ -109,10 +116,10 @@ public class MssqlReportSearcher implements IReportSearcher {
 			whereClauses.add("reports.atmosphere = :atmosphere");
 			args.put("atmosphere", DaoUtils.getEnumId(query.getAtmosphere()));
 		}
-		
-		if (query.getPoamId() != null) { 
-			whereClauses.add("reports.id IN (SELECT reportId from reportPoams where poamId = :poamId)");
-			args.put("poamId", query.getPoamId());
+
+		if (query.getTaskId() != null) {
+			whereClauses.add("reports.id IN (SELECT reportId from reportTasks where taskId = :taskId)");
+			args.put("taskId", query.getTaskId());
 		}
 		
 		if (query.getOrgId() != null) { 
@@ -202,6 +209,40 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("tagId", query.getTagId());
 		}
 
+		if (query.getAuthorPositionId() != null) {
+			// Search for reports authored by people serving in that position at the report's creation date
+			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
+							+ "JOIN peoplePositions pp ON pp.personId = r.authorId "
+							+ "  AND pp.createdAt <= r.createdAt "
+							+ "LEFT JOIN peoplePositions maxPp ON maxPp.positionId = pp.positionId "
+							+ "  AND maxPp.createdAt > pp.createdAt "
+							+ "  AND maxPp.createdAt <= r.createdAt "
+							+ "WHERE pp.positionId = :authorPositionId "
+							+ "  AND maxPp.createdAt IS NULL )");
+			args.put("authorPositionId", query.getAuthorPositionId());
+		}
+
+		if (query.getAuthorizationGroupId() != null) {
+			// Search for reports related to a given authorization group
+			whereClauses.add("reports.id IN ( SELECT ra.reportId FROM reportAuthorizationGroups ra "
+							+ "WHERE ra.authorizationGroupId = :authorizationGroupId) ");
+			args.put("authorizationGroupId", query.getAuthorizationGroupId());
+		}
+
+		if (query.getAttendeePositionId() != null) {
+			// Search for reports attended by people serving in that position at the engagement date
+			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
+							+ "JOIN reportPeople rp ON rp.reportId = r.id "
+							+ "JOIN peoplePositions pp ON pp.personId = rp.personId "
+							+ "  AND pp.createdAt <= r.engagementDate "
+							+ "LEFT JOIN peoplePositions maxPp ON maxPp.positionId = pp.positionId "
+							+ "  AND maxPp.createdAt > pp.createdAt "
+							+ "  AND maxPp.createdAt <= r.engagementDate "
+							+ "WHERE pp.positionId = :attendeePositionId "
+							+ "  AND maxPp.createdAt IS NULL )");
+			args.put("attendeePositionId", query.getAttendeePositionId());
+		}
+
 		if (whereClauses.size() == 0) { return results; }
 		
 		//Apply a filter to restrict access to other's draft reports
@@ -255,7 +296,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 
 		final Query<Report> map = MssqlSearcher.addPagination(query, dbHandle, sql, args)
 				.map(new ReportMapper());
-		return ReportList.fromQuery(map, query.getPageNum(), query.getPageSize());
+		return ReportList.fromQuery(user, map, query.getPageNum(), query.getPageSize());
 		
 	}
 	
