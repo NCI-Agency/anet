@@ -239,7 +239,7 @@ docker {
 		tag = 'ncia/anet-app-server:'+project.version
 		exec {
 			defaultCommand "server","/home/anet/anet.yml"
-			entryPoint "/$project.name-$project.version/bin/anet"
+			entryPoint "/$project.name/bin/anet"
 		}
 	}
 }
