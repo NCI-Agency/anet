@@ -5,7 +5,6 @@ import org.skife.jdbi.v2.DBI;
 import io.dropwizard.cli.ConfiguredCommand;
 import net.sourceforge.argparse4j.inf.Namespace;
 import mil.dds.anet.config.AnetConfiguration;
-import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.jdbi.DBIFactory;
 import io.dropwizard.setup.Environment;
@@ -21,18 +20,18 @@ public class WaitForDBCommand extends ConfiguredCommand<AnetConfiguration> {
 	@Override
 	public void configure(Subparser subparser) {
 		subparser.addArgument("-n", "--nbAttempts")
-		.dest("dbConnectionNbAttempts")
-		.type(Integer.class)
-		.required(false)
-		.setDefault(20)
-		.help("Nb of attempts before giving up. 20 by default");
+			.dest("dbConnectionNbAttempts")
+			.type(Integer.class)
+			.required(false)
+			.setDefault(20)
+			.help("Nb of attempts before giving up. 20 by default");
 
 		subparser.addArgument("-d", "--delay")
-		.dest("dbConnectionDelay")
-		.type(Integer.class)
-		.required(false)
-		.setDefault(500)
-		.help("Delay in ms between attempts. 500 by default");
+			.dest("dbConnectionDelay")
+			.type(Integer.class)
+			.required(false)
+			.setDefault(500)
+			.help("Delay in ms between attempts. 500 by default");
 
 		addFileArgument(subparser);
 	}
@@ -53,24 +52,21 @@ public class WaitForDBCommand extends ConfiguredCommand<AnetConfiguration> {
 		int remainingTries = namespace.getInt("dbConnectionNbAttempts").intValue();
 		final int delay = namespace.getInt("dbConnectionDelay").intValue();
 		Exception dbiException;
-		do {
+		while (remainingTries-- > 0) {
 			try {
 				jdbi.close(jdbi.open());
-				dbiException = null;
 				break;
 			}
-			catch (Exception exception){
-				dbiException = exception;
+			catch (Exception exception) {
+				if (remainingTries==0)
+					throw new RuntimeException(exception);
 			}
-			try{
+			try {
 				Thread.sleep(delay);
 			}
 			catch(InterruptedException exception){
 				throw new RuntimeException(exception);
 			}
-		} while (dbiException != null && remainingTries-- > 0);
-
-		if (dbiException != null)
-			throw new RuntimeException(dbiException);
+		} 
 	}
 }

@@ -63,6 +63,6 @@ addons:
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "candidate" ]; then
-    docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-    ./gradlew dockerBuildImage dockerPushImage
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+      ./gradlew dockerBuildImage dockerPushImage
     fi
