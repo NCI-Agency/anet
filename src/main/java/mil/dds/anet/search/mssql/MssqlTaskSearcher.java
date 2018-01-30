@@ -83,8 +83,8 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		}
 
 		if (query.getPlannedCompletionEnd() != null) {
-			whereClauses.add("plannedCompletion <= :plannedCompletionStart");
-			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionEnd()));
+			whereClauses.add("plannedCompletion <= :plannedCompletionEnd");
+			args.put("plannedCompletionEnd", Utils.handleRelativeDate(query.getPlannedCompletionEnd()));
 		}
 
 		if (query.getProjectedCompletionStart() != null) {
