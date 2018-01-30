@@ -1,5 +1,11 @@
+import React from 'react'
 import * as changeCase from 'change-case'
+import parseAddressList from 'email-addresses'
 import pluralize from 'pluralize'
+
+import Settings from 'Settings'
+
+const WILDCARD = '*'
 
 export default {
 	...changeCase,
@@ -16,6 +22,86 @@ export default {
 			str += key + '=' + encodeURIComponent(val)
 		})
 		return str
+	},
+
+	handleEmailValidation: function(value, shouldValidate) {
+		const domainNames = Settings.domainNames.map(d => d.toLowerCase())
+		if (!shouldValidate || domainNames.length === 0) {
+			return { isValid: null, message: 'No custom validator is set' }
+		}
+
+		let wildcardDomains = this.getWildcardDomains(domainNames, WILDCARD)
+		try {
+			let isValid = this.validateEmail(value, domainNames, wildcardDomains)
+			return { isValid: isValid, message: this.emailErrorMessage(domainNames) }
+		}
+		catch (e) {
+			return { isValid: false, message: (<div>{e.message}</div>) }
+		}
+	},
+
+	validateEmail: function(emailValue, domainNames, wildcardDomains) {
+		let email = emailValue.split('@')
+		if (email.length < 2 || email[1].length === 0) {
+			throw new Error('Please provide a valid email address')
+		}
+		let from =  email[0].trim()
+		let domain = email[1].toLowerCase()
+		return (
+			this.validateWithWhitelist(from, domain, domainNames) ||
+			this.validateWithWildcard(domain, wildcardDomains)
+		)
+	},
+
+	validateWithWhitelist: function(from, domain, whitelist) {
+		return from.length > 0 && whitelist.includes(domain)
+	},
+
+	validateWithWildcard: function(domain, wildcardDomains) {
+		let isValid = false
+		if (domain) {
+			isValid = wildcardDomains.some(wildcard => {
+				return domain[0] !== '.' && domain.endsWith(wildcard.substr(1))
+			})
+		}
+		return isValid
+	},
+
+	getWildcardDomains: function(domainList, token) {
+		let wildcardDomains = domainList.filter(domain => {
+			return domain[0] === token
+		})
+		return wildcardDomains
+	},
+
+	emailErrorMessage: function(validDomainNames) {
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
+		const emailMessage = supportEmail ? ` at ${supportEmail}`: ''
+		const errorMessage = `Only the following email domain names are allowed. If your email domain name is not in the list, please contact the support team${emailMessage}.`
+		const items = validDomainNames.map(name => [
+			<li>{name}</li>
+		])
+		return (
+			<div>
+				<p>{errorMessage}</p>
+				<ul>{items}</ul>
+			</div>
+		)
+	},
+
+	parseEmailAddresses: function(addressees) {
+		const addrs = parseAddressList(addressees)
+		if (!addrs) {
+			return { isValid: false, message: (<div>Please provide one or more valid email addresses</div>) }
+		}
+		const toAddresses = addrs.addresses.map(a => a.address)
+		for (let i = 0; i < toAddresses.length; i++) {
+			const r = this.handleEmailValidation(toAddresses[i], true)
+			if (r.isValid === false) {
+				return r
+			}
+		}
+		return { isValid: true, to: toAddresses }
 	}
 }
 

@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import Page from 'components/Page'
-import {Modal, Alert, Button, Popover, Overlay} from 'react-bootstrap'
+import {Modal, Alert, Button, HelpBlock, Popover, Overlay} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 
@@ -15,6 +15,7 @@ import Messages from 'components/Messages'
 import Settings from 'Settings'
 
 import {Organization} from 'models'
+import utils from 'utils'
 
 import API from 'api'
 
@@ -357,6 +358,10 @@ export default class RollupShow extends Page {
 					}
 
 					<Form.Field id="to" />
+					<HelpBlock>
+						One or more email addresses, comma separated, e.g.:<br />
+						<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
+					</HelpBlock>
 					<Form.Field componentClass="textarea" id="comment" />
 				</Modal.Body>
 
@@ -417,17 +422,16 @@ export default class RollupShow extends Page {
 	@autobind
 	emailRollup() {
 		let email = this.state.email
-		if (!email.to) {
-			email.errors = 'You must select a person to send this to'
+		let r = utils.parseEmailAddresses(email.to)
+		if (!r.isValid) {
+			email.errors = r.message
 			this.setState({email})
 			return
 		}
-
-		email = {
-			toAddresses: email.to.replace(/\s/g, '').split(/[,;]/),
+		const emailDelivery = {
+			toAddresses: r.to,
 			comment: email.comment
 		}
-
 		let emailUrl = `/api/reports/rollup/email?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
@@ -441,7 +445,7 @@ export default class RollupShow extends Page {
 		}
 
 
-		API.send(emailUrl, email).then (() =>
+		API.send(emailUrl, emailDelivery).then (() =>
 			this.setState({
 				success: 'Email successfully sent',
 				showEmailModal: false,
