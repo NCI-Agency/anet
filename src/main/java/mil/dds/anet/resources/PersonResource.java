@@ -341,6 +341,9 @@ public class PersonResource implements IGraphQLResource {
 
 		final String WILDCARD = "*";
 		final String[] splittedEmail = emailInput.split("@");
+		if (splittedEmail.length < 2 || splittedEmail[1].length() == 0) {
+			throw new WebApplicationException("Please provide a valid email address", Status.BAD_REQUEST);
+		}
 		final String from = splittedEmail[0].trim();
 		final String domainName = splittedEmail[1].toLowerCase();
 

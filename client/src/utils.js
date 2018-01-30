@@ -30,13 +30,20 @@ export default {
 		}
 
 		let wildcardDomains = this.getWildcardDomains(domainNames, WILDCARD)
-		let isValid = this.validateEmail(value, domainNames, wildcardDomains)
-
-		return { isValid: isValid, message: this.emailErrorMessage(domainNames) }
+		try {
+			let isValid = this.validateEmail(value, domainNames, wildcardDomains)
+			return { isValid: isValid, message: this.emailErrorMessage(domainNames) }
+		}
+		catch (e) {
+			return { isValid: false, message: (<div>{e.message}</div>) }
+		}
 	},
 
 	validateEmail: function(emailValue, domainNames, wildcardDomains) {
 		let email = emailValue.split('@')
+		if (email.length < 2 || email[1].length === 0) {
+			throw new Error('Please provide a valid email address')
+		}
 		let from =  email[0].trim()
 		let domain = email[1].toLowerCase()
 		return (
