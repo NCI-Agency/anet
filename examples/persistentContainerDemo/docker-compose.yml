@@ -1,5 +1,6 @@
 version: '3'
 services:
+# TODO make sql db volume persistent
   anet-mssql:
     image: ncia/anet-mssql-linux
     container_name: anet-mssql
@@ -13,6 +14,17 @@ services:
       DB_NAME: ANET
       DB_USER: AnetUser
       DB_USER_PASSWORD: P@ssw0rd
+  anet-migrate:
+    image: ncia/anet-app-server
+    command: db migrate /home/anet/anet.yml
+    depends_on:
+      - anet-mssql
+    environment:
+      ANET_DB_USERNAME: AnetUser
+      ANET_DB_PASSWORD: P@ssw0rd
+      ANET_DB_URL: jdbc:sqlserver://anet-mssql:1433;databaseName=ANET
+    volumes:
+      -  ${PWD}/anet.yml:/home/anet/anet.yml
   anet-app:
     image: ncia/anet-app-server
     container_name: anet-app
