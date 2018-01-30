@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import Page from 'components/Page'
-import {Alert, Table, Button, Col, Modal, Checkbox} from 'react-bootstrap'
+import {Alert, Table, Button, Col, HelpBlock, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 import utils from 'utils'
@@ -423,6 +423,10 @@ export default class ReportShow extends Page {
 					}
 
 					<Form.Field id="to" />
+					<HelpBlock>
+						One or more email addresses, comma separated, e.g.:<br />
+						<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
+					</HelpBlock>
 					<Form.Field id="comment" componentClass="textarea" />
 				</Modal.Body>
 
@@ -441,17 +445,18 @@ export default class ReportShow extends Page {
 	@autobind
 	emailReport() {
 		let email = this.state.email
-		if (!email.to) {
-			email.errors = 'You must select a person to send this to'
+		let r = utils.parseEmailAddresses(email.to)
+		if (!r.isValid) {
+			email.errors = r.message
 			this.setState({email})
 			return
 		}
-
-		email = {
-			toAddresses: email.to.replace(/\s/g, '').split(/[,;]/),
+		const emailDelivery = {
+			toAddresses: r.to,
 			comment: email.comment
 		}
-		API.send(`/api/reports/${this.state.report.id}/email`, email).then (() =>
+
+		API.send(`/api/reports/${this.state.report.id}/email`, emailDelivery).then (() =>
 			this.setState({
 				success: 'Email successfully sent',
 				showEmailModal: false,

@@ -1,5 +1,6 @@
 import React from 'react'
 import * as changeCase from 'change-case'
+import parseAddressList from 'email-addresses'
 import pluralize from 'pluralize'
 
 import Settings from 'Settings'
@@ -86,6 +87,21 @@ export default {
 				<ul>{items}</ul>
 			</div>
 		)
+	},
+
+	parseEmailAddresses: function(addressees) {
+		const addrs = parseAddressList(addressees)
+		if (!addrs) {
+			return { isValid: false, message: (<div>Please provide one or more valid email addresses</div>) }
+		}
+		const toAddresses = addrs.addresses.map(a => a.address)
+		for (let i = 0; i < toAddresses.length; i++) {
+			const r = this.handleEmailValidation(toAddresses[i], true)
+			if (r.isValid === false) {
+				return r
+			}
+		}
+		return { isValid: true, to: toAddresses }
 	}
 }
 
