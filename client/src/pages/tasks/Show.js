@@ -101,7 +101,7 @@ export default class TaskShow extends Page {
 						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
 						<this.PlannedCompletionField dictProps={Settings.fields.task.plannedCompletion} id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
 						<this.ProjectedCompletionField dictProps={Settings.fields.task.projectedCompletion} id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
-						<this.TaskCustomFieldEnum dictProps={Settings.fields.task.customFieldEnum} id="customFieldEnum"/>
+						<this.TaskCustomFieldEnum dictProps={Object.without(Settings.fields.task.customFieldEnum, 'enum')} id="customFieldEnum"/>
 
 					</Fieldset>
 				</Form>
