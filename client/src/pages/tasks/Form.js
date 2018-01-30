@@ -43,6 +43,9 @@ export default class TaskForm extends ValidatableFormWrapper {
 	constructor(props) {
 		super(props)
 		this.TaskCustomField = DictionaryField(Form.Field)
+		this.PlannedCompletionField = DictionaryField(Form.Field)
+		this.ProjectedCompletionField = DictionaryField(Form.Field)
+		this.TaskCustomFieldEnum = DictionaryField(Form.Field)
 	}
 
 	render() {
@@ -97,23 +100,23 @@ export default class TaskForm extends ValidatableFormWrapper {
 						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
 
 						{plannedCompletion &&
-							<Form.Field id="plannedCompletion" label={plannedCompletion.label} addon={CALENDAR_ICON} >
+							<this.PlannedCompletionField dictProps={plannedCompletion} id="plannedCompletion" addon={CALENDAR_ICON}>
 								<DatePicker showTodayButton placeholder={plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
-							</Form.Field>
+							</this.PlannedCompletionField>
 						}
 
 						{projectedCompletion &&
-							<Form.Field id="projectedCompletion" label={projectedCompletion.label} addon={CALENDAR_ICON} >
+							<this.ProjectedCompletionField dictProps={projectedCompletion} id="projectedCompletion" addon={CALENDAR_ICON}>
 								<DatePicker showTodayButton placeholder={projectedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
-							</Form.Field>
+							</this.ProjectedCompletionField>
 						}
 
 						{customFieldEnum &&
-							<Form.Field id="customFieldEnum" label={customFieldEnum.label} >
+							<this.TaskCustomFieldEnum  dictProps={Object.without(customFieldEnum, 'enum')} id="customFieldEnum">
 								<ButtonToggleGroup>
 									{customEnumButtons(customFieldEnum.enum)}
 								</ButtonToggleGroup>
-							</Form.Field>
+							</this.TaskCustomFieldEnum>
 						}
 
 					</Fieldset>
