@@ -51,7 +51,6 @@ public class WaitForDBCommand extends ConfiguredCommand<AnetConfiguration> {
 		//We want to possibly wait for the database to be ready, and keep trying to connect
 		int remainingTries = namespace.getInt("dbConnectionNbAttempts").intValue();
 		final int delay = namespace.getInt("dbConnectionDelay").intValue();
-		Exception dbiException;
 		while (remainingTries-- > 0) {
 			try {
 				jdbi.close(jdbi.open());
