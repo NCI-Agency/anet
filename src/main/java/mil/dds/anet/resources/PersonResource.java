@@ -342,10 +342,11 @@ public class PersonResource implements IGraphQLResource {
 		final String WILDCARD = "*";
 		final String[] splittedEmail = emailInput.split("@");
 		final String from = splittedEmail[0].trim();
-		final String domainName = splittedEmail[1];
+		final String domainName = splittedEmail[1].toLowerCase();
 
 		@SuppressWarnings("unchecked")
-		final List<String> whitelistDomainNames = (List<String>)this.config.getDictionary().get("domainNames");
+		final List<String> whitelistDomainNames = ((List<String>)this.config.getDictionary().get("domainNames"))
+			.stream().map(String::toLowerCase).collect(Collectors.toList());
 
 		final List<String> wildcardDomainNames = whitelistDomainNames.stream()
 			.filter(domain -> String.valueOf(domain.charAt(0)).equals(WILDCARD))
@@ -355,7 +356,7 @@ public class PersonResource implements IGraphQLResource {
 		final Boolean isValidWildcardDomain = wildcardDomainNames.stream()
 			.anyMatch(wildcardDomain ->
 				domainName.charAt(0) != '.' &&
-				domainName.endsWith(wildcardDomain.substring(2)));
+				domainName.endsWith(wildcardDomain.substring(1)));
 
 		if (!isWhitelistedEmail && !isValidWildcardDomain) {
 			throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);

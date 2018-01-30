@@ -277,7 +277,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 	@autobind
 	handleEmailValidation(value) {
-		const domainNames = Settings.domainNames
+		const domainNames = Settings.domainNames.map(d => d.toLowerCase())
 		if (!this.props.person.isAdvisor() || domainNames.length === 0) {
 			return { isValid: null, message: 'No custom validator is set' }
 		}
@@ -291,7 +291,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 	validateEmail(emailValue, domainNames, wildcardDomains) {
 		let email = emailValue.split('@')
 		let from =  email[0].trim()
-		let domain = email[1]
+		let domain = email[1].toLowerCase()
 		return (
 			this.validateWithWhitelist(from, domain, domainNames) ||
 			this.validateWithWildcard(domain, wildcardDomains)
