@@ -13,6 +13,7 @@ import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
+import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 
 import {Person, Task, Position, Organization} from 'models'
 
@@ -30,18 +31,17 @@ const taskFilters = props => {
 		'Projected completion': <DateRangeSearch queryKey="projectedCompletion"/>,
 		'Planned completion': <DateRangeSearch queryKey="plannedCompletion"/>
 	}
-	// TODO: reenable custom fields
-	// const customEnum = Settings.fields.task.customFieldEnum
-	// if (customEnum)
-	// 	taskFiltersObj[customEnum.label] = <SelectSearchFilter
-	// 		queryKey="projectStatus"
-	// 		values={Object.keys(customEnum.enum)}
-	// 		labels={Object.values(customEnum.enum)}/>
-	// const customField = Settings.fields.task.customField
-	// if (customField)
-	// 	taskFiltersObj[customField.label] = <SelectSearchFilter
-	// 		queryKey="customField"
-	// 		/>
+	const customEnum = Settings.fields.task.customFieldEnum
+	if (customEnum)
+		taskFiltersObj[customEnum.label] = <SelectSearchFilter
+			queryKey="projectStatus"
+			values={Object.keys(customEnum.enum)}
+			labels={Object.values(customEnum.enum)} />
+	const customField = Settings.fields.task.customField
+	if (customField)
+		taskFiltersObj[customField.label] = <TextInputFilter
+			queryKey="customField" />
+
 	return taskFiltersObj
 }
 
@@ -209,6 +209,7 @@ export default class AdvancedSearch extends Component {
 		filters[pluralize(taskShortLabel)] = {
 			filters: taskFilters()
 		}
+
 		return filters
 	}
 
