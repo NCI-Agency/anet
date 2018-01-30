@@ -43,7 +43,22 @@ describe('Create new Person form page', () => {
             const alertMessage = CreatePerson.alertSuccess.getText()
             expect(alertMessage).to.equal('Person saved successfully')
         })
-        it('Should save an advisor with a valid email address in uppercase', () => {
+    })
+
+    describe('When creating an Advisor user', () => {
+        it('Should display a warning message specific for duplicate accounts', () => {
+            // Only admin users can create an advisor user
+            CreatePerson.openAsAdmin()
+            CreatePerson.form.waitForExist()
+            CreatePerson.form.waitForVisible()
+            CreatePerson.roleAdvisorButton.waitForExist()
+            CreatePerson.roleAdvisorButton.click()
+            const warningMessage = browser.element('.alert.alert-warning')
+            warningMessage.waitForExist()
+            warningMessage.waitForVisible()
+            expect(warningMessage.getText()).to.equal('Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.')
+        })
+        it('Should save with a valid email address in uppercase', () => {
             CreatePerson.openAsAdmin()
             CreatePerson.form.waitForExist()
             CreatePerson.form.waitForVisible()
@@ -61,21 +76,6 @@ describe('Create new Person form page', () => {
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
             expect(alertMessage).to.equal('Person saved successfully')
-        })
-    })
-
-    describe('When creating an Advisor user', () => {
-        it('Should display a warning message specific for duplicate accounts', () => {
-            // Only admin users can create an advisor user
-            CreatePerson.openAsAdmin()
-            CreatePerson.form.waitForExist()
-            CreatePerson.form.waitForVisible()
-            CreatePerson.roleAdvisorButton.waitForExist()
-            CreatePerson.roleAdvisorButton.click()
-            const warningMessage = browser.element('.alert.alert-warning')
-            warningMessage.waitForExist()
-            warningMessage.waitForVisible()
-            expect(warningMessage.getText()).to.equal('Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.')
         })
     })
 })
