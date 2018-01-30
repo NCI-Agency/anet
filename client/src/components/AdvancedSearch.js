@@ -27,10 +27,16 @@ const taskFilters = props => {
 		Status: <SelectSearchFilter
 						queryKey="status"
 						values={["ACTIVE", "INACTIVE"]}
-						labels={["Active", "Inactive"]}/>,
-		'Projected completion': <DateRangeSearch queryKey="projectedCompletion"/>,
-		'Planned completion': <DateRangeSearch queryKey="plannedCompletion"/>
+						labels={["Active", "Inactive"]}/>
 	}
+	const projectedCompletion = Settings.fields.task.projectedCompletion
+	if (projectedCompletion)
+		taskFiltersObj[projectedCompletion.label] = <DateRangeSearch
+			queryKey="projectedCompletion" />
+	const plannedCompletion = Settings.fields.task.plannedCompletion
+	if (plannedCompletion)
+		taskFiltersObj[plannedCompletion.label] = <DateRangeSearch
+			queryKey="plannedCompletion" />
 	const customEnum = Settings.fields.task.customFieldEnum
 	if (customEnum)
 		taskFiltersObj[customEnum.label] = <SelectSearchFilter
