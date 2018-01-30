@@ -4,6 +4,11 @@ import { expect } from 'chai'
 const VALID_PERSON_PRINCIPAL = {
         lastName: 'Doe'
     }
+const VALID_PERSON_ADVISOR = {
+        lastName: 'Roe',
+        firstName: 'Jane',
+        emailAddress: 'test@NATO.INT'
+    }
 
 describe('Create new Person form page', () => {
 
@@ -33,6 +38,25 @@ describe('Create new Person form page', () => {
             // perform submit form to prevent warning dialog
             CreatePerson.emailAddress.clearElement()
             CreatePerson.lastName.click()
+            CreatePerson.submitForm()
+            CreatePerson.waitForAlertSuccessToLoad()
+            const alertMessage = CreatePerson.alertSuccess.getText()
+            expect(alertMessage).to.equal('Person saved successfully')
+        })
+        it('Should save an advisor with a valid email address in uppercase', () => {
+            CreatePerson.openAsAdmin()
+            CreatePerson.form.waitForExist()
+            CreatePerson.form.waitForVisible()
+            CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
+            CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
+            CreatePerson.roleAdvisorButton.waitForExist()
+            CreatePerson.roleAdvisorButton.click()
+            CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
+            const errorMessage = browser.element('input#emailAddress + span.help-block')
+            errorMessage.waitForVisible(1000, true) // element should *not* be visible!
+            CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
+            CreatePerson.gender.selectByValue(CreatePerson.getRandomOption(CreatePerson.gender))
+            CreatePerson.country.selectByValue(CreatePerson.getRandomOption(CreatePerson.country))
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
