@@ -1112,7 +1112,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="update-extra-fields-to-Tasks" author="evdhoudt">
+	<changeSet id="update-extra-fields-to-Tasks" author="evdhoudt" dbms="mssql">
 		<modifyDataType columnName="customField" newDataType="nvarchar(max)" tableName="tasks" />
 		<modifyDataType columnName="customFieldEnum" newDataType="nvarchar(max)" tableName="tasks" />
 	</changeSet>
