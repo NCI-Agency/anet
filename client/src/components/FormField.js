@@ -335,7 +335,6 @@ export default class FormField extends Component {
 		const id = this.props.id
 		const value = this.getEventValue(event)
 		this.setFormContextWith(id, value)
-
 		if (this.props.maxCharacters && value.length > this.props.maxCharacters) {
 			return
 		}

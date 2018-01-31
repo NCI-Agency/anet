@@ -1,6 +1,6 @@
 let test = require('../util/test'),
     moment = require('moment'),
-    guid = require('guid')
+    uuidv4 = require('uuid/v4')
 
 test('checking super user permissions', async t => {
     t.plan(12)
@@ -149,7 +149,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
     )
     let originalBioText = await $bioTextArea.getText()
 
-    let fakeBioText = `fake bio ${guid.raw()} `
+    let fakeBioText = `fake bio ${uuidv4()} `
     await $bioTextArea.sendKeys(fakeBioText)
 
     await t.context.pageHelpers.clickFormBottomSubmit()

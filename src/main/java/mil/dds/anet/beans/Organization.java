@@ -180,13 +180,6 @@ public class Organization extends AbstractAnetBean {
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 	
-	public static Organization create(String shortName, OrganizationType type) { 
-		Organization org = new Organization();
-		org.setShortName(shortName);
-		org.setType(type);
-		return org;
-	}
-	
 	public static Organization createWithId(Integer id) { 
 		Organization ao = new Organization();
 		ao.setId(id);

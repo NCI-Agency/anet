@@ -14,12 +14,11 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import API from 'api'
 import Settings from 'Settings'
 import {Person} from 'models'
+import utils from 'utils'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 import { Col, ControlLabel, FormGroup } from 'react-bootstrap'
 import '../../components/NameInput.css'
-
-const WILDCARD = '*'
 
 export default class PersonForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -277,61 +276,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 	@autobind
 	handleEmailValidation(value) {
-		const domainNames = Settings.domainNames
-		if (!this.props.person.isAdvisor() || domainNames.length === 0) {
-			return { isValid: null, message: 'No custom validator is set' }
-		}
-
-		let wildcardDomains = this.getWildcardDomains(domainNames, WILDCARD)
-		let isValid = this.validateEmail(value, domainNames, wildcardDomains)
-
-		return { isValid: isValid, message: this.emailErrorMessage(domainNames) }
-	}
-
-	validateEmail(emailValue, domainNames, wildcardDomains) {
-		let email = emailValue.split('@')
-		let from =  email[0].trim()
-		let domain = email[1]
-		return (
-			this.validateWithWhitelist(from, domain, domainNames) ||
-			this.validateWithWildcard(domain, wildcardDomains)
-		)
-	}
-
-	validateWithWhitelist(from, domain, whitelist) {
-		return from.length > 0 && whitelist.includes(domain)
-	}
-
-	validateWithWildcard(domain, wildcardDomains) {
-		let isValid = false
-		if (domain) {
-			isValid = wildcardDomains.some(wildcard => {
-				return domain[0] !== '.' && domain.endsWith(wildcard.substr(1))
-			})
-		}
-		return isValid
-	}
-
-	getWildcardDomains(domainList, token) {
-		let wildcardDomains = domainList.filter(domain => {
-			return domain[0] === token
-		})
-		return wildcardDomains
-	}
-
-	emailErrorMessage(validDomainNames) {
-		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
-		const emailMessage = supportEmail ? ` at ${supportEmail}`: ''
-		const errorMessage = `Only the following email domain names are allowed. If your email domain name is not in the list, please contact the support team${emailMessage}.`
-		const items = validDomainNames.map(name => [
-			<li>{name}</li>
-		])
-		return (
-			<div>
-				<p>{errorMessage}</p>
-				<ul>{items}</ul>
-			</div>
-		)
+		return utils.handleEmailValidation(value, this.props.person.isAdvisor())
 	}
 
 	@autobind

@@ -3,7 +3,6 @@ import {Pagination, Table} from 'react-bootstrap'
 
 import LinkTo from 'components/LinkTo'
 import {Position} from 'models'
-import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
 import utils from 'utils'
 import _get from 'lodash/get'

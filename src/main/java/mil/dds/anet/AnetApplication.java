@@ -99,6 +99,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
 			)
 		);
 
+		//Add the waitForDB command
+		bootstrap.addCommand(new WaitForDBCommand());
+
 		//Add the db migration commands
 		bootstrap.addBundle(new MigrationsBundle<AnetConfiguration>() {
 			@Override
