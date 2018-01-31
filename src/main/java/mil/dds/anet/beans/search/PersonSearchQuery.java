@@ -24,15 +24,11 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 	//Find people who are pending verification
 	Boolean pendingVerification;
 	
-	PersonSearchSortBy sortBy;
-	SortOrder sortOrder;
+	private PersonSearchSortBy sortBy;
+	private SortOrder sortOrder;
 	
-	int pageNum;
-	int pageSize;
-	
-	public PersonSearchQuery() { 
-		this.pageNum = 0;
-		this.pageSize = 100;
+	public PersonSearchQuery() {
+		this.setPageSize(100); 
 		this.sortOrder = SortOrder.ASC;
 		this.sortBy = PersonSearchSortBy.NAME;
 	}

@@ -54,6 +54,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
@@ -77,7 +78,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final Person author = getJackJackson();
 
 		//Create a principal for the report
-		ReportPerson principal = PersonTest.personToReportPerson(getSteveSteveson());
+		final Person principalPerson = getSteveSteveson();
+		final ReportPerson principal = PersonTest.personToReportPerson(principalPerson);
 		principal.setPrimary(true);
 		Position principalPosition = principal.loadPosition();
 		assertThat(principalPosition).isNotNull();
@@ -168,16 +170,16 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Ensure the approver is an approver
 		assertThat(approver1Pos.loadIsApprover()).isTrue();
-		
+
 		//Create some tasks for this organization
 		Task top = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("test-1", "Test Top Task", "TOP", null, advisorOrg, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("test-1", "Test Top Task", "TOP", null, advisorOrg, TaskStatus.ACTIVE)), Task.class);
 		Task action = httpQuery("/api/tasks/new", admin)
-				.post(Entity.json(Task.create("test-1-1", "Test Task Action", "Action", top, null, TaskStatus.ACTIVE)), Task.class);
+				.post(Entity.json(TestData.createTask("test-1-1", "Test Task Action", "Action", top, null, TaskStatus.ACTIVE)), Task.class);
 
 		//Create a Location that this Report was written at
 		Location loc = httpQuery("/api/locations/new", admin)
-				.post(Entity.json(Location.create("The Boat Dock", 1.23,4.56)), Location.class);
+				.post(Entity.json(TestData.createLocation("The Boat Dock", 1.23,4.56)), Location.class);
 
 		//Write a Report
 		Report r = new Report();
@@ -249,7 +251,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Reject the report
 		resp = httpQuery(String.format("/api/reports/%d/reject", created.getId()), approver1)
-				.post(Entity.json(Comment.withText("a test rejection")));
+				.post(Entity.json(TestData.createComment("a test rejection")));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Check on report status to verify it was rejected
@@ -317,22 +319,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		ReportList rollup = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
 		assertThat(rollup.getTotalCount()).isGreaterThan(0);
 		assertThat(rollup.getList()).contains(returned);
-		
-		//Pull recent People, Tasks, and Locations and verify that the records from the last report are there. 
+
+		//Pull recent People, Tasks, and Locations and verify that the records from the last report are there.
 		List<Person> recentPeople = httpQuery("/api/people/recents", author).get(PersonList.class).getList();
-		assertThat(recentPeople).contains(principal);
-		
+		assertThat(recentPeople).contains(principalPerson);
+
 		List<Task> recentTasks = httpQuery("/api/tasks/recents", author).get(TaskList.class).getList();
 		assertThat(recentTasks).contains(action);
-		
+
 		List<Location> recentLocations = httpQuery("/api/locations/recents", author).get(LocationList.class).getList();
 		assertThat(recentLocations).contains(loc);
-		
-		//Go and delete the entire approval chain! 
+
+		//Go and delete the entire approval chain!
 		advisorOrg.setApprovalSteps(ImmutableList.of());
 		resp = httpQuery("/api/organizations/update", admin).post(Entity.json(advisorOrg));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		
+
 		Organization updatedOrg = httpQuery("/api/organizations/" + advisorOrg.getId(), admin).get(Organization.class);
 		assertThat(updatedOrg).isNotNull();
 		assertThat(updatedOrg.loadApprovalSteps()).hasSize(0);
@@ -343,7 +345,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		c.setText(string);
 		return c;
 	}
-	
+
 	@Test
 	public void testDefaultApprovalFlow() {
 		final Person jack = getJackJackson();
@@ -470,8 +472,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Elizabeth edits the report (update locationId, addPerson, remove a Task)
 		returned.setLocation(loc);
-		returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger), 
-				PersonTest.personToReportPerson(nick), 
+		returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
+				PersonTest.personToReportPerson(nick),
 				PersonTest.personToPrimaryReportPerson(elizabeth)));
 		returned.setTasks(ImmutableList.of());
 		Response resp = httpQuery("/api/reports/update", elizabeth).post(Entity.json(returned));
@@ -600,7 +602,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(searchResults.getList()).isNotEmpty();
 		//#TODO: figure out how to verify the results?
 
-		//Check search for just an org, when we don't know if it's advisor or principal. 
+		//Check search for just an org, when we don't know if it's advisor or principal.
 		query.setOrgId(ef11.getId());
 		query.setAdvisorOrgId(null);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
@@ -608,8 +610,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(searchResults.getList().stream().filter(r ->
 				r.loadAdvisorOrg().getId().equals(ef11.getId())
 			)).hasSameSizeAs(searchResults.getList());
-		
-		
+
+
 		//Search by location
 		List<Location> locs = httpQuery("/api/locations/search?text=Cabot", jack).get(LocationList.class).getList();
 		assertThat(locs.size() == 0);
@@ -623,23 +625,23 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				r.getLocation().getId().equals(cabot.getId())
 			)).hasSameSizeAs(searchResults.getList());
 
-		//Search by Status. 
+		//Search by Status.
 		query.setLocationId(null);
 		query.setState(ImmutableList.of(ReportState.CANCELLED));
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		final int numCancelled = searchResults.getTotalCount();
-		
+
 		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.RELEASED));
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getTotalCount()).isGreaterThan(numCancelled);
-		
+
 		orgs = httpQuery("/api/organizations/search?type=PRINCIPAL_ORG&text=Defense", jack).get(OrganizationList.class);
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization mod = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("MoD")).findFirst().get();
 		assertThat(mod.getShortName()).isEqualToIgnoringCase("MoD");
-		
+
 		//Search by Principal Organization
 		query.setState(null);
 		query.setPrincipalOrgId(mod.getId());
@@ -648,62 +650,62 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(searchResults.getList().stream().filter(r ->
 				r.loadPrincipalOrg().getId().equals(mod.getId())
 			)).hasSameSizeAs(searchResults.getList());
-		
+
 		//Search by Principal Parent Organization
 		query.setPrincipalOrgId(mod.getId());
 		query.setIncludePrincipalOrgChildren(true);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
-		//TODO: figure out how to verify the results? 
-		
+		//TODO: figure out how to verify the results?
+
 		query = new ReportSearchQuery();
 		query.setText("spreadsheet");
 		query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
 		query.setSortOrder(SortOrder.ASC);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		DateTime prev = new DateTime(0L);
-		for (Report res : searchResults.getList()) { 
+		for (Report res : searchResults.getList()) {
 			assertThat(res.getEngagementDate()).isGreaterThan(prev);
 			prev = res.getEngagementDate();
 		}
-		
+
 		//Search for report text with stopwords
 		query = new ReportSearchQuery();
 		query.setText("Hospital usage of Drugs");
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList().stream().filter(r -> r.getIntent().contains("Hospital usage of Drugs")).count()).isGreaterThan(0);
-		
+
 		///find EF 2.2
 		orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%202.2", jack).get(OrganizationList.class);
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization ef22 = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 2.2")).findFirst().get();
 		assertThat(ef22.getShortName()).isEqualToIgnoringCase("EF 2.2");
-		
-		
-		//Search for a report by both principal AND advisor orgs. 
+
+
+		//Search for a report by both principal AND advisor orgs.
 		query = new ReportSearchQuery();
 		query.setAdvisorOrgId(mod.getId());
 		query.setPrincipalOrgId(ef22.getId());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
-		assertThat(searchResults.getList().stream().filter(r -> 
+		assertThat(searchResults.getList().stream().filter(r ->
 			r.getAdvisorOrg().getId().equals(ef22.getId()) && r.getPrincipalOrg().getId().equals(mod.getId())
 			).count()).isEqualTo(searchResults.getList().size());
-		
-		//this might fail if there are any children of ef22 or mod, but there aren't in the base data set. 
+
+		//this might fail if there are any children of ef22 or mod, but there aren't in the base data set.
 		query.setIncludeAdvisorOrgChildren(true);
 		query.setIncludePrincipalOrgChildren(true);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
-		assertThat(searchResults.getList().stream().filter(r -> 
+		assertThat(searchResults.getList().stream().filter(r ->
 			r.getAdvisorOrg().getId().equals(ef22.getId()) && r.getPrincipalOrg().getId().equals(mod.getId())
 			).count()).isEqualTo(searchResults.getList().size());
-		
+
 		//Search by Atmosphere
 		query = new ReportSearchQuery();
 		query.setAtmosphere(Atmosphere.NEGATIVE);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList().stream().filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)
 			).count()).isEqualTo(searchResults.getList().size());
-		
+
 	}
 
 	@Test
@@ -850,7 +852,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	@Test
 	public void dailyRollupGraphNonReportingTest() {
 		Person steve = getSteveSteveson();
-		
+
 		Report r = new Report();
 		r.setAuthor(admin);
 		r.setIntent("Test the Daily rollup graph");
@@ -858,40 +860,40 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		r.setKeyOutcomes("Foobar the bazbiz");
 		r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(admin), PersonTest.personToPrimaryReportPerson(steve)));
 		r = httpQuery("/api/reports/new", admin).post(Entity.json(r), Report.class);
-		
+
 		//Pull the daily rollup graph
 		DateTime startDate = DateTime.now().minusDays(1);
 		DateTime endDate = DateTime.now().plusDays(1);
 		final List<RollupGraph> startGraph = httpQuery(
 				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), admin)
 				.get(new GenericType<List<RollupGraph>>() {});
-		
+
 		//Submit the report
 		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
-		
+
 		//Oops set the engagementDate.
 		r.setEngagementDate(DateTime.now());
 		resp = httpQuery("/api/reports/update", admin).post(Entity.json(r));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		
-		//Re-submit the report, it should work. 
+
+		//Re-submit the report, it should work.
 		resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
-		
+
 		//Admin can approve his own reports.
 		resp = httpQuery("/api/reports/" + r.getId() + "/approve", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
-		
-		//Verify report is in RELEASED state. 
+
+		//Verify report is in RELEASED state.
 		r = httpQuery("/api/reports/" + r.getId(), admin).get(Report.class);
 		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
-	
-		//Check on the daily rollup graph now. 
+
+		//Check on the daily rollup graph now.
 		List<RollupGraph> endGraph = httpQuery(
 				String.format("/api/reports/rollupGraph?startDate=%d&endDate=%d", startDate.getMillis(), endDate.getMillis()), admin)
 				.get(new GenericType<List<RollupGraph>>() {});
-		
+
 		final Position pos = admin.loadPosition();
 		pos.getOrganization().setLoadLevel(LoadLevel.ID_ONLY);
 		final Organization org = pos.loadOrganization();

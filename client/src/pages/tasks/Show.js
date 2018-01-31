@@ -36,6 +36,10 @@ export default class TaskShow extends Page {
 			}),
 			reportsPageNum: 0,
 		}
+		this.TaskCustomField = DictionaryField(Form.Field)
+		this.PlannedCompletionField = DictionaryField(Form.Field)
+		this.ProjectedCompletionField = DictionaryField(Form.Field)
+		this.TaskCustomFieldEnum = DictionaryField(Form.Field)
 
 		setMessages(props,this.state)
 	}
@@ -76,10 +80,6 @@ export default class TaskShow extends Page {
 		let currentUser = this.context.currentUser
 
 		const taskShortLabel = Settings.fields.task.shortLabel
-		const CustomField = DictionaryField(Settings.fields.task.customField)(Form.Field)
-		const PlannedCompletion = DictionaryField(Settings.fields.task.plannedCompletion)(Form.Field)
-		const ProjectedCompletion = DictionaryField(Settings.fields.task.projectedCompletion)(Form.Field)
-		const CustomFieldEnum = DictionaryField(Settings.fields.task.customFieldEnum)(Form.Field)
 
 		let canEdit = currentUser.isAdmin()
 
@@ -98,10 +98,10 @@ export default class TaskShow extends Page {
 							this.renderOrg()
 						}
 
-						<CustomField id="customField"/>
-						<PlannedCompletion id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
-						<ProjectedCompletion id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
-						<CustomFieldEnum id="customFieldEnum"/>
+						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
+						<this.PlannedCompletionField dictProps={Settings.fields.task.plannedCompletion} id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
+						<this.ProjectedCompletionField dictProps={Settings.fields.task.projectedCompletion} id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
+						<this.TaskCustomFieldEnum dictProps={Object.without(Settings.fields.task.customFieldEnum, 'enum')} id="customFieldEnum"/>
 
 					</Fieldset>
 				</Form>

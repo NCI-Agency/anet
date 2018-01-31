@@ -94,7 +94,7 @@ public class ReportResource implements IGraphQLResource {
 	ReportDao dao;
 	AnetObjectEngine engine;
 	AnetConfiguration config;
-	
+
 	private final RollupGraphComparator rollupGraphComparator;
 
 	public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
@@ -104,32 +104,32 @@ public class ReportResource implements IGraphQLResource {
 
 		@SuppressWarnings("unchecked")
 		List<String> pinnedOrgNames = (List<String>)this.config.getDictionary().get("pinned_ORGs");
-		
+
 		this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
 
 	}
 
 	@Override
 	public String getDescription() {
-		return "Reports"; 
+		return "Reports";
 	}
 
 	@Override
 	public Class<Report> getBeanClass() {
-		return Report.class; 
+		return Report.class;
 	}
-	
+
 	@Override
 	public Class<ReportList> getBeanListClass() {
-		return ReportList.class; 
-	} 
+		return ReportList.class;
+	}
 
 	@GET
 	@Timed
 	@GraphQLFetcher
 	@Path("/")
 	public ReportList getAll(@Auth Person user,
-			@DefaultValue("0") @QueryParam("pageNum") Integer pageNum, 
+			@DefaultValue("0") @QueryParam("pageNum") Integer pageNum,
 			@DefaultValue("100") @QueryParam("pageSize") Integer pageSize) {
 		return dao.getAll(pageNum, pageSize, user);
 	}
@@ -140,28 +140,28 @@ public class ReportResource implements IGraphQLResource {
 	@GraphQLFetcher
 	public Report getById(@Auth Person user, @PathParam("id") Integer id) {
 		final Report r = dao.getById(id, user);
-		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
+		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return r;
 	}
 
-	//Returns a dateTime representing the very end of today. 
-	// Used to determine if a date is tomorrow or later. 
-	private DateTime tomorrow() { 
+	//Returns a dateTime representing the very end of today.
+	// Used to determine if a date is tomorrow or later.
+	private DateTime tomorrow() {
 		return DateTime.now().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59);
 	}
-	
-	// Helper method to determine if a report should be pushed into FUTURE state. 
-	private boolean shouldBeFuture(Report r) { 
+
+	// Helper method to determine if a report should be pushed into FUTURE state.
+	private boolean shouldBeFuture(Report r) {
 		return r.getEngagementDate() != null && r.getEngagementDate().isAfter(tomorrow()) && r.getCancelledReason() == null;
 	}
-	
+
 	@POST
 	@Timed
 	@Path("/new")
 	public Report createNewReport(@Auth Person author, Report r) {
 		if (r.getState() == null) { r.setState(ReportState.DRAFT); }
 		if (r.getAuthor() == null) { r.setAuthor(author); }
-	
+
 		Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
 		if (r.getAdvisorOrg() == null && primaryAdvisor != null) {
 			r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
@@ -170,24 +170,24 @@ public class ReportResource implements IGraphQLResource {
 		if (r.getPrincipalOrg() == null && primaryPrincipal != null) {
 			r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
 		}
-		
-		if (shouldBeFuture(r)) { 
+
+		if (shouldBeFuture(r)) {
 			r.setState(ReportState.FUTURE);
 		}
-		
+
 		r.setReportText(Utils.sanitizeHtml(r.getReportText()));
 		r = dao.insert(r, author);
 		AnetAuditLogger.log("Report {} created by author {} ", r, author);
 		return r;
 	}
 
-	private Person findPrimaryAttendee(Report r, Role role) { 
-		if (r.getAttendees() == null) { return null; } 
+	private Person findPrimaryAttendee(Report r, Role role) {
+		if (r.getAttendees() == null) { return null; }
 		return r.getAttendees().stream().filter(p ->
 				p.isPrimary() && p.getRole().equals(role)
 			).findFirst().orElse(null);
 	}
-	
+
 	@POST
 	@Timed
 	@Path("/update")
@@ -199,49 +199,49 @@ public class ReportResource implements IGraphQLResource {
 		r.setApprovalStep(existing.getApprovalStep());
 		r.setAuthor(existing.getAuthor());
 		assertCanEditReport(r, editor);
-		
-		//If this report is in draft and in the future, set state to Future. 
-		if (ReportState.DRAFT.equals(r.getState()) && shouldBeFuture(r)) { 
+
+		//If this report is in draft and in the future, set state to Future.
+		if (ReportState.DRAFT.equals(r.getState()) && shouldBeFuture(r)) {
 			r.setState(ReportState.FUTURE);
 		} else if (ReportState.FUTURE.equals(r.getState()) && (r.getEngagementDate() == null || r.getEngagementDate().isBefore(tomorrow()))) {
-			//This catches a user editing the report to change date back to the past. 
+			//This catches a user editing the report to change date back to the past.
 			r.setState(ReportState.DRAFT);
 		} else if (ReportState.FUTURE.equals(r.getState()) && r.getCancelledReason() != null) {
-			//Cancelled future engagements become draft. 
+			//Cancelled future engagements become draft.
 			r.setState(ReportState.DRAFT);
 		}
-		
-		//If there is a change to the primary advisor, change the advisor Org. 
+
+		//If there is a change to the primary advisor, change the advisor Org.
 		Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
-		if (Utils.idEqual(primaryAdvisor, existing.loadPrimaryAdvisor()) == false || existing.getAdvisorOrg() == null) { 
+		if (Utils.idEqual(primaryAdvisor, existing.loadPrimaryAdvisor()) == false || existing.getAdvisorOrg() == null) {
 			r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
-		} else { 
+		} else {
 			r.setAdvisorOrg(existing.getAdvisorOrg());
 		}
 
 		Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
-		if (Utils.idEqual(primaryPrincipal, existing.loadPrimaryPrincipal()) ==  false || existing.getPrincipalOrg() == null) { 
+		if (Utils.idEqual(primaryPrincipal, existing.loadPrimaryPrincipal()) ==  false || existing.getPrincipalOrg() == null) {
 			r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
-		} else { 
+		} else {
 			r.setPrincipalOrg(existing.getPrincipalOrg());
 		}
-		
+
 		r.setReportText(Utils.sanitizeHtml(r.getReportText()));
 		dao.update(r, editor);
-		
+
 		//Update Attendees:
-		if (r.getAttendees() != null) { 
+		if (r.getAttendees() != null) {
 			//Fetch the people associated with this report
 			List<ReportPerson> existingPeople = dao.getAttendeesForReport(r.getId());
 			//Find any differences and fix them.
 			for (ReportPerson rp : r.getAttendees()) {
 				Optional<ReportPerson> existingPerson = existingPeople.stream().filter(el -> el.getId().equals(rp.getId())).findFirst();
-				if (existingPerson.isPresent()) { 
-					if (existingPerson.get().isPrimary() != rp.isPrimary()) { 
+				if (existingPerson.isPresent()) {
+					if (existingPerson.get().isPrimary() != rp.isPrimary()) {
 						dao.updateAttendeeOnReport(rp, r);
 					}
 					existingPeople.remove(existingPerson.get());
-				} else { 
+				} else {
 					dao.addAttendeeToReport(rp, r);
 				}
 			}
@@ -252,15 +252,15 @@ public class ReportResource implements IGraphQLResource {
 		}
 
 		//Update Tasks:
-		if (r.getTasks() != null) { 
+		if (r.getTasks() != null) {
 			List<Task> existingTasks = dao.getTasksForReport(r);
 			List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
 			for (Task p : r.getTasks()) {
 				int idx = existingTaskIds.indexOf(p.getId());
-				if (idx == -1) { 
-					dao.addTaskToReport(p, r); 
+				if (idx == -1) {
+					dao.addTaskToReport(p, r);
 				} else {
-					existingTaskIds.remove(idx); 
+					existingTaskIds.remove(idx);
 				}
 			}
 			for (Integer id : existingTaskIds) {
@@ -302,7 +302,7 @@ public class ReportResource implements IGraphQLResource {
 
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
 			boolean canApprove = engine.canUserApproveStep(editor.getId(), existing.getApprovalStep().getId());
-			if (canApprove) { 
+			if (canApprove) {
 				AnetEmail email = new AnetEmail();
 				ReportEditedEmail action = new ReportEditedEmail();
 				action.setReport(existing);
@@ -352,7 +352,7 @@ public class ReportResource implements IGraphQLResource {
 			throw new WebApplicationException("Cannot edit a released report", Status.FORBIDDEN);
 		}
 	}
-	
+
 	/* Submit a report for approval
 	 * Kicks a report from DRAFT to PENDING_APPROVAL and sets the approval step Id
 	 */
@@ -380,7 +380,7 @@ public class ReportResource implements IGraphQLResource {
 
 		if (r.getEngagementDate() == null) {
 			throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
-		} else if (r.getEngagementDate().isAfter(tomorrow()) && r.getCancelledReason() == null) { 
+		} else if (r.getEngagementDate().isAfter(tomorrow()) && r.getCancelledReason() == null) {
 			throw new WebApplicationException("You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
 		}
 
@@ -428,7 +428,7 @@ public class ReportResource implements IGraphQLResource {
 		ApprovalNeededEmail action = new ApprovalNeededEmail();
 		action.setReport(r);
 		approverEmail.setAction(action);
-		
+
 		approverEmail.setToAddresses(approvers.stream()
 				.filter(a -> a.getPerson() != null)
 				.map(a -> a.loadPerson().getEmailAddress())
@@ -504,9 +504,9 @@ public class ReportResource implements IGraphQLResource {
 		email.setAction(action);
 		AnetEmailWorker.sendEmailAsync(email);
 	}
-	
+
 	/**
-	 * Rejects a report and moves it back to the author with state REJECTED. 
+	 * Rejects a report and moves it back to the author with state REJECTED.
 	 * @param id the Report ID to reject
 	 * @param reason : A @link Comment object which will be posted to the report with the reason why the report was rejected.
 	 * @return 200 on a successful reject, 401 if you don't have privileges to reject this report.
@@ -568,7 +568,7 @@ public class ReportResource implements IGraphQLResource {
 		email.setAction(action);
 		AnetEmailWorker.sendEmailAsync(email);
 	}
-		
+
 	@POST
 	@Timed
 	@Path("/{id}/comments")
@@ -589,7 +589,7 @@ public class ReportResource implements IGraphQLResource {
 		email.setAction(action);
 		AnetEmailWorker.sendEmailAsync(email);
 	}
-	
+
 	@GET
 	@Timed
 	@Path("/{id}/comments")
@@ -614,10 +614,10 @@ public class ReportResource implements IGraphQLResource {
 	@POST
 	@Timed
 	@Path("/{id}/email")
-	public Response emailReport(@Auth Person user, @PathParam("id") int reportId, AnetEmail email) { 
+	public Response emailReport(@Auth Person user, @PathParam("id") int reportId, AnetEmail email) {
 		final Report r = dao.getById(reportId, user);
 		if (r == null) { return Response.status(Status.NOT_FOUND).build(); }
-		
+
 		ReportEmail action = new ReportEmail();
 		action.setReport(Report.createWithId(reportId));
 		action.setSender(user);
@@ -628,12 +628,12 @@ public class ReportResource implements IGraphQLResource {
 	}
 
 	/*
-	 * Delete a draft report. Authors can delete DRAFT, REJECTED reports. Admins can delete any report 
+	 * Delete a draft report. Authors can delete DRAFT, REJECTED reports. Admins can delete any report
 	 */
 	@DELETE
 	@Timed
 	@Path("/{id}/delete")
-	public Response deleteReport(@Auth Person user, @PathParam("id") int reportId) { 
+	public Response deleteReport(@Auth Person user, @PathParam("id") int reportId) {
 		final Report report = dao.getById(reportId, user);
 		assertCanDeleteReport(report, user);
 
@@ -642,17 +642,17 @@ public class ReportResource implements IGraphQLResource {
 	}
 
 	private void assertCanDeleteReport(Report report, Person user) {
-		if (AuthUtils.isAdmin(user)) { return; } 
-		
-		if (report.getState() == ReportState.DRAFT || report.getState() == ReportState.REJECTED) { 
+		if (AuthUtils.isAdmin(user)) { return; }
+
+		if (report.getState() == ReportState.DRAFT || report.getState() == ReportState.REJECTED) {
 			//only the author may delete these reports
-			if (Objects.equals(report.getAuthor().getId(), user.getId())) { 
+			if (Objects.equals(report.getAuthor().getId(), user.getId())) {
 				return;
 			}
 		}
 		throw new WebApplicationException("You cannot delete this report", Status.FORBIDDEN);
 	}
-	
+
 	@GET
 	@Timed
 	@Path("/search")
@@ -672,55 +672,55 @@ public class ReportResource implements IGraphQLResource {
 		return dao.search(query, user);
 	}
 
-	/** 
-	 * 
+	/**
+	 *
 	 * @param start Start timestamp for the rollup period
 	 * @param end end timestamp for the rollup period
-	 * @param engagementDateStart minimum date on reports to include 
+	 * @param engagementDateStart minimum date on reports to include
 	 * @param orgType  If orgId is NULL then the type of organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
-	 * @param orgId if orgType is NULL then the parent org to create the graph off of. All reports will be by/about this org or a child org. 
+	 * @param orgId if orgType is NULL then the parent org to create the graph off of. All reports will be by/about this org or a child org.
 	 */
 	@GET
 	@Timed
 	@Path("/rollupGraph")
-	public List<RollupGraph> getDailyRollupGraph(@QueryParam("startDate") Long start, 
-			@QueryParam("endDate") Long end, 
-			@QueryParam("orgType") OrganizationType orgType, 
+	public List<RollupGraph> getDailyRollupGraph(@QueryParam("startDate") Long start,
+			@QueryParam("endDate") Long end,
+			@QueryParam("orgType") OrganizationType orgType,
 			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
 			@QueryParam("principalOrganizationId") Integer principalOrgId) {
 		DateTime startDate = new DateTime(start);
 		DateTime endDate = new DateTime(end);
-		
+
 		final List<RollupGraph> dailyRollupGraph;
 
 		@SuppressWarnings("unchecked")
 		final List<String> nonReportingOrgsShortNames = (List<String>) config.getDictionary().get("non_reporting_ORGs");
 		final Map<Integer, Organization> nonReportingOrgs = getOrgsByShortNames(nonReportingOrgsShortNames);
-		
-		if (principalOrgId != null) { 
+
+		if (principalOrgId != null) {
 			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, principalOrgId, OrganizationType.PRINCIPAL_ORG, nonReportingOrgs);
-		} else if (advisorOrgId != null) { 
+		} else if (advisorOrgId != null) {
 			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, advisorOrgId, OrganizationType.ADVISOR_ORG, nonReportingOrgs);
 		} else {
 			if (orgType == null) {
 				orgType = OrganizationType.ADVISOR_ORG;
-			} 
-			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, orgType, nonReportingOrgs);	
+			}
+			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, orgType, nonReportingOrgs);
 		}
-		
+
 		Collections.sort(dailyRollupGraph, rollupGraphComparator);
-		
+
 		return dailyRollupGraph;
-		
+
 	}
 
 	@POST
 	@Timed
 	@Path("/rollup/email")
-	public Response emailRollup(@Auth Person user, 
-			@QueryParam("startDate") Long start, 
-			@QueryParam("endDate") Long end, 
-			@QueryParam("orgType") OrganizationType orgType, 
+	public Response emailRollup(@Auth Person user,
+			@QueryParam("startDate") Long start,
+			@QueryParam("endDate") Long end,
+			@QueryParam("orgType") OrganizationType orgType,
 			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
 			@QueryParam("principalOrganizationId") Integer principalOrgId,
 			AnetEmail email) {
@@ -734,20 +734,20 @@ public class ReportResource implements IGraphQLResource {
 
 		email.setAction(action);
 		AnetEmailWorker.sendEmailAsync(email);
-		
+
 		return Response.ok().build();
 	}
-	
+
 	/* Used to generate an HTML view of the daily rollup email
-	 * 
+	 *
 	 */
 	@GET
 	@Timed
 	@Path("/rollup")
 	@Produces(MediaType.TEXT_HTML)
-	public Response showRollupEmail(@Auth Person user, @QueryParam("startDate") Long start, 
-			@QueryParam("endDate") Long end, 
-			@QueryParam("orgType") OrganizationType orgType, 
+	public Response showRollupEmail(@Auth Person user, @QueryParam("startDate") Long start,
+			@QueryParam("endDate") Long end,
+			@QueryParam("orgType") OrganizationType orgType,
 			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
 			@QueryParam("principalOrganizationId") Integer principalOrgId,
 			@QueryParam("showText") @DefaultValue("false") Boolean showReportText) {
@@ -757,32 +757,32 @@ public class ReportResource implements IGraphQLResource {
 		action.setChartOrgType(orgType);
 		action.setAdvisorOrganizationId(advisorOrgId);
 		action.setPrincipalOrganizationId(principalOrgId);
-		
+
 		Map<String,Object> context = action.execute();
 
 		@SuppressWarnings("unchecked")
-		final Map<String,Object> task = (Map<String, Object>) config.getDictionary().get("TASK");
+		final Map<String,Object> task = (Map<String, Object>) ((Map<String, Object>)config.getDictionary().get("fields")).get("task");
 
 		context.put("serverUrl", config.getServerUrl());
 		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 		context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
 		context.put("TASK_SHORT_LABEL", task.get("shortLabel"));
-		
-		try { 
+
+		try {
 			Configuration freemarkerConfig = new Configuration(Configuration.getVersion());
 			freemarkerConfig.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.getVersion()).build());
 			freemarkerConfig.loadBuiltInEncodingMap();
 			freemarkerConfig.setDefaultEncoding(StandardCharsets.UTF_8.name());
 			freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
 			freemarkerConfig.setAPIBuiltinEnabled(true);
-			
+
 			Template temp = freemarkerConfig.getTemplate(action.getTemplateName());
 			StringWriter writer = new StringWriter();
 			temp.process(context, writer);
-			
+
 			return Response.ok(writer.toString(), MediaType.TEXT_HTML_TYPE).build();
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			throw new WebApplicationException(e);
 		}
 	}
@@ -834,7 +834,7 @@ public class ReportResource implements IGraphQLResource {
 		/**
 		 * Creates an instance of this comparator using the supplied pinned organisation
 		 * names.
-		 * 
+		 *
 		 * @param pinnedOrgNames
 		 *            the pinned organisation names
 		 */
@@ -845,7 +845,7 @@ public class ReportResource implements IGraphQLResource {
 		/**
 		 * Compare the suppled objects, based on whether they are in the list of pinned
 		 * org names and their short names.
-		 * 
+		 *
 		 * @param o1
 		 *            the first object
 		 * @param o2

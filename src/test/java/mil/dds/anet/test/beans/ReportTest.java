@@ -20,6 +20,7 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.AuthorizationGroup;
+import mil.dds.anet.test.TestData;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportTest extends BeanTester<Report> {
@@ -30,7 +31,7 @@ public class ReportTest extends BeanTester<Report> {
 		r.setUpdatedAt(new DateTime(1453753380000L, ISOChronology.getInstanceUTC()));
 		r.setState(ReportState.DRAFT);
 		
-		Location loc = Location.create("The Boat Dock", 32.456,-123.4999);
+		Location loc = TestData.createLocation("The Boat Dock", 32.456,-123.4999);
 		r.setLocation(loc);
 		r.setIntent("Check up with Steve");
 		r.setAtmosphere(Atmosphere.POSITIVE);

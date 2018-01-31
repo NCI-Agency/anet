@@ -78,7 +78,7 @@ public class AnetEmailWorker implements Runnable {
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionary().get("SUPPORT_EMAIL_ADDR");
-		this.task = (Map<String, Object>) config.getDictionary().get("TASK");
+		this.task = (Map<String, Object>) ((Map<String, Object>)config.getDictionary().get("fields")).get("task");
 		instance = this;
 
 		SmtpConfiguration smtpConfig = config.getSmtp();
@@ -90,7 +90,7 @@ public class AnetEmailWorker implements Runnable {
 		this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
 		this.noEmailConfiguration = config.isDevelopmentMode() && smtpConfig.getHostname().startsWith("${");
 
-		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) { 
+		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) {
 			props.put("mail.smtp.auth", "true");
 			auth = new javax.mail.Authenticator() {
 				protected PasswordAuthentication getPasswordAuthentication() {
@@ -108,24 +108,24 @@ public class AnetEmailWorker implements Runnable {
 		freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/");
 		freemarkerConfig.setAPIBuiltinEnabled(true);
 	}
-	
+
 	@Override
-	public void run() { 
+	public void run() {
 		logger.debug("AnetEmailWorker waking up to send emails!");
-		try { 
+		try {
 			runInternal();
 		} catch (Throwable e) {
 			//Cannot let this thread die, otherwise ANET will stop sending emails until you reboot the server :(
 			logger.error("Exception in run()", e);
 		}
 	}
-	
+
 	private void runInternal() {
 		//check the database for any emails we need to send. 
 		final List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM \"pendingEmails\" ORDER BY \"createdAt\" ASC")
 				.map(emailMapper)
 				.list();
-		
+
 		//Send the emails!
 		final List<Integer> processedEmails = new LinkedList<Integer>();
 		for (final AnetEmail email : emails) {
@@ -147,7 +147,7 @@ public class AnetEmailWorker implements Runnable {
 				}
 			}
 		}
-		
+
 		//Update the database.
 		if (!processedEmails.isEmpty()) {
 			final String emailIds = Joiner.on(", ").join(processedEmails);
@@ -161,39 +161,39 @@ public class AnetEmailWorker implements Runnable {
 		}
 		//Remove any null email addresses
 		email.getToAddresses().removeIf(s -> Objects.equals(s, null));
-		if (email.getToAddresses().size() == 0) { 
+		if (email.getToAddresses().size() == 0) {
 			//This email will never get sent... just kill it off
 			//log.error("Unable to send email of subject {}, because there are no valid to email addresses");
 			return;
 		}
-		
+
 		Map<String,Object> context;
-		try { 
+		try {
 			context = email.getAction().execute();
-		} catch (Throwable t) { 
-			//This email will never complete, just kill it. 
+		} catch (Throwable t) {
+			//This email will never complete, just kill it.
 			logger.error("Error execution action", t);
 			return;
 		}
-		
+
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		
+
 		StringWriter writer = new StringWriter();
-		try { 
+		try {
 			context.put("serverUrl", serverUrl);
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
 			context.put("TASK_SHORT_LABEL", task.get("shortLabel"));
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
-			
+
 			temp.process(context, writer);
-		} catch (Exception e) { 
-			//Exceptions thrown while processing the template are unlikely to ever get fixed, so we just log this and drop the email. 
+		} catch (Exception e) {
+			//Exceptions thrown while processing the template are unlikely to ever get fixed, so we just log this and drop the email.
 			logger.error("Error when processing template", e);
 			return;
 		}
-		
+
 		Session session = Session.getInstance(props, auth);
 		Message message = new MimeMessage(session);
 		message.setFrom(new InternetAddress(fromAddr));
@@ -203,77 +203,77 @@ public class AnetEmailWorker implements Runnable {
 		message.setSubject(email.getAction().getSubject());
 		message.setContent(writer.toString(), "text/html; charset=utf-8");
 
-		try { 
+		try {
 			Transport.send(message);
-		} catch (SendFailedException e) { 
-			//The server rejected this... we'll log it and then not try again. 
+		} catch (SendFailedException e) {
+			//The server rejected this... we'll log it and then not try again.
 			logger.error("Send failed", e);
 			return;
 		}
-		//Other errors are intentially thrown, as we want ANET to try again. 
+		//Other errors are intentially thrown, as we want ANET to try again.
 	}
-	
-	
+
+
 	public static void sendEmailAsync(AnetEmail email) {
 		instance.internal_sendEmailAsync(email);
 	}
-	
-	private synchronized void internal_sendEmailAsync(AnetEmail email) { 
+
+	private synchronized void internal_sendEmailAsync(AnetEmail email) {
 		//Insert the job spec into the database.
-		try { 
+		try {
 			String jobSpec = mapper.writeValueAsString(email);
 			handle.createStatement("/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")
 				.bind("jobSpec", jobSpec)
 				.bind("createdAt", new DateTime())
 				.execute();
-		} catch (JsonProcessingException jsonError) { 
+		} catch (JsonProcessingException jsonError) {
 			throw new WebApplicationException(jsonError);
 		}
-		
-		//poke the worker thread so it wakes up. 
+
+		//poke the worker thread so it wakes up.
 		scheduler.schedule(this, 1, TimeUnit.SECONDS);
-	} 
-	
-	public static class AnetEmail { 
+	}
+
+	public static class AnetEmail {
 		Integer id;
 		AnetEmailAction action;
 		List<String> toAddresses;
 		DateTime createdAt;
 		String comment;
-		
+
 		public Integer getId() {
 			return id;
 		}
-		
+
 		public void setId(Integer id) {
 			this.id = id;
 		}
-		
+
 		public AnetEmailAction getAction() {
 			return action;
 		}
-		
+
 		public void setAction(AnetEmailAction action) {
 			this.action = action;
 		}
-		
+
 		public List<String> getToAddresses() {
 			return toAddresses;
 		}
-		
+
 		public void setToAddresses(List<String> toAddresses) {
 			this.toAddresses = toAddresses;
 		}
-		
-		public void addToAddress(String toAddress) { 
-			if (toAddresses == null) { toAddresses = new LinkedList<String>(); } 
+
+		public void addToAddress(String toAddress) {
+			if (toAddresses == null) { toAddresses = new LinkedList<String>(); }
 			toAddresses.add(toAddress);
 		}
-		
+
 		public DateTime getCreatedAt() {
 			return createdAt;
 		}
-		
+
 		public void setCreatedAt(DateTime createdAt) {
 			this.createdAt = createdAt;
 		}
@@ -286,32 +286,32 @@ public class AnetEmailWorker implements Runnable {
 			this.comment = comment;
 		}
 	}
-	
+
 	public static class AnetEmailMapper implements ResultSetMapper<AnetEmail> {
 
 		ObjectMapper mapper;
-		
-		public AnetEmailMapper() { 
+
+		public AnetEmailMapper() {
 			this.mapper = new ObjectMapper();
 			mapper.registerModule(new JodaModule());
 			//mapper.enableDefaultTyping();
 		}
-		
+
 		@Override
 		public AnetEmail map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
 			String jobSpec = rs.getString("jobSpec");
-			try { 
+			try {
 				AnetEmail email = mapper.readValue(jobSpec, AnetEmail.class);
-				
+
 				email.setId(rs.getInt("id"));
 				email.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 				return email;
-			} catch (Exception e) { 
+			} catch (Exception e) {
 				logger.error("Error mapping email", e);
 			}
-			return null;			
-		} 
-		
+			return null;
+		}
+
 	}
-	
+
 }

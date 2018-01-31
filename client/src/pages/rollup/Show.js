@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import Page from 'components/Page'
-import {Modal, Alert, Button, Popover, Overlay} from 'react-bootstrap'
+import {Modal, Alert, Button, HelpBlock, Popover, Overlay} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 
@@ -15,6 +15,7 @@ import Messages from 'components/Messages'
 import Settings from 'Settings'
 
 import {Organization} from 'models'
+import utils from 'utils'
 
 import API from 'api'
 
@@ -63,6 +64,11 @@ export default class RollupShow extends Page {
 			maxReportAge: null,
 			hoveredBar: {org: {}},
 			orgType: Organization.TYPE.ADVISOR_ORG,
+		}
+		this.previewPlaceholderUrl = "/help"
+		if (process.env.NODE_ENV === 'development' && window.location.search) {
+			// Ugly way to get the credentials from the test to the preview window
+			this.previewPlaceholderUrl += window.location.search
 		}
 	}
 
@@ -171,7 +177,7 @@ export default class RollupShow extends Page {
 					</span>
 				} action={
 					<div>
-						<Button href={this.emailPreviewUrl()} target="rollup">Print</Button>
+						<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.printPreview}>Print</Button>
 						<Button onClick={this.toggleEmailModal} bsStyle="primary">Email rollup</Button>
 					</div>
 				}>
@@ -352,11 +358,15 @@ export default class RollupShow extends Page {
 					}
 
 					<Form.Field id="to" />
+					<HelpBlock>
+						One or more email addresses, comma separated, e.g.:<br />
+						<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
+					</HelpBlock>
 					<Form.Field componentClass="textarea" id="comment" />
 				</Modal.Body>
 
 				<Modal.Footer>
-					<a href={this.emailPreviewUrl()} target="rollup" className="btn">Preview</a>
+					<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.showPreview}>Preview</Button>
 					<Button bsStyle="primary" onClick={this.emailRollup}>Send email</Button>
 				</Modal.Footer>
 			</Form>
@@ -368,13 +378,8 @@ export default class RollupShow extends Page {
 		this.setState({showEmailModal: !this.state.showEmailModal})
 	}
 
-	//**NOTE**: This hits an endpoint that sits only on the backend dropwizard server
-	// In development mode when running the frontend out of Node, this link will not work
-	// but if you change the URL to the port of the backend server (ie 8080) rather than
-	// the port of the frontend server (ie 3000) then it should work.  NPM doesn't proxy this
-	// through for some reason. But it works in production when the frontend and backend
-	// are run out of the same server process.
-	emailPreviewUrl() {
+	@autobind
+	previewUrl() {
 		// orgType drives chart
 		// principalOrganizationId or advisorOrganizationId drive drill down.
 		let rollupUrl = `/api/reports/rollup?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
@@ -393,19 +398,40 @@ export default class RollupShow extends Page {
 	}
 
 	@autobind
+	printPreview() {
+		this.showPreview(true)
+	}
+
+	@autobind
+	showPreview(print) {
+		API.fetch(this.previewUrl(), {}, 'text/*').then(response => {
+			response.text().then(text => {
+				let rollupWindow = window.open("", "rollup")
+				let doc = rollupWindow.document
+				doc.clear()
+				doc.open()
+				doc.write(text)
+				doc.close()
+				if (print === true) {
+					rollupWindow.print()
+				}
+			})
+		})
+	}
+
+	@autobind
 	emailRollup() {
 		let email = this.state.email
-		if (!email.to) {
-			email.errors = 'You must select a person to send this to'
+		let r = utils.parseEmailAddresses(email.to)
+		if (!r.isValid) {
+			email.errors = r.message
 			this.setState({email})
 			return
 		}
-
-		email = {
-			toAddresses: email.to.replace(/\s/g, '').split(/[,;]/),
+		const emailDelivery = {
+			toAddresses: r.to,
 			comment: email.comment
 		}
-
 		let emailUrl = `/api/reports/rollup/email?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
@@ -419,7 +445,7 @@ export default class RollupShow extends Page {
 		}
 
 
-		API.send(emailUrl, email).then (() =>
+		API.send(emailUrl, emailDelivery).then (() =>
 			this.setState({
 				success: 'Email successfully sent',
 				showEmailModal: false,

@@ -61,12 +61,6 @@ public class Comment extends AbstractAnetBean {
 		return String.format("[%d] - [Author:%d,Report:%d] - (%s)", id, author.getId(), reportId, text);
 	}
 
-	public static Comment withText(String text) {
-		Comment c = new Comment();
-		c.setText(text);
-		return c;
-	}
-
 	public static Comment createWithId(Integer id) {
 		Comment c = new Comment();
 		c.setId(id);

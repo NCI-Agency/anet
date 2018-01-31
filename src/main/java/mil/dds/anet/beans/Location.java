@@ -58,14 +58,6 @@ public class Location extends AbstractAnetBean {
 		return String.format("(%d) - %s [%f, %f]", id, name, lat, lng); 
 	}
 	
-	public static Location create(String name, Double lat, Double lng) {
-		Location l = new Location();
-		l.setName(name);
-		l.setLat(lat);
-		l.setLng(lng);
-		return l;
-	}
-	
 	public static Location createWithId(Integer id) {
 		Location l = new Location();
 		l.setId(id);

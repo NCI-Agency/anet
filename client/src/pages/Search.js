@@ -45,6 +45,8 @@ const QUERY_STRINGS = {
 const SEARCH_CONFIG = {
 	reports : {
 		listName : 'reports: reportList',
+		sortBy: 'ENGAGEMENT_DATE',
+		sortOrder: 'DESC',
 		variableType: 'ReportSearchQuery',
 		fields : ReportCollection.GQL_REPORT_FIELDS
 	},
@@ -57,21 +59,29 @@ const SEARCH_CONFIG = {
 	},
 	positions : {
 		listName: 'positions: positionList',
+		sortBy: 'NAME',
+		sortOrder: 'ASC',
 		variableType: 'PositionSearchQuery',
 		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
+		sortBy: 'NAME',
+		sortOrder: 'ASC',
 		variableType: 'TaskSearchQuery',
 		fields: 'id, shortName, longName'
 	},
 	locations : {
 		listName: 'locations: locationList',
+		sortBy: 'NAME',
+		sortOrder: 'ASC',
 		variableType: 'LocationSearchQuery',
 		fields : 'id, name, lat, lng'
 	},
 	organizations : {
 		listName: 'organizations: organizationList',
+		sortBy: 'NAME',
+		sortOrder: 'ASC',
 		variableType: 'OrganizationSearchQuery',
 		fields: 'id, shortName, longName, identificationCode, type'
 	}
