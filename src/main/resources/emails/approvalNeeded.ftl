@@ -50,10 +50,10 @@ Dear ${approvalStepName},
       <#if attendee.role == "ADVISOR">
         <li>
           ${(attendee.name)!}
-          <#assign position = attendee.loadPosition()>
-          <#if position??>
-            <#assign organization = position.loadOrganization()>
-            <#if organization??>
+          <#if attendee.loadPosition()??>
+            <#assign position = attendee.loadPosition()>
+            <#if position.loadOrganization()??>
+              <#assign organization = position.loadOrganization()>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
@@ -77,10 +77,10 @@ Dear ${approvalStepName},
       <#if attendee.role == "PRINCIPAL">
          <li>
           ${(attendee.name)!}
-          <#assign position = attendee.loadPosition()>
-          <#if position??>
-            <#assign organization = position.loadOrganization()>
-            <#if organization??>
+          <#if attendee.loadPosition()??>
+            <#assign position = attendee.loadPosition()>
+            <#if position.loadOrganization()??>
+              <#assign organization = position.loadOrganization()>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
@@ -100,8 +100,8 @@ Dear ${approvalStepName},
   </#if>
 </div>
 
-<#assign tags = report.loadTags()>
-<#if tags??>
+<#if report.loadTags()??>
+  <#assign tags = report.loadTags()>
   <div>
     <strong>Tags:</strong>
     <ul>
