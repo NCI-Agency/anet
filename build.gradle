@@ -232,7 +232,7 @@ buildscript {
 
 docker {
 	javaApplication {
-		baseImage = 'openjdk:8-jre'
+		baseImage = 'openjdk:8-jre-alpine'
 		maintainer = 'Vassil Iordanov "vassil.iordanov@gmail.com"'
 		ports = [80, 443]
 		tag = 'ncia/anet-app-server:'+project.version
