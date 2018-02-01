@@ -2,7 +2,6 @@
   "name": "anet",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8080",
   "homepage": "/assets/client",
   "devDependencies": {
     "autobind-decorator": "1.4.3",
@@ -45,7 +44,6 @@
     "gzip-size": "3.0.0",
     "html-loader": "0.4.5",
     "html-webpack-plugin": "2.29.0",
-    "http-proxy-middleware": "0.17.4",
     "jest": "20.0.4",
     "json-loader": "0.5.7",
     "object-assign": "4.1.1",
@@ -104,7 +102,7 @@
   },
   "scripts": {
     "build": "webpack --config config/webpack.prod.js",
-    "start": "webpack-dev-server --open --config config/webpack.dev.js",
+    "start": "webpack-dev-server --open --config config/webpack.dev.js --port 3000",
     "lint": "eslint src tests/e2e/**/*.js tests/util/**/*.js",
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "test": "npm run lint && node --harmony-async-await $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
