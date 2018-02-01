@@ -65,7 +65,7 @@ addons:
 # If one wants to have a demo built out of a container, adding tag such as `demo-new-feature-XYZ` will do the job
 after_success:
   - if [ "$TRAVIS_PULL_REQUEST" == false ]; then
-      if  [ -n "${TRAVIS_TAG} ] || [ "$TRAVIS_BRANCH" == "candidate" ] || [ "$TRAVIS_BRANCH" == "master" ]; then
+      if  [ -n "${TRAVIS_TAG}" ] || [ "$TRAVIS_BRANCH" == "candidate" ] || [ "$TRAVIS_BRANCH" == "master" ]; then
         docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
         ./gradlew dockerBuildImage;
       fi;
