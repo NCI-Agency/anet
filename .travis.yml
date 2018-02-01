@@ -68,16 +68,16 @@ after_success:
       if  [ -z $(TRAVIS_TAG) ] || [ "$TRAVIS_BRANCH" == "candidate" ] || [ "$TRAVIS_BRANCH" == "master" ]; then
         docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
         ./gradlew dockerBuildImage;
-      fi
+      fi;
       if [-z $(TRAVIS_TAG)]; then
         ./gradlew dockerPushImage;
-      fi
+      fi;
       if [ "$TRAVIS_BRANCH" == "candidate" ]; then
         docker tag ncia/anet-app-server ncia/anet-app-server:candidate
         docker push ncia/anet-app-server:candidate
-      fi
+      fi;
       if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker tag ncia/anet-app-server ncia/anet-app-server:latest
         docker push ncia/anet-app-server:latest
-      fi
+      fi;
     fi
