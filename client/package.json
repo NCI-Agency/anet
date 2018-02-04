@@ -2,6 +2,7 @@
   "name": "anet",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8080",
   "homepage": "/assets/client",
   "devDependencies": {
     "autobind-decorator": "1.4.3",
@@ -60,6 +61,7 @@
     "sw-precache-webpack-plugin": "0.11.4",
     "url-loader": "0.6.2",
     "uuid": "3.2.1",
+    "wdio": "1.0.3",
     "wdio-chromedriver-service": "0.1.1",
     "wdio-dot-reporter": "0.0.9",
     "wdio-mocha-framework": "^0.5.11",
@@ -106,7 +108,7 @@
     "start": "webpack-dev-server --open --config config/webpack.dev.js --port 3000",
     "lint": "eslint src tests/e2e/**/*.js tests/util/**/*.js",
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
-    "test": "npm run lint && node --harmony-async-await $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
+    "test": "npm run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "wdio": "wdio ./config/wdio.config.js",
     "wdio:watch": "wdio ./config/wdio.config.js --watch"
   },
