@@ -3,12 +3,12 @@ import querystring from 'querystring'
 const query = querystring.parse(window.location.search.slice(1))
 
 const API = {
-	fetch(pathName, params) {
+	fetch(pathName, params, accept) {
 		params = params || {}
 		params.credentials = 'same-origin'
 
 		params.headers = params.headers || {}
-		params.headers.Accept = 'application/json'
+		params.headers.Accept = accept || 'application/json'
 
 		if (process.env.NODE_ENV === 'development' && query.user && query.pass) {
 			params.headers.Authorization = 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64')
@@ -80,9 +80,12 @@ const API = {
 	loadFileAjaxSync(filePath, mimeType) {
 		let xmlhttp=new XMLHttpRequest()
 		xmlhttp.open("GET",filePath,false)
+		if (process.env.NODE_ENV === 'development' && query.user && query.pass) {
+			xmlhttp.setRequestHeader('Authorization', 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64'))
+		}
 		if (mimeType != null) {
 			if (xmlhttp.overrideMimeType) {
-			xmlhttp.overrideMimeType(mimeType)
+				xmlhttp.overrideMimeType(mimeType)
 			}
 		}
 		xmlhttp.send()

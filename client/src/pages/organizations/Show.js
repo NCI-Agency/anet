@@ -46,6 +46,9 @@ export default class OrganizationShow extends Page {
 		this.reportsPageNum = 0
 		this.tasksPageNum = 0
 		this.togglePendingApprovalFilter = this.togglePendingApprovalFilter.bind(this)
+		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
+		this.LongNameWithLabel = DictionaryField(Form.Field)
+
 		setMessages(props,this.state)
 	}
 
@@ -164,8 +167,6 @@ export default class OrganizationShow extends Page {
 
 		const superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
-		const IdentificationCodeFieldWithLabel = DictionaryField(orgSettings.identificationCode)(Form.Field)
-		const LongNameWithLabel = DictionaryField(orgSettings.longName)(Form.Field)
 
 		return (
 			<div>
@@ -197,9 +198,9 @@ export default class OrganizationShow extends Page {
 							{org.humanNameOfType()}
 						</Form.Field>
 
-						<LongNameWithLabel id="longName"/>
+						<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName"/>
 
-						<IdentificationCodeFieldWithLabel id="identificationCode"/>
+						<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.identificationCode} id="identificationCode"/>
 		
 						{org.parentOrg && org.parentOrg.id &&
 							<Form.Field id="parentOrg" label="Parent organization">

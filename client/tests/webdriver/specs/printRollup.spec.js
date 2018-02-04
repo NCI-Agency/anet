@@ -16,9 +16,6 @@ describe('Print rollup page', () => {
 			const switchHandle = handles.pop()
 			browser.switchTab(switchHandle)
 
-			const url = browser.getUrl()
-			Rollup.openAPI(url)
-			
 			const rollupClassification = 'p:nth-of-type(1) i'
 			browser.waitForText(rollupClassification, 3000)
 			const title = browser.getText(rollupClassification)

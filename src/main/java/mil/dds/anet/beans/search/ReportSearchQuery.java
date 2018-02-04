@@ -46,8 +46,8 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 	private Integer attendeePositionId;
 	private Integer authorizationGroupId;
 
-	ReportSearchSortBy sortBy;
-	SortOrder sortOrder;
+	private ReportSearchSortBy sortBy;
+	private SortOrder sortOrder;
 
 	public ReportSearchQuery() {
 		super();

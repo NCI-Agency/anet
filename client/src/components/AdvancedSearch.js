@@ -13,10 +13,43 @@ import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
+import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 
 import {Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
+
+const taskFilters = props => {
+	const taskFiltersObj = {
+		Organization: <OrganizationFilter
+						queryKey="responsibleOrgId"
+						queryIncludeChildOrgsKey="includeChildrenOrgs"/>,
+		Status: <SelectSearchFilter
+						queryKey="status"
+						values={["ACTIVE", "INACTIVE"]}
+						labels={["Active", "Inactive"]}/>
+	}
+	const projectedCompletion = Settings.fields.task.projectedCompletion
+	if (projectedCompletion)
+		taskFiltersObj[projectedCompletion.label] = <DateRangeSearch
+			queryKey="projectedCompletion" />
+	const plannedCompletion = Settings.fields.task.plannedCompletion
+	if (plannedCompletion)
+		taskFiltersObj[plannedCompletion.label] = <DateRangeSearch
+			queryKey="plannedCompletion" />
+	const customEnum = Settings.fields.task.customFieldEnum
+	if (customEnum)
+		taskFiltersObj[customEnum.label] = <SelectSearchFilter
+			queryKey="projectStatus"
+			values={Object.keys(customEnum.enum)}
+			labels={Object.values(customEnum.enum)} />
+	const customField = Settings.fields.task.customField
+	if (customField)
+		taskFiltersObj[customField.label] = <TextInputFilter
+			queryKey="customField" />
+
+	return taskFiltersObj
+}
 
 export default class AdvancedSearch extends Component {
 	static propTypes = {
@@ -180,18 +213,9 @@ export default class AdvancedSearch extends Component {
 
 		//Task filters
 		filters[pluralize(taskShortLabel)] = {
-			filters: {
-				Organization: <OrganizationFilter
-					queryKey="responsibleOrgId"
-					queryIncludeChildOrgsKey="includeChildrenOrgs"
-				/>,
-				Status: <SelectSearchFilter
-					queryKey="status"
-					values={["ACTIVE", "INACTIVE"]}
-					labels={["Active", "Inactive"]}
-				/>,
-			}
+			filters: taskFilters()
 		}
+
 		return filters
 	}
 

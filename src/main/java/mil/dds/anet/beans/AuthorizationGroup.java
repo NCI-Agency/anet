@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLIgnore;
@@ -70,6 +71,15 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		query.setPageSize(pageSize);
 		query.setAuthorizationGroupId(id);
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
+	}
+
+	@GraphQLFetcher("paginatedPositions")
+	public PositionList fetchPositions(@GraphQLParam("pageNum") int pageNum, @GraphQLParam("pageSize") int pageSize) {
+		PositionSearchQuery query = new PositionSearchQuery();
+		query.setPageNum(pageNum);
+		query.setPageSize(pageSize);
+		query.setAuthorizationGroupId(id);
+		return AnetObjectEngine.getInstance().getPositionDao().search(query);
 	}
 
 	@Override

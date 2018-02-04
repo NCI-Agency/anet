@@ -152,27 +152,6 @@ public class Task extends AbstractAnetBean {
 		return responsibleOrg;
 	}
 
-	/**
-	 * TODO this method should be moved to the Test suite
-	 */
-	public static Task create(String shortName, String longName, String category) { 
-		return create(shortName, longName, category, null, null, TaskStatus.ACTIVE);
-	}
-
-	/**
-	 * TODO this method should be moved to the Test suite
-	 */
-	public static Task create(String shortName, String longName, String category, Task parent, Organization responsibleOrg, TaskStatus status) { 
-		Task p = new Task();
-		p.setShortName(shortName);
-		p.setLongName(longName);
-		p.setCategory(category);
-		p.setParentTask(parent);
-		p.setResponsibleOrg(responsibleOrg);
-		p.setStatus(status);
-		return p;
-	}
-
 	public static Task createWithId(Integer id) { 
 		Task p = new Task();
 		p.setId(id);

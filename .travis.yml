@@ -60,3 +60,24 @@ addons:
     branches:
       - master
       - candidate_scan
+
+# Travis will publish docker images to docker hub of any tagged revision in candidate. This will therefore include all ANET releases. 
+# If one wants to have a demo built out of a container, adding tag such as `demo-new-feature-XYZ` will do the job
+after_success:
+  - if [ "$TRAVIS_PULL_REQUEST" == false ]; then
+      if  [ -n "${TRAVIS_TAG}" ] || [ "$TRAVIS_BRANCH" == "candidate" ] || [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+        ./gradlew dockerBuildImage;
+      fi;
+      if [ -n "${TRAVIS_TAG}" ]; then
+        ./gradlew dockerPushImage;
+      fi;
+      if [ "$TRAVIS_BRANCH" == "candidate" ]; then
+        docker tag ncia/anet-app-server ncia/anet-app-server:candidate;
+        docker push ncia/anet-app-server:candidate;
+      fi;
+      if [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker tag ncia/anet-app-server ncia/anet-app-server:latest;
+        docker push ncia/anet-app-server:latest;
+      fi;
+    fi
