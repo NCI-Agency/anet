@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 import {Checkbox, Table, Button, Collapse, HelpBlock} from 'react-bootstrap'
 import DatePicker from 'react-bootstrap-date-picker'
 import autobind from 'autobind-decorator'

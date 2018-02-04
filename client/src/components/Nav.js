@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
 import {Injectable, Injector} from 'react-injectables'

@@ -1,5 +1,7 @@
 /* eslint no-restricted-globals: ["off", "confirm"] */ //TODO remove this
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+
+import React from 'react'
 import Page from 'components/Page'
 import moment from 'moment'
 import autobind from 'autobind-decorator'

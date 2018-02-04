@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import utils from 'utils'
 import deepEqual from 'deep-equal'
 import autobind from 'autobind-decorator'

@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 import Page from 'components/Page'
 import {Grid, Row, Col} from 'react-bootstrap'
 

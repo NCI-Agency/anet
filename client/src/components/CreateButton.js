@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import {DropdownButton, MenuItem, Button} from 'react-bootstrap'
 import History from 'components/History'
 import * as Models from 'models'

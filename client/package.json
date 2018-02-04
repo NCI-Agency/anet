@@ -91,6 +91,7 @@
     "moment": "2.20.1",
     "nprogress": "0.2.0",
     "pluralize": "7.0.0",
+    "prop-types": "15.6.0",
     "rc-progress": "2.2.5",
     "react": "15.6.2",
     "react-autosuggest-ie11-compatible": "8.0.6",

@@ -1,4 +1,5 @@
-import React, {PropTypes, Component} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import {Table, Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 

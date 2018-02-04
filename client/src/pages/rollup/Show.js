@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 import Page from 'components/Page'
 import {Modal, Alert, Button, HelpBlock, Popover, Overlay} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
@@ -39,7 +40,7 @@ const legendCss = {
 
 export default class RollupShow extends Page {
 	static propTypes = {
-		date: React.PropTypes.object,
+		date: PropTypes.object,
 	}
 
 	static contextTypes = {

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import API from 'api'
 import Settings from 'Settings'
@@ -22,7 +23,7 @@ const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
  */
 export default class CancelledEngagementReports extends Component {
   static propTypes = {
-    date: React.PropTypes.object,
+    date: PropTypes.object,
   }
 
   constructor(props) {
