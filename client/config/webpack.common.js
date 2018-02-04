@@ -1,15 +1,15 @@
-const path = require('path');
-const paths = require('./paths');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
-const getClientEnvironment = require('./env');
-const webpack = require('webpack');
+const path = require('path')
+const paths = require('./paths')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
+const getClientEnvironment = require('./env')
+const webpack = require('webpack')
 
-const publicPath = '/';
-const publicUrl = '';
+const publicPath = '/'
+const publicUrl = ''
 
 // Get environment variables to inject into our app.
-var env = getClientEnvironment(publicUrl);
+var env = getClientEnvironment(publicUrl)
 
 module.exports = {
     entry: [
@@ -70,4 +70,4 @@ module.exports = {
         new HtmlWebpackPlugin({inject: true, template: paths.appHtml}),
         new webpack.DefinePlugin(env),
     ]
-};
+}

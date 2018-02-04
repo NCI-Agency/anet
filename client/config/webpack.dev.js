@@ -1,13 +1,13 @@
-process.env.NODE_ENV = 'development';
+process.env.NODE_ENV = 'development'
 
-const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
-const paths = require('./paths');
-const webpack = require('webpack');
+const merge = require('webpack-merge')
+const common = require('./webpack.common.js')
+const paths = require('./paths')
+const webpack = require('webpack')
 
-const publicPath = '/';
+const publicPath = '/'
 
-const proxy = require(paths.appPackageJson).proxy;
+const proxy = require(paths.appPackageJson).proxy
 
 module.exports = merge(common, {
     devtool: 'eval',
@@ -25,7 +25,7 @@ module.exports = merge(common, {
                 // we need to bypass the proxy 
                 bypass: function(req, res, proxyOptions) {
                     if (req.headers.accept.indexOf("html") !== -1) {
-                      return "/";
+                      return "/"
                     }
                 }
             }
@@ -36,4 +36,4 @@ module.exports = merge(common, {
         new webpack.HotModuleReplacementPlugin()
     ]
 
-});
+})
