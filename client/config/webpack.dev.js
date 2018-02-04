@@ -20,8 +20,15 @@ module.exports = merge(common, {
         publicPath: publicPath,
         hot: true,
         proxy: {
-            "/api": proxy,
-            "/graphql": proxy
+            "/": {
+                target: proxy,
+                // we need to bypass the proxy 
+                bypass: function(req, res, proxyOptions) {
+                    if (req.headers.accept.indexOf("html") !== -1) {
+                      return "/";
+                    }
+                }
+            }
         }
     },
     plugins: [
