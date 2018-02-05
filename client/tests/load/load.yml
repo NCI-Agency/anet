@@ -1,0 +1,261 @@
+config:
+  target: 'http://localhost:8080'
+  phases:
+    - duration: 600
+      arrivalRate: 20
+  defaults:
+    headers:
+      x-my-service-auth: '987401838271002188298567'
+  variables:
+    advisor:
+      - "erin"
+      - "arthur"
+      - "rebecca"
+      - "jack"
+      - "henry"
+    superuser:
+      - "arthur"
+      - "rebecca"
+      - "henry"
+    admin:
+      - "arthur"
+scenarios:
+  - name: Check home
+    weight: 5
+    flow:
+    - get:
+        url: "/"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Make report
+    weight: 1
+    flow:
+    - post:
+        url: "/api/reports/new"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          intent: aaaaaaa
+          engagementDate: '2018-02-01T11:00:00.000Z'
+          atmosphere: POSITIVE
+          atmosphereDetails: aaaaaa
+          location:
+            id: 1008
+            createdAt: 1517748118396
+            updatedAt: 1517748118396
+            name: Fort Amherst
+            lat: 47.563763
+            lng: -52.68059
+          attendees:
+          - status: ACTIVE
+            country: ''
+            rank: Civ
+            gender: MALE
+            phoneNumber: ''
+            endOfTourDate: ''
+            biography: ''
+            role: ADVISOR
+            id: 1004
+            emailAddress: hunter+erin@dds.mil
+            _loaded: true
+            primary: true
+          - name: REINTON, Reina
+            status: ACTIVE
+            country: ''
+            rank: CIV
+            gender: MALE
+            phoneNumber: ''
+            endOfTourDate: ''
+            biography: ''
+            role: ADVISOR
+            id: 1005
+            primary: false
+          - name: TOPFERNESS, Christopf
+            status: ACTIVE
+            country: ''
+            rank: CIV
+            gender: MALE
+            phoneNumber: ''
+            endOfTourDate: ''
+            biography: ''
+            role: PRINCIPAL
+            id: 1009
+            primary: true
+          tasks: []
+          comments: []
+          reportText: ''
+          nextSteps: aaaaaaaaaaaaaa
+          keyOutcomes: aaaaaaaaaa
+          tags: []
+          reportSensitiveInformation:
+            id: 
+            createdAt: 
+            updatedAt: 
+            text: 
+            reportId: 1020
+          authorizationGroups: []
+    - post:
+        url: "/api/reports/{{$.id}}/submit"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  # - name: Update report
+  #   weight: 5
+  #   flow:
+  #   - post:
+  #       url: "/graphql"
+  #       auth:
+  #         user: "{{advisor}}"
+  #         pass: "{{advisor}}"
+  #       json: 
+  #         query: "query { person(f:me) { id }}"
+  #   - post:
+  #       url: "/graphql"
+  #       auth:
+  #         user: "{{advisor}}"
+  #         pass: "{{advisor}}"
+  #       json: 
+  #         query: "query  { reports: reportList (f:search, query:{authorId:{{$.data.person.id}},state:[DRAFT,REJECTED]}) {list { id}}}"
+  #   - post:
+  #       url: "/api/reports/{{$.data.reports.list[0].id}}/update"
+  #       auth:
+  #         user: "{{advisor}}"
+  #         pass: "{{advisor}}"
+  #       json:
+  #         intent: aaaaaaa
+  #         engagementDate: '2018-02-01T11:00:00.000Z'
+  #         atmosphere: POSITIVE
+  #         atmosphereDetails: aaaaaa
+  #         location:
+  #           id: 1008
+  #           createdAt: 1517748118396
+  #           updatedAt: 1517748118396
+  #           name: Fort Amherst
+  #           lat: 47.563763
+  #           lng: -52.68059
+  #         attendees:
+  #         - status: ACTIVE
+  #           country: ''
+  #           rank: Civ
+  #           gender: MALE
+  #           phoneNumber: ''
+  #           endOfTourDate: ''
+  #           biography: ''
+  #           role: ADVISOR
+  #           id: 1004
+  #           _loaded: true
+  #           primary: true
+  #         - name: REINTON, Reina
+  #           status: ACTIVE
+  #           country: ''
+  #           rank: CIV
+  #           gender: MALE
+  #           phoneNumber: ''
+  #           endOfTourDate: ''
+  #           biography: ''
+  #           role: ADVISOR
+  #           id: 1005
+  #           primary: false
+  #         - name: TOPFERNESS, Christopf
+  #           status: ACTIVE
+  #           country: ''
+  #           rank: CIV
+  #           gender: MALE
+  #           phoneNumber: ''
+  #           endOfTourDate: ''
+  #           biography: ''
+  #           role: PRINCIPAL
+  #           id: 1009
+  #           primary: true
+  #         tasks: []
+  #         comments: []
+  #         reportText: ''
+  #         nextSteps: aaaaaaaaaaaaaa
+  #         keyOutcomes: aaaaaaaaaa
+  #         tags: []
+  #         reportSensitiveInformation:
+  #           id: 
+  #           createdAt: 
+  #           updatedAt: 
+  #           text: 
+  #           reportId: 1020
+  #         authorizationGroups: []
+  # - name: Submit report
+  #   weight: 1
+  #   flow:
+  #   - post:
+  #       url: "/graphql"
+  #       auth:
+  #         user: "{{advisor}}"
+  #         pass: "{{advisor}}"
+  #       json: 
+  #         query: "query { person(f:me) { id }}"
+  #   - post:
+  #       url: "/graphql"
+  #       auth:
+  #         user: "{{advisor}}"
+  #         pass: "{{advisor}}"
+  #       json: 
+  #         query: "query  { reports: reportList (f:search, query:{authorId:{{$.data.person.id}},state:[DRAFT,REJECTED]}) {list { id}}}"
+  #   - post:
+  #       url: "/api/reports/{{$.data.reports.list[0].id}}/submit"
+  #       auth:
+  #         user: "{{advisor}}"
+  #         pass: "{{advisor}}"
+  - name: Rollups
+    weight: 1  
+    flow:
+    - get:
+        url: "/rollup"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - think: 1
+    - get:
+        url: "/rollup?date=-1"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Insights
+    weight: 1
+    flow:
+    - get:
+        url: "/insights/not-approved-reports"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/cancelled-reports"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/reports-by-task"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/future-engagements-by-location"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/reports-by-day-of-week"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/advisor-reports"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Do searches
+    weight: 50
+    flow:
+    - get:
+        url: "/search?text=aaaaaaa"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
