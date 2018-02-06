@@ -10,9 +10,7 @@ import org.skife.jdbi.v2.Handle;
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
-import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.IPersonSearcher;
@@ -66,8 +64,9 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) { 
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
 			if (query.getMatchPositionName()) { 
 				whereClauses.add("(people.name LIKE '%' || :text || '%' "
 						+ "OR \"emailAddress\" LIKE '%' || :text || '%' "

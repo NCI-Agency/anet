@@ -1,5 +1,6 @@
 package mil.dds.anet.beans.lists;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 
 import org.skife.jdbi.v2.Query;
@@ -18,7 +19,7 @@ import mil.dds.anet.graphql.IGraphQLBean;
 
 public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IGraphQLBean {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAnetBeanList.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	List<T> list;
 	Integer pageNum;
@@ -46,7 +47,7 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 		} else if (resultSize == 0) {
 			setTotalCount(0);
 		} else {
-			LOGGER.debug("Bulk query context attributes are {}", query.getContext().getAttributes());
+			logger.debug("Bulk query context attributes are {}", query.getContext().getAttributes());
 			Integer foundCount = (Integer) query.getContext().getAttribute("totalCount");
 			setTotalCount(foundCount == null ? resultSize : foundCount);
 		}
@@ -158,7 +159,7 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			return new OrganizationList(query, pageNum, pageSize, manualRowCount);
 		}
 
-		public static OrganizationList fromQuery(Query<Organization> query, int pageNum, int pageSize) { 
+		public static OrganizationList fromQuery(Query<Organization> query, int pageNum, int pageSize) {
 			return fromQuery(query, pageNum, pageSize, null);
 		}
 	}

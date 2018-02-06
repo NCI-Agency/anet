@@ -76,7 +76,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return 0;
 		}
-		// Do not allow the \"reportId\" to be updated!
+		// Do not allow the reportId to be updated!
 		final int numRows = dbHandle.createStatement(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
 					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")

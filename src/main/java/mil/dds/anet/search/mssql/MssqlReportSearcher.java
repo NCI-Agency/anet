@@ -74,22 +74,11 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("freetextQuery", text);
 		}
 
-		sql.append(", people");
-		whereClauses.add("reports.authorId = people.id");
+		sql.append(", people");  // join condition added at the end
 
 		if (query.getAuthorId() != null) {
 			whereClauses.add("reports.authorId = :authorId");
 			args.put("authorId", query.getAuthorId());
-		}
-		
-		if (text != null && text.trim().length() > 0) {
-			String cleanText = Utils.getSqlServerFullTextQuery(text);
-			whereClauses.add("(CONTAINS ((text, intent, keyOutcomes, nextSteps), :containsQuery) "
-					+ "OR FREETEXT((text, intent, keyOutcomes, nextSteps), :freetextQuery) "
-					+ "OR CONTAINS ((tags.name, tags.description), :containsQuery) "
-					+ "OR FREETEXT((tags.name, tags.description), :freetextQuery))");
-			args.put("containsQuery", cleanText);
-			args.put("freetextQuery", query.getText());
 		}
 
 		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses);
@@ -258,6 +247,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		sql.append(" WHERE ");
+		whereClauses.add(0, "reports.authorId = people.id");  // add join condition at the front
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		sql.append(" ) l");
 

@@ -55,7 +55,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* personInsert */ INSERT INTO people " 
 				+ "(name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
-				+ "gender, country, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") " 
+				+ "gender, country, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
 				+ "VALUES (:name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
 				+ ":gender, :country, ");
 		if (DaoUtils.isMsSql(dbHandle)) {
@@ -114,7 +114,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 			sql = "/* getOrganizationForPerson */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
 					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
 					+ "\"peoplePositions\".\"personId\" = :personId AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id " 
+					+ "AND positions.\"organizationId\" = organizations.id "
 					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
 		}
 		

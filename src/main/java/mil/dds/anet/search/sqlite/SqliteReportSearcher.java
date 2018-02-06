@@ -45,7 +45,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		this.dateTimeFormatter = dateTimeFormatter;
 		this.isoDowComparison = "(" + this.isoDowFormat + ") = :%s";
 	}
-	
+
 	public SqliteReportSearcher() {
 		this(
 			"strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1", 	// %w day of week 0-6 with Sunday==0
@@ -76,8 +76,9 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("authorId", query.getAuthorId());
 		}
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) {
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
 			whereClauses.add("(text LIKE '%' || :text || '%' OR "
 					+ "intent LIKE '%' || :text || '%' OR "
 					+ "\"keyOutcomes\" LIKE '%' || :text || '%' OR "
@@ -102,7 +103,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
 		}
 
-		if (query.getAttendeeId() != null) { 
+		if (query.getAttendeeId() != null) {
 			whereClauses.add("reports.id IN (SELECT \"reportId\" from \"reportPeople\" where \"personId\" = :attendeeId)");
 			args.put("attendeeId", query.getAttendeeId());
 		}

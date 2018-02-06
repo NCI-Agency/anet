@@ -87,7 +87,6 @@ public class AnetObjectEngine {
 		emailDao = new EmailDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
-		
 		instance = this;
 	}
 

@@ -65,7 +65,7 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 	}
 
 	public int deleteSavedSearch(Integer id, Person owner) {
-		return dbHandle.createStatement("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" " 
+		return dbHandle.createStatement("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
 				+ "WHERE id = :id AND \"ownerId\" = :ownerId")
 			.bind("id", id)
 			.bind("ownerId", owner.getId())

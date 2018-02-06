@@ -470,7 +470,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("%5$s");
 			sql.append("organizations");
 
-			sql.append(" WHERE positions.\"currentPersonId\" = reports.authorId");
+			sql.append(" WHERE positions.\"currentPersonId\" = reports.\"authorId\"");
 			sql.append(" %6$s");
 			sql.append(" AND reports.\"advisorOrganizationId\" = organizations.id");
 			sql.append(" AND positions.type = :positionAdvisor");
@@ -598,7 +598,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sqlArgs.put("endDate", end.plusMillis(1));
 			sqlArgs.put("engagementDateStart", getRollupEngagmentStart(start));
 		} else { 
-			sql.append("\"releasedAt\"  >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) " 
+			sql.append("\"releasedAt\"  >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) "
 					+ "AND \"engagementDate\" > DateTime(:engagementDateStart) ");
 			sqlArgs.put("startDate", SqliteReportSearcher.sqlitePattern.print(start));
 			sqlArgs.put("endDate", SqliteReportSearcher.sqlitePattern.print(end));

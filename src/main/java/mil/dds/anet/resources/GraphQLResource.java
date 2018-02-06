@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -516,9 +517,13 @@ public class GraphQLResource {
 		 */
 		@Override
 		public void write(final OutputStream output) throws IOException, WebApplicationException {
-			
-			// TODO: The performance of this operation, specifically with large files, should be tested.
-			workbook.write(output);
+			try {
+				// TODO: The performance of this operation, specifically with large files, should be tested.
+				workbook.write(output);
+			} catch (Exception e) {
+				final Throwable rootCause = ExceptionUtils.getRootCause(e);
+				logger.error("Error writing XSSFWorkbook", rootCause == null ? e.getMessage() : rootCause.getMessage());
+			}
 		}
 	}
 }

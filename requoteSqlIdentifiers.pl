@@ -73,7 +73,7 @@ my $identifiers = qr/
 
 # skip lines that are specifically annoying: method declarations, exception message
 # builders, and two specific cases in ReportDao that don't generalize
-next if /^\s+(?:public [A-Z]|\.bind\(|throw |query\.setParentOrgId|\@BindBean)/ 
+next if /^\s+(?:public [A-Z]|\.bind\(|throw |query\.setParentOrgId|\@BindBean)/
     or /Utils\.buildParentOrgMapping/;
 s/$identifiers/\\"$1\\"/g;
 s/\[key\]/\\"key\\"/; # super super specific case that I'm sick of re-doing by hand

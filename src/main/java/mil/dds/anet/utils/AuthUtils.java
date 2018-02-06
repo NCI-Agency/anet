@@ -1,5 +1,6 @@
 package mil.dds.anet.utils;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
@@ -17,12 +18,12 @@ import mil.dds.anet.beans.Position.PositionType;
 
 public class AuthUtils {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuthUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static String UNAUTH_MESSAGE = "You do not have permissions to do this";
 	
 	public static void assertAdministrator(Person user) { 
-		LOGGER.debug("Asserting admin status for {}", user);
+		logger.debug("Asserting admin status for {}", user);
 		if (user.loadPosition() != null
 				&& user.getPosition().getType() == PositionType.ADMINISTRATOR) { 
 			return;
@@ -32,20 +33,20 @@ public class AuthUtils {
 	
 	public static boolean isSuperUserForOrg(final Person user, final Organization org) {
 		if (org == null || org.getId() == null) {
-			LOGGER.error("Organization {} is null or has a null ID in SuperUser check for {}",
+			logger.error("Organization {} is null or has a null ID in SuperUser check for {}",
 					org, user); // DANGER: possible log injection vector here?
 			return false;
 		}
 		Position position = user.loadPosition();
 		if (position == null) {
-			LOGGER.warn("User {} has no position, hence no permissions", user);
+			logger.warn("User {} has no position, hence no permissions", user);
 			return false;
 		}
 		if (position.getType() == PositionType.ADMINISTRATOR) {
-			LOGGER.debug("User {} is an administrator, automatically a superuser", user);
+			logger.debug("User {} is an administrator, automatically a superuser", user);
 			return true;
 		}
-		LOGGER.debug("Position for user {} is {}", user, position);
+		logger.debug("Position for user {} is {}", user, position);
 		if (position.getType() != PositionType.SUPER_USER) { return false; } 
 
 		// Given that we know it's a super-user position, does it actually match this organization?
@@ -66,13 +67,13 @@ public class AuthUtils {
 	
 	public static void assertSuperUserForOrg(Person user, Organization org) {
 		// log injection possibility here?
-		LOGGER.debug("Asserting superuser status for {} in {}", user, org);
+		logger.debug("Asserting superuser status for {} in {}", user, org);
 		if (isSuperUserForOrg(user, org)) { return; }
 		throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
 	}
 
 	public static void assertSuperUser(Person user) {
-		LOGGER.debug("Asserting some superuser status for {}", user);
+		logger.debug("Asserting some superuser status for {}", user);
 		Position position = user.loadPosition();
 		if (position != null
 			&& (position.getType() == PositionType.SUPER_USER

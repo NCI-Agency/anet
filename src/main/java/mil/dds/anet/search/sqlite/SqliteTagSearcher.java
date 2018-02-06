@@ -16,7 +16,8 @@ public class SqliteTagSearcher implements ITagSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		final String text = query.getText();
-		if (text == null || text.trim().length() == 0) {
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (!doFullTextSearch) {
 			return result;
 		}
 
