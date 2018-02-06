@@ -74,8 +74,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("freetextQuery", text);
 		}
 
-		sql.append(", people");
-		whereClauses.add("reports.authorId = people.id");
+		sql.append(", people");  // join condition added at the end
 
 		if (query.getAuthorId() != null) {
 			whereClauses.add("reports.authorId = :authorId");
@@ -248,6 +247,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		sql.append(" WHERE ");
+		whereClauses.add(0, "reports.authorId = people.id");  // add join condition at the front
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		sql.append(" ) l");
 
