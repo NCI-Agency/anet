@@ -34,12 +34,13 @@ scenarios:
     flow:
     - post:
         url: "/api/reports/new"
+        beforeRequest: "generateRandomData"
         auth:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json:
-          intent: aaaaaaa
-          engagementDate: '2018-02-01T11:00:00.000Z'
+          intent: "{{ report.intent }}"
+          engagementDate: "{{ report.engagementDate }}"
           atmosphere: POSITIVE
           atmosphereDetails: aaaaaa
           location:
@@ -156,12 +157,13 @@ scenarios:
     - log: "{{ advisor }} updating report {{ result }}"
     - post:
         url: "/api/reports/{{ result }}/update"
+        beforeRequest: "generateRandomData"
         auth:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json:
-          intent: aaaaaaa
-          engagementDate: '2018-02-01T11:00:00.000Z'
+          intent: "{{ report.intent }}"
+          engagementDate: "{{ report.engagementDate }}"
           atmosphere: POSITIVE
           atmosphereDetails: aaaaaa
           location:
