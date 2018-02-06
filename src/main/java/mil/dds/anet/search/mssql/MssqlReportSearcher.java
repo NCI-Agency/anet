@@ -82,16 +82,6 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("authorId", query.getAuthorId());
 		}
 
-		if (text != null && text.trim().length() > 0) {
-			String cleanText = Utils.getSqlServerFullTextQuery(text);
-			whereClauses.add("(CONTAINS ((text, intent, keyOutcomes, nextSteps), :containsQuery) "
-					+ "OR FREETEXT((text, intent, keyOutcomes, nextSteps), :freetextQuery) "
-					+ "OR CONTAINS ((tags.name, tags.description), :containsQuery) "
-					+ "OR FREETEXT((tags.name, tags.description), :freetextQuery))");
-			args.put("containsQuery", cleanText);
-			args.put("freetextQuery", query.getText());
-		}
-
 		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses);
 		searchBuilder.addDateClause(query.getEngagementDateStart(), Comparison.AFTER, "engagementDate", "startDate");
 		searchBuilder.addDateClause(query.getEngagementDateEnd(), Comparison.BEFORE, "engagementDate", "endDate");
