@@ -3,6 +3,7 @@ config:
   phases:
     - duration: 600
       arrivalRate: 20
+  processor: "./processor.js"
   defaults:
     headers:
       x-my-service-auth: '987401838271002188298567'
@@ -43,8 +44,6 @@ scenarios:
           atmosphereDetails: aaaaaa
           location:
             id: 1008
-            createdAt: 1517748118396
-            updatedAt: 1517748118396
             name: Fort Amherst
             lat: 47.563763
             lng: -52.68059
@@ -96,117 +95,163 @@ scenarios:
             text: 
             reportId: 1020
           authorizationGroups: []
+        capture:
+          json: "$.id"
+          as: "reportId"
+    - log: "{{ advisor }} creating report {{ reportId }}"
+  - name: Approve report
+    weight: 5
+    flow:
     - post:
-        url: "/api/reports/{{$.id}}/submit"
+        url: "/graphql"
         auth:
           user: "{{advisor}}"
           pass: "{{advisor}}"
-  # - name: Update report
-  #   weight: 5
-  #   flow:
-  #   - post:
-  #       url: "/graphql"
-  #       auth:
-  #         user: "{{advisor}}"
-  #         pass: "{{advisor}}"
-  #       json: 
-  #         query: "query { person(f:me) { id }}"
-  #   - post:
-  #       url: "/graphql"
-  #       auth:
-  #         user: "{{advisor}}"
-  #         pass: "{{advisor}}"
-  #       json: 
-  #         query: "query  { reports: reportList (f:search, query:{authorId:{{$.data.person.id}},state:[DRAFT,REJECTED]}) {list { id}}}"
-  #   - post:
-  #       url: "/api/reports/{{$.data.reports.list[0].id}}/update"
-  #       auth:
-  #         user: "{{advisor}}"
-  #         pass: "{{advisor}}"
-  #       json:
-  #         intent: aaaaaaa
-  #         engagementDate: '2018-02-01T11:00:00.000Z'
-  #         atmosphere: POSITIVE
-  #         atmosphereDetails: aaaaaa
-  #         location:
-  #           id: 1008
-  #           createdAt: 1517748118396
-  #           updatedAt: 1517748118396
-  #           name: Fort Amherst
-  #           lat: 47.563763
-  #           lng: -52.68059
-  #         attendees:
-  #         - status: ACTIVE
-  #           country: ''
-  #           rank: Civ
-  #           gender: MALE
-  #           phoneNumber: ''
-  #           endOfTourDate: ''
-  #           biography: ''
-  #           role: ADVISOR
-  #           id: 1004
-  #           _loaded: true
-  #           primary: true
-  #         - name: REINTON, Reina
-  #           status: ACTIVE
-  #           country: ''
-  #           rank: CIV
-  #           gender: MALE
-  #           phoneNumber: ''
-  #           endOfTourDate: ''
-  #           biography: ''
-  #           role: ADVISOR
-  #           id: 1005
-  #           primary: false
-  #         - name: TOPFERNESS, Christopf
-  #           status: ACTIVE
-  #           country: ''
-  #           rank: CIV
-  #           gender: MALE
-  #           phoneNumber: ''
-  #           endOfTourDate: ''
-  #           biography: ''
-  #           role: PRINCIPAL
-  #           id: 1009
-  #           primary: true
-  #         tasks: []
-  #         comments: []
-  #         reportText: ''
-  #         nextSteps: aaaaaaaaaaaaaa
-  #         keyOutcomes: aaaaaaaaaa
-  #         tags: []
-  #         reportSensitiveInformation:
-  #           id: 
-  #           createdAt: 
-  #           updatedAt: 
-  #           text: 
-  #           reportId: 1020
-  #         authorizationGroups: []
-  # - name: Submit report
-  #   weight: 1
-  #   flow:
-  #   - post:
-  #       url: "/graphql"
-  #       auth:
-  #         user: "{{advisor}}"
-  #         pass: "{{advisor}}"
-  #       json: 
-  #         query: "query { person(f:me) { id }}"
-  #   - post:
-  #       url: "/graphql"
-  #       auth:
-  #         user: "{{advisor}}"
-  #         pass: "{{advisor}}"
-  #       json: 
-  #         query: "query  { reports: reportList (f:search, query:{authorId:{{$.data.person.id}},state:[DRAFT,REJECTED]}) {list { id}}}"
-  #   - post:
-  #       url: "/api/reports/{{$.data.reports.list[0].id}}/submit"
-  #       auth:
-  #         user: "{{advisor}}"
-  #         pass: "{{advisor}}"
+        json: 
+          query: "query { person(f:me) { id }}"
+        capture:
+          json: "$.data.person.id"
+          as: "personId"
+    - post:
+        url: "/graphql"
+        afterResponse: "continueIfResult"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query  { reports: reportList (f:search, query:{pendingApprovalOf:{{ personId }} }) {list { id}}}"
+        capture:
+          json: "$.data.reports.list[0].id"
+          as: "result"
+    - log: "{{ advisor }} approving report {{ result }}"
+    - post:
+        url: "/api/reports/{{ result }}/approve"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Update report
+    weight: 5
+    flow:
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query { person(f:me) { id }}"
+        capture:
+          json: "$.data.person.id"
+          as: "personId"
+    - post:
+        url: "/graphql"
+        afterResponse: "continueIfResult"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query  { reports: reportList (f:search, query:{authorId:{{ personId }},state:[DRAFT,REJECTED]}) {list { id}}}"
+        capture:
+          json: "$.data.reports.list[0].id"
+          as: "result"
+    - log: "{{ advisor }} updating report {{ result }}"
+    - post:
+        url: "/api/reports/{{ result }}/update"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          intent: aaaaaaa
+          engagementDate: '2018-02-01T11:00:00.000Z'
+          atmosphere: POSITIVE
+          atmosphereDetails: aaaaaa
+          location:
+            id: 1008
+            createdAt: 1517748118396
+            updatedAt: 1517748118396
+            name: Fort Amherst
+            lat: 47.563763
+            lng: -52.68059
+          attendees:
+          - status: ACTIVE
+            country: ''
+            rank: Civ
+            gender: MALE
+            phoneNumber: ''
+            endOfTourDate: ''
+            biography: ''
+            role: ADVISOR
+            id: 1004
+            _loaded: true
+            primary: true
+          - name: REINTON, Reina
+            status: ACTIVE
+            country: ''
+            rank: CIV
+            gender: MALE
+            phoneNumber: ''
+            endOfTourDate: ''
+            biography: ''
+            role: ADVISOR
+            id: 1005
+            primary: false
+          - name: TOPFERNESS, Christopf
+            status: ACTIVE
+            country: ''
+            rank: CIV
+            gender: MALE
+            phoneNumber: ''
+            endOfTourDate: ''
+            biography: ''
+            role: PRINCIPAL
+            id: 1009
+            primary: true
+          tasks: []
+          comments: []
+          reportText: ''
+          nextSteps: aaaaaaaaaaaaaa
+          keyOutcomes: aaaaaaaaaa
+          tags: []
+          reportSensitiveInformation:
+            id: 
+            createdAt: 
+            updatedAt: 
+            text: 
+            reportId: 1020
+          authorizationGroups: []
+  - name: Submit report
+    weight: 1
+    flow:
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query { person(f:me) { id }}"
+        capture:
+          json: "$.data.person.id"
+          as: "personId"
+    - post:
+        url: "/graphql"
+        afterResponse: "continueIfResult"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query  { reports: reportList (f:search, query:{authorId:{{ personId }},state:[DRAFT,REJECTED]}) {list { id}}}"
+        capture:
+          json: "$.data.reports.list[0].id"
+          as: "result"
+    - log: "{{ advisor }} submitting report {{ result }}"
+    - post:
+        url: "/api/reports/{{ result }}/submit"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
   - name: Rollups
     weight: 1  
     flow:
+    - log: "{{ advisor }} checking rollups"
     - get:
         url: "/rollup"
         auth:
@@ -221,6 +266,7 @@ scenarios:
   - name: Insights
     weight: 1
     flow:
+    - log: "{{ advisor }} checking insights"
     - get:
         url: "/insights/not-approved-reports"
         auth:
@@ -254,8 +300,9 @@ scenarios:
   - name: Do searches
     weight: 50
     flow:
+    - log: "{{ advisor }} searching"
     - get:
-        url: "/search?text=aaaaaaa"
+        url: "/search?text=a"
         auth:
           user: "{{advisor}}"
           pass: "{{advisor}}"
