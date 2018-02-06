@@ -111,22 +111,24 @@ public class DaoUtils {
 
 	public static String buildPagedGetAllSql(DbType databaseType, String entityTag,
 			String tableName, String fieldList, String orderBy) {
-		if (orderBy == null) { orderBy = "\"createdAt\""; }
+		if (orderBy == null) {
+			orderBy = "\"createdAt\"";
+		}
 		StringBuilder sb = new StringBuilder("/* getAll%s */ SELECT %s ");
 		switch (databaseType) {
-		case MSSQL:
-			sb.append(", count(*) over() AS \"totalCount\" FROM %s ")
-			  .append("ORDER BY %s ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
-			break;
-		case SQLITE:
-			sb.append("FROM %s ORDER BY %s ASC LIMIT :limit OFFSET :offset");
-			break;
-		case POSTGRESQL:
-			sb.append(", count(*) over() AS \"totalCount\" ")
-			  .append("FROM %s ORDER BY %s ASC LIMIT :limit OFFSET :offset");
-			break;
-		default:
-			throw new RuntimeException();
+			case MSSQL:
+				sb.append(", count(*) over() AS \"totalCount\" FROM %s ")
+				  .append("ORDER BY %s ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY");
+				break;
+			case SQLITE:
+				sb.append("FROM %s ORDER BY %s ASC LIMIT :limit OFFSET :offset");
+				break;
+			case POSTGRESQL:
+				sb.append(", count(*) over() AS \"totalCount\" ")
+				  .append("FROM %s ORDER BY %s ASC LIMIT :limit OFFSET :offset");
+				break;
+			default:
+				throw new RuntimeException();
 		}
 
 		return String.format(sb.toString(), entityTag, fieldList, tableName, orderBy);

@@ -38,7 +38,7 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 * Ordered by their date ascending (earliest to most recent). 
 	 */
 	public List<ApprovalAction> getActionsForReport(int reportId) {
-		Query<ApprovalAction> query = dbHandle.createQuery("/* getReportApprovals */ SELECT * FROM \"approvalActions\" " 
+		Query<ApprovalAction> query = dbHandle.createQuery("/* getReportApprovals */ SELECT * FROM \"approvalActions\" "
 				+ "WHERE \"reportId\" = :reportId ORDER BY \"createdAt\" ASC")
 			.bind("reportId", reportId)
 			.map(new ApprovalActionMapper());

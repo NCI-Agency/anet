@@ -159,7 +159,7 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			return new OrganizationList(query, pageNum, pageSize, manualRowCount);
 		}
 
-		public static OrganizationList fromQuery(Query<Organization> query, int pageNum, int pageSize) { 
+		public static OrganizationList fromQuery(Query<Organization> query, int pageNum, int pageSize) {
 			return fromQuery(query, pageNum, pageSize, null);
 		}
 	}

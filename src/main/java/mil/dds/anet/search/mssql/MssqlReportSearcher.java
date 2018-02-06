@@ -81,7 +81,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 			whereClauses.add("reports.authorId = :authorId");
 			args.put("authorId", query.getAuthorId());
 		}
-		
+
 		if (text != null && text.trim().length() > 0) {
 			String cleanText = Utils.getSqlServerFullTextQuery(text);
 			whereClauses.add("(CONTAINS ((text, intent, keyOutcomes, nextSteps), :containsQuery) "

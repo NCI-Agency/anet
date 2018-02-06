@@ -60,7 +60,7 @@ public class LocationDao implements IAnetDao<Location> {
 		l.setCreatedAt(DateTime.now());
 		l.setUpdatedAt(DateTime.now());
 		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* locationInsert */ INSERT INTO locations (name, lat, lng, \"createdAt\", \"updatedAt\") " 
+				"/* locationInsert */ INSERT INTO locations (name, lat, lng, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:name, :lat, :lng, :createdAt, :updatedAt)")
 			.bind("name", l.getName())
 			.bind("lat", l.getLat())

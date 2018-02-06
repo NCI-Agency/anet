@@ -461,10 +461,10 @@
 	</changeSet>
 
 	<changeSet id="17" author="hpitelka" dbms="!sqlite" >
-		<renameColumn 
-			columnDataType="varchar(255)" 
-			oldColumnName="name" 
-			newColumnName="shortName" 
+		<renameColumn
+			columnDataType="varchar(255)"
+			oldColumnName="name"
+			newColumnName="shortName"
 			tableName="organizations" />
 	</changeSet>
 
@@ -863,7 +863,7 @@
 	</changeSet>
 
 	<changeSet id="add_reports_sensitive_information_constraints" author="gjvoosten" dbms="!sqlite">
-	    <!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
+    	<!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
 		<addUniqueConstraint tableName="reportsSensitiveInformation" columnNames="reportId" constraintName="uniqueReport" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportsSensitiveInformation"
 			constraintName="fk_reportsSensitiveInformation_report" onDelete="CASCADE" onUpdate="CASCADE"

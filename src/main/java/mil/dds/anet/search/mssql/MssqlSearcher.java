@@ -12,7 +12,7 @@ import mil.dds.anet.search.Searcher;
 public class MssqlSearcher extends Searcher {
 
 	private final MssqlAuthorizationGroupSearcher authorizationGroupSearcher;
-	
+
 	public MssqlSearcher() { 
 		super(new MssqlReportSearcher(), new MssqlPersonSearcher(), new MssqlOrganizationSearcher(),
 				new MssqlPositionSearcher(), new MssqlTaskSearcher(), new MssqlLocationSearcher(), new MssqlTagSearcher());

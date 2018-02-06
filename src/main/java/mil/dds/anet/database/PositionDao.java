@@ -66,7 +66,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 				.executeAndReturnGeneratedKeys();
 			p.setId(DaoUtils.getGeneratedId(keys));
 		
-			//Specifically don't set \"currentPersonId\" here because we'll handle that later in setPersonInPosition();
+			//Specifically don't set currentPersonId here because we'll handle that later in setPersonInPosition();
 		} catch (UnableToExecuteStatementException e) {
 			checkForUniqueCodeViolation(e);
 			throw e;
@@ -152,7 +152,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("positionId", position.getId())
 					.execute();
 				dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
-						+ "(\"positionId\", \"personId\", \"createdAt\") " 
+						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, :personId, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("personId", person.getId())
@@ -189,7 +189,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 							+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES(null, " 
 							+ "(SELECT \"personId\" FROM \"peoplePositions\" WHERE \"positionId\" = :positionId "
-							+ "ORDER BY \"createdAt\" DESC LIMIT 1), " 
+							+ "ORDER BY \"createdAt\" DESC LIMIT 1), "
 						+ ":createdAt)";
 				}
 				dbHandle.createStatement(sql)
@@ -244,10 +244,10 @@ public class PositionDao extends AnetBaseDao<Position> {
 	}
 
 	public List<Person> getPeoplePreviouslyInPosition(Position p) { 
-		List<Person> people = dbHandle.createQuery("/* positionFindPreviousPeople */ SELECT " + PersonDao.PERSON_FIELDS 
+		List<Person> people = dbHandle.createQuery("/* positionFindPreviousPeople */ SELECT " + PersonDao.PERSON_FIELDS
 				+ "FROM \"peoplePositions\" "
 				+ "LEFT JOIN people ON \"peoplePositions\".\"personId\" = people.id "
-				+ "WHERE \"peoplePositions\".\"positionId\" = :positionId " 
+				+ "WHERE \"peoplePositions\".\"positionId\" = :positionId "
 				+ "AND \"peoplePositions\".\"personId\" IS NOT NULL "
 				+ "ORDER BY \"createdAt\" DESC")
 			.bind("positionId", p.getId())
@@ -338,7 +338,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 	public List<PersonPositionHistory> getPositionHistory(Position position) {
 		PersonPositionHistoryMapper mapper = new PersonPositionHistoryMapper(position);
 		List<PersonPositionHistory> results = dbHandle.createQuery("/* getPositionHistory */ SELECT \"peoplePositions\".\"personId\" AS \"personId\", "
-				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, " 
+				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
 				+ PersonDao.PERSON_FIELDS + " FROM \"peoplePositions\" "
 				+ "LEFT JOIN people ON \"peoplePositions\".\"personId\" = people.id "
 				+ "WHERE \"positionId\" = :positionId ORDER BY \"peoplePositions\".\"createdAt\" ASC")

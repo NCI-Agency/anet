@@ -75,7 +75,7 @@ public class AnetObjectEngine {
 		tagDao = new TagDao(dbHandle);
 		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
-		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));		
+		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
 
 		instance = this;
 	}

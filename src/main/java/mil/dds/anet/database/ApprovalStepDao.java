@@ -87,7 +87,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 		as = insert(as);
 		
 		//Add this Step to the current org list. 
-		dbHandle.createStatement("/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepId\" = :id " 
+		dbHandle.createStatement("/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepId\" = :id "
 				+ "WHERE \"advisorOrganizationId\" = :advisorOrganizationId "
 				+ "AND \"nextStepId\" IS NULL AND id != :id")
 			.bindFromProperties(as)
@@ -96,7 +96,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	}
 	
 	/**
-	 * Updates the name, \"nextStepId\", and advisorOrgId on this Approval Step
+	 * Updates the name, nextStepId, and advisorOrgId on this Approval Step
 	 * DOES NOT update the list of members for this step. 
 	 */
 	public int update(ApprovalStep as) {
@@ -125,7 +125,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 				//fix up the linked list.
 				dbHandle.createStatement("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
 						+ "SET \"nextStepId\" = (SELECT \"nextStepId\" from \"approvalSteps\" where id = :stepToDeleteId) "
-						+ "WHERE \"nextStepId\" = :stepToDeleteId") 	
+						+ "WHERE \"nextStepId\" = :stepToDeleteId")
 					.bind("stepToDeleteId", id)
 					.execute();
 

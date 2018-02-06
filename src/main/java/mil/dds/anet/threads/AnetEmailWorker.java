@@ -67,8 +67,8 @@ public class AnetEmailWorker implements Runnable {
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
 	private boolean noEmailConfiguration;
-	
-	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) { 
+
+	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) {
 		this.handle = dbHandle;
 		this.scheduler = scheduler;
 		this.mapper = new ObjectMapper();
@@ -121,7 +121,7 @@ public class AnetEmailWorker implements Runnable {
 	}
 
 	private void runInternal() {
-		//check the database for any emails we need to send. 
+		//check the database for any emails we need to send.
 		final List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM \"pendingEmails\" ORDER BY \"createdAt\" ASC")
 				.map(emailMapper)
 				.list();
