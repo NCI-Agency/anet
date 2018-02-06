@@ -1,5 +1,6 @@
 package mil.dds.anet.search;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import mil.dds.anet.utils.Utils;
 public class ReportSearchBuilder {
 
 	private static final String DEFAULT_WHERE_FORMAT = "reports.\"%s\" %s :%s";
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReportSearchBuilder.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private DateTimeFormatter dateFormatter;
 	private Map<String, Object> args = new HashMap<>();
@@ -52,7 +53,7 @@ public class ReportSearchBuilder {
 			whereClauses.add(whereClause);
 			Object dateArg = dateFormatter == null ? realQueryDate : dateFormatter.print(realQueryDate);
 			args.put(parameterName, dateArg);
-			LOGGER.debug("Specifying that {} is {} {}", fieldName, comp, dateArg);
+			logger.debug("Specifying that {} is {} {}", fieldName, comp, dateArg);
 		}
 	}
 }

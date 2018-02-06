@@ -1,5 +1,6 @@
 package mil.dds.anet.resources;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 
 import javax.annotation.security.PermitAll;
@@ -52,7 +53,7 @@ import mil.dds.anet.utils.Utils;
 @PermitAll
 public class OrganizationResource implements IGraphQLResource {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private OrganizationDao dao;
 	private AnetObjectEngine engine;
@@ -162,14 +163,14 @@ public class OrganizationResource implements IGraphQLResource {
 					Organization existing = dao.getById(org.getId());
 
 					if (org.getTasks() != null) {
-						LOGGER.debug("Editing tasks for {}", org);
+						logger.debug("Editing tasks for {}", org);
 						Utils.addRemoveElementsById(existing.loadTasks(), org.getTasks(),
 								newTask -> engine.getTaskDao().setResponsibleOrgForTask(newTask, existing),
 								oldTaskId -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithId(oldTaskId), null));
 					}
 
 					if (org.getApprovalSteps() != null) {
-						LOGGER.debug("Editing approval steps for {}", org);
+						logger.debug("Editing approval steps for {}", org);
 						for (ApprovalStep step : org.getApprovalSteps()) {
 							validateApprovalStep(step);
 							step.setAdvisorOrganizationId(org.getId());
@@ -237,7 +238,7 @@ public class OrganizationResource implements IGraphQLResource {
 				return new WebApplicationException("Duplicate identification code", Status.CONFLICT);
 			}
 		}
-		LOGGER.error("Unexpected SQL exception raised", e);
+		logger.error("Unexpected SQL exception raised", e);
 		return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 	}
 

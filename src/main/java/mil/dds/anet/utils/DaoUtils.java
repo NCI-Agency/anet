@@ -1,5 +1,6 @@
 package mil.dds.anet.utils;
 
+import java.lang.invoke.MethodHandles;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class DaoUtils {
 		}
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DaoUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	
 	public static Integer getId(AbstractAnetBean obj) { 
 		if (obj == null) { return null; }
@@ -59,7 +60,7 @@ public class DaoUtils {
 				String databaseUrl = dbHandle.getConnection().getMetaData().getURL();
 				String driverType = databaseUrl.split(":", 3)[1].toLowerCase();
 				DB_TYPE = DbType.fromTag(driverType);
-				LOGGER.info("Detected and cached database type as {}", DB_TYPE);
+				logger.info("Detected and cached database type as {}", DB_TYPE);
 			} catch (SQLException e) { 
 				throw new RuntimeException("Error determining database type", e);
 			}
@@ -91,7 +92,7 @@ public class DaoUtils {
 		} else if (id instanceof Number) {
 			return ((Number) id).intValue();
 		} else {
-			LOGGER.error("Database returned an ID of type {} (not a Number or Integer)", id.getClass());
+			logger.error("Database returned an ID of type {} (not a Number or Integer)", id.getClass());
 			throw new WebApplicationException("Unexpected id type returned from database");
 		}
 	}
