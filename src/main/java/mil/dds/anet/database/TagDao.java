@@ -59,7 +59,7 @@ public class TagDao implements IAnetDao<Tag> {
 		t.setCreatedAt(DateTime.now());
 		t.setUpdatedAt(DateTime.now());
 		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* tagInsert */ INSERT INTO tags (name, description, createdAt, updatedAt) "
+				"/* tagInsert */ INSERT INTO tags (name, description, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:name, :description, :createdAt, :updatedAt)")
 			.bind("name", t.getName())
 				.bind("description", t.getDescription())
@@ -73,7 +73,7 @@ public class TagDao implements IAnetDao<Tag> {
 	@Override
 	public int update(Tag t) {
 		return dbHandle.createStatement("/* updateTag */ UPDATE tags "
-					+ "SET name = :name, description = :description, updatedAt = :updatedAt WHERE id = :id")
+					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bind("id", t.getId())
 				.bind("name", t.getName())
 				.bind("description", t.getDescription())

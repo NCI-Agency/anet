@@ -3,6 +3,8 @@ package mil.dds.anet.beans.lists;
 import java.util.List;
 
 import org.skife.jdbi.v2.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Location;
@@ -16,6 +18,8 @@ import mil.dds.anet.graphql.IGraphQLBean;
 
 public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IGraphQLBean {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAnetBeanList.class);
+
 	List<T> list;
 	Integer pageNum;
 	Integer pageSize;
@@ -23,17 +27,31 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 	
 	public AbstractAnetBeanList() { /*Serialization Constructor */ } 
 	
-	public AbstractAnetBeanList(List<T> list) { 
+	protected AbstractAnetBeanList(List<T> list) {
 		this(null, null, list);
 		this.totalCount = list.size();
 	}
 	
-	public AbstractAnetBeanList(Integer pageNum, Integer pageSize, List<T> list) { 
+	protected AbstractAnetBeanList(Integer pageNum, Integer pageSize, List<T> list) {
 		this.pageNum = pageNum;
 		this.pageSize = pageSize;
 		this.list = list;
 	}
-	
+
+	protected AbstractAnetBeanList(Query<T> query, int pageNum, int pageSize, Long manualRowCount) {
+		this(pageNum, pageSize, query.list());
+		int resultSize = getList().size();
+		if (manualRowCount != null) {
+			setTotalCount(manualRowCount.intValue());
+		} else if (resultSize == 0) {
+			setTotalCount(0);
+		} else {
+			LOGGER.debug("Bulk query context attributes are {}", query.getContext().getAttributes());
+			Integer foundCount = (Integer) query.getContext().getAttribute("totalCount");
+			setTotalCount(foundCount == null ? resultSize : foundCount);
+		}
+	}
+
 	public List<T> getList() {
 		return list;
 	}
@@ -72,64 +90,58 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 	public static class ReportList extends AbstractAnetBeanList<Report> {
 		public ReportList() { /*Serialization Constructor */ } 
 		
-		public ReportList(Integer pageNum, Integer pageSize, List<Report> list) {
-			super(pageNum, pageSize, list);
+		public ReportList(Query<Report> query, int pageNum, int pageSize, Long manualRowCount) {
+			super(query, pageNum, pageSize, manualRowCount);
 		}
-		
-		public ReportList(List<Report> list) { 
-			super(list);
-		}
-		
+
 		public List<Report> getList() {
 			return list; 
 		}
 
-		public static ReportList fromQuery(Person user, Query<Report> query, int pageNum, int pageSize) {
-			ReportList results = new ReportList(pageNum, pageSize, query.list()); 
-			if (results.getList().size() == 0) { 
-				results.setTotalCount(0);
-			} else {
-				//This value gets set by the ReportMapper on each row.
-				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
-			}
-			// Record the user who instantiated these
+		public static ReportList fromQuery(Person user, Query<Report> query, int pageNum, int pageSize, Long manualRowCount) {
+			ReportList results = new ReportList(query, pageNum, pageSize, manualRowCount);
 			for (final Report report : results.getList()) {
 				report.setUser(user);
 			}
 			return results;
 		}
+
+		public static ReportList fromQuery(Person user, Query<Report> query, int pageNum, int pageSize) {
+			return fromQuery(user, query, pageNum, pageSize, null);
+		}
 	}
 	
 	public static class PersonList extends AbstractAnetBeanList<Person> {
 		public PersonList() { /*Serialization Constructor */ } 
-		
-		public PersonList(Integer pageNum, Integer pageSize, List<Person> list) {
-			super(pageNum, pageSize, list);
+
+		public PersonList(Query<Person> query, int pageNum, int pageSize, Long manualRowCount) {
+			super(query, pageNum, pageSize, manualRowCount);
 		}
-		
+
 		public PersonList(List<Person> list) { 
 			super(list);
 		}
-		
+
 		public List<Person> getList() {
 			return list; 
 		}
-		
-		public static PersonList fromQuery(Query<Person> query, int pageNum, int pageSize) { 
-			PersonList results = new PersonList(pageNum, pageSize, query.list());
-			results.setList(query.list());
-			if (results.getList().size() == 0) { 
-				results.setTotalCount(0);
-			} else {
-				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
-			}
-			return results;
+
+		public static PersonList fromQuery(Query<Person> query, int pageNum, int pageSize) {
+			return fromQuery(query, pageNum, pageSize, null);
+		}
+
+		public static PersonList fromQuery(Query<Person> query, int pageNum, int pageSize, Long manualCount) {
+			return new PersonList(query, pageNum, pageSize, manualCount);
 		}
 	}
 	
 	public static class OrganizationList extends AbstractAnetBeanList<Organization> {
 		public OrganizationList() { /*Serialization Constructor */ } 
 		
+		public OrganizationList(Query<Organization> query, int pageNum, int pageSize, Long manualRowCount) {
+			super(query, pageNum, pageSize, manualRowCount);
+		}
+
 		public OrganizationList(Integer pageNum, Integer pageSize, List<Organization> list) {
 			super(pageNum, pageSize, list);
 		}
@@ -141,24 +153,21 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 		public List<Organization> getList() {
 			return list;
 		}
-		
+
+		public static OrganizationList fromQuery(Query<Organization> query, int pageNum, int pageSize, Long manualRowCount) {
+			return new OrganizationList(query, pageNum, pageSize, manualRowCount);
+		}
+
 		public static OrganizationList fromQuery(Query<Organization> query, int pageNum, int pageSize) { 
-			OrganizationList results = new OrganizationList(pageNum, pageSize, query.list());
-			results.setList(query.list());
-			if (results.getList().size() == 0) { 
-				results.setTotalCount(0);
-			} else {
-				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
-			}
-			return results;
+			return fromQuery(query, pageNum, pageSize, null);
 		}
 	}
 	
 	public static class PositionList extends AbstractAnetBeanList<Position> {
 		public PositionList() { /*Serialization Constructor */ } 
 		
-		public PositionList(Integer pageNum, Integer pageSize, List<Position> list) {
-			super(pageNum, pageSize, list);
+		public PositionList(Query<Position> query, Integer pageNum, Integer pageSize, Long manualRowCount) {
+			super(query, pageNum, pageSize, manualRowCount);
 		}
 		
 		public PositionList(List<Position> list) { 
@@ -169,16 +178,12 @@ public abstract class AbstractAnetBeanList<T extends IGraphQLBean> implements IG
 			return list;
 		}
 		
-		public static PositionList fromQuery(Query<Position> query, int pageNum, int pageSize) { 
-			PositionList results = new PositionList(pageNum, pageSize, query.list());
-			results.setList(query.list());
-			if (results.getList().size() == 0) { 
-				results.setTotalCount(0);
-			} else {
-				//This value gets set by the PositionMapper on each row.
-				results.setTotalCount((Integer) query.getContext().getAttribute("totalCount"));
-			}
-			return results;
+		public static PositionList fromQuery(Query<Position> query, int pageNum, int pageSize) {
+			return fromQuery(query, pageNum, pageSize, null);
+		}
+
+		public static PositionList fromQuery(Query<Position> query, int pageNum, int pageSize, Long manualRowCount) {
+			return new PositionList(query, pageNum, pageSize, manualRowCount);
 		}
 	}
 	

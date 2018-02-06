@@ -52,6 +52,14 @@ module.exports = {
   // We generate sourcemaps in production. This is slow but gives good results.
   // You can exclude the *.map files from the build during deployment.
   devtool: 'source-map',
+  // A strange workaround for a strange compile-time bug:
+  //   Error in ./~/xmlhttprequest/lib/XMLHttpRequest.js
+  //   Module not found: 'child_process' in ./node_modules/xmlhttprequest/lib
+  // This fix suggested in:
+  // https://github.com/webpack/webpack-dev-server/issues/66#issuecomment-61577531
+  externals:[{
+    xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
+  }],
   // In production, we only want to load the polyfills and the app code.
   entry: [
     require.resolve('./polyfills'),

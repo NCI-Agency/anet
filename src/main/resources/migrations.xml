@@ -266,7 +266,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="8" author="hpitelka" dbms="mssql" >
+	<changeSet id="8" author="hpitelka" dbms="!sqlite" >
 		<!-- Groups -->
 		<addUniqueConstraint tableName="groupMemberships" columnNames="groupId, personId" constraintName="uniqueGroupMembership" />
 		<addNotNullConstraint tableName="groups" columnName="name" columnDataType="varchar(512)" />
@@ -380,7 +380,7 @@
 			<column name="value" type="text" />
 		</createTable>
 	</changeSet>
-	<changeSet id="10" author="hpitelka" dbms="mssql" >
+	<changeSet id="10" author="hpitelka" dbms="!sqlite" >
 		<addUniqueConstraint tableName="adminSettings" columnNames="key" constraintName="adminSettingKey" />
 	</changeSet>
 
@@ -424,7 +424,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="14" author="hpitelka"  dbms="mssql" >
+	<changeSet id="14" author="hpitelka"  dbms="!sqlite" >
 		<addForeignKeyConstraint baseColumnNames="organizationId" baseTableName="poams"
 			constraintName="fk_poams_org" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="organizations" />
@@ -460,11 +460,11 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="17" author="hpitelka" dbms="mssql" >
-		<renameColumn
-			columnDataType="varchar(255)"
-			oldColumnName="name"
-			newColumnName="shortName"
+	<changeSet id="17" author="hpitelka" dbms="!sqlite" >
+		<renameColumn 
+			columnDataType="varchar(255)" 
+			oldColumnName="name" 
+			newColumnName="shortName" 
 			tableName="organizations" />
 	</changeSet>
 
@@ -489,7 +489,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="20" author="hpitelka"  dbms="mssql" >
+	<changeSet id="20" author="hpitelka"  dbms="!sqlite" >
 		<addForeignKeyConstraint baseColumnNames="ownerId" baseTableName="savedSearches"
 			constraintName="fk_savedSearch_owner" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="people" />
@@ -502,7 +502,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="22" author="hpitelka" dbms="mssql" >
+	<changeSet id="22" author="hpitelka" dbms="!sqlite" >
 		<dropForeignKeyConstraint baseTableName="groupMemberships" constraintName="fk_groupMember_group" />
 		<dropForeignKeyConstraint baseTableName="groupMemberships" constraintName="fk_groupMember_person" />
 		<dropForeignKeyConstraint baseTableName="approvalSteps" constraintName="fk_approvalSteps_group" />
@@ -521,7 +521,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="24" author="hpitelka" dbms="mssql" >
+	<changeSet id="24" author="hpitelka" dbms="!sqlite" >
 		<addForeignKeyConstraint baseColumnNames="approvalStepId" baseTableName="approvers"
 			constraintName="fk_approvers_step" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="approvalSteps" />
@@ -614,10 +614,24 @@
 		</sql>
 	</changeSet>
 
+	<!-- partial unique index syntax varies by database (if available) -->
 	<changeSet id="30" author="hpitelka" dbms="mssql" >
-		<sql dbms="mssql">
+		<sql>
 			CREATE UNIQUE NONCLUSTERED INDEX UniqueCurrentPersonInPosition ON positions (currentPersonId) WHERE currentPersonId IS NOT NULL;
 		</sql>
+		<rollback>
+			<dropIndex tableName="positions" indexName="UniqueCurrentPersonInPosition" />
+		</rollback>
+	</changeSet>
+	<!-- this works for at least: "postgresql,sqlite" -->
+	<changeSet id="30p" author="bwarfield" dbms="!mssql" >
+		<comment>Create a unique index for "positions.currentPersonId", excluding nulls.</comment>
+		<sql>
+			CREATE UNIQUE INDEX "UniqueCurrentPersonInPosition" ON positions ("currentPersonId") WHERE "currentPersonId" IS NOT NULL;
+		</sql>
+		<rollback>
+			<dropIndex tableName="positions" indexName="UniqueCurrentPersonInPosition" />
+		</rollback>
 	</changeSet>
 
 	<changeSet id="31" author="hpitelka" dbms="mssql" >
@@ -627,7 +641,12 @@
 	</changeSet>
 
 	<changeSet id="32" author="hpitelka" >
-		<sql>
+		<!-- this syntax works in SQL Server and SQLite, but not postgresql. Since we already have
+		     to add a catch-up migration, restricting this to mssql only (which could cause problems
+			 for anybody with a long-running installation using sqlite, but that seems like an unlikely
+			 contingency).
+		-->
+		<sql dbms="mssql">
 			INSERT INTO adminSettings ([key], value) VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
 		</sql>
 	</changeSet>
@@ -640,14 +659,28 @@
 		</addColumn>
 	</changeSet>
 
+	<!-- partial unique index syntax varies by database (if available) -->
 	<changeSet id="34" author="hpitelka" dbms="mssql" >
-		<sql dbms="mssql">
+		<sql>
 			CREATE UNIQUE NONCLUSTERED INDEX UniquePositionCodes ON positions (code) WHERE code IS NOT NULL;
 		</sql>
+		<rollback>
+			<dropIndex tableName="positions" indexName="UniquePositionCodes" />
+		</rollback>
+	</changeSet>
+	<!-- this works for at least: "postgresql,sqlite" -->
+	<changeSet id="34p" author="bwarfield" dbms="!mssql">
+		<comment>Create a unique index for "positions.currentPersonId", excluding nulls.</comment>
+		<sql>
+			CREATE UNIQUE INDEX "UniquePositionCodes" ON positions(code) WHERE code IS NOT NULL;
+		</sql>
+		<rollback>
+			<dropIndex tableName="positions" indexName="UniquePositionCodes" />
+		</rollback>
 	</changeSet>
 
 	<changeSet id="35" author="evdhoudt" dbms="mssql" >
-		<sql dbms="">
+		<sql>
 			INSERT INTO adminSettings ([key], value) VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
 		</sql>
 	</changeSet>
@@ -677,7 +710,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_report_tags_constraints" author="gjvoosten" dbms="mssql">
+	<changeSet id="add_report_tags_constraints" author="gjvoosten" dbms="!sqlite">
 		<addUniqueConstraint tableName="reportTags" columnNames="reportId, tagId" constraintName="uniqueReportTag" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportTags"
 			constraintName="fk_reportTags_report" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -760,8 +793,10 @@
 		</addColumn>
 	</changeSet>
 
+	<!-- separate migrations for SQL Server and other DBMS systems -->
 	<changeSet id="add_organizations_identificationCode_constraints" author="gjvoosten" dbms="mssql">
 		<!-- Use SQL because we want to allow NULLs while still requiring non-NULL and non-empty columns to be unique -->
+		<comment>Add a partial unique index to force non-empty organization codes to be unique.</comment>
 		<sql>
 			CREATE UNIQUE NONCLUSTERED INDEX uniqueOrganizationIdentificationCode
 			ON organizations ( identificationCode )
@@ -770,6 +805,20 @@
 		</sql>
 		<rollback>
 			DROP INDEX uniqueOrganizationIdentificationCode ON organizations;
+		</rollback>
+	</changeSet>
+	<!-- this works for at least: "postgresql,sqlite" -->
+	<changeSet id="add_organizations_identificationCode_constraints_pg" author="bwarfield" dbms="!mssql">
+		<comment>Add a partial unique index to force non-empty organization codes to be unique.</comment>
+		<!-- Use SQL because we want to allow NULLs while still requiring non-NULL and non-empty columns to be unique -->
+		<sql>
+			CREATE UNIQUE INDEX "uniqueOrganizationIdentificationCode"
+			ON organizations ( "identificationCode" )
+			WHERE "identificationCode" IS NOT NULL
+			AND "identificationCode" != '';
+		</sql>
+		<rollback>
+			<dropIndex tableName="organizations" indexName="uniqueOrganizationIdentificationCode" />
 		</rollback>
 	</changeSet>
 
@@ -782,7 +831,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="add_reports_sensitive_information" author="gjvoosten">
+	<changeSet id="add_reports_sensitive_information" author="gjvoosten" dbms="mssql">
 		<createTable tableName="reportsSensitiveInformation">
 			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false" />
@@ -796,8 +845,25 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_reports_sensitive_information_constraints" author="gjvoosten" dbms="mssql">
-		<!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
+	<!-- a better way to do this would be to have a single migration using a modifySql
+	     tag: http://www.liquibase.org/documentation/modify_sql.html (but that would change the
+		 checksum, so we can't do it with an already-run migration) -->
+	<changeSet id="add_reports_sensitive_information_no_nvarchar" author="bwarfield" dbms="!mssql">
+		<createTable tableName="reportsSensitiveInformation">
+			<column name="id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="text" type="text" />
+			<column name="reportId" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_reports_sensitive_information_constraints" author="gjvoosten" dbms="!sqlite">
+	    <!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
 		<addUniqueConstraint tableName="reportsSensitiveInformation" columnNames="reportId" constraintName="uniqueReport" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportsSensitiveInformation"
 			constraintName="fk_reportsSensitiveInformation_report" onDelete="CASCADE" onUpdate="CASCADE"
@@ -812,7 +878,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="renamePoams-to-Tasks" author="evdhoudt">
+	<changeSet id="renamePoams-to-Tasks" author="evdhoudt" dbms="!sqlite">
 		<!-- Tasks -->
 		<renameTable
 			newTableName="tasks"
@@ -827,9 +893,25 @@
 		<addForeignKeyConstraint baseColumnNames="parentTaskId" baseTableName="tasks"
 			constraintName="fk_tasks_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="tasks" />
+		<rollback>
+			<!-- sadly, 'dropforeignkeyconstraint' does not have an auto-rollback, so we have to do a manual rollback for everything -->
+			<renameColumn
+				columnDataType="int"
+				newColumnName="parentPoamId"
+				oldColumnName="parentTaskId"
+				tableName="tasks" />
+			<renameTable
+				newTableName="poams"
+				oldTableName="tasks" />
+			<dropForeignKeyConstraint baseTableName="poams" constraintName="fk_tasks_parent"/>
+			<addForeignKeyConstraint baseColumnNames="parentPoamId" baseTableName="poams"
+				constraintName="fk_poams_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
+				referencedColumnNames="id" referencedTableName="poams" />
+
+		</rollback>
 	</changeSet>
 
-	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt">
+	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt" dbms="!sqlite">
 		<!-- Report Tasks -->
 		<renameTable
 			newTableName="reportTasks"
@@ -841,7 +923,33 @@
 			tableName="reportTasks" />
 	</changeSet>
 
-	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt">
+	<changeSet id="renamePoams-to-Tasks-sqlite-combined-tables" author="bwarfield" dbms="sqlite">
+		<comment>Rename poams and taskPoams, and add new columns.</comment>
+		<!-- Tasks -->
+		<renameTable
+			newTableName="tasks"
+			oldTableName="poams" />
+		<!-- reportTasks -->
+		<renameTable
+			newTableName="reportTasks"
+			oldTableName="reportPoams" />
+	</changeSet>
+
+	<changeSet id="renamePoams-to-Tasks-sqlite-combined-columns" author="bwarfield" dbms="sqlite">
+		<comment>Create and populate new task ID columns, but leave the old ones in place because sqlite does not support dropping columns.</comment>
+		<sql>
+			ALTER TABLE tasks add column parentTaskId int;
+			ALTER TABLE reportTasks add column taskId int;
+			UPDATE tasks set parentTaskId = parentPoamId;
+			UPDATE reportTasks set taskId = poamId;
+		</sql>
+		<rollback>
+			UPDATE tasks set parentPoamId = parentTaskId;
+			UPDATE reportTasks set poamId = taskId;
+		</rollback>
+	</changeSet>
+
+	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt" dbms="!sqlite">
 		<dropUniqueConstraint tableName="reportTasks" constraintName="uniqueReportPoam"/>
 		<addUniqueConstraint tableName="reportTasks" columnNames="taskId, reportId" constraintName="uniqueReportTask" />
 
@@ -876,6 +984,18 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="36" author="bwarfield" dbms="!mssql">
+		<comment>This is a repeat of migrations 32 and 35, with a more generic syntax.</comment>
+		<sql>
+			INSERT INTO "adminSettings" ("key", "value") VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
+			INSERT INTO "adminSettings" ("key", "value") VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
+		</sql>
+		<rollback>
+			DELETE FROM "adminSettings"
+			WHERE "key" in ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', 'EXTERNAL_DOCUMENTATION_LINK_URL')
+		</rollback>
+	</changeSet>
+
 	<changeSet id="add_authorization_groups" author="maradragan">
 		<createTable tableName="authorizationGroups">
 			<column name="id" type="int" autoIncrement="true">
@@ -904,7 +1024,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="mssql">
+	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="!sqlite">
 		<addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
 		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
 			constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -925,7 +1045,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="mssql">
+	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="!sqlite">
 		<addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
 			constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -983,7 +1103,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="drop_positions_authorized" author="gjvoosten">
+	<changeSet id="drop_positions_authorized" author="gjvoosten" dbms="!sqlite">
 	    <!-- Some magic to make sure any auto-generated database constraints are dropped -->
 		<dropNotNullConstraint tableName="positions" columnName="authorized" columnDataType="boolean" />
 		<dropDefaultValue tableName="positions" columnName="authorized" columnDataType="boolean" />
@@ -992,7 +1112,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="update-extra-fields-to-Tasks" author="evdhoudt">
+	<changeSet id="update-extra-fields-to-Tasks" author="evdhoudt" dbms="mssql">
 		<modifyDataType columnName="customField" newDataType="nvarchar(max)" tableName="tasks" />
 		<modifyDataType columnName="customFieldEnum" newDataType="nvarchar(max)" tableName="tasks" />
 	</changeSet>

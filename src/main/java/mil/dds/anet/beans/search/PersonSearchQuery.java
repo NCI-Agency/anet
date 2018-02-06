@@ -26,6 +26,12 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 	
 	private PersonSearchSortBy sortBy;
 	private SortOrder sortOrder;
+	
+	public PersonSearchQuery() {
+		this.setPageSize(100); 
+		this.sortOrder = SortOrder.ASC;
+		this.sortBy = PersonSearchSortBy.NAME;
+	}
 
 	public Integer getOrgId() {
 		return orgId;

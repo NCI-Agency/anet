@@ -31,11 +31,11 @@ public class LocationDao implements IAnetDao<Location> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getAllLocations */ SELECT locations.*, COUNT(*) OVER() AS totalCount "
-					+ "FROM locations ORDER BY createdAt DESC "
+					+ "FROM locations ORDER BY \"createdAt\" DESC "
 					+ "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else {
 			sql = "/* getAllLocations */ SELECT * from locations "
-					+ "ORDER BY createdAt ASC LIMIT :limit OFFSET :offset";
+					+ "ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		
 		Query<Location> query = dbHandle.createQuery(sql)
@@ -60,7 +60,7 @@ public class LocationDao implements IAnetDao<Location> {
 		l.setCreatedAt(DateTime.now());
 		l.setUpdatedAt(DateTime.now());
 		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* locationInsert */ INSERT INTO locations (name, lat, lng, createdAt, updatedAt) " 
+				"/* locationInsert */ INSERT INTO locations (name, lat, lng, \"createdAt\", \"updatedAt\") " 
 					+ "VALUES (:name, :lat, :lng, :createdAt, :updatedAt)")
 			.bind("name", l.getName())
 			.bind("lat", l.getLat())
@@ -75,7 +75,7 @@ public class LocationDao implements IAnetDao<Location> {
 	@Override
 	public int update(Location l) {
 		return dbHandle.createStatement("/* updateLocation */ UPDATE locations "
-					+ "SET name = :name, lat = :lat, lng = :lng, updatedAt = :updatedAt WHERE id = :id")
+					+ "SET name = :name, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bind("id", l.getId())
 				.bind("name", l.getName())
 				.bind("lat", l.getLat())
@@ -88,19 +88,19 @@ public class LocationDao implements IAnetDao<Location> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE id IN ( "
-					+ "SELECT TOP(:maxResults) reports.locationId "
+					+ "SELECT TOP(:maxResults) reports.\"locationId\" "
 					+ "FROM reports "
 					+ "WHERE authorid = :authorId "
-					+ "GROUP BY locationId "
-					+ "ORDER BY MAX(reports.createdAt) DESC"
+					+ "GROUP BY \"locationId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
 			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE id IN ( "
-					+ "SELECT reports.locationId "
+					+ "SELECT reports.\"locationId\" "
 					+ "FROM reports "
-					+ "WHERE authorid = :authorId "
-					+ "GROUP BY locationId "
-					+ "ORDER BY MAX(reports.createdAt) DESC "
+					+ "WHERE \"authorId\" = :authorId "
+					+ "GROUP BY \"locationId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}

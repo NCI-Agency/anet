@@ -21,9 +21,12 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.PersonDao;
+import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.IReportSearcher;
+import mil.dds.anet.search.ReportSearchBuilder;
+import mil.dds.anet.search.ReportSearchBuilder.Comparison;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
@@ -78,44 +81,30 @@ public class MssqlReportSearcher implements IReportSearcher {
 			whereClauses.add("reports.authorId = :authorId");
 			args.put("authorId", query.getAuthorId());
 		}
-		if (query.getEngagementDateStart() != null) {
-			whereClauses.add("reports.engagementDate >= :startDate");
-			args.put("startDate", Utils.handleRelativeDate(query.getEngagementDateStart()));
+		
+		if (text != null && text.trim().length() > 0) {
+			String cleanText = Utils.getSqlServerFullTextQuery(text);
+			whereClauses.add("(CONTAINS ((text, intent, keyOutcomes, nextSteps), :containsQuery) "
+					+ "OR FREETEXT((text, intent, keyOutcomes, nextSteps), :freetextQuery) "
+					+ "OR CONTAINS ((tags.name, tags.description), :containsQuery) "
+					+ "OR FREETEXT((tags.name, tags.description), :freetextQuery))");
+			args.put("containsQuery", cleanText);
+			args.put("freetextQuery", query.getText());
 		}
-		if (query.getEngagementDateEnd() != null) { 
-			whereClauses.add("reports.engagementDate < :endDate");
-			args.put("endDate", Utils.handleRelativeDate(query.getEngagementDateEnd()).plusMillis(1));
-		}
+
+		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses);
+		searchBuilder.addDateClause(query.getEngagementDateStart(), Comparison.AFTER, "engagementDate", "startDate");
+		searchBuilder.addDateClause(query.getEngagementDateEnd(), Comparison.BEFORE, "engagementDate", "endDate");
+		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.AFTER, "createdAt", "startCreatedAt");
+		searchBuilder.addDateClause(query.getCreatedAtStart(), Comparison.BEFORE	, "createdAt", "endCreatedAt");
+		searchBuilder.addDateClause(query.getUpdatedAtStart(), Comparison.AFTER, "updatedAt", "updatedAtStart");
+		searchBuilder.addDateClause(query.getUpdatedAtEnd(), Comparison.BEFORE, "updatedAt", "updatedAtEnd");
+		searchBuilder.addDateClause(query.getReleasedAtStart(), Comparison.AFTER, "releasedAt", "releasedAtStart");
+		searchBuilder.addDateClause(query.getReleasedAtEnd(), Comparison.BEFORE, "releasedAt", "releasedAtEnd");
+
 		if (query.getEngagementDayOfWeek() != null) {
 			whereClauses.add("DATEPART(dw, reports.engagementDate) = :engagementDayOfWeek");
 			args.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
-		}
-
-		if (query.getCreatedAtStart() != null) {
-			whereClauses.add("reports.createdAt >= :startCreatedAt");
-			args.put("startCreatedAt", Utils.handleRelativeDate(query.getCreatedAtStart()));
-		}
-		if (query.getCreatedAtEnd() != null) { 
-			whereClauses.add("reports.createdAt < :endCreatedAt");
-			args.put("endCreatedAt", Utils.handleRelativeDate(query.getCreatedAtEnd()).plusMillis(1));
-		}
-
-		if (query.getUpdatedAtStart() != null) {
-			whereClauses.add("reports.updatedAt >= :updatedAtStart");
-			args.put("updatedAtStart", Utils.handleRelativeDate(query.getUpdatedAtStart()));
-		}
-		if (query.getUpdatedAtEnd() != null) {
-			whereClauses.add("reports.updatedAt < :updatedAtEnd");
-			args.put("updatedAtEnd", Utils.handleRelativeDate(query.getUpdatedAtEnd()).plusMillis(1));
-		}
-
-		if (query.getReleasedAtStart() != null) {
-			whereClauses.add("reports.releasedAt >= :releasedAtStart");
-			args.put("releasedAtStart", Utils.handleRelativeDate(query.getReleasedAtStart()));
-		}
-		if (query.getReleasedAtEnd() != null) { 
-			whereClauses.add("reports.releasedAt < :releasedAtEnd");
-			args.put("releasedAtEnd", Utils.handleRelativeDate(query.getReleasedAtEnd()).plusMillis(1));
 		}
 
 		if (query.getAttendeeId() != null) {
@@ -224,13 +213,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 		if (query.getAuthorPositionId() != null) {
 			// Search for reports authored by people serving in that position at the report's creation date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
-							+ "JOIN peoplePositions pp ON pp.personId = r.authorId "
-							+ "  AND pp.createdAt <= r.createdAt "
-							+ "LEFT JOIN peoplePositions maxPp ON maxPp.positionId = pp.positionId "
-							+ "  AND maxPp.createdAt > pp.createdAt "
-							+ "  AND maxPp.createdAt <= r.createdAt "
-							+ "WHERE pp.positionId = :authorPositionId "
-							+ "  AND maxPp.createdAt IS NULL )");
+				+ PositionDao.generateCurrentPositionFilter("r.\"authorId\"", "r.\"createdAt\"", "authorPositionId")
+				+ ")"
+			);
 			args.put("authorPositionId", query.getAuthorPositionId());
 		}
 
@@ -244,14 +229,10 @@ public class MssqlReportSearcher implements IReportSearcher {
 		if (query.getAttendeePositionId() != null) {
 			// Search for reports attended by people serving in that position at the engagement date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
-							+ "JOIN reportPeople rp ON rp.reportId = r.id "
-							+ "JOIN peoplePositions pp ON pp.personId = rp.personId "
-							+ "  AND pp.createdAt <= r.engagementDate "
-							+ "LEFT JOIN peoplePositions maxPp ON maxPp.positionId = pp.positionId "
-							+ "  AND maxPp.createdAt > pp.createdAt "
-							+ "  AND maxPp.createdAt <= r.engagementDate "
-							+ "WHERE pp.positionId = :attendeePositionId "
-							+ "  AND maxPp.createdAt IS NULL )");
+				+ "JOIN \"reportPeople\" rp ON rp.\"reportId\" = r.id "
+				+ PositionDao.generateCurrentPositionFilter("rp.\"personId\"", "r.\"engagementDate\"", "attendeePositionId")
+				+ ")"
+			);
 			args.put("attendeePositionId", query.getAttendeePositionId());
 		}
 

@@ -47,7 +47,7 @@ public class AdminDao {
 	}
 	
 	public List<AdminSetting> getAllSettings() { 
-		return dbHandle.createQuery("/* getAllAdminSettings */ SELECT * FROM adminSettings")
+		return dbHandle.createQuery("/* getAllAdminSettings */ SELECT * FROM \"adminSettings\"")
 				.map(new AdminSettingMapper())
 				.list();
 	}
@@ -59,9 +59,9 @@ public class AdminDao {
 		if (cachedSettings == null) { initCache(); }
 		String sql; 
 		if (cachedSettings.containsKey(setting.getKey())) {
-			sql = "/* updateAdminSetting */ UPDATE adminSettings SET value = :value WHERE [key] = :key";
+			sql = "/* updateAdminSetting */ UPDATE \"adminSettings\" SET value = :value WHERE \"key\" = :key";
 		} else { 
-			sql = "/* insertAdminSetting */ INSERT INTO adminSettings ([key], value) VALUES (:key, :value)";
+			sql = "/* insertAdminSetting */ INSERT INTO \"adminSettings\" (\"key\", value) VALUES (:key, :value)";
 		}
 		cachedSettings.put(setting.getKey(), setting.getValue());
 		return dbHandle.createStatement(sql)
