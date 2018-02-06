@@ -100,29 +100,36 @@ public class OrganizationResource implements IGraphQLResource {
 	@RolesAllowed("ADMINISTRATOR")
 	public Organization createNewOrganization(Organization org, @Auth Person user) {
 		AuthUtils.assertAdministrator(user);
-		final Organization created;
-		try {
-			created = dao.insert(org);
-		} catch (UnableToExecuteStatementException e) {
-			throw handleSqlException(e);
-		}
-		
-		if (org.getTasks() != null) { 
-			//Assign all of these tasks to this organization. 
-			for (Task p : org.getTasks()) { 
-				engine.getTaskDao().setResponsibleOrgForTask(p, created);
+		final Organization outer;
+		outer = engine.getDbHandle().inTransaction(new TransactionCallback<Organization>() {
+			@Override
+			public Organization inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				Organization created;
+				try {
+					created = dao.insert(org);
+				} catch (UnableToExecuteStatementException e) {
+					throw handleSqlException(e);
+				}
+
+				if (org.getTasks() != null) {
+					//Assign all of these tasks to this organization.
+					for (Task p : org.getTasks()) {
+						engine.getTaskDao().setResponsibleOrgForTask(p, created);
+					}
+				}
+				if (org.getApprovalSteps() != null) {
+					//Create the approval steps
+					for (ApprovalStep step : org.getApprovalSteps()) {
+						validateApprovalStep(step);
+						step.setAdvisorOrganizationId(created.getId());
+						engine.getApprovalStepDao().insertAtEnd(step);
+					}
+				}
+				return created;
 			}
-		}
-		if (org.getApprovalSteps() != null) { 
-			//Create the approval steps 
-			for (ApprovalStep step : org.getApprovalSteps()) { 
-				validateApprovalStep(step);
-				step.setAdvisorOrganizationId(created.getId());
-				engine.getApprovalStepDao().insertAtEnd(step);
-			}
-		}
+		});
 		AnetAuditLogger.log("Organization {} created by {}", org, user);
-		return created; 
+		return outer;
 	}
 	
 	@GET

@@ -27,7 +27,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 import org.slf4j.Logger;
@@ -43,8 +42,10 @@ import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
+import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.emails.AnetEmailAction;
 
@@ -54,9 +55,8 @@ public class AnetEmailWorker implements Runnable {
 
 	private static AnetEmailWorker instance;
 
-	private Handle handle;
+	private EmailDao dao;
 	private ObjectMapper mapper;
-	private AnetEmailMapper emailMapper;
 	private Properties props;
 	private Authenticator auth;
 	private String fromAddr;
@@ -68,14 +68,13 @@ public class AnetEmailWorker implements Runnable {
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
 	private boolean noEmailConfiguration;
-
-	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) {
-		this.handle = dbHandle;
+	
+	public AnetEmailWorker(EmailDao dao, AnetConfiguration config, ScheduledExecutorService scheduler) {
+		this.dao = dao;
 		this.scheduler = scheduler;
 		this.mapper = new ObjectMapper();
 		mapper.registerModule(new JodaModule());
 		//mapper.enableDefaultTyping();
-		this.emailMapper = new AnetEmailMapper();
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionary().get("SUPPORT_EMAIL_ADDR");
@@ -122,11 +121,9 @@ public class AnetEmailWorker implements Runnable {
 	}
 
 	private void runInternal() {
-		//check the database for any emails we need to send.
-		final List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM \"pendingEmails\" ORDER BY \"createdAt\" ASC")
-				.map(emailMapper)
-				.list();
-
+		//check the database for any emails we need to send. 
+		final List<AnetEmail> emails = dao.getAll();
+		
 		//Send the emails!
 		final List<Integer> processedEmails = new LinkedList<Integer>();
 		for (final AnetEmail email : emails) {
@@ -151,10 +148,7 @@ public class AnetEmailWorker implements Runnable {
 		}
 
 		//Update the database.
-		if (!processedEmails.isEmpty()) {
-			final String emailIds = Joiner.on(", ").join(processedEmails);
-			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN (" + emailIds + ")").execute();
-		}
+		dao.deletePendingEmails(processedEmails);
 	}
 
 	private void sendEmail(AnetEmail email) throws MessagingException, IOException, TemplateException {
@@ -224,96 +218,12 @@ public class AnetEmailWorker implements Runnable {
 		//Insert the job spec into the database.
 		try {
 			String jobSpec = mapper.writeValueAsString(email);
-			handle.createStatement("/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")
-				.bind("jobSpec", jobSpec)
-				.bind("createdAt", new DateTime())
-				.execute();
-		} catch (JsonProcessingException jsonError) {
+			dao.createPendingEmail(jobSpec);
+		} catch (JsonProcessingException jsonError) { 
 			throw new WebApplicationException(jsonError);
 		}
 
 		//poke the worker thread so it wakes up.
 		scheduler.schedule(this, 1, TimeUnit.SECONDS);
-	}
-
-	public static class AnetEmail {
-		Integer id;
-		AnetEmailAction action;
-		List<String> toAddresses;
-		DateTime createdAt;
-		String comment;
-
-		public Integer getId() {
-			return id;
-		}
-
-		public void setId(Integer id) {
-			this.id = id;
-		}
-
-		public AnetEmailAction getAction() {
-			return action;
-		}
-
-		public void setAction(AnetEmailAction action) {
-			this.action = action;
-		}
-
-		public List<String> getToAddresses() {
-			return toAddresses;
-		}
-
-		public void setToAddresses(List<String> toAddresses) {
-			this.toAddresses = toAddresses;
-		}
-
-		public void addToAddress(String toAddress) {
-			if (toAddresses == null) { toAddresses = new LinkedList<String>(); }
-			toAddresses.add(toAddress);
-		}
-
-		public DateTime getCreatedAt() {
-			return createdAt;
-		}
-
-		public void setCreatedAt(DateTime createdAt) {
-			this.createdAt = createdAt;
-		}
-
-		public String getComment() {
-			return comment;
-		}
-
-		public void setComment(String comment) {
-			this.comment = comment;
-		}
-	}
-
-	public static class AnetEmailMapper implements ResultSetMapper<AnetEmail> {
-
-		ObjectMapper mapper;
-
-		public AnetEmailMapper() {
-			this.mapper = new ObjectMapper();
-			mapper.registerModule(new JodaModule());
-			//mapper.enableDefaultTyping();
-		}
-
-		@Override
-		public AnetEmail map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
-			String jobSpec = rs.getString("jobSpec");
-			try {
-				AnetEmail email = mapper.readValue(jobSpec, AnetEmail.class);
-
-				email.setId(rs.getInt("id"));
-				email.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
-				return email;
-			} catch (Exception e) {
-				logger.error("Error mapping email", e);
-			}
-			return null;
-		}
-
-	}
-
+	} 
 }
