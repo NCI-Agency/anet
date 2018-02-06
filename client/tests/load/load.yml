@@ -2,7 +2,7 @@ config:
   target: 'http://localhost:8080'
   phases:
     - duration: 600
-      arrivalRate: 20
+      arrivalRate: 60
   processor: "./processor.js"
   defaults:
     headers:
@@ -30,7 +30,7 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
   - name: Make report
-    weight: 1
+    weight: 3
     flow:
     - post:
         url: "/api/reports/new"
@@ -39,55 +39,26 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json:
-          intent: "{{ report.intent }}"
-          engagementDate: "{{ report.engagementDate }}"
-          atmosphere: POSITIVE
-          atmosphereDetails: aaaaaa
-          location:
-            id: 1008
-            name: Fort Amherst
-            lat: 47.563763
-            lng: -52.68059
+          intent: "{{ intent }}"
+          engagementDate: "{{ engagementDate }}"
+          atmosphere: "{{ atmosphere }}"
+          atmosphereDetails: "{{ atmosphereDetails }}"
           attendees:
-          - status: ACTIVE
-            country: ''
-            rank: Civ
-            gender: MALE
-            phoneNumber: ''
-            endOfTourDate: ''
-            biography: ''
-            role: ADVISOR
-            id: 1004
-            emailAddress: hunter+erin@dds.mil
-            _loaded: true
-            primary: true
           - name: REINTON, Reina
             status: ACTIVE
-            country: ''
-            rank: CIV
-            gender: MALE
-            phoneNumber: ''
-            endOfTourDate: ''
-            biography: ''
             role: ADVISOR
-            id: 1005
-            primary: false
+            id: 4
+            primary: true
           - name: TOPFERNESS, Christopf
             status: ACTIVE
-            country: ''
-            rank: CIV
-            gender: MALE
-            phoneNumber: ''
-            endOfTourDate: ''
-            biography: ''
             role: PRINCIPAL
-            id: 1009
+            id: 8
             primary: true
           tasks: []
           comments: []
-          reportText: ''
-          nextSteps: aaaaaaaaaaaaaa
-          keyOutcomes: aaaaaaaaaa
+          reportText: "{{ reportText }}"
+          nextSteps: "{{ nextSteps }}"
+          keyOutcomes: "{{ keyOutcomes }}"
           tags: []
           reportSensitiveInformation:
             id: 
@@ -131,7 +102,7 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
   - name: Update report
-    weight: 5
+    weight: 50
     flow:
     - post:
         url: "/graphql"
@@ -162,56 +133,26 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json:
-          intent: "{{ report.intent }}"
-          engagementDate: "{{ report.engagementDate }}"
-          atmosphere: POSITIVE
-          atmosphereDetails: aaaaaa
-          location:
-            id: 1008
-            createdAt: 1517748118396
-            updatedAt: 1517748118396
-            name: Fort Amherst
-            lat: 47.563763
-            lng: -52.68059
+          intent: "{{ intent }}"
+          engagementDate: "{{ engagementDate }}"
+          atmosphere: "{{ atmosphere }}"
+          atmosphereDetails: "{{ atmosphereDetails }}"
           attendees:
-          - status: ACTIVE
-            country: ''
-            rank: Civ
-            gender: MALE
-            phoneNumber: ''
-            endOfTourDate: ''
-            biography: ''
-            role: ADVISOR
-            id: 1004
-            _loaded: true
-            primary: true
           - name: REINTON, Reina
             status: ACTIVE
-            country: ''
-            rank: CIV
-            gender: MALE
-            phoneNumber: ''
-            endOfTourDate: ''
-            biography: ''
             role: ADVISOR
-            id: 1005
-            primary: false
+            id: 4
+            primary: true
           - name: TOPFERNESS, Christopf
             status: ACTIVE
-            country: ''
-            rank: CIV
-            gender: MALE
-            phoneNumber: ''
-            endOfTourDate: ''
-            biography: ''
             role: PRINCIPAL
-            id: 1009
+            id: 8
             primary: true
           tasks: []
           comments: []
-          reportText: ''
-          nextSteps: aaaaaaaaaaaaaa
-          keyOutcomes: aaaaaaaaaa
+          reportText: "{{ reportText }}"
+          nextSteps: "{{ nextSteps }}"
+          keyOutcomes: "{{ keyOutcomes }}"
           tags: []
           reportSensitiveInformation:
             id: 
@@ -300,7 +241,7 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
   - name: Do searches
-    weight: 50
+    weight: 3
     flow:
     - log: "{{ advisor }} searching"
     - get:

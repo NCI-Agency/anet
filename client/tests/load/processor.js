@@ -6,10 +6,13 @@
   const Faker = require('faker');
 
   function generateRandomData(requestParams, context, ee, next) {
-    context.vars.report = {}
-    context.vars.report.intent = Faker.lorem.paragraph()
-    context.vars.report.engagementDate = Faker.date.recent()
-
+    context.vars.intent = Faker.lorem.paragraph()
+    context.vars.engagementDate = Faker.date.recent().toISOString()
+    context.vars.atmosphere = Faker.random.arrayElement(["POSITIVE","NEUTRAL","NEGATIVE"])
+    context.vars.atmosphereDetails = Faker.lorem.sentences()
+    context.vars.reportText = Faker.lorem.paragraphs()
+    context.vars.nextSteps = Faker.lorem.paragraph()
+    context.vars.keyOutcomes = Faker.lorem.paragraph()
     return next();
   }
 
