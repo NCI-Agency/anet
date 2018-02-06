@@ -39,11 +39,11 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	public AuthorizationGroupList getAll(int pageNum, int pageSize) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getAllAuthorizationGroups */ SELECT authorizationGroups.*, COUNT(*) OVER() AS totalCount "
-					+ "FROM authorizationGroups ORDER BY name ASC "
+			sql = "/* getAllAuthorizationGroups */ SELECT \"authorizationGroups\".*, COUNT(*) OVER() AS totalCount "
+					+ "FROM \"authorizationGroups\" ORDER BY name ASC "
 					+ "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else {
-			sql = "/* getAllAuthorizationGroups */ SELECT * from authorizationGroups "
+			sql = "/* getAllAuthorizationGroups */ SELECT * from \"authorizationGroups\" "
 					+ "ORDER BY name ASC LIMIT :limit OFFSET :offset";
 		}
 
@@ -56,7 +56,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 
 	@Override
 	public AuthorizationGroup getById(int id) {
-		final Query<AuthorizationGroup> query = dbHandle.createQuery("/* getAuthorizationGroupById */ SELECT * from authorizationGroups where id = :id")
+		final Query<AuthorizationGroup> query = dbHandle.createQuery("/* getAuthorizationGroupById */ SELECT * from \"authorizationGroups\" where id = :id")
 			.bind("id", id)
 			.map(new AuthorizationGroupMapper());
 		final List<AuthorizationGroup> results = query.list();
@@ -72,7 +72,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				a.setCreatedAt(DateTime.now());
 				a.setUpdatedAt(DateTime.now());
 				final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-						"/* authorizationGroupInsert */ INSERT INTO authorizationGroups (name, description, createdAt, updatedAt, status) "
+						"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (name, description, \"createdAt\", \"updatedAt\", status) "
 							+ "VALUES (:name, :description, :createdAt, :updatedAt, :status)")
 					.bind("name", a.getName())
 					.bind("description", a.getDescription())
@@ -92,7 +92,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public interface AuthorizationGroupBatch {
-		@SqlBatch("INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId) VALUES (:authorizationGroupId, :id)")
+		@SqlBatch("INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupId\", \"positionId\") VALUES (:authorizationGroupId, :id)")
 		void insertAuthorizationGroupPositions(@Bind("authorizationGroupId") Integer authorizationGroupId,
 				@BindBean List<Position> positions);
 	}
@@ -102,8 +102,8 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
 			@Override
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				return dbHandle.createStatement("/* updateAuthorizationGroup */ UPDATE authorizationGroups "
-							+ "SET name = :name, description = :description, updatedAt = :updatedAt, status = :status  WHERE id = :id")
+				return dbHandle.createStatement("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
+							+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE id = :id")
 						.bind("id", a.getId())
 						.bind("name", a.getName())
 						.bind("description", a.getDescription())
@@ -115,7 +115,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public int addPositionToAuthorizationGroup(Position p, AuthorizationGroup a) {
-		return dbHandle.createStatement("/* addPositionToAuthorizationGroup */ INSERT INTO authorizationGroupPositions (authorizationGroupId, positionId) "
+		return dbHandle.createStatement("/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupId\", \"positionId\") "
 				+ "VALUES (:authorizationGroupId, :positionId)")
 			.bind("authorizationGroupId", a.getId())
 			.bind("positionId", p.getId())
@@ -123,17 +123,17 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public int removePositionFromAuthorizationGroup(Position p, AuthorizationGroup a) {
-		return dbHandle.createStatement("/* removePositionFromAuthorizationGroup*/ DELETE FROM authorizationGroupPositions "
-				+ "WHERE authorizationGroupId = :authorizationGroupId AND positionId = :positionId")
+		return dbHandle.createStatement("/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupPositions\" "
+				+ "WHERE \"authorizationGroupId\" = :authorizationGroupId AND \"positionId\" = :positionId")
 				.bind("authorizationGroupId", a.getId())
 				.bind("positionId", p.getId())
 				.execute();
 	}
 
 	public List<Position> getPositionsForAuthorizationGroup(AuthorizationGroup a) {
-		return dbHandle.createQuery("/* getPositionsForAuthorizationGroup */ SELECT " + PositionDao.POSITIONS_FIELDS + " FROM positions, authorizationGroupPositions "
-				+ "WHERE authorizationGroupPositions.authorizationGroupId = :authorizationGroupId "
-				+ "AND authorizationGroupPositions.positionId = positions.id")
+		return dbHandle.createQuery("/* getPositionsForAuthorizationGroup */ SELECT " + PositionDao.POSITIONS_FIELDS + " FROM positions, \"authorizationGroupPositions\" "
+				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupId\" = :authorizationGroupId "
+				+ "AND \"authorizationGroupPositions\".\"positionId\" = positions.id")
 				.bind("authorizationGroupId", a.getId())
 				.map(new PositionMapper())
 				.list();
@@ -147,26 +147,26 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	public List<AuthorizationGroup> getRecentAuthorizationGroups(Person author, int maxResults) {
 		final String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getRecentAuthorizationGroups */ SELECT authorizationGroups.* FROM authorizationGroups WHERE authorizationGroups.id IN ("
-					+ "SELECT TOP(:maxResults) reportAuthorizationGroups.authorizationGroupId "
+			sql = "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".id IN ("
+					+ "SELECT TOP(:maxResults) \"reportAuthorizationGroups\".\"authorizationGroupId\" "
 					+ "FROM reports "
-					+ "JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
-					+ "JOIN authorizationGroups ON authorizationGroups.id = reportAuthorizationGroups.authorizationGroupId "
-					+ "WHERE reports.authorId = :authorId "
-					+ "AND authorizationGroups.status = :activeStatus "
-					+ "GROUP BY reportAuthorizationGroups.authorizationGroupId "
-					+ "ORDER BY MAX(reports.createdAt) DESC"
+					+ "JOIN \"reportAuthorizationGroups\" ON reports.id = \"reportAuthorizationGroups\".\"reportId\" "
+					+ "JOIN \"authorizationGroups\" ON \"authorizationGroups\".id = \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+					+ "WHERE reports.\"authorId\" = :authorId "
+					+ "AND \"authorizationGroups\".status = :activeStatus "
+					+ "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
-			sql =  "/* getRecentAuthorizationGroups */ SELECT authorizationGroups.* FROM authorizationGroups WHERE authorizationGroups.id IN ("
-					+ "SELECT reportAuthorizationGroups.authorizationGroupId "
+			sql =  "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".id IN ("
+					+ "SELECT \"reportAuthorizationGroups\".\"authorizationGroupId\" "
 					+ "FROM reports "
-					+ "JOIN reportAuthorizationGroups ON reports.id = reportAuthorizationGroups.reportId "
-					+ "JOIN authorizationGroups ON authorizationGroups.id = reportAuthorizationGroups.authorizationGroupId "
-					+ "WHERE reports.authorId = :authorId "
-					+ "AND authorizationGroups.status = :activeStatus "
-					+ "GROUP BY reportAuthorizationGroups.authorizationGroupId "
-					+ "ORDER BY MAX(reports.createdAt) DESC "
+					+ "JOIN \"reportAuthorizationGroups\" ON reports.id = \"reportAuthorizationGroups\".\"reportId\" "
+					+ "JOIN \"authorizationGroups\" ON \"authorizationGroups\".id = \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+					+ "WHERE reports.\"authorId\" = :authorId "
+					+ "AND \"authorizationGroups\".status = :activeStatus "
+					+ "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
@@ -180,10 +180,10 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 
 	public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
 		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS  + ", " + PersonDao.PERSON_FIELDS
-				+ " FROM reports, people, reportAuthorizationGroups "
-				+ "WHERE reports.authorId = people.id "
-				+ "AND reportAuthorizationGroups.authorizationGroupId = :authorizationGroupId "
-				+ "AND reportAuthorizationGroups.reportId = reports.id")
+				+ " FROM reports, people, \"reportAuthorizationGroups\" "
+				+ "WHERE reports.\"authorId\" = people.id "
+				+ "AND \"reportAuthorizationGroups\".\"authorizationGroupId\" = :authorizationGroupId "
+				+ "AND \"reportAuthorizationGroups\".\"reportId\" = reports.id")
 				.bind("authorizationGroupId", a.getId())
 				.map(new ReportMapper())
 				.list();

@@ -31,9 +31,10 @@ public class SqliteOrganizationSearcher implements IOrganizationSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) { 
-			whereClauses.add("(shortName LIKE '%' || :text || '%' OR longName LIKE '%' || :text || '%' )");
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
+			whereClauses.add("(\"shortName\" LIKE '%' || :text || '%' OR \"longName\" LIKE '%' || :text || '%' )");
 			sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
 		}
 		
@@ -44,14 +45,14 @@ public class SqliteOrganizationSearcher implements IOrganizationSearcher {
 		
 		if (query.getParentOrgId() != null) { 
 			if (query.getParentOrgRecursively() != null && query.getParentOrgRecursively()) { 
-				whereClauses.add("(organizations.parentOrgId IN ("
+				whereClauses.add("(organizations.\"parentOrgId\" IN ("
 					+ "WITH RECURSIVE parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :parentOrgId "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
 					+ ") SELECT id from parent_orgs) OR organizations.id = :parentOrgId)");
 			} else { 
-				whereClauses.add("organizations.parentOrgId = :parentOrgId");
+				whereClauses.add("organizations.\"parentOrgId\" = :parentOrgId");
 			}
 			sqlArgs.put("parentOrgId", query.getParentOrgId());
 		}

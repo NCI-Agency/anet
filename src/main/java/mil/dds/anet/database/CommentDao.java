@@ -30,9 +30,9 @@ public class CommentDao implements IAnetDao<Comment> {
 	@Override
 	public Comment getById(int id) {
 		List<Comment> results = dbHandle.createQuery("/* getCommentById */ SELECT comments.id AS c_id, "
-				+ "comments.createdAt AS c_createdAt, comments.updatedAt AS c_updatedAt, "
-				+ "comments.authorId, comments.reportId, comments.text, " + PersonDao.PERSON_FIELDS
-				+ "FROM comments LEFT JOIN people ON comments.authorId = people.id "
+				+ "comments.\"createdAt\" AS c_createdAt, comments.\"updatedAt\" AS c_updatedAt, "
+				+ "comments.\"authorId\", comments.\"reportId\", comments.text, " + PersonDao.PERSON_FIELDS
+				+ "FROM comments LEFT JOIN people ON comments.\"authorId\" = people.id "
 				+ "WHERE comments.id = :id")
 			.bind("id", id)
 			.map(new CommentMapper())
@@ -46,7 +46,7 @@ public class CommentDao implements IAnetDao<Comment> {
 		c.setCreatedAt(DateTime.now());
 		c.setUpdatedAt(DateTime.now());
 		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement("/* insertComment */ "
-				+ "INSERT INTO comments (reportId, authorId, createdAt, updatedAt, text)"
+				+ "INSERT INTO comments (\"reportId\", \"authorId\", \"createdAt\", \"updatedAt\", text)"
 				+ "VALUES (:reportId, :authorId, :createdAt, :updatedAt, :text)")
 			.bindFromProperties(c)
 			.bind("authorId", DaoUtils.getId(c.getAuthor()))
@@ -58,17 +58,17 @@ public class CommentDao implements IAnetDao<Comment> {
 	@Override
 	public int update(Comment c) {
 		c.setUpdatedAt(DateTime.now());
-		return dbHandle.createStatement("/* updateComment */ UPDATE comments SET text = :text, updatedAt = :updatedAt WHERE id = :id")
+		return dbHandle.createStatement("/* updateComment */ UPDATE comments SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")
 			.bindFromProperties(c)
 			.execute();
 	}
 
 	public List<Comment> getCommentsForReport(Report report) {
 		return dbHandle.createQuery("/* getCommentForReport */ SELECT c.id AS c_id, "
-				+ "c.createdAt AS c_createdAt, c.updatedAt AS c_updatedAt, "
-				+ "c.authorId, c.reportId, c.text, " + PersonDao.PERSON_FIELDS + " "
-				+ "FROM comments c LEFT JOIN people ON c.authorId = people.id "
-				+ "WHERE c.reportId = :reportId ORDER BY c.createdAt ASC")
+				+ "c.\"createdAt\" AS c_createdAt, c.\"updatedAt\" AS c_updatedAt, "
+				+ "c.\"authorId\", c.\"reportId\", c.text, " + PersonDao.PERSON_FIELDS + " "
+				+ "FROM comments c LEFT JOIN people ON c.\"authorId\" = people.id "
+				+ "WHERE c.\"reportId\" = :reportId ORDER BY c.\"createdAt\" ASC")
 			.bind("reportId", report.getId())
 			.map(new CommentMapper())
 			.list();

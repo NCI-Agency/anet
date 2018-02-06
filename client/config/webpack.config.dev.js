@@ -28,6 +28,14 @@ module.exports = {
   // https://github.com/facebookincubator/create-react-app/issues/343#issuecomment-237241875
   // You may want 'cheap-module-source-map' instead if you prefer source maps.
   devtool: 'eval',
+  // A strange workaround for a strange compile-time bug:
+  //   Error in ./~/xmlhttprequest/lib/XMLHttpRequest.js
+  //   Module not found: 'child_process' in ./node_modules/xmlhttprequest/lib
+  // This fix suggested in:
+  // https://github.com/webpack/webpack-dev-server/issues/66#issuecomment-61577531
+  externals:[{
+      xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
+  }],
   // These are the "entry points" to our application.
   // This means they will be the "root" imports that are included in JS bundle.
   // The first two entry points enable "hot" CSS and auto-refreshes for JS.

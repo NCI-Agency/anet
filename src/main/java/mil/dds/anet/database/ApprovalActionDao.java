@@ -21,8 +21,8 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	@Override
 	public ApprovalAction insert(ApprovalAction action) {
 		action.setCreatedAt(DateTime.now());
-		dbHandle.createStatement("/* insertApprovalAction */ INSERT INTO approvalActions "
-				+ "(approvalStepId, personId, reportId, createdAt, type) "
+		dbHandle.createStatement("/* insertApprovalAction */ INSERT INTO \"approvalActions\" "
+				+ "(\"approvalStepId\", \"personId\", \"reportId\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepId, :personId, :reportId, :createdAt, :type)")
 			.bind("approvalStepId", action.getStep().getId())
 			.bind("personId", action.getPerson().getId())
@@ -38,8 +38,8 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 * Ordered by their date ascending (earliest to most recent). 
 	 */
 	public List<ApprovalAction> getActionsForReport(int reportId) {
-		Query<ApprovalAction> query = dbHandle.createQuery("/* getReportApprovals */ SELECT * FROM approvalActions " 
-				+ "WHERE reportId = :reportId ORDER BY createdAt ASC")
+		Query<ApprovalAction> query = dbHandle.createQuery("/* getReportApprovals */ SELECT * FROM \"approvalActions\" "
+				+ "WHERE \"reportId\" = :reportId ORDER BY \"createdAt\" ASC")
 			.bind("reportId", reportId)
 			.map(new ApprovalActionMapper());
 		return query.list();
@@ -52,9 +52,9 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 */
 	public List<ApprovalAction> getFinalActionsForReport(int reportId) {
 		//TODO: test this. I don't think it works.... 
-		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM approvalActions "
-				+ "WHERE reportId = :reportId GROUP BY approvalStepId "
-				+ "ORDER BY createdAt DESC")
+		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM \"approvalActions\" "
+				+ "WHERE \"reportId\" = :reportId GROUP BY \"approvalStepId\" "
+				+ "ORDER BY \"createdAt\" DESC")
 			.bind("reportId", reportId)
 			.map(new ApprovalActionMapper())
 			.list();
