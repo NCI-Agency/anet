@@ -25,6 +25,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.StatementContext;
@@ -143,7 +144,8 @@ public class AnetEmailWorker implements Runnable {
 					}
 					processedEmails.add(email.getId());
 				} catch (Exception e) {
-					logger.error("Error sending email", e);
+					final Throwable rootCause = ExceptionUtils.getRootCause(e);
+					logger.error("Error sending email", rootCause == null ? e.getMessage() : rootCause.getMessage());
 				}
 			}
 		}
