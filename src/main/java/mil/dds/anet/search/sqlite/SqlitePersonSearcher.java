@@ -64,8 +64,9 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) { 
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
 			if (query.getMatchPositionName()) { 
 				whereClauses.add("(people.name LIKE '%' || :text || '%' "
 						+ "OR \"emailAddress\" LIKE '%' || :text || '%' "

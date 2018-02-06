@@ -37,8 +37,9 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) {
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
 			if (query.getMatchPersonName() != null && query.getMatchPersonName()) { 
 				whereClauses.add("((positions.name LIKE '%' || :text || '%' "
 						+ "OR positions.code LIKE '%' || :text || '%') "

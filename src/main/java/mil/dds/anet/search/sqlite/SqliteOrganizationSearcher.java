@@ -31,8 +31,9 @@ public class SqliteOrganizationSearcher implements IOrganizationSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) { 
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
 			whereClauses.add("(\"shortName\" LIKE '%' || :text || '%' OR \"longName\" LIKE '%' || :text || '%' )");
 			sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
 		}

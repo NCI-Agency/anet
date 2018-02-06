@@ -76,8 +76,9 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("authorId", query.getAuthorId());
 		}
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) {
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
 			whereClauses.add("(text LIKE '%' || :text || '%' OR "
 					+ "intent LIKE '%' || :text || '%' OR "
 					+ "\"keyOutcomes\" LIKE '%' || :text || '%' OR "
