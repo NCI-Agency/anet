@@ -1,5 +1,7 @@
 package mil.dds.anet;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +46,7 @@ import mil.dds.anet.utils.Utils;
 
 public class AnetObjectEngine {
 
-	private static final Logger logger = LoggerFactory.getLogger(AnetObjectEngine.class);
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	PersonDao personDao;
 	TaskDao taskDao;
@@ -87,6 +89,7 @@ public class AnetObjectEngine {
 		emailDao = new EmailDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
+
 		instance = this;
 	}
 
