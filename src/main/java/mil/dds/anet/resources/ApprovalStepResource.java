@@ -93,7 +93,7 @@ public class ApprovalStepResource implements IGraphQLResource {
 	public Response deleteStep(@Auth Person user, @PathParam("id") int id) {
 		ApprovalStep step = dao.getById(id);
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(step.getAdvisorOrganizationId()));
-		boolean success =  engine.executeInTransaction(dao::deleteStep, id);
+		boolean success = engine.executeInTransaction(dao::deleteStep, id);
 		return (success) ? Response.ok().build() : Response.status(Status.NOT_ACCEPTABLE).build();
 	}
 
