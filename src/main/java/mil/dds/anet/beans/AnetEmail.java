@@ -8,11 +8,11 @@ import org.joda.time.DateTime;
 import mil.dds.anet.emails.AnetEmailAction;
 
 public class AnetEmail {
-	Integer id;
-	AnetEmailAction action;
-	List<String> toAddresses;
-	DateTime createdAt;
-	String comment;
+	private Integer id;
+	private AnetEmailAction action;
+	private List<String> toAddresses;
+	private DateTime createdAt;
+	private String comment;
 
 	public Integer getId() {
 		return id;
