@@ -195,7 +195,7 @@ public class ReportResource implements IGraphQLResource {
 	@Path("/update")
 	public Response editReport(@Auth Person editor, Report r, @DefaultValue("true") @QueryParam("sendEditEmail") Boolean sendEmail) {
 		// perform all modifications to the report and its tasks and steps in a single transaction, returning the original state of the report
-		Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
+		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
 
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
 			boolean canApprove = engine.canUserApproveStep(editor.getId(), existing.getApprovalStep().getId());
