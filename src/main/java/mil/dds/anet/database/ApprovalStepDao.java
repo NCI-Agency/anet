@@ -10,8 +10,6 @@ import javax.ws.rs.core.Response.Status;
 import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
 
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Position;
