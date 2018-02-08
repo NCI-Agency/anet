@@ -25,6 +25,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.StatementContext;
@@ -66,6 +67,7 @@ public class AnetEmailWorker implements Runnable {
 	private final String supportEmailAddr;
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
+	private boolean noEmailConfiguration;
 
 	public AnetEmailWorker(Handle dbHandle, AnetConfiguration config, ScheduledExecutorService scheduler) {
 		this.handle = dbHandle;
@@ -87,6 +89,7 @@ public class AnetEmailWorker implements Runnable {
 		props.put("mail.smtp.port", smtpConfig.getPort().toString());
 		auth = null;
 		this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
+		this.noEmailConfiguration = config.isDevelopmentMode() && smtpConfig.getHostname().startsWith("${");
 
 		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) {
 			props.put("mail.smtp.auth", "true");
@@ -120,7 +123,7 @@ public class AnetEmailWorker implements Runnable {
 
 	private void runInternal() {
 		//check the database for any emails we need to send.
-		final List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM pendingEmails ORDER BY createdAt ASC")
+		final List<AnetEmail> emails = handle.createQuery("/* PendingEmailCheck */ SELECT * FROM \"pendingEmails\" ORDER BY \"createdAt\" ASC")
 				.map(emailMapper)
 				.list();
 
@@ -141,7 +144,8 @@ public class AnetEmailWorker implements Runnable {
 					}
 					processedEmails.add(email.getId());
 				} catch (Exception e) {
-					logger.error("Error sending email", e);
+					final Throwable rootCause = ExceptionUtils.getRootCause(e);
+					logger.error("Error sending email", rootCause == null ? e.getMessage() : rootCause.getMessage());
 				}
 			}
 		}
@@ -149,11 +153,14 @@ public class AnetEmailWorker implements Runnable {
 		//Update the database.
 		if (!processedEmails.isEmpty()) {
 			final String emailIds = Joiner.on(", ").join(processedEmails);
-			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM pendingEmails WHERE id IN (" + emailIds + ")").execute();
+			handle.createStatement("/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN (" + emailIds + ")").execute();
 		}
 	}
 
 	private void sendEmail(AnetEmail email) throws MessagingException, IOException, TemplateException {
+		if (this.noEmailConfiguration) {
+			return;
+		}
 		//Remove any null email addresses
 		email.getToAddresses().removeIf(s -> Objects.equals(s, null));
 		if (email.getToAddresses().size() == 0) {
@@ -217,7 +224,7 @@ public class AnetEmailWorker implements Runnable {
 		//Insert the job spec into the database.
 		try {
 			String jobSpec = mapper.writeValueAsString(email);
-			handle.createStatement("/* SendEmailAsync */ INSERT INTO pendingEmails (jobSpec, createdAt) VALUES (:jobSpec, :createdAt)")
+			handle.createStatement("/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")
 				.bind("jobSpec", jobSpec)
 				.bind("createdAt", new DateTime())
 				.execute();

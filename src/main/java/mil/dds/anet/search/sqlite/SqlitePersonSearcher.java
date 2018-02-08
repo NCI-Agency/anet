@@ -10,9 +10,7 @@ import org.skife.jdbi.v2.Handle;
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
-import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.IPersonSearcher;
@@ -21,6 +19,35 @@ import mil.dds.anet.utils.Utils;
 
 public class SqlitePersonSearcher implements IPersonSearcher {
 
+	protected String buildOrderBy(PersonSearchQuery query) {
+		StringBuilder orderBy = new StringBuilder(" ORDER BY ");
+		switch (query.getSortBy()) {
+			case RANK:
+				orderBy.append("people.rank");
+				break;
+			case CREATED_AT:
+				orderBy.append("people.\"createdAt\"");
+				break;
+			case NAME:
+			default:
+				// case-insensitive ordering! could use COLLATE NOCASE but not if we want this to
+				// work as a generic new-database searcher for pg/mysql
+				orderBy.append("LOWER(people.\"name\")");
+				break;
+		}
+		switch (query.getSortOrder()) {
+			case ASC:
+				orderBy.append(" ASC ");
+				break;
+			case DESC:
+			default:
+				orderBy.append(" DESC ");
+				break;
+		}
+
+		return orderBy.toString();
+	}
+
 	@Override
 	public PersonList runSearch(PersonSearchQuery query, Handle dbHandle) { 
 		StringBuilder sql = new StringBuilder("/* SqlitePersonSearch */ SELECT " + PersonDao.PERSON_FIELDS 
@@ -28,7 +55,7 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		
 		if (query.getOrgId() != null || query.getLocationId() != null || query.getMatchPositionName()) { 
-			sql.append(" LEFT JOIN positions ON people.id = positions.currentPersonId ");
+			sql.append(" LEFT JOIN positions ON people.id = positions.\"currentPersonId\" ");
 		}
 		
 		sql.append(" WHERE ");
@@ -37,17 +64,18 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 		
-		String text = query.getText();
-		if (text != null && text.trim().length() > 0) { 
+		final String text = query.getText();
+		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
+		if (doFullTextSearch) {
 			if (query.getMatchPositionName()) { 
 				whereClauses.add("(people.name LIKE '%' || :text || '%' "
-						+ "OR emailAddress LIKE '%' || :text || '%' "
+						+ "OR \"emailAddress\" LIKE '%' || :text || '%' "
 						+ "OR biography LIKE '%' || :text || '%'"
 						+ "OR positions.name LIKE '%' || :text || '%'"
 						+ "OR positions.code LIKE '%' || :text || '%')");
 			} else { 
 				whereClauses.add("(people.name LIKE '%' || :text || '%' "
-						+ "OR emailAddress LIKE '%' || :text || '%' "
+						+ "OR \"emailAddress\" LIKE '%' || :text || '%' "
 						+ "OR biography LIKE '%' || :text || '%')");
 			}
 			sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
@@ -78,26 +106,26 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		}
 		
 		if (query.getPendingVerification() != null) { 
-			whereClauses.add(" people.pendingVerification = :pendingVerification ");
+			whereClauses.add(" people.\"pendingVerification\" = :pendingVerification ");
 			sqlArgs.put("pendingVerification", query.getPendingVerification());
 		}
 		
 		if (query.getOrgId() != null) { 
 			if (query.getIncludeChildOrgs() != null && query.getIncludeChildOrgs()) { 
-				whereClauses.add(" positions.organizationId IN ( "
+				whereClauses.add(" positions.\"organizationId\" IN ( "
 					+ "WITH RECURSIVE parent_orgs(id) AS ( "
 						+ "SELECT id FROM organizations WHERE id = :orgId "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
 					+ ") SELECT id from parent_orgs)");
 			} else { 
-				whereClauses.add(" positions.organizationId = :orgId ");
+				whereClauses.add(" positions.\"organizationId\" = :orgId ");
 			}
 			sqlArgs.put("orgId", query.getOrgId());
 		}
 		
 		if (query.getLocationId() != null) { 
-			whereClauses.add(" positions.locationId = :locationId ");
+			whereClauses.add(" positions.\"locationId\" = :locationId ");
 			sqlArgs.put("locationId", query.getLocationId());
 		}
 		
@@ -106,34 +134,12 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		
 		//Sort Ordering
-		sql.append(" ORDER BY ");
-		if (query.getSortBy() == null) { query.setSortBy(PersonSearchSortBy.NAME); }
-		switch (query.getSortBy()) {
-			case RANK:
-				sql.append("people.rank");
-				break;
-			case CREATED_AT:
-				sql.append("people.createdAt");
-				break;
-			case NAME:
-			default:
-				sql.append("people.name");
-				break;
-		}
-		
-		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
-		switch (query.getSortOrder()) {
-			case ASC:
-				sql.append(" ASC ");
-				break;
-			case DESC:
-			default:
-				sql.append(" DESC ");
-				break;
-		}
-
+		String orderBy = buildOrderBy(query);
+		sql.append(orderBy);
 		sql.append(" LIMIT :limit OFFSET :offset)");
-		
+		// append outside the subselect to enforce ordering there
+		sql.append(orderBy);
+
 		List<Person> list = dbHandle.createQuery(sql.toString())
 			.bindFromMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())

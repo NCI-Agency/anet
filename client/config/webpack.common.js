@@ -16,6 +16,14 @@ module.exports = {
         require.resolve('./polyfills'),
         paths.appIndexJs
     ],
+    // A strange workaround for a strange compile-time bug:
+    //   Error in ./~/xmlhttprequest/lib/XMLHttpRequest.js
+    //   Module not found: 'child_process' in ./node_modules/xmlhttprequest/lib
+    // This fix suggested in:
+    // https://github.com/webpack/webpack-dev-server/issues/66#issuecomment-61577531
+    externals:[{
+        xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
+    }],
     devtool: 'inline-source-map',
     output: {
         path: paths.appBuild,
@@ -24,7 +32,6 @@ module.exports = {
     resolve: {
         modules: [paths.appSrc, "node_modules"]
     },
-
     module: {
         rules: [
             {

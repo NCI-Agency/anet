@@ -296,10 +296,6 @@ export default class AdvancedSearch extends Component {
 	addFilter(filterKey) {
 		let filters = this.state.filters
 		let filterDefs = this.ALL_FILTERS[this.state.objectType].filters
-		if (!filterKey) {
-			filterKey = Object.keys(filterDefs)[0]
-		}
-
 		if (filterKey) {
 			filters.push({key: filterKey})
 			this.setState({filters})

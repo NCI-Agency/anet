@@ -54,8 +54,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		rsi.setCreatedAt(DateTime.now());
 		rsi.setUpdatedAt(DateTime.now());
 		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* insertReportsSensitiveInformation */ INSERT INTO " + tableName
-					+ " (text, reportId, createdAt, updatedAt) "
+				"/* insertReportsSensitiveInformation */ INSERT INTO \"" + tableName + "\" "
+					+ " (text, \"reportId\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:text, :reportId, :createdAt, :updatedAt)")
 				.bind("text", rsi.getText())
 				.bind("reportId", rsi.getReportId())
@@ -78,8 +78,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		}
 		// Do not allow the reportId to be updated!
 		final int numRows = dbHandle.createStatement(
-				"/* updateReportsSensitiveInformation */ UPDATE " + tableName
-					+ " SET text = :text, updatedAt = :updatedAt WHERE id = :id")
+				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
+					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bind("id", rsi.getId())
 				.bind("text", rsi.getText())
 				.bind("updatedAt", DateTime.now())
@@ -100,8 +100,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		}
 		final Query<ReportSensitiveInformation> query = dbHandle.createQuery(
 				"/* getReportSensitiveInformationByReportId */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
-					+ " FROM " + tableName
-					+ " WHERE reportId = :reportId")
+					+ " FROM \"" + tableName + "\""
+					+ " WHERE \"reportId\" = :reportId")
 			.bind("reportId", report.getId())
 			.map(new ReportSensitiveInformationMapper());
 		final List<ReportSensitiveInformation> results = query.list();
@@ -136,14 +136,14 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		final Query<Map<String, Object>> query = dbHandle.createQuery(
 				"/* checkReportAuthorization */ SELECT r.id"
 					+ " FROM reports r"
-					+ " LEFT JOIN reportAuthorizationGroups rag ON rag.reportId = r.id"
-					+ " LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupId = rag.authorizationGroupId"
-					+ " LEFT JOIN positions p ON p.id = agp.positionId"
+					+ " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportId\" = r.id"
+					+ " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupId\" = rag.\"authorizationGroupId\" "
+					+ " LEFT JOIN positions p ON p.id = agp.\"positionId\" "
 					+ " WHERE r.id = :reportId"
 					+ " AND ("
-					+ "   (r.authorId = :userId)"
+					+ "   (r.\"authorId\" = :userId)"
 					+ "   OR"
-					+ "   (p.currentPersonId = :userId)"
+					+ "   (p.\"currentPersonId\" = :userId)"
 					+ " )")
 			.bind("reportId", reportId)
 			.bind("userId", userId);

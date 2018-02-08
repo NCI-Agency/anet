@@ -1,5 +1,6 @@
 package mil.dds.anet.resources;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 
 import javax.annotation.security.PermitAll;
@@ -22,9 +23,10 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.TransactionCallback;
 import org.skife.jdbi.v2.TransactionStatus;
 import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.annotation.Timed;
-import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
@@ -50,6 +52,8 @@ import mil.dds.anet.utils.Utils;
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class OrganizationResource implements IGraphQLResource {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private OrganizationDao dao;
 	private AnetObjectEngine engine;
@@ -117,7 +121,6 @@ public class OrganizationResource implements IGraphQLResource {
 				engine.getApprovalStepDao().insertAtEnd(step);
 			}
 		}
-		
 		AnetAuditLogger.log("Organization {} created by {}", org, user);
 		return created; 
 	}
@@ -160,12 +163,14 @@ public class OrganizationResource implements IGraphQLResource {
 					Organization existing = dao.getById(org.getId());
 
 					if (org.getTasks() != null) {
+						logger.debug("Editing tasks for {}", org);
 						Utils.addRemoveElementsById(existing.loadTasks(), org.getTasks(),
 								newTask -> engine.getTaskDao().setResponsibleOrgForTask(newTask, existing),
 								oldTaskId -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithId(oldTaskId), null));
 					}
 
 					if (org.getApprovalSteps() != null) {
+						logger.debug("Editing approval steps for {}", org);
 						for (ApprovalStep step : org.getApprovalSteps()) {
 							validateApprovalStep(step);
 							step.setAdvisorOrganizationId(org.getId());
@@ -227,12 +232,13 @@ public class OrganizationResource implements IGraphQLResource {
 	private WebApplicationException handleSqlException(UnableToExecuteStatementException e) {
 		// FIXME: Ugly way to handle the unique index on identificationCode
 		final Throwable cause = e.getCause();
-		if (cause != null && cause instanceof SQLServerException) {
+		if (cause != null) {
 			final String message = cause.getMessage();
-			if (message != null && message.contains(" duplicate ")) {
+			if (message != null && (message.contains(" duplicate ") || message.contains(" UNIQUE constraint "))) {
 				return new WebApplicationException("Duplicate identification code", Status.CONFLICT);
 			}
 		}
+		logger.error("Unexpected SQL exception raised", e);
 		return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 	}
 

@@ -17,8 +17,11 @@ apply plugin: 'org.kordamp.markdown.convert'
 apply plugin: 'com.bmuschko.docker-java-application'
 apply plugin: 'com.moowork.node'
 apply plugin: "org.sonarqube"
+apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 
-apply from: 'localSettings.gradle'
+if (file('localSettings.gradle').exists()) {
+	apply from: 'localSettings.gradle'
+}
 
 sourceCompatibility = 1.8
 
@@ -39,7 +42,9 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.0.2'
 	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1'
 
-	compile 'org.xerial:sqlite-jdbc:3.14.2.1' //If using SQLite
+	compile 'org.xerial:sqlite-jdbc:3.19.3' //If using SQLite
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
+
 	compile 'javax.mail:mail:1.4.7'
 	compile 'ch.qos.logback:logback-classic:1.2.3'
 	compile 'ch.qos.logback:logback-core:1.2.3'
@@ -79,17 +84,30 @@ String anetConfig = "anet.yml"
 
 applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
 
-String dbDriver = run.environment['DB_DRIVER']
-dbDriver = dbDriver ? dbDriver : "sqlite"
+// Set up DB parameters, with sensible defaults:
+String dbDriver = run.environment['DB_DRIVER'] ?: 'sqlite'
+String dbLoc = run.environment['ANET_DB_SERVER'] ?: 'localhost'
+String dbName = run.environment['ANET_DB_NAME'] ?: 'anet'
+if (run.environment['ANET_DB_PORT']) {
+	dbLoc = dbLoc + ":" + run.environment['ANET_DB_PORT'].toString()
+}
+if (!run.environment['ANET_DB_USERNAME']) {
+	run.environment('ANET_DB_USERNAME', run.environment['USER'])
+}
 
 if (dbDriver == "sqlserver") {
 	run.environment("ANET_DB_DRIVER", "com.microsoft.sqlserver.jdbc.SQLServerDriver")
-	run.environment("ANET_DB_URL", "jdbc:sqlserver://${run.environment['ANET_DB_SERVER']};databaseName=${run.environment['ANET_DB_NAME']}")
-} else {
+	run.environment("ANET_DB_URL", "jdbc:sqlserver://${dbLoc};databaseName=${dbName}")
+} else if (dbDriver == "postgresql") {
+	run.environment("ANET_DB_DRIVER", "org.postgresql.Driver")
+	run.environment("ANET_DB_URL", "jdbc:postgresql://${dbLoc}/${dbName}")
+} else if (dbDriver == "sqlite") {
 	run.environment("ANET_DB_DRIVER", "org.sqlite.JDBC")
-	run.environment("ANET_DB_URL", "jdbc:sqlite:development.db")
+	run.environment("ANET_DB_URL", "jdbc:sqlite:development.db?foreign_keys=on")
 	run.environment("ANET_DB_DATE_STRING_FORMAT", "yyyy-MM-dd hh:mm:ss.SSS Z")
 	run.environment("ANET_DB_DATE_CLASS", "text")
+} else {
+	throw new GradleException( "Unsupported DB_DRIVER value \'${dbDriver}\'")
 }
 
 test.environment = run.environment
