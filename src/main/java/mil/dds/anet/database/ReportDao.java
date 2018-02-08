@@ -187,49 +187,56 @@ public class ReportDao implements IAnetDao<Report> {
 		return r;
 	}
 
+	/** This should always be wrapped in a transaction! But actually it's never used at all. */
 	@Override
 	public int update(Report r) {
 		// Update the report without sensitive information
 		return update(r, null);
 	}
 
+	/** NOTE: this should always be wrapped in a transaction! (If JDBI were able to handle nested calls to inTransaction, we would have
+	 * one inside this method, but it isn't.)
+	 * @param r the report to update, in its updated state
+	 * @param user the user attempting the update, for authorization purposes
+	 * @return the number of rows updated by the final update call (should be 1 in all cases).
+	 */
 	public int update(Report r, Person user) {
-		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
-			@Override
-			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				// Write sensitive information (if allowed)
-				AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insertOrUpdate(r.getReportSensitiveInformation(), user, r);
+		// Write sensitive information (if allowed)
+		AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insertOrUpdate(r.getReportSensitiveInformation(), user, r);
 
-				r.setUpdatedAt(DateTime.now());
+		r.setUpdatedAt(DateTime.now());
 
-				StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
-						+ "state = :state, \"updatedAt\" = :updatedAt, \"locationId\" = :locationId, "
-						+ "intent = :intent, exsum = :exsum, text = :reportText, "
-						+ "\"keyOutcomes\" = :keyOutcomes, \"nextSteps\" = :nextSteps, "
-						+ "\"approvalStepId\" = :approvalStepId, ");
-				if (DaoUtils.isMsSql(dbHandle)) {
-					sql.append("\"engagementDate\" = CAST(:engagementDate AS datetime2), \"releasedAt\" = CAST(:releasedAt AS datetime2), ");
-				} else {
-					sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
-				}
-				sql.append("atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
-						+ "\"cancelledReason\" = :cancelledReason, "
-						+ "\"principalOrganizationId\" = :principalOrgId, \"advisorOrganizationId\" = :advisorOrgId "
-						+ "WHERE id = :id");
+		StringBuilder sql = new StringBuilder("/* updateReport */ UPDATE reports SET "
+				+ "state = :state, \"updatedAt\" = :updatedAt, \"locationId\" = :locationId, "
+				+ "intent = :intent, exsum = :exsum, text = :reportText, "
+				+ "\"keyOutcomes\" = :keyOutcomes, \"nextSteps\" = :nextSteps, "
+				+ "\"approvalStepId\" = :approvalStepId, ");
+		if (DaoUtils.isMsSql(dbHandle)) {
+			sql.append("\"engagementDate\" = CAST(:engagementDate AS datetime2), \"releasedAt\" = CAST(:releasedAt AS datetime2), ");
+		} else {
+			sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
+		}
+		sql.append("atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
+				+ "\"cancelledReason\" = :cancelledReason, "
+				+ "\"principalOrganizationId\" = :principalOrgId, \"advisorOrganizationId\" = :advisorOrgId "
+				+ "WHERE id = :id");
 
-				return dbHandle.createStatement(sql.toString())
-					.bindFromProperties(r)
-					.bind("state", DaoUtils.getEnumId(r.getState()))
-					.bind("locationId", DaoUtils.getId(r.getLocation()))
-					.bind("authorId", DaoUtils.getId(r.getAuthor()))
-					.bind("approvalStepId", DaoUtils.getId(r.getApprovalStep()))
-					.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
-					.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
-					.bind("advisorOrgId", DaoUtils.getId(r.getAdvisorOrg()))
-					.bind("principalOrgId", DaoUtils.getId(r.getPrincipalOrg()))
-					.execute();
-					}
-		});
+		return dbHandle.createStatement(sql.toString())
+			.bindFromProperties(r)
+			.bind("state", DaoUtils.getEnumId(r.getState()))
+			.bind("locationId", DaoUtils.getId(r.getLocation()))
+			.bind("authorId", DaoUtils.getId(r.getAuthor()))
+			.bind("approvalStepId", DaoUtils.getId(r.getApprovalStep()))
+			.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
+			.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
+			.bind("advisorOrgId", DaoUtils.getId(r.getAdvisorOrg()))
+			.bind("principalOrgId", DaoUtils.getId(r.getPrincipalOrg()))
+			.execute();
+	}
+
+	public void updateToDraftState(Report r) {
+		dbHandle.execute("/* UpdateFutureEngagement */ UPDATE reports SET state = ? "
+				+ "WHERE id = ?", DaoUtils.getEnumId(ReportState.DRAFT), r.getId());
 	}
 
 	public int addAttendeeToReport(ReportPerson rp, Report r) {
