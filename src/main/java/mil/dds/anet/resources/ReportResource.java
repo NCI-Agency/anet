@@ -46,6 +46,7 @@ import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.ApprovalAction.ApprovalType;
 import mil.dds.anet.beans.ApprovalStep;
@@ -78,7 +79,6 @@ import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.GraphQLParam;
 import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.threads.AnetEmailWorker;
-import mil.dds.anet.threads.AnetEmailWorker.AnetEmail;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.ResponseUtils;
@@ -164,10 +164,12 @@ public class ReportResource implements IGraphQLResource {
 
 		Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
 		if (r.getAdvisorOrg() == null && primaryAdvisor != null) {
+			logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
 			r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
 		}
 		Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
 		if (r.getPrincipalOrg() == null && primaryPrincipal != null) {
+			logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
 			r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
 		}
 
@@ -192,6 +194,37 @@ public class ReportResource implements IGraphQLResource {
 	@Timed
 	@Path("/update")
 	public Response editReport(@Auth Person editor, Report r, @DefaultValue("true") @QueryParam("sendEditEmail") Boolean sendEmail) {
+		// perform all modifications to the report and its tasks and steps in a single transaction, returning the original state of the report
+		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
+
+		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
+			boolean canApprove = engine.canUserApproveStep(editor.getId(), existing.getApprovalStep().getId());
+			if (canApprove) {
+				AnetEmail email = new AnetEmail();
+				ReportEditedEmail action = new ReportEditedEmail();
+				action.setReport(existing);
+				action.setEditor(editor);
+				email.setAction(action);
+				email.setToAddresses(Collections.singletonList(existing.loadAuthor().getEmailAddress()));
+				AnetEmailWorker.sendEmailAsync(email);
+			}
+		}
+
+		// Possibly load sensitive information; needed in case of autoSave by the client form
+		r.setUser(editor);
+		r.loadReportSensitiveInformation();
+
+		// Return the report in the response; used in autoSave by the client form
+		return Response.ok(r).build();
+	}
+
+	/** Perform all modifications to the report and its tasks and steps, returning the original state of the report.  Should be wrapped in
+	 * a single transaction to ensure consistency.
+	 * @param editor the current user (for authorization checks)
+	 * @param r a Report object with the desired modifications
+	 * @return the report as it was stored in the database before this method was called.
+	 */
+	private Report executeReportUpdates(Person editor, Report r) {
 		//Verify this person has access to edit this report
 		//Either they are the author, or an approver for the current step.
 		final Report existing = dao.getById(r.getId(), editor);
@@ -227,6 +260,8 @@ public class ReportResource implements IGraphQLResource {
 		}
 
 		r.setReportText(Utils.sanitizeHtml(r.getReportText()));
+
+		// begin DB modifications
 		dao.update(r, editor);
 
 		//Update Attendees:
@@ -300,25 +335,12 @@ public class ReportResource implements IGraphQLResource {
 			}
 		}
 
-		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
-			boolean canApprove = engine.canUserApproveStep(editor.getId(), existing.getApprovalStep().getId());
-			if (canApprove) {
-				AnetEmail email = new AnetEmail();
-				ReportEditedEmail action = new ReportEditedEmail();
-				action.setReport(existing);
-				action.setEditor(editor);
-				email.setAction(action);
-				email.setToAddresses(Collections.singletonList(existing.loadAuthor().getEmailAddress()));
-				AnetEmailWorker.sendEmailAsync(email);
-			}
-		}
-
 		// Possibly load sensitive information; needed in case of autoSave by the client form
 		r.setUser(editor);
 		r.loadReportSensitiveInformation();
 
 		// Return the report in the response; used in autoSave by the client form
-		return Response.ok(r).build();
+		return existing;
 	}
 
 	private void assertCanEditReport(Report report, Person editor) {
@@ -361,8 +383,9 @@ public class ReportResource implements IGraphQLResource {
 	@Path("/{id}/submit")
 	public Report submitReport(@Auth Person user, @PathParam("id") int id) {
 		final Report r = dao.getById(id, user);
-		//TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
+		logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
+		// TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
 		if (r.getAdvisorOrg() == null) {
 			ReportPerson advisor = r.loadPrimaryAdvisor();
 			if (advisor == null) {
@@ -396,7 +419,7 @@ public class ReportResource implements IGraphQLResource {
 		//Push the report into the first step of this workflow
 		r.setApprovalStep(steps.get(0));
 		r.setState(ReportState.PENDING_APPROVAL);
-		final int numRows = dao.update(r, user);
+		final int numRows = engine.executeInTransaction(dao::update, r, user);
 		sendApprovalNeededEmail(r);
 		logger.info("Putting report {} into step {} because of org {} on author {}",
 				r.getId(), steps.get(0).getId(), org.getId(), r.getAuthor().getId());

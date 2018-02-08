@@ -5,26 +5,25 @@ import java.util.Collections;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.search.ReportSearchQuery;
+import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.FutureEngagementUpdated;
-import mil.dds.anet.threads.AnetEmailWorker.AnetEmail;
-import mil.dds.anet.utils.DaoUtils;
 
 public class FutureEngagementWorker implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-	Handle handle;
 	
-	public FutureEngagementWorker(Handle dbHandle) { 
-		this.handle = dbHandle;
+	private ReportDao dao;
+
+	public FutureEngagementWorker(ReportDao dao) {
+		this.dao = dao;
 	}
 	
 	@Override
@@ -56,9 +55,7 @@ public class FutureEngagementWorker implements Runnable {
 				email.setAction(action);
 				email.setToAddresses(Collections.singletonList(r.loadAuthor().getEmailAddress()));
 				AnetEmailWorker.sendEmailAsync(email);
-						
-				handle.execute("/* UpdateFutureEngagement */ UPDATE reports SET state = ? "
-						+ "WHERE id = ?", DaoUtils.getEnumId(ReportState.DRAFT), r.getId());
+				dao.updateToDraftState(r);
 			} catch (Exception e) { 
 				logger.error("Exception when updating", e);
 			}
