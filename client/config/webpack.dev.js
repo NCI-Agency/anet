@@ -4,8 +4,8 @@ const merge = require('webpack-merge')
 const common = require('./webpack.common.js')
 const paths = require('./paths')
 const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const publicPath = '/'
 
 const proxy = require(paths.appPackageJson).proxy
 
@@ -13,11 +13,10 @@ module.exports = merge(common, {
     devtool: 'eval',
     output: {
         pathinfo: true,
-        filename: 'static/js/bundle.js'
+        filename: 'static/js/bundle.js',
+        publicPath: '/',
     },
     devServer: {
-        contentBase: paths.appPublic,
-        publicPath: publicPath,
         hot: true,
         proxy: {
             "/": {
@@ -33,7 +32,11 @@ module.exports = merge(common, {
     },
     plugins: [
         new webpack.NamedModulesPlugin(),
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new HtmlWebpackPlugin({
+            inject: true,
+            template: paths.appHtml,
+        })
     ]
 
 })

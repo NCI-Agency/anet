@@ -1,6 +1,4 @@
-const path = require('path')
 const paths = require('./paths')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
 const getClientEnvironment = require('./env')
 const webpack = require('webpack')
@@ -16,14 +14,15 @@ module.exports = {
         require.resolve('./polyfills'),
         paths.appIndexJs
     ],
-    // A strange workaround for a strange compile-time bug:
-    //   Error in ./~/xmlhttprequest/lib/XMLHttpRequest.js
-    //   Module not found: 'child_process' in ./node_modules/xmlhttprequest/lib
-    // This fix suggested in:
+    // A strange workaround for a strange compile-time bug:   Error in
+    // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
+    // in ./node_modules/xmlhttprequest/lib This fix suggested in:
     // https://github.com/webpack/webpack-dev-server/issues/66#issuecomment-61577531
-    externals:[{
-        xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
-    }],
+    externals: [
+        {
+            xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
+        }
+    ],
     devtool: 'inline-source-map',
     output: {
         path: paths.appBuild,
@@ -37,8 +36,7 @@ module.exports = {
             {
                 test: /\.html$/,
                 use: 'html-loader'
-            }, 
-            {
+            }, {
                 enforce: "pre",
                 test: /\.js$/,
                 exclude: /node_modules/,
@@ -46,8 +44,7 @@ module.exports = {
                 options: {
                     cache: true
                 }
-            },
-            {
+            }, {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: {
@@ -74,7 +71,6 @@ module.exports = {
     },
     plugins: [
         new InterpolateHtmlPlugin({PUBLIC_URL: publicUrl}),
-        new HtmlWebpackPlugin({inject: true, template: paths.appHtml}),
-        new webpack.DefinePlugin(env),
+        new webpack.DefinePlugin(env)
     ]
 }
