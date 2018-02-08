@@ -29,7 +29,7 @@ export default class Organization extends Model {
 	static humanNameOfType(type) {
 
 		if (type === Organization.TYPE.PRINCIPAL_ORG) {
-			return Settings.fields.advisor.org.name
+			return Settings.fields.principal.org.name
 		}
 		else {
 			return Settings.fields.advisor.org.name
