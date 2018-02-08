@@ -1,9 +1,8 @@
 const paths = require('./paths')
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
 const getClientEnvironment = require('./env')
+const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin");
 const webpack = require('webpack')
-
-const publicPath = '/'
 const publicUrl = ''
 
 // Get environment variables to inject into our app.
@@ -26,7 +25,6 @@ module.exports = {
     devtool: 'inline-source-map',
     output: {
         path: paths.appBuild,
-        publicPath: publicPath
     },
     resolve: {
         modules: [paths.appSrc, "node_modules"]
@@ -70,6 +68,7 @@ module.exports = {
         ]
     },
     plugins: [
+        new ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
         new InterpolateHtmlPlugin({PUBLIC_URL: publicUrl}),
         new webpack.DefinePlugin(env)
     ]

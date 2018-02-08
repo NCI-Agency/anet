@@ -5,6 +5,7 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const common = require('./webpack.common.js')
 const paths = require('../config/paths');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin");
 
 module.exports = merge(common, {
   bail: true,
