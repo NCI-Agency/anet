@@ -5,20 +5,13 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const common = require('./webpack.common.js')
 const paths = require('../config/paths');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const webpack = require('webpack')
 
 module.exports = merge(common, {
   bail: true,
   output: {
     publicPath: '/assets/client/',
-    filename: 'static/js/[name].[chunkhash:8].js',
-    chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js'
 },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "dependencies",
-      minChunks: ({ resource }) => /node_modules/.test(resource)
-    }),
     new UglifyJSPlugin({
       parallel: true,
       cache: true

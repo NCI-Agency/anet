@@ -25,6 +25,8 @@ module.exports = {
     devtool: 'inline-source-map',
     output: {
         path: paths.appBuild,
+        filename: 'static/js/[name].[hash:8].js',
+        chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js'
     },
     resolve: {
         modules: [paths.appSrc, "node_modules"]
@@ -68,6 +70,10 @@ module.exports = {
         ]
     },
     plugins: [
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "dependencies",
+            minChunks: ({ resource }) => /node_modules/.test(resource)
+          }),
         new ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
         new InterpolateHtmlPlugin({PUBLIC_URL: publicUrl}),
         new webpack.DefinePlugin(env)

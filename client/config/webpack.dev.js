@@ -13,7 +13,6 @@ module.exports = merge(common, {
     devtool: 'eval',
     output: {
         pathinfo: true,
-        filename: 'static/js/bundle.js',
         publicPath: '/',
     },
     devServer: {
