@@ -210,7 +210,7 @@ task dockerLoadDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecCon
 	cmd = ["/opt/mssql-tools/bin/sqlcmd", "-S", run.environment["ANET_DB_SERVER"], "-U", run.environment["ANET_DB_USERNAME"], "-P", run.environment["ANET_DB_PASSWORD"], "-d", run.environment["ANET_DB_NAME"], "-a", "32767", "-i", "/hostdata/insertBaseData.sql"]
 }
 
-jar.dependsOn buildClient
+classes.dependsOn buildClient
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {

@@ -9,10 +9,10 @@ const publicUrl = ''
 var env = getClientEnvironment(publicUrl)
 
 module.exports = {
-    entry: [
-        require.resolve('./polyfills'),
-        paths.appIndexJs
-    ],
+    entry: {
+        anet: './src/index.js',
+        polyfills: require.resolve('./polyfills')
+    },
     // A strange workaround for a strange compile-time bug:   Error in
     // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
     // in ./node_modules/xmlhttprequest/lib This fix suggested in:
