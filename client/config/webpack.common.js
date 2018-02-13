@@ -18,9 +18,9 @@ module.exports = (env) => {
                 xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
             }
         ],
-        devtool: 'inline-source-map',
         output: {
             path: paths.appBuild,
+            publicPath: env.PUBLIC_URL,
             filename: 'static/js/[name].[hash:8].js',
             chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js'
         },

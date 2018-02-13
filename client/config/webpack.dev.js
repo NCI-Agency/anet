@@ -19,20 +19,11 @@ module.exports = merge(common(env), {
     },
     devServer: {
         hot: true,
+        historyApiFallback: true,
         contentBase: 'public',
         proxy: [{
             context: ["/graphql", "/api"],
             target: proxy,
-            // we need to bypass the proxy 
-            bypass: function(req, res, proxyOptions) {
-                // TODO: this is a hack, need a better mechanism 
-                if (req.url.startsWith("/favicon") || req.url.startsWith("/alloy-editor")) 
-                    return false
-                if (req.headers.accept.indexOf("html") !== -1) {
-                    return "/"
-                }
-            }
-        
         }]
     },
     plugins: [

@@ -7,15 +7,12 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const env = {
     'process.env.NODE_ENV': JSON.stringify('production'),
-    PUBLIC_URL: '/assets/client'
+    PUBLIC_URL: '/assets/client/'
   }
-
 
 module.exports = merge(common(env), {
   bail: true,
-  output: {
-    publicPath: '/assets/client/',
-},
+  devtool: 'source-map',
   plugins: [
     new CopyWebpackPlugin([
       { from: 'public', ignore : ['index.html','alloy-editor/**/*'] },
@@ -23,7 +20,8 @@ module.exports = merge(common(env), {
   ]),
     new UglifyJSPlugin({
       parallel: true,
-      cache: true
+      cache: true,
+      sourceMap: true
     }),
     new HtmlWebpackPlugin({
       inject: true,
