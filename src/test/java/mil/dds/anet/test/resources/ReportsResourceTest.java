@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -705,7 +707,17 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList().stream().filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)
 			).count()).isEqualTo(searchResults.getList().size());
+	}
 
+	@Test
+	public void searchAuthorizationGroupId() {
+		final Person jack = getJackJackson();
+
+		// Search by empty list of authorization groups should not return reports
+		ReportSearchQuery query = new ReportSearchQuery();
+		query.setAuthorizationGroupId(Collections.emptyList());
+		ReportList searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		assertThat(searchResults.getList().isEmpty());
 	}
 
 	@Test
