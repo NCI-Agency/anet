@@ -1,15 +1,17 @@
-process.env.NODE_ENV = 'development'
-
 const merge = require('webpack-merge')
 const common = require('./webpack.common.js')
 const paths = require('./paths')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
+const env = {
+    'process.env.NODE_ENV': JSON.stringify('development'),
+    PUBLIC_URL: ''
+  }
 
 const proxy = require(paths.appPackageJson).proxy
 
-module.exports = merge(common, {
+module.exports = merge(common(env), {
     devtool: 'eval',
     output: {
         pathinfo: true,
@@ -17,17 +19,21 @@ module.exports = merge(common, {
     },
     devServer: {
         hot: true,
-        proxy: {
-            "/": {
-                target: proxy,
-                // we need to bypass the proxy 
-                bypass: function(req, res, proxyOptions) {
-                    if (req.headers.accept.indexOf("html") !== -1) {
-                      return "/"
-                    }
+        contentBase: 'public',
+        proxy: [{
+            context: ["/graphql", "/api"],
+            target: proxy,
+            // we need to bypass the proxy 
+            bypass: function(req, res, proxyOptions) {
+                // TODO: this is a hack, need a better mechanism 
+                if (req.url.startsWith("/favicon") || req.url.startsWith("/alloy-editor")) 
+                    return false
+                if (req.headers.accept.indexOf("html") !== -1) {
+                    return "/"
                 }
             }
-        }
+        
+        }]
     },
     plugins: [
         new webpack.NamedModulesPlugin(),

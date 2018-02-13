@@ -1,17 +1,26 @@
-process.env.NODE_ENV = 'production'
-
 const merge = require('webpack-merge')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const common = require('./webpack.common.js')
 const paths = require('../config/paths');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = merge(common, {
+const env = {
+    'process.env.NODE_ENV': JSON.stringify('production'),
+    PUBLIC_URL: '/assets/client'
+  }
+
+
+module.exports = merge(common(env), {
   bail: true,
   output: {
     publicPath: '/assets/client/',
 },
   plugins: [
+    new CopyWebpackPlugin([
+      { from: 'public', ignore : ['index.html','alloy-editor/**/*'] },
+      { from: 'node_modules/alloyeditor/dist/alloy-editor', to: 'alloy-editor'}
+  ]),
     new UglifyJSPlugin({
       parallel: true,
       cache: true
@@ -32,6 +41,5 @@ module.exports = merge(common, {
           minifyCSS: true,
           minifyURLs: true
       }
-  })
-  ]
+  })]
 })
