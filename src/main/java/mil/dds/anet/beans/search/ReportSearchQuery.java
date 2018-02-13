@@ -44,7 +44,7 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 	private Integer tagId;
 	private Integer authorPositionId;
 	private Integer attendeePositionId;
-	private Integer authorizationGroupId;
+	private List<Integer> authorizationGroupId;
 
 	private ReportSearchSortBy sortBy;
 	private SortOrder sortOrder;
@@ -271,11 +271,11 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.attendeePositionId = attendeePositionId;
 	}
 
-	public Integer getAuthorizationGroupId() {
+	public List<Integer> getAuthorizationGroupId() {
 		return authorizationGroupId;
 	}
 
-	public void setAuthorizationGroupId(Integer authorizationGroupId) {
+	public void setAuthorizationGroupId(List<Integer> authorizationGroupId) {
 		this.authorizationGroupId = authorizationGroupId;
 	}
 
