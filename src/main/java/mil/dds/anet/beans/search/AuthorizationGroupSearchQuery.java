@@ -8,6 +8,8 @@ public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 
 	private AuthorizationGroupStatus status;
 
+	private Integer positionId;
+
 	private AuthorizationGroupSearchSortBy sortBy;
 	private SortOrder sortOrder;
 
@@ -17,6 +19,14 @@ public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 
 	public void setStatus(AuthorizationGroupStatus status) {
 		this.status = status;
+	}
+
+	public Integer getPositionId() {
+		return positionId;
+	}
+
+	public void setPositionId(Integer positionId) {
+		this.positionId = positionId;
 	}
 
 	public AuthorizationGroupSearchSortBy getSortBy() {

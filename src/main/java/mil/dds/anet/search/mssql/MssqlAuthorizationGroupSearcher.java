@@ -55,6 +55,13 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
+		if (query.getPositionId() != null) {
+			// Search for authorization groups related to a given position
+			whereClauses.add("authorizationGroups.id IN ( SELECT ap.authorizationGroupId FROM authorizationGroupPositions ap "
+							+ "WHERE ap.positionId = :positionId) ");
+			sqlArgs.put("positionId", query.getPositionId());
+		}
+
 		final AuthorizationGroupList result = new AuthorizationGroupList();
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
