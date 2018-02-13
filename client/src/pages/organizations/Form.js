@@ -74,8 +74,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
-				<this.LongNameWithLabel dictProps={orgSettings.identificationCode} id="longName" disabled={isPrincipalOrg && !isAdmin} />
-				<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.longName} id="identificationCode" disabled={!isAdmin}/>
+				<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName" disabled={isPrincipalOrg && !isAdmin} />
+				<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.identificationCode} id="identificationCode" disabled={!isAdmin}/>
 			</Fieldset>
 
 			{organization.isAdvisorOrg() && <div>
