@@ -124,7 +124,7 @@ const reportTour = (currentUser) => {
 		},
 		{
 			title: 'Atmospherics',
-			content: 'Select the atmosphere of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.',
+			content: 'Select the atmospherics of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.',
 			target: '#neutralAtmos',
 			placement: 'bottom',
 		},
