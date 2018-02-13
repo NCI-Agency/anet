@@ -15,6 +15,7 @@ import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
 
 import API from 'api'
+import Settings from 'Settings'
 
 export default class Home extends Page {
 	static contextTypes = {
@@ -153,6 +154,9 @@ export default class Home extends Page {
 
 	render() {
 		let {currentUser} = this.context
+		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
+		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		let queries = this.getQueriesForUser(currentUser)
 
 		return (
@@ -167,6 +171,20 @@ export default class Home extends Page {
 				</div>
 
 				<Breadcrumbs />
+				{!currentUser.hasAssignedPosition() &&
+					<div className="alert alert-warning" style={alertStyle}>
+						You are not assigned to an advisor position.<br/>
+						Please contact your organization's super user(s) to assign you to an advisor position.<br/>
+						If you are unsure, you can also contact the support team {supportEmailMessage}.
+					</div>
+				}
+				{currentUser.hasAssignedPosition() && !currentUser.hasActivePosition() &&
+					<div className="alert alert-warning" style={alertStyle}>
+						Your advisor position has an inactive status.<br/>
+						Please contact your organization's super users to change your position to an active status.<br/>
+						If you are unsure, you can also contact the support team {supportEmailMessage}.
+					</div>
+				}
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset className="home-tile-row" title="My ANET snapshot">
