@@ -192,7 +192,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 						canSubmitWithError={true}
 						validateBeforeUserTouches={this.props.edit}
 						className="meeting-goal"
-						placeholder="What happened?" componentClass="textarea" maxCharacters={250}>
+						placeholder="What is the engagement supposed to achieve?" componentClass="textarea" maxCharacters={250}>
 						<Form.Field.ExtraCol>{250 - report.intent.length} characters remaining</Form.Field.ExtraCol>
 					</RequiredField>
 
