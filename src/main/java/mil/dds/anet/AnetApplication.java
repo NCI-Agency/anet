@@ -54,6 +54,7 @@ import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.resources.LocationResource;
+import mil.dds.anet.resources.LoggingResource;
 import mil.dds.anet.resources.OrganizationResource;
 import mil.dds.anet.resources.PersonResource;
 import mil.dds.anet.resources.TaskResource;
@@ -194,6 +195,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
 		
 		//Create all of the HTTP Resources.  
+		LoggingResource loggingResource = new LoggingResource();
 		PersonResource personResource = new PersonResource(engine, configuration);
 		TaskResource taskResource =  new TaskResource(engine);
 		LocationResource locationResource = new LocationResource(engine);
@@ -208,6 +210,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		final AuthorizationGroupResource authorizationGroupResource = new AuthorizationGroupResource(engine);
 
 		//Register all of the HTTP Resources
+		environment.jersey().register(loggingResource);
 		environment.jersey().register(personResource);
 		environment.jersey().register(taskResource);
 		environment.jersey().register(locationResource);

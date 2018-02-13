@@ -98,6 +98,14 @@ logging:
   level: INFO
   loggers:
     "io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper" : INFO
+    "mil.dds.anet.resources.LoggingResource" :
+      level: TRACE
+      appenders:
+        - type: file
+          currentLogFilename: ./logs/clientLog.log
+          archivedLogFilenamePattern: ./logs/clientLog-%d.log.zip
+          archivedFileCount: 2
+          logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
     "org.skife.jdbi.v2.DBI" :
       level: INFO
       appenders:

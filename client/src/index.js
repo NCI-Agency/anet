@@ -58,7 +58,13 @@ import AuthorizationGroupShow from 'pages/admin/authorizationgroup/Show'
 import AuthorizationGroupEdit from 'pages/admin/authorizationgroup/Edit'
 import AuthorizationGroupNew from 'pages/admin/authorizationgroup/New'
 
+import API from 'api'
 import Help from 'pages/Help'
+
+window.onerror = function(message, url, lineNumber, columnNumber) {
+	API.logOnServer('ERROR', url, lineNumber+":"+columnNumber, message)
+	return false
+  }
 
 ReactDOM.render((
 	<InjectablesProvider>
