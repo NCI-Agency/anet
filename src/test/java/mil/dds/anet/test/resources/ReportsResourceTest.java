@@ -714,9 +714,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final Person jack = getJackJackson();
 
 		// Search by empty list of authorization groups should not return reports
-		ReportSearchQuery query = new ReportSearchQuery();
+		final ReportSearchQuery query = new ReportSearchQuery();
 		query.setAuthorizationGroupId(Collections.emptyList());
-		ReportList searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		final ReportList searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList().isEmpty());
 	}
 
