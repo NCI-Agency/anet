@@ -209,10 +209,14 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getAuthorizationGroupId() != null) {
-			// Search for reports related to a given authorization group
+			final List<String> argNames = new LinkedList<String>();
+			for (int i = 0; i < query.getAuthorizationGroupId().size(); i++) {
+				argNames.add(":authorizationGroupId" + i);
+				args.put("authorizationGroupId" + i, query.getAuthorizationGroupId().get(i));
+			}
+			final String authorizationGroupIds = query.getAuthorizationGroupId().isEmpty() ? "-1" : Joiner.on(", ").join(argNames);
 			whereClauses.add("reports.id IN ( SELECT ra.reportId FROM reportAuthorizationGroups ra "
-							+ "WHERE ra.authorizationGroupId = :authorizationGroupId) ");
-			args.put("authorizationGroupId", query.getAuthorizationGroupId());
+					+ "WHERE ra.authorizationGroupId IN (" + authorizationGroupIds + "))");
 		}
 
 		if (query.getAttendeePositionId() != null) {
