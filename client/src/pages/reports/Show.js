@@ -98,9 +98,24 @@ export default class ReportShow extends Page {
 	}
 
 	renderNoPositionAssignedText() {
+		const {currentUser} = this.context
+		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
-		return <div className="alert alert-warning">You cannot submit a report. Your assigned advisor position has an inactive status.<br /> -- Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage} --</div>
+		if (!currentUser.hasAssignedPosition()) {
+			return <div className="alert alert-warning" style={alertStyle}>
+					You cannot submit a report: you are not assigned to an advisor position.<br/>
+					Please contact your organization's super user(s) and request to be assigned to an advisor position.<br/>
+					If you are unsure, you can also contact the support team {supportEmailMessage}.
+				</div>
+		}
+		else {
+			return <div className="alert alert-warning" style={alertStyle}>
+					You cannot submit a report: your assigned advisor position has an inactive status.<br/>
+					Please contact your organization's super users and request them to assign you to an active advisor position.<br/>
+					If you are unsure, you can also contact the support team {supportEmailMessage}.
+				</div>
+		}
 	}
 
 	render() {
@@ -116,6 +131,7 @@ export default class ReportShow extends Page {
 		canEdit = canEdit || canApprove
 
 		//Only the author can submit when report is in Draft or rejected AND author has a position
+		const hasAssignedPosition = currentUser.hasAssignedPosition()
 		const hasActivePosition = currentUser.hasActivePosition()
 		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
 
@@ -151,7 +167,7 @@ export default class ReportShow extends Page {
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This is a DRAFT report and hasn't been submitted.</h4>
 						<p>You can review the draft below to make sure all the details are correct.</p>
-						{!hasActivePosition &&
+						{(!hasAssignedPosition || !hasActivePosition) &&
 							this.renderNoPositionAssignedText()
 						}
 						<div style={{textAlign: 'left'}}>

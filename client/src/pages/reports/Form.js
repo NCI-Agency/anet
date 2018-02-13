@@ -55,6 +55,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 			isCancelled: (props.report.cancelledReason ? true : false),
 			errors: {},
 
+			showAssignedPositionWarning: false,
 			showActivePositionWarning: false,
 			disableOnSubmit: false,
 
@@ -113,10 +114,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	componentWillReceiveProps(nextProps) {
 		const { currentUser } = this.context
-
-		if (currentUser.hasAssignedPosition()) {
-			this.setState({showActivePositionWarning: !currentUser.hasActivePosition()})
-		}
+		this.setState({showAssignedPositionWarning: !currentUser.hasAssignedPosition()})
+		this.setState({showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()})
 
 		let report = nextProps.report
 		if (report.cancelledReason) {
@@ -140,7 +139,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const { currentUser } = this.context
 		const {report, onDelete} = this.props
 		const { edit } = this.props
-		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, autoSaveError, showActivePositionWarning} = this.state
+		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, autoSaveError, showAssignedPositionWarning, showActivePositionWarning} = this.state
 
 		const hasErrors = Object.keys(errors).length > 0
 		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
@@ -159,8 +158,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
-		const supportEmailMessage = supportEmail ? `(${supportEmail})` : ''
-		const warningMessageNoPosition = `You cannot submit a report. Your assigned advisor position has an inactive status. Please contact your organization's super users and request them to assign you to a position. If you are unsure, you can also contact the support team ${supportEmailMessage}`
+		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		return <div className="report-form">
 
 			<Collapse in={showAutoSaveBanner}>
@@ -175,9 +173,19 @@ export default class ReportForm extends ValidatableFormWrapper {
 				)}
 			</Collapse>
 
+			{showAssignedPositionWarning &&
+				<div className="alert alert-warning" style={alertStyle}>
+					You cannot submit a report: you are not assigned to an advisor position.<br/>
+					Please contact your organization's super user(s) and request to be assigned to an advisor position.<br/>
+					If you are unsure, you can also contact the support team {supportEmailMessage}.
+				</div>
+			}
+
 			{showActivePositionWarning &&
 				<div className="alert alert-warning" style={alertStyle}>
-					{warningMessageNoPosition}
+					You cannot submit a report: your assigned advisor position has an inactive status.<br/>
+					Please contact your organization's super users and request them to assign you to an active advisor position.<br/>
+					If you are unsure, you can also contact the support team {supportEmailMessage}.
 				</div>
 			}
 
