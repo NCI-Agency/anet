@@ -7,9 +7,7 @@ public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 	public enum AuthorizationGroupSearchSortBy { CREATED_AT, NAME }
 
 	private AuthorizationGroupStatus status;
-
 	private Integer positionId;
-
 	private AuthorizationGroupSearchSortBy sortBy;
 	private SortOrder sortOrder;
 

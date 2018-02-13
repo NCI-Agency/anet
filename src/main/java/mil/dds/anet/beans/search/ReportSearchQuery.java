@@ -44,7 +44,7 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 	private Integer tagId;
 	private Integer authorPositionId;
 	private Integer attendeePositionId;
-	List<Integer> authorizationGroupId;
+	private List<Integer> authorizationGroupId;
 
 	private ReportSearchSortBy sortBy;
 	private SortOrder sortOrder;
