@@ -4,11 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -711,13 +715,29 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 	@Test
 	public void searchAuthorizationGroupId() {
-		final Person jack = getJackJackson();
-
 		// Search by empty list of authorization groups should not return reports
-		final ReportSearchQuery query = new ReportSearchQuery();
+		ReportSearchQuery query = new ReportSearchQuery();
 		query.setAuthorizationGroupId(Collections.emptyList());
-		final ReportList searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
-		assertThat(searchResults.getList().isEmpty());
+		ReportList searchResults = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		assertThat(searchResults.getList()).isEmpty();
+
+		// Search by list of authorization groups
+		final List<Integer> agIds = Arrays.asList(1, 2, 3);
+		final Set<Integer> agIdSet = new HashSet<Integer>(agIds);
+		query = new ReportSearchQuery();
+		query.setAuthorizationGroupId(agIds);
+		final List<Report> reportList = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class).getList();
+
+		for (final Report report : reportList) {
+			assertThat(report.loadAuthorizationGroups()).isNotNull();
+			assertThat(report.getAuthorizationGroups()).isNotEmpty();
+			final Set<Integer> collect = report.getAuthorizationGroups()
+					.stream()
+					.map(ag -> ag.getId())
+					.collect(Collectors.toSet());
+			collect.retainAll(agIdSet);
+			assertThat(collect).isNotEmpty();
+		}
 	}
 
 	@Test
