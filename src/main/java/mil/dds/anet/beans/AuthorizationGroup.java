@@ -1,5 +1,7 @@
 package mil.dds.anet.beans;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,7 +71,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
-		query.setAuthorizationGroupId(id);
+		query.setAuthorizationGroupId(Arrays.asList(id));
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 

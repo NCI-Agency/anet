@@ -223,10 +223,10 @@ test('Verify that validation and other reports/new interactions work', async t =
 
     await assertElementNotPresent(t, '#cancelledReason', 'Cancelled reason should not be present initially', shortWaitMs)
     let $atmosphereFormGroup = await $('.atmosphere-form-group')
-    t.true(await $atmosphereFormGroup.isDisplayed(), 'Atmosphere form group should be shown by default')
+    t.true(await $atmosphereFormGroup.isDisplayed(), 'Atmospherics form group should be shown by default')
 
     await assertElementNotPresent(
-        t, '#atmosphere-details', 'Atmosphere details should not be displayed before choosing an atmosphere', shortWaitMs
+        t, '#atmosphere-details', 'Atmospherics details should not be displayed before choosing atmospherics', shortWaitMs
     )
 
     let $positiveAtmosphereButton = await $('#positiveAtmos')
@@ -246,7 +246,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     let $atmosphereDetailsGroup = await $('.atmosphere-details')
 
     await $neutralAtmosphereButton.click()
-    await verifyFieldIsRequired($atmosphereDetailsGroup, $atmosphereDetails, 'has-error', 'Neutral atmosphere details')
+    await verifyFieldIsRequired($atmosphereDetailsGroup, $atmosphereDetails, 'has-error', 'Neutral atmospherics details')
 
     let $attendanceFieldsetTitle = await $('#attendance-fieldset .title-text')
     await assertElementText(

@@ -86,7 +86,8 @@ export default class Person extends Model {
 	}
 
 	hasAssignedPosition() {
-		return !_isEmpty(this.position)
+		// has a non-empty position with a non-zero id
+		return !_isEmpty(this.position) && !!this.position.id
 	}
 
 	hasActivePosition() {

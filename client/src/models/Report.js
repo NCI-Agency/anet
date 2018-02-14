@@ -58,10 +58,10 @@ export default class Report extends Model {
 		let isCancelled = this.cancelledReason ? true : false
 		if (!isCancelled) {
 			if (!this.atmosphere) {
-				errors.push('You must provide the overall atmosphere of the engagement')
+				errors.push('You must provide the overall atmospherics of the engagement')
 			} else {
 				if (this.atmosphere !== 'POSITIVE' && !this.atmosphereDetails) {
-					errors.push('You must provide atmosphere details if the engagement was not Positive')
+					errors.push('You must provide atmospherics details if the engagement was not Positive')
 				}
 			}
 		}

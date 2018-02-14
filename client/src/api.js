@@ -77,6 +77,18 @@ const API = {
 		return API._queryCommon(query, variables, variableDef, output).then(response => response.blob())
 	},
 
+	/**
+	 * Creates a log entry on the server based on the following inputs
+	 * - severity: one of 'DEBUG','ERROR','FATAL','INFO','WARN'
+	 * - url: the context url
+	 * - lineNr: line number of the error
+	 * - message: The error/log message
+	 */
+	logOnServer(severity, url, lineNr, message)
+	{
+		API.send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
+	},
+
 	loadFileAjaxSync(filePath, mimeType) {
 		let xmlhttp=new XMLHttpRequest()
 		xmlhttp.open("GET",filePath,false)

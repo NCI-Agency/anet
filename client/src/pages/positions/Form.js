@@ -106,7 +106,9 @@ export default class PositionForm extends ValidatableFormWrapper {
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
 								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.name}</Button>
-								<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.name}</Button>
+								{isAdmin &&
+									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.name}</Button>
+								}
 								{isAdmin &&
 									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.name}</Button>
 								}

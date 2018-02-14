@@ -18,6 +18,7 @@ import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
 
 import API from 'api'
+import Settings from 'Settings'
 
 export default class Home extends Page {
 	static contextTypes = {
@@ -30,19 +31,22 @@ export default class Home extends Page {
 			tileCounts: [],
 			savedSearches: [],
 			selectedSearch: null,
+			userAuthGroups: []
 		}
 	}
 
 	adminQueries(currentUser) {
-		return [ this.allDraft(), this.allPending(), this.pendingMe(currentUser), this.allUpcoming() ]
+		return [ this.allDraft(), this.allPending(), this.pendingMe(currentUser), this.allUpcoming(), this.mySensitiveInfo() ]
 	}
 
 	approverQueries(currentUser) {
-		return [ this.pendingMe(currentUser), this.myDraft(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser) ]
+		return [ this.pendingMe(currentUser), this.myDraft(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser),
+		         this.mySensitiveInfo() ]
 	}
 
 	advisorQueries(currentUser) {
-		return [ this.myDraft(currentUser), this.myPending(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser) ]
+		return [ this.myDraft(currentUser), this.myPending(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser),
+		         this.mySensitiveInfo() ]
 	}
 
 	allDraft() { return {
@@ -110,6 +114,13 @@ export default class Home extends Page {
 		}
 	}
 
+	mySensitiveInfo() {
+		return {
+			title: "Reports with sensitive information",
+			query: { state: ["RELEASED"], authorizationGroupId: this.state.userAuthGroups.map(f => f.id) }
+		}
+	}
+
 	getQueriesForUser(currentUser) {
 		if (currentUser.isAdmin()) {
 			return this.adminQueries(currentUser)
@@ -124,38 +135,52 @@ export default class Home extends Page {
 		//If we don't have the currentUser yet (ie page is still loading, don't run these queries)
 		let {currentUser} = context
 		if (!currentUser || !currentUser._loaded) { return }
-
-		//queries will contain the four queries that will show up on the home tiles
-		//Based on the users role. They are all report searches
-		let queries = this.getQueriesForUser(currentUser)
-		//Run those four queries
-		let graphQL = /* GraphQL */`
-			tileOne: reportList(f:search, query:$queryOne) { totalCount},
-			tileTwo: reportList(f:search, query: $queryTwo) { totalCount},
-			tileThree: reportList(f:search, query: $queryThree) { totalCount },
-			tileFour: reportList(f:search, query: $queryFour) { totalCount },
-			savedSearches: savedSearchs(f:mine) {id, name, objectType, query}`
-		let variables = {
-			queryOne: queries[0].query,
-			queryTwo: queries[1].query,
-			queryThree: queries[2].query,
-			queryFour: queries[3].query
-		}
-
-		API.query(graphQL, variables,
-			"($queryOne: ReportSearchQuery, $queryTwo: ReportSearchQuery, $queryThree: ReportSearchQuery, $queryFour: ReportSearchQuery)")
-		.then(data => {
-			let selectedSearch = data.savedSearches && data.savedSearches.length > 0 ? data.savedSearches[0] : null
-			this.setState({
-				tileCounts: [data.tileOne.totalCount, data.tileTwo.totalCount, data.tileThree.totalCount, data.tileFour.totalCount],
-				savedSearches: data.savedSearches,
-				selectedSearch: selectedSearch
+		// Get current user authorization groups (needed for reports query 5)
+		const userAuthGroupsGraphQL = /* GraphQL */`
+			userAuthGroups: authorizationGroupList(f:search, query:$queryUserAuthGroups) {totalCount, list { id }}`
+		API.query(
+				userAuthGroupsGraphQL,
+				{queryUserAuthGroups: {positionId: currentUser.position ? currentUser.position.id : -1}},
+				"($queryUserAuthGroups: AuthorizationGroupSearchQuery)")
+			.then(data => {
+				this.setState({userAuthGroups: data.userAuthGroups.list})
+				//queries will contain the five queries that will show up on the home tiles
+				//Based on the users role. They are all report searches
+				let queries = this.getQueriesForUser(currentUser)
+				//Run those five queries
+				let graphQL = /* GraphQL */`
+					tileOne: reportList(f:search, query:$queryOne) { totalCount},
+					tileTwo: reportList(f:search, query: $queryTwo) { totalCount},
+					tileThree: reportList(f:search, query: $queryThree) { totalCount },
+					tileFour: reportList(f:search, query: $queryFour) { totalCount },
+					tileFive: reportList(f:search, query: $queryFive) { totalCount },
+					savedSearches: savedSearchs(f:mine) {id, name, objectType, query}`
+				let variables = {
+					queryOne: queries[0].query,
+					queryTwo: queries[1].query,
+					queryThree: queries[2].query,
+					queryFour: queries[3].query,
+					queryFive: queries[4].query
+				}
+				API.query(graphQL, variables,
+					"($queryOne: ReportSearchQuery, $queryTwo: ReportSearchQuery, $queryThree: ReportSearchQuery, $queryFour: ReportSearchQuery," +
+					"$queryFive: ReportSearchQuery)")
+				.then(data => {
+					let selectedSearch = data.savedSearches && data.savedSearches.length > 0 ? data.savedSearches[0] : null
+					this.setState({
+						tileCounts: [data.tileOne.totalCount, data.tileTwo.totalCount, data.tileThree.totalCount, data.tileFour.totalCount, data.tileFive.totalCount],
+						savedSearches: data.savedSearches,
+						selectedSearch: selectedSearch
+					})
 			})
 		})
 	}
 
 	render() {
 		let {currentUser} = this.context
+		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
+		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		let queries = this.getQueriesForUser(currentUser)
 
 		return (
@@ -170,6 +195,20 @@ export default class Home extends Page {
 				</div>
 
 				<Breadcrumbs />
+				{!currentUser.hasAssignedPosition() &&
+					<div className="alert alert-warning" style={alertStyle}>
+						You are not assigned to an advisor position.<br/>
+						Please contact your organization's super user(s) to assign you to an advisor position.<br/>
+						If you are unsure, you can also contact the support team {supportEmailMessage}.
+					</div>
+				}
+				{currentUser.hasAssignedPosition() && !currentUser.hasActivePosition() &&
+					<div className="alert alert-warning" style={alertStyle}>
+						Your advisor position has an inactive status.<br/>
+						Please contact your organization's super users to change your position to an active status.<br/>
+						If you are unsure, you can also contact the support team {supportEmailMessage}.
+					</div>
+				}
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset className="home-tile-row" title="My ANET snapshot">

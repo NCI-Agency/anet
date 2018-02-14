@@ -113,7 +113,7 @@ export default class AdvancedSearch extends Component {
 					url="/api/locations/search"
 				/>,
 				State: <ReportStateSearch />,
-				Atmosphere: <SelectSearchFilter
+				Atmospherics: <SelectSearchFilter
 					queryKey="atmosphere"
 					values={["POSITIVE","NEUTRAL","NEGATIVE"]}
 				/>,

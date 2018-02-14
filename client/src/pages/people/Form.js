@@ -215,8 +215,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 	handleOnKeyDown = (event) => {
 		if (event.key === ',') {
-			let nameInput = document.getElementById("firstName")
-			nameInput.focus()
+			event.preventDefault()
+			document.getElementById('firstName').focus()
 		}
 	}
 
@@ -228,17 +228,15 @@ export default class PersonForm extends ValidatableFormWrapper {
 	}
 
 	handleOnChangeFirstName = (event) => {
+		const value = event.target.value
 		const { person } = this.state
-		const target = event.target
-		const value = target.value
 
-		target.value = value.replace(/,/, '')
 		this.savePersonWithFullName(person, { firstName: value })
 	}
 
 	fullName = (person) => {
 		if (person.lastName && person.firstName) {
-			return(`${this.formattedLastName(person.lastName)}, ${person.firstName.trim()}`)
+			return(`${this.formattedLastName(person.lastName)}, ${this.formattedFirstName(person.firstName)}`)
 		}
 		else if (person.lastName) {
 			return this.formattedLastName(person.lastName)
@@ -250,6 +248,10 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 	formattedLastName = (lastName) => {
 		return lastName.toUpperCase().trim()
+	}
+
+	formattedFirstName = (firstName) => {
+		return firstName.trim()
 	}
 
 	parseFullName = (name) => {
