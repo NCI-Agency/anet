@@ -107,8 +107,8 @@
     "react-tag-input": "4.7.2"
   },
   "scripts": {
-    "build": "webpack --config config/webpack.prod.js",
-    "start": "webpack-dev-server --open --config config/webpack.dev.js --port 3000",
+    "build": "NODE_ENV=production webpack --config config/webpack.prod.js",
+    "start": "NODE_ENV=development webpack-dev-server --open --config config/webpack.dev.js --port 3000",
     "lint": "eslint src tests/e2e/**/*.js tests/util/**/*.js",
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "test": "npm run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",

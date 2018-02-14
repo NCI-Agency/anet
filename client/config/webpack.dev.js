@@ -3,15 +3,11 @@ const common = require('./webpack.common.js')
 const paths = require('./paths')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-
-const env = {
-    'process.env.NODE_ENV': JSON.stringify('development'),
-    PUBLIC_URL: ''
-  }
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
 
 const proxy = require(paths.appPackageJson).proxy
 
-module.exports = merge(common(env), {
+module.exports = merge(common, {
     devtool: 'eval',
     output: {
         pathinfo: true,
@@ -27,12 +23,12 @@ module.exports = merge(common(env), {
         }]
     },
     plugins: [
-        new webpack.NamedModulesPlugin(),
-        new webpack.HotModuleReplacementPlugin(),
+        new InterpolateHtmlPlugin({ PUBLIC_URL: ''}),
         new HtmlWebpackPlugin({
             inject: true,
             template: paths.appHtml,
-        })
+        }),
+        new webpack.NamedModulesPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
     ]
-
 })
