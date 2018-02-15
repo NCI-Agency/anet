@@ -112,9 +112,10 @@ export default class Home extends Page {
 	}
 
 	mySensitiveInfo() {
+		console.log(this.state.userAuthGroups)
 		return {
 			title: "Reports with sensitive information",
-			query: { state: ["RELEASED"], authorizationGroupId: this.state.userAuthGroups.map(f => f.id) }
+			query: { state: ["RELEASED"], authorizationGroupId: (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.id) : [-1]) }
 		}
 	}
 
