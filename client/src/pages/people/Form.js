@@ -124,7 +124,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 							<Form.Field disabled={!canEditName} {...firstNameProps} />
 						}
 						</Col>
-						<RequiredField disabled={!canEditName} className="hidden" id="name" value={this.fullName(this.state.person)} />
+						<RequiredField disabled={!canEditName} className="hidden" id="name" value={Person.fullName(this.state.person)} />
 					</Col>
 				</FormGroup>
 
@@ -209,7 +209,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const { person } = nextProps
 		const emptyName = { lastName: '', firstName: ''}
 
-		const parsedName = person.name ? this.parseFullName(person.name) : emptyName
+		const parsedName = person.name ? Person.parseFullName(person.name) : emptyName
 
 		this.savePersonWithFullName(person, parsedName)
 	}
@@ -218,7 +218,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 		if (editName.lastName) { person.lastName = editName.lastName }
 		if (editName.firstName) { person.firstName = editName.firstName }
 
-		person.name = this.fullName(person)
+		person.name = Person.fullName(person)
 		this.setState({ person })
 	}
 
@@ -241,44 +241,6 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const { person } = this.state
 
 		this.savePersonWithFullName(person, { firstName: value })
-	}
-
-	fullName = (person) => {
-		if (person.lastName && person.firstName) {
-			return(`${this.formattedLastName(person.lastName)}, ${this.formattedFirstName(person.firstName)}`)
-		}
-		else if (person.lastName) {
-			return this.formattedLastName(person.lastName)
-		}
-		else {
-			return ''
-		}
-	}
-
-	formattedLastName = (lastName) => {
-		return lastName.toUpperCase().trim()
-	}
-
-	formattedFirstName = (firstName) => {
-		return firstName.trim()
-	}
-
-	parseFullName = (name) => {
-		const delimiter = name.indexOf(',')
-		let lastName = name
-		let firstName = ''
-
-		if(delimiter > -1) {
-			lastName = name.substring(0, delimiter)
-			firstName = name.substring(delimiter + 1, name.length)
-		}
-
-		return(
-			{
-				lastName: lastName.trim().toUpperCase(),
-				firstName: firstName.trim()
-			}
-		)
 	}
 
 	@autobind
