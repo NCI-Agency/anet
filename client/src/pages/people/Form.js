@@ -87,7 +87,15 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 		const currentUser = this.context.currentUser
 		const isAdmin = currentUser && currentUser.isAdmin()
-		const disableStatusChange = this.state.originalStatus === 'INACTIVE' || Person.isEqual(currentUser, person)
+		const isSelf = Person.isEqual(currentUser, person)
+		const disableStatusChange = this.state.originalStatus === 'INACTIVE' || isSelf
+		// admins can edit all persons, new users can be edited by super users or themselves
+		const canEditName = isAdmin || (
+				person.isNewUser() && currentUser && (
+						currentUser.isSuperUser() ||
+						isSelf
+				)
+			)
 
 		return <ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
 			submitText={this.props.saveText || 'Save person'}>
@@ -99,7 +107,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 					<Col sm={2} componentClass={ControlLabel}>Name</Col>
 					<Col sm={8}>
 						<Col sm={5}>
-							<RequiredField
+							<RequiredField disabled={!canEditName}
 								id="lastName"
 								type="text"
 								display="inline"
@@ -111,12 +119,12 @@ export default class PersonForm extends ValidatableFormWrapper {
 						<Col sm={1} className="name-input">,</Col>
 						<Col sm={6}>
 						{isAdvisor ?
-							<RequiredField {...firstNameProps} />
+							<RequiredField disabled={!canEditName} {...firstNameProps} />
 							:
-							<Form.Field {...firstNameProps} />
+							<Form.Field disabled={!canEditName} {...firstNameProps} />
 						}
 						</Col>
-						<RequiredField className="hidden" id="name" value={this.fullName(this.state.person)} />
+						<RequiredField disabled={!canEditName} className="hidden" id="name" value={this.fullName(this.state.person)} />
 					</Col>
 				</FormGroup>
 
