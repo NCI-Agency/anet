@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react'
-import {Button, Alert, HelpBlock} from 'react-bootstrap'
+import {Button, Alert, HelpBlock, Radio} from 'react-bootstrap'
 import DatePicker from 'react-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 
@@ -10,6 +10,7 @@ import Messages from 'components/Messages'
 import TextEditor from 'components/TextEditor'
 import History from 'components/History'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import OptionListModal from 'components/OptionListModal'
 
 import API from 'api'
 import Settings from 'Settings'
@@ -39,6 +40,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 			person: null,
 			error: null,
 			originalStatus: props.person.status,
+			showWrongPersonModal: false,
 		}
 	}
 
@@ -91,11 +93,14 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const disableStatusChange = this.state.originalStatus === 'INACTIVE' || isSelf
 		// admins can edit all persons, new users can be edited by super users or themselves
 		const canEditName = isAdmin || (
-				person.isNewUser() && currentUser && (
+				(person.isNewUser() || !edit) && currentUser && (
 						currentUser.isSuperUser() ||
 						isSelf
 				)
 			)
+		const fullName = Person.fullName(this.state.person)
+		const nameMessage = "This is not " + (isSelf ? "me" : fullName)
+		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 
 		return <ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
 			submitText={this.props.saveText || 'Save person'}>
@@ -105,7 +110,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 			<Fieldset title={legendText}>
 				<FormGroup>
 					<Col sm={2} componentClass={ControlLabel}>Name</Col>
-					<Col sm={8}>
+					<Col sm={7}>
 						<Col sm={5}>
 							<RequiredField disabled={!canEditName}
 								id="lastName"
@@ -124,8 +129,55 @@ export default class PersonForm extends ValidatableFormWrapper {
 							<Form.Field disabled={!canEditName} {...firstNameProps} />
 						}
 						</Col>
-						<RequiredField disabled={!canEditName} className="hidden" id="name" value={Person.fullName(this.state.person)} />
+						<RequiredField disabled={!canEditName} className="hidden" id="name" value={fullName} />
 					</Col>
+
+					{edit && !canEditName &&
+						<div>
+							<Button id="wrongPerson" onClick={this.showWrongPersonModal}>{nameMessage}</Button>
+
+							<OptionListModal
+								title={modalTitle}
+								showModal={this.state.showWrongPersonModal}
+								onCancel={this.hideWrongPersonModal.bind(this)}
+								onSuccess={this.hideWrongPersonModal.bind(this)}>
+								{(isSelf &&
+									<div>
+										<Radio name="wrongPerson" value="needNewAccount">
+											<em>{fullName}</em> has left and is replaced by me. I need to set up a new account.
+										</Radio>
+										<Radio name="wrongPerson" value="haveAccount">
+											<em>{fullName}</em> has left and is replaced by me. I already have an account.
+										</Radio>
+										<Radio name="wrongPerson" value="transferAccount">
+											<em>{fullName}</em> is still active, but this should be my account.
+										</Radio>
+										<Radio name="wrongPerson" value="misspelledName">
+											I am <em>{fullName}</em>, but my name is misspelled.
+										</Radio>
+										<Radio name="wrongPerson" value="otherError">
+											Something else is wrong.
+										</Radio>
+									</div>
+								) || (
+									<div>
+										<Radio name="wrongPerson" value="leftVacant">
+											<em>{fullName}</em> has left and the position is vacant.
+										</Radio>
+										<Radio name="wrongPerson" value="hasReplacement">
+											<em>{fullName}</em> has left and has a replacement.
+										</Radio>
+										<Radio name="wrongPerson" value="misspelledName">
+											The name of <em>{fullName}</em> is misspelled.
+										</Radio>
+										<Radio name="wrongPerson" value="otherError">
+											Something else is wrong.
+										</Radio>
+									</div>
+								)}
+							</OptionListModal>
+						</div>
+					}
 				</FormGroup>
 
 				{edit ?
@@ -290,5 +342,32 @@ export default class PersonForm extends ValidatableFormWrapper {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
 			})
+	}
+
+	@autobind
+	showWrongPersonModal() {
+		this.setState({showWrongPersonModal: true})
+	}
+
+	@autobind
+	hideWrongPersonModal(optionValue) {
+		this.setState({showWrongPersonModal: false})
+		if (optionValue) {
+			// do something useful with optionValue
+			switch (optionValue) {
+				case 'needNewAccount':
+				case 'leftVacant':
+				case 'hasReplacement':
+					// reset account?
+					if (confirm('Are you sure you want to reset this account?')) {
+						alert("TODO: should reset account")
+					}
+					break
+				default:
+					// email admin
+					alert("TODO: should email admin")
+					break
+			}
+		}
 	}
 }
