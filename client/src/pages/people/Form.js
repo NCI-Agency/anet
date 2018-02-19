@@ -314,7 +314,11 @@ export default class PersonForm extends ValidatableFormWrapper {
 			isFirstTimeUser = true
 			person.status = 'ACTIVE'
 		}
+		this.updatePerson(person, edit, isFirstTimeUser)
+	}
 
+	@autobind
+	updatePerson(person, edit, isNew) {
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
 
@@ -325,7 +329,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 					throw response.code
 				}
 
-				if (isFirstTimeUser) {
+				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
 					this.context.app.loadData()
@@ -360,7 +364,9 @@ export default class PersonForm extends ValidatableFormWrapper {
 				case 'hasReplacement':
 					// reset account?
 					if (confirm('Are you sure you want to reset this account?')) {
-						alert("TODO: should reset account")
+						let { person } = this.state
+						person.status = 'INACTIVE'
+						this.updatePerson(person, true, optionValue === 'needNewAccount')
 					}
 					break
 				default:
