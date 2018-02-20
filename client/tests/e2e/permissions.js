@@ -258,7 +258,7 @@ async function validateSuperUserPrincipalOrgPermissions(t) {
 }
 
 async function validateAdminPrincipalOrgPermissions(t) {
-  let {$, assertElementDisabled, assertElementEnabled} = t.context
+  let {$, assertElementEnabled} = t.context
 
   let $editPrincipalOrgButton = await $('#editButton')
   await t.context.driver.wait(t.context.until.elementIsVisible($editPrincipalOrgButton))
