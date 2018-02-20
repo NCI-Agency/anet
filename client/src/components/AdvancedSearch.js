@@ -12,6 +12,7 @@ import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
+import PositionTypeSearchFilter from 'components/advancedSearch/PositionTypeSearchFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 
@@ -184,7 +185,7 @@ export default class AdvancedSearch extends Component {
 
 		filters.Positions = {
 			filters: {
-				"Position type": <SelectSearchFilter
+				"Position type": <PositionTypeSearchFilter
 					queryKey="type"
 					values={[Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL]}
 					labels={[Settings.fields.advisor.position.name, Settings.fields.principal.position.name]}
@@ -304,9 +305,8 @@ export default class AdvancedSearch extends Component {
 
 	@autobind
 	addFilter(filterKey) {
-		let filters = this.state.filters
-		let filterDefs = this.ALL_FILTERS[this.state.objectType].filters
 		if (filterKey) {
+			let {filters} = this.state
 			filters.push({key: filterKey})
 			this.setState({filters})
 		}
@@ -314,7 +314,7 @@ export default class AdvancedSearch extends Component {
 
 	@autobind
 	removeFilter(filter) {
-		let filters = this.state.filters
+		let {filters} = this.state
 		filters.splice(filters.indexOf(filter), 1)
 		this.setState({filters})
 
