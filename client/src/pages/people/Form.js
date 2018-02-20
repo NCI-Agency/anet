@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react'
-import {Button, Alert, HelpBlock} from 'react-bootstrap'
+import {Button, Alert, HelpBlock, Radio} from 'react-bootstrap'
 import DatePicker from 'react-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 
@@ -10,6 +10,7 @@ import Messages from 'components/Messages'
 import TextEditor from 'components/TextEditor'
 import History from 'components/History'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import OptionListModal from 'components/OptionListModal'
 
 import API from 'api'
 import Settings from 'Settings'
@@ -39,6 +40,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 			person: null,
 			error: null,
 			originalStatus: props.person.status,
+			showWrongPersonModal: false,
 		}
 	}
 
@@ -87,7 +89,18 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 		const currentUser = this.context.currentUser
 		const isAdmin = currentUser && currentUser.isAdmin()
-		const disableStatusChange = this.state.originalStatus === 'INACTIVE' || Person.isEqual(currentUser, person)
+		const isSelf = Person.isEqual(currentUser, person)
+		const disableStatusChange = this.state.originalStatus === 'INACTIVE' || isSelf
+		// admins can edit all persons, new users can be edited by super users or themselves
+		const canEditName = isAdmin || (
+				(person.isNewUser() || !edit) && currentUser && (
+						currentUser.isSuperUser() ||
+						isSelf
+				)
+			)
+		const fullName = Person.fullName(this.state.person)
+		const nameMessage = "This is not " + (isSelf ? "me" : fullName)
+		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 
 		return <ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
 			submitText={this.props.saveText || 'Save person'}>
@@ -97,9 +110,9 @@ export default class PersonForm extends ValidatableFormWrapper {
 			<Fieldset title={legendText}>
 				<FormGroup>
 					<Col sm={2} componentClass={ControlLabel}>Name</Col>
-					<Col sm={8}>
+					<Col sm={7}>
 						<Col sm={5}>
-							<RequiredField
+							<RequiredField disabled={!canEditName}
 								id="lastName"
 								type="text"
 								display="inline"
@@ -111,13 +124,60 @@ export default class PersonForm extends ValidatableFormWrapper {
 						<Col sm={1} className="name-input">,</Col>
 						<Col sm={6}>
 						{isAdvisor ?
-							<RequiredField {...firstNameProps} />
+							<RequiredField disabled={!canEditName} {...firstNameProps} />
 							:
-							<Form.Field {...firstNameProps} />
+							<Form.Field disabled={!canEditName} {...firstNameProps} />
 						}
 						</Col>
-						<RequiredField className="hidden" id="name" value={this.fullName(this.state.person)} />
+						<RequiredField disabled={!canEditName} className="hidden" id="name" value={fullName} />
 					</Col>
+
+					{edit && !canEditName &&
+						<div>
+							<Button id="wrongPerson" onClick={this.showWrongPersonModal}>{nameMessage}</Button>
+
+							<OptionListModal
+								title={modalTitle}
+								showModal={this.state.showWrongPersonModal}
+								onCancel={this.hideWrongPersonModal.bind(this)}
+								onSuccess={this.hideWrongPersonModal.bind(this)}>
+								{(isSelf &&
+									<div>
+										<Radio name="wrongPerson" value="needNewAccount">
+											<em>{fullName}</em> has left and is replaced by me. I need to set up a new account.
+										</Radio>
+										<Radio name="wrongPerson" value="haveAccount">
+											<em>{fullName}</em> has left and is replaced by me. I already have an account.
+										</Radio>
+										<Radio name="wrongPerson" value="transferAccount">
+											<em>{fullName}</em> is still active, but this should be my account.
+										</Radio>
+										<Radio name="wrongPerson" value="misspelledName">
+											I am <em>{fullName}</em>, but my name is misspelled.
+										</Radio>
+										<Radio name="wrongPerson" value="otherError">
+											Something else is wrong.
+										</Radio>
+									</div>
+								) || (
+									<div>
+										<Radio name="wrongPerson" value="leftVacant">
+											<em>{fullName}</em> has left and the position is vacant.
+										</Radio>
+										<Radio name="wrongPerson" value="hasReplacement">
+											<em>{fullName}</em> has left and has a replacement.
+										</Radio>
+										<Radio name="wrongPerson" value="misspelledName">
+											The name of <em>{fullName}</em> is misspelled.
+										</Radio>
+										<Radio name="wrongPerson" value="otherError">
+											Something else is wrong.
+										</Radio>
+									</div>
+								)}
+							</OptionListModal>
+						</div>
+					}
 				</FormGroup>
 
 				{edit ?
@@ -201,7 +261,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const { person } = nextProps
 		const emptyName = { lastName: '', firstName: ''}
 
-		const parsedName = person.name ? this.parseFullName(person.name) : emptyName
+		const parsedName = person.name ? Person.parseFullName(person.name) : emptyName
 
 		this.savePersonWithFullName(person, parsedName)
 	}
@@ -210,7 +270,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 		if (editName.lastName) { person.lastName = editName.lastName }
 		if (editName.firstName) { person.firstName = editName.firstName }
 
-		person.name = this.fullName(person)
+		person.name = Person.fullName(person)
 		this.setState({ person })
 	}
 
@@ -235,44 +295,6 @@ export default class PersonForm extends ValidatableFormWrapper {
 		this.savePersonWithFullName(person, { firstName: value })
 	}
 
-	fullName = (person) => {
-		if (person.lastName && person.firstName) {
-			return(`${this.formattedLastName(person.lastName)}, ${this.formattedFirstName(person.firstName)}`)
-		}
-		else if (person.lastName) {
-			return this.formattedLastName(person.lastName)
-		}
-		else {
-			return ''
-		}
-	}
-
-	formattedLastName = (lastName) => {
-		return lastName.toUpperCase().trim()
-	}
-
-	formattedFirstName = (firstName) => {
-		return firstName.trim()
-	}
-
-	parseFullName = (name) => {
-		const delimiter = name.indexOf(',')
-		let lastName = name
-		let firstName = ''
-
-		if(delimiter > -1) {
-			lastName = name.substring(0, delimiter)
-			firstName = name.substring(delimiter + 1, name.length)
-		}
-
-		return(
-			{
-				lastName: lastName.trim().toUpperCase(),
-				firstName: firstName.trim()
-			}
-		)
-	}
-
 	@autobind
 	onChange() {
 		this.forceUpdate()
@@ -292,7 +314,11 @@ export default class PersonForm extends ValidatableFormWrapper {
 			isFirstTimeUser = true
 			person.status = 'ACTIVE'
 		}
+		this.updatePerson(person, edit, isFirstTimeUser)
+	}
 
+	@autobind
+	updatePerson(person, edit, isNew) {
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
 
@@ -303,7 +329,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 					throw response.code
 				}
 
-				if (isFirstTimeUser) {
+				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
 					this.context.app.loadData()
@@ -320,5 +346,34 @@ export default class PersonForm extends ValidatableFormWrapper {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
 			})
+	}
+
+	@autobind
+	showWrongPersonModal() {
+		this.setState({showWrongPersonModal: true})
+	}
+
+	@autobind
+	hideWrongPersonModal(optionValue) {
+		this.setState({showWrongPersonModal: false})
+		if (optionValue) {
+			// do something useful with optionValue
+			switch (optionValue) {
+				case 'needNewAccount':
+				case 'leftVacant':
+				case 'hasReplacement':
+					// reset account?
+					if (confirm('Are you sure you want to reset this account?')) {
+						let { person } = this.state
+						person.status = 'INACTIVE'
+						this.updatePerson(person, true, optionValue === 'needNewAccount')
+					}
+					break
+				default:
+					// TODO: integrate action to email admin
+					alert("Please contact your administrator " + Settings.SUPPORT_EMAIL_ADDR)
+					break
+			}
+		}
 	}
 }

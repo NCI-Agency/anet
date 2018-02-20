@@ -22,6 +22,8 @@ export default class Person extends Model {
 		PRINCIPAL: 'PRINCIPAL'
 	}
 
+	static nameDelimiter = ','
+
 	static schema = {
 		name: '',
 		status: ACTIVE,
@@ -130,6 +132,44 @@ export default class Person extends Model {
 		} else {
 			return this.name || this.id
 		}
+	}
+
+	static fullName(person) {
+		if (person.lastName && person.firstName) {
+			return(`${Person.formattedLastName(person.lastName)}${Person.nameDelimiter} ${Person.formattedFirstName(person.firstName)}`)
+		}
+		else if (person.lastName) {
+			return Person.formattedLastName(person.lastName)
+		}
+		else {
+			return ''
+		}
+	}
+
+	static formattedLastName(lastName) {
+		return lastName.toUpperCase().trim()
+	}
+
+	static formattedFirstName(firstName) {
+		return firstName.trim()
+	}
+
+	static parseFullName(name) {
+		const delimiter = name.indexOf(Person.nameDelimiter)
+		let lastName = name
+		let firstName = ''
+
+		if(delimiter > -1) {
+			lastName = name.substring(0, delimiter)
+			firstName = name.substring(delimiter + 1, name.length)
+		}
+
+		return(
+			{
+				lastName: lastName.trim().toUpperCase(),
+				firstName: firstName.trim()
+			}
+		)
 	}
 
 }
