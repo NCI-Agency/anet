@@ -3,6 +3,7 @@ package mil.dds.anet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -33,8 +34,10 @@ import com.google.common.collect.ImmutableList;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
+import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -46,6 +49,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import mil.dds.anet.auth.AnetAuthenticationFilter;
 import mil.dds.anet.auth.AnetDevAuthenticator;
+import mil.dds.anet.auth.UrlParamsAuthFilter;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.resources.AdminResource;
@@ -149,13 +153,19 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		environment.servlets().setSessionHandler(new SessionHandler());
 		
 		if (configuration.isDevelopmentMode()) {
-			//In development mode just allow basic HTTP Authentication
+			// In development mode chain URL params (used during testing) and basic HTTP Authentication
+			final UrlParamsAuthFilter<Person> urlParamsAuthFilter = new UrlParamsAuthFilter.Builder<Person>()
+				.setAuthenticator(new AnetDevAuthenticator(engine))
+				.setAuthorizer(new AnetAuthenticationFilter(engine)) //Acting only as Authz.
+				.setRealm("ANET")
+				.buildAuthFilter();
+			final BasicCredentialAuthFilter<Person> basicAuthFilter = new BasicCredentialAuthFilter.Builder<Person>()
+				.setAuthenticator(new AnetDevAuthenticator(engine))
+				.setAuthorizer(new AnetAuthenticationFilter(engine)) //Acting only as Authz.
+				.setRealm("ANET")
+				.buildAuthFilter();
 			environment.jersey().register(new AuthDynamicFeature(
-					new BasicCredentialAuthFilter.Builder<Person>()
-						.setAuthenticator(new AnetDevAuthenticator(engine))
-						.setAuthorizer(new AnetAuthenticationFilter(engine)) //Acting only as Authz.
-						.setRealm("ANET")
-						.buildAuthFilter()));	
+				new ChainedAuthFilter<>(Arrays.asList(new AuthFilter[] {urlParamsAuthFilter, basicAuthFilter}))));
 		} else { 
 			//In Production require Windows AD Authentication.
 			Filter nsf = new NegotiateSecurityFilter();
