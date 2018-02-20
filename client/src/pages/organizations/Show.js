@@ -236,7 +236,9 @@ export default class OrganizationShow extends Page {
 
 					<OrganizationLaydown organization={org} />
 					<OrganizationApprovals organization={org} />
-					<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
+					{ org.isTaskEnabled() &&
+						<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
+					}
 
 					<Fieldset id="reports" title={`Reports from ${org.shortName}`}>
 						<ReportCollection
