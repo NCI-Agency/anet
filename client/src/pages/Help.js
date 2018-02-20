@@ -24,7 +24,10 @@ export default class Help extends Page {
 
 	fetchData() {
 		let {currentUser} = this.context.app.state
-		if (!currentUser.id) { return }
+		if (!currentUser.id || !currentUser.position || !currentUser.position.organization) {
+			// No super users to be found
+			return
+		}
 
 		let orgId = currentUser.position.organization.id
 		API.query(/* GraphQL */`
