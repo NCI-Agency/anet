@@ -302,6 +302,15 @@ properties:
       description: A list of organizations that are considered non-reporting and as such will not be shown in insights.
       examples:
       - ANET Administrators
+  tasking_ORGs:
+    type: array
+    uniqueItems: true
+    items:
+      type: string
+      title: The list of tasking organizations
+      description: When defined, indicates which organizations maintain tasks. When not set, all organizations may contain tasks
+      examples:
+      - EF 2.2
   domainNames:
     type: array
     uniqueItems: true

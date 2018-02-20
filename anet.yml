@@ -285,6 +285,8 @@ dictionary:
     - Key Leader Engagement
   non_reporting_ORGs:
     - ANET Administrators
+  tasking_ORGs:
+    - EF 2.2
   domainNames:
     - cmil.mil
     - mission.ita

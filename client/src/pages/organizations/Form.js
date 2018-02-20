@@ -89,7 +89,9 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 					)}
 				</Fieldset>
 
-				<TaskSelector tasks={organization.tasks} onChange={this.onChange} />
+				{ organization.isTaskEnabled() &&
+					<TaskSelector tasks={organization.tasks} onChange={this.onChange} />
+				}
 			</div>}
 		</ValidatableForm>
 	}
