@@ -73,7 +73,10 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const ranks = Settings.fields.person.ranks || []
 
 		const countries = this.countries(person)
-		const nationalityDefaultValue = countries.length === 1 ? countries[0] : ''
+		if (!edit && countries.length === 1) {
+			// For new objects, assign default country if there's only one
+			person.country = countries[0]
+		}
 		const firstNameProps = {
 			id: "firstName",
 			type: "text",
@@ -180,7 +183,6 @@ export default class PersonForm extends ValidatableFormWrapper {
 				</RequiredField>
 
 				<RequiredField id="country" label="Nationality" componentClass="select"
-					value={nationalityDefaultValue}
 					required={isAdvisor}>
 					<option />
 					{this.renderCountrySelectOptions(countries)}
