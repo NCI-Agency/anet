@@ -370,8 +370,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 					}
 					break
 				default:
-					// email admin
-					alert("TODO: should email admin")
+					// TODO: integrate action to email admin
+					alert("Please contact your administrator " + Settings.SUPPORT_EMAIL_ADDR)
 					break
 			}
 		}
