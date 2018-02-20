@@ -54,7 +54,7 @@ export default class PositionTable extends Component {
 					</header>
 					}
 
-				<Table responsive hover striped class="positions_table">
+				<Table responsive hover striped className="positions_table">
 					<thead>
 						<tr>
 							<th>Name</th>
