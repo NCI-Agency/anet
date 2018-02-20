@@ -9,19 +9,24 @@ test('checking super user permissions', async t => {
     await t.context.pageHelpers.clickMyOrgLink()
 
     let $rebeccaLink = await findSuperUserLink(t, 'CTR BECCABON, Rebecca')
+
     await $rebeccaLink.click()
 
     await validateUserCanEditUserForCurrentPage(t)
-    await editAndSavePositionFromCurrentUserPage(t)
 
+    // User is super user, only admins may edit position of type super user
+    await editAndSavePositionFromCurrentUserPage(t, false)
+    // We are now still on the edit position page
+
+    await t.context.get('/', 'rebecca')
     await t.context.pageHelpers.clickMyOrgLink()
-
     let $jacobLink = await findSuperUserLink(t, 'CIV JACOBSON, Jacob')
-
     await $jacobLink.click()
+
     await validateUserCanEditUserForCurrentPage(t)
 
-    await editAndSavePositionFromCurrentUserPage(t)
+    // User is super user, only admins may edit position of type super user
+    await editAndSavePositionFromCurrentUserPage(t, false)
 
     let $principalOrgLink =
       await getPrincipalOrgFromSearchResults(t, 'MoD')
@@ -68,7 +73,8 @@ test('checking admin permissions', async t => {
     await $arthurLink.click()
 
     await validateUserCanEditUserForCurrentPage(t)
-    await editAndSavePositionFromCurrentUserPage(t)
+    // User is admin, and can therefore edit an admin position type
+    await editAndSavePositionFromCurrentUserPage(t, true)
 
     let $principalOrgLink =
       await getPrincipalOrgFromSearchResults(t, 'MoD')
@@ -87,10 +93,8 @@ test('admins can edit superusers and their positions', async t => {
     await $rebeccaPersonLink.click()
     await validateUserCanEditUserForCurrentPage(t)
 
-    let $rebeccaPositionLink =
-        (await getUserPersonAndPositionFromSearchResults(t, 'rebecca', 'CTR BECCABON, Rebecca', 'EF 2.2 Final Reviewer'))[1]
-    await $rebeccaPositionLink.click()
-    await validatePositionCanBeEditedOnCurrentPage(t)
+    // User is admin, and can therefore edit a super user position type
+    await editAndSavePositionFromCurrentUserPage(t, true)
 })
 
 function validateUserCannotEditOtherUser(testTitle, user, searchQuery, otherUserName, otherUserPosition) {
@@ -158,22 +162,26 @@ async function validateUserCanEditUserForCurrentPage(t) {
     await assertElementText(t, await $('#biography p'), fakeBioText + originalBioText)
 }
 
-async function editAndSavePositionFromCurrentUserPage(t) {
+async function editAndSavePositionFromCurrentUserPage(t, validateTrue) {
     let {$} = t.context
 
     let $positionName = await $('.position-name')
     await $positionName.click()
-    await validatePositionCanBeEditedOnCurrentPage(t)
+    await validationEditPositionOnCurrentPage(t, validateTrue)
 }
 
-async function validatePositionCanBeEditedOnCurrentPage(t) {
+async function validationEditPositionOnCurrentPage(t, validateTrue) {
     let {$, assertElementText, until} = t.context
     let $editButton = await $('.edit-position')
     await t.context.driver.wait(until.elementIsVisible($editButton))
     await $editButton.click()
     await t.context.pageHelpers.clickFormBottomSubmit()
-
-    await assertElementText(t, await $('.alert'), 'Saved Position')
+    if (validateTrue) {
+      await assertElementText(t, await $('.alert'), 'Saved Position')
+    }
+    else {
+      await assertElementText(t, await $('.alert'), 'Forbidden: You do not have permissions to do this')
+    }
 }
 
 async function getUserPersonAndPositionFromSearchResults(t, searchQuery, personName, positionName) {
@@ -250,7 +258,7 @@ async function validateSuperUserPrincipalOrgPermissions(t) {
 }
 
 async function validateAdminPrincipalOrgPermissions(t) {
-  let {$, assertElementDisabled, assertElementEnabled} = t.context
+  let {$, assertElementEnabled} = t.context
 
   let $editPrincipalOrgButton = await $('#editButton')
   await t.context.driver.wait(t.context.until.elementIsVisible($editPrincipalOrgButton))
