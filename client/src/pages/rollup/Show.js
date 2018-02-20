@@ -66,11 +66,7 @@ export default class RollupShow extends Page {
 			hoveredBar: {org: {}},
 			orgType: Organization.TYPE.ADVISOR_ORG,
 		}
-		this.previewPlaceholderUrl = "/help"
-		if (process.env.NODE_ENV === 'development' && window.location.search) {
-			// Ugly way to get the credentials from the test to the preview window
-			this.previewPlaceholderUrl += window.location.search
-		}
+		this.previewPlaceholderUrl = API.addAuthParams("/help")
 	}
 
 	componentWillReceiveProps(newProps, newContext) {
