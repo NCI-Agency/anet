@@ -27,7 +27,7 @@ export default class Organization extends Model {
 	}
 
 	isTaskEnabled() {
-		return !Settings.tasking_ORGs || Settings.tasking_ORGs.includes(this.shortName);
+		return !Settings.tasking_ORGs || Settings.tasking_ORGs.includes(this.shortName)
 	}
 
 	static humanNameOfType(type) {
