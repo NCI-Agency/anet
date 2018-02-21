@@ -21,6 +21,9 @@ import utils from 'utils'
 import CALENDAR_ICON from 'resources/calendar.png'
 import '../../components/NameInput.css'
 
+import { confirmAlert } from 'react-confirm-alert'; 
+import 'react-confirm-alert/src/react-confirm-alert.css' 
+
 export default class PersonForm extends ValidatableFormWrapper {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
@@ -363,11 +366,17 @@ export default class PersonForm extends ValidatableFormWrapper {
 				case 'leftVacant':
 				case 'hasReplacement':
 					// reset account?
-					if (confirm('Are you sure you want to reset this account?')) {
-						let { person } = this.state
-						person.status = 'INACTIVE'
-						this.updatePerson(person, true, optionValue === 'needNewAccount')
-					}
+					confirmAlert({
+						title: 'Confirm to proceed',
+						message: 'Are you sure you want to reset this account?',
+						confirmLabel: 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself',
+						cancelLabel: 'I am not sure',
+						onConfirm: () => {
+							const { person } = this.state
+							person.status = 'INACTIVE'
+							this.updatePerson(person, true, optionValue === 'needNewAccount')
+						}
+					})
 					break
 				default:
 					// TODO: integrate action to email admin
