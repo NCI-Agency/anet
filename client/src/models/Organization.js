@@ -26,6 +26,10 @@ export default class Organization extends Model {
 		return this.type === Organization.TYPE.ADVISOR_ORG
 	}
 
+	isTaskEnabled() {
+		return !Settings.tasking_ORGs || Settings.tasking_ORGs.includes(this.shortName);
+	}
+
 	static humanNameOfType(type) {
 
 		if (type === Organization.TYPE.PRINCIPAL_ORG) {

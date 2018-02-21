@@ -189,7 +189,11 @@ public class PersonResource implements IGraphQLResource {
 		if (PersonStatus.INACTIVE.equals(p.getStatus()) && p.getPosition() != null) {
 			Position existingPos = existing.loadPosition();
 			if (existingPos != null) { 
-				AuthUtils.assertSuperUser(user);
+				// A user can reset 'themselves' if the account was incorrect ("This is not me")
+				if (!user.getId().equals(p.getId())) {
+					// Otherwise needs to be at least super user
+					AuthUtils.assertSuperUser(user);
+				}
 				AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive", p, user);	
 				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos);
 			}
