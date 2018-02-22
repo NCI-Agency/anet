@@ -366,10 +366,13 @@ export default class PersonForm extends ValidatableFormWrapper {
 				case 'leftVacant':
 				case 'hasReplacement':
 					// reset account?
+					const confirmLabel = optionValue === 'needNewAccount'
+						? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
+						: 'Yes, I would like to inactivate this account'
 					confirmAlert({
 						title: 'Confirm to proceed',
 						message: 'Are you sure you want to reset this account?',
-						confirmLabel: 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself',
+						confirmLabel: confirmLabel,
 						cancelLabel: 'I am not sure',
 						onConfirm: () => {
 							const { person } = this.state
