@@ -121,7 +121,7 @@ task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["check", anetConfig]
 }
 
-task buildClient(type: NpmTask) {
+task buildClient(dependsOn: 'npmInstall', type: NpmTask) {
 	outputs.upToDateWhen { false };
 	args = ['run', 'build']
 }
