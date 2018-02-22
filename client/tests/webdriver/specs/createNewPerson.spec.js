@@ -59,9 +59,7 @@ describe('Create new Person form page', () => {
             expect(warningMessage.getText()).to.equal('Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.')
         })
         it('Should save with a valid email address in uppercase', () => {
-            CreatePerson.openAsAdmin()
-            CreatePerson.form.waitForExist()
-            CreatePerson.form.waitForVisible()
+            // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
             CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
             CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
             CreatePerson.roleAdvisorButton.waitForExist()
