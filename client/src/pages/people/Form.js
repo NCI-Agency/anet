@@ -22,7 +22,7 @@ import CALENDAR_ICON from 'resources/calendar.png'
 import 'components/NameInput.css'
 
 import { confirmAlert } from 'react-confirm-alert'
-import 'react-confirm-alert/src/react-confirm-alert.css'
+import 'components/react-confirm-alert.css'
 
 export default class PersonForm extends ValidatableFormWrapper {
 	static propTypes = {
