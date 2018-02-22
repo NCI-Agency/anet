@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
-import 'components/ReportApprovals.css'
+import './ReportApprovals.css'
 
 import Fieldset from 'components/Fieldset'
 import moment from 'moment'
