@@ -18,7 +18,6 @@ import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 
 import moment from 'moment'
-import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
 import Settings from 'Settings'

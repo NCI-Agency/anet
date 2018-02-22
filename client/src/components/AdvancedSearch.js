@@ -294,9 +294,8 @@ export default class AdvancedSearch extends Component {
 
 	@autobind
 	addFilter(filterKey) {
-		let filters = this.state.filters
-		let filterDefs = this.ALL_FILTERS[this.state.objectType].filters
 		if (filterKey) {
+			let filters = this.state.filters
 			filters.push({key: filterKey})
 			this.setState({filters})
 		}
