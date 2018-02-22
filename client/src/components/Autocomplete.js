@@ -86,7 +86,7 @@ export default class Autocomplete extends Component {
 		inputProps.onBlur = this.onInputBlur
 
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
-			<img src={SEARCH_ICON} className="form-control-icon" role="presentation" onClick={this.focus} />
+			<img src={SEARCH_ICON} className="form-control-icon" alt="" onClick={this.focus} />
 
 			<Autosuggest
 				suggestions={this.state.noSuggestions ? [{}] : this.state.suggestions}

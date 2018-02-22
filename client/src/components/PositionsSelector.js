@@ -39,7 +39,7 @@ export default class PositionsSelector extends Component {
 				clearOnSelect={true} />
 
 			{validationState && <HelpBlock>
-				<img src={WARNING_ICON} role="presentation" height="20px" />
+				<img src={WARNING_ICON} alt="" height="20px" />
 				Position not found in Database
 			</HelpBlock>}
 			<PositionTable

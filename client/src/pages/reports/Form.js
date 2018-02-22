@@ -146,7 +146,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
 
 		const invalidInputWarningMessage = <HelpBlock><b>
-			<img src={WARNING_ICON} role="presentation" height="20px" />
+			<img src={WARNING_ICON} alt="" height="20px" />
 			Location not found in database
 		</b></HelpBlock>
 
@@ -282,7 +282,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 							valueKey="name" />
 
 						{errors.attendees && <HelpBlock>
-							<img src={WARNING_ICON} role="presentation" height="20px" />
+							<img src={WARNING_ICON} alt="" height="20px" />
 							Person not found in ANET Database.
 						</HelpBlock>}
 
