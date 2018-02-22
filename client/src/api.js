@@ -108,22 +108,29 @@ const API = {
 		}
 	},
 
-	addAuthParams: function(url) {
+	_getAuthParams: function() {
 		const query = querystring.parse(window.location.search.slice(1))
-		if (url && query.user && query.pass) {
-			const creds = querystring.stringify({
+		if (query.user && query.pass) {
+			window.ANET_DATA.creds = {
 				user: query.user,
 				pass: query.pass
-			})
-			url += "?" + creds
+			}
+		}
+		return window.ANET_DATA.creds
+	},
+
+	addAuthParams: function(url) {
+		const creds = API._getAuthParams()
+		if (creds) {
+			url += "?" + querystring.stringify(creds)
 		}
 		return url
 	},
 
 	getAuthHeader: function() {
-		const query = querystring.parse(window.location.search.slice(1))
-		if (query.user && query.pass) {
-			return ['Authorization', 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64')]
+		const creds = API._getAuthParams()
+		if (creds) {
+			return ['Authorization', 'Basic ' + new Buffer(`${creds.user}:${creds.pass}`).toString('base64')]
 		}
 		return null
 	}
