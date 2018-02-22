@@ -370,10 +370,10 @@ export default class PersonForm extends ValidatableFormWrapper {
 						? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
 						: 'Yes, I would like to inactivate this account'
 					confirmAlert({
-						title: 'Confirm to proceed',
+						title: 'Confirm to reset account',
 						message: 'Are you sure you want to reset this account?',
 						confirmLabel: confirmLabel,
-						cancelLabel: 'I am not sure',
+						cancelLabel: 'No, I am not entirely sure at this point',
 						onConfirm: () => {
 							const { person } = this.state
 							person.status = 'INACTIVE'
