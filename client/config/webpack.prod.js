@@ -1,10 +1,13 @@
 const merge = require('webpack-merge')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const common = require('./webpack.common.js')
-const paths = require('../config/paths');
+const paths = require('../config/paths')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
+const webpack = require('webpack')
+const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
+
 
 module.exports = merge(common, {
   bail: true,
@@ -13,6 +16,8 @@ module.exports = merge(common, {
     publicPath: '/assets/client/',
   },
   plugins: [
+    new WebpackCleanupPlugin(),
+    new webpack.HashedModuleIdsPlugin(),
     new InterpolateHtmlPlugin({ PUBLIC_URL: '/assets/client/' }),
     new HtmlWebpackPlugin({
       inject: true,

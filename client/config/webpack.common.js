@@ -18,7 +18,7 @@ module.exports = {
     ],
     output: {
         path: paths.appBuild,
-        filename: 'static/js/[name].[hash:8].js',
+        filename: 'static/js/[name].[chunkhash:8].js',
         chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js'
     },
     resolve: {
@@ -69,5 +69,8 @@ module.exports = {
             name: "dependencies",
             minChunks: ({ resource }) => /node_modules/.test(resource)
         }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'manifest'
+          })
     ]
 }
