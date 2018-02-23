@@ -62,7 +62,8 @@ export default class TaskShow extends Page {
 				id, shortName, longName, status,
 				customField, customFieldEnum,
 				plannedCompletion, projectedCompletion,
-				responsibleOrg {id, shortName, longName, identificationCode}
+				responsibleOrg {id, shortName, longName, identificationCode},
+				parentTask { id, shortName, longName }
 			}
 		`)
 
@@ -96,6 +97,12 @@ export default class TaskShow extends Page {
 
 						{task.responsibleOrg && task.responsibleOrg.id && 
 							this.renderOrg()
+						}
+
+						{task.parentTask && task.parentTask.id &&
+							<Form.Field id="parentTask" label="Parent task">
+								<LinkTo task={task.parentTask} >{task.parentTask.shortName} {task.parentTask.longName}</LinkTo>
+							</Form.Field>
 						}
 
 						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
