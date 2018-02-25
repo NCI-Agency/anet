@@ -8,6 +8,17 @@ const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
 const webpack = require('webpack')
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
 
+function packageSort(packages) {
+  return function sort(left, right) {
+      var leftIndex = packages.indexOf(left.names[0])
+      var rightindex = packages.indexOf(right.names[0])
+      if (rightindex < 0)
+          return -1
+      if ( leftIndex < 0 || leftIndex > rightindex)
+          return 1
+      return -1
+  }
+}
 
 module.exports = merge(common, {
   bail: true,
@@ -23,6 +34,7 @@ module.exports = merge(common, {
       inject: true,
       template: paths.appHtml,
       filename: paths.appBuild + '/../../views/index.ftl',
+      chunksSortMode: packageSort(['polyfills']),
       minify: {
           removeComments: true,
           collapseWhitespace: true,

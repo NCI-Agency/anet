@@ -4,8 +4,8 @@ const webpack = require('webpack')
 
 module.exports = {
     entry: {
-        anet: './src/index.js',
-        polyfills: require.resolve('./polyfills')
+        polyfills: require.resolve('./polyfills'),
+        anet: './src/index.js'
     },
     // A strange workaround for a strange compile-time bug:   Error in
     // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
