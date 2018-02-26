@@ -39,12 +39,11 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
-import org.json.JSONObject;
-import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.annotation.Timed;
+import com.github.underscore.lodash.$;
 import com.google.common.base.Joiner;
 
 import graphql.ExceptionWhileDataFetching;
@@ -285,9 +284,8 @@ public class GraphQLResource {
 		}
 		result.put(RESULT_KEY_DATA, executionResult.getData());
 		if (OUTPUT_XML.equals(output)) {
-			JSONObject json = new JSONObject(result);
 			// TODO: Decide if we indeed want pretty-printed XML:
-			String xml = ResponseUtils.toPrettyString(XML.toString(json, "result"), 2);
+			final String xml = ResponseUtils.toPrettyString($.toXml(result), 2);
 			return Response.ok(xml, MediaType.APPLICATION_XML).build();
 		} else if (OUTPUT_XLSX.equals(output)) {
 			return Response.ok(new XSSFWorkbookStreamingOutput(createWorkbook(result)), MEDIATYPE_XLSX)
