@@ -8,8 +8,10 @@ const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
 const proxy = require(paths.appPackageJson).proxy
 
 module.exports = merge(common, {
-    devtool: 'eval',
-    output: {
+    // not using source maps due to https://github.com/facebook/create-react-app/issues/343#issuecomment-237241875
+    // switched from 'eval' to 'cheap-module-source-map' to address https://github.com/facebook/create-react-app/issues/920
+    devtool: 'cheap-module-source-map',
+        output: {
         pathinfo: true,
         publicPath: '/',
         filename: 'static/js/[name].js',
