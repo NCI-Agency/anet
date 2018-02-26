@@ -36,7 +36,8 @@ module.exports = merge(common, {
       inject: true,
       template: paths.appHtml,
       filename: paths.appBuild + '/../../views/index.ftl',
-      chunksSortMode: packageSort(['polyfills']),
+      // making sure that the manifest and polyfills are included in index.html before anything else
+      chunksSortMode: packageSort(['manifest','polyfills']),
       minify: {
           removeComments: true,
           collapseWhitespace: true,
