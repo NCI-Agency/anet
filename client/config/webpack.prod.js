@@ -25,6 +25,8 @@ module.exports = merge(common, {
   devtool: 'source-map',
   output: {
     publicPath: '/assets/client/',
+    filename: 'static/js/[name].[chunkhash:8].js',
+    chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js'
   },
   plugins: [
     new WebpackCleanupPlugin(),

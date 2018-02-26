@@ -12,6 +12,8 @@ module.exports = merge(common, {
     output: {
         pathinfo: true,
         publicPath: '/',
+        filename: 'static/js/[name].js',
+        chunkFilename: 'static/js/[name].chunk.js'
     },
     devServer: {
         hot: true,
