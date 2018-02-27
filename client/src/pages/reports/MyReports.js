@@ -5,6 +5,7 @@ import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
+import {Report} from 'models'
 
 export default class MyReports extends Page {
 	static contextTypes = {
@@ -26,10 +27,10 @@ export default class MyReports extends Page {
 			released: 0
 		}
 		this.partFuncs = {
-			draft: this.getPart.bind(this, 'draft', ['DRAFT','REJECTED']),
-			future: this.getPart.bind(this, 'future', ['FUTURE']),
-			pending: this.getPart.bind(this, 'pending', ['PENDING_APPROVAL']),
-			released: this.getPart.bind(this, 'released', ["RELEASED", "CANCELLED"])
+			draft: this.getPart.bind(this, 'draft', [Report.STATE.DRAFT, Report.STATE.REJECTED]),
+			future: this.getPart.bind(this, 'future', [Report.STATE.FUTURE]),
+			pending: this.getPart.bind(this, 'pending', [Report.STATE.PENDING_APPROVAL]),
+			released: this.getPart.bind(this, 'released', [Report.STATE.RELEASED, Report.STATE.CANCELLED])
 		}
 	}
 

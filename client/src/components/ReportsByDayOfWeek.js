@@ -8,6 +8,8 @@ import BarChart from 'components/BarChart'
 import Fieldset from 'components/Fieldset'
 import ReportCollection from 'components/ReportCollection'
 
+import {Report} from 'models'
+
 import LoaderHOC from '../HOC/LoaderHOC'
 
 const d3 = require('d3')
@@ -38,7 +40,7 @@ export default class ReportsByDayOfWeek extends Component {
 
   get queryParams() {
     return {
-      state: ['RELEASED'],
+      state: [Report.STATE.RELEASED],
       releasedAtStart: this.props.startDate.valueOf(),
       releasedAtEnd: this.props.endDate.valueOf(),
       includeEngagementDayOfWeek: 1,

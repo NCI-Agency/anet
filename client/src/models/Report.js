@@ -6,6 +6,15 @@ export default class Report extends Model {
 	static resourceName = 'Report'
 	static listName = 'reportList'
 
+	static STATE = {
+		DRAFT: 'DRAFT',
+		PENDING_APPROVAL: 'PENDING_APPROVAL',
+		RELEASED: 'RELEASED',
+		REJECTED: 'REJECTED',
+		CANCELLED: 'CANCELLED',
+		FUTURE: 'FUTURE'
+	}
+
 	static schema = {
 		intent: '',
 		engagementDate: null,
@@ -25,23 +34,23 @@ export default class Report extends Model {
 	}
 
 	isDraft() {
-		return this.state === 'DRAFT'
+		return this.state === Report.STATE.DRAFT
 	}
 
 	isPending() {
-		return this.state === 'PENDING_APPROVAL'
+		return this.state === Report.STATE.PENDING_APPROVAL
 	}
 
 	isReleased() {
-		return this.state === 'RELEASED'
+		return this.state === Report.STATE.RELEASED
 	}
 
 	isRejected() {
-		return this.state === 'REJECTED'
+		return this.state === Report.STATE.REJECTED
 	}
 
 	isFuture() {
-		return this.state === 'FUTURE'
+		return this.state === Report.STATE.FUTURE
 	}
 
 	showApprovals() {

@@ -19,10 +19,9 @@ import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
 import Settings from 'Settings'
-import {Organization, Position, Task} from 'models'
+import {Organization, Position, Report, Task} from 'models'
 import GQL from 'graphqlapi'
 
-const PENDING_APPROVAL = 'PENDING_APPROVAL'
 const NO_REPORT_FILTER = 'NO_FILTER'
 
 export default class OrganizationShow extends Page {
@@ -147,10 +146,10 @@ export default class OrganizationShow extends Page {
 
 	togglePendingApprovalFilter() {
 		let toggleToFilter = this.state.reportsFilter
-		if(toggleToFilter === PENDING_APPROVAL){
+		if(toggleToFilter === Report.STATE.PENDING_APPROVAL){
 			toggleToFilter = NO_REPORT_FILTER
 		}else{
-			toggleToFilter = PENDING_APPROVAL
+			toggleToFilter = Report.STATE.PENDING_APPROVAL
 		}
 		this.setState({ reportsFilter: toggleToFilter })
 	}
