@@ -8,6 +8,7 @@ import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class LocationMapper implements ResultSetMapper<Location> {
@@ -17,6 +18,7 @@ public class LocationMapper implements ResultSetMapper<Location> {
 		Location l = new Location();
 		l.setId(rs.getInt("id"));
 		l.setName(rs.getString("name"));
+		l.setStatus(MapperUtils.getEnumIdx(rs, "status", LocationStatus.class));
 		l.setLat(rs.getDouble("lat"));
 		l.setLng(rs.getDouble("lng"));
 		l.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));

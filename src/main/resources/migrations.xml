@@ -1134,4 +1134,12 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add_locations_status" author="gjvoosten" >
+		<addColumn tableName="locations" >
+			<column name="status" type="int" defaultValue="0" >
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

@@ -7,7 +7,10 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Location extends AbstractAnetBean {
 
+	public static enum LocationStatus { ACTIVE, INACTIVE }
+
 	private String name;
+	private LocationStatus status;
 	private Double lat;
 	private Double lng;
 	
@@ -19,6 +22,14 @@ public class Location extends AbstractAnetBean {
 		this.name = Utils.trimStringReturnNull(name);
 	}
 	
+	public LocationStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(LocationStatus status) {
+		this.status = status;
+	}
+
 	public Double getLat() {
 		return lat;
 	}
@@ -43,6 +54,7 @@ public class Location extends AbstractAnetBean {
 		Location l = (Location) o;
 		return Objects.equals(l.getId(), id)
 				&& Objects.equals(l.getName(), name)
+				&& Objects.equals(l.getStatus(), status)
 				&& Objects.equals(l.getLat(), lat)
 				&& Objects.equals(l.getLng(), lng)
 				&& Objects.equals(l.getCreatedAt(), createdAt);
@@ -50,7 +62,7 @@ public class Location extends AbstractAnetBean {
 	
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, name, lat, lng, createdAt);
+		return Objects.hash(id, name, status, lat, lng, createdAt);
 	}
 	
 	@Override
