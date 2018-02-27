@@ -24,7 +24,7 @@ import mil.dds.anet.utils.Utils;
 
 public class OrganizationDao extends AnetBaseDao<Organization> {
 
-	private static String[] fields = {"id", "shortName", "longName", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgId"};
+	private static String[] fields = {"id", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgId"};
 	private static String tableName = "organizations";
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 	
@@ -63,6 +63,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		@SqlQuery("SELECT id AS organizations_id"
 				+ ", \"shortName\" AS organizations_shortName"
 				+ ", \"longName\" AS organizations_longName"
+				+ ", status AS organizations_status"
 				+ ", \"identificationCode\" AS organizations_identificationCode"
 				+ ", type AS organizations_type"
 				+ ", \"parentOrgId\" AS organizations_parentOrgId"
@@ -84,9 +85,10 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		org.setUpdatedAt(org.getCreatedAt());
 		
 		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* insertOrg */ INSERT INTO organizations (\"shortName\", \"longName\", \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgId\") "
-				+ "VALUES (:shortName, :longName, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgId)")
+				"/* insertOrg */ INSERT INTO organizations (\"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgId\") "
+				+ "VALUES (:shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgId)")
 			.bindFromProperties(org)
+			.bind("status", DaoUtils.getEnumId(org.getStatus()))
 			.bind("type", DaoUtils.getEnumId(org.getType()))
 			.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))
 			.executeAndReturnGeneratedKeys();
@@ -98,9 +100,10 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	public int update(Organization org) {
 		org.setUpdatedAt(DateTime.now());
 		int numRows = dbHandle.createStatement("/* updateOrg */ UPDATE organizations "
-				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, \"identificationCode\" = :identificationCode, type = :type, "
+				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
 				+ "\"updatedAt\" = :updatedAt, \"parentOrgId\" = :parentOrgId where id = :id")
 				.bindFromProperties(org)
+				.bind("status", DaoUtils.getEnumId(org.getStatus()))
 				.bind("type", DaoUtils.getEnumId(org.getType()))
 				.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))
 				.execute();
