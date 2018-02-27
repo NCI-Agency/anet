@@ -2,6 +2,7 @@ package mil.dds.anet.test;
 
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Task;
@@ -57,6 +58,7 @@ public class TestData {
 	public static Location createLocation(String name, Double lat, Double lng) {
 		Location l = new Location();
 		l.setName(name);
+		l.setStatus(LocationStatus.ACTIVE);
 		l.setLat(lat);
 		l.setLng(lng);
 		return l;

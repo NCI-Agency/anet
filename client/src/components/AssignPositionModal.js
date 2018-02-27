@@ -35,7 +35,7 @@ export default class AssignPositionModal extends Component {
 		let newPosition = new Position(this.state.position)
 		let currentUser = this.context.currentUser
 
-		let positionSearchQuery = {}
+		let positionSearchQuery = {status: Position.STATUS.ACTIVE}
 		if (person.role === Person.ROLE.ADVISOR) {
 			positionSearchQuery.type = [Position.TYPE.ADVISOR]
 			if (currentUser.isAdmin()) { //only admins can put people in admin billets.

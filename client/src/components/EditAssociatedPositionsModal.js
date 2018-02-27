@@ -41,7 +41,7 @@ export default class EditAssociatedPositionsModal extends Component {
 		const currentUser = this.context.currentUser
 		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
-		const positionSearchQuery = {matchPersonName: true}
+		const positionSearchQuery = {status: Position.STATUS.ACTIVE, matchPersonName: true}
 		if (position.type === Position.TYPE.PRINCIPAL) {
 			positionSearchQuery.type = [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]
 			if (currentUser.isAdmin() === false) {

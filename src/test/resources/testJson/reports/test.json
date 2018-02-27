@@ -8,6 +8,7 @@
 	"location": {
 		"id": null,
 		"name": "The Boat Dock",
+		"status": "ACTIVE",
 		"lat": 32.456,
 		"lng": -123.4999
 	},

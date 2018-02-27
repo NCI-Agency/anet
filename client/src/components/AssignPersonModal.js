@@ -30,7 +30,7 @@ export default class AssignPersonModal extends Component {
 		let {position} = this.props
 		let newPerson = this.state.person
 
-		let personSearchQuery = {}
+		let personSearchQuery = {status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]}
 		if (position.type === Position.TYPE.PRINCIPAL) {
 			personSearchQuery.role = Person.ROLE.PRINCIPAL
 		} else  {
