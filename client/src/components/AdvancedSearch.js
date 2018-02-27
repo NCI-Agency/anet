@@ -26,7 +26,7 @@ const taskFilters = props => {
 						queryIncludeChildOrgsKey="includeChildrenOrgs"/>,
 		Status: <SelectSearchFilter
 						queryKey="status"
-						values={["ACTIVE", "INACTIVE"]}
+						values={[Task.STATUS.ACTIVE, Task.STATUS.INACTIVE]}
 						labels={["Active", "Inactive"]}/>
 	}
 	const projectedCompletion = Settings.fields.task.projectedCompletion
@@ -152,7 +152,7 @@ export default class AdvancedSearch extends Component {
 				/>,
 				Status: <SelectSearchFilter
 					queryKey="status"
-					values={["ACTIVE","INACTIVE","NEW_USER"]}
+					values={[Person.STATUS.ACTIVE, Person.STATUS.INACTIVE, Person.STATUS.NEW_USER]}
 				/>,
 				Location: <AutocompleteFilter
 					queryKey="locationId"
@@ -192,7 +192,7 @@ export default class AdvancedSearch extends Component {
 				/>,
 				Status: <SelectSearchFilter
 					queryKey="status"
-					values={["ACTIVE","INACTIVE"]}
+					values={[Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]}
 				/>,
 				Location: <AutocompleteFilter
 					queryKey="locationId"

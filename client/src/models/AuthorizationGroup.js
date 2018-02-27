@@ -17,11 +17,16 @@ export default class AuthorizationGroup extends Model {
 		return 'Authorization Group'
 	}
 
+	static STATUS = {
+		ACTIVE: 'ACTIVE',
+		INACTIVE: 'INACTIVE'
+	}
+
 	static schema = {
 		name: '',
 		description: '',
 		positions: [],
-		status: 'ACTIVE'
+		get status() { return AuthorizationGroup.STATUS.ACTIVE }
 	}
 
 	static autocompleteQuery = "id, name, description"

@@ -50,8 +50,8 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 						</RequiredField>
 						<Form.Field id="status" >
 							<ButtonToggleGroup>
-								<Button id="statusActiveButton" value="ACTIVE">Active</Button>
-								<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
+								<Button id="statusActiveButton" value={ AuthorizationGroup.STATUS.ACTIVE }>Active</Button>
+								<Button id="statusInactiveButton" value={ AuthorizationGroup.STATUS.INACTIVE }>Inactive</Button>
 							</ButtonToggleGroup>
 						</Form.Field>
 						<PositionsSelector

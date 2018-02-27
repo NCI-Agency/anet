@@ -20,10 +20,9 @@ import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
 import Settings from 'Settings'
-import {Organization, Position} from 'models'
+import {Organization, Position, Report, Task} from 'models'
 import GQL from 'graphqlapi'
 
-const PENDING_APPROVAL = 'PENDING_APPROVAL'
 const NO_REPORT_FILTER = 'NO_FILTER'
 
 export default class OrganizationShow extends Page {
@@ -90,7 +89,7 @@ export default class OrganizationShow extends Page {
 	gettaskQueryPart(orgId) {
 		let taskQuery = {
 			pageNum: this.tasksPageNum,
-			status: 'ACTIVE',
+			status: Task.STATUS.ACTIVE,
 			pageSize: 10,
 			responsibleOrgId: orgId
 		}
@@ -148,10 +147,10 @@ export default class OrganizationShow extends Page {
 
 	togglePendingApprovalFilter() {
 		let toggleToFilter = this.state.reportsFilter
-		if(toggleToFilter === PENDING_APPROVAL){
+		if(toggleToFilter === Report.STATE.PENDING_APPROVAL){
 			toggleToFilter = NO_REPORT_FILTER
 		}else{
-			toggleToFilter = PENDING_APPROVAL
+			toggleToFilter = Report.STATE.PENDING_APPROVAL
 		}
 		this.setState({ reportsFilter: toggleToFilter })
 	}
@@ -166,7 +165,7 @@ export default class OrganizationShow extends Page {
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isPrincipalOrg = org.type === Organization.TYPE.PRINCIPAL_ORG
 
-		const superUsers = org.positions.filter(pos => pos.status !== 'INACTIVE' && (!pos.person || pos.person.status !== 'INACTIVE') && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
+		const superUsers = org.positions.filter(pos => pos.status !== Position.STATUS.INACTIVE && (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
 
 		return (

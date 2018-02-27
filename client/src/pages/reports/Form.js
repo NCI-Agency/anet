@@ -274,7 +274,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 							onChange={this.addAttendee}
 							onErrorChange={this.attendeeError}
 							clearOnSelect={true}
-							queryParams={{status: ['ACTIVE','NEW_USER'], matchPositionName: true}}
+							queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], matchPositionName: true}}
 							fields={Person.autocompleteQuery}
 							template={Person.autocompleteTemplate}
 							placeholder="Start typing to search for people who attended the meeting..."

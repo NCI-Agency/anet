@@ -31,7 +31,7 @@ export default class PositionsSelector extends Component {
 			<Autocomplete
 				objectType={Position}
 				fields={Position.autocompleteQuery}
-				queryParams={{status: 'ACTIVE'}}
+				queryParams={{status: Position.STATUS.ACTIVE}}
 				placeholder="Start typing to search for a position..."
 				template={Position.autocompleteTemplate}
 				onChange={this.addPosition}

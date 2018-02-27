@@ -16,6 +16,11 @@ export default class Task extends Model {
 
 	static listName = 'taskList'
 
+	static STATUS = {
+		ACTIVE: 'ACTIVE',
+		INACTIVE: 'INACTIVE'
+	}
+
 	static schema = {
 		shortName: '',
 		longName: '',

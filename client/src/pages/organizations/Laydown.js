@@ -32,7 +32,7 @@ export default class OrganizationLaydown extends Component {
 		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 
 		const showInactivePositions = this.state.showInactivePositions
-		const numInactivePos = org.positions.filter(p => p.status === 'INACTIVE').length
+		const numInactivePos = org.positions.filter(p => p.status === Position.STATUS.INACTIVE).length
 
 		const positionsNeedingAttention = org.positions.filter(position => !position.person )
 		const supportedPositions = org.positions.filter(position => positionsNeedingAttention.indexOf(position) === -1)
@@ -98,7 +98,7 @@ export default class OrganizationLaydown extends Component {
 	renderPositionRow(position, other, otherIndex) {
 		let key = position.id
 		let otherPersonCol, otherNameCol, positionPersonCol, positionNameCol
-		if (position.status === 'INACTIVE' && this.state.showInactivePositions === false) {
+		if (position.status === Position.STATUS.INACTIVE && this.state.showInactivePositions === false) {
 			return
 		}
 
@@ -135,7 +135,7 @@ export default class OrganizationLaydown extends Component {
 
 	personWithStatus(person) {
 		person = new Person(person)
-		if (person.status === 'INACTIVE') {
+		if (person.status === Person.STATUS.INACTIVE) {
 			return <i>{person.toString() + " (Inactive)"}</i>
 		} else {
 			return person.toString()
@@ -144,7 +144,7 @@ export default class OrganizationLaydown extends Component {
 
 	positionWithStatus(pos) {
 		let code = (pos.code) ? ` (${pos.code})` : ''
-		if (pos.status === 'INACTIVE') {
+		if (pos.status === Position.STATUS.INACTIVE) {
 			return <i>{`${pos.name}${code} (Inactive)`}</i>
 		} else {
 			return pos.name + code

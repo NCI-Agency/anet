@@ -85,8 +85,8 @@ export default class TaskForm extends ValidatableFormWrapper {
 
 						<RequiredField id="status" >
 							<ButtonToggleGroup>
-								<Button id="statusActiveButton" value="ACTIVE">Active</Button>
-								<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
+								<Button id="statusActiveButton" value={ Task.STATUS.ACTIVE }>Active</Button>
+								<Button id="statusInactiveButton" value={ Task.STATUS.INACTIVE }>Inactive</Button>
 							</ButtonToggleGroup>
 						</RequiredField>
 

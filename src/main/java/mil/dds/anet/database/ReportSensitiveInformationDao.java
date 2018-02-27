@@ -76,13 +76,15 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return 0;
 		}
-		// Do not allow the reportId to be updated!
+		// Update relevant fields, but do not allow the reportId to be updated by the query!
+		rsi.setReportId(report.getId());
+		rsi.setUpdatedAt(DateTime.now());
 		final int numRows = dbHandle.createStatement(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
 					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bind("id", rsi.getId())
 				.bind("text", rsi.getText())
-				.bind("updatedAt", DateTime.now())
+				.bind("updatedAt", rsi.getUpdatedAt())
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
 		return numRows;

@@ -16,6 +16,8 @@ import SavedSearchTable from 'components/SavedSearchTable'
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
 
+import {Report} from 'models'
+
 import API from 'api'
 import Settings from 'Settings'
 
@@ -53,20 +55,20 @@ export default class Home extends Page {
 
 	allDraft() { return {
 		title: "All draft reports",
-		query: { state: ["DRAFT", "REJECTED"] }
+		query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }
 	}}
 
 	myDraft(currentUser) {
 		return {
 			title: "My draft reports",
-			query: { state: ["DRAFT", "REJECTED"], authorId: currentUser.id }
+			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id }
 		}
 	}
 
 	myPending(currentUser) {
 		return {
 			title: "My reports pending approval",
-			query: { authorId: currentUser.id, state: ["PENDING_APPROVAL"]}
+			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]}
 		}
 	}
 
@@ -80,7 +82,7 @@ export default class Home extends Page {
 	allPending() {
 		return {
 			title: "All reports pending approval",
-			query: { state: ["PENDING_APPROVAL"] }
+			query: { state: [Report.STATE.PENDING_APPROVAL] }
 		}
 	}
 
@@ -92,7 +94,7 @@ export default class Home extends Page {
 			query: {
 				advisorOrgId: currentUser.position.organization.id,
 				createdAtStart: lastWeek,
-				state: ["RELEASED", "CANCELLED", "PENDING_APPROVAL"]
+				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			}
 		}
 	}
@@ -103,7 +105,7 @@ export default class Home extends Page {
 			title: currentUser.position.organization.shortName + "'s upcoming engagements",
 			query: {
 				advisorOrgId: currentUser.position.organization.id,
-				state: ["FUTURE"],
+				state: [Report.STATE.FUTURE],
 				sortOrder: 'ASC'
 			}
 		}
@@ -112,14 +114,14 @@ export default class Home extends Page {
 	allUpcoming() {
 		return {
 			title: "All upcoming engagements",
-			query: { state: ["FUTURE"], sortOrder: 'ASC' }
+			query: { state: [Report.STATE.FUTURE], sortOrder: 'ASC' }
 		}
 	}
 
 	mySensitiveInfo() {
 		return {
 			title: "Reports with sensitive information",
-			query: { state: ["RELEASED"], authorizationGroupId: (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.id) : [-1]) }
+			query: { state: [Report.STATE.RELEASED], authorizationGroupId: (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.id) : [-1]) }
 		}
 	}
 

@@ -53,7 +53,7 @@ export default class PositionForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		let willAutoKickPerson = position.status === 'INACTIVE' && position.person && position.person.id
+		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.id
 
 		return (
 			<ValidatableForm
@@ -76,8 +76,8 @@ export default class PositionForm extends ValidatableFormWrapper {
 
 					<Form.Field id="status" >
 						<ButtonToggleGroup>
-							<Button id="statusActiveButton" value="ACTIVE">Active</Button>
-							<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
+							<Button id="statusActiveButton" value={ Position.STATUS.ACTIVE }>Active</Button>
+							<Button id="statusInactiveButton" value={ Position.STATUS.INACTIVE }>Inactive</Button>
 						</ButtonToggleGroup>
 
 						{willAutoKickPerson && <HelpBlock>

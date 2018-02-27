@@ -35,7 +35,7 @@ class Nav extends Component {
 		const inMyReports = path.indexOf('/reports/mine') === 0
 		const inInsights = path.indexOf('/insights') === 0
 
-		const myOrg = currentUser.position.organization
+		const myOrg = currentUser.position ? currentUser.position.organization : null
 		let orgId, myOrgId
 		if (inOrg) {
 			orgId = +this.context.app.props.params.id

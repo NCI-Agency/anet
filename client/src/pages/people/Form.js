@@ -73,8 +73,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		const willAutoKickPosition = person.status === 'INACTIVE' && person.position && !!person.position.id
-		const warnDomainUsername = person.status === 'INACTIVE' && person.domainUsername
+		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.id
+		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && person.domainUsername
 		const ranks = Settings.fields.person.ranks || []
 
 		const countries = this.countries(person)
@@ -93,7 +93,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const currentUser = this.context.currentUser
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isSelf = Person.isEqual(currentUser, person)
-		const disableStatusChange = this.state.originalStatus === 'INACTIVE' || isSelf
+		const disableStatusChange = this.state.originalStatus === Person.STATUS.INACTIVE || isSelf
 		// admins can edit all persons, new users can be edited by super users or themselves
 		const canEditName = isAdmin || (
 				(person.isNewUser() || !edit) && currentUser && (
@@ -202,8 +202,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 						:
 						<Form.Field id="status" >
 							<ButtonToggleGroup>
-								<Button id="statusActiveButton" value="ACTIVE">Active</Button>
-								<Button id="statusInactiveButton" value="INACTIVE">Inactive</Button>
+								<Button id="statusActiveButton" value={ Person.STATUS.ACTIVE }>Active</Button>
+								<Button id="statusInactiveButton" value={ Person.STATUS.INACTIVE }>Inactive</Button>
 							</ButtonToggleGroup>
 
 							{willAutoKickPosition && <HelpBlock>
@@ -315,7 +315,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 		let isFirstTimeUser = false
 		if (person.isNewUser()) {
 			isFirstTimeUser = true
-			person.status = 'ACTIVE'
+			person.status = Person.STATUS.ACTIVE
 		}
 		this.updatePerson(person, edit, isFirstTimeUser)
 	}
