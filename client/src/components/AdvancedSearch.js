@@ -170,6 +170,10 @@ export default class AdvancedSearch extends Component {
 
 		filters.Organizations = {
 			filters: {
+				Status: <SelectSearchFilter
+					queryKey="status"
+					values={[Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]}
+				/>,
 				"Organization type": <SelectSearchFilter
 					queryKey="type"
 					values={[Organization.TYPE.ADVISOR_ORG, Organization.TYPE.PRINCIPAL_ORG]}
