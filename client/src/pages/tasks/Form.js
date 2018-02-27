@@ -55,7 +55,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 		const customFieldEnum = Settings.fields.task.customFieldEnum
 		const plannedCompletion = Settings.fields.task.plannedCompletion
 		const projectedCompletion = Settings.fields.task.projectedCompletion
-		const orgSearchQuery = {}
+		const orgSearchQuery = {status: Organization.STATUS.ACTIVE}
 
 		orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {

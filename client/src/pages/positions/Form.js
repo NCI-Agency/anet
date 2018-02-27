@@ -12,7 +12,7 @@ import History from 'components/History'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Position, Organization} from 'models'
+import {Location, Position, Organization} from 'models'
 
 
 export default class PositionForm extends ValidatableFormWrapper {
@@ -34,7 +34,7 @@ export default class PositionForm extends ValidatableFormWrapper {
 		const currentUser = this.context.currentUser
 		const isAdmin = currentUser && currentUser.isAdmin()
 
-		let orgSearchQuery = {}
+		let orgSearchQuery = {status: Organization.STATUS.ACTIVE}
 		if (position.isPrincipal()) {
 			orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
 		} else {
@@ -119,7 +119,12 @@ export default class PositionForm extends ValidatableFormWrapper {
 
 				<Fieldset title="Additional information">
 					<Form.Field id="location">
-						<Autocomplete valueKey="name" placeholder="Start typing to find a location where this Position will operate from..." url="/api/locations/search" />
+						<Autocomplete
+							valueKey="name"
+							placeholder="Start typing to find a location where this Position will operate from..."
+							url="/api/locations/search"
+							queryParams={{status: Location.STATUS.ACTIVE}}
+						/>
 					</Form.Field>
 				</Fieldset>
 			</ValidatableForm>

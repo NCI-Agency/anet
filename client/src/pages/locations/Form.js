@@ -1,10 +1,12 @@
 import React, {PropTypes} from 'react'
+import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
 import NavigationWarning from 'components/NavigationWarning'
 import History from 'components/History'
 import Form from 'components/Form'
+import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Messages from 'components/Messages'
 import Leaflet from 'components/Leaflet'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -59,6 +61,14 @@ export default class LocationForm extends ValidatableFormWrapper {
 
 					<Fieldset title={edit ? `Edit Location ${location.name}` : "Create new Location"}>
 						<RequiredField id="name" />
+
+						<Form.Field id="status" >
+							<ButtonToggleGroup>
+								<Button id="statusActiveButton" value={ Location.STATUS.ACTIVE }>Active</Button>
+								<Button id="statusInactiveButton" value={ Location.STATUS.INACTIVE }>Inactive</Button>
+							</ButtonToggleGroup>
+						</Form.Field>
+
 						<Form.Field type="static" id="location">
 							<Coordinate coord={location.lat} />, <Coordinate coord={location.lng} />
 						</Form.Field>

@@ -105,7 +105,7 @@ export default class OrganizationShow extends Page {
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
 			organization(id:${props.params.id}) {
-				id, shortName, longName, identificationCode, type
+				id, shortName, longName, status, identificationCode, type
 				parentOrg { id, shortName, longName, identificationCode }
 				childrenOrgs { id, shortName, longName, identificationCode },
 				positions {
@@ -192,6 +192,8 @@ export default class OrganizationShow extends Page {
 							Edit
 						</LinkTo>}
 					</div>}>
+
+						<Form.Field id="status" />
 
 						<Form.Field id="type">
 							{org.humanNameOfType()}

@@ -5,6 +5,11 @@ export default class Organization extends Model {
 	static resourceName = 'Organization'
 	static listName = 'organizationList'
 
+	static STATUS = {
+		ACTIVE: 'ACTIVE',
+		INACTIVE: 'INACTIVE'
+	}
+
 	static TYPE = {
 		ADVISOR_ORG: 'ADVISOR_ORG',
 		PRINCIPAL_ORG: 'PRINCIPAL_ORG'
@@ -13,6 +18,7 @@ export default class Organization extends Model {
 	static schema = {
 		shortName: '',
 		longName: '',
+		get status() { return Organization.STATUS.ACTIVE },
 		identificationCode: null,
 		type: '',
 		parentOrg: null,

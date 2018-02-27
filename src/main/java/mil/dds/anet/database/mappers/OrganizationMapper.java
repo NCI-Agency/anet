@@ -8,6 +8,7 @@ import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
@@ -19,6 +20,7 @@ public class OrganizationMapper implements ResultSetMapper<Organization> {
 		org.setId(r.getInt("organizations_id"));
 		org.setShortName(r.getString("organizations_shortName"));
 		org.setLongName(r.getString("organizations_longName"));
+		org.setStatus(MapperUtils.getEnumIdx(r, "organizations_status", OrganizationStatus.class));
 		org.setIdentificationCode(r.getString("organizations_identificationCode"));
 		org.setType(MapperUtils.getEnumIdx(r, "organizations_type", OrganizationType.class));
 		

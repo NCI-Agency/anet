@@ -21,7 +21,7 @@ import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Report, Person} from 'models'
+import {Location, Report, Person} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 import LOCATION_ICON from 'resources/locations.png'
@@ -210,7 +210,12 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 					<Form.Field id="location" addon={LOCATION_ICON} validationState={errors.location} className="location-form-group"
 						postInputGroupChildren={errors.location && invalidInputWarningMessage}>
-						<Autocomplete valueKey="name" placeholder="Start typing to search for the location where this happened..." url="/api/locations/search" />
+						<Autocomplete
+							valueKey="name"
+							placeholder="Start typing to search for the location where this happened..."
+							queryParams={{status: Location.STATUS.ACTIVE}}
+							url="/api/locations/search"
+						/>
 						{recents.locations && recents.locations.length > 0 &&
 							<Form.Field.ExtraCol className="shortcut-list">
 								<h5>Recent locations</h5>

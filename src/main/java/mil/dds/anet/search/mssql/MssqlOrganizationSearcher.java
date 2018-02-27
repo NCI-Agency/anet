@@ -50,6 +50,11 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 			sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
 
+		if (query.getStatus() != null) {
+			whereClauses.add("organizations.status = :status");
+			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
+		}
+
 		if (query.getType() != null) {
 			whereClauses.add(" organizations.type = :type ");
 			sqlArgs.put("type", DaoUtils.getEnumId(query.getType()));

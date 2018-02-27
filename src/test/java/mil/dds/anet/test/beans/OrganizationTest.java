@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 
 public class OrganizationTest extends BeanTester<Organization> {
@@ -13,6 +14,7 @@ public class OrganizationTest extends BeanTester<Organization> {
 		Organization ao = new Organization();
 		ao.setShortName("TBAE");
 		ao.setLongName("The Best Advisors Ever");
+		ao.setStatus(OrganizationStatus.ACTIVE);
 		if (generateIdentificationCode) {
 			ao.setIdentificationCode(UUID.randomUUID().toString());
 		}

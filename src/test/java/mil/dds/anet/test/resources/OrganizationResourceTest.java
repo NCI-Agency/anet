@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
@@ -84,6 +85,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		child.setParentOrg(Organization.createWithId(created.getId()));
 		child.setShortName("AO McChild");
 		child.setLongName("Child McAo");
+		child.setStatus(OrganizationStatus.ACTIVE);
 		child.setType(OrganizationType.ADVISOR_ORG);
 		child = httpQuery("/api/organizations/new", admin)
 				.post(Entity.json(child), Organization.class);

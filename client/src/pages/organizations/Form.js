@@ -69,12 +69,20 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 					<Autocomplete valueKey="shortName" disabled={isPrincipalOrg && !isAdmin}
 						placeholder="Start typing to search for a higher level organization..."
 						url="/api/organizations/search"
-						queryParams={{type: organization.type}}
+						queryParams={{status: Organization.STATUS.ACTIVE, type: organization.type}}
 					/>
 				</Form.Field>
 
 				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
 				<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName" disabled={isPrincipalOrg && !isAdmin} />
+
+				<Form.Field id="status" >
+					<ButtonToggleGroup>
+						<Button id="statusActiveButton" value={ Organization.STATUS.ACTIVE }>Active</Button>
+						<Button id="statusInactiveButton" value={ Organization.STATUS.INACTIVE }>Inactive</Button>
+					</ButtonToggleGroup>
+				</Form.Field>
+
 				<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.identificationCode} id="identificationCode" disabled={!isAdmin}/>
 			</Fieldset>
 
@@ -122,7 +130,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 						pos.code && components.push(pos.code)
 						return <span>{components.join(' - ')}</span>
 					}}
-					queryParams={{type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
+					queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
 					onChange={this.addApprover.bind(this, index)}
 					clearOnSelect={true} />
 
