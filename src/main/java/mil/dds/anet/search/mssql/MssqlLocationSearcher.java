@@ -17,6 +17,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.LocationSearchQuery.LocationSearchSortBy;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.search.ILocationSearcher;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlLocationSearcher implements ILocationSearcher {
@@ -42,6 +43,11 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 					+ " ON locations.id = c_locations.[Key]");
 			whereClauses.add("c_locations.rank IS NOT NULL");
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
+		}
+
+		if (query.getStatus() != null) {
+			whereClauses.add("status = :status");
+			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
 		final LocationList result = new LocationList();

@@ -376,7 +376,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 						cancelLabel: 'No, I am not entirely sure at this point',
 						onConfirm: () => {
 							const { person } = this.state
-							person.status = 'INACTIVE'
+							person.status = Person.STATUS.INACTIVE
 							this.updatePerson(person, true, optionValue === 'needNewAccount')
 						}
 					})

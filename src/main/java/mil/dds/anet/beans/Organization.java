@@ -17,10 +17,12 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Organization extends AbstractAnetBean {
 
+	public static enum OrganizationStatus { ACTIVE, INACTIVE }
 	public static enum OrganizationType { ADVISOR_ORG, PRINCIPAL_ORG }
 	
 	String shortName;
 	String longName;
+	private OrganizationStatus status;
 	private String identificationCode;
 	Organization parentOrg;
 	OrganizationType type;
@@ -48,6 +50,14 @@ public class Organization extends AbstractAnetBean {
 		this.longName = Utils.trimStringReturnNull(longName);
 	}
 	
+	public OrganizationStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(OrganizationStatus status) {
+		this.status = status;
+	}
+
 	public String getIdentificationCode() {
 		return identificationCode;
 	}
@@ -196,13 +206,14 @@ public class Organization extends AbstractAnetBean {
 		return Objects.equals(other.getId(), id) 
 				&& Objects.equals(other.getShortName(), shortName) 
 				&& Objects.equals(other.getLongName(), longName) 
+				&& Objects.equals(other.getStatus(), status)
 				&& Objects.equals(other.getIdentificationCode(), identificationCode)
 				&& Objects.equals(other.getType(), type);
 	}
 	
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, shortName, longName, identificationCode, type, createdAt, updatedAt);
+		return Objects.hash(id, shortName, longName, status, identificationCode, type, createdAt, updatedAt);
 	}
 	
 	@Override

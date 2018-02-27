@@ -1126,4 +1126,20 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="add_organizations_status" author="gjvoosten" >
+		<addColumn tableName="organizations" >
+			<column name="status" type="int" defaultValue="0" >
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add_locations_status" author="gjvoosten" >
+		<addColumn tableName="locations" >
+			<column name="status" type="int" defaultValue="0" >
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

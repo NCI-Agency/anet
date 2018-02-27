@@ -26,7 +26,7 @@ export default class LocationEdit extends Page {
 	fetchData(props) {
 		API.query(/* GraphQL */`
 			location(id:${props.params.id}) {
-				id, name, lat, lng
+				id, name, status, lat, lng
 			}
 		`).then(data => {
 			this.setState({location: new Location(data.location), originalLocation : new Location(data.location) })

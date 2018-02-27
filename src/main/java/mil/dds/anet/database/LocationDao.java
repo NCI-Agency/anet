@@ -60,9 +60,10 @@ public class LocationDao implements IAnetDao<Location> {
 		l.setCreatedAt(DateTime.now());
 		l.setUpdatedAt(DateTime.now());
 		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* locationInsert */ INSERT INTO locations (name, lat, lng, \"createdAt\", \"updatedAt\") "
-					+ "VALUES (:name, :lat, :lng, :createdAt, :updatedAt)")
+				"/* locationInsert */ INSERT INTO locations (name, status, lat, lng, \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:name, :status, :lat, :lng, :createdAt, :updatedAt)")
 			.bind("name", l.getName())
+			.bind("status", DaoUtils.getEnumId(l.getStatus()))
 			.bind("lat", l.getLat())
 			.bind("lng", l.getLng())
 			.bind("createdAt", l.getCreatedAt())
@@ -75,9 +76,10 @@ public class LocationDao implements IAnetDao<Location> {
 	@Override
 	public int update(Location l) {
 		return dbHandle.createStatement("/* updateLocation */ UPDATE locations "
-					+ "SET name = :name, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE id = :id")
+					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE id = :id")
 				.bind("id", l.getId())
 				.bind("name", l.getName())
+				.bind("status", DaoUtils.getEnumId(l.getStatus()))
 				.bind("lat", l.getLat())
 				.bind("lng", l.getLng())
 				.bind("updatedAt", DateTime.now())
