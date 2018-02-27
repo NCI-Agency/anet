@@ -73,11 +73,9 @@ after_success:
         ./gradlew dockerPushImage;
       fi;
       if [ "$TRAVIS_BRANCH" == "candidate" ]; then
-        docker tag ncia/anet-app-server ncia/anet-app-server:candidate;
-        docker push ncia/anet-app-server:candidate;
+        ./gradlew dockerPushCandidateImage;
       fi;
       if [ "$TRAVIS_BRANCH" == "master" ]; then
-        docker tag ncia/anet-app-server ncia/anet-app-server:latest;
-        docker push ncia/anet-app-server:latest;
+        ./gradlew dockerPushLatestImage;
       fi;
     fi
