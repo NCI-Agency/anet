@@ -73,7 +73,7 @@ export default class PositionShow extends Page {
 			//Super users can edit positions within their own organization
 			(position.organization && position.organization.id && currentUser.isSuperUserForOrg(position.organization))
 		const canDelete = (currentUser.isAdmin()) &&
-			position.status === 'INACTIVE' &&
+			position.status === Position.STATUS.INACTIVE &&
 			(position.id && ((!position.person) || (!position.person.id)))
 
 		return (

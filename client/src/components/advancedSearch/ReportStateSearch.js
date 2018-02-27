@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
+import {Report} from 'models'
 
 export default class ReportStateSearch extends Component {
 	constructor(props) {
@@ -9,7 +10,7 @@ export default class ReportStateSearch extends Component {
 
 		this.state = {
 			value: {
-				state: value.state || "DRAFT",
+				state: value.state || Report.STATE.DRAFT,
 				cancelledReason: value.cancelledReason || "",
 			}
 		}
@@ -26,14 +27,14 @@ export default class ReportStateSearch extends Component {
 
 		return <div>
 			<select value={value.state} onChange={this.changeState}>
-				<option value="DRAFT">Draft</option>
-				<option value="PENDING_APPROVAL">Pending Approval</option>
-				<option value="RELEASED">Released</option>
-				<option value="CANCELLED">Cancelled</option>
-				<option value="FUTURE">Upcoming Engagement</option>
+				<option value={ Report.STATE.DRAFT }>Draft</option>
+				<option value={ Report.STATE.PENDING_APPROVAL }>Pending Approval</option>
+				<option value={ Report.STATE.RELEASED }>Released</option>
+				<option value={ Report.STATE.CANCELLED }>Cancelled</option>
+				<option value={ Report.STATE.FUTURE }>Upcoming Engagement</option>
 			</select>
 
-			{value.state === "CANCELLED" && <span>
+			{value.state === Report.STATE.CANCELLED && <span>
 				due to <select value={value.cancelledReason} onChange={this.changeCancelledReason}>
 					<option value="">Everything</option>
 					<option value="CANCELLED_BY_ADVISOR">Advisor</option>

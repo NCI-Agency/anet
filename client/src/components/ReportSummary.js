@@ -29,7 +29,7 @@ export default class ReportSummary extends Component {
 		}
 
 		return <Grid fluid className="report-summary">
-			{report.state === 'DRAFT' &&
+			{report.state === Report.STATE.DRAFT &&
 				<p className="report-draft">
 					<strong>Draft{report.updatedAt && ':'}</strong>
 					{

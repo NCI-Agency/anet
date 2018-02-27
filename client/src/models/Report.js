@@ -1,10 +1,19 @@
 import Model from 'components/Model'
 import moment from 'moment'
-import Person from 'models/Person'
+import {Organization, Person, Position} from 'models'
 
 export default class Report extends Model {
 	static resourceName = 'Report'
 	static listName = 'reportList'
+
+	static STATE = {
+		DRAFT: 'DRAFT',
+		PENDING_APPROVAL: 'PENDING_APPROVAL',
+		RELEASED: 'RELEASED',
+		REJECTED: 'REJECTED',
+		CANCELLED: 'CANCELLED',
+		FUTURE: 'FUTURE'
+	}
 
 	static schema = {
 		intent: '',
@@ -25,23 +34,23 @@ export default class Report extends Model {
 	}
 
 	isDraft() {
-		return this.state === 'DRAFT'
+		return this.state === Report.STATE.DRAFT
 	}
 
 	isPending() {
-		return this.state === 'PENDING_APPROVAL'
+		return this.state === Report.STATE.PENDING_APPROVAL
 	}
 
 	isReleased() {
-		return this.state === 'RELEASED'
+		return this.state === Report.STATE.RELEASED
 	}
 
 	isRejected() {
-		return this.state === 'REJECTED'
+		return this.state === Report.STATE.REJECTED
 	}
 
 	isFuture() {
-		return this.state === 'FUTURE'
+		return this.state === Report.STATE.FUTURE
 	}
 
 	showApprovals() {
@@ -71,19 +80,8 @@ export default class Report extends Model {
 			errors.push('You cannot submit reports for future dates, except for cancelled engagements')
 		}
 
-		let primaryPrincipal = this.getPrimaryPrincipal()
-		let primaryAdvisor = this.getPrimaryAdvisor()
-		if (!primaryPrincipal) {
-			errors.push('You must provide the primary Principal for the Engagement')
-		} else if (!primaryPrincipal.position) {
-			errors.push('The primary Principal - ' + primaryPrincipal.name + ' - needs to be assigned to a position')
-		}
-
-		if (!primaryAdvisor) {
-			errors.push('You must provide the primary Advisor for the Engagement')
-		} else if (!primaryAdvisor.position) {
-			errors.push('The primary Advisor - ' + primaryAdvisor.name + ' - needs to be assigned to a position')
-		}
+		this.checkPrimaryAttendee(this.getPrimaryPrincipal(), this.principalOrg, 'Principal', Organization.TYPE.PRINCIPAL_ORG, errors)
+		this.checkPrimaryAttendee(this.getPrimaryAdvisor(), this.advisorOrg, 'Advisor', Organization.TYPE.ADVISOR_ORG, errors)
 
 		if (!this.intent) {
 			errors.push("You must provide the Meeting Goal (purpose)")
@@ -97,6 +95,22 @@ export default class Report extends Model {
 			errors.push('You must provide a brief summary of the Key Outcomes')
 		}
 		return errors
+	}
+
+	checkPrimaryAttendee(primaryAttendee, primaryOrg, roleName, orgType, errors) {
+		if (!primaryAttendee) {
+			errors.push('You must provide the primary ' + roleName + ' for the Engagement')
+		} else if (primaryAttendee.status !== Person.STATUS.ACTIVE) {
+			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to have an active profile')
+		} else if (primaryAttendee.endOfTourDate && moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf('day'))) {
+			errors.push('The primary ' + roleName + '\'s - ' + primaryAttendee.name + ' - end of tour date has passed')
+		} else if (!primaryAttendee.position) {
+			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to be assigned to a position')
+		} else if (primaryAttendee.position.status !== Position.STATUS.ACTIVE) {
+			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to be in an active position')
+		} else if (primaryOrg.type !== orgType) {
+			errors.push('The primary ' + roleName + '\'s - ' + primaryAttendee.name + ' - organization should be ' + Organization.humanNameOfType(orgType))
+		}
 	}
 
 	getPrimaryPrincipal() {

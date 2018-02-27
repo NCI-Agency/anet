@@ -8,6 +8,8 @@ import BarChart from 'components/BarChart'
 import Fieldset from 'components/Fieldset'
 import ReportCollection from 'components/ReportCollection'
 
+import {Report} from 'models'
+
 import LoaderHOC from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
@@ -39,7 +41,7 @@ export default class PendingApprovalReports extends Component {
 
   get queryParams() {
     return {
-      state: ['PENDING_APPROVAL'],
+      state: [Report.STATE.PENDING_APPROVAL],
       updatedAtEnd: this.props.date.valueOf(),
     }
   }

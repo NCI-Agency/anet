@@ -14,7 +14,7 @@ import History from 'components/History'
 import Messages from 'components/Messages'
 import Settings from 'Settings'
 
-import {Organization} from 'models'
+import {Organization, Report} from 'models'
 import utils from 'utils'
 
 import API from 'api'
@@ -103,7 +103,7 @@ export default class RollupShow extends Page {
 		}
 
 		const rollupQuery = {
-			state: ['RELEASED'], //Specifically excluding cancelled engagements.
+			state: [Report.STATE.RELEASED], //Specifically excluding cancelled engagements.
 			releasedAtStart: this.rollupStart.valueOf(),
 			releasedAtEnd: this.rollupEnd.valueOf(),
 			engagementDateStart: moment(this.rollupStart).subtract(maxReportAge, 'days').valueOf(),

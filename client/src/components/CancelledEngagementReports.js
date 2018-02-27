@@ -8,6 +8,8 @@ import BarChart from 'components/BarChart'
 import Fieldset from 'components/Fieldset'
 import ReportCollection from 'components/ReportCollection'
 
+import {Report} from 'models'
+
 import LoaderHOC from '../HOC/LoaderHOC'
 
 const d3 = require('d3')
@@ -40,7 +42,7 @@ export default class CancelledEngagementReports extends Component {
 
   get queryParams() {
     return {
-      state: ['CANCELLED'],
+      state: [Report.STATE.CANCELLED],
       releasedAtStart: this.props.date.valueOf(),
     }
   }

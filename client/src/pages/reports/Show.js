@@ -62,8 +62,8 @@ export default class ReportShow extends Page {
 				}
 
 				attendees {
-					id, name, role, primary, rank,
-					position { id, name }
+					id, name, role, primary, rank, status, endOfTourDate
+					position { id, name, status }
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -75,8 +75,8 @@ export default class ReportShow extends Page {
 					author { id, name, rank }
 				}
 
-				principalOrg { id, shortName, longName, identificationCode }
-				advisorOrg { id, shortName, longName, identificationCode }
+				principalOrg { id, shortName, longName, identificationCode, type }
+				advisorOrg { id, shortName, longName, identificationCode, type }
 
 				approvalStatus {
 					type, createdAt
