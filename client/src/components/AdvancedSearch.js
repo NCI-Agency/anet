@@ -15,7 +15,7 @@ import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 
-import {Person, Task, Position, Organization} from 'models'
+import {Location, Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -212,8 +212,14 @@ export default class AdvancedSearch extends Component {
 			}
 		}
 
-		//No filters on Location
-		filters.Locations = {filters: {}}
+		filters.Locations = {
+			filters: {
+				Status: <SelectSearchFilter
+					queryKey="status"
+					values={[Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]}
+				/>,
+			}
+		}
 
 		//Task filters
 		filters[pluralize(taskShortLabel)] = {
