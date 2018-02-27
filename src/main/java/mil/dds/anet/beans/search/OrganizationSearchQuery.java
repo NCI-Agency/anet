@@ -1,11 +1,13 @@
 package mil.dds.anet.beans.search;
 
+import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 
 public class OrganizationSearchQuery extends AbstractSearchQuery {
 
 	public enum OrganizationSearchSortBy { CREATED_AT, NAME, TYPE }
 
+	private OrganizationStatus status;
 	OrganizationType type;
 	
 	//Search for organizations with a specific parent Org. 
@@ -17,6 +19,14 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
 
 	private OrganizationSearchSortBy sortBy;
 	private SortOrder sortOrder;
+
+	public OrganizationStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(OrganizationStatus status) {
+		this.status = status;
+	}
 
 	public OrganizationType getType() {
 		return type;
