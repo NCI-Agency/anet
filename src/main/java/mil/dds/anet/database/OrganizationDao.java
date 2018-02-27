@@ -15,6 +15,7 @@ import org.skife.jdbi.v2.unstable.BindIn;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -51,7 +52,9 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return dbHandle.createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS
 				+ " FROM organizations "
 				+ "WHERE \"parentOrgId\" IS NULL "
+				+ "AND status = :status "
 				+ "AND type = :type")
+			.bind("status", DaoUtils.getEnumId(OrganizationStatus.ACTIVE))
 			.bind("type", DaoUtils.getEnumId(type))
 			.map(new OrganizationMapper())
 			.list();
