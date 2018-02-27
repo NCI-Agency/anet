@@ -34,7 +34,7 @@ export default class PositionForm extends ValidatableFormWrapper {
 		const currentUser = this.context.currentUser
 		const isAdmin = currentUser && currentUser.isAdmin()
 
-		let orgSearchQuery = {}
+		let orgSearchQuery = {status: Organization.STATUS.ACTIVE}
 		if (position.isPrincipal()) {
 			orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
 		} else {

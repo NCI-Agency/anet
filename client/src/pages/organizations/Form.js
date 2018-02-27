@@ -69,7 +69,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 					<Autocomplete valueKey="shortName" disabled={isPrincipalOrg && !isAdmin}
 						placeholder="Start typing to search for a higher level organization..."
 						url="/api/organizations/search"
-						queryParams={{type: organization.type}}
+						queryParams={{status: Organization.STATUS.ACTIVE, type: organization.type}}
 					/>
 				</Form.Field>
 
