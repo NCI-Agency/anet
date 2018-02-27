@@ -10,6 +10,11 @@ export default class Position extends Model {
 	static resourceName = 'Position'
 	static listName = 'positionList'
 
+	static STATUS = {
+		ACTIVE: 'ACTIVE',
+		INACTIVE: 'INACTIVE'
+	}
+
 	static TYPE = {
 		ADVISOR: 'ADVISOR',
 		PRINCIPAL: 'PRINCIPAL',
@@ -21,7 +26,7 @@ export default class Position extends Model {
 		name: '',
 		type: '',
 		code: '',
-		status: 'ACTIVE',
+		get status() { return Position.STATUS.ACTIVE },
 		associatedPositions: [],
 		organization: {},
 		person: {},

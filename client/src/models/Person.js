@@ -11,11 +11,15 @@ import AFG_ICON from 'resources/afg_small.png'
 
 import _isEmpty from 'lodash/isEmpty'
 
-const ACTIVE = 'ACTIVE'
-
 export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
+
+	static STATUS = {
+		NEW_USER: 'NEW_USER',
+		ACTIVE: 'ACTIVE',
+		INACTIVE: 'INACTIVE'
+	}
 
 	static ROLE = {
 		ADVISOR: 'ADVISOR',
@@ -26,14 +30,14 @@ export default class Person extends Model {
 
 	static schema = {
 		name: '',
-		status: ACTIVE,
+		get status() { return Person.STATUS.ACTIVE },
 		country: '',
 		rank: '',
 		gender: 'MALE',
 		phoneNumber: '',
 		endOfTourDate: '',
 		biography: '',
-		role: 'PRINCIPAL',
+		get role() { return Person.ROLE.PRINCIPAL },
 		position: {},
 	}
 
@@ -65,7 +69,7 @@ export default class Person extends Model {
 	}
 
 	isNewUser() {
-		return this.status === 'NEW_USER'
+		return this.status === Person.STATUS.NEW_USER
 	}
 
 	isAdvisor() {
@@ -93,7 +97,7 @@ export default class Person extends Model {
 	}
 
 	hasActivePosition() {
-		return this.hasAssignedPosition() && this.position.status === ACTIVE
+		return this.hasAssignedPosition() && this.position.status === Person.STATUS.ACTIVE
 	}
 
 	//Checks if this user is a valid super user for a particular organization

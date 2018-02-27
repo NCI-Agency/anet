@@ -37,7 +37,7 @@ export default class TasksSelector extends Component {
 				<Autocomplete
 					objectType={Task}
 					fields={Task.autocompleteQuery}
-					queryParams={{status: 'ACTIVE'}}
+					queryParams={{status: Task.STATUS.ACTIVE}}
 					placeholder={`Start typing to search for ${taskShortLabel}...`}
 					template={Task.autocompleteTemplate}
 					onChange={this.addTask}
