@@ -40,7 +40,7 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.2.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.2.2'
 	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.2.2'
-	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1'
+	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1' // optional dependency of jdbi
 
 	compile 'org.xerial:sqlite-jdbc:3.19.3' //If using SQLite
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
@@ -51,7 +51,7 @@ dependencies {
 	compile 'ch.qos.logback:logback-access:1.2.3'
 	compile 'com.github.waffle:waffle-jna:1.8.3'
 	compile 'com.graphql-java:graphql-java:2.2.0'
-	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20160924.1'
+	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
 
 	compile group: 'org.jvnet.com4j', name: 'com4j', version: '20110320'
 	compile 'org.jvnet.com4j.typelibs:active-directory:1.0'
