@@ -126,9 +126,8 @@ task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["check", anetConfig]
 }
 
-task buildClient(dependsOn: 'npmInstall', type: NpmTask) {
-    inputs.file("client/package-lock.json").withPathSensitivity(PathSensitivity.RELATIVE)
-	inputs.file("client/package.json").withPathSensitivity(PathSensitivity.RELATIVE)
+task buildClient(dependsOn: 'yarn', type: YarnTask) {
+    inputs.file("client/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.dir("client/src").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/config").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
