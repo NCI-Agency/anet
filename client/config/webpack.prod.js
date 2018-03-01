@@ -4,7 +4,6 @@ const common = require('./webpack.common.js')
 const paths = require('../config/paths')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
 const webpack = require('webpack')
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
 
@@ -19,10 +18,14 @@ module.exports = merge(common, {
   plugins: [
     new WebpackCleanupPlugin(),
     new webpack.HashedModuleIdsPlugin(),
-    new InterpolateHtmlPlugin({ PUBLIC_URL: '/assets/client/' }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production')
+    }),
     new HtmlWebpackPlugin({
+      title: 'ANET',
+      publicUrl: '/assets/client/',
       inject: true,
-      template: paths.appHtml,
+      template: 'public/index.html',
       filename: paths.appBuild + '/../../views/index.ftl',
       minify: {
           removeComments: true,

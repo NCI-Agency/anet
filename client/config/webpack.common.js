@@ -62,12 +62,12 @@ module.exports = {
     plugins: [
         new webpack.DefinePlugin({"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)}),
         new ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "dependencies",
-            minChunks: ({ resource }) => /node_modules/.test(resource)
-        }),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'manifest'
-          })
+        // new webpack.optimize.CommonsChunkPlugin({
+        //     name: "dependencies",
+        //     minChunks: ({ resource }) => /node_modules/.test(resource)
+        // }),
+        // new webpack.optimize.CommonsChunkPlugin({
+        //     name: 'manifest'
+        //   })
     ]
 }

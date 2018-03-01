@@ -1,11 +1,9 @@
 const merge = require('webpack-merge')
 const common = require('./webpack.common.js')
-const paths = require('./paths')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin')
 
-const proxy = require(paths.appPackageJson).proxy
+const proxy = require('package.json').proxy
 
 module.exports = merge(common, {
     // not using source maps due to https://github.com/facebook/create-react-app/issues/343#issuecomment-237241875
@@ -27,10 +25,13 @@ module.exports = merge(common, {
         }]
     },
     plugins: [
-        new InterpolateHtmlPlugin({ PUBLIC_URL: ''}),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify('development')
+          }),
         new HtmlWebpackPlugin({
             inject: true,
-            template: paths.appHtml,
+            publicUrl: '',
+            template: 'public/index.html'
         }),
         new webpack.NamedModulesPlugin(),
         new webpack.HotModuleReplacementPlugin(),
