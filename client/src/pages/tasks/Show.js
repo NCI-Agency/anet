@@ -40,6 +40,7 @@ export default class TaskShow extends Page {
 		this.PlannedCompletionField = DictionaryField(Form.Field)
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
 		this.TaskCustomFieldEnum = DictionaryField(Form.Field)
+		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
 
 		setMessages(props,this.state)
 	}
@@ -60,7 +61,7 @@ export default class TaskShow extends Page {
 		let taskQuery = new GQL.Part(/* GraphQL */`
 			task(id:${props.params.id}) {
 				id, shortName, longName, status,
-				customField, customFieldEnum,
+				customField, customFieldEnum, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
 				responsibleOrg {id, shortName, longName, identificationCode}
 			}
@@ -102,6 +103,7 @@ export default class TaskShow extends Page {
 						<this.PlannedCompletionField dictProps={Settings.fields.task.plannedCompletion} id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
 						<this.ProjectedCompletionField dictProps={Settings.fields.task.projectedCompletion} id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
 						<this.TaskCustomFieldEnum dictProps={Object.without(Settings.fields.task.customFieldEnum, 'enum')} id="customFieldEnum"/>
+						<this.TaskCustomFieldEnum2 dictProps={Object.without(Settings.fields.task.customFieldEnum2, 'enum')} id="customFieldEnum2"/>
 
 					</Fieldset>
 				</Form>

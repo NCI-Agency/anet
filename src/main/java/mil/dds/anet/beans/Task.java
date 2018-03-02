@@ -24,6 +24,7 @@ public class Task extends AbstractAnetBean {
 	String category;
 	String customField;
 	String customFieldEnum;
+	String customFieldEnum2;
 
 	Task parentTask;
 	List<Task> childrenTasks;
@@ -78,6 +79,14 @@ public class Task extends AbstractAnetBean {
 
 	public void setCustomFieldEnum(String customFieldEnum) {
 		this.customFieldEnum = Utils.trimStringReturnNull(customFieldEnum);
+	}
+
+	public String getCustomFieldEnum2() {
+		return customFieldEnum2;
+	}
+
+	public void setCustomFieldEnum2(String customFieldEnum2) {
+		this.customFieldEnum2 = Utils.trimStringReturnNull(customFieldEnum2);
 	}
 
 	public String getCategory() {

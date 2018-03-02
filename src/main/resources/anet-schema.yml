@@ -85,6 +85,8 @@ properties:
             "$ref": "#/definitions/inputField"
           customFieldEnum:
             "$ref": "#/definitions/choiceField"
+          customFieldEnum2:
+            "$ref": "#/definitions/choiceField"
         required:
         - shortLabel
         - longLabel

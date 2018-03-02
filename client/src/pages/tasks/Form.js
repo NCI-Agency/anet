@@ -46,6 +46,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 		this.PlannedCompletionField = DictionaryField(Form.Field)
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
 		this.TaskCustomFieldEnum = DictionaryField(Form.Field)
+		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
 	}
 
 	render() {
@@ -53,6 +54,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 		const {currentUser} = this.context.app.state
 		const taskShortLabel = Settings.fields.task.shortLabel
 		const customFieldEnum = Settings.fields.task.customFieldEnum
+		const customFieldEnum2 = Settings.fields.task.customFieldEnum2
 		const plannedCompletion = Settings.fields.task.plannedCompletion
 		const projectedCompletion = Settings.fields.task.projectedCompletion
 		const orgSearchQuery = {status: Organization.STATUS.ACTIVE}
@@ -119,7 +121,15 @@ export default class TaskForm extends ValidatableFormWrapper {
 							</this.TaskCustomFieldEnum>
 						}
 
-					</Fieldset>
+						{customFieldEnum2 &&
+							<this.TaskCustomFieldEnum2  dictProps={Object.without(customFieldEnum2, 'enum')} id="customFieldEnum2">
+								<ButtonToggleGroup>
+									{customEnumButtons(customFieldEnum2.enum)}
+								</ButtonToggleGroup>
+							</this.TaskCustomFieldEnum2>
+						}
+
+						</Fieldset>
 				</ValidatableForm>
 			</div>
 		)

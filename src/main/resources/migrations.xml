@@ -1142,4 +1142,16 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-custom-field-enum-2-to-Tasks" author="maradragan" dbms="mssql">
+		<addColumn tableName="tasks" >
+			<column name="customFieldEnum2" type="nvarchar(max)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add-custom-field-enum-2-to-Tasks-no-mssql" author="maradragan" dbms="!mssql">
+		<addColumn tableName="tasks" >
+			<column name="customFieldEnum2" type="text" />
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

@@ -178,6 +178,11 @@ dictionary:
         enum:
           OPEN: Open
           CLOSED: Closed
+      customFieldEnum2:
+        label: 'Custom field enum 2'
+        enum:
+          CUSTOMVALUE1: Custom value 1
+          CUSTOMVALUE2: Custom value 2
     person:
       ranks:
         - CIV
