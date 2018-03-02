@@ -23,7 +23,7 @@ public class Task extends AbstractAnetBean {
 	String longName;
 	String category;
 	String customField;
-	String customFieldEnum;
+	String customFieldEnum1;
 	String customFieldEnum2;
 
 	Task parentTask;
@@ -73,12 +73,12 @@ public class Task extends AbstractAnetBean {
 		this.customField = Utils.trimStringReturnNull(customField);
 	}
 
-	public String getCustomFieldEnum() {
-		return customFieldEnum;
+	public String getCustomFieldEnum1() {
+		return customFieldEnum1;
 	}
 
-	public void setCustomFieldEnum(String customFieldEnum) {
-		this.customFieldEnum = Utils.trimStringReturnNull(customFieldEnum);
+	public void setCustomFieldEnum1(String customFieldEnum1) {
+		this.customFieldEnum1 = Utils.trimStringReturnNull(customFieldEnum1);
 	}
 
 	public String getCustomFieldEnum2() {

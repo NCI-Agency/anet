@@ -27,7 +27,7 @@ export default class Task extends Model {
 		responsibleOrg: {},
 		parentTask: {},
 		childrenTasks: [],
-		customFieldEnum: '',
+		customFieldEnum1: '',
 		customFieldEnum2: '',
 		customField: '',
 		projectedCompletion: null,

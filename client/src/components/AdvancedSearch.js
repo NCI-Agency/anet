@@ -37,12 +37,12 @@ const taskFilters = props => {
 	if (plannedCompletion)
 		taskFiltersObj[plannedCompletion.label] = <DateRangeSearch
 			queryKey="plannedCompletion" />
-	const customEnum = Settings.fields.task.customFieldEnum
-	if (customEnum)
-		taskFiltersObj[customEnum.label] = <SelectSearchFilter
+	const customEnum1 = Settings.fields.task.customFieldEnum1
+	if (customEnum1)
+		taskFiltersObj[customEnum1.label] = <SelectSearchFilter
 			queryKey="projectStatus"
-			values={Object.keys(customEnum.enum)}
-			labels={Object.values(customEnum.enum)} />
+			values={Object.keys(customEnum1.enum)}
+			labels={Object.values(customEnum1.enum)} />
 	const customField = Settings.fields.task.customField
 	if (customField)
 		taskFiltersObj[customField.label] = <TextInputFilter

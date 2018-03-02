@@ -1154,4 +1154,20 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="rename-custom-field-enum-in-tasks" author="maradragan" dbms="!sqlite">
+		<renameColumn
+			columnDataType="nvarchar(max)"
+			oldColumnName="customFieldEnum"
+			newColumnName="customFieldEnum1"
+			tableName="tasks" />
+	</changeSet>
+
+	<changeSet id="rename-custom-field-enum-in-tasks-sqlite" author="maradragan" dbms="sqlite">
+		<!-- sqlite doesn't support rename column, so drop and add a new column -->
+		<addColumn tableName="tasks">
+			<column name="customFieldEnum1" type="nvarchar(max)" />
+		</addColumn>
+		<dropColumn tableName="tasks" columnName="customFieldEnum" />
+	</changeSet>
+
 </databaseChangeLog>

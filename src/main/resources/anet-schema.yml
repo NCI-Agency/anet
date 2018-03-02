@@ -83,7 +83,7 @@ properties:
             "$ref": "#/definitions/inputField"
           customField:
             "$ref": "#/definitions/inputField"
-          customFieldEnum:
+          customFieldEnum1:
             "$ref": "#/definitions/choiceField"
           customFieldEnum2:
             "$ref": "#/definitions/choiceField"

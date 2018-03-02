@@ -33,7 +33,7 @@ export default class TaskEdit extends Page {
 		API.query(/* GraphQL */`
 			task(id:${props.params.id}) {
 				id, shortName, longName, status,
-				customField, customFieldEnum, customFieldEnum2,
+				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
 				responsibleOrg {id,shortName, longName, identificationCode}
 			}

@@ -22,7 +22,7 @@ public class TaskMapper implements ResultSetMapper<Task> {
 		p.setShortName(r.getString("shortName"));
 		p.setCategory(r.getString("category"));
 		p.setCustomField(r.getString("customField"));
-		p.setCustomFieldEnum(r.getString("customFieldEnum"));
+		p.setCustomFieldEnum1(r.getString("customFieldEnum1"));
 		p.setCustomFieldEnum2(r.getString("customFieldEnum2"));
 
 		Timestamp plannedCompletion = r.getTimestamp("plannedCompletion");

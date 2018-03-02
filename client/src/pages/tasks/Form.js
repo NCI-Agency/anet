@@ -45,7 +45,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 		this.TaskCustomField = DictionaryField(Form.Field)
 		this.PlannedCompletionField = DictionaryField(Form.Field)
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
-		this.TaskCustomFieldEnum = DictionaryField(Form.Field)
+		this.TaskCustomFieldEnum1 = DictionaryField(Form.Field)
 		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
 	}
 
@@ -53,7 +53,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 		const {task, edit} = this.props
 		const {currentUser} = this.context.app.state
 		const taskShortLabel = Settings.fields.task.shortLabel
-		const customFieldEnum = Settings.fields.task.customFieldEnum
+		const customFieldEnum1 = Settings.fields.task.customFieldEnum1
 		const customFieldEnum2 = Settings.fields.task.customFieldEnum2
 		const plannedCompletion = Settings.fields.task.plannedCompletion
 		const projectedCompletion = Settings.fields.task.projectedCompletion
@@ -113,12 +113,12 @@ export default class TaskForm extends ValidatableFormWrapper {
 							</this.ProjectedCompletionField>
 						}
 
-						{customFieldEnum &&
-							<this.TaskCustomFieldEnum  dictProps={Object.without(customFieldEnum, 'enum')} id="customFieldEnum">
+						{customFieldEnum1 &&
+							<this.TaskCustomFieldEnum1  dictProps={Object.without(customFieldEnum1, 'enum')} id="customFieldEnum1">
 								<ButtonToggleGroup>
-									{customEnumButtons(customFieldEnum.enum)}
+									{customEnumButtons(customFieldEnum1.enum)}
 								</ButtonToggleGroup>
-							</this.TaskCustomFieldEnum>
+							</this.TaskCustomFieldEnum1>
 						}
 
 						{customFieldEnum2 &&
