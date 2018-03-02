@@ -73,7 +73,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		}
 
 		if (query.getProjectStatus() != null) {
-			whereClauses.add("customFieldEnum LIKE :projectStatus");
+			whereClauses.add("customFieldEnum1 LIKE :projectStatus");
 			args.put("projectStatus", query.getProjectStatus());
 		}
 
