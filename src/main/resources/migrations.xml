@@ -1170,4 +1170,23 @@
 		<dropColumn tableName="tasks" columnName="customFieldEnum" />
 	</changeSet>
 
+	<changeSet id="migrate_duplicate_savedSearches" author="gjvoosten" dbms="mssql">
+		<sql>
+			UPDATE dups
+			SET name = name + ' (' + cast(NEWID() as varchar(40)) + ')'
+			FROM (
+			  SELECT
+			    name,
+			    ROW_NUMBER() OVER (PARTITION BY ownerId, name ORDER BY name) AS r
+			  FROM savedSearches
+			) dups
+			WHERE r > 1
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add_unique_savedSearches_constraint" author="gjvoosten" dbms="!sqlite">
+		<addUniqueConstraint tableName="savedSearches" columnNames="ownerId, name" constraintName="uniqueOwnerIdName" />
+	</changeSet>
+
 </databaseChangeLog>
