@@ -2,10 +2,12 @@ package mil.dds.anet.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,6 +20,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,6 +31,8 @@ import org.xml.sax.InputSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ResponseUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private static ObjectMapper mapper = new ObjectMapper();
 	
@@ -84,5 +91,18 @@ public class ResponseUtils {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static WebApplicationException handleSqlException(UnableToExecuteStatementException e, String userMessage) {
+		// FIXME: Ugly way to handle unique index
+		final Throwable cause = e.getCause();
+		if (cause != null) {
+			final String message = cause.getMessage();
+			if (message != null && (message.contains(" duplicate ") || message.contains(" UNIQUE constraint "))) {
+				return new WebApplicationException(userMessage, Status.CONFLICT);
+			}
+		}
+		logger.error("Unexpected SQL exception raised", e);
+		return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 	}
 }
