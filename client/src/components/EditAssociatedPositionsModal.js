@@ -25,13 +25,14 @@ export default class EditAssociatedPositionsModal extends Component {
 	constructor(props, context) {
 		super(props, context)
 		this.state = {
-			associatedPositions: props.position.associatedPositions
+			error: null,
+			associatedPositions: props.position.associatedPositions.slice()
 		}
 	}
 
 	componentWillReceiveProps(nextProps, nextContext) {
-		let assoc = nextProps.position.associatedPositions
-		this.setState({associatedPositions: assoc})
+		let assoc = nextProps.position.associatedPositions.slice()
+		this.setState({error: null, associatedPositions: assoc})
 	}
 
 	render() {
