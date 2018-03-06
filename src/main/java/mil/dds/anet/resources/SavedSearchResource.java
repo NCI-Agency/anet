@@ -13,6 +13,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -21,6 +23,7 @@ import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.graphql.GraphQLFetcher;
 import mil.dds.anet.graphql.IGraphQLBean;
 import mil.dds.anet.graphql.IGraphQLResource;
+import mil.dds.anet.utils.ResponseUtils;
 
 @Path("/api/savedSearches")
 @Produces(MediaType.APPLICATION_JSON)
@@ -37,7 +40,11 @@ public class SavedSearchResource implements IGraphQLResource  {
 	@Path("/new")
 	public SavedSearch saveSearch(@Auth Person user, SavedSearch search) {
 		search.setOwner(Person.createWithId(user.getId()));
-		return dao.insert(search);
+		try {
+			return dao.insert(search);
+		} catch (UnableToExecuteStatementException e) {
+			throw ResponseUtils.handleSqlException(e, "Duplicate name for saved search");
+		}
 	}
 	
 	@GET
