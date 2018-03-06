@@ -99,6 +99,14 @@ export default class TaskForm extends ValidatableFormWrapper {
 							/>
 						</Form.Field>
 
+						<Form.Field id="parentTask" label="Parent task">
+							<Autocomplete valueKey="shortName"
+								placeholder="Start typing to search for a higher level task..."
+								url="/api/tasks/search"
+								queryParams={{}}
+							/>
+						</Form.Field>
+
 						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
 
 						{plannedCompletion &&
@@ -146,6 +154,10 @@ export default class TaskForm extends ValidatableFormWrapper {
 		if (task.responsibleOrg && task.responsibleOrg.id) {
 			task.responsibleOrg = {id: task.responsibleOrg.id}
 		}
+		if (task.parentTask && task.parentTask.id) {
+			task.parentTask = {id: task.parentTask.id}
+		}
+
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
 		API.send(url, task, {disableSubmits: true})
 			.then(response => {
