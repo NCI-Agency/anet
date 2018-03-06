@@ -111,7 +111,7 @@ public class TaskResource implements IGraphQLResource {
 		return p;
 	}
 	
-	/* Updates shortName, longName, category, and parentTaskId */
+	/* Updates shortName, longName, category, and customFieldRef1Id */
 	@POST
 	@Path("/update")
 	@RolesAllowed("ADMIN")
@@ -139,9 +139,9 @@ public class TaskResource implements IGraphQLResource {
 	}
 	
 	@GET
-	@Path("/byParentId")
-	public TaskList getTasksByParentId(@QueryParam("id") int parentId) {
-		return new TaskList(dao.getTasksByParentId(parentId));
+	@Path("/byCustomFieldRef1Id")
+	public TaskList getTasksByCustomFieldRef1Id(@QueryParam("id") int customFieldRef1Id) {
+		return new TaskList(dao.getTasksByCustomFieldRef1Id(customFieldRef1Id));
 	}
 	
 	@GET
@@ -157,9 +157,9 @@ public class TaskResource implements IGraphQLResource {
 			taskById.put(p.getId(), p);
 		}
 		for (Task p : tasks) { 
-			if (p.getParentTask() != null) { 
-				Task parent = taskById.get(p.getParentTask().getId());
-				parent.getChildrenTasks().add(p);
+			if (p.getCustomFieldRef1() != null) {
+				Task customFieldRef1 = taskById.get(p.getCustomFieldRef1().getId());
+				customFieldRef1.getChildrenTasks().add(p);
 			} else { 
 				topTasks.add(p);
 			}

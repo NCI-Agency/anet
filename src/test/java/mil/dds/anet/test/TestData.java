@@ -31,12 +31,12 @@ public class TestData {
 		return TestData.createTask(shortName, longName, category, null, null, Task.TaskStatus.ACTIVE);
 	}
 
-	public static Task createTask(String shortName, String longName, String category, Task parent, Organization responsibleOrg, Task.TaskStatus status) {
+	public static Task createTask(String shortName, String longName, String category, Task customFieldRef1, Organization responsibleOrg, Task.TaskStatus status) {
 		Task p = new Task();
 		p.setShortName(shortName);
 		p.setLongName(longName);
 		p.setCategory(category);
-		p.setParentTask(parent);
+		p.setCustomFieldRef1(customFieldRef1);
 		p.setResponsibleOrg(responsibleOrg);
 		p.setStatus(status);
 		return p;

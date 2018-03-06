@@ -170,6 +170,9 @@ dictionary:
       plannedCompletion:
         label: 'Planned completion'
         placeholder: 'Fill in the planned completion date'
+      customFieldRef1:
+        label: 'Parent task'
+        placeholder: 'Start typing to search for a higher level task'
       customField:
         label: 'Custom field'
         placeholder: 'Fill in the custom field'

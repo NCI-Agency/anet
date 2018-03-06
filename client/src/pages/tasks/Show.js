@@ -36,6 +36,7 @@ export default class TaskShow extends Page {
 			}),
 			reportsPageNum: 0,
 		}
+		this.TaskCustomFieldRef1 = DictionaryField(Form.Field)
 		this.TaskCustomField = DictionaryField(Form.Field)
 		this.PlannedCompletionField = DictionaryField(Form.Field)
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
@@ -64,7 +65,7 @@ export default class TaskShow extends Page {
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
 				responsibleOrg {id, shortName, longName, identificationCode},
-				parentTask { id, shortName, longName }
+				customFieldRef1 { id, shortName, longName }
 			}
 		`)
 
@@ -96,14 +97,14 @@ export default class TaskShow extends Page {
 						<Form.Field id="longName" label={`${taskShortLabel} description`} />
 						<Form.Field id="status" />
 
-						{task.responsibleOrg && task.responsibleOrg.id && 
+						{task.responsibleOrg && task.responsibleOrg.id &&
 							this.renderOrg()
 						}
 
-						{task.parentTask && task.parentTask.id &&
-							<Form.Field id="parentTask" label="Parent task">
-								<LinkTo task={task.parentTask} >{task.parentTask.shortName} {task.parentTask.longName}</LinkTo>
-							</Form.Field>
+						{task.customFieldRef1 && task.customFieldRef1.id &&
+							<this.TaskCustomFieldRef1 dictProps={Settings.fields.task.customFieldRef1} id="customFieldRef1">
+								<LinkTo task={task.customFieldRef1}>{task.customFieldRef1.shortName} {task.customFieldRef1.longName}</LinkTo>
+							</this.TaskCustomFieldRef1>
 						}
 
 						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>

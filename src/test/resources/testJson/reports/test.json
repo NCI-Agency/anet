@@ -31,13 +31,13 @@
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
-		"parentTask": null
+		"customFieldRef1": null
 	}, {
 		"id": null,
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
-		"parentTask": null
+		"customFieldRef1": null
 	}],
 	"atmosphere" : "POSITIVE",
 	"atmosphereDetails" : "This was a great meeting!!!",
