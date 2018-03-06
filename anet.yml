@@ -173,11 +173,16 @@ dictionary:
       customField:
         label: 'Custom field'
         placeholder: 'Fill in the custom field'
-      customFieldEnum:
+      customFieldEnum1:
         label: 'Project status'
         enum:
           OPEN: Open
           CLOSED: Closed
+      customFieldEnum2:
+        label: 'Custom field enum 2'
+        enum:
+          CUSTOMVALUE1: Custom value 1
+          CUSTOMVALUE2: Custom value 2
     person:
       ranks:
         - CIV

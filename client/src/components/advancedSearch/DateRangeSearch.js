@@ -37,9 +37,15 @@ export default class DateRangeSearch extends Component {
 
 		this.state = {
 			value: {
-				relative: "0",
-				start: value.start ? value.start : null,
-				end: value.end ? value.end : null,
+				relative: value.relative || "0",
+				start: value.start || null,
+				end: value.end || null,
+			},
+			ids: {
+				between: _uniqueId('dateRange_'),
+				last_day: _uniqueId('dateRange_'),
+				last_week: _uniqueId('dateRange_'),
+				last_month: _uniqueId('dateRange_'),
 			}
 		}
 
@@ -47,12 +53,12 @@ export default class DateRangeSearch extends Component {
 	}
 
 	selectMenu = (onlyBetween) => {
-		const betweenOption = <option key={ _uniqueId('dateRange_') } value={0} >Between</option>
+		const betweenOption = <option key={ this.state.ids.between } value={0} >Between</option>
 		const remainingOptions =
 			[
-				<option key={ _uniqueId('dateRange_') } value={LAST_DAY} >Last 24 hours</option>,
-				<option key={ _uniqueId('dateRange_') } value={LAST_WEEK} >Last 7 days</option>,
-				<option key={ _uniqueId('dateRange_') } value={LAST_MONTH} >Last 30 days</option>
+				<option key={ this.state.ids.last_day } value={LAST_DAY} >Last 24 hours</option>,
+				<option key={ this.state.ids.last_week } value={LAST_WEEK} >Last 7 days</option>,
+				<option key={ this.state.ids.last_month } value={LAST_MONTH} >Last 30 days</option>
 			]
 		const options = (onlyBetween) ? betweenOption : [betweenOption, ...remainingOptions]
 
