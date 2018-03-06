@@ -3,7 +3,7 @@ const common = require('./webpack.common.js')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const proxy = require('package.json').proxy
+const proxy = require('../package.json').proxy
 
 module.exports = merge(common, {
     // not using source maps due to https://github.com/facebook/create-react-app/issues/343#issuecomment-237241875
@@ -31,7 +31,7 @@ module.exports = merge(common, {
         new HtmlWebpackPlugin({
             inject: true,
             publicUrl: '',
-            template: 'public/index.html'
+            template: 'public/index.hbs'
         }),
         new webpack.NamedModulesPlugin(),
         new webpack.HotModuleReplacementPlugin(),

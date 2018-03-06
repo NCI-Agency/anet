@@ -1,11 +1,12 @@
 const merge = require('webpack-merge')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 const common = require('./webpack.common.js')
-const paths = require('../config/paths')
+const paths = require('./paths')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
+const path = require('path')
 
 module.exports = merge(common, {
   bail: true,
@@ -25,8 +26,8 @@ module.exports = merge(common, {
       title: 'ANET',
       publicUrl: '/assets/client/',
       inject: true,
-      template: 'public/index.html',
-      filename: paths.appBuild + '/../../views/index.ftl',
+      template: 'public/index.hbs',
+      filename: path.resolve(paths.appBuild,'../../views/index.ftl'),
       minify: {
           removeComments: true,
           collapseWhitespace: true,
@@ -38,7 +39,7 @@ module.exports = merge(common, {
           minifyJS: true,
           minifyCSS: true,
           minifyURLs: true
-      }
+        }
   }),
     new CopyWebpackPlugin([
       { from: 'public', ignore : ['index.html','alloy-editor/**/*'] },
