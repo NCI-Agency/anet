@@ -14,7 +14,10 @@ import LoaderHOC from '../HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartByDayOfWeekId = 'reports_by_day_of_week'
-
+const GQL_CHART_FIELDS =  /* GraphQL */`
+  id
+  engagementDayOfWeek
+`
 const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
 
 /*
@@ -152,7 +155,7 @@ export default class ReportsByDayOfWeek extends Component {
     return API.query(/* GraphQL */`
       reportList(f:search, query:$chartQueryParams) {
         totalCount, list {
-          ${ReportCollection.GQL_REPORT_FIELDS}
+          ${GQL_CHART_FIELDS}
         }
       }`, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
   }

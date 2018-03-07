@@ -14,8 +14,12 @@ import LoaderHOC from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartId = 'not_approved_reports_chart'
-
+const GQL_CHART_FIELDS =  /* GraphQL */`
+  id
+  advisorOrg { id, shortName }
+`
 const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+
 /*
  * Component displaying reports submitted for approval up to the given date but
  * which have not been approved yet. They are displayed in different
@@ -52,7 +56,7 @@ export default class PendingApprovalReports extends Component {
     const focusDetails = this.focusDetails
     return (
       <div>
-        <p className="help-text">{`Number of pending reports, submited on or before ${this.referenceDateLongStr}, by advisor organization`}</p>
+        <p className="help-text">{`Number of pending reports, submitted on or before ${this.referenceDateLongStr}, by advisor organization`}</p>
         <p className="chart-description">
           {`Displays the number of pending approval reports which have been
             submitted on or before ${this.referenceDateLongStr}. The reports are
@@ -110,7 +114,7 @@ export default class PendingApprovalReports extends Component {
     const chartQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$chartQueryParams) {
           totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
+            ${GQL_CHART_FIELDS}
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')

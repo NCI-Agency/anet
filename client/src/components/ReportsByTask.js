@@ -16,7 +16,10 @@ import pluralize from 'pluralize'
 
 const d3 = require('d3')
 const chartByTaskId = 'reports_by_task'
-
+const GQL_CHART_FIELDS =  /* GraphQL */`
+  id
+  tasks { id, shortName }
+`
 const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
 
 /*
@@ -110,7 +113,7 @@ export default class ReportsByTask extends Component {
     const chartQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$chartQueryParams) {
           totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
+            ${GQL_CHART_FIELDS}
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
