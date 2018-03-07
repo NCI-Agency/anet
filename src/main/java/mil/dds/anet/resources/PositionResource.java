@@ -123,6 +123,20 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Path("/updateAssociatedPosition")
+	@RolesAllowed("SUPER_USER")
+	public Response updateAssociatedPosition(@Auth Person user, Position pos) {
+		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
+
+		final int numRows = dao.update(pos);
+		final Position current = dao.getById(pos.getId());
+		updateAssociatedPosition(user, current, pos);
+
+		AnetAuditLogger.log("Position {} edited by {}", pos, user);
+		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+	}
+
+	@POST
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updatePosition(@Auth Person user, Position pos) {
@@ -132,10 +146,11 @@ public class PositionResource implements IGraphQLResource {
 		}
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
-		int numRows = dao.update(pos);
+		final int numRows = dao.update(pos);
+		final Position current = dao.getById(pos.getId());
+		updateAssociatedPosition(user, current, pos);
 
-		if (pos.getPerson() != null || pos.getAssociatedPositions() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
-			Position current = dao.getById(pos.getId());
+		if (pos.getPerson() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
 			if (current != null) {
 				//Run the diff and see if anything changed and update.
 				if (pos.getPerson() != null) {
@@ -147,17 +162,6 @@ public class PositionResource implements IGraphQLResource {
 						dao.setPersonInPosition(pos.getPerson(), pos);
 						AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPerson(), current, user);
 					}
-				}
-
-				if (pos.getAssociatedPositions() != null) {
-					Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
-							newPosition -> {
-								dao.associatePosition(newPosition, pos);
-							},
-							oldPositionId -> {
-								dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
-							});
-					AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
 				}
 
 				if (PositionStatus.INACTIVE.equals(pos.getStatus()) && current.getPerson() != null) {
@@ -306,4 +310,22 @@ public class PositionResource implements IGraphQLResource {
 		return Response.ok().build();
 	}
 	
+	private void updateAssociatedPosition(@Auth Person user, Position oldPos, Position newPos) {
+		if (newPos.getAssociatedPositions() != null) {
+			if (oldPos != null) {
+				// Run the diff and see if anything changed and update.
+				if (newPos.getAssociatedPositions() != null) {
+					Utils.addRemoveElementsById(oldPos.loadAssociatedPositions(), newPos.getAssociatedPositions(),
+							newPosition -> {
+								dao.associatePosition(newPosition, newPos);
+							},
+							oldPositionId -> {
+								dao.deletePositionAssociation(newPos, Position.createWithId(oldPositionId));
+							});
+					AnetAuditLogger.log("Person {} associations changed to {} by {}", oldPos, newPos.getAssociatedPositions(), user);
+				}
+			}
+		}
+	}
+
 }
