@@ -486,7 +486,7 @@ export default class ReportShow extends Page {
 		API.send(`/api/reports/${this.state.report.id}/submit`).then(data => {
 			this.updateReport()
 			this.setState({error:null})
-			this.setState({success:'Successfully submited report'})
+			this.setState({success:'Successfully submitted report'})
 		}, data => {
 			this.handleError(data)
 		})

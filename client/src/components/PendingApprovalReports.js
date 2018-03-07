@@ -56,7 +56,7 @@ export default class PendingApprovalReports extends Component {
     const focusDetails = this.focusDetails
     return (
       <div>
-        <p className="help-text">{`Number of pending reports, submited on or before ${this.referenceDateLongStr}, by advisor organization`}</p>
+        <p className="help-text">{`Number of pending reports, submitted on or before ${this.referenceDateLongStr}, by advisor organization`}</p>
         <p className="chart-description">
           {`Displays the number of pending approval reports which have been
             submitted on or before ${this.referenceDateLongStr}. The reports are
