@@ -16,7 +16,7 @@ const d3 = require('d3')
 const chartId = 'not_approved_reports_chart'
 const GQL_CHART_FIELDS =  /* GraphQL */`
   id
-  advisorOrg { id, shortName}
+  advisorOrg { id, shortName }
 `
 const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
 

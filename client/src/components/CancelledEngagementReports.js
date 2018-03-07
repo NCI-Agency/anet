@@ -17,7 +17,7 @@ const chartByOrgId = 'cancelled_reports_by_org'
 const chartByReasonId = 'cancelled_reports_by_reason'
 const GQL_CHART_FIELDS =  /* GraphQL */`
   id
-  advisorOrg { id, shortName}
+  advisorOrg { id, shortName }
   cancelledReason
 `
 const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
