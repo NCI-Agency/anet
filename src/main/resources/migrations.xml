@@ -1190,23 +1190,23 @@
 	</changeSet>
 
 	<changeSet id="rename-parent-task-in-tasks" author="maradragan" dbms="!sqlite">
+		<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_tasks_parent"/>
 		<renameColumn
 			columnDataType="int"
 			oldColumnName="parentTaskId"
 			newColumnName="customFieldRef1Id"
 			tableName="tasks" />
-		<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_tasks_parent"/>
 		<addForeignKeyConstraint baseColumnNames="customFieldRef1Id" baseTableName="tasks"
 			constraintName="fk_tasks_customFieldRef1Id" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="tasks" />
 		<rollback>
 			<!-- sadly, 'dropforeignkeyconstraint' does not have an auto-rollback, so we have to do a manual rollback for everything -->
+			<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_tasks_customFieldRef1Id"/>
 			<renameColumn
 				columnDataType="int"
 				newColumnName="parentTaskId"
 				oldColumnName="customFieldRef1Id"
 				tableName="tasks" />
-			<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_tasks_customFieldRef1Id"/>
 			<addForeignKeyConstraint baseColumnNames="parentTaskId" baseTableName="tasks"
 				constraintName="fk_tasks_parent" onDelete="NO ACTION" onUpdate="NO ACTION"
 				referencedColumnNames="id" referencedTableName="tasks" />
