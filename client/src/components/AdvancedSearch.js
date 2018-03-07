@@ -12,6 +12,7 @@ import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
 import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
+import PositionTypeSearchFilter from 'components/advancedSearch/PositionTypeSearchFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 
@@ -37,12 +38,12 @@ const taskFilters = props => {
 	if (plannedCompletion)
 		taskFiltersObj[plannedCompletion.label] = <DateRangeSearch
 			queryKey="plannedCompletion" />
-	const customEnum = Settings.fields.task.customFieldEnum
-	if (customEnum)
-		taskFiltersObj[customEnum.label] = <SelectSearchFilter
+	const customEnum1 = Settings.fields.task.customFieldEnum1
+	if (customEnum1)
+		taskFiltersObj[customEnum1.label] = <SelectSearchFilter
 			queryKey="projectStatus"
-			values={Object.keys(customEnum.enum)}
-			labels={Object.values(customEnum.enum)} />
+			values={Object.keys(customEnum1.enum)}
+			labels={Object.values(customEnum1.enum)} />
 	const customField = Settings.fields.task.customField
 	if (customField)
 		taskFiltersObj[customField.label] = <TextInputFilter
@@ -184,7 +185,7 @@ export default class AdvancedSearch extends Component {
 
 		filters.Positions = {
 			filters: {
-				"Position type": <SelectSearchFilter
+				"Position type": <PositionTypeSearchFilter
 					queryKey="type"
 					values={[Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL]}
 					labels={[Settings.fields.advisor.position.name, Settings.fields.principal.position.name]}
@@ -305,7 +306,7 @@ export default class AdvancedSearch extends Component {
 	@autobind
 	addFilter(filterKey) {
 		if (filterKey) {
-			let filters = this.state.filters
+			let {filters} = this.state
 			filters.push({key: filterKey})
 			this.setState({filters})
 		}
@@ -313,7 +314,7 @@ export default class AdvancedSearch extends Component {
 
 	@autobind
 	removeFilter(filter) {
-		let filters = this.state.filters
+		let {filters} = this.state
 		filters.splice(filters.indexOf(filter), 1)
 		this.setState({filters})
 

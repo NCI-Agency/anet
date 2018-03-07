@@ -40,7 +40,8 @@ export default class TaskShow extends Page {
 		this.TaskCustomField = DictionaryField(Form.Field)
 		this.PlannedCompletionField = DictionaryField(Form.Field)
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
-		this.TaskCustomFieldEnum = DictionaryField(Form.Field)
+		this.TaskCustomFieldEnum1 = DictionaryField(Form.Field)
+		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
 
 		setMessages(props,this.state)
 	}
@@ -61,9 +62,10 @@ export default class TaskShow extends Page {
 		let taskQuery = new GQL.Part(/* GraphQL */`
 			task(id:${props.params.id}) {
 				id, shortName, longName, status,
-				customField, customFieldEnum,
+				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
-				responsibleOrg {id, shortName, longName, identificationCode}
+				responsibleOrg {id, shortName, longName, identificationCode},
+				parentTask { id, shortName, longName }
 			}
 		`)
 
@@ -99,10 +101,17 @@ export default class TaskShow extends Page {
 							this.renderOrg()
 						}
 
+						{task.parentTask && task.parentTask.id &&
+							<Form.Field id="parentTask" label="Parent task">
+								<LinkTo task={task.parentTask} >{task.parentTask.shortName} {task.parentTask.longName}</LinkTo>
+							</Form.Field>
+						}
+
 						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
 						<this.PlannedCompletionField dictProps={Settings.fields.task.plannedCompletion} id="plannedCompletion" value={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')} />
 						<this.ProjectedCompletionField dictProps={Settings.fields.task.projectedCompletion} id="projectedCompletion" value={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')} />
-						<this.TaskCustomFieldEnum dictProps={Object.without(Settings.fields.task.customFieldEnum, 'enum')} id="customFieldEnum"/>
+						<this.TaskCustomFieldEnum1 dictProps={Object.without(Settings.fields.task.customFieldEnum1, 'enum')} id="customFieldEnum1"/>
+						<this.TaskCustomFieldEnum2 dictProps={Object.without(Settings.fields.task.customFieldEnum2, 'enum')} id="customFieldEnum2"/>
 
 					</Fieldset>
 				</Form>

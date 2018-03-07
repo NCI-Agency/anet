@@ -202,9 +202,9 @@ export default class Search extends Page {
 	@autobind
 	_fetchDataCallback(parts) {
 		GQL.run(parts).then(data => {
-			this.setState({results: data})
+			this.setState({success: null, error: null, results: data})
 		}).catch(response =>
-			this.setState({error: response})
+			this.setState({success: null, error: response})
 		)
 	}
 
@@ -533,11 +533,13 @@ export default class Search extends Page {
 				if (response.code) throw response.code
 				this.setState({
 					success: 'Search successfully saved!',
+					error: null,
 					saveSearch: {show: false}
 				})
 				window.scrollTo(0, 0)
 			}).catch(response => {
 				this.setState({
+					success: null,
 					error: response,
 					saveSearch: {show: false}
 				})

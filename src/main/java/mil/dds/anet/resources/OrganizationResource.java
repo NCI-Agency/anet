@@ -108,7 +108,7 @@ public class OrganizationResource implements IGraphQLResource {
 				try {
 					created = dao.insert(org);
 				} catch (UnableToExecuteStatementException e) {
-					throw handleSqlException(e);
+					throw ResponseUtils.handleSqlException(e, "Duplicate identification code");
 				}
 
 				if (org.getTasks() != null) {
@@ -162,7 +162,7 @@ public class OrganizationResource implements IGraphQLResource {
 				try {
 					numRows = dao.update(org);
 				} catch (UnableToExecuteStatementException e) {
-					throw handleSqlException(e);
+					throw ResponseUtils.handleSqlException(e, "Duplicate identification code");
 				}
 
 				if (org.getTasks() != null || org.getApprovalSteps() != null) {
@@ -234,19 +234,6 @@ public class OrganizationResource implements IGraphQLResource {
 	@Path("/{id}/tasks")
 	public TaskList getTasks(@PathParam("id") Integer orgId) { 
 		return new TaskList(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
-	}
-
-	private WebApplicationException handleSqlException(UnableToExecuteStatementException e) {
-		// FIXME: Ugly way to handle the unique index on identificationCode
-		final Throwable cause = e.getCause();
-		if (cause != null) {
-			final String message = cause.getMessage();
-			if (message != null && (message.contains(" duplicate ") || message.contains(" UNIQUE constraint "))) {
-				return new WebApplicationException("Duplicate identification code", Status.CONFLICT);
-			}
-		}
-		logger.error("Unexpected SQL exception raised", e);
-		return new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
 	}
 
 	private void validateApprovalStep(ApprovalStep step) {

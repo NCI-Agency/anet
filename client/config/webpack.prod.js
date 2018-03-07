@@ -16,6 +16,14 @@ module.exports = merge(common, {
     filename: 'static/js/[name].[chunkhash:8].js',
     chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js'
   },
+  optimization: {
+    minimize: true,
+    splitChunks: {
+      cacheGroups: {
+        commons: { test: /[\\/]node_modules[\\/]/, name: "vendors", chunks: "all" }
+      }
+    }
+  },
   plugins: [
     new WebpackCleanupPlugin(),
     new webpack.HashedModuleIdsPlugin(),
@@ -44,10 +52,6 @@ module.exports = merge(common, {
     new CopyWebpackPlugin([
       { from: 'public', ignore : ['index.html','alloy-editor/**/*'] },
       { from: 'node_modules/alloyeditor/dist/alloy-editor', to: 'alloy-editor'}
-  ]),
-    new UglifyJSPlugin({
-      parallel: true,
-      cache: true,
-      sourceMap: true
-    }),
+  ])
+
 ]})

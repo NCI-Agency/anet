@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css'
 
 const css = {
 	height: '500px',
-	marginBottom: '80px',
+	marginBottom: '18px',
 	zIndex: 1,
 }
 

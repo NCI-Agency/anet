@@ -104,6 +104,21 @@ export default class ReportCollection extends Component {
 						{this.state.viewFormat === FORMAT_SUMMARY && this.renderSummary(reports)}
 						{this.state.viewFormat === FORMAT_MAP && this.renderMap(reports)}
 					</div>
+
+					<footer>
+						{numPages > 1 &&
+							<Pagination
+								className="pull-right"
+								prev
+								next
+								items={numPages}
+								ellipsis
+								maxButtons={6}
+								activePage={pageNum}
+								onSelect={(value) => {this.props.goToPage(value - 1)}}
+							/>
+						}
+					</footer>
 				</div>
 				:
 				<em>No reports found</em>
