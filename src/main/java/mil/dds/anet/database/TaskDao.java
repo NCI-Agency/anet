@@ -96,40 +96,6 @@ public class TaskDao implements IAnetDao<Task> {
 			.execute();
 	}
 	
-	public List<Task> getTasksByCustomFieldRef1Id(int customFieldRef1Id) {
-		return dbHandle.createQuery("/* getTasksByCustomFieldRef1 */ SELECT * from tasks where \"customFieldRef1Id\" = :customFieldRef1Id")
-			.bind("customFieldRef1Id", customFieldRef1Id)
-			.map(new TaskMapper())
-			.list();
-	}
-	
-	/* Returns the task and all tasks under this one (to all depths) */
-	public List<Task> getTaskAndChildren(int taskId) {
-		StringBuilder sql = new StringBuilder("/* getTasksAndChildren */ ");
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql.append("WITH");
-		} else { 
-			sql.append("WITH RECURSIVE");
-		}
-		sql.append(" customFieldRef1_tasks(id, \"shortName\", \"longName\", category, \"customFieldRef1Id\", "
-				+ "\"organizationId\", \"createdAt\", \"updatedAt\", status,"
-				+ "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\") AS ("
-				+ "SELECT id, \"shortName\", \"longName\", category, \"customFieldRef1Id\", "
-				+ "\"organizationId\", \"createdAt\", \"updatedAt\", status, "
-				+ "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\" "
-				+ "FROM tasks WHERE id = :taskId "
-			+ "UNION ALL "
-				+ "SELECT p.id, p.\"shortName\", p.\"longName\", p.category, p.\"customFieldRef1Id\", "
-				+ "p.\"organizationId\", p.\"createdAt\", p.\"updatedAt\", p.status, "
-				+ "p.\"customField\", p.\"customFieldEnum1\", p.\"customFieldEnum2\", p.\"plannedCompletion\", p.\"projectedCompletion\" "
-				+ "FROM customFieldRef1_tasks pp, tasks p WHERE p.\"customFieldRef1Id\" = pp.id "
-			+ ") SELECT * from customFieldRef1_tasks;");
-		return dbHandle.createQuery(sql.toString())
-			.bind("taskId", taskId)
-			.map(new TaskMapper())
-			.list();
-	}
-
 	public List<Task> getTopLevelTasks() {
 		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Id\" IS NULL")
 			.map(new TaskMapper())

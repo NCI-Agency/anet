@@ -27,7 +27,6 @@ public class Task extends AbstractAnetBean {
 	String customFieldEnum2;
 
 	Task customFieldRef1;
-	List<Task> childrenTasks;
 
 	TaskStatus status;
 
@@ -114,24 +113,6 @@ public class Task extends AbstractAnetBean {
 	@GraphQLIgnore
 	public Task getCustomFieldRef1() {
 		return this.customFieldRef1;
-	}
-
-	@GraphQLFetcher("childrenTasks")
-	public List<Task> loadChildrenTasks() { 
-		if (childrenTasks == null) { 
-			childrenTasks = AnetObjectEngine.getInstance()
-					.getTaskDao().getTasksByCustomFieldRef1Id(this.getId());
-		}
-		return childrenTasks;
-	}
-
-	@GraphQLIgnore
-	public List<Task> getChildrenTasks() { 
-		return childrenTasks;
-	}
-
-	public void setChildrenTasks(List<Task> childrenTasks) { 
-		this.childrenTasks = childrenTasks;
 	}
 
 	public TaskStatus getStatus() {

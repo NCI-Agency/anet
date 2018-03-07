@@ -84,17 +84,6 @@ public class TaskResource implements IGraphQLResource {
 		return p;
 	}
 	
-	@GET
-	@Path("/{id}/children")
-	public TaskList getChildren(@PathParam("id") int id, @QueryParam("cat") String category) {
-		List<Task> p = dao.getTaskAndChildren(id);
-		if (category != null) { 
-			p = p.stream().filter(el -> el.getCategory().equalsIgnoreCase(category))
-				.collect(Collectors.toList());
-		}
-		return new TaskList(p);
-	}
-	
 	@POST
 	@Path("/new")
 	@RolesAllowed("ADMIN")
@@ -136,35 +125,6 @@ public class TaskResource implements IGraphQLResource {
 		}
 		AnetAuditLogger.log("Task {} updatedby {}", p, user);
 		return Response.ok().build();
-	}
-	
-	@GET
-	@Path("/byCustomFieldRef1Id")
-	public TaskList getTasksByCustomFieldRef1Id(@QueryParam("id") int customFieldRef1Id) {
-		return new TaskList(dao.getTasksByCustomFieldRef1Id(customFieldRef1Id));
-	}
-	
-	@GET
-	@GraphQLFetcher
-	@Path("/tree")
-	public TaskList getFullTaskTree() { 
-		List<Task> tasks = dao.getAll(0, Integer.MAX_VALUE).getList();
-		
-		Map<Integer,Task> taskById = new HashMap<Integer,Task>();
-		List<Task> topTasks = new LinkedList<Task>();
-		for (Task p : tasks) {
-			p.setChildrenTasks(new LinkedList<Task>());
-			taskById.put(p.getId(), p);
-		}
-		for (Task p : tasks) { 
-			if (p.getCustomFieldRef1() != null) {
-				Task customFieldRef1 = taskById.get(p.getCustomFieldRef1().getId());
-				customFieldRef1.getChildrenTasks().add(p);
-			} else { 
-				topTasks.add(p);
-			}
-		}
-		return new TaskList(topTasks);
 	}
 	
 	@POST
