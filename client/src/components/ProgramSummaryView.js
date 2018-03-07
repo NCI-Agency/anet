@@ -3,19 +3,15 @@ import API from 'api'
 import _ from 'lodash'
 import ReactTable from "react-table"
 import "react-table/react-table.css"
-import Fullscreen from "react-full-screen"
 import Settings from 'Settings'
 
 export default class ProgramSummaryView extends React.Component {
     constructor() {
         super();
         this.state = {
-            isFull: false,
             data: []
         }
     }
-
-    goFull = () => this.setState( {isFull: true} );
 
     findParents = task => {
         const parents = []
@@ -37,11 +33,6 @@ export default class ProgramSummaryView extends React.Component {
             })},[])
 
         return (
-            <div className="App">
-                <button onClick={this.goFull}>Fullscreen</button>
-                <Fullscreen
-                    enabled={this.state.isFull}
-                    onChange={isFull => this.setState({isFull})}>
                     <ReactTable
                         data={data.filter(task => this.findParents(task).length > 1)}
                         pivotBy={['EF', 'PT']}
@@ -69,8 +60,6 @@ export default class ProgramSummaryView extends React.Component {
                         },
                     ], phaseAccessors)}
                         defaultPageSize={25}/>
-                </Fullscreen>
-            </div>
         );
     }
 
