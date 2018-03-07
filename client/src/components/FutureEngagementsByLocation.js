@@ -13,9 +13,12 @@ import LoaderHOC from '../HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartId = 'future_engagements_by_location'
-
+const GQL_CHART_FIELDS =  /* GraphQL */`
+  id
+  engagementDate
+  location { id, name }
+`
 const BarChartWithLoader = LoaderHOC('isLoading')('data')(HorizontalBarChart)
-
 
 /*
  * Component displaying a chart with number of future engagements per date and
@@ -210,7 +213,7 @@ export default class FutureEngagementsByLocation extends Component {
     return API.query(/* GraphQL */`
     reportList(f:search, query:$chartQueryParams) {
       totalCount, list {
-        ${ReportCollection.GQL_REPORT_FIELDS}
+        ${GQL_CHART_FIELDS}
       }
     }
   `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
