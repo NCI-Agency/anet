@@ -301,6 +301,8 @@ allprojects {
 
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
+	version = '8.10.0'
+	download = true
 }
 
 sonarqube {

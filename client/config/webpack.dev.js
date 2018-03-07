@@ -29,6 +29,7 @@ module.exports = merge(common, {
             'process.env.NODE_ENV': JSON.stringify('development')
           }),
         new HtmlWebpackPlugin({
+            title: 'ANET',
             inject: true,
             publicUrl: '',
             template: 'public/index.hbs'
