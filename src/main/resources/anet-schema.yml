@@ -81,6 +81,8 @@ properties:
             "$ref": "#/definitions/inputField"
           plannedCompletion:
             "$ref": "#/definitions/inputField"
+          customFieldRef1:
+            "$ref": "#/definitions/inputField"
           customField:
             "$ref": "#/definitions/inputField"
           customFieldEnum1:

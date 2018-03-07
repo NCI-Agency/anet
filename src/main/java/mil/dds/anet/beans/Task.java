@@ -26,8 +26,7 @@ public class Task extends AbstractAnetBean {
 	String customFieldEnum1;
 	String customFieldEnum2;
 
-	Task parentTask;
-	List<Task> childrenTasks;
+	Task customFieldRef1;
 
 	TaskStatus status;
 
@@ -97,41 +96,23 @@ public class Task extends AbstractAnetBean {
 		this.category = Utils.trimStringReturnNull(category);
 	}
 
-	@GraphQLFetcher("parentTask")
-	public Task loadParentTask() {
-		if (parentTask == null || parentTask.getLoadLevel() == null) { return parentTask; }
-		if (parentTask.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.parentTask = AnetObjectEngine.getInstance()
-					.getTaskDao().getById(parentTask.getId());
+	@GraphQLFetcher("customFieldRef1")
+	public Task loadCustomFieldRef1() {
+		if (customFieldRef1 == null || customFieldRef1.getLoadLevel() == null) { return customFieldRef1; }
+		if (customFieldRef1.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) {
+			this.customFieldRef1 = AnetObjectEngine.getInstance()
+					.getTaskDao().getById(customFieldRef1.getId());
 		}
-		return parentTask;
+		return customFieldRef1;
 	}
 
-	public void setParentTask(Task parent) {
-		this.parentTask = parent;
+	public void setCustomFieldRef1(Task customFieldRef1) {
+		this.customFieldRef1 = customFieldRef1;
 	}
 
 	@GraphQLIgnore
-	public Task getParentTask() { 
-		return this.parentTask;
-	}
-
-	@GraphQLFetcher("childrenTasks")
-	public List<Task> loadChildrenTasks() { 
-		if (childrenTasks == null) { 
-			childrenTasks = AnetObjectEngine.getInstance()
-					.getTaskDao().getTasksByParentId(this.getId());
-		}
-		return childrenTasks;
-	}
-
-	@GraphQLIgnore
-	public List<Task> getChildrenTasks() { 
-		return childrenTasks;
-	}
-
-	public void setChildrenTasks(List<Task> childrenTasks) { 
-		this.childrenTasks = childrenTasks;
+	public Task getCustomFieldRef1() {
+		return this.customFieldRef1;
 	}
 
 	public TaskStatus getStatus() {
@@ -178,17 +159,17 @@ public class Task extends AbstractAnetBean {
 				&& Objects.equals(other.getShortName(), shortName) 
 				&& Objects.equals(other.getLongName(), longName) 
 				&& Objects.equals(other.getCategory(), category) 
-				&& idEqual(other.getParentTask(), parentTask);
+				&& idEqual(other.getCustomFieldRef1(), customFieldRef1);
 	}
 
 	@Override
 	public int hashCode() { 
-		return Objects.hash(id, shortName, longName, category, parentTask);
+		return Objects.hash(id, shortName, longName, category, customFieldRef1);
 	}
 
 	@Override
 	public String toString() { 
-		return String.format("[id:%d shortName:%s category:%s parentTask:%d]", id, shortName, category, DaoUtils.getId(parentTask));
+		return String.format("[id:%d shortName:%s category:%s customFieldRef1:%d]", id, shortName, category, DaoUtils.getId(customFieldRef1));
 	}
 
 }

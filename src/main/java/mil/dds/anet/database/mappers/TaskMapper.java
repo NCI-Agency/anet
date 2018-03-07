@@ -37,9 +37,9 @@ public class TaskMapper implements ResultSetMapper<Task> {
 
 		p.setStatus(MapperUtils.getEnumIdx(r, "status", TaskStatus.class));
 
-		Integer parentTaskId = MapperUtils.getInteger(r, "parentTaskId");
-		if (parentTaskId != null) { 
-			p.setParentTask(Task.createWithId(parentTaskId));
+		Integer customFieldRef1Id = MapperUtils.getInteger(r, "customFieldRef1Id");
+		if (customFieldRef1Id != null) {
+			p.setCustomFieldRef1(Task.createWithId(customFieldRef1Id));
 		}
 		
 		Integer responsibleOrgId = MapperUtils.getInteger(r, "organizationId");

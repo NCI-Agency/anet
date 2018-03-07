@@ -42,6 +42,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 
 	constructor(props) {
 		super(props)
+		this.TaskCustomFieldRef1 = DictionaryField(Form.Field)
 		this.TaskCustomField = DictionaryField(Form.Field)
 		this.PlannedCompletionField = DictionaryField(Form.Field)
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
@@ -53,6 +54,7 @@ export default class TaskForm extends ValidatableFormWrapper {
 		const {task, edit} = this.props
 		const {currentUser} = this.context.app.state
 		const taskShortLabel = Settings.fields.task.shortLabel
+		const customFieldRef1 = Settings.fields.task.customFieldRef1
 		const customFieldEnum1 = Settings.fields.task.customFieldEnum1
 		const customFieldEnum2 = Settings.fields.task.customFieldEnum2
 		const plannedCompletion = Settings.fields.task.plannedCompletion
@@ -99,13 +101,15 @@ export default class TaskForm extends ValidatableFormWrapper {
 							/>
 						</Form.Field>
 
-						<Form.Field id="parentTask" label="Parent task">
-							<Autocomplete valueKey="shortName"
-								placeholder="Start typing to search for a higher level task..."
-								url="/api/tasks/search"
-								queryParams={{}}
-							/>
-						</Form.Field>
+						{customFieldRef1 &&
+							<this.TaskCustomFieldRef1 dictProps={customFieldRef1} id="customFieldRef1">
+								<Autocomplete valueKey="shortName"
+									placeholder={customFieldRef1.placeholder}
+									url="/api/tasks/search"
+									queryParams={{}}
+								/>
+							</this.TaskCustomFieldRef1>
+						}
 
 						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
 
@@ -154,8 +158,8 @@ export default class TaskForm extends ValidatableFormWrapper {
 		if (task.responsibleOrg && task.responsibleOrg.id) {
 			task.responsibleOrg = {id: task.responsibleOrg.id}
 		}
-		if (task.parentTask && task.parentTask.id) {
-			task.parentTask = {id: task.parentTask.id}
+		if (task.customFieldRef1 && task.customFieldRef1.id) {
+			task.customFieldRef1 = {id: task.customFieldRef1.id}
 		}
 
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
