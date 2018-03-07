@@ -15,23 +15,24 @@ import moment from 'moment'
 
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
+import ProgramSummaryView from 'components/ProgramSummaryView'
 
 const insightDetails = {
   'not-approved-reports': {
     component: PendingApprovalReports,
-    title: 'Pending Approval Reports',
+    title: 'Pending approval reports',
     dateRange: false,
     showCalendar: true
   },
   'cancelled-reports': {
     component: CancelledEngagementReports,
-    title: 'Cancelled Engagement Reports',
+    title: 'Cancelled engagement reports',
     dateRange: false,
     showCalendar: true
   },
   'reports-by-task': {
     component: ReportsByTask,
-    title: 'Reports by Task',
+    title: 'Reports by task',
     help: '',
     dateRange: false,
     showCalendar: true
@@ -45,16 +46,23 @@ const insightDetails = {
   },
   'advisor-reports': {
     component: FilterableAdvisorReportsTable,
-    title: 'Advisor Reports',
+    title: 'Advisor reports',
     dateRange: false,
     showCalendar: false
   },
   'future-engagements-by-location': {
     component: FutureEngagementsByLocation,
-    title: 'Future Engagements by Location',
+    title: 'Future engagements by location',
     help: 'Number of future engagements by location',
     dateRange: true,
     onlyShowBetween: true,
+  },
+  'program-summary-view': {
+    component: ProgramSummaryView,
+    title: 'Program summary view',
+    help: 'Summary view of the program',
+    dateRange: false,
+    onlyShowBetween: false,
   },
 }
 

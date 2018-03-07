@@ -148,6 +148,9 @@ class Nav extends Component {
 						<Link to="/insights/advisor-reports">
 							<MenuItem>Advisor reports</MenuItem>
 						</Link>
+						<Link to="/insights/program-summary-view">
+							<MenuItem>Program summary view</MenuItem>
+						</Link>
 					</NavDropdown>
 				}
 			</BSNav>
