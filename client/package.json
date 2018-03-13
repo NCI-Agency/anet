@@ -5,6 +5,7 @@
   "proxy": "http://localhost:8080",
   "homepage": "/assets/client",
   "devDependencies": {
+    "artillery": "^1.6.0-12",
     "autobind-decorator": "^2.1.0",
     "autoprefixer": "^8.1.0",
     "ava": "^0.25.0",
@@ -32,6 +33,7 @@
     "eslint-plugin-import": "^2.6.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.1.0",
+    "faker": "^4.1.0",
     "file-loader": "^1.1.11",
     "git-describe": "^4.0.2",
     "handlebars": "^4.0.11",
@@ -100,7 +102,8 @@
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "test": "npm run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "wdio": "wdio -b http://localhost:8080 ./config/wdio.config.js",
-    "wdio:watch": "wdio ./config/wdio.config.js --watch"
+    "wdio:watch": "wdio ./config/wdio.config.js --watch",
+    "load-test": "artillery run tests/load/load.yml"
   },
   "jest": {
     "moduleFileExtensions": [

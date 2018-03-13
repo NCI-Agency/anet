@@ -16,7 +16,11 @@ import LoaderHOC from '../HOC/LoaderHOC'
 const d3 = require('d3')
 const chartByOrgId = 'cancelled_reports_by_org'
 const chartByReasonId = 'cancelled_reports_by_reason'
-
+const GQL_CHART_FIELDS =  /* GraphQL */`
+  id
+  advisorOrg { id, shortName }
+  cancelledReason
+`
 const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
 
 /*
@@ -139,7 +143,7 @@ export default class CancelledEngagementReports extends Component {
     const chartQuery = API.query(/* GraphQL */`
         reportList(f:search, query:$chartQueryParams) {
           totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
+            ${GQL_CHART_FIELDS}
           }
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')

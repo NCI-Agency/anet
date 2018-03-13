@@ -56,19 +56,6 @@ public class TaskResourceTest extends AbstractResourceTest {
 		returned = httpQuery("/api/tasks/" + b.getId(), admin).get(Task.class);
 		assertThat(returned).isEqualTo(b);		
 		
-		List<Task> children = httpQuery("/api/tasks/" + a.getId() + "/children", jack).get(TaskList.class).getList();
-		assertThat(children).contains(b, c, d);
-		assertThat(children).doesNotContain(e);
-		
-		List<Task> tree = httpQuery("/api/tasks/tree", jack).get(TaskList.class).getList();
-		assertThat(tree).contains(a, e);
-		assertThat(tree).doesNotContain(b);
-		for (Task p : tree) {
-			if (p.getId() == a.getId()) {
-				assertThat(p.getChildrenTasks()).contains(b, c, d);
-			}
-		}
-		
 		//modify a task. 
 		a.setLongName("Do a thing with a person modified");
 		Response resp = httpQuery("/api/tasks/update", admin).post(Entity.json(a));
