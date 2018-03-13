@@ -257,37 +257,37 @@ export default class Search extends Page {
 
 						<Nav stacked bsStyle="pills" activeKey={queryType} onSelect={this.onSelectQueryType}>
 							<NavItem eventKey="everything" disabled={!numResults}>
-								<img src={EVERYTHING_ICON} role="presentation" /> Everything
+								<img src={EVERYTHING_ICON} alt="" /> Everything
 								{numResults > 0 && <Badge pullRight>{numResults}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="organizations" disabled={!numOrganizations}>
-								<img src={ORGANIZATIONS_ICON} role="presentation" /> Organizations
+								<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
 								{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="people" disabled={!numPeople}>
-								<img src={PEOPLE_ICON} role="presentation" /> People
+								<img src={PEOPLE_ICON} alt="" /> People
 								{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="positions" disabled={!numPositions}>
-								<img src={POSITIONS_ICON} role="presentation" /> Positions
+								<img src={POSITIONS_ICON} alt="" /> Positions
 								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="tasks" disabled={!numTasks}>
-								<img src={TASKS_ICON} role="presentation" /> {pluralize(taskShortLabel)}
+								<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
 								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="locations" disabled={!numLocations}>
-								<img src={LOCATIONS_ICON} role="presentation" /> Locations
+								<img src={LOCATIONS_ICON} alt="" /> Locations
 								{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
 							</NavItem>
 
 							<NavItem eventKey="reports" disabled={!numReports}>
-								<img src={REPORTS_ICON} role="presentation" /> Reports
+								<img src={REPORTS_ICON} alt="" /> Reports
 								{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
 							</NavItem>
 

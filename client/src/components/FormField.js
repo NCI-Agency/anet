@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import utils from 'utils'
 import deepEqual from 'deep-equal'
 import autobind from 'autobind-decorator'
@@ -168,14 +169,14 @@ export default class FormField extends Component {
 		}
 
 		if (icon) {
-			icon = <img src={icon} height={24} role="presentation" />
+			icon = <img src={icon} height={24} alt="" />
 		}
 
 		// if there's an addon we need to use an InputGroup
 		if (addon) {
 			// allows passing a url for an image
 			if (addon.indexOf('.') !== -1) {
-				addon = <img src={addon} height={20} role="presentation" />
+				addon = <img src={addon} height={20} alt="" />
 			}
 
 			children = <div>

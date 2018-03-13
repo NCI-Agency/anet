@@ -1,5 +1,6 @@
-import React, {PropTypes} from 'react'
-import {Button, Alert, HelpBlock, Radio} from 'react-bootstrap'
+import PropTypes from 'prop-types'
+import React from 'react'
+import {Button, Alert, HelpBlock, Radio, Col, ControlLabel, FormGroup} from 'react-bootstrap'
 import DatePicker from 'react-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 
@@ -18,8 +19,10 @@ import {Person} from 'models'
 import utils from 'utils'
 
 import CALENDAR_ICON from 'resources/calendar.png'
-import { Col, ControlLabel, FormGroup } from 'react-bootstrap'
-import '../../components/NameInput.css'
+import 'components/NameInput.css'
+
+import { confirmAlert } from 'react-confirm-alert'
+import 'components/react-confirm-alert.css'
 
 export default class PersonForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -363,11 +366,20 @@ export default class PersonForm extends ValidatableFormWrapper {
 				case 'leftVacant':
 				case 'hasReplacement':
 					// reset account?
-					if (confirm('Are you sure you want to reset this account?')) {
-						let { person } = this.state
-						person.status = 'INACTIVE'
-						this.updatePerson(person, true, optionValue === 'needNewAccount')
-					}
+					const confirmLabel = optionValue === 'needNewAccount'
+						? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
+						: 'Yes, I would like to inactivate this account'
+					confirmAlert({
+						title: 'Confirm to reset account',
+						message: 'Are you sure you want to reset this account?',
+						confirmLabel: confirmLabel,
+						cancelLabel: 'No, I am not entirely sure at this point',
+						onConfirm: () => {
+							const { person } = this.state
+							person.status = Person.STATUS.INACTIVE
+							this.updatePerson(person, true, optionValue === 'needNewAccount')
+						}
+					})
 					break
 				default:
 					// TODO: integrate action to email admin

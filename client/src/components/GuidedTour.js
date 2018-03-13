@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
@@ -53,7 +54,7 @@ export default class GuidedTour extends Component {
 		let title = this.props.title || 'New to ANET? Take a guided tour'
 		return <Button bsStyle="link" onClick={this.onClick} className="persistent-tour-launcher">
 			{title}
-			<img src={TOUR_ICON} className="tour-icon" role="presentation" style={iconCss} />
+			<img src={TOUR_ICON} className="tour-icon" alt="" style={iconCss} />
 		</Button>
 	}
 

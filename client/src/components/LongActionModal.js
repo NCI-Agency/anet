@@ -1,6 +1,7 @@
-import React, {Component, PropTypes} from 'react'
+import React, { Component } from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
+import PropTypes from 'prop-types'
 import { Line } from 'rc-progress'
 
 export default class LongAction extends Component {

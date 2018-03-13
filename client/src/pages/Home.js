@@ -1,4 +1,6 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+
+import React from 'react'
 import Page from 'components/Page'
 import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-bootstrap'
 import {Link} from 'react-router'
@@ -18,6 +20,9 @@ import {Report} from 'models'
 
 import API from 'api'
 import Settings from 'Settings'
+
+import { confirmAlert } from 'react-confirm-alert'
+import 'components/react-confirm-alert.css'
 
 export default class Home extends Page {
 	static contextTypes = {
@@ -275,16 +280,22 @@ export default class Home extends Page {
 	deleteSearch() {
 		let search = this.state.selectedSearch
 		let index = this.state.savedSearches.findIndex(s => s.id === search.id)
-		if (confirm("Are you sure you want to delete '" + search.name + "'?")) {
-			API.send(`/api/savedSearches/${search.id}`, {}, {method: 'DELETE'})
-				.then(data => {
-					let savedSearches = this.state.savedSearches
-					savedSearches.splice(index, 1)
-					let nextSelect = savedSearches.length > 0 ? savedSearches[0] : null
-					this.setState({ savedSearches: savedSearches, selectedSearch : nextSelect })
-				}, data => {
-					this.setState({success:null, error: data})
-				})
-		}
+		confirmAlert({
+			title: 'Confirm to delete search',
+			message: 'Are you sure you want to delete this search?',
+			confirmLabel: "Yes, I am sure that I want to delete '" + search.name + "'",
+			cancelLabel: 'No, I am not entirely sure at this point',
+			onConfirm: () => {
+				API.send(`/api/savedSearches/${search.id}`, {}, {method: 'DELETE'})
+					.then(data => {
+						let savedSearches = this.state.savedSearches
+						savedSearches.splice(index, 1)
+						let nextSelect = savedSearches.length > 0 ? savedSearches[0] : null
+						this.setState({ savedSearches: savedSearches, selectedSearch : nextSelect })
+					}, data => {
+						this.setState({success:null, error: data})
+					})
+			}
+		})
 	}
 }

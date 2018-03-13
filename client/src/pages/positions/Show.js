@@ -1,4 +1,7 @@
-import React, {PropTypes} from 'react'
+/* eslint no-restricted-globals: ["off", "confirm"] */ //TODO remove this
+import PropTypes from 'prop-types'
+
+import React from 'react'
 import Page from 'components/Page'
 import {Link} from 'react-router'
 import {Table, Button} from 'react-bootstrap'

@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import {FormControl} from 'react-bootstrap'
 import Autosuggest from 'react-autosuggest-ie11-compatible'
 import autobind from 'autobind-decorator'
@@ -85,7 +86,7 @@ export default class Autocomplete extends Component {
 		inputProps.onBlur = this.onInputBlur
 
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
-			<img src={SEARCH_ICON} className="form-control-icon" role="presentation" onClick={this.focus} />
+			<img src={SEARCH_ICON} className="form-control-icon" alt="" onClick={this.focus} />
 
 			<Autosuggest
 				suggestions={this.state.noSuggestions ? [{}] : this.state.suggestions}

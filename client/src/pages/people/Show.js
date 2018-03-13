@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 import Page from 'components/Page'
 import {Table, FormGroup, Col, ControlLabel, Button} from 'react-bootstrap'
 import moment from 'moment'

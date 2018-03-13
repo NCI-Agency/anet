@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import {Grid, Row, Col, Label} from 'react-bootstrap'
 import utils from 'utils'
 import pluralize from 'pluralize'
