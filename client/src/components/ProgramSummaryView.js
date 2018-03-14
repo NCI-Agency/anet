@@ -4,6 +4,7 @@ import _ from 'lodash'
 import ReactTable from "react-table"
 import "react-table/react-table.css"
 import Settings from 'Settings'
+import LinkTo from 'components/LinkTo'
 
 export default class ProgramSummaryView extends React.Component {
     constructor() {
@@ -42,22 +43,22 @@ export default class ProgramSummaryView extends React.Component {
                             Header: "EF",
                             accessor: task => {
                                 const parents = this.findParents(task)
-                                return parents.length > 0 && parents[0].shortName
+                                return parents.length > 0 && (parents[0].shortName + " " + parents[0].longName)
                             }
                         }, {
                             id: "PT",
                             Header: "Program Task",
                             accessor: task => {
                                 const parents = this.findParents(task)
-                                return parents.length > 1 && parents[1].shortName
-                            }
+                                return parents.length > 1 && (parents[1].shortName  + " " + parents[1].longName)
+                            },
+                            Aggregated: row => null
                         }, {
                             Header: "Task",
-                            accessor: "shortName"
-                        }, {
-                            Header: "Name",
-                            accessor: "longName"
-                        },
+                            accessor: "shortName",
+                            Aggregated: row => null,
+                            Cell: row => row.original && (<LinkTo task={row.original} key={row.original.id}>{row.original.shortName + " " + row.original.longName}</LinkTo>)
+                        }
                     ], phaseAccessors)}
                         defaultPageSize={25}/>
         );
