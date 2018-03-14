@@ -16,66 +16,66 @@ export default class ProgramSummaryView extends React.Component {
     }
 
     static STATUS = {
-		COMPLETED: 'completed',
-		ONGOING: 'ongoing',
-		OVERDUE: 'overdue'
+		COMPLETED: {id: 'completed', color: 'green'},
+		ONGOING: {id: 'ongoing', color: 'black'},
+        OVERDUE: {id: 'overdue', color: 'red'}
     }
     
     findParents = task => {
         const parents = []
-        const matchTask = element => {
+        const matchParentTask = element => {
             if (element.id === task.parentTask.id) 
                 return element
         }
         while (task.parentTask) 
-            parents.unshift(task = this.state.data.find(matchTask))
+            parents.unshift(task = this.state.data.find(matchParentTask))
         return parents
     }
 
     render() {
         const {data} = this.state
         const now = new Date()
-        const phaseAccessors = _.transform(Settings.fields.task.customFieldEnum2.enum, (result,val,key) => {
+
+        // Making a starting object for aggregations with stats initialized at 0
+        const initialStats = Object.values(ProgramSummaryView.STATUS).reduce((accumulator, currentValue) => {accumulator[currentValue.id]=0; return accumulator},{})
+
+        // Making a column for each possible enum value of customFieldEnum2
+        const customFieldEnum2Columns = _.transform(Settings.fields.task.customFieldEnum2.enum, (result,val,key) => {
             result.push( {   id : "_phase" + key,  Header: val,
                 accessor: task => {
                     if (task.customFieldEnum2 !== key)
                         return null
-                    if (task.projectedCompletion)
+                    if (task.projectedCompletion) // TODO: refactor projectedCompletion into dateOfCompletion
                         return ProgramSummaryView.STATUS.COMPLETED
                     else if (task.plannedCompletion < now)
                         return ProgramSummaryView.STATUS.OVERDUE
                     else 
                         return ProgramSummaryView.STATUS.ONGOING
                 },
-                aggregate: (values, rows) => values.reduce((accumulator, currentValue) => 
-                {
-                    if (typeof currentValue === 'string') 
-                    {    
-                        ++ accumulator[currentValue]
-                        return accumulator
-                    }
-                    else if (currentValue) 
-                    {
-                    accumulator[ProgramSummaryView.STATUS.COMPLETED] = currentValue[ProgramSummaryView.STATUS.COMPLETED] + accumulator[ProgramSummaryView.STATUS.COMPLETED]
-                    accumulator[ProgramSummaryView.STATUS.OVERDUE] = currentValue[ProgramSummaryView.STATUS.OVERDUE] + accumulator[ProgramSummaryView.STATUS.OVERDUE]
-                    accumulator[ProgramSummaryView.STATUS.ONGOING] = currentValue[ProgramSummaryView.STATUS.ONGOING] + accumulator[ProgramSummaryView.STATUS.ONGOING]
-                    }
+                aggregate: (values, rows) => values.reduce((accumulator, currentValue) => {
+                    if (currentValue)
+                        if (currentValue.id) // TODO: find better way to recognize non-aggregated values
+                            ++ accumulator[currentValue.id]
+                        else if (currentValue)
+                            Object.values(ProgramSummaryView.STATUS).forEach(element => accumulator[element.id] += currentValue[element.id])
                     return accumulator
-                }, {completed:0, ongoing:0, overdue:0}),
+                }, Object.assign({}, initialStats)) ,
                 Cell: row => {
                     if (!row.value)
                         return null
-                    if (typeof row.value === 'string')
-                        return row.value
-                    const number = row.value.overdue > 0 ? row.value.overdue : row.value.ongoing
+
+                    if (row.value.id)
+                        return <div style={{color: row.value.color}}> {row.value.id} </div>
+
+                    const number = row.value.overdue > 0 ? row.value.overdue : row.value.completed
                     const all = row.value.ongoing+row.value.overdue+row.value.completed
-                    const rest = all - number
                     return <div style={{background: 'lightGray'}}>                
-                        <div style={{width: ''+100*number/all+'%', float:'left', 'textAlign':'right', background: row.value.overdue > 0 ? 'red' : 'green'}}>
+                        <div style={{width: ''+100*number/all+'%', float:'left', textAlign:'right', background: row.value.overdue > 0 ? 'red' : 'green'}}>
                             {number > 0 ? number : ""}
+                            {number > 0 && number===all && "/"+ all }
                         </div>
                         {number === 0 ? 0 : ""}
-                        {rest>0 && "/"+ rest }
+                        {number<all && "/"+ all }
                     </div>
                 }
             })},[])
@@ -87,7 +87,7 @@ export default class ProgramSummaryView extends React.Component {
                         columns={_.union([
                         {
                             id: "EF",
-                            Header: "EF2",
+                            Header: "EF",
                             accessor: task => {
                                 const parents = this.findParents(task)
                                 return parents.length > 0 && (parents[0].shortName + " " + parents[0].longName)
@@ -106,7 +106,7 @@ export default class ProgramSummaryView extends React.Component {
                             Aggregated: row => null,
                             Cell: row => row.original && (<LinkTo task={row.original} key={row.original.id}>{row.original.shortName + " " + row.original.longName}</LinkTo>)
                         }
-                    ], phaseAccessors, [
+                    ], customFieldEnum2Columns, [
                         {
                             id: "plannedCompletion",
                             Header: "Planned completion",
