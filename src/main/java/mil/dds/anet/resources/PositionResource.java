@@ -85,7 +85,6 @@ public class PositionResource implements IGraphQLResource {
 	/**
 	 * Creates a new position in the database. Must have Type and Organization with ID specified.
 	 * Optionally can provide:
-	 * - position.associatedPositions:  a list of Associated Positions and those relationships will be created at this point.
 	 * - position.person : If a person ID is provided in the Person object, that person will be put in this position.
 	 * @param position the position to create
 	 * @return the same Position object with the ID field filled in.
@@ -111,15 +110,32 @@ public class PositionResource implements IGraphQLResource {
 			dao.setPersonInPosition(p.getPerson(), created);
 		}
 
-		if (p.getAssociatedPositions() != null && p.getAssociatedPositions().size() > 0) {
-			//Create the associations now
-			for (Position associated : p.getAssociatedPositions()) {
-				dao.associatePosition(created, associated);
+		AnetAuditLogger.log("Position {} created by {}", p, user);
+		return created;
+	}
+
+	@POST
+	@Path("/updateAssociatedPosition")
+	@RolesAllowed("SUPER_USER")
+	public Response updateAssociatedPosition(@Auth Person user, Position pos) {
+		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
+
+		final Position current = dao.getById(pos.getId());
+		if (current != null) {
+			// Run the diff and see if anything changed and update.
+			if (pos.getAssociatedPositions() != null) {
+				Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
+						newPosition -> {
+							dao.associatePosition(newPosition, pos);
+						},
+						oldPositionId -> {
+							dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
+						});
+				AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
 			}
 		}
 
-		AnetAuditLogger.log("Position {} created by {}", p, user);
-		return created;
+		return (current == null) ? Response.status(Status.NOT_FOUND).build() : Response.ok().build();
 	}
 
 	@POST
@@ -132,10 +148,10 @@ public class PositionResource implements IGraphQLResource {
 		}
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
-		int numRows = dao.update(pos);
+		final int numRows = dao.update(pos);
 
-		if (pos.getPerson() != null || pos.getAssociatedPositions() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
-			Position current = dao.getById(pos.getId());
+		if (pos.getPerson() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
+			final Position current = dao.getById(pos.getId());
 			if (current != null) {
 				//Run the diff and see if anything changed and update.
 				if (pos.getPerson() != null) {
@@ -147,17 +163,6 @@ public class PositionResource implements IGraphQLResource {
 						dao.setPersonInPosition(pos.getPerson(), pos);
 						AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPerson(), current, user);
 					}
-				}
-
-				if (pos.getAssociatedPositions() != null) {
-					Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
-							newPosition -> {
-								dao.associatePosition(newPosition, pos);
-							},
-							oldPositionId -> {
-								dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
-							});
-					AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
 				}
 
 				if (PositionStatus.INACTIVE.equals(pos.getStatus()) && current.getPerson() != null) {
@@ -305,5 +310,5 @@ public class PositionResource implements IGraphQLResource {
 		dao.deletePosition(p);
 		return Response.ok().build();
 	}
-	
+
 }

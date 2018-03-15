@@ -240,8 +240,9 @@ export default class ReportMinimal extends Page {
 	renderApprovals(canApprove) {
 		let report = this.state.report
 		return <Fieldset>
-			<a name="approvals" />
-			<legend>Approvals</legend>
+			<a name="approvals">
+				<legend>Approvals</legend>
+			</a>
 			{report.approvalStatus.map(action =>
 				this.renderApprovalAction(action)
 			)}

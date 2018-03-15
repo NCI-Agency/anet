@@ -1,4 +1,6 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+
+import React from 'react'
 import Page from 'components/Page'
 import {Alert, Table, Button, Col, HelpBlock, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
@@ -17,6 +19,9 @@ import Tag from 'components/Tag'
 import API from 'api'
 import Settings from 'Settings'
 import {Report, Person, Task, Comment, Position} from 'models'
+
+import { confirmAlert } from 'react-confirm-alert'
+import 'components/react-confirm-alert.css'
 
 export default class ReportShow extends Page {
 	static contextTypes = {
@@ -486,7 +491,7 @@ export default class ReportShow extends Page {
 		API.send(`/api/reports/${this.state.report.id}/submit`).then(data => {
 			this.updateReport()
 			this.setState({error:null})
-			this.setState({success:'Successfully submited report'})
+			this.setState({success:'Successfully submitted report'})
 		}, data => {
 			this.handleError(data)
 		})
@@ -592,15 +597,19 @@ export default class ReportShow extends Page {
 
 	@autobind
 	deleteReport() {
-		if (!confirm("Are you sure you want to delete this report? This cannot be undone.")) {
-			return
-		}
-
-		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-			History.push('/', {success: 'Report deleted'})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
+		confirmAlert({
+			title: 'Confirm to delete report',
+			message: "Are you sure you want to delete this report? This cannot be undone.",
+			confirmLabel: `Yes, I am sure that I want to delete report #${this.state.report.id}`,
+			cancelLabel: 'No, I am not entirely sure at this point',
+			onConfirm: () => {
+				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+					History.push('/', {success: 'Report deleted'})
+				}, data => {
+					this.setState({success:null})
+					this.handleError(data)
+				})
+			}
 		})
 	}
 }

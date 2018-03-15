@@ -1,7 +1,5 @@
 import querystring from 'querystring'
 
-const query = querystring.parse(window.location.search.slice(1))
-
 const API = {
 	fetch(pathName, params, accept) {
 		params = params || {}
@@ -9,9 +7,9 @@ const API = {
 
 		params.headers = params.headers || {}
 		params.headers.Accept = accept || 'application/json'
-
-		if (process.env.NODE_ENV === 'development' && query.user && query.pass) {
-			params.headers.Authorization = 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64')
+		const authHeader = API.getAuthHeader()
+		if (authHeader) {
+			params.headers[authHeader[0]] = authHeader[1]
 		}
 
 		let promise = window.fetch(pathName, params)
@@ -92,8 +90,9 @@ const API = {
 	loadFileAjaxSync(filePath, mimeType) {
 		let xmlhttp=new XMLHttpRequest()
 		xmlhttp.open("GET",filePath,false)
-		if (process.env.NODE_ENV === 'development' && query.user && query.pass) {
-			xmlhttp.setRequestHeader('Authorization', 'Basic ' + new Buffer(`${query.user}:${query.pass}`).toString('base64'))
+		const authHeader = API.getAuthHeader()
+		if (authHeader) {
+			xmlhttp.setRequestHeader(authHeader[0], authHeader[1])
 		}
 		if (mimeType != null) {
 			if (xmlhttp.overrideMimeType) {
@@ -108,6 +107,33 @@ const API = {
 			throw new Error("unable to load " + filePath)
 		}
 	},
+
+	_getAuthParams: function() {
+		const query = querystring.parse(window.location.search.slice(1))
+		if (query.user && query.pass) {
+			window.ANET_DATA.creds = {
+				user: query.user,
+				pass: query.pass
+			}
+		}
+		return window.ANET_DATA.creds
+	},
+
+	addAuthParams: function(url) {
+		const creds = API._getAuthParams()
+		if (creds) {
+			url += "?" + querystring.stringify(creds)
+		}
+		return url
+	},
+
+	getAuthHeader: function() {
+		const creds = API._getAuthParams()
+		if (creds) {
+			return ['Authorization', 'Basic ' + new Buffer(`${creds.user}:${creds.pass}`).toString('base64')]
+		}
+		return null
+	}
 }
 
 export default API

@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import LinkTo from 'components/LinkTo'
 
 const SETTING_KEY_TEXT = 'SECURITY_BANNER_TEXT'

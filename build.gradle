@@ -14,7 +14,7 @@ apply plugin: 'idea'
 apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'org.kordamp.markdown.convert'
-apply plugin: 'com.bmuschko.docker-java-application'
+apply plugin: 'com.bmuschko.docker-remote-api'
 apply plugin: 'com.moowork.node'
 apply plugin: "org.sonarqube"
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
@@ -34,13 +34,13 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
-	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-jdbi', version: '1.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.0.2'
-	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.0.2'
-	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1'
+	compile group: 'io.dropwizard', name: 'dropwizard-core', version: '1.2.2'
+	compile group: 'io.dropwizard', name: 'dropwizard-jdbi', version: '1.2.2'
+	compile group: 'io.dropwizard', name: 'dropwizard-migrations', version: '1.2.2'
+	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.2.2'
+	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.2.2'
+	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.2.2'
+	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1' // optional dependency of jdbi
 
 	compile 'org.xerial:sqlite-jdbc:3.19.3' //If using SQLite
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
@@ -51,11 +51,7 @@ dependencies {
 	compile 'ch.qos.logback:logback-access:1.2.3'
 	compile 'com.github.waffle:waffle-jna:1.8.3'
 	compile 'com.graphql-java:graphql-java:2.2.0'
-	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20160924.1'
-
-	compile group: 'org.jvnet.com4j', name: 'com4j', version: '20110320'
-	compile 'org.jvnet.com4j.typelibs:active-directory:1.0'
-	compile 'org.jvnet.com4j.typelibs:ado20:1.0'
+	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
 
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
@@ -68,8 +64,8 @@ dependencies {
 	compile group: 'org.apache.poi', name: 'poi', version: '3.17'
 	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
 
-	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.0.2'
-	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.0.2'
+	testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.2.2'
+	testCompile group: 'io.dropwizard', name: 'dropwizard-client', version: '1.2.2'
 	testCompile 'org.apache.commons:commons-io:1.3.2'
 }
 
@@ -77,6 +73,11 @@ dependencies {
 def proc = "git describe".execute(null, projectDir);
 proc.waitFor();
 project.version = proc.text.trim();
+
+def projectBranch = "git rev-parse --abbrev-ref HEAD".execute(null, projectDir);
+projectBranch.waitFor();
+projectBranch = projectBranch.text.trim();
+
 project.group = "ncia"
 
 mainClassName = "mil.dds.anet.AnetApplication"
@@ -121,8 +122,13 @@ task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["check", anetConfig]
 }
 
-task buildClient(type: NpmTask) {
-	outputs.upToDateWhen { false };
+task buildClient(dependsOn: 'yarn', type: YarnTask) {
+    inputs.file("client/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("client/src").withPathSensitivity(PathSensitivity.RELATIVE)
+	inputs.dir("client/config").withPathSensitivity(PathSensitivity.RELATIVE)
+	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
+	outputs.dir("$buildDir/resources/main/assets/client")
+	outputs.cacheIf { true }
 	args = ['run', 'build']
 }
 
@@ -165,6 +171,37 @@ task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
 	environment(run.environment)
 	main = mainClassName
 	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
+}
+
+task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
+	description = "Builds anet-app-server container image"
+	doFirst {
+		copy {
+			from 'docker/anet-app-server/Dockerfile'
+			into 'build/install'
+		}
+	}
+	inputDir =  project.file('build/install')
+	tags = ['ncia/anet-app-server:'+project.version]
+	if (projectBranch=="candidate")
+		tags << 'ncia/anet-app-server:'+projectBranch
+	if (projectBranch=="master")
+		tags << 'ncia/anet-app-server:latest'
+}
+
+task dockerPushCandidateImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
+	imageName = 'ncia/anet-app-server'
+	tag = 'candidate'
+}
+
+task dockerPushLatestImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
+	imageName = 'ncia/anet-app-server'
+	tag = 'latest'
+}
+
+task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
+	imageName = 'ncia/anet-app-server'
+	tag = project.version
 }
 
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
@@ -210,7 +247,7 @@ task dockerLoadDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecCon
 	cmd = ["/opt/mssql-tools/bin/sqlcmd", "-S", run.environment["ANET_DB_SERVER"], "-U", run.environment["ANET_DB_USERNAME"], "-P", run.environment["ANET_DB_PASSWORD"], "-d", run.environment["ANET_DB_NAME"], "-a", "32767", "-i", "/hostdata/insertBaseData.sql"]
 }
 
-jar.dependsOn buildClient
+classes.dependsOn buildClient
 
 //Configure the Java Checkstyle settings. Run with ./gradlew check
 checkstyle {
@@ -248,19 +285,6 @@ buildscript {
 	}
 }
 
-docker {
-	javaApplication {
-		baseImage = 'openjdk:8-jre-alpine'
-		maintainer = 'Vassil Iordanov "vassil.iordanov@gmail.com"'
-		ports = [80, 443]
-		tag = 'ncia/anet-app-server:'+project.version
-		exec {
-			defaultCommand "server","/home/anet/anet.yml"
-			entryPoint "/$project.name/bin/anet"
-		}
-	}
-}
-
 startScripts {
 	doLast {
 		unixScript.text = unixScript.text.replace('MY_APP_HOME', '\$APP_HOME')
@@ -277,6 +301,8 @@ allprojects {
 
 node {
 	nodeModulesDir = file("${project.projectDir}/client")
+	version = '8.10.0'
+	download = true
 }
 
 sonarqube {

@@ -38,8 +38,8 @@ TRUNCATE TABLE reportsSensitiveInformation;
 TRUNCATE TABLE authorizationGroupPositions;
 TRUNCATE TABLE reportAuthorizationGroups;
 DELETE FROM positions;
-DELETE FROM tasks WHERE parentTaskId IS NOT NULL;
-DELETE FROM tasks WHERE parentTaskId IS NULL;
+DELETE FROM tasks WHERE customFieldRef1Id IS NOT NULL;
+DELETE FROM tasks WHERE customFieldRef1Id IS NULL;
 DELETE FROM reports;
 DELETE FROM people;
 DELETE FROM approvalSteps;
@@ -235,241 +235,87 @@ INSERT INTO approvers (approvalStepId, positionId) VALUES
 	((SELECT id from approvalSteps WHERE name='EF 2.2 Secondary Reviewers'), (SELECT id from positions where name = 'EF 2.2 Final Reviewer'));
 
 
-
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)					VALUES ('1001', '1001', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01', '1001.01.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.001', '1001.01.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.002', '1001.01.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.003', '1001.01.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.004', '1001.01.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.005', '1001.01.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.006', '1001.01.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.007', '1001.01.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.01.008', '1001.01.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.01'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02', '1001.01.02', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.001', '1001.01.02.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.002', '1001.01.02.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.003', '1001.01.02.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.004', '1001.01.02.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.005', '1001.01.02.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.006', '1001.01.02.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.007', '1001.01.02.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.02.008', '1001.01.02.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.02'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03', '1001.01.03', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.001', '1001.01.03.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.002', '1001.01.03.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.003', '1001.01.03.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.004', '1001.01.03.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.005', '1001.01.03.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.006', '1001.01.03.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.007', '1001.01.03.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.01.03.008', '1001.01.03.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.01.03'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01', '1001.02.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.001', '1001.02.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.002', '1001.02.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.003', '1001.02.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.004', '1001.02.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.005', '1001.02.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.006', '1001.02.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.007', '1001.02.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1001.02.01.008', '1001.02.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1001.02.01'));
-
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)					VALUES ('1002', '1002', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01', '1002.01.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.001', '1002.01.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.002', '1002.01.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.003', '1002.01.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.004', '1002.01.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.005', '1002.01.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.006', '1002.01.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.007', '1002.01.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.01.008', '1002.01.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.01'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02', '1002.01.02', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.001', '1002.01.02.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.002', '1002.01.02.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.003', '1002.01.02.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.004', '1002.01.02.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.005', '1002.01.02.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.006', '1002.01.02.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.007', '1002.01.02.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.02.008', '1002.01.02.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.02'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03', '1002.01.03', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.001', '1002.01.03.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.002', '1002.01.03.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.003', '1002.01.03.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.004', '1002.01.03.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.005', '1002.01.03.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.006', '1002.01.03.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.007', '1002.01.03.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.01.03.008', '1002.01.03.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.01.03'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01', '1002.02.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.001', '1002.02.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.002', '1002.02.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.003', '1002.02.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.004', '1002.02.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.005', '1002.02.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.006', '1002.02.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.007', '1002.02.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1002.02.01.008', '1002.02.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1002.02.01'));
-
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)					VALUES ('1003', '1003', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01', '1003.01.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.001', '1003.01.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.002', '1003.01.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.003', '1003.01.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.004', '1003.01.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.005', '1003.01.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.006', '1003.01.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.007', '1003.01.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.01.008', '1003.01.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.01'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02', '1003.01.02', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.001', '1003.01.02.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.002', '1003.01.02.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.003', '1003.01.02.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.004', '1003.01.02.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.005', '1003.01.02.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.006', '1003.01.02.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.007', '1003.01.02.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.02.008', '1003.01.02.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.02'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03', '1003.01.03', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.001', '1003.01.03.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.002', '1003.01.03.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.003', '1003.01.03.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.004', '1003.01.03.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.005', '1003.01.03.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.006', '1003.01.03.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.007', '1003.01.03.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.01.03.008', '1003.01.03.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.01.03'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01', '1003.02.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.001', '1003.02.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.002', '1003.02.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.003', '1003.02.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.004', '1003.02.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.005', '1003.02.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.006', '1003.02.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.007', '1003.02.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1003.02.01.008', '1003.02.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1003.02.01'));
-
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)					VALUES ('1004', '1004', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01', '1004.01.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.001', '1004.01.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.002', '1004.01.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.003', '1004.01.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.004', '1004.01.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.005', '1004.01.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.006', '1004.01.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.007', '1004.01.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.01.008', '1004.01.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.01'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02', '1004.01.02', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.001', '1004.01.02.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.002', '1004.01.02.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.003', '1004.01.02.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.004', '1004.01.02.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.005', '1004.01.02.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.006', '1004.01.02.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.007', '1004.01.02.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.02.008', '1004.01.02.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.02'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03', '1004.01.03', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.001', '1004.01.03.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.002', '1004.01.03.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.003', '1004.01.03.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.004', '1004.01.03.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.005', '1004.01.03.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.006', '1004.01.03.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.007', '1004.01.03.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.01.03.008', '1004.01.03.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.01.03'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01', '1004.02.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.001', '1004.02.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.002', '1004.02.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.003', '1004.02.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.004', '1004.02.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.005', '1004.02.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.006', '1004.02.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.007', '1004.02.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1004.02.01.008', '1004.02.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1004.02.01'));
-
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)					VALUES ('1005', '1005', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01', '1005.01.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.001', '1005.01.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.002', '1005.01.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.003', '1005.01.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.004', '1005.01.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.005', '1005.01.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.006', '1005.01.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.007', '1005.01.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.01.008', '1005.01.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.01'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02', '1005.01.02', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.001', '1005.01.02.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.002', '1005.01.02.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.003', '1005.01.02.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.004', '1005.01.02.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.005', '1005.01.02.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.006', '1005.01.02.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.007', '1005.01.02.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.02.008', '1005.01.02.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.02'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03', '1005.01.03', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.001', '1005.01.03.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.002', '1005.01.03.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.003', '1005.01.03.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.004', '1005.01.03.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.005', '1005.01.03.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.006', '1005.01.03.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.007', '1005.01.03.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.01.03.008', '1005.01.03.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.01.03'));
-
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01', '1005.02.01', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.001', '1005.02.01.001', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.002', '1005.02.01.002', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.003', '1005.02.01.003', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.004', '1005.02.01.004', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.005', '1005.02.01.005', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.006', '1005.02.01.006', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.007', '1005.02.01.007', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId) 	VALUES ('1005.02.01.008', '1005.02.01.008', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = '1005.02.01'));
-
-
-
 INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)	VALUES ('EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId)
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id)
 	VALUES ('1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'));
-INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, parentTaskId, organizationId)
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
 	VALUES ('1.1.A', 'Milestone the First in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1'));
 
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)	VALUES ('EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id)
+	VALUES ('1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.1.A', 'Milestone the First in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.1.B', 'Milestone the Second in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.1.C', 'Milestone the Third in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1.1'));
 
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('EF 1.2', 'Budgeting in the MoI', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'), (SELECT id from organizations WHERE shortName='EF 1.2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.2.A', 'Milestone the First in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.2.B', 'Milestone the Second in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.2.C', 'Milestone the Third in EF 1.2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.2'), (SELECT id from organizations where shortName='EF 1.2'));
+
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('EF 1.3', 'Budgeting in the Police?', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'), (SELECT id FROM organizations WHERE shortName='EF 1.3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.3.A', 'Getting a budget in place', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.3.B', 'Tracking your expenses', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.3.C', 'Knowing when you run out of money', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.3'), (SELECT id from organizations where shortName='EF 1.3'));
+
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, organizationId)
+	VALUES ('EF 2', 'Transparency, Accountability, O (TAO)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('2.A', 'This is the first Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('2.B', 'This is the second Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('2.C', 'This is the third Milestone in EF 2', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('2.D', 'Keep track of the petty cash drawer', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 2'), (SELECT id from organizations where shortName='EF 2'));
+
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 3', 'Rule of Law', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('3.a', 'Get some Lawyers to read a book', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('3.b', 'Get some Lawyers to wear a suit to court', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('3.c', 'Get some Lawyers to cross-examine witnesses in a non-hostile fashion', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 3'), (SELECT id from organizations where shortName='EF 3'));
+
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 4', 'Force Gen (Training)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.a', 'Get a website for people to apply on', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.b', 'Hire People', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.b.1', 'Get an HR team', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.b.2', 'Review resumes for hiring', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.b.3', 'Invite people to come interview', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.b.4', 'Interview candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.b.5', 'Extend Job Offers to successful candidates', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('4.c', 'Onboard new Employees', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 4'), (SELECT id from organizations where shortName='EF 4'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF 5', 'Force Sustainment (Logistics)', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF6', 'C2 Operations', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF7', 'Intelligence', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('EF8', 'Stratcom', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('Gender', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-N', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-S', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-E', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-W', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC-C', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt) VALUES ('TAAC Air', '', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO locations (name, lat, lng, createdAt, updatedAt) VALUES('St Johns Airport', 47.613442, -52.740936, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO locations (name, lat, lng, createdAt, updatedAt) VALUES('Murray''s Hotel', 47.561517, -52.708760, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

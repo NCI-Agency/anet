@@ -121,7 +121,7 @@ export default class ProgramSummaryView extends React.Component {
     fetchData() {
         const chartQuery = API.query(/* GraphQL */
         `taskList (f:getAll pageSize:10000) { 
-            totalCount, list { id, shortName, longName, customFieldEnum2, plannedCompletion, projectedCompletion, parentTask { id }, }
+            totalCount, list { id, shortName, longName, customFieldEnum2, plannedCompletion, projectedCompletion, customFieldRef1 { id }, }
         }`)
 
         Promise

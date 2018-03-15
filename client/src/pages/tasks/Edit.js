@@ -36,7 +36,7 @@ export default class TaskEdit extends Page {
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
 				responsibleOrg {id,shortName, longName, identificationCode},
-				parentTask { id, shortName, longName }
+				customFieldRef1 { id, shortName, longName }
 			}
 		`).then(data => {
 			if (data.task.plannedCompletion) {

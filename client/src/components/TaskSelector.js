@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
@@ -45,7 +46,7 @@ export default class TasksSelector extends Component {
 					clearOnSelect={true} />
 
 				{validationState && <HelpBlock>
-					<img src={WARNING_ICON} role="presentation" height="20px" />
+					<img src={WARNING_ICON} alt="" height="20px" />
 					{taskShortLabel} not found in Database
 				</HelpBlock>}
 

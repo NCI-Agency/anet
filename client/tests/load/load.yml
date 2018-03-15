@@ -1,0 +1,251 @@
+config:
+  target: 'http://localhost:8080'
+  phases:
+    - duration: 600
+      arrivalRate: 60
+  processor: "./processor.js"
+  defaults:
+    headers:
+      x-my-service-auth: '987401838271002188298567'
+  variables:
+    advisor:
+      - "erin"
+      - "arthur"
+      - "rebecca"
+      - "jack"
+      - "henry"
+    superuser:
+      - "arthur"
+      - "rebecca"
+      - "henry"
+    admin:
+      - "arthur"
+scenarios:
+  - name: Check home
+    weight: 5
+    flow:
+    - get:
+        url: "/"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Make report
+    weight: 3
+    flow:
+    - post:
+        url: "/api/reports/new"
+        beforeRequest: "generateRandomData"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          intent: "{{ intent }}"
+          engagementDate: "{{ engagementDate }}"
+          atmosphere: "{{ atmosphere }}"
+          atmosphereDetails: "{{ atmosphereDetails }}"
+          attendees:
+          - name: REINTON, Reina
+            status: ACTIVE
+            role: ADVISOR
+            id: 4
+            primary: true
+          - name: TOPFERNESS, Christopf
+            status: ACTIVE
+            role: PRINCIPAL
+            id: 8
+            primary: true
+          tasks: []
+          comments: []
+          reportText: "{{ reportText }}"
+          nextSteps: "{{ nextSteps }}"
+          keyOutcomes: "{{ keyOutcomes }}"
+          tags: []
+          reportSensitiveInformation:
+            id: 
+            createdAt: 
+            updatedAt: 
+            text: 
+            reportId: 1020
+          authorizationGroups: []
+        capture:
+          json: "$.id"
+          as: "reportId"
+    - log: "{{ advisor }} creating report {{ reportId }}"
+  - name: Approve report
+    weight: 5
+    flow:
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query { person(f:me) { id }}"
+        capture:
+          json: "$.data.person.id"
+          as: "personId"
+    - post:
+        url: "/graphql"
+        afterResponse: "continueIfResult"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query  { reports: reportList (f:search, query:{pendingApprovalOf:{{ personId }} }) {list { id}}}"
+        capture:
+          json: "$.data.reports.list[0].id"
+          as: "result"
+    - log: "{{ advisor }} approving report {{ result }}"
+    - post:
+        url: "/api/reports/{{ result }}/approve"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Update report
+    weight: 50
+    flow:
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query { person(f:me) { id }}"
+        capture:
+          json: "$.data.person.id"
+          as: "personId"
+    - post:
+        url: "/graphql"
+        afterResponse: "continueIfResult"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query  { reports: reportList (f:search, query:{authorId:{{ personId }},state:[DRAFT,REJECTED]}) {list { id}}}"
+        capture:
+          json: "$.data.reports.list[0].id"
+          as: "result"
+    - log: "{{ advisor }} updating report {{ result }}"
+    - post:
+        url: "/api/reports/{{ result }}/update"
+        beforeRequest: "generateRandomData"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          intent: "{{ intent }}"
+          engagementDate: "{{ engagementDate }}"
+          atmosphere: "{{ atmosphere }}"
+          atmosphereDetails: "{{ atmosphereDetails }}"
+          attendees:
+          - name: REINTON, Reina
+            status: ACTIVE
+            role: ADVISOR
+            id: 4
+            primary: true
+          - name: TOPFERNESS, Christopf
+            status: ACTIVE
+            role: PRINCIPAL
+            id: 8
+            primary: true
+          tasks: []
+          comments: []
+          reportText: "{{ reportText }}"
+          nextSteps: "{{ nextSteps }}"
+          keyOutcomes: "{{ keyOutcomes }}"
+          tags: []
+          reportSensitiveInformation:
+            id: 
+            createdAt: 
+            updatedAt: 
+            text: 
+            reportId: 1020
+          authorizationGroups: []
+  - name: Submit report
+    weight: 1
+    flow:
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query { person(f:me) { id }}"
+        capture:
+          json: "$.data.person.id"
+          as: "personId"
+    - post:
+        url: "/graphql"
+        afterResponse: "continueIfResult"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json: 
+          query: "query  { reports: reportList (f:search, query:{authorId:{{ personId }},state:[DRAFT,REJECTED]}) {list { id}}}"
+        capture:
+          json: "$.data.reports.list[0].id"
+          as: "result"
+    - log: "{{ advisor }} submitting report {{ result }}"
+    - post:
+        url: "/api/reports/{{ result }}/submit"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Rollups
+    weight: 1  
+    flow:
+    - log: "{{ advisor }} checking rollups"
+    - get:
+        url: "/rollup"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - think: 1
+    - get:
+        url: "/rollup?date=-1"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Insights
+    weight: 1
+    flow:
+    - log: "{{ advisor }} checking insights"
+    - get:
+        url: "/insights/not-approved-reports"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/cancelled-reports"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/reports-by-task"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/future-engagements-by-location"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/reports-by-day-of-week"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+    - get:
+        url: "/insights/advisor-reports"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+  - name: Do searches
+    weight: 3
+    flow:
+    - log: "{{ advisor }} searching"
+    - get:
+        url: "/search?text=a"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"

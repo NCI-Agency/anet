@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 
 import Model from 'components/Model'
 import Settings from 'Settings'
@@ -25,8 +26,7 @@ export default class Task extends Model {
 		longName: '',
 		category: '',
 		responsibleOrg: {},
-		parentTask: {},
-		childrenTasks: [],
+		customFieldRef1: {},
 		customFieldEnum1: '',
 		customFieldEnum2: '',
 		customField: '',

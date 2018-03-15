@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 import {Checkbox, Table, Button, Collapse, HelpBlock} from 'react-bootstrap'
 import DatePicker from 'react-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
@@ -17,7 +18,6 @@ import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 
 import moment from 'moment'
-import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
 import Settings from 'Settings'
@@ -145,7 +145,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
 
 		const invalidInputWarningMessage = <HelpBlock><b>
-			<img src={WARNING_ICON} role="presentation" height="20px" />
+			<img src={WARNING_ICON} alt="" height="20px" />
 			Location not found in database
 		</b></HelpBlock>
 
@@ -286,7 +286,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 							valueKey="name" />
 
 						{errors.attendees && <HelpBlock>
-							<img src={WARNING_ICON} role="presentation" height="20px" />
+							<img src={WARNING_ICON} alt="" height="20px" />
 							Person not found in ANET Database.
 						</HelpBlock>}
 

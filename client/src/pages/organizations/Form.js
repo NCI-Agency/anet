@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React from 'react'
 import {Button, Table} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
@@ -113,7 +114,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				X
 			</Button>
 
-			<RequiredField id="approvalStepName"
+			<RequiredField id={`approvalStepName${index}`}
 				label="Step name"
 				value={step.name}
 				onChange={(event) => this.setStepName(index, event)} />
@@ -217,7 +218,11 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
-		let organization = Object.without(this.props.organization, 'childrenOrgs', 'positions', 'approvalStepName')
+		let organization = Object.without(this.props.organization, 'childrenOrgs', 'positions')
+		for (var i = 0; i < this.props.organization.approvalSteps.length; i++) {
+			organization = Object.without(organization, 'approvalStepName' + i)
+		}
+
 		if (organization.parentOrg) {
 			organization.parentOrg = {id: organization.parentOrg.id}
 		}

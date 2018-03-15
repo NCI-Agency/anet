@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
 import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Table} from 'react-bootstrap'
@@ -146,7 +147,7 @@ export default class EditAssociatedPositionsModal extends Component {
 		delete position.previousPeople
 		delete position.person //prevent any changes to person.
 
-		API.send('/api/positions/update', position)
+		API.send('/api/positions/updateAssociatedPosition', position)
 			.then(resp =>
 				this.props.onSuccess()
 			).catch(error => {

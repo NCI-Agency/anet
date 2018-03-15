@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import {Button, Pagination} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
@@ -16,21 +17,20 @@ const GQL_REPORT_FIELDS =  /* GraphQL */`
 	id, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
 	author { id, name }
-	primaryAdvisor { id, name, role, position { organization { id, shortName}}},
-	primaryPrincipal { id, name, role, position { organization { id, shortName}}},
-	advisorOrg { id, shortName},
-	principalOrg { id, shortName},
-	location { id, name, lat, lng},
-	tasks {id, shortName, longName},
-	tags {id, name, description}
+	primaryAdvisor { id, name },
+	primaryPrincipal { id, name },
+	advisorOrg { id, shortName },
+	principalOrg { id, shortName },
+	location { id, name, lat, lng },
+	tasks { id, shortName },
+	tags { id, name, description }
 	approvalStatus {
 		type, createdAt
 		step { id , name
 			approvers { id, name, person { id, name, rank } }
 		},
-		person { id, name, rank}
+		person { id, name, rank }
 	}
-	engagementDayOfWeek
 `
 
 
