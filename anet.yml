@@ -164,12 +164,12 @@ dictionary:
     task:
       shortLabel: Task
       longLabel: Tasks and Milestones
-      projectedCompletion:
-        label: Projected Completion
-        placeholder: 'Fill in the projected completion date'
       plannedCompletion:
         label: 'Planned completion'
         placeholder: 'Fill in the planned completion date'
+      projectedCompletion:
+        label: Date of Completion
+        placeholder: 'Fill in the date of completion'
       customFieldRef1:
         label: 'Parent task'
         placeholder: 'Start typing to search for a higher level task'
@@ -295,6 +295,7 @@ dictionary:
     - ANET Administrators
   tasking_ORGs:
     - EF 2.2
+    - EF 1
   domainNames:
     - cmil.mil
     - mission.ita

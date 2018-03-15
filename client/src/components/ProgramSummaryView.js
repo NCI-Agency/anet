@@ -24,10 +24,10 @@ export default class ProgramSummaryView extends React.Component {
     findParents = task => {
         const parents = []
         const matchParentTask = element => {
-            if (element.id === task.parentTask.id) 
+            if (element.id === task.customFieldRef1.id) 
                 return element
         }
-        while (task.parentTask) 
+        while (task.customFieldRef1) 
             parents.unshift(task = this.state.data.find(matchParentTask))
         return parents
     }
@@ -45,7 +45,7 @@ export default class ProgramSummaryView extends React.Component {
                 accessor: task => {
                     if (task.customFieldEnum2 !== key)
                         return null
-                    if (task.projectedCompletion) // TODO: refactor projectedCompletion into dateOfCompletion
+                    if (task.customFieldEnum1.toLowerCase() === ProgramSummaryView.STATUS.COMPLETED.id)
                         return ProgramSummaryView.STATUS.COMPLETED
                     else if (task.plannedCompletion < now)
                         return ProgramSummaryView.STATUS.OVERDUE
@@ -121,7 +121,7 @@ export default class ProgramSummaryView extends React.Component {
     fetchData() {
         const chartQuery = API.query(/* GraphQL */
         `taskList (f:getAll pageSize:10000) { 
-            totalCount, list { id, shortName, longName, customFieldEnum2, plannedCompletion, projectedCompletion, customFieldRef1 { id }, }
+            totalCount, list { id, shortName, longName, customFieldEnum1, customFieldEnum2, plannedCompletion, customFieldRef1 { id }, }
         }`)
 
         Promise
