@@ -56,7 +56,7 @@ public class AnetEmailWorker implements Runnable {
 	private Authenticator auth;
 	private String fromAddr;
 	private String serverUrl;
-	private Map<String, Object> task;
+	private final Map<String, Object> fields;
 	private Configuration freemarkerConfig;
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
@@ -73,7 +73,7 @@ public class AnetEmailWorker implements Runnable {
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionary().get("SUPPORT_EMAIL_ADDR");
-		this.task = (Map<String, Object>) ((Map<String, Object>)config.getDictionary().get("fields")).get("task");
+		this.fields = (Map<String, Object>) config.getDictionary().get("fields");
 		instance = this;
 
 		SmtpConfiguration smtpConfig = config.getSmtp();
@@ -175,7 +175,7 @@ public class AnetEmailWorker implements Runnable {
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
-			context.put("TASK_SHORT_LABEL", task.get("shortLabel"));
+			context.put("fields", fields);
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
 
 			temp.process(context, writer);
