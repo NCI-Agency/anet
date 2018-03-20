@@ -96,8 +96,8 @@
     "whatwg-fetch": "^2.0.3"
   },
   "scripts": {
-    "build": "NODE_ENV=production webpack -p --config config/webpack.prod.js",
-    "start": "NODE_ENV=development webpack-dev-server --debug --open --config config/webpack.dev.js --port 3000",
+    "build": "NODE_ENV=production webpack --mode production --config config/webpack.prod.js",
+    "start": "NODE_ENV=development webpack-dev-server --mode development --open --config config/webpack.dev.js --port 3000",
     "lint": "eslint src tests/e2e/**/*.js tests/util/**/*.js",
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "test": "npm run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
