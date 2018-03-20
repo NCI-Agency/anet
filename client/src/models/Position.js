@@ -63,7 +63,7 @@ export default class Position extends Model {
 	}
 
 	toString() {
-		return this.code || this.name
+		return this.name
 	}
 
 	iconUrl() {
