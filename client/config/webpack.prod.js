@@ -51,7 +51,7 @@ module.exports = merge(common, {
   }),
     new CopyWebpackPlugin([
       { from: 'public', ignore : ['index.html','alloy-editor/**/*'] },
-      { from: 'node_modules/alloyeditor/dist/alloy-editor', to: 'alloy-editor'}
+      //{ from: 'node_modules/alloyeditor/dist/alloy-editor', to: 'alloy-editor'}
   ])
 
 ]})
