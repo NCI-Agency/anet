@@ -97,7 +97,7 @@ export default class Person extends Model {
 	}
 
 	hasActivePosition() {
-		return this.hasAssignedPosition() && this.position.status === Person.STATUS.ACTIVE
+		return this.hasAssignedPosition() && this.position.status === Position.STATUS.ACTIVE
 	}
 
 	//Checks if this user is a valid super user for a particular organization
