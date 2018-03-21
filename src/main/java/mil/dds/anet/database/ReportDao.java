@@ -56,7 +56,7 @@ public class ReportDao implements IAnetDao<Report> {
 			"atmosphereDetails", "text", "keyOutcomes",
 			"nextSteps", "authorId"};
 	private static final String tableName = "reports";
-	public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
 	Handle dbHandle;
 
