@@ -30,7 +30,12 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
-		if (doFullTextSearch) {
+		final boolean doSoundex = doFullTextSearch && query.getSortBy() == null;
+		if (doSoundex) {
+			sql.append(", EXP(SUM(LOG(1.0/(5-DIFFERENCE(name_token.value, search_token.value)))))");
+			sql.append(" AS search_rank");
+		}
+		else if (doFullTextSearch) {
 			// If we're doing a full-text search, add a pseudo-rank (the sum of all search ranks)
 			// so we can sort on it (show the most relevant hits at the top).
 			// Note that summing up independent ranks is not ideal, but it's the best we can do now.
@@ -47,7 +52,12 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 			sql.append(" LEFT JOIN positions ON people.id = positions.currentPersonId ");
 		}
 
-		if (doFullTextSearch) {
+		if (doSoundex) {
+			sql.append(" CROSS APPLY STRING_SPLIT(people.name, ' ') AS name_token"
+					+ " CROSS APPLY STRING_SPLIT(:freetextQuery, ' ') AS search_token");
+			sqlArgs.put("freetextQuery", text);
+		}
+		else if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (people, (name, emailAddress, biography), :containsQuery) c_people"
 					+ " ON people.id = c_people.[Key]"
 					+ " LEFT JOIN FREETEXTTABLE(people, (name, biography), :freetextQuery) f_people"
@@ -119,12 +129,19 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 		result.setPageNum(query.getPageNum());
 		result.setPageSize(query.getPageSize());
 
-		if (whereClauses.isEmpty()) {
+		if (whereClauses.isEmpty() && !doSoundex) {
 			return result;
 		}
 
-		sql.append(" WHERE ");
-		sql.append(Joiner.on(" AND ").join(whereClauses));
+		if (!whereClauses.isEmpty()) {
+			sql.append(" WHERE ");
+			sql.append(Joiner.on(" AND ").join(whereClauses));
+		}
+
+		if (doSoundex) {
+			// Add grouping needed for soundex score
+			sql.append(" GROUP BY " + PersonDao.PERSON_FIELDS_NOAS);
+		}
 
 		//Sort Ordering
 		final List<String> orderByClauses = new LinkedList<>();
