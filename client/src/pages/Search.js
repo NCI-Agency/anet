@@ -5,8 +5,7 @@ import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
 import Fieldset from 'components/Fieldset'
-import {ContentForNav} from 'components/Nav'
-import History from 'components/History'
+//import {ContentForNav} from 'components/Nav'
 import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
@@ -251,50 +250,6 @@ export default class Search extends Page {
 
 				<Breadcrumbs items={[['Search results', '']]} />
 
-				<ContentForNav>
-					<div className="nav-fixed">
-						<div><Button onClick={History.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
-
-						<Nav stacked bsStyle="pills" activeKey={queryType} onSelect={this.onSelectQueryType}>
-							<NavItem eventKey="everything" disabled={!numResults}>
-								<img src={EVERYTHING_ICON} alt="" /> Everything
-								{numResults > 0 && <Badge pullRight>{numResults}</Badge>}
-							</NavItem>
-
-							<NavItem eventKey="organizations" disabled={!numOrganizations}>
-								<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
-								{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
-							</NavItem>
-
-							<NavItem eventKey="people" disabled={!numPeople}>
-								<img src={PEOPLE_ICON} alt="" /> People
-								{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
-							</NavItem>
-
-							<NavItem eventKey="positions" disabled={!numPositions}>
-								<img src={POSITIONS_ICON} alt="" /> Positions
-								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
-							</NavItem>
-
-							<NavItem eventKey="tasks" disabled={!numTasks}>
-								<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
-								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
-							</NavItem>
-
-							<NavItem eventKey="locations" disabled={!numLocations}>
-								<img src={LOCATIONS_ICON} alt="" /> Locations
-								{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
-							</NavItem>
-
-							<NavItem eventKey="reports" disabled={!numReports}>
-								<img src={REPORTS_ICON} alt="" /> Reports
-								{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
-							</NavItem>
-
-						</Nav>
-					</div>
-				</ContentForNav>
-
 				{this.state.advancedSearch && <Fieldset title="Search filters">
 					<AdvancedSearch query={this.state.advancedSearch} onCancel={this.cancelAdvancedSearch} />
 				</Fieldset>}
@@ -389,7 +344,7 @@ export default class Search extends Page {
 
 	@autobind
 	cancelAdvancedSearch() {
-		History.push({pathname: '/search', query: {text: this.state.advancedSearch ? this.state.advancedSearch.text : ""}, advancedSearch: null})
+//		History.push({pathname: '/search', query: {text: this.state.advancedSearch ? this.state.advancedSearch.text : ""}, advancedSearch: null}) FIXME React16
 	}
 
 	renderPeople() {

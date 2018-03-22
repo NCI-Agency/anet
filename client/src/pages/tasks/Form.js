@@ -3,13 +3,12 @@ import React from 'react'
 import autobind from 'autobind-decorator'
 
 import {Button} from 'react-bootstrap'
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import Form from 'components/Form'
-import History from 'components/History'
 import Messages from'components/Messages'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import DictionaryField from '../../HOC/DictionaryField'
@@ -173,9 +172,9 @@ export default class TaskForm extends ValidatableFormWrapper {
 				if (response.id) {
 					task.id = response.id
 				}
-
-				History.replace(Task.pathForEdit(task), false)
-				History.push(Task.pathFor(task), {success: 'Saved successfully', skipPageLeaveWarning: true})
+//				FIXME React16
+//				History.replace(Task.pathForEdit(task), false)
+//				History.push(Task.pathFor(task), {success: 'Saved successfully', skipPageLeaveWarning: true})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)

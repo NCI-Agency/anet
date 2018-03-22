@@ -3,7 +3,6 @@ import {Form, Button, InputGroup, FormControl, Popover, Overlay} from 'react-boo
 import autobind from 'autobind-decorator'
 
 import AdvancedSearch from 'components/AdvancedSearch'
-import History from 'components/History'
 
 import SEARCH_ICON from 'resources/search-alt.png'
 
@@ -17,11 +16,11 @@ export default class SearchBar extends Component {
 	}
 	componentWillMount() {
 		this.setQueryState()
-		this.unregisterHistoryListener = History.listen(this.setQueryState)
+		// this.unregisterHistoryListener = History.listen(this.setQueryState) FIXME React16
 	}
 
 	componentWillUnmount() {
-		this.unregisterHistoryListener()
+		// this.unregisterHistoryListener() FIXME React16
 	}
 
 	render() {
@@ -44,7 +43,8 @@ export default class SearchBar extends Component {
 
 	@autobind
 	setQueryState() {
-		this.setState({query: History.getCurrentLocation().query.text || ''})
+//		this.setState({query: History.getCurrentLocation().query.text || ''}) FIXME React16
+		this.setState({query: ''})
 	}
 
 	@autobind
@@ -54,7 +54,7 @@ export default class SearchBar extends Component {
 
 	@autobind
 	onSubmit(event) {
-		History.push({pathname: '/search', query: {text: this.state.query}})
+//		History.push({pathname: '/search', query: {text: this.state.query}}) FIXME React16
 		event.preventDefault()
 		event.stopPropagation()
 	}

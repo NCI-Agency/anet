@@ -7,7 +7,6 @@ import autobind from 'autobind-decorator'
 import moment from 'moment'
 import utils from 'utils'
 
-import History from 'components/History'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Form from 'components/Form'
@@ -604,7 +603,7 @@ export default class ReportShow extends Page {
 			cancelLabel: 'No, I am not entirely sure at this point',
 			onConfirm: () => {
 				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-					History.push('/', {success: 'Report deleted'})
+//					History.push('/', {success: 'Report deleted'}) FIXME React16
 				}, data => {
 					this.setState({success:null})
 					this.handleError(data)

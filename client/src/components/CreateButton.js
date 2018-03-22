@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {DropdownButton, MenuItem, Button} from 'react-bootstrap'
-import History from 'components/History'
 import * as Models from 'models'
 
 const DEFAULT_ACTIONS = [
@@ -52,6 +51,6 @@ export default class CreateButton extends Component {
 	}
 
 	onSelect(modelClass) {
-		History.push(modelClass.pathForNew())
+//		History.push(modelClass.pathForNew()) FIXME React16
 	}
 }

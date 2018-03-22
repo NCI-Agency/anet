@@ -9,7 +9,6 @@ import Form from 'components/Form'
 import Messages from 'components/Messages'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import History from 'components/History'
 
 import API from 'api'
 import Settings from 'Settings'
@@ -158,9 +157,9 @@ export default class PositionForm extends ValidatableFormWrapper {
 				if (response.id) {
 					position.id = response.id
 				}
-
-				History.replace(Position.pathForEdit(position), false)
-				History.push(Position.pathFor(position), {success: 'Saved Position', skipPageLeaveWarning: true})
+//				FIXME React16
+//				History.replace(Position.pathForEdit(position), false)
+//				History.push(Position.pathFor(position), {success: 'Saved Position', skipPageLeaveWarning: true})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)

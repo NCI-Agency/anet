@@ -10,7 +10,6 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Autocomplete from 'components/Autocomplete'
 import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
-import History from 'components/History'
 import Messages from 'components/Messages'
 
 import API from 'api'
@@ -237,12 +236,12 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				if (response.id) {
 					organization.id = response.id
 				}
-
-				History.replace(Organization.pathForEdit(organization), false)
-				History.push(Organization.pathFor(organization), {
-					success: 'Organization saved successfully',
-					skipPageLeaveWarning: true
-				})
+//				 FIXME React16
+//				History.replace(Organization.pathForEdit(organization), false)
+//				History.push(Organization.pathFor(organization), {
+//					success: 'Organization saved successfully',
+//					skipPageLeaveWarning: true
+//				})
 			}).catch(error => {
 				this.setState({error})
 				window.scrollTo(0, 0)

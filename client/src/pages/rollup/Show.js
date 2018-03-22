@@ -11,7 +11,6 @@ import ReportCollection from 'components/ReportCollection'
 import CalendarButton from 'components/CalendarButton'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Form from 'components/Form'
-import History from 'components/History'
 import Messages from 'components/Messages'
 import Settings from 'Settings'
 
@@ -330,7 +329,7 @@ export default class RollupShow extends Page {
 	@autobind
 	changeRollupDate(newDate) {
 		let date = moment(newDate)
-		History.replace({pathname: 'rollup', query: {date: date.valueOf()}})
+//		History.replace({pathname: 'rollup', query: {date: date.valueOf()}}) FIXME React16
 	}
 
 	@autobind

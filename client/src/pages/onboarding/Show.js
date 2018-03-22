@@ -3,7 +3,6 @@ import Page from 'components/Page'
 import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
-import History from 'components/History'
 
 export default class OnboardingShow extends Page {
 	static pageProps = {
@@ -31,6 +30,6 @@ export default class OnboardingShow extends Page {
 
 	@autobind
 	onCreateAccountClick() {
-		History.push('/onboarding/edit')
+//		History.push('/onboarding/edit') FIXME React16
 	}
 }

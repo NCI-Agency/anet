@@ -4,7 +4,6 @@ import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
-import History from 'components/History'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -90,7 +89,7 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 				if (response.id) {
 					authGroup.id = response.id
 				}
-				History.push(AuthorizationGroup.pathFor(authGroup), {success: 'Saved authorization group', skipPageLeaveWarning: true})
+//				History.push(AuthorizationGroup.pathFor(authGroup), {success: 'Saved authorization group', skipPageLeaveWarning: true}) FIXME React16
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)

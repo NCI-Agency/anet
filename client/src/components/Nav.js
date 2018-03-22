@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
-import {Injectable, Injector} from 'react-injectables'
+//import {Injectable, Injector} from 'react-injectables'  FIXME: React16
 import {Scrollspy} from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
@@ -10,7 +10,7 @@ import pluralize from 'pluralize'
 
 import {Organization} from 'models'
 
-class Nav extends Component {
+export default class Nav extends Component {
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
 	}
@@ -24,7 +24,8 @@ class Nav extends Component {
 		const appData = this.context.app.state
 		const currentUser = appData.currentUser
 		const organizations = appData.organizations || []
-		let path = this.context.app.props.location.pathname
+//		let path = this.context.app.props.location.pathname FIXME React16
+		let path = ['']
 
 		const {settings} = appData || {}
 		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -175,6 +176,7 @@ const AnchorLink = function(props) {
 	return <NavItem onClick={onClick} {...childProps} />
 }
 
+/* FIXME React16
 let InjectableNav = null
 let ContentForNav = null
 if (process.env.NODE_ENV === 'test') {
@@ -196,3 +198,4 @@ if (process.env.NODE_ENV === 'test') {
 
 export default InjectableNav
 export {ContentForNav}
+*/

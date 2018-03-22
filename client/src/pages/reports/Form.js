@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Checkbox, Table, Button, Collapse, HelpBlock} from 'react-bootstrap'
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 import { WithContext as ReactTags } from 'react-tag-input'
 import 'components/reactTags.css'
@@ -14,7 +14,6 @@ import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
-import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 
 import moment from 'moment'
@@ -554,13 +553,14 @@ export default class ReportForm extends ValidatableFormWrapper {
 				// this updates the current page URL on model/new to be the edit page,
 				// so that if you press back after saving a new model, it takes you
 				// back to editing the model you just saved
-				History.replace(Report.pathForEdit(this.props.report), false)
+//				History.replace(Report.pathForEdit(this.props.report), false) FIXME React16
 
 				// then after, we redirect you to the to page
-				History.push(Report.pathFor(this.props.report), {
-					success: 'Report saved successfully',
-					skipPageLeaveWarning: true
-				})
+//				FIXME React16
+//				History.push(Report.pathFor(this.props.report), {
+//					success: 'Report saved successfully',
+//					skipPageLeaveWarning: true
+//				})
 			})
 			.catch(response => {
 				this.setState({

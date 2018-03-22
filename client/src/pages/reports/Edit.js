@@ -7,7 +7,6 @@ import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import NavigationWarning from 'components/NavigationWarning'
-import History from 'components/History'
 
 import ReportForm from './Form'
 
@@ -89,7 +88,7 @@ export default class ReportEdit extends Page {
 			cancelLabel: 'No, I am not entirely sure at this point',
 			onConfirm: () => {
 				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-					History.push('/', {success: 'Report deleted'})
+//					History.push('/', {success: 'Report deleted'}) FIXME React16
 				}, data => {
 					this.setState({success:null})
 					this.handleError(data)

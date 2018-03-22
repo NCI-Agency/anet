@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Form as BSForm, Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import History from 'components/History'
 
 import FormField from 'components/FormField'
 
@@ -118,7 +117,7 @@ export default class Form extends Component {
 
 	@autobind
 	onCancel() {
-		History.goBack({skipPageLeaveWarning: true})
+//		History.goBack({skipPageLeaveWarning: true}) FIXME React16
 	}
 }
 

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import React from 'react'
 import Page from 'components/Page'
-import {Link} from 'react-router'
+import {Link} from 'react-router-dom'
 import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
 
@@ -20,7 +20,6 @@ import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
 import Settings from 'Settings'
-import History from 'components/History'
 import {Position, Organization} from 'models'
 import autobind from 'autobind-decorator'
 
@@ -244,7 +243,7 @@ export default class PositionShow extends Page {
 		}
 
 		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
-			History.push('/', {success: 'Position Deleted'})
+//			History.push('/', {success: 'Position Deleted'}) FIXME React16
 		}, data => {
 			this.setState({success: null, error: data})
 		})

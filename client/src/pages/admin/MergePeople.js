@@ -9,7 +9,6 @@ import Autocomplete from 'components/Autocomplete'
 import LinkTo from 'components/LinkTo'
 import moment from 'moment'
 import Messages from 'components/Messages'
-import History from 'components/History'
 
 import {Person} from 'models'
 
@@ -188,7 +187,7 @@ export default class MergePeople extends Page {
 		let {winner, loser, copyPosition} = this.state
         API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
             .then(() => {
-				History.push(Person.pathFor(this.state.winner), {success: 'People successfully merged'})
+//				History.push(Person.pathFor(this.state.winner), {success: 'People successfully merged'}) FIXME React16
 			})
 			.catch(error => {
                 this.setState({error})

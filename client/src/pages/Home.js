@@ -3,12 +3,11 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-bootstrap'
-import {Link} from 'react-router'
+import {Link} from 'react-router-dom'
 import moment from 'moment'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
-import History from 'components/History'
 import Messages from 'components/Messages'
 import Breadcrumbs from 'components/Breadcrumbs'
 import SavedSearchTable from 'components/SavedSearchTable'
@@ -272,7 +271,7 @@ export default class Home extends Page {
 			if (search.objectType) {
 				query.type = search.objectType.toLowerCase()
 			}
-			History.push({pathname: '/search', query: query})
+//			History.push({pathname: '/search', query: query}) FIXME React16
 		}
 	}
 

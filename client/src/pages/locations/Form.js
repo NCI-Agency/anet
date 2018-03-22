@@ -5,7 +5,6 @@ import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
 import NavigationWarning from 'components/NavigationWarning'
-import History from 'components/History'
 import Form from 'components/Form'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Messages from 'components/Messages'
@@ -107,7 +106,7 @@ export default class LocationForm extends ValidatableFormWrapper {
 				if (response.id) {
 					loc.id = response.id
 				}
-				History.push(Location.pathFor(loc), {success: 'Saved Location', skipPageLeaveWarning: true})
+//				History.push(Location.pathFor(loc), {success: 'Saved Location', skipPageLeaveWarning: true}) FIXME React16
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)

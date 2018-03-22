@@ -6,7 +6,6 @@ import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import History from 'components/History'
 
 import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
@@ -336,9 +335,9 @@ export default class AdvancedSearch extends Component {
 	@autobind
 	performSearch() {
 		let queryState = {objectType: this.state.objectType, filters: this.state.filters, text: this.state.text}
-		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
-			History.push('/search', {advancedSearch: queryState})
-		}
+//		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) { FIXME React16
+//			History.push('/search', {advancedSearch: queryState})
+//		}
 	}
 }
 

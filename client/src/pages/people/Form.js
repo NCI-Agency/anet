@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Button, Alert, HelpBlock, Radio, Col, ControlLabel, FormGroup} from 'react-bootstrap'
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -9,7 +9,6 @@ import Form from 'components/Form'
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import TextEditor from 'components/TextEditor'
-import History from 'components/History'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import OptionListModal from 'components/OptionListModal'
 
@@ -336,14 +335,14 @@ export default class PersonForm extends ValidatableFormWrapper {
 					localStorage.clear()
 					localStorage.newUser = 'true'
 					this.context.app.loadData()
-					History.push('/', {skipPageLeaveWarning: true})
+//					History.push('/', {skipPageLeaveWarning: true}) FIXME React16
 				} else {
 					if (response.id) {
 						person.id = response.id
 					}
-
-					History.replace(Person.pathForEdit(person), false)
-					History.push(Person.pathFor(person), {success: 'Person saved successfully', skipPageLeaveWarning: true})
+//					FIXME React16
+//					History.replace(Person.pathForEdit(person), false)
+//					History.push(Person.pathFor(person), {success: 'Person saved successfully', skipPageLeaveWarning: true})
 				}
 			}).catch(error => {
 				this.setState({error: error})

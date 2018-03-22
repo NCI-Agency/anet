@@ -1,4 +1,3 @@
-import History from 'components/History'
 import {Organization} from 'models'
 import Settings from 'Settings'
 import pluralize from 'pluralize'
@@ -92,7 +91,7 @@ const superUserTour = (currentUser) => { return {
 			placement: 'right',
 			fixedElement: true,
 			multipage: true,
-			onNext: () => History.push(Organization.pathFor(currentUser.position.organization))
+//			onNext: () => History.push(Organization.pathFor(currentUser.position.organization)) FIXME React16
 		},
 		{}
 	]

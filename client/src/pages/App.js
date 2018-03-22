@@ -5,7 +5,6 @@ import {Grid, Row, Col} from 'react-bootstrap'
 
 import TopBar from 'components/TopBar'
 import Nav from 'components/Nav'
-import History from 'components/History'
 
 import API from 'api'
 import {Person, Organization} from 'models'
@@ -72,9 +71,10 @@ export default class App extends Page {
 			data.person._loaded = true
 			this.setState(this.processData(data), () => {
 				// if this is a new user, redirect to the create profile page
-				if (this.state.currentUser.isNewUser()) {
-					History.replace('/onboarding')
-				}
+// FIXME React16
+//				if (this.state.currentUser.isNewUser()) {
+//					History.replace('/onboarding')
+//				}
 			})
 		})
 
