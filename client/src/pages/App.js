@@ -9,15 +9,15 @@ import Nav from 'components/Nav'
 import API from 'api'
 import {Person, Organization} from 'models'
 
+import {Route, Switch} from 'react-router'
+import Home from 'pages/Home'
+import Search from 'pages/Search'
+import RollupShow from 'pages/rollup/Show'
 
 export default class App extends Page {
 	static PagePropTypes = {
 		useNavigation: PropTypes.bool,
 		fluidContainer: PropTypes.bool,
-	}
-
-	static propTypes = {
-		children: PropTypes.element.isRequired,
 	}
 
 	static childContextTypes = {
@@ -93,7 +93,13 @@ export default class App extends Page {
 	}
 
 	render() {
-		let pageProps = this.props.children.type.pageProps || {}
+		const routing = <Switch>
+			<Route exact path="/" component={Home} />
+			<Route path="/search" component={Search} />
+			<Route path="/rollup" component={RollupShow} />
+		</Switch>
+
+		let pageProps = {} //FIXME React16: this.props.children.type.pageProps || {}
 		return (
 			<div className="anet">
 				<TopBar
@@ -104,15 +110,19 @@ export default class App extends Page {
 
 				<Grid componentClass="section" bsClass={pageProps.fluidContainer ? 'container-fluid' : 'container'}>
 					{pageProps.useNavigation === false
-						? <Row><Col xs={12}>{this.props.children}</Col></Row>
+						? <Row>
+								<Col xs={12}>
+									{routing}
+								</Col>
+							</Row>
 						: <Row>
-							<Col sm={3} className="hide-for-print">
-								<Nav />
-							</Col>
-							<Col sm={9} className="primary-content">
-								{this.props.children}
-							</Col>
-						</Row>
+								<Col sm={3} className="hide-for-print">
+									<Nav />
+								</Col>
+								<Col sm={9} className="primary-content">
+									{routing}
+								</Col>
+							</Row>
 					}
 				</Grid>
 			</div>

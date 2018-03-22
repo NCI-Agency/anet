@@ -92,7 +92,7 @@ export default class Search extends Page {
 		super(props)
 
 		this.state = {
-			query: props.location.query.text,
+			query: props.location.search.text,
 			queryType: null,
 			pageNum: {
 				reports: 0,
@@ -208,7 +208,7 @@ export default class Search extends Page {
 	}
 
 	fetchData(props) {
-		this._dataFetcher(props.location.query, this._fetchDataCallback)
+		this._dataFetcher(props.location.search, this._fetchDataCallback)
 	}
 
 	render() {
@@ -226,7 +226,7 @@ export default class Search extends Page {
 		const numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
 		const noResults = numResults === 0
 
-		const query = this.props.location.query
+		const query = this.props.location.search
 		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
 		const queryType = this.state.queryType || query.type || 'everything'
 
@@ -256,7 +256,7 @@ export default class Search extends Page {
 
 				<Messages error={error} success={success} />
 
-				{this.props.location.query.text && <h2 className="only-show-for-print">Search query: '{this.props.location.query.text}'</h2>}
+				{this.props.location.search.text && <h2 className="only-show-for-print">Search query: '{this.props.location.search.text}'</h2>}
 
 				{noResults &&
 					<Alert bsStyle="warning">
@@ -326,7 +326,7 @@ export default class Search extends Page {
 		const pageNums = this.state.pageNum
 		pageNums[type] = pageNum
 
-		const query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.query, 'type')
+		const query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.search, 'type')
 		const part = this.getSearchPart(type, query)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
@@ -480,7 +480,7 @@ export default class Search extends Page {
 			search.query = JSON.stringify(this.getAdvancedSearchQuery())
 			search.objectType = this.state.advancedSearch.objectType.toUpperCase()
 		} else {
-			search.query = JSON.stringify({text: this.props.location.query.text })
+			search.query = JSON.stringify({text: this.props.location.search.text })
 		}
 
 		API.send('/api/savedSearches/new', search, {disableSubmits: true})
@@ -518,7 +518,7 @@ export default class Search extends Page {
 
 	@autobind
 	exportSearchResults() {
-		this._dataFetcher(this.props.location.query, this._exportSearchResultsCallback, 0)
+		this._dataFetcher(this.props.location.search, this._exportSearchResultsCallback, 0)
 	}
 
 	@autobind
