@@ -8,6 +8,8 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import API from 'api'
 import {Organization} from 'models'
 
+import utils from 'utils'
+
 export default class OrganizationNew extends Page {
 	static pageProps = {
 		useNavigation: false,
@@ -23,9 +25,10 @@ export default class OrganizationNew extends Page {
 	}
 
 	fetchData(props) {
-		if (props.location.query.parentOrgId) {
+		const qs = utils.parseQueryString(props.location.search)
+		if (qs.parentOrgId) {
 			API.query(/* GraphQL */`
-				organization(id: ${props.location.query.parentOrgId}) {
+				organization(id: ${qs.parentOrgId}) {
 					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {

@@ -9,6 +9,8 @@ import API from 'api'
 import Settings from 'Settings'
 import {Task,Organization} from 'models'
 
+import utils from 'utils'
+
 export default class TaskNew extends Page {
 	static pageProps = {
 		useNavigation: false
@@ -25,9 +27,10 @@ export default class TaskNew extends Page {
 	}
 
 	fetchData(props) {
-		if (props.location.query.responsibleOrgId) {
+		const qs = utils.parseQueryString(props.location.search)
+		if (qs.responsibleOrgId) {
 			API.query(/* GraphQL */`
-				organization(id: ${props.location.query.responsibleOrgId}) {
+				organization(id: ${qs.responsibleOrgId}) {
 					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {

@@ -9,6 +9,8 @@ import PositionForm from './Form'
 import API from 'api'
 import {Position, Organization} from 'models'
 
+import utils from 'utils'
+
 export default class PositionNew extends Page {
 	static pageProps = {
 		useNavigation: false
@@ -24,11 +26,12 @@ export default class PositionNew extends Page {
 	}
 
 	fetchData(props) {
-		if (props.location.query.organizationId) {
+		const qs = utils.parseQueryString(props.location.search)
+		if (qs.organizationId) {
 			//If an organizationId was given in query parameters,
 			// then look that org up and pre-populate the field.
 			API.query(/* GraphQL */`
-				organization(id:${props.location.query.organizationId}) {
+				organization(id:${qs.organizationId}) {
 					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {

@@ -56,8 +56,9 @@ class RollupShow extends Page {
 	constructor(props) {
 		super(props)
 
+		const qs = utils.parseQueryString(props.location.search)
 		this.state = {
-			date: moment(+props.date || +props.location.search.date || undefined),
+			date: moment(+props.date || +qs.date || undefined),
 			reports: {list: []},
 			reportsPageNum: 0,
 			graphData: [],
@@ -71,7 +72,8 @@ class RollupShow extends Page {
 	}
 
 	componentWillReceiveProps(newProps, newContext) {
-		let newDate = moment(+newProps.location.search.date || undefined)
+		const qs = utils.parseQueryString(newProps.location.search)
+		let newDate = moment(+qs.date || undefined)
 		if (!this.state.date.isSame(newDate)) {
 			this.setState({date: newDate}, () => this.loadData(newProps, newContext))
 		} else {
