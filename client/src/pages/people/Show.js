@@ -175,7 +175,7 @@ export default class PersonShow extends Page {
 
 					<Fieldset title="Position" >
 						<Fieldset title="Current Position" id="current-position"
-							className={(!position || !position.id) && 'warning'}
+							className={(!position || !position.id) ? 'warning' : undefined}
 							action={position && position.id && canChangePosition &&
 								<div>
 									<LinkTo position={position} edit button="default" >Edit position details</LinkTo>

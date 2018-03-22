@@ -117,7 +117,7 @@ export default class PositionShow extends Page {
 
 					<Fieldset title="Current assigned person"
 						id="assigned-advisor"
-						className={(!position.person || !position.person.id) && 'warning'}
+						className={(!position.person || !position.person.id) ? 'warning' : undefined}
 						style={{textAlign: 'center'}}
 						action={position.person && position.person.id && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
 						{position.person && position.person.id
