@@ -42,7 +42,7 @@ class Form extends Component {
 
 	render() {
 		let {children, submitText, submitOnEnter, submitDisabled, deleteText, onDelete, bottomAccessory, ...bsProps} = this.props
-		bsProps = Object.without(bsProps, 'formFor', 'static')
+		bsProps = Object.without(bsProps, 'formFor', 'static', 'staticContext')
 
 		if (this.props.static) {
 			bsProps.componentClass = 'div'
