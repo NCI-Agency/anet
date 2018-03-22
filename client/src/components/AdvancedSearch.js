@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {Button, DropdownButton, MenuItem, Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
+import {Button, DropdownButton, MenuItem, Row, Col, Form, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
@@ -259,42 +259,44 @@ export default class AdvancedSearch extends Component {
 		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
 
 		return <div className="advanced-search form-horizontal">
-			<FormGroup style={{textAlign: "center"}}>
-				<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
-					{Object.keys(this.ALL_FILTERS).map(type =>
-						<Button key={type} value={type}>{type}</Button>
-					)}
-				</ButtonToggleGroup>
-			</FormGroup>
+			<Form onSubmit={this.onSubmit}>
+				<FormGroup style={{textAlign: "center"}}>
+					<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
+						{Object.keys(this.ALL_FILTERS).map(type =>
+							<Button key={type} value={type}>{type}</Button>
+						)}
+					</ButtonToggleGroup>
+				</FormGroup>
 
-			<SearchFilter label="Search term" onRemove={() => this.setState({text: ""})}>
-				<FormControl value={text} onChange={this.setText} />
-			</SearchFilter>
+				<SearchFilter label="Search term" onRemove={() => this.setState({text: ""})}>
+					<FormControl value={text} onChange={this.setText} />
+				</SearchFilter>
 
-			{filters.map(filter =>
-				<SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
-			)}
+				{filters.map(filter =>
+					<SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
+				)}
 
-			<Row>
-				<Col xs={5} xsOffset={3}>
-					{moreFiltersAvailable ?
-						<DropdownButton bsStyle="link" title="+ Add another filter" onSelect={this.addFilter} id="addFilterDropdown">
-							{Object.keys(filterDefs).map(filterKey =>
-								<MenuItem disabled={existingKeys.indexOf(filterKey) > -1} eventKey={filterKey} key={filterKey} >{filterKey}</MenuItem>
-							)}
-						</DropdownButton>
-						:
-						"No additional filters available"
-					}
-				</Col>
-			</Row>
+				<Row>
+					<Col xs={5} xsOffset={3}>
+						{moreFiltersAvailable ?
+							<DropdownButton bsStyle="link" title="+ Add another filter" onSelect={this.addFilter} id="addFilterDropdown">
+								{Object.keys(filterDefs).map(filterKey =>
+									<MenuItem disabled={existingKeys.indexOf(filterKey) > -1} eventKey={filterKey} key={filterKey} >{filterKey}</MenuItem>
+								)}
+							</DropdownButton>
+							:
+							"No additional filters available"
+						}
+					</Col>
+				</Row>
 
-			<Row>
-				<div className="pull-right">
-					<Button onClick={this.props.onCancel} style={{marginRight: 20}}>Cancel</Button>
-					<Button bsStyle="primary" onClick={this.performSearch} style={{marginRight: 20}}>Search</Button>
-				</div>
-			</Row>
+				<Row>
+					<div className="pull-right">
+						<Button onClick={this.props.onCancel} style={{marginRight: 20}}>Cancel</Button>
+						<Button bsStyle="primary" type="submit" onClick={this.onSubmit} style={{marginRight: 20}}>Search</Button>
+					</div>
+				</Row>
+			</Form>
 		</div>
 	}
 
@@ -334,10 +336,12 @@ export default class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	performSearch() {
+	onSubmit(event) {
 		let queryState = {objectType: this.state.objectType, filters: this.state.filters, text: this.state.text}
 		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
 			History.push('/search', {advancedSearch: queryState})
+			event.preventDefault()
+			event.stopPropagation()
 		}
 	}
 }
