@@ -89,7 +89,7 @@ export default class InsightsShow extends Page {
   constructor(props) {
     super(props)
     this.state = {
-      insight: props.params.insight,
+      insight: props.match.params.insight,
       referenceDate: null,
       startDate: null,
       endDate: null,
@@ -113,9 +113,9 @@ export default class InsightsShow extends Page {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.params.insight !== this.state.insight) {
-      this.setState({insight: nextProps.params.insight})
-      this.setStateDefaultDates(nextProps.params.insight)
+    if (nextprops.match.params.insight !== this.state.insight) {
+      this.setState({insight: nextprops.match.params.insight})
+      this.setStateDefaultDates(nextprops.match.params.insight)
     }
   }
 

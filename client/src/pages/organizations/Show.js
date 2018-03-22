@@ -40,7 +40,7 @@ export default class OrganizationShow extends Page {
 			reports: null,
 			tasks: null,
 			reportsFilter: NO_REPORT_FILTER,
-			action: props.params.action
+			action: props.match.params.action
 		}
 
 		this.reportsPageNum = 0
@@ -53,8 +53,8 @@ export default class OrganizationShow extends Page {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if (nextProps.params.action !== this.state.action) {
-			this.setState({action: nextProps.params.action})
+		if (nextprops.match.params.action !== this.state.action) {
+			this.setState({action: nextprops.match.params.action})
 		}
 
 		if (+nextprops.match.params.id !== this.state.organization.id) {
