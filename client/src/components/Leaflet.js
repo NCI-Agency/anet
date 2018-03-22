@@ -43,26 +43,8 @@ export default class Leaflet extends Component {
 	}
 
 	componentDidMount() {
-		// let app = this.context.app;
-
 		let map = L.map('map', {zoomControl:true}).setView([34.52, 69.16], 10)
-/*		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
-		    layers: 'nexrad-n0r-900913',
-		    format: 'image/png',
-		    transparent: true,
-		    attribution: "Weather data © 2012 IEM Nexrad"
-		});
-		let nmra = L.tileLayer.wms("https://mrdata.usgs.gov/services/nmra", {
-			layers: 'USNationalMineralAssessment1998',
-			format: 'image/png',
-			transparent: true
-		})
-
-		let osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
-		let baseLayers = { "Nexrad" : nexrad, "NMRA" : nmra, "OSM" : osm}
-*/
-		let layerControl = L.control.layers({}, {})
+		let layerControl = L.control.layers({}, {}, {collapsed:false})
 		layerControl.addTo(map)
 
 		map.on('moveend', this.moveEnd)
