@@ -24,6 +24,10 @@ import PersonShow from 'pages/people/Show'
 import PersonNew from 'pages/people/New'
 import PersonEdit from 'pages/people/Edit'
 
+import OrganizationShow from 'pages/organizations/Show'
+import OrganizationNew from 'pages/organizations/New'
+import OrganizationEdit from 'pages/organizations/Edit'
+
 import TaskShow from 'pages/tasks/Show'
 import TaskNew from 'pages/tasks/New'
 import TaskEdit from 'pages/tasks/Edit'
@@ -131,6 +135,16 @@ class App extends Page {
 					<Route path={`${url}/new`} component={PersonNew} />
 					<Route path={`${url}/:id/edit`} component={PersonEdit} />
 					<Route path={`${url}/:id`} component={PersonShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/organizations"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={OrganizationNew} />
+					<Route path={`${url}/:id/edit`} component={OrganizationEdit} />
+					<Route path={`${url}/:id(/:action)`} component={OrganizationShow} />
 				</Switch>
 			)}
 			/>
