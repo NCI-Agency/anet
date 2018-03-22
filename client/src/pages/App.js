@@ -13,11 +13,16 @@ import {Route, Switch} from 'react-router'
 import Home from 'pages/Home'
 import Search from 'pages/Search'
 import RollupShow from 'pages/rollup/Show'
+
 import ReportNew from 'pages/reports/New'
 import ReportShow from 'pages/reports/Show'
 import ReportEdit from 'pages/reports/Edit'
 import ReportMinimal from 'pages/reports/Minimal'
 import MyReports from 'pages/reports/MyReports'
+
+import PersonShow from 'pages/people/Show'
+import PersonNew from 'pages/people/New'
+import PersonEdit from 'pages/people/Edit'
 
 export default class App extends Page {
 	static PagePropTypes = {
@@ -113,6 +118,16 @@ export default class App extends Page {
 						<Route path={`${url}/:id`} component={ReportShow} />
 					</Switch>
 				)}
+			/>
+			<Route
+			path="/people"
+			render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={PersonNew} />
+					<Route path={`${url}/:id/edit`} component={PersonEdit} />
+					<Route path={`${url}/:id`} component={PersonShow} />
+				</Switch>
+			)}
 			/>
 		</Switch>
 
