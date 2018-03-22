@@ -13,6 +13,11 @@ import {Route, Switch} from 'react-router'
 import Home from 'pages/Home'
 import Search from 'pages/Search'
 import RollupShow from 'pages/rollup/Show'
+import ReportNew from 'pages/reports/New'
+import ReportShow from 'pages/reports/Show'
+import ReportEdit from 'pages/reports/Edit'
+import ReportMinimal from 'pages/reports/Minimal'
+import MyReports from 'pages/reports/MyReports'
 
 export default class App extends Page {
 	static PagePropTypes = {
@@ -97,6 +102,18 @@ export default class App extends Page {
 			<Route exact path="/" component={Home} />
 			<Route path="/search" component={Search} />
 			<Route path="/rollup" component={RollupShow} />
+			<Route
+				path="/reports"
+				render={({ match: { url } }) => (
+					<Switch>
+						<Route path={`${url}/new`} component={ReportNew} />
+						<Route path={`${url}/:id/edit`} component={ReportEdit} />
+						<Route path={`${url}/:id/min`} component={ReportMinimal} />
+						<Route path={`${url}/mine`} component={MyReports} />
+						<Route path={`${url}/:id`} component={ReportShow} />
+	      </Switch>
+	    )}
+	    />
 		</Switch>
 
 		let pageProps = {} //FIXME React16: this.props.children.type.pageProps || {}
