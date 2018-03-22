@@ -39,7 +39,7 @@ export default class Nav extends Component {
 		const myOrg = currentUser.position ? currentUser.position.organization : null
 		let orgId, myOrgId
 		if (inOrg) {
-			orgId = +this.context.app.props.params.id
+			orgId = +this.context.app.props.match.params.id
 			myOrgId = myOrg && +myOrg.id
 			path = `/organizations/${orgId}`
 		}

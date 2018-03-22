@@ -30,7 +30,7 @@ export default class TaskShow extends Page {
 
 		this.state = {
 			task: new Task({
-				id: props.params.id,
+				id: props.match.params.id,
 				shortName: props.params.shorName,
 				longName: props.params.longName,
 				responsibleOrg: props.params.responsibleOrg
@@ -57,11 +57,11 @@ export default class TaskShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			taskId: props.params.id,
+			taskId: props.match.params.id,
 		})
 
 		let taskQuery = new GQL.Part(/* GraphQL */`
-			task(id:${props.params.id}) {
+			task(id:${props.match.params.id}) {
 				id, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,

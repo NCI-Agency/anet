@@ -25,13 +25,13 @@ export default class ReportMinimal extends Page {
 		super(props)
 
 		this.state = {
-			report: new Report({id: props.params.id}),
+			report: new Report({id: props.match.params.id}),
 		}
 	}
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			report(id:${props.params.id}) {
+			report(id:${props.match.params.id}) {
 				id, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 

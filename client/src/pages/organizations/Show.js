@@ -36,7 +36,7 @@ export default class OrganizationShow extends Page {
 		super(props)
 
 		this.state = {
-			organization: new Organization({id: props.params.id}),
+			organization: new Organization({id: props.match.params.id}),
 			reports: null,
 			tasks: null,
 			reportsFilter: NO_REPORT_FILTER,
@@ -57,14 +57,14 @@ export default class OrganizationShow extends Page {
 			this.setState({action: nextProps.params.action})
 		}
 
-		if (+nextProps.params.id !== this.state.organization.id) {
+		if (+nextprops.match.params.id !== this.state.organization.id) {
 			this.loadData(nextProps)
 		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
 		if(prevState.reportsFilter !== this.state.reportsFilter){
-			let reports = this.getReportQueryPart(this.props.params.id)
+			let reports = this.getReportQueryPart(this.props.match.params.id)
 			this.runGQLReports([reports])
 		}
 	}
@@ -105,7 +105,7 @@ export default class OrganizationShow extends Page {
 
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
-			organization(id:${props.params.id}) {
+			organization(id:${props.match.params.id}) {
 				id, shortName, longName, status, identificationCode, type
 				parentOrg { id, shortName, longName, identificationCode }
 				childrenOrgs { id, shortName, longName, identificationCode },
@@ -121,8 +121,8 @@ export default class OrganizationShow extends Page {
 					id, name, approvers { id, name, person { id, name}}
 				}
 			}`)
-		let reportsPart = this.getReportQueryPart(props.params.id)
-		let tasksPart = this.gettaskQueryPart(props.params.id)
+		let reportsPart = this.getReportQueryPart(props.match.params.id)
+		let tasksPart = this.gettaskQueryPart(props.match.params.id)
 
 		this.runGQL([orgPart, reportsPart, tasksPart])
 	}

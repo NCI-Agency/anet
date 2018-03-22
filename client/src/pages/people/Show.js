@@ -32,7 +32,7 @@ export default class PersonShow extends Page {
 		super(props)
 		this.state = {
 			person: new Person({
-				id: props.params.id,
+				id: props.match.params.id,
 			}),
 			authoredReports: null,
 			attendedReports: null,
@@ -79,7 +79,7 @@ export default class PersonShow extends Page {
 
 	fetchData(props) {
 		let personPart = new GQL.Part(/* GraphQL */`
-			person(id:${props.params.id}) {
+			person(id:${props.match.params.id}) {
 				id,
 				name, rank, role, status, emailAddress, phoneNumber,
 				biography, country, gender, endOfTourDate,
@@ -97,8 +97,8 @@ export default class PersonShow extends Page {
 					}
 				}
 			}`)
-		let authoredReportsPart = this.getAuthoredReportsPart(props.params.id)
-		let attendedReportsPart = this.getAttendedReportsPart(props.params.id)
+		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.id)
+		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.id)
 
 		GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
 			this.setState({

@@ -35,7 +35,7 @@ export default class PositionShow extends Page {
 
 		this.state = {
 			position: new Position( {
-				id: props.params.id,
+				id: props.match.params.id,
 				previousPeople: [],
 				associatedPositions: [],
 				showAssignPersonModal: false,
@@ -48,7 +48,7 @@ export default class PositionShow extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			position(id:${props.params.id}) {
+			position(id:${props.match.params.id}) {
 				id, name, type, status, code,
 				organization { id, shortName, longName, identificationCode },
 				person { id, name, rank },

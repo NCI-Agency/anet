@@ -39,11 +39,11 @@ export default class LocationShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			locationId: props.params.id,
+			locationId: props.match.params.id,
 		})
 
 		let locationQuery = new GQL.Part(/* GraphQL */`
-			location(id:${props.params.id}) {
+			location(id:${props.match.params.id}) {
 				id, name, lat, lng
 			}
 		`)
