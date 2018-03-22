@@ -110,18 +110,18 @@ export default class App extends Page {
 			<Route
 				path="/reports"
 				render={({ match: { url } }) => (
-					<Switch>
-						<Route path={`${url}/new`} component={ReportNew} />
-						<Route path={`${url}/:id/edit`} component={ReportEdit} />
-						<Route path={`${url}/:id/min`} component={ReportMinimal} />
-						<Route path={`${url}/mine`} component={MyReports} />
-						<Route path={`${url}/:id`} component={ReportShow} />
-					</Switch>
-				)}
+				<Switch>
+					<Route path={`${url}/new`} component={ReportNew} />
+					<Route path={`${url}/:id/edit`} component={ReportEdit} />
+					<Route path={`${url}/:id/min`} component={ReportMinimal} />
+					<Route path={`${url}/mine`} component={MyReports} />
+					<Route path={`${url}/:id`} component={ReportShow} />
+				</Switch>
+			)}
 			/>
 			<Route
-			path="/people"
-			render={({ match: { url } }) => (
+				path="/people"
+				render={({ match: { url } }) => (
 				<Switch>
 					<Route path={`${url}/new`} component={PersonNew} />
 					<Route path={`${url}/:id/edit`} component={PersonEdit} />
