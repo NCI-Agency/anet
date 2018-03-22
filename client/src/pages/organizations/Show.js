@@ -53,11 +53,11 @@ export default class OrganizationShow extends Page {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if (nextprops.match.params.action !== this.state.action) {
-			this.setState({action: nextprops.match.params.action})
+		if (nextProps.match.params.action !== this.state.action) {
+			this.setState({action: nextProps.match.params.action})
 		}
 
-		if (+nextprops.match.params.id !== this.state.organization.id) {
+		if (+nextProps.match.params.id !== this.state.organization.id) {
 			this.loadData(nextProps)
 		}
 	}

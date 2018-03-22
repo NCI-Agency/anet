@@ -113,9 +113,9 @@ export default class InsightsShow extends Page {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextprops.match.params.insight !== this.state.insight) {
-      this.setState({insight: nextprops.match.params.insight})
-      this.setStateDefaultDates(nextprops.match.params.insight)
+    if (nextProps.match.params.insight !== this.state.insight) {
+      this.setState({insight: nextProps.match.params.insight})
+      this.setStateDefaultDates(nextProps.match.params.insight)
     }
   }
 
