@@ -326,9 +326,36 @@ properties:
       examples:
       - "*.nato.int"
       - dds.mil
+  imagery:
+    type: object
+    additionalProperties: false
+    properties:
+      baseLayers:
+        type: array
+        uniqueItems: true
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            name: 
+              type: string
+            default:
+              type: boolean
+            type:
+              type: string
+            url:
+              type: string
+            options:
+              type: object
+              additionalProperties: true
+          required:
+            - name
+            - type
 required:
 - SUPPORT_EMAIL_ADDR
 - fields
 - pinned_ORGs
 - non_reporting_ORGs
 - domainNames
+- imagery

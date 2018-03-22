@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
-
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import Settings from 'Settings'
 
 const css = {
 	height: '500px',
@@ -25,9 +25,7 @@ export default class Leaflet extends Component {
 		this.state = {
 			map: null,
 			center: null,
-			layerControl: null,
-			markerLayer: null,
-			hasLayers: false
+			markerLayer: null
 		}
 
 		this.icon = L.icon({
@@ -43,36 +41,22 @@ export default class Leaflet extends Component {
 	}
 
 	componentDidMount() {
-		let map = L.map('map', {zoomControl:true}).setView([34.52, 69.16], 10)
-		let layerControl = L.control.layers({}, {}, {collapsed:false})
+		const map = L.map('map', {zoomControl:true}).setView([34.52, 69.16], 10)
+		const layerControl = L.control.layers({}, {}, {collapsed:false})
 		layerControl.addTo(map)
+		this.addLayers(map,layerControl)
 
 		map.on('moveend', this.moveEnd)
 
 		let state = this.state
 		state.map = map
-		state.layerControl = layerControl
 		state.markerLayer = L.featureGroup([]).addTo(map)
 		this.setState(state)
-
-		this.tryAddLayers()
 		this.updateMarkerLayer(this.props.markers)
 	}
 
-	@autobind
-	tryAddLayers() {
-		if (this.state.hasLayers === false) {
-			this.addLayers()
-		}
-	}
-
-	componentWillUnmount() {
-		this.setState({hasLayers:false})
-	}
 
 	componentWillReceiveProps(nextProps) {
-		this.tryAddLayers()
-
 		let existingMarkers = this.state.markerLayer.getLayers()
 		let markersToAdd = nextProps.markers.filter(m =>
 			existingMarkers.findIndex(el => el.options.id === m.id) === -1
@@ -114,34 +98,22 @@ export default class Leaflet extends Component {
 	}
 
 	@autobind
-	addLayers() {
-		let app = this.context.app
-		let rawLayers = app.state.settings.MAP_LAYERS
-		if (!rawLayers || rawLayers.length === 0) {
-			return
-		}
-
-		let mapLayers = JSON.parse(rawLayers)
-
+	addLayers(map, layerControl) {
 		let defaultLayer = null
-		mapLayers.forEach(l => {
+		Settings.imagery.baseLayers.forEach(layerConfig => {
 			let layer = null
-			if (l.type === 'wms') {
-				layer = L.tileLayer.wms(l.url, {
-					layers: l.layer,
-					format: l.format || 'image/png'
-				})
-			} else if (l.type === 'osm') {
-				layer = L.tileLayer(l.url)
+			if (layerConfig.type === 'wms') {
+				layer = L.tileLayer.wms(layerConfig.url, layerConfig.options)
+			} else if (layerConfig.type === 'osm' || layerConfig.type === 'tile') {
+				layer = L.tileLayer(layerConfig.url)
 			}
 
 			if (layer) {
-				this.state.layerControl.addBaseLayer(layer, l.name)
+				layerControl.addBaseLayer(layer, layerConfig.name)
 			}
-			if (l.default) { defaultLayer = layer  }
+			if (layerConfig.default) { defaultLayer = layer  }
 		})
-		if (defaultLayer) { this.state.map.addLayer(defaultLayer) }
-		this.setState({hasLayers:true})
+		if (defaultLayer) { map.addLayer(defaultLayer) }
 	}
 
 	render() {
