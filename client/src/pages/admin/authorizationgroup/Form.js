@@ -13,7 +13,9 @@ import PositionsSelector from 'components/PositionsSelector'
 import API from 'api'
 import {AuthorizationGroup} from 'models'
 
-export default class AuthorizationGroupForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+
+class AuthorizationGroupForm extends ValidatableFormWrapper {
 	static propTypes = {
 		authorizationGroup: PropTypes.object.isRequired,
 		edit: PropTypes.bool
@@ -89,7 +91,13 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 				if (response.id) {
 					authGroup.id = response.id
 				}
-//				History.push(AuthorizationGroup.pathFor(authGroup), {success: 'Saved authorization group', skipPageLeaveWarning: true}) FIXME React16
+				this.props.history.push({
+					pathname: AuthorizationGroup.pathFor(authGroup),
+					state: {
+						success: 'Saved authorization group',
+						skipPageLeaveWarning: true
+					}
+				}) // FIXME React16
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
@@ -97,3 +105,5 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 	}
 
 }
+
+export default withRouter(AuthorizationGroupForm)

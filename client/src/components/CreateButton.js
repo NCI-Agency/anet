@@ -3,6 +3,8 @@ import React, { Component } from 'react'
 import {DropdownButton, MenuItem, Button} from 'react-bootstrap'
 import * as Models from 'models'
 
+import { withRouter } from 'react-router-dom'
+
 const DEFAULT_ACTIONS = [
 	Models.Report,
 ]
@@ -19,7 +21,7 @@ const ADMIN_ACTIONS = [
 	Models.AuthorizationGroup
 ]
 
-export default class CreateButton extends Component {
+class CreateButton extends Component {
 	static contextTypes = {
 		currentUser: PropTypes.object,
 	}
@@ -51,6 +53,8 @@ export default class CreateButton extends Component {
 	}
 
 	onSelect(modelClass) {
-//		History.push(modelClass.pathForNew()) FIXME React16
+		this.props.history.push(modelClass.pathForNew()) // FIXME React16
 	}
 }
+
+export default withRouter(CreateButton)

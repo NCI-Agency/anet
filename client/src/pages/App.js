@@ -28,7 +28,9 @@ import TaskShow from 'pages/tasks/Show'
 import TaskNew from 'pages/tasks/New'
 import TaskEdit from 'pages/tasks/Edit'
 
-export default class App extends Page {
+import { withRouter } from 'react-router-dom'
+
+class App extends Page {
 	static PagePropTypes = {
 		useNavigation: PropTypes.bool,
 		fluidContainer: PropTypes.bool,
@@ -85,10 +87,9 @@ export default class App extends Page {
 			data.person._loaded = true
 			this.setState(this.processData(data), () => {
 				// if this is a new user, redirect to the create profile page
-// FIXME React16
-//				if (this.state.currentUser.isNewUser()) {
-//					History.replace('/onboarding')
-//				}
+				if (this.state.currentUser.isNewUser()) {
+					this.props.history.replace('/onboarding') // FIXME React16
+				}
 			})
 		})
 
@@ -175,3 +176,5 @@ export default class App extends Page {
 		)
 	}
 }
+
+export default withRouter(App)

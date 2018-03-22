@@ -19,6 +19,8 @@ import {Location, Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
 
+import { withRouter } from 'react-router-dom'
+
 const taskFilters = props => {
 	const taskFiltersObj = {
 		Organization: <OrganizationFilter
@@ -51,7 +53,7 @@ const taskFilters = props => {
 	return taskFiltersObj
 }
 
-export default class AdvancedSearch extends Component {
+class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
 	}
@@ -335,11 +337,16 @@ export default class AdvancedSearch extends Component {
 	@autobind
 	performSearch() {
 		let queryState = {objectType: this.state.objectType, filters: this.state.filters, text: this.state.text}
-//		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) { FIXME React16
-//			History.push('/search', {advancedSearch: queryState})
-//		}
+		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) { //FIXME React16
+			this.props.history.push({
+				pathname: '/search',
+				state: {advancedSearch: queryState}
+			})
+		}
 	}
 }
+
+export default withRouter(AdvancedSearch)
 
 class SearchFilter extends Component {
 	static propTypes = {

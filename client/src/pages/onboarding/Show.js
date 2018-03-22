@@ -3,8 +3,9 @@ import Page from 'components/Page'
 import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
+import { withRouter } from 'react-router-dom'
 
-export default class OnboardingShow extends Page {
+class OnboardingShow extends Page {
 	static pageProps = {
 		useNavigation: false,
 		minimalHeader: true,
@@ -30,6 +31,8 @@ export default class OnboardingShow extends Page {
 
 	@autobind
 	onCreateAccountClick() {
-//		History.push('/onboarding/edit') FIXME React16
+		this.props.history.push('/onboarding/edit') // FIXME React16
 	}
 }
+
+export default withRouter(OnboardingShow)

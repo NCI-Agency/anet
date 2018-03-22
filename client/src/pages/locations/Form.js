@@ -14,7 +14,9 @@ import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import API from 'api'
 import {Location} from 'models'
 
-export default class LocationForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+
+class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		location: PropTypes.object.isRequired,
 		edit: PropTypes.bool
@@ -106,7 +108,13 @@ export default class LocationForm extends ValidatableFormWrapper {
 				if (response.id) {
 					loc.id = response.id
 				}
-//				History.push(Location.pathFor(loc), {success: 'Saved Location', skipPageLeaveWarning: true}) FIXME React16
+				this.props.history.push({
+					pathname: Location.pathFor(loc),
+					state: {
+						success: 'Saved Location',
+						skipPageLeaveWarning: true
+					}
+				}) // FIXME React16
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
@@ -114,3 +122,5 @@ export default class LocationForm extends ValidatableFormWrapper {
 	}
 
 }
+
+export default withRouter(LocationForm)

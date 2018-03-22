@@ -14,7 +14,9 @@ import {Person} from 'models'
 
 import API from 'api'
 
-export default class MergePeople extends Page {
+import { withRouter } from 'react-router-dom'
+
+class MergePeople extends Page {
 	constructor(props) {
 		super(props)
 		this.state = {
@@ -187,7 +189,10 @@ export default class MergePeople extends Page {
 		let {winner, loser, copyPosition} = this.state
         API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
             .then(() => {
-//				History.push(Person.pathFor(this.state.winner), {success: 'People successfully merged'}) FIXME React16
+				this.props.history.push({
+					pathname: Person.pathFor(this.state.winner),
+					state: {success: 'People successfully merged'}
+				}) // FIXME React16
 			})
 			.catch(error => {
                 this.setState({error})
@@ -197,3 +202,5 @@ export default class MergePeople extends Page {
 	}
 
 }
+
+export default withRouter(MergePeople)

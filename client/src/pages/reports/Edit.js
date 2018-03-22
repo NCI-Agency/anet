@@ -16,7 +16,9 @@ import {Report, Person} from 'models'
 import { confirmAlert } from 'react-confirm-alert'
 import 'components/react-confirm-alert.css'
 
-export default class ReportEdit extends Page {
+import { withRouter } from 'react-router-dom'
+
+class ReportEdit extends Page {
 	static pageProps = {
 		useNavigation: false
 	}
@@ -88,7 +90,10 @@ export default class ReportEdit extends Page {
 			cancelLabel: 'No, I am not entirely sure at this point',
 			onConfirm: () => {
 				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-//					History.push('/', {success: 'Report deleted'}) FIXME React16
+					this.props.history.push({
+						pathname: '/',
+						state: {success: 'Report deleted'}
+					}) // FIXME React16
 				}, data => {
 					this.setState({success:null})
 					this.handleError(data)
@@ -97,3 +102,5 @@ export default class ReportEdit extends Page {
 		})
 	}
 }
+
+export default withRouter(ReportEdit)

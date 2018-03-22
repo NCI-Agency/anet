@@ -5,7 +5,9 @@ import autobind from 'autobind-decorator'
 
 import FormField from 'components/FormField'
 
-export default class Form extends Component {
+import { withRouter } from 'react-router-dom'
+
+class Form extends Component {
 	static propTypes = Object.assign({}, BSForm.propTypes, {
 		formFor: PropTypes.object,
 		static: PropTypes.bool,
@@ -117,9 +119,11 @@ export default class Form extends Component {
 
 	@autobind
 	onCancel() {
-//		History.goBack({skipPageLeaveWarning: true}) FIXME React16
+		this.props.history.goBack({skipPageLeaveWarning: true}) // FIXME React16
 	}
 }
 
 // just a little sugar to make importing and building forms easier
 Form.Field = FormField
+
+export default withRouter(Form)

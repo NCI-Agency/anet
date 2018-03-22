@@ -19,6 +19,8 @@ import utils from 'utils'
 
 import API from 'api'
 
+import { withRouter } from 'react-router-dom'
+
 var d3 = null/* required later */
 
 const barColors = {
@@ -37,7 +39,7 @@ const legendCss = {
 	display: 'inline-block',
 }
 
-export default class RollupShow extends Page {
+class RollupShow extends Page {
 	static propTypes = {
 		date: PropTypes.object,
 	}
@@ -329,7 +331,10 @@ export default class RollupShow extends Page {
 	@autobind
 	changeRollupDate(newDate) {
 		let date = moment(newDate)
-//		History.replace({pathname: 'rollup', query: {date: date.valueOf()}}) FIXME React16
+		this.props.history.replace({
+			pathname: 'rollup',
+			search: utils.formatQueryString({date: date.valueOf()})
+		}) // FIXME React16
 	}
 
 	@autobind
@@ -450,3 +455,5 @@ export default class RollupShow extends Page {
 		)
 	}
 }
+
+export default withRouter(RollupShow)

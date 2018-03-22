@@ -20,7 +20,9 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
-export default class OrganizationForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+
+class OrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		organization: PropTypes.object,
 		edit: PropTypes.bool,
@@ -236,15 +238,20 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				if (response.id) {
 					organization.id = response.id
 				}
-//				 FIXME React16
-//				History.replace(Organization.pathForEdit(organization), false)
-//				History.push(Organization.pathFor(organization), {
-//					success: 'Organization saved successfully',
-//					skipPageLeaveWarning: true
-//				})
+				// FIXME React16
+				this.props.history.replace(Organization.pathForEdit(organization))
+				this.props.history.push({
+					pathname: Organization.pathFor(organization),
+					state: {
+						success: 'Organization saved successfully',
+						skipPageLeaveWarning: true
+					}
+				})
 			}).catch(error => {
 				this.setState({error})
 				window.scrollTo(0, 0)
 			})
 	}
 }
+
+export default withRouter(OrganizationForm)

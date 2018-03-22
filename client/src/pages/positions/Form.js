@@ -14,8 +14,9 @@ import API from 'api'
 import Settings from 'Settings'
 import {Location, Position, Organization} from 'models'
 
+import { withRouter } from 'react-router-dom'
 
-export default class PositionForm extends ValidatableFormWrapper {
+class PositionForm extends ValidatableFormWrapper {
 	static propTypes = {
 		position: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
@@ -157,9 +158,14 @@ export default class PositionForm extends ValidatableFormWrapper {
 				if (response.id) {
 					position.id = response.id
 				}
-//				FIXME React16
-//				History.replace(Position.pathForEdit(position), false)
-//				History.push(Position.pathFor(position), {success: 'Saved Position', skipPageLeaveWarning: true})
+				// FIXME React16
+				this.props.history.replace(Position.pathForEdit(position))
+				this.props.history.push({
+					pathname: Position.pathFor(position),
+					state: {
+						success: 'Saved Position',
+						skipPageLeaveWarning: true}
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
@@ -167,3 +173,5 @@ export default class PositionForm extends ValidatableFormWrapper {
 	}
 
 }
+
+export default withRouter(PositionForm)

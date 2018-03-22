@@ -23,7 +23,9 @@ import 'components/NameInput.css'
 import { confirmAlert } from 'react-confirm-alert'
 import 'components/react-confirm-alert.css'
 
-export default class PersonForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+
+class PersonForm extends ValidatableFormWrapper {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
@@ -335,14 +337,23 @@ export default class PersonForm extends ValidatableFormWrapper {
 					localStorage.clear()
 					localStorage.newUser = 'true'
 					this.context.app.loadData()
-//					History.push('/', {skipPageLeaveWarning: true}) FIXME React16
+					this.props.history.push({
+						pathname: '/',
+						state: {skipPageLeaveWarning: true}
+					}) // FIXME React16
 				} else {
 					if (response.id) {
 						person.id = response.id
 					}
-//					FIXME React16
-//					History.replace(Person.pathForEdit(person), false)
-//					History.push(Person.pathFor(person), {success: 'Person saved successfully', skipPageLeaveWarning: true})
+					// FIXME React16
+					this.props.history.replace(Person.pathForEdit(person))
+					this.props.history.push({
+						pathname: Person.pathFor(person),
+						state: {
+							success: 'Person saved successfully',
+							skipPageLeaveWarning: true
+						}
+					})
 				}
 			}).catch(error => {
 				this.setState({error: error})
@@ -388,3 +399,5 @@ export default class PersonForm extends ValidatableFormWrapper {
 		}
 	}
 }
+
+export default withRouter(PersonForm)

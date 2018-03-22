@@ -19,6 +19,8 @@ import {Task, Position, Organization} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 
+import { withRouter } from 'react-router-dom'
+
 const customEnumButtons = (list) => {
 	let buttons = []
 	for (const key in list) {
@@ -30,7 +32,7 @@ const customEnumButtons = (list) => {
     return buttons
 }
 
-export default class TaskForm extends ValidatableFormWrapper {
+class TaskForm extends ValidatableFormWrapper {
 	static propTypes = {
 		task: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
@@ -172,12 +174,20 @@ export default class TaskForm extends ValidatableFormWrapper {
 				if (response.id) {
 					task.id = response.id
 				}
-//				FIXME React16
-//				History.replace(Task.pathForEdit(task), false)
-//				History.push(Task.pathFor(task), {success: 'Saved successfully', skipPageLeaveWarning: true})
+				// FIXME React16
+				this.props.history.replace(Task.pathForEdit(task))
+				this.props.history.push({
+					pathname: Task.pathFor(task),
+					state: {
+						success: 'Saved successfully',
+						skipPageLeaveWarning: true
+					}
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
 			})
 	}
 }
+
+export default withRouter(TaskForm)

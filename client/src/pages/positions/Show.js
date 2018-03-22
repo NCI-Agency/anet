@@ -23,7 +23,9 @@ import Settings from 'Settings'
 import {Position, Organization} from 'models'
 import autobind from 'autobind-decorator'
 
-export default class PositionShow extends Page {
+import { withRouter } from 'react-router-dom'
+
+class PositionShow extends Page {
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -243,9 +245,14 @@ export default class PositionShow extends Page {
 		}
 
 		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
-//			History.push('/', {success: 'Position Deleted'}) FIXME React16
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Position Deleted'}
+			}) // FIXME React16
 		}, data => {
 			this.setState({success: null, error: data})
 		})
 	}
 }
+
+export default withRouter(PositionShow)

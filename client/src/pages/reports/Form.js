@@ -27,7 +27,9 @@ import LOCATION_ICON from 'resources/locations.png'
 import REMOVE_ICON from 'resources/delete.png'
 import WARNING_ICON from 'resources/warning.png'
 
-export default class ReportForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+
+class ReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
 		edit: PropTypes.bool
@@ -553,14 +555,17 @@ export default class ReportForm extends ValidatableFormWrapper {
 				// this updates the current page URL on model/new to be the edit page,
 				// so that if you press back after saving a new model, it takes you
 				// back to editing the model you just saved
-//				History.replace(Report.pathForEdit(this.props.report), false) FIXME React16
+				this.props.history.replace(Report.pathForEdit(this.props.report)) // FIXME React16
 
 				// then after, we redirect you to the to page
-//				FIXME React16
-//				History.push(Report.pathFor(this.props.report), {
-//					success: 'Report saved successfully',
-//					skipPageLeaveWarning: true
-//				})
+				// FIXME React16
+				this.props.history.push({
+					pathname: Report.pathFor(this.props.report),
+					state: {
+						success: 'Report saved successfully',
+						skipPageLeaveWarning: true
+					}
+				})
 			})
 			.catch(response => {
 				this.setState({
@@ -615,3 +620,5 @@ export default class ReportForm extends ValidatableFormWrapper {
 		this.setState({showAutoSaveBanner: false})
 	}
 }
+
+export default withRouter(ReportForm)
