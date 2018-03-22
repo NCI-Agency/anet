@@ -23,7 +23,10 @@ import Settings from 'Settings'
 import { confirmAlert } from 'react-confirm-alert'
 import 'components/react-confirm-alert.css'
 
-export default class Home extends Page {
+import { withRouter } from 'react-router-dom'
+import utils from 'utils'
+
+class Home extends Page {
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -271,7 +274,10 @@ export default class Home extends Page {
 			if (search.objectType) {
 				query.type = search.objectType.toLowerCase()
 			}
-//			History.push({pathname: '/search', query: query}) FIXME React16
+			this.props.history.push({
+				pathname: '/search',
+				search: utils.formatQueryString(query)
+			})
 		}
 	}
 
@@ -298,3 +304,5 @@ export default class Home extends Page {
 		})
 	}
 }
+
+export default withRouter(Home)

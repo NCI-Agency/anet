@@ -30,6 +30,8 @@ import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
+import { withRouter } from 'react-router-dom'
+import utils from 'utils'
 
 const QUERY_STRINGS = {
 	reports: {
@@ -86,13 +88,14 @@ const SEARCH_CONFIG = {
 	}
 }
 
-export default class Search extends Page {
+class Search extends Page {
 
 	constructor(props) {
 		super(props)
 
+		const qs = utils.parseQueryString(props.location.search)
 		this.state = {
-			query: props.location.search.text,
+			query: qs.text,
 			queryType: null,
 			pageNum: {
 				reports: 0,
@@ -208,7 +211,8 @@ export default class Search extends Page {
 	}
 
 	fetchData(props) {
-		this._dataFetcher(props.location.search, this._fetchDataCallback)
+		const qs = utils.parseQueryString(props.location.search)
+		this._dataFetcher(qs, this._fetchDataCallback)
 	}
 
 	render() {
@@ -226,14 +230,14 @@ export default class Search extends Page {
 		const numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
 		const noResults = numResults === 0
 
-		const query = this.props.location.search
-		let queryString = QUERY_STRINGS[query.type] || query.text || 'TODO'
-		const queryType = this.state.queryType || query.type || 'everything'
+		const qs = utils.parseQueryString(this.props.location.search)
+		let queryString = QUERY_STRINGS[qs.type] || qs.text || 'TODO'
+		const queryType = this.state.queryType || qs.type || 'everything'
 
 		const taskShortLabel = Settings.fields.task.shortLabel
 
 		if (typeof queryString === 'object') {
-			queryString = queryString[Object.keys(query)[1]]
+			queryString = queryString[Object.keys(qs)[1]]
 		}
 
 		return (
@@ -256,7 +260,7 @@ export default class Search extends Page {
 
 				<Messages error={error} success={success} />
 
-				{this.props.location.search.text && <h2 className="only-show-for-print">Search query: '{this.props.location.search.text}'</h2>}
+				{qs.text && <h2 className="only-show-for-print">Search query: '{qs.text}'</h2>}
 
 				{noResults &&
 					<Alert bsStyle="warning">
@@ -326,7 +330,8 @@ export default class Search extends Page {
 		const pageNums = this.state.pageNum
 		pageNums[type] = pageNum
 
-		const query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(this.props.location.search, 'type')
+		const qs = utils.parseQueryString(this.props.location.search)
+		const query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(qs, 'type')
 		const part = this.getSearchPart(type, query)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
@@ -344,7 +349,11 @@ export default class Search extends Page {
 
 	@autobind
 	cancelAdvancedSearch() {
-//		History.push({pathname: '/search', query: {text: this.state.advancedSearch ? this.state.advancedSearch.text : ""}, advancedSearch: null}) FIXME React16
+		this.props.history.push({
+			pathname: '/search',
+			search: utils.formatQueryString({text: this.state.advancedSearch ? this.state.advancedSearch.text : ""}),
+			state: {advancedSearch: null}
+		})
 	}
 
 	renderPeople() {
@@ -480,7 +489,8 @@ export default class Search extends Page {
 			search.query = JSON.stringify(this.getAdvancedSearchQuery())
 			search.objectType = this.state.advancedSearch.objectType.toUpperCase()
 		} else {
-			search.query = JSON.stringify({text: this.props.location.search.text })
+			const qs = utils.parseQueryString(this.props.location.search)
+			search.query = JSON.stringify({text: qs.text })
 		}
 
 		API.send('/api/savedSearches/new', search, {disableSubmits: true})
@@ -518,7 +528,8 @@ export default class Search extends Page {
 
 	@autobind
 	exportSearchResults() {
-		this._dataFetcher(this.props.location.search, this._exportSearchResultsCallback, 0)
+		const qs = utils.parseQueryString(this.props.location.search)
+		this._dataFetcher(qs, this._exportSearchResultsCallback, 0)
 	}
 
 	@autobind
@@ -532,3 +543,5 @@ export default class Search extends Page {
 	}
 
 }
+
+export default withRouter(Search)

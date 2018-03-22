@@ -6,21 +6,24 @@ import AdvancedSearch from 'components/AdvancedSearch'
 
 import SEARCH_ICON from 'resources/search-alt.png'
 
-export default class SearchBar extends Component {
+import { withRouter } from 'react-router-dom'
+import utils from 'utils'
+
+class SearchBar extends Component {
 	constructor() {
 		super()
 
 		this.state = {
+			query: '',
 			showAdvancedSearch: false
 		}
 	}
 	componentWillMount() {
-		this.setQueryState()
-		// this.unregisterHistoryListener = History.listen(this.setQueryState) FIXME React16
+		this.unregisterHistoryListener = this.props.history.listen(this.setQueryState)
 	}
 
 	componentWillUnmount() {
-		// this.unregisterHistoryListener() FIXME React16
+		this.unregisterHistoryListener()
 	}
 
 	render() {
@@ -42,9 +45,9 @@ export default class SearchBar extends Component {
 	}
 
 	@autobind
-	setQueryState() {
-//		this.setState({query: History.getCurrentLocation().query.text || ''}) FIXME React16
-		this.setState({query: ''})
+	setQueryState(location, action) {
+		const qs = utils.parseQueryString(location.search)
+		this.setState({query: qs.text || ''})
 	}
 
 	@autobind
@@ -54,7 +57,10 @@ export default class SearchBar extends Component {
 
 	@autobind
 	onSubmit(event) {
-//		History.push({pathname: '/search', query: {text: this.state.query}}) FIXME React16
+		this.props.history.push({
+			pathname: '/search',
+			search: utils.formatQueryString({text: this.state.query})
+		})
 		event.preventDefault()
 		event.stopPropagation()
 	}
@@ -64,3 +70,5 @@ export default class SearchBar extends Component {
 		this.setState({showAdvancedSearch: false})
 	}
 }
+
+export default withRouter(SearchBar)
