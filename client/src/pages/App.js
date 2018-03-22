@@ -111,9 +111,9 @@ export default class App extends Page {
 						<Route path={`${url}/:id/min`} component={ReportMinimal} />
 						<Route path={`${url}/mine`} component={MyReports} />
 						<Route path={`${url}/:id`} component={ReportShow} />
-	      </Switch>
-	    )}
-	    />
+					</Switch>
+				)}
+			/>
 		</Switch>
 
 		let pageProps = {} //FIXME React16: this.props.children.type.pageProps || {}
