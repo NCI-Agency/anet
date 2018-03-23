@@ -15,23 +15,28 @@ import moment from 'moment'
 
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
+import ProgramSummaryView from 'components/ProgramSummaryView'
+
+import FULLSCREEN_ICON from 'resources/fullscreen.png'
+import Fullscreen from "react-full-screen"
+import {Button} from 'react-bootstrap'
 
 const insightDetails = {
   'not-approved-reports': {
     component: PendingApprovalReports,
-    title: 'Pending Approval Reports',
+    title: 'Pending approval reports',
     dateRange: false,
     showCalendar: true
   },
   'cancelled-reports': {
     component: CancelledEngagementReports,
-    title: 'Cancelled Engagement Reports',
+    title: 'Cancelled engagement reports',
     dateRange: false,
     showCalendar: true
   },
   'reports-by-task': {
     component: ReportsByTask,
-    title: 'Reports by Task',
+    title: 'Reports by task',
     help: '',
     dateRange: false,
     showCalendar: true
@@ -45,16 +50,23 @@ const insightDetails = {
   },
   'advisor-reports': {
     component: FilterableAdvisorReportsTable,
-    title: 'Advisor Reports',
+    title: 'Advisor reports',
     dateRange: false,
     showCalendar: false
   },
   'future-engagements-by-location': {
     component: FutureEngagementsByLocation,
-    title: 'Future Engagements by Location',
+    title: 'Future engagements by location',
     help: 'Number of future engagements by location',
     dateRange: true,
     onlyShowBetween: true,
+  },
+  'program-summary-view': {
+    component: ProgramSummaryView,
+    title: 'Program summary view',
+    help: 'Summary view of the program',
+    dateRange: false,
+    onlyShowBetween: false,
   },
 }
 
@@ -89,6 +101,7 @@ export default class InsightsShow extends Page {
   constructor(props) {
     super(props)
     this.state = {
+      isFull: false,
       insight: props.params.insight,
       referenceDate: null,
       startDate: null,
@@ -96,6 +109,8 @@ export default class InsightsShow extends Page {
       date: {relative: "0", start: null, end: null}
     }
   }
+
+ toggleFull = () => this.setState( {isFull: !this.state.isFull} );
 
  get defaultDates() {
     return {
@@ -109,7 +124,8 @@ export default class InsightsShow extends Page {
     const insight = insightDetails[this.state.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
     const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
-    return <span>{dateRangeFilter}{calenderFilter}</span>
+    const fullscreenButton = <Button onClick={this.toggleFull} style={calendarButtonCss}><img src={FULLSCREEN_ICON} height={16} alt="Switch to fullscreen mode" /></Button>
+    return <span>{dateRangeFilter}{calenderFilter}{fullscreenButton}</span>
   }
 
   componentWillReceiveProps(nextProps) {
@@ -202,17 +218,20 @@ export default class InsightsShow extends Page {
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
-          <Fieldset id={this.state.insight} data-jumptarget title={
-            <span>
-              {insightConfig.title}
-              {this.getFilters()}
-            </span>
-            }>
-            <InsightComponent
-              date={this.state.referenceDate.clone()}
-              startDate={this.state.startDate.clone()}
-              endDate={this.state.endDate.clone()} />
-          </Fieldset>
+            <Fullscreen enabled={this.state.isFull}
+              onChange={isFull => this.setState({isFull})}>
+              <Fieldset id={this.state.insight} data-jumptarget title={
+                <span>
+                  {insightConfig.title}
+                  {this.getFilters()}
+                </span>
+                }>
+                <InsightComponent
+                  date={this.state.referenceDate.clone()}
+                  startDate={this.state.startDate.clone()}
+                  endDate={this.state.endDate.clone()} />
+              </Fieldset>
+            </Fullscreen>
         }
       </div>
     )
