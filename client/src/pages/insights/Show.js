@@ -16,6 +16,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 import ProgramSummaryView from 'components/ProgramSummaryView'
+import OrganizationView from 'components/OrganizationView'
 
 import FULLSCREEN_ICON from 'resources/fullscreen.png'
 import Fullscreen from "react-full-screen"
@@ -65,6 +66,13 @@ const insightDetails = {
     component: ProgramSummaryView,
     title: 'Program summary view',
     help: 'Summary view of the program',
+    dateRange: false,
+    onlyShowBetween: false,
+  },
+  'organization-view': {
+    component: OrganizationView,
+    title: 'Organization view',
+    help: 'Organization explorer',
     dateRange: false,
     onlyShowBetween: false,
   },
