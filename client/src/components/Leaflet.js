@@ -105,7 +105,7 @@ export default class Leaflet extends Component {
 			if (layerConfig.type === 'wms') {
 				layer = L.tileLayer.wms(layerConfig.url, layerConfig.options)
 			} else if (layerConfig.type === 'osm' || layerConfig.type === 'tile') {
-				layer = L.tileLayer(layerConfig.url)
+				layer = L.tileLayer(layerConfig.url, layerConfig.options)
 			}
 
 			if (layer) {
