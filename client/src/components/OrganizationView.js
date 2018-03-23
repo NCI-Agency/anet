@@ -34,7 +34,7 @@ export default class OrganizationView extends React.Component {
 
     fetchData() {
         const chartQuery = API.query(/* GraphQL */
-            `organizationList(f:getAll)
+            `organizationList(f:getAll pageSize:100000)
             {
                 list
                 {
@@ -54,8 +54,6 @@ export default class OrganizationView extends React.Component {
         const svg = d3.select(this.svgElement)
         const canvas = this.canvas = svg.append("g");
         svg .call(d3.zoom().on("zoom",  () => canvas.attr("transform", d3.event.transform) ));
-
-   
         this.fetchData()
     }
 
@@ -93,7 +91,7 @@ export default class OrganizationView extends React.Component {
           .attr("x", function(d) { return d.children ? -8 : 8; })
           .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
            .text(function(d) { 
-               return d.data.shortName
+               return d.data && d.data.shortName
             });
     }
 }
