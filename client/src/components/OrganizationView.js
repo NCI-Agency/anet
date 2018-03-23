@@ -14,9 +14,6 @@ const graphCss = {
     height: '1000px'
 }
 
-
-
-
 export default class OrganizationView extends React.Component {
     constructor() {
         super()
@@ -59,7 +56,8 @@ export default class OrganizationView extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         var tree = d3.tree()
-        .size([this.svgElement.clientWidth, this.svgElement.clientHeight]);
+
+        tree.nodeSize([15,60])
     
         const rootOrg = {childrenOrgs : _.filter(this.state.data, org => !(org.parentOrg && org.parentOrg.id))}
 
