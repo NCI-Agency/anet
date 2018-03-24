@@ -302,6 +302,8 @@ dictionary:
     - dds.mil
     - "*.isaf.nato.int"
   imagery:
+    mapOptions:
+      crs: EPSG3857
     baseLayers:
       - name: OSM
         default: true

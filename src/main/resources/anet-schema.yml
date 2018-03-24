@@ -330,6 +330,9 @@ properties:
     type: object
     additionalProperties: false
     properties:
+      mapOptions:
+        type: object
+        additionalProperties: true
       baseLayers:
         type: array
         uniqueItems: true
