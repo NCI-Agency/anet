@@ -57,7 +57,7 @@ export default class OrganizationView extends React.Component {
     componentDidUpdate(prevProps, prevState) {
         var tree = d3.tree()
 
-        tree.nodeSize([15,60])
+        tree.nodeSize([15,150])
     
         const rootOrg = {childrenOrgs : _.filter(this.state.data, org => !(org.parentOrg && org.parentOrg.id))}
 
