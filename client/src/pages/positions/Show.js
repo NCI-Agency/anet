@@ -113,7 +113,7 @@ class PositionShow extends Page {
 						</Form.Field>}
 
 						<Form.Field id="location" label="Location">
-							{position.location && <LinkTo location={position.location}>{position.location.name}</LinkTo>}
+							{position.location && <LinkTo anetLocation={position.location}>{position.location.name}</LinkTo>}
 						</Form.Field>
 					</Fieldset>
 

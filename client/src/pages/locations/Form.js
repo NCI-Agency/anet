@@ -18,7 +18,7 @@ import { withRouter } from 'react-router-dom'
 
 class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
-		location: PropTypes.object.isRequired,
+		anetLocation: PropTypes.object.isRequired,
 		edit: PropTypes.bool
 	}
 
@@ -31,18 +31,19 @@ class LocationForm extends ValidatableFormWrapper {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if (nextProps.location && nextProps.location.lat) {
+		if (nextProps.anetLocation && nextProps.anetLocation.lat) {
+			const loc = nextProps.anetLocation
 			let marker = this.state.markers[0]
-			marker.name = nextProps.location.name
-			marker.lat = nextProps.location.lat
-			marker.lng = nextProps.location.lng
-			marker.id = nextProps.location.id
+			marker.name = loc.name
+			marker.lat = loc.lat
+			marker.lng = loc.lng
+			marker.id = loc.id
 			this.setState({markers: [marker]})
 		}
 	}
 
 	render() {
-		let location = this.props.location
+		let location = this.props.anetLocation
 		let markers = this.state.markers
 		let edit = this.props.edit
 
@@ -87,7 +88,7 @@ class LocationForm extends ValidatableFormWrapper {
 	@autobind
 	onMarkerMove(event) {
 		let latLng = event.latlng
-		let loc = this.props.location
+		let loc = this.props.anetLocation
 		loc.lat = latLng.lat
 		loc.lng = latLng.lng
 		this.onChange()
@@ -100,7 +101,7 @@ class LocationForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
-		let loc = this.props.location
+		let loc = this.props.anetLocation
 		let edit = this.props.edit
 		let url = `/api/locations/${edit ? 'update'  :'new'}`
 		API.send(url, loc, {disableSubmits: true})

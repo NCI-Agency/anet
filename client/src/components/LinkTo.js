@@ -8,6 +8,9 @@ import * as Models from 'models'
 
 const MODEL_NAMES = Object.keys(Models).map(key => {
 	let camel = utils.camelCase(key)
+	if (camel === 'location') {
+		camel = 'anetLocation'
+	}
 	Models[camel] = Models[key]
 	return camel
 })

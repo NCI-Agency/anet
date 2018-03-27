@@ -222,7 +222,7 @@ class ReportShow extends Page {
 						<Form.Field id="engagementDate" label="Engagement Date" getter={date => date && moment(date).format('D MMMM, YYYY')} />
 
 						<Form.Field id="location" label="Location">
-							{report.location && <LinkTo location={report.location} />}
+							{report.location && <LinkTo anetLocation={report.location} />}
 						</Form.Field>
 
 						{!isCancelled &&

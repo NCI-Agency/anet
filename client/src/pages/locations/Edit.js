@@ -41,7 +41,7 @@ export default class LocationEdit extends Page {
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<NavigationWarning original={this.state.originalLocation} current={location} />
-				<LocationForm location={location} edit />
+				<LocationForm anetLocation={location} edit />
 			</div>
 		)
 	}

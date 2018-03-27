@@ -428,7 +428,7 @@ class Search extends Page {
 				<tbody>
 					{this.state.results.locations.list.map(loc =>
 						<tr key={loc.id}>
-							<td><LinkTo location={loc} /></td>
+							<td><LinkTo anetLocation={loc} /></td>
 						</tr>
 					)}
 				</tbody>

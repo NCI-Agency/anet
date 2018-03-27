@@ -31,7 +31,7 @@ export default class LocationNew extends ValidatableFormWrapper {
 				<Breadcrumbs items={[['Create new Location', Location.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<LocationForm location={location} />
+				<LocationForm anetLocation={location} />
 			</div>
 		)
 	}

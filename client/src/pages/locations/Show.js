@@ -73,7 +73,7 @@ export default class LocationShow extends Page {
 				<Messages success={this.state.success} error={this.state.error} />
 
 				<Form static formFor={location} horizontal >
-					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo location={location} edit button="primary">Edit</LinkTo>} >
+					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>} >
 						<Form.Field id="status" />
 
 						<Form.Field id="latlng" value={latlng} label="Lat/Lon" />
