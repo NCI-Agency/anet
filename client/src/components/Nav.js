@@ -10,7 +10,9 @@ import pluralize from 'pluralize'
 
 import {Organization} from 'models'
 
-export default class Nav extends Component {
+import { withRouter } from 'react-router-dom'
+
+class Nav extends Component {
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
 	}
@@ -24,8 +26,7 @@ export default class Nav extends Component {
 		const appData = this.context.app.state
 		const currentUser = appData.currentUser
 		const organizations = appData.organizations || []
-//		let path = this.context.app.props.location.pathname FIXME React16
-		let path = ['']
+		const path = this.props.location.pathname
 
 		const {settings} = appData || {}
 		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -39,9 +40,8 @@ export default class Nav extends Component {
 		const myOrg = currentUser.position ? currentUser.position.organization : null
 		let orgId, myOrgId
 		if (inOrg) {
-			orgId = +this.context.app.props.match.params.id
+			orgId = +path.split('/')[2]
 			myOrgId = myOrg && +myOrg.id
-			path = `/organizations/${orgId}`
 		}
 
 		const orgSubNav = (
@@ -156,6 +156,8 @@ export default class Nav extends Component {
 		)
 	}
 }
+
+export default withRouter(Nav)
 
 function SubNav(props) {
 	let {componentClass, ...childProps} = props
