@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {DropdownButton, MenuItem, Button} from 'react-bootstrap'
 import * as Models from 'models'
+import autobind from 'autobind-decorator'
 
 import { withRouter } from 'react-router-dom'
 
@@ -52,6 +53,7 @@ class CreateButton extends Component {
 		}
 	}
 
+	@autobind
 	onSelect(modelClass) {
 		this.props.history.push(modelClass.pathForNew())
 	}
