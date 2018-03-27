@@ -192,7 +192,7 @@ class MergePeople extends Page {
 				this.props.history.push({
 					pathname: Person.pathFor(this.state.winner),
 					state: {success: 'People successfully merged'}
-				}) // FIXME React16
+				})
 			})
 			.catch(error => {
                 this.setState({error})

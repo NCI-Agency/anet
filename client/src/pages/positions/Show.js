@@ -248,7 +248,7 @@ class PositionShow extends Page {
 			this.props.history.push({
 				pathname: '/',
 				state: {success: 'Position Deleted'}
-			}) // FIXME React16
+			})
 		}, data => {
 			this.setState({success: null, error: data})
 		})

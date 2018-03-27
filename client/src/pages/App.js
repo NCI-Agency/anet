@@ -115,7 +115,7 @@ class App extends Page {
 			this.setState(this.processData(data), () => {
 				// if this is a new user, redirect to the create profile page
 				if (this.state.currentUser.isNewUser()) {
-					this.props.history.replace('/onboarding') // FIXME React16
+					this.props.history.replace('/onboarding')
 				}
 			})
 		})

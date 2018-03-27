@@ -93,7 +93,7 @@ class ReportEdit extends Page {
 					this.props.history.push({
 						pathname: '/',
 						state: {success: 'Report deleted'}
-					}) // FIXME React16
+					})
 				}, data => {
 					this.setState({success:null})
 					this.handleError(data)
