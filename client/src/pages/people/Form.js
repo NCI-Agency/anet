@@ -339,8 +339,8 @@ class PersonForm extends ValidatableFormWrapper {
 					this.context.app.loadData()
 					this.props.history.push({
 						pathname: '/',
-						state: {skipPageLeaveWarning: true}
-					}) // FIXME React16
+						state: {skipPageLeaveWarning: true} // FIXME React16
+					})
 				} else {
 					if (response.id) {
 						person.id = response.id
@@ -350,7 +350,7 @@ class PersonForm extends ValidatableFormWrapper {
 						pathname: Person.pathFor(person),
 						state: {
 							success: 'Person saved successfully',
-							skipPageLeaveWarning: true
+							skipPageLeaveWarning: true // FIXME React16
 						}
 					})
 				}

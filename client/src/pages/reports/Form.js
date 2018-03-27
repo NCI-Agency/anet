@@ -562,7 +562,7 @@ class ReportForm extends ValidatableFormWrapper {
 					pathname: Report.pathFor(this.props.report),
 					state: {
 						success: 'Report saved successfully',
-						skipPageLeaveWarning: true
+						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			})

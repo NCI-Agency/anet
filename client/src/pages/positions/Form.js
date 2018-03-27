@@ -163,7 +163,8 @@ class PositionForm extends ValidatableFormWrapper {
 					pathname: Position.pathFor(position),
 					state: {
 						success: 'Saved Position',
-						skipPageLeaveWarning: true}
+						skipPageLeaveWarning: true // FIXME React16
+					}
 				})
 			}).catch(error => {
 				this.setState({error: error})

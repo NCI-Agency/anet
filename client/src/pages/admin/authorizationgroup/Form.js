@@ -95,7 +95,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 					pathname: AuthorizationGroup.pathFor(authGroup),
 					state: {
 						success: 'Saved authorization group',
-						skipPageLeaveWarning: true
+						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {

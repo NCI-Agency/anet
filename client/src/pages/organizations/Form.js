@@ -243,7 +243,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 					pathname: Organization.pathFor(organization),
 					state: {
 						success: 'Organization saved successfully',
-						skipPageLeaveWarning: true
+						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {

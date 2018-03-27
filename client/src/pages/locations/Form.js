@@ -113,9 +113,9 @@ class LocationForm extends ValidatableFormWrapper {
 					pathname: Location.pathFor(loc),
 					state: {
 						success: 'Saved Location',
-						skipPageLeaveWarning: true
+						skipPageLeaveWarning: true // FIXME React16
 					}
-				}) // FIXME React16
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)

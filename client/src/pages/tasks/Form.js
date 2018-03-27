@@ -179,7 +179,7 @@ class TaskForm extends ValidatableFormWrapper {
 					pathname: Task.pathFor(task),
 					state: {
 						success: 'Saved successfully',
-						skipPageLeaveWarning: true
+						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {
