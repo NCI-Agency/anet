@@ -144,7 +144,7 @@ class App extends Page {
 				<Switch>
 					<Route path={`${url}/new`} component={OrganizationNew} />
 					<Route path={`${url}/:id/edit`} component={OrganizationEdit} />
-					<Route path={`${url}/:id(/:action)`} component={OrganizationShow} />
+					<Route path={`${url}/:id/:action?`} component={OrganizationShow} />
 				</Switch>
 			)}
 			/>
