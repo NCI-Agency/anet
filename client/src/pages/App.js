@@ -13,6 +13,9 @@ import {Route, Switch} from 'react-router'
 import Home from 'pages/Home'
 import Search from 'pages/Search'
 import RollupShow from 'pages/rollup/Show'
+import GraphiQL from 'pages/GraphiQL'
+import Help from 'pages/Help'
+import PageMissing from 'pages/PageMissing'
 
 import ReportNew from 'pages/reports/New'
 import ReportShow from 'pages/reports/Show'
@@ -28,9 +31,29 @@ import OrganizationShow from 'pages/organizations/Show'
 import OrganizationNew from 'pages/organizations/New'
 import OrganizationEdit from 'pages/organizations/Edit'
 
+import LocationShow from 'pages/locations/Show'
+import LocationEdit from 'pages/locations/Edit'
+import LocationNew from 'pages/locations/New'
+
+import PositionShow from 'pages/positions/Show'
+import PositionEdit from 'pages/positions/Edit'
+import PositionNew from 'pages/positions/New'
+
 import TaskShow from 'pages/tasks/Show'
 import TaskNew from 'pages/tasks/New'
 import TaskEdit from 'pages/tasks/Edit'
+
+import AdminIndex from 'pages/admin/Index'
+import MergePeople from 'pages/admin/MergePeople'
+import AuthorizationGroups from 'pages/admin/AuthorizationGroups'
+import AuthorizationGroupShow from 'pages/admin/authorizationgroup/Show'
+import AuthorizationGroupEdit from 'pages/admin/authorizationgroup/Edit'
+import AuthorizationGroupNew from 'pages/admin/authorizationgroup/New'
+
+import InsightsShow from  'pages/insights/Show'
+
+import OnboardingShow from 'pages/onboarding/Show'
+import OnboardingEdit from 'pages/onboarding/Edit'
 
 import { withRouter } from 'react-router-dom'
 
@@ -116,6 +139,8 @@ class App extends Page {
 			<Route exact path="/" component={Home} />
 			<Route path="/search" component={Search} />
 			<Route path="/rollup" component={RollupShow} />
+			<Route path="/graphiql" component={GraphiQL} />
+			<Route path="/help" component={Help} />
 			<Route
 				path="/reports"
 				render={({ match: { url } }) => (
@@ -149,6 +174,26 @@ class App extends Page {
 			)}
 			/>
 			<Route
+				path="/locations"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={LocationNew} />
+					<Route path={`${url}/:id/edit`} component={LocationEdit} />
+					<Route path={`${url}/:id`} component={LocationShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/positions"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={PositionNew} />
+					<Route path={`${url}/:id/edit`} component={PositionEdit} />
+					<Route path={`${url}/:id`} component={PositionShow} />
+				</Switch>
+			)}
+			/>
+			<Route
 				path="/tasks"
 				render={({ match: { url } }) => (
 				<Switch>
@@ -158,6 +203,38 @@ class App extends Page {
 				</Switch>
 			)}
 			/>
+			<Route
+				path="/admin"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route exact path={`${url}/`} component={AdminIndex} />
+					<Route path={`${url}/mergePeople`} component={MergePeople} />
+					<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
+					<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
+					<Route path={`${url}/authorizationGroups/:id/edit`} component={AuthorizationGroupEdit} />
+					<Route path={`${url}/authorizationGroups/:id`} component={AuthorizationGroupShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/insights"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/:insight`} component={InsightsShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/onboarding"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route exact path={`${url}/`} component={OnboardingShow} />
+					<Route path={`${url}/edit`} component={OnboardingEdit} />
+				</Switch>
+			)}
+			/>
+
+			<Route path="*" component={PageMissing} />
 		</Switch>
 
 		let pageProps = {} //FIXME React16: this.props.children.type.pageProps || {}
