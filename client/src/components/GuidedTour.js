@@ -8,6 +8,8 @@ import 'hopscotch/dist/css/hopscotch.css'
 
 import TOUR_ICON from 'resources/tour-icon.png'
 
+import { withRouter } from 'react-router-dom'
+
 const iconCss = {
 	width: '20px',
 	marginLeft: '8px',
@@ -17,7 +19,7 @@ const HOPSCOTCH_CONFIG = {
 	bubbleWidth: 400,
 }
 
-export default class GuidedTour extends Component {
+class GuidedTour extends Component {
 	static propTypes = {
 		tour: PropTypes.func.isRequired,
 		autostart: PropTypes.bool,
@@ -65,7 +67,7 @@ export default class GuidedTour extends Component {
 
 	startTour(stepId) {
 		let currentUser = this.context.currentUser
-		let tour = this.props.tour(currentUser)
+		let tour = this.props.tour(currentUser, this.props.history)
 
 		// I don't know why hopscotch requires itself to be reconfigured
 		// EVERY TIME you start a tour, but it does. so this does that.
@@ -90,3 +92,5 @@ export default class GuidedTour extends Component {
 		}
 	}
 }
+
+export default withRouter(GuidedTour)
