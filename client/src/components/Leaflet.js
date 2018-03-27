@@ -5,6 +5,10 @@ import autobind from 'autobind-decorator'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+import MARKER_ICON from 'resources/leaflet/marker-icon.png'
+import MARKER_ICON_2X from 'resources/leaflet/marker-icon-2x.png'
+import MARKER_SHADOW from 'resources/leaflet/marker-shadow.png'
+
 const css = {
 	height: '500px',
 	marginBottom: '18px',
@@ -31,9 +35,9 @@ export default class Leaflet extends Component {
 		}
 
 		this.icon = L.icon({
-			iconUrl:       '/assets/img/leaflet/marker-icon.png',
-			iconRetinaUrl: '/assets/img/leaflet/marker-icon-2x.png',
-			shadowUrl:     '/assets/img/leaflet/marker-shadow.png',
+			iconUrl:       MARKER_ICON,
+			iconRetinaUrl: MARKER_ICON_2X,
+			shadowUrl:     MARKER_SHADOW,
 			iconSize:    [25, 41],
 			iconAnchor:  [12, 41],
 			popupAnchor: [1, -34],
