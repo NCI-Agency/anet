@@ -31,7 +31,7 @@ class OnboardingShow extends Page {
 
 	@autobind
 	onCreateAccountClick() {
-		this.props.history.push('/onboarding/edit') // FIXME React16
+		this.props.history.push('/onboarding/edit')
 	}
 }
 

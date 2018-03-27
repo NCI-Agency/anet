@@ -97,7 +97,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 						success: 'Saved authorization group',
 						skipPageLeaveWarning: true
 					}
-				}) // FIXME React16
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)

@@ -336,7 +336,7 @@ class RollupShow extends Page {
 		this.props.history.replace({
 			pathname: 'rollup',
 			search: utils.formatQueryString({date: date.valueOf()})
-		}) // FIXME React16
+		})
 	}
 
 	@autobind

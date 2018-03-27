@@ -238,7 +238,6 @@ class OrganizationForm extends ValidatableFormWrapper {
 				if (response.id) {
 					organization.id = response.id
 				}
-				// FIXME React16
 				this.props.history.replace(Organization.pathForEdit(organization))
 				this.props.history.push({
 					pathname: Organization.pathFor(organization),

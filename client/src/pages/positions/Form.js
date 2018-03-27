@@ -158,7 +158,6 @@ class PositionForm extends ValidatableFormWrapper {
 				if (response.id) {
 					position.id = response.id
 				}
-				// FIXME React16
 				this.props.history.replace(Position.pathForEdit(position))
 				this.props.history.push({
 					pathname: Position.pathFor(position),

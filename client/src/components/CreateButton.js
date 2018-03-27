@@ -53,7 +53,7 @@ class CreateButton extends Component {
 	}
 
 	onSelect(modelClass) {
-		this.props.history.push(modelClass.pathForNew()) // FIXME React16
+		this.props.history.push(modelClass.pathForNew())
 	}
 }
 

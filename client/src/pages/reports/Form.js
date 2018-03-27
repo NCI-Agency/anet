@@ -555,10 +555,9 @@ class ReportForm extends ValidatableFormWrapper {
 				// this updates the current page URL on model/new to be the edit page,
 				// so that if you press back after saving a new model, it takes you
 				// back to editing the model you just saved
-				this.props.history.replace(Report.pathForEdit(this.props.report)) // FIXME React16
+				this.props.history.replace(Report.pathForEdit(this.props.report))
 
 				// then after, we redirect you to the to page
-				// FIXME React16
 				this.props.history.push({
 					pathname: Report.pathFor(this.props.report),
 					state: {

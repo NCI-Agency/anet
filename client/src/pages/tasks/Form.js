@@ -174,7 +174,6 @@ class TaskForm extends ValidatableFormWrapper {
 				if (response.id) {
 					task.id = response.id
 				}
-				// FIXME React16
 				this.props.history.replace(Task.pathForEdit(task))
 				this.props.history.push({
 					pathname: Task.pathFor(task),

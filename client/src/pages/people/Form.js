@@ -345,7 +345,6 @@ class PersonForm extends ValidatableFormWrapper {
 					if (response.id) {
 						person.id = response.id
 					}
-					// FIXME React16
 					this.props.history.replace(Person.pathForEdit(person))
 					this.props.history.push({
 						pathname: Person.pathFor(person),
