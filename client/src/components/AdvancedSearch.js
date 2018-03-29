@@ -20,6 +20,7 @@ import {Location, Person, Task, Position, Organization} from 'models'
 import REMOVE_ICON from 'resources/delete.png'
 
 import { withRouter } from 'react-router-dom'
+import _isEqual from 'lodash/isEqual'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -247,7 +248,7 @@ class AdvancedSearch extends Component {
 		if (props.query) {
 			this.setState(props.query)
 		}
-		if (nextContext !== this.context) {
+		if (!_isEqual(this.context, nextContext)) {
 			this.ALL_FILTERS = this.getFilters(nextContext)
 		}
 	}
