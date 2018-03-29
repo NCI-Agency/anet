@@ -31,7 +31,7 @@ export default class TaskShow extends Page {
 		this.state = {
 			task: new Task({
 				id: props.match.params.id,
-				shortName: props.match.params.shorName,
+				shortName: props.match.params.shortName,
 				longName: props.match.params.longName,
 				responsibleOrg: props.match.params.responsibleOrg
 			}),
