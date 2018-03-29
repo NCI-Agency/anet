@@ -8119,7 +8119,7 @@ react-autowhatever@^10.1.0:
     react-themeable "^1.1.0"
     section-iterator "^2.0.0"
 
-react-bootstrap@^0.31.0:
+react-bootstrap@^0.31.0, react-bootstrap@^0.31.5:
   version "0.31.5"
   resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-0.31.5.tgz#57040fa8b1274e1e074803c21a1b895fdabea05a"
   dependencies:
@@ -8134,9 +8134,12 @@ react-bootstrap@^0.31.0:
     uncontrollable "^4.1.0"
     warning "^3.0.0"
 
-react-confirm-alert@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/react-confirm-alert/-/react-confirm-alert-2.0.2.tgz#8691d4f1b109e0b74022fe4d42ce0b7f985d19a5"
+react-confirm-bootstrap@^5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/react-confirm-bootstrap/-/react-confirm-bootstrap-5.2.1.tgz#3daaadac1fddd17c201ac0e86f7fb897d5813d08"
+  dependencies:
+    prop-types "^15.6.0"
+    react-bootstrap "^0.31.5"
 
 react-dnd-html5-backend@2.5.4:
   version "2.5.4"

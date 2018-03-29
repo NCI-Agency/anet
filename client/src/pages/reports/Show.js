@@ -19,8 +19,7 @@ import API from 'api'
 import Settings from 'Settings'
 import {Report, Person, Task, Comment, Position} from 'models'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
+import ConfirmDelete from 'components/ConfirmDelete'
 
 import { withRouter } from 'react-router-dom'
 
@@ -385,13 +384,29 @@ class ReportShow extends Page {
 				</Form>
 				{currentUser.isAdmin() &&
 					<div className="submit-buttons"><div>
-					<Button bsStyle="warning" onClick={this.deleteReport} className="pull-right">
-						Delete report
-					</Button>
+					<ConfirmDelete
+						onConfirmDelete={this.onConfirmDelete}
+						objectType="report"
+						objectDisplay={'#' + this.state.report.id}
+						bsStyle="warning"
+						buttonLabel="Delete report" />
 					</div></div>
 				}
 			</div>
 		)
+	}
+
+	@autobind
+	onConfirmDelete() {
+		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Report deleted'}
+			})
+		}, data => {
+			this.setState({success:null})
+			this.handleError(data)
+		})
 	}
 
 	@autobind
@@ -593,28 +608,6 @@ class ReportShow extends Page {
 			)}
 			</ul>
 		</Alert>
-	}
-
-
-	@autobind
-	deleteReport() {
-		confirmAlert({
-			title: 'Confirm to delete report',
-			message: "Are you sure you want to delete this report? This cannot be undone.",
-			confirmLabel: `Yes, I am sure that I want to delete report #${this.state.report.id}`,
-			cancelLabel: 'No, I am not entirely sure at this point',
-			onConfirm: () => {
-				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-					this.props.history.push({
-						pathname: '/',
-						state: {success: 'Report deleted'}
-					}) // FIXME React16
-				}, data => {
-					this.setState({success:null})
-					this.handleError(data)
-				})
-			}
-		})
 	}
 }
 

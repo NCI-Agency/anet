@@ -33,7 +33,8 @@ import NavigationWarning from 'components/NavigationWarning'
 class ReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
-		edit: PropTypes.bool
+		edit: PropTypes.bool,
+		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
 	}
 
 	static contextTypes = {
@@ -193,8 +194,8 @@ class ReportForm extends ValidatableFormWrapper {
 				</div>
 			}
 
-			<ValidatableForm formFor={report} horizontal onSubmit={this.onSubmit} onChange={this.onChange}
-				onDelete={onDelete} deleteText="Delete this report"
+			<ValidatableForm formFor={report} horizontal
+				onSubmit={this.onSubmit} onChange={this.onChange} onDelete={onDelete}
 				submitDisabled={hasErrors} submitText={submitText}
 				bottomAccessory={this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format('hh:mm:ss')}</div>}
 			>

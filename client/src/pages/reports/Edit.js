@@ -12,9 +12,6 @@ import ReportForm from './Form'
 import API from 'api'
 import {Report, Person} from 'models'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
-
 import { withRouter } from 'react-router-dom'
 
 class ReportEdit extends Page {
@@ -69,34 +66,33 @@ class ReportEdit extends Page {
 
 		//Only the author can delete a report, and only in DRAFT.
 		let canDelete = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author)
+		const onConfirmDeleteProps = {
+				onConfirmDelete: this.onConfirmDelete,
+				objectType: "report",
+				objectDisplay: `#${this.state.report.id}`,
+				bsStyle: "warning",
+				buttonLabel: "Delete this report"
+		}
 
 		return (
 			<div className="report-edit">
 				<Breadcrumbs items={[['Report #' + report.id, '/reports/' + report.id], ['Edit', '/reports/' + report.id + '/edit']]} />
 
-				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && this.deleteReport} />
+				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
 			</div>
 		)
 	}
 
 	@autobind
-	deleteReport() {
-		confirmAlert({
-			title: 'Confirm to delete report',
-			message: "Are you sure you want to delete this report? This cannot be undone.",
-			confirmLabel: `Yes, I am sure that I want to delete report #${this.state.report.id}`,
-			cancelLabel: 'No, I am not entirely sure at this point',
-			onConfirm: () => {
-				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-					this.props.history.push({
-						pathname: '/',
-						state: {success: 'Report deleted'}
-					})
-				}, data => {
-					this.setState({success:null})
-					this.handleError(data)
-				})
-			}
+	onConfirmDelete() {
+		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Report deleted'}
+			})
+		}, data => {
+			this.setState({success:null})
+			this.handleError(data)
 		})
 	}
 }

@@ -1,30 +1,9 @@
-@import "~react-confirm-alert/src/react-confirm-alert.css";
 
-/* Style overrides for react-confirm-alert buttons */
+/* Style overrides for react-confirm-bootstrap buttons, to make them align well */
 
-/* from bootstrap .btn-primary: */
-.react-confirm-alert-button-group > button {
-  border: 1px solid;
-  background-color: #337ab7;
-  border-color: #2e6da4;
-  color: #fff;
+.react-confirm-bootstrap-modal {
+  display: flex !important;
 }
-
-/* from bootstrap .btn-default: */
-.react-confirm-alert-button-group > button:first-child {
-  background-color: #fff;
-  border-color: #ccc;
-  color: #333;
-}
-
-/* from bootstrap .btn-primary:hover: */
-.react-confirm-alert-button-group > button:hover {
-   background-color: #286090;
-   border-color: #204d74;
- }
-
-/* from bootstrap .btn-default:hover: */
-.react-confirm-alert-button-group > button:first-child:hover {
-  background-color: #e6e6e6;
-  border-color: #adadad;
+.react-confirm-bootstrap-modal .modal-footer {
+  display: flex !important;
 }

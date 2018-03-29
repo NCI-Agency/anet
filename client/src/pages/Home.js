@@ -20,8 +20,7 @@ import {Report} from 'models'
 import API from 'api'
 import Settings from 'Settings'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
+import ConfirmDelete from 'components/ConfirmDelete'
 
 import { withRouter } from 'react-router-dom'
 import utils from 'utils'
@@ -247,9 +246,12 @@ class Home extends Page {
 								<Button style={{marginRight: 12}} onClick={this.showSearch} >
 									Show Search
 								</Button>
-								<Button bsStyle="danger" bsSize="small" onClick={this.deleteSearch} >
-									Delete Search
-								</Button>
+								<ConfirmDelete
+									onConfirmDelete={this.onConfirmDelete}
+									objectType="search"
+									objectDisplay={this.state.selectedSearch.name}
+									bsStyle="danger"
+									buttonLabel="Delete Search" />
 							</div>
 							<SavedSearchTable search={this.state.selectedSearch} />
 						</div>
@@ -282,26 +284,18 @@ class Home extends Page {
 	}
 
 	@autobind
-	deleteSearch() {
-		let search = this.state.selectedSearch
-		let index = this.state.savedSearches.findIndex(s => s.id === search.id)
-		confirmAlert({
-			title: 'Confirm to delete search',
-			message: 'Are you sure you want to delete this search?',
-			confirmLabel: "Yes, I am sure that I want to delete '" + search.name + "'",
-			cancelLabel: 'No, I am not entirely sure at this point',
-			onConfirm: () => {
-				API.send(`/api/savedSearches/${search.id}`, {}, {method: 'DELETE'})
-					.then(data => {
-						let savedSearches = this.state.savedSearches
-						savedSearches.splice(index, 1)
-						let nextSelect = savedSearches.length > 0 ? savedSearches[0] : null
-						this.setState({ savedSearches: savedSearches, selectedSearch : nextSelect })
-					}, data => {
-						this.setState({success:null, error: data})
-					})
-			}
-		})
+	onConfirmDelete() {
+		const search = this.state.selectedSearch
+		const index = this.state.savedSearches.findIndex(s => s.id === search.id)
+		API.send(`/api/savedSearches/${search.id}`, {}, {method: 'DELETE'})
+			.then(data => {
+				let savedSearches = this.state.savedSearches
+				savedSearches.splice(index, 1)
+				let nextSelect = savedSearches.length > 0 ? savedSearches[0] : null
+				this.setState({ savedSearches: savedSearches, selectedSearch : nextSelect })
+			}, data => {
+				this.setState({success:null, error: data})
+			})
 	}
 }
 
