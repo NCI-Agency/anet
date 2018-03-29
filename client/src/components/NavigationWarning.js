@@ -1,18 +1,28 @@
-import {Component} from 'react'
-import _isEqual from 'lodash/isEqual'
-import _last from 'lodash/last'
-import _get from 'lodash/get'
-import autobind from 'autobind-decorator'
+import React, {Component} from 'react'
+//import _last from 'lodash/last'
+//import _get from 'lodash/get'
+//import autobind from 'autobind-decorator'
 import {withRouter} from 'react-router'
+import {Prompt} from 'react-router-dom'
 
 class NavigationWarning extends Component {
 
-// FIXME React16
-// FIXME idea: https://reacttraining.com/react-router/web/example/preventing-transitions
-//	formHasUnsavedChanges() {
-//		return !_isEqual(this.props.current, this.props.original)
-//	}
-//
+	constructor(props, context) {
+		super(props, context)
+
+		this.state = {
+			isBlocking: props.isBlocking,
+		}
+	}
+
+	componentWillReceiveProps(nextProps) {
+		if (this.state.isBlocking !== nextProps.isBlocking) {
+			this.setState({
+				isBlocking: nextProps.isBlocking,
+			})
+		}
+	}
+
 //	@autobind
 //	onBeforeUnloadListener(event) {
 //		if (this.formHasUnsavedChanges()) {
@@ -43,9 +53,12 @@ class NavigationWarning extends Component {
 //		window.removeEventListener('beforeunload', this.onBeforeUnloadListener)
 //	}
 
-    render() {
-        return null
-    }
+	render() {
+		return <Prompt
+			when={this.state.isBlocking}
+			message="Are you sure you wish to navigate away from the page? You will lose unsaved changes."
+		/>
+	}
 
 }
 

@@ -15,6 +15,7 @@ import Settings from 'Settings'
 import {Location, Position, Organization} from 'models'
 
 import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 class PositionForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -26,6 +27,15 @@ class PositionForm extends ValidatableFormWrapper {
 
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
+	}
+
+	constructor(props) {
+		super(props)
+
+		this.state = {
+			isBlocking: false,
+			errors: {},
+		}
 	}
 
 	render() {
@@ -56,6 +66,9 @@ class PositionForm extends ValidatableFormWrapper {
 		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.id
 
 		return (
+			<div>
+			<NavigationWarning isBlocking={this.state.isBlocking} />
+
 			<ValidatableForm
 				formFor={position}
 				onChange={this.onChange}
@@ -129,12 +142,16 @@ class PositionForm extends ValidatableFormWrapper {
 					</Form.Field>
 				</Fieldset>
 			</ValidatableForm>
+			</div>
 		)
 	}
 
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 

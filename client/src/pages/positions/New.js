@@ -2,7 +2,6 @@ import React from 'react'
 import Page from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import PositionForm from './Form'
 
@@ -58,8 +57,7 @@ export default class PositionNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Position', Position.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalPosition} current={position} />
-				<PositionForm position={position} />
+				<PositionForm original={this.state.originalPosition} position={position} />
 			</div>
 		)
 	}

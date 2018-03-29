@@ -4,7 +4,6 @@ import Page from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 
 import ReportForm from './Form'
 
@@ -65,8 +64,7 @@ export default class ReportNew extends Page {
 				<Breadcrumbs items={[['Submit a report', Report.pathForNew()]]} />
 				<Messages error={this.state.error} />
 
-				<NavigationWarning original={this.state.originalReport} current={this.state.report} />
-				<ReportForm report={this.state.report} title="Create a new Report" />
+				<ReportForm original={this.state.originalReport} report={this.state.report} title="Create a new Report" />
 			</div>
 		)
 	}

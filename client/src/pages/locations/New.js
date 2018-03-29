@@ -1,6 +1,5 @@
 import React from 'react'
 
-import NavigationWarning from 'components/NavigationWarning'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -26,12 +25,10 @@ export default class LocationNew extends ValidatableFormWrapper {
 
 		return (
 			<div>
-				<NavigationWarning original={new Location()} current={location} />
-
 				<Breadcrumbs items={[['Create new Location', Location.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<LocationForm anetLocation={location} />
+				<LocationForm original={new Location()} anetLocation={location} />
 			</div>
 		)
 	}

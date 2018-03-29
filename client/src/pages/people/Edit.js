@@ -5,7 +5,6 @@ import moment from 'moment'
 
 import PersonForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import API from 'api'
 import {Person} from 'models'
@@ -62,8 +61,7 @@ export default class PersonEdit extends Page {
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
 
-				<NavigationWarning original={originalPerson} current={person} />
-				<PersonForm person={person} edit showPositionAssignment={canEditPosition}
+				<PersonForm original={originalPerson} person={person} edit showPositionAssignment={canEditPosition}
 					legendText={legendText} saveText={saveText} />
 			</div>
 		)

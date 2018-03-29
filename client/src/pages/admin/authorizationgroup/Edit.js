@@ -2,7 +2,6 @@ import React from 'react'
 import Page from 'components/Page'
 
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import AuthorizationGroupForm from 'pages/admin/authorizationgroup/Form'
@@ -46,8 +45,7 @@ export default class AuthorizationGroupEdit extends Page {
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)], ["Edit", AuthorizationGroup.pathForEdit(authorizationGroup)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<NavigationWarning original={this.state.originalAuthorizationGroup} current={authorizationGroup} />
-				<AuthorizationGroupForm authorizationGroup={authorizationGroup} edit />
+				<AuthorizationGroupForm original={this.state.originalAuthorizationGroup} authorizationGroup={authorizationGroup} edit />
 			</div>
 		)
 	}

@@ -28,6 +28,7 @@ import REMOVE_ICON from 'resources/delete.png'
 import WARNING_ICON from 'resources/warning.png'
 
 import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 class ReportForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -43,6 +44,7 @@ class ReportForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			isBlocking: false,
 			recents: {
 				persons: [],
 				locations: [],
@@ -161,6 +163,7 @@ class ReportForm extends ValidatableFormWrapper {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		return <div className="report-form">
+			<NavigationWarning isBlocking={this.state.isBlocking} />
 
 			<Collapse in={showAutoSaveBanner}>
 				{(autoSaveError &&
@@ -501,7 +504,11 @@ class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
-		this.setState({errors : this.validateReport(), reportChanged: true})
+		this.setState({
+			errors : this.validateReport(),
+			reportChanged: true,
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 

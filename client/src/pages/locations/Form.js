@@ -4,7 +4,6 @@ import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
-import NavigationWarning from 'components/NavigationWarning'
 import Form from 'components/Form'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Messages from 'components/Messages'
@@ -15,6 +14,7 @@ import API from 'api'
 import {Location} from 'models'
 
 import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -26,6 +26,7 @@ class LocationForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			isBlocking: false,
 			markers: [{id: 0, draggable: true, onMove: this.onMarkerMove}]
 		}
 	}
@@ -55,7 +56,7 @@ class LocationForm extends ValidatableFormWrapper {
 
 		return (
 			<div>
-				<NavigationWarning original={new Location()} current={location} />
+				<NavigationWarning isBlocking={this.state.isBlocking} />
 
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -96,6 +97,9 @@ class LocationForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 

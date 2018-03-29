@@ -2,7 +2,6 @@ import React from 'react'
 import Page from 'components/Page'
 
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 
 import LocationForm from './Form'
 import {Location} from 'models'
@@ -40,8 +39,7 @@ export default class LocationEdit extends Page {
 			<div>
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<NavigationWarning original={this.state.originalLocation} current={location} />
-				<LocationForm anetLocation={location} edit />
+				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />
 			</div>
 		)
 	}

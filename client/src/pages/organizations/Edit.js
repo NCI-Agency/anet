@@ -1,6 +1,5 @@
 import React from 'react'
 import Page from 'components/Page'
-import NavigationWarning from 'components/NavigationWarning'
 
 import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -47,12 +46,10 @@ export default class OrganizationEdit extends Page {
 
 		return (
 			<div>
-				<NavigationWarning original={this.state.originalOrganization} current={organization} />
-
 				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<OrganizationForm organization={organization} edit />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} edit />
 			</div>
 		)
 	}

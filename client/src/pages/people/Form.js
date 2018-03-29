@@ -24,6 +24,7 @@ import { confirmAlert } from 'react-confirm-alert'
 import 'components/react-confirm-alert.css'
 
 import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 class PersonForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -41,6 +42,7 @@ class PersonForm extends ValidatableFormWrapper {
 	constructor(props) {
 		super(props)
 		this.state = {
+			isBlocking: false,
 			person: null,
 			error: null,
 			originalStatus: props.person.status,
@@ -106,7 +108,10 @@ class PersonForm extends ValidatableFormWrapper {
 		const nameMessage = "This is not " + (isSelf ? "me" : fullName)
 		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 
-		return <ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
+		return <div>
+			<NavigationWarning isBlocking={this.state.isBlocking} />
+
+			<ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
 			submitText={this.props.saveText || 'Save person'}>
 
 			<Messages error={this.state.error} />
@@ -259,6 +264,7 @@ class PersonForm extends ValidatableFormWrapper {
 				<Form.Field id="biography" componentClass={TextEditor} className="biography" />
 			</Fieldset>
 		</ValidatableForm>
+		</div>
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -301,6 +307,9 @@ class PersonForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 

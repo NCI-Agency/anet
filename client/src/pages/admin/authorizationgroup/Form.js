@@ -14,6 +14,7 @@ import API from 'api'
 import {AuthorizationGroup} from 'models'
 
 import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 class AuthorizationGroupForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -25,6 +26,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			isBlocking: false,
 			errors: {},
 		}
 	}
@@ -37,6 +39,8 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 		return (
 			<div>
+				<NavigationWarning isBlocking={this.state.isBlocking} />
+
 				<Messages success={this.state.success} error={this.state.error} />
 
 				<ValidatableForm formFor={authorizationGroup} onChange={this.onChange} onSubmit={this.onSubmit} horizontal submitText="Save authorization group">
@@ -78,6 +82,9 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 

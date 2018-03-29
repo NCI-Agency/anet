@@ -3,7 +3,6 @@ import Page from 'components/Page'
 
 import TaskForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import API from 'api'
 import Settings from 'Settings'
@@ -49,8 +48,7 @@ export default class TaskNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new ' + Settings.fields.task.shortLabel, Task.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalTask} current={task} />
-				<TaskForm task={task} />
+				<TaskForm original={this.state.originalTask} task={task} />
 			</div>
 		)
 	}

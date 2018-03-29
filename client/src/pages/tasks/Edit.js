@@ -4,7 +4,6 @@ import moment from 'moment'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 
 import TaskForm from './Form'
 
@@ -58,8 +57,7 @@ export default class TaskEdit extends Page {
 
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<NavigationWarning original={this.state.originalTask} current={task} />
-				<TaskForm task={task} edit />
+				<TaskForm original={this.state.originalTask} task={task} edit />
 			</div>
 		)
 	}

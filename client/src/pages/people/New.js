@@ -3,7 +3,6 @@ import Page from 'components/Page'
 
 import PersonForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import {Person} from 'models'
 
@@ -28,9 +27,7 @@ export default class PersonNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Person', Person.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalPerson} current={person} />
-
-				<PersonForm person={person} showPositionAssignment={true} />
+				<PersonForm original={this.state.originalPerson} person={person} showPositionAssignment={true} />
 			</div>
 		)
 	}

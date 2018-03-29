@@ -1,7 +1,6 @@
 import React from 'react'
 import Page from 'components/Page'
 
-import NavigationWarning from 'components/NavigationWarning'
 import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
@@ -52,8 +51,7 @@ export default class OrganizationNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Organization', Organization.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalOrganization} current={organization} />
-				<OrganizationForm organization={organization} />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} />
 			</div>
 		)
 	}

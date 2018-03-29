@@ -20,6 +20,7 @@ import {Task, Position, Organization} from 'models'
 import CALENDAR_ICON from 'resources/calendar.png'
 
 import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 const customEnumButtons = (list) => {
 	let buttons = []
@@ -50,6 +51,10 @@ class TaskForm extends ValidatableFormWrapper {
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
 		this.TaskCustomFieldEnum1 = DictionaryField(Form.Field)
 		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
+
+		this.state = {
+			isBlocking: false,
+		}
 	}
 
 	render() {
@@ -71,6 +76,8 @@ class TaskForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 		return (
 			<div>
+				<NavigationWarning isBlocking={this.state.isBlocking} />
+
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<ValidatableForm
@@ -151,6 +158,9 @@ class TaskForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 

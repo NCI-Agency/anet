@@ -10,6 +10,8 @@ import API from 'api'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
+import _isEqual from 'lodash/isEqual'
+
 const NPROGRESS_CONTAINER = '.header'
 
 if (process.env.NODE_ENV !== 'test') {
@@ -91,9 +93,14 @@ export default class Page extends Component {
 	}
 
 	componentWillReceiveProps(nextProps, nextContext) {
-		if (nextProps !== this.props) {
+		// Filter out React Router props before comparing; for the property names,
+		// see https://github.com/ReactTraining/react-router/issues/4424#issuecomment-285809552
+		const routerProps = ['match', 'location', 'history']
+		const filteredNextProps = Object.without(nextProps, ...routerProps)
+		const filteredProps = Object.without(this.props, ...routerProps)
+		if (!_isEqual(filteredProps, filteredNextProps)) {
 			this.loadData(nextProps, nextContext)
-		} else if (this.context && (this.context !== nextContext)) {
+		} else if (!_isEqual(this.context, nextContext)) {
 			this.loadData(nextProps, nextContext)
 		}
 	}

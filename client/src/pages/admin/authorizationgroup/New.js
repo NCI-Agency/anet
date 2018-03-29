@@ -1,6 +1,5 @@
 import React from 'react'
 
-import NavigationWarning from 'components/NavigationWarning'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -26,11 +25,10 @@ export default class AuthorizationGroupNew extends ValidatableFormWrapper {
 
 		return (
 			<div>
-				<NavigationWarning original={new AuthorizationGroup()} current={authorizationGroup} />
 				<Breadcrumbs items={[['Create new authorization group', AuthorizationGroup.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<AuthorizationGroupForm authorizationGroup={authorizationGroup} />
+				<AuthorizationGroupForm original={new AuthorizationGroup()} authorizationGroup={authorizationGroup} />
 			</div>
 		)
 	}

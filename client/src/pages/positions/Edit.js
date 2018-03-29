@@ -2,7 +2,6 @@ import React from 'react'
 import Page from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import PositionForm from './Form'
 
@@ -59,8 +58,7 @@ export default class PositionEdit extends Page {
 			<div>
 				<Breadcrumbs items={[[`Edit ${position.name}`, Position.pathForEdit(position)]]} />
 
-				<NavigationWarning original={this.state.originalPosition} current={position} />
-				<PositionForm position={position} edit success={this.state.success} error={this.state.error} />
+				<PositionForm original={this.state.originalPosition} position={position} edit success={this.state.success} error={this.state.error} />
 			</div>
 		)
 	}

@@ -6,7 +6,6 @@ import moment from 'moment'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import ReportForm from './Form'
 
@@ -75,8 +74,7 @@ class ReportEdit extends Page {
 			<div className="report-edit">
 				<Breadcrumbs items={[['Report #' + report.id, '/reports/' + report.id], ['Edit', '/reports/' + report.id + '/edit']]} />
 
-				<NavigationWarning original={this.state.originalReport} current={report} />
-				<ReportForm edit report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && this.deleteReport} />
+				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && this.deleteReport} />
 			</div>
 		)
 	}

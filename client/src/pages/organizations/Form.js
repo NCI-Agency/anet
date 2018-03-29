@@ -21,6 +21,7 @@ import DictionaryField from '../../HOC/DictionaryField'
 import REMOVE_ICON from 'resources/delete.png'
 
 import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 class OrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -35,6 +36,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 	constructor(props) {
 		super(props)
 		this.state = {
+			isBlocking: false,
 			error: null,
 		}
 		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
@@ -51,7 +53,10 @@ class OrganizationForm extends ValidatableFormWrapper {
 
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
 
-		return <ValidatableForm formFor={organization}
+		return <div>
+			<NavigationWarning isBlocking={this.state.isBlocking} />
+
+			<ValidatableForm formFor={organization}
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
 			submitText="Save organization"
@@ -104,6 +109,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 				}
 			</div>}
 		</ValidatableForm>
+		</div>
 	}
 
 	renderApprovalStep(step, index) {
@@ -214,6 +220,9 @@ class OrganizationForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
