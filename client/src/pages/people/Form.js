@@ -20,9 +20,6 @@ import utils from 'utils'
 import CALENDAR_ICON from 'resources/calendar.png'
 import 'components/NameInput.css'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
-
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
@@ -387,17 +384,18 @@ class PersonForm extends ValidatableFormWrapper {
 					const confirmLabel = optionValue === 'needNewAccount'
 						? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
 						: 'Yes, I would like to inactivate this account'
-					confirmAlert({
-						title: 'Confirm to reset account',
-						message: 'Are you sure you want to reset this account?',
-						confirmLabel: confirmLabel,
-						cancelLabel: 'No, I am not entirely sure at this point',
-						onConfirm: () => {
-							const { person } = this.state
-							person.status = Person.STATUS.INACTIVE
-							this.updatePerson(person, true, optionValue === 'needNewAccount')
-						}
-					})
+// FIXME React16
+//					confirmAlert({
+//						title: 'Confirm to reset account',
+//						message: 'Are you sure you want to reset this account?',
+//						confirmLabel: confirmLabel,
+//						cancelLabel: 'No, I am not entirely sure at this point',
+//						onConfirm: () => {
+//							const { person } = this.state
+//							person.status = Person.STATUS.INACTIVE
+//							this.updatePerson(person, true, optionValue === 'needNewAccount')
+//						}
+//					})
 					break
 				default:
 					// TODO: integrate action to email admin
