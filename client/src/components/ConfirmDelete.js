@@ -16,21 +16,22 @@ export default class ConfirmDelete extends Component {
 	}
 
 	render() {
-		const confirmDeleteText = `Yes, I am sure that I want to delete ${this.props.objectType} ${this.props.objectDisplay}`
-		const title = `Confirm to delete ${this.props.objectType}`
-		const body = `Are you sure you want to delete this ${this.props.objectType}? This cannot be undone.`
+		const {onConfirmDelete, objectType, objectDisplay, bsStyle, buttonLabel, buttonClass, ...otherProps} = this.props
+		const confirmDeleteText = `Yes, I am sure that I want to delete ${objectType} ${objectDisplay}`
+		const title = `Confirm to delete ${objectType}`
+		const body = `Are you sure you want to delete this ${objectType}? This cannot be undone.`
 
 		return (
 			<Confirm
-				onConfirm={this.props.onConfirmDelete}
+				onConfirm={onConfirmDelete}
 				title={title}
 				body={body}
 				confirmText={confirmDeleteText}
 				cancelText="No, I am not entirely sure at this point"
 				dialogClassName="react-confirm-bootstrap-modal"
 				confirmBSStyle="primary">
-				<Button bsStyle={this.props.bsStyle}>
-					{this.props.buttonLabel}
+				<Button bsStyle={bsStyle} {...otherProps}>
+					{buttonLabel}
 				</Button>
 			</Confirm>
 		)

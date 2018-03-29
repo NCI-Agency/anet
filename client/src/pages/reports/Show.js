@@ -384,12 +384,13 @@ class ReportShow extends Page {
 				</Form>
 				{currentUser.isAdmin() &&
 					<div className="submit-buttons"><div>
-					<ConfirmDelete
-						onConfirmDelete={this.onConfirmDelete}
-						objectType="report"
-						objectDisplay={'#' + this.state.report.id}
-						bsStyle="warning"
-						buttonLabel="Delete report" />
+						<ConfirmDelete
+							onConfirmDelete={this.onConfirmDelete}
+							objectType="report"
+							objectDisplay={'#' + this.state.report.id}
+							bsStyle="warning"
+							buttonLabel="Delete report"
+							className="pull-right" />
 					</div></div>
 				}
 			</div>
