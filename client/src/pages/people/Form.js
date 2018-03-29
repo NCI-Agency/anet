@@ -336,6 +336,8 @@ class PersonForm extends ValidatableFormWrapper {
 		person = Object.without(person, 'firstName', 'lastName')
 
 		let url = `/api/people/${edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, person, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
@@ -348,7 +350,6 @@ class PersonForm extends ValidatableFormWrapper {
 					this.context.app.loadData()
 					this.props.history.push({
 						pathname: '/',
-						state: {skipPageLeaveWarning: true} // FIXME React16
 					})
 				} else {
 					if (response.id) {
@@ -359,7 +360,6 @@ class PersonForm extends ValidatableFormWrapper {
 						pathname: Person.pathFor(person),
 						state: {
 							success: 'Person saved successfully',
-							skipPageLeaveWarning: true // FIXME React16
 						}
 					})
 				}

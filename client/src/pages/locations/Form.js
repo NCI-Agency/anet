@@ -108,6 +108,8 @@ class LocationForm extends ValidatableFormWrapper {
 		let loc = this.props.anetLocation
 		let edit = this.props.edit
 		let url = `/api/locations/${edit ? 'update'  :'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, loc, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {
@@ -117,7 +119,6 @@ class LocationForm extends ValidatableFormWrapper {
 					pathname: Location.pathFor(loc),
 					state: {
 						success: 'Saved Location',
-						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {

@@ -553,6 +553,8 @@ class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		this.saveReport(true)
 			.then(response => {
 				if (response.id) {
@@ -569,7 +571,6 @@ class ReportForm extends ValidatableFormWrapper {
 					pathname: Report.pathFor(this.props.report),
 					state: {
 						success: 'Report saved successfully',
-						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			})

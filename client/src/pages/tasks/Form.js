@@ -175,6 +175,8 @@ class TaskForm extends ValidatableFormWrapper {
 		}
 
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, task, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
@@ -189,7 +191,6 @@ class TaskForm extends ValidatableFormWrapper {
 					pathname: Task.pathFor(task),
 					state: {
 						success: 'Saved successfully',
-						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {

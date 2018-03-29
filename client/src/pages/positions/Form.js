@@ -170,6 +170,8 @@ class PositionForm extends ValidatableFormWrapper {
 		position.code = position.code || null //Need to null out empty position codes
 
 		let url = `/api/positions/${edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, position, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {
@@ -180,7 +182,6 @@ class PositionForm extends ValidatableFormWrapper {
 					pathname: Position.pathFor(position),
 					state: {
 						success: 'Saved Position',
-						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {

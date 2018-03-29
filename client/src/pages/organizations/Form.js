@@ -238,6 +238,8 @@ class OrganizationForm extends ValidatableFormWrapper {
 		}
 
 		let url = `/api/organizations/${this.props.edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, organization, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
@@ -252,7 +254,6 @@ class OrganizationForm extends ValidatableFormWrapper {
 					pathname: Organization.pathFor(organization),
 					state: {
 						success: 'Organization saved successfully',
-						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {

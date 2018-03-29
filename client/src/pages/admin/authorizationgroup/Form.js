@@ -93,6 +93,8 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		let authGroup = this.props.authorizationGroup
 		let edit = this.props.edit
 		let url = `/api/authorizationGroups/${edit ? 'update'  :'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, authGroup, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {
@@ -102,7 +104,6 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 					pathname: AuthorizationGroup.pathFor(authGroup),
 					state: {
 						success: 'Saved authorization group',
-						skipPageLeaveWarning: true // FIXME React16
 					}
 				})
 			}).catch(error => {
