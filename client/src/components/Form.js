@@ -119,7 +119,7 @@ class Form extends Component {
 
 	@autobind
 	onCancel() {
-		this.props.history.goBack({skipPageLeaveWarning: true}) // FIXME React16
+		this.props.history.goBack()
 	}
 }
 
