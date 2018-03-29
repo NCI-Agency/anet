@@ -222,7 +222,7 @@ class Home extends Page {
 						<Row>
 							{queries.map((query, index) =>{
 								query.query.type = "reports"
-									return <Link to={{pathname: '/search', query: query.query, }} className="col-md-3 home-tile" key={index}>
+									return <Link to={{pathname: '/search', search: utils.formatQueryString(query.query)}} className="col-md-3 home-tile" key={index}>
 										<h1>{this.state.tileCounts[index]}</h1>
 										{query.title}
 									</Link>
