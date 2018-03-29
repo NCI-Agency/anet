@@ -9,6 +9,6 @@ export default class PageMissing extends Page {
     }
 
 	render() {
-		return <NotFound text={`Page ${this.props.match.params.splat} not found`} />
+		return <NotFound text={`Page ${this.props.match.params[0]} not found`} />
 	}
 }
