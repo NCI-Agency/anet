@@ -1,4 +1,3 @@
-/* eslint no-restricted-globals: ["off", "confirm"] */ //TODO remove this
 import PropTypes from 'prop-types'
 
 import React from 'react'
@@ -22,6 +21,8 @@ import API from 'api'
 import Settings from 'Settings'
 import {Position, Organization} from 'models'
 import autobind from 'autobind-decorator'
+
+import ConfirmDelete from 'components/ConfirmDelete'
 
 import { withRouter } from 'react-router-dom'
 
@@ -194,9 +195,15 @@ class PositionShow extends Page {
 					</Fieldset>
 				</Form>
 
-				{canDelete && <div className="pull-right submit-buttons">
-					<Button bsStyle="danger" onClick={this.deletePosition}>Delete Position</Button>
-				</div>}
+				{canDelete && <div className="submit-buttons"><div>
+					<ConfirmDelete
+						onConfirmDelete={this.deletePosition}
+						objectType="position"
+						objectDisplay={'#' + this.state.position.id}
+						bsStyle="warning"
+						buttonLabel="Delete position"
+						className="pull-right" />
+				</div></div>}
 			</div>
 		)
 	}
@@ -240,10 +247,6 @@ class PositionShow extends Page {
 
 	@autobind
 	deletePosition() {
-		if (!confirm("Are you sure you want to delete this position? This cannot be undone")) {
-			return
-		}
-
 		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
 			this.props.history.push({
 				pathname: '/',
