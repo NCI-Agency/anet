@@ -9,13 +9,20 @@ import Form from 'components/Form'
 
 import API from 'api'
 
-export default class AdminIndex extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class AdminIndex extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		app: PropTypes.object,
 	}
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			settings: {},
 		}
@@ -74,3 +81,9 @@ export default class AdminIndex extends Page {
 	}
 
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(AdminIndex)

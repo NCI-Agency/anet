@@ -14,7 +14,13 @@ import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import {Location} from 'models'
 
-export default class LocationShow extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class LocationShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -94,3 +100,9 @@ export default class LocationShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(LocationShow)

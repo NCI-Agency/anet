@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 
@@ -10,14 +11,15 @@ import {Task,Organization} from 'models'
 
 import utils from 'utils'
 
-export default class TaskNew extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
 
+class TaskNew extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			task: new Task(),
@@ -53,3 +55,9 @@ export default class TaskNew extends Page {
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(TaskNew)

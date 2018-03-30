@@ -9,19 +9,21 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import API from 'api'
 import {Person} from 'models'
 
-export default class PersonEdit extends Page {
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class PersonEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
-	}
-
-	static pageProps = {
-		useNavigation: false
 	}
 
 	static modelName = 'User'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			person: new Person(),
@@ -67,3 +69,9 @@ export default class PersonEdit extends Page {
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(PersonEdit)

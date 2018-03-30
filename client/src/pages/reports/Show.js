@@ -22,8 +22,13 @@ import {Report, Person, Task, Comment, Position} from 'models'
 import ConfirmDelete from 'components/ConfirmDelete'
 
 import { withRouter } from 'react-router-dom'
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
 
 class ReportShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -32,6 +37,7 @@ class ReportShow extends Page {
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			report: new Report({id: props.match.params.id}),
 			newComment: new Comment(),
@@ -612,4 +618,8 @@ class ReportShow extends Page {
 	}
 }
 
-export default withRouter(ReportShow)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(ReportShow))

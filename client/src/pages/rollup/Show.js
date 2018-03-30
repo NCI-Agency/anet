@@ -20,6 +20,8 @@ import utils from 'utils'
 import API from 'api'
 
 import { withRouter } from 'react-router-dom'
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
 
 var d3 = null/* required later */
 
@@ -40,9 +42,10 @@ const legendCss = {
 }
 
 class RollupShow extends Page {
-	static propTypes = {
+
+	static propTypes = Object.assign({}, Page.propTypes, {
 		date: PropTypes.object,
-	}
+	})
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -458,4 +461,8 @@ class RollupShow extends Page {
 	}
 }
 
-export default withRouter(RollupShow)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(RollupShow))

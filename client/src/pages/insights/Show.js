@@ -16,6 +16,9 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
 const insightDetails = {
   'not-approved-reports': {
     component: PendingApprovalReports,
@@ -69,7 +72,10 @@ const dateRangeFilterCss = {
   marginTop: '20px'
 }
 
-export default class InsightsShow extends Page {
+class InsightsShow extends Page {
+
+  static propTypes = Object.assign({}, Page.propTypes)
+
   static contextTypes = {
     app: PropTypes.object.isRequired,
   }
@@ -219,3 +225,9 @@ export default class InsightsShow extends Page {
   }
 
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(InsightsShow)

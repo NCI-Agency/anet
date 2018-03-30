@@ -9,7 +9,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import {Route} from 'react-router'
 import {BrowserRouter} from 'react-router-dom'
-//import {InjectablesProvider} from 'react-injectables'  FIXME: React16
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
+import rootReducer from './reducers'
 
 import App from 'pages/App'
 
@@ -20,12 +22,14 @@ window.onerror = function(message, url, lineNumber, columnNumber) {
 	return false
   }
 
+const store = createStore(rootReducer)
+
 ReactDOM.render((
-//	<InjectablesProvider> FIXME: React16
+	<Provider store={store}>
 		<BrowserRouter onUpdate={jumpToTop}>
 			<Route path="/" component={App} />
 		</BrowserRouter>
-//	</InjectablesProvider>  FIXME: React16
+	</Provider>
 ), document.getElementById('root'))
 
 function jumpToTop() {
