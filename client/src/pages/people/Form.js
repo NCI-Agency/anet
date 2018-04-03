@@ -20,6 +20,8 @@ import utils from 'utils'
 import CALENDAR_ICON from 'resources/calendar.png'
 import 'components/NameInput.css'
 
+import TriggerableConfirm from 'components/TriggerableConfirm'
+
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
@@ -44,6 +46,7 @@ class PersonForm extends ValidatableFormWrapper {
 			error: null,
 			originalStatus: props.person.status,
 			showWrongPersonModal: false,
+			wrongPersonOptionValue: null,
 		}
 	}
 
@@ -105,6 +108,10 @@ class PersonForm extends ValidatableFormWrapper {
 		const nameMessage = "This is not " + (isSelf ? "me" : fullName)
 		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 
+		const confirmLabel = this.state.wrongPersonOptionValue === 'needNewAccount'
+      ? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
+          : 'Yes, I would like to inactivate this account'
+
 		return <div>
 			<NavigationWarning isBlocking={this.state.isBlocking} />
 
@@ -140,8 +147,17 @@ class PersonForm extends ValidatableFormWrapper {
 
 					{edit && !canEditName &&
 						<div>
+							<TriggerableConfirm
+								onConfirm={this.confirmReset.bind(this)}
+								title="Confirm to reset account"
+								body="Are you sure you want to reset this account?"
+								confirmText={confirmLabel}
+								cancelText="No, I am not entirely sure at this point"
+								bsStyle="warning"
+								buttonLabel="Reset account"
+								className="hidden"
+								ref={confirmComponent => this.confirmHasReplacementButton = confirmComponent} />
 							<Button id="wrongPerson" onClick={this.showWrongPersonModal}>{nameMessage}</Button>
-
 							<OptionListModal
 								title={modalTitle}
 								showModal={this.state.showWrongPersonModal}
@@ -372,8 +388,15 @@ class PersonForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
+	confirmReset() {
+		const { person } = this.state
+		person.status = Person.STATUS.INACTIVE
+		this.updatePerson(person, true, this.state.wrongPersonOptionValue === 'needNewAccount')
+	}
+
+	@autobind
 	hideWrongPersonModal(optionValue) {
-		this.setState({showWrongPersonModal: false})
+		this.setState({showWrongPersonModal: false, wrongPersonOptionValue: optionValue})
 		if (optionValue) {
 			// do something useful with optionValue
 			switch (optionValue) {
@@ -381,21 +404,7 @@ class PersonForm extends ValidatableFormWrapper {
 				case 'leftVacant':
 				case 'hasReplacement':
 					// reset account?
-					const confirmLabel = optionValue === 'needNewAccount'
-						? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
-						: 'Yes, I would like to inactivate this account'
-// FIXME React16
-//					confirmAlert({
-//						title: 'Confirm to reset account',
-//						message: 'Are you sure you want to reset this account?',
-//						confirmLabel: confirmLabel,
-//						cancelLabel: 'No, I am not entirely sure at this point',
-//						onConfirm: () => {
-//							const { person } = this.state
-//							person.status = Person.STATUS.INACTIVE
-//							this.updatePerson(person, true, optionValue === 'needNewAccount')
-//						}
-//					})
+					this.confirmHasReplacementButton.buttonRef.props.onClick()
 					break
 				default:
 					// TODO: integrate action to email admin
