@@ -27,13 +27,15 @@ class SearchBar extends Component {
 	}
 
 	render() {
-		return <Form onSubmit={this.onSubmit}>
-			<InputGroup>
-				<FormControl value={this.state.query} placeholder="Search for people, reports, positions, or locations" onChange={this.onChange} id="searchBarInput" />
-				<InputGroup.Button>
-					<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
-				</InputGroup.Button>
-			</InputGroup>
+		return <div>
+			<Form onSubmit={this.onSubmit}>
+				<InputGroup>
+					<FormControl value={this.state.query} placeholder="Search for people, reports, positions, or locations" onChange={this.onChange} id="searchBarInput" />
+					<InputGroup.Button>
+						<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
+					</InputGroup.Button>
+				</InputGroup>
+			</Form>
 
 			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: true})}><a>Advanced search</a></small>
 			<Overlay show={this.state.showAdvancedSearch} onHide={() => this.setState({showAdvancedSearch: false})} placement="bottom" target={this.advancedSearchLink}>
@@ -41,7 +43,7 @@ class SearchBar extends Component {
 					<AdvancedSearch onSearch={this.runAdvancedSearch} onCancel={() => this.setState({showAdvancedSearch: false})} />
 				</Popover>
 			</Overlay>
-		</Form>
+		</div>
 	}
 
 	@autobind
