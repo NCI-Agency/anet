@@ -313,6 +313,14 @@ a.home-tile {
 	border-left:4px solid #1772B8;
 }
 
+div#search-nav .nav > li {
+	border-left: none;
+}
+
+div#search-nav .nav > li a {
+	padding-right: 4px;
+}
+
 @media (min-width: 768px) {
 	.nav-fixed {
 		position: fixed;

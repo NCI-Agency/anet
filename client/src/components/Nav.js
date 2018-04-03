@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
-//import {Injectable, Injector} from 'react-injectables'  FIXME: React16
 import {Scrollspy} from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
@@ -18,11 +17,6 @@ class Nav extends Component {
 	}
 
 	render() {
-		const injections = this.props.injections
-		if (injections && injections.length) {
-			return <div>{injections}</div>
-		}
-
 		const appData = this.context.app.state
 		const currentUser = appData.currentUser
 		const organizations = appData.organizations || []
@@ -63,6 +57,8 @@ class Nav extends Component {
 				<Link to="/">
 					<NavItem>Home</NavItem>
 				</Link>
+
+				<div id="search-nav"></div>
 
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
@@ -177,27 +173,3 @@ const AnchorLink = function(props) {
 	}
 	return <NavItem onClick={onClick} {...childProps} />
 }
-
-/* FIXME React16
-let InjectableNav = null
-let ContentForNav = null
-if (process.env.NODE_ENV === 'test') {
-	ContentForNav = function(props) {
-		return <div />
-	}
-} else {
-	// this is some magic around the Injectable library to allow
-	// components further down the tree to inject children into the header
-	InjectableNav = Injectable(Nav)
-
-	const NavInjector = Injector({into: InjectableNav})
-	ContentForNav = function(props) {
-		let {children, ...childProps} = props
-		let Component = NavInjector(function() { return children })
-		return <Component {...childProps} />
-	}
-}
-
-export default InjectableNav
-export {ContentForNav}
-*/
