@@ -12,11 +12,10 @@ export default class ConfirmDelete extends Component {
 		objectDisplay: PropTypes.string,
 		bsStyle: PropTypes.string,
 		buttonLabel: PropTypes.string,
-		buttonClass: PropTypes.string,
 	}
 
 	render() {
-		const {onConfirmDelete, objectType, objectDisplay, bsStyle, buttonLabel, buttonClass, ...otherProps} = this.props
+		const {onConfirmDelete, objectType, objectDisplay, bsStyle, buttonLabel, ...otherProps} = this.props
 		const confirmDeleteText = `Yes, I am sure that I want to delete ${objectType} ${objectDisplay}`
 		const title = `Confirm to delete ${objectType}`
 		const body = `Are you sure you want to delete this ${objectType}? This cannot be undone.`
