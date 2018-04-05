@@ -189,7 +189,10 @@ class Search extends Page {
 		advancedSearch.filters.forEach(filter => {
 			if (filter.value) {
 				if (filter.value.toQuery) {
-					Object.assign(query, filter.value.toQuery())
+					const toQuery = typeof filter.value.toQuery === 'function'
+						? filter.value.toQuery()
+						: filter.value.toQuery
+					Object.assign(query, toQuery)
 				} else {
 					query[filter.key] = filter.value
 				}

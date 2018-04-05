@@ -21,6 +21,7 @@ import REMOVE_ICON from 'resources/delete.png'
 
 import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
+import _cloneDeepWith from 'lodash/cloneDeepWith'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -337,9 +338,16 @@ class AdvancedSearch extends Component {
 		this.setState({text: event.target.value})
 	}
 
+	@autobind resolveToQuery(value) {
+		if (typeof value === 'function' && value.name === 'bound toQuery') {
+			return value()
+		}
+	}
+
 	@autobind
 	onSubmit(event) {
-		let queryState = {objectType: this.state.objectType, filters: this.state.filters, text: this.state.text}
+		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
+		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
 		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
 			this.props.history.push({
 				pathname: '/search',
