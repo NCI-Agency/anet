@@ -313,11 +313,11 @@ a.home-tile {
 	border-left:4px solid #1772B8;
 }
 
-div#search-nav .nav > li {
+li#search-nav .nav > li {
 	border-left: none;
 }
 
-div#search-nav .nav > li a {
+li#search-nav .nav > li a {
 	padding-right: 4px;
 }
 

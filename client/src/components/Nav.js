@@ -58,7 +58,7 @@ class Nav extends Component {
 					<NavItem>Home</NavItem>
 				</Link>
 
-				<div id="search-nav"></div>
+				<li id="search-nav"></li>
 
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
