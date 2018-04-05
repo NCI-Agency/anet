@@ -8,13 +8,20 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
 
-export default class MyReports extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class MyReports extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
 
-	constructor() {
-		super()
+	constructor(props) {
+		super(props)
+
 		this.state = {
 			draft: null,
 			future: null,
@@ -111,3 +118,9 @@ export default class MyReports extends Page {
 		})
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(MyReports)

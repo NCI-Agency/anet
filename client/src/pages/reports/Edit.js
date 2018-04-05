@@ -13,11 +13,12 @@ import API from 'api'
 import {Report, Person} from 'models'
 
 import { withRouter } from 'react-router-dom'
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
 
 class ReportEdit extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static modelName = 'Report'
 
@@ -26,7 +27,7 @@ class ReportEdit extends Page {
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			report: new Report(),
@@ -97,4 +98,8 @@ class ReportEdit extends Page {
 	}
 }
 
-export default withRouter(ReportEdit)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(ReportEdit))

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 import moment from 'moment'
@@ -11,16 +12,17 @@ import API from 'api'
 import Settings from 'Settings'
 import {Task} from 'models'
 
-export default class TaskEdit extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
 
+class TaskEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static modelName = 'Task'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			task: new Task(),
@@ -62,3 +64,9 @@ export default class TaskEdit extends Page {
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(TaskEdit)

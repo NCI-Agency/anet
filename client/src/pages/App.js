@@ -56,11 +56,13 @@ import OnboardingShow from 'pages/onboarding/Show'
 import OnboardingEdit from 'pages/onboarding/Edit'
 
 import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+import _isEqual from 'lodash/isEqual'
 
 class App extends Page {
-	static PagePropTypes = {
-		useNavigation: PropTypes.bool,
-		fluidContainer: PropTypes.bool,
+
+	static propTypes = {
+		pageProps: PropTypes.object,
 	}
 
 	static childContextTypes = {
@@ -75,22 +77,23 @@ class App extends Page {
 		}
 	}
 
-	constructor(props) {
-		super(props)
+	constructor(props, context) {
+		super(props, context)
 
 		this.state = {
+			pageProps: props.pageProps,
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
 		}
 
-		this.state = this.processData(window.ANET_DATA)
+		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
-	componentWillReceiveProps() {
-		// this is just to prevent App from refetching app settings on every
-		// single page load. in the future we may wish to do something more
-		// intelligent to refetch page settings
+	componentWillReceiveProps(nextProps) {
+		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
+			this.setState({pageProps: nextProps.pageProps})
+		}
 	}
 
 	fetchData() {
@@ -237,17 +240,16 @@ class App extends Page {
 			<Route path="*" component={PageMissing} />
 		</Switch>
 
-		let pageProps = {} //FIXME React16: this.props.children.type.pageProps || {}
 		return (
 			<div className="anet">
 				<TopBar
 					currentUser={this.state.currentUser}
 					settings={this.state.settings}
-					minimalHeader={pageProps.minimalHeader}
+					minimalHeader={this.state.pageProps.minimalHeader}
 					location={this.props.location} />
 
-				<Grid componentClass="section" bsClass={pageProps.fluidContainer ? 'container-fluid' : 'container'}>
-					{pageProps.useNavigation === false
+				<Grid componentClass="section" bsClass={this.state.pageProps.fluidContainer ? 'container-fluid' : 'container'}>
+					{this.state.pageProps.useNavigation === false
 						? <Row>
 								<Col xs={12}>
 									{routing}
@@ -268,4 +270,8 @@ class App extends Page {
 	}
 }
 
-export default withRouter(App)
+const mapStateToProps = (state, ownProps) => ({
+	pageProps: state.pageProps
+})
+
+export default connect(mapStateToProps)(withRouter(App))

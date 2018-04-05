@@ -23,15 +23,20 @@ import Settings from 'Settings'
 import ConfirmDelete from 'components/ConfirmDelete'
 
 import { withRouter } from 'react-router-dom'
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
 import utils from 'utils'
 
 class Home extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
 
-	constructor(props) {
-		super(props)
+	constructor(props, context) {
+		super(props, context)
 		this.state = {
 			tileCounts: [],
 			savedSearches: [],
@@ -299,4 +304,8 @@ class Home extends Page {
 	}
 }
 
-export default withRouter(Home)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(Home))

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 
@@ -8,15 +9,17 @@ import Messages from 'components/Messages'
 import API from 'api'
 import {Organization} from 'models'
 
-export default class OrganizationEdit extends Page {
-	static pageProps = {
-		useNavigation: false,
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class OrganizationEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static modelName = 'Organization'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			organization: new Organization(),
@@ -54,3 +57,9 @@ export default class OrganizationEdit extends Page {
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(OrganizationEdit)

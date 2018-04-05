@@ -17,7 +17,13 @@ import {Task} from 'models'
 
 import moment from 'moment'
 
-export default class TaskShow extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class TaskShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 		app: PropTypes.object.isRequired,
@@ -141,3 +147,9 @@ export default class TaskShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(TaskShow)

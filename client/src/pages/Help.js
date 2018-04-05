@@ -6,6 +6,9 @@ import Fieldset from 'components/Fieldset'
 
 import API from 'api'
 
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
 import TOUR_SCREENSHOT from 'resources/tour-screenshot.png'
 
 const screenshotCss = {
@@ -13,13 +16,19 @@ const screenshotCss = {
 	boxShadow: "0px 0px 10px #aaa",
 }
 
-export default class Help extends Page {
-	state = {
-		superUsers: []
-	}
+class Help extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
+	}
+
+	constructor(props) {
+		super(props)
+		this.state = {
+			superUsers: []
+		}
 	}
 
 	fetchData() {
@@ -87,3 +96,9 @@ export default class Help extends Page {
 		</div>
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(Help)

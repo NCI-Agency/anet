@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import _get from 'lodash/get'
 import autobind from 'autobind-decorator'
@@ -12,6 +13,8 @@ import 'nprogress/nprogress.css'
 
 import _isEqual from 'lodash/isEqual'
 
+import { DEFAULT_PAGE_PROPS } from 'actions'
+
 const NPROGRESS_CONTAINER = '.header'
 
 if (process.env.NODE_ENV !== 'test') {
@@ -21,8 +24,16 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 export default class Page extends Component {
-	constructor() {
-		super()
+
+	static propTypes = {
+		setPageProps: PropTypes.func.isRequired,
+	}
+
+	constructor(props, pageProps) {
+		super(props)
+		if (typeof props.setPageProps === 'function') {
+			props.setPageProps(pageProps || DEFAULT_PAGE_PROPS)
+		}
 
 		this.state = {
 			notFound: false,

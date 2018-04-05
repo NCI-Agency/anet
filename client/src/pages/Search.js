@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import Page from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge, Pagination} from 'react-bootstrap'
@@ -30,6 +31,8 @@ import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
 import { withRouter } from 'react-router-dom'
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
 import utils from 'utils'
 import ReactDOM from 'react-dom'
 
@@ -117,6 +120,8 @@ class SearchNav extends Component {
 }
 
 class Search extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	constructor(props) {
 		super(props)
@@ -615,4 +620,8 @@ class Search extends Page {
 
 }
 
-export default withRouter(Search)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(Search))
