@@ -104,12 +104,19 @@ export default class Page extends Component {
 	}
 
 	componentWillReceiveProps(nextProps, nextContext) {
+		// Location always has a new key. In order to check whether the location
+		// really changed filter out the key.
+		const locationFilterProps = ['key']
+		const nextPropsFilteredLocation = Object.without(nextProps.location, ...locationFilterProps)
+		const propsFilteredLocation = Object.without(this.props.location, ...locationFilterProps)
 		// Filter out React Router props before comparing; for the property names,
 		// see https://github.com/ReactTraining/react-router/issues/4424#issuecomment-285809552
 		const routerProps = ['match', 'location', 'history']
 		const filteredNextProps = Object.without(nextProps, ...routerProps)
 		const filteredProps = Object.without(this.props, ...routerProps)
 		if (!_isEqual(filteredProps, filteredNextProps)) {
+			this.loadData(nextProps, nextContext)
+		} else if (!_isEqual(propsFilteredLocation, nextPropsFilteredLocation)) {
 			this.loadData(nextProps, nextContext)
 		} else if (!_isEqual(this.context, nextContext)) {
 			this.loadData(nextProps, nextContext)
