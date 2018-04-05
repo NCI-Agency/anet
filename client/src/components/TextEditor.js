@@ -28,7 +28,10 @@ export default class TextEditor extends Component {
 	}
 
 	componentWillUnmount() {
-		this.editor && this.editor.destroy()
+		if (this.editor && this.nativeEditor && this.nativeEditor.document) {
+			this.editor.destroy()
+			this.editor = this.nativeEditor = null
+		}
 	}
 
 	componentWillReceiveProps(newProps) {
