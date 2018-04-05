@@ -52,6 +52,7 @@ class ReportForm extends ValidatableFormWrapper {
 				tasks: [],
 				authorizationGroups: [],
 			},
+			reportTags: [],
 			tagList: [],
 			suggestionList: [],
 
@@ -100,7 +101,7 @@ class ReportForm extends ValidatableFormWrapper {
 					tasks: data.taskList.list,
 					authorizationGroups: data.authorizationGroupList.list,
 				},
-				tagList: data.tagList.list,
+				tagList: data.tagList.list.map(function(tag) { return {id: tag.id, text: tag.name} }),
 				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
 			}
 			this.setState(newState)
@@ -125,19 +126,25 @@ class ReportForm extends ValidatableFormWrapper {
 		if (report.cancelledReason) {
 			this.setState({isCancelled: true})
 		}
-		this.setState({showReportText: !!report.reportText || !!report.reportSensitiveInformation})
+		const reportTags = report.tags.map(function(tag) { return {id: tag.id, text: tag.name} })
+		this.setState({
+			reportTags: reportTags,
+			showReportText: !!report.reportText || !!report.reportSensitiveInformation
+		})
 	}
 
-    handleTagDelete(i) {
-        let {tags} = this.props.report
-        tags.splice(i, 1)
-    }
+	handleTagDelete(i) {
+		let {reportTags} = this.state
+		reportTags.splice(i, 1)
+		this.setState({reportTags})
+	}
 
-    handleTagAddition(tag) {
-        let newTag = this.state.tagList.find(function (t) { return t.name === tag })
-        let {tags} = this.props.report
-        tags.push(newTag)
-    }
+	handleTagAddition(tag) {
+		let newTag = this.state.tagList.find(function (t) { return t.text === tag })
+		let {reportTags} = this.state
+		reportTags.push(newTag)
+		this.setState({reportTags})
+	}
 
 	render() {
 		const { currentUser } = this.context
@@ -263,9 +270,8 @@ class ReportForm extends ValidatableFormWrapper {
 					}
 
 					<Form.Field id="tags" label="Tags">
-						<ReactTags tags={report.tags}
+						<ReactTags tags={this.state.reportTags}
 							suggestions={suggestionList}
-							labelField={'name'}
 							classNames={{
 								tag: 'reportTag label label-info',
 								remove: 'reportTagRemove label-info',
@@ -528,7 +534,8 @@ class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	saveReport(disableSubmits) {
-		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText'))
+		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
+		report.tags = this.state.reportTags.map(function(tag) { return {id: tag.id} })
 		let isCancelled = this.state.isCancelled
 		let edit = !!report.id
 		if(report.primaryAdvisor) { report.attendees.find(a => a.id === report.primaryAdvisor.id).isPrimary = true }
