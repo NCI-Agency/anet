@@ -21,6 +21,9 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
+import { confirmAlert } from 'react-confirm-alert'
+import 'components/react-confirm-alert.css'
+
 export default class OrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		organization: PropTypes.object,
@@ -199,8 +202,21 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 	addApprovalStep() {
 		let org = this.props.organization
 		let approvalSteps = org.approvalSteps || []
-		approvalSteps.push({name: '', approvers: []})
 
+		for (let i = 0; i < approvalSteps.length; i++) {
+			const step = approvalSteps[i]
+			if (!step.name || !step.approvers || step.approvers.length === 0) {
+				confirmAlert({
+					title: 'Step not added',
+					message: 'Please complete all approval steps; there already is an approval step that is not completely filled in.',
+					confirmLabel: 'OK',
+					cancelLabel: null,
+				})
+				return
+			}
+		}
+
+		approvalSteps.push({name: '', approvers: []})
 		this.onChange()
 	}
 
