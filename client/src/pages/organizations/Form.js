@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {Button, Table} from 'react-bootstrap'
+import {Button, Modal, Table} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -20,9 +20,6 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
-
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
@@ -41,6 +38,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 		this.state = {
 			isBlocking: false,
 			error: null,
+			showAddPositionAlert: false,
 		}
 		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
 		this.LongNameWithLabel = DictionaryField(Form.Field)
@@ -101,6 +99,17 @@ class OrganizationForm extends ValidatableFormWrapper {
 					<Button className="pull-right" onClick={this.addApprovalStep} bsStyle="primary" id="addApprovalStepButton" >
 						Add an Approval Step
 					</Button>
+					<Modal show={this.state.showAddPositionAlert} onHide={this.hideAddPositionAlert}>
+						<Modal.Header closeButton>
+							<Modal.Title>Step not added</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							Please complete all approval steps; there already is an approval step that is not completely filled in.
+						</Modal.Body>
+						<Modal.Footer>
+							<Button className="pull-right" onClick={this.hideAddPositionAlert} bsStyle="primary">OK</Button>
+						</Modal.Footer>
+					</Modal>
 
 					{approvalSteps && approvalSteps.map((step, index) =>
 						this.renderApprovalStep(step, index)
@@ -206,6 +215,11 @@ class OrganizationForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
+	hideAddPositionAlert() {
+		this.setState({showAddPositionAlert: false})
+	}
+
+	@autobind
 	addApprovalStep() {
 		let org = this.props.organization
 		let approvalSteps = org.approvalSteps || []
@@ -213,12 +227,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 		for (let i = 0; i < approvalSteps.length; i++) {
 			const step = approvalSteps[i]
 			if (!step.name || !step.approvers || step.approvers.length === 0) {
-				confirmAlert({
-					title: 'Step not added',
-					message: 'Please complete all approval steps; there already is an approval step that is not completely filled in.',
-					confirmLabel: 'OK',
-					cancelLabel: null,
-				})
+				this.setState({showAddPositionAlert: true})
 				return
 			}
 		}
