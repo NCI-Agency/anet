@@ -53,7 +53,6 @@ class ReportForm extends ValidatableFormWrapper {
 				authorizationGroups: [],
 			},
 			reportTags: [],
-			tagList: [],
 			suggestionList: [],
 
 			showReportText: false,
@@ -70,8 +69,6 @@ class ReportForm extends ValidatableFormWrapper {
 			showAutoSaveBanner: false,
 			autoSaveError: null,
 		}
-		this.handleTagDelete = this.handleTagDelete.bind(this)
-		this.handleTagAddition = this.handleTagAddition.bind(this)
 		this.defaultTimeout = moment.duration(30, 'seconds')
 		this.autoSaveTimeout = this.defaultTimeout.clone()
 	}
@@ -101,8 +98,7 @@ class ReportForm extends ValidatableFormWrapper {
 					tasks: data.taskList.list,
 					authorizationGroups: data.authorizationGroupList.list,
 				},
-				tagList: data.tagList.list.map(function(tag) { return {id: tag.id, text: tag.name} }),
-				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
+				suggestionList: data.tagList.list.map(tag => ({id: tag.id.toString(), text: tag.name})),
 			}
 			this.setState(newState)
 		})
@@ -126,24 +122,38 @@ class ReportForm extends ValidatableFormWrapper {
 		if (report.cancelledReason) {
 			this.setState({isCancelled: true})
 		}
-		const reportTags = report.tags.map(function(tag) { return {id: tag.id, text: tag.name} })
+		const reportTags = report.tags.map(tag => ({id: tag.id.toString(), text: tag.name}))
 		this.setState({
 			reportTags: reportTags,
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation
 		})
 	}
 
+	@autobind
 	handleTagDelete(i) {
 		let {reportTags} = this.state
 		reportTags.splice(i, 1)
 		this.setState({reportTags})
 	}
 
+	@autobind
 	handleTagAddition(tag) {
-		let newTag = this.state.tagList.find(function (t) { return t.text === tag })
-		let {reportTags} = this.state
-		reportTags.push(newTag)
-		this.setState({reportTags})
+		const newTag = this.state.suggestionList.find(t => t.id === tag.id)
+		if (newTag) {
+			let {reportTags} = this.state
+			reportTags.push(newTag)
+			this.setState({reportTags})
+		}
+	}
+
+	@autobind
+	handleTagSuggestions(query, suggestions) {
+		const text = ((query && typeof query === 'object') ? query.text : query).toLowerCase()
+		const {reportTags} = this.state
+		return suggestions.filter(item => (
+			item.text.toLowerCase().includes(text)
+			&& !reportTags.some(reportTag => reportTag.id === item.id)
+		))
 	}
 
 	render() {
@@ -279,6 +289,7 @@ class ReportForm extends ValidatableFormWrapper {
 							minQueryLength={1}
 							autocomplete={true}
 							autofocus={false}
+							handleFilterSuggestions={this.handleTagSuggestions}
 							handleDelete={this.handleTagDelete}
 							handleAddition={this.handleTagAddition} />
 					</Form.Field>
@@ -535,7 +546,7 @@ class ReportForm extends ValidatableFormWrapper {
 	@autobind
 	saveReport(disableSubmits) {
 		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
-		report.tags = this.state.reportTags.map(function(tag) { return {id: tag.id} })
+		report.tags = this.state.reportTags.map(tag => ({id: tag.id}))
 		let isCancelled = this.state.isCancelled
 		let edit = !!report.id
 		if(report.primaryAdvisor) { report.attendees.find(a => a.id === report.primaryAdvisor.id).isPrimary = true }
