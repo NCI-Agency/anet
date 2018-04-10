@@ -32,7 +32,7 @@ class LocationForm extends ValidatableFormWrapper {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if (nextProps.anetLocation && nextProps.anetLocation.lat) {
+		if (Location.hasCoordinates(nextProps.anetLocation)) {
 			const loc = nextProps.anetLocation
 			let marker = this.state.markers[0]
 			marker.name = loc.name
@@ -51,7 +51,8 @@ class LocationForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		function Coordinate(props) {
-			return <span>{Math.round(props.coord * 1000) / 1000}</span>
+			const coord = typeof props.coord === 'number' ? Math.round(props.coord * 1000) / 1000 : '?'
+			return <span>{coord}</span>
 		}
 
 		return (

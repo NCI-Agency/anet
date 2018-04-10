@@ -67,7 +67,7 @@ class LocationShow extends Page {
 		let currentUser = this.context.currentUser
 		let markers=[]
 		let latlng = 'None'
-		if (location.lat && location.lng) {
+		if (Location.hasCoordinates(location)) {
 			latlng = location.lat + ', ' + location.lng
 			markers.push({name: location.name, lat: location.lat, lng: location.lng})
 		}

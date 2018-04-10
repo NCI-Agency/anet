@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
+import {Location} from 'models'
 
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -113,7 +114,7 @@ export default class Leaflet extends Component {
 		let newMarkers = []
 		let markerLayer = this.state.markerLayer
 		markers.forEach(m => {
-			let latLng = (m.lat && m.lng) ? [m.lat, m.lng] : this.state.map.getCenter()
+			let latLng = (Location.hasCoordinates(m)) ? [m.lat, m.lng] : this.state.map.getCenter()
 			let marker = L.marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
 				.bindPopup(m.name)
 			if (m.onMove) {
