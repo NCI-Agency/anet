@@ -108,7 +108,7 @@ export default class Report extends Model {
 			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to be assigned to a position')
 		} else if (primaryAttendee.position.status !== Position.STATUS.ACTIVE) {
 			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to be in an active position')
-		} else if (primaryOrg.type !== orgType) {
+		} else if (primaryOrg && (primaryOrg.type !== orgType)) {
 			errors.push('The primary ' + roleName + '\'s - ' + primaryAttendee.name + ' - organization should be ' + Organization.humanNameOfType(orgType))
 		}
 	}
