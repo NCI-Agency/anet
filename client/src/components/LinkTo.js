@@ -57,7 +57,7 @@ export default class LinkTo extends Component {
 		if (typeof to === 'string') {
 			if (to.indexOf('?')) {
 				let components = to.split('?')
-				to = {pathname: components[0], query: decodeQuery(components[1])}
+				to = {pathname: components[0], search: components[1]}
 			}
 		} else {
 			to = edit ? modelClass.pathForEdit(modelInstance) : modelClass.pathFor(modelInstance)
