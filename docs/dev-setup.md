@@ -17,9 +17,7 @@ This section describes the recommended Developer Environment and how to set it u
    ```
    cd anet
    git config core.hooksPath scripts/githooks
-
    ```
-
 
 ### Possible Problems
 - **You cannot access [the source code repo](https://github.com/deptofdefense/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
