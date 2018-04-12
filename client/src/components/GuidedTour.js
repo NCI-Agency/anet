@@ -48,8 +48,9 @@ class GuidedTour extends Component {
 	componentWillUnmount() {
 		hopscotch.unlisten('end', this.onEnd)
 		hopscotch.unlisten('close', this.onEnd)
-
-		this.endTour()
+		if (this.runningTour) {
+			this.endTour()
+		}
 	}
 
 	render() {
