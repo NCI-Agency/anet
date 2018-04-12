@@ -324,19 +324,6 @@ li#search-nav .nav > li a {
 	padding-right: 4px;
 }
 
-@media (min-width: 768px) {
-	.nav-fixed {
-		position: fixed;
-		width: 158px;
-	}
-}
-
-@media (min-width: 992px) {
-	.nav-fixed {
-		width: 212px;
-	}
-}
-
 .report-sub-form .form-group {
 	margin: 24px;
 }
