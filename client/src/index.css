@@ -11,10 +11,6 @@ body {
   visibility: hidden;
 }
 
-.container {
-	max-width: 1024px;
-}
-
 h5 {
 	text-decoration: underline;
 }
@@ -558,7 +554,7 @@ table hr.attendee-divider {
 .report-form textarea {
 	/* Without this, users can make the textarea arbitrarily wide,
 		causing it to overlap with other elements and break the layout. */
-	max-width: 546px;
+	max-width: 100%;
 }
 
 .attendee-divider-row td {

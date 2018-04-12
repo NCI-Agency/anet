@@ -3,7 +3,7 @@ import React from 'react'
 import Page from 'components/Page'
 import NotFound from 'components/NotFound'
 
-import { setPageProps, PAGE_PROPS_FLUID } from 'actions'
+import { setPageProps, PAGE_PROPS_NO_NAV} from 'actions'
 import { connect } from 'react-redux'
 
 class PageMissing extends Page {
@@ -11,7 +11,7 @@ class PageMissing extends Page {
 	static propTypes = Object.assign({}, Page.propTypes)
 
 	constructor(props) {
-		super(props, PAGE_PROPS_FLUID)
+		super(props, PAGE_PROPS_NO_NAV)
 	}
 
 	render() {

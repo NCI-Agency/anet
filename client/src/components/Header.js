@@ -19,7 +19,7 @@ export default class Header extends Component {
 	render() {
 		return (
 			<header style={backgroundCss} className="header">
-				<Grid>
+				<Grid fluid>
 					<Row>
 						<Col xs={3}>
 							{

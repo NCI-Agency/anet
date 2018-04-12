@@ -248,7 +248,7 @@ class App extends Page {
 					minimalHeader={this.state.pageProps.minimalHeader}
 					location={this.props.location} />
 
-				<Grid componentClass="section" bsClass={this.state.pageProps.fluidContainer ? 'container-fluid' : 'container'}>
+				<Grid fluid componentClass="section">
 					{this.state.pageProps.useNavigation === false
 						? <Row>
 								<Col xs={12}>
