@@ -325,7 +325,6 @@ class Search extends Page {
 						</Button>
 					}
 					<Button onClick={this.showSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
-					{!this.state.advancedSearch && <Button onClick={this.showAdvancedSearch}>Advanced search</Button>}
 				</div>
 
 				<Breadcrumbs items={[['Search results', '']]} />
