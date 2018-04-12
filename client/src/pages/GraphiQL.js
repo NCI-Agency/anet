@@ -1,21 +1,29 @@
-import React, {Component} from 'react'
+import PropTypes from 'prop-types'
+
+import React from 'react'
+import Page from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 
-var GraphiQL = null/* required later */
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
 
-export default class extends Component {
-	static pageProps = {
-		useNavigation: false,
-		fluidContainer: true,
+var GraphiQLreq = null/* required later */
+
+class GraphiQL extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
+	constructor(props) {
+		super(props, PAGE_PROPS_NO_NAV)
 	}
 
 	componentDidMount() {
-		if (GraphiQL)
+		if (GraphiQLreq)
 			return
 
 		require.ensure([], () => {
-			GraphiQL = require('graphiql')
+			GraphiQLreq = require('graphiql')
 			require('graphiql/graphiql.css')
 			this.forceUpdate()
 		})
@@ -33,7 +41,13 @@ export default class extends Component {
 	render() {
 		return <div>
 			<Breadcrumbs items={[['Run GraphQL queries', '/graphiql']]} />
-			{GraphiQL ? <GraphiQL fetcher={this.fetch} /> : 'Loading...'}
+			{GraphiQLreq ? <GraphiQLreq fetcher={this.fetch} /> : 'Loading...'}
 		</div>
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(GraphiQL)
