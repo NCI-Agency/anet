@@ -582,6 +582,11 @@ table hr.attendee-divider {
 .reportTagRemove, .reportTagRemove:hover {
     text-decoration: none;
 }
+.reportTag.label {
+	display: inline-block;
+	font-size: 80%;
+	line-height: inherit;
+}
 
 .form-control-static {
 	/* The design calls for 18px of separation between static form rows.
