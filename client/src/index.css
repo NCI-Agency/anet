@@ -232,8 +232,15 @@ fieldset.danger {
 	padding: 0;
 }
 
+.home-tile-row .container-fluid {
+	padding: 0;
+	display: block;
+}
+
 .home-tile-row .row {
-	display: table;
+	display: table;n
+	width: 100%;
+	margin: 0;
 }
 
 .home-tile-row span.close-getting-started {
@@ -256,11 +263,11 @@ fieldset.danger {
 
 a.home-tile {
 	display: table-cell;
+	width: 20%;
 	float: none;
 	vertical-align: top;
 	text-align: center;
-	padding-top: 20px;
-	padding-bottom: 20px;
+	padding: 10px;
 	color: #5c5c5c;
 	text-decoration: none;
 }
