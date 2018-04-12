@@ -252,7 +252,7 @@ class PersonShow extends Page {
 		let assocTitle = position.type === Position.TYPE.PRINCIPAL ? 'Is advised by' : 'Advises'
 		return <FormGroup controlId="counterparts">
 			<Col sm={2} componentClass={ControlLabel}>{assocTitle}</Col>
-			<Col sm={9}>
+			<Col sm={10}>
 				<Table>
 					<thead>
 						<tr><th>Name</th><th>Position</th><th>Organization</th></tr>
