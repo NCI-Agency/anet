@@ -256,10 +256,10 @@ class App extends Page {
 								</Col>
 							</Row>
 						: <Row>
-								<Col sm={3} className="hide-for-print">
+								<Col sm={4} md={3} className="hide-for-print">
 									<Nav />
 								</Col>
-								<Col sm={9} className="primary-content">
+								<Col sm={8} md={9} className="primary-content">
 									{routing}
 								</Col>
 							</Row>
