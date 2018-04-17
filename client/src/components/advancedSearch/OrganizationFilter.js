@@ -13,7 +13,7 @@ export default class OrganizationFilter extends Component {
 		//An Autocomplete filter allows users to search the ANET database
 		// for existing records and use that records ID as the search term.
 		// the filterKey property tells this filter what property to set on the
-		// search query. (ie authorId, organizationId, etc)
+		// search query. (ie authorUuid, organizationUuid, etc)
 		queryKey: PropTypes.string.isRequired,
 		queryIncludeChildOrgsKey: PropTypes.string.isRequired,
 
@@ -75,7 +75,7 @@ export default class OrganizationFilter extends Component {
 	@autobind
 	toQuery() {
 		return {
-			[this.props.queryKey]: this.state.value.id,
+			[this.props.queryKey]: this.state.value.uuid,
 			[this.props.queryIncludeChildOrgsKey]: this.state.includeChildOrgs,
 		}
 	}

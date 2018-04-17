@@ -14,6 +14,7 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -62,18 +63,18 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		sql.append(" FROM reports ");
 		sql.append(", people ");
-		sql.append("WHERE reports.\"authorId\" = people.id ");
-		sql.append("AND reports.id IN ( SELECT reports.id FROM reports ");
-		sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportId\" = reports.id ");
-		sql.append("LEFT JOIN tags ON \"reportTags\".\"tagId\" = tags.id ");
+		sql.append("WHERE reports.\"authorUuid\" = people.uuid ");
+		sql.append("AND reports.uuid IN ( SELECT reports.uuid FROM reports ");
+		sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid ");
+		sql.append("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid ");
 		
 		String commonTableExpression = null;
 		Map<String,Object> args = new HashMap<String,Object>();
 		List<String> whereClauses = new LinkedList<String>();
 		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses, this.dateTimeFormatter);
-		if (query.getAuthorId() != null) { 
-			whereClauses.add("reports.\"authorId\" = :authorId");
-			args.put("authorId", query.getAuthorId());
+		if (query.getAuthorUuid() != null) {
+			whereClauses.add("reports.\"authorUuid\" = :authorUuid");
+			args.put("authorUuid", query.getAuthorUuid());
 		}
 		
 		final String text = query.getText();
@@ -103,28 +104,28 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("engagementDayOfWeek", query.getEngagementDayOfWeek());
 		}
 
-		if (query.getAttendeeId() != null) {
-			whereClauses.add("reports.id IN (SELECT \"reportId\" from \"reportPeople\" where \"personId\" = :attendeeId)");
-			args.put("attendeeId", query.getAttendeeId());
+		if (query.getAttendeeUuid() != null) {
+			whereClauses.add("reports.uuid IN (SELECT \"reportUuid\" from \"reportPeople\" where \"personUuid\" = :attendeeUuid)");
+			args.put("attendeeUuid", query.getAttendeeUuid());
 		}
 
-		if (query.getAuthorPositionId() != null) {
+		if (query.getAuthorPositionUuid() != null) {
 			// Search for reports authored by people serving in that position at the report's creation date
-			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
-				+ PositionDao.generateCurrentPositionFilter("r.\"authorId\"", "r.\"createdAt\"", "authorPositionId")
+			whereClauses.add("reports.uuid IN ( SELECT r.uuid FROM reports r "
+				+ PositionDao.generateCurrentPositionFilter("r.\"authorUuid\"", "r.\"createdAt\"", "authorPositionUuid")
 				+ ")"
 			);
-			args.put("authorPositionId", query.getAuthorPositionId());
+			args.put("authorPositionUuid", query.getAuthorPositionUuid());
 		}
 
-		if (query.getAttendeePositionId() != null) {
+		if (query.getAttendeePositionUuid() != null) {
 			// Search for reports attended by people serving in that position at the engagement date
-			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
-				+ "JOIN \"reportPeople\" rp ON rp.\"reportId\" = r.id "
-				+ PositionDao.generateCurrentPositionFilter("rp.\"personId\"", "r.\"engagementDate\"", "attendeePositionId")
+			whereClauses.add("reports.uuid IN ( SELECT r.uuid FROM reports r "
+				+ "JOIN \"reportPeople\" rp ON rp.\"reportUuid\" = r.uuid "
+				+ PositionDao.generateCurrentPositionFilter("rp.\"personUuid\"", "r.\"engagementDate\"", "attendeePositionUuid")
 				+ ")"
 			);
-			args.put("attendeePositionId", query.getAttendeePositionId());
+			args.put("attendeePositionUuid", query.getAttendeePositionUuid());
 		}
 
 		if (query.getAtmosphere() != null) { 
@@ -132,71 +133,71 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("atmosphere", DaoUtils.getEnumId(query.getAtmosphere()));
 		}
 		
-		if (query.getTaskId() != null) { 
-			whereClauses.add("reports.id IN (SELECT \"reportId\" from \"reportTasks\" where \"taskId\" = :taskId)");
-			args.put("taskId", query.getTaskId());
+		if (query.getTaskUuid() != null) {
+			whereClauses.add("reports.uuid IN (SELECT \"reportUuid\" from \"reportTasks\" where \"taskUuid\" = :taskUuid)");
+			args.put("taskUuid", query.getTaskUuid());
 		}
 		
-		if (query.getOrgId() != null) { 
-			if (query.getAdvisorOrgId() != null || query.getPrincipalOrgId() != null) { 
-				throw new WebApplicationException("Cannot combine orgId with principalOrgId or advisorOrgId parameters", Status.BAD_REQUEST);
+		if (query.getOrgUuid() != null) {
+			if (query.getAdvisorOrgUuid() != null || query.getPrincipalOrgUuid() != null) {
+				throw new WebApplicationException("Cannot combine orgUuid with principalOrgUuid or advisorOrgUuid parameters", Status.BAD_REQUEST);
 			}
 			if (query.getIncludeOrgChildren()) { 
-				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
 					+ ")";
-				whereClauses.add("(reports.\"advisorOrganizationId\" IN (SELECT id from parent_orgs) "
-						+ "OR reports.\"principalOrganizationId\" IN (SELECT id from parent_orgs))");
+				whereClauses.add("(reports.\"advisorOrganizationUuid\" IN (SELECT uuid from parent_orgs) "
+						+ "OR reports.\"principalOrganizationUuid\" IN (SELECT uuid from parent_orgs))");
 			} else { 
-				whereClauses.add("(reports.\"advisorOrganizationId\" = :orgId OR reports.\"principalOrganizationId\" = :orgId)");
+				whereClauses.add("(reports.\"advisorOrganizationUuid\" = :orgUuid OR reports.\"principalOrganizationUuid\" = :orgUuid)");
 			}
-			args.put("orgId", query.getOrgId());
+			args.put("orgUuid", query.getOrgUuid());
 		}
 		
-		if (query.getAdvisorOrgId() != null) { 
-			if (query.getAdvisorOrgId() == -1) { 
-				whereClauses.add("reports.\"advisorOrganizationId\" IS NULL");
+		if (query.getAdvisorOrgUuid() != null) {
+			if (Organization.DUMMY_ORG_UUID.equals(query.getAdvisorOrgUuid())) {
+				whereClauses.add("reports.\"advisorOrganizationUuid\" IS NULL");
 			} else if (query.getIncludeAdvisorOrgChildren()) { 
-				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :advisorOrgId "
+				commonTableExpression = "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :advisorOrgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
 					+ ") ";
-				whereClauses.add("reports.\"advisorOrganizationId\" IN (SELECT id from parent_orgs)");
+				whereClauses.add("reports.\"advisorOrganizationUuid\" IN (SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add("reports.\"advisorOrganizationId\" = :advisorOrgId");
+				whereClauses.add("reports.\"advisorOrganizationUuid\" = :advisorOrgUuid");
 			}
-			args.put("advisorOrgId", query.getAdvisorOrgId());
+			args.put("advisorOrgUuid", query.getAdvisorOrgUuid());
 		}
 		
-		if (query.getPrincipalOrgId() != null) { 
-			if (query.getPrincipalOrgId() == -1) { 
-				whereClauses.add("reports.\"principalOrganizationId\" IS NULL");
+		if (query.getPrincipalOrgUuid() != null) {
+			if (Organization.DUMMY_ORG_UUID.equals(query.getPrincipalOrgUuid())) {
+				whereClauses.add("reports.\"principalOrganizationUuid\" IS NULL");
 			} else if (query.getIncludePrincipalOrgChildren()) { 
-				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :principalOrgId "
+				commonTableExpression = "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :principalOrgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
 					+ ")";
-				whereClauses.add("reports.\"principalOrganizationId\" IN (SELECT id from parent_orgs)");
+				whereClauses.add("reports.\"principalOrganizationUuid\" IN (SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add("reports.\"principalOrganizationId\" = :principalOrgId");
+				whereClauses.add("reports.\"principalOrganizationUuid\" = :principalOrgUuid");
 			}
-			args.put("principalOrgId", query.getAdvisorOrgId());
+			args.put("principalOrgUuid", query.getAdvisorOrgUuid());
 		}
 		
-		if (query.getLocationId() != null) { 
-			whereClauses.add("\"locationId\" = :locationId");
-			args.put("locationId", query.getLocationId());
+		if (query.getLocationUuid() != null) {
+			whereClauses.add("\"locationUuid\" = :locationUuid");
+			args.put("locationUuid", query.getLocationUuid());
 		}
 		
 		if (query.getPendingApprovalOf() != null) { 
-			whereClauses.add("reports.\"approvalStepId\" IN "
-				+ "(SELECT \"approvalStepId\" from approvers where \"positionId\" IN "
-				+ "(SELECT id FROM positions where \"currentPersonId\" = :approverId))");
-			args.put("approverId", query.getPendingApprovalOf());
+			whereClauses.add("reports.\"approvalStepUuid\" IN "
+				+ "(SELECT \"approvalStepUuid\" from approvers where \"positionUuid\" IN "
+				+ "(SELECT uuid FROM positions where \"currentPersonUuid\" = :approverUuid))");
+			args.put("approverUuid", query.getPendingApprovalOf());
 		}
 		
 		if (query.getState() != null && query.getState().size() > 0) {
@@ -228,10 +229,10 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
 		} else { 
-			whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorId\" = :userId))");
+			whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorUuid\" = :userUuid))");
 			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-			args.put("userId", user.getId());
+			args.put("userUuid", user.getUuid());
 		}
 		
 		sql.append(" WHERE ");

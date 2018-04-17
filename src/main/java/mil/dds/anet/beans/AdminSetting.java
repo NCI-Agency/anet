@@ -1,21 +1,12 @@
 package mil.dds.anet.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class AdminSetting extends AbstractAnetBean {
 
 	private String key;
 	private String value;
-	
-	
-	@Override
-	@JsonIgnore
-	public Integer getId() { 
-		throw new UnsupportedOperationException();
-	}
-	
+
 	public String getKey() {
 		return key;
 	}

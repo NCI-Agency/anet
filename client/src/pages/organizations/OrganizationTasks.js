@@ -28,7 +28,7 @@ export default class OrganizationTasks extends Component {
 		const taskShortLabel = Settings.fields.task.shortLabel
 
 		return <Fieldset id="tasks" title={pluralize(taskShortLabel)} action={
-			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgId: org.id})} button>Create {taskShortLabel}</LinkTo>
+			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgUuid: org.uuid})} button>Create {taskShortLabel}</LinkTo>
 		}>
 			{this.pagination()}
 			<Table>
@@ -41,7 +41,7 @@ export default class OrganizationTasks extends Component {
 
 				<tbody>
 					{Task.map(tasks, (task, idx) =>
-						<tr key={task.id} id={`task_${idx}`} >
+						<tr key={task.uuid} id={`task_${idx}`} >
 							<td><LinkTo task={task} >{task.shortName}</LinkTo></td>
 							<td>{task.longName}</td>
 						</tr>

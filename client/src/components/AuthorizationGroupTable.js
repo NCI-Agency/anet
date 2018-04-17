@@ -24,10 +24,10 @@ export default class AuthorizationGroupTable extends Component {
 
 			<tbody>
 				{authorizationGroups.map(authorizationGroup =>
-					<tr key={authorizationGroup.id}>
+					<tr key={authorizationGroup.uuid}>
 						<td>{<LinkTo authorizationGroup={authorizationGroup} />}</td>
 						<td>{authorizationGroup.description}</td>
-						<td>{authorizationGroup.positions.map(position => <div key={position.id}><LinkTo position={position} /></div>)}</td>
+						<td>{authorizationGroup.positions.map(position => <div key={position.uuid}><LinkTo position={position} /></div>)}</td>
 						<td>{authorizationGroup.humanNameOfStatus()} </td>
 					</tr>
 				)}

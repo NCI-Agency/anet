@@ -28,13 +28,13 @@ class OrganizationEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			organization(id:${props.match.params.id}) {
-				id, shortName, longName, status, identificationCode, type,
-				parentOrg { id, shortName, longName, identificationCode }
-				approvalSteps { id, name
-					approvers { id, name, person { id, name}}
+			organization(uuid:"${props.match.params.uuid}") {
+				uuid, shortName, longName, status, identificationCode, type,
+				parentOrg { uuid, shortName, longName, identificationCode }
+				approvalSteps { uuid, name
+					approvers { uuid, name, person { uuid, name}}
 				},
-				tasks { id, shortName, longName}
+				tasks { uuid, shortName, longName}
 			}
 		`).then(data => {
 			this.setState({

@@ -17,11 +17,11 @@ class AdvisorReportsModal extends Component {
     }
 
     handleModalOpen() {
-        this.fetchAdvisors(this.props.id)
+        this.fetchAdvisors(this.props.uuid)
     }
 
-    fetchAdvisors(orgId) {
-        let query = `${advisorsQueryUrl}?orgId=${orgId}`
+    fetchAdvisors(orgUuid) {
+        let query = `${advisorsQueryUrl}?orgUuid=${orgUuid}`
         let advisorsQuery = API.fetch(query)
         Promise.resolve(advisorsQuery).then(value => {
             this.setState({

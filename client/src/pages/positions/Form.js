@@ -51,7 +51,7 @@ class PositionForm extends ValidatableFormWrapper {
 		} else {
 			orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 			if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
-				orgSearchQuery.parentOrgId = currentUser.position.organization.id
+				orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
 				orgSearchQuery.parentOrgRecursively = true
 			}
 		}
@@ -63,7 +63,7 @@ class PositionForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.id
+		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.uuid
 
 		return (
 			<div>
@@ -102,7 +102,7 @@ class PositionForm extends ValidatableFormWrapper {
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
-							fields="id, longName, shortName, identificationCode, type"
+							fields="uuid, longName, shortName, identificationCode, type"
 							template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
@@ -165,8 +165,8 @@ class PositionForm extends ValidatableFormWrapper {
 		// Remove permissions property, was added temporarily in order to be able
 		// to select a specific advisor type.
 		delete position.permissions
-		position.organization = {id: position.organization.id}
-		position.person = (position.person && position.person.id) ? {id: position.person.id} : {}
+		position.organization = {uuid: position.organization.uuid}
+		position.person = (position.person && position.person.uuid) ? {uuid: position.person.uuid} : {}
 		position.code = position.code || null //Need to null out empty position codes
 
 		let url = `/api/positions/${edit ? 'update' : 'new'}`
@@ -174,8 +174,8 @@ class PositionForm extends ValidatableFormWrapper {
 		this.forceUpdate()
 		API.send(url, position, {disableSubmits: true})
 			.then(response => {
-				if (response.id) {
-					position.id = response.id
+				if (response.uuid) {
+					position.uuid = response.uuid
 				}
 				this.props.history.replace(Position.pathForEdit(position))
 				this.props.history.push({

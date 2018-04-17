@@ -121,7 +121,7 @@ public class OrganizationResource implements IGraphQLResource {
 					//Create the approval steps
 					for (ApprovalStep step : org.getApprovalSteps()) {
 						validateApprovalStep(step);
-						step.setAdvisorOrganizationId(created.getId());
+						step.setAdvisorOrganizationUuid(created.getUuid());
 						engine.getApprovalStepDao().insertAtEnd(step);
 					}
 				}
@@ -135,9 +135,9 @@ public class OrganizationResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@GraphQLFetcher
-	@Path("/{id}")
-	public Organization getById(@PathParam("id") int id) {
-		Organization org = dao.getById(id);
+	@Path("/{uuid}")
+	public Organization getByUuid(@PathParam("uuid") String uuid) {
+		Organization org = dao.getByUuid(uuid);
 		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
 		return org;
 	}
@@ -167,37 +167,37 @@ public class OrganizationResource implements IGraphQLResource {
 
 				if (org.getTasks() != null || org.getApprovalSteps() != null) {
 					//Load the existing org, so we can check for differences.
-					Organization existing = dao.getById(org.getId());
+					Organization existing = dao.getByUuid(org.getUuid());
 
 					if (org.getTasks() != null) {
 						logger.debug("Editing tasks for {}", org);
-						Utils.addRemoveElementsById(existing.loadTasks(), org.getTasks(),
+						Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
 								newTask -> engine.getTaskDao().setResponsibleOrgForTask(newTask, existing),
-								oldTaskId -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithId(oldTaskId), null));
+								oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithUuid(oldTaskUuid), null));
 					}
 
 					if (org.getApprovalSteps() != null) {
 						logger.debug("Editing approval steps for {}", org);
 						for (ApprovalStep step : org.getApprovalSteps()) {
 							validateApprovalStep(step);
-							step.setAdvisorOrganizationId(org.getId());
+							step.setAdvisorOrganizationUuid(org.getUuid());
 						}
 						List<ApprovalStep> existingSteps = existing.loadApprovalSteps();
 
-						Utils.addRemoveElementsById(existingSteps, org.getApprovalSteps(),
+						Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
 								newStep -> engine.getApprovalStepDao().insert(newStep),
-								oldStepId -> engine.getApprovalStepDao().deleteStep(oldStepId));
+								oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
 
 						for (int i = 0;i < org.getApprovalSteps().size();i++) {
 							ApprovalStep curr = org.getApprovalSteps().get(i);
 							ApprovalStep next = (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
-							curr.setNextStepId(DaoUtils.getId(next));
-							ApprovalStep existingStep = Utils.getById(existingSteps, curr.getId());
-							//If this step didn't exist before, we still need to set the nextStepId on it, but don't need to do a deep update.
+							curr.setNextStepUuid(DaoUtils.getUuid(next));
+							ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
+							//If this step didn't exist before, we still need to set the nextStepUuid on it, but don't need to do a deep update.
 							if (existingStep == null) {
 								engine.getApprovalStepDao().update(curr);
 							} else {
-								//Check for updates to name, nextStepId and approvers.
+								//Check for updates to name, nextStepUuid and approvers.
 								ApprovalStepResource.updateStep(curr, existingStep);
 							}
 						}
@@ -231,9 +231,9 @@ public class OrganizationResource implements IGraphQLResource {
 	
 	@GET
 	@Timed
-	@Path("/{id}/tasks")
-	public TaskList getTasks(@PathParam("id") Integer orgId) { 
-		return new TaskList(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
+	@Path("/{uuid}/tasks")
+	public TaskList getTasks(@PathParam("uuid") String orgUuid) {
+		return new TaskList(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationUuid(orgUuid));
 	}
 
 	private void validateApprovalStep(ApprovalStep step) {

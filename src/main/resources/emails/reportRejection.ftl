@@ -24,7 +24,7 @@ Hi, ${report.author.name},
 <p>Your report "<i>${report.intent}</i>" has been rejected by ${rejector.name}. The following comment was provided:</p>
 <p>"${comment.text}"</p>
 
-<p>You can edit and re-submit your report by <a href="${serverUrl}/reports/${report.id?c}">clicking here</a>.</p>
+<p>You can edit and re-submit your report by <a href="${serverUrl}/reports/${report.uuid?c}">clicking here</a>.</p>
 
 ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>

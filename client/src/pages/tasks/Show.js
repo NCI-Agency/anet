@@ -36,7 +36,7 @@ class TaskShow extends Page {
 
 		this.state = {
 			task: new Task({
-				id: props.match.params.id,
+				uuid: props.match.params.uuid,
 				shortName: props.match.params.shortName,
 				longName: props.match.params.longName,
 				responsibleOrg: props.match.params.responsibleOrg
@@ -63,16 +63,16 @@ class TaskShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			taskId: props.match.params.id,
+			taskUuid: props.match.params.uuid,
 		})
 
 		let taskQuery = new GQL.Part(/* GraphQL */`
-			task(id:${props.match.params.id}) {
-				id, shortName, longName, status,
+			task(uuid:"${props.match.params.uuid}") {
+				uuid, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
-				responsibleOrg {id, shortName, longName, identificationCode},
-				customFieldRef1 { id, shortName, longName }
+				responsibleOrg { uuid, shortName, longName, identificationCode },
+				customFieldRef1 { uuid, shortName, longName }
 			}
 		`)
 
@@ -104,11 +104,11 @@ class TaskShow extends Page {
 						<Form.Field id="longName" label={`${taskShortLabel} description`} />
 						<Form.Field id="status" />
 
-						{task.responsibleOrg && task.responsibleOrg.id &&
+						{task.responsibleOrg && task.responsibleOrg.uuid &&
 							this.renderOrg()
 						}
 
-						{task.customFieldRef1 && task.customFieldRef1.id &&
+						{task.customFieldRef1 && task.customFieldRef1.uuid &&
 							<this.TaskCustomFieldRef1 dictProps={Settings.fields.task.customFieldRef1} id="customFieldRef1">
 								<LinkTo task={task.customFieldRef1}>{task.customFieldRef1.shortName} {task.customFieldRef1.longName}</LinkTo>
 							</this.TaskCustomFieldRef1>

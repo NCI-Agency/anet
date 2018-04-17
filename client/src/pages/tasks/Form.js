@@ -70,7 +70,7 @@ class TaskForm extends ValidatableFormWrapper {
 
 		orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
-			orgSearchQuery.parentOrgId = currentUser.position.organization.id
+			orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
 			orgSearchQuery.parentOrgRecursively = true
 		}
 		const {ValidatableForm, RequiredField} = this
@@ -167,11 +167,11 @@ class TaskForm extends ValidatableFormWrapper {
 	@autobind
 	onSubmit(event) {
 		let {task, edit} = this.props
-		if (task.responsibleOrg && task.responsibleOrg.id) {
-			task.responsibleOrg = {id: task.responsibleOrg.id}
+		if (task.responsibleOrg && task.responsibleOrg.uuid) {
+			task.responsibleOrg = {uuid: task.responsibleOrg.uuid}
 		}
-		if (task.customFieldRef1 && task.customFieldRef1.id) {
-			task.customFieldRef1 = {id: task.customFieldRef1.id}
+		if (task.customFieldRef1 && task.customFieldRef1.uuid) {
+			task.customFieldRef1 = {uuid: task.customFieldRef1.uuid}
 		}
 
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
@@ -183,8 +183,8 @@ class TaskForm extends ValidatableFormWrapper {
 					throw response.code
 				}
 
-				if (response.id) {
-					task.id = response.id
+				if (response.uuid) {
+					task.uuid = response.uuid
 				}
 				this.props.history.replace(Task.pathForEdit(task))
 				this.props.history.push({

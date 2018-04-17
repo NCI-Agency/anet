@@ -10,8 +10,8 @@ const _advisorStats = (columnGroups, statistics) => {
         let keySubmitted = _uniqueId('submitted_')
         let keyAttended = _uniqueId('attended_')
         if(rowCell) {
-            stats.push(<td key={ keySubmitted }>{ rowCell.nrreportssubmitted }</td>)
-            stats.push(<td key={ keyAttended }>{ rowCell.nrengagementsattended }</td>)
+            stats.push(<td key={ keySubmitted }>{ rowCell.nrReportsSubmitted }</td>)
+            stats.push(<td key={ keyAttended }>{ rowCell.nrEngagementsAttended }</td>)
         }
         else {
             stats.push(<td key={ keySubmitted }>0</td>)

@@ -12,8 +12,8 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class ApprovalStep extends AbstractAnetBean {
 
 	List<Position> approvers;
-	Integer nextStepId;
-	Integer advisorOrganizationId;
+	String nextStepUuid;
+	String advisorOrganizationUuid;
 	String name;
 
 	@GraphQLFetcher("approvers")
@@ -33,20 +33,20 @@ public class ApprovalStep extends AbstractAnetBean {
 		this.approvers = approvers;
 	}
 
-	public Integer getNextStepId() {
-		return nextStepId;
+	public String getNextStepUuid() {
+		return nextStepUuid;
 	}
 	
-	public void setNextStepId(Integer nextStepId) {
-		this.nextStepId = nextStepId;
+	public void setNextStepUuid(String nextStepUuid) {
+		this.nextStepUuid = nextStepUuid;
 	}
 	
-	public Integer getAdvisorOrganizationId() {
-		return advisorOrganizationId;
+	public String getAdvisorOrganizationUuid() {
+		return advisorOrganizationUuid;
 	}
 	
-	public void setAdvisorOrganizationId(Integer advisorOrganizationId) {
-		this.advisorOrganizationId = advisorOrganizationId;
+	public void setAdvisorOrganizationUuid(String advisorOrganizationUuid) {
+		this.advisorOrganizationUuid = advisorOrganizationUuid;
 	}
 	
 	public String getName() {
@@ -58,30 +58,30 @@ public class ApprovalStep extends AbstractAnetBean {
 	}
 
 	@Override
-	public boolean equals(Object o) { 
+	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		ApprovalStep as = (ApprovalStep) o;
-		return Objects.equals(id, as.getId()) 
-			&& Objects.equals(name,  as.getName()) 
-			&& Objects.equals(nextStepId, as.getNextStepId()) 
-			&& Objects.equals(advisorOrganizationId, as.getAdvisorOrganizationId());
+		return Objects.equals(uuid, as.getUuid())
+			&& Objects.equals(name,  as.getName())
+			&& Objects.equals(nextStepUuid, as.getNextStepUuid())
+			&& Objects.equals(advisorOrganizationUuid, as.getAdvisorOrganizationUuid());
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, approvers, name, nextStepId, advisorOrganizationId);
+	public int hashCode() {
+		return Objects.hash(uuid, approvers, name, nextStepUuid, advisorOrganizationUuid);
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("%d - %s, aoid: %d, nsid: %d", id, name, advisorOrganizationId, nextStepId);
+	public String toString() {
+		return String.format("%s - %s, aoid: %d, nsid: %d", uuid, name, advisorOrganizationUuid, nextStepUuid);
 	}
 
-	public static ApprovalStep createWithId(Integer id) {
-		ApprovalStep step = new ApprovalStep();
-		step.setId(id);
+	public static ApprovalStep createWithUuid(String uuid) {
+		final ApprovalStep step = new ApprovalStep();
+		step.setUuid(uuid);
 		step.setLoadLevel(LoadLevel.ID_ONLY);
 		return step;
 	}

@@ -74,20 +74,20 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
-	@Path("/{id}")
+	@Path("/{uuid}")
 	@GraphQLFetcher
-	public Position getById(@PathParam("id") int id) {
-		Position p = dao.getById(id);
+	public Position getByUuid(@PathParam("uuid") String uuid) {
+		Position p = dao.getByUuid(uuid);
 		if (p == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return p;
 	}
 
 	/**
-	 * Creates a new position in the database. Must have Type and Organization with ID specified.
+	 * Creates a new position in the database. Must have Type and Organization with UUID specified.
 	 * Optionally can provide:
-	 * - position.person : If a person ID is provided in the Person object, that person will be put in this position.
+	 * - position.person : If a person UUID is provided in the Person object, that person will be put in this position.
 	 * @param position the position to create
-	 * @return the same Position object with the ID field filled in.
+	 * @return the same Position object with the UUID field filled in.
 	 */
 	@POST
 	@Path("/new")
@@ -97,7 +97,7 @@ public class PositionResource implements IGraphQLResource {
 			throw new WebApplicationException("Position Name must not be null", Status.BAD_REQUEST);
 		}
 		if (p.getType() == null) { throw new WebApplicationException("Position type must be defined", Status.BAD_REQUEST); }
-		if (p.getOrganization() == null || p.getOrganization().getId() == null) { 
+		if (p.getOrganization() == null || p.getOrganization().getUuid() == null) {
 			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST); 
 		}
 		if (p.getType() == PositionType.ADMINISTRATOR || p.getType() == PositionType.SUPER_USER) { AuthUtils.assertAdministrator(user); }
@@ -120,16 +120,16 @@ public class PositionResource implements IGraphQLResource {
 	public Response updateAssociatedPosition(@Auth Person user, Position pos) {
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
-		final Position current = dao.getById(pos.getId());
+		final Position current = dao.getByUuid(pos.getUuid());
 		if (current != null) {
 			// Run the diff and see if anything changed and update.
 			if (pos.getAssociatedPositions() != null) {
-				Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
+				Utils.addRemoveElementsByUuid(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
 						newPosition -> {
 							dao.associatePosition(newPosition, pos);
 						},
-						oldPositionId -> {
-							dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
+						oldPositionUuid -> {
+							dao.deletePositionAssociation(pos, Position.createWithUuid(oldPositionUuid));
 						});
 				AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
 			}
@@ -143,7 +143,7 @@ public class PositionResource implements IGraphQLResource {
 	@RolesAllowed("SUPER_USER")
 	public Response updatePosition(@Auth Person user, Position pos) {
 		if (pos.getType() == PositionType.ADMINISTRATOR || pos.getType() == PositionType.SUPER_USER) { AuthUtils.assertAdministrator(user); }
-		if (DaoUtils.getId(pos.getOrganization()) == null) { 
+		if (DaoUtils.getUuid(pos.getOrganization()) == null) {
 			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST); 
 		}
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
@@ -151,15 +151,15 @@ public class PositionResource implements IGraphQLResource {
 		final int numRows = dao.update(pos);
 
 		if (pos.getPerson() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
-			final Position current = dao.getById(pos.getId());
+			final Position current = dao.getByUuid(pos.getUuid());
 			if (current != null) {
 				//Run the diff and see if anything changed and update.
 				if (pos.getPerson() != null) {
-					if (pos.getPerson().getId() == null) {
+					if (pos.getPerson().getUuid() == null) {
 						//Intentionally remove the person
 						dao.removePersonFromPosition(current);
 						AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPerson(), current, user);
-					} else if (Utils.idEqual(pos.getPerson(), current.getPerson()) == false) {
+					} else if (Utils.uuidEqual(pos.getPerson(), current.getPerson()) == false) {
 						dao.setPersonInPosition(pos.getPerson(), pos);
 						AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPerson(), current, user);
 					}
@@ -179,19 +179,19 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
-	@Path("/{id}/person")
-	public Person getAdvisorInPosition(@PathParam("id") int positionId, @QueryParam("atTime") Long atTimeMillis) {
-		Position p = Position.createWithId(positionId);
+	@Path("/{uuid}/person")
+	public Person getAdvisorInPosition(@PathParam("uuid") String positionUuid, @QueryParam("atTime") Long atTimeMillis) {
+		Position p = Position.createWithUuid(positionUuid);
 
 		DateTime dtg = (atTimeMillis == null) ? DateTime.now() : new DateTime(atTimeMillis);
 		return dao.getPersonInPosition(p, dtg);
 	}
 
 	@POST
-	@Path("/{id}/person")
+	@Path("/{uuid}/person")
 	@RolesAllowed("SUPER_USER")
-	public Response putPersonInPosition(@Auth Person user, @PathParam("id") int positionId, Person p) {
-		Position pos = dao.getById(positionId);
+	public Response putPersonInPosition(@Auth Person user, @PathParam("uuid") String positionUuid, Person p) {
+		Position pos = dao.getByUuid(positionUuid);
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
 		dao.setPersonInPosition(p, pos);
@@ -200,32 +200,32 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@DELETE
-	@Path("/{id}/person")
+	@Path("/{uuid}/person")
 	@RolesAllowed("SUPER_USER")
-	public Response deletePersonFromPosition(@Auth Person user, @PathParam("id") int positionId) {
-		Position pos = dao.getById(positionId);
+	public Response deletePersonFromPosition(@Auth Person user, @PathParam("uuid") String positionUuid) {
+		Position pos = dao.getByUuid(positionUuid);
 		if (pos == null) { return Response.status(Status.NOT_FOUND).build(); } 
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
 		dao.removePersonFromPosition(pos);
-		AnetAuditLogger.log("Person removed from Position id#{} by {}", positionId, user);
+		AnetAuditLogger.log("Person removed from Position uuid#{} by {}", positionUuid, user);
 		return Response.ok().build();
 	}
 
 	@GET
-	@Path("/{id}/associated")
-	public PositionList getAssociatedPositions(@PathParam("id") int positionId) {
-		Position b = Position.createWithId(positionId);
+	@Path("/{uuid}/associated")
+	public PositionList getAssociatedPositions(@PathParam("uuid") String positionUuid) {
+		Position b = Position.createWithUuid(positionUuid);
 
 		return new PositionList(dao.getAssociatedPositions(b));
 	}
 
 	@POST
-	@Path("/{id}/associated")
+	@Path("/{uuid}/associated")
 	@RolesAllowed("SUPER_USER")
-	public Response associatePositions(@PathParam("id") int positionId, Position b, @Auth Person user) {
-		Position a = dao.getById(positionId);
-		b = dao.getById(b.getId());
+	public Response associatePositions(@PathParam("uuid") String positionUuid, Position b, @Auth Person user) {
+		Position a = dao.getByUuid(positionUuid);
+		b = dao.getByUuid(b.getUuid());
 		
 		Position principalPos = (a.getType() == PositionType.PRINCIPAL) ? a : b;
 		Position advisorPos = (a.getType() == PositionType.PRINCIPAL) ? b : a;
@@ -247,11 +247,11 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@DELETE
-	@Path("/{id}/associated/{positionId}")
+	@Path("/{uuid}/associated/{positionUuid}")
 	@RolesAllowed("SUPER_USER")
-	public Response deletePositionAssociation(@PathParam("id") int positionId, @PathParam("positionId") int associatedPositionId, @Auth Person user) {
-		Position a = dao.getById(positionId);
-		Position b = dao.getById(associatedPositionId);
+	public Response deletePositionAssociation(@PathParam("uuid") String positionUuid, @PathParam("positionUuid") String associatedPositionUuid, @Auth Person user) {
+		Position a = dao.getByUuid(positionUuid);
+		Position b = dao.getByUuid(associatedPositionUuid);
 
 		Position advisorPos = (a.getType() == PositionType.PRINCIPAL) ? b : a;
 		AuthUtils.assertSuperUserForOrg(user, advisorPos.getOrganization());
@@ -262,9 +262,9 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
-	@Path("/{id}/history")
-	public List<PersonPositionHistory> getPositionHistory(@PathParam("id") int positionId) { 
-		Position position = dao.getById(positionId);
+	@Path("/{uuid}/history")
+	public List<PersonPositionHistory> getPositionHistory(@PathParam("uuid") String positionUuid) {
+		Position position = dao.getByUuid(positionUuid);
 		if (position == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
 		return dao.getPositionHistory(position);
 	}
@@ -288,9 +288,9 @@ public class PositionResource implements IGraphQLResource {
 
 	
 	@DELETE
-	@Path("/{id}")
-	public Response deletePosition(@PathParam("id") int positionId) { 
-		Position p = dao.getById(positionId);
+	@Path("/{uuid}")
+	public Response deletePosition(@PathParam("uuid") String positionUuid) {
+		Position p = dao.getByUuid(positionUuid);
 		if (p == null) { return Response.status(Status.NOT_FOUND).build(); } 
 		
 		//if there is a person in this position, reject

@@ -7,7 +7,7 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class ReportSensitiveInformation extends AbstractAnetBean {
 
 	private String text;
-	private int reportId;
+	private String reportUuid;
 
 	public String getText() {
 		return text;
@@ -17,12 +17,12 @@ public class ReportSensitiveInformation extends AbstractAnetBean {
 		this.text = text;
 	}
 
-	public int getReportId() {
-		return reportId;
+	public String getReportUuid() {
+		return reportUuid;
 	}
 
-	public void setReportId(int reportId) {
-		this.reportId = reportId;
+	public void setReportUuid(String reportUuid) {
+		this.reportUuid = reportUuid;
 	}
 
 	@Override
@@ -31,19 +31,19 @@ public class ReportSensitiveInformation extends AbstractAnetBean {
 			return false;
 		}
 		final ReportSensitiveInformation rsi = (ReportSensitiveInformation) o;
-		return Objects.equals(rsi.getId(), id)
+		return Objects.equals(rsi.getUuid(), uuid)
 				&& Objects.equals(rsi.getText(), text)
-				&& Objects.equals(rsi.getReportId(), reportId);
+				&& Objects.equals(rsi.getReportUuid(), reportUuid);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, text, reportId);
+		return Objects.hash(uuid, text, reportUuid);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("[id:%d, reportId:%d]", id, reportId);
+		return String.format("[uuid:%s, reportUuid:%s]", uuid, reportUuid);
 	}
 
 }

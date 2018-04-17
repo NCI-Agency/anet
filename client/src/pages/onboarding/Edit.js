@@ -31,12 +31,12 @@ class OnboardingEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			person(id:${this.context.currentUser.id}) {
-				id,
+			person(uuid:"${this.context.currentUser.uuid}") {
+				uuid,
 				name, rank, role, emailAddress, phoneNumber, status
 				biography, country, gender, endOfTourDate, domainUsername
 				position {
-					id, name
+					uuid, name
 				}
 			}
 		`).then(data => {

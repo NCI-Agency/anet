@@ -66,7 +66,7 @@ export default class Autocomplete extends Component {
 	componentWillReceiveProps(props) {
 		let value = props.value
 		if (Array.isArray(value)) {
-			this.selectedIds = value.map(object => object.id)
+			this.selectedUuids = value.map(object => object.uuid)
 			return {}
 		}
 
@@ -143,12 +143,12 @@ export default class Autocomplete extends Component {
 				url += '&' + utils.createUrlParams(queryParams)
 			}
 
-			let selectedIds = this.selectedIds
+			let selectedUuids = this.selectedUuids
 
 			API.fetch(url, {showLoader: false}).then(data => {
 				data = data.list
-				if (selectedIds)
-					data = data.filter(suggestion => suggestion && suggestion.id && selectedIds.indexOf(suggestion.id) === -1)
+				if (selectedUuids)
+					data = data.filter(suggestion => suggestion && suggestion.uuid && selectedUuids.indexOf(suggestion.uuid) === -1)
 
 				let noSuggestions = data.length === 0
 				this.setState({suggestions: data, noSuggestions})
@@ -207,8 +207,8 @@ export default class Autocomplete extends Component {
 				//If the component had a value, and the user just cleared the input
 				// then set the selection to an empty object. We need to do this because we need to
 				// tell the server that value was cleared, rather than that there was no change.
-				//This is so the server sees that the value is not-null, but that id is NULL.
-				//Which tells the server specifically that the id should be set to NULL on the foreignKey
+				//This is so the server sees that the value is not-null, but that uuid is NULL.
+				//Which tells the server specifically that the uuid should be set to NULL on the foreignKey
 				this.onSuggestionSelected(event, {suggestion: {}, suggestionValue: ''})
 			}
 			if (this.props.onErrorChange) {

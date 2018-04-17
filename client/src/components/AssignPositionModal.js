@@ -45,7 +45,7 @@ export default class AssignPositionModal extends Component {
 				//Only super users can put people in super user billets
 				//And they are limited to their organization.
 				positionSearchQuery.type.push(Position.TYPE.SUPER_USER)
-				positionSearchQuery.organizationId = currentUser.position.organization.id
+				positionSearchQuery.organizationUuid = currentUser.position.organization.uuid
 				positionSearchQuery.includeChildrenOrgs = true
 			}
 		} else if (person.role === Person.ROLE.PRINCIPAL) {
@@ -58,7 +58,7 @@ export default class AssignPositionModal extends Component {
 					<Modal.Title>Set Position for {person.name}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					{person.position.id &&
+					{person.position.uuid &&
 						<div style={{textAlign:'center'}}>
 							<Button bsStyle="danger" onClick={this.remove} className="remove-person-from-position">
 								Remove {person.name} from {person.position.name}
@@ -75,7 +75,7 @@ export default class AssignPositionModal extends Component {
 								<Autocomplete valueKey="name"
 									placeholder="Select a position for this person"
 									objectType={Position}
-									fields={'id, name, code, type, organization { id, shortName, longName, identificationCode}, person { id, name }'}
+									fields={'uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name }'}
 									template={pos =>
 										<span>{[pos.name, pos.code].join(' - ')}</span>
 									}
@@ -85,7 +85,7 @@ export default class AssignPositionModal extends Component {
 								/>
 							</Col>
 						</Row>
-						{newPosition && newPosition.id &&
+						{newPosition && newPosition.uuid &&
 							<Table>
 								<thead>
 									<tr>
@@ -106,7 +106,7 @@ export default class AssignPositionModal extends Component {
 											{newPosition.person ?
 												newPosition.person.name
 												:
-												(newPosition.id === person.position.id ?
+												(newPosition.uuid === person.position.uuid ?
 													person.name
 													:
 													<i>Unfilled</i>
@@ -117,7 +117,7 @@ export default class AssignPositionModal extends Component {
 								</tbody>
 							</Table>
 						}
-						{this.state.position && this.state.position.person && this.state.position.person.id !== person.id &&
+						{this.state.position && this.state.position.person && this.state.position.person.uuid !== person.uuid &&
 							<Alert bsStyle={"danger"}>
 								This position is currently held by {this.state.position.person.name}.  By selecting this position, they will be removed.
 							</Alert>
@@ -135,7 +135,7 @@ export default class AssignPositionModal extends Component {
 	@autobind
 	remove() {
 		let position = this.props.person.position
-		API.fetch('/api/positions/' + position.id + '/person', { method: 'DELETE'}
+		API.fetch('/api/positions/' + position.uuid + '/person', { method: 'DELETE'}
 			).then(resp =>
 				this.props.onSuccess()
 			).catch(error => {
@@ -145,9 +145,9 @@ export default class AssignPositionModal extends Component {
 
 	@autobind
 	save() {
-		let person = {id: this.props.person.id}
+		let person = {uuid: this.props.person.uuid}
 		let position = this.state.position
-		API.send('/api/positions/' + position.id + '/person', person)
+		API.send('/api/positions/' + position.uuid + '/person', person)
 			.then(resp =>
 				this.props.onSuccess()
 			).catch(error => {

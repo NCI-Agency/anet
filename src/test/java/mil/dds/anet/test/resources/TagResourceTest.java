@@ -49,13 +49,13 @@ public class TagResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		// Get
-		final Tag returned = httpQuery(String.format("/api/tags/%d", created.getId()), admin).get(Tag.class);
+		final Tag returned = httpQuery(String.format("/api/tags/%s", created.getUuid()), admin).get(Tag.class);
 		assertThat(returned).isEqualTo(created);
 	}
 
 	@Test
 	public void tagExceptionTest() throws UnsupportedEncodingException {
-		// Get with unknown id
+		// Get with unknown uuid
 		thrown.expect(NotFoundException.class);
 		httpQuery(String.format("/api/tags/-1"), admin).get(Tag.class);
 

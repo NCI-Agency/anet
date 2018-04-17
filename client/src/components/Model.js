@@ -41,8 +41,8 @@ export default class Model {
 		}
 
 		let resourceName = utils.resourceize(this.resourceName)
-		let id = instance.id
-		let url = ['', resourceName, id].join('/')
+		let uuid = instance.uuid
+		let url = ['', resourceName, uuid].join('/')
 
 		if (query) {
 			url += '?' + encodeQuery(query)
@@ -73,7 +73,7 @@ export default class Model {
 	}
 
 	static isEqual(a, b) {
-		return a && b && a.id === b.id
+		return a && b && a.uuid === b.uuid
 	}
 
 	constructor(props) {
@@ -102,10 +102,10 @@ export default class Model {
 	}
 
 	toPath(query) {
-		return this.id ? this.constructor.pathFor(this, query) : this.constructor.pathForNew(query)
+		return this.uuid ? this.constructor.pathFor(this, query) : this.constructor.pathForNew(query)
 	}
 
 	toString() {
-		return this.name || this.id
+		return this.name || this.uuid
 	}
 }

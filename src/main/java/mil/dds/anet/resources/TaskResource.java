@@ -72,9 +72,9 @@ public class TaskResource implements IGraphQLResource {
 	
 	@GET
 	@GraphQLFetcher
-	@Path("/{id}")
-	public Task getById(@PathParam("id") int id) {
-		Task p =  dao.getById(id);
+	@Path("/{uuid}")
+	public Task getByUuid(@PathParam("uuid") String uuid) {
+		Task p =  dao.getByUuid(uuid);
 		if (p == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
 		return p;
 	}
@@ -84,7 +84,7 @@ public class TaskResource implements IGraphQLResource {
 	@RolesAllowed("ADMIN")
 	public Task createNewTask(@Auth Person user, Task p) {
 		if (AuthUtils.isAdmin(user) == false) { 
-			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getId() == null) { 
+			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getUuid() == null) {
 				throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 			}
 			//Admin Users can only create tasks within their organization.
@@ -95,19 +95,19 @@ public class TaskResource implements IGraphQLResource {
 		return p;
 	}
 	
-	/* Updates shortName, longName, category, and customFieldRef1Id */
+	/* Updates shortName, longName, category, and customFieldRef1Uuid */
 	@POST
 	@Path("/update")
 	@RolesAllowed("ADMIN")
 	public Response updateTask(@Auth Person user, Task p) { 
 		//Admins can edit all Tasks, SuperUsers can edit tasks within their EF. 
 		if (AuthUtils.isAdmin(user) == false) { 
-			Task existing = dao.getById(p.getId());
+			Task existing = dao.getByUuid(p.getUuid());
 			AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrg());
 			
 			//If changing the Responsible Organization, Super Users must also have super user privileges over the next org.
-			if (!Objects.equals(DaoUtils.getId(existing.getResponsibleOrg()), DaoUtils.getId(p.getResponsibleOrg()))) {
-				if (DaoUtils.getId(p.getResponsibleOrg()) == null) { 
+			if (!Objects.equals(DaoUtils.getUuid(existing.getResponsibleOrg()), DaoUtils.getUuid(p.getResponsibleOrg()))) {
+				if (DaoUtils.getUuid(p.getResponsibleOrg()) == null) {
 					throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 				}
 				AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrg());

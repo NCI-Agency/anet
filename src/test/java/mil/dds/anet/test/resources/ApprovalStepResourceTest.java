@@ -35,39 +35,39 @@ public class ApprovalStepResourceTest extends AbstractResourceTest {
 		//Create an Advisor Organization
 		Organization org = httpQuery("/api/organizations/new", admin)
 				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
-		assertThat(org.getId()).isNotNull();
+		assertThat(org.getUuid()).isNotNull();
 	
 		//Create 3 steps in order for this AO
 		ApprovalStep as1 = new ApprovalStep();
 		as1.setName("Test Approval Step 1");
-		as1.setAdvisorOrganizationId(org.getId());
+		as1.setAdvisorOrganizationUuid(org.getUuid());
 		as1.setApprovers(ImmutableList.of(liz.loadPosition()));
 		as1 = httpQuery("/api/approvalSteps/new", admin).post(Entity.json(as1), ApprovalStep.class);
-		assertThat(as1.getId()).isNotNull();
+		assertThat(as1.getUuid()).isNotNull();
 		
 		ApprovalStep as2 = new ApprovalStep();
 		as2.setName("Test Approval Step 2");
-		as2.setAdvisorOrganizationId(org.getId());
+		as2.setAdvisorOrganizationUuid(org.getUuid());
 		as2.setApprovers(ImmutableList.of(admin.loadPosition()));
 		as2 = httpQuery("/api/approvalSteps/new", admin).post(Entity.json(as2), ApprovalStep.class);
-		assertThat(as2.getId()).isNotNull();
+		assertThat(as2.getUuid()).isNotNull();
 		
-		as1.setNextStepId(as2.getId());
+		as1.setNextStepUuid(as2.getUuid());
 		Response resp = httpQuery("/api/approvalSteps/update", admin).post(Entity.json(as1));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Get them back in order
-		List<ApprovalStep> returned = httpQuery(String.format("/api/approvalSteps/byOrganization?orgId=%d", org.getId()), jack)
+		List<ApprovalStep> returned = httpQuery(String.format("/api/approvalSteps/byOrganization?orgUuid=%s", org.getUuid()), jack)
 				.get(new GenericType<List<ApprovalStep>>() {});
 		assertThat(returned.size()).isEqualTo(2);
 		assertThat(returned).contains(as1, atIndex(0));
 		assertThat(returned).contains(as2, atIndex(1));
 		
 		//Remove the first step
-		resp = httpQuery(String.format("/api/approvalSteps/%d", as1.getId()), admin).delete();
+		resp = httpQuery(String.format("/api/approvalSteps/%s", as1.getUuid()), admin).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		returned = httpQuery(String.format("/api/approvalSteps/byOrganization?orgId=%d", org.getId()), jack)
+		returned = httpQuery(String.format("/api/approvalSteps/byOrganization?orgUuid=%s", org.getUuid()), jack)
 				.get(new GenericType<List<ApprovalStep>>() {});
 		assertThat(returned.size()).isEqualTo(1);
 		assertThat(returned).contains(as2, atIndex(0));
@@ -75,16 +75,16 @@ public class ApprovalStepResourceTest extends AbstractResourceTest {
 		//Create a new step and put in the middle
 		ApprovalStep as4 = new ApprovalStep();
 		as4.setName("Test Approval Step 4");
-		as4.setAdvisorOrganizationId(org.getId());
+		as4.setAdvisorOrganizationUuid(org.getUuid());
 		as4 = httpQuery("/api/approvalSteps/new", admin).post(Entity.json(as4), ApprovalStep.class);
-		assertThat(as4.getId()).isNotNull();
+		assertThat(as4.getUuid()).isNotNull();
 		
-		as2.setNextStepId(as4.getId());
+		as2.setNextStepUuid(as4.getUuid());
 		resp = httpQuery("/api/approvalSteps/update", admin).post(Entity.json(as2));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Get them back in order 2 -> 4
-		returned = httpQuery("/api/approvalSteps/byOrganization?orgId=" + org.getId(), admin)
+		returned = httpQuery("/api/approvalSteps/byOrganization?orgUuid=" + org.getUuid(), admin)
 				.get(new GenericType<List<ApprovalStep>>() {});
 		assertThat(returned.size()).isEqualTo(2);
 		assertThat(returned).contains(as2, atIndex(0));

@@ -39,7 +39,7 @@ class ReportShow extends Page {
 		super(props)
 
 		this.state = {
-			report: new Report({id: props.match.params.id}),
+			report: new Report({uuid: props.match.params.uuid}),
 			newComment: new Comment(),
 			approvalComment: new Comment(),
 			showEmailModal: false,
@@ -49,23 +49,23 @@ class ReportShow extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			report(id:${props.match.params.id}) {
-				id, intent, engagementDate, atmosphere, atmosphereDetails
+			report(uuid:"${props.match.params.uuid}") {
+				uuid, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
 				state
 
-				location { id, name }
+				location { uuid, name }
 				author {
-					id, name, rank,
+					uuid, name, rank,
 					position {
 						organization {
 							shortName, longName, identificationCode
 							approvalSteps {
-								id, name,
+								uuid, name,
 								approvers {
-									id, name,
-									person { id, name rank }
+									uuid, name,
+									person { uuid, name rank }
 								}
 							}
 						}
@@ -73,35 +73,35 @@ class ReportShow extends Page {
 				}
 
 				attendees {
-					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status }
+					uuid, name, role, primary, rank, status, endOfTourDate
+					position { uuid, name, status }
 				}
-				primaryAdvisor { id }
-				primaryPrincipal { id }
+				primaryAdvisor { uuid }
+				primaryPrincipal { uuid }
 
-				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
 
 				comments {
-					id, text, createdAt, updatedAt
-					author { id, name, rank }
+					uuid, text, createdAt, updatedAt
+					author { uuid, name, rank }
 				}
 
-				principalOrg { id, shortName, longName, identificationCode, type }
-				advisorOrg { id, shortName, longName, identificationCode, type }
+				principalOrg { uuid, shortName, longName, identificationCode, type }
+				advisorOrg { uuid, shortName, longName, identificationCode, type }
 
 				approvalStatus {
 					type, createdAt
-					step { id , name
-						approvers { id, name, person { id, name, rank } }
+					step { uuid , name
+						approvers { uuid, name, person { uuid, name, rank } }
 					},
-					person { id, name, rank}
+					person { uuid, name, rank}
 				}
 
-				approvalStep { name, approvers { id }, nextStepId }
+				approvalStep { name, approvers { uuid }, nextStepUuid }
 
-				tags { id, name, description }
-				reportSensitiveInformation { id, text }
-				authorizationGroups { id, name, description }
+				tags { uuid, name, description }
+				reportSensitiveInformation { uuid, text }
+				authorizationGroups { uuid, name, description }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -157,7 +157,7 @@ class ReportShow extends Page {
 
 		return (
 			<div className="report-show">
-				<Breadcrumbs items={[['Report #' + report.id, Report.pathFor(report)]]} />
+				<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				{report.isReleased() &&
@@ -211,7 +211,7 @@ class ReportShow extends Page {
 				{this.renderEmailModal()}
 
 				<Form static formFor={report} horizontal>
-					<Fieldset title={`Report #${report.id}`} className="show-report-overview" action={<div>
+					<Fieldset title={`Report #${report.uuid}`} className="show-report-overview" action={<div>
 						{canEmail && <Button onClick={this.toggleEmailModal}>Email report</Button>}
 						{canEdit && <LinkTo report={report} edit button="primary">Edit</LinkTo>}
 						{canSubmit && errors.length === 0 && <Button bsStyle="primary" onClick={this.submitDraft}>Submit report</Button>}
@@ -242,7 +242,7 @@ class ReportShow extends Page {
 							</Form.Field>
 						}
 						<Form.Field id="tags" label="Tags">
-							{report.tags && report.tags.map((tag,i) => <Tag key={tag.id} tag={tag} />)}
+							{report.tags && report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}
 						</Form.Field>
 						<Form.Field id="author" label="Report author">
 							<LinkTo person={report.author} />
@@ -288,7 +288,7 @@ class ReportShow extends Page {
 
 							<tbody>
 								{Task.map(report.tasks, (task, idx) =>
-									<tr key={task.id} id={"task_" + idx}>
+									<tr key={task.uuid} id={"task_" + idx}>
 										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
 										<td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>
 									</tr>
@@ -319,7 +319,7 @@ class ReportShow extends Page {
 										<tbody>
 											{report.authorizationGroups.map(ag => {
 												return (
-													<tr key={ag.id}>
+													<tr key={ag.uuid}>
 														<td>{ag.name}</td>
 														<td>{ag.description}</td>
 													</tr>
@@ -367,7 +367,7 @@ class ReportShow extends Page {
 						{report.comments.map(comment => {
 							let createdAt = moment(comment.createdAt)
 							return (
-								<p key={comment.id}>
+								<p key={comment.uuid}>
 									<LinkTo person={comment.author} />
 									<span title={createdAt.format('L LT')}> {createdAt.fromNow()}: </span>
 									"{comment.text}"
@@ -393,7 +393,7 @@ class ReportShow extends Page {
 						<ConfirmDelete
 							onConfirmDelete={this.onConfirmDelete}
 							objectType="report"
-							objectDisplay={'#' + this.state.report.id}
+							objectDisplay={'#' + this.state.report.uuid}
 							bsStyle="warning"
 							buttonLabel="Delete report"
 							className="pull-right" />
@@ -405,7 +405,7 @@ class ReportShow extends Page {
 
 	@autobind
 	onConfirmDelete() {
-		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+		API.send(`/api/reports/${this.state.report.uuid}/delete`, {}, {method: 'DELETE'}).then(data => {
 			this.props.history.push({
 				pathname: '/',
 				state: {success: 'Report deleted'}
@@ -440,7 +440,7 @@ class ReportShow extends Page {
 
 	@autobind
 	renderAttendeeRow(person) {
-		return <tr key={person.id}>
+		return <tr key={person.uuid}>
 			<td className="primary-attendee">
 				{person.primary && <Checkbox readOnly checked />}
 			</td>
@@ -500,7 +500,7 @@ class ReportShow extends Page {
 			comment: email.comment
 		}
 
-		API.send(`/api/reports/${this.state.report.id}/email`, emailDelivery).then (() =>
+		API.send(`/api/reports/${this.state.report.uuid}/email`, emailDelivery).then (() =>
 			this.setState({
 				success: 'Email successfully sent',
 				showEmailModal: false,
@@ -511,7 +511,7 @@ class ReportShow extends Page {
 
 	@autobind
 	submitDraft() {
-		API.send(`/api/reports/${this.state.report.id}/submit`).then(data => {
+		API.send(`/api/reports/${this.state.report.uuid}/submit`).then(data => {
 			this.updateReport()
 			this.setState({error:null})
 			this.setState({success:'Successfully submitted report'})
@@ -522,7 +522,7 @@ class ReportShow extends Page {
 
 	@autobind
 	submitComment(event){
-		API.send(`/api/reports/${this.state.report.id}/comments`,
+		API.send(`/api/reports/${this.state.report.uuid}/comments`,
 			this.state.newComment)
 		.then(data => {
 			this.updateReport()
@@ -545,7 +545,7 @@ class ReportShow extends Page {
 		}
 
 		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
-		API.send(`/api/reports/${this.state.report.id}/reject`, this.state.approvalComment).then(data => {
+		API.send(`/api/reports/${this.state.report.uuid}/reject`, this.state.approvalComment).then(data => {
 			this.updateReport()
 			this.setState({success:'Successfully rejected report'})
 			this.setState({error:null})
@@ -558,8 +558,8 @@ class ReportShow extends Page {
 	@autobind
 	approveReport() {
 		let comment = (this.state.approvalComment.text.length > 0) ? this.state.approvalComment : {}
-		API.send(`/api/reports/${this.state.report.id}/approve`, comment).then(data => {
-			let lastApproval = (this.state.report.approvalStep.nextStepId === null)
+		API.send(`/api/reports/${this.state.report.uuid}/approve`, comment).then(data => {
+			let lastApproval = (this.state.report.approvalStep.nextStepUuid === null)
 			this.updateReport()
 			let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
 			this.setState({error:null, success: message})

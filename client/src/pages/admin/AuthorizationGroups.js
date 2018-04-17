@@ -26,7 +26,7 @@ class AuthorizationGroups extends Page {
 	fetchData() {
 		API.query(/* GraphQL */`
 			authorizationGroupList(f:getAll) {
-				list { id, name, description, positions { id, name, type }, status }
+				list { uuid, name, description, positions { uuid, name, type }, status }
 			}
 		`).then(data => {
 			this.setState({authorizationGroups: data.authorizationGroupList.list})

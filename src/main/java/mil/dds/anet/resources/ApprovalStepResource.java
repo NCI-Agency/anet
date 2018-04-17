@@ -44,9 +44,9 @@ public class ApprovalStepResource implements IGraphQLResource {
 	@GET
 	@GraphQLFetcher
 	@Path("/byOrganization")
-	public List<ApprovalStep> getStepsForOrg(@QueryParam("orgId") int orgId) {
+	public List<ApprovalStep> getStepsForOrg(@QueryParam("orgUuid") String orgUuid) {
 		Organization ao = new Organization();
-		ao.setId(orgId);
+		ao.setUuid(orgUuid);
 		return engine.getApprovalStepsForOrg(ao);
 	}
 	
@@ -54,7 +54,7 @@ public class ApprovalStepResource implements IGraphQLResource {
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public ApprovalStep createNewStep(@Auth Person user, ApprovalStep as) {
-		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(as.getAdvisorOrganizationId()));
+		AuthUtils.assertSuperUserForOrg(user, Organization.createWithUuid(as.getAdvisorOrganizationUuid()));
 		return engine.executeInTransaction(dao::insertAtEnd, as);
 	}
 	
@@ -62,9 +62,9 @@ public class ApprovalStepResource implements IGraphQLResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateSteps(@Auth Person user, ApprovalStep as) {
-		ApprovalStep existingStep = dao.getById(as.getId());
-		int orgId = existingStep.getAdvisorOrganizationId();
-		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(orgId));
+		ApprovalStep existingStep = dao.getByUuid(as.getUuid());
+		String orgUuid = existingStep.getAdvisorOrganizationUuid();
+		AuthUtils.assertSuperUserForOrg(user, Organization.createWithUuid(orgUuid));
 		
 		updateStep(as, existingStep);
 		return Response.ok().build();
@@ -73,27 +73,27 @@ public class ApprovalStepResource implements IGraphQLResource {
 	//Helper method that diffs the name/members of an approvalStep 
 	public static void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		newStep.setId(oldStep.getId()); //Always want to make changes to the existing group
+		newStep.setUuid(oldStep.getUuid()); //Always want to make changes to the existing group
 		if (newStep.getName().equals(oldStep.getName()) == false) { 
 			engine.getApprovalStepDao().update(newStep);
-		} else if (Objects.equals(newStep.getNextStepId(), oldStep.getNextStepId()) == false) { 
+		} else if (Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid()) == false) {
 			engine.getApprovalStepDao().update(newStep);
 		}
 	
 		if (newStep.getApprovers() != null) { 
-			Utils.addRemoveElementsById(oldStep.loadApprovers(), newStep.getApprovers(), 
-				newPosition -> engine.getApprovalStepDao().addApprover(newStep, newPosition), 
-				oldPositionId -> engine.getApprovalStepDao().removeApprover(newStep, Position.createWithId(oldPositionId)));
+			Utils.addRemoveElementsByUuid(oldStep.loadApprovers(), newStep.getApprovers(),
+				newPosition -> engine.getApprovalStepDao().addApprover(newStep, newPosition),
+				oldPositionUuid -> engine.getApprovalStepDao().removeApprover(newStep, Position.createWithUuid(oldPositionUuid)));
 		}
 	}
 	
 	@DELETE
-	@Path("/{id}")
+	@Path("/{uuid}")
 	@RolesAllowed("SUPER_USER")
-	public Response deleteStep(@Auth Person user, @PathParam("id") int id) {
-		ApprovalStep step = dao.getById(id);
-		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(step.getAdvisorOrganizationId()));
-		boolean success = engine.executeInTransaction(dao::deleteStep, id);
+	public Response deleteStep(@Auth Person user, @PathParam("uuid") String uuid) {
+		ApprovalStep step = dao.getByUuid(uuid);
+		AuthUtils.assertSuperUserForOrg(user, Organization.createWithUuid(step.getAdvisorOrganizationUuid()));
+		boolean success = engine.executeInTransaction(dao::deleteStep, uuid);
 		return (success) ? Response.ok().build() : Response.status(Status.NOT_ACCEPTABLE).build();
 	}
 

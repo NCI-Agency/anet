@@ -117,7 +117,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		approver1Pos.setStatus(PositionStatus.ACTIVE);
 		approver1Pos = httpQuery("/api/positions/new", admin)
 				.post(Entity.json(approver1Pos), Position.class);
-		Response resp = httpQuery("/api/positions/" + approver1Pos.getId() + "/person", admin).post(Entity.json(approver1));
+		Response resp = httpQuery("/api/positions/" + approver1Pos.getUuid() + "/person", admin).post(Entity.json(approver1));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		Position approver2Pos = new Position();
@@ -127,7 +127,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		approver2Pos.setStatus(PositionStatus.ACTIVE);
 		approver2Pos = httpQuery("/api/positions/new", admin)
 				.post(Entity.json(approver1Pos), Position.class);
-		resp = httpQuery("/api/positions/" + approver2Pos.getId() + "/person", admin).post(Entity.json(approver2));
+		resp = httpQuery("/api/positions/" + approver2Pos.getUuid() + "/person", admin).post(Entity.json(approver2));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Create a billet for the author
@@ -137,40 +137,40 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		authorBillet.setOrganization(advisorOrg);
 		authorBillet.setStatus(PositionStatus.ACTIVE);
 		authorBillet = httpQuery("/api/positions/new", admin).post(Entity.json(authorBillet), Position.class);
-		assertThat(authorBillet.getId()).isNotNull();
+		assertThat(authorBillet.getUuid()).isNotNull();
 
 		//Set this author in this billet
-		resp = httpQuery(String.format("/api/positions/%d/person", authorBillet.getId()), admin).post(Entity.json(author));
+		resp = httpQuery(String.format("/api/positions/%s/person", authorBillet.getUuid()), admin).post(Entity.json(author));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		Person checkit = httpQuery(String.format("/api/positions/%d/person", authorBillet.getId()), admin).get(Person.class);
+		Person checkit = httpQuery(String.format("/api/positions/%s/person", authorBillet.getUuid()), admin).get(Person.class);
 		assertThat(checkit).isEqualTo(author);
 
 		//Create Approval workflow for Advising Organization
 		ApprovalStep approval = new ApprovalStep();
 		approval.setName("Test Group for Approving");
-		approval.setAdvisorOrganizationId(advisorOrg.getId());
+		approval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
 		approval.setApprovers(ImmutableList.of(approver1Pos));
 
 		approval = httpQuery("/api/approvalSteps/new", admin)
 				.post(Entity.json(approval), ApprovalStep.class);
-		assertThat(approval.getId()).isNotNull();
+		assertThat(approval.getUuid()).isNotNull();
 
 		//Adding a new approval step to an AO automatically puts it at the end of the approval process.
 		ApprovalStep releaseApproval = new ApprovalStep();
 		releaseApproval.setName("Test Group of Releasers");
-		releaseApproval.setAdvisorOrganizationId(advisorOrg.getId());
+		releaseApproval.setAdvisorOrganizationUuid(advisorOrg.getUuid());
 		releaseApproval.setApprovers(ImmutableList.of(approver2Pos));
 		releaseApproval = httpQuery("/api/approvalSteps/new", admin)
 				.post(Entity.json(releaseApproval), ApprovalStep.class);
-		assertThat(releaseApproval.getId()).isNotNull();
+		assertThat(releaseApproval.getUuid()).isNotNull();
 
 		//Pull the approval workflow for this AO
-		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgId=" + advisorOrg.getId(), admin)
+		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgUuid=" + advisorOrg.getUuid(), admin)
 				.get(new GenericType<List<ApprovalStep>>() {});
 		assertThat(steps.size()).isEqualTo(2);
-		assertThat(steps.get(0).getId()).isEqualTo(approval.getId());
-		assertThat(steps.get(0).getNextStepId()).isEqualTo(releaseApproval.getId());
-		assertThat(steps.get(1).getId()).isEqualTo(releaseApproval.getId());
+		assertThat(steps.get(0).getUuid()).isEqualTo(approval.getUuid());
+		assertThat(steps.get(0).getNextStepUuid()).isEqualTo(releaseApproval.getUuid());
+		assertThat(steps.get(1).getUuid()).isEqualTo(releaseApproval.getUuid());
 
 		//Ensure the approver is an approver
 		assertThat(approver1Pos.loadIsApprover()).isTrue();
@@ -202,23 +202,23 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		r.setPrincipalOrg(principalOrg);
 		Report created = httpQuery("/api/reports/new", author)
 				.post(Entity.json(r), Report.class);
-		assertThat(created.getId()).isNotNull();
+		assertThat(created.getUuid()).isNotNull();
 		assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
 		assertThat(created.getAdvisorOrg()).isEqualTo(advisorOrg);
 		assertThat(created.getPrincipalOrg()).isEqualTo(principalOrg);
 
 		//Have the author submit the report
-		resp = httpQuery(String.format("/api/reports/%d/submit", created.getId()), author).post(null);
+		resp = httpQuery(String.format("/api/reports/%s/submit", created.getUuid()), author).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
-		Report returned = httpQuery(String.format("/api/reports/%d", created.getId()), author).get(Report.class);
+		Report returned = httpQuery(String.format("/api/reports/%s", created.getUuid()), author).get(Report.class);
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 		logger.debug("Expecting report {} in step {} because of org {} on author {}",
-				new Object[] { returned.getId(), approval.getId(), advisorOrg.getId(), author.getId() });
-		assertThat(returned.getApprovalStep().getId()).isEqualTo(approval.getId());
+				new Object[] { returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author.getUuid() });
+		assertThat(returned.getApprovalStep().getUuid()).isEqualTo(approval.getUuid());
 
 		//verify the location on this report
-		assertThat(returned.getLocation().getId()).isEqualTo(loc.getId());
+		assertThat(returned.getLocation().getUuid()).isEqualTo(loc.getUuid());
 
 		//verify the principals on this report
 		assertThat(returned.loadAttendees()).contains(principal);
@@ -230,16 +230,16 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Verify this shows up on the approvers list of pending documents
 		ReportSearchQuery pendingQuery = new ReportSearchQuery();
-		pendingQuery.setPendingApprovalOf(approver1.getId());
+		pendingQuery.setPendingApprovalOf(approver1.getUuid());
 		ReportList pending = httpQuery("/api/reports/search", approver1).post(Entity.json(pendingQuery), ReportList.class);
-		int id = returned.getId();
-		Report expected = pending.getList().stream().filter(re -> re.getId().equals(id)).findFirst().get();
+		String uuid = returned.getUuid();
+		Report expected = pending.getList().stream().filter(re -> re.getUuid().equals(uuid)).findFirst().get();
 		assertThat(expected).isEqualTo(returned);
 		assertThat(pending.getList()).contains(returned);
 
 		//Run a search for this users pending approvals
 		ReportSearchQuery searchQuery = new ReportSearchQuery();
-		searchQuery.setPendingApprovalOf(approver1.getId());
+		searchQuery.setPendingApprovalOf(approver1.getUuid());
 		pending = httpQuery("/api/reports/search", approver1).post(Entity.json(searchQuery), ReportList.class);
 		assertThat(pending.getList().size()).isGreaterThan(0);
 
@@ -254,40 +254,40 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(approvalAction.loadStep()).isEqualTo(steps.get(1));
 
 		//Reject the report
-		resp = httpQuery(String.format("/api/reports/%d/reject", created.getId()), approver1)
+		resp = httpQuery(String.format("/api/reports/%s/reject", created.getUuid()), approver1)
 				.post(Entity.json(TestData.createComment("a test rejection")));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Check on report status to verify it was rejected
-		returned = httpQuery(String.format("/api/reports/%d", created.getId()), author).get(Report.class);
+		returned = httpQuery(String.format("/api/reports/%s", created.getUuid()), author).get(Report.class);
 		assertThat(returned.getState()).isEqualTo(ReportState.REJECTED);
 		assertThat(returned.getApprovalStep()).isNull();
 
 		//Author needs to re-submit
-		resp = httpQuery(String.format("/api/reports/%d/submit", created.getId()), author).post(null);
+		resp = httpQuery(String.format("/api/reports/%s/submit", created.getUuid()), author).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//TODO: Approver modify the report *specifically change the attendees!*
 
 		//Approve the report
-		resp = httpQuery(String.format("/api/reports/%d/approve", created.getId()), approver1).post(null);
+		resp = httpQuery(String.format("/api/reports/%s/approve", created.getUuid()), approver1).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Check on Report status to verify it got moved forward
-		returned = httpQuery(String.format("/api/reports/%d", created.getId()), author).get(Report.class);
+		returned = httpQuery(String.format("/api/reports/%s", created.getUuid()), author).get(Report.class);
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
-		assertThat(returned.getApprovalStep().getId()).isEqualTo(releaseApproval.getId());
+		assertThat(returned.getApprovalStep().getUuid()).isEqualTo(releaseApproval.getUuid());
 
 		//Verify that the wrong person cannot approve this report.
-		resp = httpQuery(String.format("/api/reports/%d/approve", created.getId()), approver1).post(null);
+		resp = httpQuery(String.format("/api/reports/%s/approve", created.getUuid()), approver1).post(null);
 		assertThat(resp.getStatus()).isEqualTo(Status.FORBIDDEN.getStatusCode());
 
 		//Approve the report
-		resp = httpQuery(String.format("/api/reports/%d/approve", created.getId()), approver2).post(null);
+		resp = httpQuery(String.format("/api/reports/%s/approve", created.getUuid()), approver2).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Check on Report status to verify it got moved forward
-		returned = httpQuery(String.format("/api/reports/%d", created.getId()), author).get(Report.class);
+		returned = httpQuery(String.format("/api/reports/%s", created.getUuid()), author).get(Report.class);
 		assertThat(returned.getState()).isEqualTo(ReportState.RELEASED);
 		assertThat(returned.getApprovalStep()).isNull();
 
@@ -295,24 +295,24 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		approvalStatus = returned.loadApprovalStatus();
 		assertThat(approvalStatus.size()).isEqualTo(2);
 		approvalAction = approvalStatus.get(0);
-		assertThat(approvalAction.getPerson().getId()).isEqualTo(approver1.getId());
+		assertThat(approvalAction.getPerson().getUuid()).isEqualTo(approver1.getUuid());
 		assertThat(approvalAction.getCreatedAt()).isNotNull();
 		assertThat(approvalAction.loadStep()).isEqualTo(steps.get(0));
 		approvalAction = approvalStatus.get(1);
 		assertThat(approvalAction.loadStep()).isEqualTo(steps.get(1));
 
 		//Post a comment on the report because it's awesome
-		Comment commentOne = httpQuery(String.format("/api/reports/%d/comments", created.getId()), author)
+		Comment commentOne = httpQuery(String.format("/api/reports/%s/comments", created.getUuid()), author)
 				.post(Entity.json(commentFromText("This is a test comment one")), Comment.class);
-		assertThat(commentOne.getId()).isNotNull();
-		assertThat(commentOne.getReportId()).isEqualTo(created.getId());
-		assertThat(commentOne.getAuthor().getId()).isEqualTo(author.getId());
+		assertThat(commentOne.getUuid()).isNotNull();
+		assertThat(commentOne.getReportUuid()).isEqualTo(created.getUuid());
+		assertThat(commentOne.getAuthor().getUuid()).isEqualTo(author.getUuid());
 
-		Comment commentTwo = httpQuery(String.format("/api/reports/%d/comments", created.getId()), approver1)
+		Comment commentTwo = httpQuery(String.format("/api/reports/%s/comments", created.getUuid()), approver1)
 				.post(Entity.json(commentFromText("This is a test comment two")), Comment.class);
-		assertThat(commentTwo.getId()).isNotNull();
+		assertThat(commentTwo.getUuid()).isNotNull();
 
-		List<Comment> commentsReturned = httpQuery(String.format("/api/reports/%d/comments", created.getId()), approver1)
+		List<Comment> commentsReturned = httpQuery(String.format("/api/reports/%s/comments", created.getUuid()), approver1)
 			.get(new GenericType<List<Comment>>() {});
 		assertThat(commentsReturned).hasSize(3); //the rejection comment will be there as well.
 		assertThat(commentsReturned).containsSequence(commentOne, commentTwo); //Assert order of comments!
@@ -339,7 +339,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		resp = httpQuery("/api/organizations/update", admin).post(Entity.json(advisorOrg));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
-		Organization updatedOrg = httpQuery("/api/organizations/" + advisorOrg.getId(), admin).get(Organization.class);
+		Organization updatedOrg = httpQuery("/api/organizations/" + advisorOrg.getUuid(), admin).get(Organization.class);
 		assertThat(updatedOrg).isNotNull();
 		assertThat(updatedOrg.loadApprovalSteps()).hasSize(0);
 	}
@@ -363,7 +363,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		author.setDomainUsername("newGuy");
 		author.setEmailAddress("newGuy@dds.mil");
 		author = httpQuery("/api/people/new", admin).post(Entity.json(author), Person.class);
-		assertThat(author.getId()).isNotNull();
+		assertThat(author.getUuid()).isNotNull();
 
 		List<ReportPerson> attendees = ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger), PersonTest.personToPrimaryReportPerson(jack));
 
@@ -378,25 +378,25 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		r.setNextSteps("Summary for the next steps");
 		r.setEngagementDate(DateTime.now());
 		r = httpQuery("/api/reports/new", jack).post(Entity.json(r), Report.class);
-		assertThat(r.getId()).isNotNull();
+		assertThat(r.getUuid()).isNotNull();
 
 		//Submit the report
-		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", jack).post(Entity.json(null));
+		Response resp = httpQuery("/api/reports/" + r.getUuid() + "/submit", jack).post(Entity.json(null));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Check the approval Step
-		Report returned = httpQuery("/api/reports/" + r.getId(), jack).get(Report.class);
-		assertThat(returned.getId()).isEqualTo(r.getId());
+		Report returned = httpQuery("/api/reports/" + r.getUuid(), jack).get(Report.class);
+		assertThat(returned.getUuid()).isEqualTo(r.getUuid());
 		assertThat(returned.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
 
 		//Find the default ApprovalSteps
-		Integer defaultOrgId = Integer.parseInt(AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION));
-		assertThat(defaultOrgId).isNotNull();
-		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgId=" + defaultOrgId, jack)
+		String defaultOrgUuid = AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
+		assertThat(defaultOrgUuid).isNotNull();
+		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgUuid=" + defaultOrgUuid, jack)
 				.get(new GenericType<List<ApprovalStep>>() {});
 		assertThat(steps).isNotNull();
 		assertThat(steps).hasSize(1);
-		assertThat(returned.getApprovalStep().getId()).isEqualTo(steps.get(0).getId());
+		assertThat(returned.getApprovalStep().getUuid()).isEqualTo(steps.get(0).getUuid());
 
 		//Get the Person who is able to approve that report (nick@example.com)
 		Person nick = new Person();
@@ -414,7 +414,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Organization ef1 = null;
 		for (Organization org : results.getList()) {
 			if (org.getShortName().trim().equalsIgnoreCase("ef 1.1")) {
-				billet.setOrganization(Organization.createWithId(org.getId()));
+				billet.setOrganization(Organization.createWithUuid(org.getUuid()));
 				ef1 = org;
 				break;
 			}
@@ -424,22 +424,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		billet = httpQuery("/api/positions/new", admin)
 				.post(Entity.json(billet), Position.class);
-		assertThat(billet.getId()).isNotNull();
+		assertThat(billet.getUuid()).isNotNull();
 
 		//Put Author in the billet
-		resp = httpQuery("/api/positions/" + billet.getId() + "/person", admin)
+		resp = httpQuery("/api/positions/" + billet.getUuid() + "/person", admin)
 				.post(Entity.json(author));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Nick should kick the report
-		resp = httpQuery("/api/reports/" + r.getId() + "/submit", nick).post(Entity.json(null));
+		resp = httpQuery("/api/reports/" + r.getUuid() + "/submit", nick).post(Entity.json(null));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Report should now be up for review by EF1 approvers
-		Report returned2 = httpQuery("/api/reports/" + r.getId(), jack).get(Report.class);
-		assertThat(returned2.getId()).isEqualTo(r.getId());
+		Report returned2 = httpQuery("/api/reports/" + r.getUuid(), jack).get(Report.class);
+		assertThat(returned2.getUuid()).isEqualTo(r.getUuid());
 		assertThat(returned2.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
-		assertThat(returned2.getApprovalStep().getId()).isNotEqualTo(returned.getApprovalStep().getId());
+		assertThat(returned2.getApprovalStep().getUuid()).isNotEqualTo(returned.getApprovalStep().getUuid());
 	}
 
 	@Test
@@ -472,9 +472,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		r.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger)));
 		r.setTasks(ImmutableList.of(taskSearchResults.getList().get(0)));
 		Report returned = httpQuery("/api/reports/new", elizabeth).post(Entity.json(r), Report.class);
-		assertThat(returned.getId()).isNotNull();
+		assertThat(returned.getUuid()).isNotNull();
 
-		//Elizabeth edits the report (update locationId, addPerson, remove a Task)
+		//Elizabeth edits the report (update locationUuid, addPerson, remove a Task)
 		returned.setLocation(loc);
 		returned.setAttendees(ImmutableList.of(PersonTest.personToPrimaryReportPerson(roger),
 				PersonTest.personToReportPerson(nick),
@@ -484,24 +484,24 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Verify the report changed
-		Report returned2 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
+		Report returned2 = httpQuery("/api/reports/" + returned.getUuid(), elizabeth).get(Report.class);
 		assertThat(returned2.getIntent()).isEqualTo(r.getIntent());
-		assertThat(returned2.getLocation().getId()).isEqualTo(loc.getId());
+		assertThat(returned2.getLocation().getUuid()).isEqualTo(loc.getUuid());
 		assertThat(returned2.loadTasks()).isEmpty(); //yes this does a DB load :(
 		assertThat(returned2.loadAttendees()).hasSize(3);
 		assertThat(returned2.loadAttendees().contains(roger));
 
 		//Elizabeth submits the report
-		resp = httpQuery("/api/reports/" + returned.getId() + "/submit", elizabeth).post(Entity.json(null));
+		resp = httpQuery("/api/reports/" + returned.getUuid() + "/submit", elizabeth).post(Entity.json(null));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		Report returned3 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
+		Report returned3 = httpQuery("/api/reports/" + returned.getUuid(), elizabeth).get(Report.class);
 		assertThat(returned3.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
 		//Bob gets the approval (EF1 Approvers)
 		ReportSearchQuery pendingQuery = new ReportSearchQuery();
-		pendingQuery.setPendingApprovalOf(bob.getId());
+		pendingQuery.setPendingApprovalOf(bob.getUuid());
 		ReportList pendingBobsApproval = httpQuery("/api/reports/search", bob).post(Entity.json(pendingQuery), ReportList.class);
-		assertThat(pendingBobsApproval.getList().stream().anyMatch(rpt -> rpt.getId().equals(returned3.getId()))).isTrue();
+		assertThat(pendingBobsApproval.getList().stream().anyMatch(rpt -> rpt.getUuid().equals(returned3.getUuid()))).isTrue();
 
 		//Bob edits the report (change reportText, remove Person, add a Task)
 		returned3.setReportText(r.getReportText() + ", edited by Bob!!");
@@ -510,13 +510,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		resp = httpQuery("/api/reports/update", bob).post(Entity.json(returned3));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
-		Report returned4 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
+		Report returned4 = httpQuery("/api/reports/" + returned.getUuid(), elizabeth).get(Report.class);
 		assertThat(returned4.getReportText()).endsWith("Bob!!");
 		assertThat(returned4.loadAttendees()).hasSize(2);
 		assertThat(returned4.loadAttendees()).contains(PersonTest.personToPrimaryReportPerson(nick));
 		assertThat(returned4.loadTasks()).hasSize(2);
 
-		resp = httpQuery("/api/reports/" + returned.getId() + "/approve", bob).post(null);
+		resp = httpQuery("/api/reports/" + returned.getUuid() + "/approve", bob).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 	}
 
@@ -538,11 +538,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Search by Author
 		query.setText(null);
-		query.setAuthorId(jack.getId());
+		query.setAuthorUuid(jack.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream()
-				.filter(r -> (r.getAuthor().getId().equals(jack.getId()))).count())
+				.filter(r -> (r.getAuthor().getUuid().equals(jack.getUuid()))).count())
 			.isEqualTo(searchResults.getList().size());
 		final int numResults = searchResults.getList().size();
 
@@ -556,13 +556,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Search by Attendee
 		query.setEngagementDateStart(null);
 		query.setEngagementDateEnd(null);
-		query.setAuthorId(null);
-		query.setAttendeeId(steve.getId());
+		query.setAuthorUuid(null);
+		query.setAttendeeUUid(steve.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
 			r.loadAttendees().stream().anyMatch(rp ->
-				(rp.getId().equals(steve.getId()))
+				(rp.getUuid().equals(steve.getUuid()))
 			))).hasSameSizeAs(searchResults.getList());
 
 		List<Task> taskResults = httpQuery("/api/tasks/search?text=1.1.A", jack).get(TaskList.class).getList();
@@ -570,13 +570,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Task task = taskResults.get(0);
 
 		//Search by Task
-		query.setAttendeeId(null);
-		query.setTaskId(task.getId());
+		query.setAttendeeUUid(null);
+		query.setTaskUuid(task.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
 				r.loadTasks().stream().anyMatch(p ->
-					p.getId().equals(task.getId()))
+					p.getUuid().equals(task.getUuid()))
 			)).hasSameSizeAs(searchResults.getList());
 
 		//Search by direct organization
@@ -586,12 +586,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(ef11.getShortName()).isEqualToIgnoringCase("EF 1.1");
 
 		query = new ReportSearchQuery();
-		query.setAdvisorOrgId(ef11.getId());
+		query.setAdvisorOrgUuid(ef11.getUuid());
 		query.setIncludeAdvisorOrgChildren(false);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
-				r.loadAdvisorOrg().getId().equals(ef11.getId())
+				r.loadAdvisorOrg().getUuid().equals(ef11.getUuid())
 			)).hasSameSizeAs(searchResults.getList());
 
 		//Search by parent organization
@@ -600,19 +600,19 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Organization ef1 = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
 		assertThat(ef1.getShortName()).isEqualToIgnoringCase("EF 1");
 
-		query.setAdvisorOrgId(ef1.getId());
+		query.setAdvisorOrgUuid(ef1.getUuid());
 		query.setIncludeAdvisorOrgChildren(true);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		//#TODO: figure out how to verify the results?
 
 		//Check search for just an org, when we don't know if it's advisor or principal.
-		query.setOrgId(ef11.getId());
-		query.setAdvisorOrgId(null);
+		query.setOrgUuid(ef11.getUuid());
+		query.setAdvisorOrgUuid(null);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
-				r.loadAdvisorOrg().getId().equals(ef11.getId())
+				r.loadAdvisorOrg().getUuid().equals(ef11.getUuid())
 			)).hasSameSizeAs(searchResults.getList());
 
 
@@ -622,15 +622,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Location cabot = locs.get(0);
 
 		query = new ReportSearchQuery();
-		query.setLocationId(cabot.getId());
+		query.setLocationUuid(cabot.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
-				r.getLocation().getId().equals(cabot.getId())
+				r.getLocation().getUuid().equals(cabot.getUuid())
 			)).hasSameSizeAs(searchResults.getList());
 
 		//Search by Status.
-		query.setLocationId(null);
+		query.setLocationUuid(null);
 		query.setState(ImmutableList.of(ReportState.CANCELLED));
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
@@ -648,15 +648,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Search by Principal Organization
 		query.setState(null);
-		query.setPrincipalOrgId(mod.getId());
+		query.setPrincipalOrgUuid(mod.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
-				r.loadPrincipalOrg().getId().equals(mod.getId())
+				r.loadPrincipalOrg().getUuid().equals(mod.getUuid())
 			)).hasSameSizeAs(searchResults.getList());
 
 		//Search by Principal Parent Organization
-		query.setPrincipalOrgId(mod.getId());
+		query.setPrincipalOrgUuid(mod.getUuid());
 		query.setIncludePrincipalOrgChildren(true);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
@@ -688,11 +688,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Search for a report by both principal AND advisor orgs.
 		query = new ReportSearchQuery();
-		query.setAdvisorOrgId(mod.getId());
-		query.setPrincipalOrgId(ef22.getId());
+		query.setAdvisorOrgUuid(mod.getUuid());
+		query.setPrincipalOrgUuid(ef22.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList().stream().filter(r ->
-			r.getAdvisorOrg().getId().equals(ef22.getId()) && r.getPrincipalOrg().getId().equals(mod.getId())
+			r.getAdvisorOrg().getUuid().equals(ef22.getUuid()) && r.getPrincipalOrg().getUuid().equals(mod.getUuid())
 			).count()).isEqualTo(searchResults.getList().size());
 
 		//this might fail if there are any children of ef22 or mod, but there aren't in the base data set.
@@ -700,7 +700,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setIncludePrincipalOrgChildren(true);
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList().stream().filter(r ->
-			r.getAdvisorOrg().getId().equals(ef22.getId()) && r.getPrincipalOrg().getId().equals(mod.getId())
+			r.getAdvisorOrg().getUuid().equals(ef22.getUuid()) && r.getPrincipalOrg().getUuid().equals(mod.getUuid())
 			).count()).isEqualTo(searchResults.getList().size());
 
 		//Search by Atmosphere
@@ -712,28 +712,28 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void searchAuthorizationGroupId() {
+	public void searchAuthorizationGroupUuid() {
 		// Search by empty list of authorization groups should not return reports
 		ReportSearchQuery query = new ReportSearchQuery();
-		query.setAuthorizationGroupId(Collections.emptyList());
+		query.setAuthorizationGroupUuid(Collections.emptyList());
 		ReportList searchResults = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isEmpty();
 
 		// Search by list of authorization groups
-		final List<Integer> agIds = Arrays.asList(1, 2, 3);
-		final Set<Integer> agIdSet = new HashSet<Integer>(agIds);
+		final List<String> agUuids = Arrays.asList("1", "2", "3"); // FIXME: use real uuid's
+		final Set<String> agUuidSet = new HashSet<String>(agUuids);
 		query = new ReportSearchQuery();
-		query.setAuthorizationGroupId(agIds);
+		query.setAuthorizationGroupUuid(agUuids);
 		final List<Report> reportList = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class).getList();
 
 		for (final Report report : reportList) {
 			assertThat(report.loadAuthorizationGroups()).isNotNull();
 			assertThat(report.getAuthorizationGroups()).isNotEmpty();
-			final Set<Integer> collect = report.getAuthorizationGroups()
+			final Set<String> collect = report.getAuthorizationGroups()
 					.stream()
-					.map(ag -> ag.getId())
+					.map(ag -> ag.getUuid())
 					.collect(Collectors.toSet());
-			collect.retainAll(agIdSet);
+			collect.retainAll(agUuidSet);
 			assertThat(collect).isNotEmpty();
 		}
 	}
@@ -783,7 +783,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	public void searchByAuthorPosition() {
 		final ReportSearchQuery query = new ReportSearchQuery();
 		final Position adminPos = admin.loadPosition();
-		query.setAuthorPositionId(adminPos.getId());
+		query.setAuthorPositionUuid(adminPos.getUuid());
 
 		//Search by author position
 		final ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
@@ -796,7 +796,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	public void searchAttendeePosition() {
 		final ReportSearchQuery query = new ReportSearchQuery();
 		final Position adminPos = admin.loadPosition();
-		query.setAttendeePositionId(adminPos.getId());
+		query.setAttendeePositionUuid(adminPos.getUuid());
 
 		//Search by attendee position
 		final ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
@@ -826,18 +826,18 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		r.setNextSteps("Summary for the next steps");
 		r.setEngagementDate(DateTime.now());
 		r = httpQuery("/api/reports/new", liz).post(Entity.json(r), Report.class);
-		assertThat(r.getId()).isNotNull();
+		assertThat(r.getUuid()).isNotNull();
 
 		//Try to delete  by jack, this should fail.
-		Response resp = httpQuery("/api/reports/" + r.getId() + "/delete", jack).delete();
+		Response resp = httpQuery("/api/reports/" + r.getUuid() + "/delete", jack).delete();
 		assertThat(resp.getStatus()).isEqualTo(Status.FORBIDDEN.getStatusCode());
 
 		//Now have the author delete this report.
-		resp = httpQuery("/api/reports/" + r.getId() + "/delete", liz).delete();
+		resp = httpQuery("/api/reports/" + r.getUuid() + "/delete", liz).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Assert the report is gone.
-		resp = httpQuery("/api/reports/" + r.getId(),liz).get();
+		resp = httpQuery("/api/reports/" + r.getUuid(),liz).get();
 		assertThat(resp.getStatus()).isEqualTo(404);
 	}
 
@@ -856,26 +856,26 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		r.setCancelledReason(ReportCancelledReason.CANCELLED_BY_PRINCIPAL);
 
 		Report saved = httpQuery("/api/reports/new", liz).post(Entity.json(r), Report.class);
-		assertThat(saved.getId()).isNotNull();
+		assertThat(saved.getUuid()).isNotNull();
 
-		Response resp = httpQuery("/api/reports/" + saved.getId() + "/submit", liz).post(null);
+		Response resp = httpQuery("/api/reports/" + saved.getUuid() + "/submit", liz).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
-		Report returned = httpQuery("/api/reports/" + saved.getId(), liz).get(Report.class);
+		Report returned = httpQuery("/api/reports/" + saved.getUuid(), liz).get(Report.class);
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 		assertThat(returned.getCancelledReason()).isEqualTo(ReportCancelledReason.CANCELLED_BY_PRINCIPAL);
 
 		//Bob gets the approval (EF1 Approvers)
 		ReportSearchQuery pendingQuery = new ReportSearchQuery();
-		pendingQuery.setPendingApprovalOf(bob.getId());
+		pendingQuery.setPendingApprovalOf(bob.getUuid());
 		ReportList pendingBobsApproval = httpQuery("/api/reports/search", bob).post(Entity.json(pendingQuery), ReportList.class);
-		assertThat(pendingBobsApproval.getList().stream().anyMatch(rpt -> rpt.getId().equals(returned.getId()))).isTrue();
+		assertThat(pendingBobsApproval.getList().stream().anyMatch(rpt -> rpt.getUuid().equals(returned.getUuid()))).isTrue();
 
 		//Bob should approve this report.
-		resp = httpQuery("/api/reports/" + saved.getId() + "/approve", bob).post(null);
+		resp = httpQuery("/api/reports/" + saved.getUuid() + "/approve", bob).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Ensure it went to cancelled status.
-		Report returned2 = httpQuery("/api/reports/" + saved.getId(), liz).get(Report.class);
+		Report returned2 = httpQuery("/api/reports/" + saved.getUuid(), liz).get(Report.class);
 		assertThat(returned2.getState()).isEqualTo(ReportState.CANCELLED);
 	}
 
@@ -899,7 +899,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				.get(new GenericType<List<RollupGraph>>() {});
 
 		//Submit the report
-		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
+		Response resp = httpQuery("/api/reports/" + r.getUuid() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
 		//Oops set the engagementDate.
@@ -908,15 +908,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Re-submit the report, it should work.
-		resp = httpQuery("/api/reports/" + r.getId() + "/submit", admin).post(null);
+		resp = httpQuery("/api/reports/" + r.getUuid() + "/submit", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Admin can approve his own reports.
-		resp = httpQuery("/api/reports/" + r.getId() + "/approve", admin).post(null);
+		resp = httpQuery("/api/reports/" + r.getUuid() + "/approve", admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Verify report is in RELEASED state.
-		r = httpQuery("/api/reports/" + r.getId(), admin).get(Report.class);
+		r = httpQuery("/api/reports/" + r.getUuid(), admin).get(Report.class);
 		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
 
 		//Check on the daily rollup graph now.
@@ -932,10 +932,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
 		//Admin's organization should have one more report RELEASED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-		final int orgId = org.getId();
-		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		final String orgUuid = org.getUuid();
+		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
 		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
-		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
 		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
 		assertThat(startCt).isEqualTo(endCt - diff);
 	}
@@ -962,7 +962,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				.get(new GenericType<List<RollupGraph>>() {});
 
 		//Submit the report
-		Response resp = httpQuery("/api/reports/" + r.getId() + "/submit", elizabeth).post(null);
+		Response resp = httpQuery("/api/reports/" + r.getUuid() + "/submit", elizabeth).post(null);
 		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
 		//Oops set the engagementDate.
@@ -971,15 +971,15 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Re-submit the report, it should work.
-		resp = httpQuery("/api/reports/" + r.getId() + "/submit", elizabeth).post(null);
+		resp = httpQuery("/api/reports/" + r.getUuid() + "/submit", elizabeth).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Approve report.
-		resp = httpQuery("/api/reports/" + r.getId() + "/approve", bob).post(null);
+		resp = httpQuery("/api/reports/" + r.getUuid() + "/approve", bob).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Verify report is in RELEASED state.
-		r = httpQuery("/api/reports/" + r.getId(), elizabeth).get(Report.class);
+		r = httpQuery("/api/reports/" + r.getUuid(), elizabeth).get(Report.class);
 		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
 
 		//Check on the daily rollup graph now.
@@ -995,10 +995,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
 		//Elizabeth's organization should have one more report RELEASED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-		final int orgId = org.loadParentOrg().getId();
-		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		final String orgUuid = org.loadParentOrg().getUuid();
+		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
 		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
-		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
+		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
 		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
 		assertThat(startCt).isEqualTo(endCt - diff);
 	}
@@ -1027,19 +1027,19 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		rsi.setText("This sensitiveInformation was generated by ReportsResourceTest#testSensitiveInformation");
 		r.setReportSensitiveInformation(rsi);
 		final Report returned = httpQuery("/api/reports/new", elizabeth).post(Entity.json(r), Report.class);
-		assertThat(returned.getId()).isNotNull();
+		assertThat(returned.getUuid()).isNotNull();
 		// elizabeth should be allowed to see it returned, as she's the author
 		assertThat(returned.getReportSensitiveInformation()).isNotNull();
 		assertThat(returned.getReportSensitiveInformation().getText()).isEqualTo(rsi.getText());
 
-		final Report returned2 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
+		final Report returned2 = httpQuery("/api/reports/" + returned.getUuid(), elizabeth).get(Report.class);
 		// elizabeth should be allowed to see it
 		returned2.setUser(elizabeth);
 		assertThat(returned2.loadReportSensitiveInformation()).isNotNull();
 		assertThat(returned2.getReportSensitiveInformation().getText()).isEqualTo(rsi.getText());
 
 		final Person jack = getJackJackson();
-		final Report returned3 = httpQuery("/api/reports/" + returned.getId(), jack).get(Report.class);
+		final Report returned3 = httpQuery("/api/reports/" + returned.getUuid(), jack).get(Report.class);
 		// jack should not be allowed to see it
 		returned3.setUser(jack);
 		assertThat(returned3.loadReportSensitiveInformation()).isNull();

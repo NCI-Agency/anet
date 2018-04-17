@@ -47,12 +47,12 @@ public class Location extends AbstractAnetBean {
 	}
 
 	@Override
-	public boolean equals(Object o) { 
+	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		Location l = (Location) o;
-		return Objects.equals(l.getId(), id)
+		return Objects.equals(l.getUuid(), uuid)
 				&& Objects.equals(l.getName(), name)
 				&& Objects.equals(l.getStatus(), status)
 				&& Objects.equals(l.getLat(), lat)
@@ -61,21 +61,20 @@ public class Location extends AbstractAnetBean {
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, name, status, lat, lng, createdAt);
+	public int hashCode() {
+		return Objects.hash(uuid, name, status, lat, lng, createdAt);
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("(%d) - %s [%f, %f]", id, name, lat, lng); 
+	public String toString() {
+		return String.format("(%s) - %s [%f, %f]", uuid, name, lat, lng);
 	}
-	
-	public static Location createWithId(Integer id) {
-		Location l = new Location();
-		l.setId(id);
+
+	public static Location createWithUuid(String uuid) {
+		final Location l = new Location();
+		l.setUuid(uuid);
 		l.setLoadLevel(LoadLevel.ID_ONLY);
 		return l;
 	}
-	
-	
+
 }

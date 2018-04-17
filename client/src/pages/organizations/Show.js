@@ -42,7 +42,7 @@ class OrganizationShow extends Page {
 		super(props)
 
 		this.state = {
-			organization: new Organization({id: props.match.params.id}),
+			organization: new Organization({uuid: props.match.params.uuid}),
 			reports: null,
 			tasks: null,
 			reportsFilter: NO_REPORT_FILTER,
@@ -63,23 +63,23 @@ class OrganizationShow extends Page {
 			this.setState({action: nextProps.match.params.action})
 		}
 
-		if (+nextProps.match.params.id !== this.state.organization.id) {
+		if (+nextProps.match.params.uuid !== this.state.organization.uuid) {
 			this.loadData(nextProps)
 		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
 		if(prevState.reportsFilter !== this.state.reportsFilter){
-			let reports = this.getReportQueryPart(this.props.match.params.id)
+			let reports = this.getReportQueryPart(this.props.match.params.uuid)
 			this.runGQLReports([reports])
 		}
 	}
 
-	getReportQueryPart(orgId) {
+	getReportQueryPart(orgUuid) {
 		let reportQuery = {
 			pageNum: this.reportsPageNum,
 			pageSize: 10,
-			orgId: orgId,
+			orgUuid: orgUuid,
 			state: (this.reportsFilterIsSet()) ? this.state.reportsFilter : null
 		}
 		let reportsPart = new GQL.Part(/* GraphQL */`
@@ -92,17 +92,17 @@ class OrganizationShow extends Page {
 		return reportsPart
 	}
 
-	gettaskQueryPart(orgId) {
+	gettaskQueryPart(orgUuid) {
 		let taskQuery = {
 			pageNum: this.tasksPageNum,
 			status: Task.STATUS.ACTIVE,
 			pageSize: 10,
-			responsibleOrgId: orgId
+			responsibleOrgUuid: orgUuid
 		}
 		let taskPart = new GQL.Part(/* GraphQL */`
 			tasks: taskList(query:$taskQuery) {
 				pageNum, pageSize, totalCount, list {
-					id, shortName, longName
+					uuid, shortName, longName
 				}
 			}`)
 			.addVariable("taskQuery", "TaskSearchQuery", taskQuery)
@@ -111,24 +111,24 @@ class OrganizationShow extends Page {
 
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
-			organization(id:${props.match.params.id}) {
-				id, shortName, longName, status, identificationCode, type
-				parentOrg { id, shortName, longName, identificationCode }
-				childrenOrgs { id, shortName, longName, identificationCode },
+			organization(uuid:"${props.match.params.uuid}") {
+				uuid, shortName, longName, status, identificationCode, type
+				parentOrg { uuid, shortName, longName, identificationCode }
+				childrenOrgs { uuid, shortName, longName, identificationCode },
 				positions {
-					id, name, code, status, type,
-					person { id, name, status, rank }
+					uuid, name, code, status, type,
+					person { uuid, name, status, rank }
 					associatedPositions {
-						id, name, code, status
-						person { id, name, status, rank}
+						uuid, name, code, status
+						person { uuid, name, status, rank}
 					}
 				},
 				approvalSteps {
-					id, name, approvers { id, name, person { id, name}}
+					uuid, name, approvers { uuid, name, person { uuid, name}}
 				}
 			}`)
-		let reportsPart = this.getReportQueryPart(props.match.params.id)
-		let tasksPart = this.gettaskQueryPart(props.match.params.id)
+		let reportsPart = this.getReportQueryPart(props.match.params.uuid)
+		let tasksPart = this.gettaskQueryPart(props.match.params.uuid)
 
 		this.runGQL([orgPart, reportsPart, tasksPart])
 	}
@@ -191,7 +191,7 @@ class OrganizationShow extends Page {
 
 				<Form formFor={org} static horizontal>
 					<Fieldset id="info" title={org.shortName} action={<div>
-						{isAdmin && <LinkTo organization={Organization.pathForNew({parentOrgId: org.id})} button>
+						{isAdmin && <LinkTo organization={Organization.pathForNew({parentOrgUuid: org.uuid})} button>
 							Create sub-organization
 						</LinkTo>}
 
@@ -210,7 +210,7 @@ class OrganizationShow extends Page {
 
 						<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.identificationCode} id="identificationCode"/>
 		
-						{org.parentOrg && org.parentOrg.id &&
+						{org.parentOrg && org.parentOrg.uuid &&
 							<Form.Field id="parentOrg" label="Parent organization">
 								<LinkTo organization={org.parentOrg} >{org.parentOrg.shortName} {org.parentOrg.longName} {org.parentOrg.identificationCode}</LinkTo>
 							</Form.Field>
@@ -219,7 +219,7 @@ class OrganizationShow extends Page {
 						{org.isAdvisorOrg() &&
 							<Form.Field id="superUsers" label="Super users">
 								{superUsers.map(position =>
-									<p key={position.id}>
+									<p key={position.uuid}>
 										{position.person ?
 											<LinkTo person={position.person} />
 											:
@@ -234,7 +234,7 @@ class OrganizationShow extends Page {
 						{org.childrenOrgs && org.childrenOrgs.length > 0 && <Form.Field id="childrenOrgs" label="Sub organizations">
 							<ListGroup>
 								{org.childrenOrgs.map(org =>
-									<ListGroupItem key={org.id} >
+									<ListGroupItem key={org.uuid} >
 										<LinkTo organization={org} >{org.shortName} {org.longName} {org.identificationCode}</LinkTo>
 									</ListGroupItem>
 								)}
@@ -265,7 +265,7 @@ class OrganizationShow extends Page {
 	@autobind
 	goToReportsPage(pageNum) {
 		this.reportsPageNum = pageNum
-		let reportQueryPart = this.getReportQueryPart(this.state.organization.id)
+		let reportQueryPart = this.getReportQueryPart(this.state.organization.uuid)
 		GQL.run([reportQueryPart]).then(data =>
 			this.setState({reports: data.reports})
 		)
@@ -274,7 +274,7 @@ class OrganizationShow extends Page {
 	@autobind
 	goTotasksPage(pageNum) {
 		this.tasksPageNum = pageNum
-		let taskQueryPart = this.gettaskQueryPart(this.state.organization.id)
+		let taskQueryPart = this.gettaskQueryPart(this.state.organization.uuid)
 		GQL.run([taskQueryPart]).then(data =>
 			this.setState({tasks: data.tasks})
 		)

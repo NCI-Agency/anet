@@ -19,8 +19,8 @@ public class ReportEmail extends AnetEmailAction {
 	
 	@Override
 	public Map<String, Object> execute() {
-		Report r = AnetObjectEngine.getInstance().getReportDao().getById(report.getId());
-		sender = AnetObjectEngine.getInstance().getPersonDao().getById(sender.getId());
+		Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+		sender = AnetObjectEngine.getInstance().getPersonDao().getByUuid(sender.getUuid());
 		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("report", r);
 		context.put("sender", sender);
@@ -33,7 +33,7 @@ public class ReportEmail extends AnetEmailAction {
 	}
 
 	public void setReport(Report report) {
-		this.report = Report.createWithId(report.getId());
+		this.report = Report.createWithUuid(report.getUuid());
 	}
 
 	public Person getSender() {
@@ -41,7 +41,7 @@ public class ReportEmail extends AnetEmailAction {
 	}
 
 	public void setSender(Person sender) {
-		this.sender = Person.createWithId(sender.getId());
+		this.sender = Person.createWithUuid(sender.getUuid());
 	}
 
 	public String getComment() {

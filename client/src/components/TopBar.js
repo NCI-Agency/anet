@@ -77,7 +77,7 @@ export default class TopBar extends Component {
     render() {
         return (
             <div id="topbar" className="navbar navbar-fixed-top">
-                {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
+                {this.props.currentUser && this.props.position && this.props.position.uuid === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
                 <SecurityBanner location={this.props.location} />
                 <Header minimalHeader={this.props.minimalHeader} />

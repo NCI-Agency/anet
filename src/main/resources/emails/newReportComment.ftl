@@ -25,7 +25,7 @@ Hi, ${report.author.name},
 
 <p><i>"${comment.text}"</i></p>
 
-<p>You can <a href="${serverUrl}/reports/${report.id?c}">view or reply to this comment by using this link</a>.</p>
+<p>You can <a href="${serverUrl}/reports/${report.uuid?c}">view or reply to this comment by using this link</a>.</p>
 
 ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>

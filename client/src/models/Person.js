@@ -41,7 +41,7 @@ export default class Person extends Model {
 		position: {},
 	}
 
-	static autocompleteQuery = "id, name, role, rank, position { id, name, organization { id, shortName } }"
+	static autocompleteQuery = "uuid, name, role, rank, position { uuid, name, organization { uuid, shortName } }"
 
 	static autocompleteTemplate(person) {
 		return <span>
@@ -92,8 +92,8 @@ export default class Person extends Model {
 	}
 
 	hasAssignedPosition() {
-		// has a non-empty position with a non-zero id
-		return !_isEmpty(this.position) && !!this.position.id
+		// has a non-empty position with a non-zero uuid
+		return !_isEmpty(this.position) && !!this.position.uuid
 	}
 
 	hasActivePosition() {
@@ -115,9 +115,9 @@ export default class Person extends Model {
 		if (!this.position || !this.position.organization) { return false }
 		let orgs = this.position.organization.allDescendantOrgs || []
 		orgs.push(this.position.organization)
-		let orgIds = orgs.map(o => o.id)
+		let orgUuids = orgs.map(o => o.uuid)
 
-		return orgIds.includes(org.id)
+		return orgUuids.includes(org.uuid)
 	}
 
 	iconUrl() {
@@ -134,7 +134,7 @@ export default class Person extends Model {
 		if (this.rank) {
 			return this.rank + " " + this.name
 		} else {
-			return this.name || this.id
+			return this.name || this.uuid
 		}
 	}
 

@@ -43,7 +43,7 @@ class PositionShow extends Page {
 
 		this.state = {
 			position: new Position( {
-				id: props.match.params.id,
+				uuid: props.match.params.uuid,
 				previousPeople: [],
 				associatedPositions: [],
 				showAssignPersonModal: false,
@@ -56,16 +56,16 @@ class PositionShow extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			position(id:${props.match.params.id}) {
-				id, name, type, status, code,
-				organization { id, shortName, longName, identificationCode },
-				person { id, name, rank },
+			position(uuid:"${props.match.params.uuid}") {
+				uuid, name, type, status, code,
+				organization { uuid, shortName, longName, identificationCode },
+				person { uuid, name, rank },
 				associatedPositions {
-					id, name,
-					person { id, name, rank }
+					uuid, name,
+					person { uuid, name, rank }
 				},
-				previousPeople { startTime, endTime, person { id, name, rank }}
-				location { id, name }
+				previousPeople { startTime, endTime, person { uuid, name, rank }}
+				location { uuid, name }
 			}
 		`).then(data => this.setState({position: new Position(data.position)}))
 	}
@@ -81,10 +81,10 @@ class PositionShow extends Page {
 			//Admins can edit anybody
 			(currentUser.isAdmin()) ||
 			//Super users can edit positions within their own organization
-			(position.organization && position.organization.id && currentUser.isSuperUserForOrg(position.organization))
+			(position.organization && position.organization.uuid && currentUser.isSuperUserForOrg(position.organization))
 		const canDelete = (currentUser.isAdmin()) &&
 			position.status === Position.STATUS.INACTIVE &&
-			(position.id && ((!position.person) || (!position.person.id)))
+			(position.uuid && ((!position.person) || (!position.person.uuid)))
 
 		return (
 			<div>
@@ -125,10 +125,10 @@ class PositionShow extends Page {
 
 					<Fieldset title="Current assigned person"
 						id="assigned-advisor"
-						className={(!position.person || !position.person.id) ? 'warning' : undefined}
+						className={(!position.person || !position.person.uuid) ? 'warning' : undefined}
 						style={{textAlign: 'center'}}
-						action={position.person && position.person.id && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
-						{position.person && position.person.id
+						action={position.person && position.person.uuid && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
+						{position.person && position.person.uuid
 							? <div>
 								<h4 className="assigned-person-name"><LinkTo person={position.person}>{position.person.rank} {position.person.name}</LinkTo></h4>
 								<p></p>
@@ -204,7 +204,7 @@ class PositionShow extends Page {
 					<ConfirmDelete
 						onConfirmDelete={this.deletePosition}
 						objectType="position"
-						objectDisplay={'#' + this.state.position.id}
+						objectDisplay={'#' + this.state.position.uuid}
 						bsStyle="warning"
 						buttonLabel="Delete position"
 						className="pull-right" />
@@ -218,7 +218,7 @@ class PositionShow extends Page {
 		if (pos.person) {
 			personName = <LinkTo person={pos.person} />
 		}
-		return <tr key={pos.id} id={`associatedPosition_${idx}`}>
+		return <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
 			<td>{personName}</td>
 			<td><Link to={Position.pathFor(pos)}>{pos.name}</Link></td>
 		</tr>
@@ -252,7 +252,7 @@ class PositionShow extends Page {
 
 	@autobind
 	deletePosition() {
-		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
+		API.send(`/api/positions/${this.state.position.uuid}`, {}, {method: 'DELETE'}).then(data => {
 			this.props.history.push({
 				pathname: '/',
 				state: {success: 'Position Deleted'}

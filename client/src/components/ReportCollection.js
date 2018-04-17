@@ -15,22 +15,22 @@ const FORMAT_TABLE = 'table'
 const FORMAT_MAP = 'map'
 
 const GQL_REPORT_FIELDS =  /* GraphQL */`
-	id, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
+	uuid, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
-	author { id, name }
-	primaryAdvisor { id, name },
-	primaryPrincipal { id, name },
-	advisorOrg { id, shortName },
-	principalOrg { id, shortName },
-	location { id, name, lat, lng },
-	tasks { id, shortName },
-	tags { id, name, description }
+	author { uuid, name }
+	primaryAdvisor { uuid, name },
+	primaryPrincipal { uuid, name },
+	advisorOrg { uuid, shortName },
+	principalOrg { uuid, shortName },
+	location { uuid, name, lat, lng },
+	tasks { uuid, shortName },
+	tags { uuid, name, description }
 	approvalStatus {
 		type, createdAt
-		step { id , name
-			approvers { id, name, person { id, name, rank } }
+		step { uuid, name
+			approvers { uuid, name, person { uuid, name, rank } }
 		},
-		person { id, name, rank }
+		person { uuid, name, rank }
 	}
 `
 
@@ -141,7 +141,7 @@ export default class ReportCollection extends Component {
 	renderSummary(reports) {
 		return <div>
 			{reports.map(report =>
-				<ReportSummary report={report} key={report.id} />
+				<ReportSummary report={report} key={report.uuid} />
 			)}
 		</div>
 	}
@@ -150,7 +150,7 @@ export default class ReportCollection extends Component {
 		let markers = []
 		reports.forEach(report => {
 			if (Location.hasCoordinates(report.location)) {
-				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng, name: report.intent})
+				markers.push({uuid: report.uuid, lat: report.location.lat, lng: report.location.lng, name: report.intent})
 			}
 		})
 		return <Leaflet markers={markers} />

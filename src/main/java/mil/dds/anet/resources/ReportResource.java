@@ -136,10 +136,10 @@ public class ReportResource implements IGraphQLResource {
 
 	@GET
 	@Timed
-	@Path("/{id}")
+	@Path("/{uuid}")
 	@GraphQLFetcher
-	public Report getById(@Auth Person user, @PathParam("id") Integer id) {
-		final Report r = dao.getById(id, user);
+	public Report getByUuid(@Auth Person user, @PathParam("uuid") String uuid) {
+		final Report r = dao.getByUuid(uuid, user);
 		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return r;
 	}
@@ -198,7 +198,7 @@ public class ReportResource implements IGraphQLResource {
 		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
 
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
-			boolean canApprove = engine.canUserApproveStep(editor.getId(), existing.getApprovalStep().getId());
+			boolean canApprove = engine.canUserApproveStep(editor.getUuid(), existing.getApprovalStep().getUuid());
 			if (canApprove) {
 				AnetEmail email = new AnetEmail();
 				ReportEditedEmail action = new ReportEditedEmail();
@@ -227,7 +227,7 @@ public class ReportResource implements IGraphQLResource {
 	private Report executeReportUpdates(Person editor, Report r) {
 		//Verify this person has access to edit this report
 		//Either they are the author, or an approver for the current step.
-		final Report existing = dao.getById(r.getId(), editor);
+		final Report existing = dao.getByUuid(r.getUuid(), editor);
 		r.setState(existing.getState());
 		r.setApprovalStep(existing.getApprovalStep());
 		r.setAuthor(existing.getAuthor());
@@ -246,14 +246,14 @@ public class ReportResource implements IGraphQLResource {
 
 		//If there is a change to the primary advisor, change the advisor Org.
 		Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
-		if (Utils.idEqual(primaryAdvisor, existing.loadPrimaryAdvisor()) == false || existing.getAdvisorOrg() == null) {
+		if (Utils.uuidEqual(primaryAdvisor, existing.loadPrimaryAdvisor()) == false || existing.getAdvisorOrg() == null) {
 			r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
 		} else {
 			r.setAdvisorOrg(existing.getAdvisorOrg());
 		}
 
 		Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
-		if (Utils.idEqual(primaryPrincipal, existing.loadPrimaryPrincipal()) ==  false || existing.getPrincipalOrg() == null) {
+		if (Utils.uuidEqual(primaryPrincipal, existing.loadPrimaryPrincipal()) ==  false || existing.getPrincipalOrg() == null) {
 			r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
 		} else {
 			r.setPrincipalOrg(existing.getPrincipalOrg());
@@ -267,10 +267,10 @@ public class ReportResource implements IGraphQLResource {
 		//Update Attendees:
 		if (r.getAttendees() != null) {
 			//Fetch the people associated with this report
-			List<ReportPerson> existingPeople = dao.getAttendeesForReport(r.getId());
+			List<ReportPerson> existingPeople = dao.getAttendeesForReport(r.getUuid());
 			//Find any differences and fix them.
 			for (ReportPerson rp : r.getAttendees()) {
-				Optional<ReportPerson> existingPerson = existingPeople.stream().filter(el -> el.getId().equals(rp.getId())).findFirst();
+				Optional<ReportPerson> existingPerson = existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
 				if (existingPerson.isPresent()) {
 					if (existingPerson.get().isPrimary() != rp.isPrimary()) {
 						dao.updateAttendeeOnReport(rp, r);
@@ -289,25 +289,25 @@ public class ReportResource implements IGraphQLResource {
 		//Update Tasks:
 		if (r.getTasks() != null) {
 			List<Task> existingTasks = dao.getTasksForReport(r);
-			List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
+			List<String> existingTaskUuids = existingTasks.stream().map(p -> p.getUuid()).collect(Collectors.toList());
 			for (Task p : r.getTasks()) {
-				int idx = existingTaskIds.indexOf(p.getId());
+				int idx = existingTaskUuids.indexOf(p.getUuid());
 				if (idx == -1) {
 					dao.addTaskToReport(p, r);
 				} else {
-					existingTaskIds.remove(idx);
+					existingTaskUuids.remove(idx);
 				}
 			}
-			for (Integer id : existingTaskIds) {
-				dao.removeTaskFromReport(Task.createWithId(id), r);
+			for (String uuid : existingTaskUuids) {
+				dao.removeTaskFromReport(Task.createWithUuid(uuid), r);
 			}
 		}
 
 		// Update Tags:
 		if (r.getTags() != null) {
-			List<Tag> existingTags = dao.getTagsForReport(r.getId());
+			List<Tag> existingTags = dao.getTagsForReport(r.getUuid());
 			for (final Tag t : r.getTags()) {
-				Optional<Tag> existingTag = existingTags.stream().filter(el -> el.getId().equals(t.getId())).findFirst();
+				Optional<Tag> existingTag = existingTags.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
 				if (existingTag.isPresent()) {
 					existingTags.remove(existingTag.get());
 				} else {
@@ -321,9 +321,9 @@ public class ReportResource implements IGraphQLResource {
 
 		// Update AuthorizationGroups:
 		if (r.getAuthorizationGroups() != null) {
-			final List<AuthorizationGroup> existingAuthorizationGroups = dao.getAuthorizationGroupsForReport(r.getId());
+			final List<AuthorizationGroup> existingAuthorizationGroups = dao.getAuthorizationGroupsForReport(r.getUuid());
 			for (final AuthorizationGroup t : r.getAuthorizationGroups()) {
-				Optional<AuthorizationGroup> existingAuthorizationGroup = existingAuthorizationGroups.stream().filter(el -> el.getId().equals(t.getId())).findFirst();
+				Optional<AuthorizationGroup> existingAuthorizationGroup = existingAuthorizationGroups.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
 				if (existingAuthorizationGroup.isPresent()) {
 					existingAuthorizationGroups.remove(existingAuthorizationGroup.get());
 				} else {
@@ -350,18 +350,18 @@ public class ReportResource implements IGraphQLResource {
 		case REJECTED:
 		case FUTURE:
 			//Must be the author
-			if (!report.getAuthor().getId().equals(editor.getId())) {
+			if (!report.getAuthor().getUuid().equals(editor.getUuid())) {
 				throw new WebApplicationException(permError + "Must be the author of this report.", Status.FORBIDDEN);
 			}
 			break;
 		case PENDING_APPROVAL:
 			//Either the author, or the approver
-			if (report.getAuthor().getId().equals(editor.getId())) {
+			if (report.getAuthor().getUuid().equals(editor.getUuid())) {
 				//This is okay, but move it back to draft
 				report.setState(ReportState.DRAFT);
 				report.setApprovalStep(null);
 			} else {
-				boolean canApprove = engine.canUserApproveStep(editor.getId(), report.getApprovalStep().getId());
+				boolean canApprove = engine.canUserApproveStep(editor.getUuid(), report.getApprovalStep().getUuid());
 				if (!canApprove) {
 					throw new WebApplicationException(permError + "Must be the author or the current approver", Status.FORBIDDEN);
 				}
@@ -369,20 +369,20 @@ public class ReportResource implements IGraphQLResource {
 			break;
 		case RELEASED:
 		case CANCELLED:
-			AnetAuditLogger.log("attempt to edit released report {} by editor {} (id: {}) was forbidden",
-					report.getId(), editor.getName(), editor.getId());
+			AnetAuditLogger.log("attempt to edit released report {} by editor {} (uuid: {}) was forbidden",
+					report.getUuid(), editor.getName(), editor.getUuid());
 			throw new WebApplicationException("Cannot edit a released report", Status.FORBIDDEN);
 		}
 	}
 
 	/* Submit a report for approval
-	 * Kicks a report from DRAFT to PENDING_APPROVAL and sets the approval step Id
+	 * Kicks a report from DRAFT to PENDING_APPROVAL and sets the approval step uuid
 	 */
 	@POST
 	@Timed
-	@Path("/{id}/submit")
-	public Report submitReport(@Auth Person user, @PathParam("id") int id) {
-		final Report r = dao.getById(id, user);
+	@Path("/{uuid}/submit")
+	public Report submitReport(@Auth Person user, @PathParam("uuid") String uuid) {
+		final Report r = dao.getByUuid(uuid, user);
 		logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
 		// TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
@@ -410,8 +410,8 @@ public class ReportResource implements IGraphQLResource {
 		Organization org = engine.getOrganizationForPerson(r.getAuthor());
 		if (org == null) {
 			// Author missing Org, use the Default Approval Workflow
-			org = Organization.createWithId(
-				Integer.parseInt(engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION)));
+			org = Organization.createWithUuid(
+				engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION));
 		}
 		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(org);
 		throwExceptionNoApprovalSteps(steps);
@@ -422,13 +422,13 @@ public class ReportResource implements IGraphQLResource {
 		final int numRows = engine.executeInTransaction(dao::update, r, user);
 		sendApprovalNeededEmail(r);
 		logger.info("Putting report {} into step {} because of org {} on author {}",
-				r.getId(), steps.get(0).getId(), org.getId(), r.getAuthor().getId());
+				r.getUuid(), steps.get(0).getUuid(), org.getUuid(), r.getAuthor().getUuid());
 
 		if (numRows != 1) {
 			throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
 		}
 
-		AnetAuditLogger.log("report {} submitted by author {} (id: {})", r.getId(), r.getAuthor().getName(), r.getAuthor().getId());
+		AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(), r.getAuthor().getName(), r.getAuthor().getUuid());
 		return r;
 	}
 
@@ -464,39 +464,39 @@ public class ReportResource implements IGraphQLResource {
 	 */
 	@POST
 	@Timed
-	@Path("/{id}/approve")
-	public Report approveReport(@Auth Person approver, @PathParam("id") int id, Comment comment) {
+	@Path("/{uuid}/approve")
+	public Report approveReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment comment) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				final Report r = dao.getById(id, approver);
+				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) {
 					throw new WebApplicationException("Report not found", Status.NOT_FOUND);
 				}
 				final ApprovalStep step = r.loadApprovalStep();
 				if (step == null) {
-					logger.info("Report ID {} does not currently need an approval", r.getId());
+					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
 					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
 				}
 
 				//Verify that this user can approve for this step.
-				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				boolean canApprove = engine.canUserApproveStep(approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
-					logger.info("User ID {} cannot approve report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
 				}
 
 				//Write the approval
 				ApprovalAction approval = new ApprovalAction();
 				approval.setReport(r);
-				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setStep(ApprovalStep.createWithUuid(step.getUuid()));
 				approval.setPerson(approver);
 				approval.setType(ApprovalType.APPROVE);
 				engine.getApprovalActionDao().insert(approval);
 
 				//Update the report
-				r.setApprovalStep(ApprovalStep.createWithId(step.getNextStepId()));
-				if (step.getNextStepId() == null) {
+				r.setApprovalStep(ApprovalStep.createWithUuid(step.getNextStepUuid()));
+				if (step.getNextStepUuid() == null) {
 					//Done with approvals, move to released (or cancelled) state!
 					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
 					r.setReleasedAt(DateTime.now());
@@ -508,12 +508,12 @@ public class ReportResource implements IGraphQLResource {
 
 				//Add the comment
 				if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
-					comment.setReportId(r.getId());
+					comment.setReportUuid(r.getUuid());
 					comment.setAuthor(approver);
 					engine.getCommentDao().insert(comment);
 				}
 
-				AnetAuditLogger.log("report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				AnetAuditLogger.log("report {} approved by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
 				return r;
 			}
 		});
@@ -530,36 +530,36 @@ public class ReportResource implements IGraphQLResource {
 
 	/**
 	 * Rejects a report and moves it back to the author with state REJECTED.
-	 * @param id the Report ID to reject
+	 * @param uuid the Report UUID to reject
 	 * @param reason : A @link Comment object which will be posted to the report with the reason why the report was rejected.
 	 * @return 200 on a successful reject, 401 if you don't have privileges to reject this report.
 	 */
 	@POST
 	@Timed
-	@Path("/{id}/reject")
-	public Report rejectReport(@Auth Person approver, @PathParam("id") int id, Comment reason) {
+	@Path("/{uuid}/reject")
+	public Report rejectReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment reason) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				final Report r = dao.getById(id, approver);
+				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep();
 				if (step == null) {
-					logger.info("Report ID {} does not currently need an approval", r.getId());
+					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
 					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
 				}
 
 				//Verify that this user can reject for this step.
-				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				boolean canApprove = engine.canUserApproveStep(approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
-					logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					logger.info("User UUID {} cannot reject report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
 				}
 
 				//Write the rejection
 				ApprovalAction approval = new ApprovalAction();
 				approval.setReport(r);
-				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setStep(ApprovalStep.createWithUuid(step.getUuid()));
 				approval.setPerson(approver);
 				approval.setType(ApprovalType.REJECT);
 				engine.getApprovalActionDao().insert(approval);
@@ -570,12 +570,12 @@ public class ReportResource implements IGraphQLResource {
 				dao.update(r, approver);
 
 				//Add the comment
-				reason.setReportId(r.getId());
+				reason.setReportUuid(r.getUuid());
 				reason.setAuthor(approver);
 				engine.getCommentDao().insert(reason);
 
 				sendReportRejectEmail(r, approver, reason);
-				AnetAuditLogger.log("report {} rejected by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				AnetAuditLogger.log("report {} rejected by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
 				return r;
 			}
 		});
@@ -594,12 +594,12 @@ public class ReportResource implements IGraphQLResource {
 
 	@POST
 	@Timed
-	@Path("/{id}/comments")
-	public Comment postNewComment(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
-		comment.setReportId(reportId);
+	@Path("/{uuid}/comments")
+	public Comment postNewComment(@Auth Person author, @PathParam("uuid") String reportUuid, Comment comment) {
+		comment.setReportUuid(reportUuid);
 		comment.setAuthor(author);
 		comment = engine.getCommentDao().insert(comment);
-		sendNewCommentEmail(dao.getById(reportId, author), comment);
+		sendNewCommentEmail(dao.getByUuid(reportUuid, author), comment);
 		return comment;
 	}
 
@@ -615,19 +615,19 @@ public class ReportResource implements IGraphQLResource {
 
 	@GET
 	@Timed
-	@Path("/{id}/comments")
-	public List<Comment> getCommentsForReport(@PathParam("id") int reportId) {
-		return engine.getCommentDao().getCommentsForReport(Report.createWithId(reportId));
+	@Path("/{uuid}/comments")
+	public List<Comment> getCommentsForReport(@PathParam("uuid") String reportUuid) {
+		return engine.getCommentDao().getCommentsForReport(Report.createWithUuid(reportUuid));
 	}
 
 	@DELETE
 	@Timed
-	@Path("/{id}/comments/{commentId}")
-	public Response deleteComment(@Auth Person user, @PathParam("commentId") int commentId) {
+	@Path("/{uuid}/comments/{commentUuid}")
+	public Response deleteComment(@Auth Person user, @PathParam("commentUuid") String commentUuid) {
 		// For now, only admins are allowed to delete a comment
 		// (even though there's no action for it in the front-end).
 		AuthUtils.assertAdministrator(user);
-		int numRows = engine.getCommentDao().delete(commentId);
+		int numRows = engine.getCommentDao().delete(commentUuid);
 		if (numRows != 1) {
 			throw new WebApplicationException("Unable to delete comment", Status.NOT_FOUND);
 		}
@@ -636,13 +636,13 @@ public class ReportResource implements IGraphQLResource {
 
 	@POST
 	@Timed
-	@Path("/{id}/email")
-	public Response emailReport(@Auth Person user, @PathParam("id") int reportId, AnetEmail email) {
-		final Report r = dao.getById(reportId, user);
+	@Path("/{uuid}/email")
+	public Response emailReport(@Auth Person user, @PathParam("uuid") String reportUuid, AnetEmail email) {
+		final Report r = dao.getByUuid(reportUuid, user);
 		if (r == null) { return Response.status(Status.NOT_FOUND).build(); }
 
 		ReportEmail action = new ReportEmail();
-		action.setReport(Report.createWithId(reportId));
+		action.setReport(Report.createWithUuid(reportUuid));
 		action.setSender(user);
 		action.setComment(email.getComment());
 		email.setAction(action);
@@ -655,9 +655,9 @@ public class ReportResource implements IGraphQLResource {
 	 */
 	@DELETE
 	@Timed
-	@Path("/{id}/delete")
-	public Response deleteReport(@Auth Person user, @PathParam("id") int reportId) {
-		final Report report = dao.getById(reportId, user);
+	@Path("/{uuid}/delete")
+	public Response deleteReport(@Auth Person user, @PathParam("uuid") String reportUuid) {
+		final Report report = dao.getByUuid(reportUuid, user);
 		assertCanDeleteReport(report, user);
 
 		dao.deleteReport(report);
@@ -669,7 +669,7 @@ public class ReportResource implements IGraphQLResource {
 
 		if (report.getState() == ReportState.DRAFT || report.getState() == ReportState.REJECTED) {
 			//only the author may delete these reports
-			if (Objects.equals(report.getAuthor().getId(), user.getId())) {
+			if (Objects.equals(report.getAuthor().getUuid(), user.getUuid())) {
 				return;
 			}
 		}
@@ -700,8 +700,8 @@ public class ReportResource implements IGraphQLResource {
 	 * @param start Start timestamp for the rollup period
 	 * @param end end timestamp for the rollup period
 	 * @param engagementDateStart minimum date on reports to include
-	 * @param orgType  If orgId is NULL then the type of organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
-	 * @param orgId if orgType is NULL then the parent org to create the graph off of. All reports will be by/about this org or a child org.
+	 * @param orgType  If orgUuid is NULL then the type of organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
+	 * @param orgUuid if orgType is NULL then the parent org to create the graph off of. All reports will be by/about this org or a child org.
 	 */
 	@GET
 	@Timed
@@ -709,8 +709,8 @@ public class ReportResource implements IGraphQLResource {
 	public List<RollupGraph> getDailyRollupGraph(@QueryParam("startDate") Long start,
 			@QueryParam("endDate") Long end,
 			@QueryParam("orgType") OrganizationType orgType,
-			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
-			@QueryParam("principalOrganizationId") Integer principalOrgId) {
+			@QueryParam("advisorOrganizationUuid") String advisorOrgUuid,
+			@QueryParam("principalOrganizationUuid") String principalOrgUuid) {
 		DateTime startDate = new DateTime(start);
 		DateTime endDate = new DateTime(end);
 
@@ -718,12 +718,12 @@ public class ReportResource implements IGraphQLResource {
 
 		@SuppressWarnings("unchecked")
 		final List<String> nonReportingOrgsShortNames = (List<String>) config.getDictionary().get("non_reporting_ORGs");
-		final Map<Integer, Organization> nonReportingOrgs = getOrgsByShortNames(nonReportingOrgsShortNames);
+		final Map<String, Organization> nonReportingOrgs = getOrgsByShortNames(nonReportingOrgsShortNames);
 
-		if (principalOrgId != null) {
-			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, principalOrgId, OrganizationType.PRINCIPAL_ORG, nonReportingOrgs);
-		} else if (advisorOrgId != null) {
-			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, advisorOrgId, OrganizationType.ADVISOR_ORG, nonReportingOrgs);
+		if (principalOrgUuid != null) {
+			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, principalOrgUuid, OrganizationType.PRINCIPAL_ORG, nonReportingOrgs);
+		} else if (advisorOrgUuid != null) {
+			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, advisorOrgUuid, OrganizationType.ADVISOR_ORG, nonReportingOrgs);
 		} else {
 			if (orgType == null) {
 				orgType = OrganizationType.ADVISOR_ORG;
@@ -744,15 +744,15 @@ public class ReportResource implements IGraphQLResource {
 			@QueryParam("startDate") Long start,
 			@QueryParam("endDate") Long end,
 			@QueryParam("orgType") OrganizationType orgType,
-			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
-			@QueryParam("principalOrganizationId") Integer principalOrgId,
+			@QueryParam("advisorOrganizationUuid") String advisorOrgUuid,
+			@QueryParam("principalOrganizationUuid") String principalOrgUuid,
 			AnetEmail email) {
 		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
 		action.setComment(email.getComment());
-		action.setAdvisorOrganizationId(advisorOrgId);
-		action.setPrincipalOrganizationId(principalOrgId);
+		action.setAdvisorOrganizationUuid(advisorOrgUuid);
+		action.setPrincipalOrganizationUuid(principalOrgUuid);
 		action.setChartOrgType(orgType);
 
 		email.setAction(action);
@@ -771,15 +771,15 @@ public class ReportResource implements IGraphQLResource {
 	public Response showRollupEmail(@Auth Person user, @QueryParam("startDate") Long start,
 			@QueryParam("endDate") Long end,
 			@QueryParam("orgType") OrganizationType orgType,
-			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
-			@QueryParam("principalOrganizationId") Integer principalOrgId,
+			@QueryParam("advisorOrganizationUuid") String advisorOrgUuid,
+			@QueryParam("principalOrganizationUuid") String principalOrgUuid,
 			@QueryParam("showText") @DefaultValue("false") Boolean showReportText) {
 		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
 		action.setChartOrgType(orgType);
-		action.setAdvisorOrganizationId(advisorOrgId);
-		action.setPrincipalOrganizationId(principalOrgId);
+		action.setAdvisorOrganizationUuid(advisorOrgUuid);
+		action.setPrincipalOrganizationUuid(principalOrgUuid);
 
 		Map<String,Object> context = action.execute();
 
@@ -822,26 +822,26 @@ public class ReportResource implements IGraphQLResource {
 	@RolesAllowed("SUPER_USER")
 	public List<Map<String, Object>> getAdvisorReportInsights(
 		@DefaultValue("3") 	@QueryParam("weeksAgo") int weeksAgo,
-		@DefaultValue("-1") @QueryParam("orgId") int orgId) {
+		@DefaultValue(Organization.DUMMY_ORG_UUID) @QueryParam("orgUuid") String orgUuid) {
 
 		DateTime now = DateTime.now();
 		DateTime weekStart = now.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay();
 		DateTime startDate = weekStart.minusWeeks(weeksAgo);
-		final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgId);
+		final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgUuid);
 
-		if (orgId < 0) {
-			final Set<String> tlf = Stream.of("organizationshortname").collect(Collectors.toSet());
-			return Utils.resultGrouper(list, "stats", "organizationid", tlf);
+		if (Organization.DUMMY_ORG_UUID.equals(orgUuid)) {
+			final Set<String> tlf = Stream.of("organizationShortName").collect(Collectors.toSet());
+			return Utils.resultGrouper(list, "stats", "organizationUuid", tlf);
 		} else {
 			final Set<String> tlf = Stream.of("name").collect(Collectors.toSet());
-			return Utils.resultGrouper(list, "stats", "personId", tlf);
+			return Utils.resultGrouper(list, "stats", "personUuid", tlf);
 		}
 	}
 
-	private Map<Integer, Organization> getOrgsByShortNames(List<String> orgShortNames) {
-		final Map<Integer, Organization> result = new HashMap<>();
+	private Map<String, Organization> getOrgsByShortNames(List<String> orgShortNames) {
+		final Map<String, Organization> result = new HashMap<>();
 		for (final Organization organization : engine.getOrganizationDao().getOrgsByShortNames(orgShortNames)) {
-			result.put(organization.getId(), organization);
+			result.put(organization.getUuid(), organization);
 		}
 		return result;
 	}
@@ -901,7 +901,7 @@ public class ReportResource implements IGraphQLResource {
 				if (c != 0) {
 					result = c;
 				} else {
-					result = o1.getOrg().getId() - o2.getOrg().getId();
+					result = o1.getOrg().getUuid().compareTo(o2.getOrg().getUuid());
 				}
 			}
 

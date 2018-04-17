@@ -3,12 +3,12 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.joda.time.DateTime;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class CommentMapper implements ResultSetMapper<Comment> {
@@ -24,15 +24,13 @@ public class CommentMapper implements ResultSetMapper<Comment> {
 	@Override
 	public Comment map(int index, ResultSet r, StatementContext ctx) throws SQLException {
 		Comment c = new Comment();
-		c.setId(r.getInt("C_id"));
-		c.setReportId(r.getInt("reportId"));
+		DaoUtils.setCommonBeanFields(c, r, "c");
+		c.setReportUuid(r.getString("reportUuid"));
 		
 		Person author = personMapper.map(index, r, ctx);
 		c.setAuthor(author);
 		
 		c.setText(r.getString("text"));
-		c.setCreatedAt(new DateTime(r.getTimestamp("c_createdAt")));
-		c.setUpdatedAt(new DateTime(r.getTimestamp("c_updatedAt")));
 		c.setLoadLevel(LoadLevel.PROPERTIES);
 		return c;
 	}

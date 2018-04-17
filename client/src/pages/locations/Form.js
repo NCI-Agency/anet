@@ -38,7 +38,7 @@ class LocationForm extends ValidatableFormWrapper {
 			marker.name = loc.name
 			marker.lat = loc.lat
 			marker.lng = loc.lng
-			marker.id = loc.id
+			marker.id = loc.uuid
 			this.setState({markers: [marker]})
 		}
 	}
@@ -113,8 +113,8 @@ class LocationForm extends ValidatableFormWrapper {
 		this.forceUpdate()
 		API.send(url, loc, {disableSubmits: true})
 			.then(response => {
-				if (response.id) {
-					loc.id = response.id
+				if (response.uuid) {
+					loc.uuid = response.uuid
 				}
 				this.props.history.push({
 					pathname: Location.pathFor(loc),

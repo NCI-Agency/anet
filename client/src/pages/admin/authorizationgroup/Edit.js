@@ -28,9 +28,9 @@ class AuthorizationGroupEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-				authorizationGroup(id:${props.match.params.id}) {
-				id, name, description
-				positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
+				authorizationGroup(uuid:"${props.match.params.uuid}") {
+				uuid, name, description
+				positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
 				status
 			}
 		`).then(data => {

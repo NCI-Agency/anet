@@ -36,18 +36,18 @@ public class SqliteTaskSearcher implements ITaskSearcher {
 			args.put("text", Utils.getSqliteFullTextQuery(text));
 		}
 		
-		if (query.getResponsibleOrgId() != null) { 
+		if (query.getResponsibleOrgUuid() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
 					+ ") ";
-				whereClauses.add(" \"organizationId\" IN (SELECT id from parent_orgs)");
+				whereClauses.add(" \"organizationUuid\" IN (SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add("\"organizationId\" = :orgId");
+				whereClauses.add("\"organizationUuid\" = :orgUuid");
 			}
-			args.put("orgId", query.getResponsibleOrgId());
+			args.put("orgUuid", query.getResponsibleOrgUuid());
 		}
 		
 		if (query.getCategory() != null) { 

@@ -53,9 +53,9 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 
 	@GET
 	@GraphQLFetcher
-	@Path("/{id}")
-	public AuthorizationGroup getById(@PathParam("id") int id) {
-		final AuthorizationGroup t = dao.getById(id);
+	@Path("/{uuid}")
+	public AuthorizationGroup getByUuid(@PathParam("uuid") String uuid) {
+		final AuthorizationGroup t = dao.getByUuid(uuid);
 		if (t == null) {
 			throw new WebApplicationException(Status.NOT_FOUND);
 		}
@@ -97,7 +97,7 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 		if (t.getPositions() != null) {
 			final List<Position> existingPositions = dao.getPositionsForAuthorizationGroup(t);
 			for (final Position p : t.getPositions()) {
-				Optional<Position> existingPosition = existingPositions.stream().filter(el -> el.getId().equals(p.getId())).findFirst();
+				Optional<Position> existingPosition = existingPositions.stream().filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
 				if (existingPosition.isPresent()) {
 					existingPositions.remove(existingPosition.get());
 				} else {

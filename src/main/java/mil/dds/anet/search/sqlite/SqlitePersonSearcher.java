@@ -51,11 +51,11 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 	@Override
 	public PersonList runSearch(PersonSearchQuery query, Handle dbHandle) { 
 		StringBuilder sql = new StringBuilder("/* SqlitePersonSearch */ SELECT " + PersonDao.PERSON_FIELDS 
-				+ " FROM people WHERE people.id IN (SELECT people.id FROM people ");
+				+ " FROM people WHERE people.uuid IN (SELECT people.uuid FROM people ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		
-		if (query.getOrgId() != null || query.getLocationId() != null || query.getMatchPositionName()) { 
-			sql.append(" LEFT JOIN positions ON people.id = positions.\"currentPersonId\" ");
+		if (query.getOrgUuid() != null || query.getLocationUuid() != null || query.getMatchPositionName()) {
+			sql.append(" LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" ");
 		}
 		
 		sql.append(" WHERE ");
@@ -110,23 +110,23 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 			sqlArgs.put("pendingVerification", query.getPendingVerification());
 		}
 		
-		if (query.getOrgId() != null) { 
+		if (query.getOrgUuid() != null) {
 			if (query.getIncludeChildOrgs() != null && query.getIncludeChildOrgs()) { 
-				whereClauses.add(" positions.\"organizationId\" IN ( "
-					+ "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				whereClauses.add(" positions.\"organizationUuid\" IN ( "
+					+ "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
-					+ ") SELECT id from parent_orgs)");
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
+					+ ") SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add(" positions.\"organizationId\" = :orgId ");
+				whereClauses.add(" positions.\"organizationUuid\" = :orgUuid ");
 			}
-			sqlArgs.put("orgId", query.getOrgId());
+			sqlArgs.put("orgUuid", query.getOrgUuid());
 		}
 		
-		if (query.getLocationId() != null) { 
-			whereClauses.add(" positions.\"locationId\" = :locationId ");
-			sqlArgs.put("locationId", query.getLocationId());
+		if (query.getLocationUuid() != null) {
+			whereClauses.add(" positions.\"locationUuid\" = :locationUuid ");
+			sqlArgs.put("locationUuid", query.getLocationUuid());
 		}
 		
 		if (whereClauses.size() == 0) { return result; }

@@ -40,9 +40,9 @@ public class PersonResourceTest extends AbstractResourceTest {
 	public void testCreatePerson() {
 		final Person jack = getJackJackson();
 
-		Person retPerson = httpQuery(String.format("/api/people/%d", jack.getId()), jack).get(Person.class);
+		Person retPerson = httpQuery(String.format("/api/people/%s", jack.getUuid()), jack).get(Person.class);
 		assertThat(retPerson).isEqualTo(jack);
-		assertThat(retPerson.getId()).isEqualTo(jack.getId());
+		assertThat(retPerson.getUuid()).isEqualTo(jack.getUuid());
 
 		Person newPerson = new Person();
 		newPerson.setName("testCreatePerson Person");
@@ -53,7 +53,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson.setCountry("Canada");
 		newPerson.setEndOfTourDate(new DateTime(2020,4,1,0,0,0));
 		newPerson = httpQuery("/api/people/new", admin).post(Entity.json(newPerson), Person.class);
-		assertThat(newPerson.getId()).isNotNull();
+		assertThat(newPerson.getUuid()).isNotNull();
 		assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
 
 		newPerson.setName("testCreatePerson updated name");
@@ -62,7 +62,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 				.post(Entity.json(newPerson));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
-		retPerson = httpQuery(String.format("/api/people/%d", newPerson.getId()), jack).get(Person.class);
+		retPerson = httpQuery(String.format("/api/people/%s", newPerson.getUuid()), jack).get(Person.class);
 		assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
 		
 		//Test creating a person with a position already set. 
@@ -76,7 +76,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPos.setOrganization(org);
 		newPos.setStatus(PositionStatus.ACTIVE);
 		newPos = httpQuery("/api/positions/new", admin).post(Entity.json(newPos), Position.class);
-		assertThat(newPos.getId()).isNotNull();
+		assertThat(newPos.getUuid()).isNotNull();
 		
 		Person newPerson2 = new Person();
 		newPerson2.setName("Namey McNameface");
@@ -85,12 +85,12 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson2.setDomainUsername("namey_" + DateTime.now().getMillis());
 		newPerson2.setPosition(newPos);
 		newPerson2 = httpQuery("/api/people/new", admin).post(Entity.json(newPerson2), Person.class);
-		assertThat(newPerson2.getId()).isNotNull();
+		assertThat(newPerson2.getUuid()).isNotNull();
 		
-		retPerson = httpQuery("/api/people/" + newPerson2.getId(), admin).get(Person.class);
+		retPerson = httpQuery("/api/people/" + newPerson2.getUuid(), admin).get(Person.class);
 		assertThat(retPerson).isNotNull();
 		assertThat(retPerson.loadPosition()).isNotNull();
-		assertThat(retPerson.getPosition().getId()).isEqualTo(newPos.getId());
+		assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos.getUuid());
 		
 		//Change this person w/ a new position, and ensure it gets changed. 
 		
@@ -100,7 +100,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPos2.setOrganization(org);
 		newPos2.setStatus(PositionStatus.ACTIVE);
 		newPos2 = httpQuery("/api/positions/new", admin).post(Entity.json(newPos2), Position.class);
-		assertThat(newPos2.getId()).isNotNull();
+		assertThat(newPos2.getUuid()).isNotNull();
 		
 		newPerson2.setName("Changey McChangeface");
 		newPerson2.setPosition(newPos2);
@@ -111,11 +111,11 @@ public class PersonResourceTest extends AbstractResourceTest {
 		resp = httpQuery("/api/people/update", admin).post(Entity.json(newPerson2));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		retPerson = httpQuery("/api/people/" + newPerson2.getId(), admin).get(Person.class);
+		retPerson = httpQuery("/api/people/" + newPerson2.getUuid(), admin).get(Person.class);
 		assertThat(retPerson).isNotNull();
 		assertThat(retPerson.getName()).isEqualTo(newPerson2.getName());
 		assertThat(retPerson.loadPosition()).isNotNull();
-		assertThat(retPerson.getPosition().getId()).isEqualTo(newPos2.getId());
+		assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos2.getUuid());
 		
 		//Now newPerson2 who is a super user, should NOT be able to edit newPerson
 		//Because they are not in newPerson2's organization. 
@@ -127,7 +127,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		resp = httpQuery("/api/people/update", admin).post(Entity.json(newPerson2));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		retPerson = httpQuery("/api/people/" + newPerson2.getId(), admin).get(Person.class);
+		retPerson = httpQuery("/api/people/" + newPerson2.getUuid(), admin).get(Person.class);
 		assertThat(retPerson.getBiography()).contains("<b>Hello world</b>");
 		assertThat(retPerson.getBiography()).doesNotContain("<script>window.alert");
 	}
@@ -148,11 +148,11 @@ public class PersonResourceTest extends AbstractResourceTest {
 		Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1.1")).findFirst().get();
 
 		query.setText(null);
-		query.setOrgId(org.getId());
+		query.setOrgUuid(org.getUuid());
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 
-		query.setOrgId(null);
+		query.setOrgUuid(null);
 		query.setStatus(ImmutableList.of(PersonStatus.INACTIVE));
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
@@ -162,7 +162,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		//Search with children orgs
 		org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1")).findFirst().get();
 		query.setStatus(null);
-		query.setOrgId(org.getId());
+		query.setOrgUuid(org.getUuid());
 		//First don't include child orgs and then increase the scope and verify results increase.
 		final PersonList parentOnlyResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 
@@ -175,7 +175,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 
-		query.setOrgId(null);
+		query.setOrgUuid(null);
 		query.setText("advisor"); //Search against biographies
 		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
 		assertThat(searchResults.getList().size()).isGreaterThan(1);
@@ -257,13 +257,13 @@ public class PersonResourceTest extends AbstractResourceTest {
 		//Assign to an AO
 		Organization ao = httpQuery("/api/organizations/new", admin)
 				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
-		test.setOrganization(Organization.createWithId(ao.getId()));
+		test.setOrganization(Organization.createWithUuid(ao.getUuid()));
 
 		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);
 		assertThat(created.getName()).isEqualTo(test.getName());
 		
 		//Assign the loser into the position
-		Response resp = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).post(Entity.json(loser));
+		Response resp = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).post(Entity.json(loser));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Create a second person
@@ -272,15 +272,15 @@ public class PersonResourceTest extends AbstractResourceTest {
 		winner.setName("Winner for Merging");
 		winner = httpQuery("/api/people/new", admin).post(Entity.json(winner), Person.class);
 		
-		resp = httpQuery(String.format("/api/people/merge?winner=%d&loser=%d", winner.getId(), loser.getId()), admin).post(null);
+		resp = httpQuery(String.format("/api/people/merge?winner=%s&loser=%s", winner.getUuid(), loser.getUuid()), admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Assert that loser is gone. 
-		resp = httpQuery("/api/people/" + loser.getId(), admin).get();
+		resp = httpQuery("/api/people/" + loser.getUuid(), admin).get();
 		assertThat(resp.getStatus()).isEqualTo(404);
 		
 		//Assert that the position is empty. 
-		Person curr = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).get(Person.class);
+		Person curr = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).get(Person.class);
 		assertThat(curr).isNull();
 		
 		//Re-create loser and put into the position. 
@@ -288,18 +288,18 @@ public class PersonResourceTest extends AbstractResourceTest {
 		loser.setRole(Role.ADVISOR);
 		loser.setName("Loser for Merging");
 		loser = httpQuery("/api/people/new", admin).post(Entity.json(loser), Person.class);
-		resp = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).post(Entity.json(loser));
+		resp = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).post(Entity.json(loser));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		resp = httpQuery(String.format("/api/people/merge?winner=%d&loser=%d&copyPosition=true", winner.getId(), loser.getId()), admin).post(null);
+		resp = httpQuery(String.format("/api/people/merge?winner=%s&loser=%s&copyPosition=true", winner.getUuid(), loser.getUuid()), admin).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Assert that loser is gone. 
-		resp = httpQuery("/api/people/" + loser.getId(), admin).get();
+		resp = httpQuery("/api/people/" + loser.getUuid(), admin).get();
 		assertThat(resp.getStatus()).isEqualTo(404);
 		
 		//Assert that the winner is in the position. 
-		curr = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).get(Person.class);
+		curr = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).get(Person.class);
 		assertThat(curr).isEqualTo(winner);
 		
 		
@@ -311,7 +311,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		final OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(OrganizationList.class);
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		final Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
-		assertThat(org.getId()).isNotNull();
+		assertThat(org.getUuid()).isNotNull();
 
 		final Position newPos = new Position();
 		newPos.setType(PositionType.ADVISOR);
@@ -319,7 +319,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPos.setOrganization(org);
 		newPos.setStatus(PositionStatus.ACTIVE);
 		final Position retPos = httpQuery("/api/positions/new", admin).post(Entity.json(newPos), Position.class);
-		assertThat(retPos.getId()).isNotNull();
+		assertThat(retPos.getUuid()).isNotNull();
 
 		final Person newPerson = new Person();
 		newPerson.setName("Namey McNameface");
@@ -328,14 +328,14 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson.setDomainUsername("namey_" + DateTime.now().getMillis());
 		newPerson.setPosition(newPos);
 		final Person retPerson = httpQuery("/api/people/new", admin).post(Entity.json(newPerson), Person.class);
-		assertThat(retPerson.getId()).isNotNull();
+		assertThat(retPerson.getUuid()).isNotNull();
 		assertThat(retPerson.getPosition()).isNotNull();
 
 		retPerson.setStatus(PersonStatus.INACTIVE);
 		final Response resp = httpQuery("/api/people/update", admin).post(Entity.json(retPerson));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
-		final Person retPerson2 = httpQuery(String.format("/api/people/%d", retPerson.getId()), admin).get(Person.class);
+		final Person retPerson2 = httpQuery(String.format("/api/people/%s", retPerson.getUuid()), admin).get(Person.class);
 		assertThat(retPerson2.getDomainUsername()).isNull();
 		assertThat(retPerson2.getPosition()).isNull();
 	}

@@ -93,14 +93,14 @@ class FilterableAdvisorReportsTable extends Component {
         data.forEach( (item) => {
             let stats = item.stats
             ctr = 0
-            result += item.organizationshortname
+            result += item.organizationShortName
             weekColumns.forEach( (column, index) => {
                 if (ctr > 0) result += columnDelimiter
 
                 if (stats[index]) {
-                    result += stats[index].nrreportssubmitted
+                    result += stats[index].nrReportsSubmitted
                     result += columnDelimiter
-                    result += stats[index].nrengagementsattended
+                    result += stats[index].nrEngagementsAttended
                 } else {
                     result += '0,0'
                 }

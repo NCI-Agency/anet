@@ -43,21 +43,21 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 		}
 		sql.append(", count(*) over() as totalCount FROM people");
 
-		if (query.getOrgId() != null || query.getLocationId() != null || query.getMatchPositionName()) {
-			sql.append(" LEFT JOIN positions ON people.id = positions.currentPersonId ");
+		if (query.getOrgUuid() != null || query.getLocationUuid() != null || query.getMatchPositionName()) {
+			sql.append(" LEFT JOIN positions ON people.uuid = positions.currentPersonUuid ");
 		}
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (people, (name, emailAddress, biography), :containsQuery) c_people"
-					+ " ON people.id = c_people.[Key]"
+					+ " ON people.uuid = c_people.[Key]"
 					+ " LEFT JOIN FREETEXTTABLE(people, (name, biography), :freetextQuery) f_people"
-					+ " ON people.id = f_people.[Key]");
+					+ " ON people.uuid = f_people.[Key]");
 			final StringBuilder whereRank = new StringBuilder("("
 					+ "c_people.rank IS NOT NULL"
 					+ " OR f_people.rank IS NOT NULL");
 			if (query.getMatchPositionName()) {
 				sql.append(" LEFT JOIN CONTAINSTABLE(positions, (name, code), :containsQuery) c_positions"
-						+ " ON positions.id = c_positions.[Key]");
+						+ " ON positions.uuid = c_positions.[Key]");
 				whereRank.append(" OR c_positions.rank IS NOT NULL");
 			}
 			whereRank.append(")");
@@ -96,23 +96,23 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 		}
 
 		String commonTableExpression = null;
-		if (query.getOrgId() != null) {
+		if (query.getOrgUuid() != null) {
 			if (query.getIncludeChildOrgs() != null && query.getIncludeChildOrgs()) {
-				commonTableExpression = "WITH parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
 					+ ") ";
-				whereClauses.add(" positions.organizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add(" positions.organizationUuid IN (SELECT uuid from parent_orgs)");
 			} else {
-				whereClauses.add(" positions.organizationId = :orgId ");
+				whereClauses.add(" positions.organizationUuid = :orgUuid ");
 			}
-			sqlArgs.put("orgId", query.getOrgId());
+			sqlArgs.put("orgUuid", query.getOrgUuid());
 		}
 
-		if (query.getLocationId() != null) {
-			whereClauses.add(" positions.locationId = :locationId ");
-			sqlArgs.put("locationId", query.getLocationId());
+		if (query.getLocationUuid() != null) {
+			whereClauses.add(" positions.locationUuid = :locationUuid ");
+			sqlArgs.put("locationUuid", query.getLocationUuid());
 		}
 
 		final PersonList result = new PersonList();
@@ -148,7 +148,7 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "people", "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "people", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "people", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 

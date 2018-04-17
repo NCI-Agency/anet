@@ -2,11 +2,7 @@ package mil.dds.anet.beans;
 
 import java.util.Objects;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.joda.time.DateTime;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.graphql.GraphQLFetcher;
@@ -21,20 +17,13 @@ public class ApprovalAction extends AbstractAnetBean {
 	Person person;
 	Report report;
 	ApprovalType type;
-	
-	@Override
-	@JsonIgnore
-	@GraphQLIgnore
-	public Integer getId() { 
-		throw new WebApplicationException("no ID field on Approval Action");
-	}
 
 	@GraphQLFetcher("step")
 	public ApprovalStep loadStep() {
 		if (step == null || step.getLoadLevel() == null) { return step; }
 		if (step.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
 			this.step = AnetObjectEngine.getInstance()
-					.getApprovalStepDao().getById(step.getId());
+					.getApprovalStepDao().getByUuid(step.getUuid());
 		}
 		return step;
 	}
@@ -62,7 +51,7 @@ public class ApprovalAction extends AbstractAnetBean {
 		if (person == null || person.getLoadLevel() == null) { return person; } 
 		if (person.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
 			this.person = AnetObjectEngine.getInstance()
-				.getPersonDao().getById(person.getId());
+				.getPersonDao().getByUuid(person.getUuid());
 		}
 		return person;
 	}
@@ -98,7 +87,7 @@ public class ApprovalAction extends AbstractAnetBean {
 		}
 		ApprovalAction other = (ApprovalAction) o;
 		return Objects.equals(step, other.getStep()) 
-				&& AbstractAnetBean.idEqual(person, other.getPerson()) 
+				&& AbstractAnetBean.uuidEqual(person, other.getPerson())
 				&& Objects.equals(report, other.getReport()) 
 				&& Objects.equals(createdAt, other.getCreatedAt()) 
 				&& Objects.equals(type, other.getType());
@@ -111,6 +100,6 @@ public class ApprovalAction extends AbstractAnetBean {
 	
 	@Override
 	public String toString() { 
-		return String.format("[ApprovalAction: step:%d, type:%s, person:%d, report:%d]", step.getId(), type, person.getId(), report.getId());
+		return String.format("[ApprovalAction: step:%s, type:%s, person:%s, report:%s]", step.getUuid(), type, person.getUuid(), report.getUuid());
 	}
 }

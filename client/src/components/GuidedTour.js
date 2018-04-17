@@ -40,7 +40,7 @@ class GuidedTour extends Component {
 	}
 
 	componentDidUpdate() {
-		if (!this.runningTour && this.props.autostart && this.context.currentUser.id) {
+		if (!this.runningTour && this.props.autostart && this.context.currentUser.uuid) {
 			this.startTour()
 		}
 	}

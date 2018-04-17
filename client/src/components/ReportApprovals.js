@@ -68,7 +68,7 @@ export default class ReportApprovals extends Component {
         let approvalStatus = this.renderApprovalStatus(action)
         let approvalDetails = this.renderApprovalDetails(action)
         return (
-            <div className="approval-action" key={step.id}>
+            <div className="approval-action" key={step.uuid}>
                 { approvalStatus }
                 { approvalButton }
                 { approvalDetails }
@@ -81,7 +81,7 @@ export default class ReportApprovals extends Component {
         let approvalButton = this.renderApprovalButton(action)
         let approvalModal = this.renderApprovalModal(action)
         return (
-            <div className="approval-action" key={action.step.id}>
+            <div className="approval-action" key={action.step.uuid}>
                 { approvalButton }
                 { approvalModal }
             </div>
@@ -138,7 +138,7 @@ export default class ReportApprovals extends Component {
                 <Modal.Body>
                     <ul>
                     {step.approvers.map(p =>
-                        <li key={p.id}>{p.name} - {p.person && p.person.name}</li>
+                        <li key={p.uuid}>{p.name} - {p.person && p.person.name}</li>
                     )}
                     </ul>
                 </Modal.Body>
