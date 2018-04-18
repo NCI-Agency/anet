@@ -338,8 +338,9 @@ class AdvancedSearch extends Component {
 		this.setState({text: event.target.value})
 	}
 
-	@autobind resolveToQuery(value) {
-		if (typeof value === 'function' && value.name === 'bound toQuery') {
+	@autobind
+	resolveToQuery(value) {
+		if (typeof value === 'function' && value.name && value.name.startsWith('bound ')) {
 			return value()
 		}
 	}
