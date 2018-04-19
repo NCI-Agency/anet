@@ -28,6 +28,7 @@ export default class ReportsByDayOfWeek extends Component {
   static propTypes = {
     startDate: PropTypes.object.isRequired,
     endDate: PropTypes.object.isRequired,
+    searchQuery: PropTypes.string,
   }
 
   constructor(props) {
@@ -47,6 +48,7 @@ export default class ReportsByDayOfWeek extends Component {
       releasedAtStart: this.props.startDate.valueOf(),
       releasedAtEnd: this.props.endDate.valueOf(),
       includeEngagementDayOfWeek: 1,
+      text: this.props.searchQuery,
     }
   }
 
@@ -218,7 +220,7 @@ export default class ReportsByDayOfWeek extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.datePropsChanged(prevProps)) {
+    if ((this.datePropsChanged(prevProps)) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
       this.fetchData()
     }
   }

@@ -29,6 +29,7 @@ const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
 export default class ReportsByTask extends Component {
   static propTypes = {
     date: PropTypes.object,
+    searchQuery: PropTypes.string,
   }
 
   constructor(props) {
@@ -46,6 +47,7 @@ export default class ReportsByTask extends Component {
     return {
       state: [Report.STATE.RELEASED],
       releasedAtStart: this.props.date.valueOf(),
+      text: this.props.searchQuery,
     }
   }
 
@@ -207,7 +209,7 @@ export default class ReportsByTask extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
+    if ((prevProps.date.valueOf() !== this.props.date.valueOf()) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
       this.fetchData()
     }
   }

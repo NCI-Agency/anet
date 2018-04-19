@@ -28,6 +28,7 @@ export default class FutureEngagementsByLocation extends Component {
   static propTypes = {
     startDate: PropTypes.object.isRequired,
     endDate: PropTypes.object.isRequired,
+    searchQuery: PropTypes.string,
   }
 
   constructor(props) {
@@ -46,6 +47,7 @@ export default class FutureEngagementsByLocation extends Component {
     return {
       engagementDateStart: this.props.startDate.clone().startOf('day').valueOf(),
       engagementDateEnd: this.props.endDate.valueOf(),
+      text: this.props.searchQuery,
     }
   }
 
@@ -264,7 +266,7 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.datePropsChanged(prevProps)) {
+    if ((this.datePropsChanged(prevProps)) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
       this.fetchData()
     }
   }

@@ -74,7 +74,9 @@ const dateRangeFilterCss = {
 
 class InsightsShow extends Page {
 
-  static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {
+		searchQuery: PropTypes.string
+	}
 
   static contextTypes = {
     app: PropTypes.object.isRequired,
@@ -201,7 +203,6 @@ class InsightsShow extends Page {
     const insightConfig = insightDetails[this.state.insight]
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.state.insight
-
     return (
       <div>
         <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
@@ -217,7 +218,8 @@ class InsightsShow extends Page {
             <InsightComponent
               date={this.state.referenceDate.clone()}
               startDate={this.state.startDate.clone()}
-              endDate={this.state.endDate.clone()} />
+              endDate={this.state.endDate.clone()}
+              searchQuery={this.props.searchQuery} />
           </Fieldset>
         }
       </div>
@@ -229,5 +231,8 @@ class InsightsShow extends Page {
 const mapDispatchToProps = (dispatch, ownProps) => ({
 	setPageProps: pageProps => dispatch(setPageProps(pageProps))
 })
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery.query
+})
 
-export default connect(null, mapDispatchToProps)(InsightsShow)
+export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)
