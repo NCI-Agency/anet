@@ -16,7 +16,7 @@
 
 	<!-- Use a NONCLUSTERED index only for MSSQL -->
 	<property name="non_clustered" value="NONCLUSTERED" dbms="mssql" />
-	<property name="non_clustered" value="" dbms="!mssql" />
+	<property name="non_clustered" value="" dbms="postgresql,sqlite" />
 
 	<changeSet id="1" author="hpitelka">
 		<createTable tableName="people">
@@ -278,7 +278,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="8" author="hpitelka" dbms="!sqlite" >
+	<changeSet id="8" author="hpitelka" dbms="mssql,postgresql" >
 		<!-- Groups -->
 		<addUniqueConstraint tableName="groupMemberships" columnNames="groupId, personId" constraintName="uniqueGroupMembership" />
 		<addNotNullConstraint tableName="groups" columnName="name" columnDataType="varchar(512)" />
@@ -392,7 +392,7 @@
 			<column name="value" type="text" />
 		</createTable>
 	</changeSet>
-	<changeSet id="10" author="hpitelka" dbms="!sqlite" >
+	<changeSet id="10" author="hpitelka" dbms="mssql,postgresql" >
 		<addUniqueConstraint tableName="adminSettings" columnNames="key" constraintName="adminSettingKey" />
 	</changeSet>
 
@@ -436,7 +436,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="14" author="hpitelka"  dbms="!sqlite" >
+	<changeSet id="14" author="hpitelka"  dbms="mssql,postgresql" >
 		<addForeignKeyConstraint baseColumnNames="organizationId" baseTableName="poams"
 			constraintName="fk_poams_org" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="organizations" />
@@ -472,7 +472,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="17" author="hpitelka" dbms="!sqlite" >
+	<changeSet id="17" author="hpitelka" dbms="mssql,postgresql" >
 		<renameColumn
 			columnDataType="varchar(255)"
 			oldColumnName="name"
@@ -501,7 +501,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="20" author="hpitelka"  dbms="!sqlite" >
+	<changeSet id="20" author="hpitelka"  dbms="mssql,postgresql" >
 		<addForeignKeyConstraint baseColumnNames="ownerId" baseTableName="savedSearches"
 			constraintName="fk_savedSearch_owner" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="people" />
@@ -514,7 +514,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet id="22" author="hpitelka" dbms="!sqlite" >
+	<changeSet id="22" author="hpitelka" dbms="mssql,postgresql" >
 		<dropForeignKeyConstraint baseTableName="groupMemberships" constraintName="fk_groupMember_group" />
 		<dropForeignKeyConstraint baseTableName="groupMemberships" constraintName="fk_groupMember_person" />
 		<dropForeignKeyConstraint baseTableName="approvalSteps" constraintName="fk_approvalSteps_group" />
@@ -533,7 +533,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="24" author="hpitelka" dbms="!sqlite" >
+	<changeSet id="24" author="hpitelka" dbms="mssql,postgresql" >
 		<addForeignKeyConstraint baseColumnNames="approvalStepId" baseTableName="approvers"
 			constraintName="fk_approvers_step" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="id" referencedTableName="approvalSteps" />
@@ -636,7 +636,7 @@
 		</rollback>
 	</changeSet>
 	<!-- this works for at least: "postgresql,sqlite" -->
-	<changeSet id="30p" author="bwarfield" dbms="!mssql" >
+	<changeSet id="30p" author="bwarfield" dbms="postgresql,sqlite" >
 		<comment>Create a unique index for "positions.currentPersonId", excluding nulls.</comment>
 		<sql>
 			CREATE UNIQUE INDEX "UniqueCurrentPersonInPosition" ON positions ("currentPersonId") WHERE "currentPersonId" IS NOT NULL;
@@ -681,7 +681,7 @@
 		</rollback>
 	</changeSet>
 	<!-- this works for at least: "postgresql,sqlite" -->
-	<changeSet id="34p" author="bwarfield" dbms="!mssql">
+	<changeSet id="34p" author="bwarfield" dbms="postgresql,sqlite">
 		<comment>Create a unique index for "positions.currentPersonId", excluding nulls.</comment>
 		<sql>
 			CREATE UNIQUE INDEX "UniquePositionCodes" ON positions(code) WHERE code IS NOT NULL;
@@ -722,7 +722,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_report_tags_constraints" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="add_report_tags_constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<addUniqueConstraint tableName="reportTags" columnNames="reportId, tagId" constraintName="uniqueReportTag" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportTags"
 			constraintName="fk_reportTags_report" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -820,7 +820,7 @@
 		</rollback>
 	</changeSet>
 	<!-- this works for at least: "postgresql,sqlite" -->
-	<changeSet id="add_organizations_identificationCode_constraints_pg" author="bwarfield" dbms="!mssql">
+	<changeSet id="add_organizations_identificationCode_constraints_pg" author="bwarfield" dbms="postgresql,sqlite">
 		<comment>Add a partial unique index to force non-empty organization codes to be unique.</comment>
 		<!-- Use SQL because we want to allow NULLs while still requiring non-NULL and non-empty columns to be unique -->
 		<sql>
@@ -860,7 +860,7 @@
 	<!-- a better way to do this would be to have a single migration using a modifySql
 	     tag: http://www.liquibase.org/documentation/modify_sql.html (but that would change the
 		 checksum, so we can't do it with an already-run migration) -->
-	<changeSet id="add_reports_sensitive_information_no_nvarchar" author="bwarfield" dbms="!mssql">
+	<changeSet id="add_reports_sensitive_information_no_nvarchar" author="bwarfield" dbms="postgresql,sqlite">
 		<createTable tableName="reportsSensitiveInformation">
 			<column name="id" type="int" autoIncrement="true">
 				<constraints primaryKey="true" nullable="false" />
@@ -874,7 +874,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_reports_sensitive_information_constraints" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="add_reports_sensitive_information_constraints" author="gjvoosten" dbms="mssql,postgresql">
     	<!-- Add unique constraint because we want to enforce a one-to-one relationship between reports and reportsSensitiveInformation -->
 		<addUniqueConstraint tableName="reportsSensitiveInformation" columnNames="reportId" constraintName="uniqueReport" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportsSensitiveInformation"
@@ -890,7 +890,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="renamePoams-to-Tasks" author="evdhoudt" dbms="!sqlite">
+	<changeSet id="renamePoams-to-Tasks" author="evdhoudt" dbms="mssql,postgresql">
 		<!-- Tasks -->
 		<renameTable
 			newTableName="tasks"
@@ -923,7 +923,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt" dbms="!sqlite">
+	<changeSet id="renameReportPoams-to-ReportTasks" author="evdhoudt" dbms="mssql,postgresql">
 		<!-- Report Tasks -->
 		<renameTable
 			newTableName="reportTasks"
@@ -961,7 +961,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt" dbms="!sqlite">
+	<changeSet id="renameConstraints-Poams-to-Tasks" author="evdhoudt" dbms="mssql,postgresql">
 		<dropUniqueConstraint tableName="reportTasks" constraintName="uniqueReportPoam"/>
 		<addUniqueConstraint tableName="reportTasks" columnNames="taskId, reportId" constraintName="uniqueReportTask" />
 
@@ -996,7 +996,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="36" author="bwarfield" dbms="!mssql">
+	<changeSet id="36" author="bwarfield" dbms="postgresql,sqlite">
 		<comment>This is a repeat of migrations 32 and 35, with a more generic syntax.</comment>
 		<sql>
 			INSERT INTO "adminSettings" ("key", "value") VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
@@ -1036,7 +1036,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="!sqlite">
+	<changeSet id="add_authorization_group_positions_constraints" author="maradragan" dbms="mssql,postgresql">
 		<addUniqueConstraint tableName="authorizationGroupPositions" columnNames="authorizationGroupId, positionId" constraintName="uniqueAuthorizationGroupPositions" />
 		<addForeignKeyConstraint baseColumnNames="authorizationGroupId" baseTableName="authorizationGroupPositions"
 			constraintName="fk_authorizationGroupPositions_authorizationGroup" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -1057,7 +1057,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="!sqlite">
+	<changeSet id="add_report_authorization_groups_constraints" author="maradragan" dbms="mssql,postgresql">
 		<addUniqueConstraint tableName="reportAuthorizationGroups" columnNames="reportId, authorizationGroupId" constraintName="uniqueReportAuthorizationGroup" />
 		<addForeignKeyConstraint baseColumnNames="reportId" baseTableName="reportAuthorizationGroups"
 			constraintName="fk_reportAuthorizationGroups_report" onDelete="NO ACTION" onUpdate="NO ACTION"
@@ -1115,7 +1115,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="drop_positions_authorized" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="drop_positions_authorized" author="gjvoosten" dbms="mssql,postgresql">
 	    <!-- Some magic to make sure any auto-generated database constraints are dropped -->
 		<dropNotNullConstraint tableName="positions" columnName="authorized" columnDataType="boolean" />
 		<dropDefaultValue tableName="positions" columnName="authorized" columnDataType="boolean" />
@@ -1160,13 +1160,13 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="add-custom-field-enum-2-to-Tasks-no-mssql" author="maradragan" dbms="!mssql">
+	<changeSet id="add-custom-field-enum-2-to-Tasks-no-mssql" author="maradragan" dbms="postgresql,sqlite">
 		<addColumn tableName="tasks" >
 			<column name="customFieldEnum2" type="text" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="rename-custom-field-enum-in-tasks" author="maradragan" dbms="!sqlite">
+	<changeSet id="rename-custom-field-enum-in-tasks" author="maradragan" dbms="mssql,postgresql">
 		<renameColumn
 			columnDataType="nvarchar(max)"
 			oldColumnName="customFieldEnum"
@@ -1197,11 +1197,11 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="add_unique_savedSearches_constraint" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="add_unique_savedSearches_constraint" author="gjvoosten" dbms="mssql,postgresql">
 		<addUniqueConstraint tableName="savedSearches" columnNames="ownerId, name" constraintName="uniqueOwnerIdName" />
 	</changeSet>
 
-	<changeSet id="rename-parent-task-in-tasks" author="maradragan" dbms="!sqlite">
+	<changeSet id="rename-parent-task-in-tasks" author="maradragan" dbms="mssql,postgresql">
 		<dropForeignKeyConstraint baseTableName="tasks" constraintName="fk_tasks_parent"/>
 		<renameColumn
 			columnDataType="int"
@@ -1398,22 +1398,22 @@
 	</changeSet>
 
 	<changeSet id="fill-uuid-primaryKey-columns" author="gjvoosten">
-		<!-- Enable uuid generation on postgresql just in case -->
-		<sql dbms="postgresql">
-			CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-		</sql>
+		<!--
+			If on postgresql, make sure to enable uuid generation before running this changeset:
+				CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+		-->
 		<!-- Generate new uuid's for all tables -->
 		<sql>
-			UPDATE approvalSteps SET uuid = ${uuid_function};
-			UPDATE authorizationGroups SET uuid = ${uuid_function};
+			UPDATE "approvalSteps" SET uuid = ${uuid_function};
+			UPDATE "authorizationGroups" SET uuid = ${uuid_function};
 			UPDATE comments SET uuid = ${uuid_function};
 			UPDATE locations SET uuid = ${uuid_function};
 			UPDATE organizations SET uuid = ${uuid_function};
 			UPDATE people SET uuid = ${uuid_function};
 			UPDATE positions SET uuid = ${uuid_function};
 			UPDATE reports SET uuid = ${uuid_function};
-			UPDATE reportsSensitiveInformation SET uuid = ${uuid_function};
-			UPDATE savedSearches SET uuid = ${uuid_function};
+			UPDATE "reportsSensitiveInformation" SET uuid = ${uuid_function};
+			UPDATE "savedSearches" SET uuid = ${uuid_function};
 			UPDATE tags SET uuid = ${uuid_function};
 			UPDATE tasks SET uuid = ${uuid_function};
 		</sql>
@@ -1423,149 +1423,149 @@
 	<changeSet id="fill-uuid-foreignKey-columns" author="gjvoosten">
 		<!-- Fill uuid references for all tables -->
 		<sql>
-			UPDATE approvalActions SET approvalStepUuid = (
-				SELECT uuid FROM approvalSteps
-				WHERE approvalSteps.id = approvalActions.approvalStepId
+			UPDATE "approvalActions" SET "approvalStepUuid" = (
+				SELECT uuid FROM "approvalSteps"
+				WHERE "approvalSteps".id = "approvalActions"."approvalStepId"
 			);
-			UPDATE approvalActions SET personUuid = (
+			UPDATE "approvalActions" SET "personUuid" = (
 				SELECT uuid FROM people
-				WHERE people.id = approvalActions.personId
+				WHERE people.id = "approvalActions"."personId"
 			);
-			UPDATE approvalActions SET reportUuid = (
+			UPDATE "approvalActions" SET "reportUuid" = (
 				SELECT uuid FROM reports
-				WHERE reports.id = approvalActions.reportId
+				WHERE reports.id = "approvalActions"."reportId"
 			);
-			UPDATE approvalSteps SET advisorOrganizationUuid = (
+			UPDATE "approvalSteps" SET "advisorOrganizationUuid" = (
 				SELECT uuid FROM organizations
-				WHERE organizations.id = approvalSteps.advisorOrganizationId
+				WHERE organizations.id = "approvalSteps"."advisorOrganizationId"
 			);
-			UPDATE approvalSteps SET nextStepUuid = (
-				SELECT a2.uuid FROM approvalSteps a2
-				WHERE a2.id = approvalSteps.nextStepId
+			UPDATE "approvalSteps" SET "nextStepUuid" = (
+				SELECT a2.uuid FROM "approvalSteps" a2
+				WHERE a2.id = "approvalSteps"."nextStepId"
 			);
-			UPDATE approvers SET approvalStepUuid = (
-				SELECT uuid FROM approvalSteps
-				WHERE approvalSteps.id = approvers.approvalStepId
+			UPDATE approvers SET "approvalStepUuid" = (
+				SELECT uuid FROM "approvalSteps"
+				WHERE "approvalSteps".id = approvers."approvalStepId"
 			);
-			UPDATE approvers SET positionUuid = (
+			UPDATE approvers SET "positionUuid" = (
 				SELECT uuid FROM positions
-				WHERE positions.id = approvers.positionId
+				WHERE positions.id = approvers."positionId"
 			);
-			UPDATE authorizationGroupPositions SET authorizationGroupUuid = (
-				SELECT uuid FROM authorizationGroups
-				WHERE authorizationGroups.id = authorizationGroupPositions.authorizationGroupId
+			UPDATE "authorizationGroupPositions" SET "authorizationGroupUuid" = (
+				SELECT uuid FROM "authorizationGroups"
+				WHERE "authorizationGroups".id = "authorizationGroupPositions"."authorizationGroupId"
 			);
-			UPDATE authorizationGroupPositions SET positionUuid = (
+			UPDATE "authorizationGroupPositions" SET "positionUuid" = (
 				SELECT uuid FROM positions
-				WHERE positions.id = authorizationGroupPositions.positionId
+				WHERE positions.id = "authorizationGroupPositions"."positionId"
 			);
-			UPDATE comments SET authorUuid = (
+			UPDATE comments SET "authorUuid" = (
 				SELECT uuid FROM people
-				WHERE people.id = comments.authorId
+				WHERE people.id = comments."authorId"
 			);
-			UPDATE comments SET reportUuid = (
+			UPDATE comments SET "reportUuid" = (
 				SELECT uuid FROM reports
-				WHERE reports.id = comments.reportId
+				WHERE reports.id = comments."reportId"
 			);
-			UPDATE organizations SET parentOrgUuid = (
+			UPDATE organizations SET "parentOrgUuid" = (
 				SELECT o2.uuid FROM organizations o2
-				WHERE o2.id = organizations.parentOrgId
+				WHERE o2.id = organizations."parentOrgId"
 			);
-			UPDATE peoplePositions SET personUuid = (
+			UPDATE "peoplePositions" SET "personUuid" = (
 				SELECT uuid FROM people
-				WHERE people.id = peoplePositions.personId
+				WHERE people.id = "peoplePositions"."personId"
 			);
-			UPDATE peoplePositions SET positionUuid = (
+			UPDATE "peoplePositions" SET "positionUuid" = (
 				SELECT uuid FROM positions
-				WHERE positions.id = peoplePositions.positionId
+				WHERE positions.id = "peoplePositions"."positionId"
 			);
-			UPDATE positionRelationships SET positionUuid_a = (
+			UPDATE "positionRelationships" SET "positionUuid_a" = (
 				SELECT uuid FROM positions
-				WHERE positions.id = positionRelationships.positionId_a
+				WHERE positions.id = "positionRelationships"."positionId_a"
 			);
-			UPDATE positionRelationships SET positionUuid_b = (
+			UPDATE "positionRelationships" SET "positionUuid_b" = (
 				SELECT uuid FROM positions
-				WHERE positions.id = positionRelationships.positionId_b
+				WHERE positions.id = "positionRelationships"."positionId_b"
 			);
-			UPDATE positions SET currentPersonUuid = (
+			UPDATE positions SET "currentPersonUuid" = (
 				SELECT uuid FROM people
-				WHERE people.id = positions.currentPersonId
+				WHERE people.id = positions."currentPersonId"
 			);
-			UPDATE positions SET locationUuid = (
+			UPDATE positions SET "locationUuid" = (
 				SELECT uuid FROM locations
-				WHERE locations.id = positions.locationId
+				WHERE locations.id = positions."locationId"
 			);
-			UPDATE positions SET organizationUuid = (
+			UPDATE positions SET "organizationUuid" = (
 				SELECT uuid FROM organizations
-				WHERE organizations.id = positions.organizationId
+				WHERE organizations.id = positions."organizationId"
 			);
-			UPDATE reportAuthorizationGroups SET authorizationGroupUuid = (
-				SELECT uuid FROM authorizationGroups
-				WHERE authorizationGroups.id = reportAuthorizationGroups.authorizationGroupId
+			UPDATE "reportAuthorizationGroups" SET "authorizationGroupUuid" = (
+				SELECT uuid FROM "authorizationGroups"
+				WHERE "authorizationGroups".id = "reportAuthorizationGroups"."authorizationGroupId"
 			);
-			UPDATE reportAuthorizationGroups SET reportUuid = (
+			UPDATE "reportAuthorizationGroups" SET "reportUuid" = (
 				SELECT uuid FROM reports
-				WHERE reports.id = reportAuthorizationGroups.reportId
+				WHERE reports.id = "reportAuthorizationGroups"."reportId"
 			);
-			UPDATE reportPeople SET personUuid = (
+			UPDATE "reportPeople" SET "personUuid" = (
 				SELECT uuid FROM people
-				WHERE people.id = reportPeople.personId
+				WHERE people.id = "reportPeople"."personId"
 			);
-			UPDATE reportPeople SET reportUuid = (
+			UPDATE "reportPeople" SET "reportUuid" = (
 				SELECT uuid FROM reports
-				WHERE reports.id = reportPeople.reportId
+				WHERE reports.id = "reportPeople"."reportId"
 			);
-			UPDATE reports SET advisorOrganizationUuid = (
+			UPDATE reports SET "advisorOrganizationUuid" = (
 				SELECT uuid FROM organizations
-				WHERE organizations.id = reports.advisorOrganizationId
+				WHERE organizations.id = reports."advisorOrganizationId"
 			);
-			UPDATE reports SET approvalStepUuid = (
-				SELECT uuid FROM approvalSteps
-				WHERE approvalSteps.id = reports.approvalStepId
+			UPDATE reports SET "approvalStepUuid" = (
+				SELECT uuid FROM "approvalSteps"
+				WHERE "approvalSteps".id = reports."approvalStepId"
 			);
-			UPDATE reports SET authorUuid = (
+			UPDATE reports SET "authorUuid" = (
 				SELECT uuid FROM people
-				WHERE people.id = reports.authorId
+				WHERE people.id = reports."authorId"
 			);
-			UPDATE reports SET locationUuid = (
+			UPDATE reports SET "locationUuid" = (
 				SELECT uuid FROM locations
-				WHERE locations.id = reports.locationId
+				WHERE locations.id = reports."locationId"
 			);
-			UPDATE reports SET principalOrganizationUuid = (
+			UPDATE reports SET "principalOrganizationUuid" = (
 				SELECT uuid FROM organizations
-				WHERE organizations.id = reports.principalOrganizationId
+				WHERE organizations.id = reports."principalOrganizationId"
 			);
-			UPDATE reportsSensitiveInformation SET reportUuid = (
+			UPDATE "reportsSensitiveInformation" SET "reportUuid" = (
 				SELECT uuid FROM reports
-				WHERE reports.id = reportsSensitiveInformation.reportId
+				WHERE reports.id = "reportsSensitiveInformation"."reportId"
 			);
-			UPDATE reportTags SET reportUuid = (
+			UPDATE "reportTags" SET "reportUuid" = (
 				SELECT uuid FROM reports
-				WHERE reports.id = reportTags.reportId
+				WHERE reports.id = "reportTags"."reportId"
 			);
-			UPDATE reportTags SET tagUuid = (
+			UPDATE "reportTags" SET "tagUuid" = (
 				SELECT uuid FROM tags
-				WHERE tags.id = reportTags.tagId
+				WHERE tags.id = "reportTags"."tagId"
 			);
-			UPDATE reportTasks SET reportUuid = (
+			UPDATE "reportTasks" SET "reportUuid" = (
 				SELECT uuid FROM reports
-				WHERE reports.id = reportTasks.reportId
+				WHERE reports.id = "reportTasks"."reportId"
 			);
-			UPDATE reportTasks SET taskUuid = (
+			UPDATE "reportTasks" SET "taskUuid" = (
 				SELECT uuid FROM tasks
-				WHERE tasks.id = reportTasks.taskId
+				WHERE tasks.id = "reportTasks"."taskId"
 			);
-			UPDATE savedSearches SET ownerUuid = (
+			UPDATE "savedSearches" SET "ownerUuid" = (
 				SELECT uuid FROM people
-				WHERE people.id = savedSearches.ownerId
+				WHERE people.id = "savedSearches"."ownerId"
 			);
-			UPDATE tasks SET customFieldRef1Uuid = (
+			UPDATE tasks SET "customFieldRef1Uuid" = (
 				SELECT t2.uuid FROM tasks t2
-				WHERE t2.id = tasks.customFieldRef1Id
+				WHERE t2.id = tasks."customFieldRef1Id"
 			);
-			UPDATE tasks SET organizationUuid = (
+			UPDATE tasks SET "organizationUuid" = (
 				SELECT uuid FROM organizations
-				WHERE organizations.id = tasks.organizationId
+				WHERE organizations.id = tasks."organizationId"
 			);
 		</sql>
 		<!-- Rolling back is not useful -->
@@ -1592,7 +1592,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="drop-id-foreignKey-constraints" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="drop-id-foreignKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<dropForeignKeyConstraint
 			baseTableName="approvalActions" constraintName="fk_approvalActions_step" />
 		<dropForeignKeyConstraint
@@ -1680,7 +1680,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="drop-id-unique-constraints" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="drop-id-unique-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<dropUniqueConstraint
 			tableName="authorizationGroupPositions" constraintName="uniqueAuthorizationGroupPositions" />
 		<dropUniqueConstraint
@@ -1825,7 +1825,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="add-uuid-unique-constraints" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="add-uuid-unique-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<addUniqueConstraint
 			tableName="authorizationGroupPositions" constraintName="UQ_AuthorizationGroupPositions" columnNames="authorizationGroupUuid, positionUuid" />
 		<addUniqueConstraint
@@ -1843,7 +1843,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="add-uuid-foreignKey-constraints" author="gjvoosten" dbms="!sqlite">
+	<changeSet id="add-uuid-foreignKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<addForeignKeyConstraint
 			baseTableName="approvalActions" constraintName="FK_approvalActions_step" baseColumnNames="approvalStepUuid"
 			referencedTableName="approvalSteps" referencedColumnNames="uuid"
