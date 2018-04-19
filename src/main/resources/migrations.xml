@@ -1177,7 +1177,7 @@
 	<changeSet id="rename-custom-field-enum-in-tasks-sqlite" author="maradragan" dbms="sqlite">
 		<!-- sqlite doesn't support rename column, so drop and add a new column -->
 		<addColumn tableName="tasks">
-			<column name="customFieldEnum1" type="nvarchar(max)" />
+			<column name="customFieldEnum1" type="text" />
 		</addColumn>
 		<dropColumn tableName="tasks" columnName="customFieldEnum" />
 	</changeSet>
@@ -1698,7 +1698,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="drop-id-primaryKey-constraints" author="gjvoosten">
+	<changeSet id="drop-id-primaryKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<dropPrimaryKey
 			tableName="approvalSteps" />
 		<dropPrimaryKey
@@ -1726,7 +1726,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="drop-id-notNull-constraints" author="gjvoosten">
+	<changeSet id="drop-id-notNull-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<!-- only for foreign keys; primary keys have IDENTITY so cannot be null -->
 		<dropNotNullConstraint
 			tableName="approvalSteps" columnName="advisorOrganizationId" columnDataType="int"  />
@@ -1749,7 +1749,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="add-uuid-notNull-constraints" author="gjvoosten">
+	<changeSet id="add-uuid-notNull-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<!-- primary keys -->
 		<addNotNullConstraint
 			tableName="approvalSteps" columnName="uuid" columnDataType="${uuid_type}" />
@@ -1797,7 +1797,7 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<changeSet id="add-uuid-primaryKey-constraints" author="gjvoosten">
+	<changeSet id="add-uuid-primaryKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
 		<addPrimaryKey
 			tableName="approvalSteps" constraintName="PK_approvalSteps" columnNames="uuid" />
 		<addPrimaryKey
