@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {Form, Button, InputGroup, FormControl, Popover, Overlay} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
@@ -7,17 +8,25 @@ import AdvancedSearch from 'components/AdvancedSearch'
 import SEARCH_ICON from 'resources/search-alt.png'
 
 import { withRouter } from 'react-router-dom'
+import { setSearchQuery } from 'actions'
+import { connect } from 'react-redux'
 import utils from 'utils'
 
 class SearchBar extends Component {
-	constructor() {
-		super()
+
+	static propTypes = {
+		onChange: PropTypes.func.isRequired,
+		query: PropTypes.string.isRequired
+	}
+
+	constructor(props) {
+		super(props)
 
 		this.state = {
-			query: '',
 			showAdvancedSearch: false
 		}
 	}
+
 	componentWillMount() {
 		this.unregisterHistoryListener = this.props.history.listen(this.setQueryState)
 	}
@@ -30,7 +39,7 @@ class SearchBar extends Component {
 		return <div>
 			<Form onSubmit={this.onSubmit}>
 				<InputGroup>
-					<FormControl value={this.state.query} placeholder="Search for people, reports, positions, or locations" onChange={this.onChange} id="searchBarInput" />
+					<FormControl value={this.props.query} placeholder="Search for people, reports, positions, or locations" onChange={this.props.onChange} id="searchBarInput" />
 					<InputGroup.Button>
 						<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
 					</InputGroup.Button>
@@ -53,15 +62,10 @@ class SearchBar extends Component {
 	}
 
 	@autobind
-	onChange(event) {
-		this.setState({query: event.target.value})
-	}
-
-	@autobind
 	onSubmit(event) {
 		this.props.history.push({
 			pathname: '/search',
-			search: utils.formatQueryString({text: this.state.query})
+			search: utils.formatQueryString({text: this.props.query})
 		})
 		event.preventDefault()
 		event.stopPropagation()
@@ -73,4 +77,12 @@ class SearchBar extends Component {
 	}
 }
 
-export default withRouter(SearchBar)
+const mapStateToProps = (state, ownProps) => ({
+	query: state.searchQuery.query
+})
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	onChange: event => dispatch(setSearchQuery({query: event.target.value}))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SearchBar))
