@@ -71,7 +71,7 @@ public class ReportDao implements IAnetDao<Report> {
 			case MSSQL:
 				return "DATEPART(week, %s)";
 			case SQLITE:
-				return "strftime('%%W', substr(%s, 1, 10))";
+				return "strftime('%%%%W', substr(%s, 1, 10))";
 			case POSTGRESQL:
 				return "EXTRACT(WEEK FROM %s)";
 			default:
