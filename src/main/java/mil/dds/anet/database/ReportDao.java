@@ -58,10 +58,25 @@ public class ReportDao implements IAnetDao<Report> {
 	private static final String tableName = "reports";
 	public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 
-	Handle dbHandle;
+	private final Handle dbHandle;
+	private final String weekFormat;
 
 	public ReportDao(Handle db) {
 		this.dbHandle = db;
+		this.weekFormat = getWeekFormat(DaoUtils.getDbType(db));
+	}
+
+	private String getWeekFormat(DaoUtils.DbType dbType) {
+		switch (dbType) {
+			case MSSQL:
+				return "DATEPART(week, %s)";
+			case SQLITE:
+				return "strftime('%%W', substr(%s, 1, 10))";
+			case POSTGRESQL:
+				return "EXTRACT(WEEK FROM %s)";
+			default:
+				throw new RuntimeException("No week format found for " + dbType);
+		}
 	}
 
 	public ReportList getAll(int pageNum, int pageSize) {
@@ -475,7 +490,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
 			sql.append("%3$s");
 			sql.append("%4$s");
-			sql.append("DATEPART(week, reports.\"createdAt\") AS week,");
+			sql.append(" " + String.format(weekFormat, "reports.\"createdAt\"") + " AS week,");
 			sql.append("COUNT(reports.\"authorUuid\") AS \"nrReportsSubmitted\"");
 
 			sql.append(" FROM ");
@@ -497,7 +512,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("organizations.\"shortName\",");
 			sql.append("%7$s");
 			sql.append("%8$s");
-			sql.append("DATEPART(week, reports.\"createdAt\")");
+			sql.append(" " + String.format(weekFormat, "reports.\"createdAt\""));
 		sql.append(") a");
 
 		sql.append(" FULL OUTER JOIN (");
@@ -506,7 +521,6 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
 			sql.append("%3$s");
 			sql.append("%4$s");
-			sql.append("DATEPART(week, reports.\"engagementDate\") AS week,");
 			sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrEngagementsAttended\"");
 
 			sql.append(" FROM ");
@@ -530,7 +544,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("organizations.\"shortName\",");
 			sql.append("%7$s");
 			sql.append("%8$s");
-			sql.append("DATEPART(week, reports.\"engagementDate\")");
+			sql.append(" " + String.format(weekFormat, "reports.\"engagementDate\""));
 		sql.append(") b");
 
 		sql.append(" ON ");
