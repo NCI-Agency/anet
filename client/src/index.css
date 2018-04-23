@@ -250,7 +250,7 @@ fieldset.danger {
 }
 
 .home-tile-row .row {
-	display: table;n
+	display: table;
 	width: 100%;
 	margin: 0;
 }
@@ -334,6 +334,12 @@ li#search-nav .nav > li {
 
 li#search-nav .nav > li a {
 	padding-right: 4px;
+}
+
+@media (min-width: 768px) {
+	.nav-fixed {
+		position: fixed;
+	}
 }
 
 .report-sub-form .form-group {
