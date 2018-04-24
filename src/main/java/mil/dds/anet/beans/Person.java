@@ -174,7 +174,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
-		query.setAttendeeUUid(uuid);
+		query.setAttendeeUuid(uuid);
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 	

@@ -147,7 +147,7 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		return attendeeUuid;
 	}
 
-	public void setAttendeeUUid(String attendeeUuid) {
+	public void setAttendeeUuid(String attendeeUuid) {
 		this.attendeeUuid = attendeeUuid;
 	}
 
@@ -195,8 +195,8 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		return orgUuid;
 	}
 
-	public void setOrgUuid(String orgUUid) {
-		this.orgUuid = orgUUid;
+	public void setOrgUuid(String orgUuid) {
+		this.orgUuid = orgUuid;
 	}
 
 	public boolean getIncludeOrgChildren() {

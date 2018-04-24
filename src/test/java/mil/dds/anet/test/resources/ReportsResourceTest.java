@@ -557,7 +557,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setEngagementDateStart(null);
 		query.setEngagementDateEnd(null);
 		query.setAuthorUuid(null);
-		query.setAttendeeUUid(steve.getUuid());
+		query.setAttendeeUuid(steve.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
@@ -570,7 +570,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Task task = taskResults.get(0);
 
 		//Search by Task
-		query.setAttendeeUUid(null);
+		query.setAttendeeUuid(null);
 		query.setTaskUuid(task.getUuid());
 		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
 		assertThat(searchResults.getList()).isNotEmpty();
