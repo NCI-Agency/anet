@@ -97,7 +97,6 @@
     "react-scrollspy": "^3.3.4",
     "react-tag-input": "^5.0.1",
     "redux": "^3.7.2",
-    "sourcemap-lookup": "^0.0.3",
     "whatwg-fetch": "^2.0.3"
   },
   "scripts": {
