@@ -330,7 +330,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 						onChange={this.onChange}
 						onErrorChange={this.onTaskError}
 						validationState={errors.tasks}
-						optional={true} />
+						optional={false} />
 				}
 
 				<Fieldset title={!isCancelled ? "Meeting discussion" : "Next steps and details"}>
