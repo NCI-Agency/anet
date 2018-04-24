@@ -50,7 +50,8 @@ class Nav extends Component {
 				offset={-152}
 			>
 				<AnchorLink scrollTo="info">Info</AnchorLink>
-				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
+				<AnchorLink scrollTo="supportedPositions">Supported positions</AnchorLink>
+				<AnchorLink scrollTo="vacantPositions">Vacant positions</AnchorLink>
 				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
 				<AnchorLink scrollTo="tasks">{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
 				<AnchorLink scrollTo="reports">Reports</AnchorLink>

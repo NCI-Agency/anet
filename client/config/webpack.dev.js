@@ -30,8 +30,8 @@ module.exports = merge(common, {
           }),
         new HtmlWebpackPlugin({
             title: 'ANET',
+            publicUrl: '/',
             inject: true,
-            publicUrl: '',
             template: 'public/index.hbs'
         }),
         new webpack.NamedModulesPlugin(),

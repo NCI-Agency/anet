@@ -1,5 +1,6 @@
 const paths = require('./paths')
 const ContextReplacementPlugin = require("webpack/lib/ContextReplacementPlugin")
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 
 module.exports = {
@@ -63,6 +64,10 @@ module.exports = {
     plugins: [
         new webpack.DefinePlugin({"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)}),
         new ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
+        new CopyWebpackPlugin([
+            { from: 'public', ignore : ['index.html','alloy-editor/**/*'] },
+            { from: 'node_modules/alloyeditor/dist/alloy-editor', to: 'alloy-editor'}
+        ])
         // new webpack.optimize.CommonsChunkPlugin({
         //     name: "dependencies",
         //     minChunks: ({ resource }) => /node_modules/.test(resource)
