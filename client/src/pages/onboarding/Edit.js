@@ -8,20 +8,21 @@ import PersonForm from 'pages/people/Form'
 import API from 'api'
 import {Person} from 'models'
 
-export default class OnboardingEdit extends Page {
+import { setPageProps, PAGE_PROPS_MIN_HEAD } from 'actions'
+import { connect } from 'react-redux'
+
+class OnboardingEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
 
-	static pageProps = {
-		useNavigation: false,
-		minimalHeader: true,
-	}
-
 	static modelName = 'User'
 
-	constructor(props, context) {
-		super(props)
+	constructor(props) {
+		super(props, PAGE_PROPS_MIN_HEAD)
 
 		this.state = {
 			person: new Person(),
@@ -57,3 +58,9 @@ export default class OnboardingEdit extends Page {
 		</div>
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(OnboardingEdit)

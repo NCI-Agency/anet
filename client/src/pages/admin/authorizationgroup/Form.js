@@ -4,7 +4,6 @@ import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
-import History from 'components/History'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -14,7 +13,10 @@ import PositionsSelector from 'components/PositionsSelector'
 import API from 'api'
 import {AuthorizationGroup} from 'models'
 
-export default class AuthorizationGroupForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
+
+class AuthorizationGroupForm extends ValidatableFormWrapper {
 	static propTypes = {
 		authorizationGroup: PropTypes.object.isRequired,
 		edit: PropTypes.bool
@@ -24,6 +26,7 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			isBlocking: false,
 			errors: {},
 		}
 	}
@@ -36,6 +39,8 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 		return (
 			<div>
+				<NavigationWarning isBlocking={this.state.isBlocking} />
+
 				<Messages success={this.state.success} error={this.state.error} />
 
 				<ValidatableForm formFor={authorizationGroup} onChange={this.onChange} onSubmit={this.onSubmit} horizontal submitText="Save authorization group">
@@ -77,6 +82,9 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
@@ -85,12 +93,19 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 		let authGroup = this.props.authorizationGroup
 		let edit = this.props.edit
 		let url = `/api/authorizationGroups/${edit ? 'update'  :'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, authGroup, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {
 					authGroup.id = response.id
 				}
-				History.push(AuthorizationGroup.pathFor(authGroup), {success: 'Saved authorization group', skipPageLeaveWarning: true})
+				this.props.history.push({
+					pathname: AuthorizationGroup.pathFor(authGroup),
+					state: {
+						success: 'Saved authorization group',
+					}
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
@@ -98,3 +113,5 @@ export default class AuthorizationGroupForm extends ValidatableFormWrapper {
 	}
 
 }
+
+export default withRouter(AuthorizationGroupForm)

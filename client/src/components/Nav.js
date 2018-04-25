@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
-import {Injectable, Injector} from 'react-injectables'
 import {Scrollspy} from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
@@ -10,21 +9,18 @@ import pluralize from 'pluralize'
 
 import {Organization} from 'models'
 
+import { withRouter } from 'react-router-dom'
+
 class Nav extends Component {
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
 	}
 
 	render() {
-		const injections = this.props.injections
-		if (injections && injections.length) {
-			return <div>{injections}</div>
-		}
-
 		const appData = this.context.app.state
 		const currentUser = appData.currentUser
 		const organizations = appData.organizations || []
-		let path = this.context.app.props.location.pathname
+		const path = this.props.location.pathname
 
 		const {settings} = appData || {}
 		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -38,9 +34,8 @@ class Nav extends Component {
 		const myOrg = currentUser.position ? currentUser.position.organization : null
 		let orgId, myOrgId
 		if (inOrg) {
-			orgId = +this.context.app.props.params.id
+			orgId = +path.split('/')[2]
 			myOrgId = myOrg && +myOrg.id
-			path = `/organizations/${orgId}`
 		}
 
 		const orgSubNav = (
@@ -63,6 +58,8 @@ class Nav extends Component {
 				<Link to="/">
 					<NavItem>Home</NavItem>
 				</Link>
+
+				<li id="search-nav"></li>
 
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
@@ -157,6 +154,8 @@ class Nav extends Component {
 	}
 }
 
+export default withRouter(Nav)
+
 function SubNav(props) {
 	let {componentClass, ...childProps} = props
 	childProps = Object.without(childProps, 'active')
@@ -175,25 +174,3 @@ const AnchorLink = function(props) {
 	}
 	return <NavItem onClick={onClick} {...childProps} />
 }
-
-let InjectableNav = null
-let ContentForNav = null
-if (process.env.NODE_ENV === 'test') {
-	ContentForNav = function(props) {
-		return <div />
-	}
-} else {
-	// this is some magic around the Injectable library to allow
-	// components further down the tree to inject children into the header
-	InjectableNav = Injectable(Nav)
-
-	const NavInjector = Injector({into: InjectableNav})
-	ContentForNav = function(props) {
-		let {children, ...childProps} = props
-		let Component = NavInjector(function() { return children })
-		return <Component {...childProps} />
-	}
-}
-
-export default InjectableNav
-export {ContentForNav}

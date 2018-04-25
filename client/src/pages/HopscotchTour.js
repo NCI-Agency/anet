@@ -1,9 +1,8 @@
-import History from 'components/History'
 import {Organization} from 'models'
 import Settings from 'Settings'
 import pluralize from 'pluralize'
 
-const userTour = (currentUser) => { return {
+const userTour = (currentUser, history) => { return {
 	id: 'home',
 	steps: [
 		{
@@ -49,7 +48,7 @@ const userTour = (currentUser) => { return {
 	]
 }}
 
-const superUserTour = (currentUser) => { return {
+const superUserTour = (currentUser, history) => { return {
 	id: 'home',
 	steps: [
 		{
@@ -92,13 +91,13 @@ const superUserTour = (currentUser) => { return {
 			placement: 'right',
 			fixedElement: true,
 			multipage: true,
-			onNext: () => History.push(Organization.pathFor(currentUser.position.organization))
+			onNext: () => history.push(Organization.pathFor(currentUser.position.organization))
 		},
 		{}
 	]
 }}
 
-const reportTour = (currentUser) => {
+const reportTour = (currentUser, history) => {
 	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'report',
@@ -185,7 +184,7 @@ const reportTour = (currentUser) => {
 	]
 }}
 
-const orgTour = (currentUser) => {
+const orgTour = (currentUser, history) => {
 	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'org',
@@ -247,7 +246,7 @@ const orgTour = (currentUser) => {
 	]
 }}
 
-const positionTour = (currentUser) => {
+const positionTour = (currentUser, history) => {
 	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 		id: 'position',
@@ -298,7 +297,7 @@ const positionTour = (currentUser) => {
 	}
 }
 
-const personTour = (currentUser) => { return {
+const personTour = (currentUser, history) => { return {
 	id: 'person',
 	steps: [
 		{

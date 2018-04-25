@@ -2,6 +2,8 @@ import React from 'react'
 import * as changeCase from 'change-case'
 import parseAddressList from 'email-addresses'
 import pluralize from 'pluralize'
+import decodeQuery from 'querystring/decode'
+import encodeQuery from 'querystring/encode'
 
 import Settings from 'Settings'
 
@@ -102,6 +104,20 @@ export default {
 			}
 		}
 		return { isValid: true, to: toAddresses }
+	},
+
+	parseQueryString: function(queryString) {
+		if (!queryString) {
+			return {}
+		}
+		return decodeQuery(queryString.slice(1)) || {}
+	},
+
+	formatQueryString: function(queryParams) {
+		if (!queryParams) {
+			return ''
+		}
+		return '?' + encodeQuery(queryParams)
 	}
 }
 

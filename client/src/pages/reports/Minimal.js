@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 import {Alert, Table, Button, Modal, Checkbox} from 'react-bootstrap'
@@ -13,25 +14,26 @@ import Tag from 'components/Tag'
 import API from 'api'
 import {Report, Person, Task} from 'models'
 
-export default class ReportMinimal extends Page {
-	static pageProps = {
-		useNavigation: false,
-		minimalHeader: true
-	}
+import { setPageProps, PAGE_PROPS_MIN_HEAD } from 'actions'
+import { connect } from 'react-redux'
+
+class ReportMinimal extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static modelName = 'Report'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_MIN_HEAD)
 
 		this.state = {
-			report: new Report({id: props.params.id}),
+			report: new Report({id: props.match.params.id}),
 		}
 	}
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			report(id:${props.params.id}) {
+			report(id:${props.match.params.id}) {
 				id, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
@@ -344,3 +346,9 @@ export default class ReportMinimal extends Page {
 		this.setState(this.state)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(ReportMinimal)

@@ -1,21 +1,23 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 
 import LocationForm from './Form'
 import {Location} from 'models'
 
 import API from 'api'
 
-export default class LocationEdit extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class LocationEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			location: {},
@@ -25,7 +27,7 @@ export default class LocationEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			location(id:${props.params.id}) {
+			location(id:${props.match.params.id}) {
 				id, name, status, lat, lng
 			}
 		`).then(data => {
@@ -40,9 +42,14 @@ export default class LocationEdit extends Page {
 			<div>
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<NavigationWarning original={this.state.originalLocation} current={location} />
-				<LocationForm location={location} edit />
+				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />
 			</div>
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(LocationEdit)

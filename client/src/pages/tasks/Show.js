@@ -17,7 +17,13 @@ import {Task} from 'models'
 
 import moment from 'moment'
 
-export default class TaskShow extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class TaskShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 		app: PropTypes.object.isRequired,
@@ -30,10 +36,10 @@ export default class TaskShow extends Page {
 
 		this.state = {
 			task: new Task({
-				id: props.params.id,
-				shortName: props.params.shorName,
-				longName: props.params.longName,
-				responsibleOrg: props.params.responsibleOrg
+				id: props.match.params.id,
+				shortName: props.match.params.shortName,
+				longName: props.match.params.longName,
+				responsibleOrg: props.match.params.responsibleOrg
 			}),
 			reportsPageNum: 0,
 		}
@@ -57,11 +63,11 @@ export default class TaskShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			taskId: props.params.id,
+			taskId: props.match.params.id,
 		})
 
 		let taskQuery = new GQL.Part(/* GraphQL */`
-			task(id:${props.params.id}) {
+			task(id:${props.match.params.id}) {
 				id, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
@@ -141,3 +147,9 @@ export default class TaskShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(TaskShow)

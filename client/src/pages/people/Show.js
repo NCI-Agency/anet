@@ -21,7 +21,13 @@ import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
 import Settings from 'Settings'
 
-export default class PersonShow extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class PersonShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -32,7 +38,7 @@ export default class PersonShow extends Page {
 		super(props)
 		this.state = {
 			person: new Person({
-				id: props.params.id,
+				id: props.match.params.id,
 			}),
 			authoredReports: null,
 			attendedReports: null,
@@ -79,7 +85,7 @@ export default class PersonShow extends Page {
 
 	fetchData(props) {
 		let personPart = new GQL.Part(/* GraphQL */`
-			person(id:${props.params.id}) {
+			person(id:${props.match.params.id}) {
 				id,
 				name, rank, role, status, emailAddress, phoneNumber,
 				biography, country, gender, endOfTourDate,
@@ -97,8 +103,8 @@ export default class PersonShow extends Page {
 					}
 				}
 			}`)
-		let authoredReportsPart = this.getAuthoredReportsPart(props.params.id)
-		let attendedReportsPart = this.getAttendedReportsPart(props.params.id)
+		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.id)
+		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.id)
 
 		GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
 			this.setState({
@@ -175,7 +181,7 @@ export default class PersonShow extends Page {
 
 					<Fieldset title="Position" >
 						<Fieldset title="Current Position" id="current-position"
-							className={(!position || !position.id) && 'warning'}
+							className={(!position || !position.id) ? 'warning' : undefined}
 							action={position && position.id && canChangePosition &&
 								<div>
 									<LinkTo position={position} edit button="default" >Edit position details</LinkTo>
@@ -246,7 +252,7 @@ export default class PersonShow extends Page {
 		let assocTitle = position.type === Position.TYPE.PRINCIPAL ? 'Is advised by' : 'Advises'
 		return <FormGroup controlId="counterparts">
 			<Col sm={2} componentClass={ControlLabel}>{assocTitle}</Col>
-			<Col sm={9}>
+			<Col sm={10}>
 				<Table>
 					<thead>
 						<tr><th>Name</th><th>Position</th><th>Organization</th></tr>
@@ -328,3 +334,9 @@ export default class PersonShow extends Page {
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(PersonShow)

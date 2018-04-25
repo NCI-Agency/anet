@@ -11,7 +11,6 @@ import ReportCollection from 'components/ReportCollection'
 import CalendarButton from 'components/CalendarButton'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Form from 'components/Form'
-import History from 'components/History'
 import Messages from 'components/Messages'
 import Settings from 'Settings'
 
@@ -19,6 +18,10 @@ import {Organization, Report} from 'models'
 import utils from 'utils'
 
 import API from 'api'
+
+import { withRouter } from 'react-router-dom'
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
 
 var d3 = null/* required later */
 
@@ -38,10 +41,11 @@ const legendCss = {
 	display: 'inline-block',
 }
 
-export default class RollupShow extends Page {
-	static propTypes = {
+class RollupShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes, {
 		date: PropTypes.object,
-	}
+	})
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -55,8 +59,9 @@ export default class RollupShow extends Page {
 	constructor(props) {
 		super(props)
 
+		const qs = utils.parseQueryString(props.location.search)
 		this.state = {
-			date: moment(+props.date || +props.location.query.date || undefined),
+			date: moment(+props.date || +qs.date || undefined),
 			reports: {list: []},
 			reportsPageNum: 0,
 			graphData: [],
@@ -70,7 +75,8 @@ export default class RollupShow extends Page {
 	}
 
 	componentWillReceiveProps(newProps, newContext) {
-		let newDate = moment(+newProps.location.query.date || undefined)
+		const qs = utils.parseQueryString(newProps.location.search)
+		let newDate = moment(+qs.date || undefined)
 		if (!this.state.date.isSame(newDate)) {
 			this.setState({date: newDate}, () => this.loadData(newProps, newContext))
 		} else {
@@ -330,7 +336,10 @@ export default class RollupShow extends Page {
 	@autobind
 	changeRollupDate(newDate) {
 		let date = moment(newDate)
-		History.replace({pathname: 'rollup', query: {date: date.valueOf()}})
+		this.props.history.replace({
+			pathname: 'rollup',
+			search: utils.formatQueryString({date: date.valueOf()})
+		})
 	}
 
 	@autobind
@@ -451,3 +460,9 @@ export default class RollupShow extends Page {
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(RollupShow))

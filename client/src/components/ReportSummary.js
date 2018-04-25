@@ -84,7 +84,7 @@ export default class ReportSummary extends Component {
 					}
 					{report.location &&
 						<span>
-							<LinkTo location={report.location} />
+							<LinkTo anetLocation={report.location} />
 						</span>
 					}
 				</Col>

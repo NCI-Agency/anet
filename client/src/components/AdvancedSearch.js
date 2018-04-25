@@ -6,7 +6,6 @@ import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import History from 'components/History'
 
 import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
@@ -19,6 +18,10 @@ import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 import {Location, Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
+
+import { withRouter } from 'react-router-dom'
+import _isEqual from 'lodash/isEqual'
+import _cloneDeepWith from 'lodash/cloneDeepWith'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -52,7 +55,7 @@ const taskFilters = props => {
 	return taskFiltersObj
 }
 
-export default class AdvancedSearch extends Component {
+class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
 	}
@@ -246,7 +249,7 @@ export default class AdvancedSearch extends Component {
 		if (props.query) {
 			this.setState(props.query)
 		}
-		if (nextContext !== this.context) {
+		if (!_isEqual(this.context, nextContext)) {
 			this.ALL_FILTERS = this.getFilters(nextContext)
 		}
 	}
@@ -336,15 +339,28 @@ export default class AdvancedSearch extends Component {
 	}
 
 	@autobind
+	resolveToQuery(value) {
+		if (typeof value === 'function' && value.name && value.name.startsWith('bound ')) {
+			return value()
+		}
+	}
+
+	@autobind
 	onSubmit(event) {
-		let queryState = {objectType: this.state.objectType, filters: this.state.filters, text: this.state.text}
+		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
+		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
 		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
-			History.push('/search', {advancedSearch: queryState})
+			this.props.history.push({
+				pathname: '/search',
+				state: {advancedSearch: queryState}
+			})
 			event.preventDefault()
 			event.stopPropagation()
 		}
 	}
 }
+
+export default withRouter(AdvancedSearch)
 
 class SearchFilter extends Component {
 	static propTypes = {

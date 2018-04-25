@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 import {Row, Col} from 'react-bootstrap'
 import moment from 'moment'
 import _uniqueId from 'lodash/uniqueId'

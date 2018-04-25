@@ -1,8 +1,8 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import AuthorizationGroupForm from 'pages/admin/authorizationgroup/Form'
@@ -10,13 +10,15 @@ import {AuthorizationGroup} from 'models'
 
 import API from 'api'
 
-export default class AuthorizationGroupEdit extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class AuthorizationGroupEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			authorizationGroup: new AuthorizationGroup(),
@@ -26,7 +28,7 @@ export default class AuthorizationGroupEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-				authorizationGroup(id:${props.params.id}) {
+				authorizationGroup(id:${props.match.params.id}) {
 				id, name, description
 				positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
 				status
@@ -46,9 +48,14 @@ export default class AuthorizationGroupEdit extends Page {
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)], ["Edit", AuthorizationGroup.pathForEdit(authorizationGroup)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<NavigationWarning original={this.state.originalAuthorizationGroup} current={authorizationGroup} />
-				<AuthorizationGroupForm authorizationGroup={authorizationGroup} edit />
+				<AuthorizationGroupForm original={this.state.originalAuthorizationGroup} authorizationGroup={authorizationGroup} edit />
 			</div>
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(AuthorizationGroupEdit)

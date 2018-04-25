@@ -6,6 +6,7 @@ import autobind from 'autobind-decorator'
 import ReportSummary from 'components/ReportSummary'
 import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import {Location} from 'models'
 import Leaflet from 'components/Leaflet'
 import _get from 'lodash/get'
 
@@ -148,8 +149,8 @@ export default class ReportCollection extends Component {
 	renderMap(reports) {
 		let markers = []
 		reports.forEach(report => {
-			if (report.location && report.location.lat) {
-				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng , name: report.intent })
+			if (Location.hasCoordinates(report.location)) {
+				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng, name: report.intent})
 			}
 		})
 		return <Leaflet markers={markers} />

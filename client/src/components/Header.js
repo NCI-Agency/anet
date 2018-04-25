@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Link} from 'react-router'
+import {Link} from 'react-router-dom'
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import SearchBar from 'components/SearchBar'
@@ -9,8 +9,8 @@ import logo from 'resources/logo.png'
 
 const backgroundCss = {
 	background: '#fff',
-	paddingTop: '58px',
-	height: '132px',
+	paddingTop: '2em',
+	height: '100%',
 	boxShadow: '0 4px 3px 0 rgba(0,0,0,0.1)',
 	zIndex: 100
 }
@@ -19,7 +19,7 @@ export default class Header extends Component {
 	render() {
 		return (
 			<header style={backgroundCss} className="header">
-				<Grid>
+				<Grid fluid>
 					<Row>
 						<Col xs={3}>
 							{

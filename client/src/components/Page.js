@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import _get from 'lodash/get'
 import autobind from 'autobind-decorator'
@@ -10,6 +11,10 @@ import API from 'api'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
+import _isEqual from 'lodash/isEqual'
+
+import { DEFAULT_PAGE_PROPS } from 'actions'
+
 const NPROGRESS_CONTAINER = '.header'
 
 if (process.env.NODE_ENV !== 'test') {
@@ -19,8 +24,16 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 export default class Page extends Component {
-	constructor() {
-		super()
+
+	static propTypes = {
+		setPageProps: PropTypes.func.isRequired,
+	}
+
+	constructor(props, pageProps) {
+		super(props)
+		if (typeof props.setPageProps === 'function') {
+			props.setPageProps(pageProps || DEFAULT_PAGE_PROPS)
+		}
 
 		this.state = {
 			notFound: false,
@@ -81,7 +94,7 @@ export default class Page extends Component {
 	render() {
 		if (this.state.notFound) {
 			let modelName = this.constructor.modelName
-			let text = modelName ? `${modelName} #${this.props.params.id}` : `Page`
+			let text = modelName ? `${modelName} #${this.props.match.params.id}` : `Page`
 			return <NotFound text={`${text} not found.`} />
 		} else if (this.state.invalidRequest) {
 			return <NotFound text="There was an error processing this request. Please contact an administrator." />
@@ -91,9 +104,21 @@ export default class Page extends Component {
 	}
 
 	componentWillReceiveProps(nextProps, nextContext) {
-		if (nextProps !== this.props) {
+		// Location always has a new key. In order to check whether the location
+		// really changed filter out the key.
+		const locationFilterProps = ['key']
+		const nextPropsFilteredLocation = Object.without(nextProps.location, ...locationFilterProps)
+		const propsFilteredLocation = Object.without(this.props.location, ...locationFilterProps)
+		// Filter out React Router props before comparing; for the property names,
+		// see https://github.com/ReactTraining/react-router/issues/4424#issuecomment-285809552
+		const routerProps = ['match', 'location', 'history']
+		const filteredNextProps = Object.without(nextProps, ...routerProps)
+		const filteredProps = Object.without(this.props, ...routerProps)
+		if (!_isEqual(filteredProps, filteredNextProps)) {
 			this.loadData(nextProps, nextContext)
-		} else if (this.context && (this.context !== nextContext)) {
+		} else if (!_isEqual(propsFilteredLocation, nextPropsFilteredLocation)) {
+			this.loadData(nextProps, nextContext)
+		} else if (!_isEqual(this.context, nextContext)) {
 			this.loadData(nextProps, nextContext)
 		}
 	}

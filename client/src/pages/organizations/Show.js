@@ -23,9 +23,15 @@ import Settings from 'Settings'
 import {Organization, Position, Report, Task} from 'models'
 import GQL from 'graphqlapi'
 
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
 const NO_REPORT_FILTER = 'NO_FILTER'
 
-export default class OrganizationShow extends Page {
+class OrganizationShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -36,11 +42,11 @@ export default class OrganizationShow extends Page {
 		super(props)
 
 		this.state = {
-			organization: new Organization({id: props.params.id}),
+			organization: new Organization({id: props.match.params.id}),
 			reports: null,
 			tasks: null,
 			reportsFilter: NO_REPORT_FILTER,
-			action: props.params.action
+			action: props.match.params.action
 		}
 
 		this.reportsPageNum = 0
@@ -53,18 +59,18 @@ export default class OrganizationShow extends Page {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if (nextProps.params.action !== this.state.action) {
-			this.setState({action: nextProps.params.action})
+		if (nextProps.match.params.action !== this.state.action) {
+			this.setState({action: nextProps.match.params.action})
 		}
 
-		if (+nextProps.params.id !== this.state.organization.id) {
+		if (+nextProps.match.params.id !== this.state.organization.id) {
 			this.loadData(nextProps)
 		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
 		if(prevState.reportsFilter !== this.state.reportsFilter){
-			let reports = this.getReportQueryPart(this.props.params.id)
+			let reports = this.getReportQueryPart(this.props.match.params.id)
 			this.runGQLReports([reports])
 		}
 	}
@@ -105,7 +111,7 @@ export default class OrganizationShow extends Page {
 
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
-			organization(id:${props.params.id}) {
+			organization(id:${props.match.params.id}) {
 				id, shortName, longName, status, identificationCode, type
 				parentOrg { id, shortName, longName, identificationCode }
 				childrenOrgs { id, shortName, longName, identificationCode },
@@ -121,8 +127,8 @@ export default class OrganizationShow extends Page {
 					id, name, approvers { id, name, person { id, name}}
 				}
 			}`)
-		let reportsPart = this.getReportQueryPart(props.params.id)
-		let tasksPart = this.gettaskQueryPart(props.params.id)
+		let reportsPart = this.getReportQueryPart(props.match.params.id)
+		let tasksPart = this.gettaskQueryPart(props.match.params.id)
 
 		this.runGQL([orgPart, reportsPart, tasksPart])
 	}
@@ -275,3 +281,9 @@ export default class OrganizationShow extends Page {
 	}
 
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(OrganizationShow)

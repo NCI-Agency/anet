@@ -4,7 +4,6 @@ import Page from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 
 import ReportForm from './Form'
 
@@ -13,17 +12,19 @@ import {reportTour} from 'pages/HopscotchTour'
 
 import {Report} from 'models'
 
-export default class ReportNew extends Page {
-	static pageProps = {
-		useNavigation: false,
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class ReportNew extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			report: new Report(),
@@ -65,9 +66,14 @@ export default class ReportNew extends Page {
 				<Breadcrumbs items={[['Submit a report', Report.pathForNew()]]} />
 				<Messages error={this.state.error} />
 
-				<NavigationWarning original={this.state.originalReport} current={this.state.report} />
-				<ReportForm report={this.state.report} title="Create a new Report" />
+				<ReportForm original={this.state.originalReport} report={this.state.report} title="Create a new Report" />
 			</div>
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(ReportNew)

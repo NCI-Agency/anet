@@ -14,13 +14,20 @@ import {AuthorizationGroup} from 'models'
 import GQL from 'graphqlapi'
 import autobind from 'autobind-decorator'
 
-export default class AuthorizationGroupShow extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class AuthorizationGroupShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			authorizationGroup: new AuthorizationGroup(),
 			positions: null,
@@ -61,13 +68,13 @@ export default class AuthorizationGroupShow extends Page {
 
 	fetchData(props) {
 		let authGroupPart = new GQL.Part(/* GraphQL */`
-			authorizationGroup(id:${props.params.id}) {
+			authorizationGroup(id:${props.match.params.id}) {
 			id, name, description
 			positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
 			status
 		}` )
-		let positionsPart = this.getPositionQueryPart(props.params.id)
-		let reportsPart = this.getReportQueryPart(props.params.id)
+		let positionsPart = this.getPositionQueryPart(props.match.params.id)
+		let reportsPart = this.getReportQueryPart(props.match.params.id)
 		this.runGQL([authGroupPart, positionsPart, reportsPart])
 	}
 
@@ -131,3 +138,9 @@ export default class AuthorizationGroupShow extends Page {
 	}
 
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(AuthorizationGroupShow)

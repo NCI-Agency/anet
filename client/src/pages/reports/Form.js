@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Checkbox, Table, Button, Collapse, HelpBlock} from 'react-bootstrap'
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 import { WithContext as ReactTags } from 'react-tag-input'
 import 'components/reactTags.css'
@@ -14,7 +14,6 @@ import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
-import History from 'components/History'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 
 import moment from 'moment'
@@ -28,10 +27,14 @@ import LOCATION_ICON from 'resources/locations.png'
 import REMOVE_ICON from 'resources/delete.png'
 import WARNING_ICON from 'resources/warning.png'
 
-export default class ReportForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
+
+class ReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
-		edit: PropTypes.bool
+		edit: PropTypes.bool,
+		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
 	}
 
 	static contextTypes = {
@@ -42,13 +45,14 @@ export default class ReportForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			isBlocking: false,
 			recents: {
 				persons: [],
 				locations: [],
 				tasks: [],
 				authorizationGroups: [],
 			},
-			tagList: [],
+			reportTags: [],
 			suggestionList: [],
 
 			showReportText: false,
@@ -65,8 +69,6 @@ export default class ReportForm extends ValidatableFormWrapper {
 			showAutoSaveBanner: false,
 			autoSaveError: null,
 		}
-		this.handleTagDelete = this.handleTagDelete.bind(this)
-		this.handleTagAddition = this.handleTagAddition.bind(this)
 		this.defaultTimeout = moment.duration(30, 'seconds')
 		this.autoSaveTimeout = this.defaultTimeout.clone()
 	}
@@ -96,8 +98,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 					tasks: data.taskList.list,
 					authorizationGroups: data.authorizationGroupList.list,
 				},
-				tagList: data.tagList.list,
-				suggestionList: data.tagList.list.map(function(tag) { return tag.name }),
+				suggestionList: data.tagList.list.map(tag => ({id: tag.id.toString(), text: tag.name})),
 			}
 			this.setState(newState)
 		})
@@ -121,19 +122,39 @@ export default class ReportForm extends ValidatableFormWrapper {
 		if (report.cancelledReason) {
 			this.setState({isCancelled: true})
 		}
-		this.setState({showReportText: !!report.reportText || !!report.reportSensitiveInformation})
+		const reportTags = report.tags.map(tag => ({id: tag.id.toString(), text: tag.name}))
+		this.setState({
+			reportTags: reportTags,
+			showReportText: !!report.reportText || !!report.reportSensitiveInformation
+		})
 	}
 
-    handleTagDelete(i) {
-        let {tags} = this.props.report
-        tags.splice(i, 1)
-    }
+	@autobind
+	handleTagDelete(i) {
+		let {reportTags} = this.state
+		reportTags.splice(i, 1)
+		this.setState({reportTags})
+	}
 
-    handleTagAddition(tag) {
-        let newTag = this.state.tagList.find(function (t) { return t.name === tag })
-        let {tags} = this.props.report
-        tags.push(newTag)
-    }
+	@autobind
+	handleTagAddition(tag) {
+		const newTag = this.state.suggestionList.find(t => t.id === tag.id)
+		if (newTag) {
+			let {reportTags} = this.state
+			reportTags.push(newTag)
+			this.setState({reportTags})
+		}
+	}
+
+	@autobind
+	handleTagSuggestions(query, suggestions) {
+		const text = ((query && typeof query === 'object') ? query.text : query).toLowerCase()
+		const {reportTags} = this.state
+		return suggestions.filter(item => (
+			item.text.toLowerCase().includes(text)
+			&& !reportTags.some(reportTag => reportTag.id === item.id)
+		))
+	}
 
 	render() {
 		const { currentUser } = this.context
@@ -160,6 +181,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		return <div className="report-form">
+			<NavigationWarning isBlocking={this.state.isBlocking} />
 
 			<Collapse in={showAutoSaveBanner}>
 				{(autoSaveError &&
@@ -189,8 +211,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 				</div>
 			}
 
-			<ValidatableForm formFor={report} horizontal onSubmit={this.onSubmit} onChange={this.onChange}
-				onDelete={onDelete} deleteText="Delete this report"
+			<ValidatableForm formFor={report} horizontal
+				onSubmit={this.onSubmit} onChange={this.onChange} onDelete={onDelete}
 				submitDisabled={hasErrors} submitText={submitText}
 				bottomAccessory={this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format('hh:mm:ss')}</div>}
 			>
@@ -258,9 +280,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 					}
 
 					<Form.Field id="tags" label="Tags">
-						<ReactTags tags={report.tags}
+						<ReactTags tags={this.state.reportTags}
 							suggestions={suggestionList}
-							labelField={'name'}
 							classNames={{
 								tag: 'reportTag label label-info',
 								remove: 'reportTagRemove label-info',
@@ -268,6 +289,7 @@ export default class ReportForm extends ValidatableFormWrapper {
 							minQueryLength={1}
 							autocomplete={true}
 							autofocus={false}
+							handleFilterSuggestions={this.handleTagSuggestions}
 							handleDelete={this.handleTagDelete}
 							handleAddition={this.handleTagAddition} />
 					</Form.Field>
@@ -500,7 +522,11 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
-		this.setState({errors : this.validateReport(), reportChanged: true})
+		this.setState({
+			errors : this.validateReport(),
+			reportChanged: true,
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
@@ -519,7 +545,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	saveReport(disableSubmits) {
-		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText'))
+		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
+		report.tags = this.state.reportTags.map(tag => ({id: tag.id}))
 		let isCancelled = this.state.isCancelled
 		let edit = !!report.id
 		if(report.primaryAdvisor) { report.attendees.find(a => a.id === report.primaryAdvisor.id).isPrimary = true }
@@ -545,6 +572,8 @@ export default class ReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		this.saveReport(true)
 			.then(response => {
 				if (response.id) {
@@ -554,12 +583,14 @@ export default class ReportForm extends ValidatableFormWrapper {
 				// this updates the current page URL on model/new to be the edit page,
 				// so that if you press back after saving a new model, it takes you
 				// back to editing the model you just saved
-				History.replace(Report.pathForEdit(this.props.report), false)
+				this.props.history.replace(Report.pathForEdit(this.props.report))
 
 				// then after, we redirect you to the to page
-				History.push(Report.pathFor(this.props.report), {
-					success: 'Report saved successfully',
-					skipPageLeaveWarning: true
+				this.props.history.push({
+					pathname: Report.pathFor(this.props.report),
+					state: {
+						success: 'Report saved successfully',
+					}
 				})
 			})
 			.catch(response => {
@@ -615,3 +646,5 @@ export default class ReportForm extends ValidatableFormWrapper {
 		this.setState({showAutoSaveBanner: false})
 	}
 }
+
+export default withRouter(ReportForm)

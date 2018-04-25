@@ -14,7 +14,13 @@ import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import {Location} from 'models'
 
-export default class LocationShow extends Page {
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class LocationShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -39,11 +45,11 @@ export default class LocationShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			locationId: props.params.id,
+			locationId: props.match.params.id,
 		})
 
 		let locationQuery = new GQL.Part(/* GraphQL */`
-			location(id:${props.params.id}) {
+			location(id:${props.match.params.id}) {
 				id, name, lat, lng
 			}
 		`)
@@ -61,7 +67,7 @@ export default class LocationShow extends Page {
 		let currentUser = this.context.currentUser
 		let markers=[]
 		let latlng = 'None'
-		if (location.lat && location.lng) {
+		if (Location.hasCoordinates(location)) {
 			latlng = location.lat + ', ' + location.lng
 			markers.push({name: location.name, lat: location.lat, lng: location.lng})
 		}
@@ -73,7 +79,7 @@ export default class LocationShow extends Page {
 				<Messages success={this.state.success} error={this.state.error} />
 
 				<Form static formFor={location} horizontal >
-					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo location={location} edit button="primary">Edit</LinkTo>} >
+					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>} >
 						<Form.Field id="status" />
 
 						<Form.Field id="latlng" value={latlng} label="Lat/Lon" />
@@ -94,3 +100,9 @@ export default class LocationShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(LocationShow)

@@ -1,23 +1,25 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import PositionForm from './Form'
 
 import API from 'api'
 import {Position} from 'models'
 
-export default class PositionEdit extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class PositionEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static modelName = 'Position'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			position: new Position(),
@@ -27,7 +29,7 @@ export default class PositionEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			position(id:${props.params.id}) {
+			position(id:${props.match.params.id}) {
 				id, name, code, status, type
 				location { id, name },
 				associatedPositions { id, name, person { id, name, rank } },
@@ -59,9 +61,14 @@ export default class PositionEdit extends Page {
 			<div>
 				<Breadcrumbs items={[[`Edit ${position.name}`, Position.pathForEdit(position)]]} />
 
-				<NavigationWarning original={this.state.originalPosition} current={position} />
-				<PositionForm position={position} edit success={this.state.success} error={this.state.error} />
+				<PositionForm original={this.state.originalPosition} position={position} edit success={this.state.success} error={this.state.error} />
 			</div>
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(PositionEdit)

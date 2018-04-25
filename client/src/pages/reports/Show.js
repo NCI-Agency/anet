@@ -7,7 +7,6 @@ import autobind from 'autobind-decorator'
 import moment from 'moment'
 import utils from 'utils'
 
-import History from 'components/History'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Form from 'components/Form'
@@ -20,10 +19,16 @@ import API from 'api'
 import Settings from 'Settings'
 import {Report, Person, Task, Comment, Position} from 'models'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
+import ConfirmDelete from 'components/ConfirmDelete'
 
-export default class ReportShow extends Page {
+import { withRouter } from 'react-router-dom'
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class ReportShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -32,8 +37,9 @@ export default class ReportShow extends Page {
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
-			report: new Report({id: props.params.id}),
+			report: new Report({id: props.match.params.id}),
 			newComment: new Comment(),
 			approvalComment: new Comment(),
 			showEmailModal: false,
@@ -43,7 +49,7 @@ export default class ReportShow extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			report(id:${props.params.id}) {
+			report(id:${props.match.params.id}) {
 				id, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
@@ -221,7 +227,7 @@ export default class ReportShow extends Page {
 						<Form.Field id="engagementDate" label="Engagement Date" getter={date => date && moment(date).format('D MMMM, YYYY')} />
 
 						<Form.Field id="location" label="Location">
-							{report.location && <LinkTo location={report.location} />}
+							{report.location && <LinkTo anetLocation={report.location} />}
 						</Form.Field>
 
 						{!isCancelled &&
@@ -384,13 +390,30 @@ export default class ReportShow extends Page {
 				</Form>
 				{currentUser.isAdmin() &&
 					<div className="submit-buttons"><div>
-					<Button bsStyle="warning" onClick={this.deleteReport} className="pull-right">
-						Delete report
-					</Button>
+						<ConfirmDelete
+							onConfirmDelete={this.onConfirmDelete}
+							objectType="report"
+							objectDisplay={'#' + this.state.report.id}
+							bsStyle="warning"
+							buttonLabel="Delete report"
+							className="pull-right" />
 					</div></div>
 				}
 			</div>
 		)
+	}
+
+	@autobind
+	onConfirmDelete() {
+		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Report deleted'}
+			})
+		}, data => {
+			this.setState({success:null})
+			this.handleError(data)
+		})
 	}
 
 	@autobind
@@ -593,23 +616,10 @@ export default class ReportShow extends Page {
 			</ul>
 		</Alert>
 	}
-
-
-	@autobind
-	deleteReport() {
-		confirmAlert({
-			title: 'Confirm to delete report',
-			message: "Are you sure you want to delete this report? This cannot be undone.",
-			confirmLabel: `Yes, I am sure that I want to delete report #${this.state.report.id}`,
-			cancelLabel: 'No, I am not entirely sure at this point',
-			onConfirm: () => {
-				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-					History.push('/', {success: 'Report deleted'})
-				}, data => {
-					this.setState({success:null})
-					this.handleError(data)
-				})
-			}
-		})
-	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(ReportShow))

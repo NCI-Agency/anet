@@ -6,21 +6,19 @@ import moment from 'moment'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
-import History from 'components/History'
 
 import ReportForm from './Form'
 
 import API from 'api'
 import {Report, Person} from 'models'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
+import { withRouter } from 'react-router-dom'
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
 
-export default class ReportEdit extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+class ReportEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static modelName = 'Report'
 
@@ -29,7 +27,7 @@ export default class ReportEdit extends Page {
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			report: new Report(),
@@ -39,7 +37,7 @@ export default class ReportEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			report(id:${props.params.id}) {
+			report(id:${props.match.params.id}) {
 				id, intent, engagementDate, atmosphere, atmosphereDetails, state
 				keyOutcomes, reportText, nextSteps, cancelledReason,
 				author { id, name },
@@ -69,32 +67,39 @@ export default class ReportEdit extends Page {
 
 		//Only the author can delete a report, and only in DRAFT.
 		let canDelete = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author)
+		const onConfirmDeleteProps = {
+				onConfirmDelete: this.onConfirmDelete,
+				objectType: "report",
+				objectDisplay: `#${this.state.report.id}`,
+				bsStyle: "warning",
+				buttonLabel: "Delete this report"
+		}
 
 		return (
 			<div className="report-edit">
 				<Breadcrumbs items={[['Report #' + report.id, '/reports/' + report.id], ['Edit', '/reports/' + report.id + '/edit']]} />
 
-				<NavigationWarning original={this.state.originalReport} current={report} />
-				<ReportForm edit report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && this.deleteReport} />
+				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
 			</div>
 		)
 	}
 
 	@autobind
-	deleteReport() {
-		confirmAlert({
-			title: 'Confirm to delete report',
-			message: "Are you sure you want to delete this report? This cannot be undone.",
-			confirmLabel: `Yes, I am sure that I want to delete report #${this.state.report.id}`,
-			cancelLabel: 'No, I am not entirely sure at this point',
-			onConfirm: () => {
-				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-					History.push('/', {success: 'Report deleted'})
-				}, data => {
-					this.setState({success:null})
-					this.handleError(data)
-				})
-			}
+	onConfirmDelete() {
+		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Report deleted'}
+			})
+		}, data => {
+			this.setState({success:null})
+			this.handleError(data)
 		})
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(ReportEdit))

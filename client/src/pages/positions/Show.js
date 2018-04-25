@@ -1,9 +1,8 @@
-/* eslint no-restricted-globals: ["off", "confirm"] */ //TODO remove this
 import PropTypes from 'prop-types'
 
 import React from 'react'
 import Page from 'components/Page'
-import {Link} from 'react-router'
+import {Link} from 'react-router-dom'
 import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
 
@@ -20,11 +19,19 @@ import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
 import Settings from 'Settings'
-import History from 'components/History'
 import {Position, Organization} from 'models'
 import autobind from 'autobind-decorator'
 
-export default class PositionShow extends Page {
+import ConfirmDelete from 'components/ConfirmDelete'
+
+import { withRouter } from 'react-router-dom'
+import { setPageProps } from 'actions'
+import { connect } from 'react-redux'
+
+class PositionShow extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
+
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
 	}
@@ -36,7 +43,7 @@ export default class PositionShow extends Page {
 
 		this.state = {
 			position: new Position( {
-				id: props.params.id,
+				id: props.match.params.id,
 				previousPeople: [],
 				associatedPositions: [],
 				showAssignPersonModal: false,
@@ -49,7 +56,7 @@ export default class PositionShow extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			position(id:${props.params.id}) {
+			position(id:${props.match.params.id}) {
 				id, name, type, status, code,
 				organization { id, shortName, longName, identificationCode },
 				person { id, name, rank },
@@ -112,13 +119,13 @@ export default class PositionShow extends Page {
 						</Form.Field>}
 
 						<Form.Field id="location" label="Location">
-							{position.location && <LinkTo location={position.location}>{position.location.name}</LinkTo>}
+							{position.location && <LinkTo anetLocation={position.location}>{position.location.name}</LinkTo>}
 						</Form.Field>
 					</Fieldset>
 
 					<Fieldset title="Current assigned person"
 						id="assigned-advisor"
-						className={(!position.person || !position.person.id) && 'warning'}
+						className={(!position.person || !position.person.id) ? 'warning' : undefined}
 						style={{textAlign: 'center'}}
 						action={position.person && position.person.id && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
 						{position.person && position.person.id
@@ -193,9 +200,15 @@ export default class PositionShow extends Page {
 					</Fieldset>
 				</Form>
 
-				{canDelete && <div className="pull-right submit-buttons">
-					<Button bsStyle="danger" onClick={this.deletePosition}>Delete Position</Button>
-				</div>}
+				{canDelete && <div className="submit-buttons"><div>
+					<ConfirmDelete
+						onConfirmDelete={this.deletePosition}
+						objectType="position"
+						objectDisplay={'#' + this.state.position.id}
+						bsStyle="warning"
+						buttonLabel="Delete position"
+						className="pull-right" />
+				</div></div>}
 			</div>
 		)
 	}
@@ -239,14 +252,19 @@ export default class PositionShow extends Page {
 
 	@autobind
 	deletePosition() {
-		if (!confirm("Are you sure you want to delete this position? This cannot be undone")) {
-			return
-		}
-
 		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
-			History.push('/', {success: 'Position Deleted'})
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Position Deleted'}
+			})
 		}, data => {
 			this.setState({success: null, error: data})
 		})
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(withRouter(PositionShow))

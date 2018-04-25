@@ -1,19 +1,21 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 
 import PersonForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import {Person} from 'models'
 
-export default class PersonNew extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class PersonNew extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			originalPerson: new Person(),
@@ -28,10 +30,14 @@ export default class PersonNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Person', Person.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalPerson} current={person} />
-
-				<PersonForm person={person} showPositionAssignment={true} />
+				<PersonForm original={this.state.originalPerson} person={person} showPositionAssignment={true} />
 			</div>
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(PersonNew)

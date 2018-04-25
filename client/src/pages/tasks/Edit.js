@@ -1,10 +1,10 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page from 'components/Page'
 import moment from 'moment'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 
 import TaskForm from './Form'
 
@@ -12,16 +12,17 @@ import API from 'api'
 import Settings from 'Settings'
 import {Task} from 'models'
 
-export default class TaskEdit extends Page {
-	static pageProps = {
-		useNavigation: false
-	}
+import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
 
+class TaskEdit extends Page {
+
+	static propTypes = Object.assign({}, Page.propTypes)
 
 	static modelName = 'Task'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			task: new Task(),
@@ -31,7 +32,7 @@ export default class TaskEdit extends Page {
 
 	fetchData(props) {
 		API.query(/* GraphQL */`
-			task(id:${props.params.id}) {
+			task(id:${props.match.params.id}) {
 				id, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
@@ -58,9 +59,14 @@ export default class TaskEdit extends Page {
 
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<NavigationWarning original={this.state.originalTask} current={task} />
-				<TaskForm task={task} edit />
+				<TaskForm original={this.state.originalTask} task={task} edit />
 			</div>
 		)
 	}
 }
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
+
+export default connect(null, mapDispatchToProps)(TaskEdit)

@@ -5,20 +5,64 @@ import {Grid, Row, Col} from 'react-bootstrap'
 
 import TopBar from 'components/TopBar'
 import Nav from 'components/Nav'
-import History from 'components/History'
 
 import API from 'api'
 import {Person, Organization} from 'models'
 
+import {Route, Switch} from 'react-router'
+import Home from 'pages/Home'
+import Search from 'pages/Search'
+import RollupShow from 'pages/rollup/Show'
+import GraphiQL from 'pages/GraphiQL'
+import Help from 'pages/Help'
+import PageMissing from 'pages/PageMissing'
 
-export default class App extends Page {
-	static PagePropTypes = {
-		useNavigation: PropTypes.bool,
-		fluidContainer: PropTypes.bool,
-	}
+import ReportNew from 'pages/reports/New'
+import ReportShow from 'pages/reports/Show'
+import ReportEdit from 'pages/reports/Edit'
+import ReportMinimal from 'pages/reports/Minimal'
+import MyReports from 'pages/reports/MyReports'
+
+import PersonShow from 'pages/people/Show'
+import PersonNew from 'pages/people/New'
+import PersonEdit from 'pages/people/Edit'
+
+import OrganizationShow from 'pages/organizations/Show'
+import OrganizationNew from 'pages/organizations/New'
+import OrganizationEdit from 'pages/organizations/Edit'
+
+import LocationShow from 'pages/locations/Show'
+import LocationEdit from 'pages/locations/Edit'
+import LocationNew from 'pages/locations/New'
+
+import PositionShow from 'pages/positions/Show'
+import PositionEdit from 'pages/positions/Edit'
+import PositionNew from 'pages/positions/New'
+
+import TaskShow from 'pages/tasks/Show'
+import TaskNew from 'pages/tasks/New'
+import TaskEdit from 'pages/tasks/Edit'
+
+import AdminIndex from 'pages/admin/Index'
+import MergePeople from 'pages/admin/MergePeople'
+import AuthorizationGroups from 'pages/admin/AuthorizationGroups'
+import AuthorizationGroupShow from 'pages/admin/authorizationgroup/Show'
+import AuthorizationGroupEdit from 'pages/admin/authorizationgroup/Edit'
+import AuthorizationGroupNew from 'pages/admin/authorizationgroup/New'
+
+import InsightsShow from  'pages/insights/Show'
+
+import OnboardingShow from 'pages/onboarding/Show'
+import OnboardingEdit from 'pages/onboarding/Edit'
+
+import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+import _isEqual from 'lodash/isEqual'
+
+class App extends Page {
 
 	static propTypes = {
-		children: PropTypes.element.isRequired,
+		pageProps: PropTypes.object,
 	}
 
 	static childContextTypes = {
@@ -33,22 +77,23 @@ export default class App extends Page {
 		}
 	}
 
-	constructor(props) {
-		super(props)
+	constructor(props, context) {
+		super(props, context)
 
 		this.state = {
+			pageProps: props.pageProps,
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
 		}
 
-		this.state = this.processData(window.ANET_DATA)
+		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
-	componentWillReceiveProps() {
-		// this is just to prevent App from refetching app settings on every
-		// single page load. in the future we may wish to do something more
-		// intelligent to refetch page settings
+	componentWillReceiveProps(nextProps) {
+		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
+			this.setState({pageProps: nextProps.pageProps})
+		}
 	}
 
 	fetchData() {
@@ -73,7 +118,7 @@ export default class App extends Page {
 			this.setState(this.processData(data), () => {
 				// if this is a new user, redirect to the create profile page
 				if (this.state.currentUser.isNewUser()) {
-					History.replace('/onboarding')
+					this.props.history.replace('/onboarding')
 				}
 			})
 		})
@@ -93,29 +138,140 @@ export default class App extends Page {
 	}
 
 	render() {
-		let pageProps = this.props.children.type.pageProps || {}
+		const routing = <Switch>
+			<Route exact path="/" component={Home} />
+			<Route path="/search" component={Search} />
+			<Route path="/rollup" component={RollupShow} />
+			<Route path="/graphiql" component={GraphiQL} />
+			<Route path="/help" component={Help} />
+			<Route
+				path="/reports"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={ReportNew} />
+					<Route path={`${url}/:id/edit`} component={ReportEdit} />
+					<Route path={`${url}/:id/min`} component={ReportMinimal} />
+					<Route path={`${url}/mine`} component={MyReports} />
+					<Route path={`${url}/:id`} component={ReportShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/people"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={PersonNew} />
+					<Route path={`${url}/:id/edit`} component={PersonEdit} />
+					<Route path={`${url}/:id`} component={PersonShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/organizations"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={OrganizationNew} />
+					<Route path={`${url}/:id/edit`} component={OrganizationEdit} />
+					<Route path={`${url}/:id/:action?`} component={OrganizationShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/locations"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={LocationNew} />
+					<Route path={`${url}/:id/edit`} component={LocationEdit} />
+					<Route path={`${url}/:id`} component={LocationShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/positions"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={PositionNew} />
+					<Route path={`${url}/:id/edit`} component={PositionEdit} />
+					<Route path={`${url}/:id`} component={PositionShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/tasks"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/new`} component={TaskNew} />
+					<Route path={`${url}/:id/edit`} component={TaskEdit} />
+					<Route path={`${url}/:id`} component={TaskShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/admin"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route exact path={`${url}/`} component={AdminIndex} />
+					<Route path={`${url}/mergePeople`} component={MergePeople} />
+					<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
+					<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
+					<Route path={`${url}/authorizationGroups/:id/edit`} component={AuthorizationGroupEdit} />
+					<Route path={`${url}/authorizationGroups/:id`} component={AuthorizationGroupShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/insights"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route path={`${url}/:insight`} component={InsightsShow} />
+				</Switch>
+			)}
+			/>
+			<Route
+				path="/onboarding"
+				render={({ match: { url } }) => (
+				<Switch>
+					<Route exact path={`${url}/`} component={OnboardingShow} />
+					<Route path={`${url}/edit`} component={OnboardingEdit} />
+				</Switch>
+			)}
+			/>
+
+			<Route path="*" component={PageMissing} />
+		</Switch>
+
 		return (
 			<div className="anet">
 				<TopBar
 					currentUser={this.state.currentUser}
 					settings={this.state.settings}
-					minimalHeader={pageProps.minimalHeader}
+					minimalHeader={this.state.pageProps.minimalHeader}
 					location={this.props.location} />
 
-				<Grid componentClass="section" bsClass={pageProps.fluidContainer ? 'container-fluid' : 'container'}>
-					{pageProps.useNavigation === false
-						? <Row><Col xs={12}>{this.props.children}</Col></Row>
+				<Grid fluid componentClass="section">
+					{this.state.pageProps.useNavigation === false
+						? <Row>
+								<Col xs={12}>
+									{routing}
+								</Col>
+							</Row>
 						: <Row>
-							<Col sm={3} className="hide-for-print">
-								<Nav />
-							</Col>
-							<Col sm={9} className="primary-content">
-								{this.props.children}
-							</Col>
-						</Row>
+								<Col sm={4} md={3} className="hide-for-print">
+									<Nav />
+								</Col>
+								<Col sm={8} md={9} className="primary-content">
+									{routing}
+								</Col>
+							</Row>
 					}
 				</Grid>
 			</div>
 		)
 	}
 }
+
+const mapStateToProps = (state, ownProps) => ({
+	pageProps: state.pageProps
+})
+
+export default connect(mapStateToProps)(withRouter(App))

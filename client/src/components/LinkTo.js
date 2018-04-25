@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Link} from 'react-router'
+import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import decodeQuery from 'querystring/decode'
 import utils from 'utils'
@@ -8,6 +8,9 @@ import * as Models from 'models'
 
 const MODEL_NAMES = Object.keys(Models).map(key => {
 	let camel = utils.camelCase(key)
+	if (camel === 'location') {
+		camel = 'anetLocation'
+	}
 	Models[camel] = Models[key]
 	return camel
 })
@@ -54,7 +57,7 @@ export default class LinkTo extends Component {
 		if (typeof to === 'string') {
 			if (to.indexOf('?')) {
 				let components = to.split('?')
-				to = {pathname: components[0], query: decodeQuery(components[1])}
+				to = {pathname: components[0], search: components[1]}
 			}
 		} else {
 			to = edit ? modelClass.pathForEdit(modelInstance) : modelClass.pathFor(modelInstance)
