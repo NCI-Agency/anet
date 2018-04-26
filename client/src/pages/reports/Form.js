@@ -65,7 +65,7 @@ class ReportForm extends ValidatableFormWrapper {
 
 			//State for auto-saving reports
 			reportChanged: false, //Flag to determine if we need to auto-save.
-			timeoutUuid: null,
+			timeoutId: null,
 			showAutoSaveBanner: false,
 			autoSaveError: null,
 		}
