@@ -23,7 +23,7 @@ Dear ${approvalStepName},
 <br><br>
 <div>
   ${report.author.name}'s report, <em><strong>${report.intent}</strong></em>, is ready for your review.<br>
-  Using <a href="${serverUrl}/reports/${report.uuid?c}" />this link</a>,
+  Using <a href="${serverUrl}/reports/${report.uuid}" />this link</a>,
   you can either <em>Approve</em>, <em>Reject</em> or <em>Edit</em> the report.
 </div>
 <br>

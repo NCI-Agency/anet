@@ -101,7 +101,7 @@ a {
 				<h3>${advisor.name}</h3>
 				<#list advisor.nonCancelled as report>
 					<#if ! (report.cancelledReason??)>
-						${counter}. Report #${report.uuid?c} <#assign counter = counter + 1>
+						${counter}. Report #${report.uuid} <#assign counter = counter + 1>
 						<@renderReport report />
 						<#sep><hr /></#sep>
 					</#if>
@@ -180,7 +180,7 @@ a {
         </div>
     </div>
 
-    <a href="${serverUrl}/reports/${report.uuid?c}/min" >
+    <a href="${serverUrl}/reports/${report.uuid}/min" >
     	Read full report
     </a>
 </#macro>

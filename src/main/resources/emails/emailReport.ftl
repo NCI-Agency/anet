@@ -240,7 +240,7 @@ ${sender.name} sent you a report from ANET:
   <div>
     <h2 class="legend">
       <span class="title-text">Report #${report.uuid}</span>
-      [<a class=" btn btn-primary" href="/reports/${report.uuid?c}">view on-line</a>]
+      [<a class=" btn btn-primary" href="/reports/${report.uuid}">view on-line</a>]
     </h2>
 
     <fieldset class="show-report-overview">
@@ -276,7 +276,7 @@ ${sender.name} sent you a report from ANET:
           <div id="location" class="form-control-static">
             <#if report.loadLocation()??>
               <#assign location = report.loadLocation()>
-              <a href="/locations/${location.uuid?c}">${(location.name)!}</a>
+              <a href="/locations/${location.uuid}">${(location.name)!}</a>
             </#if>
           </div>
         </div>
@@ -319,7 +319,7 @@ ${sender.name} sent you a report from ANET:
         <label for="author" class="col-sm-2 control-label">Report author</label>
         <div class="col-sm-7">
           <div id="author" class="form-control-static">
-            <a href="/people/${report.author.uuid?c}">${(report.author.rank)!} ${(report.author.name)!}</a>
+            <a href="/people/${report.author.uuid}">${(report.author.rank)!} ${(report.author.name)!}</a>
           </div>
         </div>
       </div>
@@ -330,7 +330,7 @@ ${sender.name} sent you a report from ANET:
           <div id="advisorOrg" class="form-control-static">
             <#if report.loadAdvisorOrg()??>
               <#assign advisorOrg = report.loadAdvisorOrg()>
-              <a href="/organizations/${advisorOrg.uuid?c}">${(advisorOrg.shortName)!(advisorOrg.longName)!(advisorOrg.identificationCode)!}</a>
+              <a href="/organizations/${advisorOrg.uuid}">${(advisorOrg.shortName)!(advisorOrg.longName)!(advisorOrg.identificationCode)!}</a>
             </#if>
           </div>
         </div>
@@ -342,7 +342,7 @@ ${sender.name} sent you a report from ANET:
           <div id="principalOrg" class="form-control-static">
             <#if report.loadPrincipalOrg()??>
               <#assign principalOrg = report.loadPrincipalOrg()>
-              <a href="/organizations/${principalOrg.uuid?c}">${(principalOrg.shortName)!(principalOrg.longName)!(principalOrg.identificationCode)!}</a>
+              <a href="/organizations/${principalOrg.uuid}">${(principalOrg.shortName)!(principalOrg.longName)!(principalOrg.identificationCode)!}</a>
             </#if>
           </div>
         </div>
@@ -383,12 +383,12 @@ ${sender.name} sent you a report from ANET:
               </div>
             </td>
             <td>
-              <img src="${roleImg}" alt="${attendee.role?capitalize}" class="person-icon" height="20" width="20"><a href="/people/${attendee.uuid?c}">${(attendee.rank)!} ${(attendee.name)!}</a>
+              <img src="${roleImg}" alt="${attendee.role?capitalize}" class="person-icon" height="20" width="20"><a href="/people/${attendee.uuid}">${(attendee.rank)!} ${(attendee.name)!}</a>
             </td>
             <td>
               <#if attendee.loadPosition()??>
                 <#assign position = attendee.loadPosition()>
-                <a href="/positions/${position.uuid?c}">${(position.name)!}</a>
+                <a href="/positions/${position.uuid}">${(position.name)!}</a>
               </#if>
             </td>
           </tr>
@@ -438,12 +438,12 @@ ${sender.name} sent you a report from ANET:
             <#list tasks as task>
             <tr>
               <td class="taskName">
-                <a href="/tasks/${task.uuid?c}">${(task.shortName)!} - ${(task.longName)!}</a>
+                <a href="/tasks/${task.uuid}">${(task.shortName)!} - ${(task.longName)!}</a>
               </td>
               <td class="taskOrg">
                 <#if task.loadResponsibleOrg()??>
                   <#assign responsibleOrg = task.loadResponsibleOrg()>
-                  <a href="/organizations/${responsibleOrg.uuid?c}">${(responsibleOrg.shortName)!(responsibleOrg.longName)!(responsibleOrg.identificationCode)!}</a>
+                  <a href="/organizations/${responsibleOrg.uuid}">${(responsibleOrg.shortName)!(responsibleOrg.longName)!(responsibleOrg.identificationCode)!}</a>
                 </#if>
               </td>
             </tr>
