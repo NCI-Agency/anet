@@ -1,21 +1,29 @@
-const DEFAULT_CREDENTIALS = { user: 'erin', superUser: 'rebecca', adminUser: 'arthur' }
-
 class Page {
-    open(pathName = '/', credentials = DEFAULT_CREDENTIALS.user) {
-        const urlToGet = `${browser.options.baseUrl}${pathName}?user=${credentials}&pass=${credentials}`
-        browser.url(urlToGet)
+    static DEFAULT_CREDENTIALS = {
+        user: 'erin',
+        superUser: 'rebecca',
+        adminUser: 'arthur'
+    }
+
+    _buildUrl(pathName, credentials) {
+        const credSep = pathName.includes("?") ? "&" : "?"
+        return `${browser.options.baseUrl}${pathName}${credSep}user=${credentials}&pass=${credentials}`
+    }
+
+    _open(pathName, credentials) {
+        browser.url(this._buildUrl(pathName, credentials))
+    }
+
+    open(pathName = '/', credentials = Page.DEFAULT_CREDENTIALS.user) {
+        this._open(pathName, credentials)
     }
 
     openAsSuperUser(pathName = '/') {
-        const credentials = DEFAULT_CREDENTIALS.superUser
-        const urlToGet = `${browser.options.baseUrl}${pathName}?user=${credentials}&pass=${credentials}`
-        browser.url(urlToGet)
+        this._open(pathName, Page.DEFAULT_CREDENTIALS.superUser)
     }
 
     openAsAdminUser(pathName = '/') {
-      const credentials = DEFAULT_CREDENTIALS.adminUser
-      const urlToGet = `${browser.options.baseUrl}${pathName}?user=${credentials}&pass=${credentials}`
-      browser.url(urlToGet)
+        this._open(pathName, Page.DEFAULT_CREDENTIALS.adminUser)
     }
 
     getRandomOption(select) {
