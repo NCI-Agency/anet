@@ -37,7 +37,7 @@
     "file-loader": "^1.1.11",
     "git-describe": "^4.0.2",
     "handlebars": "^4.0.11",
-    "handlebars-loader": "github:Waavi/handlebars-loader",
+    "handlebars-loader": "^1.7.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.0.7",
     "jest": "^22.4.2",
@@ -97,7 +97,6 @@
     "react-scrollspy": "^3.3.4",
     "react-tag-input": "^5.0.1",
     "redux": "^3.7.2",
-    "sourcemap-lookup": "^0.0.3",
     "whatwg-fetch": "^2.0.3"
   },
   "scripts": {
