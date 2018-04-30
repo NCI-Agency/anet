@@ -30,6 +30,10 @@ import WARNING_ICON from 'resources/warning.png'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import 'components/reactToastify.css'
+
 class ReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
@@ -66,8 +70,6 @@ class ReportForm extends ValidatableFormWrapper {
 			//State for auto-saving reports
 			reportChanged: false, //Flag to determine if we need to auto-save.
 			timeoutId: null,
-			showAutoSaveBanner: false,
-			autoSaveError: null,
 		}
 		this.defaultTimeout = moment.duration(30, 'seconds')
 		this.autoSaveTimeout = this.defaultTimeout.clone()
@@ -160,7 +162,7 @@ class ReportForm extends ValidatableFormWrapper {
 		const { currentUser } = this.context
 		const {report, onDelete} = this.props
 		const { edit } = this.props
-		const {recents, suggestionList, errors, isCancelled, showAutoSaveBanner, autoSaveError, showAssignedPositionWarning, showActivePositionWarning} = this.state
+		const {recents, suggestionList, errors, isCancelled, showAssignedPositionWarning, showActivePositionWarning} = this.state
 
 		const hasErrors = Object.keys(errors).length > 0
 		const isFuture = report.engagementDate && moment().endOf("day").isBefore(report.engagementDate)
@@ -183,17 +185,7 @@ class ReportForm extends ValidatableFormWrapper {
 		return <div className="report-form">
 			<NavigationWarning isBlocking={this.state.isBlocking} />
 
-			<Collapse in={showAutoSaveBanner}>
-				{(autoSaveError &&
-					<div className="alert alert-warning" style={alertStyle}>
-						{autoSaveError}
-					</div>
-				) || (
-					<div className="alert alert-success" style={alertStyle}>
-						Your report has been automatically saved
-					</div>
-				)}
-			</Collapse>
+			<ToastContainer />
 
 			{showAssignedPositionWarning &&
 				<div className="alert alert-warning" style={alertStyle}>
@@ -622,28 +614,20 @@ class ReportForm extends ValidatableFormWrapper {
 					// Reset the reportChanged state, yes this could drop a few keystrokes that
 					// the user made while we were saving, but that's not a huge deal.
 					this.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
-					this.setState({autoSavedAt: moment(), reportChanged: false, showAutoSaveBanner: true, autoSaveError: null})
-					// Hide the auto-save banner after a while
-					window.setTimeout(this.hideAutoSaveBanner, 5000)
+					this.setState({autoSavedAt: moment(), reportChanged: false})
+					toast.success('Your report has been automatically saved')
 					// And re-schedule the auto-save timer
 					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
 					this.setState({timeoutId})
 				}).catch(response => {
 					// Show an error message
 					this.autoSaveTimeout.add(this.autoSaveTimeout) // exponential back-off
-					this.setState({showAutoSaveBanner: true, autoSaveError: "There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout.humanize()})
-					// Hide the auto-save banner after a while
-					window.setTimeout(this.hideAutoSaveBanner, 5000)
+					toast.error("There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout.humanize())
 					// And re-schedule the auto-save timer
 					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
 					this.setState({timeoutId})
 				})
 		}
-	}
-
-	@autobind
-	hideAutoSaveBanner() {
-		this.setState({showAutoSaveBanner: false})
 	}
 }
 
