@@ -521,6 +521,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
 			sql.append("%3$s");
 			sql.append("%4$s");
+			sql.append(" " + String.format(weekFormat, "reports.\"engagementDate\"") + " AS week,");
 			sql.append("COUNT(\"reportPeople\".\"personUuid\") AS \"nrEngagementsAttended\"");
 
 			sql.append(" FROM ");
