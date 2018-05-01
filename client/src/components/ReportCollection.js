@@ -150,7 +150,7 @@ export default class ReportCollection extends Component {
 		let markers = []
 		reports.forEach(report => {
 			if (Location.hasCoordinates(report.location)) {
-				markers.push({uuid: report.uuid, lat: report.location.lat, lng: report.location.lng, name: report.intent})
+				markers.push({id: report.uuid, lat: report.location.lat, lng: report.location.lng, name: report.intent})
 			}
 		})
 		return <Leaflet markers={markers} />
