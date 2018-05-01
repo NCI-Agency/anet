@@ -10,6 +10,7 @@ import OptionListModal from "components/OptionListModal"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import TriggerableConfirm from "components/TriggerableConfirm"
+import AvatarComponent from "components/AvatarComponent"
 import { Field, Form, Formik } from "formik"
 import _isEmpty from "lodash/isEmpty"
 import { Person } from "models"
@@ -398,6 +399,7 @@ class BasePersonForm extends Component {
                 </Fieldset>
 
                 <Fieldset title="Additional information">
+                  <AvatarComponent />
                   <Field
                     name="emailAddress"
                     label={Settings.fields.person.emailAddress}
