@@ -9400,14 +9400,6 @@ source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
 
-sourcemap-lookup@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/sourcemap-lookup/-/sourcemap-lookup-0.0.3.tgz#2dd4599206929ddece73754ae3e234e5e9f98bea"
-  dependencies:
-    colors "^1.1.2"
-    minimist "^1.2.0"
-    source-map "^0.5.3"
-
 spdx-correct@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-3.0.0.tgz#05a5b4d7153a195bc92c3c425b69f3b2a9524c82"
