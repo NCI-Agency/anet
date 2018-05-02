@@ -94,7 +94,7 @@
     "react-router": "^4.2.0",
     "react-router-bootstrap": "^0.24.4",
     "react-router-dom": "^4.0.0",
-    "react-scrollspy": "^3.3.4",
+    "react-scrollspy": "^3.3.5",
     "react-tag-input": "^5.0.1",
     "react-toastify": "^4.0.0-rc.5",
     "redux": "^3.7.2",
