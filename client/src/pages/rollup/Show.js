@@ -319,8 +319,7 @@ class RollupShow extends Page {
 
 	@autobind
 	goToReportsPage(newPageNum) {
-		this.state.reportsPageNum = newPageNum
-		this.loadData()
+		this.setState({reportsPageNum: newPageNum}, () => this.loadData())
 	}
 
 	@autobind
