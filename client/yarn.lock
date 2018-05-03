@@ -8224,9 +8224,9 @@ react-16-bootstrap-date-picker@^5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/react-16-bootstrap-date-picker/-/react-16-bootstrap-date-picker-5.1.2.tgz#2f41b925e2a97f8925dd4fe3087f578b86223d3c"
 
-react-autosuggest-ie11-compatible@^9.3.1:
-  version "9.3.1"
-  resolved "https://registry.yarnpkg.com/react-autosuggest-ie11-compatible/-/react-autosuggest-ie11-compatible-9.3.1.tgz#405416462c51d93d111988136d441fd40c1cc101"
+react-autosuggest@^9.3.4:
+  version "9.3.4"
+  resolved "https://registry.yarnpkg.com/react-autosuggest/-/react-autosuggest-9.3.4.tgz#e47ff800081b2f7c678165bfb7cc84b07f462336"
   dependencies:
     prop-types "^15.5.10"
     react-autowhatever "^10.1.0"
