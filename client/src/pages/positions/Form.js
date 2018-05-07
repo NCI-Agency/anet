@@ -165,6 +165,7 @@ class PositionForm extends ValidatableFormWrapper {
 		// Remove permissions property, was added temporarily in order to be able
 		// to select a specific advisor type.
 		delete position.permissions
+		position.location = {uuid: position.location.uuid}
 		position.organization = {uuid: position.organization.uuid}
 		position.person = (position.person && position.person.uuid) ? {uuid: position.person.uuid} : {}
 		position.code = position.code || null //Need to null out empty position codes

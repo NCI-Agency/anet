@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
-import {Scrollspy} from 'react-scrollspy'
+import Scrollspy from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
@@ -39,18 +39,17 @@ class Nav extends Component {
 		}
 
 		const orgSubNav = (
-			<SubNav
-				componentClass={Scrollspy}
-				className="nav"
-				offset={-152}
-			>
-				<AnchorLink scrollTo="info">Info</AnchorLink>
-				<AnchorLink scrollTo="supportedPositions">Supported positions</AnchorLink>
-				<AnchorLink scrollTo="vacantPositions">Vacant positions</AnchorLink>
-				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="tasks">{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
-				<AnchorLink scrollTo="reports">Reports</AnchorLink>
-			</SubNav>
+			<li>
+				<Scrollspy className="nav" currentClassName="active" offset={-152}
+					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
+					<NavItem href="#info">Info</NavItem>
+					<NavItem href="#supportedPositions">Supported positions</NavItem>
+					<NavItem href="#vacantPositions">Vacant positions</NavItem>
+					<NavItem href="#approvals">Approvals</NavItem>
+					<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
+					<NavItem href="#reports">Reports</NavItem>
+				</Scrollspy>
+			</li>
 		)
 
 		return (
@@ -66,16 +65,15 @@ class Nav extends Component {
 				</Link>}
 
 				{inMyReports &&
-					<SubNav
-						componentClass={Scrollspy}
-						className="nav"
-						offset={-152}
-					>
-						<AnchorLink scrollTo="draft-reports">Draft reports</AnchorLink>
-						<AnchorLink scrollTo="upcoming-engagements">Upcoming Engagements</AnchorLink>
-						<AnchorLink scrollTo="pending-approval">Pending approval</AnchorLink>
-						<AnchorLink scrollTo="published-reports">Published reports</AnchorLink>
-					</SubNav>
+					<li>
+						<Scrollspy className="nav" currentClassName="active" offset={-152}
+							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
+							<NavItem href="#draft-reports">Draft reports</NavItem>
+							<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>
+							<NavItem href="#pending-approval">Pending approval</NavItem>
+							<NavItem href="#published-reports">Published reports</NavItem>
+						</Scrollspy>
+					</li>
 				}
 
 				{myOrg && <Link to={Organization.pathFor(myOrg)}>
@@ -111,10 +109,12 @@ class Nav extends Component {
 				}
 
 				{inAdmin &&
-					<SubNav>
-						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
-						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
-					</SubNav>
+					<li>
+						<ul className="nav">
+							<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
+							<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
+						</ul>
+					</li>
 				}
 				
 				{externalDocumentationUrl && externalDocumentationUrlText &&
@@ -155,22 +155,3 @@ class Nav extends Component {
 }
 
 export default withRouter(Nav)
-
-function SubNav(props) {
-	let {componentClass, ...childProps} = props
-	childProps = Object.without(childProps, 'active')
-
-	let Component = componentClass || BSNav
-	return <li>
-		<Component {...childProps} />
-	</li>
-}
-
-const AnchorLink = function(props) {
-	const {scrollTo, ...childProps} = props
-	const onClick = function() {
-		const elem = document.getElementById(scrollTo)
-		elem && elem.scrollIntoView(true)
-	}
-	return <NavItem onClick={onClick} {...childProps} />
-}

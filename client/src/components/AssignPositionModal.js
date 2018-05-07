@@ -162,7 +162,9 @@ export default class AssignPositionModal extends Component {
 
 	@autobind
 	onPositionSelect(position) {
-		this.setState({position})
+		if (position.uuid) {
+			this.setState({position})
+		}
 	}
 
 }

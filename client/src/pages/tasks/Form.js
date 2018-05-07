@@ -167,10 +167,10 @@ class TaskForm extends ValidatableFormWrapper {
 	@autobind
 	onSubmit(event) {
 		let {task, edit} = this.props
-		if (task.responsibleOrg && task.responsibleOrg.uuid) {
+		if (task.responsibleOrg) {
 			task.responsibleOrg = {uuid: task.responsibleOrg.uuid}
 		}
-		if (task.customFieldRef1 && task.customFieldRef1.uuid) {
+		if (task.customFieldRef1) {
 			task.customFieldRef1 = {uuid: task.customFieldRef1.uuid}
 		}
 

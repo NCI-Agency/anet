@@ -46,7 +46,9 @@ export default class AutocompleteFilter extends Component {
 
 	@autobind
 	onChange(event) {
-		this.setState({value: event}, this.updateFilter)
+		if (typeof event === 'object') {
+			this.setState({value: event}, this.updateFilter)
+		}
 	}
 
 	@autobind

@@ -316,16 +316,13 @@ a.home-tile {
 	margin-right: 6px;
 }
 
-.nav .nav > li {
+.nav .nav > li > a {
 	border-left: 4px solid rgba(0,0,0,0);
-}
-
-.nav .nav > li a {
 	padding: 4px 0 4px 38px;
 }
 
-.nav .nav > li.active  {
-	border-left:4px solid #1772B8;
+.nav .nav > li.active > a {
+	border-left: 4px solid #1772B8;
 }
 
 li#search-nav .nav > li {
