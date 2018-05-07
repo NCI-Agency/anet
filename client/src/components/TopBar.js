@@ -44,6 +44,7 @@ export default class TopBar extends Component {
         let topbarPaddingHeight = document.getElementById('topbar').offsetHeight + 20
         if (this.state.bodyPaddingTop !== topbarPaddingHeight){
             document.body.style.paddingTop =`${topbarPaddingHeight}px` 
+            this.props.updateTopbarOffset(topbarPaddingHeight)
             this.setState({ bodyPaddingTop: topbarPaddingHeight })
         }
     }
