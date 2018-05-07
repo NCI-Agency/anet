@@ -311,21 +311,53 @@ a.home-tile {
 	font-size: 2rem;
 }
 
+/* styling for auto-collapsing left navigation */
+.navbar-default .btn-link,
+.navbar-default .navbar-nav > li > a {
+	color: #337ab7;
+}
+.navbar-default .navbar-nav > li.active > a,
+.navbar-default .navbar-nav > li.active > a:hover,
+.navbar-default .navbar-nav > li.active > a:focus {
+    color: #fff;
+    background-color: #337ab7;
+}
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+	color: #23527c;
+	background-color: #e0e0e0;
+}
+.container > .navbar-header,
+.container-fluid > .navbar-header,
+.container > .navbar-collapse,
+.container-fluid > .navbar-collapse {
+    margin-right: 0;
+    margin-left: 0;
+    padding: 0;
+}
+.navbar-nav {
+	margin: 0;
+}
+.navbar-nav > li {
+	float: none;
+}
+.nav > li > a {
+	padding: 10px 15px;
+}
+
+/* other navigation styling */
 .nav img {
 	width: 16px;
 	margin-right: 6px;
 }
 
-.nav .nav > li {
+.nav .nav > li > a {
 	border-left: 4px solid rgba(0,0,0,0);
-}
-
-.nav .nav > li a {
 	padding: 4px 0 4px 38px;
 }
 
-.nav .nav > li.active  {
-	border-left:4px solid #1772B8;
+.nav .nav > li.active > a {
+	border-left: 4px solid #1772B8;
 }
 
 li#search-nav .nav > li {
