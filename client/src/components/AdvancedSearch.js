@@ -340,7 +340,7 @@ class AdvancedSearch extends Component {
 
 	@autobind
 	resolveToQuery(value) {
-		if (typeof value === 'function' && value.name && value.name.startsWith('bound ')) {
+		if (typeof value === 'function') {
 			return value()
 		}
 	}
