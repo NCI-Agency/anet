@@ -550,6 +550,10 @@ class ReportForm extends ValidatableFormWrapper {
 			Object.without(a, 'position')
 		)
 
+		if (report.location) {
+			report.location = {id: report.location.id}
+		}
+
 		if (!isCancelled) {
 			delete report.cancelledReason
 		}
@@ -557,7 +561,6 @@ class ReportForm extends ValidatableFormWrapper {
 		if (disableSubmits) {
 			this.setState({disableOnSubmit: disableSubmits})
 		}
-
 		let url = `/api/reports/${edit ? 'update' : 'new'}?sendEditEmail=${disableSubmits}`
 		return API.send(url, report, {disableSubmits})
 	}

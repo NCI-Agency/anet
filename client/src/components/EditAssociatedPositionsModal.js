@@ -119,13 +119,15 @@ export default class EditAssociatedPositionsModal extends Component {
 
 	@autobind
 	addPositionRelationship(newRelatedPos)  {
-		let rels = this.state.associatedPositions
+		if (newRelatedPos.id) {
+			let rels = this.state.associatedPositions
 
-		if (!rels.find(relPos => relPos.id === newRelatedPos.id)) {
-			let newRels = rels.slice()
-			newRels.push(new Position(newRelatedPos))
+			if (!rels.find(relPos => relPos.id === newRelatedPos.id)) {
+				let newRels = rels.slice()
+				newRels.push(new Position(newRelatedPos))
 
-			this.setState({associatedPositions: newRels})
+				this.setState({associatedPositions: newRels})
+			}
 		}
 	}
 
