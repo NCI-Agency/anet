@@ -85,14 +85,22 @@ class App extends Page {
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
+			topbarOffset: 0
 		}
 
+		this.updateTopbarOffset = this.updateTopbarOffset.bind(this)
 		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
 	componentWillReceiveProps(nextProps) {
 		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
 			this.setState({pageProps: nextProps.pageProps})
+		}
+	}
+
+	updateTopbarOffset(topbarOffset) {
+		if (this.state.topbarOffset !== topbarOffset){
+			this.setState({ topbarOffset: topbarOffset })
 		}
 	}
 
@@ -243,6 +251,7 @@ class App extends Page {
 		return (
 			<div className="anet">
 				<TopBar
+					updateTopbarOffset={this.updateTopbarOffset}
 					currentUser={this.state.currentUser}
 					settings={this.state.settings}
 					minimalHeader={this.state.pageProps.minimalHeader}
@@ -257,7 +266,7 @@ class App extends Page {
 							</Row>
 						: <Row>
 								<Col sm={4} md={3} lg={2} className="hide-for-print">
-									<Nav />
+									<Nav topbarOffset={this.state.topbarOffset} />
 								</Col>
 								<Col sm={8} md={9} lg={10} className="primary-content">
 									{routing}
