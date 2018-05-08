@@ -171,7 +171,22 @@ public class PersonDao extends AnetBaseDao<Person> {
 	public boolean mergePeople(Person winner, Person loser, Boolean copyPosition) {
 		dbHandle.inTransaction(new TransactionCallback<Void>() {
 			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				//update report attendence
+				//delete duplicates where other is primary, or where neither is primary
+				dbHandle.createStatement("DELETE FROM \"reportPeople\" WHERE ("
+						+ "\"personId\" = :loserId AND \"reportId\" IN ("
+							+ "SELECT \"reportId\" FROM \"reportPeople\" WHERE \"personId\" = :winnerId AND \"isPrimary\" = :isPrimary"
+						+ ")) OR ("
+						+ "\"personId\" = :winnerId AND \"reportId\" IN ("
+							+ "SELECT \"reportId\" FROM \"reportPeople\" WHERE \"personId\" = :loserId AND \"isPrimary\" = :isPrimary"
+						+ ")) OR ("
+						+ "\"personId\" = :loserId AND \"isPrimary\" != :isPrimary AND \"reportId\" IN ("
+							+ "SELECT \"reportId\" FROM \"reportPeople\" WHERE \"personId\" = :winnerId AND \"isPrimary\" != :isPrimary"
+						+ "))")
+					.bind("winnerId", winner.getId())
+					.bind("loserId", loser.getId())
+					.bind("isPrimary", true)
+					.execute();
+				//update report attendance, should now be unique
 				dbHandle.createStatement("UPDATE \"reportPeople\" SET \"personId\" = :winnerId WHERE \"personId\" = :loserId")
 					.bind("winnerId", winner.getId())
 					.bind("loserId", loser.getId())
