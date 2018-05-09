@@ -50,7 +50,7 @@ export default class LinkTo extends Component {
 
 		let modelInstance = this.props[modelName]
 		if (!modelInstance)
-			return null
+			return <span>Unspecified</span>
 
 		let modelClass = Models[modelName]
 		let to = modelInstance
