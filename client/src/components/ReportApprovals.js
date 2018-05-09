@@ -156,7 +156,7 @@ export default class ReportApprovals extends Component {
             let approvalType = this.approvalType(action.type)
             let cssClass = 'label ' + approvalType.cssClass
             return (
-                <span className={cssClass}> {approvalType.text} by {action.person.name} on
+                <span className={cssClass}> {approvalType.text} by <LinkTo person={action.person} isLink= {false}/> on
                     <small> {moment(action.createdAt).format('D MMM YYYY, h:mm a')}</small>
                 </span>
             )
