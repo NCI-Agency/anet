@@ -4,6 +4,7 @@ import autobind from 'autobind-decorator'
 import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Person, Position} from 'models'
+import LinkTo from 'components/LinkTo'
 import API from 'api'
 
 export default class AssignPersonModal extends Component {
@@ -40,13 +41,13 @@ export default class AssignPersonModal extends Component {
 		return (
 			<Modal show={this.props.showModal} onHide={this.close}>
 				<Modal.Header closeButton>
-					<Modal.Title>Set Person for {position.name}</Modal.Title>
+					<Modal.Title>Set Person for <LinkTo position={position} isLink={false}/></Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					{position.person.id &&
 						<div style={{textAlign:'center'}}>
 							<Button bsStyle="danger" onClick={this.remove}>
-								Remove {position.person.name} from {position.name}
+								Remove <LinkTo person={position.person} isLink={false}/> from <LinkTo position={position} isLink={false}/>
 							</Button>
 							<hr className="assignModalSplit" />
 						</div>
@@ -63,7 +64,7 @@ export default class AssignPersonModal extends Component {
 									className="select-person-autocomplete"
 									fields={'id, name, rank, role, position  { id, name}'}
 									template={person =>
-										<span>{[person.name, person.rank].join(' - ')}</span>
+										<LinkTo person={person} isLink={false} />
 									}
 									queryParams={personSearchQuery}
 									value={this.state.person}

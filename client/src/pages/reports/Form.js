@@ -331,7 +331,7 @@ class ReportForm extends ValidatableFormWrapper {
 							<Form.Field.ExtraCol className="shortcut-list">
 								<h5>Recent attendees</h5>
 								{Person.map(recents.persons, person =>
-									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add {person.name} {person.rank}</Button>
+									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add <LinkTo person={person} isLink={false}/></Button>
 								)}
 							</Form.Field.ExtraCol>
 						}
@@ -443,7 +443,7 @@ class ReportForm extends ValidatableFormWrapper {
 
 			<td id={"attendeeName_" + person.role + "_" + idx} >
 				<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-				{person.name} {person.rank && person.rank.toUpperCase()}
+				<LinkTo person={person}/>
 			</td>
 			<td><LinkTo position={person.position} /></td>
 			<td>{person.position && person.position.organization && person.position.organization.shortName}</td>

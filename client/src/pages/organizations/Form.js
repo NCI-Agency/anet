@@ -143,13 +143,9 @@ class OrganizationForm extends ValidatableFormWrapper {
 					placeholder="Search for the approver's position"
 					objectType={Position}
 					fields="id, name, code, type, person { id, name, rank }"
-					template={pos => {
-						let components = []
-						pos.person && components.push(pos.person.name)
-						pos.name && components.push(pos.name)
-						pos.code && components.push(pos.code)
-						return <span>{components.join(' - ')}</span>
-					}}
+					template={position => 
+						<span> {position.person && <span> <LinkTo person={position.person} isLink={false}/> - </span>} <LinkTo position={position} isLink={false}/> {position.code && <span> - {position.code} </span>} </span>
+					}
 					queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
 					onChange={this.addApprover.bind(this, index)}
 					clearOnSelect={true} />

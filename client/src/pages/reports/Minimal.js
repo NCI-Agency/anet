@@ -10,6 +10,7 @@ import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import Tag from 'components/Tag'
+import LinkTo from 'components/LinkTo'
 
 import API from 'api'
 import {Report, Person, Task} from 'models'
@@ -57,7 +58,7 @@ class ReportMinimal extends Page {
 				}
 
 				attendees {
-					id, name, role, primary
+					id, name, rank, role, primary
 					position { id, name }
 				}
 				primaryAdvisor { id }
@@ -76,7 +77,7 @@ class ReportMinimal extends Page {
 				approvalStatus {
 					type, createdAt
 					step { id , name
-						approvers { id, name, person { id, name } }
+						approvers { id, name, person { id, name, rank } }
 					},
 					person { id, name, rank}
 				}
@@ -259,7 +260,7 @@ class ReportMinimal extends Page {
 			</td>
 			<td>
 				<img src={person.iconUrl()} alt={person.role} height={20} width={20} className="person-icon" />
-				{person.name}
+				<LinkTo person={person} isLink={false}/>
 			</td>
 				<td>{person.position && person.position.name}</td>
 		</tr>
@@ -309,14 +310,14 @@ class ReportMinimal extends Page {
 				</Modal.Header>
 				<Modal.Body>
 					<ul>
-					{step.approvers.map(p =>
-						<li key={p.id}>{p.name} - {p.person && p.person.name}</li>
+					{step.approvers.map(position =>
+						<li key={position.id}>{position.name} - {position.person && <LinkTo person={position.person} isLink={false}/> }</li>
 					)}
 					</ul>
 				</Modal.Body>
 			</Modal>
 	 	{action.type ?
-				<span> {action.type} by {action.person.name} <small>{moment(action.createdAt).format('D MMM YYYY')}</small></span>
+				<span> {action.type} by <LinkTo person={action.person} isLink={false}/> <small>{moment(action.createdAt).format('D MMM YYYY')}</small></span>
 				:
 				<span className="text-danger"> Pending</span>
 			}

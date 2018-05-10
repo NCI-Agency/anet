@@ -66,7 +66,7 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQuery',
-		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name }'
+		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name, rank }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
@@ -447,7 +447,7 @@ class Search extends Page {
 						<tr key={person.id}>
 							<td>
 								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-								<LinkTo person={person}>{person.rank} {person.name}</LinkTo>
+								<LinkTo person={person}/>
 							</td>
 							<td>{person.position && <LinkTo position={person.position} />}</td>
 							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
