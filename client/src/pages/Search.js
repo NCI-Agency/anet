@@ -66,7 +66,7 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQuery',
-		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name }'
+		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name, rank }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
