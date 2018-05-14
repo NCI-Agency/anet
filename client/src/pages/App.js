@@ -257,23 +257,14 @@ class App extends Page {
 					minimalHeader={this.state.pageProps.minimalHeader}
 					location={this.props.location} />
 
-				<Grid fluid componentClass="section">
-					{this.state.pageProps.useNavigation === false
-						? <Row>
-								<Col xs={12}>
-									{routing}
-								</Col>
-							</Row>
-						: <Row>
-								<Col sm={4} md={3} lg={2} className="hide-for-print">
-									<Nav topbarOffset={this.state.topbarOffset} />
-								</Col>
-								<Col sm={8} md={9} lg={10} className="primary-content">
-									{routing}
-								</Col>
-							</Row>
+				<div>
+					{this.state.pageProps.useNavigation !== false && 
+						<Nav />
 					}
-				</Grid>
+					<div className="primary-content">
+						{routing}
+					</div>
+				</div>
 			</div>
 		)
 	}

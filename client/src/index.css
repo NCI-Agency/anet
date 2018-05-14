@@ -335,7 +335,9 @@ li#search-nav .nav > li a {
 
 @media (min-width: 768px) {
 	.nav-fixed {
-		position: fixed;
+		float:left;
+		white-space:nowrap;
+		padding:8px;
 	}
 }
 
@@ -746,4 +748,8 @@ header.searchPagination {
 	.primary-content {
 		width: 100%
 	}
+}
+
+.primary-content {
+	overflow: hidden;
 }

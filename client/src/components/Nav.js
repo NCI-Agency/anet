@@ -67,7 +67,7 @@ class Nav extends Component {
 		)
 
 		return (
-			<BSNav bsStyle="pills" stacked id="leftNav" className="nav-fixed">
+			<BSNav bsStyle="pills" stacked id="leftNav" className="nav-fixed hide-for-print">
 				<Link to="/">
 					<NavItem>Home</NavItem>
 				</Link>
