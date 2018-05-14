@@ -12,15 +12,11 @@ html {
 
 body {
 	background: #f2f2f2;
+	overflow-y:hidden;
 }
 
-/* this makes jump links work correctly with the header overlaying content */
-*[data-jumptarget]:before {
-  display: block;
-  content: " ";
-  margin-top: -152px;
-  height: 152px;
-  visibility: hidden;
+.anet {
+	height:100vh;
 }
 
 h5 {
@@ -334,6 +330,7 @@ li#search-nav .nav > li a {
 }
 
 .nav-fixed {
+	top:0;
 	float:left;
 	white-space:nowrap;
 	padding:8px;
@@ -759,7 +756,8 @@ header.searchPagination {
 }
 
 .primary-content {
-	overflow: hidden;
+	overflow-y: scroll;
+	height: 100%;
 }
 
 .glass-pane {

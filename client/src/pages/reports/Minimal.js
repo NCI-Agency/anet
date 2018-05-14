@@ -288,13 +288,13 @@ class ReportMinimal extends Page {
 	@autobind
 	updateReport(json) {
 		this.fetchData(this.props)
-		window.scrollTo(0, 0)
+		// window.scrollTo(0, 0)
 	}
 
 	@autobind
 	handleError(response) {
 		this.setState({error: response})
-		window.scrollTo(0, 0)
+		// window.scrollTo(0, 0)
 	}
 
 	@autobind

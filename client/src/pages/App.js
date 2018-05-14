@@ -85,11 +85,9 @@ class App extends Page {
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
-			topbarOffset: 0,
 			floatingMenu: false
 		}
 
-		this.updateTopbarOffset = this.updateTopbarOffset.bind(this)
 		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
@@ -112,12 +110,6 @@ class App extends Page {
 	componentWillReceiveProps(nextProps) {
 		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
 			this.setState({pageProps: nextProps.pageProps})
-		}
-	}
-
-	updateTopbarOffset(topbarOffset) {
-		if (this.state.topbarOffset !== topbarOffset){
-			this.setState({ topbarOffset: topbarOffset })
 		}
 	}
 
@@ -268,7 +260,6 @@ class App extends Page {
 		return (
 			<div className="anet">
 				<TopBar
-					updateTopbarOffset={this.updateTopbarOffset}
 					currentUser={this.state.currentUser}
 					settings={this.state.settings}
 					minimalHeader={this.state.pageProps.minimalHeader}
@@ -277,7 +268,7 @@ class App extends Page {
 						this.setState({floatingMenu: !this.state.floatingMenu})
 					}} />
 
-				<div>
+				<div style={{height:"100%"}}>
 					{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
 					<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
 						<Nav />

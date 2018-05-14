@@ -33,5 +33,5 @@ ReactDOM.render((
 ), document.getElementById('root'))
 
 function jumpToTop() {
-	window.scrollTo(0,0)
+	// window.scrollTo(0,0)
 }

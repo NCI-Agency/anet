@@ -576,14 +576,14 @@ class Search extends Page {
 					error: null,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				// window.scrollTo(0, 0)
 			}).catch(response => {
 				this.setState({
 					success: null,
 					error: response,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				// window.scrollTo(0, 0)
 			})
 	}
 

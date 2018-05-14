@@ -16,20 +16,6 @@ class Nav extends Component {
 		app: PropTypes.object.isRequired,
 	}
 
-	constructor(props) {
-		super(props)
-		this.state = {
-			scrollspyOffset: 0
-		}
-	}
-
-	componentWillReceiveProps(nextProps) {
-		const scrollspyOffset = -(nextProps.topbarOffset + 20)
-		if (this.state.scrollspyOffset !== scrollspyOffset) {
-			this.setState({scrollspyOffset: scrollspyOffset})
-		}
-	}
-
 	render() {
 		const appData = this.context.app.state
 		const currentUser = appData.currentUser
@@ -54,7 +40,7 @@ class Nav extends Component {
 
 		const orgSubNav = (
 			<li>
-				<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
+				<Scrollspy className="nav" currentClassName="active" 
 					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
 					<NavItem href="#info">Info</NavItem>
 					<NavItem href="#supportedPositions">Supported positions</NavItem>
@@ -80,7 +66,7 @@ class Nav extends Component {
 
 				{inMyReports &&
 					<li>
-						<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
+						<Scrollspy className="nav" currentClassName="active"
 							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
 							<NavItem href="#draft-reports">Draft reports</NavItem>
 							<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>

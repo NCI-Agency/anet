@@ -593,7 +593,7 @@ class ReportForm extends ValidatableFormWrapper {
 					error: {message: response.message || response.error},
 					disableOnSubmit: false
 				})
-				window.scrollTo(0, 0)
+				// window.scrollTo(0, 0)
 			})
 	}
 

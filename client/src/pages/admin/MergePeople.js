@@ -203,7 +203,7 @@ class MergePeople extends Page {
 			})
 			.catch(error => {
                 this.setState({error})
-                window.scrollTo(0, 0)
+                // window.scrollTo(0, 0)
 				console.error(error)
             })
 	}

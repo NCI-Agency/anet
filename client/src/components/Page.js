@@ -45,7 +45,7 @@ export default class Page extends Component {
 	}
 
 	componentWillMount() {
-		window.scrollTo(0,0)
+		// window.scrollTo(0,0)
 
 		if (document.querySelector(NPROGRESS_CONTAINER)) {
 			NProgress.start()

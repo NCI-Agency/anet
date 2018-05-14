@@ -195,7 +195,7 @@ class TaskForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({error: error})
-				window.scrollTo(0, 0)
+				// window.scrollTo(0, 0)
 			})
 	}
 }
