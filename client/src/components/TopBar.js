@@ -81,7 +81,7 @@ export default class TopBar extends Component {
                 {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
                 <SecurityBanner location={this.props.location} />
-                <Header minimalHeader={this.props.minimalHeader} />
+                <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
             </div>
         )
     }
