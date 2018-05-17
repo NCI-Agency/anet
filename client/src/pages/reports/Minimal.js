@@ -59,7 +59,7 @@ class ReportMinimal extends Page {
 
 				attendees {
 					id, name, rank, role, primary
-					position { id, name }
+					position { id, name, organization { id, shortName}}
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -173,6 +173,7 @@ class ReportMinimal extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Org</th>
 								</tr>
 							</thead>
 
@@ -180,7 +181,7 @@ class ReportMinimal extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -262,7 +263,8 @@ class ReportMinimal extends Page {
 				<img src={person.iconUrl()} alt={person.role} height={20} width={20} className="person-icon" />
 				<LinkTo person={person} isLink={false}/>
 			</td>
-				<td>{person.position && person.position.name}</td>
+				<td><LinkTo isLink={false} position={person.position} /></td>
+				<td><LinkTo whenUnspecified="" isLink={false} organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
 

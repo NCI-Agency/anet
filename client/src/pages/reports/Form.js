@@ -446,8 +446,7 @@ class ReportForm extends ValidatableFormWrapper {
 				<LinkTo person={person}/>
 			</td>
 			<td><LinkTo position={person.position} /></td>
-			<td>{person.position && person.position.organization && person.position.organization.shortName}</td>
-
+			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 			<td onClick={this.removeAttendee.bind(this, person)} id={'attendeeDelete_' + person.role + "_" + idx} >
 				<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
 			</td>
