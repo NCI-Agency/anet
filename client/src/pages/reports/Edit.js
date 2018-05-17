@@ -44,7 +44,7 @@ class ReportEdit extends Page {
 				location { id, name },
 				attendees {
 					id, name, role, primary
-					position { id, name }
+					position { id, name, organization { id, shortName} }
 				}
 				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 				tags { id, name, description }
