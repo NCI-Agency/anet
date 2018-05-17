@@ -15,21 +15,22 @@ import utils from 'utils'
 class SearchBar extends Component {
 
 	static propTypes = {
-		onChange: PropTypes.func.isRequired,
+		setSearchQuery: PropTypes.func.isRequired,
 		query: PropTypes.string.isRequired
 	}
 
 	constructor(props) {
 		super(props)
-
 		this.state = {
+			searchTerms: props.query,
 			showAdvancedSearch: false
 		}
 	}
 
-	componentWillMount() {
-		this.unregisterHistoryListener = this.props.history.listen(this.setQueryState)
-	}
+//FIXME: should we do something with the history?
+//	componentWillMount() {
+//		this.unregisterHistoryListener = this.props.history.listen(this.setSearchTermsState)
+//	}
 
 	componentWillUnmount() {
 		this.unregisterHistoryListener()
@@ -39,9 +40,9 @@ class SearchBar extends Component {
 		return <div>
 			<Form onSubmit={this.onSubmit}>
 				<InputGroup>
-					<FormControl value={this.props.query} placeholder="Search for people, reports, positions, or locations" onChange={this.props.onChange} id="searchBarInput" />
+					<FormControl value={this.state.searchTerms} placeholder="Search for people, reports, positions, or locations" onChange={this.onChange} id="searchBarInput" />
 					<InputGroup.Button>
-						<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
+						<Button onClick={this.props.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
 					</InputGroup.Button>
 				</InputGroup>
 			</Form>
@@ -55,20 +56,28 @@ class SearchBar extends Component {
 		</div>
 	}
 
+//	@autobind
+//	setSearchTermsState(location, action) {
+//		const qs = utils.parseQueryString(location.search)
+//		this.setState({searchTerms: qs.text || ''})
+//	}
+
 	@autobind
-	setQueryState(location, action) {
-		const qs = utils.parseQueryString(location.search)
-		this.setState({query: qs.text || ''})
+	onChange(event) {
+		this.setState({searchTerms: event.target.value})
 	}
 
 	@autobind
 	onSubmit(event) {
-		this.props.history.push({
-			pathname: '/search',
-			search: utils.formatQueryString({text: this.props.query})
-		})
+//FIXME: should we do something with the history
+//		this.props.history.push({
+//			pathname: '/search',
+//			search: utils.formatQueryString({text: this.props.query})
+//		})
 		event.preventDefault()
 		event.stopPropagation()
+		// We only update the Redux state on submit
+		this.props.setSearchQuery(this.state.searchTerms)
 	}
 
 	@autobind
@@ -82,7 +91,7 @@ const mapStateToProps = (state, ownProps) => ({
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-	onChange: event => dispatch(setSearchQuery({query: event.target.value}))
+	setSearchQuery: searchTerms => dispatch(setSearchQuery({query: searchTerms}))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SearchBar))
