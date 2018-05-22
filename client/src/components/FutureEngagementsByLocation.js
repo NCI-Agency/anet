@@ -28,7 +28,11 @@ export default class FutureEngagementsByLocation extends Component {
   static propTypes = {
     startDate: PropTypes.object.isRequired,
     endDate: PropTypes.object.isRequired,
-    searchQuery: PropTypes.string,
+    searchQuery: PropTypes.shape({
+      text: PropTypes.string,
+      filters: PropTypes.any,
+      objectType: PropTypes.string
+    }),
   }
 
   constructor(props) {
@@ -44,11 +48,13 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   get queryParams() {
-    return {
+    let insightQueryParams = {}
+    Object.assign(insightQueryParams, {
       engagementDateStart: this.props.startDate.clone().startOf('day').valueOf(),
       engagementDateEnd: this.props.endDate.valueOf(),
-      text: this.props.searchQuery,
-    }
+    })
+    Object.assign(insightQueryParams, this.props.searchQuery)
+    return insightQueryParams
   }
 
   get engagementDateRangeArray() {

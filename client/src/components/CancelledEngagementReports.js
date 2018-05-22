@@ -30,7 +30,11 @@ const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
 export default class CancelledEngagementReports extends Component {
   static propTypes = {
     date: PropTypes.object,
-    searchQuery: PropTypes.string,
+    searchQuery: PropTypes.shape({
+      text: PropTypes.string,
+      filters: PropTypes.any,
+      objectType: PropTypes.string
+    }),
   }
 
   constructor(props) {
@@ -47,11 +51,13 @@ export default class CancelledEngagementReports extends Component {
   }
 
   get queryParams() {
-    return {
+    let insightQueryParams = {}
+    Object.assign(insightQueryParams, {
       state: [Report.STATE.CANCELLED],
-      releasedAtStart: this.props.date.valueOf(),
-      text: this.props.searchQuery,
-    }
+      releasedAtStart: this.props.date.valueOf()
+    })
+    Object.assign(insightQueryParams, this.props.searchQuery)
+    return insightQueryParams
   }
 
   get referenceDateLongStr() { return this.props.date.format('DD MMM YYYY') }

@@ -75,7 +75,11 @@ const dateRangeFilterCss = {
 class InsightsShow extends Page {
 
 	static propTypes = {
-		searchQuery: PropTypes.string
+		searchQuery: PropTypes.shape({
+			text: PropTypes.string,
+			filters: PropTypes.any,
+			objectType: PropTypes.string
+		}),
 	}
 
   static contextTypes = {
@@ -232,7 +236,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 	setPageProps: pageProps => dispatch(setPageProps(pageProps))
 })
 const mapStateToProps = (state, ownProps) => ({
-	searchQuery: state.searchQuery.query
+	searchQuery: state.searchQuery
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)

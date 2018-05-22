@@ -16,13 +16,17 @@ class SearchBar extends Component {
 
 	static propTypes = {
 		setSearchQuery: PropTypes.func.isRequired,
-		query: PropTypes.string.isRequired
+		query: PropTypes.shape({
+			text: PropTypes.string,
+			filters: PropTypes.any,
+			objectType: PropTypes.string
+		})
 	}
 
 	constructor(props) {
 		super(props)
 		this.state = {
-			searchTerms: props.query,
+			searchTerms: props.query.text,
 			showAdvancedSearch: false
 		}
 	}
@@ -36,6 +40,14 @@ class SearchBar extends Component {
 		this.unregisterHistoryListener()
 	}
 
+	static getDerivedStateFromProps(nextProps, prevState) {
+		if (nextProps.query.text === prevState.searchTerms) {
+			return null
+		}
+		return {
+			searchTerms: nextProps.query.text
+		}
+	}
 	render() {
 		return <div>
 			<Form onSubmit={this.onSubmit}>
@@ -77,21 +89,22 @@ class SearchBar extends Component {
 		event.preventDefault()
 		event.stopPropagation()
 		// We only update the Redux state on submit
-		this.props.setSearchQuery(this.state.searchTerms)
+		this.props.setSearchQuery({text: this.state.searchTerms})
 	}
 
 	@autobind
 	runAdvancedSearch() {
 		this.setState({showAdvancedSearch: false})
+		return true
 	}
 }
 
 const mapStateToProps = (state, ownProps) => ({
-	query: state.searchQuery.query
+	query: state.searchQuery
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-	setSearchQuery: searchTerms => dispatch(setSearchQuery({query: searchTerms}))
+	setSearchQuery: searchTerms => dispatch(setSearchQuery(searchTerms))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SearchBar))

@@ -330,7 +330,7 @@ class Search extends Page {
 				<Breadcrumbs items={[['Search results', '']]} />
 
 				{this.state.advancedSearch && <Fieldset title="Search filters">
-					<AdvancedSearch query={this.state.advancedSearch} onCancel={this.cancelAdvancedSearch} />
+					<AdvancedSearch onCancel={this.cancelAdvancedSearch} />
 				</Fieldset>}
 
 				<Messages error={error} success={success} />

@@ -28,7 +28,11 @@ export default class ReportsByDayOfWeek extends Component {
   static propTypes = {
     startDate: PropTypes.object.isRequired,
     endDate: PropTypes.object.isRequired,
-    searchQuery: PropTypes.string,
+    searchQuery: PropTypes.shape({
+      text: PropTypes.string,
+      filters: PropTypes.any,
+      objectType: PropTypes.string
+    }),
   }
 
   constructor(props) {

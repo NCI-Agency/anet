@@ -1,7 +1,7 @@
 export const DEFAULT_PAGE_PROPS = {useNavigation: true, minimalHeader: false}
 export const PAGE_PROPS_NO_NAV = {useNavigation: false, minimalHeader: false}
 export const PAGE_PROPS_MIN_HEAD = {useNavigation: false, minimalHeader: true}
-export const DEFAULT_SEARCH_QUERY = {query: ''}
+export const DEFAULT_SEARCH_QUERY = {text: ''}
 
 /*
  *  action constructors

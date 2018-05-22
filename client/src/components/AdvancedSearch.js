@@ -19,6 +19,8 @@ import {Location, Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
 
+import { setSearchQuery } from 'actions'
+import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
 import _cloneDeepWith from 'lodash/cloneDeepWith'
@@ -58,6 +60,12 @@ const taskFilters = props => {
 class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
+		setSearchQuery: PropTypes.func.isRequired,
+		query: PropTypes.shape({
+			text: PropTypes.string,
+			filters: PropTypes.any,
+			objectType: PropTypes.string
+		})
 	}
 
 	@autobind
@@ -236,7 +244,7 @@ class AdvancedSearch extends Component {
 	constructor(props, context) {
 		super(props, context)
 
-		const query = props || {}
+		const query = props.query || {}
 		this.ALL_FILTERS = this.getFilters(context)
 		this.state = {
 			objectType: query.objectType || "Reports",
@@ -350,17 +358,29 @@ class AdvancedSearch extends Component {
 		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
 		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
 		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
-			this.props.history.push({
-				pathname: '/search',
-				state: {advancedSearch: queryState}
-			})
+//FIXME: should we do something with the history?
+//			this.props.history.push({
+//				pathname: '/search',
+//				state: {advancedSearch: queryState}
+//			})
 			event.preventDefault()
 			event.stopPropagation()
+		// We only update the Redux state on submit
+		this.props.setSearchQuery(queryState)
 		}
 	}
 }
 
-export default withRouter(AdvancedSearch)
+const mapStateToProps = (state, ownProps) => (
+		{query: state.searchQuery}
+)
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setSearchQuery: advancedSearchQuery => dispatch(setSearchQuery(advancedSearchQuery))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(AdvancedSearch))
+
 
 class SearchFilter extends Component {
 	static propTypes = {
