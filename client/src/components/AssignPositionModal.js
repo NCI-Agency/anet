@@ -4,6 +4,7 @@ import autobind from 'autobind-decorator'
 import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Position, Person} from 'models'
+import LinkTo from 'components/LinkTo'
 import API from 'api'
 
 export default class AssignPositionModal extends Component {
@@ -55,13 +56,13 @@ export default class AssignPositionModal extends Component {
 		return (
 			<Modal show={this.props.showModal} onHide={this.close}>
 				<Modal.Header closeButton>
-					<Modal.Title>Set Position for {person.name}</Modal.Title>
+					<Modal.Title>Set Position for <LinkTo person={person} isLink={false}/></Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					{person.position.uuid &&
 						<div style={{textAlign:'center'}}>
 							<Button bsStyle="danger" onClick={this.remove} className="remove-person-from-position">
-								Remove {person.name} from {person.position.name}
+								Remove <LinkTo person={person} isLink={false}/> from <LinkTo position={person.position} isLink={false}/>
 							</Button>
 							<hr className="assignModalSplit" />
 						</div>
@@ -119,7 +120,7 @@ export default class AssignPositionModal extends Component {
 						}
 						{this.state.position && this.state.position.person && this.state.position.person.uuid !== person.uuid &&
 							<Alert bsStyle={"danger"}>
-								This position is currently held by {this.state.position.person.name}.  By selecting this position, they will be removed.
+								This position is currently held by <LinkTo person={this.state.position.person}/>.  By selecting this position, they will be removed.
 							</Alert>
 						}
 					</Grid>

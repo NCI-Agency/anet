@@ -10,6 +10,7 @@ import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import Tag from 'components/Tag'
+import LinkTo from 'components/LinkTo'
 
 import API from 'api'
 import {Report, Person, Task} from 'models'
@@ -58,7 +59,7 @@ class ReportMinimal extends Page {
 
 				attendees {
 					uuid, name, role, primary
-					position { uuid, name }
+					position { uuid, name, organization { uuid, shortName} }
 				}
 				primaryAdvisor { uuid }
 				primaryPrincipal { uuid }
@@ -76,7 +77,7 @@ class ReportMinimal extends Page {
 				approvalStatus {
 					type, createdAt
 					step { uuid , name
-						approvers { uuid, name, person { uuid, name } }
+						approvers { uuid, name, person { uuid, name, rank } }
 					},
 					person { uuid, name, rank}
 				}
@@ -172,6 +173,7 @@ class ReportMinimal extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Org</th>
 								</tr>
 							</thead>
 
@@ -179,7 +181,7 @@ class ReportMinimal extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -259,9 +261,10 @@ class ReportMinimal extends Page {
 			</td>
 			<td>
 				<img src={person.iconUrl()} alt={person.role} height={20} width={20} className="person-icon" />
-				{person.name}
+				<LinkTo person={person} isLink={false}/>
 			</td>
-				<td>{person.position && person.position.name}</td>
+				<td><LinkTo isLink={false} position={person.position} /></td>
+				<td><LinkTo whenUnspecified="" isLink={false} organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
 
@@ -309,14 +312,14 @@ class ReportMinimal extends Page {
 				</Modal.Header>
 				<Modal.Body>
 					<ul>
-					{step.approvers.map(p =>
-						<li key={p.uuid}>{p.name} - {p.person && p.person.name}</li>
+					{step.approvers.map(position =>
+						<li key={position.uuid}>{position.name} - {position.person && <LinkTo person={position.person} isLink={false}/> }</li>
 					)}
 					</ul>
 				</Modal.Body>
 			</Modal>
 	 	{action.type ?
-				<span> {action.type} by {action.person.name} <small>{moment(action.createdAt).format('D MMM YYYY')}</small></span>
+				<span> {action.type} by <LinkTo person={action.person} isLink={false}/> <small>{moment(action.createdAt).format('D MMM YYYY')}</small></span>
 				:
 				<span className="text-danger"> Pending</span>
 			}

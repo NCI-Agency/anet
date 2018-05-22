@@ -8,20 +8,9 @@ import {setMessages} from 'components/Messages'
 
 import API from 'api'
 
-import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
-
 import _isEqual from 'lodash/isEqual'
 
 import { DEFAULT_PAGE_PROPS } from 'actions'
-
-const NPROGRESS_CONTAINER = '.header'
-
-if (process.env.NODE_ENV !== 'test') {
-	NProgress.configure({
-		parent: NPROGRESS_CONTAINER
-	})
-}
 
 export default class Page extends Component {
 
@@ -46,10 +35,6 @@ export default class Page extends Component {
 
 	componentWillMount() {
 		window.scrollTo(0,0)
-
-		if (document.querySelector(NPROGRESS_CONTAINER)) {
-			NProgress.start()
-		}
 	}
 
 	loadData(props, context) {
@@ -63,7 +48,6 @@ export default class Page extends Component {
 			let promise = API.inProgress
 
 			if (promise && promise.then instanceof Function) {
-				NProgress.set(0.5)
 				promise.then(this.doneLoading, this.doneLoading)
 			} else {
 				this.doneLoading()
@@ -77,7 +61,6 @@ export default class Page extends Component {
 
 	@autobind
 	doneLoading(response) {
-		NProgress.done()
 		document.body.classList.remove('loading')
 
 		if (response) {

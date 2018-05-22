@@ -20,15 +20,6 @@ export default class ReportSummary extends Component {
 	render() {
 		let report = new Report(this.props.report)
 
-		function PersonComponent({person}) {
-			if (!person) {
-				return <span style={{marginLeft: '5px'}}>Unspecified</span>
-			}
-			return <LinkTo person={person}>
-				{person.rank} {person.name}
-			</LinkTo>
-		}
-
 		return <Grid fluid className="report-summary">
 			{report.state === Report.STATE.DRAFT &&
 				<p className="report-draft">
@@ -91,15 +82,13 @@ export default class ReportSummary extends Component {
 			</Row>
 			<Row>
 				<Col md={12}>
-					<PersonComponent person={report.primaryAdvisor} />
-					{report.advisorOrg &&
-						<span> (<LinkTo organization={report.advisorOrg} />)</span>
-					}
+
+					<LinkTo person={report.primaryAdvisor} />
+					<span> (<LinkTo organization={report.advisorOrg} />)</span>
 					<span className="people-separator">&#x25B6;</span>
-					<PersonComponent person={report.primaryPrincipal} />
-					{report.principalOrg &&
-						<span> (<LinkTo organization={report.principalOrg} />)</span>
-					}
+					<LinkTo person={report.primaryPrincipal} />
+					<span> (<LinkTo organization={report.principalOrg} />)</span>
+
 				</Col>
 			</Row>
 

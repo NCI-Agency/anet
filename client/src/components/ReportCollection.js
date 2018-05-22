@@ -17,9 +17,9 @@ const FORMAT_MAP = 'map'
 const GQL_REPORT_FIELDS =  /* GraphQL */`
 	uuid, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
-	author { uuid, name }
-	primaryAdvisor { uuid, name },
-	primaryPrincipal { uuid, name },
+	author { uuid, name, rank }
+	primaryAdvisor { uuid, name, rank },
+	primaryPrincipal { uuid, name, rank },
 	advisorOrg { uuid, shortName },
 	principalOrg { uuid, shortName },
 	location { uuid, name, lat, lng },

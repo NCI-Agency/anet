@@ -219,19 +219,6 @@ fieldset.danger {
 	max-width: none;
 }
 
-.nprogress-custom-parent .bar {
-	top: 130px !important;
-}
-
-.nprogress-custom-parent .peg {
-	transform: rotate(-3deg) translate(0px, 4px) !important;
-}
-
-.nprogress-custom-parent .spinner {
-	top: 104px !important;
-	right: 8px !important;
-}
-
 .graphiql-container {
 	min-height: 600px;
 }

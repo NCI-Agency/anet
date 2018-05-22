@@ -130,7 +130,7 @@ class PositionShow extends Page {
 						action={position.person && position.person.uuid && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
 						{position.person && position.person.uuid
 							? <div>
-								<h4 className="assigned-person-name"><LinkTo person={position.person}>{position.person.rank} {position.person.name}</LinkTo></h4>
+								<h4 className="assigned-person-name"><LinkTo person={position.person}/></h4>
 								<p></p>
 							</div>
 							: <div>

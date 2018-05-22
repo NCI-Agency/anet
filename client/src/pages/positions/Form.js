@@ -16,6 +16,7 @@ import {Location, Position, Organization} from 'models'
 
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import LinkTo from 'components/LinkTo'
 
 class PositionForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -94,7 +95,7 @@ class PositionForm extends ValidatableFormWrapper {
 						</ButtonToggleGroup>
 
 						{willAutoKickPerson && <HelpBlock>
-							<span className="text-danger">Setting this position to inactive will automatically remove <strong>{position.person.name}</strong> from this position.</span>
+							<span className="text-danger">Setting this position to inactive will automatically remove <LinkTo person={position.person}/> from this position.</span>
 						</HelpBlock> }
 					</Form.Field>
 

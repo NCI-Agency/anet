@@ -39,10 +39,6 @@ export default class OrganizationLaydown extends Component {
 
 		return <div id="laydown" data-jumptarget>
 			<Fieldset id="supportedPositions" title="Supported positions" action={<div>
-				{numInactivePos > 0 && <Button onClick={this.toggleShowInactive}>
-					{(showInactivePositions ? "Hide " : "Show ") + numInactivePos + " inactive position(s)"}
-				</Button>}
-
 				{isSuperUser && <LinkTo position={Position.pathForNew({organizationUuid: org.uuid})} button>
 					Create position
 				</LinkTo>}
@@ -52,7 +48,12 @@ export default class OrganizationLaydown extends Component {
 				{supportedPositions.length === 0 && <em>There are no occupied positions</em>}
 			</Fieldset>
 
-			<Fieldset id="vacantPositions" title="Vacant positions">
+			<Fieldset id="vacantPositions" title="Vacant positions" action={<div>
+				{numInactivePos > 0 && <Button onClick={this.toggleShowInactive}>
+					{(showInactivePositions ? "Hide " : "Show ") + numInactivePos + " inactive position(s)"}
+				</Button>}
+			</div>}>
+
 				{this.renderPositionTable(positionsNeedingAttention)}
 				{positionsNeedingAttention.length === 0 && <em>There are no vacant positions</em>}
 			</Fieldset>

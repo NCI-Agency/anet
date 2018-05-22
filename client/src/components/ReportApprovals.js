@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import './ReportApprovals.css'
+import LinkTo from 'components/LinkTo'
 
 import Fieldset from 'components/Fieldset'
 import moment from 'moment'
@@ -92,7 +93,7 @@ export default class ReportApprovals extends Component {
         if(action.type){
             return(
                 <div className="approval-details">
-                    <span>By {action.person.name}</span><br/>
+                    <span>By <LinkTo person={action.person} /></span><br/>
                     <small>
                         On {moment(action.createdAt).format('D MMM YYYY')}<br/>
                         At {moment(action.createdAt).format('h:mm a')}
@@ -137,8 +138,10 @@ export default class ReportApprovals extends Component {
                 </Modal.Header>
                 <Modal.Body>
                     <ul>
-                    {step.approvers.map(p =>
-                        <li key={p.uuid}>{p.name} - {p.person && p.person.name}</li>
+                    {step.approvers.map(position =>
+                        <li>
+                            <LinkTo position={position} /> - <LinkTo person={position.person} />
+                        </li>
                     )}
                     </ul>
                 </Modal.Body>
@@ -153,7 +156,7 @@ export default class ReportApprovals extends Component {
             let approvalType = this.approvalType(action.type)
             let cssClass = 'label ' + approvalType.cssClass
             return (
-                <span className={cssClass}> {approvalType.text} by {action.person.name} on
+                <span className={cssClass}> {approvalType.text} by <LinkTo person={action.person} isLink= {false}/> on
                     <small> {moment(action.createdAt).format('D MMM YYYY, h:mm a')}</small>
                 </span>
             )

@@ -124,7 +124,7 @@ class OrganizationShow extends Page {
 					}
 				},
 				approvalSteps {
-					uuid, name, approvers { uuid, name, person { uuid, name}}
+					uuid, name, approvers { uuid, name, person { uuid, name, rank}}
 				}
 			}`)
 		let reportsPart = this.getReportQueryPart(props.match.params.uuid)

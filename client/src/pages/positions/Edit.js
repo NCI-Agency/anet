@@ -34,7 +34,7 @@ class PositionEdit extends Page {
 				location { uuid, name },
 				associatedPositions { uuid, name, person { uuid, name, rank } },
 				organization {uuid, shortName, longName, identificationCode, type},
-				person { uuid, name}
+				person { uuid, name, rank}
 			}
 		`).then(data => {
 			function getPositionFromData() {

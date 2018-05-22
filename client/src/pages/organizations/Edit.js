@@ -32,7 +32,7 @@ class OrganizationEdit extends Page {
 				uuid, shortName, longName, status, identificationCode, type,
 				parentOrg { uuid, shortName, longName, identificationCode }
 				approvalSteps { uuid, name
-					approvers { uuid, name, person { uuid, name}}
+					approvers { uuid, name, person { uuid, name, rank}}
 				},
 				tasks { uuid, shortName, longName}
 			}

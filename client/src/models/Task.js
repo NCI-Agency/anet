@@ -32,6 +32,7 @@ export default class Task extends Model {
 		customField: '',
 		projectedCompletion: null,
 		plannedCompletion: null,
+		get status() { return Task.STATUS.ACTIVE },
 	}
 
 	static autocompleteQuery = "uuid, shortName, longName"

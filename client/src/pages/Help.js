@@ -5,6 +5,7 @@ import Page from 'components/Page'
 import Fieldset from 'components/Fieldset'
 
 import API from 'api'
+import {Position} from 'models'
 
 import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
@@ -40,14 +41,15 @@ class Help extends Page {
 
 		let orgUuid = currentUser.position.organization.uuid
 		API.query(/* GraphQL */`
-			positionList(f:search,query:{type:[SUPER_USER,ADMINISTRATOR],organizationUuid:${orgUuid}}) {
+			positionList(f:search,query:{type:[${Position.TYPE.SUPER_USER},${Position.TYPE.ADMINISTRATOR}],status:${Position.STATUS.ACTIVE},organizationUuid:${orgUuid}}) {
 				list {
 					person { rank, name, emailAddress }
 				}
 			}
 		`).then(data => {
+			const filledPositions = data.positionList.list.filter(position => position && position.person)
 			this.setState({
-				superUsers: data.positionList.list.map(person => person.person)
+				superUsers: filledPositions.map(position => position.person)
 			})
 		})
 	}
