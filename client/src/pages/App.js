@@ -277,7 +277,7 @@ class App extends Page {
 						this.setState({floatingMenu: !this.state.floatingMenu})
 					}} />
 
-				<div>
+				<div className="container-fluid">
 					{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
 					<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
 						<Nav />
