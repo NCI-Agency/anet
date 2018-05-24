@@ -65,7 +65,8 @@ class AdvancedSearch extends Component {
 			text: PropTypes.string,
 			filters: PropTypes.any,
 			objectType: PropTypes.string
-		})
+		}),
+		onSearchGoToSearchPage: PropTypes.bool
 	}
 
 	@autobind
@@ -357,23 +358,25 @@ class AdvancedSearch extends Component {
 	onSubmit(event) {
 		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
 		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
-		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
-//FIXME: should we do something with the history?
-//			this.props.history.push({
-//				pathname: '/search',
-//				state: {advancedSearch: queryState}
-//			})
-			event.preventDefault()
-			event.stopPropagation()
 		// We only update the Redux state on submit
 		this.props.setSearchQuery(queryState)
+		if (this.props.onSearchGoToSearchPage) {
+			this.props.history.push({
+				pathname: '/search',
+				state: {advancedSearch: queryState}
+			})
 		}
+		event.preventDefault()
+		event.stopPropagation()
 	}
 }
 
-const mapStateToProps = (state, ownProps) => (
-		{query: state.searchQuery}
-)
+const mapStateToProps = (state, ownProps) => {
+	return {
+		query: state.searchQuery,
+		onSearchGoToSearchPage: state.pageProps.onSearchGoToSearchPage
+	}
+}
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
 	setSearchQuery: advancedSearchQuery => dispatch(setSearchQuery(advancedSearchQuery))

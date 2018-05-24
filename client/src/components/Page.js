@@ -16,6 +16,7 @@ export default class Page extends Component {
 
 	static propTypes = {
 		setPageProps: PropTypes.func.isRequired,
+		onSearchGoToSearchPage: PropTypes.bool,
 	}
 
 	constructor(props, pageProps) {

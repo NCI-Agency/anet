@@ -16,7 +16,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
-import { setPageProps } from 'actions'
+import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
 import { connect } from 'react-redux'
 
 const insightDetails = {
@@ -99,7 +99,7 @@ class InsightsShow extends Page {
   get referenceDateLongStr() { return this.state.referenceDate.format('DD MMMM YYYY') }
 
   constructor(props) {
-    super(props)
+    super(props, Object.assign({}, DEFAULT_PAGE_PROPS, {onSearchGoToSearchPage: false}))
     this.state = {
       insight: props.match.params.insight,
       referenceDate: null,

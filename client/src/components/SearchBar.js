@@ -31,15 +31,6 @@ class SearchBar extends Component {
 		}
 	}
 
-//FIXME: should we do something with the history?
-//	componentWillMount() {
-//		this.unregisterHistoryListener = this.props.history.listen(this.setSearchTermsState)
-//	}
-
-	componentWillUnmount() {
-		this.unregisterHistoryListener()
-	}
-
 	static getDerivedStateFromProps(nextProps, prevState) {
 		if (nextProps.query.text === prevState.searchTerms) {
 			return null
@@ -68,12 +59,6 @@ class SearchBar extends Component {
 		</div>
 	}
 
-//	@autobind
-//	setSearchTermsState(location, action) {
-//		const qs = utils.parseQueryString(location.search)
-//		this.setState({searchTerms: qs.text || ''})
-//	}
-
 	@autobind
 	onChange(event) {
 		this.setState({searchTerms: event.target.value})
@@ -81,26 +66,27 @@ class SearchBar extends Component {
 
 	@autobind
 	onSubmit(event) {
-//FIXME: should we do something with the history
-//		this.props.history.push({
-//			pathname: '/search',
-//			search: utils.formatQueryString({text: this.props.query})
-//		})
-		event.preventDefault()
-		event.stopPropagation()
 		// We only update the Redux state on submit
 		this.props.setSearchQuery({text: this.state.searchTerms})
+		if (this.props.onSearchGoToSearchPage) {
+			this.props.history.push({
+				pathname: '/search',
+				search: utils.formatQueryString({text: this.props.query})
+			})
+		}
+		event.preventDefault()
+		event.stopPropagation()
 	}
 
 	@autobind
 	runAdvancedSearch() {
 		this.setState({showAdvancedSearch: false})
-		return true
 	}
 }
 
 const mapStateToProps = (state, ownProps) => ({
-	query: state.searchQuery
+	query: state.searchQuery,
+	onSearchGoToSearchPage: state.pageProps.onSearchGoToSearchPage,
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
