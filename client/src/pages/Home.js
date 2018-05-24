@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
 import moment from 'moment'
@@ -23,7 +23,6 @@ import Settings from 'Settings'
 import ConfirmDelete from 'components/ConfirmDelete'
 
 import { withRouter } from 'react-router-dom'
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 import utils from 'utils'
 
@@ -35,8 +34,9 @@ class Home extends Page {
 		currentUser: PropTypes.object.isRequired,
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
+
 		this.state = {
 			tileCounts: [],
 			savedSearches: [],
@@ -303,9 +303,5 @@ class Home extends Page {
 			})
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(withRouter(Home))

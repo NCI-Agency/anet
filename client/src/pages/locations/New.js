@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
@@ -8,7 +8,7 @@ import LocationForm from 'pages/locations/Form'
 
 import {Location} from 'models'
 
-import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class LocationNew extends Page {
@@ -36,9 +36,5 @@ class LocationNew extends Page {
 		)
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(LocationNew)
