@@ -70,8 +70,7 @@ class SearchBar extends Component {
 		this.props.setSearchQuery({text: this.state.searchTerms})
 		if (this.props.onSearchGoToSearchPage) {
 			this.props.history.push({
-				pathname: '/search',
-				search: utils.formatQueryString({text: this.props.query})
+				pathname: '/search'
 			})
 		}
 		event.preventDefault()

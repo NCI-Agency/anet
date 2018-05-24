@@ -362,8 +362,7 @@ class AdvancedSearch extends Component {
 		this.props.setSearchQuery(queryState)
 		if (this.props.onSearchGoToSearchPage) {
 			this.props.history.push({
-				pathname: '/search',
-				state: {advancedSearch: queryState}
+				pathname: '/search'
 			})
 		}
 		event.preventDefault()
