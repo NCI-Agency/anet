@@ -9,7 +9,8 @@ import Fieldset from 'components/Fieldset'
 import ReportCollection from 'components/ReportCollection'
 import moment from 'moment'
 
-import LoaderHOC from '../HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartId = 'future_engagements_by_location'
@@ -18,7 +19,7 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   engagementDate
   location { id, name }
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(HorizontalBarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(HorizontalBarChart))
 
 /*
  * Component displaying a chart with number of future engagements per date and
