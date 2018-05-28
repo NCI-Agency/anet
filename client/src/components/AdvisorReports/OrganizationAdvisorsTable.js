@@ -10,7 +10,7 @@ class OrganizationAdvisorsTable extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            data: [],
+            data: props.data || [],
             selectedAll: false
         }
         this.handleSelectRow = this.handleSelectRow.bind(this)

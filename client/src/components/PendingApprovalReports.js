@@ -11,7 +11,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
-import LoaderHOC from 'HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartId = 'not_approved_reports_chart'
@@ -19,7 +20,7 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   id
   advisorOrg { id, shortName }
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
 /*
  * Component displaying reports submitted for approval up to the given date but

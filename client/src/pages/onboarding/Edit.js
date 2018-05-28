@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import moment from 'moment'
 
 import PersonForm from 'pages/people/Form'
@@ -8,7 +8,7 @@ import PersonForm from 'pages/people/Form'
 import API from 'api'
 import {Person} from 'models'
 
-import { setPageProps, PAGE_PROPS_MIN_HEAD } from 'actions'
+import { PAGE_PROPS_MIN_HEAD } from 'actions'
 import { connect } from 'react-redux'
 
 class OnboardingEdit extends Page {
@@ -58,9 +58,5 @@ class OnboardingEdit extends Page {
 		</div>
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(OnboardingEdit)

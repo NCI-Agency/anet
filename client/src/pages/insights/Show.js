@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import PendingApprovalReports from 'components/PendingApprovalReports'
 import CancelledEngagementReports from 'components/CancelledEngagementReports'
 import ReportsByTask from 'components/ReportsByTask'
@@ -16,7 +16,6 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 const insightDetails = {
@@ -225,9 +224,5 @@ class InsightsShow extends Page {
   }
 
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(InsightsShow)

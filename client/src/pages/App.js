@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import {Grid, Row, Col} from 'react-bootstrap'
 
+import LoadingBar from 'react-redux-loading-bar'
 import TopBar from 'components/TopBar'
 import Nav from 'components/Nav'
 
@@ -61,9 +62,9 @@ import _isEqual from 'lodash/isEqual'
 
 class App extends Page {
 
-	static propTypes = {
+	static propTypes = Object.assign({
 		pageProps: PropTypes.object,
-	}
+	}, Page.propTypes)
 
 	static childContextTypes = {
 		app: PropTypes.object,
@@ -77,8 +78,8 @@ class App extends Page {
 		}
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 
 		this.state = {
 			pageProps: props.pageProps,
@@ -257,6 +258,8 @@ class App extends Page {
 					minimalHeader={this.state.pageProps.minimalHeader}
 					location={this.props.location} />
 
+				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
+
 				<Grid fluid componentClass="section">
 					{this.state.pageProps.useNavigation === false
 						? <Row>
@@ -283,4 +286,4 @@ const mapStateToProps = (state, ownProps) => ({
 	pageProps: state.pageProps
 })
 
-export default connect(mapStateToProps)(withRouter(App))
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App))

@@ -10,7 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
-import LoaderHOC from '../HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartByDayOfWeekId = 'reports_by_day_of_week'
@@ -18,7 +19,7 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   id
   engagementDayOfWeek
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
 /*
  * Component displaying a chart with number of reports released within a certain
