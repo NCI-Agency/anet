@@ -320,10 +320,19 @@ li#search-nav .nav > li a {
 	padding-right: 4px;
 }
 
-@media (min-width: 768px) {
-	.nav-fixed {
-		position: fixed;
-	}
+.nav-fixed {
+	float:left;
+	padding:8px;
+}
+
+.nav-overlay {
+	padding:8px;
+	border: 1px solid #e0e0e0;
+    height: 100vh;
+	position: fixed;
+	background: #f2f2f2;
+	left: 0;
+    z-index: 9999;
 }
 
 .report-sub-form .form-group {
@@ -733,4 +742,17 @@ header.searchPagination {
 	.primary-content {
 		width: 100%
 	}
+}
+
+.primary-content {
+	overflow: hidden;
+}
+
+.glass-pane {
+	position: absolute;
+	background: rgba(0, 0, 0, 0.6);
+    width: 100%;
+    height: 100vh;
+	left: 0;
+	z-index: 9998;
 }

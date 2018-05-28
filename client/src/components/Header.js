@@ -6,6 +6,7 @@ import SearchBar from 'components/SearchBar'
 import CreateButton from 'components/CreateButton'
 
 import logo from 'resources/logo.png'
+import menuLogo from 'resources/anet-menu.png'
 
 const backgroundCss = {
 	background: '#fff',
@@ -21,24 +22,25 @@ export default class Header extends Component {
 			<header style={backgroundCss} className="header">
 				<Grid fluid>
 					<Row>
-						<Col xs={3}>
-							{
-								this.props.minimalHeader ?
-									<span className="logo"><img src={logo} alt="ANET Logo" /></span> :
-									<Link to="/" className="logo">
-										<img src={logo} alt="ANET logo" />
-									</Link>
-							}
+						<Col xs={3} md={2} lg={2}>
+								{
+									this.props.minimalHeader ?
+										<span className="logo hidden-xs"><img src={logo} alt="ANET Logo" /></span> :
+										<Link to="/" className="logo hidden-xs">
+											<img src={logo} alt="ANET logo" />
+										</Link>
+								}
+								<span className="logo visible-xs"><img src={menuLogo} alt="ANET Menu" onClick={this.props.toggleMenuAction}/></span>
 						</Col>
 
 						{ !this.props.minimalHeader &&
-							<Col xs={7} className="middle-header">
+							<Col xs={6} sm={7} md={8} lg={9} className="middle-header">
 								<SearchBar />
 							</Col>
 						}
 
 						{ !this.props.minimalHeader &&
-							<Col xs={2}>
+							<Col xs={3} sm={2} md={2} lg={1}>
 								<div className="pull-right">
 									<CreateButton />
 								</div>

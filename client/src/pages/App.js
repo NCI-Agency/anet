@@ -85,11 +85,28 @@ class App extends Page {
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
-			topbarOffset: 0
+			topbarOffset: 0,
+			floatingMenu: false
 		}
 
 		this.updateTopbarOffset = this.updateTopbarOffset.bind(this)
 		Object.assign(this.state, this.processData(window.ANET_DATA))
+	}
+
+	unlistenHistory
+
+	componentDidMount() {
+		super.componentDidMount()
+		// We want to hide the floating menu on navigation events
+		this.unlistenHistory = this.props.history.listen((location, action) => {
+			this.setState({floatingMenu: false})
+		  })
+		  // TODO: This should ultimately happen through redux
+	}
+
+	componentWillUnmount() {
+		super.componentWillUnmount()
+		this.unlistenHistory()
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -255,25 +272,22 @@ class App extends Page {
 					currentUser={this.state.currentUser}
 					settings={this.state.settings}
 					minimalHeader={this.state.pageProps.minimalHeader}
-					location={this.props.location} />
+					location={this.props.location}
+					toggleMenuAction={()=>{
+						this.setState({floatingMenu: !this.state.floatingMenu})
+					}} />
 
-				<Grid fluid componentClass="section">
-					{this.state.pageProps.useNavigation === false
-						? <Row>
-								<Col xs={12}>
-									{routing}
-								</Col>
-							</Row>
-						: <Row>
-								<Col sm={4} md={3} lg={2} className="hide-for-print">
-									<Nav topbarOffset={this.state.topbarOffset} />
-								</Col>
-								<Col sm={8} md={9} lg={10} className="primary-content">
-									{routing}
-								</Col>
-							</Row>
+				<div className="container-fluid">
+					{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
+					<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
+						<Nav />
+					</div>
 					}
-				</Grid>
+					<div className="primary-content">
+						<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
+						{routing}
+					</div>
+				</div>
 			</div>
 		)
 	}
