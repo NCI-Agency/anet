@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 
 import Messages from 'components/Messages'
 
@@ -9,7 +9,7 @@ import {Location} from 'models'
 
 import API from 'api'
 
-import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class LocationEdit extends Page {
@@ -47,9 +47,5 @@ class LocationEdit extends Page {
 		)
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(LocationEdit)

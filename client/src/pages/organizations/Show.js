@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import {ListGroup, ListGroupItem} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
@@ -23,7 +23,6 @@ import Settings from 'Settings'
 import {Organization, Position, Report, Task} from 'models'
 import GQL from 'graphqlapi'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 const NO_REPORT_FILTER = 'NO_FILTER'
@@ -281,9 +280,5 @@ class OrganizationShow extends Page {
 	}
 
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(OrganizationShow)

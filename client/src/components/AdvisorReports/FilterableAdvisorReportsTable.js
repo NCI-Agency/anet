@@ -6,8 +6,12 @@ import moment from 'moment'
 
 import API from 'api'
 
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
+
 const DEFAULT_WEEKS_AGO = 3
 const advisorReportsQueryUrl = `/api/reports/insights/advisors` // ?weeksAgo=3 default set at 3 weeks ago
+const OrganizationAdvisorsTableWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(OrganizationAdvisorsTable))
 
 class FilterableAdvisorReportsTable extends Component {
     constructor() {
@@ -16,6 +20,7 @@ class FilterableAdvisorReportsTable extends Component {
             filterText: '',
             export: false,
             data: [],
+            isLoading: false,
             selectedData: []
         }
         this.handleFilterTextInput = this.handleFilterTextInput.bind(this)
@@ -24,9 +29,11 @@ class FilterableAdvisorReportsTable extends Component {
     }
 
     componentDidMount() {
+        this.setState( {isLoading: true} )
         let advisorReportsQuery = API.fetch(advisorReportsQueryUrl)
         Promise.resolve(advisorReportsQuery).then(value => {
             this.setState({
+                isLoading: false,
                 data: value
             })
         })
@@ -146,11 +153,12 @@ class FilterableAdvisorReportsTable extends Component {
                 <Toolbar 
                     onFilterTextInput={ handleFilterTextInput }
                     onExportButtonClick={ this.handleExportButtonClick } />
-                <OrganizationAdvisorsTable
+                <OrganizationAdvisorsTableWithLoader
                     data={ this.state.data }
                     columnGroups={ columnGroups }
                     filterText={ this.state.filterText }
-                    onRowSelection={ this.handleRowSelection } />
+                    onRowSelection={ this.handleRowSelection }
+                    isLoading={ this.state.isLoading } />
             </div>
         )
     }

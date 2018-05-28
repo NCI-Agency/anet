@@ -10,11 +10,20 @@ import API from 'api'
 
 import _isEqual from 'lodash/isEqual'
 
-import { DEFAULT_PAGE_PROPS } from 'actions'
+import { showLoading, hideLoading } from 'react-redux-loading-bar'
+import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
+
+export const mapDispatchToProps = (dispatch, ownProps) => ({
+	showLoading: () => dispatch(showLoading()),
+	hideLoading: () => dispatch(hideLoading()),
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
 
 export default class Page extends Component {
 
 	static propTypes = {
+		showLoading: PropTypes.func.isRequired,
+		hideLoading: PropTypes.func.isRequired,
 		setPageProps: PropTypes.func.isRequired,
 	}
 
@@ -42,6 +51,9 @@ export default class Page extends Component {
 
 		if (this.fetchData) {
 			document.body.classList.add('loading')
+			if (typeof this.props.showLoading === 'function') {
+				this.props.showLoading()
+			}
 
 			this.fetchData(props || this.props, context || this.context)
 
@@ -61,6 +73,9 @@ export default class Page extends Component {
 
 	@autobind
 	doneLoading(response) {
+		if (typeof this.props.hideLoading === 'function') {
+			this.props.hideLoading()
+		}
 		document.body.classList.remove('loading')
 
 		if (response) {

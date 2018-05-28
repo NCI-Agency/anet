@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 
 import TaskForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -11,7 +11,7 @@ import {Task,Organization} from 'models'
 
 import utils from 'utils'
 
-import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class TaskNew extends Page {
@@ -55,9 +55,5 @@ class TaskNew extends Page {
 		)
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(TaskNew)

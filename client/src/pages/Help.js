@@ -1,13 +1,12 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 
 import Fieldset from 'components/Fieldset'
 
 import API from 'api'
 import {Position} from 'models'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 import TOUR_SCREENSHOT from 'resources/tour-screenshot.png'
@@ -98,9 +97,5 @@ class Help extends Page {
 		</div>
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(Help)

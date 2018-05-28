@@ -139,7 +139,7 @@ export default class ReportApprovals extends Component {
                 <Modal.Body>
                     <ul>
                     {step.approvers.map(position =>
-                        <li>
+                        <li key={position.uuid}>
                             <LinkTo position={position} /> - <LinkTo person={position.person} />
                         </li>
                     )}

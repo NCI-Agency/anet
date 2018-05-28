@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import Breadcrumbs from 'components/Breadcrumbs'
 import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
@@ -8,7 +8,6 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class MyReports extends Page {
@@ -118,9 +117,5 @@ class MyReports extends Page {
 		})
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(MyReports)

@@ -2,13 +2,12 @@ import PropTypes from 'prop-types'
 import React from 'react'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import Fieldset from 'components/Fieldset'
 import AuthorizationGroupTable from 'components/AuthorizationGroupTable'
 
 import API from 'api'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class AuthorizationGroups extends Page {
@@ -45,9 +44,5 @@ class AuthorizationGroups extends Page {
 	}
 
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(AuthorizationGroups)

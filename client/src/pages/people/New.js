@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 
 import PersonForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import {Person} from 'models'
 
-import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class PersonNew extends Page {
@@ -35,9 +35,5 @@ class PersonNew extends Page {
 		)
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(PersonNew)

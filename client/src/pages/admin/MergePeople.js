@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -16,7 +16,6 @@ import {Person} from 'models'
 import API from 'api'
 
 import { withRouter } from 'react-router-dom'
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class MergePeople extends Page {
@@ -210,9 +209,5 @@ class MergePeople extends Page {
 	}
 
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(withRouter(MergePeople))

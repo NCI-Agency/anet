@@ -55,7 +55,7 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@dds.mil', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@dds.mil', '+9-23-2323-2323', 'Civ', 'Erin is an Advisor in EF 2.2 who can release her own reports', 'erin', 'Australia', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@dds.mil', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can release her own reports', 'erin', 'Australia', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@dds.mil', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
@@ -69,7 +69,7 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 	VALUES (lower(newid()), 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@dds.mil', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Super Users
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, updatedAt)
-	VALUES (lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@dds.mil', '+1-444-7324', 'Civ', 'Bob is a Super User in EF 1.1', 'bob', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@dds.mil', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, updatedAt)
 	VALUES (lower(newid()), 'HENDERSON, Henry', 0, 0, 'hunter+henry@dds.mil', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, createdAt, updatedAt)

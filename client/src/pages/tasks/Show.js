@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
@@ -17,7 +17,6 @@ import {Task} from 'models'
 
 import moment from 'moment'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class TaskShow extends Page {
@@ -147,9 +146,5 @@ class TaskShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(TaskShow)
