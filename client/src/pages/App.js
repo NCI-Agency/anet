@@ -249,6 +249,10 @@ class App extends Page {
 			<Route path="*" component={PageMissing} />
 		</Switch>
 
+		const navWidths = {sm: 4, md: 3, lg: 2}
+		const primaryWidths = (this.state.pageProps.useNavigation === true)
+				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
+				: {sm: 12, md: 12, lg: 12}
 		return (
 			<div className="anet">
 				<TopBar
@@ -261,21 +265,16 @@ class App extends Page {
 				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
 				<Grid fluid componentClass="section">
-					{this.state.pageProps.useNavigation === false
-						? <Row>
-								<Col xs={12}>
-									{routing}
-								</Col>
-							</Row>
-						: <Row>
-								<Col sm={4} md={3} lg={2} className="hide-for-print">
-									<Nav topbarOffset={this.state.topbarOffset} />
-								</Col>
-								<Col sm={8} md={9} lg={10} className="primary-content">
-									{routing}
-								</Col>
-							</Row>
-					}
+					<Row>
+						{this.state.pageProps.useNavigation === true &&
+							<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
+								<Nav topbarOffset={this.state.topbarOffset} />
+							</Col>
+						}
+						<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
+							{routing}
+						</Col>
+					</Row>
 				</Grid>
 			</div>
 		)
