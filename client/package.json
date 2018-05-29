@@ -64,7 +64,7 @@
     "alloyeditor": "^1.5.1",
     "bootstrap": "^3.3.7",
     "change-case": "^3.0.1",
-    "core-js": "^2.5.3",
+    "core-js": "^2.5.7",
     "create-react-class": "^15.6.3",
     "d3": "^4.10.0",
     "deep-equal": "^1.0.1",
