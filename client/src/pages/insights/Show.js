@@ -203,6 +203,30 @@ class InsightsShow extends Page {
     }
   }
 
+	@autobind
+	getSearchQuery() {
+		let {searchQuery} = this.props
+		let query = {text: searchQuery.text}
+		if (searchQuery.filters) {
+			searchQuery.filters.forEach(filter => {
+				if (filter.value) {
+					if (filter.value.toQuery) {
+						const toQuery = typeof filter.value.toQuery === 'function'
+							? filter.value.toQuery()
+							: filter.value.toQuery
+						Object.assign(query, toQuery)
+					} else {
+						query[filter.key] = filter.value
+					}
+				}
+			})
+		}
+
+		console.log('SEARCH advanced query', query)
+
+		return query
+	}
+
   render() {
     const insightConfig = insightDetails[this.state.insight]
     const InsightComponent = insightConfig.component
@@ -223,7 +247,7 @@ class InsightsShow extends Page {
               date={this.state.referenceDate.clone()}
               startDate={this.state.startDate.clone()}
               endDate={this.state.endDate.clone()}
-              searchQuery={this.props.searchQuery} />
+              searchQuery={this.getSearchQuery()} />
           </Fieldset>
         }
       </div>

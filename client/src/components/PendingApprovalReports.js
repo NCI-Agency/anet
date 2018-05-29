@@ -29,11 +29,7 @@ const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
 export default class PendingApprovalReports extends Component {
   static propTypes = {
     date: PropTypes.object,
-    searchQuery: PropTypes.shape({
-      text: PropTypes.string,
-      filters: PropTypes.any,
-      objectType: PropTypes.string
-    }),
+    searchQuery: PropTypes.object,
   }
 
   constructor(props) {
