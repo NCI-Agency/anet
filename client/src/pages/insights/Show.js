@@ -74,14 +74,6 @@ const dateRangeFilterCss = {
 
 class InsightsShow extends Page {
 
-	static propTypes = {
-		searchQuery: PropTypes.shape({
-			text: PropTypes.string,
-			filters: PropTypes.any,
-			objectType: PropTypes.string
-		}),
-	}
-
   static contextTypes = {
     app: PropTypes.object.isRequired,
   }
@@ -100,13 +92,13 @@ class InsightsShow extends Page {
 
   constructor(props) {
     super(props, Object.assign({}, DEFAULT_PAGE_PROPS, {onSearchGoToSearchPage: false}))
-    this.state = {
+    Object.assign(this.state, {
       insight: props.match.params.insight,
       referenceDate: null,
       startDate: null,
       endDate: null,
       date: {relative: "0", start: null, end: null}
-    }
+    })
   }
 
  get defaultDates() {
@@ -129,6 +121,9 @@ class InsightsShow extends Page {
       this.setState({insight: nextProps.match.params.insight})
       this.setStateDefaultDates(nextProps.match.params.insight)
     }
+		if (nextProps.searchQuery !== this.state.searchQuery) {
+			this.setState({searchQuery: nextProps.searchQuery}, () => this.loadData())
+		}
   }
 
   componentDidMount() {
@@ -203,30 +198,6 @@ class InsightsShow extends Page {
     }
   }
 
-	@autobind
-	getSearchQuery() {
-		let {searchQuery} = this.props
-		let query = {text: searchQuery.text}
-		if (searchQuery.filters) {
-			searchQuery.filters.forEach(filter => {
-				if (filter.value) {
-					if (filter.value.toQuery) {
-						const toQuery = typeof filter.value.toQuery === 'function'
-							? filter.value.toQuery()
-							: filter.value.toQuery
-						Object.assign(query, toQuery)
-					} else {
-						query[filter.key] = filter.value
-					}
-				}
-			})
-		}
-
-		console.log('SEARCH advanced query', query)
-
-		return query
-	}
-
   render() {
     const insightConfig = insightDetails[this.state.insight]
     const InsightComponent = insightConfig.component
@@ -256,9 +227,6 @@ class InsightsShow extends Page {
 
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery
 })

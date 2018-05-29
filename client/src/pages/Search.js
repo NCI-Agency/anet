@@ -120,20 +120,11 @@ class SearchNav extends Component {
 
 class Search extends Page {
 
-	static propTypes = {
-		searchQuery: PropTypes.shape({
-			text: PropTypes.string,
-			filters: PropTypes.any,
-			objectType: PropTypes.string
-		})
-	}
-
 	constructor(props) {
 		super(props)
 
-		this.state = {
-			searchQuery: props.searchQuery,
-			query: props.searchQuery.text,
+		Object.assign(this.state, {
+			query: props.searchQuery.text || null,
 			queryType: null,
 			pageNum: {
 				reports: 0,
@@ -154,7 +145,7 @@ class Search extends Page {
 			},
 			error: null,
 			success: null,
-		}
+		})
 
 	}
 
@@ -183,30 +174,6 @@ class Search extends Page {
 			}
 			`).addVariable(type + "Query", config.variableType, subQuery)
 		return part
-	}
-
-	@autobind
-	getSearchQuery() {
-		let {searchQuery} = this.state
-		let query = {text: searchQuery.text}
-		if (searchQuery.filters) {
-			searchQuery.filters.forEach(filter => {
-				if (filter.value) {
-					if (filter.value.toQuery) {
-						const toQuery = typeof filter.value.toQuery === 'function'
-							? filter.value.toQuery()
-							: filter.value.toQuery
-						Object.assign(query, toQuery)
-					} else {
-						query[filter.key] = filter.value
-					}
-				}
-			})
-		}
-
-		console.log('SEARCH advanced query', query)
-
-		return query
 	}
 
 	@autobind
@@ -603,10 +570,6 @@ class Search extends Page {
 
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery,
-})
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Search))

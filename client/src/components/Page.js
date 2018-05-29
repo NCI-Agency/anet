@@ -26,6 +26,11 @@ export default class Page extends Component {
 		hideLoading: PropTypes.func.isRequired,
 		setPageProps: PropTypes.func.isRequired,
 		onSearchGoToSearchPage: PropTypes.bool,
+		searchQuery: PropTypes.shape({
+			text: PropTypes.string,
+			filters: PropTypes.any,
+			objectType: PropTypes.string
+		})
 	}
 
 	constructor(props, pageProps) {
@@ -37,6 +42,7 @@ export default class Page extends Component {
 		this.state = {
 			notFound: false,
 			invalidRequest: false,
+			searchQuery: props.searchQuery,
 		}
 
 		this.renderPage = this.render
@@ -126,4 +132,29 @@ export default class Page extends Component {
 		setMessages(this.props, this.state)
 		this.loadData(this.props)
 	}
+
+	@autobind
+	getSearchQuery() {
+		let {searchQuery} = this.state
+		let query = {text: searchQuery.text}
+		if (searchQuery.filters) {
+			searchQuery.filters.forEach(filter => {
+				if (filter.value) {
+					if (filter.value.toQuery) {
+						const toQuery = typeof filter.value.toQuery === 'function'
+							? filter.value.toQuery()
+							: filter.value.toQuery
+						Object.assign(query, toQuery)
+					} else {
+						query[filter.key] = filter.value
+					}
+				}
+			})
+		}
+
+		console.log('SEARCH advanced query', query)
+
+		return query
+	}
+
 }
