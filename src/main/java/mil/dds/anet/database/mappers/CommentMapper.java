@@ -20,17 +20,17 @@ public class CommentMapper implements ResultSetMapper<Comment> {
 	}
 	
 	// Comments are ALWAYS loaded with their author, since it doesn't make sense to get them otherwise
-	// The author fields get the namespace, and comments fields are c_* in the SQL query. 
+	// The author fields get the namespace, and comments fields are comments_* in the SQL query.
 	@Override
 	public Comment map(int index, ResultSet r, StatementContext ctx) throws SQLException {
 		Comment c = new Comment();
-		DaoUtils.setCommonBeanFields(c, r, "c");
-		c.setReportUuid(r.getString("reportUuid"));
+		DaoUtils.setCommonBeanFields(c, r, "comments");
+		c.setReportUuid(r.getString("comments_reportUuid"));
 		
 		Person author = personMapper.map(index, r, ctx);
 		c.setAuthor(author);
 		
-		c.setText(r.getString("text"));
+		c.setText(r.getString("comments_text"));
 		c.setLoadLevel(LoadLevel.PROPERTIES);
 		return c;
 	}

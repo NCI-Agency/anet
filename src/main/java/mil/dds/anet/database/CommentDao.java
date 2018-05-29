@@ -12,6 +12,10 @@ import mil.dds.anet.utils.DaoUtils;
 
 public class CommentDao implements IAnetDao<Comment> {
 
+	private static String[] fields = {"uuid", "createdAt", "updatedAt", "authorUuid", "reportUuid", "text"};
+	private static String tableName = "comments";
+	public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+
 	Handle dbHandle;
 	
 	public CommentDao(Handle dbHandle) { 
@@ -25,22 +29,16 @@ public class CommentDao implements IAnetDao<Comment> {
 	//Comments are ALWAYS loaded with the author, since they are never displayed without their author
 	@Deprecated
 	public Comment getById(int id) {
-		List<Comment> results = dbHandle.createQuery("/* getCommentById */ SELECT comments.id AS c_id, "
-				+ "comments.\"createdAt\" AS c_createdAt, comments.\"updatedAt\" AS c_updatedAt, "
-				+ "comments.\"authorUuid\", comments.\"reportUuid\", comments.text, " + PersonDao.PERSON_FIELDS
+		return dbHandle.createQuery("/* getCommentById */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
 				+ "WHERE comments.id = :id")
 			.bind("id", id)
 			.map(new CommentMapper())
-			.list();
-		if (results.size() == 0) { return null; } 
-		return results.get(0);
+			.first();
 	}
 
 	public Comment getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getCommentByUuid */ SELECT comments.uuid AS c_uuid, "
-				+ "comments.\"createdAt\" AS c_createdAt, comments.\"updatedAt\" AS c_updatedAt, "
-				+ "comments.\"authorUuid\", comments.\"reportUuid\", comments.text, " + PersonDao.PERSON_FIELDS
+		return dbHandle.createQuery("/* getCommentByUuid */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
 				+ "WHERE comments.uuid = :uuid")
 			.bind("uuid", uuid)
@@ -67,11 +65,9 @@ public class CommentDao implements IAnetDao<Comment> {
 	}
 
 	public List<Comment> getCommentsForReport(Report report) {
-		return dbHandle.createQuery("/* getCommentForReport */ SELECT c.uuid AS c_uuid, "
-				+ "c.\"createdAt\" AS c_createdAt, c.\"updatedAt\" AS c_updatedAt, "
-				+ "c.\"authorUuid\", c.\"reportUuid\", c.text, " + PersonDao.PERSON_FIELDS + " "
-				+ "FROM comments c LEFT JOIN people ON c.\"authorUuid\" = people.uuid "
-				+ "WHERE c.\"reportUuid\" = :reportUuid ORDER BY c.\"createdAt\" ASC")
+		return dbHandle.createQuery("/* getCommentForReport */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
+				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
+				+ "WHERE comments.\"reportUuid\" = :reportUuid ORDER BY comments.\"createdAt\" ASC")
 			.bind("reportUuid", report.getUuid())
 			.map(new CommentMapper())
 			.list();

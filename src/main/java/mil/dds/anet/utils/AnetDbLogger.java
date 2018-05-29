@@ -6,6 +6,7 @@ import org.apache.log4j.Priority;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.logging.FormattedLog;
 
+import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
@@ -56,6 +57,7 @@ public class AnetDbLogger extends FormattedLog {
 				.replace(OrganizationDao.ORGANIZATION_FIELDS, " <ORGANIZATION_FIELDS> ")
 				.replace(ReportDao.REPORT_FIELDS, " <REPORT_FIELDS> ")
 				.replace(ReportSensitiveInformationDao.REPORTS_SENSITIVE_INFORMATION_FIELDS, " <REPORTS_SENSITIVE_INFORMATION_FIELDS> ")
+				.replace(CommentDao.COMMENT_FIELDS, " <COMMENT_FIELDS> ")
 				.replaceAll("LEFT JOIN (CONTAINS|FREETEXT)TABLE[^=]*= (\\S+)\\.\\[Key\\]", "<$1_$2>")
 				.replaceFirst("(ISNULL|CASE).* AS (search_rank)", "<$1>");
 		log.log(level, msg);
