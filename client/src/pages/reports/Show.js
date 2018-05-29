@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import {Alert, Table, Button, Col, HelpBlock, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -22,7 +22,6 @@ import {Report, Person, Task, Comment, Position} from 'models'
 import ConfirmDelete from 'components/ConfirmDelete'
 
 import { withRouter } from 'react-router-dom'
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class ReportShow extends Page {
@@ -74,7 +73,8 @@ class ReportShow extends Page {
 
 				attendees {
 					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status }
+					position { id, name, status, organization { id, shortName}
+}
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -134,7 +134,7 @@ class ReportShow extends Page {
 		const {currentUser} = this.context
 
 		const canApprove = report.isPending() && currentUser.position &&
-			report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
+			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
 
 		//Authors can edit in draft mode, rejected mode, or Pending Mode
 		let canEdit = (report.isDraft() || report.isPending() || report.isRejected() || report.isFuture()) && Person.isEqual(currentUser, report.author)
@@ -262,6 +262,7 @@ class ReportShow extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Org</th>
 								</tr>
 							</thead>
 
@@ -269,7 +270,7 @@ class ReportShow extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -449,6 +450,7 @@ class ReportShow extends Page {
 				<LinkTo person={person} />
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
 
@@ -617,9 +619,5 @@ class ReportShow extends Page {
 		</Alert>
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(withRouter(ReportShow))

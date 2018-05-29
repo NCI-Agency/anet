@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import PendingApprovalReports from 'components/PendingApprovalReports'
 import CancelledEngagementReports from 'components/CancelledEngagementReports'
 import ReportsByTask from 'components/ReportsByTask'

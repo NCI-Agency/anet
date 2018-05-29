@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Form from 'components/Form'
@@ -14,7 +14,6 @@ import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import {Location} from 'models'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class LocationShow extends Page {
@@ -100,9 +99,5 @@ class LocationShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(LocationShow)

@@ -10,7 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
-import LoaderHOC from '../HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import Settings from 'Settings'
 
 import pluralize from 'pluralize'
@@ -21,7 +22,7 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   id
   tasks { id, shortName }
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
 /*
  * Component displaying a chart with number of reports per Task.

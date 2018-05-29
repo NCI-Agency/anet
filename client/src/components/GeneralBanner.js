@@ -16,7 +16,7 @@ const GeneralBanner = (props) => {
     if (banner.visible && banner.message){
         return (
             <div className={bannerClassName(banner.level)}>
-                <div className="messsage"><strong>{banner.title}:</strong> {banner.message}</div>
+                <div className="message"><strong>{banner.title}:</strong> {banner.message}</div>
             </div>
         )
     } else { return null }

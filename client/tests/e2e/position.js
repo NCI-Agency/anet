@@ -10,7 +10,7 @@ test('Move someone in and out of a position', async t => {
     await t.context.pageHelpers.clickMyOrgLink()
 
     let positionName = 'EF 2.2 Advisor D'
-    let personName = 'Civ ERINSON, Erin'
+    let personName = 'CIV ERINSON, Erin'
 
     await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(personName, positionName)
 
