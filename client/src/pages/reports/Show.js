@@ -134,7 +134,7 @@ class ReportShow extends Page {
 		const {currentUser} = this.context
 
 		const canApprove = report.isPending() && currentUser.position &&
-			report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
+			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
 
 		//Authors can edit in draft mode, rejected mode, or Pending Mode
 		let canEdit = (report.isDraft() || report.isPending() || report.isRejected() || report.isFuture()) && Person.isEqual(currentUser, report.author)
