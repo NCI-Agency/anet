@@ -48,7 +48,7 @@
     "style-loader": "^0.20.3",
     "url-loader": "^0.6.2",
     "uuid": "^3.2.1",
-    "wdio": "^1.0.3",
+    "wdio": "^2.0.2",
     "wdio-chromedriver-service": "^0.1.1",
     "wdio-dot-reporter": "^0.0.9",
     "wdio-mocha-framework": "^0.5.11",
