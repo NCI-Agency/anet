@@ -90,8 +90,8 @@ class RollupShow extends Page {
 			return
 		}
 
-		require.ensure([], () => {
-			d3 = require('d3')
+		import('d3').then(importedModule => {
+			d3 = importedModule
 			this.forceUpdate()
 		})
 	}

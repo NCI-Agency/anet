@@ -19,11 +19,12 @@ class GraphiQL extends Page {
 	}
 
 	componentDidMount() {
-		if (GraphiQLreq)
+		if (GraphiQLreq) {
 			return
+		}
 
-		require.ensure([], () => {
-			GraphiQLreq = require('graphiql')
+		import('graphiql').then(importedModule => {
+			GraphiQLreq = importedModule.default
 			require('graphiql/graphiql.css')
 			this.forceUpdate()
 		})
