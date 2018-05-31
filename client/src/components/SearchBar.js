@@ -18,7 +18,7 @@ class SearchBar extends Component {
 			showAdvancedSearch: false
 		}
 	}
-	componentWillMount() {
+	componentDidMount() {
 		this.unregisterHistoryListener = this.props.history.listen(this.setQueryState)
 	}
 

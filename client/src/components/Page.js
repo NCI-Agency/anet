@@ -42,10 +42,6 @@ export default class Page extends Component {
 		this.render = Page.prototype.render
 	}
 
-	componentWillMount() {
-		window.scrollTo(0,0)
-	}
-
 	loadData(props, context) {
 		this.setState({notFound: false, invalidRequest: false})
 
@@ -122,6 +118,7 @@ export default class Page extends Component {
 	}
 
 	componentDidMount() {
+		window.scrollTo(0,0)
 		setMessages(this.props, this.state)
 		this.loadData(this.props)
 	}
