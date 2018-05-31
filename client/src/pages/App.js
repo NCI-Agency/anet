@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import LoadingBar from 'react-redux-loading-bar'
@@ -62,9 +62,10 @@ import _isEqual from 'lodash/isEqual'
 
 class App extends Page {
 
-	static propTypes = Object.assign({
+	static propTypes = {
+		...pagePropTypes,
 		pageProps: PropTypes.object,
-	}, Page.propTypes)
+	}
 
 	static childContextTypes = {
 		app: PropTypes.object,

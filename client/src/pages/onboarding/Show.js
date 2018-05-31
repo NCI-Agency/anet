@@ -1,6 +1,5 @@
-import PropTypes from 'prop-types'
 import React from 'react'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
@@ -10,7 +9,7 @@ import { connect } from 'react-redux'
 
 class OnboardingShow extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_MIN_HEAD)
