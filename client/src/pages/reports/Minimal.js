@@ -244,9 +244,9 @@ class ReportMinimal extends Page {
 	renderApprovals(canApprove) {
 		let report = this.state.report
 		return <Fieldset>
-			<a name="approvals">
+			<div id="approvals">
 				<legend>Approvals</legend>
-			</a>
+			</div>
 			{report.approvalStatus.map(action =>
 				this.renderApprovalAction(action)
 			)}

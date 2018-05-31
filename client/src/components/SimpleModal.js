@@ -23,9 +23,9 @@ class SimpleModal extends Component {
     render() {
           return (
             <div>
-              <a onClick={ this.open } >
+              <span className="asLink" onClick={ this.open } >
                 { this.props.title }
-              </a>
+              </span>
       
               <Modal bsSize={ this.props.size } show={ this.state.showModal } onHide={ this.close }>
                 <Modal.Header closeButton>
