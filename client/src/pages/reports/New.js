@@ -36,7 +36,7 @@ class ReportNew extends Page {
 		this.addCurrentUserAsAttendee()
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		this.addCurrentUserAsAttendee()
 	}
 
