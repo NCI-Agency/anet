@@ -31,7 +31,7 @@ class NavigationWarning extends Component {
 		}
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		window.addEventListener('beforeunload', this.onBeforeUnloadListener)
 	}
 

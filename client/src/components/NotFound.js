@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 
 export default class NotFound extends Component {
-    componentWillMount() {
+    componentDidMount() {
         document.getElementsByTagName('html')[0].classList.add('not-found')
     }
 

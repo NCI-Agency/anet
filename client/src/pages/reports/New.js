@@ -32,11 +32,11 @@ class ReportNew extends Page {
 		}
 	}
 
-	componentWillUpdate() {
+	componentDidUpdate() {
 		this.addCurrentUserAsAttendee()
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		this.addCurrentUserAsAttendee()
 	}
 
