@@ -130,7 +130,7 @@ const API = {
 	getAuthHeader: function() {
 		const creds = API._getAuthParams()
 		if (creds) {
-			return ['Authorization', 'Basic ' + new Buffer(`${creds.user}:${creds.pass}`).toString('base64')]
+			return ['Authorization', 'Basic ' + Buffer.from(`${creds.user}:${creds.pass}`).toString('base64')]
 		}
 		return null
 	}
