@@ -66,7 +66,8 @@ class AdvancedSearch extends Component {
 			filters: PropTypes.any,
 			objectType: PropTypes.string
 		}),
-		onSearchGoToSearchPage: PropTypes.bool
+		onSearchGoToSearchPage: PropTypes.bool,
+		text: PropTypes.string,
 	}
 
 	@autobind
@@ -249,7 +250,7 @@ class AdvancedSearch extends Component {
 		this.ALL_FILTERS = this.getFilters(context)
 		this.state = {
 			objectType: query.objectType || "Reports",
-			text: query.text || "",
+			text: props.text || query.text || "",
 			filters: query.filters || [],
 		}
 	}
@@ -257,6 +258,9 @@ class AdvancedSearch extends Component {
 	componentWillReceiveProps(props, nextContext) {
 		if (props.query) {
 			this.setState(props.query)
+		}
+		if (props.text) {
+			this.setState({text: props.text})
 		}
 		if (!_isEqual(this.context, nextContext)) {
 			this.ALL_FILTERS = this.getFilters(nextContext)
@@ -280,9 +284,7 @@ class AdvancedSearch extends Component {
 					</ButtonToggleGroup>
 				</FormGroup>
 
-				<SearchFilter label="Search term" onRemove={() => this.setState({text: ""})}>
-					<FormControl value={text} onChange={this.setText} />
-				</SearchFilter>
+				<FormControl value={this.props.text} className="hidden" />
 
 				{filters.map(filter =>
 					<SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
