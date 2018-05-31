@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import PendingApprovalReports from 'components/PendingApprovalReports'
 import CancelledEngagementReports from 'components/CancelledEngagementReports'
 import ReportsByTask from 'components/ReportsByTask'
@@ -73,7 +73,7 @@ const dateRangeFilterCss = {
 
 class InsightsShow extends Page {
 
-  static propTypes = Object.assign({}, Page.propTypes)
+  static propTypes = {...pagePropTypes}
 
   static contextTypes = {
     app: PropTypes.object.isRequired,
