@@ -82,7 +82,6 @@
     "pluralize": "^7.0.0",
     "promise": "^8.0.1",
     "prop-types": "^15.6.1",
-    "rc-progress": "^2.2.5",
     "react": "^16.2.0",
     "react-16-bootstrap-date-picker": "^5.1.2",
     "react-autosuggest": "^9.3.4",
