@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Table } from 'react-bootstrap'
+import _isEqual from 'lodash/isEqual'
 import AdvisorReportsModal from 'components/AdvisorReports/AdvisorReportsModal'
 import AdvisorReportsRow from 'components/AdvisorReports/AdvisorReportsRow'
 import AdvisorReportsTableHead from 'components/AdvisorReports/AdvisorReportsTableHead'
@@ -17,8 +18,11 @@ class OrganizationAdvisorsTable extends Component {
         this.handleSelectAllRows = this.handleSelectAllRows.bind(this)
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setState({ data: nextProps.data })
+    static getDerivedStateFromProps(props, state) {
+        if (!_isEqual(props.data, state.data)) {
+            return { data: props.data }
+        }
+        return null
     }
 
     handleSelectRow(index) {

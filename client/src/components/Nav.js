@@ -23,11 +23,12 @@ class Nav extends Component {
 		}
 	}
 
-	componentWillReceiveProps(nextProps) {
-		const scrollspyOffset = -(nextProps.topbarOffset + 20)
-		if (this.state.scrollspyOffset !== scrollspyOffset) {
-			this.setState({scrollspyOffset: scrollspyOffset})
+	static getDerivedStateFromProps(props, state) {
+		const scrollspyOffset = -(props.topbarOffset + 20)
+		if (state.scrollspyOffset !== scrollspyOffset) {
+			return {scrollspyOffset: scrollspyOffset}
 		}
+		return null
 	}
 
 	render() {
