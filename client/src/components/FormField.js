@@ -16,7 +16,7 @@ export default class FormField extends Component {
 		super(props, context)
 		this.state = {
 			value: '',
-			userHasTouchedField: false,
+			userHasTouchedField: props.validateBeforeUserTouches,
 			defaultValidation: null,
 			isValid: null,
 			errorMessage: ''
@@ -244,12 +244,6 @@ export default class FormField extends Component {
 
 	getDefaultValue(props, context) {
 		return props.value || this.getValue(props, context) || ''
-	}
-
-	componentWillMount() {
-		if (this.props.validateBeforeUserTouches) {
-			this.setState({userHasTouchedField: true})
-		}
 	}
 
 	componentWillReceiveProps(nextProps) {

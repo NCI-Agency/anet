@@ -19,13 +19,13 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
 	setPageProps: pageProps => dispatch(setPageProps(pageProps))
 })
 
-export default class Page extends Component {
+export const propTypes = {
+	showLoading: PropTypes.func.isRequired,
+	hideLoading: PropTypes.func.isRequired,
+	setPageProps: PropTypes.func.isRequired,
+}
 
-	static propTypes = {
-		showLoading: PropTypes.func.isRequired,
-		hideLoading: PropTypes.func.isRequired,
-		setPageProps: PropTypes.func.isRequired,
-	}
+export default class Page extends Component {
 
 	constructor(props, pageProps) {
 		super(props)
@@ -40,10 +40,6 @@ export default class Page extends Component {
 
 		this.renderPage = this.render
 		this.render = Page.prototype.render
-	}
-
-	componentWillMount() {
-		window.scrollTo(0,0)
 	}
 
 	loadData(props, context) {
@@ -122,7 +118,10 @@ export default class Page extends Component {
 	}
 
 	componentDidMount() {
+		window.scrollTo(0,0)
 		setMessages(this.props, this.state)
 		this.loadData(this.props)
 	}
 }
+
+Page.propTypes = propTypes

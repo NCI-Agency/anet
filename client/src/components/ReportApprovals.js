@@ -45,7 +45,7 @@ export default class ReportApprovals extends Component {
     renderFullApprovalView(report, title){
         return (
             <Fieldset id="approvals" className="approval-fieldset" title={title}>
-                { report.approvalStatus.map(action =>
+                { report.approvalStatus.filter(action => action.step).map(action =>
                     this.renderApprovalAction(action)
                 )}
             </Fieldset>
@@ -55,7 +55,7 @@ export default class ReportApprovals extends Component {
     renderCompactApprovalView(report, title){
         return (
             <Fieldset className="approval-fieldset compact" title={title}>
-                { report.approvalStatus.map(action =>
+                { report.approvalStatus.filter(action => action.step).map(action =>
                     this.renderCompactApprovalAction(action)
                 )}
             </Fieldset>

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import moment from 'moment'
 import autobind from 'autobind-decorator'
 
@@ -18,7 +18,7 @@ import { connect } from 'react-redux'
 
 class ReportEdit extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static modelName = 'Report'
 

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Modal, Alert, Button, HelpBlock, Popover, Overlay} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -42,9 +42,10 @@ const legendCss = {
 
 class RollupShow extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes, {
+	static propTypes = {
+		...pagePropTypes,
 		date: PropTypes.object,
-	})
+	}
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -90,8 +91,8 @@ class RollupShow extends Page {
 			return
 		}
 
-		require.ensure([], () => {
-			d3 = require('d3')
+		import('d3').then(importedModule => {
+			d3 = importedModule
 			this.forceUpdate()
 		})
 	}
