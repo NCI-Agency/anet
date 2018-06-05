@@ -67,7 +67,7 @@ class FilterableAdvisorReportsTable extends Component {
     }
 
     convertArrayOfObjectsToCSV(args) {
-        let result, ctr, csvGroupCols, csvCols, columnDelimiter, lineDelimiter, data
+        let result, csvGroupCols, csvCols, columnDelimiter, lineDelimiter, data
 
         data = args.data || null
         if (data == null || !data.length) {
@@ -99,10 +99,9 @@ class FilterableAdvisorReportsTable extends Component {
 
         data.forEach( (item) => {
             let stats = item.stats
-            ctr = 0
             result += item.organizationshortname
             weekColumns.forEach( (column, index) => {
-                if (ctr > 0) result += columnDelimiter
+                result += columnDelimiter
 
                 if (stats[index]) {
                     result += stats[index].nrreportssubmitted
@@ -111,7 +110,6 @@ class FilterableAdvisorReportsTable extends Component {
                 } else {
                     result += '0,0'
                 }
-                ctr++
             })
             result += lineDelimiter
         })
