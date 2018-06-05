@@ -8,6 +8,7 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
 
+import { DEFAULT_PAGE_PROPS } from 'actions'
 import { connect } from 'react-redux'
 
 class MyReports extends Page {
@@ -19,7 +20,7 @@ class MyReports extends Page {
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, Object.assign({}, DEFAULT_PAGE_PROPS, {onSearchGoToSearchPage: false}))
 
 		this.state = {
 			draft: null,
@@ -42,7 +43,10 @@ class MyReports extends Page {
 	}
 
 	componentWillReceiveProps(nextProps, nextContext) {
-		if (!this.state.reports) {
+		if (nextProps.searchQuery !== this.state.searchQuery) {
+			this.setState({searchQuery: nextProps.searchQuery}, () => this.loadData(nextProps, nextContext))
+		}
+		else if (!this.state.reports) {
 			this.loadData(nextProps, nextContext)
 		}
 	}
@@ -55,6 +59,7 @@ class MyReports extends Page {
 			authorId: authorId,
 			state: state
 		}
+		Object.assign(query, this.getSearchQuery())
 		return new GQL.Part(/* GraphQL */ `
 			${partName}: reportList(query: $${partName}Query) {
 				pageNum, pageSize, totalCount, list {
@@ -118,4 +123,8 @@ class MyReports extends Page {
 	}
 }
 
-export default connect(null, mapDispatchToProps)(MyReports)
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(MyReports)
