@@ -11,12 +11,13 @@ import API from 'api'
 import _isEqual from 'lodash/isEqual'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
-import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
+import { setPageProps, clearSearchQuery,DEFAULT_PAGE_PROPS } from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
 	hideLoading: () => dispatch(hideLoading()),
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+	setPageProps: pageProps => dispatch(setPageProps(pageProps)),
+	clearSearchQuery: () => dispatch(clearSearchQuery()),
 })
 
 export default class Page extends Component {
@@ -30,7 +31,8 @@ export default class Page extends Component {
 			text: PropTypes.string,
 			filters: PropTypes.any,
 			objectType: PropTypes.string
-		})
+		}),
+		clearSearchQuery: PropTypes.func.isRequired,
 	}
 
 	constructor(props, pageProps) {

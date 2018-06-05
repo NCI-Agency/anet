@@ -30,6 +30,7 @@ import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
+import { DEFAULT_PAGE_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import utils from 'utils'
@@ -121,7 +122,7 @@ class SearchNav extends Component {
 class Search extends Page {
 
 	constructor(props) {
-		super(props)
+		super(props, Object.assign({}, DEFAULT_PAGE_PROPS, {clearSearchQuery: false}))
 
 		Object.assign(this.state, {
 			query: props.searchQuery.text || null,
