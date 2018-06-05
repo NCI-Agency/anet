@@ -246,13 +246,17 @@ export default class FormField extends Component {
 		return props.value || this.getValue(props, context) || ''
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.validateBeforeUserTouches) {
-			this.setState({userHasTouchedField: true})
+	static getDerivedStateFromProps(props, state) {
+		if (props.validateBeforeUserTouches !== undefined
+				&& props.validateBeforeUserTouches !== state.userHasTouchedField) {
+			return {userHasTouchedField: props.validateBeforeUserTouches}
 		}
+		return null
+	}
 
-		if (nextProps.required !== this.props.required) {
-			this.updateValidationState(nextProps)
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.required !== this.props.required) {
+			this.updateValidationState(this.props)
 		}
 	}
 

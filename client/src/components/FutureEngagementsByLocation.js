@@ -254,19 +254,13 @@ export default class FutureEngagementsByLocation extends Component {
     this.fetchData()
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.datePropsChanged(nextProps)) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedDate: '',
-        focusedLocation: ''
-      })
-    }
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (this.datePropsChanged(prevProps)) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedDate: '',  // reset focus when changing the date
+        focusedLocation: ''
+      }, () => this.fetchData())
     }
   }
 
