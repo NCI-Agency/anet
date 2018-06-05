@@ -123,9 +123,6 @@ class InsightsShow extends Page {
       this.setState({insight: nextProps.match.params.insight})
       this.setStateDefaultDates(nextProps.match.params.insight)
     }
-		if (nextProps.searchQuery !== this.state.searchQuery) {
-			this.setState({searchQuery: nextProps.searchQuery}, () => this.loadData())
-		}
   }
 
   componentDidMount() {

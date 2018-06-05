@@ -151,9 +151,9 @@ class Search extends Page {
 
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.searchQuery !== this.state.searchQuery) {
-			this.setState({searchQuery: nextProps.searchQuery}, () => this.loadData())
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf()) {
+			this.loadData()
 		}
 	}
 
@@ -180,7 +180,7 @@ class Search extends Page {
 
 	@autobind
 	_dataFetcher(callback, pageSize) {
-		let {searchQuery} = this.state
+		let {searchQuery} = this.props
 		let query = this.getSearchQuery()
 		let parts = []
 		if (searchQuery.objectType) {
@@ -516,8 +516,8 @@ class Search extends Page {
 
 		const search = Object.without(this.state.saveSearch, 'show')
 		search.query = JSON.stringify(this.getSearchQuery())
-		if (this.state.searchQuery.objectType) {
-			search.objectType = this.state.searchQuery.objectType.toUpperCase()
+		if (this.props.searchQuery.objectType) {
+			search.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
 
 		API.send('/api/savedSearches/new', search, {disableSubmits: true})

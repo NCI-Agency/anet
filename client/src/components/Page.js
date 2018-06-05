@@ -44,7 +44,6 @@ export default class Page extends Component {
 		this.state = {
 			notFound: false,
 			invalidRequest: false,
-			searchQuery: props.searchQuery,
 		}
 
 		this.renderPage = this.render
@@ -134,7 +133,7 @@ export default class Page extends Component {
 
 	@autobind
 	getSearchQuery() {
-		let {searchQuery} = this.state
+		let {searchQuery} = this.props
 		let query = {text: searchQuery.text}
 		if (searchQuery.filters) {
 			searchQuery.filters.forEach(filter => {

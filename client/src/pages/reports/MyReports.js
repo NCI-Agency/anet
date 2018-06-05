@@ -43,11 +43,14 @@ class MyReports extends Page {
 	}
 
 	componentWillReceiveProps(nextProps, nextContext) {
-		if (nextProps.searchQuery !== this.state.searchQuery) {
-			this.setState({searchQuery: nextProps.searchQuery}, () => this.loadData(nextProps, nextContext))
-		}
-		else if (!this.state.reports) {
+		if (!this.state.reports) {
 			this.loadData(nextProps, nextContext)
+		}
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf()) {
+			this.loadData()
 		}
 	}
 
