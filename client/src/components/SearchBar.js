@@ -50,7 +50,7 @@ class SearchBar extends Component {
 				</InputGroup>
 			</Form>
 
-			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: true})}><a>Advanced search</a></small>
+			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: true})}><span className="asLink">Advanced search</span></small>
 			<Overlay show={this.state.showAdvancedSearch} onHide={() => this.setState({showAdvancedSearch: false})} placement="bottom" target={this.advancedSearchLink}>
 				<Popover id="advanced-search" placement="bottom" title="Advanced search">
 					<AdvancedSearch onSearch={this.runAdvancedSearch} onCancel={() => this.setState({showAdvancedSearch: false})} text={this.state.searchTerms} />

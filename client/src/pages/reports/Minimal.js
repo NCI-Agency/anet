@@ -1,6 +1,5 @@
-import PropTypes from 'prop-types'
 import React from 'react'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Button, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -20,7 +19,7 @@ import { connect } from 'react-redux'
 
 class ReportMinimal extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static modelName = 'Report'
 
@@ -244,9 +243,9 @@ class ReportMinimal extends Page {
 	renderApprovals(canApprove) {
 		let report = this.state.report
 		return <Fieldset>
-			<a name="approvals">
+			<div id="approvals">
 				<legend>Approvals</legend>
-			</a>
+			</div>
 			{report.approvalStatus.map(action =>
 				this.renderApprovalAction(action)
 			)}

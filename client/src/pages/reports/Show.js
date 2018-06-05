@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Button, Col, HelpBlock, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -26,7 +26,7 @@ import { connect } from 'react-redux'
 
 class ReportShow extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
@@ -73,8 +73,7 @@ class ReportShow extends Page {
 
 				attendees {
 					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status, organization { id, shortName}
-}
+					position { id, name, status, organization { id, shortName} }
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page, {mapDispatchToProps} from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
@@ -17,7 +17,7 @@ import { connect } from 'react-redux'
 
 class ReportNew extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -32,11 +32,11 @@ class ReportNew extends Page {
 		}
 	}
 
-	componentWillUpdate() {
+	componentDidUpdate() {
 		this.addCurrentUserAsAttendee()
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		this.addCurrentUserAsAttendee()
 	}
 
