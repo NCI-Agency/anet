@@ -51,7 +51,7 @@ export default class Autocomplete extends Component {
 
 		this.fetchSuggestionsDebounced = _debounce(this.fetchSuggestions, 200)
 
-		let value = this.componentWillReceiveProps(props)
+		let value = this._getValue(props)
 		let stringValue = this.getStringValue(value)
 
 		this.state = {
@@ -63,20 +63,24 @@ export default class Autocomplete extends Component {
 		}
 	}
 
-	componentWillReceiveProps(props) {
-		let value = props.value
+	@autobind
+	_getValue(props) {
+		const {value} = props
 		if (Array.isArray(value)) {
 			this.selectedUuids = value.map(object => object.uuid)
 			return {}
 		}
 
+		return value
+	}
+
+	componentDidUpdate(prevProps, prevState) {
 		//Ensure that we update the stringValue if we get an updated value
-		if (this.state) {
-			let stringValue = this.getStringValue(value)
+		const value = this._getValue(this.props)
+		const stringValue = this.getStringValue(value)
+		if (stringValue !== this.state.originalStringValue) {
 			this.setState({stringValue, originalStringValue: stringValue})
 		}
-
-		return value
 	}
 
 	render() {

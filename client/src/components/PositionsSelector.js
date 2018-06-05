@@ -24,6 +24,10 @@ export default class PositionsSelector extends Component {
 		app: PropTypes.object.isRequired
 	}
 
+	static defaultProps = {
+		queryParams: {status: Position.STATUS.ACTIVE}
+	}
+
 	render() {
 		let {positions, shortcuts, validationState} = this.props
 
@@ -31,7 +35,7 @@ export default class PositionsSelector extends Component {
 			<Autocomplete
 				objectType={Position}
 				fields={Position.autocompleteQuery}
-				queryParams={{status: Position.STATUS.ACTIVE}}
+				queryParams={this.props.queryParams}
 				placeholder="Start typing to search for a position..."
 				template={Position.autocompleteTemplate}
 				onChange={this.addPosition}

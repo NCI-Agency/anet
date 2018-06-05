@@ -80,8 +80,8 @@ export default {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const emailMessage = supportEmail ? ` at ${supportEmail}`: ''
 		const errorMessage = `Only the following email domain names are allowed. If your email domain name is not in the list, please contact the support team${emailMessage}.`
-		const items = validDomainNames.map(name => [
-			<li>{name}</li>
+		const items = validDomainNames.map((name, index) => [
+			<li key={index}>{name}</li>
 		])
 		return (
 			<div>

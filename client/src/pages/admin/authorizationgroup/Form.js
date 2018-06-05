@@ -11,7 +11,7 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import PositionsSelector from 'components/PositionsSelector'
 
 import API from 'api'
-import {AuthorizationGroup} from 'models'
+import {AuthorizationGroup, Position} from 'models'
 
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
@@ -61,6 +61,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 						</Form.Field>
 						<PositionsSelector
 							positions={authorizationGroup.positions}
+							queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]}}
 							onChange={this.onChange}
 							onErrorChange={this.onPositonError}
 							validationState={errors.positions} />

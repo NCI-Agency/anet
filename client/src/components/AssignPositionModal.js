@@ -26,9 +26,12 @@ export default class AssignPositionModal extends Component {
 		}
 	}
 
-	componentWillReceiveProps(nextProps, nextContext) {
-		let position = nextProps.person.position
-		this.setState({position})
+	static getDerivedStateFromProps(props, state) {
+		const position = props.person.position
+		if (position !== state.position) {
+			return {position: position}
+		}
+		return null
 	}
 
 	render() {
