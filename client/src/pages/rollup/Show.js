@@ -19,6 +19,7 @@ import utils from 'utils'
 
 import API from 'api'
 
+import { DEFAULT_PAGE_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
@@ -57,7 +58,7 @@ class RollupShow extends Page {
 	get rollupEnd() { return moment(this.state.date).endOf('day').hour(18) } // 6:59:59pm today.
 
 	constructor(props) {
-		super(props)
+		super(props, Object.assign({}, DEFAULT_PAGE_PROPS, {onSearchGoToSearchPage: false}))
 
 		const qs = utils.parseQueryString(props.location.search)
 		this.state = {
@@ -115,7 +116,7 @@ class RollupShow extends Page {
 			pageNum: this.state.reportsPageNum,
 			pageSize: 10,
 		}
-
+		Object.assign(rollupQuery, this.getSearchQuery())
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
@@ -163,8 +164,11 @@ class RollupShow extends Page {
 		})
 	}
 
-	componentDidUpdate() {
+	componentDidUpdate(prevProps, prevState) {
 		this.renderGraph()
+		if (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf()) {
+			this.loadData()
+		}
 	}
 
 	render() {
@@ -460,4 +464,8 @@ class RollupShow extends Page {
 	}
 }
 
-export default connect(null, mapDispatchToProps)(withRouter(RollupShow))
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(RollupShow))
