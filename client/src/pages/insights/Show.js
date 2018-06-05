@@ -16,7 +16,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
-import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
+import { DEFAULT_PAGE_PROPS } from 'actions'
 import { connect } from 'react-redux'
 
 const insightDetails = {
