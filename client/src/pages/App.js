@@ -274,7 +274,7 @@ class App extends Page {
 
 				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
-				<div className="container-fluid">
+				<div className="container-fluid" style={{height:"100%"}}>
 					{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
 					<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
 						<Nav />

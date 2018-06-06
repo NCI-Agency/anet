@@ -12,7 +12,6 @@ const backgroundCss = {
 	background: '#fff',
 	paddingTop: '2em',
 	height: '100%',
-	boxShadow: '0 4px 3px 0 rgba(0,0,0,0.1)',
 	zIndex: 100
 }
 
