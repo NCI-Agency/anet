@@ -11,7 +11,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
-import LoaderHOC from '../HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartByOrgId = 'cancelled_reports_by_org'
@@ -21,7 +22,7 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   advisorOrg { id, shortName }
   cancelledReason
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
 /*
  * Component displaying a chart with reports cancelled since
@@ -269,23 +270,17 @@ export default class CancelledEngagementReports extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedReason: '',
-        focusedOrg: ''
-      })  // reset focus when changing the date
-    }
-  }
-
   componentDidMount() {
     this.fetchData()
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedReason: '',  // reset focus when changing the date
+        focusedOrg: ''
+      }, () => this.fetchData())
     }
   }
 }

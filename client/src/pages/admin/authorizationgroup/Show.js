@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Form from 'components/Form'
 import Fieldset from 'components/Fieldset'
@@ -14,12 +14,11 @@ import {AuthorizationGroup} from 'models'
 import GQL from 'graphqlapi'
 import autobind from 'autobind-decorator'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class AuthorizationGroupShow extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static contextTypes = {
 		currentUser: PropTypes.object.isRequired,
@@ -138,9 +137,5 @@ class AuthorizationGroupShow extends Page {
 	}
 
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(AuthorizationGroupShow)

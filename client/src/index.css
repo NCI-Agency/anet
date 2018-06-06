@@ -195,11 +195,20 @@ fieldset.danger {
 	margin: 0;
 }
 
-.header small a {
+.header small span {
 	padding: 5px;
 	text-decoration: underline;
 	display: inline-block;
+}
+
+span.asLink {
 	cursor: pointer;
+	color: #337ab7;
+}
+span.asLink:hover,
+span.asLink:focus {
+	text-decoration: underline;
+	color: #23527c;
 }
 
 .banner {
@@ -213,19 +222,6 @@ fieldset.danger {
 #advanced-search.popover {
 	width: 600px;
 	max-width: none;
-}
-
-.nprogress-custom-parent .bar {
-	top: 130px !important;
-}
-
-.nprogress-custom-parent .peg {
-	transform: rotate(-3deg) translate(0px, 4px) !important;
-}
-
-.nprogress-custom-parent .spinner {
-	top: 104px !important;
-	right: 8px !important;
 }
 
 .graphiql-container {

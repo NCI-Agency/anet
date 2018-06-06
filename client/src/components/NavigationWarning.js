@@ -15,12 +15,11 @@ class NavigationWarning extends Component {
 		}
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (this.props.isBlocking !== nextProps.isBlocking) {
-			this.setState({
-				isBlocking: nextProps.isBlocking,
-			})
+	static getDerivedStateFromProps(props, state) {
+		if (props.isBlocking !== state.isBlocking) {
+			return { isBlocking: props.isBlocking }
 		}
+		return null
 	}
 
 	@autobind
@@ -31,7 +30,7 @@ class NavigationWarning extends Component {
 		}
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		window.addEventListener('beforeunload', this.onBeforeUnloadListener)
 	}
 

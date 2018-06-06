@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Grid, Row, Col} from 'react-bootstrap'
 
+import LoadingBar from 'react-redux-loading-bar'
 import TopBar from 'components/TopBar'
 import Nav from 'components/Nav'
 
@@ -62,6 +63,7 @@ import _isEqual from 'lodash/isEqual'
 class App extends Page {
 
 	static propTypes = {
+		...pagePropTypes,
 		pageProps: PropTypes.object,
 	}
 
@@ -77,8 +79,8 @@ class App extends Page {
 		}
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 
 		this.state = {
 			pageProps: props.pageProps,
@@ -255,6 +257,10 @@ class App extends Page {
 			<Route path="*" component={PageMissing} />
 		</Switch>
 
+		const navWidths = {sm: 4, md: 3, lg: 2}
+		const primaryWidths = (this.state.pageProps.useNavigation === true)
+				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
+				: {sm: 12, md: 12, lg: 12}
 		return (
 			<div className="anet">
 				<TopBar
@@ -266,6 +272,7 @@ class App extends Page {
 						this.setState({floatingMenu: !this.state.floatingMenu})
 					}} />
 
+				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
 				<div className="container-fluid">
 					{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
@@ -287,4 +294,4 @@ const mapStateToProps = (state, ownProps) => ({
 	pageProps: state.pageProps
 })
 
-export default connect(mapStateToProps)(withRouter(App))
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App))

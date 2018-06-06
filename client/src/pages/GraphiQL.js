@@ -1,29 +1,28 @@
-import PropTypes from 'prop-types'
-
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 
-import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 var GraphiQLreq = null/* required later */
 
 class GraphiQL extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
 	}
 
 	componentDidMount() {
-		if (GraphiQLreq)
+		if (GraphiQLreq) {
 			return
+		}
 
-		require.ensure([], () => {
-			GraphiQLreq = require('graphiql')
+		import('graphiql').then(importedModule => {
+			GraphiQLreq = importedModule.default
 			require('graphiql/graphiql.css')
 			this.forceUpdate()
 		})
@@ -45,9 +44,5 @@ class GraphiQL extends Page {
 		</div>
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(GraphiQL)

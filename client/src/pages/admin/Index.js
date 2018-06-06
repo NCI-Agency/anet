@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
@@ -9,12 +9,11 @@ import Form from 'components/Form'
 
 import API from 'api'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 class AdminIndex extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static contextTypes = {
 		app: PropTypes.object,
@@ -81,9 +80,5 @@ class AdminIndex extends Page {
 	}
 
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(AdminIndex)

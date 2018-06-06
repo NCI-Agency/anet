@@ -1,8 +1,8 @@
 import CreateAuthorizationGroup from '../pages/createAuthorizationGroup.page'
 import { expect } from 'chai'
 
-const POSITION_AUTOCOMPLETE = 'Chief'
-const POSITION = 'Chief of Police'
+const POSITION_AUTOCOMPLETE = 'ANET'
+const POSITION = 'ANET Administrator'
 
 describe('Create authorization group form page', () => {
 

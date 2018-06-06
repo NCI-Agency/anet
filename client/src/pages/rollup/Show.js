@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Modal, Alert, Button, HelpBlock, Popover, Overlay} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -20,7 +20,6 @@ import utils from 'utils'
 import API from 'api'
 
 import { withRouter } from 'react-router-dom'
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 var d3 = null/* required later */
@@ -43,9 +42,10 @@ const legendCss = {
 
 class RollupShow extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes, {
+	static propTypes = {
+		...pagePropTypes,
 		date: PropTypes.object,
-	})
+	}
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -91,8 +91,8 @@ class RollupShow extends Page {
 			return
 		}
 
-		require.ensure([], () => {
-			d3 = require('d3')
+		import('d3').then(importedModule => {
+			d3 = importedModule
 			this.forceUpdate()
 		})
 	}
@@ -459,9 +459,5 @@ class RollupShow extends Page {
 		)
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(withRouter(RollupShow))

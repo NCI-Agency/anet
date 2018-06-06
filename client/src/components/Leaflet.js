@@ -93,15 +93,15 @@ export default class Leaflet extends Component {
 		this.setState({hasLayers:false})
 	}
 
-	componentWillReceiveProps(nextProps) {
+	componentDidUpdate(prevProps, prevState) {
 		this.tryAddLayers()
 
-		let existingMarkers = this.state.markerLayer.getLayers()
-		let markersToAdd = nextProps.markers.filter(m =>
+		const existingMarkers = this.state.markerLayer.getLayers()
+		const markersToAdd = this.props.markers.filter(m =>
 			existingMarkers.findIndex(el => el.options.id === m.id) === -1
 		)
-		let markersToRemove = existingMarkers.filter(m =>
-			nextProps.markers.findIndex(el => m.options.id === el.id) === -1
+		const markersToRemove = existingMarkers.filter(m =>
+			this.props.markers.findIndex(el => m.options.id === el.id) === -1
 		)
 		this.updateMarkerLayer(markersToAdd, markersToRemove)
 	}

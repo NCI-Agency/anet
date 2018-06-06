@@ -1,16 +1,15 @@
-import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import { withRouter } from 'react-router-dom'
-import { setPageProps, PAGE_PROPS_MIN_HEAD } from 'actions'
+import { PAGE_PROPS_MIN_HEAD } from 'actions'
 import { connect } from 'react-redux'
 
 class OnboardingShow extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_MIN_HEAD)
@@ -35,9 +34,5 @@ class OnboardingShow extends Page {
 		this.props.history.push('/onboarding/edit')
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(withRouter(OnboardingShow))

@@ -1,13 +1,12 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Fieldset from 'components/Fieldset'
 
 import API from 'api'
 import {Position} from 'models'
 
-import { setPageProps } from 'actions'
 import { connect } from 'react-redux'
 
 import TOUR_SCREENSHOT from 'resources/tour-screenshot.png'
@@ -19,7 +18,7 @@ const screenshotCss = {
 
 class Help extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -98,9 +97,5 @@ class Help extends Page {
 		</div>
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(Help)

@@ -38,7 +38,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 		this.state = {
 			isBlocking: false,
 			error: null,
-			showAddPositionAlert: false,
+			showAddApprovalStepAlert: false,
 		}
 		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
 		this.LongNameWithLabel = DictionaryField(Form.Field)
@@ -99,7 +99,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 					<Button className="pull-right" onClick={this.addApprovalStep} bsStyle="primary" id="addApprovalStepButton" >
 						Add an Approval Step
 					</Button>
-					<Modal show={this.state.showAddPositionAlert} onHide={this.hideAddPositionAlert}>
+					<Modal show={this.state.showAddApprovalStepAlert} onHide={this.hideAddApprovalStepAlert}>
 						<Modal.Header closeButton>
 							<Modal.Title>Step not added</Modal.Title>
 						</Modal.Header>
@@ -107,7 +107,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 							Please complete all approval steps; there already is an approval step that is not completely filled in.
 						</Modal.Body>
 						<Modal.Footer>
-							<Button className="pull-right" onClick={this.hideAddPositionAlert} bsStyle="primary">OK</Button>
+							<Button className="pull-right" onClick={this.hideAddApprovalStepAlert} bsStyle="primary">OK</Button>
 						</Modal.Footer>
 					</Modal>
 
@@ -211,8 +211,8 @@ class OrganizationForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
-	hideAddPositionAlert() {
-		this.setState({showAddPositionAlert: false})
+	hideAddApprovalStepAlert() {
+		this.setState({showAddApprovalStepAlert: false})
 	}
 
 	@autobind
@@ -223,7 +223,7 @@ class OrganizationForm extends ValidatableFormWrapper {
 		for (let i = 0; i < approvalSteps.length; i++) {
 			const step = approvalSteps[i]
 			if (!step.name || !step.approvers || step.approvers.length === 0) {
-				this.setState({showAddPositionAlert: true})
+				this.setState({showAddApprovalStepAlert: true})
 				return
 			}
 		}

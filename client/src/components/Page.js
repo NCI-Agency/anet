@@ -8,26 +8,24 @@ import {setMessages} from 'components/Messages'
 
 import API from 'api'
 
-import NProgress from 'nprogress'
-import 'nprogress/nprogress.css'
-
 import _isEqual from 'lodash/isEqual'
 
-import { DEFAULT_PAGE_PROPS } from 'actions'
+import { showLoading, hideLoading } from 'react-redux-loading-bar'
+import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
 
-const NPROGRESS_CONTAINER = '.header'
+export const mapDispatchToProps = (dispatch, ownProps) => ({
+	showLoading: () => dispatch(showLoading()),
+	hideLoading: () => dispatch(hideLoading()),
+	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+})
 
-if (process.env.NODE_ENV !== 'test') {
-	NProgress.configure({
-		parent: NPROGRESS_CONTAINER
-	})
+export const propTypes = {
+	showLoading: PropTypes.func.isRequired,
+	hideLoading: PropTypes.func.isRequired,
+	setPageProps: PropTypes.func.isRequired,
 }
 
 export default class Page extends Component {
-
-	static propTypes = {
-		setPageProps: PropTypes.func.isRequired,
-	}
 
 	constructor(props, pageProps) {
 		super(props)
@@ -44,26 +42,20 @@ export default class Page extends Component {
 		this.render = Page.prototype.render
 	}
 
-	componentWillMount() {
-		// window.scrollTo(0,0)
-
-		if (document.querySelector(NPROGRESS_CONTAINER)) {
-			NProgress.start()
-		}
-	}
-
 	loadData(props, context) {
 		this.setState({notFound: false, invalidRequest: false})
 
 		if (this.fetchData) {
 			document.body.classList.add('loading')
+			if (typeof this.props.showLoading === 'function') {
+				this.props.showLoading()
+			}
 
 			this.fetchData(props || this.props, context || this.context)
 
 			let promise = API.inProgress
 
 			if (promise && promise.then instanceof Function) {
-				NProgress.set(0.5)
 				promise.then(this.doneLoading, this.doneLoading)
 			} else {
 				this.doneLoading()
@@ -77,7 +69,9 @@ export default class Page extends Component {
 
 	@autobind
 	doneLoading(response) {
-		NProgress.done()
+		if (typeof this.props.hideLoading === 'function') {
+			this.props.hideLoading()
+		}
 		document.body.classList.remove('loading')
 
 		if (response) {
@@ -128,3 +122,5 @@ export default class Page extends Component {
 		this.loadData(this.props)
 	}
 }
+
+Page.propTypes = propTypes

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
@@ -12,12 +12,12 @@ import {reportTour} from 'pages/HopscotchTour'
 
 import {Report} from 'models'
 
-import { setPageProps, PAGE_PROPS_NO_NAV } from 'actions'
+import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class ReportNew extends Page {
 
-	static propTypes = Object.assign({}, Page.propTypes)
+	static propTypes = {...pagePropTypes}
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -32,11 +32,11 @@ class ReportNew extends Page {
 		}
 	}
 
-	componentWillUpdate() {
+	componentDidUpdate() {
 		this.addCurrentUserAsAttendee()
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		this.addCurrentUserAsAttendee()
 	}
 
@@ -71,9 +71,5 @@ class ReportNew extends Page {
 		)
 	}
 }
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
-})
 
 export default connect(null, mapDispatchToProps)(ReportNew)
