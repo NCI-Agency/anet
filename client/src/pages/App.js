@@ -91,8 +91,6 @@ class App extends Page {
 		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
-	unlistenHistory
-
 	componentDidMount() {
 		super.componentDidMount()
 		// We want to hide the floating menu on navigation events
@@ -268,7 +266,8 @@ class App extends Page {
 						this.setState({floatingMenu: !this.state.floatingMenu})
 					}} />
 
-				<div style={{height:"100%"}}>
+
+				<div className="container-fluid">
 					{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
 					<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
 						<Nav />
