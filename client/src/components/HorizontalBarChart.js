@@ -203,6 +203,7 @@ class HorizontalBarChart extends Component {
         return [d]
       })
       .enter()
+      .filter(d => d.value !== undefined)
       .append('rect')
       .attr('class', 'bar')
       .attr('id', function(d, i) { return 'bar_' + d.key + d.parentKey })
