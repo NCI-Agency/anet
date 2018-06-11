@@ -96,14 +96,7 @@ class App extends Page {
 
 	componentWillReceiveProps(nextProps) {
 		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
-			this.setState({pageProps: nextProps.pageProps}, () => this.updateSearchQuery())
-		}
-	}
-
-	updateSearchQuery() {
-		// clear the Redux searchQuery when the pageProps ask for it
-		if (typeof this.props.clearSearchQuery === 'function' && this.state.pageProps && this.state.pageProps.clearSearchQuery) {
-			this.props.clearSearchQuery()
+			this.setState({pageProps: nextProps.pageProps})
 		}
 	}
 

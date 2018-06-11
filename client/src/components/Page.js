@@ -37,8 +37,9 @@ export default class Page extends Component {
 
 	constructor(props, pageProps) {
 		super(props)
+		const pp = pageProps || DEFAULT_PAGE_PROPS
 		if (typeof props.setPageProps === 'function') {
-			props.setPageProps(pageProps || DEFAULT_PAGE_PROPS)
+			props.setPageProps(pp)
 		}
 
 		this.state = {
@@ -48,6 +49,9 @@ export default class Page extends Component {
 
 		this.renderPage = this.render
 		this.render = Page.prototype.render
+		if (typeof this.props.clearSearchQuery === 'function' && pp.clearSearchQuery) {
+			this.props.clearSearchQuery()
+		}
 	}
 
 	loadData(props, context) {
