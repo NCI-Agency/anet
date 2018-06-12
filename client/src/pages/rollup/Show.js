@@ -116,7 +116,7 @@ class RollupShow extends Page {
 			pageNum: this.state.reportsPageNum,
 			pageSize: 10,
 		}
-		Object.assign(rollupQuery, this.getSearchQuery())
+		Object.assign(rollupQuery, this.getSearchQuery(props))
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
@@ -166,9 +166,6 @@ class RollupShow extends Page {
 
 	componentDidUpdate(prevProps, prevState) {
 		this.renderGraph()
-		if (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf()) {
-			this.loadData()
-		}
 	}
 
 	render() {

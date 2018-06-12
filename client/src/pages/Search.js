@@ -151,12 +151,6 @@ class Search extends Page {
 
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		if (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf()) {
-			this.loadData()
-		}
-	}
-
 	getSearchPart(type, query, pageSize) {
 		type = type.toLowerCase()
 		let subQuery = Object.assign({}, query)
@@ -179,9 +173,10 @@ class Search extends Page {
 	}
 
 	@autobind
-	_dataFetcher(callback, pageSize) {
-		let {searchQuery} = this.props
-		let query = this.getSearchQuery()
+	_dataFetcher(props, callback, pageSize) {
+
+		let {searchQuery} = props
+		let query = this.getSearchQuery(props)
 		let parts = []
 		if (searchQuery.objectType) {
 			parts.push(this.getSearchPart(searchQuery.objectType, query, pageSize))
@@ -203,7 +198,7 @@ class Search extends Page {
 	}
 
 	fetchData(props) {
-		this._dataFetcher(this._fetchDataCallback)
+		this._dataFetcher(props, this._fetchDataCallback)
 	}
 
 	render() {
