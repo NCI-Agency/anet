@@ -94,12 +94,6 @@ class App extends Page {
 		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
-			this.setState({pageProps: nextProps.pageProps})
-		}
-	}
-
 	updateTopbarOffset(topbarOffset) {
 		if (this.state.topbarOffset !== topbarOffset){
 			this.setState({ topbarOffset: topbarOffset })
@@ -251,7 +245,7 @@ class App extends Page {
 		</Switch>
 
 		const navWidths = {sm: 4, md: 3, lg: 2}
-		const primaryWidths = (this.state.pageProps.useNavigation === true)
+		const primaryWidths = (this.props.pageProps.useNavigation === true)
 				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
 				: {sm: 12, md: 12, lg: 12}
 		return (
@@ -260,14 +254,14 @@ class App extends Page {
 					updateTopbarOffset={this.updateTopbarOffset}
 					currentUser={this.state.currentUser}
 					settings={this.state.settings}
-					minimalHeader={this.state.pageProps.minimalHeader}
+					minimalHeader={this.props.pageProps.minimalHeader}
 					location={this.props.location} />
 
 				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
 				<Grid fluid componentClass="section">
 					<Row>
-						{this.state.pageProps.useNavigation === true &&
+						{this.props.pageProps.useNavigation === true &&
 							<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
 								<Nav topbarOffset={this.state.topbarOffset} />
 							</Col>

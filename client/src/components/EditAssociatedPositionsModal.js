@@ -31,14 +31,6 @@ export default class EditAssociatedPositionsModal extends Component {
 		}
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		const assoc = props.position.associatedPositions.slice()
-		if (assoc !== state.associatedPositions) {
-			return {error: null, associatedPositions: assoc}
-		}
-		return null
-	}
-
 	render() {
 		const {position} = this.props
 		const {associatedPositions} = this.state
@@ -140,8 +132,10 @@ export default class EditAssociatedPositionsModal extends Component {
 		let index = rels.findIndex(rel => rel.id === relToDelete.id)
 
 		if (index !== -1) {
-			rels.splice(index, 1)
-			this.setState({associatedPositions: rels})
+			let newRels = rels.slice()
+			newRels.splice(index, 1)
+
+			this.setState({associatedPositions: newRels})
 		}
 	}
 

@@ -45,9 +45,10 @@ class ReportForm extends ValidatableFormWrapper {
 		currentUser: PropTypes.object,
 	}
 
-	constructor(props) {
+	constructor(props, context) {
 		super(props)
 
+		const { currentUser } = context
 		this.state = {
 			isBlocking: false,
 			recents: {
@@ -63,8 +64,10 @@ class ReportForm extends ValidatableFormWrapper {
 			isCancelled: (props.report.cancelledReason ? true : false),
 			errors: {},
 
-			showAssignedPositionWarning: false,
-			showActivePositionWarning: false,
+			// FIXME: These two need to get updated if the currentUser changes
+			showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
+			showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
+
 			disableOnSubmit: false,
 
 			//State for auto-saving reports
@@ -114,21 +117,18 @@ class ReportForm extends ValidatableFormWrapper {
 		window.clearTimeout(this.state.timeoutId)
 	}
 
-
-	componentWillReceiveProps(nextProps) {
-		const { currentUser } = this.context
-		this.setState({showAssignedPositionWarning: !currentUser.hasAssignedPosition()})
-		this.setState({showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()})
-
-		let report = nextProps.report
+	static getDerivedStateFromProps(props, state) {
+		const stateUpdate = {}
+		const report = props.report
 		if (report.cancelledReason) {
-			this.setState({isCancelled: true})
+			Object.assign(stateUpdate, {isCancelled: true})
 		}
 		const reportTags = report.tags.map(tag => ({id: tag.id.toString(), text: tag.name}))
-		this.setState({
+		Object.assign(stateUpdate, {
 			reportTags: reportTags,
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation
 		})
+		return stateUpdate
 	}
 
 	@autobind

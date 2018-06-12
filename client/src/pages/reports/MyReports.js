@@ -41,12 +41,6 @@ class MyReports extends Page {
 		}
 	}
 
-	componentWillReceiveProps(nextProps, nextContext) {
-		if (!this.state.reports) {
-			this.loadData(nextProps, nextContext)
-		}
-	}
-
 	@autobind
 	getPart(partName, state, authorId) {
 		let query = {
@@ -63,11 +57,11 @@ class MyReports extends Page {
 			}`).addVariable(partName + "Query", "ReportSearchQuery", query)
 	}
 
-	fetchData(props, context) {
-		if (!context.currentUser || !context.currentUser.id) {
+	fetchData(props) {
+		if (!this.context.currentUser || !this.context.currentUser.id) {
 			return
 		}
-		let authorId = context.currentUser.id
+		let authorId = this.context.currentUser.id
 		let pending = this.partFuncs.pending(authorId)
 		let draft = this.partFuncs.draft(authorId)
 		let future = this.partFuncs.future(authorId)

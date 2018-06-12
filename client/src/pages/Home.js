@@ -141,9 +141,9 @@ class Home extends Page {
 		}
 	}
 
-	fetchData(props, context) {
+	fetchData(props) {
 		//If we don't have the currentUser yet (ie page is still loading, don't run these queries)
-		let {currentUser} = context
+		let {currentUser} = this.context
 		if (!currentUser || !currentUser._loaded) { return }
 		// Get current user authorization groups (needed for reports query 5)
 		const userAuthGroupsGraphQL = /* GraphQL */`

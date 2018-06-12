@@ -94,7 +94,6 @@ class InsightsShow extends Page {
   constructor(props) {
     super(props)
     this.state = {
-      insight: props.match.params.insight,
       referenceDate: null,
       startDate: null,
       endDate: null,
@@ -102,7 +101,7 @@ class InsightsShow extends Page {
     }
   }
 
- get defaultDates() {
+  get defaultDates() {
     return {
       relative: "0",
       start: this.state.startDate.toISOString(),
@@ -111,22 +110,21 @@ class InsightsShow extends Page {
   }
 
   getFilters = () => {
-    const insight = insightDetails[this.state.insight]
+    const insight = insightDetails[this.props.match.params.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
     const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     return <span>{dateRangeFilter}{calenderFilter}</span>
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.match.params.insight !== this.state.insight) {
-      this.setState({insight: nextProps.match.params.insight})
-      this.setStateDefaultDates(nextProps.match.params.insight)
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.match.params.insight !== this.props.match.params.insight) {
+      this.setStateDefaultDates(this.props.match.params.insight)
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
-    this.setStateDefaultDates(this.state.insight)
+    this.setStateDefaultDates(this.props.match.params.insight)
   }
 
   setStateDefaultDates = (insight) => {
@@ -197,9 +195,9 @@ class InsightsShow extends Page {
   }
 
   render() {
-    const insightConfig = insightDetails[this.state.insight]
+    const insightConfig = insightDetails[this.props.match.params.insight]
     const InsightComponent = insightConfig.component
-    const insightPath = '/insights/' + this.state.insight
+    const insightPath = '/insights/' + this.props.match.params.insight
 
     return (
       <div>
@@ -207,7 +205,7 @@ class InsightsShow extends Page {
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
-          <Fieldset id={this.state.insight} data-jumptarget title={
+          <Fieldset id={this.props.match.params.insight} data-jumptarget title={
             <span>
               {insightConfig.title}
               {this.getFilters()}

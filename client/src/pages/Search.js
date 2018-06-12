@@ -154,12 +154,17 @@ class Search extends Page {
 		}
 	}
 
-	componentWillReceiveProps(props, context) {
-		let newAdvancedSearch = props.location.state && props.location.state.advancedSearch
-		if (this.state.advancedSearch !== newAdvancedSearch) {
-			this.setState({advancedSearch: newAdvancedSearch}, () => this.loadData())
-		} else {
-			super.componentWillReceiveProps(props, context)
+	static getDerivedStateFromProps(props, state) {
+		const newAdvancedSearch = props.location.state && props.location.state.advancedSearch
+		if (state.advancedSearch !== newAdvancedSearch) {
+			return {advancedSearch: newAdvancedSearch}
+		}
+		return null
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (this.state.advancedSearch !== prevState.advancedSearch) {
+			this.loadData()
 		}
 	}
 

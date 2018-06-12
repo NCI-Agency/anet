@@ -280,21 +280,19 @@ class PersonForm extends ValidatableFormWrapper {
 		</div>
 	}
 
-	componentWillReceiveProps(nextProps) {
-		const { person } = nextProps
+	static getDerivedStateFromProps(props, state) {
+		const { person } = props
 		const emptyName = { lastName: '', firstName: ''}
-
 		const parsedName = person.name ? Person.parseFullName(person.name) : emptyName
-
-		this.savePersonWithFullName(person, parsedName)
+		return PersonForm.getPersonWithFullName(person, parsedName)
 	}
 
-	savePersonWithFullName(person, editName) {
+	static getPersonWithFullName(person, editName) {
 		if (editName.lastName) { person.lastName = editName.lastName }
 		if (editName.firstName) { person.firstName = editName.firstName }
 
 		person.name = Person.fullName(person)
-		this.setState({ person })
+		return { person }
 	}
 
 	handleOnKeyDown = (event) => {
@@ -308,14 +306,14 @@ class PersonForm extends ValidatableFormWrapper {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.savePersonWithFullName(person, { lastName: value })
+		this.setState(PersonForm.getPersonWithFullName(person, { lastName: value }))
 	}
 
 	handleOnChangeFirstName = (event) => {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.savePersonWithFullName(person, { firstName: value })
+		this.setState(PersonForm.getPersonWithFullName(person, { firstName: value }))
 	}
 
 	@autobind

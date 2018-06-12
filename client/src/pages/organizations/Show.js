@@ -57,18 +57,19 @@ class OrganizationShow extends Page {
 		setMessages(props,this.state)
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.match.params.action !== this.state.action) {
-			this.setState({action: nextProps.match.params.action})
+	static getDerivedStateFromProps(props, state) {
+		if (props.match.params.action !== state.action) {
+			return {action: props.match.params.action}
 		}
-
-		if (+nextProps.match.params.id !== this.state.organization.id) {
-			this.loadData(nextProps)
-		}
+		return null
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if(prevState.reportsFilter !== this.state.reportsFilter){
+		// Re-load data if id has changed (convert to number before comparing)
+		if (+this.props.match.params.id !== +prevProps.match.params.id) {
+			this.loadData()
+		}
+		else if (prevState.reportsFilter !== this.state.reportsFilter) {
 			let reports = this.getReportQueryPart(this.props.match.params.id)
 			this.runGQLReports([reports])
 		}

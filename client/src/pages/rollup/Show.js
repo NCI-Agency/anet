@@ -74,13 +74,21 @@ class RollupShow extends Page {
 		this.previewPlaceholderUrl = API.addAuthParams("/help")
 	}
 
-	componentWillReceiveProps(newProps, newContext) {
-		const qs = utils.parseQueryString(newProps.location.search)
-		let newDate = moment(+qs.date || undefined)
-		if (!this.state.date.isSame(newDate)) {
-			this.setState({date: newDate}, () => this.loadData(newProps, newContext))
-		} else {
-			super.componentWillReceiveProps(newProps, newContext)
+	static getDerivedStateFromProps(props, state) {
+		const qs = utils.parseQueryString(props.location.search)
+		const newDate = moment(+qs.date || undefined)
+		if (!state.date.isSame(newDate)) {
+			return {date: newDate}
+		}
+		return null
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!this.state.date.isSame(prevState.date)) {
+			Promise.resolve(this.loadData()).then(() => this.renderGraph())
+		}
+		else {
+			this.renderGraph()
 		}
 	}
 
@@ -97,8 +105,8 @@ class RollupShow extends Page {
 		})
 	}
 
-	fetchData(props, context) {
-		const settings = context.app.state.settings
+	fetchData(props) {
+		const settings = this.context.app.state.settings
 		const maxReportAge = settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
 		if (!maxReportAge) {
 			//don't run the query unless we've loaded the rollup settings.
@@ -161,10 +169,6 @@ class RollupShow extends Page {
 					})
 			})
 		})
-	}
-
-	componentDidUpdate() {
-		this.renderGraph()
 	}
 
 	render() {
