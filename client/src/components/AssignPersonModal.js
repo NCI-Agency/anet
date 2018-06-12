@@ -22,12 +22,10 @@ export default class AssignPersonModal extends Component {
 		}
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		const person = props.position.person
-		if (person !== state.person) {
-			return {person: person}
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.position.person !== this.props.position.person) {
+			this.setState({person: this.props.position.person})
 		}
-		return null
 	}
 
 	render() {

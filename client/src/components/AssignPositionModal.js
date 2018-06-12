@@ -26,12 +26,10 @@ export default class AssignPositionModal extends Component {
 		}
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		const position = props.person.position
-		if (position !== state.position) {
-			return {position: position}
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.person.position !== this.props.person.position) {
+			this.setState({position: this.props.person.position})
 		}
-		return null
 	}
 
 	render() {
