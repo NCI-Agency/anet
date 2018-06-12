@@ -375,7 +375,7 @@ class AdvancedSearch extends Component {
 const mapStateToProps = (state, ownProps) => {
 	return {
 		query: state.searchQuery,
-		onSearchGoToSearchPage: state.pageProps.onSearchGoToSearchPage
+		onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage
 	}
 }
 

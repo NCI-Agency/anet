@@ -8,7 +8,7 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
 
-import { DEFAULT_PAGE_PROPS } from 'actions'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
 import { connect } from 'react-redux'
 
 class MyReports extends Page {
@@ -20,7 +20,7 @@ class MyReports extends Page {
 	}
 
 	constructor(props) {
-		super(props, Object.assign({}, DEFAULT_PAGE_PROPS, {onSearchGoToSearchPage: false}))
+		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
 
 		this.state = {
 			draft: null,

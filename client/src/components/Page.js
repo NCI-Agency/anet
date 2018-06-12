@@ -11,12 +11,13 @@ import API from 'api'
 import _isEqual from 'lodash/isEqual'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
-import { setPageProps, clearSearchQuery,DEFAULT_PAGE_PROPS } from 'actions'
+import { setPageProps, setSearchProps, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
 	hideLoading: () => dispatch(hideLoading()),
 	setPageProps: pageProps => dispatch(setPageProps(pageProps)),
+	setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
 	clearSearchQuery: () => dispatch(clearSearchQuery()),
 })
 
@@ -24,6 +25,7 @@ export const propTypes = {
 	showLoading: PropTypes.func.isRequired,
 	hideLoading: PropTypes.func.isRequired,
 	setPageProps: PropTypes.func.isRequired,
+	setSearchProps: PropTypes.func.isRequired,
 	onSearchGoToSearchPage: PropTypes.bool,
 	searchQuery: PropTypes.shape({
 		text: PropTypes.string,
@@ -35,11 +37,18 @@ export const propTypes = {
 
 export default class Page extends Component {
 
-	constructor(props, pageProps) {
+	constructor(props, pageProps, searchProps) {
 		super(props)
 		const pp = pageProps || DEFAULT_PAGE_PROPS
+		const sp = searchProps || DEFAULT_SEARCH_PROPS
 		if (typeof props.setPageProps === 'function') {
 			props.setPageProps(pp)
+		}
+		if (typeof props.setSearchProps === 'function') {
+			props.setSearchProps(sp)
+		}
+		if (typeof props.clearSearchQuery === 'function' && sp.clearSearchQuery) {
+			props.clearSearchQuery()
 		}
 
 		this.state = {
@@ -49,9 +58,6 @@ export default class Page extends Component {
 
 		this.renderPage = this.render
 		this.render = Page.prototype.render
-		if (typeof this.props.clearSearchQuery === 'function' && pp.clearSearchQuery) {
-			this.props.clearSearchQuery()
-		}
 	}
 
 	loadData(props, context) {

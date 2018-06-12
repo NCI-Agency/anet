@@ -85,7 +85,7 @@ class SearchBar extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
 	query: state.searchQuery,
-	onSearchGoToSearchPage: state.pageProps.onSearchGoToSearchPage,
+	onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
