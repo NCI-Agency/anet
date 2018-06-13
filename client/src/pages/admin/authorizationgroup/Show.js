@@ -74,11 +74,11 @@ class AuthorizationGroupShow extends Page {
 		}` )
 		let positionsPart = this.getPositionQueryPart(props.match.params.id)
 		let reportsPart = this.getReportQueryPart(props.match.params.id)
-		this.runGQL([authGroupPart, positionsPart, reportsPart])
+		return this.runGQL([authGroupPart, positionsPart, reportsPart])
 	}
 
 	runGQL(queries) {
-		GQL.run(queries).then(data => {
+		return GQL.run(queries).then(data => {
 			this.setState({
 				authorizationGroup: new AuthorizationGroup(data.authorizationGroup),
 				positions: data.paginatedPositions,

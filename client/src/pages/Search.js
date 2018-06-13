@@ -232,12 +232,12 @@ class Search extends Page {
 				parts.push(this.getSearchPart(key, advQuery, pageSize))
 			})
 		}
-		callback(parts)
+		return callback(parts)
 	}
 
 	@autobind
 	_fetchDataCallback(parts) {
-		GQL.run(parts).then(data => {
+		return GQL.run(parts).then(data => {
 			this.setState({success: null, error: null, results: data})
 		}).catch(response =>
 			this.setState({success: null, error: response})
@@ -246,7 +246,7 @@ class Search extends Page {
 
 	fetchData(props) {
 		const qs = utils.parseQueryString(props.location.search)
-		this._dataFetcher(qs, this._fetchDataCallback)
+		return this._dataFetcher(qs, this._fetchDataCallback)
 	}
 
 	render() {

@@ -22,7 +22,7 @@ class AuthorizationGroups extends Page {
 	}
 
 	fetchData() {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			authorizationGroupList(f:getAll) {
 				list { id, name, description, positions { id, name, type }, status }
 			}

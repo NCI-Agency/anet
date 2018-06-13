@@ -29,7 +29,7 @@ class TaskNew extends Page {
 	fetchData(props) {
 		const qs = utils.parseQueryString(props.location.search)
 		if (qs.responsibleOrgId) {
-			API.query(/* GraphQL */`
+			return API.query(/* GraphQL */`
 				organization(id: ${qs.responsibleOrgId}) {
 					id, shortName, longName, identificationCode, type
 				}

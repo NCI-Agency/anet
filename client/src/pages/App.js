@@ -107,7 +107,7 @@ class App extends Page {
 	}
 
 	fetchData() {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			person(f:me) {
 				id, name, role, emailAddress, rank, status
 				position {

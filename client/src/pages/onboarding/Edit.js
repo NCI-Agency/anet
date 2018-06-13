@@ -30,7 +30,7 @@ class OnboardingEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			person(id:${this.context.currentUser.id}) {
 				id,
 				name, rank, role, emailAddress, phoneNumber, status
