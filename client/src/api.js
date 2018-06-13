@@ -12,13 +12,9 @@ const API = {
 			params.headers[authHeader[0]] = authHeader[1]
 		}
 
-		let promise = window.fetch(pathName, params)
+		return window.fetch(pathName, params)
 					.then(response => {
 						let isOk = response.ok
-
-						if (API.inProgress === promise) {
-							API.inProgress = null
-						}
 
 						if (response.headers.get('content-type') === 'application/json') {
 							let respBody = response.json()
@@ -42,9 +38,6 @@ const API = {
 
 						return response
 					})
-
-		API.inProgress = promise
-		return promise
 	},
 
 	send(url, data, params) {

@@ -143,7 +143,7 @@ class RollupShow extends Page {
 
 		const pinned_ORGs = Settings.pinned_ORGs
 
-		Promise.all([reportQuery, graphQuery]).then(values => {
+		return Promise.all([reportQuery, graphQuery]).then(values => {
 			this.setState({
 				reports: values[0].reportList,
 				graphData: values[1]

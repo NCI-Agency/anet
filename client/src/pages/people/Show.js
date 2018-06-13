@@ -105,7 +105,7 @@ class PersonShow extends Page {
 		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.id)
 		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.id)
 
-		GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
+		return GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
 			this.setState({
 				person: new Person(data.person),
 				authoredReports: data.authoredReports,

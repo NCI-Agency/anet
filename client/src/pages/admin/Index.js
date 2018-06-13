@@ -28,7 +28,7 @@ class AdminIndex extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			adminSettings(f:getAll) { key, value }
 		`).then(data => {
 			let settings = {}

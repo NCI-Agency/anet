@@ -31,7 +31,7 @@ class PositionNew extends Page {
 		if (qs.organizationId) {
 			//If an organizationId was given in query parameters,
 			// then look that org up and pre-populate the field.
-			API.query(/* GraphQL */`
+			return API.query(/* GraphQL */`
 				organization(id:${qs.organizationId}) {
 					id, shortName, longName, identificationCode, type
 				}

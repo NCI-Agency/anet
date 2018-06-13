@@ -31,7 +31,7 @@ class PersonEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/*GraphQL*/ `
+		return API.query(/*GraphQL*/ `
 			person(id:${props.match.params.id}) {
 				id,
 				name, rank, role, emailAddress, phoneNumber, status, domainUsername,

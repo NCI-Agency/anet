@@ -25,7 +25,7 @@ class LocationEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			location(id:${props.match.params.id}) {
 				id, name, status, lat, lng
 			}

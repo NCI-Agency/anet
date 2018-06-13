@@ -75,7 +75,7 @@ class TaskShow extends Page {
 			}
 		`)
 
-		GQL.run([reportsQuery, taskQuery]).then(data => {
+		return GQL.run([reportsQuery, taskQuery]).then(data => {
             this.setState({
                 task: new Task(data.task),
 				reports: data.reports,

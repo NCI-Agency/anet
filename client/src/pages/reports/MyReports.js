@@ -73,7 +73,7 @@ class MyReports extends Page {
 		let future = this.partFuncs.future(authorId)
 		let released = this.partFuncs.released(authorId)
 
-		GQL.run([pending, draft, future, released]).then(data =>
+		return GQL.run([pending, draft, future, released]).then(data =>
 			this.setState({
 				pending: data.pending,
 				draft: data.draft,
