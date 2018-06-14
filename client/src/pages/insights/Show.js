@@ -113,12 +113,11 @@ class InsightsShow extends Page {
         referenceDate: moment().clone(),
         startDate: moment().clone(),
         endDate: moment().clone(),
-        date: {relative: "0", start: null, end: null}
       }
     )
   }
 
- get defaultDates() {
+  get defaultDates() {
     return {
       relative: "0",
       start: this.state.startDate.toISOString(),
