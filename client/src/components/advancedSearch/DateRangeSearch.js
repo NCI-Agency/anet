@@ -97,11 +97,12 @@ export default class DateRangeSearch extends Component {
 		</div>
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.value !== this.state.value) {
-			this.setState({value: nextProps.value})
+	static getDerivedStateFromProps(props, state) {
+		if (props.value && props.value !== state.value) {
+			return {value: props.value}
 		}
-	  }
+		return null
+	}
 
 	@autobind
 	onChangeStart(newDate) {

@@ -185,12 +185,12 @@ class Search extends Page {
 				parts.push(this.getSearchPart(key, query, pageSize))
 			})
 		}
-		callback(parts)
+		return callback(parts)
 	}
 
 	@autobind
 	_fetchDataCallback(parts) {
-		GQL.run(parts).then(data => {
+		return GQL.run(parts).then(data => {
 			this.setState({success: null, error: null, results: data})
 		}).catch(response =>
 			this.setState({success: null, error: response})
@@ -198,7 +198,7 @@ class Search extends Page {
 	}
 
 	fetchData(props) {
-		this._dataFetcher(props, this._fetchDataCallback)
+		return this._dataFetcher(props, this._fetchDataCallback)
 	}
 
 	render() {

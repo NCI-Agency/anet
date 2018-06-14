@@ -129,11 +129,11 @@ class OrganizationShow extends Page {
 		let reportsPart = this.getReportQueryPart(props.match.params.id)
 		let tasksPart = this.gettaskQueryPart(props.match.params.id)
 
-		this.runGQL([orgPart, reportsPart, tasksPart])
+		return this.runGQL([orgPart, reportsPart, tasksPart])
 	}
 
 	runGQL(queries) {
-		GQL.run(queries).then(data =>
+		return GQL.run(queries).then(data =>
 			this.setState({
 				organization: new Organization(data.organization),
 				reports: data.reports,

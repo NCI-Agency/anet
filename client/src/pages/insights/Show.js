@@ -149,7 +149,7 @@ class InsightsShow extends Page {
       searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
     })
     this.props.setSearchQuery({
-      text: this.props.searchQuery,
+      text: this.props.searchQuery.text,
       objectType: SEARCH_OBJECT_TYPES.REPORTS,
     })
   }

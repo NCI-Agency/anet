@@ -53,7 +53,7 @@ class LocationShow extends Page {
 			}
 		`)
 
-		GQL.run([reportsQuery, locationQuery]).then(data => {
+		return GQL.run([reportsQuery, locationQuery]).then(data => {
             this.setState({
                 location: new Location(data.location),
 				reports: data.reports,

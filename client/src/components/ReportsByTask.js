@@ -188,13 +188,6 @@ export default class ReportsByTask extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.queryParams !== this.props.queryParams) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedTask: ''})  // reset focus when changing the query params
-    }
-  }
 
   componentDidMount() {
     this.fetchData()
@@ -202,7 +195,10 @@ export default class ReportsByTask extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.queryParams !== this.props.queryParams) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedTask: ''  // reset focus when changing the queryParams
+      }, () => this.fetchData())
     }
   }
 }

@@ -71,9 +71,7 @@ export default class Page extends Component {
 				this.props.showLoading()
 			}
 
-			this.fetchData(props || this.props, context || this.context)
-
-			let promise = API.inProgress
+			const promise = this.fetchData(props || this.props, context || this.context)
 
 			if (promise && promise.then instanceof Function) {
 				promise.then(this.doneLoading, this.doneLoading)

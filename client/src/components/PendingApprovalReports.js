@@ -188,22 +188,16 @@ export default class PendingApprovalReports extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.queryParams !== this.props.queryParams) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedOrg: ''
-      })  // reset focus when changing the queryParams
-    }
-  }
-
   componentDidMount() {
     this.fetchData()
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.queryParams !== this.props.queryParams) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedOrg: ''  // reset focus when changing the queryParams
+      }, () => this.fetchData())
     }
   }
 

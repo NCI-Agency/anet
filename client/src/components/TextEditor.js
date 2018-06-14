@@ -24,7 +24,7 @@ export default class TextEditor extends Component {
 			this.nativeEditor.on('change', this.onChange)
 		}
 
-		this.componentWillReceiveProps(this.props)
+		this.componentDidUpdate()
 	}
 
 	componentWillUnmount() {
@@ -34,8 +34,8 @@ export default class TextEditor extends Component {
 		}
 	}
 
-	componentWillReceiveProps(newProps) {
-		let html = newProps.value
+	componentDidUpdate(prevProps, prevState) {
+		const html = this.props.value
 		if (html !== this.nativeEditor.getData()) {
 			this.nativeEditor.setData(html)
 		}

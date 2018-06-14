@@ -263,23 +263,17 @@ export default class CancelledEngagementReports extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.queryParams !== this.props.queryParams) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedReason: '',
-        focusedOrg: ''
-      })  // reset focus when changing the query params
-    }
-  }
-
   componentDidMount() {
     this.fetchData()
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.queryParams !== this.props.queryParams) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedReason: '',  // reset focus when changing the queryParams
+        focusedOrg: ''
+      }, () => this.fetchData())
     }
   }
 }

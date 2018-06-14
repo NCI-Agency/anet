@@ -22,9 +22,10 @@ export default class AssignPersonModal extends Component {
 		}
 	}
 
-	componentWillReceiveProps(nextProps, nextContext) {
-		let person = nextProps.position.person
-		this.setState({person})
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.position.person !== this.props.position.person) {
+			this.setState({person: this.props.position.person})
+		}
 	}
 
 	render() {

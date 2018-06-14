@@ -27,7 +27,7 @@ class PositionEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			position(id:${props.match.params.id}) {
 				id, name, code, status, type
 				location { id, name },

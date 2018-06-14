@@ -148,7 +148,7 @@ class Home extends Page {
 		// Get current user authorization groups (needed for reports query 5)
 		const userAuthGroupsGraphQL = /* GraphQL */`
 			userAuthGroups: authorizationGroupList(f:search, query:$queryUserAuthGroups) {totalCount, list { id }}`
-		API.query(
+		return API.query(
 				userAuthGroupsGraphQL,
 				{queryUserAuthGroups: {positionId: currentUser.position ? currentUser.position.id : -1}},
 				"($queryUserAuthGroups: AuthorizationGroupSearchQuery)")

@@ -199,18 +199,12 @@ export default class ReportsByDayOfWeek extends Component {
     this.fetchData()
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.datePropsChanged(nextProps)) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedDayOfWeek: ''
-      })
-    }
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (this.datePropsChanged(prevProps)) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedDayOfWeek: ''  // reset focus when changing the date
+      }, () => this.fetchData())
     }
   }
 
