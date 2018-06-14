@@ -27,9 +27,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 export default class ReportsByDayOfWeek extends Component {
   static propTypes = {
-    startDate: PropTypes.object.isRequired,
-    endDate: PropTypes.object.isRequired,
-    searchQuery: PropTypes.object,
+    queryParams: PropTypes.object,
   }
 
   constructor(props) {
@@ -40,16 +38,6 @@ export default class ReportsByDayOfWeek extends Component {
       focusedDayOfWeek: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
-    }
-  }
-
-  get queryParams() {
-    return {
-      state: [Report.STATE.RELEASED],
-      releasedAtStart: this.props.startDate.valueOf(),
-      releasedAtEnd: this.props.endDate.valueOf(),
-      includeEngagementDayOfWeek: 1,
-      text: this.props.searchQuery,
     }
   }
 
@@ -147,7 +135,7 @@ export default class ReportsByDayOfWeek extends Component {
 
   chartQueryParams = () => {
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -165,7 +153,7 @@ export default class ReportsByDayOfWeek extends Component {
 
   reportsQueryParams = () => {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -221,14 +209,12 @@ export default class ReportsByDayOfWeek extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if ((this.datePropsChanged(prevProps)) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
+    if (this.datePropsChanged(prevProps)) {
       this.fetchData()
     }
   }
 
   datePropsChanged = (otherProps) => {
-    const startDateChanged = otherProps.startDate.valueOf() !== this.props.startDate.valueOf()
-    const endDateChanged = otherProps.endDate.valueOf() !== this.props.endDate.valueOf()
-    return startDateChanged || endDateChanged
+    return otherProps.queryParams !== this.props.queryParams
   }
 }

@@ -29,8 +29,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 export default class ReportsByTask extends Component {
   static propTypes = {
-    date: PropTypes.object,
-    searchQuery: PropTypes.object,
+    queryParams: PropTypes.object,
   }
 
   constructor(props) {
@@ -41,14 +40,6 @@ export default class ReportsByTask extends Component {
       focusedTask: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
-    }
-  }
-
-  get queryParams() {
-    return {
-      state: [Report.STATE.RELEASED],
-      releasedAtStart: this.props.date.valueOf(),
-      text: this.props.searchQuery,
     }
   }
 
@@ -109,7 +100,7 @@ export default class ReportsByTask extends Component {
   fetchData() {
     this.setState( {isLoading: true} )
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -151,7 +142,7 @@ export default class ReportsByTask extends Component {
 
   fetchTaskData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -198,10 +189,10 @@ export default class ReportsByTask extends Component {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
+    if (nextProps.queryParams !== this.props.queryParams) {
       this.setState({
         reportsPageNum: 0,
-        focusedTask: ''})  // reset focus when changing the date
+        focusedTask: ''})  // reset focus when changing the query params
     }
   }
 
@@ -210,7 +201,7 @@ export default class ReportsByTask extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if ((prevProps.date.valueOf() !== this.props.date.valueOf()) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
+    if (prevProps.queryParams !== this.props.queryParams) {
       this.fetchData()
     }
   }

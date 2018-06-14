@@ -27,9 +27,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 export default class FutureEngagementsByLocation extends Component {
   static propTypes = {
-    startDate: PropTypes.object.isRequired,
-    endDate: PropTypes.object.isRequired,
-    searchQuery: PropTypes.object,
+    queryParams: PropTypes.object,
   }
 
   constructor(props) {
@@ -42,16 +40,6 @@ export default class FutureEngagementsByLocation extends Component {
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
-  }
-
-  get queryParams() {
-    let insightQueryParams = {}
-    Object.assign(insightQueryParams, {
-      engagementDateStart: this.props.startDate.clone().startOf('day').valueOf(),
-      engagementDateEnd: this.props.endDate.valueOf(),
-    })
-    Object.assign(insightQueryParams, this.props.searchQuery)
-    return insightQueryParams
   }
 
   get engagementDateRangeArray() {
@@ -174,7 +162,7 @@ export default class FutureEngagementsByLocation extends Component {
 
   fetchFocusData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -206,7 +194,7 @@ export default class FutureEngagementsByLocation extends Component {
 
   chartQueryParams = () => {
     const chartQueryParams = {}
-    const queryParams = this.queryParams
+    const queryParams = this.props.queryParams
     Object.assign(chartQueryParams, queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
@@ -269,7 +257,7 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if ((this.datePropsChanged(prevProps)) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
+    if (prevProps.queryParams !== this.props.queryParams) {
       this.fetchData()
     }
   }

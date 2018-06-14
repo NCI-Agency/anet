@@ -11,13 +11,14 @@ import API from 'api'
 import _isEqual from 'lodash/isEqual'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
-import { setPageProps, setSearchProps, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
+import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
 	hideLoading: () => dispatch(hideLoading()),
 	setPageProps: pageProps => dispatch(setPageProps(pageProps)),
 	setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
+	setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
 	clearSearchQuery: () => dispatch(clearSearchQuery()),
 })
 
@@ -26,6 +27,7 @@ export const propTypes = {
 	hideLoading: PropTypes.func.isRequired,
 	setPageProps: PropTypes.func.isRequired,
 	setSearchProps: PropTypes.func.isRequired,
+	setSearchQuery: PropTypes.func.isRequired,
 	onSearchGoToSearchPage: PropTypes.bool,
 	searchQuery: PropTypes.shape({
 		text: PropTypes.string,

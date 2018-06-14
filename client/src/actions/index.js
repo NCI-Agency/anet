@@ -10,9 +10,27 @@ export const PAGE_PROPS_MIN_HEAD = {
 	useNavigation: false,
 	minimalHeader: true,
 }
+
+export const SEARCH_OBJECT_TYPES = {
+	REPORTS: 'Reports',
+	PEOPLE: 'People',
+	ORGANIZATIONS: 'Organizations',
+	POSITIONS: 'Positions',
+	LOCATIONS: 'Locations',
+	TASKS: 'Tasks'
+}
+
 export const DEFAULT_SEARCH_PROPS = {
 	onSearchGoToSearchPage: true,
-	clearSearchQuery: true
+	clearSearchQuery: true,
+	searchObjectTypes: [
+		SEARCH_OBJECT_TYPES.REPORTS,
+		SEARCH_OBJECT_TYPES.PEOPLE,
+		SEARCH_OBJECT_TYPES.ORGANIZATIONS,
+		SEARCH_OBJECT_TYPES.POSITIONS,
+		SEARCH_OBJECT_TYPES.LOCATIONS,
+		SEARCH_OBJECT_TYPES.TASKS
+	]
 }
 export const DEFAULT_SEARCH_QUERY = {text: ''}
 

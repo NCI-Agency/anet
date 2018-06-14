@@ -67,6 +67,7 @@ class AdvancedSearch extends Component {
 			objectType: PropTypes.string
 		}),
 		onSearchGoToSearchPage: PropTypes.bool,
+		searchObjectTypes: PropTypes.array,
 		text: PropTypes.string,
 	}
 
@@ -279,7 +280,7 @@ class AdvancedSearch extends Component {
 				<FormGroup style={{textAlign: "center"}}>
 					<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
 						{Object.keys(this.ALL_FILTERS).map(type =>
-							<Button key={type} value={type}>{type}</Button>
+						this.props.searchObjectTypes.indexOf(type) !== -1 && <Button key={type} value={type}>{type}</Button>
 						)}
 					</ButtonToggleGroup>
 				</FormGroup>
@@ -375,7 +376,8 @@ class AdvancedSearch extends Component {
 const mapStateToProps = (state, ownProps) => {
 	return {
 		query: state.searchQuery,
-		onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage
+		onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
+		searchObjectTypes: state.searchProps.searchObjectTypes
 	}
 }
 

@@ -29,8 +29,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 export default class PendingApprovalReports extends Component {
   static propTypes = {
-    date: PropTypes.object,
-    searchQuery: PropTypes.object,
+    queryParams: PropTypes.object,
   }
 
   constructor(props) {
@@ -43,14 +42,6 @@ export default class PendingApprovalReports extends Component {
       focusedOrg: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
-    }
-  }
-
-  get queryParams() {
-    return {
-      state: [Report.STATE.PENDING_APPROVAL],
-      updatedAtEnd: this.props.date.valueOf(),
-      text: this.props.searchQuery,
     }
   }
 
@@ -110,7 +101,7 @@ export default class PendingApprovalReports extends Component {
     this.setState( {isLoading: true} )
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -151,7 +142,7 @@ export default class PendingApprovalReports extends Component {
 
   fetchOrgData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -198,11 +189,11 @@ export default class PendingApprovalReports extends Component {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
+    if (nextProps.queryParams !== this.props.queryParams) {
       this.setState({
         reportsPageNum: 0,
         focusedOrg: ''
-      })  // reset focus when changing the date
+      })  // reset focus when changing the queryParams
     }
   }
 
@@ -211,7 +202,7 @@ export default class PendingApprovalReports extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if ((prevProps.date.valueOf() !== this.props.date.valueOf()) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
+    if (prevProps.queryParams !== this.props.queryParams) {
       this.fetchData()
     }
   }

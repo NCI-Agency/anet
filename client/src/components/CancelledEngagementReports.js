@@ -30,8 +30,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 export default class CancelledEngagementReports extends Component {
   static propTypes = {
-    date: PropTypes.object,
-    searchQuery: PropTypes.object,
+    queryParams: PropTypes.object,
   }
 
   constructor(props) {
@@ -45,16 +44,6 @@ export default class CancelledEngagementReports extends Component {
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
-  }
-
-  get queryParams() {
-    let insightQueryParams = {}
-    Object.assign(insightQueryParams, {
-      state: [Report.STATE.CANCELLED],
-      releasedAtStart: this.props.date.valueOf()
-    })
-    Object.assign(insightQueryParams, this.props.searchQuery)
-    return insightQueryParams
   }
 
   get referenceDateLongStr() { return this.props.date.format('DD MMM YYYY') }
@@ -140,7 +129,7 @@ export default class CancelledEngagementReports extends Component {
     this.setState( {isLoading: true} )
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -188,7 +177,7 @@ export default class CancelledEngagementReports extends Component {
 
   fetchOrgData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -214,7 +203,7 @@ export default class CancelledEngagementReports extends Component {
 
   fetchReasonData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -275,12 +264,12 @@ export default class CancelledEngagementReports extends Component {
   }
 
   componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
+    if (nextProps.queryParams !== this.props.queryParams) {
       this.setState({
         reportsPageNum: 0,
         focusedReason: '',
         focusedOrg: ''
-      })  // reset focus when changing the date
+      })  // reset focus when changing the query params
     }
   }
 
@@ -289,7 +278,7 @@ export default class CancelledEngagementReports extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if ((prevProps.date.valueOf() !== this.props.date.valueOf()) || (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf())) {
+    if (prevProps.queryParams !== this.props.queryParams) {
       this.fetchData()
     }
   }

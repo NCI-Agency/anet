@@ -16,48 +16,62 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
+import {Report} from 'models'
+
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import { connect } from 'react-redux'
 
+export const NOT_APPROVED_REPORTS = 'not-approved-reports'
+export const CANCELLED_REPORTS = 'cancelled-reports'
+export const REPORTS_BY_TASK = 'reports-by-task'
+export const REPORTS_BY_DAY_OF_WEEK = 'reports-by-day-of-week'
+export const FUTURE_ENGAGEMENTS_BY_LOCATION = 'future-engagements-by-location'
+export const ADVISOR_REPORTS = 'advisor-reports'
+
+export const INSIGHTS = [
+  NOT_APPROVED_REPORTS, CANCELLED_REPORTS,
+  REPORTS_BY_TASK, FUTURE_ENGAGEMENTS_BY_LOCATION,
+  REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS
+]
 const insightDetails = {
-  'not-approved-reports': {
+  [NOT_APPROVED_REPORTS]: {
     component: PendingApprovalReports,
     title: 'Pending Approval Reports',
     dateRange: false,
     showCalendar: true
   },
-  'cancelled-reports': {
+  [CANCELLED_REPORTS]: {
     component: CancelledEngagementReports,
     title: 'Cancelled Engagement Reports',
     dateRange: false,
     showCalendar: true
   },
-  'reports-by-task': {
+  [REPORTS_BY_TASK]: {
     component: ReportsByTask,
     title: 'Reports by Task',
     help: '',
     dateRange: false,
     showCalendar: true
   },
-  'reports-by-day-of-week': {
+  [REPORTS_BY_DAY_OF_WEEK]: {
     component: ReportsByDayOfWeek,
     title: 'Reports by day of the week',
     help: 'Number of reports by day of the week',
     dateRange: true,
     showCalendar: false
   },
-  'advisor-reports': {
-    component: FilterableAdvisorReportsTable,
-    title: 'Advisor Reports',
-    dateRange: false,
-    showCalendar: false
-  },
-  'future-engagements-by-location': {
+  [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
     component: FutureEngagementsByLocation,
     title: 'Future Engagements by Location',
     help: 'Number of future engagements by location',
     dateRange: true,
     onlyShowBetween: true,
+  },
+  [ADVISOR_REPORTS]: {
+    component: FilterableAdvisorReportsTable,
+    title: 'Advisor Reports',
+    dateRange: false,
+    showCalendar: false
   },
 }
 
@@ -95,13 +109,15 @@ class InsightsShow extends Page {
   constructor(props) {
     super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
 
-    Object.assign(this.state, {
-      insight: props.match.params.insight,
-      referenceDate: null,
-      startDate: null,
-      endDate: null,
-      date: {relative: "0", start: null, end: null}
-    })
+    Object.assign(
+      this.state, {
+        insight: props.match.params.insight,
+        referenceDate: moment().clone(),
+        startDate: moment().clone(),
+        endDate: moment().clone(),
+        date: {relative: "0", start: null, end: null}
+      }
+    )
   }
 
  get defaultDates() {
@@ -129,6 +145,13 @@ class InsightsShow extends Page {
   componentDidMount() {
     super.componentDidMount()
     this.setStateDefaultDates(this.state.insight)
+    this.props.setSearchProps({
+      searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
+    })
+    this.props.setSearchQuery({
+      text: this.props.searchQuery,
+      objectType: SEARCH_OBJECT_TYPES.REPORTS,
+    })
   }
 
   setStateDefaultDates = (insight) => {
@@ -202,6 +225,33 @@ class InsightsShow extends Page {
     const insightConfig = insightDetails[this.state.insight]
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.state.insight
+    const insightQueryParams = {
+      [NOT_APPROVED_REPORTS]: {
+        state: [Report.STATE.PENDING_APPROVAL],
+        updatedAtEnd: this.state.referenceDate.clone().valueOf(),
+      },
+      [CANCELLED_REPORTS]: {
+        state: [Report.STATE.CANCELLED],
+        releasedAtStart: this.state.referenceDate.clone().valueOf(),
+      },
+      [REPORTS_BY_TASK]: {
+        state: [Report.STATE.RELEASED],
+        releasedAtStart: this.state.referenceDate.clone().valueOf(),
+      },
+      [REPORTS_BY_DAY_OF_WEEK]: {
+        state: [Report.STATE.RELEASED],
+        releasedAtStart: this.state.startDate.clone().valueOf(),
+        releasedAtEnd: this.state.endDate.clone().valueOf(),
+        includeEngagementDayOfWeek: 1,
+      },
+      [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
+        engagementDateStart: this.state.startDate.clone().startOf('day').valueOf(),
+        engagementDateEnd: this.state.endDate.clone().valueOf(),
+      },
+      [ADVISOR_REPORTS]: {},
+    }
+
+    const queryParams = Object.assign(this.getSearchQuery(), insightQueryParams[this.state.insight])
     return (
       <div>
         <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
@@ -215,10 +265,11 @@ class InsightsShow extends Page {
             </span>
             }>
             <InsightComponent
+              queryParams={queryParams}
               date={this.state.referenceDate.clone()}
               startDate={this.state.startDate.clone()}
               endDate={this.state.endDate.clone()}
-              searchQuery={this.getSearchQuery()} />
+            />
           </Fieldset>
         }
       </div>
