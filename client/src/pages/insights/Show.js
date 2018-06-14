@@ -27,13 +27,11 @@ export const REPORTS_BY_TASK = 'reports-by-task'
 export const REPORTS_BY_DAY_OF_WEEK = 'reports-by-day-of-week'
 export const FUTURE_ENGAGEMENTS_BY_LOCATION = 'future-engagements-by-location'
 export const ADVISOR_REPORTS = 'advisor-reports'
-
 export const INSIGHTS = [
-  NOT_APPROVED_REPORTS, CANCELLED_REPORTS,
-  REPORTS_BY_TASK, FUTURE_ENGAGEMENTS_BY_LOCATION,
-  REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS
+  NOT_APPROVED_REPORTS, CANCELLED_REPORTS, REPORTS_BY_TASK,
+  FUTURE_ENGAGEMENTS_BY_LOCATION, REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS
 ]
-const insightDetails = {
+export const INSIGHT_DETAILS = {
   [NOT_APPROVED_REPORTS]: {
     component: PendingApprovalReports,
     title: 'Pending Approval Reports',
@@ -129,7 +127,7 @@ class InsightsShow extends Page {
   }
 
   getFilters = () => {
-    const insight = insightDetails[this.state.insight]
+    const insight = INSIGHT_DETAILS[this.state.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
     const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     return <span>{dateRangeFilter}{calenderFilter}</span>
@@ -222,7 +220,7 @@ class InsightsShow extends Page {
   }
 
   render() {
-    const insightConfig = insightDetails[this.state.insight]
+    const insightConfig = INSIGHT_DETAILS[this.state.insight]
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.state.insight
     const insightQueryParams = {
