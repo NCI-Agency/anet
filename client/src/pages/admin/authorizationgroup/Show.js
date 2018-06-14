@@ -10,7 +10,7 @@ import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
 import ReportCollection from 'components/ReportCollection'
 
-import {AuthorizationGroup} from 'models'
+import {AuthorizationGroup, Person} from 'models'
 import GQL from 'graphqlapi'
 import autobind from 'autobind-decorator'
 
@@ -18,10 +18,9 @@ import { connect } from 'react-redux'
 
 class AuthorizationGroupShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -89,7 +88,7 @@ class AuthorizationGroupShow extends Page {
 
 	render() {
 		let authorizationGroup = this.state.authorizationGroup
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		return (
 
 			<div>

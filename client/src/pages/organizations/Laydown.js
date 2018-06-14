@@ -11,11 +11,8 @@ import {Position, Person} from 'models'
 
 export default class OrganizationLaydown extends Component {
 	static propTypes = {
-		organization: PropTypes.object.isRequired
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+		organization: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -27,7 +24,7 @@ export default class OrganizationLaydown extends Component {
 	}
 
 	render() {
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const org = this.props.organization
 		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 

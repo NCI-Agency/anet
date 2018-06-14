@@ -16,11 +16,8 @@ export default class EditAssociatedPositionsModal extends Component {
 		position: PropTypes.object.isRequired,
 		showModal: PropTypes.bool,
 		onCancel: PropTypes.func.isRequired,
-		onSuccess: PropTypes.func.isRequired
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object
+		onSuccess: PropTypes.func.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props, context) {
@@ -32,9 +29,8 @@ export default class EditAssociatedPositionsModal extends Component {
 	}
 
 	render() {
-		const {position} = this.props
+		const { position, currentUser } = this.props
 		const {associatedPositions} = this.state
-		const currentUser = this.context.currentUser
 		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
 		const positionSearchQuery = {status: Position.STATUS.ACTIVE, matchPersonName: true}

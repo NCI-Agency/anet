@@ -70,7 +70,7 @@ class AdminIndex extends Page {
 
         API.send('/api/admin/save', json, {disableSubmits: true})
             .then(() => {
-				this.context.app.fetchData()
+				this.context.app.loadData()
 			})
 			.catch(error => {
                 this.setState({error})

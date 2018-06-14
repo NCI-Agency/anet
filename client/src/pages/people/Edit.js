@@ -14,10 +14,9 @@ import { connect } from 'react-redux'
 
 class PersonEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
@@ -51,7 +50,7 @@ class PersonEdit extends Page {
 	render() {
 		let {person, originalPerson} = this.state
 
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		let canEditPosition = currentUser && currentUser.isSuperUser()
 
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
@@ -63,7 +62,7 @@ class PersonEdit extends Page {
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
 
-				<PersonForm original={originalPerson} person={person} edit showPositionAssignment={canEditPosition}
+				<PersonForm original={originalPerson} person={person} currentUser={this.props.currentUser} edit showPositionAssignment={canEditPosition}
 					legendText={legendText} saveText={saveText} />
 			</div>
 		)

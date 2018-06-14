@@ -12,11 +12,8 @@ export default class AssignPositionModal extends Component {
 		person: PropTypes.object.isRequired,
 		showModal: PropTypes.bool,
 		onCancel: PropTypes.func.isRequired,
-		onSuccess: PropTypes.func.isRequired
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object
+		onSuccess: PropTypes.func.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props, context) {
@@ -33,9 +30,8 @@ export default class AssignPositionModal extends Component {
 	}
 
 	render() {
-		let {person} = this.props
+		const { person, currentUser } = this.props
 		let newPosition = new Position(this.state.position)
-		let currentUser = this.context.currentUser
 
 		let positionSearchQuery = {status: Position.STATUS.ACTIVE}
 		if (person.role === Person.ROLE.ADVISOR) {

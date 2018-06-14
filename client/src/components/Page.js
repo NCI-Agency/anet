@@ -122,11 +122,6 @@ export default class Page extends Component {
 				this.loadData()
 			}
 		}
-		// FIXME: Previously, componentWillReceiveProps(nextProps, nextContext) had:
-		//     else if (!_isEqual(this.context, nextContext)) {
-		//         this.loadData(nextProps, nextContext)
-		//     }
-		// See https://github.com/NCI-Agency/anet/issues/641 to fix this.
 	}
 
 	componentDidMount() {

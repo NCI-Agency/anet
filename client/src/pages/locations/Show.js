@@ -12,16 +12,15 @@ import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
 
 import GQL from 'graphqlapi'
-import {Location} from 'models'
+import {Location, Person} from 'models'
 
 import { connect } from 'react-redux'
 
 class LocationShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Location'
@@ -63,7 +62,7 @@ class LocationShow extends Page {
 
 	render() {
 		let {location, reports} = this.state
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		let markers=[]
 		let latlng = 'None'
 		if (Location.hasCoordinates(location)) {

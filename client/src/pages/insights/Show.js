@@ -84,7 +84,7 @@ class InsightsShow extends Page {
   }
 
   get cutoffDate() {
-    let settings = this.context.app.state.settings
+    const { settings } = this.context.app.state || {}
     let maxReportAge = 1 + (parseInt(settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment().subtract(maxReportAge, 'days').clone()
   }

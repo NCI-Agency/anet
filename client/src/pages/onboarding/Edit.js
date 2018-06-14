@@ -13,10 +13,9 @@ import { connect } from 'react-redux'
 
 class OnboardingEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
@@ -31,7 +30,7 @@ class OnboardingEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			person(id:${this.context.currentUser.id}) {
+			person(id:${props.currentUser.id}) {
 				id,
 				name, rank, role, emailAddress, phoneNumber, status
 				biography, country, gender, endOfTourDate, domainUsername
@@ -54,6 +53,7 @@ class OnboardingEdit extends Page {
 				person={this.state.person} edit
 				legendText={"Create your account"}
 				saveText={"Create profile"}
+				currentUser={this.props.currentUser}
 			/>
 		</div>
 	}

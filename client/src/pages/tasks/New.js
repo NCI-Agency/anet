@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -6,7 +7,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Task,Organization} from 'models'
+import {Organization, Person, Task} from 'models'
 
 import utils from 'utils'
 
@@ -15,7 +16,10 @@ import { connect } from 'react-redux'
 
 class TaskNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -49,7 +53,7 @@ class TaskNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new ' + Settings.fields.task.shortLabel, Task.pathForNew()]]} />
 
-				<TaskForm original={this.state.originalTask} task={task} />
+				<TaskForm original={this.state.originalTask} task={task} currentUser={this.props.currentUser} />
 			</div>
 		)
 	}

@@ -26,10 +26,9 @@ import { connect } from 'react-redux'
 
 class ReportShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Report'
@@ -108,7 +107,7 @@ class ReportShow extends Page {
 	}
 
 	renderNoPositionAssignedText() {
-		const {currentUser} = this.context
+		const { currentUser } = this.props
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
@@ -130,7 +129,7 @@ class ReportShow extends Page {
 
 	render() {
 		const {report} = this.state
-		const {currentUser} = this.context
+		const { currentUser } = this.props
 
 		const canApprove = report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))

@@ -13,7 +13,7 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import Settings from 'Settings'
 import GQL from 'graphqlapi'
-import {Task} from 'models'
+import {Person, Task} from 'models'
 
 import moment from 'moment'
 
@@ -21,10 +21,12 @@ import { connect } from 'react-redux'
 
 class TaskShow extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
 		app: PropTypes.object.isRequired,
 	}
 
@@ -86,7 +88,7 @@ class TaskShow extends Page {
 	render() {
 		let {task, reports} = this.state
 		// Admins can edit tasks, or super users if this task is assigned to their org.
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 
 		const taskShortLabel = Settings.fields.task.shortLabel
 

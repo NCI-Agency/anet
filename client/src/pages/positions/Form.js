@@ -12,7 +12,7 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Location, Position, Organization} from 'models'
+import {Location, Organization, Person, Position} from 'models'
 
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
@@ -24,10 +24,7 @@ class PositionForm extends ValidatableFormWrapper {
 		edit: PropTypes.bool,
 		error: PropTypes.object,
 		success: PropTypes.object,
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -43,7 +40,7 @@ class PositionForm extends ValidatableFormWrapper {
 		let {position, error, success, edit} = this.props
 		error = this.props.error || (this.state && this.state.error)
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
 
 		let orgSearchQuery = {status: Organization.STATUS.ACTIVE}

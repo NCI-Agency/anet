@@ -15,7 +15,7 @@ import SavedSearchTable from 'components/SavedSearchTable'
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
 
-import {Report} from 'models'
+import {Person, Report} from 'models'
 
 import API from 'api'
 import Settings from 'Settings'
@@ -28,10 +28,9 @@ import utils from 'utils'
 
 class Home extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -143,7 +142,7 @@ class Home extends Page {
 
 	fetchData(props) {
 		//If we don't have the currentUser yet (ie page is still loading, don't run these queries)
-		let {currentUser} = this.context
+		const { currentUser } = props
 		if (!currentUser || !currentUser._loaded) { return }
 		// Get current user authorization groups (needed for reports query 5)
 		const userAuthGroupsGraphQL = /* GraphQL */`
@@ -187,7 +186,7 @@ class Home extends Page {
 	}
 
 	render() {
-		let {currentUser} = this.context
+		const { currentUser } = this.props
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
@@ -201,6 +200,7 @@ class Home extends Page {
 						tour={currentUser.isSuperUser() ? superUserTour : userTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenHomeTour !== 'true'}
 						onEnd={() => localStorage.hasSeenHomeTour = 'true'}
+						currentUser={this.props.currentUser}
 					/>
 				</div>
 

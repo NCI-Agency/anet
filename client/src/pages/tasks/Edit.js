@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import moment from 'moment'
@@ -9,14 +10,17 @@ import TaskForm from './Form'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Task} from 'models'
+import {Person, Task} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class TaskEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	static modelName = 'Task'
 
@@ -58,7 +62,7 @@ class TaskEdit extends Page {
 
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<TaskForm original={this.state.originalTask} task={task} edit />
+				<TaskForm original={this.state.originalTask} task={task} currentUser={this.props.currentUser} edit />
 			</div>
 		)
 	}

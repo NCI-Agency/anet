@@ -6,16 +6,15 @@ import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
-import {Report} from 'models'
+import {Person, Report} from 'models'
 
 import { connect } from 'react-redux'
 
 class MyReports extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -58,10 +57,11 @@ class MyReports extends Page {
 	}
 
 	fetchData(props) {
-		if (!this.context.currentUser || !this.context.currentUser.id) {
+		const { currentUser } = props
+		if (!currentUser || !currentUser.id) {
 			return
 		}
-		let authorId = this.context.currentUser.id
+		const authorId = currentUser.id
 		let pending = this.partFuncs.pending(authorId)
 		let draft = this.partFuncs.draft(authorId)
 		let future = this.partFuncs.future(authorId)
@@ -102,7 +102,7 @@ class MyReports extends Page {
 	@autobind
 	goToPage(section, pageNum) {
 		this.pageNums[section] = pageNum
-		let part = (this.partFuncs[section])(this.context.currentUser.id)
+		const part = (this.partFuncs[section])(this.props.currentUser.id)
 		GQL.run([part]).then( data => {
 			let stateChange = {}
 			stateChange[section] = data[section]

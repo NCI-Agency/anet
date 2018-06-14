@@ -19,7 +19,7 @@ import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 import autobind from 'autobind-decorator'
 
 import ConfirmDelete from 'components/ConfirmDelete'
@@ -29,10 +29,9 @@ import { connect } from 'react-redux'
 
 class PositionShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Position'
@@ -73,7 +72,7 @@ class PositionShow extends Page {
 		const position = this.state.position
 		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name // TODO: shouldn't this be Position.humanNameOfType instead of a person title?
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const canEdit =
 			//Super Users can edit any Principal
 			(currentUser.isSuperUser() && position.type === Position.TYPE.PRINCIPAL) ||
@@ -93,6 +92,7 @@ class PositionShow extends Page {
 						tour={positionTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenPositionTour !== 'true'}
 						onEnd={() => localStorage.hasSeenPositionTour = 'true'}
+						currentUser={this.props.currentUser}
 					/>
 				</div>
 
@@ -170,6 +170,7 @@ class PositionShow extends Page {
 
 						{canEdit && <EditAssociatedPositionsModal
 							position={position}
+							currentUser={this.props.currentUser}
 							showModal={this.state.showAssociatedPositionModal}
 							onCancel={this.hideAssociatedPositionsModal.bind(this, false)}
 							onSuccess={this.hideAssociatedPositionsModal.bind(this, true)}

@@ -20,7 +20,7 @@ import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
 import Settings from 'Settings'
-import {Organization, Position, Report, Task} from 'models'
+import {Organization, Person, Position, Report, Task} from 'models'
 import GQL from 'graphqlapi'
 
 import { connect } from 'react-redux'
@@ -29,10 +29,9 @@ const NO_REPORT_FILTER = 'NO_FILTER'
 
 class OrganizationShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Organization'
@@ -166,7 +165,7 @@ class OrganizationShow extends Page {
 		const reports = this.state.reports
 		const tasks = this.state.tasks
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isPrincipalOrg = org.type === Organization.TYPE.PRINCIPAL_ORG
@@ -182,6 +181,7 @@ class OrganizationShow extends Page {
 						tour={orgTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenOrgTour !== 'true'}
 						onEnd={() => localStorage.hasSeenOrgTour = 'true'}
+						currentUser={this.props.currentUser}
 					/>
 				</div>}
 
@@ -242,10 +242,10 @@ class OrganizationShow extends Page {
 						</Form.Field>}
 					</Fieldset>
 
-					<OrganizationLaydown organization={org} />
+					<OrganizationLaydown organization={org} currentUser={this.props.currentUser} />
 					<OrganizationApprovals organization={org} />
 					{ org.isTaskEnabled() &&
-						<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
+						<OrganizationTasks organization={org} tasks={tasks} currentUser={this.props.currentUser} goToPage={this.goTotasksPage}/>
 					}
 
 					<Fieldset id="reports" title={`Reports from ${org.shortName}`}>

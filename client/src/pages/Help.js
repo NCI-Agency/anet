@@ -5,7 +5,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import Fieldset from 'components/Fieldset'
 
 import API from 'api'
-import {Position} from 'models'
+import {Person, Position} from 'models'
 
 import { connect } from 'react-redux'
 
@@ -18,7 +18,10 @@ const screenshotCss = {
 
 class Help extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
@@ -31,8 +34,8 @@ class Help extends Page {
 		}
 	}
 
-	fetchData() {
-		let {currentUser} = this.context.app.state
+	fetchData(props) {
+		const { currentUser } = props
 		if (!currentUser.id || !currentUser.position || !currentUser.position.organization) {
 			// No super users to be found
 			return
@@ -54,12 +57,11 @@ class Help extends Page {
 	}
 
 	render() {
-		let {settings} = this.context.app.state || {}
+		const { settings } = this.context.app.state || {}
 		let url = settings.HELP_LINK_URL
 		let email = settings.CONTACT_EMAIL
 
-		let appData = this.context.app.state
-		let currentUser = appData.currentUser
+		const { currentUser } = this.props
 		return <div className="help-page">
 			<Fieldset title="Need help with ANET?">
 				<p className="help-text">There are a few ways to get help:</p>

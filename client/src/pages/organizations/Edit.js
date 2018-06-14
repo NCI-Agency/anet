@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -6,14 +7,17 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 
 import API from 'api'
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class OrganizationEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	static modelName = 'Organization'
 
@@ -51,7 +55,7 @@ class OrganizationEdit extends Page {
 				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<OrganizationForm original={this.state.originalOrganization} organization={organization} edit />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} currentUser={this.props.currentUser} edit />
 			</div>
 		)
 	}

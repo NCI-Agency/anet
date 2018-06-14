@@ -25,10 +25,9 @@ import { connect } from 'react-redux'
 
 class PersonShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
@@ -124,7 +123,7 @@ class PersonShow extends Page {
 		//User can always edit themselves
 		//Admins can always edit anybody
 		//SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const hasPosition = position && position.id
 		const canEdit = Person.isEqual(currentUser, person) ||
 			currentUser.isAdmin() ||
@@ -144,6 +143,7 @@ class PersonShow extends Page {
 						tour={personTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenPersonTour !== 'true'}
 						onEnd={() => localStorage.hasSeenPersonTour = 'true'}
+						currentUser={this.props.currentUser}
 					/>
 				</div>
 
@@ -196,6 +196,7 @@ class PersonShow extends Page {
 								<AssignPositionModal
 									showModal={this.state.showAssignPositionModal}
 									person={person}
+									currentUser={this.props.currentUser}
 									onCancel={this.hideAssignPositionModal.bind(this, false)}
 									onSuccess={this.hideAssignPositionModal.bind(this, true)}
 								/>
@@ -208,6 +209,7 @@ class PersonShow extends Page {
 								{canChangePosition &&
 									<EditAssociatedPositionsModal
 										position={position}
+										currentUser={this.props.currentUser}
 										showModal={this.state.showAssociatedPositionsModal}
 										onCancel={this.hideAssociatedPositionsModal.bind(this, false)}
 										onSuccess={this.hideAssociatedPositionsModal.bind(this, true)}
@@ -272,7 +274,7 @@ class PersonShow extends Page {
 	}
 
 	renderPositionBlankSlate(person) {
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		//when the person is not in a position, any super user can assign them.
 		let canChangePosition = currentUser.isSuperUser()
 

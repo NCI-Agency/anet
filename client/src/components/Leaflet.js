@@ -48,10 +48,9 @@ export default class Leaflet extends Component {
 	}
 
 	componentDidMount() {
-		// let app = this.context.app;
-
 		let map = L.map('map', {zoomControl:true}).setView([34.52, 69.16], 10)
-/*		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
+/*
+		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
 		    layers: 'nexrad-n0r-900913',
 		    format: 'image/png',
 		    transparent: true,
@@ -138,8 +137,8 @@ export default class Leaflet extends Component {
 
 	@autobind
 	addLayers() {
-		let app = this.context.app
-		let rawLayers = app.state.settings.MAP_LAYERS
+		const { settings } = this.context.app.state || {}
+		let rawLayers = settings.MAP_LAYERS
 		if (!rawLayers || rawLayers.length === 0) {
 			return
 		}

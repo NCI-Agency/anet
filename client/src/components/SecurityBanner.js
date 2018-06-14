@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import LinkTo from 'components/LinkTo'
+import {Person} from 'models'
 
 const SETTING_KEY_TEXT = 'SECURITY_BANNER_TEXT'
 const SETTING_KEY_COLOR = 'SECURITY_BANNER_COLOR'
@@ -17,6 +18,7 @@ const aCss = {
 export default class SecurityBanner extends Component {
 	static propTypes = {
 		location: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static contextTypes = {
@@ -24,8 +26,8 @@ export default class SecurityBanner extends Component {
 	}
 
 	render() {
-		let app = this.context.app
-		let {currentUser, settings} = app.state
+		const { settings } = this.context.app.state || {}
+		const { currentUser } = this.props
 
 		return (
 			<div className="banner" style={{...css, background: settings[SETTING_KEY_COLOR]}}>

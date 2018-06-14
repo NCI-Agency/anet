@@ -106,7 +106,7 @@ class RollupShow extends Page {
 	}
 
 	fetchData(props) {
-		const settings = this.context.app.state.settings
+		const { settings } = this.context.app.state || {}
 		const maxReportAge = settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
 		if (!maxReportAge) {
 			//don't run the query unless we've loaded the rollup settings.

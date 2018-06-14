@@ -69,13 +69,11 @@ class App extends Page {
 
 	static childContextTypes = {
 		app: PropTypes.object,
-		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	getChildContext() {
 		return {
 			app: this,
-			currentUser: this.state.currentUser,
 		}
 	}
 
@@ -100,7 +98,7 @@ class App extends Page {
 		}
 	}
 
-	fetchData() {
+	fetchData(props) {
 		return API.query(/* GraphQL */`
 			person(f:me) {
 				id, name, role, emailAddress, rank, status
@@ -143,20 +141,20 @@ class App extends Page {
 
 	render() {
 		const routing = <Switch>
-			<Route exact path="/" component={Home} />
+			<Route exact path="/" render={(props) => <Home {...props} currentUser={this.state.currentUser} />} />
 			<Route path="/search" component={Search} />
 			<Route path="/rollup" component={RollupShow} />
 			<Route path="/graphiql" component={GraphiQL} />
-			<Route path="/help" component={Help} />
+			<Route path="/help" render={(props) => <Help {...props} currentUser={this.state.currentUser} />} />
 			<Route
 				path="/reports"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} component={ReportNew} />
-					<Route path={`${url}/:id/edit`} component={ReportEdit} />
+					<Route path={`${url}/new`} render={(props) => <ReportNew {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/edit`} render={(props) => <ReportEdit {...props} currentUser={this.state.currentUser} />} />
 					<Route path={`${url}/:id/min`} component={ReportMinimal} />
-					<Route path={`${url}/mine`} component={MyReports} />
-					<Route path={`${url}/:id`} component={ReportShow} />
+					<Route path={`${url}/mine`} render={(props) => <MyReports {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id`} render={(props) => <ReportShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -164,9 +162,9 @@ class App extends Page {
 				path="/people"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} component={PersonNew} />
-					<Route path={`${url}/:id/edit`} component={PersonEdit} />
-					<Route path={`${url}/:id`} component={PersonShow} />
+					<Route path={`${url}/new`} render={(props) => <PersonNew {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/edit`} render={(props) => <PersonEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id`} render={(props) => <PersonShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -174,9 +172,9 @@ class App extends Page {
 				path="/organizations"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} component={OrganizationNew} />
-					<Route path={`${url}/:id/edit`} component={OrganizationEdit} />
-					<Route path={`${url}/:id/:action?`} component={OrganizationShow} />
+					<Route path={`${url}/new`} render={(props) => <OrganizationNew {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/edit`} render={(props) => <OrganizationEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/:action?`} render={(props) => <OrganizationShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -186,7 +184,7 @@ class App extends Page {
 				<Switch>
 					<Route path={`${url}/new`} component={LocationNew} />
 					<Route path={`${url}/:id/edit`} component={LocationEdit} />
-					<Route path={`${url}/:id`} component={LocationShow} />
+					<Route path={`${url}/:id`} render={(props) => <LocationShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -194,9 +192,9 @@ class App extends Page {
 				path="/positions"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} component={PositionNew} />
-					<Route path={`${url}/:id/edit`} component={PositionEdit} />
-					<Route path={`${url}/:id`} component={PositionShow} />
+					<Route path={`${url}/new`} render={(props) => <PositionNew {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/edit`} render={(props) => <PositionEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id`} render={(props) => <PositionShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -204,9 +202,9 @@ class App extends Page {
 				path="/tasks"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} component={TaskNew} />
-					<Route path={`${url}/:id/edit`} component={TaskEdit} />
-					<Route path={`${url}/:id`} component={TaskShow} />
+					<Route path={`${url}/new`} render={(props) => <TaskNew {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/edit`} render={(props) => <TaskEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id`} render={(props) => <TaskShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -219,7 +217,7 @@ class App extends Page {
 					<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
 					<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
 					<Route path={`${url}/authorizationGroups/:id/edit`} component={AuthorizationGroupEdit} />
-					<Route path={`${url}/authorizationGroups/:id`} component={AuthorizationGroupShow} />
+					<Route path={`${url}/authorizationGroups/:id`} render={(props) => <AuthorizationGroupShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -236,7 +234,7 @@ class App extends Page {
 				render={({ match: { url } }) => (
 				<Switch>
 					<Route exact path={`${url}/`} component={OnboardingShow} />
-					<Route path={`${url}/edit`} component={OnboardingEdit} />
+					<Route path={`${url}/edit`} render={(props) => <OnboardingEdit {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -263,7 +261,7 @@ class App extends Page {
 					<Row>
 						{this.props.pageProps.useNavigation === true &&
 							<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
-								<Nav topbarOffset={this.state.topbarOffset} />
+								<Nav currentUser={this.state.currentUser} topbarOffset={this.state.topbarOffset} />
 							</Col>
 						}
 						<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">

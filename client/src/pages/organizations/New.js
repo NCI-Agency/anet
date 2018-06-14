@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -5,7 +6,7 @@ import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
 import utils from 'utils'
 
@@ -14,7 +15,10 @@ import { connect } from 'react-redux'
 
 class OrganizationNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -53,7 +57,7 @@ class OrganizationNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Organization', Organization.pathForNew()]]} />
 
-				<OrganizationForm original={this.state.originalOrganization} organization={organization} />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} currentUser={this.props.currentUser} />
 			</div>
 		)
 	}

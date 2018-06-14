@@ -31,11 +31,11 @@ class PersonForm extends ValidatableFormWrapper {
 		edit: PropTypes.bool,
 		legendText: PropTypes.string,
 		saveText: PropTypes.string,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
-		currentUser: PropTypes.object.isRequired,
 	}
 
 	constructor(props) {
@@ -93,7 +93,7 @@ class PersonForm extends ValidatableFormWrapper {
 			onChange: this.handleOnChangeFirstName
 		}
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isSelf = Person.isEqual(currentUser, person)
 		const disableStatusChange = this.state.originalStatus === Person.STATUS.INACTIVE || isSelf

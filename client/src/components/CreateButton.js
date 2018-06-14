@@ -23,12 +23,12 @@ const ADMIN_ACTIONS = [
 ]
 
 class CreateButton extends Component {
-	static contextTypes = {
-		currentUser: PropTypes.object,
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Models.Person),
 	}
 
 	render() {
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 
 		const modelClasses = DEFAULT_ACTIONS.concat(
 			currentUser.isSuperUser() && SUPER_USER_ACTIONS,

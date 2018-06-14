@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -6,7 +7,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import PositionForm from './Form'
 
 import API from 'api'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 
 import utils from 'utils'
 
@@ -15,7 +16,10 @@ import { connect } from 'react-redux'
 
 class PositionNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -59,7 +63,7 @@ class PositionNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Position', Position.pathForNew()]]} />
 
-				<PositionForm original={this.state.originalPosition} position={position} />
+				<PositionForm original={this.state.originalPosition} position={position} currentUser={this.props.currentUser} />
 			</div>
 		)
 	}

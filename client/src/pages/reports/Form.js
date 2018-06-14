@@ -39,16 +39,12 @@ class ReportForm extends ValidatableFormWrapper {
 		report: PropTypes.instanceOf(Report).isRequired,
 		edit: PropTypes.bool,
 		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static contextTypes = {
-		currentUser: PropTypes.object,
-	}
-
-	constructor(props, context) {
+	constructor(props) {
 		super(props)
 
-		const { currentUser } = context
 		this.state = {
 			isBlocking: false,
 			recents: {
@@ -64,9 +60,8 @@ class ReportForm extends ValidatableFormWrapper {
 			isCancelled: (props.report.cancelledReason ? true : false),
 			errors: {},
 
-			// FIXME: These two need to get updated if the currentUser changes
-			showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
-			showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
+			showAssignedPositionWarning: false,
+			showActivePositionWarning: false,
 
 			disableOnSubmit: false,
 
@@ -119,12 +114,14 @@ class ReportForm extends ValidatableFormWrapper {
 
 	static getDerivedStateFromProps(props, state) {
 		const stateUpdate = {}
-		const report = props.report
+		const { report, currentUser } = props
 		if (report.cancelledReason) {
 			Object.assign(stateUpdate, {isCancelled: true})
 		}
 		const reportTags = report.tags.map(tag => ({id: tag.id.toString(), text: tag.name}))
 		Object.assign(stateUpdate, {
+			showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
+			showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
 			reportTags: reportTags,
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation
 		})
@@ -159,8 +156,7 @@ class ReportForm extends ValidatableFormWrapper {
 	}
 
 	render() {
-		const { currentUser } = this.context
-		const {report, onDelete} = this.props
+		const { report, onDelete, currentUser } = this.props
 		const { edit } = this.props
 		const {recents, suggestionList, errors, isCancelled, showAssignedPositionWarning, showActivePositionWarning} = this.state
 

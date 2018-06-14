@@ -7,13 +7,17 @@ import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
 
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
 import { withRouter } from 'react-router-dom'
 
 class Nav extends Component {
 	static contextTypes = {
 		app: PropTypes.object.isRequired,
+	}
+
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -32,12 +36,11 @@ class Nav extends Component {
 	}
 
 	render() {
-		const appData = this.context.app.state
-		const currentUser = appData.currentUser
-		const organizations = appData.organizations || []
+		const { currentUser } = this.props
+		const { organizations } = this.context.app.state || []
 		const path = this.props.location.pathname
 
-		const {settings} = appData || {}
+		const { settings } = this.context.app.state || {}
 		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
 		const externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 

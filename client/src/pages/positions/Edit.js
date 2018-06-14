@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -6,14 +7,17 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import PositionForm from './Form'
 
 import API from 'api'
-import {Position} from 'models'
+import {Person, Position} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class PositionEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	static modelName = 'Position'
 
@@ -60,7 +64,7 @@ class PositionEdit extends Page {
 			<div>
 				<Breadcrumbs items={[[`Edit ${position.name}`, Position.pathForEdit(position)]]} />
 
-				<PositionForm original={this.state.originalPosition} position={position} edit success={this.state.success} error={this.state.error} />
+				<PositionForm original={this.state.originalPosition} position={position} currentUser={this.props.currentUser} edit success={this.state.success} error={this.state.error} />
 			</div>
 		)
 	}

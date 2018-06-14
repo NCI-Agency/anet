@@ -1,9 +1,11 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import SearchBar from 'components/SearchBar'
 import CreateButton from 'components/CreateButton'
+import {Person} from 'models'
 
 import logo from 'resources/logo.png'
 
@@ -16,6 +18,10 @@ const backgroundCss = {
 }
 
 export default class Header extends Component {
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Person),
+	}
+
 	render() {
 		return (
 			<header style={backgroundCss} className="header">
@@ -40,7 +46,7 @@ export default class Header extends Component {
 						{ !this.props.minimalHeader &&
 							<Col xs={2}>
 								<div className="pull-right">
-									<CreateButton />
+									<CreateButton currentUser={this.props.currentUser} />
 								</div>
 							</Col>
 						}
