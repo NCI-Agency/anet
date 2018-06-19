@@ -10,6 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import Settings from 'Settings'
@@ -119,8 +121,8 @@ export default class ReportsByTask extends Component {
       longName: noTaskMessage
     }
     Promise.all([chartQuery]).then(values => {
-      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.tasks.map(p => p.id)}})
-      let tasks = values[0].reportList.list.map(d => d.tasks)
+      let simplifiedValues = values[0].reportList.list ? values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.tasks.map(p => p.id)}}): []
+      let tasks = values[0].reportList.list ? values[0].reportList.list.map(d => d.tasks) : []
       tasks = [].concat.apply([], tasks)
         .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
         .sort((a, b) => a.shortName.localeCompare(b.shortName))
@@ -194,7 +196,7 @@ export default class ReportsByTask extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.queryParams !== this.props.queryParams) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
         focusedTask: ''  // reset focus when changing the queryParams

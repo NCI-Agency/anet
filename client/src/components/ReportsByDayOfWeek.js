@@ -10,6 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
@@ -106,7 +108,9 @@ export default class ReportsByDayOfWeek extends Component {
       let daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
       // Set the order in which to display the days of the week
       let displayOrderDaysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, dayOfWeek: d.engagementDayOfWeek}})
+      let simplifiedValues = values[0].reportList.list ?
+          values[0].reportList.list.map(d => {return {reportId: d.id, dayOfWeek: d.engagementDayOfWeek}}) :
+          []
       this.setState({
         isLoading: false,
         updateChart: true,  // update chart after fetching the data

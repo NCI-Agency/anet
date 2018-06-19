@@ -9,6 +9,8 @@ import Fieldset from 'components/Fieldset'
 import ReportCollection from 'components/ReportCollection'
 import moment from 'moment'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
@@ -115,49 +117,50 @@ export default class FutureEngagementsByLocation extends Component {
       name: 'No location allocated'
     }
     Promise.all([chartQuery]).then(values => {
-      let reportsList = values[0].reportList.list
-      reportsList = reportsList
-        .map(d => { if (!d.location) d.location = noLocation; return d })
-      // add days without data as we want to display them in the chart
-      let allCategories = this.engagementDateRangeArray.map(function(d) {
-        return {
-          key: d.valueOf(),
-          values: [{}]
-        }
-      })
-      let categoriesWithData = d3.nest()
-        .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
-        .key(function(d) { return d.location.id })
-        .rollup(function(leaves) { return leaves.length })
-        .entries(reportsList)
-      let groupedData = allCategories.map((d)=> {
-        let categData = categoriesWithData.find((x) => {return Number(x.key) === d.key })
-        return Object.assign({}, d, categData)
-      })
-      let graphData = {}
-      graphData.data = groupedData
-      graphData.categoryLabels = allCategories.reduce(
-        function(prev, curr) {
-          prev[curr.key] = moment(curr.key).format('D MMM YYYY')
-          return prev
-        },
-        {}
-      )
-      graphData.leavesLabels = reportsList.reduce(
-        function(prev, curr) {
-          prev[curr.location.id] = curr.location.name
-          return prev
-        },
-        {}
-      )
-      this.setState({
-        updateChart: true,  // update chart after fetching the data
-        graphData: graphData,
-        isLoading: false
-      })
+      if (values[0].reportList.list) {
+        let reportsList = values[0].reportList.list
+        reportsList = reportsList
+          .map(d => { if (!d.location) d.location = noLocation; return d })
+        // add days without data as we want to display them in the chart
+        let allCategories = this.engagementDateRangeArray.map(function(d) {
+          return {
+            key: d.valueOf(),
+            values: [{}]
+          }
+        })
+        let categoriesWithData = d3.nest()
+          .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
+          .key(function(d) { return d.location.id })
+          .rollup(function(leaves) { return leaves.length })
+          .entries(reportsList)
+        let groupedData = allCategories.map((d)=> {
+          let categData = categoriesWithData.find((x) => {return Number(x.key) === d.key })
+          return Object.assign({}, d, categData)
+        })
+        let graphData = {}
+        graphData.data = groupedData
+        graphData.categoryLabels = allCategories.reduce(
+          function(prev, curr) {
+            prev[curr.key] = moment(curr.key).format('D MMM YYYY')
+            return prev
+          },
+          {}
+        )
+        graphData.leavesLabels = reportsList.reduce(
+          function(prev, curr) {
+            prev[curr.location.id] = curr.location.name
+            return prev
+          },
+          {}
+        )
+        this.setState({
+          updateChart: true,  // update chart after fetching the data
+          graphData: graphData,
+          isLoading: false
+        })
+      }
     })
     this.fetchFocusData()
-
   }
 
   fetchFocusData() {
@@ -247,7 +250,7 @@ export default class FutureEngagementsByLocation extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.queryParams !== this.props.queryParams) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
         focusedDate: '',  // reset focus when changing the queryParams

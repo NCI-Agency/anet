@@ -11,6 +11,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
@@ -75,7 +77,7 @@ export default class PendingApprovalReports extends Component {
           action={!focusDetails.resetFnc
             ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
           } >
-          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
+          {this.state.reports.list && <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />}
         </Fieldset>
       </div>
     )
@@ -118,24 +120,28 @@ export default class PendingApprovalReports extends Component {
       shortName: 'No advisor organization'
     }
     Promise.all([chartQuery]).then(values => {
-      let reportsList = values[0].reportList.list
-      reportsList = reportsList
-        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
-      this.setState({
-        isLoading: false,
-        updateChart: true,  // update chart after fetching the data
-        graphData: reportsList
-          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-          .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
-          .sort((a, b) => {
-            let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
-            let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
-            if (a_index < 0)
-              return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
-            else
-              return (b_index < 0) ? -1 : a_index-b_index
-          })
-      })
+      if (values[0].reportList.list) {
+        let reportsList = values[0].reportList.list
+        reportsList = reportsList
+          .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
+        this.setState({
+          isLoading: false,
+          updateChart: true,  // update chart after fetching the data
+          graphData: reportsList
+            .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
+            .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+            .sort((a, b) => {
+              let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
+              let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
+              if (a_index < 0) {
+                return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
+              }
+              else {
+                return (b_index < 0) ? -1 : a_index-b_index
+              }
+            })
+        })
+      }
     })
     this.fetchOrgData()
   }
@@ -193,7 +199,7 @@ export default class PendingApprovalReports extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.queryParams !== this.props.queryParams) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
         focusedOrg: ''  // reset focus when changing the queryParams
