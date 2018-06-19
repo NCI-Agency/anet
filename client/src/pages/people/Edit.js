@@ -17,6 +17,7 @@ class PersonEdit extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
+		loadAppData: PropTypes.func,
 	}
 
 	static modelName = 'User'
@@ -62,8 +63,15 @@ class PersonEdit extends Page {
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
 
-				<PersonForm original={originalPerson} person={person} currentUser={this.props.currentUser} edit showPositionAssignment={canEditPosition}
-					legendText={legendText} saveText={saveText} />
+				<PersonForm
+					original={originalPerson}
+					person={person}
+					currentUser={this.props.currentUser}
+					loadAppData={this.props.loadAppData}
+					edit
+					showPositionAssignment={canEditPosition}
+					legendText={legendText}
+					saveText={saveText} />
 			</div>
 		)
 	}

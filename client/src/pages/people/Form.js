@@ -32,10 +32,7 @@ class PersonForm extends ValidatableFormWrapper {
 		legendText: PropTypes.string,
 		saveText: PropTypes.string,
 		currentUser: PropTypes.instanceOf(Person),
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
@@ -358,7 +355,7 @@ class PersonForm extends ValidatableFormWrapper {
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
-					this.context.app.loadData()
+					this.props.loadAppData()
 					this.props.history.push({
 						pathname: '/',
 					})

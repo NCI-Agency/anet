@@ -15,6 +15,7 @@ class PersonNew extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
+		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
@@ -33,7 +34,12 @@ class PersonNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Person', Person.pathForNew()]]} />
 
-				<PersonForm original={this.state.originalPerson} person={person} currentUser={this.props.currentUser} showPositionAssignment={true} />
+				<PersonForm
+					original={this.state.originalPerson}
+					person={person}
+					currentUser={this.props.currentUser}
+					loadAppData={this.props.loadAppData}
+					showPositionAssignment={true} />
 			</div>
 		)
 	}

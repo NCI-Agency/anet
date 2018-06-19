@@ -58,23 +58,12 @@ import OnboardingEdit from 'pages/onboarding/Edit'
 
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import _isEqual from 'lodash/isEqual'
 
 class App extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
 		pageProps: PropTypes.object,
-	}
-
-	static childContextTypes = {
-		app: PropTypes.object,
-	}
-
-	getChildContext() {
-		return {
-			app: this,
-		}
 	}
 
 	constructor(props) {
@@ -96,6 +85,12 @@ class App extends Page {
 		if (this.state.topbarOffset !== topbarOffset){
 			this.setState({ topbarOffset: topbarOffset })
 		}
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		// TODO: We should decide what to do here, e.g. when to call this.loadData()
+		// We do not want the behaviour of our super class Page, as that would
+		// mean this.loadData() is called with each change in props or location…
 	}
 
 	fetchData(props) {
@@ -162,8 +157,8 @@ class App extends Page {
 				path="/people"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <PersonNew {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <PersonEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/new`} render={(props) => <PersonNew {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
+					<Route path={`${url}/:id/edit`} render={(props) => <PersonEdit {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
 					<Route path={`${url}/:id`} render={(props) => <PersonShow {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
 				</Switch>
 			)}
@@ -212,7 +207,7 @@ class App extends Page {
 				path="/admin"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route exact path={`${url}/`} component={AdminIndex} />
+					<Route exact path={`${url}/`} render={(props) => <AdminIndex {...props} loadAppData={this.loadData} />} />
 					<Route path={`${url}/mergePeople`} component={MergePeople} />
 					<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
 					<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
@@ -234,7 +229,7 @@ class App extends Page {
 				render={({ match: { url } }) => (
 				<Switch>
 					<Route exact path={`${url}/`} component={OnboardingShow} />
-					<Route path={`${url}/edit`} render={(props) => <OnboardingEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/edit`} render={(props) => <OnboardingEdit {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
 				</Switch>
 			)}
 			/>

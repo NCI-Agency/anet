@@ -42,6 +42,7 @@ export default class Page extends Component {
 		this.render = Page.prototype.render
 	}
 
+	@autobind
 	loadData(props) {
 		this.setState({notFound: false, invalidRequest: false})
 

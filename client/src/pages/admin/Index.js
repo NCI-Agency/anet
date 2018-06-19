@@ -13,10 +13,9 @@ import { connect } from 'react-redux'
 
 class AdminIndex extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		app: PropTypes.object,
+	static propTypes = {
+		...pagePropTypes,
+		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
@@ -70,7 +69,7 @@ class AdminIndex extends Page {
 
         API.send('/api/admin/save', json, {disableSubmits: true})
             .then(() => {
-				this.context.app.loadData()
+				this.props.loadAppData()
 			})
 			.catch(error => {
                 this.setState({error})
