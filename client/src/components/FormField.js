@@ -12,8 +12,8 @@ class FormFieldExtraCol extends Component {
 }
 
 export default class FormField extends Component {
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 		this.state = {
 			value: '',
 			userHasTouchedField: props.validateBeforeUserTouches,

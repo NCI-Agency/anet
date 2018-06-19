@@ -20,8 +20,8 @@ export default class EditAssociatedPositionsModal extends Component {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 		this.state = {
 			error: null,
 			associatedPositions: props.position.associatedPositions.slice()

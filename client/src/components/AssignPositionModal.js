@@ -16,8 +16,8 @@ export default class AssignPositionModal extends Component {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 		this.state = {
 			position: props.person && props.person.position
 		}
