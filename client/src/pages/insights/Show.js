@@ -20,6 +20,7 @@ import {Report} from 'models'
 
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import { connect } from 'react-redux'
+import _isEqualWith from 'lodash/isEqualWith'
 
 export const NOT_APPROVED_REPORTS = 'not-approved-reports'
 export const CANCELLED_REPORTS = 'cancelled-reports'
@@ -27,10 +28,12 @@ export const REPORTS_BY_TASK = 'reports-by-task'
 export const REPORTS_BY_DAY_OF_WEEK = 'reports-by-day-of-week'
 export const FUTURE_ENGAGEMENTS_BY_LOCATION = 'future-engagements-by-location'
 export const ADVISOR_REPORTS = 'advisor-reports'
+
 export const INSIGHTS = [
   NOT_APPROVED_REPORTS, CANCELLED_REPORTS, REPORTS_BY_TASK,
   FUTURE_ENGAGEMENTS_BY_LOCATION, REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS
 ]
+
 export const INSIGHT_DETAILS = {
   [NOT_APPROVED_REPORTS]: {
     component: PendingApprovalReports,
@@ -109,7 +112,6 @@ class InsightsShow extends Page {
 
     Object.assign(
       this.state, {
-        insight: props.match.params.insight,
         referenceDate: moment().clone(),
         startDate: moment().clone(),
         endDate: moment().clone(),
@@ -125,55 +127,102 @@ class InsightsShow extends Page {
     }
   }
 
+  get insightQueryParams() {
+    return {
+      [NOT_APPROVED_REPORTS]: [
+       {key: 'State', value: {state: Report.STATE.PENDING_APPROVAL, toQuery: () => {return {state: Report.STATE.PENDING_APPROVAL}}}},
+//        updatedAtEnd: this.state.referenceDate.clone().valueOf(),
+      ],
+      [CANCELLED_REPORTS]: [
+        {key: 'State', value: {state: Report.STATE.CANCELLED, cancelledReason: '', toQuery: () => {return {state: Report.STATE.CANCELLED}}}},
+//        releasedAtStart: this.state.referenceDate.clone().valueOf(),
+      ],
+      [REPORTS_BY_TASK]: [
+        {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
+//        releasedAtStart: this.state.referenceDate.clone().valueOf(),
+      ],
+      [REPORTS_BY_DAY_OF_WEEK]: [
+        {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
+//        {key: 'releasedAtStart', value: this.state.startDate.clone().valueOf()},
+//        {key: 'releasedAtEnd', value: this.state.endDate.clone().valueOf()},
+//        {key: 'includeEngagementDayOfWeek', value: 1},
+      ],
+      [FUTURE_ENGAGEMENTS_BY_LOCATION]: [
+//        engagementDateStart: this.state.startDate.clone().startOf('day').valueOf(),
+//        engagementDateEnd: this.state.endDate.clone().valueOf(),
+      ],
+      [ADVISOR_REPORTS]: [],
+    }
+  }
+
   getFilters = () => {
-    const insight = INSIGHT_DETAILS[this.state.insight]
+    const insight = INSIGHT_DETAILS[this.props.match.params.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
     const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     return <span>{dateRangeFilter}{calenderFilter}</span>
   }
 
+  @autobind
+  updateSearchQuery(insight) {
+    const insightSpecificFilters = this.insightQueryParams[insight]
+    const insightSpecificFilterKeys = insightSpecificFilters.map(filter => filter.key)
+    const notInsightSpecificFilters = this.props.searchQuery.filters.filter(filter => filter && insightSpecificFilterKeys.indexOf(filter.key) === -1)
+    const filters = notInsightSpecificFilters.concat(insightSpecificFilters)
+    this.props.setSearchQuery({
+      text: this.props.searchQuery.text,
+      objectType: SEARCH_OBJECT_TYPES.REPORTS,
+      filters: filters
+    })
+  }
+
+  @autobind
+  equalFunction(value1, value2) {
+    if (typeof value1 === 'function' && typeof value2 === 'function') {
+      return true
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
-    if (nextProps.match.params.insight !== this.state.insight) {
-      this.setState({insight: nextProps.match.params.insight})
+    if (nextProps.match.params.insight !== this.props.match.params.insight) {
       this.setStateDefaultDates(nextProps.match.params.insight)
+      if (!_isEqualWith(this.insightQueryParams[nextProps.match.params.insight], this.insightQueryParams[this.props.match.params.insight], this.equalFunction)) {
+        this.updateSearchQuery(nextProps.match.params.insight)
+      }
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
-    this.setStateDefaultDates(this.state.insight)
+    this.setStateDefaultDates(this.props.match.params.insight)
     this.props.setSearchProps({
       searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
     })
-    this.props.setSearchQuery({
-      text: this.props.searchQuery.text,
-      objectType: SEARCH_OBJECT_TYPES.REPORTS,
-    })
+    this.updateSearchQuery(this.props.match.params.insight)
   }
 
-  setStateDefaultDates = (insight) => {
+  setStateDefaultDates = (insight, cb) => {
     const prefix = insight.split('-', 1).pop()
     if (prefix !== undefined && prefix === PREFIX_FUTURE) {
-      this.setStateDefaultFutureDates()
+      this.setStateDefaultFutureDates(cb)
     } else {
-      this.setStateDefaultPastDates()
+      this.setStateDefaultPastDates(cb)
     }
   }
 
-  setStateDefaultPastDates = () => {
+  setStateDefaultPastDates = (cb) => {
     this.setState({
       referenceDate: this.cutoffDate,
       startDate: this.cutoffDate,
       endDate: this.currentDateTime.endOf('day')
-    })
+    }, () => {(typeof cb === 'function') && cb()})
   }
 
-  setStateDefaultFutureDates = () => {
+  setStateDefaultFutureDates = (cb) => {
     this.setState({
       referenceDate: this.currentDateTime,
       startDate: this.currentDateTime,
       endDate: this.currentDateTime.add(14, 'days').endOf('day')
-    })
+    }, () => {(typeof cb === 'function') && cb()})
   }
 
   handleChangeDateRange = (value) => {
@@ -219,43 +268,17 @@ class InsightsShow extends Page {
   }
 
   render() {
-    const insightConfig = INSIGHT_DETAILS[this.state.insight]
+    const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     const InsightComponent = insightConfig.component
-    const insightPath = '/insights/' + this.state.insight
-    const insightQueryParams = {
-      [NOT_APPROVED_REPORTS]: {
-        state: [Report.STATE.PENDING_APPROVAL],
-        updatedAtEnd: this.state.referenceDate.clone().valueOf(),
-      },
-      [CANCELLED_REPORTS]: {
-        state: [Report.STATE.CANCELLED],
-        releasedAtStart: this.state.referenceDate.clone().valueOf(),
-      },
-      [REPORTS_BY_TASK]: {
-        state: [Report.STATE.RELEASED],
-        releasedAtStart: this.state.referenceDate.clone().valueOf(),
-      },
-      [REPORTS_BY_DAY_OF_WEEK]: {
-        state: [Report.STATE.RELEASED],
-        releasedAtStart: this.state.startDate.clone().valueOf(),
-        releasedAtEnd: this.state.endDate.clone().valueOf(),
-        includeEngagementDayOfWeek: 1,
-      },
-      [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
-        engagementDateStart: this.state.startDate.clone().startOf('day').valueOf(),
-        engagementDateEnd: this.state.endDate.clone().valueOf(),
-      },
-      [ADVISOR_REPORTS]: {},
-    }
-
-    const queryParams = Object.assign(this.getSearchQuery(), insightQueryParams[this.state.insight])
+    const insightPath = '/insights/' + this.props.match.params.insight
+    const queryParams = this.getSearchQuery()
     return (
       <div>
         <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
-          <Fieldset id={this.state.insight} data-jumptarget title={
+          <Fieldset id={this.props.match.params.insight} data-jumptarget title={
             <span>
               {insightConfig.title}
               {this.getFilters()}

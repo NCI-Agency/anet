@@ -32,7 +32,7 @@ export const DEFAULT_SEARCH_PROPS = {
 		SEARCH_OBJECT_TYPES.TASKS
 	]
 }
-export const DEFAULT_SEARCH_QUERY = {text: ''}
+export const DEFAULT_SEARCH_QUERY = {text: '', filters: []}
 
 /*
  *  action constructors

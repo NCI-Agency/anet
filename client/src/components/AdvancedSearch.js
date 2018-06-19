@@ -23,6 +23,7 @@ import { setSearchQuery } from 'actions'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
+import _isEqualWith from 'lodash/isEqualWith'
 import _cloneDeepWith from 'lodash/cloneDeepWith'
 
 const taskFilters = props => {
@@ -77,7 +78,7 @@ class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	getFilters(context) {
+	getFilters() {
 		const filters = {}
 		filters.Reports = {
 			filters: {
@@ -248,7 +249,7 @@ class AdvancedSearch extends Component {
 		super(props, context)
 
 		const query = props.query || {}
-		this.ALL_FILTERS = this.getFilters(context)
+		this.ALL_FILTERS = this.getFilters()
 		this.state = {
 			objectType: query.objectType || "Reports",
 			text: props.text || query.text || "",
@@ -256,15 +257,19 @@ class AdvancedSearch extends Component {
 		}
 	}
 
-	componentWillReceiveProps(props, nextContext) {
-		if (props.query) {
-			this.setState(props.query)
+	@autobind
+	equalFunction(value1, value2) {
+		if (typeof value1 === 'function' && typeof value2 === 'function') {
+			return true
 		}
-		if (props.text) {
-			this.setState({text: props.text})
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.query, this.props.query, this.equalFunction)) {
+			this.setState(this.props.query)
 		}
-		if (!_isEqual(this.context, nextContext)) {
-			this.ALL_FILTERS = this.getFilters(nextContext)
+		if (!_isEqual(prevProps.text, this.props.text)) {
+			this.setState({text: this.props.text})
 		}
 	}
 
@@ -399,7 +404,6 @@ class SearchFilter extends Component {
 
 	render() {
 		let {label, onRemove, query, filter, children, element} = this.props
-
 		if (query) {
 			label = filter.key
 			children = React.cloneElement(
