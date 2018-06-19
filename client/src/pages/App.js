@@ -261,7 +261,11 @@ class App extends Page {
 					<Row>
 						{this.props.pageProps.useNavigation === true &&
 							<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
-								<Nav currentUser={this.state.currentUser} appSettings={this.state.settings} topbarOffset={this.state.topbarOffset} />
+								<Nav
+									currentUser={this.state.currentUser}
+									appSettings={this.state.settings}
+									organizations={this.state.organizations}
+									topbarOffset={this.state.topbarOffset} />
 							</Col>
 						}
 						<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">

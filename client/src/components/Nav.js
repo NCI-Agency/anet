@@ -12,13 +12,10 @@ import {Organization, Person} from 'models'
 import { withRouter } from 'react-router-dom'
 
 class Nav extends Component {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
-	}
-
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
+		organizations: PropTypes.array,
 	}
 
 	constructor(props) {
@@ -38,13 +35,12 @@ class Nav extends Component {
 
 	render() {
 		const { currentUser } = this.props
-		const { organizations } = this.context.app.state || []
-		const path = this.props.location.pathname
-
+		const { organizations } = this.props || []
 		const { appSettings } = this.props || {}
 		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
 		const externalDocumentationUrlText = appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
+		const path = this.props.location.pathname
 		const inAdmin = path.indexOf('/admin') === 0
 		const inOrg = path.indexOf('/organizations') === 0
 		const inMyReports = path.indexOf('/reports/mine') === 0
