@@ -21,6 +21,7 @@ class LocationShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
+		appSettings: PropTypes.object,
 	}
 
 	static modelName = 'Location'
@@ -83,11 +84,11 @@ class LocationShow extends Page {
 						<Form.Field id="latlng" value={latlng} label="Lat/Lon" />
 					</Fieldset>
 
-					<Leaflet markers={markers}/>
+					<Leaflet markers={markers} appSettings={this.props.appSettings} />
 				</Form>
 
 				<Fieldset title="Reports at this location">
-					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
+					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} appSettings={this.props.appSettings} />
 				</Fieldset>
 			</div>
 		)

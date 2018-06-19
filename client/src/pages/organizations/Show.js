@@ -32,6 +32,7 @@ class OrganizationShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
+		appSettings: PropTypes.object,
 	}
 
 	static modelName = 'Organization'
@@ -255,6 +256,7 @@ class OrganizationShow extends Page {
 							setReportsFilter={this.togglePendingApprovalFilter}
 							filterIsSet={this.reportsFilterIsSet()}
 							isSuperUser={isSuperUser}
+							appSettings={this.props.appSettings}
 						/>
 					</Fieldset>
 				</Form>

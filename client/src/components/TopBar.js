@@ -20,6 +20,7 @@ const visible = {
 export default class TopBar extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
+		appSettings: PropTypes.object,
 	}
 
     constructor(props) {
@@ -56,7 +57,7 @@ export default class TopBar extends Component {
     }
 
     updateBannerVisibility(){
-        let visibilitySetting = parseInt(this.props.settings[GENERAL_BANNER_VISIBILITY], 10)
+        let visibilitySetting = parseInt(this.props.appSettings[GENERAL_BANNER_VISIBILITY], 10)
         let output = false
         const { currentUser } = this.props
         if (visibilitySetting === visible.USERS && currentUser && !currentUser.isSuperUser()) {
@@ -75,8 +76,8 @@ export default class TopBar extends Component {
 
     bannerOptions(){
         return {
-            level: this.props.settings[GENERAL_BANNER_LEVEL],
-            message: this.props.settings[GENERAL_BANNER_TEXT],
+            level: this.props.appSettings[GENERAL_BANNER_LEVEL],
+            message: this.props.appSettings[GENERAL_BANNER_TEXT],
             title: GENERAL_BANNER_TITLE,
             visible: this.state.bannerVisibility
         } || {}
@@ -87,7 +88,7 @@ export default class TopBar extends Component {
             <div id="topbar" className="navbar navbar-fixed-top">
                 {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
-                <SecurityBanner location={this.props.location} currentUser={this.props.currentUser} />
+                <SecurityBanner location={this.props.location} currentUser={this.props.currentUser} appSettings={this.props.appSettings} />
                 <Header minimalHeader={this.props.minimalHeader} currentUser={this.props.currentUser} />
             </div>
         )

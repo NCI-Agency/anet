@@ -18,6 +18,7 @@ class Nav extends Component {
 
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
+		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -40,9 +41,9 @@ class Nav extends Component {
 		const { organizations } = this.context.app.state || []
 		const path = this.props.location.pathname
 
-		const { settings } = this.context.app.state || {}
-		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
-		const externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
+		const { appSettings } = this.props || {}
+		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
+		const externalDocumentationUrlText = appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
 		const inAdmin = path.indexOf('/admin') === 0
 		const inOrg = path.indexOf('/organizations') === 0

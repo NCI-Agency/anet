@@ -21,10 +21,7 @@ class Help extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -57,9 +54,9 @@ class Help extends Page {
 	}
 
 	render() {
-		const { settings } = this.context.app.state || {}
-		let url = settings.HELP_LINK_URL
-		let email = settings.CONTACT_EMAIL
+		const { appSettings } = this.props || {}
+		let url = appSettings.HELP_LINK_URL
+		let email = appSettings.CONTACT_EMAIL
 
 		const { currentUser } = this.props
 		return <div className="help-page">

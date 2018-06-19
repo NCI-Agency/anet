@@ -19,9 +19,7 @@ const css = {
 export default class Leaflet extends Component {
 	static propTypes = {
 		markers: PropTypes.array,
-	}
-	static contextTypes = {
-		app: PropTypes.object.isRequired
+		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -137,8 +135,8 @@ export default class Leaflet extends Component {
 
 	@autobind
 	addLayers() {
-		const { settings } = this.context.app.state || {}
-		let rawLayers = settings.MAP_LAYERS
+		const { appSettings } = this.props || {}
+		let rawLayers = appSettings.MAP_LAYERS
 		if (!rawLayers || rawLayers.length === 0) {
 			return
 		}

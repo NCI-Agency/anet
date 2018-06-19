@@ -19,19 +19,16 @@ export default class SecurityBanner extends Component {
 	static propTypes = {
 		location: PropTypes.object.isRequired,
 		currentUser: PropTypes.instanceOf(Person),
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+		appSettings: PropTypes.object,
 	}
 
 	render() {
-		const { settings } = this.context.app.state || {}
+		const { appSettings } = this.props|| {}
 		const { currentUser } = this.props
 
 		return (
-			<div className="banner" style={{...css, background: settings[SETTING_KEY_COLOR]}}>
-				{settings[SETTING_KEY_TEXT]}
+			<div className="banner" style={{...css, background: appSettings[SETTING_KEY_COLOR]}}>
+				{appSettings[SETTING_KEY_TEXT]}
 				{' '}||{' '}
 				{currentUser.name} <LinkTo person={currentUser} style={aCss}>(edit)</LinkTo>
 			</div>

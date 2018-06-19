@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -12,7 +13,10 @@ import { connect } from 'react-redux'
 
 class LocationNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		appSettings: PropTypes.object,
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -30,7 +34,7 @@ class LocationNew extends Page {
 				<Breadcrumbs items={[['Create new Location', Location.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<LocationForm original={new Location()} anetLocation={location} />
+				<LocationForm original={new Location()} anetLocation={location} appSettings={this.props.appSettings} />
 			</div>
 		)
 	}

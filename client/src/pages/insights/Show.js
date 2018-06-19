@@ -73,10 +73,9 @@ const dateRangeFilterCss = {
 
 class InsightsShow extends Page {
 
-  static propTypes = {...pagePropTypes}
-
-  static contextTypes = {
-    app: PropTypes.object.isRequired,
+  static propTypes = {
+    ...pagePropTypes,
+    appSettings: PropTypes.object,
   }
 
   get currentDateTime() {
@@ -84,8 +83,8 @@ class InsightsShow extends Page {
   }
 
   get cutoffDate() {
-    const { settings } = this.context.app.state || {}
-    let maxReportAge = 1 + (parseInt(settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
+    const { appSettings } = this.props || {}
+    let maxReportAge = 1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment().subtract(maxReportAge, 'days').clone()
   }
 
@@ -214,7 +213,9 @@ class InsightsShow extends Page {
             <InsightComponent
               date={this.state.referenceDate.clone()}
               startDate={this.state.startDate.clone()}
-              endDate={this.state.endDate.clone()} />
+              endDate={this.state.endDate.clone()}
+              appSettings={this.props.appSettings}
+            />
           </Fieldset>
         }
       </div>

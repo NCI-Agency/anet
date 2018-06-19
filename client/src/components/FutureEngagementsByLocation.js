@@ -29,6 +29,7 @@ export default class FutureEngagementsByLocation extends Component {
   static propTypes = {
     startDate: PropTypes.object.isRequired,
     endDate: PropTypes.object.isRequired,
+    appSettings: PropTypes.object,
   }
 
   constructor(props) {
@@ -91,7 +92,7 @@ export default class FutureEngagementsByLocation extends Component {
               ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
             }
           >
-          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
+          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} appSettings={this.props.appSettings} />
         </Fieldset>
       </div>
     )

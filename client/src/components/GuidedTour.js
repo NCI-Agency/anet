@@ -29,10 +29,6 @@ class GuidedTour extends Component {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
-	}
-
 	componentDidMount() {
 		hopscotch.listen('end', this.onEnd)
 		hopscotch.listen('close', this.onEnd)

@@ -45,10 +45,7 @@ class RollupShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		date: PropTypes.object,
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+		appSettings: PropTypes.object,
 	}
 
 	get dateStr() { return this.state.date.format('DD MMM YYYY') }
@@ -106,8 +103,8 @@ class RollupShow extends Page {
 	}
 
 	fetchData(props) {
-		const { settings } = this.context.app.state || {}
-		const maxReportAge = settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
+		const { appSettings } = this.props || {}
+		const maxReportAge = appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
 		if (!maxReportAge) {
 			//don't run the query unless we've loaded the rollup settings.
 			return
@@ -225,7 +222,7 @@ class RollupShow extends Page {
 						: <Button onClick={() => this.goToOrg()}>All organizations</Button>
 					}
 				>
-					<ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
+					<ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} appSettings={this.props.appSettings} />
 				</Fieldset>
 
 				{this.renderEmailModal()}

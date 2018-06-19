@@ -30,6 +30,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
 export default class ReportsByTask extends Component {
   static propTypes = {
     date: PropTypes.object,
+    appSettings: PropTypes.object,
   }
 
   constructor(props) {
@@ -80,7 +81,7 @@ export default class ReportsByTask extends Component {
           action={!focusDetails.resetFnc
             ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
           } >
-          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
+          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} appSettings={this.props.appSettings} />
         </Fieldset>
       </div>
     )
