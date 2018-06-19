@@ -92,7 +92,7 @@ class MyReports extends Page {
 	renderSection(title, reports, goToPage, id) {
 		let content = <p>Loading...</p>
 		if (reports && reports.list) {
-			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} appSettings={this.props.settings} />
+			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} appSettings={this.props.appSettings} mapId={id} />
 		}
 
 		return <Fieldset title={title} id={id}>

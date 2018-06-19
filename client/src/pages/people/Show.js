@@ -222,7 +222,7 @@ class PersonShow extends Page {
 
 					{person.isAdvisor() && authoredReports &&
 						<Fieldset title="Reports authored" id="reports-authored">
-							<ReportCollection
+							<ReportCollection mapId="reports-authored"
 								paginatedReports={authoredReports}
 								goToPage={this.goToAuthoredPage}
 								appSettings={this.props.appSettings}
@@ -232,7 +232,7 @@ class PersonShow extends Page {
 
 					{attendedReports &&
 						<Fieldset title={`Reports attended by ${person.name}`} id="reports-attended">
-							<ReportCollection
+							<ReportCollection mapId="reports-attended"
 								paginatedReports={attendedReports}
 								goToPage={this.goToAttendedPage}
 								appSettings={this.props.appSettings}

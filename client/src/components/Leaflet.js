@@ -20,6 +20,7 @@ export default class Leaflet extends Component {
 	static propTypes = {
 		markers: PropTypes.array,
 		appSettings: PropTypes.object,
+		mapId: PropTypes.string, // pass this when you have more than one map on a page
 	}
 
 	constructor(props) {
@@ -45,8 +46,13 @@ export default class Leaflet extends Component {
 		})
 	}
 
+	get mapId() {
+		const mapId = this.props.mapId || 'default'
+		return 'map-' + mapId
+	}
+
 	componentDidMount() {
-		let map = L.map('map', {zoomControl:true}).setView([34.52, 69.16], 10)
+		let map = L.map(this.mapId, {zoomControl:true}).setView([34.52, 69.16], 10)
 /*
 		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
 		    layers: 'nexrad-n0r-900913',
@@ -73,10 +79,10 @@ export default class Leaflet extends Component {
 		state.map = map
 		state.layerControl = layerControl
 		state.markerLayer = L.featureGroup([]).addTo(map)
-		this.setState(state)
-
-		this.tryAddLayers()
-		this.updateMarkerLayer(this.props.markers)
+		this.setState(state, () => {
+			this.tryAddLayers()
+			this.updateMarkerLayer(this.props.markers)
+		})
 	}
 
 	@autobind
@@ -167,7 +173,7 @@ export default class Leaflet extends Component {
 	render() {
 		return (
 			<div>
-				<div id="map" style={css} />
+				<div id={this.mapId} style={css} />
 			</div>
 		)
 	}
