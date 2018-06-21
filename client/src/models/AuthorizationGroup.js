@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import encodeQuery from 'querystring/encode'
 import utils from 'utils'
 
