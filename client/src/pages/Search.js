@@ -119,7 +119,9 @@ class SearchNav extends Component {
 
 class Search extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props)
@@ -154,12 +156,17 @@ class Search extends Page {
 		}
 	}
 
-	componentWillReceiveProps(props, context) {
-		let newAdvancedSearch = props.location.state && props.location.state.advancedSearch
-		if (this.state.advancedSearch !== newAdvancedSearch) {
-			this.setState({advancedSearch: newAdvancedSearch}, () => this.loadData())
-		} else {
-			super.componentWillReceiveProps(props, context)
+	static getDerivedStateFromProps(props, state) {
+		const newAdvancedSearch = props.location.state && props.location.state.advancedSearch
+		if (state.advancedSearch !== newAdvancedSearch) {
+			return {advancedSearch: newAdvancedSearch}
+		}
+		return null
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (this.state.advancedSearch !== prevState.advancedSearch) {
+			this.loadData()
 		}
 	}
 
@@ -232,12 +239,12 @@ class Search extends Page {
 				parts.push(this.getSearchPart(key, advQuery, pageSize))
 			})
 		}
-		callback(parts)
+		return callback(parts)
 	}
 
 	@autobind
 	_fetchDataCallback(parts) {
-		GQL.run(parts).then(data => {
+		return GQL.run(parts).then(data => {
 			this.setState({success: null, error: null, results: data})
 		}).catch(response =>
 			this.setState({success: null, error: response})
@@ -246,7 +253,7 @@ class Search extends Page {
 
 	fetchData(props) {
 		const qs = utils.parseQueryString(props.location.search)
-		this._dataFetcher(qs, this._fetchDataCallback)
+		return this._dataFetcher(qs, this._fetchDataCallback)
 	}
 
 	render() {

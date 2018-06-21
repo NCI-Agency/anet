@@ -20,10 +20,6 @@ export default class PositionsSelector extends Component {
 		shortcuts: PropTypes.array,
 	}
 
-	static contextTypes = {
-		app: PropTypes.object.isRequired
-	}
-
 	static defaultProps = {
 		queryParams: {status: Position.STATUS.ACTIVE}
 	}

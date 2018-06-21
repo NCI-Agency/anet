@@ -21,15 +21,15 @@ import {Report, Person, Task, Comment, Position} from 'models'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-class ReportShow extends Page {
+class BaseReportShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Report'
@@ -47,7 +47,7 @@ class ReportShow extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			report(uuid:"${props.match.params.uuid}") {
 				uuid, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
@@ -108,7 +108,7 @@ class ReportShow extends Page {
 	}
 
 	renderNoPositionAssignedText() {
-		const {currentUser} = this.context
+		const { currentUser } = this.props
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
@@ -130,7 +130,7 @@ class ReportShow extends Page {
 
 	render() {
 		const {report} = this.state
-		const {currentUser} = this.context
+		const { currentUser } = this.props
 
 		const canApprove = report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
@@ -618,5 +618,13 @@ class ReportShow extends Page {
 		</Alert>
 	}
 }
+
+const ReportShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(ReportShow))

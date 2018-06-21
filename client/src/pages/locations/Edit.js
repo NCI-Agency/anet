@@ -13,7 +13,9 @@ import { connect } from 'react-redux'
 
 class LocationEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -25,7 +27,7 @@ class LocationEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
 				uuid, name, status, lat, lng
 			}

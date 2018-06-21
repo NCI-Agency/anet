@@ -1,14 +1,9 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 
 import Model from 'components/Model'
 import Settings from 'Settings'
 
 export default class Task extends Model {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
-	}
-
 	static resourceName = 'Task'
 	static displayName() {
 		return Settings.fields.task.shortLabel

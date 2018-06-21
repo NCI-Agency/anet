@@ -15,10 +15,11 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import Settings from 'Settings'
 import API from 'api'
-import {Task, Position, Organization} from 'models'
+import {Organization, Person, Position, Task} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
@@ -33,14 +34,11 @@ const customEnumButtons = (list) => {
     return buttons
 }
 
-class TaskForm extends ValidatableFormWrapper {
+class BaseTaskForm extends ValidatableFormWrapper {
 	static propTypes = {
 		task: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -58,8 +56,7 @@ class TaskForm extends ValidatableFormWrapper {
 	}
 
 	render() {
-		const {task, edit} = this.props
-		const {currentUser} = this.context.app.state
+		const { task, edit, currentUser } = this.props
 		const taskShortLabel = Settings.fields.task.shortLabel
 		const customFieldRef1 = Settings.fields.task.customFieldRef1
 		const customFieldEnum1 = Settings.fields.task.customFieldEnum1
@@ -199,5 +196,13 @@ class TaskForm extends ValidatableFormWrapper {
 			})
 	}
 }
+
+const TaskForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseTaskForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(TaskForm)

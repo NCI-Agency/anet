@@ -66,7 +66,7 @@ class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	getFilters(context) {
+	getFilters() {
 		const filters = {}
 		filters.Reports = {
 			filters: {
@@ -233,11 +233,11 @@ class AdvancedSearch extends Component {
 		return filters
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 
 		const query = props || {}
-		this.ALL_FILTERS = this.getFilters(context)
+		this.ALL_FILTERS = this.getFilters()
 		this.state = {
 			objectType: query.objectType || "Reports",
 			text: query.text || "",
@@ -245,13 +245,11 @@ class AdvancedSearch extends Component {
 		}
 	}
 
-	componentWillReceiveProps(props, nextContext) {
+	static getDerivedStateFromProps(props, state) {
 		if (props.query) {
-			this.setState(props.query)
+			return props.query
 		}
-		if (!_isEqual(this.context, nextContext)) {
-			this.ALL_FILTERS = this.getFilters(nextContext)
-		}
+		return null
 	}
 
 	render() {

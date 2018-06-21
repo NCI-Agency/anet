@@ -8,14 +8,12 @@ import LinkTo from 'components/LinkTo'
 import Settings from 'Settings'
 
 import {Position, Person} from 'models'
+import AppContext from 'components/AppContext'
 
-export default class OrganizationLaydown extends Component {
+class BaseOrganizationLaydown extends Component {
 	static propTypes = {
-		organization: PropTypes.object.isRequired
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+		organization: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -27,7 +25,7 @@ export default class OrganizationLaydown extends Component {
 	}
 
 	render() {
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const org = this.props.organization
 		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 
@@ -157,3 +155,13 @@ export default class OrganizationLaydown extends Component {
 		this.setState({showInactivePositions: !this.state.showInactivePositions})
 	}
 }
+
+const OrganizationLaydown = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationLaydown currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default OrganizationLaydown

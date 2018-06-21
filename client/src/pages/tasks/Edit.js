@@ -9,14 +9,16 @@ import TaskForm from './Form'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Task} from 'models'
+import {Person, Task} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class TaskEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	static modelName = 'Task'
 
@@ -30,7 +32,7 @@ class TaskEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			task(uuid:"${props.match.params.uuid}") {
 				uuid, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,

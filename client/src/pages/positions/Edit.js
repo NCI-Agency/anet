@@ -6,14 +6,16 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import PositionForm from './Form'
 
 import API from 'api'
-import {Position} from 'models'
+import {Person, Position} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class PositionEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	static modelName = 'Position'
 
@@ -27,7 +29,7 @@ class PositionEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			position(uuid:"${props.match.params.uuid}") {
 				uuid, name, code, status, type
 				location { uuid, name },

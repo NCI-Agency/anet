@@ -8,15 +8,15 @@ import PersonForm from 'pages/people/Form'
 import API from 'api'
 import {Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { PAGE_PROPS_MIN_HEAD } from 'actions'
 import { connect } from 'react-redux'
 
-class OnboardingEdit extends Page {
+class BaseOnboardingEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
@@ -30,8 +30,8 @@ class OnboardingEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
-			person(uuid:"${this.context.currentUser.uuid}") {
+		return API.query(/* GraphQL */`
+			person(uuid:"${props.currentUser.uuid}") {
 				uuid,
 				name, rank, role, emailAddress, phoneNumber, status
 				biography, country, gender, endOfTourDate, domainUsername
@@ -54,9 +54,18 @@ class OnboardingEdit extends Page {
 				person={this.state.person} edit
 				legendText={"Create your account"}
 				saveText={"Create profile"}
+				currentUser={this.props.currentUser}
 			/>
 		</div>
 	}
 }
+
+const OnboardingEdit = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOnboardingEdit currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(OnboardingEdit)

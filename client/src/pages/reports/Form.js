@@ -27,6 +27,7 @@ import LOCATION_ICON from 'resources/locations.png'
 import REMOVE_ICON from 'resources/delete.png'
 import WARNING_ICON from 'resources/warning.png'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
@@ -34,15 +35,12 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
 
-class ReportForm extends ValidatableFormWrapper {
+class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
 		edit: PropTypes.bool,
 		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -65,6 +63,7 @@ class ReportForm extends ValidatableFormWrapper {
 
 			showAssignedPositionWarning: false,
 			showActivePositionWarning: false,
+
 			disableOnSubmit: false,
 
 			//State for auto-saving reports
@@ -114,21 +113,20 @@ class ReportForm extends ValidatableFormWrapper {
 		window.clearTimeout(this.state.timeoutId)
 	}
 
-
-	componentWillReceiveProps(nextProps) {
-		const { currentUser } = this.context
-		this.setState({showAssignedPositionWarning: !currentUser.hasAssignedPosition()})
-		this.setState({showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()})
-
-		let report = nextProps.report
+	static getDerivedStateFromProps(props, state) {
+		const stateUpdate = {}
+		const { report, currentUser } = props
 		if (report.cancelledReason) {
-			this.setState({isCancelled: true})
+			Object.assign(stateUpdate, {isCancelled: true})
 		}
 		const reportTags = report.tags.map(tag => ({id: tag.uuid.toString(), text: tag.name}))
-		this.setState({
+		Object.assign(stateUpdate, {
+			showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
+			showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
 			reportTags: reportTags,
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation
 		})
+		return stateUpdate
 	}
 
 	@autobind
@@ -159,8 +157,7 @@ class ReportForm extends ValidatableFormWrapper {
 	}
 
 	render() {
-		const { currentUser } = this.context
-		const {report, onDelete} = this.props
+		const { report, onDelete, currentUser } = this.props
 		const { edit } = this.props
 		const {recents, suggestionList, errors, isCancelled, showAssignedPositionWarning, showActivePositionWarning} = this.state
 
@@ -632,5 +629,13 @@ class ReportForm extends ValidatableFormWrapper {
 		}
 	}
 }
+
+const ReportForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(ReportForm)

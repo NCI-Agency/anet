@@ -6,14 +6,16 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 
 import API from 'api'
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class OrganizationEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	static modelName = 'Organization'
 
@@ -26,7 +28,7 @@ class OrganizationEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			organization(uuid:"${props.match.params.uuid}") {
 				uuid, shortName, longName, status, identificationCode, type,
 				parentOrg { uuid, shortName, longName, identificationCode }

@@ -6,7 +6,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import PositionForm from './Form'
 
 import API from 'api'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 
 import utils from 'utils'
 
@@ -15,7 +15,9 @@ import { connect } from 'react-redux'
 
 class PositionNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -31,7 +33,7 @@ class PositionNew extends Page {
 		if (qs.organizationUuid) {
 			//If an organizationUuid was given in query parameters,
 			// then look that org up and pre-populate the field.
-			API.query(/* GraphQL */`
+			return API.query(/* GraphQL */`
 				organization(uuid:"${qs.organizationUuid}") {
 					uuid, shortName, longName, identificationCode, type
 				}

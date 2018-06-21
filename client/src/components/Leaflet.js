@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
 import {Location} from 'models'
+import AppContext from 'components/AppContext'
 
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -16,12 +17,11 @@ const css = {
 	zIndex: 1,
 }
 
-export default class Leaflet extends Component {
+class BaseLeaflet extends Component {
 	static propTypes = {
 		markers: PropTypes.array,
-	}
-	static contextTypes = {
-		app: PropTypes.object.isRequired
+		appSettings: PropTypes.object,
+		mapId: PropTypes.string, // pass this when you have more than one map on a page
 	}
 
 	constructor(props) {
@@ -47,11 +47,15 @@ export default class Leaflet extends Component {
 		})
 	}
 
-	componentDidMount() {
-		// let app = this.context.app;
+	get mapId() {
+		const mapId = this.props.mapId || 'default'
+		return 'map-' + mapId
+	}
 
-		let map = L.map('map', {zoomControl:true}).setView([34.52, 69.16], 10)
-/*		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
+	componentDidMount() {
+		let map = L.map(this.mapId, {zoomControl:true}).setView([34.52, 69.16], 10)
+/*
+		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
 		    layers: 'nexrad-n0r-900913',
 		    format: 'image/png',
 		    transparent: true,
@@ -76,10 +80,10 @@ export default class Leaflet extends Component {
 		state.map = map
 		state.layerControl = layerControl
 		state.markerLayer = L.featureGroup([]).addTo(map)
-		this.setState(state)
-
-		this.tryAddLayers()
-		this.updateMarkerLayer(this.props.markers)
+		this.setState(state, () => {
+			this.tryAddLayers()
+			this.updateMarkerLayer(this.props.markers)
+		})
 	}
 
 	@autobind
@@ -138,8 +142,8 @@ export default class Leaflet extends Component {
 
 	@autobind
 	addLayers() {
-		let app = this.context.app
-		let rawLayers = app.state.settings.MAP_LAYERS
+		const { appSettings } = this.props || {}
+		let rawLayers = appSettings.MAP_LAYERS
 		if (!rawLayers || rawLayers.length === 0) {
 			return
 		}
@@ -170,7 +174,7 @@ export default class Leaflet extends Component {
 	render() {
 		return (
 			<div>
-				<div id="map" style={css} />
+				<div id={this.mapId} style={css} />
 			</div>
 		)
 	}
@@ -184,3 +188,13 @@ export default class Leaflet extends Component {
 	}
 
 }
+
+const Leaflet = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseLeaflet appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default Leaflet

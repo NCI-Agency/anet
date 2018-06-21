@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import OrganizationAdvisorsTable from 'components/AdvisorReports/OrganizationAdvisorsTable'
 import Toolbar from 'components/AdvisorReports/Toolbar'
@@ -14,6 +15,12 @@ const advisorReportsQueryUrl = `/api/reports/insights/advisors` // ?weeksAgo=3 d
 const OrganizationAdvisorsTableWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(OrganizationAdvisorsTable))
 
 class FilterableAdvisorReportsTable extends Component {
+    static propTypes = {
+        date: PropTypes.object,
+        showLoading: PropTypes.func.isRequired,
+        hideLoading: PropTypes.func.isRequired,
+    }
+
     constructor() {
         super()
         this.state = {
@@ -30,12 +37,14 @@ class FilterableAdvisorReportsTable extends Component {
 
     componentDidMount() {
         this.setState( {isLoading: true} )
+        this.props.showLoading()
         let advisorReportsQuery = API.fetch(advisorReportsQueryUrl)
         Promise.resolve(advisorReportsQuery).then(value => {
             this.setState({
                 isLoading: false,
                 data: value
             })
+            this.props.hideLoading()
         })
     }
 
@@ -162,4 +171,4 @@ class FilterableAdvisorReportsTable extends Component {
     }
 }
 
-export default FilterableAdvisorReportsTable
+export default connect(null, mapDispatchToProps)(FilterableAdvisorReportsTable)

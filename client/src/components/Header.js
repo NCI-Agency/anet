@@ -4,6 +4,7 @@ import {Grid, Row, Col} from 'react-bootstrap'
 
 import SearchBar from 'components/SearchBar'
 import CreateButton from 'components/CreateButton'
+import {Person} from 'models'
 
 import logo from 'resources/logo.png'
 

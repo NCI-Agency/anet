@@ -20,10 +20,6 @@ export default class AuthorizationGroupsSelector extends Component {
 		shortcuts: PropTypes.array,
 	}
 
-	static contextTypes = {
-		app: PropTypes.object.isRequired
-	}
-
 	render() {
 		let {groups, shortcuts, validationState} = this.props
 
