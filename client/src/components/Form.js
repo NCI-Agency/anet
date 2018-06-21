@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import {Form as BSForm, Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
+import FormContext from 'components/FormContext'
 import FormField from 'components/FormField'
 import ConfirmDelete from 'components/ConfirmDelete'
 
@@ -27,18 +28,6 @@ class Form extends Component {
 		submitText: "Save",
 	}
 
-	static childContextTypes = {
-		formFor: PropTypes.object,
-		form: PropTypes.object,
-	}
-
-	getChildContext() {
-		return {
-			formFor: this.props.formFor,
-			form: this,
-		}
-	}
-
 	render() {
 		let {children, submitText, submitOnEnter, submitDisabled, onDelete, bottomAccessory, ...bsProps} = this.props
 		bsProps = Object.without(bsProps, 'formFor', 'static', 'staticContext')
@@ -55,45 +44,50 @@ class Form extends Component {
 		bsProps.onSubmit = this.onSubmit
 
 		return (
-			<BSForm {...bsProps} ref="container">
-				{showSubmit && <div className="row">
-					<div className="form-top-submit col-xs-12">
-						<div className="pull-right">
-							<Button bsStyle="primary"type="submit" disabled={submitDisabled}>
-								{submitText}
-							</Button>
-						</div>
-					</div>
-				</div>}
-
-				{children}
-
-				{!this.props.static && (showSubmit || onDelete) &&
-					<div className="submit-buttons">
-						{showSubmit &&
-							<div>
-								<Button onClick={this.onCancel}>Cancel</Button>
-							</div>
-						}
-
-						{bottomAccessory}
-
-						{onDelete &&
-							<div>
-									<ConfirmDelete {...onDelete} />
-							</div>
-						}
-
-						{showSubmit &&
-							<div>
-								<Button bsStyle="primary" type="submit" disabled={submitDisabled} id="formBottomSubmit">
+			<FormContext.Provider value={{
+				formFor: this.props.formFor,
+				form: this,
+			}}>
+				<BSForm {...bsProps} ref="container">
+					{showSubmit && <div className="row">
+						<div className="form-top-submit col-xs-12">
+							<div className="pull-right">
+								<Button bsStyle="primary"type="submit" disabled={submitDisabled}>
 									{submitText}
 								</Button>
 							</div>
-						}
-					</div>
-				}
-			</BSForm>
+						</div>
+					</div>}
+
+					{children}
+
+					{!this.props.static && (showSubmit || onDelete) &&
+						<div className="submit-buttons">
+							{showSubmit &&
+								<div>
+									<Button onClick={this.onCancel}>Cancel</Button>
+								</div>
+							}
+
+							{bottomAccessory}
+
+							{onDelete &&
+								<div>
+										<ConfirmDelete {...onDelete} />
+								</div>
+							}
+
+							{showSubmit &&
+								<div>
+									<Button bsStyle="primary" type="submit" disabled={submitDisabled} id="formBottomSubmit">
+										{submitText}
+									</Button>
+								</div>
+							}
+						</div>
+					}
+				</BSForm>
+			</FormContext.Provider>
 		)
 	}
 
