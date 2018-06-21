@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -17,7 +16,6 @@ class OrganizationNew extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -57,7 +55,7 @@ class OrganizationNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Organization', Organization.pathForNew()]]} />
 
-				<OrganizationForm original={this.state.originalOrganization} organization={organization} currentUser={this.props.currentUser} />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} />
 			</div>
 		)
 	}

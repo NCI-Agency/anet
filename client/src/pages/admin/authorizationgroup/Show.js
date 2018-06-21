@@ -14,9 +14,10 @@ import {AuthorizationGroup, Person} from 'models'
 import GQL from 'graphqlapi'
 import autobind from 'autobind-decorator'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class AuthorizationGroupShow extends Page {
+class BaseAuthorizationGroupShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -136,5 +137,13 @@ class AuthorizationGroupShow extends Page {
 	}
 
 }
+
+const AuthorizationGroupShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAuthorizationGroupShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(AuthorizationGroupShow)

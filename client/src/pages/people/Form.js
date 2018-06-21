@@ -282,7 +282,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const { person } = props
 		const emptyName = { lastName: '', firstName: ''}
 		const parsedName = person.name ? Person.parseFullName(person.name) : emptyName
-		return PersonForm.getPersonWithFullName(person, parsedName)
+		return BasePersonForm.getPersonWithFullName(person, parsedName)
 	}
 
 	static getPersonWithFullName(person, editName) {
@@ -304,14 +304,14 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.setState(PersonForm.getPersonWithFullName(person, { lastName: value }))
+		this.setState(BasePersonForm.getPersonWithFullName(person, { lastName: value }))
 	}
 
 	handleOnChangeFirstName = (event) => {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.setState(PersonForm.getPersonWithFullName(person, { firstName: value }))
+		this.setState(BasePersonForm.getPersonWithFullName(person, { firstName: value }))
 	}
 
 	@autobind
@@ -414,7 +414,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 const PersonForm = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BasePersonForm loadAppData={context.loadAppData} {...props} />
+			<BasePersonForm currentUser={context.currentUser} loadAppData={context.loadAppData} {...props} />
 		}
 	</AppContext.Consumer>
 )

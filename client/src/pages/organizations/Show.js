@@ -23,11 +23,12 @@ import Settings from 'Settings'
 import {Organization, Person, Position, Report, Task} from 'models'
 import GQL from 'graphqlapi'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
 const NO_REPORT_FILTER = 'NO_FILTER'
 
-class OrganizationShow extends Page {
+class BaseOrganizationShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -281,5 +282,13 @@ class OrganizationShow extends Page {
 	}
 
 }
+
+const OrganizationShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(OrganizationShow)

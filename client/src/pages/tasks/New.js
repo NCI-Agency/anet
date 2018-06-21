@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -18,7 +17,6 @@ class TaskNew extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -53,7 +51,7 @@ class TaskNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new ' + Settings.fields.task.shortLabel, Task.pathForNew()]]} />
 
-				<TaskForm original={this.state.originalTask} task={task} currentUser={this.props.currentUser} />
+				<TaskForm original={this.state.originalTask} task={task} />
 			</div>
 		)
 	}

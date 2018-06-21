@@ -40,7 +40,7 @@ class BaseSecurityBanner extends Component {
 const SecurityBanner = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseSecurityBanner appSettings={context.appSettings} {...props} />
+			<BaseSecurityBanner appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )

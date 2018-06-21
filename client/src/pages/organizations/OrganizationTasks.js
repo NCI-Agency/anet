@@ -9,8 +9,9 @@ import LinkTo from 'components/LinkTo'
 import Settings from 'Settings'
 
 import {Person, Task} from 'models'
+import AppContext from 'components/AppContext'
 
-export default class OrganizationTasks extends Component {
+class BaseOrganizationTasks extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
 	}
@@ -71,3 +72,13 @@ export default class OrganizationTasks extends Component {
 		/></header>
 	}
 }
+
+const OrganizationTasks = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationTasks currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default OrganizationTasks

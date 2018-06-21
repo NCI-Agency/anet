@@ -17,9 +17,10 @@ import {Person, Task} from 'models'
 
 import moment from 'moment'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class TaskShow extends Page {
+class BaseTaskShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -144,5 +145,13 @@ class TaskShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const TaskShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseTaskShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(TaskShow)

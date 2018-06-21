@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import moment from 'moment'
@@ -19,7 +18,6 @@ class TaskEdit extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Task'
@@ -62,7 +60,7 @@ class TaskEdit extends Page {
 
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<TaskForm original={this.state.originalTask} task={task} currentUser={this.props.currentUser} edit />
+				<TaskForm original={this.state.originalTask} task={task} edit />
 			</div>
 		)
 	}

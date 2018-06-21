@@ -8,9 +8,10 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Person, Report} from 'models'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class MyReports extends Page {
+class BaseMyReports extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -111,5 +112,13 @@ class MyReports extends Page {
 		})
 	}
 }
+
+const MyReports = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseMyReports currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(MyReports)

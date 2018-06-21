@@ -21,10 +21,11 @@ import {Report, Person, Task, Comment, Position} from 'models'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-class ReportShow extends Page {
+class BaseReportShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -617,5 +618,13 @@ class ReportShow extends Page {
 		</Alert>
 	}
 }
+
+const ReportShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(ReportShow))

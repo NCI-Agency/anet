@@ -22,11 +22,12 @@ import Settings from 'Settings'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import utils from 'utils'
 
-class Home extends Page {
+class BaseHome extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -303,5 +304,13 @@ class Home extends Page {
 			})
 	}
 }
+
+const Home = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseHome currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(Home))

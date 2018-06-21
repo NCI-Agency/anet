@@ -14,9 +14,10 @@ import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import {Location, Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class LocationShow extends Page {
+class BaseLocationShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -98,5 +99,13 @@ class LocationShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const LocationShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseLocationShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(LocationShow)

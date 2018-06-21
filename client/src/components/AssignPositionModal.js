@@ -6,8 +6,9 @@ import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Position, Person} from 'models'
 import LinkTo from 'components/LinkTo'
 import API from 'api'
+import AppContext from 'components/AppContext'
 
-export default class AssignPositionModal extends Component {
+class BaseAssignPositionModal extends Component {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
 		showModal: PropTypes.bool,
@@ -166,3 +167,12 @@ export default class AssignPositionModal extends Component {
 	}
 
 }
+const AssignPositionModal = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAssignPositionModal currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default AssignPositionModal

@@ -8,10 +8,11 @@ import API from 'api'
 import Settings from 'Settings'
 
 import Messages from'components/Messages'
+import AppContext from 'components/AppContext'
 
 import REMOVE_ICON from 'resources/delete.png'
 
-export default class EditAssociatedPositionsModal extends Component {
+class BaseEditAssociatedPositionsModal extends Component {
 	static propTypes = {
 		position: PropTypes.object.isRequired,
 		showModal: PropTypes.bool,
@@ -155,3 +156,13 @@ export default class EditAssociatedPositionsModal extends Component {
 		this.props.onCancel()
 	}
 }
+
+const EditAssociatedPositionsModal = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseEditAssociatedPositionsModal currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default EditAssociatedPositionsModal

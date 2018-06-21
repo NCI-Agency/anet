@@ -19,6 +19,7 @@ import {Organization, Person, Position, Task} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
@@ -33,7 +34,7 @@ const customEnumButtons = (list) => {
     return buttons
 }
 
-class TaskForm extends ValidatableFormWrapper {
+class BaseTaskForm extends ValidatableFormWrapper {
 	static propTypes = {
 		task: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
@@ -195,5 +196,13 @@ class TaskForm extends ValidatableFormWrapper {
 			})
 	}
 }
+
+const TaskForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseTaskForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(TaskForm)

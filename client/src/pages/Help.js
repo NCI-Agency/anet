@@ -100,7 +100,7 @@ class BaseHelp extends Page {
 const Help = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseHelp appSettings={context.appSettings} {...props} />
+			<BaseHelp appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )

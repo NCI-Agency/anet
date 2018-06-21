@@ -12,11 +12,12 @@ import ReportForm from './Form'
 import API from 'api'
 import {Report, Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
-class ReportEdit extends Page {
+class BaseReportEdit extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -96,5 +97,13 @@ class ReportEdit extends Page {
 		})
 	}
 }
+
+const ReportEdit = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportEdit currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(ReportEdit))

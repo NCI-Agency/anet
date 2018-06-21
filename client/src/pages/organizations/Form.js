@@ -20,10 +20,11 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
-class OrganizationForm extends ValidatableFormWrapper {
+class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		organization: PropTypes.object,
 		edit: PropTypes.bool,
@@ -279,5 +280,13 @@ class OrganizationForm extends ValidatableFormWrapper {
 			})
 	}
 }
+
+const OrganizationForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(OrganizationForm)

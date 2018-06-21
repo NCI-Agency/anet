@@ -14,11 +14,12 @@ import API from 'api'
 import Settings from 'Settings'
 import {Location, Organization, Person, Position} from 'models'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import LinkTo from 'components/LinkTo'
 
-class PositionForm extends ValidatableFormWrapper {
+class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
 		position: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
@@ -190,5 +191,13 @@ class PositionForm extends ValidatableFormWrapper {
 	}
 
 }
+
+const PositionForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePositionForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(PositionForm)

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -16,7 +15,6 @@ class OrganizationEdit extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Organization'
@@ -55,7 +53,7 @@ class OrganizationEdit extends Page {
 				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<OrganizationForm original={this.state.originalOrganization} organization={organization} currentUser={this.props.currentUser} edit />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} edit />
 			</div>
 		)
 	}

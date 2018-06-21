@@ -10,7 +10,8 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import { withRouter } from 'react-router-dom'
 
 class Form extends Component {
-	static propTypes = Object.assign({}, BSForm.propTypes, {
+	static propTypes = {
+		...BSForm.propTypes,
 		formFor: PropTypes.object,
 		static: PropTypes.bool,
 		submitText: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
@@ -20,7 +21,7 @@ class Form extends Component {
 		onSubmit: PropTypes.func,
 		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
 		bottomAccessory: PropTypes.node,
-	})
+	}
 
 	static defaultProps = {
 		static: false,

@@ -137,20 +137,20 @@ class App extends Page {
 
 	render() {
 		const routing = <Switch>
-			<Route exact path="/" render={(props) => <Home {...props} currentUser={this.state.currentUser} />} />
+			<Route exact path="/" component={Home} />
 			<Route path="/search" component={Search} />
 			<Route path="/rollup" component={RollupShow} />
 			<Route path="/graphiql" component={GraphiQL} />
-			<Route path="/help" render={(props) => <Help {...props} currentUser={this.state.currentUser} />} />
+			<Route path="/help" component={Help} />
 			<Route
 				path="/reports"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <ReportNew {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <ReportEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/new`} component={ReportNew} />
+					<Route path={`${url}/:id/edit`} component={ReportEdit} />
 					<Route path={`${url}/:id/min`} component={ReportMinimal} />
-					<Route path={`${url}/mine`} render={(props) => <MyReports {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id`} render={(props) => <ReportShow {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/mine`} component={MyReports} />
+					<Route path={`${url}/:id`} component={ReportShow} />
 				</Switch>
 			)}
 			/>
@@ -158,9 +158,9 @@ class App extends Page {
 				path="/people"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <PersonNew {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <PersonEdit {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id`} render={(props) => <PersonShow {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/new`} component={PersonNew} />
+					<Route path={`${url}/:id/edit`} component={PersonEdit} />
+					<Route path={`${url}/:id`} component={PersonShow} />
 				</Switch>
 			)}
 			/>
@@ -168,9 +168,9 @@ class App extends Page {
 				path="/organizations"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <OrganizationNew {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <OrganizationEdit {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/:action?`} render={(props) => <OrganizationShow {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/new`} component={OrganizationNew} />
+					<Route path={`${url}/:id/edit`} component={OrganizationEdit} />
+					<Route path={`${url}/:id/:action?`} component={OrganizationShow} />
 				</Switch>
 			)}
 			/>
@@ -179,8 +179,8 @@ class App extends Page {
 				render={({ match: { url } }) => (
 				<Switch>
 					<Route path={`${url}/new`} component={LocationNew} />
-					<Route path={`${url}/:id/edit`} component={LocationEdit} />} />
-					<Route path={`${url}/:id`} render={(props) => <LocationShow {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/edit`} component={LocationEdit} />
+					<Route path={`${url}/:id`} component={LocationShow} />
 				</Switch>
 			)}
 			/>
@@ -188,9 +188,9 @@ class App extends Page {
 				path="/positions"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <PositionNew {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <PositionEdit {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id`} render={(props) => <PositionShow {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/new`} component={PositionNew} />
+					<Route path={`${url}/:id/edit`} component={PositionEdit} />
+					<Route path={`${url}/:id`} component={PositionShow} />
 				</Switch>
 			)}
 			/>
@@ -198,9 +198,9 @@ class App extends Page {
 				path="/tasks"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <TaskNew {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <TaskEdit {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id`} render={(props) => <TaskShow {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/new`} component={TaskNew} />
+					<Route path={`${url}/:id/edit`} component={TaskEdit} />
+					<Route path={`${url}/:id`} component={TaskShow} />
 				</Switch>
 			)}
 			/>
@@ -208,12 +208,12 @@ class App extends Page {
 				path="/admin"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route exact path={`${url}/`} component={AdminIndex} />} />
+					<Route exact path={`${url}/`} component={AdminIndex} />
 					<Route path={`${url}/mergePeople`} component={MergePeople} />
 					<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
 					<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
 					<Route path={`${url}/authorizationGroups/:id/edit`} component={AuthorizationGroupEdit} />
-					<Route path={`${url}/authorizationGroups/:id`} render={(props) => <AuthorizationGroupShow {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/authorizationGroups/:id`} component={AuthorizationGroupShow} />
 				</Switch>
 			)}
 			/>
@@ -230,7 +230,7 @@ class App extends Page {
 				render={({ match: { url } }) => (
 				<Switch>
 					<Route exact path={`${url}/`} component={OnboardingShow} />
-					<Route path={`${url}/edit`} render={(props) => <OnboardingEdit {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/edit`} component={OnboardingEdit} />
 				</Switch>
 			)}
 			/>
@@ -245,6 +245,7 @@ class App extends Page {
 		return (
 			<AppContext.Provider value={{
 				appSettings: this.state.settings,
+				currentUser: this.state.currentUser,
 				loadAppData: this.loadData,
 			}}>
 				<div className="anet">

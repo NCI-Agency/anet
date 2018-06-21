@@ -12,10 +12,11 @@ import {reportTour} from 'pages/HopscotchTour'
 
 import {Person, Report} from 'models'
 
+import AppContext from 'components/AppContext'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
-class ReportNew extends Page {
+class BaseReportNew extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -72,5 +73,13 @@ class ReportNew extends Page {
 		)
 	}
 }
+
+const ReportNew = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportNew currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(ReportNew)

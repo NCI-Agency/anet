@@ -24,10 +24,11 @@ import autobind from 'autobind-decorator'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-class PositionShow extends Page {
+class BasePositionShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -262,5 +263,13 @@ class PositionShow extends Page {
 		})
 	}
 }
+
+const PositionShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePositionShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(PositionShow))

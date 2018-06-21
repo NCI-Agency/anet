@@ -21,9 +21,10 @@ import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
 import Settings from 'Settings'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class PersonShow extends Page {
+class BasePersonShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -335,5 +336,13 @@ class PersonShow extends Page {
 		)
 	}
 }
+
+const PersonShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(PersonShow)

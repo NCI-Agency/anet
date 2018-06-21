@@ -9,10 +9,11 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import API from 'api'
 import {Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
-class PersonEdit extends Page {
+class BasePersonEdit extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -74,5 +75,13 @@ class PersonEdit extends Page {
 		)
 	}
 }
+
+const PersonEdit = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonEdit currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(PersonEdit)

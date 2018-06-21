@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -14,7 +13,6 @@ class PersonNew extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -36,7 +34,6 @@ class PersonNew extends Page {
 				<PersonForm
 					original={this.state.originalPerson}
 					person={person}
-					currentUser={this.props.currentUser}
 					showPositionAssignment={true} />
 			</div>
 		)

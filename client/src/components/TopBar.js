@@ -99,7 +99,7 @@ class BaseTopBar extends Component {
 const TopBar = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseTopBar appSettings={context.appSettings} {...props} />
+			<BaseTopBar appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )

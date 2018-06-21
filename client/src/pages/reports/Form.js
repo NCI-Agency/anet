@@ -27,6 +27,7 @@ import LOCATION_ICON from 'resources/locations.png'
 import REMOVE_ICON from 'resources/delete.png'
 import WARNING_ICON from 'resources/warning.png'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
@@ -34,7 +35,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
 
-class ReportForm extends ValidatableFormWrapper {
+class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
 		edit: PropTypes.bool,
@@ -628,5 +629,13 @@ class ReportForm extends ValidatableFormWrapper {
 		}
 	}
 }
+
+const ReportForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(ReportForm)

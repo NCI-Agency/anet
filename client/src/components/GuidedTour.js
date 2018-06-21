@@ -9,6 +9,7 @@ import 'hopscotch/dist/css/hopscotch.css'
 import TOUR_ICON from 'resources/tour-icon.png'
 
 import {Person} from 'models'
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
 const iconCss = {
@@ -20,7 +21,7 @@ const HOPSCOTCH_CONFIG = {
 	bubbleWidth: 400,
 }
 
-class GuidedTour extends Component {
+class BaseGuidedTour extends Component {
 	static propTypes = {
 		tour: PropTypes.func.isRequired,
 		autostart: PropTypes.bool,
@@ -90,5 +91,13 @@ class GuidedTour extends Component {
 		}
 	}
 }
+
+const GuidedTour = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseGuidedTour currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(GuidedTour)

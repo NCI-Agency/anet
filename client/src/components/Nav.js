@@ -8,8 +8,8 @@ import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
 
 import {Organization, Person} from 'models'
-import AppContext from 'components/AppContext'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
 class BaseNav extends Component {
@@ -173,7 +173,7 @@ class BaseNav extends Component {
 const Nav = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseNav appSettings={context.appSettings} {...props} />
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )
