@@ -80,7 +80,7 @@ export default class Autocomplete extends Component {
 	_getSelectedUuids(props) {
 		const {value} = props
 		if (Array.isArray(value)) {
-			return value.map(object => object.id)
+			return value.map(object => object.uuid)
 		}
 
 		return []
@@ -154,7 +154,7 @@ export default class Autocomplete extends Component {
 	@autobind
 	_setFilteredSuggestions(list) {
 		if (this.state.selectedUuids) {
-			list = list.filter(suggestion => suggestion && suggestion.id && this.state.selectedUuids.indexOf(suggestion.id) === -1)
+			list = list.filter(suggestion => suggestion && suggestion.uuid && this.state.selectedUuids.indexOf(suggestion.uuid) === -1)
 		}
 		let noSuggestions = list.length === 0
 		this.setState({suggestions: list, noSuggestions})
