@@ -13,6 +13,7 @@ import {Report} from 'models'
 
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
+import { showLoading, hideLoading } from 'react-redux-loading-bar'
 
 const d3 = require('d3')
 const chartByOrgId = 'cancelled_reports_by_org'
@@ -28,9 +29,11 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  * Component displaying a chart with reports cancelled since
  * the given date.
  */
-export default class CancelledEngagementReports extends Component {
+class CancelledEngagementReports extends Component {
   static propTypes = {
     date: PropTypes.object,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -134,6 +137,7 @@ export default class CancelledEngagementReports extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.queryParams)
@@ -178,6 +182,7 @@ export default class CancelledEngagementReports extends Component {
             return a.reason.localeCompare(b.reason)
         })
       })
+      this.props.hideLoading()
     })
     this.fetchOrgData()
   }
@@ -284,3 +289,5 @@ export default class CancelledEngagementReports extends Component {
     }
   }
 }
+
+export default connect(null, mapDispatchToProps)(CancelledEngagementReports)
