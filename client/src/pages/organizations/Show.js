@@ -182,7 +182,6 @@ class BaseOrganizationShow extends Page {
 						tour={orgTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenOrgTour !== 'true'}
 						onEnd={() => localStorage.hasSeenOrgTour = 'true'}
-						currentUser={this.props.currentUser}
 					/>
 				</div>}
 
@@ -243,10 +242,10 @@ class BaseOrganizationShow extends Page {
 						</Form.Field>}
 					</Fieldset>
 
-					<OrganizationLaydown organization={org} currentUser={this.props.currentUser} />
+					<OrganizationLaydown organization={org} />
 					<OrganizationApprovals organization={org} />
 					{ org.isTaskEnabled() &&
-						<OrganizationTasks organization={org} tasks={tasks} currentUser={this.props.currentUser} goToPage={this.goTotasksPage}/>
+						<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
 					}
 
 					<Fieldset id="reports" title={`Reports from ${org.shortName}`}>

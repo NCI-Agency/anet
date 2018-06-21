@@ -61,14 +61,13 @@ class BaseReportNew extends Page {
 						tour={reportTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenReportTour !== 'true'}
 						onEnd={() => localStorage.hasSeenReportTour = 'true'}
-						currentUser={this.props.currentUser}
 					/>
 				</div>
 
 				<Breadcrumbs items={[['Submit a report', Report.pathForNew()]]} />
 				<Messages error={this.state.error} />
 
-				<ReportForm original={this.state.originalReport} report={this.state.report} currentUser={this.props.currentUser} title="Create a new Report" />
+				<ReportForm original={this.state.originalReport} report={this.state.report} title="Create a new Report" />
 			</div>
 		)
 	}
