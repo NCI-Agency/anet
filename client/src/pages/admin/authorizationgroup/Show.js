@@ -21,7 +21,6 @@ class AuthorizationGroupShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -111,7 +110,6 @@ class AuthorizationGroupShow extends Page {
 						<ReportCollection
 							paginatedReports={this.state.reports}
 							goToPage={this.goToReportsPage}
-							appSettings={this.props.appSettings}
 						/>
 					</Fieldset>
 				</Form>

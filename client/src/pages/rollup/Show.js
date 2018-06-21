@@ -19,6 +19,7 @@ import utils from 'utils'
 
 import API from 'api'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
@@ -40,12 +41,11 @@ const legendCss = {
 	display: 'inline-block',
 }
 
-class RollupShow extends Page {
+class BaseRollupShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
 		date: PropTypes.object,
-		appSettings: PropTypes.object,
 	}
 
 	get dateStr() { return this.state.date.format('DD MMM YYYY') }
@@ -222,7 +222,7 @@ class RollupShow extends Page {
 						: <Button onClick={() => this.goToOrg()}>All organizations</Button>
 					}
 				>
-					<ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} appSettings={this.props.appSettings} />
+					<ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
 				</Fieldset>
 
 				{this.renderEmailModal()}
@@ -460,5 +460,13 @@ class RollupShow extends Page {
 		)
 	}
 }
+
+const RollupShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseRollupShow appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(RollupShow))

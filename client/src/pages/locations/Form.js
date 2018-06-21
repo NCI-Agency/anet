@@ -20,7 +20,6 @@ class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		anetLocation: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -82,7 +81,7 @@ class LocationForm extends ValidatableFormWrapper {
 					</Fieldset>
 
 					<h3>Drag the marker below to set the location</h3>
-					<Leaflet markers={markers} appSettings={this.props.appSettings} />
+					<Leaflet markers={markers} />
 
 				</ValidatableForm>
 			</div>

@@ -24,7 +24,6 @@ class TaskShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		appSettings: PropTypes.object,
 	}
 
 	static modelName = 'Task'
@@ -122,7 +121,7 @@ class TaskShow extends Page {
 				</Form>
 
 				<Fieldset title={`Reports for this ${taskShortLabel}`}>
-					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} appSettings={this.props.appSettings} />
+					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
 				</Fieldset>
 			</div>
 		)

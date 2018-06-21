@@ -7,6 +7,7 @@ import Fieldset from 'components/Fieldset'
 import API from 'api'
 import {Person, Position} from 'models'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
 import TOUR_SCREENSHOT from 'resources/tour-screenshot.png'
@@ -16,12 +17,11 @@ const screenshotCss = {
 	boxShadow: "0px 0px 10px #aaa",
 }
 
-class Help extends Page {
+class BaseHelp extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -96,5 +96,13 @@ class Help extends Page {
 		</div>
 	}
 }
+
+const Help = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseHelp appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(Help)

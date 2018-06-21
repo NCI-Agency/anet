@@ -28,7 +28,6 @@ class PersonShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		appSettings: PropTypes.object,
 	}
 
 	static modelName = 'User'
@@ -225,7 +224,6 @@ class PersonShow extends Page {
 							<ReportCollection mapId="reports-authored"
 								paginatedReports={authoredReports}
 								goToPage={this.goToAuthoredPage}
-								appSettings={this.props.appSettings}
 							 />
 						</Fieldset>
 					}
@@ -235,7 +233,6 @@ class PersonShow extends Page {
 							<ReportCollection mapId="reports-attended"
 								paginatedReports={attendedReports}
 								goToPage={this.goToAttendedPage}
-								appSettings={this.props.appSettings}
 							/>
 						</Fieldset>
 					}

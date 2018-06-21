@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge, Pagination} from 'react-bootstrap'
@@ -122,7 +121,6 @@ class Search extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -381,7 +379,7 @@ class Search extends Page {
 				}
 				{numReports > 0 && (queryType === 'everything' || queryType === 'reports') &&
 					<Fieldset title="Reports">
-						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} appSettings={this.props.appSettings} />
+						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} />
 					</Fieldset>
 				}
 

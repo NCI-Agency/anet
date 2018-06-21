@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import LinkTo from 'components/LinkTo'
 import {Person} from 'models'
+import AppContext from 'components/AppContext'
 
 const SETTING_KEY_TEXT = 'SECURITY_BANNER_TEXT'
 const SETTING_KEY_COLOR = 'SECURITY_BANNER_COLOR'
@@ -15,7 +16,7 @@ const aCss = {
 	fontSize: '0.7em',
 }
 
-export default class SecurityBanner extends Component {
+class BaseSecurityBanner extends Component {
 	static propTypes = {
 		location: PropTypes.object.isRequired,
 		currentUser: PropTypes.instanceOf(Person),
@@ -35,3 +36,13 @@ export default class SecurityBanner extends Component {
 		)
 	}
 }
+
+const SecurityBanner = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseSecurityBanner appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default SecurityBanner

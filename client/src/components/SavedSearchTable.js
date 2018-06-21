@@ -9,7 +9,6 @@ import API from 'api'
 export default class SavedSearchTable extends Component {
 	static propTypes = {
 		search: PropTypes.any.isRequired,
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -49,7 +48,7 @@ export default class SavedSearchTable extends Component {
 	}
 
 	render() {
-		return <ReportCollection reports={this.state.reports.list} appSettings={this.props.appSettings} />
+		return <ReportCollection reports={this.state.reports.list} />
 	}
 
 }

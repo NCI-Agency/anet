@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
 import {Location} from 'models'
+import AppContext from 'components/AppContext'
 
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -16,7 +17,7 @@ const css = {
 	zIndex: 1,
 }
 
-export default class Leaflet extends Component {
+class BaseLeaflet extends Component {
 	static propTypes = {
 		markers: PropTypes.array,
 		appSettings: PropTypes.object,
@@ -187,3 +188,13 @@ export default class Leaflet extends Component {
 	}
 
 }
+
+const Leaflet = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseLeaflet appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default Leaflet

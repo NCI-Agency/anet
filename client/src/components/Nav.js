@@ -8,10 +8,11 @@ import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
 
 import {Organization, Person} from 'models'
+import AppContext from 'components/AppContext'
 
 import { withRouter } from 'react-router-dom'
 
-class Nav extends Component {
+class BaseNav extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
@@ -168,5 +169,13 @@ class Nav extends Component {
 		)
 	}
 }
+
+const Nav = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseNav appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(Nav)

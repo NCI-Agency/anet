@@ -16,6 +16,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
 const insightDetails = {
@@ -71,7 +72,7 @@ const dateRangeFilterCss = {
   marginTop: '20px'
 }
 
-class InsightsShow extends Page {
+class BaseInsightsShow extends Page {
 
   static propTypes = {
     ...pagePropTypes,
@@ -214,7 +215,6 @@ class InsightsShow extends Page {
               date={this.state.referenceDate.clone()}
               startDate={this.state.startDate.clone()}
               endDate={this.state.endDate.clone()}
-              appSettings={this.props.appSettings}
             />
           </Fieldset>
         }
@@ -223,5 +223,13 @@ class InsightsShow extends Page {
   }
 
 }
+
+const InsightsShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseInsightsShow appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(InsightsShow)

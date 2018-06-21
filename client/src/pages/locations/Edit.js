@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -16,7 +15,6 @@ class LocationEdit extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -45,7 +43,7 @@ class LocationEdit extends Page {
 			<div>
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<LocationForm original={this.state.originalLocation} anetLocation={location} appSettings={this.props.appSettings} edit />
+				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />
 			</div>
 		)
 	}

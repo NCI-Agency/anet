@@ -29,7 +29,6 @@ export default class ReportsByDayOfWeek extends Component {
   static propTypes = {
     startDate: PropTypes.object.isRequired,
     endDate: PropTypes.object.isRequired,
-    appSettings: PropTypes.object,
   }
 
   constructor(props) {
@@ -84,7 +83,7 @@ export default class ReportsByDayOfWeek extends Component {
           action={!focusDetails.resetFnc
             ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
           } >
-          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} appSettings={this.props.appSettings} />
+          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
         </Fieldset>
       </div>
     )

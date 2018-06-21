@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
@@ -15,7 +14,6 @@ class LocationNew extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -34,7 +32,7 @@ class LocationNew extends Page {
 				<Breadcrumbs items={[['Create new Location', Location.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<LocationForm original={new Location()} anetLocation={location} appSettings={this.props.appSettings} />
+				<LocationForm original={new Location()} anetLocation={location} />
 			</div>
 		)
 	}

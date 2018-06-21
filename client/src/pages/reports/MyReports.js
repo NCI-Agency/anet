@@ -15,7 +15,6 @@ class MyReports extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		appSettings: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -92,7 +91,7 @@ class MyReports extends Page {
 	renderSection(title, reports, goToPage, id) {
 		let content = <p>Loading...</p>
 		if (reports && reports.list) {
-			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} appSettings={this.props.appSettings} mapId={id} />
+			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} mapId={id} />
 		}
 
 		return <Fieldset title={title} id={id}>

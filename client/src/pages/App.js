@@ -56,6 +56,7 @@ import InsightsShow from  'pages/insights/Show'
 import OnboardingShow from 'pages/onboarding/Show'
 import OnboardingEdit from 'pages/onboarding/Edit'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
@@ -136,11 +137,11 @@ class App extends Page {
 
 	render() {
 		const routing = <Switch>
-			<Route exact path="/" render={(props) => <Home {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
-			<Route path="/search" render={(props) => <Search {...props} appSettings={this.state.settings} />} />
-			<Route path="/rollup" render={(props) => <RollupShow {...props} appSettings={this.state.settings} />} />
+			<Route exact path="/" render={(props) => <Home {...props} currentUser={this.state.currentUser} />} />
+			<Route path="/search" component={Search} />
+			<Route path="/rollup" component={RollupShow} />
 			<Route path="/graphiql" component={GraphiQL} />
-			<Route path="/help" render={(props) => <Help {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
+			<Route path="/help" render={(props) => <Help {...props} currentUser={this.state.currentUser} />} />
 			<Route
 				path="/reports"
 				render={({ match: { url } }) => (
@@ -148,7 +149,7 @@ class App extends Page {
 					<Route path={`${url}/new`} render={(props) => <ReportNew {...props} currentUser={this.state.currentUser} />} />
 					<Route path={`${url}/:id/edit`} render={(props) => <ReportEdit {...props} currentUser={this.state.currentUser} />} />
 					<Route path={`${url}/:id/min`} component={ReportMinimal} />
-					<Route path={`${url}/mine`} render={(props) => <MyReports {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
+					<Route path={`${url}/mine`} render={(props) => <MyReports {...props} currentUser={this.state.currentUser} />} />
 					<Route path={`${url}/:id`} render={(props) => <ReportShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
@@ -159,7 +160,7 @@ class App extends Page {
 				<Switch>
 					<Route path={`${url}/new`} render={(props) => <PersonNew {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
 					<Route path={`${url}/:id/edit`} render={(props) => <PersonEdit {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
-					<Route path={`${url}/:id`} render={(props) => <PersonShow {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
+					<Route path={`${url}/:id`} render={(props) => <PersonShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -169,7 +170,7 @@ class App extends Page {
 				<Switch>
 					<Route path={`${url}/new`} render={(props) => <OrganizationNew {...props} currentUser={this.state.currentUser} />} />
 					<Route path={`${url}/:id/edit`} render={(props) => <OrganizationEdit {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id/:action?`} render={(props) => <OrganizationShow {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
+					<Route path={`${url}/:id/:action?`} render={(props) => <OrganizationShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -177,9 +178,9 @@ class App extends Page {
 				path="/locations"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <LocationNew {...props} appSettings={this.state.settings} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <LocationEdit {...props} appSettings={this.state.settings} />} />
-					<Route path={`${url}/:id`} render={(props) => <LocationShow {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
+					<Route path={`${url}/new`} component={LocationNew} />
+					<Route path={`${url}/:id/edit`} component={LocationEdit} />} />
+					<Route path={`${url}/:id`} render={(props) => <LocationShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -199,7 +200,7 @@ class App extends Page {
 				<Switch>
 					<Route path={`${url}/new`} render={(props) => <TaskNew {...props} currentUser={this.state.currentUser} />} />
 					<Route path={`${url}/:id/edit`} render={(props) => <TaskEdit {...props} currentUser={this.state.currentUser} />} />
-					<Route path={`${url}/:id`} render={(props) => <TaskShow {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
+					<Route path={`${url}/:id`} render={(props) => <TaskShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -212,7 +213,7 @@ class App extends Page {
 					<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
 					<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
 					<Route path={`${url}/authorizationGroups/:id/edit`} component={AuthorizationGroupEdit} />
-					<Route path={`${url}/authorizationGroups/:id`} render={(props) => <AuthorizationGroupShow {...props} currentUser={this.state.currentUser} appSettings={this.state.settings} />} />
+					<Route path={`${url}/authorizationGroups/:id`} render={(props) => <AuthorizationGroupShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -220,7 +221,7 @@ class App extends Page {
 				path="/insights"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/:insight`} render={(props) => <InsightsShow {...props} appSettings={this.state.settings} />} />
+					<Route path={`${url}/:insight`} component={InsightsShow} />
 				</Switch>
 			)}
 			/>
@@ -242,33 +243,35 @@ class App extends Page {
 				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
 				: {sm: 12, md: 12, lg: 12}
 		return (
-			<div className="anet">
-				<TopBar
-					updateTopbarOffset={this.updateTopbarOffset}
-					currentUser={this.state.currentUser}
-					appSettings={this.state.settings}
-					minimalHeader={this.props.pageProps.minimalHeader}
-					location={this.props.location} />
+			<AppContext.Provider value={{
+				appSettings: this.state.settings,
+			}}>
+				<div className="anet">
+					<TopBar
+						updateTopbarOffset={this.updateTopbarOffset}
+						currentUser={this.state.currentUser}
+						minimalHeader={this.props.pageProps.minimalHeader}
+						location={this.props.location} />
 
-				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
+					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
-				<Grid fluid componentClass="section">
-					<Row>
-						{this.props.pageProps.useNavigation === true &&
-							<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
-								<Nav
-									currentUser={this.state.currentUser}
-									appSettings={this.state.settings}
-									organizations={this.state.organizations}
-									topbarOffset={this.state.topbarOffset} />
+					<Grid fluid componentClass="section">
+						<Row>
+							{this.props.pageProps.useNavigation === true &&
+								<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
+									<Nav
+										currentUser={this.state.currentUser}
+										organizations={this.state.organizations}
+										topbarOffset={this.state.topbarOffset} />
+								</Col>
+							}
+							<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
+								{routing}
 							</Col>
-						}
-						<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
-							{routing}
-						</Col>
-					</Row>
-				</Grid>
-			</div>
+						</Row>
+					</Grid>
+				</div>
+			</AppContext.Provider>
 		)
 	}
 }

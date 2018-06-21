@@ -6,6 +6,7 @@ import GeneralBanner from 'components/GeneralBanner'
 import SecurityBanner from 'components/SecurityBanner'
 import Header from 'components/Header'
 import {Person} from 'models'
+import AppContext from 'components/AppContext'
 
 const GENERAL_BANNER_LEVEL = 'GENERAL_BANNER_LEVEL'
 const GENERAL_BANNER_TEXT = 'GENERAL_BANNER_TEXT'
@@ -17,7 +18,7 @@ const visible = {
     USERS_AND_SUPER_USERS: 3
 }
 
-export default class TopBar extends Component {
+class BaseTopBar extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
@@ -88,9 +89,19 @@ export default class TopBar extends Component {
             <div id="topbar" className="navbar navbar-fixed-top">
                 {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
-                <SecurityBanner location={this.props.location} currentUser={this.props.currentUser} appSettings={this.props.appSettings} />
+                <SecurityBanner location={this.props.location} currentUser={this.props.currentUser} />
                 <Header minimalHeader={this.props.minimalHeader} currentUser={this.props.currentUser} />
             </div>
         )
     }
 }
+
+const TopBar = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseTopBar appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default TopBar

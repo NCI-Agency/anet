@@ -45,7 +45,6 @@ export default class ReportCollection extends Component {
 			list: PropTypes.array.isRequired,
 		}),
 		goToPage: PropTypes.func,
-		appSettings: PropTypes.object,
 		mapId: PropTypes.string,
 	}
 
@@ -155,7 +154,7 @@ export default class ReportCollection extends Component {
 				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng, name: report.intent})
 			}
 		})
-		return <Leaflet markers={markers} appSettings={this.props.appSettings} mapId={this.props.mapId} />
+		return <Leaflet markers={markers} mapId={this.props.mapId} />
 	}
 
 	@autobind
