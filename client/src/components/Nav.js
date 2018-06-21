@@ -50,8 +50,8 @@ class BaseNav extends Component {
 		const myOrg = currentUser.position ? currentUser.position.organization : null
 		let orgUuid, myOrgUuid
 		if (inOrg) {
-			orgUuid = +path.split('/')[2]
-			myOrgUuid = myOrg && +myOrg.uuid
+			orgUuid = path.split('/')[2]
+			myOrgUuid = myOrg && myOrg.uuid
 		}
 
 		const orgSubNav = (
