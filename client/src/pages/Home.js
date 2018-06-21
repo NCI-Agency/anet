@@ -201,7 +201,6 @@ class BaseHome extends Page {
 						tour={currentUser.isSuperUser() ? superUserTour : userTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenHomeTour !== 'true'}
 						onEnd={() => localStorage.hasSeenHomeTour = 'true'}
-						currentUser={this.props.currentUser}
 					/>
 				</div>
 

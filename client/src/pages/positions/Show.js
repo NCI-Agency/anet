@@ -93,7 +93,6 @@ class BasePositionShow extends Page {
 						tour={positionTour}
 						autostart={localStorage.newUser === 'true' && localStorage.hasSeenPositionTour !== 'true'}
 						onEnd={() => localStorage.hasSeenPositionTour = 'true'}
-						currentUser={this.props.currentUser}
 					/>
 				</div>
 
@@ -171,7 +170,6 @@ class BasePositionShow extends Page {
 
 						{canEdit && <EditAssociatedPositionsModal
 							position={position}
-							currentUser={this.props.currentUser}
 							showModal={this.state.showAssociatedPositionModal}
 							onCancel={this.hideAssociatedPositionsModal.bind(this, false)}
 							onSuccess={this.hideAssociatedPositionsModal.bind(this, true)}

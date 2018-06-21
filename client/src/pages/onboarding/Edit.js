@@ -54,7 +54,6 @@ class BaseOnboardingEdit extends Page {
 				person={this.state.person} edit
 				legendText={"Create your account"}
 				saveText={"Create profile"}
-				currentUser={this.props.currentUser}
 			/>
 		</div>
 	}
