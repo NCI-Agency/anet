@@ -13,6 +13,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
@@ -110,7 +111,7 @@ public class TaskDao implements IAnetDao<Task> {
 	public List<Task> getRecentTasks(Person author, int maxResults) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = 0 AND tasks.id IN (" // TODO: convert to a safe check for status = active
+			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.id IN ("
 					+ "SELECT TOP(:maxResults) \"reportTasks\".\"taskId\" "
 					+ "FROM reports JOIN \"reportTasks\" ON reports.id = \"reportTasks\".\"reportId\" "
 					+ "WHERE \"authorId\" = :authorId "
@@ -118,7 +119,7 @@ public class TaskDao implements IAnetDao<Task> {
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
-			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = 0 AND tasks.id IN (" // TODO: convert to a safe check for status = active
+			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.id IN ("
 					+ "SELECT \"reportTasks\".\"taskId\" "
 					+ "FROM reports JOIN \"reportTasks\" ON reports.id = \"reportTasks\".\"reportId\" "
 					+ "WHERE \"authorId\" = :authorId "
@@ -130,6 +131,7 @@ public class TaskDao implements IAnetDao<Task> {
 		return dbHandle.createQuery(sql)
 				.bind("authorId", author.getId())
 				.bind("maxResults", maxResults)
+				.bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
 				.map(new TaskMapper())
 				.list();
 	}

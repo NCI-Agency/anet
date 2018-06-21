@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Link} from 'react-router'
+import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import decodeQuery from 'querystring/decode'
 import utils from 'utils'
@@ -8,6 +8,9 @@ import * as Models from 'models'
 
 const MODEL_NAMES = Object.keys(Models).map(key => {
 	let camel = utils.camelCase(key)
+	if (camel === 'location') {
+		camel = 'anetLocation'
+	}
 	Models[camel] = Models[key]
 	return camel
 })
@@ -31,8 +34,13 @@ export default class LinkTo extends Component {
 		target: PropTypes.string,
 	}
 
+	static defaultProps = {
+		isLink: true,
+		whenUnspecified: "Unspecified"
+	}
+
 	render() {
-		let {componentClass, children, edit, button, className, ...componentProps} = this.props
+		let {componentClass, children, edit, button, isLink, whenUnspecified, className, ...componentProps} = this.props
 
 		if (button) {
 			componentProps.className = [className, 'btn', `btn-${button === true ? 'default' : button}`].join(' ')
@@ -47,14 +55,18 @@ export default class LinkTo extends Component {
 
 		let modelInstance = this.props[modelName]
 		if (!modelInstance)
-			return null
+			return <span>{whenUnspecified}</span>
 
 		let modelClass = Models[modelName]
+
+		if (!isLink)
+			return <span> {modelClass.prototype.toString.call(modelInstance)} </span>
+
 		let to = modelInstance
 		if (typeof to === 'string') {
 			if (to.indexOf('?')) {
 				let components = to.split('?')
-				to = {pathname: components[0], query: decodeQuery(components[1])}
+				to = {pathname: components[0], search: components[1]}
 			}
 		} else {
 			to = edit ? modelClass.pathForEdit(modelInstance) : modelClass.pathFor(modelInstance)

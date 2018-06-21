@@ -1,3 +1,15 @@
+/* Copied from https://github.com/twbs/bootstrap/pull/18775/files */
+html {
+  /*
+   * IE11 & Edge make the scrollbar overlap the content and automatically hide itself when not in use.
+   * Unfortunately, the auto-showing of the scrollbar is sometimes too sensitive,
+   * thus making it hard to click on stuff near the right edge of the page.
+   * So we add this style to force IE11 & Edge to use a "normal", non-overlapping, non-auto-hiding scrollbar.
+   * See https://github.com/twbs/bootstrap/issues/18543
+   */
+  -ms-overflow-style: scrollbar;
+}
+
 body {
 	background: #f2f2f2;
 }
@@ -9,10 +21,6 @@ body {
   margin-top: -152px;
   height: 152px;
   visibility: hidden;
-}
-
-.container {
-	max-width: 1024px;
 }
 
 h5 {
@@ -191,11 +199,20 @@ fieldset.danger {
 	margin: 0;
 }
 
-.header small a {
+.header small span {
 	padding: 5px;
 	text-decoration: underline;
 	display: inline-block;
+}
+
+span.asLink {
 	cursor: pointer;
+	color: #337ab7;
+}
+span.asLink:hover,
+span.asLink:focus {
+	text-decoration: underline;
+	color: #23527c;
 }
 
 .banner {
@@ -211,19 +228,6 @@ fieldset.danger {
 	max-width: none;
 }
 
-.nprogress-custom-parent .bar {
-	top: 130px !important;
-}
-
-.nprogress-custom-parent .peg {
-	transform: rotate(-3deg) translate(0px, 4px) !important;
-}
-
-.nprogress-custom-parent .spinner {
-	top: 104px !important;
-	right: 8px !important;
-}
-
 .graphiql-container {
 	min-height: 600px;
 }
@@ -236,8 +240,15 @@ fieldset.danger {
 	padding: 0;
 }
 
+.home-tile-row .container-fluid {
+	padding: 0;
+	display: block;
+}
+
 .home-tile-row .row {
 	display: table;
+	width: 100%;
+	margin: 0;
 }
 
 .home-tile-row span.close-getting-started {
@@ -260,11 +271,11 @@ fieldset.danger {
 
 a.home-tile {
 	display: table-cell;
+	width: 20%;
 	float: none;
 	vertical-align: top;
 	text-align: center;
-	padding-top: 20px;
-	padding-bottom: 20px;
+	padding: 10px;
 	color: #5c5c5c;
 	text-decoration: none;
 }
@@ -301,28 +312,26 @@ a.home-tile {
 	margin-right: 6px;
 }
 
-.nav .nav > li {
+.nav .nav > li > a {
 	border-left: 4px solid rgba(0,0,0,0);
-}
-
-.nav .nav > li a {
 	padding: 4px 0 4px 38px;
 }
 
-.nav .nav > li.active  {
-	border-left:4px solid #1772B8;
+.nav .nav > li.active > a {
+	border-left: 4px solid #1772B8;
+}
+
+li#search-nav .nav > li {
+	border-left: none;
+}
+
+li#search-nav .nav > li a {
+	padding-right: 4px;
 }
 
 @media (min-width: 768px) {
 	.nav-fixed {
 		position: fixed;
-		width: 158px;
-	}
-}
-
-@media (min-width: 992px) {
-	.nav-fixed {
-		width: 212px;
 	}
 }
 
@@ -550,7 +559,7 @@ table hr.attendee-divider {
 .report-form textarea {
 	/* Without this, users can make the textarea arbitrarily wide,
 		causing it to overlap with other elements and break the layout. */
-	max-width: 546px;
+	max-width: 100%;
 }
 
 .attendee-divider-row td {
@@ -583,6 +592,11 @@ table hr.attendee-divider {
 }
 .reportTagRemove, .reportTagRemove:hover {
     text-decoration: none;
+}
+.reportTag.label {
+	display: inline-block;
+	font-size: 80%;
+	line-height: inherit;
 }
 
 .form-control-static {

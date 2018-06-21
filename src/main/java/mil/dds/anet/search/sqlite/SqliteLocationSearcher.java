@@ -48,7 +48,7 @@ public class SqliteLocationSearcher implements ILocationSearcher {
 		sql.append(" WHERE ");
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		
-		sql.append(" LIMIT :limit OFFSET :offset)");
+		sql.append(" LIMIT :limit OFFSET :offset");
 		
 		final List<Location> list = dbHandle.createQuery(sql.toString())
 			.bindFromMap(sqlArgs)

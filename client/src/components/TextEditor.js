@@ -24,15 +24,18 @@ export default class TextEditor extends Component {
 			this.nativeEditor.on('change', this.onChange)
 		}
 
-		this.componentWillReceiveProps(this.props)
+		this.componentDidUpdate()
 	}
 
 	componentWillUnmount() {
-		this.editor && this.editor.destroy()
+		if (this.editor && this.nativeEditor && this.nativeEditor.document) {
+			this.editor.destroy()
+			this.editor = this.nativeEditor = null
+		}
 	}
 
-	componentWillReceiveProps(newProps) {
-		let html = newProps.value
+	componentDidUpdate(prevProps, prevState) {
+		const html = this.props.value
 		if (html !== this.nativeEditor.getData()) {
 			this.nativeEditor.setData(html)
 		}

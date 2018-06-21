@@ -1,22 +1,26 @@
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import TaskForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Task,Organization} from 'models'
+import {Organization, Person, Task} from 'models'
 
-export default class TaskNew extends Page {
-	static pageProps = {
-		useNavigation: false
+import utils from 'utils'
+
+import { PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class TaskNew extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
 	}
 
-
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			task: new Task(),
@@ -25,9 +29,10 @@ export default class TaskNew extends Page {
 	}
 
 	fetchData(props) {
-		if (props.location.query.responsibleOrgId) {
-			API.query(/* GraphQL */`
-				organization(id: ${props.location.query.responsibleOrgId}) {
+		const qs = utils.parseQueryString(props.location.search)
+		if (qs.responsibleOrgId) {
+			return API.query(/* GraphQL */`
+				organization(id: ${qs.responsibleOrgId}) {
 					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
@@ -46,9 +51,10 @@ export default class TaskNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new ' + Settings.fields.task.shortLabel, Task.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalTask} current={task} />
-				<TaskForm task={task} />
+				<TaskForm original={this.state.originalTask} task={task} />
 			</div>
 		)
 	}
 }
+
+export default connect(null, mapDispatchToProps)(TaskNew)

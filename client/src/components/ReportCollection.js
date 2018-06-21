@@ -6,6 +6,7 @@ import autobind from 'autobind-decorator'
 import ReportSummary from 'components/ReportSummary'
 import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import {Location} from 'models'
 import Leaflet from 'components/Leaflet'
 import _get from 'lodash/get'
 
@@ -16,9 +17,9 @@ const FORMAT_MAP = 'map'
 const GQL_REPORT_FIELDS =  /* GraphQL */`
 	id, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
-	author { id, name }
-	primaryAdvisor { id, name },
-	primaryPrincipal { id, name },
+	author { id, name, rank }
+	primaryAdvisor { id, name, rank },
+	primaryPrincipal { id, name, rank },
 	advisorOrg { id, shortName },
 	principalOrg { id, shortName },
 	location { id, name, lat, lng },
@@ -44,6 +45,7 @@ export default class ReportCollection extends Component {
 			list: PropTypes.array.isRequired,
 		}),
 		goToPage: PropTypes.func,
+		mapId: PropTypes.string,
 	}
 
 	constructor(props) {
@@ -148,11 +150,11 @@ export default class ReportCollection extends Component {
 	renderMap(reports) {
 		let markers = []
 		reports.forEach(report => {
-			if (report.location && report.location.lat) {
-				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng , name: report.intent })
+			if (Location.hasCoordinates(report.location)) {
+				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng, name: report.intent})
 			}
 		})
-		return <Leaflet markers={markers} />
+		return <Leaflet markers={markers} mapId={this.props.mapId} />
 	}
 
 	@autobind

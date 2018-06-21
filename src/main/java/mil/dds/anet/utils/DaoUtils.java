@@ -1,6 +1,7 @@
 package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
@@ -140,5 +141,10 @@ public class DaoUtils {
 
 	public static String buildCountAllSql(String entityTag, String tableName) {
 		return String.format("/* countAll%s */ SELECT COUNT(1) from \"%s\"", entityTag, tableName);
+	}
+
+	public static Double getOptionalDouble(final ResultSet rs, final String columnName) throws SQLException {
+	    final Double value = rs.getDouble(columnName);
+	    return rs.wasNull() ? null : value;
 	}
 }

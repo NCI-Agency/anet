@@ -33,7 +33,7 @@ test('Home Page', async t => {
     let $hopscotchNext = await $('.hopscotch-next')
     await $hopscotchNext.click()
 
-    let $myReportsLink = await $('#leftNav > li:nth-child(2) > a')
+    let $myReportsLink = await $('#leftNav > li:nth-child(3) > a')
     await $myReportsLink.click()
     await assertElementNotPresent(t, '.hopscotch-title', 'Navigating to a new page clears the hopscotch tour')
 })

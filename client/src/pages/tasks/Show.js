@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
@@ -13,14 +13,18 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import Settings from 'Settings'
 import GQL from 'graphqlapi'
-import {Task} from 'models'
+import {Person, Task} from 'models'
 
 import moment from 'moment'
 
-export default class TaskShow extends Page {
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
-		app: PropTypes.object.isRequired,
+import AppContext from 'components/AppContext'
+import { connect } from 'react-redux'
+
+class BaseTaskShow extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Task'
@@ -30,10 +34,10 @@ export default class TaskShow extends Page {
 
 		this.state = {
 			task: new Task({
-				id: props.params.id,
-				shortName: props.params.shorName,
-				longName: props.params.longName,
-				responsibleOrg: props.params.responsibleOrg
+				id: props.match.params.id,
+				shortName: props.match.params.shortName,
+				longName: props.match.params.longName,
+				responsibleOrg: props.match.params.responsibleOrg
 			}),
 			reportsPageNum: 0,
 		}
@@ -57,11 +61,11 @@ export default class TaskShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			taskId: props.params.id,
+			taskId: props.match.params.id,
 		})
 
 		let taskQuery = new GQL.Part(/* GraphQL */`
-			task(id:${props.params.id}) {
+			task(id:${props.match.params.id}) {
 				id, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
@@ -70,7 +74,7 @@ export default class TaskShow extends Page {
 			}
 		`)
 
-		GQL.run([reportsQuery, taskQuery]).then(data => {
+		return GQL.run([reportsQuery, taskQuery]).then(data => {
             this.setState({
                 task: new Task(data.task),
 				reports: data.reports,
@@ -81,7 +85,7 @@ export default class TaskShow extends Page {
 	render() {
 		let {task, reports} = this.state
 		// Admins can edit tasks, or super users if this task is assigned to their org.
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 
 		const taskShortLabel = Settings.fields.task.shortLabel
 
@@ -141,3 +145,13 @@ export default class TaskShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const TaskShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseTaskShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(TaskShow)

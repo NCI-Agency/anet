@@ -1,5 +1,5 @@
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Button, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -9,29 +9,31 @@ import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
 import Tag from 'components/Tag'
+import LinkTo from 'components/LinkTo'
 
 import API from 'api'
 import {Report, Person, Task} from 'models'
 
-export default class ReportMinimal extends Page {
-	static pageProps = {
-		useNavigation: false,
-		minimalHeader: true
-	}
+import { PAGE_PROPS_MIN_HEAD } from 'actions'
+import { connect } from 'react-redux'
+
+class ReportMinimal extends Page {
+
+	static propTypes = {...pagePropTypes}
 
 	static modelName = 'Report'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_MIN_HEAD)
 
 		this.state = {
-			report: new Report({id: props.params.id}),
+			report: new Report({id: props.match.params.id}),
 		}
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
-			report(id:${props.params.id}) {
+		return API.query(/* GraphQL */`
+			report(id:${props.match.params.id}) {
 				id, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
@@ -55,8 +57,8 @@ export default class ReportMinimal extends Page {
 				}
 
 				attendees {
-					id, name, role, primary
-					position { id, name }
+					id, name, rank, role, primary
+					position { id, name, organization { id, shortName}}
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -74,7 +76,7 @@ export default class ReportMinimal extends Page {
 				approvalStatus {
 					type, createdAt
 					step { id , name
-						approvers { id, name, person { id, name } }
+						approvers { id, name, person { id, name, rank } }
 					},
 					person { id, name, rank}
 				}
@@ -170,6 +172,7 @@ export default class ReportMinimal extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Org</th>
 								</tr>
 							</thead>
 
@@ -177,7 +180,7 @@ export default class ReportMinimal extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -240,9 +243,9 @@ export default class ReportMinimal extends Page {
 	renderApprovals(canApprove) {
 		let report = this.state.report
 		return <Fieldset>
-			<a name="approvals">
+			<div id="approvals">
 				<legend>Approvals</legend>
-			</a>
+			</div>
 			{report.approvalStatus.map(action =>
 				this.renderApprovalAction(action)
 			)}
@@ -257,9 +260,10 @@ export default class ReportMinimal extends Page {
 			</td>
 			<td>
 				<img src={person.iconUrl()} alt={person.role} height={20} width={20} className="person-icon" />
-				{person.name}
+				<LinkTo person={person} isLink={false}/>
 			</td>
-				<td>{person.position && person.position.name}</td>
+				<td><LinkTo isLink={false} position={person.position} /></td>
+				<td><LinkTo whenUnspecified="" isLink={false} organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
 
@@ -307,14 +311,14 @@ export default class ReportMinimal extends Page {
 				</Modal.Header>
 				<Modal.Body>
 					<ul>
-					{step.approvers.map(p =>
-						<li key={p.id}>{p.name} - {p.person && p.person.name}</li>
+					{step.approvers.map(position =>
+						<li key={position.id}>{position.name} - {position.person && <LinkTo person={position.person} isLink={false}/> }</li>
 					)}
 					</ul>
 				</Modal.Body>
 			</Modal>
 	 	{action.type ?
-				<span> {action.type} by {action.person.name} <small>{moment(action.createdAt).format('D MMM YYYY')}</small></span>
+				<span> {action.type} by <LinkTo person={action.person} isLink={false}/> <small>{moment(action.createdAt).format('D MMM YYYY')}</small></span>
 				:
 				<span className="text-danger"> Pending</span>
 			}
@@ -344,3 +348,5 @@ export default class ReportMinimal extends Page {
 		this.setState(this.state)
 	}
 }
+
+export default connect(null, mapDispatchToProps)(ReportMinimal)
