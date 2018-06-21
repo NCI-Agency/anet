@@ -590,6 +590,7 @@ INSERT INTO adminSettings ([key], value) VALUES ('MAP_LAYERS', '[{"name":"OSM","
 INSERT INTO adminSettings ([key], value) VALUES ('HELP_LINK_URL', 'http://google.com');
 INSERT INTO adminSettings ([key], value) VALUES ('CONTACT_EMAIL', 'team-anet@dds.mil');
 INSERT INTO adminSettings ([key], value) VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
+INSERT INTO adminSettings ([key], value) VALUES ('EXTERNAL_DOCUMENTATION_LINK_TEXT', '');
 INSERT INTO adminSettings ([key], value) VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
 INSERT INTO adminSettings ([key], value) VALUES ('GENERAL_BANNER_TEXT', '');
 INSERT INTO adminSettings ([key], value) VALUES ('GENERAL_BANNER_LEVEL', 'notice');

@@ -6,6 +6,7 @@ import Scrollspy from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
+import NavWrap from 'components/NavWrap'
 
 import {Organization, Person} from 'models'
 
@@ -55,7 +56,7 @@ class BaseNav extends Component {
 		}
 
 		const orgSubNav = (
-			<li>
+			<NavWrap>
 				<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
 					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
 					<NavItem href="#info">Info</NavItem>
@@ -65,7 +66,7 @@ class BaseNav extends Component {
 					<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
 					<NavItem href="#reports">Reports</NavItem>
 				</Scrollspy>
-			</li>
+			</NavWrap>
 		)
 
 		return (
@@ -74,14 +75,14 @@ class BaseNav extends Component {
 					<NavItem>Home</NavItem>
 				</Link>
 
-				<li id="search-nav"></li>
+				<NavWrap id="search-nav"></NavWrap>
 
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
 				{inMyReports &&
-					<li>
+					<NavWrap>
 						<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
 							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
 							<NavItem href="#draft-reports">Draft reports</NavItem>
@@ -89,7 +90,7 @@ class BaseNav extends Component {
 							<NavItem href="#pending-approval">Pending approval</NavItem>
 							<NavItem href="#published-reports">Published reports</NavItem>
 						</Scrollspy>
-					</li>
+					</NavWrap>
 				}
 
 				{myOrg && <Link to={Organization.pathFor(myOrg)}>
@@ -125,18 +126,16 @@ class BaseNav extends Component {
 				}
 
 				{inAdmin &&
-					<li>
+					<NavWrap>
 						<ul className="nav">
 							<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
 							<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
 						</ul>
-					</li>
+					</NavWrap>
 				}
 				
 				{externalDocumentationUrl && externalDocumentationUrlText &&
-					<li alt="">
-						<a href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</a>
-					</li>
+					<NavItem href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</NavItem>
 				}
 
 				<Link to="/help">
