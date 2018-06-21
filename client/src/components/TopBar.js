@@ -89,8 +89,8 @@ class BaseTopBar extends Component {
             <div id="topbar" className="navbar navbar-fixed-top">
                 {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
-                <SecurityBanner location={this.props.location} currentUser={this.props.currentUser} />
-                <Header minimalHeader={this.props.minimalHeader} currentUser={this.props.currentUser} />
+                <SecurityBanner location={this.props.location} />
+                <Header minimalHeader={this.props.minimalHeader} />
             </div>
         )
     }

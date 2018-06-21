@@ -79,7 +79,7 @@ class BaseReportEdit extends Page {
 			<div className="report-edit">
 				<Breadcrumbs items={[['Report #' + report.id, '/reports/' + report.id], ['Edit', '/reports/' + report.id + '/edit']]} />
 
-				<ReportForm edit original={this.state.originalReport} report={report} currentUser={this.props.currentUser} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
+				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
 			</div>
 		)
 	}
