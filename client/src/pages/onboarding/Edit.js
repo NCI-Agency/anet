@@ -16,7 +16,6 @@ class OnboardingEdit extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		loadAppData: PropTypes.func,
 	}
 
 	static modelName = 'User'
@@ -55,7 +54,6 @@ class OnboardingEdit extends Page {
 				legendText={"Create your account"}
 				saveText={"Create profile"}
 				currentUser={this.props.currentUser}
-				loadAppData={this.props.loadAppData}
 			/>
 		</div>
 	}

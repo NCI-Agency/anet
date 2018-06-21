@@ -15,7 +15,6 @@ class PersonNew extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
@@ -38,7 +37,6 @@ class PersonNew extends Page {
 					original={this.state.originalPerson}
 					person={person}
 					currentUser={this.props.currentUser}
-					loadAppData={this.props.loadAppData}
 					showPositionAssignment={true} />
 			</div>
 		)

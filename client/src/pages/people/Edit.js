@@ -17,7 +17,6 @@ class PersonEdit extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		loadAppData: PropTypes.func,
 	}
 
 	static modelName = 'User'
@@ -67,7 +66,6 @@ class PersonEdit extends Page {
 					original={originalPerson}
 					person={person}
 					currentUser={this.props.currentUser}
-					loadAppData={this.props.loadAppData}
 					edit
 					showPositionAssignment={canEditPosition}
 					legendText={legendText}

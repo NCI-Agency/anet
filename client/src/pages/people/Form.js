@@ -22,10 +22,11 @@ import 'components/NameInput.css'
 
 import TriggerableConfirm from 'components/TriggerableConfirm'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
-class PersonForm extends ValidatableFormWrapper {
+class BasePersonForm extends ValidatableFormWrapper {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
@@ -409,5 +410,13 @@ class PersonForm extends ValidatableFormWrapper {
 		}
 	}
 }
+
+const PersonForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonForm loadAppData={context.loadAppData} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(PersonForm)

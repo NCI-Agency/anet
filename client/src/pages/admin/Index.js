@@ -9,9 +9,10 @@ import Form from 'components/Form'
 
 import API from 'api'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class AdminIndex extends Page {
+class BaseAdminIndex extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
@@ -79,5 +80,13 @@ class AdminIndex extends Page {
 	}
 
 }
+
+const AdminIndex = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAdminIndex loadAppData={context.loadAppData} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(AdminIndex)

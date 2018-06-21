@@ -158,8 +158,8 @@ class App extends Page {
 				path="/people"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route path={`${url}/new`} render={(props) => <PersonNew {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
-					<Route path={`${url}/:id/edit`} render={(props) => <PersonEdit {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
+					<Route path={`${url}/new`} render={(props) => <PersonNew {...props} currentUser={this.state.currentUser} />} />
+					<Route path={`${url}/:id/edit`} render={(props) => <PersonEdit {...props} currentUser={this.state.currentUser} />} />
 					<Route path={`${url}/:id`} render={(props) => <PersonShow {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
@@ -208,7 +208,7 @@ class App extends Page {
 				path="/admin"
 				render={({ match: { url } }) => (
 				<Switch>
-					<Route exact path={`${url}/`} render={(props) => <AdminIndex {...props} loadAppData={this.loadData} />} />
+					<Route exact path={`${url}/`} component={AdminIndex} />} />
 					<Route path={`${url}/mergePeople`} component={MergePeople} />
 					<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
 					<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
@@ -230,7 +230,7 @@ class App extends Page {
 				render={({ match: { url } }) => (
 				<Switch>
 					<Route exact path={`${url}/`} component={OnboardingShow} />
-					<Route path={`${url}/edit`} render={(props) => <OnboardingEdit {...props} currentUser={this.state.currentUser} loadAppData={this.loadData} />} />
+					<Route path={`${url}/edit`} render={(props) => <OnboardingEdit {...props} currentUser={this.state.currentUser} />} />
 				</Switch>
 			)}
 			/>
@@ -245,6 +245,7 @@ class App extends Page {
 		return (
 			<AppContext.Provider value={{
 				appSettings: this.state.settings,
+				loadAppData: this.loadData,
 			}}>
 				<div className="anet">
 					<TopBar
