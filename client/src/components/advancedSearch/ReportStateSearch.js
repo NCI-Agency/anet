@@ -14,6 +14,9 @@ export default class ReportStateSearch extends Component {
 				cancelledReason: value.cancelledReason || "",
 			}
 		}
+	}
+
+	componentDidMount() {
 		this.updateFilter()
 	}
 

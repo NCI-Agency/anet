@@ -1,15 +1,10 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 import encodeQuery from 'querystring/encode'
 import utils from 'utils'
 
 import Model from 'components/Model'
 
 export default class AuthorizationGroup extends Model {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
-	}
-
 	static resourceName = 'AuthorizationGroup'
 	static listName = 'authorizationGroupList'
 	static displayName() {

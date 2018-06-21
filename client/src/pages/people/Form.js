@@ -22,20 +22,18 @@ import 'components/NameInput.css'
 
 import TriggerableConfirm from 'components/TriggerableConfirm'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
-class PersonForm extends ValidatableFormWrapper {
+class BasePersonForm extends ValidatableFormWrapper {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		legendText: PropTypes.string,
 		saveText: PropTypes.string,
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
-		currentUser: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
+		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
@@ -93,7 +91,7 @@ class PersonForm extends ValidatableFormWrapper {
 			onChange: this.handleOnChangeFirstName
 		}
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isSelf = Person.isEqual(currentUser, person)
 		const disableStatusChange = this.state.originalStatus === Person.STATUS.INACTIVE || isSelf
@@ -280,21 +278,19 @@ class PersonForm extends ValidatableFormWrapper {
 		</div>
 	}
 
-	componentWillReceiveProps(nextProps) {
-		const { person } = nextProps
+	static getDerivedStateFromProps(props, state) {
+		const { person } = props
 		const emptyName = { lastName: '', firstName: ''}
-
 		const parsedName = person.name ? Person.parseFullName(person.name) : emptyName
-
-		this.savePersonWithFullName(person, parsedName)
+		return BasePersonForm.getPersonWithFullName(person, parsedName)
 	}
 
-	savePersonWithFullName(person, editName) {
+	static getPersonWithFullName(person, editName) {
 		if (editName.lastName) { person.lastName = editName.lastName }
 		if (editName.firstName) { person.firstName = editName.firstName }
 
 		person.name = Person.fullName(person)
-		this.setState({ person })
+		return { person }
 	}
 
 	handleOnKeyDown = (event) => {
@@ -308,14 +304,14 @@ class PersonForm extends ValidatableFormWrapper {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.savePersonWithFullName(person, { lastName: value })
+		this.setState(BasePersonForm.getPersonWithFullName(person, { lastName: value }))
 	}
 
 	handleOnChangeFirstName = (event) => {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.savePersonWithFullName(person, { firstName: value })
+		this.setState(BasePersonForm.getPersonWithFullName(person, { firstName: value }))
 	}
 
 	@autobind
@@ -360,7 +356,7 @@ class PersonForm extends ValidatableFormWrapper {
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
-					this.context.app.loadData()
+					this.props.loadAppData()
 					this.props.history.push({
 						pathname: '/',
 					})
@@ -414,5 +410,13 @@ class PersonForm extends ValidatableFormWrapper {
 		}
 	}
 }
+
+const PersonForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonForm currentUser={context.currentUser} loadAppData={context.loadAppData} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(PersonForm)

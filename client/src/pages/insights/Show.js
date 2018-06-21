@@ -17,8 +17,8 @@ import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableA
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
 import {Report} from 'models'
-
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 
@@ -87,12 +87,11 @@ const dateRangeFilterCss = {
   marginTop: '20px'
 }
 
-class InsightsShow extends Page {
+class BaseInsightsShow extends Page {
 
-  static propTypes = {...pagePropTypes}
-
-  static contextTypes = {
-    app: PropTypes.object.isRequired,
+  static propTypes = {
+    ...pagePropTypes,
+    appSettings: PropTypes.object,
   }
 
   get currentDateTime() {
@@ -100,8 +99,8 @@ class InsightsShow extends Page {
   }
 
   get cutoffDate() {
-    let settings = this.context.app.state.settings
-    let maxReportAge = 1 + (parseInt(settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
+    const { appSettings } = this.props || {}
+    let maxReportAge = 1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment().subtract(maxReportAge, 'days').clone()
   }
 
@@ -110,13 +109,11 @@ class InsightsShow extends Page {
   constructor(props) {
     super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
 
-    Object.assign(
-      this.state, {
-        referenceDate: moment().clone(),
-        startDate: moment().clone(),
-        endDate: moment().clone(),
-      }
-    )
+    this.state = {
+      referenceDate: moment().clone(),
+      startDate: moment().clone(),
+      endDate: moment().clone(),
+    }
   }
 
   get defaultDates() {
@@ -182,11 +179,11 @@ class InsightsShow extends Page {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.match.params.insight !== this.props.match.params.insight) {
-      this.setStateDefaultDates(nextProps.match.params.insight)
-      if (!_isEqualWith(this.insightQueryParams[nextProps.match.params.insight], this.insightQueryParams[this.props.match.params.insight], this.equalFunction)) {
-        this.updateSearchQuery(nextProps.match.params.insight)
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.match.params.insight !== this.props.match.params.insight) {
+      this.setStateDefaultDates(this.props.match.params.insight)
+      if (!_isEqualWith(this.insightQueryParams[prevProps.match.params.insight], this.insightQueryParams[this.props.match.params.insight], this.equalFunction)) {
+        this.updateSearchQuery(this.props.match.params.insight)
       }
     }
   }
@@ -272,6 +269,7 @@ class InsightsShow extends Page {
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.props.match.params.insight
     const queryParams = this.getSearchQuery()
+
     return (
       <div>
         <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
@@ -301,5 +299,13 @@ class InsightsShow extends Page {
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery
 })
+
+const InsightsShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseInsightsShow appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)

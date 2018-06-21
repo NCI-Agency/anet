@@ -245,10 +245,10 @@ class AdvancedSearch extends Component {
 		return filters
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 
-		const query = props.query || {}
+		const query = props || {}
 		this.ALL_FILTERS = this.getFilters()
 		this.state = {
 			objectType: query.objectType || "Reports",
@@ -257,11 +257,8 @@ class AdvancedSearch extends Component {
 		}
 	}
 
-	@autobind
-	equalFunction(value1, value2) {
-		if (typeof value1 === 'function' && typeof value2 === 'function') {
-			return true
-		}
+	componentDidMount() {
+		this.setState(this.props.query)
 	}
 
 	componentDidUpdate(prevProps, prevState) {

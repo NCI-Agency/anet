@@ -13,7 +13,9 @@ import { connect } from 'react-redux'
 
 class LocationEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)

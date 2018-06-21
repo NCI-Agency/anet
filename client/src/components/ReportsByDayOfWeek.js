@@ -27,9 +27,13 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  * Component displaying a chart with number of reports released within a certain
  * period. The counting is done grouped by day of the week. 
  */
-export default class ReportsByDayOfWeek extends Component {
+class ReportsByDayOfWeek extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
+    startDate: PropTypes.object.isRequired,
+    endDate: PropTypes.object.isRequired,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -99,6 +103,7 @@ export default class ReportsByDayOfWeek extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     // Query used by the chart
     const chartQuery = this.runChartQuery(this.chartQueryParams())
     Promise.all([chartQuery]).then(values => {
@@ -122,6 +127,7 @@ export default class ReportsByDayOfWeek extends Component {
             r.reportsCount = simplifiedValues.filter(item => item.dayOfWeek === r.dayOfWeekInt).length
             return r})
       })
+      this.props.hideLoading()
     })
     this.fetchDayOfWeekData()
   }
@@ -216,3 +222,5 @@ export default class ReportsByDayOfWeek extends Component {
     return otherProps.queryParams !== this.props.queryParams
   }
 }
+
+export default connect(null, mapDispatchToProps)(ReportsByDayOfWeek)

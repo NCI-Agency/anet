@@ -8,15 +8,16 @@ import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
 import Settings from 'Settings'
 
-import {Task} from 'models'
+import {Person, Task} from 'models'
+import AppContext from 'components/AppContext'
 
-export default class OrganizationTasks extends Component {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+class BaseOrganizationTasks extends Component {
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	render() {
-		const currentUser = this.context.app.state.currentUser
+		const { currentUser } = this.props
 		const org = this.props.organization
 
 		if (!org.isAdvisorOrg()) {
@@ -71,3 +72,13 @@ export default class OrganizationTasks extends Component {
 		/></header>
 	}
 }
+
+const OrganizationTasks = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationTasks currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default OrganizationTasks

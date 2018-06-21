@@ -6,17 +6,17 @@ import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
-import {Report} from 'models'
+import {Person, Report} from 'models'
 
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class MyReports extends Page {
+class BaseMyReports extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -39,12 +39,6 @@ class MyReports extends Page {
 			future: this.getPart.bind(this, 'future', [Report.STATE.FUTURE]),
 			pending: this.getPart.bind(this, 'pending', [Report.STATE.PENDING_APPROVAL]),
 			released: this.getPart.bind(this, 'released', [Report.STATE.RELEASED, Report.STATE.CANCELLED])
-		}
-	}
-
-	componentWillReceiveProps(nextProps, nextContext) {
-		if (!this.state.reports) {
-			this.loadData(nextProps, nextContext)
 		}
 	}
 
@@ -71,11 +65,12 @@ class MyReports extends Page {
 			}`).addVariable(partName + "Query", "ReportSearchQuery", query)
 	}
 
-	fetchData(props, context) {
-		if (!context.currentUser || !context.currentUser.id) {
+	fetchData(props) {
+		const { currentUser } = props
+		if (!currentUser || !currentUser.id) {
 			return
 		}
-		let authorId = context.currentUser.id
+		const authorId = currentUser.id
 		let pending = this.partFuncs.pending(authorId)
 		let draft = this.partFuncs.draft(authorId)
 		let future = this.partFuncs.future(authorId)
@@ -105,7 +100,7 @@ class MyReports extends Page {
 	renderSection(title, reports, goToPage, id) {
 		let content = <p>Loading...</p>
 		if (reports && reports.list) {
-			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} />
+			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} mapId={id} />
 		}
 
 		return <Fieldset title={title} id={id}>
@@ -116,7 +111,7 @@ class MyReports extends Page {
 	@autobind
 	goToPage(section, pageNum) {
 		this.pageNums[section] = pageNum
-		let part = (this.partFuncs[section])(this.context.currentUser.id)
+		const part = (this.partFuncs[section])(this.props.currentUser.id)
 		GQL.run([part]).then( data => {
 			let stateChange = {}
 			stateChange[section] = data[section]
@@ -129,5 +124,12 @@ class MyReports extends Page {
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery
 })
+const MyReports = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseMyReports currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(mapStateToProps, mapDispatchToProps)(MyReports)

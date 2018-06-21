@@ -27,9 +27,13 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  * Component displaying a chart with number of future engagements per date and
  * location. Locations are grouped per date.
  */
-export default class FutureEngagementsByLocation extends Component {
+class FutureEngagementsByLocation extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
+    startDate: PropTypes.object.isRequired,
+    endDate: PropTypes.object.isRequired,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -110,6 +114,7 @@ export default class FutureEngagementsByLocation extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     // Query used by the chart
     const chartQuery = this.runChartQuery(this.chartQueryParams())
     const noLocation = {
@@ -159,6 +164,7 @@ export default class FutureEngagementsByLocation extends Component {
           isLoading: false
         })
       }
+      this.props.hideLoading()
     })
     this.fetchFocusData()
   }
@@ -265,3 +271,5 @@ export default class FutureEngagementsByLocation extends Component {
     return startDateChanged || endDateChanged
   }
 }
+
+export default connect(null, mapDispatchToProps)(FutureEngagementsByLocation)

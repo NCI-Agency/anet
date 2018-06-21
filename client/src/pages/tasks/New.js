@@ -6,7 +6,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Task,Organization} from 'models'
+import {Organization, Person, Task} from 'models'
 
 import utils from 'utils'
 
@@ -15,7 +15,9 @@ import { connect } from 'react-redux'
 
 class TaskNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)

@@ -6,14 +6,16 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 
 import API from 'api'
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
 class OrganizationEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	static modelName = 'Organization'
 

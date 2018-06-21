@@ -23,10 +23,6 @@ export default class TasksSelector extends Component {
 		optional: PropTypes.bool,
 	}
 
-	static contextTypes = {
-		app: PropTypes.object.isRequired
-	}
-
 	render() {
 		const {tasks, shortcuts, validationState, optional} = this.props
 

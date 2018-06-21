@@ -20,6 +20,7 @@ import utils from 'utils'
 import API from 'api'
 
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
@@ -41,15 +42,11 @@ const legendCss = {
 	display: 'inline-block',
 }
 
-class RollupShow extends Page {
+class BaseRollupShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
 		date: PropTypes.object,
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
 	}
 
 	get dateStr() { return this.state.date.format('DD MMM YYYY') }
@@ -75,13 +72,21 @@ class RollupShow extends Page {
 		this.previewPlaceholderUrl = API.addAuthParams("/help")
 	}
 
-	componentWillReceiveProps(newProps, newContext) {
-		const qs = utils.parseQueryString(newProps.location.search)
-		let newDate = moment(+qs.date || undefined)
-		if (!this.state.date.isSame(newDate)) {
-			this.setState({date: newDate}, () => this.loadData(newProps, newContext))
-		} else {
-			super.componentWillReceiveProps(newProps, newContext)
+	static getDerivedStateFromProps(props, state) {
+		const qs = utils.parseQueryString(props.location.search)
+		const newDate = moment(+qs.date || undefined)
+		if (!state.date.isSame(newDate)) {
+			return {date: newDate}
+		}
+		return null
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!this.state.date.isSame(prevState.date)) {
+			Promise.resolve(this.loadData()).then(() => this.renderGraph())
+		}
+		else {
+			this.renderGraph()
 		}
 	}
 
@@ -98,9 +103,9 @@ class RollupShow extends Page {
 		})
 	}
 
-	fetchData(props, context) {
-		const settings = context.app.state.settings
-		const maxReportAge = settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
+	fetchData(props) {
+		const { appSettings } = this.props || {}
+		const maxReportAge = appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
 		if (!maxReportAge) {
 			//don't run the query unless we've loaded the rollup settings.
 			return
@@ -162,10 +167,6 @@ class RollupShow extends Page {
 					})
 			})
 		})
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		this.renderGraph()
 	}
 
 	render() {
@@ -464,5 +465,13 @@ class RollupShow extends Page {
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery
 })
+
+const RollupShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseRollupShow appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(RollupShow))

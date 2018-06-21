@@ -12,19 +12,19 @@ import ReportForm from './Form'
 import API from 'api'
 import {Report, Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
-class ReportEdit extends Page {
+class BaseReportEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
+	}
 
 	static modelName = 'Report'
-
-	static contextTypes = {
-		currentUser: PropTypes.object,
-	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -63,7 +63,7 @@ class ReportEdit extends Page {
 
 	render() {
 		let {report} = this.state
-		let {currentUser} = this.context
+		const { currentUser } = this.props
 
 		//Only the author can delete a report, and only in DRAFT.
 		let canDelete = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author)
@@ -79,7 +79,7 @@ class ReportEdit extends Page {
 			<div className="report-edit">
 				<Breadcrumbs items={[['Report #' + report.id, '/reports/' + report.id], ['Edit', '/reports/' + report.id + '/edit']]} />
 
-				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
+				<ReportForm edit original={this.state.originalReport} report={report} currentUser={this.props.currentUser} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
 			</div>
 		)
 	}
@@ -97,5 +97,13 @@ class ReportEdit extends Page {
 		})
 	}
 }
+
+const ReportEdit = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportEdit currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(ReportEdit))

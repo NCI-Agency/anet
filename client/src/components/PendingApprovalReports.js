@@ -29,9 +29,12 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  * which have not been approved yet. They are displayed in different
  * presentation forms: chart, summary, table and map.
  */
-export default class PendingApprovalReports extends Component {
+class PendingApprovalReports extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
+    date: PropTypes.object,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -101,6 +104,7 @@ export default class PendingApprovalReports extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
@@ -142,6 +146,7 @@ export default class PendingApprovalReports extends Component {
             })
         })
       }
+      this.props.hideLoading()
     })
     this.fetchOrgData()
   }
@@ -194,10 +199,6 @@ export default class PendingApprovalReports extends Component {
     }
   }
 
-  componentDidMount() {
-    this.fetchData()
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
@@ -208,3 +209,5 @@ export default class PendingApprovalReports extends Component {
   }
 
 }
+
+export default connect(null, mapDispatchToProps)(PendingApprovalReports)

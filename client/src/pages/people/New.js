@@ -11,7 +11,9 @@ import { connect } from 'react-redux'
 
 class PersonNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
@@ -29,7 +31,10 @@ class PersonNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Person', Person.pathForNew()]]} />
 
-				<PersonForm original={this.state.originalPerson} person={person} showPositionAssignment={true} />
+				<PersonForm
+					original={this.state.originalPerson}
+					person={person}
+					showPositionAssignment={true} />
 			</div>
 		)
 	}
