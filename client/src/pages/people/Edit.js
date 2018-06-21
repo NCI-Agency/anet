@@ -9,15 +9,15 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import API from 'api'
 import {Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
-class PersonEdit extends Page {
+class BasePersonEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
@@ -51,7 +51,7 @@ class PersonEdit extends Page {
 	render() {
 		let {person, originalPerson} = this.state
 
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		let canEditPosition = currentUser && currentUser.isSuperUser()
 
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
@@ -63,11 +63,25 @@ class PersonEdit extends Page {
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
 
-				<PersonForm original={originalPerson} person={person} edit showPositionAssignment={canEditPosition}
-					legendText={legendText} saveText={saveText} />
+				<PersonForm
+					original={originalPerson}
+					person={person}
+					currentUser={this.props.currentUser}
+					edit
+					showPositionAssignment={canEditPosition}
+					legendText={legendText}
+					saveText={saveText} />
 			</div>
 		)
 	}
 }
+
+const PersonEdit = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonEdit currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(PersonEdit)

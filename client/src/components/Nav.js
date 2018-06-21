@@ -7,13 +7,16 @@ import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
 
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
-class Nav extends Component {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+class BaseNav extends Component {
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Person),
+		appSettings: PropTypes.object,
+		organizations: PropTypes.array,
 	}
 
 	constructor(props) {
@@ -32,15 +35,13 @@ class Nav extends Component {
 	}
 
 	render() {
-		const appData = this.context.app.state
-		const currentUser = appData.currentUser
-		const organizations = appData.organizations || []
+		const { currentUser } = this.props
+		const { organizations } = this.props || []
+		const { appSettings } = this.props || {}
+		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
+		const externalDocumentationUrlText = appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
+
 		const path = this.props.location.pathname
-
-		const {settings} = appData || {}
-		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
-		const externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
-
 		const inAdmin = path.indexOf('/admin') === 0
 		const inOrg = path.indexOf('/organizations') === 0
 		const inMyReports = path.indexOf('/reports/mine') === 0
@@ -168,5 +169,13 @@ class Nav extends Component {
 		)
 	}
 }
+
+const Nav = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(Nav)

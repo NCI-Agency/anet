@@ -7,8 +7,8 @@ const LEAVE_WARNING = 'Are you sure you wish to navigate away from the page? You
 
 class NavigationWarning extends Component {
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 
 		this.state = {
 			isBlocking: props.isBlocking,

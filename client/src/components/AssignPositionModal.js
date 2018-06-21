@@ -6,21 +6,19 @@ import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Position, Person} from 'models'
 import LinkTo from 'components/LinkTo'
 import API from 'api'
+import AppContext from 'components/AppContext'
 
-export default class AssignPositionModal extends Component {
+class BaseAssignPositionModal extends Component {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
 		showModal: PropTypes.bool,
 		onCancel: PropTypes.func.isRequired,
-		onSuccess: PropTypes.func.isRequired
+		onSuccess: PropTypes.func.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static contextTypes = {
-		currentUser: PropTypes.object
-	}
-
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 		this.state = {
 			position: props.person && props.person.position
 		}
@@ -33,9 +31,8 @@ export default class AssignPositionModal extends Component {
 	}
 
 	render() {
-		let {person} = this.props
+		const { person, currentUser } = this.props
 		let newPosition = new Position(this.state.position)
-		let currentUser = this.context.currentUser
 
 		let positionSearchQuery = {status: Position.STATUS.ACTIVE}
 		if (person.role === Person.ROLE.ADVISOR) {
@@ -170,3 +167,12 @@ export default class AssignPositionModal extends Component {
 	}
 
 }
+const AssignPositionModal = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAssignPositionModal currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default AssignPositionModal

@@ -19,7 +19,7 @@ import NavigationWarning from 'components/NavigationWarning'
 class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		anetLocation: PropTypes.object.isRequired,
-		edit: PropTypes.bool
+		edit: PropTypes.bool,
 	}
 
 	constructor(props) {
@@ -31,16 +31,17 @@ class LocationForm extends ValidatableFormWrapper {
 		}
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (Location.hasCoordinates(nextProps.anetLocation)) {
-			const loc = nextProps.anetLocation
+	static getDerivedStateFromProps(props, state) {
+		if (Location.hasCoordinates(props.anetLocation)) {
+			const loc = props.anetLocation
 			let marker = this.state.markers[0]
 			marker.name = loc.name
 			marker.lat = loc.lat
 			marker.lng = loc.lng
 			marker.id = loc.id
-			this.setState({markers: [marker]})
+			return {markers: [marker]}
 		}
+		return null
 	}
 
 	render() {

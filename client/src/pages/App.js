@@ -56,27 +56,15 @@ import InsightsShow from  'pages/insights/Show'
 import OnboardingShow from 'pages/onboarding/Show'
 import OnboardingEdit from 'pages/onboarding/Edit'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import _isEqual from 'lodash/isEqual'
 
 class App extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
 		pageProps: PropTypes.object,
-	}
-
-	static childContextTypes = {
-		app: PropTypes.object,
-		currentUser: PropTypes.instanceOf(Person),
-	}
-
-	getChildContext() {
-		return {
-			app: this,
-			currentUser: this.state.currentUser,
-		}
 	}
 
 	constructor(props) {
@@ -94,19 +82,19 @@ class App extends Page {
 		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
-			this.setState({pageProps: nextProps.pageProps})
-		}
-	}
-
 	updateTopbarOffset(topbarOffset) {
 		if (this.state.topbarOffset !== topbarOffset){
 			this.setState({ topbarOffset: topbarOffset })
 		}
 	}
 
-	fetchData() {
+	componentDidUpdate(prevProps, prevState) {
+		// TODO: We should decide what to do here, e.g. when to call this.loadData()
+		// We do not want the behaviour of our super class Page, as that would
+		// mean this.loadData() is called with each change in props or location…
+	}
+
+	fetchData(props) {
 		return API.query(/* GraphQL */`
 			person(f:me) {
 				id, name, role, emailAddress, rank, status
@@ -251,33 +239,41 @@ class App extends Page {
 		</Switch>
 
 		const navWidths = {sm: 4, md: 3, lg: 2}
-		const primaryWidths = (this.state.pageProps.useNavigation === true)
+		const primaryWidths = (this.props.pageProps.useNavigation === true)
 				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
 				: {sm: 12, md: 12, lg: 12}
 		return (
-			<div className="anet">
-				<TopBar
-					updateTopbarOffset={this.updateTopbarOffset}
-					currentUser={this.state.currentUser}
-					settings={this.state.settings}
-					minimalHeader={this.state.pageProps.minimalHeader}
-					location={this.props.location} />
+			<AppContext.Provider value={{
+				appSettings: this.state.settings,
+				currentUser: this.state.currentUser,
+				loadAppData: this.loadData,
+			}}>
+				<div className="anet">
+					<TopBar
+						updateTopbarOffset={this.updateTopbarOffset}
+						currentUser={this.state.currentUser}
+						minimalHeader={this.props.pageProps.minimalHeader}
+						location={this.props.location} />
 
-				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
+					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
-				<Grid fluid componentClass="section">
-					<Row>
-						{this.state.pageProps.useNavigation === true &&
-							<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
-								<Nav topbarOffset={this.state.topbarOffset} />
+					<Grid fluid componentClass="section">
+						<Row>
+							{this.props.pageProps.useNavigation === true &&
+								<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
+									<Nav
+										currentUser={this.state.currentUser}
+										organizations={this.state.organizations}
+										topbarOffset={this.state.topbarOffset} />
+								</Col>
+							}
+							<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
+								{routing}
 							</Col>
-						}
-						<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
-							{routing}
-						</Col>
-					</Row>
-				</Grid>
-			</div>
+						</Row>
+					</Grid>
+				</div>
+			</AppContext.Provider>
 		)
 	}
 }

@@ -8,6 +8,8 @@ import 'hopscotch/dist/css/hopscotch.css'
 
 import TOUR_ICON from 'resources/tour-icon.png'
 
+import {Person} from 'models'
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
 const iconCss = {
@@ -19,17 +21,13 @@ const HOPSCOTCH_CONFIG = {
 	bubbleWidth: 400,
 }
 
-class GuidedTour extends Component {
+class BaseGuidedTour extends Component {
 	static propTypes = {
 		tour: PropTypes.func.isRequired,
 		autostart: PropTypes.bool,
 		onEnd: PropTypes.func,
 		title: PropTypes.string,
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
-		app: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	componentDidMount() {
@@ -40,7 +38,7 @@ class GuidedTour extends Component {
 	}
 
 	componentDidUpdate() {
-		if (!this.runningTour && this.props.autostart && this.context.currentUser.id) {
+		if (!this.runningTour && this.props.autostart && this.props.currentUser.id) {
 			this.startTour()
 		}
 	}
@@ -67,7 +65,7 @@ class GuidedTour extends Component {
 	}
 
 	startTour(stepId) {
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		let tour = this.props.tour(currentUser, this.props.history)
 
 		// I don't know why hopscotch requires itself to be reconfigured
@@ -93,5 +91,13 @@ class GuidedTour extends Component {
 		}
 	}
 }
+
+const GuidedTour = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseGuidedTour currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(GuidedTour)

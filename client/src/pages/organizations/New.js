@@ -5,7 +5,7 @@ import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
 import utils from 'utils'
 
@@ -14,7 +14,9 @@ import { connect } from 'react-redux'
 
 class OrganizationNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
