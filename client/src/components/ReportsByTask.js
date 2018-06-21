@@ -27,9 +27,11 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
 /*
  * Component displaying a chart with number of reports per Task.
  */
-export default class ReportsByTask extends Component {
+class ReportsByTask extends Component {
   static propTypes = {
     date: PropTypes.object,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -106,6 +108,7 @@ export default class ReportsByTask extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.queryParams)
     Object.assign(chartQueryParams, {
@@ -143,6 +146,7 @@ export default class ReportsByTask extends Component {
             r.reportsCount = (d.id ? simplifiedValues.filter(item => item.tasks.indexOf(d.id) > -1).length : simplifiedValues.filter(item => item.tasks.length === 0).length)
             return r}),
       })
+      this.props.hideLoading()
     })
     this.fetchTaskData()
   }
@@ -208,3 +212,5 @@ export default class ReportsByTask extends Component {
     }
   }
 }
+
+export default connect(null, mapDispatchToProps)(ReportsByTask)
