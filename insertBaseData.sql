@@ -734,6 +734,8 @@ INSERT INTO adminSettings ([key], value)
 INSERT INTO adminSettings ([key], value)
 	VALUES ('DAILY_ROLLUP_MAX_REPORT_AGE_DAYS', '14');
 INSERT INTO adminSettings ([key], value)
+	VALUES ('EXTERNAL_DOCUMENTATION_LINK_TEXT', '');
+INSERT INTO adminSettings ([key], value)
 	VALUES ('EXTERNAL_DOCUMENTATION_LINK_URL', '');
 INSERT INTO adminSettings ([key], value)
 	VALUES ('GENERAL_BANNER_TEXT', '');
