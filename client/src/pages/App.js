@@ -252,7 +252,6 @@ class App extends Page {
 				<div className="anet">
 					<TopBar
 						updateTopbarOffset={this.updateTopbarOffset}
-						currentUser={this.state.currentUser}
 						minimalHeader={this.props.pageProps.minimalHeader}
 						location={this.props.location} />
 
@@ -263,7 +262,6 @@ class App extends Page {
 							{this.props.pageProps.useNavigation === true &&
 								<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
 									<Nav
-										currentUser={this.state.currentUser}
 										organizations={this.state.organizations}
 										topbarOffset={this.state.topbarOffset} />
 								</Col>

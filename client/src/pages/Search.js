@@ -150,7 +150,6 @@ class Search extends Page {
 			error: null,
 			success: null,
 		})
-
 	}
 
 	getSearchPart(type, query, pageSize) {

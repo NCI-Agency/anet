@@ -66,7 +66,6 @@ class BasePersonEdit extends Page {
 				<PersonForm
 					original={originalPerson}
 					person={person}
-					currentUser={this.props.currentUser}
 					edit
 					showPositionAssignment={canEditPosition}
 					legendText={legendText}
