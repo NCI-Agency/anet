@@ -168,6 +168,9 @@ class Search extends Page {
 		if (this.state.advancedSearch !== prevState.advancedSearch) {
 			this.loadData()
 		}
+		else {
+			super.componentDidUpdate(prevProps, prevState)
+		}
 	}
 
 	getSearchPart(type, query, pageSize) {
