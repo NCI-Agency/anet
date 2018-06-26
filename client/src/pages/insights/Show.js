@@ -21,6 +21,7 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'a
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 export const NOT_APPROVED_REPORTS = 'not-approved-reports'
 export const CANCELLED_REPORTS = 'cancelled-reports'
@@ -168,17 +169,10 @@ class BaseInsightsShow extends Page {
     })
   }
 
-  @autobind
-  equalFunction(value1, value2) {
-    if (typeof value1 === 'function' && typeof value2 === 'function') {
-      return true
-    }
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.insight !== this.props.match.params.insight) {
       this.setStateDefaultDates(this.props.match.params.insight)
-      if (!_isEqualWith(this.insightQueryParams[prevProps.match.params.insight], this.insightQueryParams[this.props.match.params.insight], this.equalFunction)) {
+      if (!_isEqualWith(this.insightQueryParams[prevProps.match.params.insight], this.insightQueryParams[this.props.match.params.insight], utils.equalFunction)) {
         this.updateSearchQuery(this.props.match.params.insight)
       }
     }

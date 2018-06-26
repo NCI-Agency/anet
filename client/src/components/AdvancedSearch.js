@@ -25,6 +25,7 @@ import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
 import _isEqualWith from 'lodash/isEqualWith'
 import _cloneDeepWith from 'lodash/cloneDeepWith'
+import utils from 'utils'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -257,19 +258,12 @@ class AdvancedSearch extends Component {
 		}
 	}
 
-	@autobind
-	equalFunction(value1, value2) {
-		if (typeof value1 === 'function' && typeof value2 === 'function') {
-			return true
-		}
-	}
-
 	componentDidMount() {
 		this.setState(this.props.query)
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (!_isEqualWith(prevProps.query, this.props.query, this.equalFunction)) {
+		if (!_isEqualWith(prevProps.query, this.props.query, utils.equalFunction)) {
 			this.setState(this.props.query)
 		}
 		if (!_isEqual(prevProps.text, this.props.text)) {
