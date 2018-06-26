@@ -2079,7 +2079,75 @@
 		<dropColumn tableName="tasks" columnName="customFieldRef1Id" />
 		<dropColumn tableName="tasks" columnName="organizationId" />
 		<!-- Rolling back is not useful -->
-	</changeSet> 
+	</changeSet>
+
+	<changeSet id="update-uuid-savedSearches" author="gjvoosten">
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			-- Add JSON fields for the new uuid's
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeeUuid', (SELECT uuid FROM people WHERE id=JSON_VALUE(query, '$.attendeeId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeePositionUuid', (SELECT uuid FROM positions WHERE id=JSON_VALUE(query, '$.attendeePositionId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorUuid', (SELECT uuid FROM people WHERE id=JSON_VALUE(query, '$.authorId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorPositionUuid', (SELECT uuid FROM positions WHERE id=JSON_VALUE(query, '$.authorPositionId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.locationUuid', (SELECT uuid FROM locations WHERE id=JSON_VALUE(query, '$.locationId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.orgUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.orgId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.organizationUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.organizationId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.responsibleOrgUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.responsibleOrgId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.tagUuid', (SELECT uuid FROM tags WHERE id=JSON_VALUE(query, '$.tagId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskUuid', (SELECT uuid FROM tasks WHERE id=JSON_VALUE(query, '$.taskId')));
+			-- Remove JSON fields for the old id's
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeeId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeePositionId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorPositionId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.locationId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.orgId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.organizationId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.responsibleOrgId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.tagId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskId', NULL);
+		</sql>
+		<!-- Requires at least PostgreSQL 9.5: -->
+		<sql dbms="postgresql">
+			-- Add JSON fields for the new uuid's
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{attendeeUuid}', TO_JSONB(p.uuid), true)
+				FROM people p WHERE p.id=(s.query::json->>'attendeeId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{attendeePositionUuid}', TO_JSONB(p.uuid), true)
+				FROM positions p WHERE p.id=(s.query::json->>'attendeePositionId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{authorUuid}', TO_JSONB(p.uuid), true)
+				FROM people p WHERE p.id=(s.query::json->>'authorId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{authorPositionUuid}', TO_JSONB(p.uuid), true)
+				FROM positions p WHERE p.id=(s.query::json->>'authorPositionId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{locationUuid}', TO_JSONB(l.uuid), true)
+				FROM locations l WHERE l.id=(s.query::json->>'locationId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{orgUuid}', TO_JSONB(o.uuid), true)
+				FROM organizations o WHERE o.id=(s.query::json->>'orgId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{orgUuid}', TO_JSONB(o.uuid), true)
+				FROM organizations o WHERE o.id=(s.query::json->>'organizationId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{responsibleOrgUuid}', TO_JSONB(o.uuid), true)
+				FROM organizations o WHERE o.id=(s.query::json->>'responsibleOrgId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{tagUuid}', TO_JSONB(t.uuid), true)
+				FROM tags t WHERE t.id=(s.query::json->>'tagId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{taskUuid}', TO_JSONB(t.uuid), true)
+				FROM tasks t WHERE t.id=(s.query::json->>'taskId')::int;
+			-- Remove JSON fields for the old id's
+			UPDATE "savedSearches" SET query=query::jsonb #- '{attendeeId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{attendeePositionId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{authorId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{authorPositionId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{locationId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{orgId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{organizationId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{responsibleOrgId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{tagId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{taskId}';
+		</sql>
+		<!-- No JSON manipulation in SQLite: -->
+		<sql dbms="sqlite">
+			DELETE FROM "savedSearches";
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
 
 	<!-- TODO: At some point, drop-id-primaryKey-columns -->
 
