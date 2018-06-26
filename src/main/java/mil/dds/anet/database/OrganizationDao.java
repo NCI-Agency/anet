@@ -36,16 +36,6 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return OrganizationList.fromQuery(query, pageNum, pageSize, manualRowCount);
 	}
 
-	@Deprecated
-	public Organization getById(int id) { 
-		Query<Organization> query = dbHandle.createQuery(
-				"/* getOrgById */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id = :id")
-			.bind("id", id)
-			.map(new OrganizationMapper());
-		List<Organization> results = query.list();
-		return (results.size() == 0) ? null : results.get(0);
-	}
-
 	public Organization getByUuid(String uuid) {
 		return dbHandle.createQuery(
 				"/* getOrgByUuid */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid = :uuid")

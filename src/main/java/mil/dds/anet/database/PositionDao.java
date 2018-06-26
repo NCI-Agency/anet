@@ -84,18 +84,6 @@ public class PositionDao extends AnetBaseDao<Position> {
 		}
 	}
 
-	@Deprecated
-	public Position getById(int id) { 
-		Query<Position> query = dbHandle.createQuery("/* positionGetById */ SELECT " + POSITIONS_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM positions LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid "
-				+ "WHERE positions.id = :id")
-			.bind("id", id)
-			.map(new PositionMapper());
-		List<Position> positions = query.list();
-		if (positions.size() == 0) { return null; } 
-		return positions.get(0);
-	}
-
 	public Position getByUuid(String uuid) {
 		return dbHandle.createQuery("/* positionGetByUuid */ SELECT " + POSITIONS_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM positions LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid "

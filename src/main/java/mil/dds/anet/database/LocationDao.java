@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.AnetObjectEngine;
@@ -40,16 +39,6 @@ public class LocationDao implements IAnetDao<Location> {
 				.bind("offset", pageSize * pageNum)
 				.map(new LocationMapper());
 		return LocationList.fromQuery(query, pageNum, pageSize);
-	}
-
-	@Deprecated
-	public Location getById(@Bind("id") int id) { 
-		Query<Location> query = dbHandle.createQuery("/* getLocationById */ SELECT * from locations where id = :id")
-				.bind("id", id)
-				.map(new LocationMapper());
-			List<Location> results = query.list();
-			if (results.size() == 0) { return null; } 
-			return results.get(0);
 	}
 
 	public Location getByUuid(String uuid) {

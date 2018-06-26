@@ -178,38 +178,32 @@ public class ReportDao implements IAnetDao<Report> {
 				@BindBean List<Tag> tags);
 	}
 
-	@Deprecated
-	public Report getById(int id) {
-		// Return the report without sensitive information
-		return getById(id, null);
-	}
-
-	@Deprecated
-	public Report getById(int id, Person user) {
-		Query<Report> query = dbHandle.createQuery("/* getReportById */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM reports, people "
-				+ "WHERE reports.id = :id "
-				+ "AND reports.\"authorUuid\" = people.uuid")
-				.bind("id", id)
-				.map(new ReportMapper());
-		List<Report> results = query.list();
-		if (results.size() == 0) { return null; }
-		Report r = results.get(0);
-		r.setUser(user);
-		return r;
-	}
-
 	public Report getByUuid(String uuid) {
 		// Return the report without sensitive information
 		return getByUuid(uuid, null);
 	}
 
 	public Report getByUuid(String uuid, Person user) {
-		final Report result = dbHandle.createQuery("/* getReportByUuid */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
+		/* Check whether uuid is purely numerical, and if so, query on legacyId */
+		final String queryDescriptor;
+		final String keyField;
+		final Object key;
+		final Integer legacyId = Utils.getInteger(uuid);
+		if (legacyId != null) {
+			queryDescriptor = "getReportByLegacyId";
+			keyField = "legacyId";
+			key = legacyId;
+		}
+		else {
+			queryDescriptor = "getReportByUuid";
+			keyField = "uuid";
+			key = uuid;
+		}
+		final Report result = dbHandle.createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM reports, people "
-				+ "WHERE reports.uuid = :uuid "
+				+ "WHERE reports.\"" + keyField + "\" = :key "
 				+ "AND reports.\"authorUuid\" = people.uuid")
-				.bind("uuid", uuid)
+				.bind("key", key)
 				.map(new ReportMapper())
 				.first();
 		if (result == null) { return null; }

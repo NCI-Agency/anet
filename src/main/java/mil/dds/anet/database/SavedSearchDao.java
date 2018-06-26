@@ -22,14 +22,6 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 		throw new UnsupportedOperationException();
 	}
 
-	@Deprecated
-	public SavedSearch getById(int id) { 
-		return dbHandle.createQuery("/* getSavedSearchById */ SELECT * from \"savedSearches\" where id = :id")
-				.bind("id", id)
-				.map(new SavedSearchMapper())
-				.first();
-	}
-
 	public SavedSearch getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getSavedSearchByUuid */ SELECT * from \"savedSearches\" where uuid = :uuid")
 				.bind("uuid", uuid)

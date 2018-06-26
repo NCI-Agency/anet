@@ -63,11 +63,6 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 		throw new UnsupportedOperationException();
 	}
 
-	@Deprecated
-	public ApprovalAction getById(int id) {
-		throw new UnsupportedOperationException();
-	}
-
 	public ApprovalAction getByUuid(String uuid) {
 		throw new UnsupportedOperationException();
 	}

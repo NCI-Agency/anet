@@ -22,6 +22,22 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Utils {
 
+	/**
+	 * Crude method to check whether a uuid is purely integer,
+	 * in which case it is probably a legacy id;
+	 * used for backwards-compatibility only.
+	 * @param uuid the uuid to check
+	 * @return the integer value of the uuid, or null if it isn't
+	 */
+	public static Integer getInteger(String uuid) {
+		try {
+			return Integer.parseInt(uuid);
+		}
+		catch (NumberFormatException ignored) {
+			return null;
+		}
+	}
+
 	public static boolean uuidEqual(AbstractAnetBean a, AbstractAnetBean b) {
 		if (a == null && b == null) { return true; }
 		if (a == null || b == null) { return false; }

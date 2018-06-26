@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.beans.Person;
@@ -30,11 +29,6 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	}
 
 	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Deprecated
-	public ReportSensitiveInformation getById(@Bind("id") int id) {
 		throw new UnsupportedOperationException();
 	}
 

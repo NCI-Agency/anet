@@ -1,10 +1,7 @@
 package mil.dds.anet.database;
 
-import java.util.List;
-
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.AnetObjectEngine;
@@ -39,16 +36,6 @@ public class TagDao implements IAnetDao<Tag> {
 				.bind("offset", pageSize * pageNum)
 				.map(new TagMapper());
 		return TagList.fromQuery(query, pageNum, pageSize);
-	}
-
-	@Deprecated
-	public Tag getById(@Bind("id") int id) {
-		final Query<Tag> query = dbHandle.createQuery("/* getTagById */ SELECT * from tags where id = :id")
-			.bind("id", id)
-			.map(new TagMapper());
-		final List<Tag> results = query.list();
-		if (results.size() == 0) { return null; }
-		return results.get(0);
 	}
 
 	public Tag getByUuid(String uuid) {

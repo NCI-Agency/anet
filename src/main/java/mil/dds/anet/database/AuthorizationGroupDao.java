@@ -51,16 +51,6 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 		return AuthorizationGroupList.fromQuery(query, pageNum, pageSize);
 	}
 
-	@Deprecated
-	public AuthorizationGroup getById(int id) {
-		final Query<AuthorizationGroup> query = dbHandle.createQuery("/* getAuthorizationGroupById */ SELECT * from \"authorizationGroups\" where id = :id")
-			.bind("id", id)
-			.map(new AuthorizationGroupMapper());
-		final List<AuthorizationGroup> results = query.list();
-		if (results.size() == 0) { return null; }
-		return results.get(0);
-	}
-
 	public AuthorizationGroup getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getAuthorizationGroupByUuid */ SELECT * from \"authorizationGroups\" where uuid = :uuid")
 				.bind("uuid", uuid)

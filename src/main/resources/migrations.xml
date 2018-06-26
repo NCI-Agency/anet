@@ -2149,6 +2149,31 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
-	<!-- TODO: At some point, drop-id-primaryKey-columns -->
+	<changeSet id="add-reports-legacyId-column" author="gjvoosten">
+		<!-- Create a new legacy id column for reports and fill it with the old id -->
+		<addColumn tableName="reports">
+			<column name="legacyId" type="int" />
+		</addColumn>
+		<sql>
+		    UPDATE reports SET legacyId=id;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-primaryKey-columns" author="gjvoosten">
+		<dropColumn tableName="approvalSteps" columnName="id" />
+		<dropColumn tableName="authorizationGroups" columnName="id" />
+		<dropColumn tableName="comments" columnName="id" />
+		<dropColumn tableName="locations" columnName="id" />
+		<dropColumn tableName="organizations" columnName="id" />
+		<dropColumn tableName="people" columnName="id" />
+		<dropColumn tableName="positions" columnName="id" />
+		<dropColumn tableName="reports" columnName="id" />
+		<dropColumn tableName="reportsSensitiveInformation" columnName="id" />
+		<dropColumn tableName="savedSearches" columnName="id" />
+		<dropColumn tableName="tags" columnName="id" />
+		<dropColumn tableName="tasks" columnName="id" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
 
 </databaseChangeLog>

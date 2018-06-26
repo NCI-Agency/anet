@@ -37,16 +37,6 @@ public class PersonDao extends AnetBaseDao<Person> {
 		return PersonList.fromQuery(query, pageNum, pageSize, manualCount);
 	}
 
-	@Deprecated
-	public Person getById(int id) { 
-		Query<Person> query = dbHandle.createQuery("/* personGetById */ SELECT " + PERSON_FIELDS + " FROM people WHERE id = :id")
-				.bind("id", id)
-				.map(new PersonMapper());
-		List<Person> rs = query.list();
-		if (rs.size() == 0) { return null; } 
-		return rs.get(0);
-	}
-
 	public Person getByUuid(String uuid) {
 		return dbHandle.createQuery("/* personGetByUuid */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid = :uuid")
 				.bind("uuid",  uuid)

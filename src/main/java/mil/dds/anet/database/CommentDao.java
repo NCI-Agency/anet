@@ -26,17 +26,6 @@ public class CommentDao implements IAnetDao<Comment> {
 		throw new UnsupportedOperationException();
 	}
 
-	//Comments are ALWAYS loaded with the author, since they are never displayed without their author
-	@Deprecated
-	public Comment getById(int id) {
-		return dbHandle.createQuery("/* getCommentById */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
-				+ "WHERE comments.id = :id")
-			.bind("id", id)
-			.map(new CommentMapper())
-			.first();
-	}
-
 	public Comment getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getCommentByUuid */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "

@@ -40,16 +40,6 @@ public class TaskDao implements IAnetDao<Task> {
 		return TaskList.fromQuery(query, pageNum, pageSize);
 	}
 
-	@Deprecated
-	public Task getById(int id) { 
-		Query<Task> query = dbHandle.createQuery("/* getTaskById */ SELECT * from tasks where id = :id")
-			.bind("id", id)
-			.map(new TaskMapper());
-		List<Task> results = query.list();
-		if (results.size() == 0) { return null; } 
-		return results.get(0);
-	}
-
 	public Task getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getTaskByUuid */ SELECT * from tasks where uuid = :uuid")
 				.bind("uuid", uuid)
