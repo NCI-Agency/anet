@@ -257,6 +257,13 @@ class AdvancedSearch extends Component {
 		}
 	}
 
+	@autobind
+	equalFunction(value1, value2) {
+		if (typeof value1 === 'function' && typeof value2 === 'function') {
+			return true
+		}
+	}
+
 	componentDidMount() {
 		this.setState(this.props.query)
 	}
@@ -276,7 +283,6 @@ class AdvancedSearch extends Component {
 		const filterDefs = this.ALL_FILTERS[this.state.objectType].filters
 		const existingKeys = filters.map(f => f.key)
 		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
-
 		return <div className="advanced-search form-horizontal">
 			<Form onSubmit={this.onSubmit}>
 				<FormGroup style={{textAlign: "center"}}>
