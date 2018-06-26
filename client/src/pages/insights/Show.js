@@ -161,14 +161,10 @@ class BaseInsightsShow extends Page {
 
   @autobind
   updateSearchQuery(insight) {
-    const insightSpecificFilters = this.insightQueryParams[insight]
-    const insightSpecificFilterKeys = insightSpecificFilters.map(filter => filter.key)
-    const notInsightSpecificFilters = this.props.searchQuery.filters.filter(filter => filter && insightSpecificFilterKeys.indexOf(filter.key) === -1)
-    const filters = notInsightSpecificFilters.concat(insightSpecificFilters)
     this.props.setSearchQuery({
-      text: this.props.searchQuery.text,
+      text: '',
       objectType: SEARCH_OBJECT_TYPES.REPORTS,
-      filters: filters
+      filters: this.insightQueryParams[insight]
     })
   }
 
