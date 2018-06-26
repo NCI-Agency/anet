@@ -20,8 +20,11 @@ export default class ReportStateSearch extends Component {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.value !== this.props.value) {
+			let value = this.props.value
+			this.setState({value}, this.updateFilter)
+		}
 	}
 
 	render() {
