@@ -42,12 +42,6 @@ class BaseMyReports extends Page {
 		}
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		if (prevProps.searchQuery.valueOf() !== this.props.searchQuery.valueOf()) {
-			this.loadData()
-		}
-	}
-
 	componentDidMount() {
 		super.componentDidMount()
 		this.props.setSearchProps({
