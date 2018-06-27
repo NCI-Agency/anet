@@ -109,15 +109,19 @@ class BaseInsightsShow extends Page {
 
   constructor(props) {
     super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
+    this.state = {...this.insightDefaultDates}
+  }
 
-    this.state = {
-      referenceDate: moment().clone(),
-      startDate: moment().clone(),
-      endDate: moment().clone(),
+  get insightDefaultDates() {
+    const prefix = this.props.match.params.insight.split('-', 1).pop()
+    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
+      return this.getDefaultFutureDates()
+    } else {
+      return this.getDefaultPastDates()
     }
   }
 
-  get defaultDates() {
+  get defaultDateRange() {
     return {
       relative: "0",
       start: this.state.startDate.toISOString(),
@@ -156,7 +160,7 @@ class BaseInsightsShow extends Page {
   getFilters = () => {
     const insight = INSIGHT_DETAILS[this.props.match.params.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
-    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
+    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDateRange} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     return <span>{dateRangeFilter}{calenderFilter}</span>
   }
 
@@ -173,43 +177,45 @@ class BaseInsightsShow extends Page {
     if (prevProps.match.params.insight !== this.props.match.params.insight) {
       const oldQueryParams = this.insightQueryParams[prevProps.match.params.insight]
       const newQueryParams = this.insightQueryParams[this.props.match.params.insight]
-      this.setStateDefaultDates(
-        this.props.match.params.insight,
-        !_isEqualWith(oldQueryParams, newQueryParams, utils.equalFunction) ? this.updateSearchQuery : '')
+      // when changing insight, set dates to insight specific defaults
+      const defaultDates = this.insightDefaultDates
+      if ((this.state.referenceDate.valueOf() !== defaultDates.referenceDate.valueOf()) ||
+          (this.state.startDate.valueOf() !== defaultDates.startDate.valueOf()) ||
+          (this.state.endDate.valueOf() !== defaultDates.endDate.valueOf())) {
+        this.setState(
+          defaultDates,
+          () => this.updateSearchQuery()
+        )
+      }
+      else if (!_isEqualWith(oldQueryParams, newQueryParams, utils.equalFunction)) {
+        this.updateSearchQuery()
+      }
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
-    this.setStateDefaultDates(this.props.match.params.insight, this.updateSearchQuery)
+    this.updateSearchQuery()
     this.props.setSearchProps({
       searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
     })
   }
 
-  setStateDefaultDates = (insight, cb) => {
-    const prefix = insight.split('-', 1).pop()
-    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
-      this.setStateDefaultFutureDates(cb)
-    } else {
-      this.setStateDefaultPastDates(cb)
+
+  getDefaultPastDates = () => {
+    return {
+      referenceDate: this.cutoffDate.startOf('day'),
+      startDate: this.cutoffDate.startOf('day'),
+      endDate: this.currentDateTime.endOf('day')
     }
   }
 
-  setStateDefaultPastDates = (cb) => {
-    this.setState({
-      referenceDate: this.cutoffDate,
-      startDate: this.cutoffDate,
-      endDate: this.currentDateTime.endOf('day')
-    }, () => {(typeof cb === 'function') && cb()})
-  }
-
-  setStateDefaultFutureDates = (cb) => {
-    this.setState({
-      referenceDate: this.currentDateTime,
-      startDate: this.currentDateTime,
+  getDefaultFutureDates = () => {
+    return {
+      referenceDate: this.currentDateTime.startOf('day'),
+      startDate: this.currentDateTime.startOf('day'),
       endDate: this.currentDateTime.add(14, 'days').endOf('day')
-    }, () => {(typeof cb === 'function') && cb()})
+    }
   }
 
   handleChangeDateRange = (value) => {
