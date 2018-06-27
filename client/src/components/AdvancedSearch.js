@@ -290,7 +290,7 @@ class AdvancedSearch extends Component {
 				<FormControl value={this.props.text} className="hidden" />
 
 				{filters.map(filter =>
-					<SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
+					filterDefs[filter.key] && <SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
 				)}
 
 				<Row>

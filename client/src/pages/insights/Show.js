@@ -201,7 +201,6 @@ class BaseInsightsShow extends Page {
     })
   }
 
-
   getDefaultPastDates = () => {
     return {
       referenceDate: this.cutoffDate.startOf('day'),
