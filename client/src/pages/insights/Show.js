@@ -133,35 +133,26 @@ class BaseInsightsShow extends Page {
     return {
       [NOT_APPROVED_REPORTS]: [
         {key: 'State', value: {state: Report.STATE.PENDING_APPROVAL, toQuery: () => {return {state: Report.STATE.PENDING_APPROVAL}}}},
-        {key: 'updatedAtEnd', value: this.state.referenceDate.clone().valueOf()},
+        {key: 'Update Date', value: {relative: "1",  end: this.state.referenceDate.toISOString()}},
       ],
       [CANCELLED_REPORTS]: [
         {key: 'State', value: {state: Report.STATE.CANCELLED, cancelledReason: '', toQuery: () => {return {state: Report.STATE.CANCELLED}}}},
-        {key: 'releasedAtStart', value: this.state.referenceDate.clone().valueOf()},
+        {key: 'Release Date', value: {relative: "2",  start: this.state.referenceDate.toISOString()}},
       ],
       [REPORTS_BY_TASK]: [
         {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
-        {key: 'releasedAtStart', value: this.state.referenceDate.clone().valueOf()},
+        {key: 'Release Date', value: {relative: "2",  start: this.state.referenceDate.toISOString()}},
       ],
       [REPORTS_BY_DAY_OF_WEEK]: [
         {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
-        {key: 'releasedAtStart', value: this.state.startDate.clone().valueOf()},
-        {key: 'releasedAtEnd', value: this.state.endDate.clone().valueOf()},
+        {key: 'Release Date', value: {relative: "0",  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
         {key: 'includeEngagementDayOfWeek', value: 1},
       ],
       [FUTURE_ENGAGEMENTS_BY_LOCATION]: [
-        {key: 'engagementDateStart', value: this.state.startDate.clone().startOf('day').valueOf()},
-        {key: 'engagementDateEnd', value: this.state.endDate.clone().valueOf()},
+        {key: 'Engagement Date', value: {relative: "0",  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
       ],
       [ADVISOR_REPORTS]: [],
     }
-  }
-
-  getFilters = () => {
-    const insight = INSIGHT_DETAILS[this.props.match.params.insight]
-    const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
-    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDateRange} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
-    return <span>{dateRangeFilter}{calenderFilter}</span>
   }
 
   @autobind
@@ -274,7 +265,6 @@ class BaseInsightsShow extends Page {
           <Fieldset id={this.props.match.params.insight} data-jumptarget title={
             <span>
               {insightConfig.title}
-              {this.getFilters()}
             </span>
             }>
             <InsightComponent
