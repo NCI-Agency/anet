@@ -128,26 +128,26 @@ class BaseInsightsShow extends Page {
   get insightQueryParams() {
     return {
       [NOT_APPROVED_REPORTS]: [
-       {key: 'State', value: {state: Report.STATE.PENDING_APPROVAL, toQuery: () => {return {state: Report.STATE.PENDING_APPROVAL}}}},
-//        updatedAtEnd: this.state.referenceDate.clone().valueOf(),
+        {key: 'State', value: {state: Report.STATE.PENDING_APPROVAL, toQuery: () => {return {state: Report.STATE.PENDING_APPROVAL}}}},
+        {key: 'updatedAtEnd', value: this.state.referenceDate.clone().valueOf()},
       ],
       [CANCELLED_REPORTS]: [
         {key: 'State', value: {state: Report.STATE.CANCELLED, cancelledReason: '', toQuery: () => {return {state: Report.STATE.CANCELLED}}}},
-//        releasedAtStart: this.state.referenceDate.clone().valueOf(),
+        {key: 'releasedAtStart', value: this.state.referenceDate.clone().valueOf()},
       ],
       [REPORTS_BY_TASK]: [
         {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
-//        releasedAtStart: this.state.referenceDate.clone().valueOf(),
+        {key: 'releasedAtStart', value: this.state.referenceDate.clone().valueOf()},
       ],
       [REPORTS_BY_DAY_OF_WEEK]: [
         {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
-//        {key: 'releasedAtStart', value: this.state.startDate.clone().valueOf()},
-//        {key: 'releasedAtEnd', value: this.state.endDate.clone().valueOf()},
-//        {key: 'includeEngagementDayOfWeek', value: 1},
+        {key: 'releasedAtStart', value: this.state.startDate.clone().valueOf()},
+        {key: 'releasedAtEnd', value: this.state.endDate.clone().valueOf()},
+        {key: 'includeEngagementDayOfWeek', value: 1},
       ],
       [FUTURE_ENGAGEMENTS_BY_LOCATION]: [
-//        engagementDateStart: this.state.startDate.clone().startOf('day').valueOf(),
-//        engagementDateEnd: this.state.endDate.clone().valueOf(),
+        {key: 'engagementDateStart', value: this.state.startDate.clone().startOf('day').valueOf()},
+        {key: 'engagementDateEnd', value: this.state.endDate.clone().valueOf()},
       ],
       [ADVISOR_REPORTS]: [],
     }
@@ -161,30 +161,30 @@ class BaseInsightsShow extends Page {
   }
 
   @autobind
-  updateSearchQuery(insight) {
+  updateSearchQuery() {
     this.props.setSearchQuery({
       text: '',
       objectType: SEARCH_OBJECT_TYPES.REPORTS,
-      filters: this.insightQueryParams[insight]
+      filters: this.insightQueryParams[this.props.match.params.insight]
     })
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.insight !== this.props.match.params.insight) {
-      this.setStateDefaultDates(this.props.match.params.insight)
-      if (!_isEqualWith(this.insightQueryParams[prevProps.match.params.insight], this.insightQueryParams[this.props.match.params.insight], utils.equalFunction)) {
-        this.updateSearchQuery(this.props.match.params.insight)
-      }
+      const oldQueryParams = this.insightQueryParams[prevProps.match.params.insight]
+      const newQueryParams = this.insightQueryParams[this.props.match.params.insight]
+      this.setStateDefaultDates(
+        this.props.match.params.insight,
+        !_isEqualWith(oldQueryParams, newQueryParams, utils.equalFunction) ? this.updateSearchQuery : '')
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
-    this.setStateDefaultDates(this.props.match.params.insight)
+    this.setStateDefaultDates(this.props.match.params.insight, this.updateSearchQuery)
     this.props.setSearchProps({
       searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
     })
-    this.updateSearchQuery(this.props.match.params.insight)
   }
 
   setStateDefaultDates = (insight, cb) => {
