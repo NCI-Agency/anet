@@ -8,7 +8,7 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Person, Report} from 'models'
 
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
@@ -48,15 +48,22 @@ class BaseMyReports extends Page {
 		}
 	}
 
+	componentDidMount() {
+		super.componentDidMount()
+		this.props.setSearchProps({
+			searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
+		})
+	}
+
 	@autobind
 	getPart(partName, state, authorId) {
-		let query = {
+		const queryConstPart = {
 			pageSize: 10,
 			pageNum: this.pageNums[partName],
 			authorId: authorId,
 			state: state
 		}
-		Object.assign(query, this.getSearchQuery())
+		const query = Object.assign({}, this.getSearchQuery(), queryConstPart)
 		return new GQL.Part(/* GraphQL */ `
 			${partName}: reportList(query: $${partName}Query) {
 				pageNum, pageSize, totalCount, list {
