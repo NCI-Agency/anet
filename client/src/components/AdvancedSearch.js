@@ -123,6 +123,7 @@ class AdvancedSearch extends Component {
 				/>,
 				"Engagement Date": <DateRangeSearch queryKey="engagementDate" />,
 				"Release Date": <DateRangeSearch queryKey="releasedAt" />,
+				"Update Date": <DateRangeSearch queryKey="updatedAt" />,
 				Location: <AutocompleteFilter
 					queryKey="locationId"
 					valueKey="name"
