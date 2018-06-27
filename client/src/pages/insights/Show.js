@@ -105,8 +105,6 @@ class BaseInsightsShow extends Page {
     return moment().subtract(maxReportAge, 'days').clone()
   }
 
-  get referenceDateLongStr() { return this.state.referenceDate.format('DD MMMM YYYY') }
-
   constructor(props) {
     super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
     this.state = {...this.insightDefaultDates}
