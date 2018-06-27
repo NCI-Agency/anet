@@ -19,7 +19,7 @@ import utils from 'utils'
 
 import API from 'api'
 
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -92,6 +92,9 @@ class BaseRollupShow extends Page {
 
 	componentDidMount() {
 		super.componentDidMount()
+		this.props.setSearchProps({
+			searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
+		})
 
 		if (d3) {
 			return
