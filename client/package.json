@@ -84,7 +84,7 @@
     "react": "^16.2.0",
     "react-16-bootstrap-date-picker": "^5.1.2",
     "react-autosuggest": "^9.3.4",
-    "react-bootstrap": "^0.31.0",
+    "react-bootstrap": "^0.32.1",
     "react-confirm-bootstrap": "^5.3.0",
     "react-dom": "^16.2.0",
     "react-redux": "^5.0.7",
@@ -95,6 +95,7 @@
     "react-scrollspy": "^3.3.5",
     "react-tag-input": "^5.0.2",
     "react-toastify": "^4.0.1",
+    "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.0",
     "whatwg-fetch": "^2.0.3"
   },
