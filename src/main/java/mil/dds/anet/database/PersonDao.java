@@ -28,7 +28,8 @@ public class PersonDao extends AnetBaseDao<Person> {
 			"domainUsername","pendingVerification","createdAt",
 			"updatedAt"};
 	private static String tableName = "people";
-	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
+	public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(tableName, fields, false);
 	
 	public PersonDao(Handle h) { 
 		super(h, "Person", tableName, PERSON_FIELDS, null);

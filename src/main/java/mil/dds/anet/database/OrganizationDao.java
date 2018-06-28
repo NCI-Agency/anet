@@ -27,7 +27,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 
 	private static String[] fields = {"id", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgId"};
 	private static String tableName = "organizations";
-	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 	
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);

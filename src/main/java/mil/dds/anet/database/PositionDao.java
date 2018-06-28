@@ -35,7 +35,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 			"updatedAt", "organizationId", "currentPersonId", "type", 
 			"status", "locationId" };
 	private static String tableName = "positions";
-	public static String POSITIONS_FIELDS  = DaoUtils.buildFieldAliases(tableName, fields);
+	public static String POSITIONS_FIELDS  = DaoUtils.buildFieldAliases(tableName, fields, true);
 	
 	public PositionDao(Handle h) { 
 		super(h, "positions", tableName, POSITIONS_FIELDS, null);

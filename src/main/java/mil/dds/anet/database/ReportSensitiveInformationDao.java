@@ -23,7 +23,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 
 	private static final String[] fields = { "id", "text", "reportId", "createdAt", "updatedAt" };
 	private static final String tableName = "reportsSensitiveInformation";
-	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
 	private Handle dbHandle;
 

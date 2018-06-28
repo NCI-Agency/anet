@@ -98,10 +98,14 @@ public class DaoUtils {
 		}
 	}
 	
-	public static String buildFieldAliases(String tableName, String[] fields) { 
-		List<String> fieldAliases = new LinkedList<String>();
-		for (String field : fields) { 
-			fieldAliases.add(String.format("\"%s\".\"%s\" AS %s_%s", tableName, field, tableName, field));
+	public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {
+		final List<String> fieldAliases = new LinkedList<String>();
+		for (String field : fields) {
+			final StringBuilder sb = new StringBuilder(String.format("\"%s\".\"%s\"", tableName, field));
+			if (addAs) {
+				sb.append(String.format(" AS %s_%s", tableName, field));
+			}
+			fieldAliases.add(sb.toString());
 		}
 		return " " + Joiner.on(", ").join(fieldAliases) + " ";
 	}
