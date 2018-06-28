@@ -58,13 +58,11 @@ class CancelledEngagementReports extends Component {
     const focusDetails = this.getFocusDetails()
     return (
       <div>
-        <p className="help-text">{`Number of cancelled engagement reports released since ${this.referenceDateLongStr}, grouped by advisor organization`}</p>
+        <p className="help-text">{`Grouped by advisor organization`}</p>
         <p className="chart-description">
-          {`Displays the number of cancelled engagement reports released since
-            ${this.referenceDateLongStr}. The reports are grouped by advisor
-            organization. In order to see the list of cancelled engagement
-            reports for an organization, click on the bar corresponding to the
-            organization.`}
+          {`The reports are grouped by advisor organization. In order to see the
+            list of cancelled engagement reports for an organization, click on
+            the bar corresponding to the organization.`}
         </p>
         <BarChartWithLoader
           chartId={chartByOrgId}
@@ -75,12 +73,12 @@ class CancelledEngagementReports extends Component {
           onBarClick={this.goToOrg}
           updateChart={this.state.updateChart}
           isLoading={this.state.isLoading} />
-        <p className="help-text">{`Number of cancelled engagement reports since ${this.referenceDateLongStr}, grouped by reason for cancellation`}</p>
+        <p className="help-text">{`Grouped by reason for cancellation`}</p>
         <p className="chart-description">
-          {`Displays the number of cancelled engagement reports released since
-            ${this.referenceDateLongStr}. The reports are grouped by reason for cancellation. In order to see the list of cancelled engagement
-            reports for a reason for cancellation, click on the bar corresponding
-            to the reason for cancellation.`}
+          {`The reports are grouped by reason for cancellation. In order to see
+            the list of cancelled engagement reports for a reason for
+            cancellation, click on the bar corresponding to the reason for
+            cancellation.`}
         </p>
         <BarChartWithLoader
           chartId={chartByReasonId}

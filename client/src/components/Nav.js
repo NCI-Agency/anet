@@ -147,7 +147,7 @@ class BaseNav extends Component {
 					<NavDropdown title="Insights" id="insights" active={inInsights}>
 						{INSIGHTS.map(insight =>
 							<Link to={"/insights/" + insight} key={insight}>
-								<MenuItem>{INSIGHT_DETAILS[insight].title}</MenuItem>
+								<MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
 							</Link>)
 						}
 					</NavDropdown>

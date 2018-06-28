@@ -14,6 +14,15 @@ const LAST_DAY = -1 * 1000 * 60 * 60 * 24
 const LAST_WEEK = LAST_DAY * 7
 const LAST_MONTH = LAST_DAY * 30
 
+const RANGE_TYPE_LABELS = {
+	[BETWEEN]: 'Between',
+	[BEFORE]: 'Before',
+	[AFTER]: 'After',
+	[LAST_DAY]: 'Last 24 hours',
+	[LAST_WEEK]: 'Last 7 days',
+	[LAST_MONTH]: 'Last 30 days',
+}
+
 const dateRangeValue = PropTypes.shape({
 	relative: PropTypes.string,
 	start: PropTypes.string,
@@ -26,16 +35,19 @@ export default class DateRangeSearch extends Component {
 		value: PropTypes.oneOfType([
 			dateRangeValue,
 			PropTypes.string
-		])
+		]),
+
+		//Passed by the SearchFilterDisplay row
+		asFormField: PropTypes.bool,
 	}
 
 	static defaultProps = {
-		onlyBetween: false
+		onlyBetween: false,
+		asFormField: true
 	}
 
 	constructor(props) {
 		super(props)
-
 		let {value} = props
 
 		this.state = {
@@ -61,11 +73,11 @@ export default class DateRangeSearch extends Component {
 		const betweenOption = <option key={ this.state.ids.between } value={BETWEEN} >Between</option>
 		const remainingOptions =
 			[
-				<option key={ this.state.ids.before } value={BEFORE} >Before</option>,
-				<option key={ this.state.ids.after } value={AFTER} >After</option>,
-				<option key={ this.state.ids.last_day } value={LAST_DAY} >Last 24 hours</option>,
-				<option key={ this.state.ids.last_week } value={LAST_WEEK} >Last 7 days</option>,
-				<option key={ this.state.ids.last_month } value={LAST_MONTH} >Last 30 days</option>
+				<option key={ this.state.ids.before } value={BEFORE} >{RANGE_TYPE_LABELS[BEFORE]}</option>,
+				<option key={ this.state.ids.after } value={AFTER} >{RANGE_TYPE_LABELS[AFTER]}</option>,
+				<option key={ this.state.ids.last_day } value={LAST_DAY} >{RANGE_TYPE_LABELS[LAST_DAY]}</option>,
+				<option key={ this.state.ids.last_week } value={LAST_WEEK} >{RANGE_TYPE_LABELS[LAST_WEEK]}</option>,
+				<option key={ this.state.ids.last_month } value={LAST_MONTH} >{RANGE_TYPE_LABELS[LAST_MONTH]}</option>
 			]
 		const options = (onlyBetween) ? betweenOption : [betweenOption, ...remainingOptions]
 
@@ -79,29 +91,43 @@ export default class DateRangeSearch extends Component {
 
 	render() {
 		let {value} = this.state
-		return <div style={this.props.style}>
-			<Row>
-			<Col md={3}>
-				{this.selectMenu(this.props.onlyBetween)}
-			</Col>
-			{((value.relative === BETWEEN) || (value.relative === AFTER)) &&
-				<Col md={4}>
-					<DatePicker value={value.start} onChange={this.onChangeStart} showTodayButton showClearButton={false} />
-				</Col>
-			}
-			{value.relative === BETWEEN &&
-				<Col md={1} style={{paddingTop:'5px', paddingLeft:'9px'}}>
-					and
-				</Col>
-			}
-
-			{((value.relative === BETWEEN) || (value.relative === BEFORE)) &&
-				<Col md={4}>
-					<DatePicker value={value.end} onChange={this.onChangeEnd} showTodayButton showClearButton={false} />
-				</Col>
-			}
-			</Row>
-		</div>
+		let dateRangeDisplay = RANGE_TYPE_LABELS[value.relative].concat(" ")
+		if ((value.relative === BETWEEN) || (value.relative === AFTER)) {
+			dateRangeDisplay = dateRangeDisplay.concat(moment(value.start).format('DD MMM YYYY'))
+		}
+		if (value.relative === BETWEEN) {
+			dateRangeDisplay = dateRangeDisplay.concat(" and ")
+		}
+		if ((value.relative === BETWEEN) || (value.relative === BEFORE)) {
+			dateRangeDisplay = dateRangeDisplay.concat(moment(value.end).format('DD MMM YYYY'))
+		}
+		return (
+			!this.props.asFormField ?
+				dateRangeDisplay
+			:
+				<div style={this.props.style}>
+					<Row>
+					<Col md={3}>
+						{this.selectMenu(this.props.onlyBetween)}
+					</Col>
+					{((value.relative === BETWEEN) || (value.relative === AFTER)) &&
+						<Col md={4}>
+							<DatePicker value={value.start} onChange={this.onChangeStart} showTodayButton showClearButton={false} />
+						</Col>
+					}
+					{value.relative === BETWEEN &&
+						<Col md={1} style={{paddingTop:'5px', paddingLeft:'9px'}}>
+							and
+						</Col>
+					}
+					{((value.relative === BETWEEN) || (value.relative === BEFORE)) &&
+						<Col md={4}>
+							<DatePicker value={value.end} onChange={this.onChangeEnd} showTodayButton showClearButton={false} />
+						</Col>
+					}
+					</Row>
+				</div>
+		)
 	}
 
 	static getDerivedStateFromProps(props, state) {
@@ -168,8 +194,10 @@ export default class DateRangeSearch extends Component {
 
 	@autobind
 	updateFilter() {
-		let value = this.state.value
-		value.toQuery = this.toQuery
-		this.props.onChange(value)
+		if (this.props.asFormField) {
+			let {value} = this.state
+			value.toQuery = this.toQuery
+			this.props.onChange(value)
+		}
 	}
 }

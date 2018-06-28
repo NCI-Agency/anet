@@ -38,39 +38,42 @@ export const INSIGHTS = [
 export const INSIGHT_DETAILS = {
   [NOT_APPROVED_REPORTS]: {
     component: PendingApprovalReports,
-    title: 'Pending Approval Reports',
+    navTitle: 'Pending Approval Reports',
+    title: 'Number of Pending Approval Reports',
     dateRange: false,
     showCalendar: true
   },
   [CANCELLED_REPORTS]: {
     component: CancelledEngagementReports,
-    title: 'Cancelled Engagement Reports',
+    navTitle: 'Cancelled Engagement Reports',
+    title: 'Number of Cancelled Engagement Reports',
     dateRange: false,
     showCalendar: true
   },
   [REPORTS_BY_TASK]: {
     component: ReportsByTask,
-    title: 'Reports by Task',
-    help: '',
+    navTitle: 'Reports by Task',
+    title: 'Number of Reports by Task',
     dateRange: false,
     showCalendar: true
   },
   [REPORTS_BY_DAY_OF_WEEK]: {
     component: ReportsByDayOfWeek,
-    title: 'Reports by day of the week',
-    help: 'Number of reports by day of the week',
+    navTitle: 'Reports by Day of the Week',
+    title: 'Number of Reports by Day of the Week',
     dateRange: true,
     showCalendar: false
   },
   [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
     component: FutureEngagementsByLocation,
-    title: 'Future Engagements by Location',
-    help: 'Number of future engagements by location',
+    navTitle: 'Future Engagements by Location',
+    title: 'Number of Future Engagements by Location',
     dateRange: true,
     onlyShowBetween: true,
   },
   [ADVISOR_REPORTS]: {
     component: FilterableAdvisorReportsTable,
+    navTitle: 'Advisor Reports',
     title: 'Advisor Reports',
     dateRange: false,
     showCalendar: false

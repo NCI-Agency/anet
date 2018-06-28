@@ -55,11 +55,9 @@ class ReportsByDayOfWeek extends Component {
     const focusDetails = this.getFocusDetails()
     return (
       <div>
-        <p className="help-text">{`Number of published reports between ${this.startDateLongStr} and ${this.endDateLongStr}, grouped by day of the week`}</p>
+        <p className="help-text">{`Grouped by day of the week`}</p>
         <p className="chart-description">
-          {`Displays the number of published reports which have been released
-            between ${this.startDateLongStr} and ${this.endDateLongStr}.
-            The reports are grouped by day of the week. In order to see the list
+          {`The reports are grouped by day of the week. In order to see the list
             of published reports for a day of the week, click on the bar
             corresponding to the day of the week.`}
         </p>

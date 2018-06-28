@@ -16,8 +16,15 @@ export default class AutocompleteFilter extends Component {
 		//queryParams: PropTypes.any,
 		onChange: PropTypes.func,
 
+		//Passed by the SearchFilterDisplay row
+		asFormField: PropTypes.bool,
+
 		//All other properties are passed directly to the Autocomplete.
 
+	}
+
+	static defaultProps = {
+		asFormField: true
 	}
 
 	constructor(props) {
@@ -35,13 +42,18 @@ export default class AutocompleteFilter extends Component {
 	}
 
 	render() {
-		let autocompleteProps = Object.without(this.props, 'value', 'queryKey')
-
-		return <Autocomplete
-			{...autocompleteProps}
-			onChange={this.onChange}
-			value={this.state.value}
-		/>
+		let autocompleteProps = Object.without(this.props, 'value', 'queryKey', 'asFormField')
+		console.log('autocompletefilter', this.props)
+		return (
+			!this.props.asFormField ?
+				<span>{this.props.value[this.props.valueKey]}</span>
+			:
+				<Autocomplete
+					{...autocompleteProps}
+					onChange={this.onChange}
+					value={this.state.value}
+				/>
+		)
 	}
 
 	@autobind
@@ -58,8 +70,10 @@ export default class AutocompleteFilter extends Component {
 
 	@autobind
 	updateFilter() {
-		let value = this.state.value
-		value.toQuery = this.toQuery
-		this.props.onChange(value)
+		if (this.props.asFormField) {
+			let {value} = this.state
+			value.toQuery = this.toQuery
+			this.props.onChange(value)
+		}
 	}
 }

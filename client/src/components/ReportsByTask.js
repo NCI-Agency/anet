@@ -55,12 +55,11 @@ class ReportsByTask extends Component {
     const taskShortLabel = Settings.fields.task.shortLabel
     return (
       <div>
-        <p className="help-text">{`Number of published reports since ${this.referenceDateLongStr}, grouped by ${taskShortLabel}`}</p>
+        <p className="help-text">{`Grouped by ${taskShortLabel}`}</p>
         <p className="chart-description">
-          {`Displays the number of published reports which have been released
-            since ${this.referenceDateLongStr}. The reports are grouped by
-            ${taskShortLabel}. In order to see the list of published reports for a ${taskShortLabel},
-            click on the bar corresponding to the ${taskShortLabel}.`}
+          {`The reports are grouped by ${taskShortLabel}. In order to see the
+            list of published reports for a ${taskShortLabel}, click on the bar
+            corresponding to the ${taskShortLabel}.`}
         </p>
         <BarChartWithLoader
           chartId={chartByTaskId}

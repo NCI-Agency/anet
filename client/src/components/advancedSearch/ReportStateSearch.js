@@ -1,8 +1,34 @@
 import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
 
+const STATE_LABELS = {
+	[Report.STATE.DRAFT]: 'Draft',
+	[Report.STATE.PENDING_APPROVAL]: 'Pending Approval',
+	[Report.STATE.RELEASED]: 'Released',
+	[Report.STATE.CANCELLED]: 'Cancelled',
+	[Report.STATE.FUTURE]: 'Upcoming Engagement',
+}
+const CANCELLATION_REASON_LABELS = {
+	[Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR]: 'Advisor',
+	[Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL]: 'Principal',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_TRANSPORTATION]: 'Transportation',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_FORCE_PROTECTION]: 'Force Protection',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES]: 'Routes',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT]: 'Threat',
+}
+
 export default class ReportStateSearch extends Component {
+	static propTypes = {
+		//Passed by the SearchFilterDisplay row
+		asFormField: PropTypes.bool,
+	}
+
+	static defaultProps = {
+		asFormField: true
+	}
+
 	constructor(props) {
 		super(props)
 
@@ -29,28 +55,36 @@ export default class ReportStateSearch extends Component {
 
 	render() {
 		let {value} = this.state
-
-		return <div>
-			<select value={value.state} onChange={this.changeState}>
-				<option value={ Report.STATE.DRAFT }>Draft</option>
-				<option value={ Report.STATE.PENDING_APPROVAL }>Pending Approval</option>
-				<option value={ Report.STATE.RELEASED }>Released</option>
-				<option value={ Report.STATE.CANCELLED }>Cancelled</option>
-				<option value={ Report.STATE.FUTURE }>Upcoming Engagement</option>
-			</select>
-
-			{value.state === Report.STATE.CANCELLED && <span>
-				due to <select value={value.cancelledReason} onChange={this.changeCancelledReason}>
-					<option value="">Everything</option>
-					<option value="CANCELLED_BY_ADVISOR">Advisor</option>
-					<option value="CANCELLED_BY_PRINCIPAL">Principal</option>
-					<option value="CANCELLED_DUE_TO_TRANSPORTATION">Transportation</option>
-					<option value="CANCELLED_DUE_TO_FORCE_PROTECTION">Force Protection</option>
-					<option value="CANCELLED_DUE_TO_ROUTES">Routes</option>
-					<option value="CANCELLED_DUE_TO_THREAT">Threat</option>
-				</select>
-			</span>}
-		</div>
+		let stateDisplay = STATE_LABELS[this.props.value.state]
+		if (value.state === Report.STATE.CANCELLED && this.props.value.cancelledReason) {
+			stateDisplay = stateDisplay.concat(" due to ")
+			stateDisplay = stateDisplay.concat(CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON[this.props.value.cancelledReason]])
+		}
+		return (
+			!this.props.asFormField ?
+				stateDisplay
+			:
+				<div>
+					<select value={value.state} onChange={this.changeState}>
+						<option value={ Report.STATE.DRAFT }>{ STATE_LABELS[Report.STATE.DRAFT] }</option>
+						<option value={ Report.STATE.PENDING_APPROVAL }>{ STATE_LABELS[Report.STATE.PENDING_APPROVAL] }</option>
+						<option value={ Report.STATE.RELEASED }>{ STATE_LABELS[Report.STATE.RELEASED] }</option>
+						<option value={ Report.STATE.CANCELLED }>{ STATE_LABELS[Report.STATE.CANCELLED] }</option>
+						<option value={ Report.STATE.FUTURE }>{ STATE_LABELS[Report.STATE.FUTURE] }</option>
+					</select>
+					{value.state === Report.STATE.CANCELLED && <span>
+						due to <select value={value.cancelledReason} onChange={this.changeCancelledReason}>
+							<option value="">Everything</option>
+							<option value={ Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR] }</option>
+							<option value={ Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL] }</option>
+							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_TRANSPORTATION }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_TRANSPORTATION] }</option>
+							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_FORCE_PROTECTION }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_FORCE_PROTECTION] }</option>
+							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES] }</option>
+							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT] }</option>
+						</select>
+					</span>}
+				</div>
+		)
 	}
 
 	@autobind
@@ -77,8 +111,10 @@ export default class ReportStateSearch extends Component {
 
 	@autobind
 	updateFilter() {
-		let value = this.state.value
-		value.toQuery = this.toQuery
-		this.props.onChange(value)
+		if (this.props.asFormField) {
+			let {value} = this.state
+			value.toQuery = this.toQuery
+			this.props.onChange(value)
+		}
 	}
 }

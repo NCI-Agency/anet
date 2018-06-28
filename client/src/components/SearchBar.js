@@ -4,6 +4,7 @@ import {Form, Button, InputGroup, FormControl, Popover, Overlay} from 'react-boo
 import autobind from 'autobind-decorator'
 
 import AdvancedSearch from 'components/AdvancedSearch'
+import searchFilters from 'components/SearchFilters'
 
 import SEARCH_ICON from 'resources/search-alt.png'
 
@@ -29,6 +30,7 @@ class SearchBar extends Component {
 			searchTerms: props.query.text,
 			showAdvancedSearch: false
 		}
+		this.ALL_FILTERS = searchFilters.searchFilters()
 	}
 
 	static getDerivedStateFromProps(nextProps, prevState) {
@@ -39,7 +41,10 @@ class SearchBar extends Component {
 			searchTerms: nextProps.query.text
 		}
 	}
+
 	render() {
+		const filterDefs = this.props.query.objectType ? this.ALL_FILTERS[this.props.query.objectType].filters: {}
+		const filters = this.props.query.filters.filter(f => filterDefs[f.key])
 		return <div>
 			<Form onSubmit={this.onSubmit}>
 				<InputGroup>
@@ -50,9 +55,23 @@ class SearchBar extends Component {
 				</InputGroup>
 			</Form>
 
-			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: true})}><span className="asLink">Advanced search</span></small>
+			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: true})}>
+				<span className="asLink">
+					<React.Fragment>
+					{(filters.length > 0) ?
+							<React.Fragment>
+								<React.Fragment>{this.props.query.objectType} filtered on </React.Fragment> 
+								{filters.map(filter =>
+									filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} />
+								)}
+							</React.Fragment>
+						:
+							"Add filters"
+					}
+					</React.Fragment>
+				</span></small>
 			<Overlay show={this.state.showAdvancedSearch} onHide={() => this.setState({showAdvancedSearch: false})} placement="bottom" target={this.advancedSearchLink}>
-				<Popover id="advanced-search" placement="bottom" title="Advanced search">
+				<Popover id="advanced-search" placement="bottom" title="Filters">
 					<AdvancedSearch onSearch={this.runAdvancedSearch} onCancel={() => this.setState({showAdvancedSearch: false})} text={this.state.searchTerms} />
 				</Popover>
 			</Overlay>
@@ -93,3 +112,21 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SearchBar))
+
+
+class SearchFilterDisplay extends Component {
+	static propTypes = {
+		filter: PropTypes.object,
+		element: PropTypes.node,
+	}
+
+	render() {
+		const {filter, element} = this.props
+		const label = filter.key
+		const children = React.cloneElement(
+			element,
+			{value: filter.value || "", asFormField: false}
+		)
+		return <React.Fragment>{label}: {children}, </React.Fragment>
+	}
+}
