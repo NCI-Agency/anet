@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {Alert, Table, Modal, Button, Nav, NavItem, Badge, Pagination} from 'react-bootstrap'
+import {Alert, Table, Modal, Button, Nav, NavItem, Badge} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
+import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
@@ -396,16 +397,19 @@ class Search extends Page {
 		const {pageSize, pageNum, totalCount} = this.state.results[type]
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
-		return <header className="searchPagination" ><Pagination
-			className="pull-right"
-			prev
-			next
-			items={numPages}
-			ellipsis
-			maxButtons={6}
-			activePage={pageNum + 1}
-			onSelect={(value) => this.goToPage(type, value - 1)}
-		/></header>
+		return <header className="searchPagination">
+			<UltimatePagination
+				className="pull-right"
+				currentPage={pageNum + 1}
+				totalPages={numPages}
+				boundaryPagesRange={1}
+				siblingPagesRange={2}
+				hideEllipsis={false}
+				hidePreviousAndNextPageLinks={false}
+				hideFirstAndLastPageLinks={true}
+				onChange={(value) => this.goToPage(type, value - 1)}
+			/>
+		</header>
 	}
 
 	@autobind

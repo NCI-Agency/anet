@@ -72,17 +72,23 @@ class BaseRollupShow extends Page {
 	}
 
 	static getDerivedStateFromProps(props, state) {
+		const stateUpdate = {}
 		const qs = utils.parseQueryString(props.location.search)
-		const newDate = moment(+qs.date || undefined)
-		if (!state.date.isSame(newDate)) {
-			return {date: newDate}
+		const date = moment(+qs.date || undefined)
+		if (!state.date.isSame(date, 'day')) {
+			Object.assign(stateUpdate, {date: date})
 		}
-		return null
+		const { appSettings } = props || {}
+		const maxReportAge = appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
+		if (maxReportAge !== state.maxReportAge) {
+			Object.assign(stateUpdate, {maxReportAge: maxReportAge})
+		}
+		return stateUpdate
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (!this.state.date.isSame(prevState.date)) {
-			Promise.resolve(this.loadData()).then(() => this.renderGraph())
+		if (!this.state.date.isSame(prevState.date, 'day') || prevState.maxReportAge !== this.state.maxReportAge) {
+			this.loadData()
 		}
 		else {
 			this.renderGraph()
@@ -103,9 +109,7 @@ class BaseRollupShow extends Page {
 	}
 
 	fetchData(props) {
-		const { appSettings } = this.props || {}
-		const maxReportAge = appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
-		if (!maxReportAge) {
+		if (!this.state.maxReportAge) {
 			//don't run the query unless we've loaded the rollup settings.
 			return
 		}
@@ -114,7 +118,7 @@ class BaseRollupShow extends Page {
 			state: [Report.STATE.RELEASED], //Specifically excluding cancelled engagements.
 			releasedAtStart: this.rollupStart.valueOf(),
 			releasedAtEnd: this.rollupEnd.valueOf(),
-			engagementDateStart: moment(this.rollupStart).subtract(maxReportAge, 'days').valueOf(),
+			engagementDateStart: moment(this.rollupStart).subtract(this.state.maxReportAge, 'days').valueOf(),
 			sortBy: "ENGAGEMENT_DATE",
 			sortOrder: "DESC",
 			pageNum: this.state.reportsPageNum,

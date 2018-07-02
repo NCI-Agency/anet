@@ -43,7 +43,7 @@ export default class Page extends Component {
 	}
 
 	@autobind
-	loadData(props) {
+	loadData() {
 		this.setState({notFound: false, invalidRequest: false})
 
 		if (this.fetchData) {
@@ -52,7 +52,7 @@ export default class Page extends Component {
 				this.props.showLoading()
 			}
 
-			const promise = this.fetchData(props || this.props)
+			const promise = this.fetchData(this.props)
 
 			if (promise && promise.then instanceof Function) {
 				promise.then(this.doneLoading, this.doneLoading)
@@ -128,7 +128,7 @@ export default class Page extends Component {
 	componentDidMount() {
 		window.scrollTo(0,0)
 		setMessages(this.props, this.state)
-		this.loadData(this.props)
+		this.loadData()
 	}
 }
 
