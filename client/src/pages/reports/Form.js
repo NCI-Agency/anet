@@ -57,7 +57,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 			reportTags: [],
 			suggestionList: [],
 
-			showReportText: false,
+			showReportText: !!props.report.reportText || !!props.report.reportSensitiveInformation,
 			isCancelled: (props.report.cancelledReason ? true : false),
 			errors: {},
 
@@ -124,9 +124,16 @@ class BaseReportForm extends ValidatableFormWrapper {
 			showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
 			showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
 			reportTags: reportTags,
-			showReportText: !!report.reportText || !!report.reportSensitiveInformation
 		})
 		return stateUpdate
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		const showReportText = !!this.props.report.reportText || !!this.props.report.reportSensitiveInformation
+		const prevShowReportText = !!prevProps.report.reportText || !!prevProps.report.reportSensitiveInformation
+		if (showReportText !== prevShowReportText) {
+			this.setState({showReportText: showReportText})
+		}
 	}
 
 	@autobind

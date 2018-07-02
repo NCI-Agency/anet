@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {Table, Pagination} from 'react-bootstrap'
+import {Table} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
+import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
 import Settings from 'Settings'
@@ -56,20 +57,22 @@ class BaseOrganizationTasks extends Component {
 
 	@autobind
 	pagination() {
-		let goToPage = this.props.goToPage
 		let {pageSize, pageNum, totalCount} = this.props.tasks
 		let numPages = Math.ceil(totalCount / pageSize)
 		if (numPages < 2 ) { return }
-		return <header className="searchPagination" ><Pagination
-			className="pull-right"
-			prev
-			next
-			items={numPages}
-			ellipsis
-			maxButtons={6}
-			activePage={pageNum + 1}
-			onSelect={(value) => goToPage(value - 1)}
-		/></header>
+		return <header className="searchPagination">
+			<UltimatePagination
+				className="pull-right"
+				currentPage={pageNum + 1}
+				totalPages={numPages}
+				boundaryPagesRange={1}
+				siblingPagesRange={2}
+				hideEllipsis={false}
+				hidePreviousAndNextPageLinks={false}
+				hideFirstAndLastPageLinks={true}
+				onChange={(value) => this.props.goToPage(value - 1)}
+			/>
+		</header>
 	}
 }
 
