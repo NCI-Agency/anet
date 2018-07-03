@@ -57,7 +57,7 @@ class SearchBar extends Component {
 					<React.Fragment>
 					{(filters.length > 0) ?
 							<React.Fragment>
-								<React.Fragment>{this.props.query.objectType} filtered on </React.Fragment> 
+								<React.Fragment><b>{this.props.query.objectType}</b> filtered on </React.Fragment>
 								{filters.map((filter, i) =>
 									filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} showSeparator={i !== filters.length-1} />
 								)}
@@ -126,6 +126,6 @@ class SearchFilterDisplay extends Component {
 			{value: filter.value || "", asFormField: false}
 		)
 		const sep = this.props.showSeparator ? ", " : ""
-		return <React.Fragment>{label}: {children}{sep}</React.Fragment>
+		return <React.Fragment><b>{label}</b>: <em>{children}</em>{sep}</React.Fragment>
 	}
 }
