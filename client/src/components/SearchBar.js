@@ -54,18 +54,23 @@ class SearchBar extends Component {
 
 			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: !this.state.showAdvancedSearch})}>
 				<span className="asLink">
-					<React.Fragment>
-					{(filters.length > 0) ?
-							<React.Fragment>
-								<React.Fragment><b>{this.props.query.objectType}</b> filtered on </React.Fragment>
-								{filters.map((filter, i) =>
-									filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} showSeparator={i !== filters.length-1} />
-								)}
-							</React.Fragment>
-						:
-							"Add filters"
+					{(this.props.query.objectType) ?
+						<React.Fragment>
+							<b>{this.props.query.objectType}</b>
+							{(filters.length > 0) ?
+								<React.Fragment>
+									<React.Fragment> filtered on </React.Fragment>
+									{filters.map((filter, i) =>
+										filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} showSeparator={i !== filters.length-1} />
+									)}
+								</React.Fragment>
+							:
+								" - add filters"
+							}
+						</React.Fragment>
+					:
+						"Add filters"
 					}
-					</React.Fragment>
 				</span></small>
 			<Overlay show={this.state.showAdvancedSearch} onHide={() => this.setState({showAdvancedSearch: false})} placement="bottom" target={this.advancedSearchLink}>
 				<Popover id="advanced-search" placement="bottom" title="Filters">
