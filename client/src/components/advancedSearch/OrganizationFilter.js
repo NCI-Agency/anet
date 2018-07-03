@@ -53,7 +53,7 @@ export default class OrganizationFilter extends Component {
 
 		return (
 			!this.props.asFormField ?
-				<span>{this.props.value.shortName}</span>
+				<React.Fragment>{this.props.value.shortName}</React.Fragment>
 			:
 				<div>
 					<Autocomplete

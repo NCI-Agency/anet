@@ -35,7 +35,7 @@ export default class TextInputFilter extends Component {
 	render() {
 		return (
 			!this.props.asFormField ?
-				<span>{this.state.value.value}</span>
+				<React.Fragment>{this.state.value.value}</React.Fragment>
 			:
 				<FormControl
 					value={this.state.value.value}
