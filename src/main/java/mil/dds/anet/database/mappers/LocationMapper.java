@@ -9,6 +9,7 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Location.LocationStatus;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class LocationMapper implements ResultSetMapper<Location> {
@@ -19,8 +20,9 @@ public class LocationMapper implements ResultSetMapper<Location> {
 		l.setId(rs.getInt("id"));
 		l.setName(rs.getString("name"));
 		l.setStatus(MapperUtils.getEnumIdx(rs, "status", LocationStatus.class));
-		l.setLat(rs.getDouble("lat"));
-		l.setLng(rs.getDouble("lng"));
+		// preserve NULL values; when NULL there are no coordinates set:
+		l.setLat(DaoUtils.getOptionalDouble(rs, "lat"));
+		l.setLng(DaoUtils.getOptionalDouble(rs, "lng"));
 		l.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 		l.setUpdatedAt(new DateTime(rs.getTimestamp("updatedAt")));
 		l.setLoadLevel(LoadLevel.PROPERTIES);

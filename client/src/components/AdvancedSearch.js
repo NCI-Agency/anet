@@ -1,12 +1,11 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {Button, DropdownButton, MenuItem, Row, Col, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
+import {Button, DropdownButton, MenuItem, Row, Col, Form, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import History from 'components/History'
 
 import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
@@ -19,6 +18,10 @@ import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 import {Location, Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
+
+import { withRouter } from 'react-router-dom'
+import _isEqual from 'lodash/isEqual'
+import _cloneDeepWith from 'lodash/cloneDeepWith'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -52,7 +55,7 @@ const taskFilters = props => {
 	return taskFiltersObj
 }
 
-export default class AdvancedSearch extends Component {
+class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
 	}
@@ -63,7 +66,7 @@ export default class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	getFilters(context) {
+	getFilters() {
 		const filters = {}
 		filters.Reports = {
 			filters: {
@@ -230,11 +233,11 @@ export default class AdvancedSearch extends Component {
 		return filters
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 
 		const query = props || {}
-		this.ALL_FILTERS = this.getFilters(context)
+		this.ALL_FILTERS = this.getFilters()
 		this.state = {
 			objectType: query.objectType || "Reports",
 			text: query.text || "",
@@ -242,13 +245,11 @@ export default class AdvancedSearch extends Component {
 		}
 	}
 
-	componentWillReceiveProps(props, nextContext) {
+	static getDerivedStateFromProps(props, state) {
 		if (props.query) {
-			this.setState(props.query)
+			return props.query
 		}
-		if (nextContext !== this.context) {
-			this.ALL_FILTERS = this.getFilters(nextContext)
-		}
+		return null
 	}
 
 	render() {
@@ -259,42 +260,44 @@ export default class AdvancedSearch extends Component {
 		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
 
 		return <div className="advanced-search form-horizontal">
-			<FormGroup style={{textAlign: "center"}}>
-				<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
-					{Object.keys(this.ALL_FILTERS).map(type =>
-						<Button key={type} value={type}>{type}</Button>
-					)}
-				</ButtonToggleGroup>
-			</FormGroup>
+			<Form onSubmit={this.onSubmit}>
+				<FormGroup style={{textAlign: "center"}}>
+					<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
+						{Object.keys(this.ALL_FILTERS).map(type =>
+							<Button key={type} value={type}>{type}</Button>
+						)}
+					</ButtonToggleGroup>
+				</FormGroup>
 
-			<SearchFilter label="Search term" onRemove={() => this.setState({text: ""})}>
-				<FormControl value={text} onChange={this.setText} />
-			</SearchFilter>
+				<SearchFilter label="Search term" onRemove={() => this.setState({text: ""})}>
+					<FormControl value={text} onChange={this.setText} />
+				</SearchFilter>
 
-			{filters.map(filter =>
-				<SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
-			)}
+				{filters.map(filter =>
+					<SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
+				)}
 
-			<Row>
-				<Col xs={5} xsOffset={3}>
-					{moreFiltersAvailable ?
-						<DropdownButton bsStyle="link" title="+ Add another filter" onSelect={this.addFilter} id="addFilterDropdown">
-							{Object.keys(filterDefs).map(filterKey =>
-								<MenuItem disabled={existingKeys.indexOf(filterKey) > -1} eventKey={filterKey} key={filterKey} >{filterKey}</MenuItem>
-							)}
-						</DropdownButton>
-						:
-						"No additional filters available"
-					}
-				</Col>
-			</Row>
+				<Row>
+					<Col xs={5} xsOffset={3}>
+						{moreFiltersAvailable ?
+							<DropdownButton bsStyle="link" title="+ Add another filter" onSelect={this.addFilter} id="addFilterDropdown">
+								{Object.keys(filterDefs).map(filterKey =>
+									<MenuItem disabled={existingKeys.indexOf(filterKey) > -1} eventKey={filterKey} key={filterKey} >{filterKey}</MenuItem>
+								)}
+							</DropdownButton>
+							:
+							"No additional filters available"
+						}
+					</Col>
+				</Row>
 
-			<Row>
-				<div className="pull-right">
-					<Button onClick={this.props.onCancel} style={{marginRight: 20}}>Cancel</Button>
-					<Button bsStyle="primary" onClick={this.performSearch} style={{marginRight: 20}}>Search</Button>
-				</div>
-			</Row>
+				<Row>
+					<div className="pull-right">
+						<Button onClick={this.props.onCancel} style={{marginRight: 20}}>Cancel</Button>
+						<Button bsStyle="primary" type="submit" onClick={this.onSubmit} style={{marginRight: 20}}>Search</Button>
+					</div>
+				</Row>
+			</Form>
 		</div>
 	}
 
@@ -334,13 +337,28 @@ export default class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	performSearch() {
-		let queryState = {objectType: this.state.objectType, filters: this.state.filters, text: this.state.text}
+	resolveToQuery(value) {
+		if (typeof value === 'function') {
+			return value()
+		}
+	}
+
+	@autobind
+	onSubmit(event) {
+		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
+		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
 		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
-			History.push('/search', {advancedSearch: queryState})
+			this.props.history.push({
+				pathname: '/search',
+				state: {advancedSearch: queryState}
+			})
+			event.preventDefault()
+			event.stopPropagation()
 		}
 	}
 }
+
+export default withRouter(AdvancedSearch)
 
 class SearchFilter extends Component {
 	static propTypes = {

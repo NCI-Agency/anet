@@ -2,46 +2,36 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Form as BSForm, Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import History from 'components/History'
 
+import FormContext from 'components/FormContext'
 import FormField from 'components/FormField'
+import ConfirmDelete from 'components/ConfirmDelete'
 
-export default class Form extends Component {
-	static propTypes = Object.assign({}, BSForm.propTypes, {
+import { withRouter } from 'react-router-dom'
+
+class Form extends Component {
+	static propTypes = {
+		...BSForm.propTypes,
 		formFor: PropTypes.object,
 		static: PropTypes.bool,
 		submitText: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
 		submitOnEnter: PropTypes.bool,
 		submitDisabled: PropTypes.bool,
-		deleteText: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
 		onChange: PropTypes.func,
 		onSubmit: PropTypes.func,
-		onDelete: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
+		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
 		bottomAccessory: PropTypes.node,
-	})
+	}
 
 	static defaultProps = {
 		static: false,
 		submitOnEnter: false,
 		submitText: "Save",
-		deleteText: "Delete",
-	}
-
-	static childContextTypes = {
-		formFor: PropTypes.object,
-		form: PropTypes.object,
-	}
-
-	getChildContext() {
-		return {
-			formFor: this.props.formFor,
-			form: this,
-		}
 	}
 
 	render() {
-		let {children, submitText, submitOnEnter, submitDisabled, deleteText, onDelete, bottomAccessory, ...bsProps} = this.props
-		bsProps = Object.without(bsProps, 'formFor', 'static')
+		let {children, submitText, submitOnEnter, submitDisabled, onDelete, bottomAccessory, ...bsProps} = this.props
+		bsProps = Object.without(bsProps, 'formFor', 'static', 'staticContext')
 
 		if (this.props.static) {
 			bsProps.componentClass = 'div'
@@ -54,50 +44,51 @@ export default class Form extends Component {
 		let showSubmit = bsProps.onSubmit && submitText !== false
 		bsProps.onSubmit = this.onSubmit
 
-		let showDelete = onDelete && deleteText !== false
-
 		return (
-			<BSForm {...bsProps} ref="container">
-				{showSubmit && <div className="row">
-					<div className="form-top-submit col-xs-12">
-						<div className="pull-right">
-							<Button bsStyle="primary"type="submit" disabled={submitDisabled}>
-								{submitText}
-							</Button>
-						</div>
-					</div>
-				</div>}
-
-				{children}
-
-				{!this.props.static && (showSubmit || showDelete) &&
-					<div className="submit-buttons">
-						{showSubmit &&
-							<div>
-								<Button onClick={this.onCancel}>Cancel</Button>
-							</div>
-						}
-
-						{bottomAccessory}
-
-						{showDelete &&
-							<div>
-								<Button bsStyle="warning" onClick={onDelete}>
-									{deleteText}
-								</Button>
-							</div>
-						}
-
-						{showSubmit &&
-							<div>
-								<Button bsStyle="primary" type="submit" disabled={submitDisabled} id="formBottomSubmit">
+			<FormContext.Provider value={{
+				formFor: this.props.formFor,
+				form: this,
+			}}>
+				<BSForm {...bsProps} ref="container">
+					{showSubmit && <div className="row">
+						<div className="form-top-submit col-xs-12">
+							<div className="pull-right">
+								<Button bsStyle="primary"type="submit" disabled={submitDisabled}>
 									{submitText}
 								</Button>
 							</div>
-						}
-					</div>
-				}
-			</BSForm>
+						</div>
+					</div>}
+
+					{children}
+
+					{!this.props.static && (showSubmit || onDelete) &&
+						<div className="submit-buttons">
+							{showSubmit &&
+								<div>
+									<Button onClick={this.onCancel}>Cancel</Button>
+								</div>
+							}
+
+							{bottomAccessory}
+
+							{onDelete &&
+								<div>
+										<ConfirmDelete {...onDelete} />
+								</div>
+							}
+
+							{showSubmit &&
+								<div>
+									<Button bsStyle="primary" type="submit" disabled={submitDisabled} id="formBottomSubmit">
+										{submitText}
+									</Button>
+								</div>
+							}
+						</div>
+					}
+				</BSForm>
+			</FormContext.Provider>
 		)
 	}
 
@@ -118,9 +109,11 @@ export default class Form extends Component {
 
 	@autobind
 	onCancel() {
-		History.goBack({skipPageLeaveWarning: true})
+		this.props.history.goBack()
 	}
 }
 
 // just a little sugar to make importing and building forms easier
 Form.Field = FormField
+
+export default withRouter(Form)

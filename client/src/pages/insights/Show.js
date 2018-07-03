@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import PendingApprovalReports from 'components/PendingApprovalReports'
 import CancelledEngagementReports from 'components/CancelledEngagementReports'
 import ReportsByTask from 'components/ReportsByTask'
@@ -20,6 +20,9 @@ import ProgramSummaryView from 'components/ProgramSummaryView'
 import FULLSCREEN_ICON from 'resources/fullscreen.png'
 import Fullscreen from "react-full-screen"
 import {Button} from 'react-bootstrap'
+
+import AppContext from 'components/AppContext'
+import { connect } from 'react-redux'
 
 const insightDetails = {
   'not-approved-reports': {
@@ -81,9 +84,11 @@ const dateRangeFilterCss = {
   marginTop: '20px'
 }
 
-export default class InsightsShow extends Page {
-  static contextTypes = {
-    app: PropTypes.object.isRequired,
+class BaseInsightsShow extends Page {
+
+  static propTypes = {
+    ...pagePropTypes,
+    appSettings: PropTypes.object,
   }
 
   get currentDateTime() {
@@ -91,8 +96,8 @@ export default class InsightsShow extends Page {
   }
 
   get cutoffDate() {
-    let settings = this.context.app.state.settings
-    let maxReportAge = 1 + (parseInt(settings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
+    const { appSettings } = this.props || {}
+    let maxReportAge = 1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment().subtract(maxReportAge, 'days').clone()
   }
 
@@ -102,7 +107,6 @@ export default class InsightsShow extends Page {
     super(props)
     this.state = {
       isFull: false,
-      insight: props.params.insight,
       referenceDate: null,
       startDate: null,
       endDate: null,
@@ -121,23 +125,22 @@ export default class InsightsShow extends Page {
   }
 
   getFilters = () => {
-    const insight = insightDetails[this.state.insight]
+    const insight = insightDetails[this.props.match.params.insight]
     const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
     const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
     const fullscreenButton = <Button onClick={this.toggleFull} style={calendarButtonCss}><img src={FULLSCREEN_ICON} height={16} alt="Switch to fullscreen mode" /></Button>
     return <span>{dateRangeFilter}{calenderFilter}{fullscreenButton}</span>
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.params.insight !== this.state.insight) {
-      this.setState({insight: nextProps.params.insight})
-      this.setStateDefaultDates(nextProps.params.insight)
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.match.params.insight !== this.props.match.params.insight) {
+      this.setStateDefaultDates(this.props.match.params.insight)
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
-    this.setStateDefaultDates(this.state.insight)
+    this.setStateDefaultDates(this.props.match.params.insight)
   }
 
   setStateDefaultDates = (insight) => {
@@ -208,9 +211,9 @@ export default class InsightsShow extends Page {
   }
 
   render() {
-    const insightConfig = insightDetails[this.state.insight]
+    const insightConfig = insightDetails[this.props.match.params.insight]
     const InsightComponent = insightConfig.component
-    const insightPath = '/insights/' + this.state.insight
+    const insightPath = '/insights/' + this.props.match.params.insight
 
     return (
       <div>
@@ -218,9 +221,10 @@ export default class InsightsShow extends Page {
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
+
             <Fullscreen enabled={this.state.isFull}
               onChange={isFull => this.setState({isFull})}>
-              <Fieldset id={this.state.insight} data-jumptarget title={
+              <Fieldset id={this.props.match.params.insight} data-jumptarget title={
                 <span>
                   {insightConfig.title}
                   {this.getFilters()}
@@ -229,7 +233,8 @@ export default class InsightsShow extends Page {
                 <InsightComponent
                   date={this.state.referenceDate.clone()}
                   startDate={this.state.startDate.clone()}
-                  endDate={this.state.endDate.clone()} />
+                  endDate={this.state.endDate.clone()}
+                />
               </Fieldset>
             </Fullscreen>
         }
@@ -238,3 +243,13 @@ export default class InsightsShow extends Page {
   }
 
 }
+
+const InsightsShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseInsightsShow appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(InsightsShow)

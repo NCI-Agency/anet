@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Model from 'components/Model'
+import LinkTo from 'components/LinkTo'
 import utils from 'utils'
 import Settings from 'Settings'
 
@@ -46,7 +47,7 @@ export default class Person extends Model {
 	static autocompleteTemplate(person) {
 		return <span>
 			<img src={(new Person(person)).iconUrl()} alt={person.role} height={20} className="person-icon" />
-			{person.name} {person.rank && person.rank.toUpperCase()} - {person.position && `(${person.position.name})`}
+			<LinkTo person={person} isLink={false}/> - {person.position && `(${person.position.name})`}
 		</span>
 	}
 

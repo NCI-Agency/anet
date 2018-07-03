@@ -1,11 +1,13 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {Button, Pagination} from 'react-bootstrap'
+import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
+import UltimatePagination from 'components/UltimatePagination'
 import ReportSummary from 'components/ReportSummary'
 import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import {Location} from 'models'
 import Leaflet from 'components/Leaflet'
 import _get from 'lodash/get'
 
@@ -16,9 +18,9 @@ const FORMAT_MAP = 'map'
 const GQL_REPORT_FIELDS =  /* GraphQL */`
 	id, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
-	author { id, name }
-	primaryAdvisor { id, name },
-	primaryPrincipal { id, name },
+	author { id, name, rank }
+	primaryAdvisor { id, name, rank },
+	primaryPrincipal { id, name, rank },
 	advisorOrg { id, shortName },
 	principalOrg { id, shortName },
 	location { id, name, lat, lng },
@@ -44,6 +46,7 @@ export default class ReportCollection extends Component {
 			list: PropTypes.array.isRequired,
 		}),
 		goToPage: PropTypes.func,
+		mapId: PropTypes.string,
 	}
 
 	constructor(props) {
@@ -79,15 +82,16 @@ export default class ReportCollection extends Component {
 						</ButtonToggleGroup>
 
 						{numPages > 1 &&
-							<Pagination
+							<UltimatePagination
 								className="pull-right"
-								prev
-								next
-								items={numPages}
-								ellipsis
-								maxButtons={6}
-								activePage={pageNum}
-								onSelect={(value) => {this.props.goToPage(value - 1)}}
+								currentPage={pageNum}
+								totalPages={numPages}
+								boundaryPagesRange={1}
+								siblingPagesRange={2}
+								hideEllipsis={false}
+								hidePreviousAndNextPageLinks={false}
+								hideFirstAndLastPageLinks={true}
+								onChange={(value) => this.props.goToPage(value - 1)}
 							/>
 						}
 
@@ -106,15 +110,16 @@ export default class ReportCollection extends Component {
 
 					<footer>
 						{numPages > 1 &&
-							<Pagination
+							<UltimatePagination
 								className="pull-right"
-								prev
-								next
-								items={numPages}
-								ellipsis
-								maxButtons={6}
-								activePage={pageNum}
-								onSelect={(value) => {this.props.goToPage(value - 1)}}
+								currentPage={pageNum}
+								totalPages={numPages}
+								boundaryPagesRange={1}
+								siblingPagesRange={2}
+								hideEllipsis={false}
+								hidePreviousAndNextPageLinks={false}
+								hideFirstAndLastPageLinks={true}
+								onChange={(value) => this.props.goToPage(value - 1)}
 							/>
 						}
 					</footer>
@@ -148,11 +153,11 @@ export default class ReportCollection extends Component {
 	renderMap(reports) {
 		let markers = []
 		reports.forEach(report => {
-			if (report.location && report.location.lat) {
-				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng , name: report.intent })
+			if (Location.hasCoordinates(report.location)) {
+				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng, name: report.intent})
 			}
 		})
-		return <Leaflet markers={markers} />
+		return <Leaflet markers={markers} mapId={this.props.mapId} />
 	}
 
 	@autobind

@@ -1,0 +1,9 @@
+
+/* Style overrides for react-confirm-bootstrap buttons, to make them align well */
+
+.react-confirm-bootstrap-modal {
+  display: flex !important;
+}
+.react-confirm-bootstrap-modal .modal-footer {
+  display: flex !important;
+}

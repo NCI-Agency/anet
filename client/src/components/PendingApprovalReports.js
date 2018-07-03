@@ -11,7 +11,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
-import LoaderHOC from 'HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartId = 'not_approved_reports_chart'
@@ -19,16 +20,18 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   id
   advisorOrg { id, shortName }
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
 /*
  * Component displaying reports submitted for approval up to the given date but
  * which have not been approved yet. They are displayed in different
  * presentation forms: chart, summary, table and map.
  */
-export default class PendingApprovalReports extends Component {
+class PendingApprovalReports extends Component {
   static propTypes = {
     date: PropTypes.object,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -105,6 +108,7 @@ export default class PendingApprovalReports extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.queryParams)
@@ -142,6 +146,7 @@ export default class PendingApprovalReports extends Component {
               return (b_index < 0) ? -1 : a_index-b_index
           })
       })
+      this.props.hideLoading()
     })
     this.fetchOrgData()
   }
@@ -194,23 +199,19 @@ export default class PendingApprovalReports extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedOrg: ''
-      })  // reset focus when changing the date
-    }
-  }
-
   componentDidMount() {
     this.fetchData()
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedOrg: ''  // reset focus when changing the date
+      }, () => this.fetchData())
     }
   }
 
 }
+
+export default connect(null, mapDispatchToProps)(PendingApprovalReports)

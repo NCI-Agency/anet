@@ -1,49 +1,49 @@
-import {Component} from 'react'
-import _isEqual from 'lodash/isEqual'
-import _last from 'lodash/last'
-import _get from 'lodash/get'
+import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
 import {withRouter} from 'react-router'
+import {Prompt} from 'react-router-dom'
+
+const LEAVE_WARNING = 'Are you sure you wish to navigate away from the page? You will lose unsaved changes.'
 
 class NavigationWarning extends Component {
 
-	formHasUnsavedChanges() {
-		return !_isEqual(this.props.current, this.props.original)
+	constructor(props) {
+		super(props)
+
+		this.state = {
+			isBlocking: props.isBlocking,
+		}
+	}
+
+	static getDerivedStateFromProps(props, state) {
+		if (props.isBlocking !== state.isBlocking) {
+			return { isBlocking: props.isBlocking }
+		}
+		return null
 	}
 
 	@autobind
 	onBeforeUnloadListener(event) {
-		if (this.formHasUnsavedChanges()) {
-			event.returnValue = 'Are you sure you wish to navigate away from the page? You will lose unsaved changes.'
+		if (this.state.isBlocking) {
+			event.returnValue = LEAVE_WARNING
 			event.preventDefault()
 		}
 	}
 
-	@autobind
-	routeLeaveHook(nextRoute) {
-        const skipPageLeaveWarning = _get(nextRoute, ['state', 'skipPageLeaveWarning'])
-		if (this.formHasUnsavedChanges() && !skipPageLeaveWarning) {
-			return 'Are you sure you wish to navigate away from the page? You will lose unsaved changes.'
-		}
-        if (skipPageLeaveWarning) {
-            nextRoute.state.skipPageLeaveWarning = false
-        }
-	}
-
-	componentWillMount() {
-		this.unsetRouteLeaveHook = 
-			this.props.router.setRouteLeaveHook(_last(this.props.routes), this.routeLeaveHook)
+	componentDidMount() {
 		window.addEventListener('beforeunload', this.onBeforeUnloadListener)
 	}
 
 	componentWillUnmount() {
-		this.unsetRouteLeaveHook()
 		window.removeEventListener('beforeunload', this.onBeforeUnloadListener)
 	}
 
-    render() {
-        return null
-    }
+	render() {
+		return <Prompt
+			when={this.state.isBlocking}
+			message={LEAVE_WARNING}
+		/>
+	}
 
 }
 

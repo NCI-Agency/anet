@@ -4,6 +4,7 @@ import utils from 'utils'
 import deepEqual from 'deep-equal'
 import autobind from 'autobind-decorator'
 import {FormGroup, Col, ControlLabel, FormControl, InputGroup, HelpBlock} from 'react-bootstrap'
+import FormContext from 'components/FormContext'
 
 class FormFieldExtraCol extends Component {
 	render() {
@@ -11,23 +12,23 @@ class FormFieldExtraCol extends Component {
 	}
 }
 
-export default class FormField extends Component {
-	constructor(props, context) {
-		super(props, context)
+class BaseFormField extends Component {
+	constructor(props) {
+		super(props)
 		this.state = {
 			value: '',
-			userHasTouchedField: false,
+			userHasTouchedField: props.validateBeforeUserTouches,
 			defaultValidation: null,
 			isValid: null,
 			errorMessage: ''
 		}
 	}
-	static contextTypes = {
-		formFor: PropTypes.object,
-		form: PropTypes.object,
-	}
 
 	static propTypes = {
+		// Passed by the React Context API
+		formFor: PropTypes.object,
+		form: PropTypes.object,
+
 		// Specifying an id prop on a FormField contained inside a Form with
 		// a formFor prop will cause the FormField to be autobound to the formFor
 		// value. That is to say, its value will be set to formForObject[idProp],
@@ -93,13 +94,13 @@ export default class FormField extends Component {
 
 		childProps = Object.without(
 			childProps,
-			'getter', 'horizontal', 'onError', 'onValid', 'humanName', 'maxCharacters', 'validateBeforeUserTouches', 'validate'
+			'formFor', 'form', 'getter', 'horizontal', 'onError', 'onValid', 'humanName', 'maxCharacters', 'validateBeforeUserTouches', 'validate'
 		)
 		if (canSubmitWithError) {
 			childProps = Object.without(childProps, 'required')
 		}
 
-		let defaultValue = this.getDefaultValue(this.props, this.context)
+		let defaultValue = this.getDefaultValue(this.props)
 
 		let state = this.state
 		if (Array.isArray(defaultValue)) {
@@ -113,7 +114,7 @@ export default class FormField extends Component {
 				(canSubmitWithError ? 'warning' : 'error')
 				: null
 
-		let horizontal = this.context.form && this.context.form.props.horizontal
+		let horizontal = this.props.form && this.props.form.props.horizontal
 		if (typeof this.props.horizontal !== 'undefined') {
 			horizontal = this.props.horizontal
 		}
@@ -130,7 +131,7 @@ export default class FormField extends Component {
 			children.splice(children.indexOf(extra), 1)
 
 		// if type is static, render out a static value
-		if (this.props.type === 'static' || (!this.props.type && !this.props.componentClass && this.context.form.props.static)) {
+		if (this.props.type === 'static' || (!this.props.type && !this.props.componentClass && this.props.form.props.static)) {
 			children = <FormControl.Static componentClass={'div'} id={id} {...childProps}>{(children.length && children) || defaultValue}</FormControl.Static>
 
 		// if children are provided, render those, but special case them to
@@ -214,7 +215,7 @@ export default class FormField extends Component {
 			return true
 		}
 
-		let newValue = this.getDefaultValue(newProps, newContext)
+		let newValue = this.getDefaultValue(newProps)
 		let oldValue = this.state.value
 
 		if (newValue !== oldValue) {
@@ -232,8 +233,8 @@ export default class FormField extends Component {
 		return false
 	}
 
-	getValue(props, context) {
-		let formContext = context.formFor
+	getValue(props) {
+		let formContext = props.formFor
 		let id = props.id
 		let getter = props.getter
 		if (formContext) {
@@ -242,23 +243,21 @@ export default class FormField extends Component {
 		}
 	}
 
-	getDefaultValue(props, context) {
-		return props.value || this.getValue(props, context) || ''
+	getDefaultValue(props) {
+		return props.value || this.getValue(props) || ''
 	}
 
-	componentWillMount() {
-		if (this.props.validateBeforeUserTouches) {
-			this.setState({userHasTouchedField: true})
+	static getDerivedStateFromProps(props, state) {
+		if (props.validateBeforeUserTouches !== undefined
+				&& props.validateBeforeUserTouches !== state.userHasTouchedField) {
+			return {userHasTouchedField: props.validateBeforeUserTouches}
 		}
+		return null
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.validateBeforeUserTouches) {
-			this.setState({userHasTouchedField: true})
-		}
-
-		if (nextProps.required !== this.props.required) {
-			this.updateValidationState(nextProps)
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.required !== this.props.required) {
+			this.updateValidationState(this.props)
 		}
 	}
 
@@ -345,7 +344,7 @@ export default class FormField extends Component {
 			return
 		}
 
-		let form = this.context.form
+		let form = this.props.form
 		if (form && form.props.onChange) {
 			form.props.onChange(event)
 			event && event.stopPropagation && event.stopPropagation()
@@ -367,7 +366,7 @@ export default class FormField extends Component {
 	}
 
 	setFormContextWith(id, value) {
-		let formContext = this.context.formFor
+		let formContext = this.props.formFor
 		if (formContext)
 			formContext[id] = value
 		return formContext
@@ -381,4 +380,14 @@ export default class FormField extends Component {
 	}
 }
 
+const FormField = (props) => (
+	<FormContext.Consumer>
+		{context =>
+			<BaseFormField formFor={context.formFor} form={context.form} {...props} />
+		}
+	</FormContext.Consumer>
+)
+
 FormField.ExtraCol = FormFieldExtraCol
+
+export default FormField

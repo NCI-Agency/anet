@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {Button, Table} from 'react-bootstrap'
+import {Button, Modal, Table} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -10,47 +10,51 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Autocomplete from 'components/Autocomplete'
 import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
-import History from 'components/History'
 import Messages from 'components/Messages'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 
 import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
-export default class OrganizationForm extends ValidatableFormWrapper {
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
+
+class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		organization: PropTypes.object,
 		edit: PropTypes.bool,
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
 		super(props)
 		this.state = {
+			isBlocking: false,
 			error: null,
+			showAddApprovalStepAlert: false,
 		}
 		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
 		this.LongNameWithLabel = DictionaryField(Form.Field)
 	}
 
 	render() {
-		let {organization, edit} = this.props
+		const { organization, edit, currentUser } = this.props
 		let {approvalSteps} = organization
-		let currentUser = this.context.currentUser 
 		let isAdmin = currentUser && currentUser.isAdmin()
 		let isPrincipalOrg = (organization.type === Organization.TYPE.PRINCIPAL_ORG)
 		const {ValidatableForm, RequiredField} = this
 
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
 
-		return <ValidatableForm formFor={organization}
+		return <div>
+			<NavigationWarning isBlocking={this.state.isBlocking} />
+
+			<ValidatableForm formFor={organization}
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
 			submitText="Save organization"
@@ -92,6 +96,17 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 					<Button className="pull-right" onClick={this.addApprovalStep} bsStyle="primary" id="addApprovalStepButton" >
 						Add an Approval Step
 					</Button>
+					<Modal show={this.state.showAddApprovalStepAlert} onHide={this.hideAddApprovalStepAlert}>
+						<Modal.Header closeButton>
+							<Modal.Title>Step not added</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							Please complete all approval steps; there already is an approval step that is not completely filled in.
+						</Modal.Body>
+						<Modal.Footer>
+							<Button className="pull-right" onClick={this.hideAddApprovalStepAlert} bsStyle="primary">OK</Button>
+						</Modal.Footer>
+					</Modal>
 
 					{approvalSteps && approvalSteps.map((step, index) =>
 						this.renderApprovalStep(step, index)
@@ -103,6 +118,7 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				}
 			</div>}
 		</ValidatableForm>
+		</div>
 	}
 
 	renderApprovalStep(step, index) {
@@ -124,13 +140,9 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 					placeholder="Search for the approver's position"
 					objectType={Position}
 					fields="id, name, code, type, person { id, name, rank }"
-					template={pos => {
-						let components = []
-						pos.person && components.push(pos.person.name)
-						pos.name && components.push(pos.name)
-						pos.code && components.push(pos.code)
-						return <span>{components.join(' - ')}</span>
-					}}
+					template={position => 
+						<span> {position.person && <span> <LinkTo person={position.person} isLink={false}/> - </span>} <LinkTo position={position} isLink={false}/> {position.code && <span> - {position.code} </span>} </span>
+					}
 					queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
 					onChange={this.addApprover.bind(this, index)}
 					clearOnSelect={true} />
@@ -196,11 +208,24 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
+	hideAddApprovalStepAlert() {
+		this.setState({showAddApprovalStepAlert: false})
+	}
+
+	@autobind
 	addApprovalStep() {
 		let org = this.props.organization
 		let approvalSteps = org.approvalSteps || []
-		approvalSteps.push({name: '', approvers: []})
 
+		for (let i = 0; i < approvalSteps.length; i++) {
+			const step = approvalSteps[i]
+			if (!step.name || !step.approvers || step.approvers.length === 0) {
+				this.setState({showAddApprovalStepAlert: true})
+				return
+			}
+		}
+
+		approvalSteps.push({name: '', approvers: []})
 		this.onChange()
 	}
 
@@ -213,6 +238,9 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
@@ -228,6 +256,8 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 		}
 
 		let url = `/api/organizations/${this.props.edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, organization, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
@@ -237,11 +267,12 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 				if (response.id) {
 					organization.id = response.id
 				}
-
-				History.replace(Organization.pathForEdit(organization), false)
-				History.push(Organization.pathFor(organization), {
-					success: 'Organization saved successfully',
-					skipPageLeaveWarning: true
+				this.props.history.replace(Organization.pathForEdit(organization))
+				this.props.history.push({
+					pathname: Organization.pathFor(organization),
+					state: {
+						success: 'Organization saved successfully',
+					}
 				})
 			}).catch(error => {
 				this.setState({error})
@@ -249,3 +280,13 @@ export default class OrganizationForm extends ValidatableFormWrapper {
 			})
 	}
 }
+
+const OrganizationForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default withRouter(OrganizationForm)

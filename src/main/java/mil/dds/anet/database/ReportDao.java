@@ -58,10 +58,25 @@ public class ReportDao implements IAnetDao<Report> {
 	private static final String tableName = "reports";
 	public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 
-	Handle dbHandle;
+	private final Handle dbHandle;
+	private final String weekFormat;
 
 	public ReportDao(Handle db) {
 		this.dbHandle = db;
+		this.weekFormat = getWeekFormat(DaoUtils.getDbType(db));
+	}
+
+	private String getWeekFormat(DaoUtils.DbType dbType) {
+		switch (dbType) {
+			case MSSQL:
+				return "DATEPART(week, %s)";
+			case SQLITE:
+				return "strftime('%%W', substr(%s, 1, 10))";
+			case POSTGRESQL:
+				return "EXTRACT(WEEK FROM %s)";
+			default:
+				throw new RuntimeException("No week format found for " + dbType);
+		}
 	}
 
 	@Override
@@ -447,22 +462,22 @@ public class ReportDao implements IAnetDao<Report> {
 		sql.append("/* AdvisorReportInsightsQuery */ ");
 		sql.append("SELECT ");
 		sql.append("CASE WHEN a.\"organizationId\" IS NULL THEN b.\"organizationId\" ELSE a.\"organizationId\" END AS \"organizationId\",");
-		sql.append("CASE WHEN a.organizationShortName IS NULL THEN b.organizationShortName ELSE a.organizationShortName END AS organizationShortName,");
+		sql.append("CASE WHEN a.\"organizationShortName\" IS NULL THEN b.\"organizationShortName\" ELSE a.\"organizationShortName\" END AS \"organizationShortName\",");
 		sql.append("%1$s");
 		sql.append("%2$s");
 		sql.append("CASE WHEN a.week IS NULL THEN b.week ELSE a.week END AS week,");
-		sql.append("CASE WHEN a.nrReportsSubmitted IS NULL THEN 0 ELSE a.nrReportsSubmitted END AS nrReportsSubmitted,");
-		sql.append("CASE WHEN b.nrEngagementsAttended IS NULL THEN 0 ELSE b.nrEngagementsAttended END AS nrEngagementsAttended");
+		sql.append("CASE WHEN a.\"nrReportsSubmitted\" IS NULL THEN 0 ELSE a.\"nrReportsSubmitted\" END AS \"nrReportsSubmitted\",");
+		sql.append("CASE WHEN b.\"nrEngagementsAttended\" IS NULL THEN 0 ELSE b.\"nrEngagementsAttended\" END AS \"nrEngagementsAttended\"");
 
 		sql.append(" FROM (");
 
 			sql.append("SELECT ");
 			sql.append("organizations.id AS \"organizationId\",");
-			sql.append("organizations.\"shortName\" AS organizationShortName,");
+			sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
 			sql.append("%3$s");
 			sql.append("%4$s");
-			sql.append("DATEPART(week, reports.\"createdAt\") AS week,");
-			sql.append("COUNT(reports.\"authorId\") AS nrReportsSubmitted");
+			sql.append(" " + String.format(weekFormat, "reports.\"createdAt\"") + " AS week,");
+			sql.append("COUNT(reports.\"authorId\") AS \"nrReportsSubmitted\"");
 
 			sql.append(" FROM ");
 			sql.append("positions,");
@@ -483,17 +498,17 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("organizations.\"shortName\",");
 			sql.append("%7$s");
 			sql.append("%8$s");
-			sql.append("DATEPART(week, reports.\"createdAt\")");
+			sql.append(" " + String.format(weekFormat, "reports.\"createdAt\""));
 		sql.append(") a");
 
 		sql.append(" FULL OUTER JOIN (");
 			sql.append("SELECT ");
 			sql.append("organizations.id AS \"organizationId\",");
-			sql.append("organizations.\"shortName\" AS organizationShortName,");
+			sql.append("organizations.\"shortName\" AS \"organizationShortName\",");
 			sql.append("%3$s");
 			sql.append("%4$s");
-			sql.append("DATEPART(week, reports.\"engagementDate\") AS week,");
-			sql.append("COUNT(\"reportPeople\".\"personId\") AS nrEngagementsAttended");
+			sql.append(" " + String.format(weekFormat, "reports.\"engagementDate\"") + " AS week,");
+			sql.append("COUNT(\"reportPeople\".\"personId\") AS \"nrEngagementsAttended\"");
 
 			sql.append(" FROM ");
 			sql.append("positions,");
@@ -502,7 +517,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("\"reportPeople\",");
 			sql.append("organizations");
 
-			sql.append(" WHERE positions.\"currentPersonId\" = \"reportPeople\".personId");
+			sql.append(" WHERE positions.\"currentPersonId\" = \"reportPeople\".\"personId\"");
 			sql.append(" %6$s");
 			sql.append(" AND \"reportPeople\".\"reportId\" = reports.id");
 			sql.append(" AND reports.\"advisorOrganizationId\" = organizations.id");
@@ -516,16 +531,16 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append("organizations.\"shortName\",");
 			sql.append("%7$s");
 			sql.append("%8$s");
-			sql.append("DATEPART(week, reports.\"engagementDate\")");
+			sql.append(" " + String.format(weekFormat, "reports.\"engagementDate\""));
 		sql.append(") b");
 
 		sql.append(" ON ");
-		sql.append(" a.\"organizationId\" = b.organizationId");
+		sql.append(" a.\"organizationId\" = b.\"organizationId\"");
 		sql.append(" %9$s");
 		sql.append(" AND a.week = b.week");
 
 		sql.append(" ORDER BY ");
-		sql.append("organizationShortName,");
+		sql.append("\"organizationShortName\",");
 		sql.append("%10$s");
 		sql.append("week;");
 
@@ -541,7 +556,7 @@ public class ReportDao implements IAnetDao<Report> {
 					"AND positions.\"currentPersonId\" = people.id",
 					"people.id,",
 					"people.name,",
-					"AND a.\"personId\" = b.personId",
+					"AND a.\"personId\" = b.\"personId\"",
 					"name,",
 					selectOrg};
 		} else {
