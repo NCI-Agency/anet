@@ -8,7 +8,6 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Person, Report} from 'models'
 
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
@@ -20,7 +19,7 @@ class BaseMyReports extends Page {
 	}
 
 	constructor(props) {
-		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
+		super(props)
 
 		this.state = {
 			draft: null,
@@ -40,13 +39,6 @@ class BaseMyReports extends Page {
 			pending: this.getPart.bind(this, 'pending', [Report.STATE.PENDING_APPROVAL]),
 			released: this.getPart.bind(this, 'released', [Report.STATE.RELEASED, Report.STATE.CANCELLED])
 		}
-	}
-
-	componentDidMount() {
-		super.componentDidMount()
-		this.props.setSearchProps({
-			searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
-		})
 	}
 
 	@autobind
