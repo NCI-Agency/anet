@@ -52,7 +52,7 @@ class SearchBar extends Component {
 				</InputGroup>
 			</Form>
 
-			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: true})}>
+			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: !this.state.showAdvancedSearch})}>
 				<span className="asLink">
 					<React.Fragment>
 					{(filters.length > 0) ?
