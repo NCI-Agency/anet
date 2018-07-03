@@ -6,7 +6,6 @@ import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import History from 'components/History'
 
 import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
@@ -19,6 +18,10 @@ import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 import {Location, Person, Task, Position, Organization} from 'models'
 
 import REMOVE_ICON from 'resources/delete.png'
+
+import { withRouter } from 'react-router-dom'
+import _isEqual from 'lodash/isEqual'
+import _cloneDeepWith from 'lodash/cloneDeepWith'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -52,7 +55,7 @@ const taskFilters = props => {
 	return taskFiltersObj
 }
 
-export default class AdvancedSearch extends Component {
+class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
 	}
@@ -63,7 +66,7 @@ export default class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	getFilters(context) {
+	getFilters() {
 		const filters = {}
 		filters.Reports = {
 			filters: {
@@ -230,11 +233,11 @@ export default class AdvancedSearch extends Component {
 		return filters
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 
 		const query = props || {}
-		this.ALL_FILTERS = this.getFilters(context)
+		this.ALL_FILTERS = this.getFilters()
 		this.state = {
 			objectType: query.objectType || "Reports",
 			text: query.text || "",
@@ -242,13 +245,11 @@ export default class AdvancedSearch extends Component {
 		}
 	}
 
-	componentWillReceiveProps(props, nextContext) {
+	static getDerivedStateFromProps(props, state) {
 		if (props.query) {
-			this.setState(props.query)
+			return props.query
 		}
-		if (nextContext !== this.context) {
-			this.ALL_FILTERS = this.getFilters(nextContext)
-		}
+		return null
 	}
 
 	render() {
@@ -336,15 +337,28 @@ export default class AdvancedSearch extends Component {
 	}
 
 	@autobind
+	resolveToQuery(value) {
+		if (typeof value === 'function') {
+			return value()
+		}
+	}
+
+	@autobind
 	onSubmit(event) {
-		let queryState = {objectType: this.state.objectType, filters: this.state.filters, text: this.state.text}
+		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
+		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
 		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
-			History.push('/search', {advancedSearch: queryState})
+			this.props.history.push({
+				pathname: '/search',
+				state: {advancedSearch: queryState}
+			})
 			event.preventDefault()
 			event.stopPropagation()
 		}
 	}
 }
+
+export default withRouter(AdvancedSearch)
 
 class SearchFilter extends Component {
 	static propTypes = {

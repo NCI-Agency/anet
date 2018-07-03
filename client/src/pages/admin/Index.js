@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
@@ -9,20 +9,26 @@ import Form from 'components/Form'
 
 import API from 'api'
 
-export default class AdminIndex extends Page {
-	static contextTypes = {
-		app: PropTypes.object,
+import AppContext from 'components/AppContext'
+import { connect } from 'react-redux'
+
+class BaseAdminIndex extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			settings: {},
 		}
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			adminSettings(f:getAll) { key, value }
 		`).then(data => {
 			let settings = {}
@@ -64,7 +70,7 @@ export default class AdminIndex extends Page {
 
         API.send('/api/admin/save', json, {disableSubmits: true})
             .then(() => {
-				this.context.app.fetchData()
+				this.props.loadAppData()
 			})
 			.catch(error => {
                 this.setState({error})
@@ -74,3 +80,13 @@ export default class AdminIndex extends Page {
 	}
 
 }
+
+const AdminIndex = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAdminIndex loadAppData={context.loadAppData} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(AdminIndex)

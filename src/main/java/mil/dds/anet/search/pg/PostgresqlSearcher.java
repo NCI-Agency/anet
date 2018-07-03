@@ -1,6 +1,7 @@
 package mil.dds.anet.search.pg;
 
 import mil.dds.anet.search.Searcher;
+import mil.dds.anet.search.sqlite.SqliteAuthorizationGroupSearcher;
 import mil.dds.anet.search.sqlite.SqliteLocationSearcher;
 import mil.dds.anet.search.sqlite.SqliteOrganizationSearcher;
 import mil.dds.anet.search.sqlite.SqlitePersonSearcher;
@@ -15,7 +16,8 @@ public class PostgresqlSearcher extends Searcher {
 		 super(
 			new SqliteReportSearcher("EXTRACT(ISODOW FROM reports.\"%s\")", null),
 			new SqlitePersonSearcher(), new SqliteOrganizationSearcher(), new SqlitePositionSearcher(),
-			new SqliteTaskSearcher(), new SqliteLocationSearcher(), new SqliteTagSearcher()
+			new SqliteTaskSearcher(), new SqliteLocationSearcher(), new SqliteTagSearcher(),
+			new SqliteAuthorizationGroupSearcher()
 		);
 	}
 }

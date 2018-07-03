@@ -5,7 +5,7 @@ This section describes the recommended Developer Environment and how to set it u
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html).  This can also be either installed, or downloaded as a .zip.  If you do not use the installer, be sure to set the `JAVA_HOME` environment variable to the location of the JDK.
 - [Eclipse](http://www.eclipse.org/downloads/).  Eclipse is a Java IDE.  It can be downloaded as an installer or as a .zip file that does not require installation.
   - When the installer asks which version you'd like to install, choose "Eclipse IDE for Java Developers".
-- [node.js 7.x](https://nodejs.org/en/).
+- [node.js 8.x](https://nodejs.org/en/).
 - [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
@@ -13,13 +13,18 @@ This section describes the recommended Developer Environment and how to set it u
    ```
    git clone git@github.com:deptofdefense/anet.git
    ```
+- Install the recommended git hooks
+   ```
+   cd anet
+   git config core.hooksPath scripts/githooks
+   ```
 
 ### Possible Problems
 - **You cannot access [the source code repo](https://github.com/deptofdefense/anet).** Solution: Get someone who does have admin access to add you as a collaborator. Ensure that you have the correct public key installed to github. See https://help.github.com/articles/connecting-to-github-with-ssh/ for more information on troubleshooting this step. 
 - **The git clone command takes a long time, then fails.** Solution: Some networks block ssh. Try using the `https` URL from github to download the source code. 
 
 ## Set Up Gradle, Eclipse and NPM
-The frontend is run with `npm`.  We recommend running the backend via `eclipse` if you are doing any backend development, and `gradle` if you are only doing frontend development.
+The frontend is run with `yarn`.  We recommend running the backend via `eclipse` if you are doing any backend development, and `gradle` if you are only doing frontend development.
 
 1. Set up Gradle
    1. Open a command line in the `anet` directory that was retrieved from github.
@@ -27,7 +32,7 @@ The frontend is run with `npm`.  We recommend running the backend via `eclipse` 
    1. Run `./gradlew eclipse` (linux/mac) or `./gradlew.bat eclipse` (windows) to download all the java dependencies.  This can take several minutes depending on your internet connection.
 1. Set up npm
    1. Change Directories into the `client/` directory
-   1. Run `npm install`  to download all the javascript dependencies.  This can take several minutes depending on your internet connection. If the command hangs, it may be because your network blocks ssh. Try the command again on a different network.
+   1. Run `yarn install`  to download all the javascript dependencies.  This can take several minutes depending on your internet connection. If the command hangs, it may be because your network blocks ssh. Try the command again on a different network.
 1. Set up Eclipse
    1. Eclipse will ask you for a `workspace` directory. You can choose any empty directory.
    1. Import the `anet/` directory into eclipse as an existing project.
@@ -135,11 +140,11 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ## React Frontend
 ### Initial Setup
-1. Make sure you have node.js v7.x installed: ( http://nodejs.org )
+1. Make sure you have node.js v8.x installed: ( http://nodejs.org )
 1. `cd client/`
     - All of the frontend code is in the `client/` directory.
-1. Install the development dependencies: `npm install`
-1. Run the server: `npm start`
+1. Install the development dependencies: `yarn install`
+1. Run the server: `yarn start`
 1. Go to [http://localhost:3000/](http://localhost:3000/) in your browser.
    - When prompted for credentials:
      - **Username:** `erin`

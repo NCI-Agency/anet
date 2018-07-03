@@ -10,7 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
-import LoaderHOC from '../HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const d3 = require('d3')
 const chartByDayOfWeekId = 'reports_by_day_of_week'
@@ -18,16 +19,18 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   id
   engagementDayOfWeek
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
 /*
  * Component displaying a chart with number of reports released within a certain
  * period. The counting is done grouped by day of the week. 
  */
-export default class ReportsByDayOfWeek extends Component {
+class ReportsByDayOfWeek extends Component {
   static propTypes = {
     startDate: PropTypes.object.isRequired,
     endDate: PropTypes.object.isRequired,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -106,6 +109,7 @@ export default class ReportsByDayOfWeek extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     // Query used by the chart
     const chartQuery = this.runChartQuery(this.chartQueryParams())
     Promise.all([chartQuery]).then(values => {
@@ -127,6 +131,7 @@ export default class ReportsByDayOfWeek extends Component {
             r.reportsCount = simplifiedValues.filter(item => item.dayOfWeek === r.dayOfWeekInt).length
             return r})
       })
+      this.props.hideLoading()
     })
     this.fetchDayOfWeekData()
   }
@@ -208,18 +213,12 @@ export default class ReportsByDayOfWeek extends Component {
     this.fetchData()
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.datePropsChanged(nextProps)) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedDayOfWeek: ''
-      })
-    }
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (this.datePropsChanged(prevProps)) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedDayOfWeek: ''  // reset focus when changing the date
+      }, () => this.fetchData())
     }
   }
 
@@ -229,3 +228,5 @@ export default class ReportsByDayOfWeek extends Component {
     return startDateChanged || endDateChanged
   }
 }
+
+export default connect(null, mapDispatchToProps)(ReportsByDayOfWeek)

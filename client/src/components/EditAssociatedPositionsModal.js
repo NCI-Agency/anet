@@ -8,38 +8,30 @@ import API from 'api'
 import Settings from 'Settings'
 
 import Messages from'components/Messages'
+import AppContext from 'components/AppContext'
 
 import REMOVE_ICON from 'resources/delete.png'
 
-export default class EditAssociatedPositionsModal extends Component {
+class BaseEditAssociatedPositionsModal extends Component {
 	static propTypes = {
 		position: PropTypes.object.isRequired,
 		showModal: PropTypes.bool,
 		onCancel: PropTypes.func.isRequired,
-		onSuccess: PropTypes.func.isRequired
+		onSuccess: PropTypes.func.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static contextTypes = {
-		currentUser: PropTypes.object
-	}
-
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 		this.state = {
 			error: null,
 			associatedPositions: props.position.associatedPositions.slice()
 		}
 	}
 
-	componentWillReceiveProps(nextProps, nextContext) {
-		let assoc = nextProps.position.associatedPositions.slice()
-		this.setState({error: null, associatedPositions: assoc})
-	}
-
 	render() {
-		const {position} = this.props
+		const { position, currentUser } = this.props
 		const {associatedPositions} = this.state
-		const currentUser = this.context.currentUser
 		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
 		const positionSearchQuery = {status: Position.STATUS.ACTIVE, matchPersonName: true}
@@ -119,13 +111,15 @@ export default class EditAssociatedPositionsModal extends Component {
 
 	@autobind
 	addPositionRelationship(newRelatedPos)  {
-		let rels = this.state.associatedPositions
+		if (newRelatedPos.id) {
+			let rels = this.state.associatedPositions
 
-		if (!rels.find(relPos => relPos.id === newRelatedPos.id)) {
-			let newRels = rels.slice()
-			newRels.push(new Position(newRelatedPos))
+			if (!rels.find(relPos => relPos.id === newRelatedPos.id)) {
+				let newRels = rels.slice()
+				newRels.push(new Position(newRelatedPos))
 
-			this.setState({associatedPositions: newRels})
+				this.setState({associatedPositions: newRels})
+			}
 		}
 	}
 
@@ -135,8 +129,10 @@ export default class EditAssociatedPositionsModal extends Component {
 		let index = rels.findIndex(rel => rel.id === relToDelete.id)
 
 		if (index !== -1) {
-			rels.splice(index, 1)
-			this.setState({associatedPositions: rels})
+			let newRels = rels.slice()
+			newRels.splice(index, 1)
+
+			this.setState({associatedPositions: newRels})
 		}
 	}
 
@@ -160,3 +156,13 @@ export default class EditAssociatedPositionsModal extends Component {
 		this.props.onCancel()
 	}
 }
+
+const EditAssociatedPositionsModal = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseEditAssociatedPositionsModal currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default EditAssociatedPositionsModal

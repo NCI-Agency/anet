@@ -1,20 +1,21 @@
 import React from 'react'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import NavigationWarning from 'components/NavigationWarning'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
-import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import AuthorizationGroupForm from 'pages/admin/authorizationgroup/Form'
 
 import {AuthorizationGroup} from 'models'
 
-export default class AuthorizationGroupNew extends ValidatableFormWrapper {
-	static pageProps = {
-		useNavigation: false
-	}
+import { PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class AuthorizationGroupNew extends Page {
+
+	static propTypes = {...pagePropTypes}
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			authorizationGroup: new AuthorizationGroup(),
@@ -26,12 +27,13 @@ export default class AuthorizationGroupNew extends ValidatableFormWrapper {
 
 		return (
 			<div>
-				<NavigationWarning original={new AuthorizationGroup()} current={authorizationGroup} />
 				<Breadcrumbs items={[['Create new authorization group', AuthorizationGroup.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<AuthorizationGroupForm authorizationGroup={authorizationGroup} />
+				<AuthorizationGroupForm original={new AuthorizationGroup()} authorizationGroup={authorizationGroup} />
 			</div>
 		)
 	}
 }
+
+export default connect(null, mapDispatchToProps)(AuthorizationGroupNew)

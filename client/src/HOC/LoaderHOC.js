@@ -1,8 +1,16 @@
+import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import './LoaderHOC.css'
+
+export const mapDispatchToProps = (dispatch, ownProps) => ({
+    showLoading: () => dispatch(showLoading()),
+    hideLoading: () => dispatch(hideLoading()),
+})
 
 const LoaderHOC = (isLoading) => (dataPropName) => (WrappedComponent) => {
     return class LoaderHOC extends Component {
+
         isEmpty(prop) {
             return (
                 prop === null ||
@@ -25,11 +33,13 @@ const LoaderHOC = (isLoading) => (dataPropName) => (WrappedComponent) => {
 
             if (showLoader) {
                 return <div className='loader'></div>
-            } else if (dataIsEmpty) {
-                return <div></div>
-            }
-            else {
-                return <WrappedComponent {...this.props} />
+            } else {
+                if (dataIsEmpty) {
+                    return <div></div>
+                }
+                else {
+                    return <WrappedComponent {...this.props} />
+                }
             }
         }
     }

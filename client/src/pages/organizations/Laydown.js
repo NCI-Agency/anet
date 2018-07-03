@@ -8,14 +8,12 @@ import LinkTo from 'components/LinkTo'
 import Settings from 'Settings'
 
 import {Position, Person} from 'models'
+import AppContext from 'components/AppContext'
 
-export default class OrganizationLaydown extends Component {
+class BaseOrganizationLaydown extends Component {
 	static propTypes = {
-		organization: PropTypes.object.isRequired
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+		organization: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -27,7 +25,7 @@ export default class OrganizationLaydown extends Component {
 	}
 
 	render() {
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const org = this.props.organization
 		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
 
@@ -39,10 +37,6 @@ export default class OrganizationLaydown extends Component {
 
 		return <div id="laydown" data-jumptarget>
 			<Fieldset id="supportedPositions" title="Supported positions" action={<div>
-				{numInactivePos > 0 && <Button onClick={this.toggleShowInactive}>
-					{(showInactivePositions ? "Hide " : "Show ") + numInactivePos + " inactive position(s)"}
-				</Button>}
-
 				{isSuperUser && <LinkTo position={Position.pathForNew({organizationId: org.id})} button>
 					Create position
 				</LinkTo>}
@@ -52,7 +46,12 @@ export default class OrganizationLaydown extends Component {
 				{supportedPositions.length === 0 && <em>There are no occupied positions</em>}
 			</Fieldset>
 
-			<Fieldset id="vacantPositions" title="Vacant positions">
+			<Fieldset id="vacantPositions" title="Vacant positions" action={<div>
+				{numInactivePos > 0 && <Button onClick={this.toggleShowInactive}>
+					{(showInactivePositions ? "Hide " : "Show ") + numInactivePos + " inactive position(s)"}
+				</Button>}
+			</div>}>
+
 				{this.renderPositionTable(positionsNeedingAttention)}
 				{positionsNeedingAttention.length === 0 && <em>There are no vacant positions</em>}
 			</Fieldset>
@@ -156,3 +155,13 @@ export default class OrganizationLaydown extends Component {
 		this.setState({showInactivePositions: !this.state.showInactivePositions})
 	}
 }
+
+const OrganizationLaydown = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationLaydown currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default OrganizationLaydown

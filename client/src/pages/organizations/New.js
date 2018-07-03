@@ -1,20 +1,25 @@
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import NavigationWarning from 'components/NavigationWarning'
 import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
-export default class OrganizationNew extends Page {
-	static pageProps = {
-		useNavigation: false,
+import utils from 'utils'
+
+import { PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class OrganizationNew extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			originalOrganization: new Organization({type: Organization.TYPE.ADVISOR_ORG}),
@@ -23,9 +28,10 @@ export default class OrganizationNew extends Page {
 	}
 
 	fetchData(props) {
-		if (props.location.query.parentOrgId) {
-			API.query(/* GraphQL */`
-				organization(id: ${props.location.query.parentOrgId}) {
+		const qs = utils.parseQueryString(props.location.search)
+		if (qs.parentOrgId) {
+			return API.query(/* GraphQL */`
+				organization(id: ${qs.parentOrgId}) {
 					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
@@ -49,9 +55,10 @@ export default class OrganizationNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Organization', Organization.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalOrganization} current={organization} />
-				<OrganizationForm organization={organization} />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} />
 			</div>
 		)
 	}
 }
+
+export default connect(null, mapDispatchToProps)(OrganizationNew)

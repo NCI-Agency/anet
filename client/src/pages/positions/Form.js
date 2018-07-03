@@ -9,30 +9,39 @@ import Form from 'components/Form'
 import Messages from 'components/Messages'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import History from 'components/History'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Location, Position, Organization} from 'models'
+import {Location, Organization, Person, Position} from 'models'
 
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
+import LinkTo from 'components/LinkTo'
 
-export default class PositionForm extends ValidatableFormWrapper {
+class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
 		position: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		error: PropTypes.object,
 		success: PropTypes.object,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	constructor(props) {
+		super(props)
+
+		this.state = {
+			isBlocking: false,
+			errors: {},
+		}
 	}
 
 	render() {
 		let {position, error, success, edit} = this.props
 		error = this.props.error || (this.state && this.state.error)
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
 
 		let orgSearchQuery = {status: Organization.STATUS.ACTIVE}
@@ -56,6 +65,9 @@ export default class PositionForm extends ValidatableFormWrapper {
 		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.id
 
 		return (
+			<div>
+			<NavigationWarning isBlocking={this.state.isBlocking} />
+
 			<ValidatableForm
 				formFor={position}
 				onChange={this.onChange}
@@ -81,7 +93,7 @@ export default class PositionForm extends ValidatableFormWrapper {
 						</ButtonToggleGroup>
 
 						{willAutoKickPerson && <HelpBlock>
-							<span className="text-danger">Setting this position to inactive will automatically remove <strong>{position.person.name}</strong> from this position.</span>
+							<span className="text-danger">Setting this position to inactive will automatically remove <LinkTo person={position.person}/> from this position.</span>
 						</HelpBlock> }
 					</Form.Field>
 
@@ -129,12 +141,16 @@ export default class PositionForm extends ValidatableFormWrapper {
 					</Form.Field>
 				</Fieldset>
 			</ValidatableForm>
+			</div>
 		)
 	}
 
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
@@ -148,19 +164,26 @@ export default class PositionForm extends ValidatableFormWrapper {
 		// Remove permissions property, was added temporarily in order to be able
 		// to select a specific advisor type.
 		delete position.permissions
+		position.location = {id: position.location.id}
 		position.organization = {id: position.organization.id}
 		position.person = (position.person && position.person.id) ? {id: position.person.id} : {}
 		position.code = position.code || null //Need to null out empty position codes
 
 		let url = `/api/positions/${edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, position, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {
 					position.id = response.id
 				}
-
-				History.replace(Position.pathForEdit(position), false)
-				History.push(Position.pathFor(position), {success: 'Saved Position', skipPageLeaveWarning: true})
+				this.props.history.replace(Position.pathForEdit(position))
+				this.props.history.push({
+					pathname: Position.pathFor(position),
+					state: {
+						success: 'Saved Position',
+					}
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
@@ -168,3 +191,13 @@ export default class PositionForm extends ValidatableFormWrapper {
 	}
 
 }
+
+const PositionForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePositionForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default withRouter(PositionForm)

@@ -1,9 +1,16 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
+import {Location} from 'models'
+import AppContext from 'components/AppContext'
+
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Settings from 'Settings'
+
+import MARKER_ICON from 'resources/leaflet/marker-icon.png'
+import MARKER_ICON_2X from 'resources/leaflet/marker-icon-2x.png'
+import MARKER_SHADOW from 'resources/leaflet/marker-shadow.png'
 
 const css = {
 	height: '500px',
@@ -11,12 +18,11 @@ const css = {
 	zIndex: 1,
 }
 
-export default class Leaflet extends Component {
+class BaseLeaflet extends Component {
 	static propTypes = {
 		markers: PropTypes.array,
-	}
-	static contextTypes = {
-		app: PropTypes.object.isRequired
+		appSettings: PropTypes.object,
+		mapId: PropTypes.string, // pass this when you have more than one map on a page
 	}
 
 	constructor(props) {
@@ -29,9 +35,9 @@ export default class Leaflet extends Component {
 		}
 
 		this.icon = L.icon({
-			iconUrl:       '/assets/img/leaflet/marker-icon.png',
-			iconRetinaUrl: '/assets/img/leaflet/marker-icon-2x.png',
-			shadowUrl:     '/assets/img/leaflet/marker-shadow.png',
+			iconUrl:       MARKER_ICON,
+			iconRetinaUrl: MARKER_ICON_2X,
+			shadowUrl:     MARKER_SHADOW,
 			iconSize:    [25, 41],
 			iconAnchor:  [12, 41],
 			popupAnchor: [1, -34],
@@ -40,7 +46,12 @@ export default class Leaflet extends Component {
 		})
 	}
 
-	componentDidMount() {		
+	get mapId() {
+		const mapId = this.props.mapId || 'default'
+		return 'map-' + mapId
+	}
+
+	componentDidMount() {
 		const mapOptions = Object.assign({zoomControl:true}, Settings.imagery.mapOptions, Settings.imagery.mapOptions.crs && { crs: L.CRS[Settings.imagery.mapOptions.crs] })
 		const map = L.map('map', mapOptions).setView([34.52, 69.16], 10)
 		const layerControl = L.control.layers({}, {}, {collapsed:false})
@@ -52,18 +63,22 @@ export default class Leaflet extends Component {
 		let state = this.state
 		state.map = map
 		state.markerLayer = L.featureGroup([]).addTo(map)
-		this.setState(state)
-		this.updateMarkerLayer(this.props.markers)
+		this.setState(state, () => {
+			this.tryAddLayers()
+			this.updateMarkerLayer(this.props.markers)
+		})
 	}
 
 
-	componentWillReceiveProps(nextProps) {
-		let existingMarkers = this.state.markerLayer.getLayers()
-		let markersToAdd = nextProps.markers.filter(m =>
+	componentDidUpdate(prevProps, prevState) {
+		this.tryAddLayers()
+
+		const existingMarkers = this.state.markerLayer.getLayers()
+		const markersToAdd = this.props.markers.filter(m =>
 			existingMarkers.findIndex(el => el.options.id === m.id) === -1
 		)
-		let markersToRemove = existingMarkers.filter(m =>
-			nextProps.markers.findIndex(el => m.options.id === el.id) === -1
+		const markersToRemove = existingMarkers.filter(m =>
+			this.props.markers.findIndex(el => m.options.id === el.id) === -1
 		)
 		this.updateMarkerLayer(markersToAdd, markersToRemove)
 	}
@@ -76,7 +91,7 @@ export default class Leaflet extends Component {
 		let newMarkers = []
 		let markerLayer = this.state.markerLayer
 		markers.forEach(m => {
-			let latLng = (m.lat && m.lng) ? [m.lat, m.lng] : this.state.map.getCenter()
+			let latLng = (Location.hasCoordinates(m)) ? [m.lat, m.lng] : this.state.map.getCenter()
 			let marker = L.marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
 				.bindPopup(m.name)
 			if (m.onMove) {
@@ -120,7 +135,7 @@ export default class Leaflet extends Component {
 	render() {
 		return (
 			<div>
-				<div id="map" style={css} />
+				<div id={this.mapId} style={css} />
 			</div>
 		)
 	}
@@ -134,3 +149,13 @@ export default class Leaflet extends Component {
 	}
 
 }
+
+const Leaflet = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseLeaflet appSettings={context.appSettings} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default Leaflet

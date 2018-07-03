@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Table, FormGroup, Col, ControlLabel, Button} from 'react-bootstrap'
 import moment from 'moment'
 
@@ -21,9 +21,14 @@ import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
 import Settings from 'Settings'
 
-export default class PersonShow extends Page {
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+import AppContext from 'components/AppContext'
+import { connect } from 'react-redux'
+
+class BasePersonShow extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
@@ -32,7 +37,7 @@ export default class PersonShow extends Page {
 		super(props)
 		this.state = {
 			person: new Person({
-				id: props.params.id,
+				id: props.match.params.id,
 			}),
 			authoredReports: null,
 			attendedReports: null,
@@ -79,7 +84,7 @@ export default class PersonShow extends Page {
 
 	fetchData(props) {
 		let personPart = new GQL.Part(/* GraphQL */`
-			person(id:${props.params.id}) {
+			person(id:${props.match.params.id}) {
 				id,
 				name, rank, role, status, emailAddress, phoneNumber,
 				biography, country, gender, endOfTourDate,
@@ -97,10 +102,10 @@ export default class PersonShow extends Page {
 					}
 				}
 			}`)
-		let authoredReportsPart = this.getAuthoredReportsPart(props.params.id)
-		let attendedReportsPart = this.getAttendedReportsPart(props.params.id)
+		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.id)
+		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.id)
 
-		GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
+		return GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
 			this.setState({
 				person: new Person(data.person),
 				authoredReports: data.authoredReports,
@@ -119,7 +124,7 @@ export default class PersonShow extends Page {
 		//User can always edit themselves
 		//Admins can always edit anybody
 		//SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const hasPosition = position && position.id
 		const canEdit = Person.isEqual(currentUser, person) ||
 			currentUser.isAdmin() ||
@@ -175,7 +180,7 @@ export default class PersonShow extends Page {
 
 					<Fieldset title="Position" >
 						<Fieldset title="Current Position" id="current-position"
-							className={(!position || !position.id) && 'warning'}
+							className={(!position || !position.id) ? 'warning' : undefined}
 							action={position && position.id && canChangePosition &&
 								<div>
 									<LinkTo position={position} edit button="default" >Edit position details</LinkTo>
@@ -214,7 +219,7 @@ export default class PersonShow extends Page {
 
 					{person.isAdvisor() && authoredReports &&
 						<Fieldset title="Reports authored" id="reports-authored">
-							<ReportCollection
+							<ReportCollection mapId="reports-authored"
 								paginatedReports={authoredReports}
 								goToPage={this.goToAuthoredPage}
 							 />
@@ -223,7 +228,7 @@ export default class PersonShow extends Page {
 
 					{attendedReports &&
 						<Fieldset title={`Reports attended by ${person.name}`} id="reports-attended">
-							<ReportCollection
+							<ReportCollection mapId="reports-attended"
 								paginatedReports={attendedReports}
 								goToPage={this.goToAttendedPage}
 							/>
@@ -246,7 +251,7 @@ export default class PersonShow extends Page {
 		let assocTitle = position.type === Position.TYPE.PRINCIPAL ? 'Is advised by' : 'Advises'
 		return <FormGroup controlId="counterparts">
 			<Col sm={2} componentClass={ControlLabel}>{assocTitle}</Col>
-			<Col sm={9}>
+			<Col sm={10}>
 				<Table>
 					<thead>
 						<tr><th>Name</th><th>Position</th><th>Organization</th></tr>
@@ -267,7 +272,7 @@ export default class PersonShow extends Page {
 	}
 
 	renderPositionBlankSlate(person) {
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		//when the person is not in a position, any super user can assign them.
 		let canChangePosition = currentUser.isSuperUser()
 
@@ -328,3 +333,13 @@ export default class PersonShow extends Page {
 		)
 	}
 }
+
+const PersonShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(PersonShow)

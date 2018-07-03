@@ -11,7 +11,9 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
-import LoaderHOC from '../HOC/LoaderHOC'
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
+import { showLoading, hideLoading } from 'react-redux-loading-bar'
 
 const d3 = require('d3')
 const chartByOrgId = 'cancelled_reports_by_org'
@@ -21,15 +23,17 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   advisorOrg { id, shortName }
   cancelledReason
 `
-const BarChartWithLoader = LoaderHOC('isLoading')('data')(BarChart)
+const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
 /*
  * Component displaying a chart with reports cancelled since
  * the given date.
  */
-export default class CancelledEngagementReports extends Component {
+class CancelledEngagementReports extends Component {
   static propTypes = {
     date: PropTypes.object,
+    showLoading: PropTypes.func.isRequired,
+    hideLoading: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -133,6 +137,7 @@ export default class CancelledEngagementReports extends Component {
 
   fetchData() {
     this.setState( {isLoading: true} )
+    this.props.showLoading()
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.queryParams)
@@ -177,6 +182,7 @@ export default class CancelledEngagementReports extends Component {
             return a.reason.localeCompare(b.reason)
         })
       })
+      this.props.hideLoading()
     })
     this.fetchOrgData()
   }
@@ -269,23 +275,19 @@ export default class CancelledEngagementReports extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
-    if (nextProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedReason: '',
-        focusedOrg: ''
-      })  // reset focus when changing the date
-    }
-  }
-
   componentDidMount() {
     this.fetchData()
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
-      this.fetchData()
+      this.setState({
+        reportsPageNum: 0,
+        focusedReason: '',  // reset focus when changing the date
+        focusedOrg: ''
+      }, () => this.fetchData())
     }
   }
 }
+
+export default connect(null, mapDispatchToProps)(CancelledEngagementReports)

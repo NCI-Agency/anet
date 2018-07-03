@@ -1,9 +1,8 @@
-/* eslint no-restricted-globals: ["off", "confirm"] */ //TODO remove this
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page from 'components/Page'
-import {Link} from 'react-router'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import {Link} from 'react-router-dom'
 import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
 
@@ -20,13 +19,20 @@ import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
 import Settings from 'Settings'
-import History from 'components/History'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 import autobind from 'autobind-decorator'
 
-export default class PositionShow extends Page {
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+import ConfirmDelete from 'components/ConfirmDelete'
+
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+
+class BasePositionShow extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Position'
@@ -36,7 +42,7 @@ export default class PositionShow extends Page {
 
 		this.state = {
 			position: new Position( {
-				id: props.params.id,
+				id: props.match.params.id,
 				previousPeople: [],
 				associatedPositions: [],
 				showAssignPersonModal: false,
@@ -48,8 +54,8 @@ export default class PositionShow extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
-			position(id:${props.params.id}) {
+		return API.query(/* GraphQL */`
+			position(id:${props.match.params.id}) {
 				id, name, type, status, code,
 				organization { id, shortName, longName, identificationCode },
 				person { id, name, rank },
@@ -67,7 +73,7 @@ export default class PositionShow extends Page {
 		const position = this.state.position
 		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name // TODO: shouldn't this be Position.humanNameOfType instead of a person title?
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const canEdit =
 			//Super Users can edit any Principal
 			(currentUser.isSuperUser() && position.type === Position.TYPE.PRINCIPAL) ||
@@ -112,18 +118,18 @@ export default class PositionShow extends Page {
 						</Form.Field>}
 
 						<Form.Field id="location" label="Location">
-							{position.location && <LinkTo location={position.location}>{position.location.name}</LinkTo>}
+							{position.location && <LinkTo anetLocation={position.location}>{position.location.name}</LinkTo>}
 						</Form.Field>
 					</Fieldset>
 
 					<Fieldset title="Current assigned person"
 						id="assigned-advisor"
-						className={(!position.person || !position.person.id) && 'warning'}
+						className={(!position.person || !position.person.id) ? 'warning' : undefined}
 						style={{textAlign: 'center'}}
 						action={position.person && position.person.id && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
 						{position.person && position.person.id
 							? <div>
-								<h4 className="assigned-person-name"><LinkTo person={position.person}>{position.person.rank} {position.person.name}</LinkTo></h4>
+								<h4 className="assigned-person-name"><LinkTo person={position.person}/></h4>
 								<p></p>
 							</div>
 							: <div>
@@ -193,9 +199,15 @@ export default class PositionShow extends Page {
 					</Fieldset>
 				</Form>
 
-				{canDelete && <div className="pull-right submit-buttons">
-					<Button bsStyle="danger" onClick={this.deletePosition}>Delete Position</Button>
-				</div>}
+				{canDelete && <div className="submit-buttons"><div>
+					<ConfirmDelete
+						onConfirmDelete={this.deletePosition}
+						objectType="position"
+						objectDisplay={'#' + this.state.position.id}
+						bsStyle="warning"
+						buttonLabel="Delete position"
+						className="pull-right" />
+				</div></div>}
 			</div>
 		)
 	}
@@ -239,14 +251,23 @@ export default class PositionShow extends Page {
 
 	@autobind
 	deletePosition() {
-		if (!confirm("Are you sure you want to delete this position? This cannot be undone")) {
-			return
-		}
-
 		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
-			History.push('/', {success: 'Position Deleted'})
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Position Deleted'}
+			})
 		}, data => {
 			this.setState({success: null, error: data})
 		})
 	}
 }
+
+const PositionShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePositionShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(withRouter(PositionShow))

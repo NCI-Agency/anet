@@ -7,14 +7,14 @@ Anybody is welcome to create a branch on this repository and make edits.  If you
 Our code style conventions are automatically checked on both the Java server side and the Javascript client side.  You can run these checks with: 
 
 - Java Checkstyle `./gradlew check`
-- JS Lint `cd client; npm run lint` 
+- JS Lint `cd client; yarn run lint`
 
 ### Testing
 
 Before we merge any code into master we verify that all tests run.  You can run these yourself with: 
 
 - Backend Unit Tests `export DB_DRIVER='sqlserver'; ./gradlew test`
-- Front-end Integration Tests `cd client; npm run test`
+- Front-end Integration Tests `cd client; yarn run test`
 
 If you are adding any new features, please write test cases that cover your features. 
 
