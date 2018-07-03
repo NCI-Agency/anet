@@ -80,8 +80,6 @@ class AdvancedSearch extends Component {
 					</ButtonToggleGroup>
 				</FormGroup>
 
-				<FormControl value={this.props.text} className="hidden" />
-
 				{filters.map(filter =>
 					filterDefs[filter.key] && <SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
 				)}
