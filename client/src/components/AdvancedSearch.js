@@ -152,6 +152,9 @@ class AdvancedSearch extends Component {
 
 	@autobind
 	onSubmit(event) {
+		if (typeof this.props.onSearch === 'function') {
+			this.props.onSearch()
+		}
 		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
 		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
 		// We only update the Redux state on submit
