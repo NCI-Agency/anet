@@ -46,7 +46,7 @@ export default class AutocompleteFilter extends Component {
 		console.log('autocompletefilter', this.props)
 		return (
 			!this.props.asFormField ?
-				<span>{this.props.value[this.props.valueKey]}</span>
+				<React.Fragment>{this.props.value[this.props.valueKey]}</React.Fragment>
 			:
 				<Autocomplete
 					{...autocompleteProps}
