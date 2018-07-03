@@ -21,7 +21,8 @@ class SearchBar extends Component {
 			text: PropTypes.string,
 			filters: PropTypes.any,
 			objectType: PropTypes.string
-		})
+		}),
+		searchObjectTypes: PropTypes.array,
 	}
 
 	constructor(props) {
@@ -42,10 +43,13 @@ class SearchBar extends Component {
 	render() {
 		const filterDefs = this.props.query.objectType ? this.ALL_FILTERS[this.props.query.objectType].filters: {}
 		const filters = this.props.query.filters.filter(f => filterDefs[f.key])
+		const placeholder = this.props.query.objectType
+			? "Filter " + this.props.query.objectType
+			: "Search for " + this.props.searchObjectTypes.join(", ")
 		return <div>
 			<Form onSubmit={this.onSubmit}>
 				<InputGroup>
-					<FormControl value={this.state.searchTerms} placeholder="Search for people, reports, positions, or locations" onChange={this.onChange} id="searchBarInput" />
+					<FormControl value={this.state.searchTerms} placeholder={placeholder} onChange={this.onChange} id="searchBarInput" />
 					<InputGroup.Button>
 						<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
 					</InputGroup.Button>
@@ -107,6 +111,7 @@ class SearchBar extends Component {
 const mapStateToProps = (state, ownProps) => ({
 	query: state.searchQuery,
 	onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
+	searchObjectTypes: state.searchProps.searchObjectTypes
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
