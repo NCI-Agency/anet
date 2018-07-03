@@ -33,12 +33,9 @@ class SearchBar extends Component {
 		this.ALL_FILTERS = searchFilters.searchFilters()
 	}
 
-	static getDerivedStateFromProps(nextProps, prevState) {
-		if (nextProps.query.text === prevState.searchTerms) {
-			return null
-		}
-		return {
-			searchTerms: nextProps.query.text
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.query.text !== this.props.query.text) {
+			this.setState({searchTerms: this.props.query.text})
 		}
 	}
 
