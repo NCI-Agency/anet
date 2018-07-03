@@ -11,6 +11,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
@@ -31,6 +33,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 class CancelledEngagementReports extends Component {
   static propTypes = {
+    queryParams: PropTypes.object,
     date: PropTypes.object,
     showLoading: PropTypes.func.isRequired,
     hideLoading: PropTypes.func.isRequired,
@@ -49,26 +52,17 @@ class CancelledEngagementReports extends Component {
     }
   }
 
-  get queryParams() {
-    return {
-      state: [Report.STATE.CANCELLED],
-      releasedAtStart: this.props.date.valueOf(),
-    }
-  }
-
   get referenceDateLongStr() { return this.props.date.format('DD MMM YYYY') }
 
   render() {
     const focusDetails = this.getFocusDetails()
     return (
       <div>
-        <p className="help-text">{`Number of cancelled engagement reports released since ${this.referenceDateLongStr}, grouped by advisor organization`}</p>
+        <p className="help-text">{`Grouped by advisor organization`}</p>
         <p className="chart-description">
-          {`Displays the number of cancelled engagement reports released since
-            ${this.referenceDateLongStr}. The reports are grouped by advisor
-            organization. In order to see the list of cancelled engagement
-            reports for an organization, click on the bar corresponding to the
-            organization.`}
+          {`The reports are grouped by advisor organization. In order to see the
+            list of cancelled engagement reports for an organization, click on
+            the bar corresponding to the organization.`}
         </p>
         <BarChartWithLoader
           chartId={chartByOrgId}
@@ -79,12 +73,12 @@ class CancelledEngagementReports extends Component {
           onBarClick={this.goToOrg}
           updateChart={this.state.updateChart}
           isLoading={this.state.isLoading} />
-        <p className="help-text">{`Number of cancelled engagement reports since ${this.referenceDateLongStr}, grouped by reason for cancellation`}</p>
+        <p className="help-text">{`Grouped by reason for cancellation`}</p>
         <p className="chart-description">
-          {`Displays the number of cancelled engagement reports released since
-            ${this.referenceDateLongStr}. The reports are grouped by reason for cancellation. In order to see the list of cancelled engagement
-            reports for a reason for cancellation, click on the bar corresponding
-            to the reason for cancellation.`}
+          {`The reports are grouped by reason for cancellation. In order to see
+            the list of cancelled engagement reports for a reason for
+            cancellation, click on the bar corresponding to the reason for
+            cancellation.`}
         </p>
         <BarChartWithLoader
           chartId={chartByReasonId}
@@ -108,10 +102,10 @@ class CancelledEngagementReports extends Component {
   }
 
   getReasonDisplayName(reason) {
-    return reason.replace("CANCELLED_", "")
+    return reason ? reason.replace("CANCELLED_", "")
       .replace(/_/g, " ")
       .toLocaleLowerCase()
-      .replace(/(\b\w)/gi, function(m) {return m.toUpperCase()})
+      .replace(/(\b\w)/gi, function(m) {return m.toUpperCase()}) : ''
   }
 
   getFocusDetails() {
@@ -140,7 +134,7 @@ class CancelledEngagementReports extends Component {
     this.props.showLoading()
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -157,31 +151,33 @@ class CancelledEngagementReports extends Component {
       shortName: 'No advisor organization'
     }
     Promise.all([chartQuery]).then(values => {
-      let reportsList = values[0].reportList.list
-      reportsList = reportsList
-        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
-      this.setState({
-        isLoading: false,
-        updateChart: true,  // update chart after fetching the data
-        graphDataByOrg: reportsList
-          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-          .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
-          .sort((a, b) => {
-            let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
-            let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
-            if (a_index < 0)
-              return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
-            else
-              return (b_index < 0) ? -1 : a_index-b_index
-          }),
-        graphDataByReason: reportsList
-          .filter((item, index, d) => d.findIndex(t => {return t.cancelledReason === item.cancelledReason }) === index)
-          .map(d => {d.cancelledByReason = reportsList.filter(item => item.cancelledReason === d.cancelledReason).length; return d})
-          .map(d => {d.reason = this.getReasonDisplayName(d.cancelledReason); return d})
-          .sort((a, b) => {
-            return a.reason.localeCompare(b.reason)
+      if (values[0].reportList.list) {
+        let reportsList = values[0].reportList.list
+        reportsList = reportsList
+          .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
+        this.setState({
+          isLoading: false,
+          updateChart: true,  // update chart after fetching the data
+          graphDataByOrg: reportsList
+            .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
+            .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+            .sort((a, b) => {
+              let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
+              let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
+              if (a_index < 0)
+                return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
+              else
+                return (b_index < 0) ? -1 : a_index-b_index
+            }),
+          graphDataByReason: reportsList
+            .filter((item, index, d) => d.findIndex(t => {return t.cancelledReason === item.cancelledReason }) === index)
+            .map(d => {d.cancelledByReason = reportsList.filter(item => item.cancelledReason === d.cancelledReason).length; return d})
+            .map(d => {d.reason = this.getReasonDisplayName(d.cancelledReason); return d})
+            .sort((a, b) => {
+              return a.reason.localeCompare(b.reason)
+          })
         })
-      })
+      }
       this.props.hideLoading()
     })
     this.fetchOrgData()
@@ -189,7 +185,7 @@ class CancelledEngagementReports extends Component {
 
   fetchOrgData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -215,7 +211,7 @@ class CancelledEngagementReports extends Component {
 
   fetchReasonData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -275,15 +271,11 @@ class CancelledEngagementReports extends Component {
     }
   }
 
-  componentDidMount() {
-    this.fetchData()
-  }
-
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
-        focusedReason: '',  // reset focus when changing the date
+        focusedReason: '',  // reset focus when changing the queryParams
         focusedOrg: ''
       }, () => this.fetchData())
     }

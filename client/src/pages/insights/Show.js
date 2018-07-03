@@ -21,56 +21,78 @@ import FULLSCREEN_ICON from 'resources/fullscreen.png'
 import Fullscreen from "react-full-screen"
 import {Button} from 'react-bootstrap'
 
+import {Report} from 'models'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
-const insightDetails = {
-  'not-approved-reports': {
+export const NOT_APPROVED_REPORTS = 'not-approved-reports'
+export const CANCELLED_REPORTS = 'cancelled-reports'
+export const REPORTS_BY_TASK = 'reports-by-task'
+export const REPORTS_BY_DAY_OF_WEEK = 'reports-by-day-of-week'
+export const FUTURE_ENGAGEMENTS_BY_LOCATION = 'future-engagements-by-location'
+export const ADVISOR_REPORTS = 'advisor-reports'
+export const PROGRAM_SUMMARY_VIEW = 'program-summary-view'
+
+export const INSIGHTS = [
+  NOT_APPROVED_REPORTS, CANCELLED_REPORTS, REPORTS_BY_TASK,
+  FUTURE_ENGAGEMENTS_BY_LOCATION, REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS, PROGRAM_SUMMARY_VIEW
+]
+
+export const INSIGHT_DETAILS = {
+  [NOT_APPROVED_REPORTS]: {
     component: PendingApprovalReports,
-    title: 'Pending approval reports',
+    navTitle: 'Pending Approval Reports',
+    title: 'Number of Pending Approval Reports',
     dateRange: false,
     showCalendar: true
   },
-  'cancelled-reports': {
+  [CANCELLED_REPORTS]: {
     component: CancelledEngagementReports,
-    title: 'Cancelled engagement reports',
+    navTitle: 'Cancelled Engagement Reports',
+    title: 'Number of Cancelled Engagement Reports',
     dateRange: false,
     showCalendar: true
   },
-  'reports-by-task': {
+  [REPORTS_BY_TASK]: {
     component: ReportsByTask,
-    title: 'Reports by task',
-    help: '',
+    navTitle: 'Reports by Task',
+    title: 'Number of Reports by Task',
     dateRange: false,
     showCalendar: true
   },
-  'reports-by-day-of-week': {
+  [REPORTS_BY_DAY_OF_WEEK]: {
     component: ReportsByDayOfWeek,
-    title: 'Reports by day of the week',
-    help: 'Number of reports by day of the week',
+    navTitle: 'Reports by Day of the Week',
+    title: 'Number of Reports by Day of the Week',
     dateRange: true,
     showCalendar: false
   },
-  'advisor-reports': {
-    component: FilterableAdvisorReportsTable,
-    title: 'Advisor reports',
-    dateRange: false,
-    showCalendar: false
-  },
-  'future-engagements-by-location': {
+  [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
     component: FutureEngagementsByLocation,
-    title: 'Future engagements by location',
-    help: 'Number of future engagements by location',
+    navTitle: 'Future Engagements by Location',
+    title: 'Number of Future Engagements by Location',
     dateRange: true,
     onlyShowBetween: true,
   },
-  'program-summary-view': {
+  [ADVISOR_REPORTS]: {
+    component: FilterableAdvisorReportsTable,
+    navTitle: 'Advisor Reports',
+    title: 'Advisor Reports',
+    dateRange: false,
+    showCalendar: false
+  },
+  [PROGRAM_SUMMARY_VIEW]: {
     component: ProgramSummaryView,
+    navTitle: 'Program summary view',
     title: 'Program summary view',
     help: 'Summary view of the program',
     dateRange: false,
     onlyShowBetween: false,
   },
+
 }
 
 const PREFIX_FUTURE = 'future'
@@ -101,22 +123,28 @@ class BaseInsightsShow extends Page {
     return moment().subtract(maxReportAge, 'days').clone()
   }
 
-  get referenceDateLongStr() { return this.state.referenceDate.format('DD MMMM YYYY') }
-
   constructor(props) {
-    super(props)
+    super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
     this.state = {
       isFull: false,
-      referenceDate: null,
-      startDate: null,
-      endDate: null,
-      date: {relative: "0", start: null, end: null}
+      ...this.insightDefaultDates
     }
   }
 
- toggleFull = () => this.setState( {isFull: !this.state.isFull} );
+  toggleFull = () => {
+    this.setState( {isFull: !this.state.isFull} )
+  }
 
- get defaultDates() {
+  get insightDefaultDates() {
+    const prefix = this.props.match.params.insight.split('-', 1).pop()
+    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
+      return this.getDefaultFutureDates()
+    } else {
+      return this.getDefaultPastDates()
+    }
+  }
+
+  get defaultDateRange() {
     return {
       relative: "0",
       start: this.state.startDate.toISOString(),
@@ -124,48 +152,84 @@ class BaseInsightsShow extends Page {
     }
   }
 
-  getFilters = () => {
-    const insight = insightDetails[this.props.match.params.insight]
-    const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
-    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
-    const fullscreenButton = <Button onClick={this.toggleFull} style={calendarButtonCss}><img src={FULLSCREEN_ICON} height={16} alt="Switch to fullscreen mode" /></Button>
-    return <span>{dateRangeFilter}{calenderFilter}{fullscreenButton}</span>
+  get insightQueryParams() {
+    return {
+      [NOT_APPROVED_REPORTS]: [
+        {key: 'State', value: {state: Report.STATE.PENDING_APPROVAL, toQuery: () => {return {state: Report.STATE.PENDING_APPROVAL}}}},
+        {key: 'Update Date', value: {relative: "1",  end: this.state.referenceDate.toISOString()}},
+      ],
+      [CANCELLED_REPORTS]: [
+        {key: 'State', value: {state: Report.STATE.CANCELLED, cancelledReason: '', toQuery: () => {return {state: Report.STATE.CANCELLED}}}},
+        {key: 'Release Date', value: {relative: "2",  start: this.state.referenceDate.toISOString()}},
+      ],
+      [REPORTS_BY_TASK]: [
+        {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
+        {key: 'Release Date', value: {relative: "2",  start: this.state.referenceDate.toISOString()}},
+      ],
+      [REPORTS_BY_DAY_OF_WEEK]: [
+        {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
+        {key: 'Release Date', value: {relative: "0",  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
+        {key: 'includeEngagementDayOfWeek', value: 1},
+      ],
+      [FUTURE_ENGAGEMENTS_BY_LOCATION]: [
+        {key: 'Engagement Date', value: {relative: "0",  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
+      ],
+      [ADVISOR_REPORTS]: [],
+      [PROGRAM_SUMMARY_VIEW]: []
+    }
+  }
+
+  @autobind
+  updateSearchQuery() {
+    this.props.setSearchQuery({
+      text: '',
+      objectType: SEARCH_OBJECT_TYPES.REPORTS,
+      filters: this.insightQueryParams[this.props.match.params.insight]
+    })
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.insight !== this.props.match.params.insight) {
-      this.setStateDefaultDates(this.props.match.params.insight)
+      const oldQueryParams = this.insightQueryParams[prevProps.match.params.insight]
+      const newQueryParams = this.insightQueryParams[this.props.match.params.insight]
+      // when changing insight, set dates to insight specific defaults
+      const defaultDates = this.insightDefaultDates
+      if ((this.state.referenceDate.valueOf() !== defaultDates.referenceDate.valueOf()) ||
+          (this.state.startDate.valueOf() !== defaultDates.startDate.valueOf()) ||
+          (this.state.endDate.valueOf() !== defaultDates.endDate.valueOf())) {
+        this.setState(
+          defaultDates,
+          () => this.updateSearchQuery()
+        )
+      }
+      else if (!_isEqualWith(oldQueryParams, newQueryParams, utils.equalFunction)) {
+        this.updateSearchQuery()
+      }
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
-    this.setStateDefaultDates(this.props.match.params.insight)
+    this.updateSearchQuery()
+    this.props.setSearchProps({
+      searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
+    })
   }
 
-  setStateDefaultDates = (insight) => {
-    const prefix = insight.split('-', 1).pop()
-    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
-      this.setStateDefaultFutureDates()
-    } else {
-      this.setStateDefaultPastDates()
+  getDefaultPastDates = () => {
+    return {
+      referenceDate: this.cutoffDate.startOf('day'),
+      startDate: this.cutoffDate.startOf('day'),
+      endDate: this.currentDateTime.endOf('day')
     }
   }
 
-  setStateDefaultPastDates = () => {
-    this.setState({
-      referenceDate: this.cutoffDate,
-      startDate: this.cutoffDate,
-      endDate: this.currentDateTime.endOf('day')
-    })
-  }
-
-  setStateDefaultFutureDates = () => {
-    this.setState({
-      referenceDate: this.currentDateTime,
-      startDate: this.currentDateTime,
+  getDefaultFutureDates = () => {
+    return {
+      referenceDate: this.currentDateTime.startOf('day'),
+      startDate: this.currentDateTime.startOf('day'),
       endDate: this.currentDateTime.add(14, 'days').endOf('day')
-    })
+    }
   }
 
   handleChangeDateRange = (value) => {
@@ -211,38 +275,42 @@ class BaseInsightsShow extends Page {
   }
 
   render() {
-    const insightConfig = insightDetails[this.props.match.params.insight]
+    const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.props.match.params.insight
+    const queryParams = this.getSearchQuery()
+    const fullscreenButton = <Button onClick={this.toggleFull} style={calendarButtonCss}><img src={FULLSCREEN_ICON} height={16} alt="Switch to fullscreen mode" /></Button>
 
     return (
       <div>
         <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
-
         {this.state.referenceDate &&
-
-            <Fullscreen enabled={this.state.isFull}
-              onChange={isFull => this.setState({isFull})}>
-              <Fieldset id={this.props.match.params.insight} data-jumptarget title={
-                <span>
-                  {insightConfig.title}
-                  {this.getFilters()}
-                </span>
-                }>
-                <InsightComponent
-                  date={this.state.referenceDate.clone()}
-                  startDate={this.state.startDate.clone()}
-                  endDate={this.state.endDate.clone()}
-                />
-              </Fieldset>
-            </Fullscreen>
+          <Fullscreen enabled={this.state.isFull}
+            onChange={isFull => this.setState({isFull})}>
+            <Fieldset id={this.props.match.params.insight} data-jumptarget title={
+              <span>
+                {insightConfig.title}{fullscreenButton}
+              </span>
+              }>
+              <InsightComponent
+                queryParams={queryParams}
+                date={this.state.referenceDate.clone()}
+                startDate={this.state.startDate.clone()}
+                endDate={this.state.endDate.clone()}
+              />
+            </Fieldset>
+          </Fullscreen>
         }
       </div>
     )
   }
 
 }
+
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
 
 const InsightsShow = (props) => (
 	<AppContext.Consumer>
@@ -252,4 +320,4 @@ const InsightsShow = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(InsightsShow)
+export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)

@@ -19,6 +19,7 @@ import utils from 'utils'
 
 import API from 'api'
 
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -54,7 +55,7 @@ class BaseRollupShow extends Page {
 	get rollupEnd() { return moment(this.state.date).endOf('day').hour(18) } // 6:59:59pm today.
 
 	constructor(props) {
-		super(props)
+		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
 
 		const qs = utils.parseQueryString(props.location.search)
 		this.state = {
@@ -97,6 +98,9 @@ class BaseRollupShow extends Page {
 
 	componentDidMount() {
 		super.componentDidMount()
+		this.props.setSearchProps({
+			searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
+		})
 
 		if (d3) {
 			return
@@ -124,7 +128,7 @@ class BaseRollupShow extends Page {
 			pageNum: this.state.reportsPageNum,
 			pageSize: 10,
 		}
-
+		Object.assign(rollupQuery, this.getSearchQuery(props))
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
@@ -465,6 +469,10 @@ class BaseRollupShow extends Page {
 	}
 }
 
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
+
 const RollupShow = (props) => (
 	<AppContext.Consumer>
 		{context =>
@@ -473,4 +481,4 @@ const RollupShow = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(withRouter(RollupShow))
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(RollupShow))

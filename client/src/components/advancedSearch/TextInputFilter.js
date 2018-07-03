@@ -8,9 +8,16 @@ import 'utils'
 export default class TextInputFilter extends Component {
 	static propTypes = {
 		queryKey: PropTypes.string.isRequired,
+
+		//Passed by the SearchFilterDisplay row
+		asFormField: PropTypes.bool,
 		//Passed by the SearchFilter row
 		//value
 		//onChange
+	}
+
+	static defaultProps = {
+		asFormField: true
 	}
 
 	constructor(props) {
@@ -26,10 +33,15 @@ export default class TextInputFilter extends Component {
 	}
 
 	render() {
-		return <FormControl
-			value={this.state.value.value}
-			onChange={this.onChange}
-		/>
+		return (
+			!this.props.asFormField ?
+				<span>{this.state.value.value}</span>
+			:
+				<FormControl
+					value={this.state.value.value}
+					onChange={this.onChange}
+				/>
+		)
 	}
 
 	@autobind
@@ -46,9 +58,10 @@ export default class TextInputFilter extends Component {
 
 	@autobind
 	updateFilter() {
-		let {value} = this.state
-		value.toQuery = this.toQuery
-		this.props.onChange(value)
+		if (this.props.asFormField) {
+			let {value} = this.state
+			value.toQuery = this.toQuery
+			this.props.onChange(value)
+		}
 	}
-
 }

@@ -8,6 +8,7 @@ import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Person, Report} from 'models'
 
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
@@ -19,7 +20,7 @@ class BaseMyReports extends Page {
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
 
 		this.state = {
 			draft: null,
@@ -41,14 +42,22 @@ class BaseMyReports extends Page {
 		}
 	}
 
+	componentDidMount() {
+		super.componentDidMount()
+		this.props.setSearchProps({
+			searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
+		})
+	}
+
 	@autobind
 	getPart(partName, state, authorId) {
-		let query = {
+		const queryConstPart = {
 			pageSize: 10,
 			pageNum: this.pageNums[partName],
 			authorId: authorId,
 			state: state
 		}
+		const query = Object.assign({}, this.getSearchQuery(), queryConstPart)
 		return new GQL.Part(/* GraphQL */ `
 			${partName}: reportList(query: $${partName}Query) {
 				pageNum, pageSize, totalCount, list {
@@ -113,6 +122,9 @@ class BaseMyReports extends Page {
 	}
 }
 
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
 const MyReports = (props) => (
 	<AppContext.Consumer>
 		{context =>
@@ -121,4 +133,4 @@ const MyReports = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(MyReports)
+export default connect(mapStateToProps, mapDispatchToProps)(MyReports)

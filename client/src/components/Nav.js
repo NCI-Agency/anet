@@ -9,6 +9,7 @@ import pluralize from 'pluralize'
 import NavWrap from 'components/NavWrap'
 
 import {Organization, Person} from 'models'
+import {INSIGHTS, INSIGHT_DETAILS} from 'pages/insights/Show'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -144,27 +145,11 @@ class BaseNav extends Component {
 
 				{(currentUser.isAdmin() || currentUser.isSuperUser()) &&
 					<NavDropdown title="Insights" id="insights" active={inInsights}>
-						<Link to="/insights/not-approved-reports">
-							<MenuItem>Pending approval reports</MenuItem>
-						</Link>
-						<Link to="/insights/cancelled-reports">
-							<MenuItem>Cancelled engagement reports</MenuItem>
-						</Link>
-						<Link to="/insights/reports-by-task">
-							<MenuItem>Reports by task</MenuItem>
-						</Link>
-						<Link to="/insights/future-engagements-by-location">
-							<MenuItem>Future engagements by location</MenuItem>
-						</Link>
-						<Link to="/insights/reports-by-day-of-week">
-							<MenuItem>Reports by day of the week</MenuItem>
-						</Link>
-						<Link to="/insights/advisor-reports">
-							<MenuItem>Advisor reports</MenuItem>
-						</Link>
-						<Link to="/insights/program-summary-view">
-							<MenuItem>Program summary view</MenuItem>
-						</Link>
+						{INSIGHTS.map(insight =>
+							<Link to={"/insights/" + insight} key={insight}>
+								<MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
+							</Link>)
+						}
 					</NavDropdown>
 				}
 			</BSNav>

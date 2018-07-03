@@ -118,7 +118,13 @@ export default {
 			return ''
 		}
 		return '?' + encodeQuery(queryParams)
-	}
+	},
+
+	equalFunction: function(value1, value2) {
+		if (typeof value1 === 'function' && typeof value2 === 'function') {
+			return true
+		}
+	},
 }
 
 Object.forEach = function(source, func) {
@@ -153,7 +159,6 @@ Object.without = function(source, ...keys) {
 		copy[key] = undefined
 		delete copy[key]
 	}
-
 	return copy
 }
 

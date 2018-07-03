@@ -30,6 +30,7 @@ import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import utils from 'utils'
@@ -125,11 +126,10 @@ class Search extends Page {
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {clearSearchQuery: false}))
 
-		const qs = utils.parseQueryString(props.location.search)
-		this.state = {
-			query: qs.text,
+		Object.assign(this.state, {
+			query: props.searchQuery.text || null,
 			queryType: null,
 			pageNum: {
 				reports: 0,
@@ -150,31 +150,11 @@ class Search extends Page {
 			},
 			error: null,
 			success: null,
-		}
-
-		if (props.location.state && props.location.state.advancedSearch) {
-			this.state.advancedSearch = props.location.state.advancedSearch
-		}
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		const newAdvancedSearch = props.location.state && props.location.state.advancedSearch
-		if (state.advancedSearch !== newAdvancedSearch) {
-			return {advancedSearch: newAdvancedSearch}
-		}
-		return null
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		if (this.state.advancedSearch !== prevState.advancedSearch) {
-			this.loadData()
-		}
-		else {
-			super.componentDidUpdate(prevProps, prevState)
-		}
+		})
 	}
 
 	getSearchPart(type, query, pageSize) {
+		type = type.toLowerCase()
 		let subQuery = Object.assign({}, query)
 		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
 		subQuery.pageNum = this.state.pageNum[type]
@@ -194,53 +174,17 @@ class Search extends Page {
 		return part
 	}
 
-
-
 	@autobind
-	getAdvancedSearchQuery() {
-		let {advancedSearch} = this.state
-		let query = {text: advancedSearch.text}
-		advancedSearch.filters.forEach(filter => {
-			if (filter.value) {
-				if (filter.value.toQuery) {
-					const toQuery = typeof filter.value.toQuery === 'function'
-						? filter.value.toQuery()
-						: filter.value.toQuery
-					Object.assign(query, toQuery)
-				} else {
-					query[filter.key] = filter.value
-				}
-			}
-		})
+	_dataFetcher(props, callback, pageSize) {
 
-		console.log('SEARCH advanced query', query)
-
-		return query
-	}
-
-	@autobind
-	_dataFetcher(queryDef, callback, pageSize) {
-		let {advancedSearch} = this.state
-
-		if (advancedSearch) {
-			let query = this.getAdvancedSearchQuery()
-			let part = this.getSearchPart(advancedSearch.objectType.toLowerCase(), query, pageSize)
-			callback([part])
-
-			return
-		}
-
-		let {type, text, ...advQuery} = queryDef
-		//Any query with a field other than 'text' and 'type' is an advanced query.
-		let isAdvQuery = Object.keys(advQuery).length
-		advQuery.text = text
-
+		let {searchQuery} = props
+		let query = this.getSearchQuery(props)
 		let parts = []
-		if (isAdvQuery) {
-			parts.push(this.getSearchPart(type, advQuery, pageSize))
+		if (searchQuery.objectType) {
+			parts.push(this.getSearchPart(searchQuery.objectType, query, pageSize))
 		} else {
 			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, advQuery, pageSize))
+				parts.push(this.getSearchPart(key, query, pageSize))
 			})
 		}
 		return callback(parts)
@@ -256,8 +200,7 @@ class Search extends Page {
 	}
 
 	fetchData(props) {
-		const qs = utils.parseQueryString(props.location.search)
-		return this._dataFetcher(qs, this._fetchDataCallback)
+		return this._dataFetcher(props, this._fetchDataCallback)
 	}
 
 	render() {
@@ -339,7 +282,7 @@ class Search extends Page {
 				<Breadcrumbs items={[['Search results', '']]} />
 
 				{this.state.advancedSearch && <Fieldset title="Search filters">
-					<AdvancedSearch query={this.state.advancedSearch} onCancel={this.cancelAdvancedSearch} />
+					<AdvancedSearch onCancel={this.cancelAdvancedSearch} />
 				</Fieldset>}
 
 				<Messages error={error} success={success} />
@@ -418,7 +361,7 @@ class Search extends Page {
 		pageNums[type] = pageNum
 
 		const qs = utils.parseQueryString(this.props.location.search)
-		const query = (this.state.advancedSearch) ? this.getAdvancedSearchQuery() : Object.without(qs, 'type')
+		const query = this.getSearchQuery()
 		const part = this.getSearchPart(type, query)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
@@ -572,12 +515,9 @@ class Search extends Page {
 		event.preventDefault()
 
 		const search = Object.without(this.state.saveSearch, 'show')
-		if (this.state.advancedSearch) {
-			search.query = JSON.stringify(this.getAdvancedSearchQuery())
-			search.objectType = this.state.advancedSearch.objectType.toUpperCase()
-		} else {
-			const qs = utils.parseQueryString(this.props.location.search)
-			search.query = JSON.stringify({text: qs.text })
+		search.query = JSON.stringify(this.getSearchQuery())
+		if (this.props.searchQuery.objectType) {
+			search.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
 
 		API.send('/api/savedSearches/new', search, {disableSubmits: true})
@@ -615,8 +555,7 @@ class Search extends Page {
 
 	@autobind
 	exportSearchResults() {
-		const qs = utils.parseQueryString(this.props.location.search)
-		this._dataFetcher(qs, this._exportSearchResultsCallback, 0)
+		this._dataFetcher(this._exportSearchResultsCallback, 0)
 	}
 
 	@autobind
@@ -631,4 +570,8 @@ class Search extends Page {
 
 }
 
-export default connect(null, mapDispatchToProps)(withRouter(Search))
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery,
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Search))
