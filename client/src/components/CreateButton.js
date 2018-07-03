@@ -1,8 +1,11 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {DropdownButton, MenuItem, Button} from 'react-bootstrap'
-import History from 'components/History'
 import * as Models from 'models'
+import autobind from 'autobind-decorator'
+
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
 
 const DEFAULT_ACTIONS = [
 	Models.Report,
@@ -20,13 +23,13 @@ const ADMIN_ACTIONS = [
 	Models.AuthorizationGroup
 ]
 
-export default class CreateButton extends Component {
-	static contextTypes = {
-		currentUser: PropTypes.object,
+class BaseCreateButton extends Component {
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Models.Person),
 	}
 
 	render() {
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 
 		const modelClasses = DEFAULT_ACTIONS.concat(
 			currentUser.isSuperUser() && SUPER_USER_ACTIONS,
@@ -35,7 +38,7 @@ export default class CreateButton extends Component {
 
 		if (modelClasses.length > 1) {
 			return (
-				<DropdownButton title="Create" bsStyle="primary" id="createButton" onSelect={this.onSelect}>
+				<DropdownButton title="Create" pullRight bsStyle="primary" id="createButton" onSelect={this.onSelect}>
 					{modelClasses.map((modelClass, i) =>
 						<MenuItem key={modelClass.resourceName} eventKey={modelClass}>New {modelClass.displayName() || modelClass.resourceName}</MenuItem>
 					)}
@@ -51,7 +54,18 @@ export default class CreateButton extends Component {
 		}
 	}
 
+	@autobind
 	onSelect(modelClass) {
-		History.push(modelClass.pathForNew())
+		this.props.history.push(modelClass.pathForNew())
 	}
 }
+
+const CreateButton = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseCreateButton currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default withRouter(CreateButton)

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import OrganizationAdvisorsTable from 'components/AdvisorReports/OrganizationAdvisorsTable'
 import Toolbar from 'components/AdvisorReports/Toolbar'
@@ -6,16 +7,27 @@ import moment from 'moment'
 
 import API from 'api'
 
+import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
+
 const DEFAULT_WEEKS_AGO = 3
 const advisorReportsQueryUrl = `/api/reports/insights/advisors` // ?weeksAgo=3 default set at 3 weeks ago
+const OrganizationAdvisorsTableWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(OrganizationAdvisorsTable))
 
 class FilterableAdvisorReportsTable extends Component {
+    static propTypes = {
+        date: PropTypes.object,
+        showLoading: PropTypes.func.isRequired,
+        hideLoading: PropTypes.func.isRequired,
+    }
+
     constructor() {
         super()
         this.state = {
             filterText: '',
             export: false,
             data: [],
+            isLoading: false,
             selectedData: []
         }
         this.handleFilterTextInput = this.handleFilterTextInput.bind(this)
@@ -24,11 +36,15 @@ class FilterableAdvisorReportsTable extends Component {
     }
 
     componentDidMount() {
+        this.setState( {isLoading: true} )
+        this.props.showLoading()
         let advisorReportsQuery = API.fetch(advisorReportsQueryUrl)
         Promise.resolve(advisorReportsQuery).then(value => {
             this.setState({
+                isLoading: false,
                 data: value
             })
+            this.props.hideLoading()
         })
     }
 
@@ -60,7 +76,7 @@ class FilterableAdvisorReportsTable extends Component {
     }
 
     convertArrayOfObjectsToCSV(args) {
-        let result, ctr, csvGroupCols, csvCols, columnDelimiter, lineDelimiter, data
+        let result, csvGroupCols, csvCols, columnDelimiter, lineDelimiter, data
 
         data = args.data || null
         if (data == null || !data.length) {
@@ -92,10 +108,9 @@ class FilterableAdvisorReportsTable extends Component {
 
         data.forEach( (item) => {
             let stats = item.stats
-            ctr = 0
             result += item.organizationshortname
             weekColumns.forEach( (column, index) => {
-                if (ctr > 0) result += columnDelimiter
+                result += columnDelimiter
 
                 if (stats[index]) {
                     result += stats[index].nrreportssubmitted
@@ -104,7 +119,6 @@ class FilterableAdvisorReportsTable extends Component {
                 } else {
                     result += '0,0'
                 }
-                ctr++
             })
             result += lineDelimiter
         })
@@ -146,14 +160,15 @@ class FilterableAdvisorReportsTable extends Component {
                 <Toolbar 
                     onFilterTextInput={ handleFilterTextInput }
                     onExportButtonClick={ this.handleExportButtonClick } />
-                <OrganizationAdvisorsTable
+                <OrganizationAdvisorsTableWithLoader
                     data={ this.state.data }
                     columnGroups={ columnGroups }
                     filterText={ this.state.filterText }
-                    onRowSelection={ this.handleRowSelection } />
+                    onRowSelection={ this.handleRowSelection }
+                    isLoading={ this.state.isLoading } />
             </div>
         )
     }
 }
 
-export default FilterableAdvisorReportsTable
+export default connect(null, mapDispatchToProps)(FilterableAdvisorReportsTable)

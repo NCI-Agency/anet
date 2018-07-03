@@ -1,22 +1,24 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {Table, Pagination} from 'react-bootstrap'
+import {Table} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
+import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
 import Settings from 'Settings'
 
-import {Task} from 'models'
+import {Person, Task} from 'models'
+import AppContext from 'components/AppContext'
 
-export default class OrganizationTasks extends Component {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+class BaseOrganizationTasks extends Component {
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	render() {
-		const currentUser = this.context.app.state.currentUser
+		const { currentUser } = this.props
 		const org = this.props.organization
 
 		if (!org.isAdvisorOrg()) {
@@ -55,19 +57,31 @@ export default class OrganizationTasks extends Component {
 
 	@autobind
 	pagination() {
-		let goToPage = this.props.goToPage
 		let {pageSize, pageNum, totalCount} = this.props.tasks
 		let numPages = Math.ceil(totalCount / pageSize)
 		if (numPages < 2 ) { return }
-		return <header className="searchPagination" ><Pagination
-			className="pull-right"
-			prev
-			next
-			items={numPages}
-			ellipsis
-			maxButtons={6}
-			activePage={pageNum + 1}
-			onSelect={(value) => goToPage(value - 1)}
-		/></header>
+		return <header className="searchPagination">
+			<UltimatePagination
+				className="pull-right"
+				currentPage={pageNum + 1}
+				totalPages={numPages}
+				boundaryPagesRange={1}
+				siblingPagesRange={2}
+				hideEllipsis={false}
+				hidePreviousAndNextPageLinks={false}
+				hideFirstAndLastPageLinks={true}
+				onChange={(value) => this.props.goToPage(value - 1)}
+			/>
+		</header>
 	}
 }
+
+const OrganizationTasks = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationTasks currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default OrganizationTasks

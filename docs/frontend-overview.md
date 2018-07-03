@@ -2,7 +2,7 @@
 React structures the application into components instead of technologies. This means that everything that gets rendered on the page has its own file based on its functionality instead of regular HTML, CSS, and JS files. For example, the new report form lives in `client/src/pages/reports/New.js` and contains everything needed to render that form (all the CSS, HTML, and JS). It comprises a number of other components, for example the `Form` and `FormField` components which live in `client/src/components/Form.js` and `client/src/components/FormField.js`, which likewise contains everything needed to render a form field to the screen. This makes it very easy to figure out where any given element on screen comes from; it's either in `client/src/pages` or `client/src/components`. Pages are just compositions of components written in HTML syntax, and components can also compose other components for reusability.
 
 # How to pull down new changes and update your local server
-1. Close any servers you have running (the `./gradlew` or `npm` commands)
+1. Close any servers you have running (the `./gradlew` or `yarn` commands)
 1. Pull down any updates `git pull`
 1. If you see any changes to `src/main/resources/migrations.xml` this means there are updates to the database schema.  Run `./gradlew dbMigrate` to update your database schema.
   - If you are using sqlserver then you need to run `export DB_DRIVER='sqlserver'` to tell gradle to use your sqlserver configuration
@@ -10,12 +10,12 @@ React structures the application into components instead of technologies. This m
   - If you are using sqlite, then run `cat insertBaseData.sql | ./mssql2sqlite.sh | sqlite3 development.db`
   - If you are using sqlserver, then use your favorite SQL connector to run the insertBaseData.sql file.
 1. Re launch the backend server with `./gradlew run`
-1. Re launch the frontend server with `./npm start`
+1. Re launch the frontend server with `./yarn start`
 
 # How to run tests
-Run `npm test` to run the linter and tests; see the next subsections for details on testing locally or remotely. Obviously, this assumes you have started both the backend and the frontend servers before starting the tests.
+Run `yarn test` to run the linter and tests; see the next subsections for details on testing locally or remotely. Obviously, this assumes you have started both the backend and the frontend servers before starting the tests.
 
-Run `npm lint-fix` to automatically fix some kinds of lint errors.
+Run `yarn lint-fix` to automatically fix some kinds of lint errors.
 
 ## How the tests work
 Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
@@ -32,7 +32,7 @@ When writing browser tests, remember that when you take an action, you need to g
 If the tests are failing and you don't know why, run them with env var `DEBUG_LOG=true`:
 
 ```
-$ DEBUG_LOG=true npm test
+$ DEBUG_LOG=true yarn test
 ```
 
 You can also insert the following into your code to make the browser pause, allowing you to investigate what is currently happening:
@@ -64,7 +64,7 @@ to your `default.json`.
 Then download the appropriate `BrowserStackLocal`, unpack it, and run it with your key.
 When all is set up, run the remote tests with:
 ```
-$ export TEST_ENV=remote npm test
+$ export TEST_ENV=remote yarn test
 ```
 You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 

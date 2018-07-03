@@ -1,5 +1,5 @@
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -9,15 +9,21 @@ import Autocomplete from 'components/Autocomplete'
 import LinkTo from 'components/LinkTo'
 import moment from 'moment'
 import Messages from 'components/Messages'
-import History from 'components/History'
 
 import {Person} from 'models'
 
 import API from 'api'
 
-export default class MergePeople extends Page {
+import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+
+class MergePeople extends Page {
+
+	static propTypes = {...pagePropTypes}
+
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			winner: {},
 			loser: {},
@@ -188,7 +194,10 @@ export default class MergePeople extends Page {
 		let {winner, loser, copyPosition} = this.state
         API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
             .then(() => {
-				History.push(Person.pathFor(this.state.winner), {success: 'People successfully merged'})
+				this.props.history.push({
+					pathname: Person.pathFor(this.state.winner),
+					state: {success: 'People successfully merged'}
+				})
 			})
 			.catch(error => {
                 this.setState({error})
@@ -198,3 +207,5 @@ export default class MergePeople extends Page {
 	}
 
 }
+
+export default connect(null, mapDispatchToProps)(withRouter(MergePeople))

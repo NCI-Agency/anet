@@ -1,21 +1,26 @@
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import NavigationWarning from 'components/NavigationWarning'
 
 import PositionForm from './Form'
 
 import API from 'api'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 
-export default class PositionNew extends Page {
-	static pageProps = {
-		useNavigation: false
+import utils from 'utils'
+
+import { PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class PositionNew extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			position: setDefaultPermissions(new Position( {type: Position.TYPE.ADVISOR})),
@@ -24,11 +29,12 @@ export default class PositionNew extends Page {
 	}
 
 	fetchData(props) {
-		if (props.location.query.organizationId) {
+		const qs = utils.parseQueryString(props.location.search)
+		if (qs.organizationId) {
 			//If an organizationId was given in query parameters,
 			// then look that org up and pre-populate the field.
-			API.query(/* GraphQL */`
-				organization(id:${props.location.query.organizationId}) {
+			return API.query(/* GraphQL */`
+				organization(id:${qs.organizationId}) {
 					id, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
@@ -55,8 +61,7 @@ export default class PositionNew extends Page {
 			<div>
 				<Breadcrumbs items={[['Create new Position', Position.pathForNew()]]} />
 
-				<NavigationWarning original={this.state.originalPosition} current={position} />
-				<PositionForm position={position} />
+				<PositionForm original={this.state.originalPosition} position={position} />
 			</div>
 		)
 	}
@@ -68,3 +73,5 @@ function setDefaultPermissions(position) {
 	}
 	return position
 }
+
+export default connect(null, mapDispatchToProps)(PositionNew)

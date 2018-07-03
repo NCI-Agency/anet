@@ -27,8 +27,14 @@ module.exports = {
             {
                 test: /\.hbs$/,
                 loader: 'handlebars-loader'
-            },
-            {
+            }, {
+                test: /\.js.flow$/,
+                loader: 'ignore-loader'
+            }, {
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: 'javascript/auto',
+            }, {
                 enforce: "pre",
                 test: /\.js$/,
                 exclude: /node_modules/,
@@ -58,6 +64,16 @@ module.exports = {
                         }
                     }
                 ]
+            }, {
+                test: /alloy-editor-no-react\.js$/,
+                use: {
+                    loader: 'imports-loader',
+                    options: {
+                        'React': 'react',
+                        'React.PropTypes': 'prop-types',
+                        'React.createClass': 'create-react-class'
+                    }
+                }
             }
         ]
     },

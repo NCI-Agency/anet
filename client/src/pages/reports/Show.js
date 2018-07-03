@@ -1,13 +1,12 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Button, Col, HelpBlock, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 import utils from 'utils'
 
-import History from 'components/History'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Form from 'components/Form'
@@ -20,20 +19,26 @@ import API from 'api'
 import Settings from 'Settings'
 import {Report, Person, Task, Comment, Position} from 'models'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
+import ConfirmDelete from 'components/ConfirmDelete'
 
-export default class ReportShow extends Page {
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+
+class BaseReportShow extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Report'
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
-			report: new Report({id: props.params.id}),
+			report: new Report({id: props.match.params.id}),
 			newComment: new Comment(),
 			approvalComment: new Comment(),
 			showEmailModal: false,
@@ -42,8 +47,8 @@ export default class ReportShow extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
-			report(id:${props.params.id}) {
+		return API.query(/* GraphQL */`
+			report(id:${props.match.params.id}) {
 				id, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
@@ -68,7 +73,7 @@ export default class ReportShow extends Page {
 
 				attendees {
 					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status }
+					position { id, name, status, organization { id, shortName} }
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -103,7 +108,7 @@ export default class ReportShow extends Page {
 	}
 
 	renderNoPositionAssignedText() {
-		const {currentUser} = this.context
+		const { currentUser } = this.props
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
@@ -125,10 +130,10 @@ export default class ReportShow extends Page {
 
 	render() {
 		const {report} = this.state
-		const {currentUser} = this.context
+		const { currentUser } = this.props
 
 		const canApprove = report.isPending() && currentUser.position &&
-			report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
+			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
 
 		//Authors can edit in draft mode, rejected mode, or Pending Mode
 		let canEdit = (report.isDraft() || report.isPending() || report.isRejected() || report.isFuture()) && Person.isEqual(currentUser, report.author)
@@ -221,7 +226,7 @@ export default class ReportShow extends Page {
 						<Form.Field id="engagementDate" label="Engagement Date" getter={date => date && moment(date).format('D MMMM, YYYY')} />
 
 						<Form.Field id="location" label="Location">
-							{report.location && <LinkTo location={report.location} />}
+							{report.location && <LinkTo anetLocation={report.location} />}
 						</Form.Field>
 
 						{!isCancelled &&
@@ -256,6 +261,7 @@ export default class ReportShow extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Org</th>
 								</tr>
 							</thead>
 
@@ -263,7 +269,7 @@ export default class ReportShow extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={3}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -384,13 +390,30 @@ export default class ReportShow extends Page {
 				</Form>
 				{currentUser.isAdmin() &&
 					<div className="submit-buttons"><div>
-					<Button bsStyle="warning" onClick={this.deleteReport} className="pull-right">
-						Delete report
-					</Button>
+						<ConfirmDelete
+							onConfirmDelete={this.onConfirmDelete}
+							objectType="report"
+							objectDisplay={'#' + this.state.report.id}
+							bsStyle="warning"
+							buttonLabel="Delete report"
+							className="pull-right" />
 					</div></div>
 				}
 			</div>
 		)
+	}
+
+	@autobind
+	onConfirmDelete() {
+		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+			this.props.history.push({
+				pathname: '/',
+				state: {success: 'Report deleted'}
+			})
+		}, data => {
+			this.setState({success:null})
+			this.handleError(data)
+		})
 	}
 
 	@autobind
@@ -426,6 +449,7 @@ export default class ReportShow extends Page {
 				<LinkTo person={person} />
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
 
@@ -593,23 +617,14 @@ export default class ReportShow extends Page {
 			</ul>
 		</Alert>
 	}
-
-
-	@autobind
-	deleteReport() {
-		confirmAlert({
-			title: 'Confirm to delete report',
-			message: "Are you sure you want to delete this report? This cannot be undone.",
-			confirmLabel: `Yes, I am sure that I want to delete report #${this.state.report.id}`,
-			cancelLabel: 'No, I am not entirely sure at this point',
-			onConfirm: () => {
-				API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-					History.push('/', {success: 'Report deleted'})
-				}, data => {
-					this.setState({success:null})
-					this.handleError(data)
-				})
-			}
-		})
-	}
 }
+
+const ReportShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(withRouter(ReportShow))

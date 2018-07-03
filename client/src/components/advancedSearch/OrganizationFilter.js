@@ -21,8 +21,15 @@ export default class OrganizationFilter extends Component {
 		value: PropTypes.any,
 		onChange: PropTypes.func,
 
+		//Passed by the SearchFilterDisplay row
+		asFormField: PropTypes.bool,
+
 		//All other properties are passed directly to the Autocomplete.
 
+	}
+
+	static defaultProps = {
+		asFormField: true
 	}
 
 	constructor(props) {
@@ -42,24 +49,29 @@ export default class OrganizationFilter extends Component {
 	}
 
 	render() {
-		let autocompleteProps = Object.without(this.props, 'value', 'queryKey', 'queryIncludeChildOrgsKey', 'queryParams')
+		let autocompleteProps = Object.without(this.props, 'value', 'queryKey', 'queryIncludeChildOrgsKey', 'queryParams', 'asFormField')
 
-		return <div>
-			<Autocomplete
-				objectType={Organization}
-				valueKey="shortName"
-				url="/api/organizations/search"
-				placeholder="Filter by organization..."
-				queryParams={this.state.queryParams}
-				{...autocompleteProps}
-				onChange={this.onAutocomplete}
-				value={this.state.value}
-			/>
+		return (
+			!this.props.asFormField ?
+				<React.Fragment>{this.props.value.shortName}</React.Fragment>
+			:
+				<div>
+					<Autocomplete
+						objectType={Organization}
+						valueKey="shortName"
+						url="/api/organizations/search"
+						placeholder="Filter by organization..."
+						queryParams={this.state.queryParams}
+						{...autocompleteProps}
+						onChange={this.onAutocomplete}
+						value={this.state.value}
+					/>
 
-			<Checkbox inline checked={this.state.includeChildOrgs} onChange={this.changeIncludeChildren}>
-				Include sub-organizations
-			</Checkbox>
-		</div>
+					<Checkbox inline checked={this.state.includeChildOrgs} onChange={this.changeIncludeChildren}>
+						Include sub-organizations
+					</Checkbox>
+				</div>
+		)
 	}
 
 	@autobind
@@ -82,9 +94,11 @@ export default class OrganizationFilter extends Component {
 
 	@autobind
 	updateFilter() {
-		let value = this.state.value
-		value.includeChildOrgs = this.state.includeChildOrgs
-		value.toQuery = this.toQuery
-		this.props.onChange(value)
+		if (this.props.asFormField) {
+			let {value} = this.state
+			value.includeChildOrgs = this.state.includeChildOrgs
+			value.toQuery = this.toQuery
+			this.props.onChange(value)
+		}
 	}
 }

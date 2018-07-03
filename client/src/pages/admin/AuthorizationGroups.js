@@ -1,22 +1,28 @@
 import React from 'react'
 
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import Breadcrumbs from 'components/Breadcrumbs'
-import Page from 'components/Page'
 import Fieldset from 'components/Fieldset'
 import AuthorizationGroupTable from 'components/AuthorizationGroupTable'
 
 import API from 'api'
 
-export default class AuthorizationGroups extends Page {
+import { connect } from 'react-redux'
+
+class AuthorizationGroups extends Page {
+
+	static propTypes = {...pagePropTypes}
+
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			authorizationGroups: []
 		}
 	}
 
-	fetchData() {
-		API.query(/* GraphQL */`
+	fetchData(props) {
+		return API.query(/* GraphQL */`
 			authorizationGroupList(f:getAll) {
 				list { id, name, description, positions { id, name, type }, status }
 			}
@@ -37,3 +43,5 @@ export default class AuthorizationGroups extends Page {
 	}
 
 }
+
+export default connect(null, mapDispatchToProps)(AuthorizationGroups)

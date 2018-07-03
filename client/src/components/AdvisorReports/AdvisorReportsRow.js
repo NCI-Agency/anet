@@ -35,7 +35,7 @@ const AdvisorReportsRow = (props) => {
 }
 
 AdvisorReportsRow.propTypes = {
-    checked: PropTypes.bool.isRequired,
+    checked: PropTypes.bool,
     columnGroups: PropTypes.array,
     handleOrganizationClick: PropTypes.func,
     link: PropTypes.object,

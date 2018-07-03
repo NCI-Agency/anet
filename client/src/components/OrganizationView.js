@@ -1,9 +1,6 @@
 import React from "react"
 import API from 'api'
 import _ from 'lodash'
-import Settings from 'Settings'
-import LinkTo from 'components/LinkTo'
-import moment from 'moment'
 
 import 'components/OrganizationView.css'
 
@@ -20,7 +17,6 @@ export default class OrganizationView extends React.Component {
         this.state = {
             data: []
         }
-
     }
 
     render() {
@@ -50,7 +46,7 @@ export default class OrganizationView extends React.Component {
     componentDidMount() {
         const svg = d3.select(this.svgElement)
         const canvas = this.canvas = svg.append("g");
-        svg .call(d3.zoom().on("zoom",  () => canvas.attr("transform", d3.event.transform) ));
+        svg.call(d3.zoom().on("zoom",  () => canvas.attr("transform", d3.event.transform) ));
         this.fetchData()
     }
 
@@ -72,24 +68,24 @@ export default class OrganizationView extends React.Component {
         .enter().append("path")
           .attr("class", "link")
           .attr("d", d3.linkHorizontal()
-              .x(function(d) { return d.y; })
-              .y(function(d) { return d.x; }));
+              .x(function(d) { return d.y })
+              .y(function(d) { return d.x }))
     
       var node = this.canvas.selectAll(".node")
         .data(root.descendants())
         .enter().append("g")
-          .attr("class", function(d) { return "node" + (d.children ? " node--internal" : " node--leaf"); })
-          .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+          .attr("class", function(d) { return "node" + (d.children ? " node--internal" : " node--leaf") })
+          .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")" })
     
       node.append("circle")
-          .attr("r", 2.5);
+          .attr("r", 2.5)
     
       node.append("text")
           .attr("dy", 3)
-          .attr("x", function(d) { return d.children ? -8 : 8; })
-          .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
+          .attr("x", function(d) { return d.children ? -8 : 8 })
+          .style("text-anchor", function(d) { return d.children ? "end" : "start" })
            .text(function(d) { 
                return d.data && d.data.shortName
-            });
+            })
     }
 }

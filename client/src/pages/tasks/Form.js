@@ -3,22 +3,25 @@ import React from 'react'
 import autobind from 'autobind-decorator'
 
 import {Button} from 'react-bootstrap'
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import Form from 'components/Form'
-import History from 'components/History'
 import Messages from'components/Messages'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import DictionaryField from '../../HOC/DictionaryField'
 
 import Settings from 'Settings'
 import API from 'api'
-import {Task, Position, Organization} from 'models'
+import {Organization, Person, Position, Task} from 'models'
 
 import CALENDAR_ICON from 'resources/calendar.png'
+
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
 
 const customEnumButtons = (list) => {
 	let buttons = []
@@ -31,14 +34,11 @@ const customEnumButtons = (list) => {
     return buttons
 }
 
-export default class TaskForm extends ValidatableFormWrapper {
+class BaseTaskForm extends ValidatableFormWrapper {
 	static propTypes = {
 		task: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -49,11 +49,14 @@ export default class TaskForm extends ValidatableFormWrapper {
 		this.ProjectedCompletionField = DictionaryField(Form.Field)
 		this.TaskCustomFieldEnum1 = DictionaryField(Form.Field)
 		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
+
+		this.state = {
+			isBlocking: false,
+		}
 	}
 
 	render() {
-		const {task, edit} = this.props
-		const {currentUser} = this.context.app.state
+		const { task, edit, currentUser } = this.props
 		const taskShortLabel = Settings.fields.task.shortLabel
 		const customFieldRef1 = Settings.fields.task.customFieldRef1
 		const customFieldEnum1 = Settings.fields.task.customFieldEnum1
@@ -70,6 +73,8 @@ export default class TaskForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 		return (
 			<div>
+				<NavigationWarning isBlocking={this.state.isBlocking} />
+
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<ValidatableForm
@@ -150,20 +155,25 @@ export default class TaskForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
 	@autobind
 	onSubmit(event) {
 		let {task, edit} = this.props
-		if (task.responsibleOrg && task.responsibleOrg.id) {
+		if (task.responsibleOrg) {
 			task.responsibleOrg = {id: task.responsibleOrg.id}
 		}
-		if (task.customFieldRef1 && task.customFieldRef1.id) {
+		if (task.customFieldRef1) {
 			task.customFieldRef1 = {id: task.customFieldRef1.id}
 		}
 
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, task, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
@@ -173,12 +183,26 @@ export default class TaskForm extends ValidatableFormWrapper {
 				if (response.id) {
 					task.id = response.id
 				}
-
-				History.replace(Task.pathForEdit(task), false)
-				History.push(Task.pathFor(task), {success: 'Saved successfully', skipPageLeaveWarning: true})
+				this.props.history.replace(Task.pathForEdit(task))
+				this.props.history.push({
+					pathname: Task.pathFor(task),
+					state: {
+						success: 'Saved successfully',
+					}
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
 			})
 	}
 }
+
+const TaskForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseTaskForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default withRouter(TaskForm)

@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {Button} from 'react-bootstrap'
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 
 import CALENDAR_ICON from 'resources/calendar.png'
