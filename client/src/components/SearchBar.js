@@ -58,8 +58,8 @@ class SearchBar extends Component {
 					{(filters.length > 0) ?
 							<React.Fragment>
 								<React.Fragment>{this.props.query.objectType} filtered on </React.Fragment> 
-								{filters.map(filter =>
-									filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} />
+								{filters.map((filter, i) =>
+									filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} showSeparator={i !== filters.length-1} />
 								)}
 							</React.Fragment>
 						:
@@ -115,6 +115,7 @@ class SearchFilterDisplay extends Component {
 	static propTypes = {
 		filter: PropTypes.object,
 		element: PropTypes.node,
+		showSeparator: PropTypes.bool,
 	}
 
 	render() {
@@ -124,6 +125,7 @@ class SearchFilterDisplay extends Component {
 			element,
 			{value: filter.value || "", asFormField: false}
 		)
-		return <React.Fragment>{label}: {children}, </React.Fragment>
+		const sep = this.props.showSeparator ? ", " : ""
+		return <React.Fragment>{label}: {children}{sep}</React.Fragment>
 	}
 }
