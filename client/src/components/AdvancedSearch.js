@@ -45,7 +45,7 @@ class AdvancedSearch extends Component {
 		const query = props || {}
 		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
-			objectType: query.objectType || "Reports",
+			objectType: query.objectType || "",
 			text: props.text || query.text || "",
 			filters: query.filters || [],
 		}
@@ -67,17 +67,24 @@ class AdvancedSearch extends Component {
 	render() {
 		const {objectType, text, filters} = this.state
 		//console.log("RENDER AdvancedSearch", objectType, text, filters)
-		const filterDefs = this.ALL_FILTERS[this.state.objectType].filters
+		const filterDefs = this.state.objectType ? this.ALL_FILTERS[this.state.objectType].filters : {}
 		const existingKeys = filters.map(f => f.key)
 		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
 		return <div className="advanced-search form-horizontal">
 			<Form onSubmit={this.onSubmit}>
-				<FormGroup style={{textAlign: "center"}}>
-					<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
-						{Object.keys(this.ALL_FILTERS).map(type =>
-						this.props.searchObjectTypes.indexOf(type) !== -1 && <Button key={type} value={type}>{type}</Button>
-						)}
-					</ButtonToggleGroup>
+				<FormGroup>
+					<Col xs={11} style={{textAlign: "center"}}>
+						<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
+							{Object.keys(this.ALL_FILTERS).map(type =>
+							this.props.searchObjectTypes.indexOf(type) !== -1 && <Button key={type} value={type}>{type}</Button>
+							)}
+						</ButtonToggleGroup>
+					</Col>
+					<Col xs={1}>
+						<Button bsStyle="link" onClick={this.clearObjectType}>
+							<img src={REMOVE_ICON} height={14} alt="Clear type" />
+						</Button>
+					</Col>
 				</FormGroup>
 
 				{filters.map(filter =>
@@ -85,16 +92,15 @@ class AdvancedSearch extends Component {
 				)}
 
 				<Row>
-					<Col xs={5} xsOffset={3}>
-						{moreFiltersAvailable ?
+					<Col xs={6} xsOffset={3}>
+					{!this.state.objectType ? "To add filters, first pick a type above" :
+						!moreFiltersAvailable ? "No additional filters available" :
 							<DropdownButton bsStyle="link" title="+ Add another filter" onSelect={this.addFilter} id="addFilterDropdown">
 								{Object.keys(filterDefs).map(filterKey =>
 									<MenuItem disabled={existingKeys.indexOf(filterKey) > -1} eventKey={filterKey} key={filterKey} >{filterKey}</MenuItem>
 								)}
 							</DropdownButton>
-							:
-							"No additional filters available"
-						}
+					    }
 					</Col>
 				</Row>
 
@@ -111,6 +117,11 @@ class AdvancedSearch extends Component {
 	@autobind
 	changeObjectType(objectType) {
 		this.setState({objectType, filters: []}, () => this.addFilter())
+	}
+
+	@autobind
+	clearObjectType() {
+		this.changeObjectType("")
 	}
 
 	@autobind

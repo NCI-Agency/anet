@@ -21,7 +21,8 @@ class SearchBar extends Component {
 			text: PropTypes.string,
 			filters: PropTypes.any,
 			objectType: PropTypes.string
-		})
+		}),
+		searchObjectTypes: PropTypes.array,
 	}
 
 	constructor(props) {
@@ -42,10 +43,13 @@ class SearchBar extends Component {
 	render() {
 		const filterDefs = this.props.query.objectType ? this.ALL_FILTERS[this.props.query.objectType].filters: {}
 		const filters = this.props.query.filters.filter(f => filterDefs[f.key])
+		const placeholder = this.props.query.objectType
+			? "Filter " + this.props.query.objectType
+			: "Search for " + this.props.searchObjectTypes.join(", ")
 		return <div>
 			<Form onSubmit={this.onSubmit}>
 				<InputGroup>
-					<FormControl value={this.state.searchTerms} placeholder="Search for people, reports, positions, or locations" onChange={this.onChange} id="searchBarInput" />
+					<FormControl value={this.state.searchTerms} placeholder={placeholder} onChange={this.onChange} id="searchBarInput" />
 					<InputGroup.Button>
 						<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
 					</InputGroup.Button>
@@ -54,18 +58,23 @@ class SearchBar extends Component {
 
 			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: !this.state.showAdvancedSearch})}>
 				<span className="asLink">
-					<React.Fragment>
-					{(filters.length > 0) ?
-							<React.Fragment>
-								<React.Fragment>{this.props.query.objectType} filtered on </React.Fragment> 
-								{filters.map((filter, i) =>
-									filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} showSeparator={i !== filters.length-1} />
-								)}
-							</React.Fragment>
-						:
-							"Add filters"
+					{(this.props.query.objectType) ?
+						<React.Fragment>
+							<b>{this.props.query.objectType}</b>
+							{(filters.length > 0) ?
+								<React.Fragment>
+									<React.Fragment> filtered on </React.Fragment>
+									{filters.map((filter, i) =>
+										filterDefs[filter.key] && <SearchFilterDisplay key={filter.key} filter={filter} element={filterDefs[filter.key]} showSeparator={i !== filters.length-1} />
+									)}
+								</React.Fragment>
+							:
+								" - add filters"
+							}
+						</React.Fragment>
+					:
+						"Add filters"
 					}
-					</React.Fragment>
 				</span></small>
 			<Overlay show={this.state.showAdvancedSearch} onHide={() => this.setState({showAdvancedSearch: false})} placement="bottom" target={this.advancedSearchLink}>
 				<Popover id="advanced-search" placement="bottom" title="Filters">
@@ -102,6 +111,7 @@ class SearchBar extends Component {
 const mapStateToProps = (state, ownProps) => ({
 	query: state.searchQuery,
 	onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
+	searchObjectTypes: state.searchProps.searchObjectTypes
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -126,6 +136,6 @@ class SearchFilterDisplay extends Component {
 			{value: filter.value || "", asFormField: false}
 		)
 		const sep = this.props.showSeparator ? ", " : ""
-		return <React.Fragment>{label}: {children}{sep}</React.Fragment>
+		return <React.Fragment><b>{label}</b>: <em>{children}</em>{sep}</React.Fragment>
 	}
 }
