@@ -60,6 +60,7 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
+import {Element} from 'react-scroll'
 class App extends Page {
 
 	static propTypes = {
@@ -272,10 +273,11 @@ class App extends Page {
 							<Nav />
 						</div>
 						}
-						<div className="primary-content">
+
+						<Element className="primary-content" id="main-viewport">
 							<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
 							{routing}
-						</div>
+						</Element>
 					</div>
 				</div>
 			</AppContext.Provider>

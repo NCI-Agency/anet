@@ -191,7 +191,7 @@ class BaseReportShow extends Page {
 				{report.isPending() &&
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p>
+						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p> // TODO: does this need a Scroll.Link?
 					</Fieldset>
 				}
 

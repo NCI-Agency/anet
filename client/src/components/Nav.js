@@ -12,6 +12,10 @@ import {Organization, Person} from 'models'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
+import * as Scroll from 'react-scroll'
+
+const ScrollLink = Scroll.Link
+
 class BaseNav extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
@@ -39,15 +43,22 @@ class BaseNav extends Component {
 			myOrgId = myOrg && +myOrg.id
 		}
 
-		const orgSubNav = (
+		//TODO: Replace li below with NavItem
+		const AnchorLink = function(props) {
+			const {to, ...childProps} = props
+			return <ScrollLink to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" {...childProps}><li>{props.children}</li></ScrollLink>
+		}
 
+		const orgSubNav = (
 			<NavWrap>
-				<NavItem href="#info">Info</NavItem>
-				<NavItem href="#supportedPositions">Supported positions</NavItem>
-				<NavItem href="#vacantPositions">Vacant positions</NavItem>
-				<NavItem href="#approvals">Approvals</NavItem>
-				<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
-				<NavItem href="#reports">Reports</NavItem>
+				<ul>
+					<AnchorLink to="info" >Info</AnchorLink>
+					<AnchorLink to="supportedPositions" >Supported positions</AnchorLink>
+					<AnchorLink to="vacantPositions" >Vacant positions</AnchorLink>
+					<AnchorLink to="approvals" >Approvals</AnchorLink>
+					<AnchorLink to="tasks" >{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
+					<AnchorLink to="reports" >Reports</AnchorLink>
+				</ul>
 			</NavWrap>
 		)
 
@@ -65,10 +76,12 @@ class BaseNav extends Component {
 
 				{inMyReports &&
 					<NavWrap>
-						<NavItem href="#draft-reports">Draft reports</NavItem>
-						<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>
-						<NavItem href="#pending-approval">Pending approval</NavItem>
-						<NavItem href="#published-reports">Published reports</NavItem>
+						<ul>
+							<AnchorLink to="#draft-reports">Draft reports</AnchorLink>
+							<AnchorLink to="#upcoming-engagements">Upcoming Engagements</AnchorLink>
+							<AnchorLink to="#pending-approval">Pending approval</AnchorLink>
+							<AnchorLink to="#published-reports">Published reports</AnchorLink>
+						</ul>
 					</NavWrap>
 				}
 
