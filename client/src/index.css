@@ -326,9 +326,9 @@ li#search-nav .nav > li a {
 }
 
 .nav-fixed {
-	top:0;
-	float:left;
+	flex:0 0 auto;
 	padding:8px;
+	overflow-y:scroll;
 }
 
 .nav-overlay {
@@ -751,8 +751,8 @@ header.searchPagination {
 }
 
 .primary-content {
-	overflow-y: scroll;
-	height: 100%;
+	flex:1 1 auto;
+	overflow-y:scroll;
 }
 
 .glass-pane {

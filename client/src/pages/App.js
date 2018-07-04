@@ -256,7 +256,7 @@ class App extends Page {
 				currentUser: this.state.currentUser,
 				loadAppData: this.loadData,
 			}}>
-				<div className="anet">
+				<div className="anet" style={{ display:'flex', flexDirection:'column'}}>
 					<TopBar
 						updateTopbarOffset={this.updateTopbarOffset}
 						minimalHeader={this.props.pageProps.minimalHeader}
@@ -267,17 +267,18 @@ class App extends Page {
 
 					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
-					<div className="container-fluid" style={{height:"100%"}}>
+					<div className="container-fluid" style={{width:"100%", flex:'1 1 auto', display:'flex', flexDirection:'row', overflowY:'scroll' }}>
 						{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
 						<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
 							<Nav />
 						</div>
 						}
-
-						<Element className="primary-content" id="main-viewport">
-							<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
-							{routing}
-						</Element>
+						<div style={{ display:'flex', flexDirection:'column', flex:'1 1 auto'}}>
+							<Element className="primary-content" id="main-viewport">
+								<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
+								{routing}
+							</Element>
+						</div>
 					</div>
 				</div>
 			</AppContext.Provider>

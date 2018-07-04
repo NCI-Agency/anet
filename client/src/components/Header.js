@@ -12,7 +12,6 @@ import menuLogo from 'resources/anet-menu.png'
 const backgroundCss = {
 	background: '#fff',
 	paddingTop: '2em',
-	height: '100%',
 	zIndex: 100
 }
 
