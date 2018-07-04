@@ -76,7 +76,7 @@
     "leaflet": "^1.2.0",
     "locale-compare-polyfill": "^0.0.2",
     "lodash": "^4.17.10",
-    "moment": "^2.21.0",
+    "moment": "^2.22.2",
     "object-assign": "^4.1.1",
     "pluralize": "^7.0.0",
     "promise": "^8.0.1",
