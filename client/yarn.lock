@@ -7982,14 +7982,6 @@ react-router@^4.2.0:
     prop-types "^15.5.4"
     warning "^3.0.0"
 
-react-scrollspy@^3.3.5:
-  version "3.3.5"
-  resolved "https://registry.yarnpkg.com/react-scrollspy/-/react-scrollspy-3.3.5.tgz#e3e605bfc153a23f5fdf1279dd9f397d6e76e228"
-  dependencies:
-    babel-runtime "^6.26.0"
-    classnames "^2.2.5"
-    prop-types "^15.5.10"
-
 react-tag-input@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/react-tag-input/-/react-tag-input-5.1.0.tgz#ac3e70c613109eea207421dd576612acfa71764c"

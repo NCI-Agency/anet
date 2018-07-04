@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
-import Scrollspy from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
@@ -43,15 +42,12 @@ class BaseNav extends Component {
 		const orgSubNav = (
 
 			<NavWrap>
-				<Scrollspy className="nav" currentClassName="active" 
-					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
-					<NavItem href="#info">Info</NavItem>
-					<NavItem href="#supportedPositions">Supported positions</NavItem>
-					<NavItem href="#vacantPositions">Vacant positions</NavItem>
-					<NavItem href="#approvals">Approvals</NavItem>
-					<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
-					<NavItem href="#reports">Reports</NavItem>
-				</Scrollspy>
+				<NavItem href="#info">Info</NavItem>
+				<NavItem href="#supportedPositions">Supported positions</NavItem>
+				<NavItem href="#vacantPositions">Vacant positions</NavItem>
+				<NavItem href="#approvals">Approvals</NavItem>
+				<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
+				<NavItem href="#reports">Reports</NavItem>
 			</NavWrap>
 		)
 
@@ -69,13 +65,10 @@ class BaseNav extends Component {
 
 				{inMyReports &&
 					<NavWrap>
-						<Scrollspy className="nav" currentClassName="active"
-							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
-							<NavItem href="#draft-reports">Draft reports</NavItem>
-							<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>
-							<NavItem href="#pending-approval">Pending approval</NavItem>
-							<NavItem href="#published-reports">Published reports</NavItem>
-						</Scrollspy>
+						<NavItem href="#draft-reports">Draft reports</NavItem>
+						<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>
+						<NavItem href="#pending-approval">Pending approval</NavItem>
+						<NavItem href="#published-reports">Published reports</NavItem>
 					</NavWrap>
 				}
 
