@@ -14,23 +14,21 @@ import Messages from 'components/Messages'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 
 import DictionaryField from '../../HOC/DictionaryField'
 
 import REMOVE_ICON from 'resources/delete.png'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 
-class OrganizationForm extends ValidatableFormWrapper {
+class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		organization: PropTypes.object,
 		edit: PropTypes.bool,
-	}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -45,9 +43,8 @@ class OrganizationForm extends ValidatableFormWrapper {
 	}
 
 	render() {
-		let {organization, edit} = this.props
+		const { organization, edit, currentUser } = this.props
 		let {approvalSteps} = organization
-		let currentUser = this.context.currentUser 
 		let isAdmin = currentUser && currentUser.isAdmin()
 		let isPrincipalOrg = (organization.type === Organization.TYPE.PRINCIPAL_ORG)
 		const {ValidatableForm, RequiredField} = this
@@ -283,5 +280,13 @@ class OrganizationForm extends ValidatableFormWrapper {
 			})
 	}
 }
+
+const OrganizationForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseOrganizationForm currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(OrganizationForm)

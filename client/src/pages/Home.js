@@ -15,23 +15,23 @@ import SavedSearchTable from 'components/SavedSearchTable'
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
 
-import {Report} from 'models'
+import {Person, Report} from 'models'
 
 import API from 'api'
 import Settings from 'Settings'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import utils from 'utils'
 
-class Home extends Page {
+class BaseHome extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
@@ -141,14 +141,14 @@ class Home extends Page {
 		}
 	}
 
-	fetchData(props, context) {
+	fetchData(props) {
 		//If we don't have the currentUser yet (ie page is still loading, don't run these queries)
-		let {currentUser} = context
+		const { currentUser } = props
 		if (!currentUser || !currentUser._loaded) { return }
 		// Get current user authorization groups (needed for reports query 5)
 		const userAuthGroupsGraphQL = /* GraphQL */`
 			userAuthGroups: authorizationGroupList(f:search, query:$queryUserAuthGroups) {totalCount, list { id }}`
-		API.query(
+		return API.query(
 				userAuthGroupsGraphQL,
 				{queryUserAuthGroups: {positionId: currentUser.position ? currentUser.position.id : -1}},
 				"($queryUserAuthGroups: AuthorizationGroupSearchQuery)")
@@ -187,7 +187,7 @@ class Home extends Page {
 	}
 
 	render() {
-		let {currentUser} = this.context
+		const { currentUser } = this.props
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
@@ -303,5 +303,13 @@ class Home extends Page {
 			})
 	}
 }
+
+const Home = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseHome currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(Home))

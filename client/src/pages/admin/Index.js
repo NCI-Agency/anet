@@ -9,14 +9,14 @@ import Form from 'components/Form'
 
 import API from 'api'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class AdminIndex extends Page {
+class BaseAdminIndex extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		app: PropTypes.object,
+	static propTypes = {
+		...pagePropTypes,
+		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
@@ -28,7 +28,7 @@ class AdminIndex extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			adminSettings(f:getAll) { key, value }
 		`).then(data => {
 			let settings = {}
@@ -70,7 +70,7 @@ class AdminIndex extends Page {
 
         API.send('/api/admin/save', json, {disableSubmits: true})
             .then(() => {
-				this.context.app.fetchData()
+				this.props.loadAppData()
 			})
 			.catch(error => {
                 this.setState({error})
@@ -80,5 +80,13 @@ class AdminIndex extends Page {
 	}
 
 }
+
+const AdminIndex = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAdminIndex loadAppData={context.loadAppData} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(AdminIndex)

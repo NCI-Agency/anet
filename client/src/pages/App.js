@@ -56,27 +56,15 @@ import InsightsShow from  'pages/insights/Show'
 import OnboardingShow from 'pages/onboarding/Show'
 import OnboardingEdit from 'pages/onboarding/Edit'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import _isEqual from 'lodash/isEqual'
 
 class App extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
 		pageProps: PropTypes.object,
-	}
-
-	static childContextTypes = {
-		app: PropTypes.object,
-		currentUser: PropTypes.instanceOf(Person),
-	}
-
-	getChildContext() {
-		return {
-			app: this,
-			currentUser: this.state.currentUser,
-		}
 	}
 
 	constructor(props) {
@@ -107,14 +95,14 @@ class App extends Page {
 		this.unlistenHistory()
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (!_isEqual(this.state.pageProps, nextProps.pageProps)) {
-			this.setState({pageProps: nextProps.pageProps})
-		}
+	componentDidUpdate(prevProps, prevState) {
+		// TODO: We should decide what to do here, e.g. when to call this.loadData()
+		// We do not want the behaviour of our super class Page, as that would
+		// mean this.loadData() is called with each change in props or location…
 	}
 
-	fetchData() {
-		API.query(/* GraphQL */`
+	fetchData(props) {
+		return API.query(/* GraphQL */`
 			person(f:me) {
 				id, name, role, emailAddress, rank, status
 				position {
@@ -258,34 +246,39 @@ class App extends Page {
 		</Switch>
 
 		const navWidths = {sm: 4, md: 3, lg: 2}
-		const primaryWidths = (this.state.pageProps.useNavigation === true)
+		const primaryWidths = (this.props.pageProps.useNavigation === true)
 				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
 				: {sm: 12, md: 12, lg: 12}
 		return (
-			<div className="anet">
-				<TopBar
-					currentUser={this.state.currentUser}
-					settings={this.state.settings}
-					minimalHeader={this.state.pageProps.minimalHeader}
-					location={this.props.location}
-					toggleMenuAction={()=>{
-						this.setState({floatingMenu: !this.state.floatingMenu})
-					}} />
+			<AppContext.Provider value={{
+				appSettings: this.state.settings,
+				currentUser: this.state.currentUser,
+				loadAppData: this.loadData,
+			}}>
+				<div className="anet">
+					<TopBar
+						updateTopbarOffset={this.updateTopbarOffset}
+						minimalHeader={this.props.pageProps.minimalHeader}
+						location={this.props.location}
+						toggleMenuAction={()=>{
+							this.setState({floatingMenu: !this.state.floatingMenu})
+						}} />
 
-				<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
+					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
-				<div className="container-fluid" style={{height:"100%"}}>
-					{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
-					<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
-						<Nav />
-					</div>
-					}
-					<div className="primary-content">
-						<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
-						{routing}
+					<div className="container-fluid" style={{height:"100%"}}>
+						{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
+						<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
+							<Nav />
+						</div>
+						}
+						<div className="primary-content">
+							<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
+							{routing}
+						</div>
 					</div>
 				</div>
-			</div>
+			</AppContext.Provider>
 		)
 	}
 }

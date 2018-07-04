@@ -19,20 +19,20 @@ import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Position, Organization} from 'models'
+import {Organization, Person, Position} from 'models'
 import autobind from 'autobind-decorator'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-class PositionShow extends Page {
+class BasePositionShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Position'
@@ -54,7 +54,7 @@ class PositionShow extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
+		return API.query(/* GraphQL */`
 			position(id:${props.match.params.id}) {
 				id, name, type, status, code,
 				organization { id, shortName, longName, identificationCode },
@@ -73,7 +73,7 @@ class PositionShow extends Page {
 		const position = this.state.position
 		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name // TODO: shouldn't this be Position.humanNameOfType instead of a person title?
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const canEdit =
 			//Super Users can edit any Principal
 			(currentUser.isSuperUser() && position.type === Position.TYPE.PRINCIPAL) ||
@@ -261,5 +261,13 @@ class PositionShow extends Page {
 		})
 	}
 }
+
+const PositionShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePositionShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(withRouter(PositionShow))

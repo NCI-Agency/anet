@@ -6,26 +6,28 @@ import Scrollspy from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
+import NavWrap from 'components/NavWrap'
 
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
+import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
-class Nav extends Component {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+class BaseNav extends Component {
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Person),
+		appSettings: PropTypes.object,
+		organizations: PropTypes.array,
 	}
 
 	render() {
-		const appData = this.context.app.state
-		const currentUser = appData.currentUser
-		const organizations = appData.organizations || []
+		const { currentUser } = this.props
+		const { organizations } = this.props || []
+		const { appSettings } = this.props || {}
+		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
+		const externalDocumentationUrlText = appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
+
 		const path = this.props.location.pathname
-
-		const {settings} = appData || {}
-		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
-		const externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
-
 		const inAdmin = path.indexOf('/admin') === 0
 		const inOrg = path.indexOf('/organizations') === 0
 		const inMyReports = path.indexOf('/reports/mine') === 0
@@ -39,7 +41,8 @@ class Nav extends Component {
 		}
 
 		const orgSubNav = (
-			<li>
+
+			<NavWrap>
 				<Scrollspy className="nav" currentClassName="active" 
 					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
 					<NavItem href="#info">Info</NavItem>
@@ -49,7 +52,7 @@ class Nav extends Component {
 					<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
 					<NavItem href="#reports">Reports</NavItem>
 				</Scrollspy>
-			</li>
+			</NavWrap>
 		)
 
 		return (
@@ -58,14 +61,14 @@ class Nav extends Component {
 					<NavItem>Home</NavItem>
 				</Link>
 
-				<li id="search-nav"></li>
+				<NavWrap id="search-nav"></NavWrap>
 
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
 				{inMyReports &&
-					<li>
+					<NavWrap>
 						<Scrollspy className="nav" currentClassName="active"
 							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
 							<NavItem href="#draft-reports">Draft reports</NavItem>
@@ -73,7 +76,7 @@ class Nav extends Component {
 							<NavItem href="#pending-approval">Pending approval</NavItem>
 							<NavItem href="#published-reports">Published reports</NavItem>
 						</Scrollspy>
-					</li>
+					</NavWrap>
 				}
 
 				{myOrg && <Link to={Organization.pathFor(myOrg)}>
@@ -109,18 +112,16 @@ class Nav extends Component {
 				}
 
 				{inAdmin &&
-					<li>
+					<NavWrap>
 						<ul className="nav">
 							<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
 							<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
 						</ul>
-					</li>
+					</NavWrap>
 				}
 				
 				{externalDocumentationUrl && externalDocumentationUrlText &&
-					<li alt="">
-						<a href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</a>
-					</li>
+					<NavItem href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</NavItem>
 				}
 
 				<Link to="/help">
@@ -153,5 +154,13 @@ class Nav extends Component {
 		)
 	}
 }
+
+const Nav = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default withRouter(Nav)

@@ -21,14 +21,14 @@ import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
 import Settings from 'Settings'
 
+import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
-class PersonShow extends Page {
+class BasePersonShow extends Page {
 
-	static propTypes = {...pagePropTypes}
-
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
@@ -105,7 +105,7 @@ class PersonShow extends Page {
 		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.id)
 		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.id)
 
-		GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
+		return GQL.run([personPart, authoredReportsPart, attendedReportsPart]).then(data =>
 			this.setState({
 				person: new Person(data.person),
 				authoredReports: data.authoredReports,
@@ -124,7 +124,7 @@ class PersonShow extends Page {
 		//User can always edit themselves
 		//Admins can always edit anybody
 		//SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const hasPosition = position && position.id
 		const canEdit = Person.isEqual(currentUser, person) ||
 			currentUser.isAdmin() ||
@@ -219,7 +219,7 @@ class PersonShow extends Page {
 
 					{person.isAdvisor() && authoredReports &&
 						<Fieldset title="Reports authored" id="reports-authored">
-							<ReportCollection
+							<ReportCollection mapId="reports-authored"
 								paginatedReports={authoredReports}
 								goToPage={this.goToAuthoredPage}
 							 />
@@ -228,7 +228,7 @@ class PersonShow extends Page {
 
 					{attendedReports &&
 						<Fieldset title={`Reports attended by ${person.name}`} id="reports-attended">
-							<ReportCollection
+							<ReportCollection mapId="reports-attended"
 								paginatedReports={attendedReports}
 								goToPage={this.goToAttendedPage}
 							/>
@@ -272,7 +272,7 @@ class PersonShow extends Page {
 	}
 
 	renderPositionBlankSlate(person) {
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		//when the person is not in a position, any super user can assign them.
 		let canChangePosition = currentUser.isSuperUser()
 
@@ -333,5 +333,13 @@ class PersonShow extends Page {
 		)
 	}
 }
+
+const PersonShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(null, mapDispatchToProps)(PersonShow)

@@ -15,19 +15,17 @@ export default class AssignPersonModal extends Component {
 		onSuccess: PropTypes.func.isRequired
 	}
 
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 		this.state = {
 			person: props.position && props.position.person
 		}
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		const person = props.position.person
-		if (person !== state.person) {
-			return {person: person}
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.position.person !== this.props.position.person) {
+			this.setState({person: this.props.position.person})
 		}
-		return null
 	}
 
 	render() {

@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {Alert, Table, Modal, Button, Nav, NavItem, Badge, Pagination} from 'react-bootstrap'
+import {Alert, Table, Modal, Button, Nav, NavItem, Badge} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
+import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
@@ -119,7 +120,9 @@ class SearchNav extends Component {
 
 class Search extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
 
 	constructor(props) {
 		super(props)
@@ -154,12 +157,20 @@ class Search extends Page {
 		}
 	}
 
-	componentWillReceiveProps(props, context) {
-		let newAdvancedSearch = props.location.state && props.location.state.advancedSearch
-		if (this.state.advancedSearch !== newAdvancedSearch) {
-			this.setState({advancedSearch: newAdvancedSearch}, () => this.loadData())
-		} else {
-			super.componentWillReceiveProps(props, context)
+	static getDerivedStateFromProps(props, state) {
+		const newAdvancedSearch = props.location.state && props.location.state.advancedSearch
+		if (state.advancedSearch !== newAdvancedSearch) {
+			return {advancedSearch: newAdvancedSearch}
+		}
+		return null
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (this.state.advancedSearch !== prevState.advancedSearch) {
+			this.loadData()
+		}
+		else {
+			super.componentDidUpdate(prevProps, prevState)
 		}
 	}
 
@@ -232,12 +243,12 @@ class Search extends Page {
 				parts.push(this.getSearchPart(key, advQuery, pageSize))
 			})
 		}
-		callback(parts)
+		return callback(parts)
 	}
 
 	@autobind
 	_fetchDataCallback(parts) {
-		GQL.run(parts).then(data => {
+		return GQL.run(parts).then(data => {
 			this.setState({success: null, error: null, results: data})
 		}).catch(response =>
 			this.setState({success: null, error: response})
@@ -246,7 +257,7 @@ class Search extends Page {
 
 	fetchData(props) {
 		const qs = utils.parseQueryString(props.location.search)
-		this._dataFetcher(qs, this._fetchDataCallback)
+		return this._dataFetcher(qs, this._fetchDataCallback)
 	}
 
 	render() {
@@ -386,16 +397,19 @@ class Search extends Page {
 		const {pageSize, pageNum, totalCount} = this.state.results[type]
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
-		return <header className="searchPagination" ><Pagination
-			className="pull-right"
-			prev
-			next
-			items={numPages}
-			ellipsis
-			maxButtons={6}
-			activePage={pageNum + 1}
-			onSelect={(value) => this.goToPage(type, value - 1)}
-		/></header>
+		return <header className="searchPagination">
+			<UltimatePagination
+				className="pull-right"
+				currentPage={pageNum + 1}
+				totalPages={numPages}
+				boundaryPagesRange={1}
+				siblingPagesRange={2}
+				hideEllipsis={false}
+				hidePreviousAndNextPageLinks={false}
+				hideFirstAndLastPageLinks={true}
+				onChange={(value) => this.goToPage(type, value - 1)}
+			/>
+		</header>
 	}
 
 	@autobind
