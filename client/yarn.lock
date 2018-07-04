@@ -9854,9 +9854,9 @@ wdio-dot-reporter@^0.0.9, wdio-dot-reporter@~0.0.8:
   version "0.0.9"
   resolved "https://registry.yarnpkg.com/wdio-dot-reporter/-/wdio-dot-reporter-0.0.9.tgz#929b2adafd49d6b0534fda068e87319b47e38fe5"
 
-wdio-mocha-framework@^0.5.11:
-  version "0.5.13"
-  resolved "https://registry.yarnpkg.com/wdio-mocha-framework/-/wdio-mocha-framework-0.5.13.tgz#f4da119456cb673b8c058fb60936132ec752a9d4"
+wdio-mocha-framework@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/wdio-mocha-framework/-/wdio-mocha-framework-0.6.1.tgz#e34aaf61b6790839e07d01b62fac0dd27d5ed533"
   dependencies:
     babel-runtime "^6.23.0"
     mocha "^5.0.0"
