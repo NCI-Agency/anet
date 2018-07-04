@@ -94,7 +94,7 @@
     "react-router-dom": "^4.0.0",
     "react-scrollspy": "^3.3.5",
     "react-tag-input": "^5.0.2",
-    "react-toastify": "^4.0.1",
+    "react-toastify": "^4.1.0",
     "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.0",
     "whatwg-fetch": "^2.0.3"
