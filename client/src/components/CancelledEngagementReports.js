@@ -148,33 +148,31 @@ class CancelledEngagementReports extends Component {
       shortName: 'No advisor organization'
     }
     Promise.all([chartQuery]).then(values => {
-      if (values[0].reportList.list) {
-        let reportsList = values[0].reportList.list
-        reportsList = reportsList
-          .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
-        this.setState({
-          isLoading: false,
-          updateChart: true,  // update chart after fetching the data
-          graphDataByOrg: reportsList
-            .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-            .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
-            .sort((a, b) => {
-              let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
-              let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
-              if (a_index < 0)
-                return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
-              else
-                return (b_index < 0) ? -1 : a_index-b_index
-            }),
-          graphDataByReason: reportsList
-            .filter((item, index, d) => d.findIndex(t => {return t.cancelledReason === item.cancelledReason }) === index)
-            .map(d => {d.cancelledByReason = reportsList.filter(item => item.cancelledReason === d.cancelledReason).length; return d})
-            .map(d => {d.reason = this.getReasonDisplayName(d.cancelledReason); return d})
-            .sort((a, b) => {
-              return a.reason.localeCompare(b.reason)
-          })
+      let reportsList = values[0].reportList.list || []
+      reportsList = reportsList
+        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
+      this.setState({
+        isLoading: false,
+        updateChart: true,  // update chart after fetching the data
+        graphDataByOrg: reportsList
+          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
+          .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+          .sort((a, b) => {
+            let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
+            let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
+            if (a_index < 0)
+              return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
+            else
+              return (b_index < 0) ? -1 : a_index-b_index
+          }),
+        graphDataByReason: reportsList
+          .filter((item, index, d) => d.findIndex(t => {return t.cancelledReason === item.cancelledReason }) === index)
+          .map(d => {d.cancelledByReason = reportsList.filter(item => item.cancelledReason === d.cancelledReason).length; return d})
+          .map(d => {d.reason = this.getReasonDisplayName(d.cancelledReason); return d})
+          .sort((a, b) => {
+            return a.reason.localeCompare(b.reason)
         })
-      }
+      })
       this.props.hideLoading()
     })
     this.fetchOrgData()
