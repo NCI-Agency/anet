@@ -18,6 +18,7 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import LinkTo from 'components/LinkTo'
+import { jumpToTop } from 'components/Page'
 
 class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -186,7 +187,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({error: error})
-				// window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

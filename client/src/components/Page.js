@@ -12,6 +12,7 @@ import _isEqualWith from 'lodash/isEqualWith'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
+import { animateScroll } from 'react-scroll'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
@@ -24,6 +25,14 @@ export const propTypes = {
 	hideLoading: PropTypes.func.isRequired,
 	setPageProps: PropTypes.func.isRequired,
 }
+
+export function jumpToTop() {
+	animateScroll.scrollToTop({
+		duration: 500,
+		delay: 100,
+		smooth: "easeInOutQuint",
+		containerId: "main-viewport"})
+	}
 
 export default class Page extends Component {
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Button, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -289,13 +289,13 @@ class ReportMinimal extends Page {
 	@autobind
 	updateReport(json) {
 		this.fetchData(this.props)
-		// window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind
 	handleError(response) {
 		this.setState({error: response})
-		// window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind

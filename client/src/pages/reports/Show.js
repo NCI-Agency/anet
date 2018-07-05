@@ -24,6 +24,7 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { jumpToTop } from 'components/Page'
 
 class BaseReportShow extends Page {
 
@@ -592,13 +593,13 @@ class BaseReportShow extends Page {
 	@autobind
 	updateReport(json) {
 		this.fetchData(this.props)
-		// window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind
 	handleError(response) {
 		this.setState({error: response})
-		// window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 
