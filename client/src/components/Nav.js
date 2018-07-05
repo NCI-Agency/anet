@@ -47,7 +47,8 @@ class BaseNav extends Component {
 		const ScrollLinkNavItem = ScrollLink(NavItem)
 		const AnchorNavItem = function(props) {
 			const {to, ...remainingProps} = props
-			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" {...remainingProps}>{props.children}</ScrollLinkNavItem>
+			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" offset={-120} {...remainingProps}>{props.children}</ScrollLinkNavItem>
+			//TODO: fix the need for offset
 		}
 
 		const orgSubNav = (
@@ -75,10 +76,10 @@ class BaseNav extends Component {
 
 				{inMyReports &&
 					<BSNav>
-						<AnchorNavItem to="#draft-reports">Draft reports</AnchorNavItem>
-						<AnchorNavItem to="#upcoming-engagements">Upcoming Engagements</AnchorNavItem>
-						<AnchorNavItem to="#pending-approval">Pending approval</AnchorNavItem>
-						<AnchorNavItem to="#published-reports">Published reports</AnchorNavItem>
+						<AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
+						<AnchorNavItem to="upcoming-engagements">Upcoming Engagements</AnchorNavItem>
+						<AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
+						<AnchorNavItem to="published-reports">Published reports</AnchorNavItem>
 					</BSNav>
 				}
 
