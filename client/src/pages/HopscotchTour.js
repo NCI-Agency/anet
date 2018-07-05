@@ -7,7 +7,7 @@ const userTour = (currentUser, history) => { return {
 	steps: [
 		{
 			title: 'Welcome',
-			content: 'Welcome to ANET! This tour will quickly show you where to find information in ANET 2, and how to draft a report.',
+			content: 'Welcome to ANET! This tour will quickly show you where to find information in ANET, and how to draft a report.',
 			target: '.persistent-tour-launcher',
 			placement: 'left',
 		},
