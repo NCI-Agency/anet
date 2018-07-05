@@ -185,9 +185,9 @@ class BaseInsightsShow extends Page {
       const newQueryParams = this.insightQueryParams[this.props.match.params.insight]
       // when changing insight, set dates to insight specific defaults
       const defaultDates = this.insightDefaultDates
-      if ((this.state.referenceDate.valueOf() !== defaultDates.referenceDate.valueOf()) ||
-          (this.state.startDate.valueOf() !== defaultDates.startDate.valueOf()) ||
-          (this.state.endDate.valueOf() !== defaultDates.endDate.valueOf())) {
+      if (!this.state.referenceDate.isSame(defaultDates.referenceDate, 'day') ||
+          !this.state.startDate.isSame(defaultDates.startDate, 'day') ||
+          !this.state.endDate.isSame(defaultDates.endDate, 'day')) {
         this.setState(
           defaultDates,
           () => this.updateSearchQuery()
@@ -209,17 +209,17 @@ class BaseInsightsShow extends Page {
 
   getDefaultPastDates = () => {
     return {
-      referenceDate: this.cutoffDate.startOf('day'),
-      startDate: this.cutoffDate.startOf('day'),
-      endDate: this.currentDateTime.endOf('day')
+      referenceDate: this.cutoffDate,
+      startDate: this.cutoffDate,
+      endDate: this.currentDateTime
     }
   }
 
   getDefaultFutureDates = () => {
     return {
-      referenceDate: this.currentDateTime.startOf('day'),
-      startDate: this.currentDateTime.startOf('day'),
-      endDate: this.currentDateTime.add(14, 'days').endOf('day')
+      referenceDate: this.currentDateTime,
+      startDate: this.currentDateTime,
+      endDate: this.currentDateTime.add(14, 'days')
     }
   }
 
@@ -245,7 +245,7 @@ class BaseInsightsShow extends Page {
     }
 
     if (value.end !== null) {
-      this.updateDate("endDate", moment(value.end).endOf('day'))
+      this.updateDate("endDate", moment(value.end))
     }
   }
 
