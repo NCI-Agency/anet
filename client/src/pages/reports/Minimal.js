@@ -11,6 +11,7 @@ import Messages from 'components/Messages'
 import Tag from 'components/Tag'
 import LinkTo from 'components/LinkTo'
 
+import Settings from 'Settings'
 import API from 'api'
 import {Report, Person, Task} from 'models'
 
@@ -157,10 +158,10 @@ class ReportMinimal extends Page {
 						<Form.Field id="author" label="Report author">
 							<span>{report.author && report.author.name}</span>
 						</Form.Field>
-						<Form.Field id="advisorOrg" label="Advisor Org">
+						<Form.Field id="advisorOrg" label={Settings.fields.advisor.org.name}>
 							<span>{report.advisorOrg && report.advisorOrg.shortName }</span>
 						</Form.Field>
-						<Form.Field id="principalOrg" label="Principal Org">
+						<Form.Field id="principalOrg" label={Settings.fields.principal.org.name}>
 							<span>{report.principalOrg && report.principalOrg.shortName }</span>
 						</Form.Field>
 					</Fieldset>

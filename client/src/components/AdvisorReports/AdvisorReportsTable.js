@@ -4,6 +4,7 @@ import { Table } from 'react-bootstrap'
 import AdvisorReportsTableHead from 'components/AdvisorReports/AdvisorReportsTableHead'
 import AdvisorReportsRow from 'components/AdvisorReports/AdvisorReportsRow'
 import _uniqueId from 'lodash/uniqueId'
+import Settings from 'Settings'
 
 const AdvisorReportsTable = (props) => {
     let rows = props.data.map( (advisor) => {
@@ -14,9 +15,9 @@ const AdvisorReportsTable = (props) => {
     })
     return(
         <Table striped bordered condensed hover responsive>
-            <caption>Shows reports submitted and engagements attended per week for each advisor in the organization</caption>
+            <caption>Shows reports submitted and engagements attended per week for each {Settings.fields.advisor.person.name} in the organization</caption>
             <AdvisorReportsTableHead
-                title="Advisor name"
+                title={Settings.fields.advisor.person.name}
                 columnGroups={ props.columnGroups } />
             <tbody>
                 { rows }

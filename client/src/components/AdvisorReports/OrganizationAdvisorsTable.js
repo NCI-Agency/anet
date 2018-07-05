@@ -2,9 +2,11 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Table } from 'react-bootstrap'
 import _isEqual from 'lodash/isEqual'
+import pluralize from 'pluralize'
 import AdvisorReportsModal from 'components/AdvisorReports/AdvisorReportsModal'
 import AdvisorReportsRow from 'components/AdvisorReports/AdvisorReportsRow'
 import AdvisorReportsTableHead from 'components/AdvisorReports/AdvisorReportsTableHead'
+import Settings from 'Settings'
 import './OrganizationAdvisorsTable.css'
 
 class OrganizationAdvisorsTable extends Component {
@@ -95,7 +97,7 @@ class OrganizationAdvisorsTable extends Component {
         return(
             <div className="organization-advisors-table">
                 <Table striped bordered condensed hover responsive>
-                    <caption>Shows reports submitted and engagements attended per week by an organizations' advisors</caption>
+                    <caption>Shows reports submitted and engagements attended per week by an organization's {pluralize(Settings.fields.advisor.person.name)}</caption>
                     <AdvisorReportsTableHead
                         columnGroups={ this.props.columnGroups }
                         title="Organization name" 
