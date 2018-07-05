@@ -285,8 +285,6 @@ class BaseInsightsShow extends Page {
             <InsightComponent
               queryParams={queryParams}
               date={this.state.referenceDate.clone()}
-              startDate={this.state.startDate.clone()}
-              endDate={this.state.endDate.clone()}
             />
           </Fieldset>
         }
