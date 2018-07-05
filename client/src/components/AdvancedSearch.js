@@ -45,10 +45,18 @@ class AdvancedSearch extends Component {
 		const query = props || {}
 		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
-			objectType: query.objectType || "",
-			text: props.text || query.text || "",
-			filters: query.filters ? query.filters.slice() : [],
+			objectType: "",
+			text: "",
+			filters: [],
 		}
+	}
+
+	componentDidMount() {
+		this.setState({
+			objectType: this.props.query.objectType,
+			text: this.props.text,
+			filters: this.props.query.filters ? this.props.query.filters.slice() : [],
+		})
 	}
 
 	componentDidUpdate(prevProps, prevState) {
