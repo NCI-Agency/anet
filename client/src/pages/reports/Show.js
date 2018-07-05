@@ -24,7 +24,7 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { jumpToTop } from 'components/Page'
+import { jumpToTop, AnchorLink } from 'components/Page'
 
 class BaseReportShow extends Page {
 
@@ -192,7 +192,7 @@ class BaseReportShow extends Page {
 				{report.isPending() &&
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p> // TODO: does this need a Scroll.Link?
+						<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
 					</Fieldset>
 				}
 

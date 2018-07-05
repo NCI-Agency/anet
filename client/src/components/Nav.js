@@ -45,19 +45,19 @@ class BaseNav extends Component {
 		}
 
 		const ScrollLinkNavItem = ScrollLink(NavItem)
-		const AnchorLink = function(props) {
+		const AnchorNavItem = function(props) {
 			const {to, ...remainingProps} = props
 			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" {...remainingProps}>{props.children}</ScrollLinkNavItem>
 		}
 
 		const orgSubNav = (
 			<BSNav>
-				<AnchorLink to="info" >Info</AnchorLink>
-				<AnchorLink to="supportedPositions" >Supported positions</AnchorLink>
-				<AnchorLink to="vacantPositions" >Vacant positions</AnchorLink>
-				<AnchorLink to="approvals" >Approvals</AnchorLink>
-				<AnchorLink to="tasks" >{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
-				<AnchorLink to="reports" >Reports</AnchorLink>
+				<AnchorNavItem to="info" >Info</AnchorNavItem>
+				<AnchorNavItem to="supportedPositions" >Supported positions</AnchorNavItem>
+				<AnchorNavItem to="vacantPositions" >Vacant positions</AnchorNavItem>
+				<AnchorNavItem to="approvals" >Approvals</AnchorNavItem>
+				<AnchorNavItem to="tasks" >{pluralize(Settings.fields.task.shortLabel)}</AnchorNavItem>
+				<AnchorNavItem to="reports" >Reports</AnchorNavItem>
 			</BSNav>
 		)
 
@@ -75,10 +75,10 @@ class BaseNav extends Component {
 
 				{inMyReports &&
 					<BSNav>
-						<AnchorLink to="#draft-reports">Draft reports</AnchorLink>
-						<AnchorLink to="#upcoming-engagements">Upcoming Engagements</AnchorLink>
-						<AnchorLink to="#pending-approval">Pending approval</AnchorLink>
-						<AnchorLink to="#published-reports">Published reports</AnchorLink>
+						<AnchorNavItem to="#draft-reports">Draft reports</AnchorNavItem>
+						<AnchorNavItem to="#upcoming-engagements">Upcoming Engagements</AnchorNavItem>
+						<AnchorNavItem to="#pending-approval">Pending approval</AnchorNavItem>
+						<AnchorNavItem to="#published-reports">Published reports</AnchorNavItem>
 					</BSNav>
 				}
 

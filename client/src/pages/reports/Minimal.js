@@ -16,6 +16,7 @@ import {Report, Person, Task} from 'models'
 
 import { PAGE_PROPS_MIN_HEAD } from 'actions'
 import { connect } from 'react-redux'
+import { AnchorLink } from 'components/Page'
 
 class ReportMinimal extends Page {
 
@@ -122,7 +123,7 @@ class ReportMinimal extends Page {
 				{report.isPending() &&
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p>
+						<p>It won't be available in the ANET database until your <AnchorLink to="#approvals">approval organization</AnchorLink> marks it as approved.</p>
 					</Fieldset>
 				}
 
