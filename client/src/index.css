@@ -338,7 +338,8 @@ li#search-nav .nav > li a {
 	position: fixed;
 	background: #f2f2f2;
 	left: 0;
-    z-index: 9999;
+	z-index: 9999;
+	overflow-y:scroll;
 }
 
 .report-sub-form .form-group {
