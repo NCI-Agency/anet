@@ -5,7 +5,6 @@ import {IndexLinkContainer as Link} from 'react-router-bootstrap'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
-import NavWrap from 'components/NavWrap'
 
 import {Organization, Person} from 'models'
 
@@ -68,7 +67,7 @@ class BaseNav extends Component {
 					<NavItem>Home</NavItem>
 				</Link>
 
-				<NavWrap id="search-nav"></NavWrap>
+				<BSNav id="search-nav"></BSNav>
 
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
@@ -116,12 +115,10 @@ class BaseNav extends Component {
 				}
 
 				{inAdmin &&
-					<NavWrap>
-						<ul className="nav">
-							<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
-							<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
-						</ul>
-					</NavWrap>
+					<BSNav>
+						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
+						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
+					</BSNav>
 				}
 				
 				{externalDocumentationUrl && externalDocumentationUrlText &&
