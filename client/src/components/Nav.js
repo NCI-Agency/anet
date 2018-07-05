@@ -12,15 +12,17 @@ import {Organization, Person} from 'models'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
-import * as Scroll from 'react-scroll'
-
-const ScrollLink = Scroll.Link
+import {Link as ScrollLink, scrollSpy} from 'react-scroll'
 
 class BaseNav extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
 		organizations: PropTypes.array,
+	}
+
+	componentDidMount() {
+		scrollSpy.update()
 	}
 
 	render() {
@@ -46,7 +48,7 @@ class BaseNav extends Component {
 		//TODO: Replace li below with NavItem
 		const AnchorLink = function(props) {
 			const {to, ...childProps} = props
-			return <ScrollLink to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" {...childProps}><li>{props.children}</li></ScrollLink>
+			return <ScrollLink activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" {...childProps}><li>{props.children}</li></ScrollLink>
 		}
 
 		const orgSubNav = (

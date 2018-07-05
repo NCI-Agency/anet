@@ -88,7 +88,6 @@ class App extends Page {
 		this.unlistenHistory = this.props.history.listen((location, action) => {
 			this.setState({floatingMenu: false})
 		  })
-		  // TODO: This should ultimately happen through redux
 	}
 
 	componentWillUnmount() {
