@@ -52,7 +52,11 @@ class AdvancedSearch extends Component {
 	}
 
 	componentDidMount() {
-		this.setState(this.props.query)
+		this.setState({
+			objectType: this.props.query.objectType,
+			text: this.props.text,
+			filters: this.props.query.filters,
+		})
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -86,6 +90,8 @@ class AdvancedSearch extends Component {
 						</Button>
 					</Col>
 				</FormGroup>
+
+				<FormControl defaultValue={this.props.text} className="hidden" />
 
 				{filters.map(filter =>
 					filterDefs[filter.key] && <SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
