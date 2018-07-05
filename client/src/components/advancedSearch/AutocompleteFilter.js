@@ -43,7 +43,6 @@ export default class AutocompleteFilter extends Component {
 
 	render() {
 		let autocompleteProps = Object.without(this.props, 'value', 'queryKey', 'asFormField')
-		console.log('autocompletefilter', this.props)
 		return (
 			!this.props.asFormField ?
 				<React.Fragment>{this.props.value[this.props.valueKey]}</React.Fragment>
