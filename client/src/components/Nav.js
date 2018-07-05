@@ -12,7 +12,7 @@ import {Organization, Person} from 'models'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 
-import {Link as ScrollLink, scrollSpy} from 'react-scroll'
+import {ScrollLink, scrollSpy} from 'react-scroll'
 
 class BaseNav extends Component {
 	static propTypes = {
@@ -45,23 +45,21 @@ class BaseNav extends Component {
 			myOrgId = myOrg && +myOrg.id
 		}
 
-		//TODO: Replace li below with NavItem
+		const ScrollLinkNavItem = ScrollLink(NavItem)
 		const AnchorLink = function(props) {
-			const {to, ...childProps} = props
-			return <ScrollLink activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" {...childProps}><li>{props.children}</li></ScrollLink>
+			const {to, ...remainingProps} = props
+			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" {...remainingProps}>{props.children}</ScrollLinkNavItem>
 		}
 
 		const orgSubNav = (
-			<NavWrap>
-				<ul>
-					<AnchorLink to="info" >Info</AnchorLink>
-					<AnchorLink to="supportedPositions" >Supported positions</AnchorLink>
-					<AnchorLink to="vacantPositions" >Vacant positions</AnchorLink>
-					<AnchorLink to="approvals" >Approvals</AnchorLink>
-					<AnchorLink to="tasks" >{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
-					<AnchorLink to="reports" >Reports</AnchorLink>
-				</ul>
-			</NavWrap>
+			<BSNav>
+				<AnchorLink to="info" >Info</AnchorLink>
+				<AnchorLink to="supportedPositions" >Supported positions</AnchorLink>
+				<AnchorLink to="vacantPositions" >Vacant positions</AnchorLink>
+				<AnchorLink to="approvals" >Approvals</AnchorLink>
+				<AnchorLink to="tasks" >{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
+				<AnchorLink to="reports" >Reports</AnchorLink>
+			</BSNav>
 		)
 
 		return (
@@ -77,14 +75,12 @@ class BaseNav extends Component {
 				</Link>}
 
 				{inMyReports &&
-					<NavWrap>
-						<ul>
-							<AnchorLink to="#draft-reports">Draft reports</AnchorLink>
-							<AnchorLink to="#upcoming-engagements">Upcoming Engagements</AnchorLink>
-							<AnchorLink to="#pending-approval">Pending approval</AnchorLink>
-							<AnchorLink to="#published-reports">Published reports</AnchorLink>
-						</ul>
-					</NavWrap>
+					<BSNav>
+						<AnchorLink to="#draft-reports">Draft reports</AnchorLink>
+						<AnchorLink to="#upcoming-engagements">Upcoming Engagements</AnchorLink>
+						<AnchorLink to="#pending-approval">Pending approval</AnchorLink>
+						<AnchorLink to="#published-reports">Published reports</AnchorLink>
+					</BSNav>
 				}
 
 				{myOrg && <Link to={Organization.pathFor(myOrg)}>
