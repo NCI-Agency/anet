@@ -2,12 +2,21 @@ import {Organization} from 'models'
 import Settings from 'Settings'
 import pluralize from 'pluralize'
 
+const taskShortLabelSingular = Settings.fields.task.shortLabel
+const taskShortLabelPlural = pluralize(taskShortLabelSingular)
+const advisorSingular = Settings.fields.advisor.person.name
+const advisorPlural = pluralize(advisorSingular)
+const principalSingular = Settings.fields.principal.person.name
+const principalPlural = pluralize(principalSingular)
+const advisorPositionSingular = Settings.fields.advisor.position.name
+const principalPositionSingular = Settings.fields.principal.position.name
+
 const userTour = (currentUser, history) => { return {
 	id: 'home',
 	steps: [
 		{
 			title: 'Welcome',
-			content: 'Welcome to ANET! This tour will quickly show you where to find information in ANET 2, and how to draft a report.',
+			content: 'Welcome to ANET! This tour will quickly show you where to find information in ANET, and how to draft a report.',
 			target: '.persistent-tour-launcher',
 			placement: 'left',
 		},
@@ -98,13 +107,12 @@ const superUserTour = (currentUser, history) => { return {
 }}
 
 const reportTour = (currentUser, history) => {
-	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'report',
 	steps: [
 		{
 			title: 'Meeting goal(s)',
-			content: "Use this section to tell readers why you met with your principal. Were you working on a specific goal or problem with them? This will be part of your report's summary, so use this space to tell readers the high-level purpose of your engagement.",
+			content: `Use this section to tell readers why you met with your ${principalSingular}. Were you working on a specific goal or problem with them? This will be part of your report's summary, so use this space to tell readers the high-level purpose of your engagement.`,
 			target: 'intent',
 			placement: 'bottom',
 		},
@@ -129,25 +137,25 @@ const reportTour = (currentUser, history) => {
 		},
 		{
 			title: 'Attendee(s)',
-			content: 'Start typing the name of everyone who was at the meeting, including Afghan principals and NATO members. Select one of the options available or ask your super user to add it.',
+			content: `Start typing the name of everyone who was at the meeting, including ${principalPlural} and ${advisorPlural}. Select one of the options available or ask your super user to add it.`,
 			target: '#attendees',
 			placement: 'right',
 		},
 			{
 			title: 'Recents',
-			content: "If you've written reports in the past, your recent selections of attendees, " + taskShortLabel + "s, and locations will display to the right in a section called \"Recents\". You can click on one of the shortcuts to quickly add it to your report.",
+			content: `If you've written reports in the past, your recent selections of attendees, ${taskShortLabelPlural}, and locations will display to the right in a section called "Recents". You can click on one of the shortcuts to quickly add it to your report.`,
 			target: '#attendees',
 			placement: 'bottom',
 		},
 		{
-			title: 'Primary advisor and principal',
-			content: "Use these check boxes to indicate who the primary advisor and primary principal was. The people you choose will display on your report's summary as the main individuals involved in your engagement.",
+			title: `Primary ${advisorSingular} and ${principalSingular}`,
+			content: `Use these check boxes to indicate who the primary ${advisorSingular} and primary ${principalSingular} was. The people you choose will display on your report's summary as the main individuals involved in your engagement.`,
 			target: '#attendeesTable',
 			placement: 'bottom',
 		},
 		{
-			title: pluralize(taskShortLabel),
-			content: 'Search for the ' + taskShortLabel + 's that apply to this engagement. You can search for ' + taskShortLabel + 's in any organization, including your organization and its sub-organizations. ' + taskShortLabel + 's are not required.',
+			title: taskShortLabelPlural,
+			content: `Search for the ${taskShortLabelPlural} that apply to this engagement. You can search for ${taskShortLabelPlural} in any organization, including your organization and its sub-organizations. ${taskShortLabelPlural} are not required.`,
 			target: '#tasks',
 			placement: 'right',
 		},
@@ -185,7 +193,6 @@ const reportTour = (currentUser, history) => {
 }}
 
 const orgTour = (currentUser, history) => {
-	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 	id: 'org',
 	steps: [
@@ -203,7 +210,7 @@ const orgTour = (currentUser, history) => {
 		},
 		{
 			title: 'Supported positions',
-			content: 'This section shows positions in your organization that currently have people assigned to them. The billet column tells you the name and billet code of the position. To update this information, click on the position and select the "Edit" option.',
+			content: `This section shows positions in your organization that currently have people assigned to them. The ${advisorPositionSingular} column tells you the name and ${advisorPositionSingular} code of the position. To update this information, click on the position and select the "Edit" option.`,
 			target: '#supportedPositions h2',
 			placement: 'top',
 		},
@@ -220,8 +227,8 @@ const orgTour = (currentUser, history) => {
 			placement: 'top',
 		},
 		{
-			title: pluralize(taskShortLabel),
-			content: 'The ' + Settings.fields.task.longLabel + ' that your organization is responsible for will be displayed in this section. If you need to make changes, or if ' + taskShortLabel + 's change, you can update that information by clicking on the ' + taskShortLabel + '.',
+			title: taskShortLabelPlural,
+			content: `The ${Settings.fields.task.longLabel} that your organization is responsible for will be displayed in this section. If you need to make changes, or if ${taskShortLabelPlural} change, you can update that information by clicking on the ${taskShortLabelSingular}.`,
 			target: '#tasks h2',
 			placement: 'top',
 		},
@@ -247,19 +254,18 @@ const orgTour = (currentUser, history) => {
 }}
 
 const positionTour = (currentUser, history) => {
-	const taskShortLabel = Settings.fields.task.shortLabel
 	return {
 		id: 'position',
 		steps: [
 			{
 				title: "Positions",
-				content: "This section allows you to quickly review this position's detailed information, such as the position's billet or tashkil code, status, and organization.",
+				content: `This section allows you to quickly review this position's detailed information, such as the position's ${advisorPositionSingular} or ${principalPositionSingular} code, status, and organization.`,
 				target: '.persistent-tour-launcher',
 				placement: 'left',
 			},
 			{
 				title: "Type of user",
-				content: "There are three types of users: user, super user, and administrator. Super users can give other positions either user or super user privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Super users are able to edit positions, people, and " + taskShortLabel + "s in their organization, as well as locations. This section isn't visible if you're looking at a tashkil position.",
+				content: `There are three types of users: user, super user, and administrator. Super users can give other positions either user or super user privileges. Users are able to take basic actions, like submitting reports, using search, and reviewing the daily rollup. Super users are able to edit positions, people, and ${taskShortLabelPlural} in their organization, as well as locations. This section isn't visible if you're looking at a ${principalPositionSingular} position.`,
 				target: '#type',
 				placement: 'bottom',
 			},
@@ -271,13 +277,13 @@ const positionTour = (currentUser, history) => {
 			},
 			{
 				title: "Current assigned person",
-				content: "This section shows you who is currently assigned to this position. For billet positions, you'll see the NATO member in this position. For tashkil positions, you'll see the current Afghan principal in that position. You can click the \"Change assigned person\" button to quickly change who is in this position.",
+				content: `This section shows you who is currently assigned to this position. For ${advisorPositionSingular} positions, you'll see the ${advisorSingular} in this position. For ${principalPositionSingular} positions, you'll see the current ${principalSingular} in that position. You can click the "Change assigned person" button to quickly change who is in this position.`,
 				target: '#assigned-advisor h2',
 				placement: 'top',
 			},
 			{
-				title: "Assigned Afghan principal or Advisor",
-				content: "If you're looking at a NATO billet position, you'll see the people this position is responisble for advising. If you're looking at a tashkil position, you'll see the advisors advising that Afghan tashkil here. You can update this information by clicking the \"Change assigned advisors\" or \"Change assigned Afghan principals\" button, depending on what type of position you're looking at.",
+				title: `Assigned ${principalSingular} or ${advisorSingular}`,
+				content: `If you're looking at a ${advisorPositionSingular} position, you'll see the people this position is responisble for advising. If you're looking at a ${principalPositionSingular} position, you'll see the ${advisorPlural} advising that ${principalPositionSingular} here. You can update this information by clicking the "Change assigned ${advisorSingular}" or "Change assigned ${principalSingular}" button, depending on what type of position you're looking at.`,
 				target: '#assigned-principal h2',
 				placement: 'top',
 			},
@@ -302,7 +308,7 @@ const personTour = (currentUser, history) => { return {
 	steps: [
 		{
 			title: "Information about this person",
-			content: "You can review this person's basic information, including their contact information, and see if they are \"Active\". A super user should change a person to \"Inactive\" when they are no longer in a job with NATO or the Afghan government. Setting them as inactive keeps them from being added to reports as attendees.",
+			content: `You can review this person's basic information, including their contact information, and see if they are "Active". A super user should change a person to "Inactive" when they are no longer in a job as a ${advisorSingular} or ${principalSingular}. Setting them as inactive keeps them from being added to reports as attendees.`,
 			target: '#phoneNumber',
 			placement: 'bottom',
 		},
@@ -314,7 +320,7 @@ const personTour = (currentUser, history) => { return {
 		},
 		{
 			title: "Authored reports",
-			content: "If this person has authored any reports, you'll be able to see them displayed here. If you're looking at an Afghan principal's page, you won't see this section.",
+			content: `If this person has authored any reports, you'll be able to see them displayed here. If you're looking at an ${principalSingular}'s page, you won't see this section.`,
 			target: '#reports-authored h2',
 			placement: 'top',
 		},
