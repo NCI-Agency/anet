@@ -10,6 +10,7 @@ import LinkTo from 'components/LinkTo'
 import moment from 'moment'
 import Messages from 'components/Messages'
 
+import Settings from 'Settings'
 import {Person} from 'models'
 
 import API from 'api'
@@ -78,12 +79,12 @@ class MergePeople extends Page {
 					<Row>
 						<Col md={6}>
 							{loser.uuid &&
-								<fieldset>{this.showPersonDetails(loser)}</fieldset>
+								<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
 							}
 						</Col>
 						<Col md={6}>
 							{winner.uuid &&
-								<fieldset>{this.showPersonDetails(winner)}</fieldset>
+								<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
 							}
 						</Col>
 					</Row>
@@ -151,7 +152,7 @@ class MergePeople extends Page {
 			errors.push("You selected the same person twice!")
 		}
 		if (winner.role !== loser.role) {
-			errors.push("You can only merge people of the same Role (ie ADVISOR/PRINCIPAL)")
+			errors.push(`You can only merge people of the same Role (i.e. ${Settings.fields.advisor.person.name}/${Settings.fields.principal.person.name})`)
 		}
 
 		return errors
@@ -164,8 +165,8 @@ class MergePeople extends Page {
 			<Form.Field id="id" />
 			<Form.Field id="uuid" />
 			<Form.Field id="name" />
-			<Form.Field id="status" />
-			<Form.Field id="role" />
+			<Form.Field id="status">{person.humanNameOfStatus()}</Form.Field>
+			<Form.Field id="role">{person.humanNameOfRole()}</Form.Field>
 			<Form.Field id="rank" />
 			<Form.Field id="emailAddress" />
 			<Form.Field id="domainUsername" />

@@ -16,6 +16,7 @@ import API from 'api'
 import Settings from 'Settings'
 import {Person} from 'models'
 import utils from 'utils'
+import pluralize from 'pluralize'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 import 'components/NameInput.css'
@@ -107,8 +108,11 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 
 		const confirmLabel = this.state.wrongPersonOptionValue === 'needNewAccount'
-      ? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
-          : 'Yes, I would like to inactivate this account'
+				? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
+				: 'Yes, I would like to inactivate this account'
+		const advisorSingular = Settings.fields.advisor.person.name
+		const advisorPlural = pluralize(advisorSingular)
+		const superUserAdvisorTitle = isAdmin ? null : `Super users cannot create ${advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${advisorPlural} have the correct domain name associated with their profile, it is required that each new ${advisorSingular} individually logs into ANET and creates their own ANET profile.`
 
 		return <div>
 			<NavigationWarning isBlocking={this.state.isBlocking} />
@@ -205,7 +209,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 					:
 					<Form.Field id="role">
 						<ButtonToggleGroup>
-							<Button id="roleAdvisorButton" disabled={!isAdmin} value={Person.ROLE.ADVISOR}>{Settings.fields.advisor.person.name}</Button>
+							<Button id="roleAdvisorButton" disabled={!isAdmin} title={superUserAdvisorTitle} value={Person.ROLE.ADVISOR}>{Settings.fields.advisor.person.name}</Button>
 							<Button id="rolePrincipalButton" value={Person.ROLE.PRINCIPAL}>{Settings.fields.principal.person.name}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>

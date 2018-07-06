@@ -4,6 +4,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 
 import Fieldset from 'components/Fieldset'
 
+import Settings from 'Settings'
 import API from 'api'
 import {Person, Position} from 'models'
 
@@ -68,7 +69,7 @@ class BaseHelp extends Page {
 				<img src={TOUR_SCREENSHOT} alt={"Screenshot of \"Guided Tour\" link"} style={screenshotCss} />
 
 				<h4>2. Email your super user</h4>
-				<p>Your organization's super users are able to modify a lot of data in the system regarding how your organization, position, principal, and profile are set up.</p>
+				<p>Your organization's super users are able to modify a lot of data in the system regarding how your organization, position, profile, and {Settings.fields.principal.person.name} are set up.</p>
 				<p>Your super users:</p>
 				<ul>
 					{this.state.superUsers.map(user =>

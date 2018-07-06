@@ -16,6 +16,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 
+import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
@@ -48,7 +49,7 @@ const insightDetails = {
   },
   'advisor-reports': {
     component: FilterableAdvisorReportsTable,
-    title: 'Advisor Reports',
+    title: `${Settings.fields.advisor.person.name} Reports`,
     dateRange: false,
     showCalendar: false
   },

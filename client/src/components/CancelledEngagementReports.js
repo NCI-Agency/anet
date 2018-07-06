@@ -62,11 +62,11 @@ class CancelledEngagementReports extends Component {
     const focusDetails = this.getFocusDetails()
     return (
       <div>
-        <p className="help-text">{`Number of cancelled engagement reports released since ${this.referenceDateLongStr}, grouped by advisor organization`}</p>
+        <p className="help-text">{`Number of cancelled engagement reports released since ${this.referenceDateLongStr}, grouped by ${Settings.fields.advisor.org.name}`}</p>
         <p className="chart-description">
           {`Displays the number of cancelled engagement reports released since
-            ${this.referenceDateLongStr}. The reports are grouped by advisor
-            organization. In order to see the list of cancelled engagement
+            ${this.referenceDateLongStr}. The reports are grouped by ${Settings.fields.advisor.org.name}.
+            In order to see the list of cancelled engagement
             reports for an organization, click on the bar corresponding to the
             organization.`}
         </p>
@@ -154,7 +154,7 @@ class CancelledEngagementReports extends Component {
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
     const noAdvisorOrg = {
       uuid: "-1",
-      shortName: 'No advisor organization'
+      shortName: `No ${Settings.fields.advisor.org.name}`
     }
     Promise.all([chartQuery]).then(values => {
       let reportsList = values[0].reportList.list

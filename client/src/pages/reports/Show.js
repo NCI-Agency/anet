@@ -112,17 +112,18 @@ class BaseReportShow extends Page {
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
+		const advisorPositionSingular = Settings.fields.advisor.position.name
 		if (!currentUser.hasAssignedPosition()) {
 			return <div className="alert alert-warning" style={alertStyle}>
-					You cannot submit a report: you are not assigned to an advisor position.<br/>
-					Please contact your organization's super user(s) and request to be assigned to an advisor position.<br/>
+					You cannot submit a report: you are not assigned to a {advisorPositionSingular} position.<br/>
+					Please contact your organization's super user(s) and request to be assigned to a {advisorPositionSingular} position.<br/>
 					If you are unsure, you can also contact the support team {supportEmailMessage}.
 				</div>
 		}
 		else {
 			return <div className="alert alert-warning" style={alertStyle}>
-					You cannot submit a report: your assigned advisor position has an inactive status.<br/>
-					Please contact your organization's super users and request them to assign you to an active advisor position.<br/>
+					You cannot submit a report: your assigned {advisorPositionSingular} position has an inactive status.<br/>
+					Please contact your organization's super users and request them to assign you to an active {advisorPositionSingular} position.<br/>
 					If you are unsure, you can also contact the support team {supportEmailMessage}.
 				</div>
 		}

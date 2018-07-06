@@ -160,7 +160,7 @@ class BaseNav extends Component {
 							<MenuItem>Reports by day of the week</MenuItem>
 						</Link>
 						<Link to="/insights/advisor-reports">
-							<MenuItem>Advisor reports</MenuItem>
+							<MenuItem>{Settings.fields.advisor.person.name} reports</MenuItem>
 						</Link>
 					</NavDropdown>
 				}

@@ -207,14 +207,14 @@ class BaseHome extends Page {
 				<Breadcrumbs />
 				{!currentUser.hasAssignedPosition() &&
 					<div className="alert alert-warning" style={alertStyle}>
-						You are not assigned to an advisor position.<br/>
-						Please contact your organization's super user(s) to assign you to an advisor position.<br/>
+						You are not assigned to a {Settings.fields.advisor.position.name} position.<br/>
+						Please contact your organization's super user(s) to assign you to a {Settings.fields.advisor.position.name} position.<br/>
 						If you are unsure, you can also contact the support team {supportEmailMessage}.
 					</div>
 				}
 				{currentUser.hasAssignedPosition() && !currentUser.hasActivePosition() &&
 					<div className="alert alert-warning" style={alertStyle}>
-						Your advisor position has an inactive status.<br/>
+						Your {Settings.fields.advisor.position.name} position has an inactive status.<br/>
 						Please contact your organization's super users to change your position to an active status.<br/>
 						If you are unsure, you can also contact the support team {supportEmailMessage}.
 					</div>
