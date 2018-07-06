@@ -130,14 +130,6 @@ class BaseInsightsShow extends Page {
     }
   }
 
-  get defaultDateRange() {
-    return {
-      relative: "0",
-      start: this.state.startDate.toISOString(),
-      end: this.state.endDate.toISOString()
-    }
-  }
-
   get insightQueryParams() {
     const params = {
       [NOT_APPROVED_REPORTS]: [
