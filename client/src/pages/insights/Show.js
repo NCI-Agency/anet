@@ -17,6 +17,7 @@ import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableA
 
 import {Report} from 'models'
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
+import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
@@ -73,8 +74,8 @@ export const INSIGHT_DETAILS = {
   },
   [ADVISOR_REPORTS]: {
     component: FilterableAdvisorReportsTable,
-    navTitle: 'Advisor Reports',
-    title: 'Advisor Reports',
+    navTitle: `${Settings.fields.advisor.person.name} Reports`,
+    title: `${Settings.fields.advisor.person.name} Reports`,
     dateRange: false,
     showCalendar: false
   },
