@@ -23,6 +23,7 @@ import {Position, Organization} from 'models'
 class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
+		onCancel: PropTypes.func,
 		setSearchQuery: PropTypes.func.isRequired,
 		query: PropTypes.shape({
 			text: PropTypes.string,
