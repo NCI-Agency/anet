@@ -34,7 +34,7 @@ class LocationForm extends ValidatableFormWrapper {
 	static getDerivedStateFromProps(props, state) {
 		if (Location.hasCoordinates(props.anetLocation)) {
 			const loc = props.anetLocation
-			let marker = this.state.markers[0]
+			let marker = state.markers[0]
 			marker.name = loc.name
 			marker.lat = loc.lat
 			marker.lng = loc.lng
