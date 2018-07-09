@@ -32,7 +32,6 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
 class ReportsByTask extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
-    date: PropTypes.object,
     showLoading: PropTypes.func.isRequired,
     hideLoading: PropTypes.func.isRequired,
   }
@@ -47,8 +46,6 @@ class ReportsByTask extends Component {
       isLoading: false
     }
   }
-
-  get referenceDateLongStr() { return this.props.date.format('DD MMM YYYY') }
 
   render() {
     const focusDetails = this.getFocusDetails()

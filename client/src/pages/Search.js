@@ -36,16 +36,6 @@ import { connect } from 'react-redux'
 import utils from 'utils'
 import ReactDOM from 'react-dom'
 
-const QUERY_STRINGS = {
-	reports: {
-		pendingApprovalOf: 'reports pending your approval',
-		advisorOrgId: 'reports recently authored by your organization',
-		authorId: 'reports you recently authored',
-	},
-	organizations: 'Organizations TODO',
-	people: 'People TODO',
-}
-
 const SEARCH_CONFIG = {
 	reports : {
 		listName : 'reports: reportList',
@@ -219,14 +209,9 @@ class Search extends Page {
 		const noResults = numResults === 0
 
 		const qs = utils.parseQueryString(this.props.location.search)
-		let queryString = QUERY_STRINGS[qs.type] || qs.text || 'TODO'
 		const queryType = this.state.queryType || qs.type || 'everything'
 
 		const taskShortLabel = Settings.fields.task.shortLabel
-
-		if (typeof queryString === 'object') {
-			queryString = queryString[Object.keys(qs)[1]]
-		}
 
 		return (
 			<div>
@@ -280,10 +265,6 @@ class Search extends Page {
 				</div>
 
 				<Breadcrumbs items={[['Search results', '']]} />
-
-				{this.state.advancedSearch && <Fieldset title="Search filters">
-					<AdvancedSearch onCancel={this.cancelAdvancedSearch} />
-				</Fieldset>}
 
 				<Messages error={error} success={success} />
 
@@ -360,7 +341,7 @@ class Search extends Page {
 		const pageNums = this.state.pageNum
 		pageNums[type] = pageNum
 
-		const qs = utils.parseQueryString(this.props.location.search)
+//		const qs = utils.parseQueryString(this.props.location.search)
 		const query = this.getSearchQuery()
 		const part = this.getSearchPart(type, query)
 		GQL.run([part]).then(data => {
@@ -370,20 +351,6 @@ class Search extends Page {
 		}).catch(response =>
 			this.setState({error: response})
 		)
-	}
-
-	@autobind
-	showAdvancedSearch() {
-		this.setState({advancedSearch: {text: this.state.query}})
-	}
-
-	@autobind
-	cancelAdvancedSearch() {
-		this.props.history.push({
-			pathname: '/search',
-			search: utils.formatQueryString({text: this.state.advancedSearch ? this.state.advancedSearch.text : ""}),
-			state: {advancedSearch: null}
-		})
 	}
 
 	renderPeople() {

@@ -89,8 +89,8 @@ export default class Report extends Model {
 			errors.push('You cannot submit reports for future dates, except for cancelled engagements')
 		}
 
-		this.checkPrimaryAttendee(this.getPrimaryPrincipal(), this.principalOrg, 'Principal', Organization.TYPE.PRINCIPAL_ORG, errors)
-		this.checkPrimaryAttendee(this.getPrimaryAdvisor(), this.advisorOrg, 'Advisor', Organization.TYPE.ADVISOR_ORG, errors)
+		this.checkPrimaryAttendee(this.getPrimaryPrincipal(), this.principalOrg, Person.ROLE.PRINCIPAL, Organization.TYPE.PRINCIPAL_ORG, errors)
+		this.checkPrimaryAttendee(this.getPrimaryAdvisor(), this.advisorOrg, Person.ROLE.ADVISOR, Organization.TYPE.ADVISOR_ORG, errors)
 
 		if (!this.intent) {
 			errors.push("You must provide the Meeting Goal (purpose)")
@@ -106,19 +106,20 @@ export default class Report extends Model {
 		return errors
 	}
 
-	checkPrimaryAttendee(primaryAttendee, primaryOrg, roleName, orgType, errors) {
+	checkPrimaryAttendee(primaryAttendee, primaryOrg, role, orgType, errors) {
+		const roleName = Person.humanNameOfRole(role)
 		if (!primaryAttendee) {
-			errors.push('You must provide the primary ' + roleName + ' for the Engagement')
+			errors.push(`You must provide the primary ${roleName} for the Engagement`)
 		} else if (primaryAttendee.status !== Person.STATUS.ACTIVE) {
-			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to have an active profile')
+			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`)
 		} else if (primaryAttendee.endOfTourDate && moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf('day'))) {
-			errors.push('The primary ' + roleName + '\'s - ' + primaryAttendee.name + ' - end of tour date has passed')
+			errors.push(`The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`)
 		} else if (!primaryAttendee.position) {
-			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to be assigned to a position')
+			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`)
 		} else if (primaryAttendee.position.status !== Position.STATUS.ACTIVE) {
-			errors.push('The primary ' + roleName + ' - ' + primaryAttendee.name + ' - needs to be in an active position')
+			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`)
 		} else if (primaryOrg && (primaryOrg.type !== orgType)) {
-			errors.push('The primary ' + roleName + '\'s - ' + primaryAttendee.name + ' - organization should be ' + Organization.humanNameOfType(orgType))
+			errors.push(`The primary ${roleName}'s - ${primaryAttendee.name} - organization should be ${Organization.humanNameOfType(orgType)}`)
 		}
 	}
 
