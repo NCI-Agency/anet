@@ -10,6 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import Settings from 'Settings'
@@ -29,7 +31,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 class ReportsByTask extends Component {
   static propTypes = {
-    date: PropTypes.object,
+    queryParams: PropTypes.object,
     showLoading: PropTypes.func.isRequired,
     hideLoading: PropTypes.func.isRequired,
   }
@@ -45,26 +47,16 @@ class ReportsByTask extends Component {
     }
   }
 
-  get queryParams() {
-    return {
-      state: [Report.STATE.RELEASED],
-      releasedAtStart: this.props.date.valueOf(),
-    }
-  }
-
-  get referenceDateLongStr() { return this.props.date.format('DD MMM YYYY') }
-
   render() {
     const focusDetails = this.getFocusDetails()
     const taskShortLabel = Settings.fields.task.shortLabel
     return (
       <div>
-        <p className="help-text">{`Number of published reports since ${this.referenceDateLongStr}, grouped by ${taskShortLabel}`}</p>
+        <p className="help-text">{`Grouped by ${taskShortLabel}`}</p>
         <p className="chart-description">
-          {`Displays the number of published reports which have been released
-            since ${this.referenceDateLongStr}. The reports are grouped by
-            ${taskShortLabel}. In order to see the list of published reports for a ${taskShortLabel},
-            click on the bar corresponding to the ${taskShortLabel}.`}
+          {`The reports are grouped by ${taskShortLabel}. In order to see the
+            list of published reports for a ${taskShortLabel}, click on the bar
+            corresponding to the ${taskShortLabel}.`}
         </p>
         <BarChartWithLoader
           chartId={chartByTaskId}
@@ -110,7 +102,7 @@ class ReportsByTask extends Component {
     this.setState( {isLoading: true} )
     this.props.showLoading()
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -129,8 +121,8 @@ class ReportsByTask extends Component {
       longName: noTaskMessage
     }
     Promise.all([chartQuery]).then(values => {
-      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.tasks.map(p => p.id)}})
-      let tasks = values[0].reportList.list.map(d => d.tasks)
+      let simplifiedValues = values[0].reportList.list ? values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.tasks.map(p => p.id)}}): []
+      let tasks = values[0].reportList.list ? values[0].reportList.list.map(d => d.tasks) : []
       tasks = [].concat.apply([], tasks)
         .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
         .sort((a, b) => a.shortName.localeCompare(b.shortName))
@@ -153,7 +145,7 @@ class ReportsByTask extends Component {
 
   fetchTaskData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -199,15 +191,16 @@ class ReportsByTask extends Component {
     }
   }
 
+
   componentDidMount() {
     this.fetchData()
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
-        focusedTask: ''  // reset focus when changing the date
+        focusedTask: ''  // reset focus when changing the queryParams
       }, () => this.fetchData())
     }
   }

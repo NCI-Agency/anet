@@ -14,6 +14,11 @@ body {
 	background: #f2f2f2;
 }
 
+.fullscreen-enabled
+{
+overflow: scroll
+}
+
 /* this makes jump links work correctly with the header overlaying content */
 *[data-jumptarget]:before {
   display: block;

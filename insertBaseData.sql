@@ -234,6 +234,13 @@ INSERT INTO approvers (approvalStepId, positionId) VALUES
 INSERT INTO approvers (approvalStepId, positionId) VALUES
 	((SELECT id from approvalSteps WHERE name='EF 2.2 Secondary Reviewers'), (SELECT id from positions where name = 'EF 2.2 Final Reviewer'));
 
+
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)	VALUES ('EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id)
+	VALUES ('1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'));
+INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id, organizationId)
+	VALUES ('1.1.A', 'Milestone the First in EF 1.1', 'Milestone', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1.1'), (SELECT id from organizations where shortName='EF 1'));
+
 INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt)	VALUES ('EF 1', 'Budget and Planning', 'EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO tasks (shortName, longName, category, createdAt, updatedAt, customFieldRef1Id)
 	VALUES ('1.1', 'Budgeting in the MoD', 'Sub-EF', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, (SELECT id from tasks where shortName = 'EF 1'));

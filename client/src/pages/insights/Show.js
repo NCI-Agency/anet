@@ -9,56 +9,96 @@ import FutureEngagementsByLocation from 'components/FutureEngagementsByLocation'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import Fieldset from 'components/Fieldset'
-import CalendarButton from 'components/CalendarButton'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
-import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
+import ProgramSummaryView from 'components/ProgramSummaryView'
 
+import OrganizationView from 'components/OrganizationView'
+import FULLSCREEN_ICON from 'resources/fullscreen.png'
+import Fullscreen from "react-full-screen"
+import {Button} from 'react-bootstrap'
+
+import {Report} from 'models'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
+import {BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
 
-const insightDetails = {
-  'not-approved-reports': {
+export const NOT_APPROVED_REPORTS = 'not-approved-reports'
+export const CANCELLED_REPORTS = 'cancelled-reports'
+export const REPORTS_BY_TASK = 'reports-by-task'
+export const REPORTS_BY_DAY_OF_WEEK = 'reports-by-day-of-week'
+export const FUTURE_ENGAGEMENTS_BY_LOCATION = 'future-engagements-by-location'
+export const ADVISOR_REPORTS = 'advisor-reports'
+export const PROGRAM_SUMMARY_VIEW = 'program-summary-view'
+export const ORGANIZATION_VIEW = 'organization-view'
+
+export const INSIGHTS = [
+  NOT_APPROVED_REPORTS, CANCELLED_REPORTS, REPORTS_BY_TASK, FUTURE_ENGAGEMENTS_BY_LOCATION, 
+  REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS, PROGRAM_SUMMARY_VIEW, ORGANIZATION_VIEW
+]
+
+export const INSIGHT_DETAILS = {
+  [NOT_APPROVED_REPORTS]: {
     component: PendingApprovalReports,
-    title: 'Pending Approval Reports',
+    navTitle: 'Pending Approval Reports',
+    title: 'Number of Pending Approval Reports',
     dateRange: false,
     showCalendar: true
   },
-  'cancelled-reports': {
+  [CANCELLED_REPORTS]: {
     component: CancelledEngagementReports,
-    title: 'Cancelled Engagement Reports',
+    navTitle: 'Cancelled Engagement Reports',
+    title: 'Number of Cancelled Engagement Reports',
     dateRange: false,
     showCalendar: true
   },
-  'reports-by-task': {
+  [REPORTS_BY_TASK]: {
     component: ReportsByTask,
-    title: 'Reports by Task',
-    help: '',
+    navTitle: 'Reports by Task',
+    title: 'Number of Reports by Task',
     dateRange: false,
     showCalendar: true
   },
-  'reports-by-day-of-week': {
+  [REPORTS_BY_DAY_OF_WEEK]: {
     component: ReportsByDayOfWeek,
-    title: 'Reports by day of the week',
-    help: 'Number of reports by day of the week',
+    navTitle: 'Reports by Day of the Week',
+    title: 'Number of Reports by Day of the Week',
     dateRange: true,
     showCalendar: false
   },
-  'advisor-reports': {
+  [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
+    component: FutureEngagementsByLocation,
+    navTitle: 'Future Engagements by Location',
+    title: 'Number of Future Engagements by Location',
+    dateRange: true,
+    onlyShowBetween: true,
+  },
+  [ADVISOR_REPORTS]: {
     component: FilterableAdvisorReportsTable,
+    navTitle: `${Settings.fields.advisor.person.name} Reports`,
     title: `${Settings.fields.advisor.person.name} Reports`,
     dateRange: false,
     showCalendar: false
   },
-  'future-engagements-by-location': {
-    component: FutureEngagementsByLocation,
-    title: 'Future Engagements by Location',
-    help: 'Number of future engagements by location',
-    dateRange: true,
-    onlyShowBetween: true,
+  [PROGRAM_SUMMARY_VIEW]: {
+    component: ProgramSummaryView,
+    navTitle: 'Program summary view',
+    title: 'Program summary view',
+    dateRange: false,
+    onlyShowBetween: false,
+  },
+  [ORGANIZATION_VIEW]: {
+    component: OrganizationView,
+    navTitle: 'Organization view',
+    title: 'Organization view',
+    dateRange: false,
+    onlyShowBetween: false,
   },
 }
 
@@ -71,6 +111,14 @@ const calendarButtonCss = {
 
 const dateRangeFilterCss = {
   marginTop: '20px'
+}
+
+function addToQuery(queryKey, value, isDate) {
+  // Add toQuery function to a value object, to be used by getSearchQuery
+  return {
+    ...value,
+    toQuery: () => {return isDate ? dateToQuery(queryKey, value) : value}
+  }
 }
 
 class BaseInsightsShow extends Page {
@@ -90,67 +138,112 @@ class BaseInsightsShow extends Page {
     return moment().subtract(maxReportAge, 'days').clone()
   }
 
-  get referenceDateLongStr() { return this.state.referenceDate.format('DD MMMM YYYY') }
-
   constructor(props) {
-    super(props)
+    super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
     this.state = {
-      referenceDate: null,
-      startDate: null,
-      endDate: null,
-      date: {relative: "0", start: null, end: null}
+      isFull: false,
+      ...this.insightDefaultDates
     }
   }
 
-  get defaultDates() {
-    return {
-      relative: "0",
-      start: this.state.startDate.toISOString(),
-      end: this.state.endDate.toISOString()
+  toggleFull = () => {
+    this.setState( {isFull: !this.state.isFull} )
+  }
+
+  get insightDefaultDates() {
+    const prefix = this.props.match.params.insight.split('-', 1).pop()
+    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
+      return this.getDefaultFutureDates()
+    } else {
+      return this.getDefaultPastDates()
     }
   }
 
-  getFilters = () => {
-    const insight = insightDetails[this.props.match.params.insight]
-    const calenderFilter = (insight.showCalendar) ? <CalendarButton onChange={this.changeReferenceDate} value={this.state.referenceDate.toISOString()} style={calendarButtonCss} /> : null
-    const dateRangeFilter = (insight.dateRange) ? <DateRangeSearch queryKey="engagementDate" value={this.defaultDates} onChange={this.handleChangeDateRange} style={dateRangeFilterCss} onlyBetween={insight.onlyShowBetween} /> : null
-    return <span>{dateRangeFilter}{calenderFilter}</span>
+  get insightQueryParams() {
+    const params = {
+      [NOT_APPROVED_REPORTS]: [
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.PENDING_APPROVAL}},
+        {key: 'Update Date', isDate: true, queryKey: 'updatedAt', value: {relative: BEFORE,  end: this.state.referenceDate.toISOString()}},
+      ],
+      [CANCELLED_REPORTS]: [
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.CANCELLED, cancelledReason: ''}},
+        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
+      ],
+      [REPORTS_BY_TASK]: [
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.RELEASED}},
+        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
+      ],
+      [REPORTS_BY_DAY_OF_WEEK]: [
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.RELEASED}},
+        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: BETWEEN,  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
+        {key: 'includeEngagementDayOfWeek', isDate: false, queryKey: '', value: 1},
+      ],
+      [FUTURE_ENGAGEMENTS_BY_LOCATION]: [
+        {key: 'Engagement Date', isDate: true, queryKey: 'engagementDate', value: {relative: BETWEEN,  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
+      ],
+      [ADVISOR_REPORTS]: [],
+      [PROGRAM_SUMMARY_VIEW]: [],
+      [ORGANIZATION_VIEW]: [],
+    }
+    let insightParams = {}
+    Object.keys(params).forEach(function(key, index) {
+      insightParams[key] = params[key].map(
+        filter => {if (typeof filter.value === 'object') { filter.value = addToQuery(filter.queryKey, filter.value, filter.isDate || false) }; return filter})
+    })
+    return insightParams
+  }
+
+  @autobind
+  updateSearchQuery() {
+    this.props.setSearchQuery({
+      text: '',
+      objectType: SEARCH_OBJECT_TYPES.REPORTS,
+      filters: this.insightQueryParams[this.props.match.params.insight]
+    })
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.insight !== this.props.match.params.insight) {
-      this.setStateDefaultDates(this.props.match.params.insight)
+      const oldQueryParams = this.insightQueryParams[prevProps.match.params.insight]
+      const newQueryParams = this.insightQueryParams[this.props.match.params.insight]
+      // when changing insight, set dates to insight specific defaults
+      const defaultDates = this.insightDefaultDates
+      if (!this.state.referenceDate.isSame(defaultDates.referenceDate, 'day') ||
+          !this.state.startDate.isSame(defaultDates.startDate, 'day') ||
+          !this.state.endDate.isSame(defaultDates.endDate, 'day')) {
+        this.setState(
+          defaultDates,
+          () => this.updateSearchQuery()
+        )
+      }
+      else if (!_isEqualWith(oldQueryParams, newQueryParams, utils.equalFunction)) {
+        this.updateSearchQuery()
+      }
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
-    this.setStateDefaultDates(this.props.match.params.insight)
+    this.updateSearchQuery()
+    this.props.setSearchProps({
+      searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
+    })
   }
 
-  setStateDefaultDates = (insight) => {
-    const prefix = insight.split('-', 1).pop()
-    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
-      this.setStateDefaultFutureDates()
-    } else {
-      this.setStateDefaultPastDates()
+  getDefaultPastDates = () => {
+    return {
+      referenceDate: this.cutoffDate,
+      startDate: this.cutoffDate,
+      endDate: this.currentDateTime
     }
   }
 
-  setStateDefaultPastDates = () => {
-    this.setState({
-      referenceDate: this.cutoffDate,
-      startDate: this.cutoffDate,
-      endDate: this.currentDateTime.endOf('day')
-    })
-  }
-
-  setStateDefaultFutureDates = () => {
-    this.setState({
+  getDefaultFutureDates = () => {
+    return {
       referenceDate: this.currentDateTime,
       startDate: this.currentDateTime,
-      endDate: this.currentDateTime.add(14, 'days').endOf('day')
-    })
+      endDate: this.currentDateTime.add(14, 'days')
+    }
   }
 
   handleChangeDateRange = (value) => {
@@ -175,7 +268,7 @@ class BaseInsightsShow extends Page {
     }
 
     if (value.end !== null) {
-      this.updateDate("endDate", moment(value.end).endOf('day'))
+      this.updateDate("endDate", moment(value.end))
     }
   }
 
@@ -196,34 +289,40 @@ class BaseInsightsShow extends Page {
   }
 
   render() {
-    const insightConfig = insightDetails[this.props.match.params.insight]
+    const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.props.match.params.insight
+    const queryParams = this.getSearchQuery()
+    const fullscreenButton = <Button onClick={this.toggleFull} style={calendarButtonCss}><img src={FULLSCREEN_ICON} height={16} alt="Switch to fullscreen mode" /></Button>
 
     return (
       <div>
         <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
-
         {this.state.referenceDate &&
-          <Fieldset id={this.props.match.params.insight} data-jumptarget title={
-            <span>
-              {insightConfig.title}
-              {this.getFilters()}
-            </span>
-            }>
-            <InsightComponent
-              date={this.state.referenceDate.clone()}
-              startDate={this.state.startDate.clone()}
-              endDate={this.state.endDate.clone()}
-            />
-          </Fieldset>
+          <Fullscreen enabled={this.state.isFull}
+            onChange={isFull => this.setState({isFull})}>
+            <Fieldset id={this.props.match.params.insight} data-jumptarget title={
+              <span>
+                {insightConfig.title}{fullscreenButton}
+              </span>
+              }>
+              <InsightComponent
+                queryParams={queryParams}
+                date={this.state.referenceDate.clone()}
+              />
+            </Fieldset>
+          </Fullscreen>
         }
       </div>
     )
   }
 
 }
+
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
 
 const InsightsShow = (props) => (
 	<AppContext.Consumer>
@@ -233,4 +332,4 @@ const InsightsShow = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(InsightsShow)
+export default connect(mapStateToProps, mapDispatchToProps)(InsightsShow)
