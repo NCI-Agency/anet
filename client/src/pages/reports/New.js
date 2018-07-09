@@ -1,29 +1,30 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
-import NavigationWarning from 'components/NavigationWarning'
 
 import ReportForm from './Form'
 
 import GuidedTour from 'components/GuidedTour'
 import {reportTour} from 'pages/HopscotchTour'
 
-import {Report} from 'models'
+import {Person, Report} from 'models'
 
-export default class ReportNew extends Page {
-	static pageProps = {
-		useNavigation: false,
+import AppContext from 'components/AppContext'
+import { PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class BaseReportNew extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
-	}
-
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			report: new Report(),
@@ -31,16 +32,17 @@ export default class ReportNew extends Page {
 		}
 	}
 
-	componentWillUpdate() {
+	componentDidUpdate() {
 		this.addCurrentUserAsAttendee()
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		this.addCurrentUserAsAttendee()
 	}
 
 	addCurrentUserAsAttendee() {
-		let newAttendee = this.context.app.state.currentUser
+		const { currentUser } = this.props
+		let newAttendee = currentUser
 
 		const addedAttendeeToReport = this.state.report.addAttendee(newAttendee)
 		const addedAttendeeToOriginalReport = this.state.originalReport.addAttendee(newAttendee)
@@ -65,9 +67,18 @@ export default class ReportNew extends Page {
 				<Breadcrumbs items={[['Submit a report', Report.pathForNew()]]} />
 				<Messages error={this.state.error} />
 
-				<NavigationWarning original={this.state.originalReport} current={this.state.report} />
-				<ReportForm report={this.state.report} title="Create a new Report" />
+				<ReportForm original={this.state.originalReport} report={this.state.report} title="Create a new Report" />
 			</div>
 		)
 	}
 }
+
+const ReportNew = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseReportNew currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(ReportNew)

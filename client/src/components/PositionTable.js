@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {Pagination, Table} from 'react-bootstrap'
+import {Table} from 'react-bootstrap'
 
+import UltimatePagination from 'components/UltimatePagination'
 import LinkTo from 'components/LinkTo'
 import {Position} from 'models'
 
@@ -41,18 +42,19 @@ export default class PositionTable extends Component {
 			{positionsExist ?
 				<div>
 					{numPages > 1 &&
-						<header className="searchPagination" >
-						<Pagination
+						<header className="searchPagination">
+							<UltimatePagination
 								className="pull-right"
-								prev
-								next
-								items={numPages}
-								ellipsis
-								maxButtons={6}
-								activePage={pageNum}
-								onSelect={(value) => {this.props.goToPage(value - 1)}}
+								currentPage={pageNum}
+								totalPages={numPages}
+								boundaryPagesRange={1}
+								siblingPagesRange={2}
+								hideEllipsis={false}
+								hidePreviousAndNextPageLinks={false}
+								hideFirstAndLastPageLinks={true}
+								onChange={(value) => this.props.goToPage(value - 1)}
 							/>
-					</header>
+						</header>
 					}
 
 				<Table responsive hover striped className="positions_table">

@@ -4,36 +4,35 @@ import autobind from 'autobind-decorator'
 import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Position, Person} from 'models'
+import LinkTo from 'components/LinkTo'
 import API from 'api'
+import AppContext from 'components/AppContext'
 
-export default class AssignPositionModal extends Component {
+class BaseAssignPositionModal extends Component {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
 		showModal: PropTypes.bool,
 		onCancel: PropTypes.func.isRequired,
-		onSuccess: PropTypes.func.isRequired
+		onSuccess: PropTypes.func.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static contextTypes = {
-		currentUser: PropTypes.object
-	}
-
-	constructor(props, context) {
-		super(props, context)
+	constructor(props) {
+		super(props)
 		this.state = {
 			position: props.person && props.person.position
 		}
 	}
 
-	componentWillReceiveProps(nextProps, nextContext) {
-		let position = nextProps.person.position
-		this.setState({position})
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.person.position !== this.props.person.position) {
+			this.setState({position: this.props.person.position})
+		}
 	}
 
 	render() {
-		let {person} = this.props
+		const { person, currentUser } = this.props
 		let newPosition = new Position(this.state.position)
-		let currentUser = this.context.currentUser
 
 		let positionSearchQuery = {status: Position.STATUS.ACTIVE}
 		if (person.role === Person.ROLE.ADVISOR) {
@@ -55,13 +54,13 @@ export default class AssignPositionModal extends Component {
 		return (
 			<Modal show={this.props.showModal} onHide={this.close}>
 				<Modal.Header closeButton>
-					<Modal.Title>Set Position for {person.name}</Modal.Title>
+					<Modal.Title>Set Position for <LinkTo person={person} isLink={false}/></Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					{person.position.id &&
 						<div style={{textAlign:'center'}}>
 							<Button bsStyle="danger" onClick={this.remove} className="remove-person-from-position">
-								Remove {person.name} from {person.position.name}
+								Remove <LinkTo person={person} isLink={false}/> from <LinkTo position={person.position} isLink={false}/>
 							</Button>
 							<hr className="assignModalSplit" />
 						</div>
@@ -119,7 +118,7 @@ export default class AssignPositionModal extends Component {
 						}
 						{this.state.position && this.state.position.person && this.state.position.person.id !== person.id &&
 							<Alert bsStyle={"danger"}>
-								This position is currently held by {this.state.position.person.name}.  By selecting this position, they will be removed.
+								This position is currently held by <LinkTo person={this.state.position.person}/>.  By selecting this position, they will be removed.
 							</Alert>
 						}
 					</Grid>
@@ -162,7 +161,18 @@ export default class AssignPositionModal extends Component {
 
 	@autobind
 	onPositionSelect(position) {
-		this.setState({position})
+		if (position.id) {
+			this.setState({position})
+		}
 	}
 
 }
+const AssignPositionModal = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAssignPositionModal currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default AssignPositionModal

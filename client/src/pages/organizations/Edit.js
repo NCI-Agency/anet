@@ -1,23 +1,26 @@
 import React from 'react'
-import Page from 'components/Page'
-import NavigationWarning from 'components/NavigationWarning'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 
 import API from 'api'
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
-export default class OrganizationEdit extends Page {
-	static pageProps = {
-		useNavigation: false,
+import { PAGE_PROPS_NO_NAV } from 'actions'
+import { connect } from 'react-redux'
+
+class OrganizationEdit extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
 	}
 
 	static modelName = 'Organization'
 
 	constructor(props) {
-		super(props)
+		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
 			organization: new Organization(),
@@ -25,12 +28,12 @@ export default class OrganizationEdit extends Page {
 	}
 
 	fetchData(props) {
-		API.query(/* GraphQL */`
-			organization(id:${props.params.id}) {
+		return API.query(/* GraphQL */`
+			organization(id:${props.match.params.id}) {
 				id, shortName, longName, status, identificationCode, type,
 				parentOrg { id, shortName, longName, identificationCode }
 				approvalSteps { id, name
-					approvers { id, name, person { id, name}}
+					approvers { id, name, person { id, name, rank}}
 				},
 				tasks { id, shortName, longName}
 			}
@@ -47,13 +50,13 @@ export default class OrganizationEdit extends Page {
 
 		return (
 			<div>
-				<NavigationWarning original={this.state.originalOrganization} current={organization} />
-
 				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
-				<OrganizationForm organization={organization} edit />
+				<OrganizationForm original={this.state.originalOrganization} organization={organization} edit />
 			</div>
 		)
 	}
 }
+
+export default connect(null, mapDispatchToProps)(OrganizationEdit)

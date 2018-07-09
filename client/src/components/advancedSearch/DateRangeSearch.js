@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 import {Row, Col} from 'react-bootstrap'
 import moment from 'moment'
 import _uniqueId from 'lodash/uniqueId'
@@ -97,11 +97,12 @@ export default class DateRangeSearch extends Component {
 		</div>
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.value !== this.state.value) {
-			this.setState({value: nextProps.value})
+	static getDerivedStateFromProps(props, state) {
+		if (props.value && props.value !== state.value) {
+			return {value: props.value}
 		}
-	  }
+		return null
+	}
 
 	@autobind
 	onChangeStart(newDate) {

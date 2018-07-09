@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import {Button, Alert, HelpBlock, Radio, Col, ControlLabel, FormGroup} from 'react-bootstrap'
-import DatePicker from 'react-bootstrap-date-picker'
+import DatePicker from 'react-16-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
@@ -9,7 +9,6 @@ import Form from 'components/Form'
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import TextEditor from 'components/TextEditor'
-import History from 'components/History'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import OptionListModal from 'components/OptionListModal'
 
@@ -17,33 +16,36 @@ import API from 'api'
 import Settings from 'Settings'
 import {Person} from 'models'
 import utils from 'utils'
+import pluralize from 'pluralize'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 import 'components/NameInput.css'
 
-import { confirmAlert } from 'react-confirm-alert'
-import 'components/react-confirm-alert.css'
+import TriggerableConfirm from 'components/TriggerableConfirm'
 
-export default class PersonForm extends ValidatableFormWrapper {
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
+
+class BasePersonForm extends ValidatableFormWrapper {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		legendText: PropTypes.string,
 		saveText: PropTypes.string,
-	}
-
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
-		currentUser: PropTypes.object.isRequired,
+		currentUser: PropTypes.instanceOf(Person),
+		loadAppData: PropTypes.func,
 	}
 
 	constructor(props) {
 		super(props)
 		this.state = {
+			isBlocking: false,
 			person: null,
 			error: null,
 			originalStatus: props.person.status,
 			showWrongPersonModal: false,
+			wrongPersonOptionValue: null,
 		}
 	}
 
@@ -90,7 +92,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 			onChange: this.handleOnChangeFirstName
 		}
 
-		const currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isSelf = Person.isEqual(currentUser, person)
 		const disableStatusChange = this.state.originalStatus === Person.STATUS.INACTIVE || isSelf
@@ -105,7 +107,17 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const nameMessage = "This is not " + (isSelf ? "me" : fullName)
 		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 
-		return <ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
+		const confirmLabel = this.state.wrongPersonOptionValue === 'needNewAccount'
+				? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
+				: 'Yes, I would like to inactivate this account'
+		const advisorSingular = Settings.fields.advisor.person.name
+		const advisorPlural = pluralize(advisorSingular)
+		const superUserAdvisorTitle = isAdmin ? null : `Super users cannot create ${advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${advisorPlural} have the correct domain name associated with their profile, it is required that each new ${advisorSingular} individually logs into ANET and creates their own ANET profile.`
+
+		return <div>
+			<NavigationWarning isBlocking={this.state.isBlocking} />
+
+			<ValidatableForm formFor={person} onChange={this.onChange} onSubmit={this.onSubmit} horizontal
 			submitText={this.props.saveText || 'Save person'}>
 
 			<Messages error={this.state.error} />
@@ -137,8 +149,17 @@ export default class PersonForm extends ValidatableFormWrapper {
 
 					{edit && !canEditName &&
 						<div>
+							<TriggerableConfirm
+								onConfirm={this.confirmReset.bind(this)}
+								title="Confirm to reset account"
+								body="Are you sure you want to reset this account?"
+								confirmText={confirmLabel}
+								cancelText="No, I am not entirely sure at this point"
+								bsStyle="warning"
+								buttonLabel="Reset account"
+								className="hidden"
+								ref={confirmComponent => this.confirmHasReplacementButton = confirmComponent} />
 							<Button id="wrongPerson" onClick={this.showWrongPersonModal}>{nameMessage}</Button>
-
 							<OptionListModal
 								title={modalTitle}
 								showModal={this.state.showWrongPersonModal}
@@ -188,7 +209,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 					:
 					<Form.Field id="role">
 						<ButtonToggleGroup>
-							<Button id="roleAdvisorButton" disabled={!isAdmin} value={Person.ROLE.ADVISOR}>{Settings.fields.advisor.person.name}</Button>
+							<Button id="roleAdvisorButton" disabled={!isAdmin} title={superUserAdvisorTitle} value={Person.ROLE.ADVISOR}>{Settings.fields.advisor.person.name}</Button>
 							<Button id="rolePrincipalButton" value={Person.ROLE.PRINCIPAL}>{Settings.fields.principal.person.name}</Button>
 						</ButtonToggleGroup>
 					</Form.Field>
@@ -258,23 +279,22 @@ export default class PersonForm extends ValidatableFormWrapper {
 				<Form.Field id="biography" componentClass={TextEditor} className="biography" />
 			</Fieldset>
 		</ValidatableForm>
+		</div>
 	}
 
-	componentWillReceiveProps(nextProps) {
-		const { person } = nextProps
+	static getDerivedStateFromProps(props, state) {
+		const { person } = props
 		const emptyName = { lastName: '', firstName: ''}
-
 		const parsedName = person.name ? Person.parseFullName(person.name) : emptyName
-
-		this.savePersonWithFullName(person, parsedName)
+		return BasePersonForm.getPersonWithFullName(person, parsedName)
 	}
 
-	savePersonWithFullName(person, editName) {
+	static getPersonWithFullName(person, editName) {
 		if (editName.lastName) { person.lastName = editName.lastName }
 		if (editName.firstName) { person.firstName = editName.firstName }
 
 		person.name = Person.fullName(person)
-		this.setState({ person })
+		return { person }
 	}
 
 	handleOnKeyDown = (event) => {
@@ -288,18 +308,21 @@ export default class PersonForm extends ValidatableFormWrapper {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.savePersonWithFullName(person, { lastName: value })
+		this.setState(BasePersonForm.getPersonWithFullName(person, { lastName: value }))
 	}
 
 	handleOnChangeFirstName = (event) => {
 		const value = event.target.value
 		const { person } = this.state
 
-		this.savePersonWithFullName(person, { firstName: value })
+		this.setState(BasePersonForm.getPersonWithFullName(person, { firstName: value }))
 	}
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
@@ -326,6 +349,8 @@ export default class PersonForm extends ValidatableFormWrapper {
 		person = Object.without(person, 'firstName', 'lastName')
 
 		let url = `/api/people/${edit ? 'update' : 'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, person, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
@@ -335,15 +360,21 @@ export default class PersonForm extends ValidatableFormWrapper {
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
-					this.context.app.loadData()
-					History.push('/', {skipPageLeaveWarning: true})
+					this.props.loadAppData()
+					this.props.history.push({
+						pathname: '/',
+					})
 				} else {
 					if (response.id) {
 						person.id = response.id
 					}
-
-					History.replace(Person.pathForEdit(person), false)
-					History.push(Person.pathFor(person), {success: 'Person saved successfully', skipPageLeaveWarning: true})
+					this.props.history.replace(Person.pathForEdit(person))
+					this.props.history.push({
+						pathname: Person.pathFor(person),
+						state: {
+							success: 'Person saved successfully',
+						}
+					})
 				}
 			}).catch(error => {
 				this.setState({error: error})
@@ -357,8 +388,15 @@ export default class PersonForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
+	confirmReset() {
+		const { person } = this.state
+		person.status = Person.STATUS.INACTIVE
+		this.updatePerson(person, true, this.state.wrongPersonOptionValue === 'needNewAccount')
+	}
+
+	@autobind
 	hideWrongPersonModal(optionValue) {
-		this.setState({showWrongPersonModal: false})
+		this.setState({showWrongPersonModal: false, wrongPersonOptionValue: optionValue})
 		if (optionValue) {
 			// do something useful with optionValue
 			switch (optionValue) {
@@ -366,20 +404,7 @@ export default class PersonForm extends ValidatableFormWrapper {
 				case 'leftVacant':
 				case 'hasReplacement':
 					// reset account?
-					const confirmLabel = optionValue === 'needNewAccount'
-						? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
-						: 'Yes, I would like to inactivate this account'
-					confirmAlert({
-						title: 'Confirm to reset account',
-						message: 'Are you sure you want to reset this account?',
-						confirmLabel: confirmLabel,
-						cancelLabel: 'No, I am not entirely sure at this point',
-						onConfirm: () => {
-							const { person } = this.state
-							person.status = Person.STATUS.INACTIVE
-							this.updatePerson(person, true, optionValue === 'needNewAccount')
-						}
-					})
+					this.confirmHasReplacementButton.buttonRef.props.onClick()
 					break
 				default:
 					// TODO: integrate action to email admin
@@ -389,3 +414,13 @@ export default class PersonForm extends ValidatableFormWrapper {
 		}
 	}
 }
+
+const PersonForm = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BasePersonForm currentUser={context.currentUser} loadAppData={context.loadAppData} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default withRouter(PersonForm)

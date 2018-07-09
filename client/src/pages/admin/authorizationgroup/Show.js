@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Form from 'components/Form'
 import Fieldset from 'components/Fieldset'
@@ -10,17 +10,23 @@ import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
 import ReportCollection from 'components/ReportCollection'
 
-import {AuthorizationGroup} from 'models'
+import {AuthorizationGroup, Person} from 'models'
 import GQL from 'graphqlapi'
 import autobind from 'autobind-decorator'
 
-export default class AuthorizationGroupShow extends Page {
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+import AppContext from 'components/AppContext'
+import { connect } from 'react-redux'
+
+class BaseAuthorizationGroupShow extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			authorizationGroup: new AuthorizationGroup(),
 			positions: null,
@@ -61,18 +67,18 @@ export default class AuthorizationGroupShow extends Page {
 
 	fetchData(props) {
 		let authGroupPart = new GQL.Part(/* GraphQL */`
-			authorizationGroup(id:${props.params.id}) {
+			authorizationGroup(id:${props.match.params.id}) {
 			id, name, description
 			positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
 			status
 		}` )
-		let positionsPart = this.getPositionQueryPart(props.params.id)
-		let reportsPart = this.getReportQueryPart(props.params.id)
-		this.runGQL([authGroupPart, positionsPart, reportsPart])
+		let positionsPart = this.getPositionQueryPart(props.match.params.id)
+		let reportsPart = this.getReportQueryPart(props.match.params.id)
+		return this.runGQL([authGroupPart, positionsPart, reportsPart])
 	}
 
 	runGQL(queries) {
-		GQL.run(queries).then(data => {
+		return GQL.run(queries).then(data => {
 			this.setState({
 				authorizationGroup: new AuthorizationGroup(data.authorizationGroup),
 				positions: data.paginatedPositions,
@@ -83,7 +89,7 @@ export default class AuthorizationGroupShow extends Page {
 
 	render() {
 		let authorizationGroup = this.state.authorizationGroup
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		return (
 
 			<div>
@@ -131,3 +137,13 @@ export default class AuthorizationGroupShow extends Page {
 	}
 
 }
+
+const AuthorizationGroupShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseAuthorizationGroupShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(AuthorizationGroupShow)

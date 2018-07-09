@@ -1,0 +1,19 @@
+/* Style overrides for react-toastify, to use our own alert colors */
+
+.Toastify__toast--success, .Toastify__close-button--success {
+	/* same as bootstrap alert-success */
+	color: #3c763d;
+	background-color: #dff0d8;
+}
+.Toastify__progress-bar--success {
+	background-color: #3c763d;
+}
+
+.Toastify__toast--error, .Toastify__close-button--error {
+	/* same as bootstrap alert-warning */
+	color: #8a6d3b;
+	background-color: #fcf8e3;
+}
+.Toastify__progress-bar--error {
+	background-color: #8a6d3b;
+}

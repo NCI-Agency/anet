@@ -1,18 +1,18 @@
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
-import History from 'components/History'
+import { withRouter } from 'react-router-dom'
+import { PAGE_PROPS_MIN_HEAD } from 'actions'
+import { connect } from 'react-redux'
 
-export default class OnboardingShow extends Page {
-	static pageProps = {
-		useNavigation: false,
-		minimalHeader: true,
-	}
+class OnboardingShow extends Page {
 
-	constructor() {
-		super()
+	static propTypes = {...pagePropTypes}
+
+	constructor(props) {
+		super(props, PAGE_PROPS_MIN_HEAD)
 		this.state = {}
 	}
 
@@ -31,6 +31,8 @@ export default class OnboardingShow extends Page {
 
 	@autobind
 	onCreateAccountClick() {
-		History.push('/onboarding/edit')
+		this.props.history.push('/onboarding/edit')
 	}
 }
+
+export default connect(null, mapDispatchToProps)(withRouter(OnboardingShow))

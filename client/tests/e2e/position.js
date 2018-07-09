@@ -1,7 +1,7 @@
 let test = require('../util/test')
 
 test('Move someone in and out of a position', async t => {
-    t.plan(8)
+    t.plan(9)
 
     let {$, $$, assertElementText, By, until} = t.context
 
@@ -10,7 +10,9 @@ test('Move someone in and out of a position', async t => {
     await t.context.pageHelpers.clickMyOrgLink()
 
     let positionName = 'EF 2.2 Advisor D'
-    let personName = 'Civ ERINSON, Erin'
+    let person = 'ERINSON, Erin'
+    let rank = 'CIV'
+    let personName = rank + ' ' + person
 
     await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(personName, positionName)
 
@@ -53,7 +55,12 @@ test('Move someone in and out of a position', async t => {
     let $changeAssignedPersonButton = await $('button.change-assigned-person')
     await $changeAssignedPersonButton.click()
 
-    await t.context.pageHelpers.chooseAutocompleteOption('.select-person-autocomplete', personName)
+    let $assignedPerson = await t.context.pageHelpers.chooseAutocompleteOption('.select-person-autocomplete', personName)
+    t.is(
+        await $assignedPerson.getAttribute('value'),
+        person,
+        'Clicking a person autocomplete suggestion populates the autocomplete field.'
+    )
     let $saveButton = await $('button.save-button')
     await $saveButton.click()
 

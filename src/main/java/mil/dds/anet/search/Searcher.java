@@ -7,13 +7,14 @@ import mil.dds.anet.utils.DaoUtils;
 
 public abstract class Searcher implements ISearcher {
 
-	private IReportSearcher reportSearcher;
-	private IPersonSearcher personSearcher;
-	private IOrganizationSearcher orgSearcher;
-	private IPositionSearcher positionSearcher;
-	private ITaskSearcher taskSearcher;
-	private ILocationSearcher locationSearcher;
-	private ITagSearcher tagSearcher;
+	private final IReportSearcher reportSearcher;
+	private final IPersonSearcher personSearcher;
+	private final IOrganizationSearcher orgSearcher;
+	private final IPositionSearcher positionSearcher;
+	private final ITaskSearcher taskSearcher;
+	private final ILocationSearcher locationSearcher;
+	private final ITagSearcher tagSearcher;
+	private final IAuthorizationGroupSearcher authorizationGroupSearcher;
 
 	public static Searcher getSearcher(DaoUtils.DbType dbType) {
 		switch (dbType) {
@@ -25,7 +26,8 @@ public abstract class Searcher implements ISearcher {
 	}
 
 	protected Searcher(IReportSearcher reportSearcher, IPersonSearcher personSearcher, IOrganizationSearcher orgSearcher,
-			IPositionSearcher positionSearcher, ITaskSearcher taskSearcher, ILocationSearcher locationSearcher, ITagSearcher tagSearcher) {
+			IPositionSearcher positionSearcher, ITaskSearcher taskSearcher, ILocationSearcher locationSearcher, ITagSearcher tagSearcher,
+			IAuthorizationGroupSearcher authorizationGroupSearcher) {
 		super();
 		this.reportSearcher = reportSearcher;
 		this.personSearcher = personSearcher;
@@ -34,6 +36,7 @@ public abstract class Searcher implements ISearcher {
 		this.taskSearcher = taskSearcher;
 		this.locationSearcher = locationSearcher;
 		this.tagSearcher = tagSearcher;
+		this.authorizationGroupSearcher = authorizationGroupSearcher;
 	}
 
 	@Override
@@ -73,6 +76,6 @@ public abstract class Searcher implements ISearcher {
 
 	@Override
 	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
-		throw new UnsupportedOperationException();
+		return authorizationGroupSearcher;
 	}
 }

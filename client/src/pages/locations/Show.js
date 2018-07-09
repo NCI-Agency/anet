@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Form from 'components/Form'
@@ -12,11 +12,16 @@ import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
 
 import GQL from 'graphqlapi'
-import {Location} from 'models'
+import {Location, Person} from 'models'
 
-export default class LocationShow extends Page {
-	static contextTypes = {
-		currentUser: PropTypes.object.isRequired,
+import AppContext from 'components/AppContext'
+import { connect } from 'react-redux'
+
+class BaseLocationShow extends Page {
+
+	static propTypes = {
+		...pagePropTypes,
+		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'Location'
@@ -39,16 +44,16 @@ export default class LocationShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQuery", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			locationId: props.params.id,
+			locationId: props.match.params.id,
 		})
 
 		let locationQuery = new GQL.Part(/* GraphQL */`
-			location(id:${props.params.id}) {
+			location(id:${props.match.params.id}) {
 				id, name, lat, lng
 			}
 		`)
 
-		GQL.run([reportsQuery, locationQuery]).then(data => {
+		return GQL.run([reportsQuery, locationQuery]).then(data => {
             this.setState({
                 location: new Location(data.location),
 				reports: data.reports,
@@ -58,10 +63,10 @@ export default class LocationShow extends Page {
 
 	render() {
 		let {location, reports} = this.state
-		let currentUser = this.context.currentUser
+		const { currentUser } = this.props
 		let markers=[]
 		let latlng = 'None'
-		if (location.lat && location.lng) {
+		if (Location.hasCoordinates(location)) {
 			latlng = location.lat + ', ' + location.lng
 			markers.push({name: location.name, lat: location.lat, lng: location.lng})
 		}
@@ -73,13 +78,13 @@ export default class LocationShow extends Page {
 				<Messages success={this.state.success} error={this.state.error} />
 
 				<Form static formFor={location} horizontal >
-					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo location={location} edit button="primary">Edit</LinkTo>} >
+					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>} >
 						<Form.Field id="status" />
 
 						<Form.Field id="latlng" value={latlng} label="Lat/Lon" />
 					</Fieldset>
 
-					<Leaflet markers={markers}/>
+					<Leaflet markers={markers} />
 				</Form>
 
 				<Fieldset title="Reports at this location">
@@ -94,3 +99,13 @@ export default class LocationShow extends Page {
 		this.setState({reportsPageNum: pageNum}, () => this.loadData())
 	}
 }
+
+const LocationShow = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseLocationShow currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
+
+export default connect(null, mapDispatchToProps)(LocationShow)

@@ -4,8 +4,6 @@ import {Button} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
-import NavigationWarning from 'components/NavigationWarning'
-import History from 'components/History'
 import Form from 'components/Form'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Messages from 'components/Messages'
@@ -15,45 +13,52 @@ import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import API from 'api'
 import {Location} from 'models'
 
-export default class LocationForm extends ValidatableFormWrapper {
+import { withRouter } from 'react-router-dom'
+import NavigationWarning from 'components/NavigationWarning'
+
+class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
-		location: PropTypes.object.isRequired,
-		edit: PropTypes.bool
+		anetLocation: PropTypes.object.isRequired,
+		edit: PropTypes.bool,
 	}
 
 	constructor(props) {
 		super(props)
 
 		this.state = {
+			isBlocking: false,
 			markers: [{id: 0, draggable: true, onMove: this.onMarkerMove}]
 		}
 	}
 
-	componentWillReceiveProps(nextProps) {
-		if (nextProps.location && nextProps.location.lat) {
-			let marker = this.state.markers[0]
-			marker.name = nextProps.location.name
-			marker.lat = nextProps.location.lat
-			marker.lng = nextProps.location.lng
-			marker.id = nextProps.location.id
-			this.setState({markers: [marker]})
+	static getDerivedStateFromProps(props, state) {
+		if (Location.hasCoordinates(props.anetLocation)) {
+			const loc = props.anetLocation
+			let marker = state.markers[0]
+			marker.name = loc.name
+			marker.lat = loc.lat
+			marker.lng = loc.lng
+			marker.id = loc.id
+			return {markers: [marker]}
 		}
+		return null
 	}
 
 	render() {
-		let location = this.props.location
+		let location = this.props.anetLocation
 		let markers = this.state.markers
 		let edit = this.props.edit
 
 		const {ValidatableForm, RequiredField} = this
 
 		function Coordinate(props) {
-			return <span>{Math.round(props.coord * 1000) / 1000}</span>
+			const coord = typeof props.coord === 'number' ? Math.round(props.coord * 1000) / 1000 : '?'
+			return <span>{coord}</span>
 		}
 
 		return (
 			<div>
-				<NavigationWarning original={new Location()} current={location} />
+				<NavigationWarning isBlocking={this.state.isBlocking} />
 
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -86,7 +91,7 @@ export default class LocationForm extends ValidatableFormWrapper {
 	@autobind
 	onMarkerMove(event) {
 		let latLng = event.latlng
-		let loc = this.props.location
+		let loc = this.props.anetLocation
 		loc.lat = latLng.lat
 		loc.lng = latLng.lng
 		this.onChange()
@@ -94,20 +99,30 @@ export default class LocationForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		this.setState({
+			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+		})
 		this.forceUpdate()
 	}
 
 	@autobind
 	onSubmit(event) {
-		let loc = this.props.location
+		let loc = this.props.anetLocation
 		let edit = this.props.edit
 		let url = `/api/locations/${edit ? 'update'  :'new'}`
+		this.setState({isBlocking: false})
+		this.forceUpdate()
 		API.send(url, loc, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {
 					loc.id = response.id
 				}
-				History.push(Location.pathFor(loc), {success: 'Saved Location', skipPageLeaveWarning: true})
+				this.props.history.push({
+					pathname: Location.pathFor(loc),
+					state: {
+						success: 'Saved Location',
+					}
+				})
 			}).catch(error => {
 				this.setState({error: error})
 				window.scrollTo(0, 0)
@@ -115,3 +130,5 @@ export default class LocationForm extends ValidatableFormWrapper {
 	}
 
 }
+
+export default withRouter(LocationForm)

@@ -18,8 +18,17 @@ if (testEnv === 'local') {
     require('./keep-alive.js')
     let config = require('config')
     capabilities = {
-        browserName: 'IE',   // or 'Chrome'
-        browser_version: '11.0', // or '61.0'
+        // Ideally, we'd like to test with:
+        //   browserName: 'IE',
+        //   browser_version: '11.0',
+        // but that is so prone to unexpected failures as to be unusable.
+        // So test with latest stable Chrome instead.
+        browserName: 'Chrome',
+        browser_version: '67.0',
+        chromeOptions: {
+            // Maximize the window so we can see what's going on
+            args: ['--start-maximized']
+        },
         os: 'Windows',
         os_version: '7',
         resolution: '2048x1536',

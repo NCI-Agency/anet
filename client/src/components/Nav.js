@@ -2,34 +2,47 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
-import {Injectable, Injector} from 'react-injectables'
-import {Scrollspy} from 'react-scrollspy'
+import Scrollspy from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
+import NavWrap from 'components/NavWrap'
 
-import {Organization} from 'models'
+import {Organization, Person} from 'models'
 
-class Nav extends Component {
-	static contextTypes = {
-		app: PropTypes.object.isRequired,
+import AppContext from 'components/AppContext'
+import { withRouter } from 'react-router-dom'
+
+class BaseNav extends Component {
+	static propTypes = {
+		currentUser: PropTypes.instanceOf(Person),
+		appSettings: PropTypes.object,
+		organizations: PropTypes.array,
+	}
+
+	constructor(props) {
+		super(props)
+		this.state = {
+			scrollspyOffset: 0
+		}
+	}
+
+	static getDerivedStateFromProps(props, state) {
+		const scrollspyOffset = -(props.topbarOffset + 20)
+		if (state.scrollspyOffset !== scrollspyOffset) {
+			return {scrollspyOffset: scrollspyOffset}
+		}
+		return null
 	}
 
 	render() {
-		const injections = this.props.injections
-		if (injections && injections.length) {
-			return <div>{injections}</div>
-		}
+		const { currentUser } = this.props
+		const { organizations } = this.props || []
+		const { appSettings } = this.props || {}
+		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
+		const externalDocumentationUrlText = appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
-		const appData = this.context.app.state
-		const currentUser = appData.currentUser
-		const organizations = appData.organizations || []
-		let path = this.context.app.props.location.pathname
-
-		const {settings} = appData || {}
-		const externalDocumentationUrl = settings.EXTERNAL_DOCUMENTATION_LINK_URL
-		const externalDocumentationUrlText = settings.EXTERNAL_DOCUMENTATION_LINK_TEXT
-
+		const path = this.props.location.pathname
 		const inAdmin = path.indexOf('/admin') === 0
 		const inOrg = path.indexOf('/organizations') === 0
 		const inMyReports = path.indexOf('/reports/mine') === 0
@@ -38,23 +51,22 @@ class Nav extends Component {
 		const myOrg = currentUser.position ? currentUser.position.organization : null
 		let orgId, myOrgId
 		if (inOrg) {
-			orgId = +this.context.app.props.params.id
+			orgId = +path.split('/')[2]
 			myOrgId = myOrg && +myOrg.id
-			path = `/organizations/${orgId}`
 		}
 
 		const orgSubNav = (
-			<SubNav
-				componentClass={Scrollspy}
-				className="nav"
-				offset={-152}
-			>
-				<AnchorLink scrollTo="info">Info</AnchorLink>
-				<AnchorLink scrollTo="laydown">Laydown</AnchorLink>
-				<AnchorLink scrollTo="approvals">Approvals</AnchorLink>
-				<AnchorLink scrollTo="tasks">{pluralize(Settings.fields.task.shortLabel)}</AnchorLink>
-				<AnchorLink scrollTo="reports">Reports</AnchorLink>
-			</SubNav>
+			<NavWrap>
+				<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
+					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
+					<NavItem href="#info">Info</NavItem>
+					<NavItem href="#supportedPositions">Supported positions</NavItem>
+					<NavItem href="#vacantPositions">Vacant positions</NavItem>
+					<NavItem href="#approvals">Approvals</NavItem>
+					<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
+					<NavItem href="#reports">Reports</NavItem>
+				</Scrollspy>
+			</NavWrap>
 		)
 
 		return (
@@ -63,21 +75,22 @@ class Nav extends Component {
 					<NavItem>Home</NavItem>
 				</Link>
 
+				<NavWrap id="search-nav"></NavWrap>
+
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
 				{inMyReports &&
-					<SubNav
-						componentClass={Scrollspy}
-						className="nav"
-						offset={-152}
-					>
-						<AnchorLink scrollTo="draft-reports">Draft reports</AnchorLink>
-						<AnchorLink scrollTo="upcoming-engagements">Upcoming Engagements</AnchorLink>
-						<AnchorLink scrollTo="pending-approval">Pending approval</AnchorLink>
-						<AnchorLink scrollTo="published-reports">Published reports</AnchorLink>
-					</SubNav>
+					<NavWrap>
+						<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
+							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
+							<NavItem href="#draft-reports">Draft reports</NavItem>
+							<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>
+							<NavItem href="#pending-approval">Pending approval</NavItem>
+							<NavItem href="#published-reports">Published reports</NavItem>
+						</Scrollspy>
+					</NavWrap>
 				}
 
 				{myOrg && <Link to={Organization.pathFor(myOrg)}>
@@ -113,16 +126,16 @@ class Nav extends Component {
 				}
 
 				{inAdmin &&
-					<SubNav>
-						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
-						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
-					</SubNav>
+					<NavWrap>
+						<ul className="nav">
+							<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
+							<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
+						</ul>
+					</NavWrap>
 				}
 				
 				{externalDocumentationUrl && externalDocumentationUrlText &&
-					<li alt="">
-						<a href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</a>
-					</li>
+					<NavItem href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</NavItem>
 				}
 
 				<Link to="/help">
@@ -147,7 +160,7 @@ class Nav extends Component {
 							<MenuItem>Reports by day of the week</MenuItem>
 						</Link>
 						<Link to="/insights/advisor-reports">
-							<MenuItem>Advisor reports</MenuItem>
+							<MenuItem>{Settings.fields.advisor.person.name} reports</MenuItem>
 						</Link>
 					</NavDropdown>
 				}
@@ -156,43 +169,12 @@ class Nav extends Component {
 	}
 }
 
-function SubNav(props) {
-	let {componentClass, ...childProps} = props
-	childProps = Object.without(childProps, 'active')
+const Nav = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
-	let Component = componentClass || BSNav
-	return <li>
-		<Component {...childProps} />
-	</li>
-}
-
-const AnchorLink = function(props) {
-	const {scrollTo, ...childProps} = props
-	const onClick = function() {
-		const elem = document.getElementById(scrollTo)
-		elem && elem.scrollIntoView(true)
-	}
-	return <NavItem onClick={onClick} {...childProps} />
-}
-
-let InjectableNav = null
-let ContentForNav = null
-if (process.env.NODE_ENV === 'test') {
-	ContentForNav = function(props) {
-		return <div />
-	}
-} else {
-	// this is some magic around the Injectable library to allow
-	// components further down the tree to inject children into the header
-	InjectableNav = Injectable(Nav)
-
-	const NavInjector = Injector({into: InjectableNav})
-	ContentForNav = function(props) {
-		let {children, ...childProps} = props
-		let Component = NavInjector(function() { return children })
-		return <Component {...childProps} />
-	}
-}
-
-export default InjectableNav
-export {ContentForNav}
+export default withRouter(Nav)

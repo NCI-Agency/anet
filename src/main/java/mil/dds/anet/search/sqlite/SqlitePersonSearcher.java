@@ -11,6 +11,8 @@ import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
+import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.IPersonSearcher;
@@ -20,6 +22,8 @@ import mil.dds.anet.utils.Utils;
 public class SqlitePersonSearcher implements IPersonSearcher {
 
 	protected String buildOrderBy(PersonSearchQuery query) {
+		if (query.getSortBy() == null) { query.setSortBy(PersonSearchSortBy.NAME); }
+		if (query.getSortOrder() == null) { query.setSortOrder(SortOrder.ASC); }
 		StringBuilder orderBy = new StringBuilder(" ORDER BY ");
 		switch (query.getSortBy()) {
 			case RANK:

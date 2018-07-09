@@ -1,5 +1,5 @@
 import React from 'react'
-import Page from 'components/Page'
+import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -9,15 +9,22 @@ import Autocomplete from 'components/Autocomplete'
 import LinkTo from 'components/LinkTo'
 import moment from 'moment'
 import Messages from 'components/Messages'
-import History from 'components/History'
 
+import Settings from 'Settings'
 import {Person} from 'models'
 
 import API from 'api'
 
-export default class MergePeople extends Page {
+import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+
+class MergePeople extends Page {
+
+	static propTypes = {...pagePropTypes}
+
 	constructor(props) {
 		super(props)
+
 		this.state = {
 			winner: {},
 			loser: {},
@@ -72,12 +79,12 @@ export default class MergePeople extends Page {
 					<Row>
 						<Col md={6}>
 							{loser.id &&
-								<fieldset>{this.showPersonDetails(loser)}</fieldset>
+								<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
 							}
 						</Col>
 						<Col md={6}>
 							{winner.id &&
-								<fieldset>{this.showPersonDetails(winner)}</fieldset>
+								<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
 							}
 						</Col>
 					</Row>
@@ -145,7 +152,7 @@ export default class MergePeople extends Page {
 			errors.push("You selected the same person twice!")
 		}
 		if (winner.role !== loser.role) {
-			errors.push("You can only merge people of the same Role (ie ADVISOR/PRINCIPAL)")
+			errors.push(`You can only merge people of the same Role (i.e. ${Settings.fields.advisor.person.name}/${Settings.fields.principal.person.name})`)
 		}
 
 		return errors
@@ -157,8 +164,8 @@ export default class MergePeople extends Page {
 		return <Form static formFor={person} >
 			<Form.Field id="id" />
 			<Form.Field id="name" />
-			<Form.Field id="status" />
-			<Form.Field id="role" />
+			<Form.Field id="status">{person.humanNameOfStatus()}</Form.Field>
+			<Form.Field id="role">{person.humanNameOfRole()}</Form.Field>
 			<Form.Field id="rank" />
 			<Form.Field id="emailAddress" />
 			<Form.Field id="domainUsername" />
@@ -188,7 +195,10 @@ export default class MergePeople extends Page {
 		let {winner, loser, copyPosition} = this.state
         API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
             .then(() => {
-				History.push(Person.pathFor(this.state.winner), {success: 'People successfully merged'})
+				this.props.history.push({
+					pathname: Person.pathFor(this.state.winner),
+					state: {success: 'People successfully merged'}
+				})
 			})
 			.catch(error => {
                 this.setState({error})
@@ -198,3 +208,5 @@ export default class MergePeople extends Page {
 	}
 
 }
+
+export default connect(null, mapDispatchToProps)(withRouter(MergePeople))
