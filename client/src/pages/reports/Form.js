@@ -187,6 +187,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
+		const advisorPositionSingular = Settings.fields.advisor.position.name
 		return <div className="report-form">
 			<NavigationWarning isBlocking={this.state.isBlocking} />
 
@@ -194,16 +195,16 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 			{showAssignedPositionWarning &&
 				<div className="alert alert-warning" style={alertStyle}>
-					You cannot submit a report: you are not assigned to an advisor position.<br/>
-					Please contact your organization's super user(s) and request to be assigned to an advisor position.<br/>
+					You cannot submit a report: you are not assigned to a {advisorPositionSingular} position.<br/>
+					Please contact your organization's super user(s) and request to be assigned to a {advisorPositionSingular} position.<br/>
 					If you are unsure, you can also contact the support team {supportEmailMessage}.
 				</div>
 			}
 
 			{showActivePositionWarning &&
 				<div className="alert alert-warning" style={alertStyle}>
-					You cannot submit a report: your assigned advisor position has an inactive status.<br/>
-					Please contact your organization's super users and request them to assign you to an active advisor position.<br/>
+					You cannot submit a report: your assigned {advisorPositionSingular} position has an inactive status.<br/>
+					Please contact your organization's super users and request them to assign you to an active {advisorPositionSingular} position.<br/>
 					If you are unsure, you can also contact the support team {supportEmailMessage}.
 				</div>
 			}
@@ -267,8 +268,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 					{isCancelled &&
 						<Form.Field id="cancelledReason" componentClass="select" className="cancelled-reason-form-group">
-							<option value="CANCELLED_BY_ADVISOR">Cancelled by Advisor</option>
-							<option value="CANCELLED_BY_PRINCIPAL">Cancelled by Principal</option>
+							<option value="CANCELLED_BY_ADVISOR">Cancelled by {Settings.fields.advisor.person.name}</option>
+							<option value="CANCELLED_BY_PRINCIPAL">Cancelled by {Settings.fields.principal.person.name}</option>
 							<option value="CANCELLED_DUE_TO_TRANSPORTATION">Cancelled due to Transportation</option>
 							<option value="CANCELLED_DUE_TO_FORCE_PROTECTION">Cancelled due to Force Protection</option>
 							<option value="CANCELLED_DUE_TO_ROUTES">Cancelled due to Routes</option>

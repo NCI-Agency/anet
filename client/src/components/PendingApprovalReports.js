@@ -60,11 +60,11 @@ class PendingApprovalReports extends Component {
     const focusDetails = this.focusDetails
     return (
       <div>
-        <p className="help-text">{`Number of pending reports, submitted on or before ${this.referenceDateLongStr}, by advisor organization`}</p>
+        <p className="help-text">{`Number of pending reports, submitted on or before ${this.referenceDateLongStr}, grouped by ${Settings.fields.advisor.org.name}`}</p>
         <p className="chart-description">
           {`Displays the number of pending approval reports which have been
             submitted on or before ${this.referenceDateLongStr}. The reports are
-            grouped by advisor organization. In order to see the list of
+            grouped by ${Settings.fields.advisor.org.name}. In order to see the list of
             pending approval reports for an organization, click on the bar
             corresponding to the organization.`}
         </p>
@@ -125,7 +125,7 @@ class PendingApprovalReports extends Component {
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
     const noAdvisorOrg = {
       id: -1,
-      shortName: 'No advisor organization'
+      shortName: `No ${Settings.fields.advisor.org.name}`
     }
     Promise.all([chartQuery]).then(values => {
       let reportsList = values[0].reportList.list

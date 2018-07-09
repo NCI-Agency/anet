@@ -4,6 +4,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import {Modal, Alert, Button, HelpBlock, Popover, Overlay} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
+import pluralize from 'pluralize'
 
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -220,8 +221,8 @@ class BaseRollupShow extends Page {
 					title={`Reports ${this.state.focusedOrg ? `for ${this.state.focusedOrg.shortName}` : ''}`}
 					action={!this.state.focusedOrg
 						? <ButtonToggleGroup value={this.state.orgType} onChange={this.changeOrgType}>
-							<Button value={Organization.TYPE.ADVISOR_ORG}>Advisor organizations</Button>
-							<Button value={Organization.TYPE.PRINCIPAL_ORG}>Principal organizations</Button>
+							<Button value={Organization.TYPE.ADVISOR_ORG}>{pluralize(Settings.fields.advisor.org.name)}</Button>
+							<Button value={Organization.TYPE.PRINCIPAL_ORG}>{pluralize(Settings.fields.principal.org.name)}</Button>
 						</ButtonToggleGroup>
 						: <Button onClick={() => this.goToOrg()}>All organizations</Button>
 					}
