@@ -32,7 +32,6 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
 class PendingApprovalReports extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
-    date: PropTypes.object,
     showLoading: PropTypes.func.isRequired,
     hideLoading: PropTypes.func.isRequired,
   }
@@ -50,17 +49,15 @@ class PendingApprovalReports extends Component {
     }
   }
 
-  get referenceDateLongStr() { return this.props.date.format('DD MMM YYYY') }
-
   render() {
     const focusDetails = this.focusDetails
     return (
       <div>
-        <p className="help-text">{`Grouped by advisor organization`}</p>
+        <p className="help-text">{`Grouped by ${Settings.fields.advisor.org.name}`}</p>
         <p className="chart-description">
-          {`The reports are grouped by advisor organization. In order to see the
-            list of pending approval reports for an organization, click on the
-            bar corresponding to the organization.`}
+          {`The reports are grouped by ${Settings.fields.advisor.org.name}. In
+            order to see the list of pending approval reports for an organization,
+            click on the bar corresponding to the organization.`}
         </p>
         <BarChartWithLoader
           chartId={chartId}
@@ -119,31 +116,29 @@ class PendingApprovalReports extends Component {
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
     const noAdvisorOrg = {
       id: -1,
-      shortName: 'No advisor organization'
+      shortName: `No ${Settings.fields.advisor.org.name}`
     }
     Promise.all([chartQuery]).then(values => {
-      if (values[0].reportList.list) {
-        let reportsList = values[0].reportList.list
-        reportsList = reportsList
-          .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
-        this.setState({
-          isLoading: false,
-          updateChart: true,  // update chart after fetching the data
-          graphData: reportsList
-            .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-            .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
-            .sort((a, b) => {
-              let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
-              let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
-              if (a_index < 0) {
-                return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
-              }
-              else {
-                return (b_index < 0) ? -1 : a_index-b_index
-              }
-            })
-        })
-      }
+      let reportsList = values[0].reportList.list || []
+      reportsList = reportsList
+        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
+      this.setState({
+        isLoading: false,
+        updateChart: true,  // update chart after fetching the data
+        graphData: reportsList
+          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
+          .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+          .sort((a, b) => {
+            let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
+            let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
+            if (a_index < 0) {
+              return (b_index < 0) ?  a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName) : 1
+            }
+            else {
+              return (b_index < 0) ? -1 : a_index-b_index
+            }
+          })
+      })
       this.props.hideLoading()
     })
     this.fetchOrgData()

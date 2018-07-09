@@ -23,6 +23,7 @@ import {Position, Organization} from 'models'
 class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
+		onCancel: PropTypes.func,
 		setSearchQuery: PropTypes.func.isRequired,
 		query: PropTypes.shape({
 			text: PropTypes.string,
@@ -45,14 +46,18 @@ class AdvancedSearch extends Component {
 		const query = props || {}
 		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
-			objectType: query.objectType || "",
-			text: props.text || query.text || "",
-			filters: query.filters || [],
+			objectType: "",
+			text: "",
+			filters: [],
 		}
 	}
 
 	componentDidMount() {
-		this.setState(this.props.query)
+		this.setState({
+			objectType: this.props.query.objectType,
+			text: this.props.text,
+			filters: this.props.query.filters ? this.props.query.filters.slice() : [],
+		})
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -86,6 +91,8 @@ class AdvancedSearch extends Component {
 						</Button>
 					</Col>
 				</FormGroup>
+
+				<FormControl defaultValue={this.props.text} className="hidden" />
 
 				{filters.map(filter =>
 					filterDefs[filter.key] && <SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
@@ -128,16 +135,18 @@ class AdvancedSearch extends Component {
 	addFilter(filterKey) {
 		if (filterKey) {
 			let {filters} = this.state
-			filters.push({key: filterKey})
-			this.setState({filters})
+			const newFilters = filters.slice()
+			newFilters.push({key: filterKey})
+			this.setState({filters: newFilters})
 		}
 	}
 
 	@autobind
 	removeFilter(filter) {
 		let {filters} = this.state
-		filters.splice(filters.indexOf(filter), 1)
-		this.setState({filters})
+		const newFilters = filters.slice()
+		newFilters.splice(newFilters.indexOf(filter), 1)
+		this.setState({filters: newFilters})
 
 		if (filter.key === "Organization") {
 			this.setOrganizationFilter(null)

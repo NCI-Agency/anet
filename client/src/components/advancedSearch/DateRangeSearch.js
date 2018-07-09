@@ -7,21 +7,7 @@ import {Row, Col} from 'react-bootstrap'
 import moment from 'moment'
 import _uniqueId from 'lodash/uniqueId'
 
-const BETWEEN = "0"
-const BEFORE = "1"
-const AFTER = "2"
-const LAST_DAY = -1 * 1000 * 60 * 60 * 24
-const LAST_WEEK = LAST_DAY * 7
-const LAST_MONTH = LAST_DAY * 30
-
-const RANGE_TYPE_LABELS = {
-	[BETWEEN]: 'Between',
-	[BEFORE]: 'Before',
-	[AFTER]: 'After',
-	[LAST_DAY]: 'Last 24 hours',
-	[LAST_WEEK]: 'Last 7 days',
-	[LAST_MONTH]: 'Last 30 days',
-}
+import {BETWEEN, BEFORE, AFTER, LAST_DAY, LAST_WEEK, LAST_MONTH, RANGE_TYPE_LABELS, dateToQuery} from 'dateUtils'
 
 const dateRangeValue = PropTypes.shape({
 	relative: PropTypes.string,
@@ -162,34 +148,7 @@ export default class DateRangeSearch extends Component {
 	toQuery() {
 		let {queryKey} = this.props
 		let {value} = this.state
-		let startKey = queryKey ? queryKey + 'Start' : 'start'
-		let endKey = queryKey ? queryKey + 'End' : 'end'
-
-		if (value.relative === BETWEEN) {
-			//Between start and end date
-			return {
-				[startKey]: moment(value.start).valueOf(),
-				[endKey]: moment(value.end).valueOf(),
-			}
-		}
-		else if (value.relative === BEFORE) {
-			// Before end date
-			return {
-				[endKey]: moment(value.end).valueOf(),
-			}
-		}
-		else if (value.relative === AFTER) {
-			// After start date
-			return {
-				[startKey]: moment(value.start).valueOf(),
-			}
-		}
-		else {
-			//time relative to now.
-			return {
-				[startKey]: value.relative
-			}
-		}
+		return dateToQuery(queryKey, value)
 	}
 
 	@autobind

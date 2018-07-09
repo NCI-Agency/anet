@@ -30,8 +30,6 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
 class ReportsByDayOfWeek extends Component {
   static propTypes = {
     queryParams: PropTypes.object,
-    startDate: PropTypes.object.isRequired,
-    endDate: PropTypes.object.isRequired,
     showLoading: PropTypes.func.isRequired,
     hideLoading: PropTypes.func.isRequired,
   }
@@ -46,10 +44,6 @@ class ReportsByDayOfWeek extends Component {
       isLoading: false
     }
   }
-
-  get startDateLongStr() { return this.props.startDate.format('DD MMM YYYY') }
-
-  get endDateLongStr() { return this.props.endDate.format('DD MMM YYYY') }
 
   render() {
     const focusDetails = this.getFocusDetails()
@@ -208,17 +202,14 @@ class ReportsByDayOfWeek extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.datePropsChanged(prevProps)) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
-        focusedDayOfWeek: ''  // reset focus when changing the date
+        focusedDayOfWeek: ''  // reset focus when changing the queryParams
       }, () => this.fetchData())
     }
   }
 
-  datePropsChanged = (otherProps) => {
-    return otherProps.queryParams !== this.props.queryParams
-  }
 }
 
 export default connect(null, mapDispatchToProps)(ReportsByDayOfWeek)

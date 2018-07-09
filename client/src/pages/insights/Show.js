@@ -13,20 +13,21 @@ import autobind from 'autobind-decorator'
 import moment from 'moment'
 
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
-import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
 import ProgramSummaryView from 'components/ProgramSummaryView'
-import OrganizationView from 'components/OrganizationView'
 
+import OrganizationView from 'components/OrganizationView'
 import FULLSCREEN_ICON from 'resources/fullscreen.png'
 import Fullscreen from "react-full-screen"
 import {Button} from 'react-bootstrap'
 
 import {Report} from 'models'
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
+import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
+import {BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
 
 export const NOT_APPROVED_REPORTS = 'not-approved-reports'
 export const CANCELLED_REPORTS = 'cancelled-reports'
@@ -80,8 +81,8 @@ export const INSIGHT_DETAILS = {
   },
   [ADVISOR_REPORTS]: {
     component: FilterableAdvisorReportsTable,
-    navTitle: 'Advisor Reports',
-    title: 'Advisor Reports',
+    navTitle: `${Settings.fields.advisor.person.name} Reports`,
+    title: `${Settings.fields.advisor.person.name} Reports`,
     dateRange: false,
     showCalendar: false
   },
@@ -110,6 +111,14 @@ const calendarButtonCss = {
 
 const dateRangeFilterCss = {
   marginTop: '20px'
+}
+
+function addToQuery(queryKey, value, isDate) {
+  // Add toQuery function to a value object, to be used by getSearchQuery
+  return {
+    ...value,
+    toQuery: () => {return isDate ? dateToQuery(queryKey, value) : value}
+  }
 }
 
 class BaseInsightsShow extends Page {
@@ -150,40 +159,38 @@ class BaseInsightsShow extends Page {
     }
   }
 
-  get defaultDateRange() {
-    return {
-      relative: "0",
-      start: this.state.startDate.toISOString(),
-      end: this.state.endDate.toISOString()
-    }
-  }
-
   get insightQueryParams() {
-    return {
+    const params = {
       [NOT_APPROVED_REPORTS]: [
-        {key: 'State', value: {state: Report.STATE.PENDING_APPROVAL, toQuery: () => {return {state: Report.STATE.PENDING_APPROVAL}}}},
-        {key: 'Update Date', value: {relative: "1",  end: this.state.referenceDate.toISOString()}},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.PENDING_APPROVAL}},
+        {key: 'Update Date', isDate: true, queryKey: 'updatedAt', value: {relative: BEFORE,  end: this.state.referenceDate.toISOString()}},
       ],
       [CANCELLED_REPORTS]: [
-        {key: 'State', value: {state: Report.STATE.CANCELLED, cancelledReason: '', toQuery: () => {return {state: Report.STATE.CANCELLED}}}},
-        {key: 'Release Date', value: {relative: "2",  start: this.state.referenceDate.toISOString()}},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.CANCELLED, cancelledReason: ''}},
+        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
       ],
       [REPORTS_BY_TASK]: [
-        {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
-        {key: 'Release Date', value: {relative: "2",  start: this.state.referenceDate.toISOString()}},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.RELEASED}},
+        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
       ],
       [REPORTS_BY_DAY_OF_WEEK]: [
-        {key: 'State', value: {state: Report.STATE.RELEASED, toQuery: () => {return {state: Report.STATE.RELEASED}}}},
-        {key: 'Release Date', value: {relative: "0",  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
-        {key: 'includeEngagementDayOfWeek', value: 1},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.RELEASED}},
+        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: BETWEEN,  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
+        {key: 'includeEngagementDayOfWeek', isDate: false, queryKey: '', value: 1},
       ],
       [FUTURE_ENGAGEMENTS_BY_LOCATION]: [
-        {key: 'Engagement Date', value: {relative: "0",  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
+        {key: 'Engagement Date', isDate: true, queryKey: 'engagementDate', value: {relative: BETWEEN,  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
       ],
       [ADVISOR_REPORTS]: [],
       [PROGRAM_SUMMARY_VIEW]: [],
       [ORGANIZATION_VIEW]: [],
     }
+    let insightParams = {}
+    Object.keys(params).forEach(function(key, index) {
+      insightParams[key] = params[key].map(
+        filter => {if (typeof filter.value === 'object') { filter.value = addToQuery(filter.queryKey, filter.value, filter.isDate || false) }; return filter})
+    })
+    return insightParams
   }
 
   @autobind
@@ -201,9 +208,9 @@ class BaseInsightsShow extends Page {
       const newQueryParams = this.insightQueryParams[this.props.match.params.insight]
       // when changing insight, set dates to insight specific defaults
       const defaultDates = this.insightDefaultDates
-      if ((this.state.referenceDate.valueOf() !== defaultDates.referenceDate.valueOf()) ||
-          (this.state.startDate.valueOf() !== defaultDates.startDate.valueOf()) ||
-          (this.state.endDate.valueOf() !== defaultDates.endDate.valueOf())) {
+      if (!this.state.referenceDate.isSame(defaultDates.referenceDate, 'day') ||
+          !this.state.startDate.isSame(defaultDates.startDate, 'day') ||
+          !this.state.endDate.isSame(defaultDates.endDate, 'day')) {
         this.setState(
           defaultDates,
           () => this.updateSearchQuery()
@@ -225,17 +232,17 @@ class BaseInsightsShow extends Page {
 
   getDefaultPastDates = () => {
     return {
-      referenceDate: this.cutoffDate.startOf('day'),
-      startDate: this.cutoffDate.startOf('day'),
-      endDate: this.currentDateTime.endOf('day')
+      referenceDate: this.cutoffDate,
+      startDate: this.cutoffDate,
+      endDate: this.currentDateTime
     }
   }
 
   getDefaultFutureDates = () => {
     return {
-      referenceDate: this.currentDateTime.startOf('day'),
-      startDate: this.currentDateTime.startOf('day'),
-      endDate: this.currentDateTime.add(14, 'days').endOf('day')
+      referenceDate: this.currentDateTime,
+      startDate: this.currentDateTime,
+      endDate: this.currentDateTime.add(14, 'days')
     }
   }
 
@@ -261,7 +268,7 @@ class BaseInsightsShow extends Page {
     }
 
     if (value.end !== null) {
-      this.updateDate("endDate", moment(value.end).endOf('day'))
+      this.updateDate("endDate", moment(value.end))
     }
   }
 
@@ -303,8 +310,6 @@ class BaseInsightsShow extends Page {
               <InsightComponent
                 queryParams={queryParams}
                 date={this.state.referenceDate.clone()}
-                startDate={this.state.startDate.clone()}
-                endDate={this.state.endDate.clone()}
               />
             </Fieldset>
           </Fullscreen>
