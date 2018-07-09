@@ -12,7 +12,8 @@ import menuLogo from 'resources/anet-menu.png'
 const backgroundCss = {
 	background: '#fff',
 	paddingTop: '2em',
-	zIndex: 100
+	zIndex: 100,
+	boxShadow: '0 4px 3px 0 rgba(0,0,0,0.1)',
 }
 
 export default class Header extends Component {
@@ -21,7 +22,7 @@ export default class Header extends Component {
 			<header style={backgroundCss} className="header">
 				<Grid fluid>
 					<Row>
-						<Col xs={3} md={2} lg={2}>
+						<Col xs={3} sm={3} md={2} lg={2}>
 								{
 									this.props.minimalHeader ?
 										<span className="logo hidden-xs"><img src={logo} alt="ANET Logo" /></span> :
