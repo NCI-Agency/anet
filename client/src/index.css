@@ -328,7 +328,7 @@ li#search-nav .nav > li a {
 .nav-fixed {
 	flex:0 0 auto;
 	padding:8px;
-	overflow-y:scroll;
+	overflow-y:auto;
 }
 
 .nav-overlay {
@@ -339,7 +339,7 @@ li#search-nav .nav > li a {
 	background: #f2f2f2;
 	left: 0;
 	z-index: 9999;
-	overflow-y:scroll;
+	overflow-y:auto;
 }
 
 .report-sub-form .form-group {
@@ -753,7 +753,7 @@ header.searchPagination {
 
 .primary-content {
 	flex:1 1 auto;
-	overflow-y:scroll;
+	overflow-y:auto;
 }
 
 .glass-pane {
