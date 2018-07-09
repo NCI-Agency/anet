@@ -151,7 +151,7 @@ If needed, see https://github.com/Waffle/waffle/blob/master/Docs/ServletSingleSi
 
 Finally, you can define a deployment-specific dictionary inside the `anet.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
-```
+```yaml
 dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
   fields:
@@ -285,6 +285,27 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
+  imagery:
+    mapOptions:
+      crs: EPSG3857
+    baseLayers:
+      - name: OSM
+        default: true
+        type: tile
+        url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      - name: World Imagery Tiles
+        default: false
+        type: tile
+        url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        options:
+          tms: false
+      - name: World WMS
+        default: false
+        type: wms
+        url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+        options:
+          layer: GEBCO_LATEST
+          format: "image/png"
 ```
 As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 
@@ -321,19 +342,49 @@ If needed, self-signed certificates can be created and used as follows:
 
 # How to configure imagery.
 
-ANET uses Leaflet as a map viewer.  You can use any tile sources that work with Leaflet in ANET. In a development environment, or anywhere with access to the internet, you can configure ANET to use OSM tiles by setting the `MAP_LAYERS` Admin Setting to 
+ANET uses Leaflet as a map viewer.  You can use any map sources that work with Leaflet in ANET. You can start by specifying the coordinate system to use in the `crs` option below:
+```yaml
+  imagery:
+    mapOptions:
+      crs: EPSG3857
+```      
+Typically this is a choice between `EPSG3857` and `EPSG4326`. Please consult the specification of the maps you are about to consult.
+_hint:_ If you are planning to use a WMS service, in a browser you can inspect the results of http://wmsURL?request=GetCapabilities&service=WMS to determine the desired coordinate system
 
-```
-[{"name":"OSM","default" : true, "url":"http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", "type":"osm"}]
+
+You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet.yml` 
+
+for OSM-type providers:
+```yaml
+      - name: OSM
+        default: true
+        type: tile
+        url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 ```
 
-For both offline and online installations, to configure ANET with a WMS server, use the following format:
-```
-[{"name":"WMS Service","default" : true, "url":"http://wmsURL", "type":"wms", "format":"image/png", "layer":"layerName"}]
+for WMS-type providers:
+```yaml
+      - name: World WMS
+        default: false
+        type: wms
+        url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+        options:
+          layer: GEBCO_LATEST
+          format: "image/png"
 ```
 _hint:_ In a browser you can inspect the results of http://wmsURL?request=GetCapabilities&service=WMS to determine the desired format and layerName
 
-If desired, you can alse configure a local imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
+and for WMTS-type providers:
+```yaml
+      - name: World Imagery Tiles
+        default: false
+        type: tile
+        url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        options:
+          tms: false
+```
+
+If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
 
 1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `maps`. Inside that, create a directory called `imagery`. 
 1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `maps/imagery/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
@@ -350,9 +401,12 @@ CLASSPATH=$APP_HOME/maps/:$CLASSPATH
 ```
 
 This will put the imagery folder on the server's classpath.  ANET looks for a folder called imagery and will serve those tiles up on the `/imagery` path. 
-1. To use this new tile source, set the `MAP_LAYERS` admin setting to 
-```
-[{"name":"OSM","default" : true, "url":"http://<your-anet-server-url>/imagery/{z}/{x}/{y}.png", "type":"osm"}]
+1. To use this new tile source, add under `baseLayers`:
+```yaml
+      - name: OSM
+        default: true
+        type: tile
+        url: "http://<your-anet-server-url>/imagery/{z}/{x}/{y}.png"
 ```
 
 Maps should now magically work!  You can test this by going to the url `http://<your-anet-server>/imagery/0/0/0.png` and hopefully seeing a tile appear. 
