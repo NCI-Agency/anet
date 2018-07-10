@@ -54,7 +54,7 @@ class BaseLeaflet extends Component {
 
 	componentDidMount() {		
 		const mapOptions = Object.assign({zoomControl:true}, Settings.imagery.mapOptions, Settings.imagery.mapOptions.crs && { crs: L.CRS[Settings.imagery.mapOptions.crs] })
-		const map = L.map('map', mapOptions).setView([34.52, 69.16], 10)
+		const map = L.map(this.mapId, mapOptions).setView([34.52, 69.16], 10)
 		const layerControl = L.control.layers({}, {}, {collapsed:false})
 
 		layerControl.addTo(map)
