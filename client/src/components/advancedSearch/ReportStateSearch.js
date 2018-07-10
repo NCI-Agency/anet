@@ -10,6 +10,7 @@ const STATE_LABELS = {
 	[Report.STATE.RELEASED]: 'Released',
 	[Report.STATE.CANCELLED]: 'Cancelled',
 	[Report.STATE.FUTURE]: 'Upcoming Engagement',
+	[Report.STATE.REJECTED]: 'Rejected',
 }
 const CANCELLATION_REASON_LABELS = {
 	[Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR]: 'Advisor',
@@ -69,21 +70,20 @@ export default class ReportStateSearch extends Component {
 			:
 				<div>
 					<select value={value.state} onChange={this.changeState} multiple={true}>
-						<option value={ Report.STATE.DRAFT }>{ STATE_LABELS[Report.STATE.DRAFT] }</option>
-						<option value={ Report.STATE.PENDING_APPROVAL }>{ STATE_LABELS[Report.STATE.PENDING_APPROVAL] }</option>
-						<option value={ Report.STATE.RELEASED }>{ STATE_LABELS[Report.STATE.RELEASED] }</option>
-						<option value={ Report.STATE.CANCELLED }>{ STATE_LABELS[Report.STATE.CANCELLED] }</option>
-						<option value={ Report.STATE.FUTURE }>{ STATE_LABELS[Report.STATE.FUTURE] }</option>
+						{
+							Object.keys(STATE_LABELS).map(key =>
+								<option key={key} value={key}>{ STATE_LABELS[key] }</option>
+							)
+						}
 					</select>
-					{onlyCancelled && <span style={{verticalAlign: 'top'}}>
+					{onlyCancelled && <span style={{verticalAlign: 'top', paddingLeft: '8px'}}>
 						due to <select value={value.cancelledReason} onChange={this.changeCancelledReason}>
 							<option value="">Everything</option>
-							<option value={ Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR] }</option>
-							<option value={ Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL] }</option>
-							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_TRANSPORTATION }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_TRANSPORTATION] }</option>
-							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_FORCE_PROTECTION }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_FORCE_PROTECTION] }</option>
-							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES] }</option>
-							<option value={ Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT }>{ CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT] }</option>
+							{
+								Object.keys(CANCELLATION_REASON_LABELS).map(key =>
+									<option key={key} value={key}>{ CANCELLATION_REASON_LABELS[key] }</option>
+								)
+							}
 						</select>
 					</span>}
 				</div>
