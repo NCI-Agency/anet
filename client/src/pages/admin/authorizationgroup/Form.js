@@ -87,7 +87,6 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		this.setState({
 			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -96,7 +95,6 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		let edit = this.props.edit
 		let url = `/api/authorizationGroups/${edit ? 'update'  :'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, authGroup, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {

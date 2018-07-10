@@ -242,7 +242,6 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		this.setState({
 			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -258,7 +257,6 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 
 		let url = `/api/organizations/${this.props.edit ? 'update' : 'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, organization, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
