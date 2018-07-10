@@ -27,6 +27,25 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import utils from 'utils'
 
+import { SEARCH_OBJECT_TYPES } from 'actions'
+import {BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
+
+function addToQuery(queryKey, value, isDate, isOrg) {
+	// Add toQuery function to a value object, to be used by getSearchQuery
+	return {
+		...value,
+		toQuery: () => {
+			return isDate
+			? dateToQuery(queryKey, value)
+			: isOrg
+				? {[queryKey]: value.id, includeOrgChildren: false}
+				: queryKey
+					? {[queryKey]: value.id}
+					: value
+		}
+	}
+}
+
 class BaseHome extends Page {
 
 	static propTypes = {
@@ -50,7 +69,7 @@ class BaseHome extends Page {
 	}
 
 	approverQueries(currentUser) {
-		return [ this.pendingMe(currentUser), this.myDraft(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser),
+		return [ this.myDraft(currentUser), this.pendingMe(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser),
 		         this.mySensitiveInfo() ]
 	}
 
@@ -61,47 +80,66 @@ class BaseHome extends Page {
 
 	allDraft() { return {
 		title: "All draft reports",
-		query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }
+		query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] },
+		filters: [{key: "State", value: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }}],
 	}}
 
 	myDraft(currentUser) {
 		return {
 			title: "My draft reports",
-			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id }
+			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id },
+			filters: [
+				{key: "State", value: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }},
+				{key: "Author", queryKey: 'authorId', value: currentUser}
+			],
 		}
 	}
 
 	myPending(currentUser) {
 		return {
 			title: "My reports pending approval",
-			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]}
+			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]},
+			filters: [
+				{key: "State", value: { state: [Report.STATE.PENDING_APPROVAL] }},
+				{key: "Author", value: currentUser}
+			],
 		}
 	}
 
 	pendingMe(currentUser) {
 		return {
 			title: "Reports pending my approval",
-			query: { pendingApprovalOf: currentUser.id }
+			query: { pendingApprovalOf: currentUser.id },
+			filters: [
+			  {key: "Approver", value: currentUser} // FIXME: no advanced filter for this condition
+			],
 		}
 	}
 
 	allPending() {
 		return {
 			title: "All reports pending approval",
-			query: { state: [Report.STATE.PENDING_APPROVAL] }
+			query: { state: [Report.STATE.PENDING_APPROVAL] },
+			filters: [{key: "State", value: { state: [Report.STATE.PENDING_APPROVAL] }}],
 		}
 	}
 
 	myOrgRecent(currentUser) {
 		if (!currentUser.position || !currentUser.position.organization) { return { query: {}} }
-		let lastWeek = moment().subtract(7, 'days').startOf('day').valueOf()
+		let lastWeek = moment().subtract(7, 'days').startOf('day')
 		return {
 			title: currentUser.position.organization.shortName + "'s reports in the last 7 days",
 			query: {
-				advisorOrgId: currentUser.position.organization.id,
-				createdAtStart: lastWeek,
+				orgId: currentUser.position.organization.id,
+				includeOrgChildren: false,
+				createdAtStart: lastWeek.valueOf(),
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
-			}
+			},
+			filters: [
+				{key: "Organization", isOrg: true, queryKey: 'orgId', value: currentUser.position.organization},
+				{key: 'createdAtStart', isDate: true, queryKey: 'createdAt', value: {relative: AFTER,  start: lastWeek.toISOString()}},
+				{key: "State", value: { state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL] }},
+			]
 		}
 	}
 
@@ -110,24 +148,37 @@ class BaseHome extends Page {
 		return {
 			title: currentUser.position.organization.shortName + "'s upcoming engagements",
 			query: {
-				advisorOrgId: currentUser.position.organization.id,
+				orgId: currentUser.position.organization.id,
+				includeOrgChildren: false,
 				state: [Report.STATE.FUTURE],
 				sortOrder: 'ASC'
-			}
+			},
+			filters: [
+				{key: "Organization", isOrg: true, queryKey: 'orgId', value: currentUser.position.organization},
+				{key: "State", value: { state: [Report.STATE.FUTURE] }},
+			]
 		}
 	}
 
 	allUpcoming() {
 		return {
 			title: "All upcoming engagements",
-			query: { state: [Report.STATE.FUTURE], sortOrder: 'ASC' }
+			query: { state: [Report.STATE.FUTURE], sortOrder: 'ASC' },
+			filters: [
+				{key: "State", value: { state: [Report.STATE.FUTURE] }},
+			]
 		}
 	}
 
 	mySensitiveInfo() {
+		const authorizationGroupId = (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.id) : [-1])
 		return {
 			title: "Reports with sensitive information",
-			query: { state: [Report.STATE.RELEASED], authorizationGroupId: (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.id) : [-1]) }
+			query: { state: [Report.STATE.RELEASED], authorizationGroupId: authorizationGroupId },
+			filters: [
+				{key: "authorizationGroupId", value: { authorizationGroupId: authorizationGroupId }}, // FIXME: no advanced filter for this condition
+				{key: "State", value: { state: [Report.STATE.RELEASED] }},
+			]
 		}
 	}
 
@@ -225,11 +276,10 @@ class BaseHome extends Page {
 					<Grid fluid>
 						<Row>
 							{queries.map((query, index) =>{
-								query.query.type = "reports"
-									return <Link to={{pathname: '/search', search: utils.formatQueryString(query.query)}} className="home-tile" key={index}>
+									return <Button bsStyle="link" onClick={this.onClickDashboard.bind(this, query)} className="home-tile" key={index}>
 										<h1>{this.state.tileCounts[index]}</h1>
 										{query.title}
-									</Link>
+									</Button>
 							})}
 						</Row>
 					</Grid>
@@ -264,6 +314,21 @@ class BaseHome extends Page {
 				</Fieldset>
 			</div>
 		)
+	}
+
+	@autobind
+	onClickDashboard(queryDetails, event) {
+		const searchFilters = queryDetails.filters.map(
+			filter => {if (typeof filter.value === 'object') { filter.value = addToQuery(filter.queryKey, filter.value, filter.isDate || false, filter.isOrg || false) }; return filter}
+		)
+		// We update the Redux state
+		const queryState = {objectType: SEARCH_OBJECT_TYPES.REPORTS, filters: searchFilters, text: ''}
+		this.props.setSearchQuery(queryState)
+		this.props.history.push({
+			pathname: '/search'
+		})
+		event.preventDefault()
+		event.stopPropagation()
 	}
 
 	@autobind
