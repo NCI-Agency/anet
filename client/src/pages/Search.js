@@ -341,7 +341,6 @@ class Search extends Page {
 		const pageNums = this.state.pageNum
 		pageNums[type] = pageNum
 
-//		const qs = utils.parseQueryString(this.props.location.search)
 		const query = this.getSearchQuery()
 		const part = this.getSearchPart(type, query)
 		GQL.run([part]).then(data => {

@@ -3,6 +3,9 @@ import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
 import {Location} from 'models'
 import AppContext from 'components/AppContext'
+import _escape from 'lodash/escape'
+import _isEqual from 'lodash/isEqual'
+import _sortBy from 'lodash/sortBy'
 
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -100,14 +103,17 @@ class BaseLeaflet extends Component {
 	componentDidUpdate(prevProps, prevState) {
 		this.tryAddLayers()
 
-		const existingMarkers = this.state.markerLayer.getLayers()
-		const markersToAdd = this.props.markers.filter(m =>
-			existingMarkers.findIndex(el => el.options.id === m.id) === -1
-		)
-		const markersToRemove = existingMarkers.filter(m =>
-			this.props.markers.findIndex(el => m.options.id === el.id) === -1
-		)
-		this.updateMarkerLayer(markersToAdd, markersToRemove)
+		const prevMarkerIds = _sortBy(prevProps.markers.map(m => m.id))
+		const markerIds = _sortBy(this.props.markers.map(m => m.id))
+		if (!_isEqual(prevMarkerIds, markerIds)) {
+			const markersToAdd = this.props.markers.filter(m =>
+				prevProps.markers.findIndex(pm => pm.id === m.id) === -1
+			)
+			const markersToRemove = prevProps.markers.filter(pm =>
+				this.props.markers.findIndex(m => m.id === pm.id) === -1
+			)
+			this.updateMarkerLayer(markersToAdd, markersToRemove)
+		}
 	}
 
 	@autobind
@@ -120,7 +126,9 @@ class BaseLeaflet extends Component {
 		markers.forEach(m => {
 			let latLng = (Location.hasCoordinates(m)) ? [m.lat, m.lng] : this.state.map.getCenter()
 			let marker = L.marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
-				.bindPopup(m.name)
+			if (m.name) {
+				marker.bindPopup(_escape(m.name)) // escape HTML!
+			}
 			if (m.onMove) {
 				marker.on('move', m.onMove)
 			}
@@ -129,7 +137,8 @@ class BaseLeaflet extends Component {
 		})
 
 		markersToRemove.forEach(m => {
-			markerLayer.removeLayer(m)
+			const ml = markerLayer.getLayers().find(ml => ml.options.id === m.id)
+			markerLayer.removeLayer(ml)
 		})
 
 

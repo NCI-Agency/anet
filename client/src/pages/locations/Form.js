@@ -27,26 +27,23 @@ class LocationForm extends ValidatableFormWrapper {
 
 		this.state = {
 			isBlocking: false,
-			markers: [{id: 0, draggable: true, onMove: this.onMarkerMove}]
 		}
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		if (Location.hasCoordinates(props.anetLocation)) {
-			const loc = props.anetLocation
-			let marker = state.markers[0]
-			marker.name = loc.name
-			marker.lat = loc.lat
-			marker.lng = loc.lng
-			marker.id = loc.id
-			return {markers: [marker]}
-		}
-		return null
 	}
 
 	render() {
-		let location = this.props.anetLocation
-		let markers = this.state.markers
+		const location = this.props.anetLocation
+		const marker = {
+			id: location.id || 0,
+			name: location.name || '',
+			draggable: true,
+			onMove: this.onMarkerMove
+		}
+		if (Location.hasCoordinates(location)) {
+			Object.assign(marker, {
+				lat: location.lat,
+				lng: location.lng,
+			})
+		}
 		let edit = this.props.edit
 
 		const {ValidatableForm, RequiredField} = this
@@ -81,7 +78,7 @@ class LocationForm extends ValidatableFormWrapper {
 					</Fieldset>
 
 					<h3>Drag the marker below to set the location</h3>
-					<Leaflet markers={markers} />
+					<Leaflet markers={[marker]} />
 
 				</ValidatableForm>
 			</div>
@@ -102,7 +99,6 @@ class LocationForm extends ValidatableFormWrapper {
 		this.setState({
 			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -111,7 +107,6 @@ class LocationForm extends ValidatableFormWrapper {
 		let edit = this.props.edit
 		let url = `/api/locations/${edit ? 'update'  :'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, loc, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {
