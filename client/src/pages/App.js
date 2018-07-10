@@ -60,6 +60,7 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
+import {Element} from 'react-scroll'
 class App extends Page {
 
 	static propTypes = {
@@ -76,17 +77,23 @@ class App extends Page {
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
-			topbarOffset: 0
+			floatingMenu: false
 		}
 
-		this.updateTopbarOffset = this.updateTopbarOffset.bind(this)
 		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
-	updateTopbarOffset(topbarOffset) {
-		if (this.state.topbarOffset !== topbarOffset){
-			this.setState({ topbarOffset: topbarOffset })
-		}
+	componentDidMount() {
+		super.componentDidMount()
+		// We want to hide the floating menu on navigation events
+		this.unlistenHistory = this.props.history.listen((location, action) => {
+			this.setState({floatingMenu: false})
+		  })
+	}
+
+	componentWillUnmount() {
+		super.componentWillUnmount()
+		this.unlistenHistory()
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -249,28 +256,30 @@ class App extends Page {
 				currentUser: this.state.currentUser,
 				loadAppData: this.loadData,
 			}}>
-				<div className="anet">
+				<div className="anet" style={{ display:'flex', flexDirection:'column'}}>
 					<TopBar
 						updateTopbarOffset={this.updateTopbarOffset}
 						minimalHeader={this.props.pageProps.minimalHeader}
-						location={this.props.location} />
+						location={this.props.location}
+						toggleMenuAction={()=>{
+							this.setState({floatingMenu: !this.state.floatingMenu})
+						}} />
 
 					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
-					<Grid fluid componentClass="section">
-						<Row>
-							{this.props.pageProps.useNavigation === true &&
-								<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
-									<Nav
-										organizations={this.state.organizations}
-										topbarOffset={this.state.topbarOffset} />
-								</Col>
-							}
-							<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
+					<div className="container-fluid" style={{width:"100%", flex:'1 1 auto', display:'flex', flexDirection:'row', overflowY:'auto' }}>
+						{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
+						<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
+							<Nav />
+						</div>
+						}
+						<div style={{ display:'flex', flexDirection:'column', flex:'1 1 auto'}}>
+							<Element className="primary-content" id="main-viewport">
+								<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
 								{routing}
-							</Col>
-						</Row>
-					</Grid>
+							</Element>
+						</div>
+					</div>
 				</div>
 			</AppContext.Provider>
 		)

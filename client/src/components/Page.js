@@ -13,6 +13,7 @@ import _isEqualWith from 'lodash/isEqualWith'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
+import { animateScroll, Link } from 'react-scroll'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
@@ -37,6 +38,20 @@ export const propTypes = {
 	}),
 	clearSearchQuery: PropTypes.func.isRequired,
 }
+
+export const AnchorLink = function(props) {
+	const {to, ...remainingProps} = props
+	return <Link to={to} smooth={true} duration={500} containerId="main-viewport" {...remainingProps}>{props.children}</Link>
+}
+
+
+export function jumpToTop() {
+	animateScroll.scrollToTop({
+		duration: 500,
+		delay: 100,
+		smooth: "easeInOutQuint",
+		containerId: "main-viewport"})
+	}
 
 export default class Page extends Component {
 
@@ -140,7 +155,6 @@ export default class Page extends Component {
 	}
 
 	componentDidMount() {
-		window.scrollTo(0,0)
 		setMessages(this.props, this.state)
 		this.loadData()
 	}

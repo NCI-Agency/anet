@@ -35,6 +35,7 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import utils from 'utils'
 import ReactDOM from 'react-dom'
+import { jumpToTop } from 'components/Page'
 
 const SEARCH_CONFIG = {
 	reports : {
@@ -494,14 +495,14 @@ class Search extends Page {
 					error: null,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			}).catch(response => {
 				this.setState({
 					success: null,
 					error: response,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 
