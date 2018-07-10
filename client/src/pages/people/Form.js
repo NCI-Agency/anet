@@ -323,7 +323,6 @@ class BasePersonForm extends ValidatableFormWrapper {
 		this.setState({
 			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -350,7 +349,6 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 		let url = `/api/people/${edit ? 'update' : 'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, person, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
