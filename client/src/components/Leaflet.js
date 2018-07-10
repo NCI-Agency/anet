@@ -9,6 +9,7 @@ import _sortBy from 'lodash/sortBy'
 
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import Settings from 'Settings'
 
 import MARKER_ICON from 'resources/leaflet/marker-icon.png'
 import MARKER_ICON_2X from 'resources/leaflet/marker-icon-2x.png'
@@ -33,9 +34,7 @@ class BaseLeaflet extends Component {
 		this.state = {
 			map: null,
 			center: null,
-			layerControl: null,
-			markerLayer: null,
-			hasLayers: false
+			markerLayer: null
 		}
 
 		this.icon = L.icon({
@@ -55,54 +54,27 @@ class BaseLeaflet extends Component {
 		return 'map-' + mapId
 	}
 
-	componentDidMount() {
-		let map = L.map(this.mapId, {zoomControl:true}).setView([34.52, 69.16], 10)
-/*
-		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
-		    layers: 'nexrad-n0r-900913',
-		    format: 'image/png',
-		    transparent: true,
-		    attribution: "Weather data © 2012 IEM Nexrad"
-		});
-		let nmra = L.tileLayer.wms("https://mrdata.usgs.gov/services/nmra", {
-			layers: 'USNationalMineralAssessment1998',
-			format: 'image/png',
-			transparent: true
-		})
 
-		let osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+	componentDidMount() {		
+		const mapOptions = Object.assign({zoomControl:true}, Settings.imagery.mapOptions, Settings.imagery.mapOptions.crs && { crs: L.CRS[Settings.imagery.mapOptions.crs] })
+		const map = L.map(this.mapId, mapOptions).setView([34.52, 69.16], 10)
+		const layerControl = L.control.layers({}, {}, {collapsed:false})
 
-		let baseLayers = { "Nexrad" : nexrad, "NMRA" : nmra, "OSM" : osm}
-*/
-		let layerControl = L.control.layers({}, {})
 		layerControl.addTo(map)
+		this.addLayers(map,layerControl)
 
 		map.on('moveend', this.moveEnd)
 
 		let state = this.state
 		state.map = map
-		state.layerControl = layerControl
 		state.markerLayer = L.featureGroup([]).addTo(map)
 		this.setState(state, () => {
-			this.tryAddLayers()
 			this.updateMarkerLayer(this.props.markers)
 		})
 	}
 
-	@autobind
-	tryAddLayers() {
-		if (this.state.hasLayers === false) {
-			this.addLayers()
-		}
-	}
-
-	componentWillUnmount() {
-		this.setState({hasLayers:false})
-	}
 
 	componentDidUpdate(prevProps, prevState) {
-		this.tryAddLayers()
-
 		const prevMarkerIds = _sortBy(prevProps.markers.map(m => m.id))
 		const markerIds = _sortBy(this.props.markers.map(m => m.id))
 		if (!_isEqual(prevMarkerIds, markerIds)) {
@@ -141,7 +113,6 @@ class BaseLeaflet extends Component {
 			markerLayer.removeLayer(ml)
 		})
 
-
 		if (newMarkers.length > 0) {
 			if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
 				this.state.map.fitBounds(markerLayer.getBounds(), {maxZoom: 15})
@@ -150,34 +121,23 @@ class BaseLeaflet extends Component {
 	}
 
 	@autobind
-	addLayers() {
-		const { appSettings } = this.props || {}
-		let rawLayers = appSettings.MAP_LAYERS
-		if (!rawLayers || rawLayers.length === 0) {
-			return
-		}
 
-		let mapLayers = JSON.parse(rawLayers)
-
+	addLayers(map, layerControl) {
 		let defaultLayer = null
-		mapLayers.forEach(l => {
+		Settings.imagery.baseLayers.forEach(layerConfig => {
 			let layer = null
-			if (l.type === 'wms') {
-				layer = L.tileLayer.wms(l.url, {
-					layers: l.layer,
-					format: l.format || 'image/png'
-				})
-			} else if (l.type === 'osm') {
-				layer = L.tileLayer(l.url)
+			if (layerConfig.type === 'wms') {
+				layer = L.tileLayer.wms(layerConfig.url, layerConfig.options)
+			} else if (layerConfig.type === 'osm' || layerConfig.type === 'tile') {
+				layer = L.tileLayer(layerConfig.url, layerConfig.options)
 			}
 
 			if (layer) {
-				this.state.layerControl.addBaseLayer(layer, l.name)
+				layerControl.addBaseLayer(layer, layerConfig.name)
 			}
-			if (l.default) { defaultLayer = layer  }
+			if (layerConfig.default) { defaultLayer = layer  }
 		})
-		if (defaultLayer) { this.state.map.addLayer(defaultLayer) }
-		this.setState({hasLayers:true})
+		if (defaultLayer) { map.addLayer(defaultLayer) }
 	}
 
 	render() {

@@ -1233,4 +1233,10 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="cleanup-map-layers-from-adminSettings" author="VassilIordanov">
+			<delete tableName="adminSettings">
+				<where>[key] = 'MAP_LAYERS'</where>
+			</delete>
+	</changeSet>
+
 </databaseChangeLog>
