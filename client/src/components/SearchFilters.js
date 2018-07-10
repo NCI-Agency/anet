@@ -67,6 +67,15 @@ export default {
 					template={Person.autocompleteTemplate}
 					placeholder="Filter reports by attendee..."
 				/>,
+				"Pending approval of": <AutocompleteFilter
+					queryKey="pendingApprovalOf"
+					objectType={Person}
+					valueKey="name"
+					fields={Person.autocompleteQuery}
+					template={Person.autocompleteTemplate}
+					queryParams={{role: Person.ROLE.ADVISOR}}
+					placeholder="Filter reports pending approval of..."
+				/>,
 				"Author Position": <AutocompleteFilter
 					queryKey="authorPositionId"
 					objectType={Position}

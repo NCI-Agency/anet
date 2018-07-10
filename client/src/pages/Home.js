@@ -101,7 +101,7 @@ class BaseHome extends Page {
 			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]},
 			filters: [
 				{key: "State", value: { state: [Report.STATE.PENDING_APPROVAL] }},
-				{key: "Author", value: currentUser}
+				{key: "Author", queryKey: 'authorId', value: currentUser}
 			],
 		}
 	}
@@ -111,7 +111,7 @@ class BaseHome extends Page {
 			title: "Reports pending my approval",
 			query: { pendingApprovalOf: currentUser.id },
 			filters: [
-			  {key: "Approver", value: currentUser} // FIXME: no advanced filter for this condition
+			  {key: "Pending approval of", queryKey: 'pendingApprovalOf', value: currentUser}
 			],
 		}
 	}
