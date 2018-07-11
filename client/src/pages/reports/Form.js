@@ -523,7 +523,6 @@ class BaseReportForm extends ValidatableFormWrapper {
 			reportChanged: true,
 			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -572,7 +571,6 @@ class BaseReportForm extends ValidatableFormWrapper {
 	@autobind
 	onSubmit(event) {
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		this.saveReport(true)
 			.then(response => {
 				if (response.uuid) {

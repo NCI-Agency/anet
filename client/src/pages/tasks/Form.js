@@ -158,7 +158,6 @@ class BaseTaskForm extends ValidatableFormWrapper {
 		this.setState({
 			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -173,7 +172,6 @@ class BaseTaskForm extends ValidatableFormWrapper {
 
 		let url = `/api/tasks/${edit ? 'update' : 'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, task, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {
