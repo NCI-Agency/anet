@@ -9864,9 +9864,9 @@ wdio-chromedriver-service@^0.1.1:
   dependencies:
     fs-extra "^0.30.0"
 
-wdio-dot-reporter@^0.0.9, wdio-dot-reporter@~0.0.8:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/wdio-dot-reporter/-/wdio-dot-reporter-0.0.9.tgz#929b2adafd49d6b0534fda068e87319b47e38fe5"
+wdio-dot-reporter@^0.0.10, wdio-dot-reporter@~0.0.8:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/wdio-dot-reporter/-/wdio-dot-reporter-0.0.10.tgz#facfb7c9c5984149951f59cbc3cd0752101cf0e0"
 
 wdio-mocha-framework@^0.6.1:
   version "0.6.1"

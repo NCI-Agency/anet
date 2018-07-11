@@ -49,7 +49,7 @@
     "uuid": "^3.3.2",
     "wdio": "^2.0.2",
     "wdio-chromedriver-service": "^0.1.1",
-    "wdio-dot-reporter": "^0.0.9",
+    "wdio-dot-reporter": "^0.0.10",
     "wdio-mocha-framework": "^0.6.1",
     "wdio-spec-reporter": "^0.1.4",
     "webdriverio": "^4.13.1",
