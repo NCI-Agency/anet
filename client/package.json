@@ -43,7 +43,7 @@
     "jest": "^23.4.0",
     "json-loader": "^0.5.7",
     "postcss-flexbugs-fixes": "^3.3.1",
-    "postcss-loader": "^2.1.5",
+    "postcss-loader": "^2.1.6",
     "selenium-webdriver": "^4.0.0-alpha.1",
     "style-loader": "^0.21.0",
     "uuid": "^3.3.2",
