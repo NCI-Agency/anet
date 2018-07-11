@@ -4867,9 +4867,9 @@ hullabaloo-config-manager@^1.1.0:
     resolve-from "^3.0.0"
     safe-buffer "^5.0.1"
 
-humanize-duration@~3.12.0:
-  version "3.12.1"
-  resolved "https://registry.yarnpkg.com/humanize-duration/-/humanize-duration-3.12.1.tgz#e9a531519d001ee600b6400fc353fed4fa3b235f"
+humanize-duration@~3.15.0:
+  version "3.15.0"
+  resolved "https://registry.yarnpkg.com/humanize-duration/-/humanize-duration-3.15.0.tgz#9fe3124c4a013f9d71e4b25a143afa6853f90844"
 
 iconv-lite@0.4, iconv-lite@0.4.19:
   version "0.4.19"
@@ -9876,13 +9876,13 @@ wdio-mocha-framework@^0.6.1:
     mocha "^5.0.0"
     wdio-sync "0.7.1"
 
-wdio-spec-reporter@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/wdio-spec-reporter/-/wdio-spec-reporter-0.1.4.tgz#17af34f8e830f3c684f2d6486dba406bfc0648eb"
+wdio-spec-reporter@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/wdio-spec-reporter/-/wdio-spec-reporter-0.1.5.tgz#6d6f865deac6b36f96988c1204cc81099b75fc7e"
   dependencies:
     babel-runtime "~6.26.0"
     chalk "^2.3.0"
-    humanize-duration "~3.12.0"
+    humanize-duration "~3.15.0"
 
 wdio-sync@0.7.1:
   version "0.7.1"
