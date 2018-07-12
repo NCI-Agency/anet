@@ -332,7 +332,23 @@ properties:
     properties:
       mapOptions:
         type: object
-        additionalProperties: true
+        properties:
+          crs:
+            type: string
+          homeView:
+            type: object
+            properties:
+              location:
+                type: array
+              zoomLevel:
+                type: number
+            additionalProperties: false
+            required:
+              - location
+              - zoomLevel
+        additionalProperties: false
+        required:
+          - homeView
       baseLayers:
         type: array
         uniqueItems: true

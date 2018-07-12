@@ -304,6 +304,9 @@ dictionary:
   imagery:
     mapOptions:
       crs: EPSG3857
+      homeView:
+        location: [34.52, 69.16]
+        zoomLevel: 10
     baseLayers:
       - name: OSM
         default: true
