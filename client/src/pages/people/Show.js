@@ -86,7 +86,7 @@ class BasePersonShow extends Page {
 		let personPart = new GQL.Part(/* GraphQL */`
 			person(id:${props.match.params.id}) {
 				id,
-				name, rank, role, status, emailAddress, phoneNumber,
+				name, rank, role, status, emailAddress, phoneNumber, domainUsername,
 				biography, country, gender, endOfTourDate,
 				position {
 					id,
@@ -125,13 +125,14 @@ class BasePersonShow extends Page {
 		//Admins can always edit anybody
 		//SuperUsers can edit people in their org, their descendant orgs, or un-positioned people.
 		const { currentUser } = this.props
+		const isAdmin = currentUser && currentUser.isAdmin()
 		const hasPosition = position && position.id
 		const canEdit = Person.isEqual(currentUser, person) ||
-			currentUser.isAdmin() ||
+			isAdmin ||
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
 			(!hasPosition && currentUser.isSuperUser()) ||
 			(person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
-		const canChangePosition = currentUser.isAdmin() ||
+		const canChangePosition = isAdmin ||
 			(!hasPosition && currentUser.isSuperUser()) ||
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
 			(person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
@@ -158,6 +159,10 @@ class BasePersonShow extends Page {
 						<Form.Field id="rank" />
 
 						<Form.Field id="role">{person.humanNameOfRole()}</Form.Field>
+
+						{isAdmin &&
+							<Form.Field id="domainUsername" />
+						}
 
 						<Form.Field id="status">{person.humanNameOfStatus()}</Form.Field>
 
