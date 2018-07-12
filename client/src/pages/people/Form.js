@@ -204,6 +204,14 @@ class BasePersonForm extends ValidatableFormWrapper {
 					}
 				</FormGroup>
 
+				{isAdmin &&
+					<Form.Field id="domainUsername">
+						<Form.Field.ExtraCol>
+							<span className="text-danger">Be careful when changing this field; you might lock someone out or create duplicate accounts.</span>
+						</Form.Field.ExtraCol>
+					</Form.Field>
+				}
+
 				{edit ?
 					<Form.Field type="static" id="role" value={person.humanNameOfRole()} />
 					:
