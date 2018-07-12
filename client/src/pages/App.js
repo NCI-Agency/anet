@@ -245,10 +245,7 @@ class App extends Page {
 			<Route path="*" component={PageMissing} />
 		</Switch>
 
-		const navWidths = {sm: 4, md: 3, lg: 2}
-		const primaryWidths = (this.props.pageProps.useNavigation === true)
-				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
-				: {sm: 12, md: 12, lg: 12}
+		const primaryWidths = {sm: 12, md: 12, lg: 12}
 		return (
 			<AppContext.Provider value={{
 				appSettings: this.state.settings,
@@ -266,10 +263,10 @@ class App extends Page {
 
 					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
 
-					<div className="container-fluid" style={{width:"100%", flex:'1 1 auto', display:'flex', flexDirection:'row', overflowY:'auto' }}>
-						{(this.state.pageProps.useNavigation !== false || this.state.floatingMenu === true) && 
+					<div style={{width:"100%", flex:'1 1 auto', display:'flex', flexDirection:'row', overflowY:'hidden', position:'relative' }}>
+						{(this.props.pageProps.useNavigation === true || this.state.floatingMenu === true) &&
 						<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
-							<Nav />
+							<Nav organizations={this.state.organizations} />
 						</div>
 						}
 						<div style={{ display:'flex', flexDirection:'column', flex:'1 1 auto'}}>

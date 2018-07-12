@@ -25,6 +25,7 @@ h5 {
 
 .breadcrumb {
 	background: #f9f9f9;
+	margin-top: 10px;
 }
 
 button {
@@ -311,6 +312,7 @@ a.home-tile {
 .nav .nav > li > a {
 	border-left: 4px solid rgba(0,0,0,0);
 	padding: 4px 0 4px 38px;
+	padding-right: 4px;
 }
 
 .nav .nav > li.active > a {
@@ -328,14 +330,13 @@ li#search-nav .nav > li a {
 .nav-fixed {
 	flex:0 0 auto;
 	padding:8px;
-	overflow-y:auto;
 }
 
 .nav-overlay {
 	padding:8px;
 	border: 1px solid #e0e0e0;
-	height: 100vh;
-	position: fixed;
+	height: 100%;
+	position: absolute;
 	background: #f2f2f2;
 	left: 0;
 	z-index: 9999;
@@ -754,6 +755,9 @@ header.searchPagination {
 .primary-content {
 	flex:1 1 auto;
 	overflow-y:auto;
+	overflow-x:hidden;
+	padding-right: 10px;
+	padding-left: 10px;
 }
 
 .glass-pane {
