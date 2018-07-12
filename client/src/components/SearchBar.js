@@ -124,18 +124,26 @@ export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SearchBar
 class SearchFilterDisplay extends Component {
 	static propTypes = {
 		filter: PropTypes.object,
-		element: PropTypes.node,
+		element: PropTypes.shape({
+			component: PropTypes.func.isRequired,
+			props: PropTypes.object,
+		}),
 		showSeparator: PropTypes.bool,
 	}
 
 	render() {
 		const {filter, element} = this.props
 		const label = filter.key
-		const children = React.cloneElement(
-			element,
-			{value: filter.value || "", asFormField: false}
-		)
+		const ChildComponent = element.component
 		const sep = this.props.showSeparator ? ", " : ""
-		return <React.Fragment><b>{label}</b>: <em>{children}</em>{sep}</React.Fragment>
+		return <React.Fragment>
+			<b>{label}</b>:	<em>
+				<ChildComponent
+					value={filter.value || ""}
+					asFormField={false}
+					{...element.props}
+				/>
+			</em>{sep}
+		</React.Fragment>
 	}
 }
