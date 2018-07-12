@@ -292,11 +292,11 @@ dictionary:
       - name: OSM
         default: true
         type: tile
-        url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       - name: World Imagery Tiles
         default: false
         type: tile
-        url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         options:
           tms: false
       - name: World WMS
@@ -359,7 +359,7 @@ for OSM-type providers:
       - name: OSM
         default: true
         type: tile
-        url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 ```
 
 for WMS-type providers:
@@ -369,7 +369,7 @@ for WMS-type providers:
         type: wms
         url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
         options:
-          layer: GEBCO_LATEST
+          layers: GEBCO_LATEST
           format: "image/png"
 ```
 _hint:_ In a browser you can inspect the results of http://wmsURL?request=GetCapabilities&service=WMS to determine the desired format and layerName
@@ -379,7 +379,7 @@ and for WMTS-type providers:
       - name: World Imagery Tiles
         default: false
         type: tile
-        url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         options:
           tms: false
 ```
