@@ -98,6 +98,10 @@ export default class OrganizationFilter extends Component {
 			let {value} = this.state
 			value.includeChildOrgs = this.state.includeChildOrgs
 			value.toQuery = this.toQuery
+			if (typeof value === 'object') {
+				value.includeChildOrgs = this.state.includeChildOrgs
+				value.toQuery = this.toQuery
+			}
 			this.props.onChange(value)
 		}
 	}

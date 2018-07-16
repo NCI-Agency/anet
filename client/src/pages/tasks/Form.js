@@ -37,6 +37,7 @@ const customEnumButtons = (list) => {
 class BaseTaskForm extends ValidatableFormWrapper {
 	static propTypes = {
 		task: PropTypes.object.isRequired,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		currentUser: PropTypes.instanceOf(Person),
 	}
@@ -156,7 +157,7 @@ class BaseTaskForm extends ValidatableFormWrapper {
 	@autobind
 	onChange() {
 		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.task, this.props.original),
 		})
 	}
 

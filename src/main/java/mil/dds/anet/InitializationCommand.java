@@ -131,13 +131,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		helpUrl.setKey(AdminSettingKeys.HELP_LINK_URL.name());
 		helpUrl.setValue("");
 		engine.getAdminDao().saveSetting(helpUrl);
-		
-		AdminSetting mapLayers = new AdminSetting();
-		mapLayers.setKey(AdminSettingKeys.MAP_LAYERS.name());
-		mapLayers.setValue("[]");
-		engine.getAdminDao().saveSetting(mapLayers);
-		
-		
+
 		System.out.println();
 		System.out.println("All Done! You should be able to start the server now and log in");
 		
