@@ -39,13 +39,29 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 	constructor(props) {
 		super(props)
+		const { person } = props
+		const splitName = Person.parseFullName(person.name)
 		this.state = {
 			isBlocking: false,
-			person: null,
+			fullName: Person.fullName(splitName),
+			splitName: splitName,
 			error: null,
-			originalStatus: props.person.status,
+			originalStatus: person.status,
 			showWrongPersonModal: false,
 			wrongPersonOptionValue: null,
+		}
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		const { person } = this.props
+		const prevPerson = prevProps.person
+		if (person.id !== prevPerson.id) {
+			const splitName = Person.parseFullName(person.name)
+			this.setState({
+				fullName: Person.fullName(splitName),
+				splitName: splitName,
+				originalStatus: person.status,
+			})
 		}
 	}
 
@@ -67,11 +83,12 @@ class BasePersonForm extends ValidatableFormWrapper {
 	}
 
 	render() {
-		if (this.state.person === null) return null
-		const { person } = this.state
+		const { person } = this.props
+		if (!person) return null
 		const { edit } = this.props
 		const isAdvisor = person.isAdvisor()
-		const legendText = this.props.legendText || (edit ? `Edit Person ${person.name}` : 'Create a new Person')
+		const { fullName } = this.state
+		const legendText = this.props.legendText || (edit ? `Edit Person ${fullName}` : 'Create a new Person')
 
 		const {ValidatableForm, RequiredField} = this
 
@@ -89,6 +106,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 			type: "text",
 			display: "inline",
 			placeholder: "First name(s)",
+			value: this.state.splitName.firstName,
 			onChange: this.handleOnChangeFirstName
 		}
 
@@ -103,7 +121,6 @@ class BasePersonForm extends ValidatableFormWrapper {
 						isSelf
 				)
 			)
-		const fullName = Person.fullName(this.state.person)
 		const nameMessage = "This is not " + (isSelf ? "me" : fullName)
 		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 
@@ -132,6 +149,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 								type="text"
 								display="inline"
 								placeholder="LAST NAME"
+								value={this.state.splitName.lastName}
 								onChange={this.handleOnChangeLastName}
 								onKeyDown={this.handleOnKeyDown}
 								/>
@@ -290,19 +308,11 @@ class BasePersonForm extends ValidatableFormWrapper {
 		</div>
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		const { person } = props
-		const emptyName = { lastName: '', firstName: ''}
-		const parsedName = person.name ? Person.parseFullName(person.name) : emptyName
-		return BasePersonForm.getPersonWithFullName(person, parsedName)
-	}
+	getFullName(splitName, editName) {
+		if (editName.lastName) { splitName.lastName = editName.lastName }
+		if (editName.firstName) { splitName.firstName = editName.firstName }
 
-	static getPersonWithFullName(person, editName) {
-		if (editName.lastName) { person.lastName = editName.lastName }
-		if (editName.firstName) { person.firstName = editName.firstName }
-
-		person.name = Person.fullName(person)
-		return { person }
+		return Person.fullName(splitName)
 	}
 
 	handleOnKeyDown = (event) => {
@@ -314,16 +324,20 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 	handleOnChangeLastName = (event) => {
 		const value = event.target.value
-		const { person } = this.state
-
-		this.setState(BasePersonForm.getPersonWithFullName(person, { lastName: value }))
+		const { splitName } = this.state
+		this.setState({
+			fullName: this.getFullName(splitName, { lastName: value }),
+			splitName: splitName
+		})
 	}
 
 	handleOnChangeFirstName = (event) => {
 		const value = event.target.value
-		const { person } = this.state
-
-		this.setState(BasePersonForm.getPersonWithFullName(person, { firstName: value }))
+		const { splitName } = this.state
+		this.setState({
+			fullName: this.getFullName(splitName, { firstName: value }),
+			splitName: splitName
+		})
 	}
 
 	@autobind
@@ -340,8 +354,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
-		const { edit } = this.props
-		let { person } = this.state
+		const { edit, person } = this.props
 		let isFirstTimeUser = false
 		if (person.isNewUser()) {
 			isFirstTimeUser = true
@@ -354,6 +367,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 	updatePerson(person, edit, isNew) {
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
+		person.name = Person.fullName(this.state.splitName, true)
 
 		let url = `/api/people/${edit ? 'update' : 'new'}`
 		this.setState({isBlocking: false})
@@ -395,7 +409,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 	@autobind
 	confirmReset() {
-		const { person } = this.state
+		const { person } = this.props
 		person.status = Person.STATUS.INACTIVE
 		this.updatePerson(person, true, this.state.wrongPersonOptionValue === 'needNewAccount')
 	}
