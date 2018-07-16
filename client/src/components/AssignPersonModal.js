@@ -45,7 +45,7 @@ export default class AssignPersonModal extends Component {
 					<Modal.Title>Set Person for <LinkTo position={position} isLink={false}/></Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					{position.person.id &&
+					{position.person.uuid &&
 						<div style={{textAlign:'center'}}>
 							<Button bsStyle="danger" onClick={this.remove}>
 								Remove <LinkTo person={position.person} isLink={false}/> from <LinkTo position={position} isLink={false}/>
@@ -63,7 +63,7 @@ export default class AssignPersonModal extends Component {
 									placeholder="Select a person for this position"
 									objectType={Person}
 									className="select-person-autocomplete"
-									fields={'id, name, rank, role, position  { id, name}'}
+									fields={'uuid, name, rank, role, position { uuid, name}'}
 									template={person =>
 										<LinkTo person={person} isLink={false} />
 									}
@@ -73,7 +73,7 @@ export default class AssignPersonModal extends Component {
 								/>
 							</Col>
 						</Row>
-						{newPerson && newPerson.id &&
+						{newPerson && newPerson.uuid &&
 							<Table>
 								<thead>
 									<tr>
@@ -94,7 +94,7 @@ export default class AssignPersonModal extends Component {
 											{newPerson.position ?
 												newPerson.position.name
 												:
-												(newPerson.id === position.person.id ?
+												(newPerson.uuid === position.person.uuid ?
 													position.name
 													:
 													<i>None</i>
@@ -105,7 +105,7 @@ export default class AssignPersonModal extends Component {
 								</tbody>
 							</Table>
 						}
-						{this.state.person && this.state.person.position && this.state.person.position.id !== position.id &&
+						{this.state.person && this.state.person.position && this.state.person.position.uuid !== position.uuid &&
 							<Alert bsStyle={"danger"}>
 								This person is currently in another position. By selecting this person, <b>{this.state.person.position.name}</b> will be left unfilled.
 							</Alert>
@@ -123,7 +123,7 @@ export default class AssignPersonModal extends Component {
 	@autobind
 	remove() {
 		let position = this.props.position
-		API.fetch('/api/positions/' + position.id + '/person', { method: 'DELETE'}
+		API.fetch('/api/positions/' + position.uuid + '/person', { method: 'DELETE'}
 			).then(resp =>
 				this.props.onSuccess()
 			).catch(error => {
@@ -133,9 +133,9 @@ export default class AssignPersonModal extends Component {
 
 	@autobind
 	save() {
-		let person = {id: this.state.person.id}
+		let person = {uuid: this.state.person.uuid}
 		let position = this.props.position
-		API.send('/api/positions/' + position.id + '/person', person)
+		API.send('/api/positions/' + position.uuid + '/person', person)
 			.then(resp =>
 				this.props.onSuccess()
 			).catch(error => {

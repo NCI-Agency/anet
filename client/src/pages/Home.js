@@ -67,21 +67,21 @@ class BaseHome extends Page {
 	myDraft(currentUser) {
 		return {
 			title: "My draft reports",
-			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id }
+			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorUuid: currentUser.uuid }
 		}
 	}
 
 	myPending(currentUser) {
 		return {
 			title: "My reports pending approval",
-			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]}
+			query: { authorUuid: currentUser.uuid, state: [Report.STATE.PENDING_APPROVAL]}
 		}
 	}
 
 	pendingMe(currentUser) {
 		return {
 			title: "Reports pending my approval",
-			query: { pendingApprovalOf: currentUser.id }
+			query: { pendingApprovalOf: currentUser.uuid }
 		}
 	}
 
@@ -98,7 +98,7 @@ class BaseHome extends Page {
 		return {
 			title: currentUser.position.organization.shortName + "'s reports in the last 7 days",
 			query: {
-				advisorOrgId: currentUser.position.organization.id,
+				advisorOrgUuid: currentUser.position.organization.uuid,
 				createdAtStart: lastWeek,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			}
@@ -110,7 +110,7 @@ class BaseHome extends Page {
 		return {
 			title: currentUser.position.organization.shortName + "'s upcoming engagements",
 			query: {
-				advisorOrgId: currentUser.position.organization.id,
+				advisorOrgUuid: currentUser.position.organization.uuid,
 				state: [Report.STATE.FUTURE],
 				sortOrder: 'ASC'
 			}
@@ -127,7 +127,7 @@ class BaseHome extends Page {
 	mySensitiveInfo() {
 		return {
 			title: "Reports with sensitive information",
-			query: { state: [Report.STATE.RELEASED], authorizationGroupId: (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.id) : [-1]) }
+			query: { state: [Report.STATE.RELEASED], authorizationGroupUuid: (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.uuid) : [-1]) }
 		}
 	}
 
@@ -147,10 +147,10 @@ class BaseHome extends Page {
 		if (!currentUser || !currentUser._loaded) { return }
 		// Get current user authorization groups (needed for reports query 5)
 		const userAuthGroupsGraphQL = /* GraphQL */`
-			userAuthGroups: authorizationGroupList(f:search, query:$queryUserAuthGroups) {totalCount, list { id }}`
+			userAuthGroups: authorizationGroupList(f:search, query:$queryUserAuthGroups) {totalCount, list { uuid }}`
 		return API.query(
 				userAuthGroupsGraphQL,
-				{queryUserAuthGroups: {positionId: currentUser.position ? currentUser.position.id : -1}},
+				{queryUserAuthGroups: {positionUuid: currentUser.position ? currentUser.position.uuid : -1}},
 				"($queryUserAuthGroups: AuthorizationGroupSearchQuery)")
 			.then(data => {
 				this.setState({userAuthGroups: data.userAuthGroups.list})
@@ -164,7 +164,7 @@ class BaseHome extends Page {
 					tileThree: reportList(f:search, query: $queryThree) { totalCount },
 					tileFour: reportList(f:search, query: $queryFour) { totalCount },
 					tileFive: reportList(f:search, query: $queryFive) { totalCount },
-					savedSearches: savedSearchs(f:mine) {id, name, objectType, query}`
+					savedSearches: savedSearchs(f:mine) {uuid, name, objectType, query}`
 				let variables = {
 					queryOne: queries[0].query,
 					queryTwo: queries[1].query,
@@ -240,7 +240,7 @@ class BaseHome extends Page {
 						<ControlLabel>Select a saved search</ControlLabel>
 						<FormControl componentClass="select" onChange={this.onSaveSearchSelect}>
 							{this.state.savedSearches && this.state.savedSearches.map( savedSearch =>
-								<option value={savedSearch.id} key={savedSearch.id}>{savedSearch.name}</option>
+								<option value={savedSearch.uuid} key={savedSearch.uuid}>{savedSearch.name}</option>
 							)}
 						</FormControl>
 					</FormGroup>
@@ -268,8 +268,8 @@ class BaseHome extends Page {
 
 	@autobind
 	onSaveSearchSelect(event) {
-		let id = event && event.target ? event.target.value : event
-		let search = this.state.savedSearches.find(el => Number(el.id) === Number(id))
+		let uuid = event && event.target ? event.target.value : event
+		let search = this.state.savedSearches.find(el => el.uuid === uuid)
 		this.setState({selectedSearch: search})
 	}
 
@@ -291,8 +291,8 @@ class BaseHome extends Page {
 	@autobind
 	onConfirmDelete() {
 		const search = this.state.selectedSearch
-		const index = this.state.savedSearches.findIndex(s => s.id === search.id)
-		API.send(`/api/savedSearches/${search.id}`, {}, {method: 'DELETE'})
+		const index = this.state.savedSearches.findIndex(s => s.uuid === search.uuid)
+		API.send(`/api/savedSearches/${search.uuid}`, {}, {method: 'DELETE'})
 			.then(data => {
 				let savedSearches = this.state.savedSearches
 				savedSearches.splice(index, 1)

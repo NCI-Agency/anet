@@ -1,7 +1,6 @@
 import Page from './page'
 
-// TODO: do not use a hard coded url, but search the position by name or by type
-const Page_URL = '/positions/39/edit'
+const Search_URL = '/api/positions/search?text=MOI-Pol-HQ-00001'
 const ADVISOR_ORG = 'EF 2.2 -'
 
 class EditPosition extends Page {
@@ -14,7 +13,11 @@ class EditPosition extends Page {
     get submitButton()          { return browser.element('#formBottomSubmit') }
 
     open() {
-        super.openAsSuperUser(Page_URL)
+        browser.url(super._buildUrl(Search_URL, Page.DEFAULT_CREDENTIALS.superUser))
+        const searchRaw = browser.getText('pre')
+        const searchJson = JSON.parse(searchRaw)
+        const uuid = searchJson.list[0].uuid
+        super.openAsSuperUser(`/positions/${uuid}/edit`)
     }
 
     waitForAlertSuccessToLoad() {

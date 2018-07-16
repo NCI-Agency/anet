@@ -42,9 +42,9 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (authorizationGroups, (name, description), :containsQuery) c_authorizationGroups"
-					+ " ON authorizationGroups.id = c_authorizationGroups.[Key]"
+					+ " ON authorizationGroups.uuid = c_authorizationGroups.[Key]"
 					+ " LEFT JOIN FREETEXTTABLE(authorizationGroups, (name, description), :freetextQuery) f_authorizationGroups"
-					+ " ON authorizationGroups.id = f_authorizationGroups.[Key]");
+					+ " ON authorizationGroups.uuid = f_authorizationGroups.[Key]");
 			whereClauses.add("c_authorizationGroups.rank IS NOT NULL");
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			sqlArgs.put("freetextQuery", text);
@@ -55,11 +55,11 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
-		if (query.getPositionId() != null) {
+		if (query.getPositionUuid() != null) {
 			// Search for authorization groups related to a given position
-			whereClauses.add("authorizationGroups.id IN ( SELECT ap.authorizationGroupId FROM authorizationGroupPositions ap "
-							+ "WHERE ap.positionId = :positionId) ");
-			sqlArgs.put("positionId", query.getPositionId());
+			whereClauses.add("authorizationGroups.uuid IN ( SELECT ap.authorizationGroupUuid FROM authorizationGroupPositions ap "
+							+ "WHERE ap.positionUuid = :positionUuid) ");
+			sqlArgs.put("positionUuid", query.getPositionUuid());
 		}
 
 		final AuthorizationGroupList result = new AuthorizationGroupList();
@@ -92,7 +92,7 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "authorizationGroups", "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "authorizationGroups", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "authorizationGroups", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 

@@ -17,8 +17,8 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 const d3 = require('d3')
 const chartId = 'not_approved_reports_chart'
 const GQL_CHART_FIELDS =  /* GraphQL */`
-  id
-  advisorOrg { id, shortName }
+  uuid
+  advisorOrg { uuid, shortName }
 `
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
@@ -71,7 +71,7 @@ class PendingApprovalReports extends Component {
         <BarChartWithLoader
           chartId={chartId}
           data={this.state.graphData}
-          xProp='advisorOrg.id'
+          xProp='advisorOrg.uuid'
           yProp='notApproved'
           xLabel='advisorOrg.shortName'
           onBarClick={this.goToOrg}
@@ -124,7 +124,7 @@ class PendingApprovalReports extends Component {
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
     const noAdvisorOrg = {
-      id: -1,
+      uuid: "-1",
       shortName: `No ${Settings.fields.advisor.org.name}`
     }
     Promise.all([chartQuery]).then(values => {
@@ -135,8 +135,8 @@ class PendingApprovalReports extends Component {
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
         graphData: reportsList
-          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-          .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.uuid === item.advisorOrg.uuid }) === index)
+          .map(d => {d.notApproved = reportsList.filter(item => item.advisorOrg.uuid === d.advisorOrg.uuid).length; return d})
           .sort((a, b) => {
             let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
             let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
@@ -159,7 +159,7 @@ class PendingApprovalReports extends Component {
       pageSize: 10
     })
     if (this.state.focusedOrg) {
-      Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
+      Object.assign(reportsQueryParams, {advisorOrgUuid: this.state.focusedOrg.uuid})
     }
     // Query used by the reports collection
     let reportsQuery = API.query(/* GraphQL */`
@@ -195,7 +195,7 @@ class PendingApprovalReports extends Component {
     this.resetChartSelection()
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartId + ' #bar_' + item.advisorOrg.id).attr('class', 'selected-bar')
+      d3.select('#' + chartId + ' #bar_' + item.advisorOrg.uuid).attr('class', 'selected-bar')
     }
   }
 

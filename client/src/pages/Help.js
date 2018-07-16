@@ -34,14 +34,14 @@ class BaseHelp extends Page {
 
 	fetchData(props) {
 		const { currentUser } = props
-		if (!currentUser.id || !currentUser.position || !currentUser.position.organization) {
+		if (!currentUser.uuid || !currentUser.position || !currentUser.position.organization) {
 			// No super users to be found
 			return
 		}
 
-		let orgId = currentUser.position.organization.id
+		let orgUuid = currentUser.position.organization.uuid
 		return API.query(/* GraphQL */`
-			positionList(f:search,query:{type:[${Position.TYPE.SUPER_USER},${Position.TYPE.ADMINISTRATOR}],status:${Position.STATUS.ACTIVE},organizationId:${orgId}}) {
+			positionList(f:search,query:{type:[${Position.TYPE.SUPER_USER},${Position.TYPE.ADMINISTRATOR}],status:${Position.STATUS.ACTIVE},organizationUuid:${orgUuid}}) {
 				list {
 					person { rank, name, emailAddress }
 				}

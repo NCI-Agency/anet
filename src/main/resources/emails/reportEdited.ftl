@@ -21,7 +21,7 @@ a {
 
 Hello ${report.author.name},
 
-<p>${editor.name} edited your report "${report.intent}". To review the changes, <a href="${serverUrl}/reports/${report.id?c}">click here</a>.</p>
+<p>${editor.name} edited your report "${report.intent}". To review the changes, <a href="${serverUrl}/reports/${report.uuid}">click here</a>.</p>
 
 ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>

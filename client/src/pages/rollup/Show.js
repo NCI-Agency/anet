@@ -129,13 +129,13 @@ class BaseRollupShow extends Page {
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				rollupQuery.principalOrgId = this.state.focusedOrg.id
+				rollupQuery.principalOrgUuid = this.state.focusedOrg.uuid
 				rollupQuery.includePrincipalOrgChildren = true
-				graphQueryUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
+				graphQueryUrl += `&principalOrganizationUuid=${this.state.focusedOrg.uuid}`
 			} else {
-				rollupQuery.advisorOrgId = this.state.focusedOrg.id
+				rollupQuery.advisorOrgUuid = this.state.focusedOrg.uuid
 				rollupQuery.includeAdvisorOrgChildren = true
-				graphQueryUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`
+				graphQueryUrl += `&advisorOrganizationUuid=${this.state.focusedOrg.uuid}`
 			}
 		} else if (this.state.orgType) {
 			graphQueryUrl += `&orgType=${this.state.orgType}`
@@ -157,13 +157,13 @@ class BaseRollupShow extends Page {
 			this.setState({
 				reports: values[0].reportList,
 				graphData: values[1]
-					.map(d => {d.org = d.org || {id: -1, shortName: "Other"}; return d})
+					.map(d => {d.org = d.org || {uuid: "-1", shortName: "Other"}; return d})
 					.sort((a, b) => {
 						let a_index = pinned_ORGs.indexOf(a.org.shortName)
 						let b_index = pinned_ORGs.indexOf(b.org.shortName)
 						if (a_index<0) {
 							let nameOrder = a.org.shortName.localeCompare(b.org.shortName)
-							return (b_index<0) ?  (nameOrder === 0 ? a.org.id - b.org.id : nameOrder)  : 1
+							return (b_index<0) ?  (nameOrder === 0 ? a.org.uuid - b.org.uuid : nameOrder)  : 1
 						}
 						else {
 							return (b_index<0) ? -1 : a_index-b_index
@@ -264,8 +264,8 @@ class BaseRollupShow extends Page {
 		let yLabels = {}
 		let yScale = d3.scaleBand()
 						.domain(graphData.map(function(d) {
-							yLabels[d.org.id] = d.org.shortName
-							return d.org.id
+							yLabels[d.org.uuid] = d.org.shortName
+							return d.org.uuid
 						}))
 						.range([0, height])
 
@@ -392,13 +392,13 @@ class BaseRollupShow extends Page {
 	@autobind
 	previewUrl() {
 		// orgType drives chart
-		// principalOrganizationId or advisorOrganizationId drive drill down.
+		// principalOrganizationUuid or advisorOrganizationUuid drive drill down.
 		let rollupUrl = `/api/reports/rollup?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				rollupUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
+				rollupUrl += `&principalOrganizationUuid=${this.state.focusedOrg.uuid}`
 			} else {
-				rollupUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`
+				rollupUrl += `&advisorOrganizationUuid=${this.state.focusedOrg.uuid}`
 			}
 		}
 		if (this.state.orgType) {
@@ -446,9 +446,9 @@ class BaseRollupShow extends Page {
 		let emailUrl = `/api/reports/rollup/email?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				emailUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
+				emailUrl += `&principalOrganizationUuid=${this.state.focusedOrg.uuid}`
 			} else {
-				emailUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`
+				emailUrl += `&advisorOrganizationUuid=${this.state.focusedOrg.uuid}`
 			}
 		}
 		if (this.state.orgType) {

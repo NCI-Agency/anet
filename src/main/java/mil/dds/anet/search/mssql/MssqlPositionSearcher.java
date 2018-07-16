@@ -44,17 +44,17 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 		sql.append(", count(*) OVER() AS totalCount FROM positions ");
 
 		if (Boolean.TRUE.equals(query.getMatchPersonName())) {
-			sql.append(" LEFT JOIN people ON positions.currentPersonId = people.id");
+			sql.append(" LEFT JOIN people ON positions.currentPersonUuid = people.uuid");
 		}
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (positions, (name, code), :containsQuery) c_positions"
-					+ " ON positions.id = c_positions.[Key]");
+					+ " ON positions.uuid = c_positions.[Key]");
 			final StringBuilder whereRank = new StringBuilder("("
 					+ "c_positions.rank IS NOT NULL");
 			if (Boolean.TRUE.equals(query.getMatchPersonName())) {
 				sql.append(" LEFT JOIN CONTAINSTABLE(people, (name), :containsQuery) c_people"
-						+ " ON people.id = c_people.[Key]");
+						+ " ON people.uuid = c_people.[Key]");
 				whereRank.append(" OR c_people.rank IS NOT NULL");
 			}
 			whereRank.append(")");
@@ -72,31 +72,31 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 		}
 
 		String commonTableExpression = null;
-		if (query.getOrganizationId() != null) {
+		if (query.getOrganizationUuid() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-				commonTableExpression = "WITH parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
 					+ ") ";
-				whereClauses.add(" positions.organizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add(" positions.organizationUuid IN (SELECT uuid from parent_orgs)");
 			} else {
-				whereClauses.add("positions.organizationId = :orgId");
+				whereClauses.add("positions.organizationUuid = :orgUuid");
 			}
-			sqlArgs.put("orgId", query.getOrganizationId());
+			sqlArgs.put("orgUuid", query.getOrganizationUuid());
 		}
 
 		if (query.getIsFilled() != null) {
 			if (query.getIsFilled()) {
-				whereClauses.add("positions.currentPersonId IS NOT NULL");
+				whereClauses.add("positions.currentPersonUuid IS NOT NULL");
 			} else {
-				whereClauses.add("positions.currentPersonId IS NULL");
+				whereClauses.add("positions.currentPersonUuid IS NULL");
 			}
 		}
 
-		if (query.getLocationId() != null) {
-			whereClauses.add("positions.locationId = :locationId");
-			sqlArgs.put("locationId", query.getLocationId());
+		if (query.getLocationUuid() != null) {
+			whereClauses.add("positions.locationUuid = :locationUuid");
+			sqlArgs.put("locationUuid", query.getLocationUuid());
 		}
 
 		if (query.getStatus() != null) {
@@ -104,11 +104,11 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
-		if (query.getAuthorizationGroupId() != null) {
+		if (query.getAuthorizationGroupUuid() != null) {
 			// Search for positions related to a given authorization group
-			whereClauses.add("positions.id IN ( SELECT ap.positionId FROM authorizationGroupPositions ap "
-							+ "WHERE ap.authorizationGroupId = :authorizationGroupId) ");
-			sqlArgs.put("authorizationGroupId", query.getAuthorizationGroupId());
+			whereClauses.add("positions.uuid IN ( SELECT ap.positionUuid FROM authorizationGroupPositions ap "
+							+ "WHERE ap.authorizationGroupUuid = :authorizationGroupUuid) ");
+			sqlArgs.put("authorizationGroupUuid", query.getAuthorizationGroupUuid());
 		}
 
 		
@@ -145,7 +145,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "positions", "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "positions", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "positions", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 

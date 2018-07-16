@@ -3,11 +3,8 @@ package mil.dds.anet.database;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.beans.Person;
@@ -21,7 +18,7 @@ import mil.dds.anet.utils.DaoUtils;
 @RegisterMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
 
-	private static final String[] fields = { "id", "text", "reportId", "createdAt", "updatedAt" };
+	private static final String[] fields = { "uuid", "text", "reportUuid", "createdAt", "updatedAt" };
 	private static final String tableName = "reportsSensitiveInformation";
 	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
@@ -31,17 +28,14 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		this.dbHandle = h;
 	}
 
-	@Override
 	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public ReportSensitiveInformation getById(@Bind("id") int id) {
+	public ReportSensitiveInformation getByUuid(String uuid) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public ReportSensitiveInformation insert(ReportSensitiveInformation rsi) {
 		throw new UnsupportedOperationException();
 	}
@@ -50,24 +44,18 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return null;
 		}
-		rsi.setReportId(report.getId());
-		rsi.setCreatedAt(DateTime.now());
-		rsi.setUpdatedAt(DateTime.now());
-		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
+		rsi.setReportUuid(report.getUuid());
+		DaoUtils.setInsertFields(rsi);
+		dbHandle.createStatement(
 				"/* insertReportsSensitiveInformation */ INSERT INTO \"" + tableName + "\" "
-					+ " (text, \"reportId\", \"createdAt\", \"updatedAt\") "
-					+ "VALUES (:text, :reportId, :createdAt, :updatedAt)")
-				.bind("text", rsi.getText())
-				.bind("reportId", rsi.getReportId())
-				.bind("createdAt", rsi.getCreatedAt())
-				.bind("updatedAt", rsi.getUpdatedAt())
-				.executeAndReturnGeneratedKeys();
-		rsi.setId(DaoUtils.getGeneratedId(keys));
+					+ " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
+				.bindFromProperties(rsi)
+				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
 		return rsi;
 	}
 
-	@Override
 	public int update(ReportSensitiveInformation rsi) {
 		throw new UnsupportedOperationException();
 	}
@@ -76,22 +64,20 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return 0;
 		}
-		// Update relevant fields, but do not allow the reportId to be updated by the query!
-		rsi.setReportId(report.getId());
-		rsi.setUpdatedAt(DateTime.now());
+		// Update relevant fields, but do not allow the reportUuid to be updated by the query!
+		rsi.setReportUuid(report.getUuid());
+		DaoUtils.setUpdateFields(rsi);
 		final int numRows = dbHandle.createStatement(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
-					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")
-				.bind("id", rsi.getId())
-				.bind("text", rsi.getText())
-				.bind("updatedAt", rsi.getUpdatedAt())
+					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+				.bindFromProperties(rsi)
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
 		return numRows;
 	}
 
 	public Object insertOrUpdate(ReportSensitiveInformation rsi, Person user, Report report) {
-		return (DaoUtils.getId(rsi) == null)
+		return (DaoUtils.getUuid(rsi) == null)
 				? insert(rsi, user, report)
 				: update(rsi, user, report);
 	}
@@ -101,10 +87,10 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			return null;
 		}
 		final Query<ReportSensitiveInformation> query = dbHandle.createQuery(
-				"/* getReportSensitiveInformationByReportId */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
+				"/* getReportSensitiveInformationByReportUuid */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
 					+ " FROM \"" + tableName + "\""
-					+ " WHERE \"reportId\" = :reportId")
-			.bind("reportId", report.getId())
+					+ " WHERE \"reportUuid\" = :reportUuid")
+			.bind("reportUuid", report.getUuid())
 			.map(new ReportSensitiveInformationMapper());
 		final List<ReportSensitiveInformation> results = query.list();
 		ReportSensitiveInformation rsi = (results.size() == 0) ? null : results.get(0);
@@ -112,7 +98,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);
 		} else {
 			rsi = new ReportSensitiveInformation();
-			rsi.setReportId(report.getId());
+			rsi.setReportUuid(report.getUuid());
 		}
 		return rsi;
 	}
@@ -127,28 +113,28 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	 * @return true if the user is allowed to access the report's sensitive information
 	 */
 	private boolean isAuthorized(Person user, Report report) {
-		final Integer userId = DaoUtils.getId(user);
-		final Integer reportId = DaoUtils.getId(report);
-		if (userId == null || reportId == null) {
+		final String userUuid = DaoUtils.getUuid(user);
+		final String reportUuid = DaoUtils.getUuid(report);
+		if (userUuid == null || reportUuid == null) {
 			// No user or no report
 			return false;
 		}
 
 		// Check authorization in a single query
 		final Query<Map<String, Object>> query = dbHandle.createQuery(
-				"/* checkReportAuthorization */ SELECT r.id"
+				"/* checkReportAuthorization */ SELECT r.uuid"
 					+ " FROM reports r"
-					+ " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportId\" = r.id"
-					+ " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupId\" = rag.\"authorizationGroupId\" "
-					+ " LEFT JOIN positions p ON p.id = agp.\"positionId\" "
-					+ " WHERE r.id = :reportId"
+					+ " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportUuid\" = r.uuid"
+					+ " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\" "
+					+ " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" "
+					+ " WHERE r.uuid = :reportUuid"
 					+ " AND ("
-					+ "   (r.\"authorId\" = :userId)"
+					+ "   (r.\"authorUuid\" = :userUuid)"
 					+ "   OR"
-					+ "   (p.\"currentPersonId\" = :userId)"
+					+ "   (p.\"currentPersonUuid\" = :userUuid)"
 					+ " )")
-			.bind("reportId", reportId)
-			.bind("userId", userId);
+			.bind("reportUuid", reportUuid)
+			.bind("userUuid", userUuid);
 		return (query.list().size() > 0);
 	}
 

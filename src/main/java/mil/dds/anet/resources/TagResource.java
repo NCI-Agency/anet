@@ -49,9 +49,9 @@ public class TagResource implements IGraphQLResource {
 
 	@GET
 	@GraphQLFetcher
-	@Path("/{id}")
-	public Tag getById(@PathParam("id") int id) {
-		final Tag t = dao.getById(id);
+	@Path("/{uuid}")
+	public Tag getByUuid(@PathParam("uuid") String uuid) {
+		final Tag t = dao.getByUuid(uuid);
 		if (t == null) {
 			throw new WebApplicationException(Status.NOT_FOUND);
 		}

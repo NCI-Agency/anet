@@ -27,8 +27,8 @@ public class PersonPositionHistoryMapper implements ResultSetMapper<PersonPositi
 	public PersonPositionHistory map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
 
 		//Each row is a change of the person/position relationship for this person
-		//If the personId is null that means that the previous person was removed from this entry
-		//Otherwise the person with that ID was placed in this position, and the previous person removed.
+		//If the personUuid is null that means that the previous person was removed from this entry
+		//Otherwise the person with that UUID was placed in this position, and the previous person removed.
 		
 		//This only returns an entry on rows that are the completion of a person's history in a position. 
 		// On a new person placed in a position row: it will create the first half of the History
@@ -36,25 +36,25 @@ public class PersonPositionHistoryMapper implements ResultSetMapper<PersonPositi
 		// After we're totally done you can call the getCurrentPerson() which will return the 
 		// un-completed record (ie no end-time) for the current person. 
 		
-		Integer personId = MapperUtils.getInteger(rs, "personId");
+		String personUuid = rs.getString("personUuid");
 		DateTime createdAt = new DateTime(rs.getTimestamp("pph_createdAt"));
 		PersonPositionHistory toReturn = null;
 
-		if (DaoUtils.getId(curr.getPerson()) != null) {
+		if (DaoUtils.getUuid(curr.getPerson()) != null) {
 			curr.setEndTime(createdAt);
 			toReturn = curr;
 			curr = new PersonPositionHistory();
 			curr.setPosition(position);
-			if (personId != null) { 
-				curr.setPerson(Person.createWithId(personId));
-				if (MapperUtils.containsColumnNamed(rs, "people_id")) { 
+			if (personUuid != null) {
+				curr.setPerson(Person.createWithUuid(personUuid));
+				if (MapperUtils.containsColumnNamed(rs, "people_uuid")) {
 					PersonMapper.fillInFields(curr.getPerson(), rs);
 				}
 				curr.setStartTime(createdAt);
 			}
 		} else {
-			curr.setPerson(Person.createWithId(personId));
-			if (MapperUtils.containsColumnNamed(rs, "people_id")) { 
+			curr.setPerson(Person.createWithUuid(personUuid));
+			if (MapperUtils.containsColumnNamed(rs, "people_uuid")) {
 				PersonMapper.fillInFields(curr.getPerson(), rs);
 			}
 			curr.setStartTime(createdAt);

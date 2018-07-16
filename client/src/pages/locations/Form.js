@@ -34,7 +34,7 @@ class LocationForm extends ValidatableFormWrapper {
 	render() {
 		const location = this.props.anetLocation
 		const marker = {
-			id: location.id || 0,
+			id: location.uuid || 0,
 			name: location.name || '',
 			draggable: true,
 			onMove: this.onMarkerMove
@@ -110,8 +110,8 @@ class LocationForm extends ValidatableFormWrapper {
 		this.setState({isBlocking: false})
 		API.send(url, loc, {disableSubmits: true})
 			.then(response => {
-				if (response.id) {
-					loc.id = response.id
+				if (response.uuid) {
+					loc.uuid = response.uuid
 				}
 				this.props.history.push({
 					pathname: Location.pathFor(loc),

@@ -162,7 +162,7 @@ public class AnetObjectEngine {
 
 	public Organization getOrganizationForPerson(Person person) { 
 		if (person == null) { return null; } 
-		return personDao.getOrganizationForPerson(person.getId());
+		return personDao.getOrganizationForPerson(person.getUuid());
 	}
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
@@ -187,17 +187,17 @@ public class AnetObjectEngine {
 
 	public List<ApprovalStep> getApprovalStepsForOrg(Organization ao) {
 		logger.debug("Fetching steps for {}", ao);
-		Collection<ApprovalStep> unordered = asDao.getByAdvisorOrganizationId(ao.getId());
+		Collection<ApprovalStep> unordered = asDao.getByAdvisorOrganizationUuid(ao.getUuid());
 		
 		int numSteps = unordered.size();
 		logger.debug("Found total of {} steps", numSteps);
 		LinkedList<ApprovalStep> ordered = new LinkedList<ApprovalStep>();
-		Integer nextStep = null;
+		String nextStep = null;
 		for (int i = 0;i < numSteps;i++) { 
 			for (ApprovalStep as : unordered) { 
-				if (Objects.equals(as.getNextStepId(), nextStep)) { 
+				if (Objects.equals(as.getNextStepUuid(), nextStep)) {
 					ordered.addFirst(as);
-					nextStep = as.getId();
+					nextStep = as.getUuid();
 					break;
 				}
 			}
@@ -205,20 +205,20 @@ public class AnetObjectEngine {
 		return ordered;
 	}
 	
-	public boolean canUserApproveStep(Integer userId, int approvalStepId) { 
-		ApprovalStep as = asDao.getById(approvalStepId);
+	public boolean canUserApproveStep(String userUuid, String approvalStepUuid) {
+		ApprovalStep as = asDao.getByUuid(approvalStepUuid);
 		for (Position approverPosition: as.loadApprovers()) {
-			//approverPosition.getPerson() has the currentPersonId already loaded, so this is safe. 
-			if (Objects.equals(userId, DaoUtils.getId(approverPosition.getPerson()))) { return true; } 
+			//approverPosition.getPerson() has the currentPersonUuid already loaded, so this is safe.
+			if (Objects.equals(userUuid, DaoUtils.getUuid(approverPosition.getPerson()))) { return true; }
 		}
 		return false;
 	}
 
 	/*
-	 * Helper function to build a map of organization IDs to their top level parent organization object.
-	 * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to get all orgs.  
+	 * Helper function to build a map of organization UUIDs to their top level parent organization object.
+	 * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to get all orgs.
 	 */
-	public Map<Integer,Organization> buildTopLevelOrgHash(OrganizationType orgType) {
+	public Map<String,Organization> buildTopLevelOrgHash(OrganizationType orgType) {
 		OrganizationSearchQuery orgQuery = new OrganizationSearchQuery();
 		orgQuery.setPageSize(Integer.MAX_VALUE);
 		orgQuery.setType(orgType);
@@ -227,18 +227,18 @@ public class AnetObjectEngine {
 		return Utils.buildParentOrgMapping(orgs, null);
 	}
 	
-	/* Helper function to build a map or organization IDS to their top parent
-	 * capped at a certain point in the hierarchy. 
-	 * parentOrg will map to parentOrg, and all children will map to the highest 
-	 * parent that is NOT the parentOrgId. 
+	/* Helper function to build a map or organization UUIDs to their top parent
+	 * capped at a certain point in the hierarchy.
+	 * parentOrg will map to parentOrg, and all children will map to the highest
+	 * parent that is NOT the parentOrgUuid.
 	 */
-	public Map<Integer,Organization> buildTopLevelOrgHash(Integer parentOrgId) { 
+	public Map<String,Organization> buildTopLevelOrgHash(String parentOrgUuid) {
 		OrganizationSearchQuery query = new OrganizationSearchQuery();
-		query.setParentOrgId(parentOrgId);
+		query.setParentOrgUuid(parentOrgUuid);
 		query.setParentOrgRecursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
 		List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
-		return Utils.buildParentOrgMapping(orgList, parentOrgId);
+		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
 	}
 	
 	public static AnetObjectEngine getInstance() { 

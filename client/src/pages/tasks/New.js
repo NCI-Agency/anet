@@ -30,10 +30,10 @@ class TaskNew extends Page {
 
 	fetchData(props) {
 		const qs = utils.parseQueryString(props.location.search)
-		if (qs.responsibleOrgId) {
+		if (qs.responsibleOrgUuid) {
 			return API.query(/* GraphQL */`
-				organization(id: ${qs.responsibleOrgId}) {
-					id, shortName, longName, identificationCode, type
+				organization(uuid:"${qs.responsibleOrgUuid}") {
+					uuid, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
 				let task = this.state.task

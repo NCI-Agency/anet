@@ -42,11 +42,11 @@ class BaseMyReports extends Page {
 	}
 
 	@autobind
-	getPart(partName, state, authorId) {
+	getPart(partName, state, authorUuid) {
 		let query = {
 			pageSize: 10,
 			pageNum: this.pageNums[partName],
-			authorId: authorId,
+			authorUuid: authorUuid,
 			state: state
 		}
 		return new GQL.Part(/* GraphQL */ `
@@ -59,14 +59,14 @@ class BaseMyReports extends Page {
 
 	fetchData(props) {
 		const { currentUser } = props
-		if (!currentUser || !currentUser.id) {
+		if (!currentUser || !currentUser.uuid) {
 			return
 		}
-		const authorId = currentUser.id
-		let pending = this.partFuncs.pending(authorId)
-		let draft = this.partFuncs.draft(authorId)
-		let future = this.partFuncs.future(authorId)
-		let released = this.partFuncs.released(authorId)
+		const authorUuid = currentUser.uuid
+		let pending = this.partFuncs.pending(authorUuid)
+		let draft = this.partFuncs.draft(authorUuid)
+		let future = this.partFuncs.future(authorUuid)
+		let released = this.partFuncs.released(authorUuid)
 
 		return GQL.run([pending, draft, future, released]).then(data =>
 			this.setState({
@@ -103,7 +103,7 @@ class BaseMyReports extends Page {
 	@autobind
 	goToPage(section, pageNum) {
 		this.pageNums[section] = pageNum
-		const part = (this.partFuncs[section])(this.props.currentUser.id)
+		const part = (this.partFuncs[section])(this.props.currentUser.uuid)
 		GQL.run([part]).then( data => {
 			let stateChange = {}
 			stateChange[section] = data[section]

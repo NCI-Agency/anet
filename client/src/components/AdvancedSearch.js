@@ -26,7 +26,7 @@ import _cloneDeepWith from 'lodash/cloneDeepWith'
 const taskFilters = props => {
 	const taskFiltersObj = {
 		Organization: <OrganizationFilter
-						queryKey="responsibleOrgId"
+						queryKey="responsibleOrgUuid"
 						queryIncludeChildOrgsKey="includeChildrenOrgs"/>,
 		Status: <SelectSearchFilter
 						queryKey="status"
@@ -71,7 +71,7 @@ class AdvancedSearch extends Component {
 		filters.Reports = {
 			filters: {
 				Author: <AutocompleteFilter
-					queryKey="authorId"
+					queryKey="authorUuid"
 					objectType={Person}
 					valueKey="name"
 					fields={Person.autocompleteQuery}
@@ -80,7 +80,7 @@ class AdvancedSearch extends Component {
 					placeholder="Filter reports by author..."
 				/>,
 				Attendee: <AutocompleteFilter
-					queryKey="attendeeId"
+					queryKey="attendeeUuid"
 					objectType={Person}
 					valueKey="name"
 					fields={Person.autocompleteQuery}
@@ -88,7 +88,7 @@ class AdvancedSearch extends Component {
 					placeholder="Filter reports by attendee..."
 				/>,
 				"Author Position": <AutocompleteFilter
-					queryKey="authorPositionId"
+					queryKey="authorPositionUuid"
 					objectType={Position}
 					valueKey="name"
 					fields={Position.autocompleteQuery}
@@ -97,7 +97,7 @@ class AdvancedSearch extends Component {
 					placeholder="Filter reports by author position..."
 				/>,
 				"Attendee Position": <AutocompleteFilter
-					queryKey="attendeePositionId"
+					queryKey="attendeePositionUuid"
 					objectType={Position}
 					valueKey="name"
 					fields={Position.autocompleteQuery}
@@ -105,13 +105,13 @@ class AdvancedSearch extends Component {
 					placeholder="Filter reports by attendee position..."
 				/>,
 				Organization: <OrganizationFilter
-					queryKey="orgId"
+					queryKey="orgUuid"
 					queryIncludeChildOrgsKey="includeOrgChildren"
 				/>,
 				"Engagement Date": <DateRangeSearch queryKey="engagementDate" />,
 				"Release Date": <DateRangeSearch queryKey="releasedAt" />,
 				Location: <AutocompleteFilter
-					queryKey="locationId"
+					queryKey="locationUuid"
 					valueKey="name"
 					placeholder="Filter reports by location..."
 					url="/api/locations/search"
@@ -122,7 +122,7 @@ class AdvancedSearch extends Component {
 					values={["POSITIVE","NEUTRAL","NEGATIVE"]}
 				/>,
 				Tag: <AutocompleteFilter
-					queryKey="tagId"
+					queryKey="tagUuid"
 					valueKey="name"
 					placeholder="Filter reports by tag..."
 					url="/api/tags/search"
@@ -133,7 +133,7 @@ class AdvancedSearch extends Component {
 		const taskShortLabel = Settings.fields.task.shortLabel
 		filters.Reports.filters[taskShortLabel] =
 			<AutocompleteFilter
-				queryKey="taskId"
+				queryKey="taskUuid"
 				objectType={Task}
 				fields={Task.autocompleteQuery}
 				template={Task.autocompleteTemplate}
@@ -146,7 +146,7 @@ class AdvancedSearch extends Component {
 		filters.People = {
 			filters: {
 				Organization: <OrganizationFilter
-					queryKey="orgId"
+					queryKey="orgUuid"
 					queryIncludeChildOrgsKey="includeChildOrgs"
 				/>,
 				Role: <SelectSearchFilter
@@ -159,7 +159,7 @@ class AdvancedSearch extends Component {
 					values={[Person.STATUS.ACTIVE, Person.STATUS.INACTIVE, Person.STATUS.NEW_USER]}
 				/>,
 				Location: <AutocompleteFilter
-					queryKey="locationId"
+					queryKey="locationUuid"
 					valueKey="name"
 					placeholder="Filter by location..."
 					url="/api/locations/search"
@@ -194,7 +194,7 @@ class AdvancedSearch extends Component {
 					labels={[Settings.fields.advisor.position.name, Settings.fields.principal.position.name]}
 				/>,
 				Organization: <OrganizationFilter
-					queryKey="organizationId"
+					queryKey="organizationUuid"
 					queryIncludeChildOrgsKey="includeChildrenOrgs"
 					ref={this.setOrganizationFilter}
 				/>,
@@ -203,7 +203,7 @@ class AdvancedSearch extends Component {
 					values={[Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]}
 				/>,
 				Location: <AutocompleteFilter
-					queryKey="locationId"
+					queryKey="locationUuid"
 					valueKey="name"
 					placeholder="Filter by location..."
 					url="/api/locations/search"

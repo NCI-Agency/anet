@@ -38,8 +38,8 @@ import ReactDOM from 'react-dom'
 const QUERY_STRINGS = {
 	reports: {
 		pendingApprovalOf: 'reports pending your approval',
-		advisorOrgId: 'reports recently authored by your organization',
-		authorId: 'reports you recently authored',
+		advisorOrgUuid: 'reports recently authored by your organization',
+		authorUuid: 'reports you recently authored',
 	},
 	organizations: 'Organizations TODO',
 	people: 'People TODO',
@@ -58,35 +58,35 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PersonSearchQuery',
-		fields: 'id, name, rank, emailAddress, role , position { id, name, organization { id, shortName} }'
+		fields: 'uuid, name, rank, emailAddress, role , position { uuid, name, organization { uuid, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQuery',
-		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name, rank }'
+		fields: 'uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'TaskSearchQuery',
-		fields: 'id, shortName, longName'
+		fields: 'uuid, shortName, longName'
 	},
 	locations : {
 		listName: 'locations: locationList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'LocationSearchQuery',
-		fields : 'id, name, lat, lng'
+		fields: 'uuid, name, lat, lng'
 	},
 	organizations : {
 		listName: 'organizations: organizationList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'OrganizationSearchQuery',
-		fields: 'id, shortName, longName, identificationCode, type'
+		fields: 'uuid, shortName, longName, identificationCode, type'
 	}
 }
 
@@ -456,7 +456,7 @@ class Search extends Page {
 				</thead>
 				<tbody>
 					{Person.map(this.state.results.people.list, person =>
-						<tr key={person.id}>
+						<tr key={person.uuid}>
 							<td>
 								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 								<LinkTo person={person}/>
@@ -484,7 +484,7 @@ class Search extends Page {
 				</thead>
 				<tbody>
 					{Organization.map(this.state.results.organizations.list, org =>
-						<tr key={org.id}>
+						<tr key={org.uuid}>
 							<td><LinkTo organization={org} /></td>
 							<td>{org.longName}</td>
 							<td>{org.identificationCode}</td>
@@ -514,7 +514,7 @@ class Search extends Page {
 				</thead>
 				<tbody>
 					{this.state.results.locations.list.map(loc =>
-						<tr key={loc.id}>
+						<tr key={loc.uuid}>
 							<td><LinkTo anetLocation={loc} /></td>
 						</tr>
 					)}
@@ -534,7 +534,7 @@ class Search extends Page {
 				</thead>
 				<tbody>
 					{Task.map(this.state.results.tasks.list, task =>
-						<tr key={task.id}>
+						<tr key={task.uuid}>
 							<td><LinkTo task={task} >{task.shortName} {task.longName}</LinkTo></td>
 						</tr>
 					)}

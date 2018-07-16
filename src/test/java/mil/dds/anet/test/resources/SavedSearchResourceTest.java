@@ -41,7 +41,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ss.setQuery("{\"text\" : \"spreadsheets\"}");
 		
 		SavedSearch created = httpQuery("/api/savedSearches/new", jack).post(Entity.json(ss), SavedSearch.class);
-		assertThat(created.getId()).isNotNull();
+		assertThat(created.getUuid()).isNotNull();
 		assertThat(created.getQuery()).isEqualTo(ss.getQuery());
 		
 		//Fetch a list of all of my saved searches
@@ -56,7 +56,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		assertThat(results.getList()).isNotEmpty();
 		
 		//Delete it
-		Response resp = httpQuery("/api/savedSearches/" + created.getId(), jack).delete();
+		Response resp = httpQuery("/api/savedSearches/" + created.getUuid(), jack).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		mine = httpQuery("/api/savedSearches/mine", jack).get(new GenericType<List<SavedSearch>>() {});
@@ -75,7 +75,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ss.setQuery("{\"text\" : \"kabul\"}");
 
 		SavedSearch created = httpQuery("/api/savedSearches/new", jack).post(Entity.json(ss), SavedSearch.class);
-		assertThat(created.getId()).isNotNull();
+		assertThat(created.getUuid()).isNotNull();
 		assertThat(created.getQuery()).isEqualTo(ss.getQuery());
 
 		//Fetch a list of all of my saved searches
@@ -90,7 +90,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		assertThat(results.getList()).isNotEmpty();
 
 		//Delete it
-		Response resp = httpQuery("/api/savedSearches/" + created.getId(), jack).delete();
+		Response resp = httpQuery("/api/savedSearches/" + created.getUuid(), jack).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		mine = httpQuery("/api/savedSearches/mine", jack).get(new GenericType<List<SavedSearch>>() {});

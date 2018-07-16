@@ -31,7 +31,7 @@ export default class ReportTable extends Component {
 
 			<tbody>
 				{reports.map(report =>
-					<tr key={report.id}>
+					<tr key={report.uuid}>
 						{showAuthors && <td><LinkTo person={report.author} /></td>}
 						<td>{<LinkTo organization={report.advisorOrg} />}</td>
 						<td>{<LinkTo report={report} />}</td>

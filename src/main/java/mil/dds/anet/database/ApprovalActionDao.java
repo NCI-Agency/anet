@@ -2,13 +2,13 @@ package mil.dds.anet.database;
 
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.lists.AbstractAnetBeanList;
 import mil.dds.anet.database.mappers.ApprovalActionMapper;
+import mil.dds.anet.utils.DaoUtils;
 
 public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 
@@ -18,17 +18,16 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 		this.dbHandle = db;
 	}
 	
-	@Override
 	public ApprovalAction insert(ApprovalAction action) {
-		action.setCreatedAt(DateTime.now());
+		DaoUtils.setInsertFields(action);
 		dbHandle.createStatement("/* insertApprovalAction */ INSERT INTO \"approvalActions\" "
-				+ "(\"approvalStepId\", \"personId\", \"reportId\", \"createdAt\", type) "
-				+ "VALUES (:approvalStepId, :personId, :reportId, :createdAt, :type)")
-			.bind("approvalStepId", action.getStep().getId())
-			.bind("personId", action.getPerson().getId())
-			.bind("reportId", action.getReport().getId())
+				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
+				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
+			.bind("approvalStepUuid", action.getStep().getUuid())
+			.bind("personUuid", action.getPerson().getUuid())
+			.bind("reportUuid", action.getReport().getUuid())
 			.bind("createdAt", action.getCreatedAt())
-			.bind("type", action.getType().ordinal())
+			.bind("type", DaoUtils.getEnumId(action.getType()))
 			.execute();
 		return action;
 	}
@@ -37,10 +36,10 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 * Returns all approval actions ever taken for a particular report. 
 	 * Ordered by their date ascending (earliest to most recent). 
 	 */
-	public List<ApprovalAction> getActionsForReport(int reportId) {
+	public List<ApprovalAction> getActionsForReport(String reportUuid) {
 		Query<ApprovalAction> query = dbHandle.createQuery("/* getReportApprovals */ SELECT * FROM \"approvalActions\" "
-				+ "WHERE \"reportId\" = :reportId ORDER BY \"createdAt\" ASC")
-			.bind("reportId", reportId)
+				+ "WHERE \"reportUuid\" = :reportUuid ORDER BY \"createdAt\" ASC")
+			.bind("reportUuid", reportUuid)
 			.map(new ApprovalActionMapper());
 		return query.list();
 	}
@@ -50,27 +49,24 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 * where there were multiple actions on the same step (ie a reject then an approval
 	 * will only return the approval).
 	 */
-	public List<ApprovalAction> getFinalActionsForReport(int reportId) {
+	public List<ApprovalAction> getFinalActionsForReport(String reportUuid) {
 		//TODO: test this. I don't think it works.... 
 		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM \"approvalActions\" "
-				+ "WHERE \"reportId\" = :reportId GROUP BY \"approvalStepId\" "
+				+ "WHERE \"reportUuid\" = :reportUuid GROUP BY \"approvalStepUuid\" "
 				+ "ORDER BY \"createdAt\" DESC")
-			.bind("reportId", reportId)
+			.bind("reportUuid", reportUuid)
 			.map(new ApprovalActionMapper())
 			.list();
 	}
 	
-	@Override
 	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public ApprovalAction getById(int id) {
+	public ApprovalAction getByUuid(String uuid) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public int update(ApprovalAction obj) {
 		throw new UnsupportedOperationException();
 	}

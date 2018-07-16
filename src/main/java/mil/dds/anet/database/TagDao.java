@@ -1,13 +1,7 @@
 package mil.dds.anet.database;
 
-import java.util.List;
-import java.util.Map;
-
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.AnetObjectEngine;
@@ -44,40 +38,28 @@ public class TagDao implements IAnetDao<Tag> {
 		return TagList.fromQuery(query, pageNum, pageSize);
 	}
 
-	@Override
-	public Tag getById(@Bind("id") int id) {
-		final Query<Tag> query = dbHandle.createQuery("/* getTagById */ SELECT * from tags where id = :id")
-			.bind("id", id)
-			.map(new TagMapper());
-		final List<Tag> results = query.list();
-		if (results.size() == 0) { return null; }
-		return results.get(0);
+	public Tag getByUuid(String uuid) {
+		return dbHandle.createQuery("/* getTagByUuid */ SELECT * from tags where uuid = :uuid")
+				.bind("uuid", uuid)
+				.map(new TagMapper())
+				.first();
 	}
 
-	@Override
 	public Tag insert(Tag t) {
-		t.setCreatedAt(DateTime.now());
-		t.setUpdatedAt(DateTime.now());
-		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* tagInsert */ INSERT INTO tags (name, description, \"createdAt\", \"updatedAt\") "
-					+ "VALUES (:name, :description, :createdAt, :updatedAt)")
-			.bind("name", t.getName())
-				.bind("description", t.getDescription())
-			.bind("createdAt", t.getCreatedAt())
-			.bind("updatedAt", t.getUpdatedAt())
-			.executeAndReturnGeneratedKeys();
-		t.setId(DaoUtils.getGeneratedId(keys));
+		DaoUtils.setInsertFields(t);
+		dbHandle.createStatement(
+				"/* tagInsert */ INSERT INTO tags (uuid, name, description, \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt)")
+			.bindFromProperties(t)
+			.execute();
 		return t;
 	}
 
-	@Override
 	public int update(Tag t) {
+		DaoUtils.setUpdateFields(t);
 		return dbHandle.createStatement("/* updateTag */ UPDATE tags "
-					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE id = :id")
-				.bind("id", t.getId())
-				.bind("name", t.getName())
-				.bind("description", t.getDescription())
-				.bind("updatedAt", DateTime.now())
+					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+				.bindFromProperties(t)
 				.execute();
 	}
 

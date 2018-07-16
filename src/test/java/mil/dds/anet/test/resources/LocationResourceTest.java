@@ -51,7 +51,7 @@ public class LocationResourceTest extends AbstractResourceTest {
 		Response resp = httpQuery("/api/locations/update", admin).post(Entity.json(created));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		Location returned = httpQuery(String.format("/api/locations/%d", created.getId()), admin).get(Location.class);
+		Location returned = httpQuery(String.format("/api/locations/%s", created.getUuid()), admin).get(Location.class);
 		assertThat(returned.getName()).isEqualTo(created.getName());
 	}
 	

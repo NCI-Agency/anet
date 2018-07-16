@@ -23,12 +23,12 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 	@Override
 	public PositionList runSearch(PositionSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqlitePositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS 
-				+ " FROM positions WHERE positions.id IN (SELECT positions.id FROM positions ");
+				+ " FROM positions WHERE positions.uuid IN (SELECT positions.uuid FROM positions ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		String commonTableExpression = null;
 		
 		if (query.getMatchPersonName() != null && query.getMatchPersonName()) { 
-			sql.append(" LEFT JOIN people ON positions.\"currentPersonId\" = people.id ");
+			sql.append(" LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid ");
 		}
 		
 		sql.append(" WHERE ");
@@ -60,31 +60,31 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 			whereClauses.add("positions.type IN (" + Joiner.on(", ").join(argNames) + ")");
 		}
 		
-		if (query.getOrganizationId() != null) { 
+		if (query.getOrganizationUuid() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) { 
-				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
 					+ ") ";
-				whereClauses.add(" positions.\"organizationId\" IN (SELECT id from parent_orgs)");
+				whereClauses.add(" positions.\"organizationUuid\" IN (SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add("positions.\"organizationId\" = :orgId");
+				whereClauses.add("positions.\"organizationUuid\" = :orgUuid");
 			}
-			sqlArgs.put("orgId", query.getOrganizationId());
+			sqlArgs.put("orgUuid", query.getOrganizationUuid());
 		}
 		
 		if (query.getIsFilled() != null) {
 			if (query.getIsFilled()) { 
-				whereClauses.add("positions.\"currentPersonId\" IS NOT NULL");
+				whereClauses.add("positions.\"currentPersonUuid\" IS NOT NULL");
 			} else { 
-				whereClauses.add("positions.\"currentPersonId\" IS NULL");
+				whereClauses.add("positions.\"currentPersonUuid\" IS NULL");
 			}
 		}
 		
-		if (query.getLocationId() != null) { 
-			whereClauses.add("positions.\"locationId\" = :locationId");
-			sqlArgs.put("locationId", query.getLocationId());
+		if (query.getLocationUuid() != null) {
+			whereClauses.add("positions.\"locationUuid\" = :locationUuid");
+			sqlArgs.put("locationUuid", query.getLocationUuid());
 		}
 		
 		if (query.getStatus() != null) { 

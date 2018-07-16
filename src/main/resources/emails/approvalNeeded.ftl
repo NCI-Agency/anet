@@ -23,7 +23,7 @@ Dear ${approvalStepName},
 <br><br>
 <div>
   ${report.author.name}'s report, <em><strong>${report.intent}</strong></em>, is ready for your review.<br>
-  Using <a href="${serverUrl}/reports/${report.id?c}" />this link</a>,
+  Using <a href="${serverUrl}/reports/${report.uuid}" />this link</a>,
   you can either <em>Approve</em>, <em>Reject</em> or <em>Edit</em> the report.
 </div>
 <br>
@@ -35,7 +35,7 @@ Dear ${approvalStepName},
 </#if>
 
 <div>
-  <strong>Report number:</strong> #${(report.id)}
+  <strong>Report number:</strong> #${(report.uuid)}
 </div>
 
 <#assign attendees = report.loadAttendees()>
@@ -122,7 +122,7 @@ Dear ${approvalStepName},
 <#list tasks as task>
 <div class="row">
   <div class="col-xs-12">
-    <#-- <a href="${serverUrl}/tasks/${task.id}"> -->
+    <#-- <a href="${serverUrl}/tasks/${task.uuid}"> -->
     <strong>Task:</strong> ${(task.longName)!}
     <#-- </a> -->
   </div>

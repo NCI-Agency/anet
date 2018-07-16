@@ -32,7 +32,7 @@ public class PersonPositionHistory implements IGraphQLBean {
 	public Person loadPerson() { 
 		if (person == null || person.getLoadLevel() == null) { return person; } 
 		if (person.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.person = AnetObjectEngine.getInstance().getPersonDao().getById(person.getId());
+			this.person = AnetObjectEngine.getInstance().getPersonDao().getByUuid(person.getUuid());
 		}
 		return person;
 	}
@@ -49,7 +49,7 @@ public class PersonPositionHistory implements IGraphQLBean {
 	public Position loadPosition() {
 		if (position == null || position.getLoadLevel() == null) { return position; } 
 		if (position.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.position = AnetObjectEngine.getInstance().getPositionDao().getById(position.getId());
+			this.position = AnetObjectEngine.getInstance().getPositionDao().getByUuid(position.getUuid());
 		}
 		return position;
 	}

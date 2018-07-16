@@ -100,7 +100,7 @@ public class Task extends AbstractAnetBean {
 		if (customFieldRef1 == null || customFieldRef1.getLoadLevel() == null) { return customFieldRef1; }
 		if (customFieldRef1.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) {
 			this.customFieldRef1 = AnetObjectEngine.getInstance()
-					.getTaskDao().getById(customFieldRef1.getId());
+					.getTaskDao().getByUuid(customFieldRef1.getUuid());
 		}
 		return customFieldRef1;
 	}
@@ -131,7 +131,7 @@ public class Task extends AbstractAnetBean {
 		if (responsibleOrg == null || responsibleOrg.getLoadLevel() == null) { return responsibleOrg; } 
 		if (responsibleOrg.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
 			this.responsibleOrg = AnetObjectEngine.getInstance()
-					.getOrganizationDao().getById(responsibleOrg.getId());
+					.getOrganizationDao().getByUuid(responsibleOrg.getUuid());
 		}
 		return responsibleOrg;
 	}
@@ -141,34 +141,34 @@ public class Task extends AbstractAnetBean {
 		return responsibleOrg;
 	}
 
-	public static Task createWithId(Integer id) { 
-		Task p = new Task();
-		p.setId(id);
+	public static Task createWithUuid(String uuid) {
+		final Task p = new Task();
+		p.setUuid(uuid);
 		p.setLoadLevel(LoadLevel.ID_ONLY);
 		return p;
 	}
 
 	@Override
-	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != this.getClass()) { 
+	public boolean equals(Object o) {
+		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		Task other = (Task) o;
-		return Objects.equals(other.getId(), id) 
-				&& Objects.equals(other.getShortName(), shortName) 
-				&& Objects.equals(other.getLongName(), longName) 
-				&& Objects.equals(other.getCategory(), category) 
-				&& idEqual(other.getCustomFieldRef1(), customFieldRef1);
+		return Objects.equals(other.getUuid(), uuid)
+				&& Objects.equals(other.getShortName(), shortName)
+				&& Objects.equals(other.getLongName(), longName)
+				&& Objects.equals(other.getCategory(), category)
+				&& uuidEqual(other.getCustomFieldRef1(), customFieldRef1);
 	}
 
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, shortName, longName, category, customFieldRef1);
+	public int hashCode() {
+		return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
 	}
 
 	@Override
-	public String toString() { 
-		return String.format("[id:%d shortName:%s category:%s customFieldRef1:%d]", id, shortName, category, DaoUtils.getId(customFieldRef1));
+	public String toString() {
+		return String.format("[uuid:%s shortName:%s category:%s customFieldRef1:%s]", uuid, shortName, category, DaoUtils.getUuid(customFieldRef1));
 	}
 
 }

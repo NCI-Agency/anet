@@ -56,7 +56,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				tasks: [],
 				authorizationGroups: [],
 			},
-			reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name})),
+			reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name})),
 			suggestionList: [],
 
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation,
@@ -79,19 +79,19 @@ class BaseReportForm extends ValidatableFormWrapper {
 	componentDidMount() {
 		API.query(/* GraphQL */`
 			locationList(f:recents, maxResults:6) {
-				list { id, name }
+				list { uuid, name }
 			}
 			personList(f:recents, maxResults:6) {
-				list { id, name, rank, role, position { id, name, organization {id, shortName}} }
+				list { uuid, name, rank, role, position { uuid, name, organization {uuid, shortName}} }
 			}
 			taskList(f:recents, maxResults:6) {
-				list { id, shortName, longName }
+				list { uuid, shortName, longName }
 			}
 			authorizationGroupList(f:recents, maxResults:6) {
-				list { id, name, description }
+				list { uuid, name, description }
 			}
 			tagList(f:getAll) {
-				list { id, name, description }
+				list { uuid, name, description }
 			}
 		`).then(data => {
 			let newState = {
@@ -101,7 +101,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 					tasks: data.taskList.list,
 					authorizationGroups: data.authorizationGroupList.list,
 				},
-				suggestionList: data.tagList.list.map(tag => ({id: tag.id.toString(), text: tag.name})),
+				suggestionList: data.tagList.list.map(tag => ({id: tag.uuid.toString(), text: tag.name})),
 			}
 			this.setState(newState)
 		})
@@ -119,8 +119,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 		const { report, currentUser } = this.props
 		const prevReport = prevProps.report
 		const prevCurrentUser = prevProps.currentUser
-		if (report.id !== prevReport.id) {
-			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name}))})
+		if (report.uuid !== prevReport.uuid) {
+			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name}))})
 		}
 		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
 		const prevShowReportText = !!prevReport.reportText || !!prevReport.reportSensitiveInformation
@@ -340,7 +340,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 							<Form.Field.ExtraCol className="shortcut-list">
 								<h5>Recent attendees</h5>
 								{Person.map(recents.persons, person =>
-									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add <LinkTo person={person} isLink={false}/></Button>
+									<Button key={person.uuid} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add <LinkTo person={person} isLink={false}/></Button>
 								)}
 							</Form.Field.ExtraCol>
 						}
@@ -445,7 +445,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	renderAttendeeRow(person, idx) {
-		return <tr key={person.id}>
+		return <tr key={person.uuid}>
 			<td className="primary-attendee">
 				<Checkbox checked={person.primary} onChange={this.setPrimaryAttendee.bind(this, person)} id={'attendeePrimary_' + person.role + "_" + idx}/>
 			</td>
@@ -545,11 +545,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 	@autobind
 	saveReport(disableSubmits) {
 		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
-		report.tags = this.state.reportTags.map(tag => ({id: tag.id}))
+		report.tags = this.state.reportTags.map(tag => ({uuid: tag.id}))
 		let isCancelled = this.state.isCancelled
-		let edit = !!report.id
-		if(report.primaryAdvisor) { report.attendees.find(a => a.id === report.primaryAdvisor.id).isPrimary = true }
-		if(report.primaryPrincipal) { report.attendees.find(a => a.id === report.primaryPrincipal.id).isPrimary = true }
+		let edit = !!report.uuid
+		if(report.primaryAdvisor) { report.attendees.find(a => a.uuid === report.primaryAdvisor.uuid).isPrimary = true }
+		if(report.primaryPrincipal) { report.attendees.find(a => a.uuid === report.primaryPrincipal.uuid).isPrimary = true }
 
 		delete report.primaryPrincipal
 		delete report.primaryAdvisor
@@ -558,7 +558,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		)
 
 		if (report.location) {
-			report.location = {id: report.location.id}
+			report.location = {uuid: report.location.uuid}
 		}
 
 		if (!isCancelled) {
@@ -577,8 +577,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 		this.setState({isBlocking: false})
 		this.saveReport(true)
 			.then(response => {
-				if (response.id) {
-					this.props.report.id = response.id
+				if (response.uuid) {
+					this.props.report.uuid = response.uuid
 				}
 
 				// this updates the current page URL on model/new to be the edit page,
@@ -613,8 +613,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 		} else {
 			this.saveReport(false)
 				.then(response => {
-					if (response.id) {
-						this.props.report.id = response.id
+					if (response.uuid) {
+						this.props.report.uuid = response.uuid
 					}
 					if (response.reportSensitiveInformation) {
 						this.props.report.reportSensitiveInformation = response.reportSensitiveInformation
