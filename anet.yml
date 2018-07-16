@@ -301,3 +301,27 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
+  imagery:
+    mapOptions:
+      crs: EPSG3857
+      homeView:
+        location: [34.52, 69.16]
+        zoomLevel: 10
+    baseLayers:
+      - name: OSM
+        default: true
+        type: tile
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      - name: World Imagery Tiles
+        default: false
+        type: tile
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        options:
+          tms: false
+      - name: World WMS
+        default: false
+        type: wms
+        url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+        options:
+          layers: GEBCO_LATEST
+          format: "image/png"
