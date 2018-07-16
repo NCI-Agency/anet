@@ -30,6 +30,7 @@ import NavigationWarning from 'components/NavigationWarning'
 class BasePersonForm extends ValidatableFormWrapper {
 	static propTypes = {
 		person: PropTypes.object.isRequired,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		legendText: PropTypes.string,
 		saveText: PropTypes.string,
@@ -342,8 +343,9 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 	@autobind
 	onChange() {
+		const person = Object.without(this.props.person, 'firstName', 'lastName')
 		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(person, this.props.original),
 		})
 	}
 

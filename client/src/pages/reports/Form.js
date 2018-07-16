@@ -38,6 +38,7 @@ import 'components/reactToastify.css'
 class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
 		currentUser: PropTypes.instanceOf(Person),
@@ -521,7 +522,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		this.setState({
 			errors : this.validateReport(),
 			reportChanged: true,
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.report, this.props.original),
 		})
 	}
 
