@@ -149,7 +149,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	handleTagAddition(tag) {
-		const newTag = this.state.suggestionList.find(t => t.id === tag.uuid)
+		const newTag = this.state.suggestionList.find(t => t.id === tag.id)
 		if (newTag) {
 			let {reportTags} = this.state
 			reportTags.push(newTag)

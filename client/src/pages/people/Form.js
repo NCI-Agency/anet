@@ -56,7 +56,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 	componentDidUpdate(prevProps, prevState) {
 		const { person } = this.props
 		const prevPerson = prevProps.person
-		if (person.id !== prevPerson.id) {
+		if (person.uuid !== prevPerson.uuid) {
 			const splitName = Person.parseFullName(person.name)
 			this.setState({
 				fullName: Person.fullName(splitName),
