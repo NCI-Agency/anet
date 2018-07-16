@@ -14,7 +14,7 @@ public class CommentDao implements IAnetDao<Comment> {
 
 	private static String[] fields = {"uuid", "createdAt", "updatedAt", "authorUuid", "reportUuid", "text"};
 	private static String tableName = "comments";
-	public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
 	Handle dbHandle;
 	
