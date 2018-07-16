@@ -726,8 +726,6 @@ INSERT INTO adminSettings ([key], value)
 INSERT INTO adminSettings ([key], value)
 	VALUES ('DEFAULT_APPROVAL_ORGANIZATION', (select uuid from organizations where shortName='ANET Administrators'));
 INSERT INTO adminSettings ([key], value)
-	VALUES ('MAP_LAYERS', '[{"name":"OSM","default" : true, "url":"http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", "type":"osm"}]');
-INSERT INTO adminSettings ([key], value)
 	VALUES ('HELP_LINK_URL', 'http://google.com');
 INSERT INTO adminSettings ([key], value)
 	VALUES ('CONTACT_EMAIL', 'team-anet@dds.mil');

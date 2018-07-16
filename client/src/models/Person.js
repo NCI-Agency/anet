@@ -139,9 +139,9 @@ export default class Person extends Model {
 		}
 	}
 
-	static fullName(person) {
+	static fullName(person, doTrim) {
 		if (person.lastName && person.firstName) {
-			return(`${Person.formattedLastName(person.lastName)}${Person.nameDelimiter} ${Person.formattedFirstName(person.firstName)}`)
+			return(`${Person.formattedLastName(person.lastName, doTrim)}${Person.nameDelimiter} ${Person.formattedFirstName(person.firstName, doTrim)}`)
 		}
 		else if (person.lastName) {
 			return Person.formattedLastName(person.lastName)
@@ -151,12 +151,20 @@ export default class Person extends Model {
 		}
 	}
 
-	static formattedLastName(lastName) {
-		return lastName.toUpperCase().trim()
+	static formattedLastName(lastName, doTrim) {
+		let r = lastName.toUpperCase()
+		if (doTrim) {
+			r = r.trim()
+		}
+		return r
 	}
 
-	static formattedFirstName(firstName) {
-		return firstName.trim()
+	static formattedFirstName(firstName, doTrim) {
+		let r = firstName
+		if (doTrim) {
+			r = r.trim()
+		}
+		return r
 	}
 
 	static parseFullName(name) {

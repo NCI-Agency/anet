@@ -21,6 +21,7 @@ class LocationNew extends Page {
 
 		this.state = {
 			location: new Location(),
+			originalLocation : new Location()
 		}
 	}
 
@@ -32,7 +33,7 @@ class LocationNew extends Page {
 				<Breadcrumbs items={[['Create new Location', Location.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<LocationForm original={new Location()} anetLocation={location} />
+				<LocationForm original={this.state.originalLocation} anetLocation={location} />
 			</div>
 		)
 	}

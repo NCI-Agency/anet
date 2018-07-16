@@ -21,8 +21,8 @@ class LocationEdit extends Page {
 		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
-			location: {},
-			originalLocation : {}
+			location: new Location(),
+			originalLocation : new Location()
 		}
 	}
 

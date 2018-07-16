@@ -1245,6 +1245,12 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="cleanup-map-layers-from-adminSettings" author="VassilIordanov">
+		<delete tableName="adminSettings">
+			<where>[key] = 'MAP_LAYERS'</where>
+		</delete>
+	</changeSet>
+
 	<changeSet id="add-uuid-primaryKey-columns" author="gjvoosten">
 		<addColumn tableName="approvalSteps">
 			<column name="uuid" type="${uuid_type}" />
