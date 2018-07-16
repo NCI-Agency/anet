@@ -26,6 +26,7 @@ class BasePersonEdit extends Page {
 		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
+			originalPerson: new Person(),
 			person: new Person(),
 		}
 	}

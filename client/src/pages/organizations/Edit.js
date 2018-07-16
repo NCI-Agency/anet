@@ -23,6 +23,7 @@ class OrganizationEdit extends Page {
 		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
+			originalOrganization: new Organization(),
 			organization: new Organization(),
 		}
 	}
