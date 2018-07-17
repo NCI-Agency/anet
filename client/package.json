@@ -60,7 +60,7 @@
     "webpack-merge": "^4.1.3"
   },
   "dependencies": {
-    "alloyeditor": "^1.5.10",
+    "alloyeditor": "^1.5.11",
     "bootstrap": "^3.3.7",
     "change-case": "^3.0.1",
     "core-js": "^2.5.7",
