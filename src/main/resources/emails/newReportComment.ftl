@@ -19,9 +19,9 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-Hi, ${report.author.name},
+Hi ${report.author.name},
 
-<p>The following comment was added to your "${report.intent}" report by ${comment.author.rank!} ${comment.author.name}:</p>
+<p>The following comment was added to your report, <a href="${serverUrl}/reports/${report.id?c}"><em><strong>"${reportIntent}"</strong></em></a>, by ${comment.author.rank!} ${comment.author.name}:</p>
 
 <p><i>"${comment.text}"</i></p>
 

@@ -19,9 +19,9 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-Hello ${report.author.name},
+Hi ${report.author.name},
 
-<p>${editor.name} edited your report "${report.intent}". To review the changes, <a href="${serverUrl}/reports/${report.id?c}">click here</a>.</p>
+<p>${editor.name} edited your report, <a href="${serverUrl}/reports/${report.id?c}"><em><strong>"${reportIntent}"</strong></em></a>. To review the changes, <a href="${serverUrl}/reports/${report.id?c}">click here</a>.</p>
 
 ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>
