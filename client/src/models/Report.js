@@ -5,6 +5,7 @@ import {Organization, Person, Position} from 'models'
 export default class Report extends Model {
 	static resourceName = 'Report'
 	static listName = 'reportList'
+	static getInstanceName = 'report'
 
 	static STATE = {
 		DRAFT: 'DRAFT',

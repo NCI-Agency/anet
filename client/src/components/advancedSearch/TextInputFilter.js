@@ -64,4 +64,20 @@ export default class TextInputFilter extends Component {
 			this.props.onChange(value)
 		}
 	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query[this.props.queryKey]) {
+			const toQueryValue = {[this.props.queryKey]: query[this.props.queryKey]}
+			return {
+				key: key,
+				value: {
+					value: query[this.props.queryKey],
+					toQuery: () => toQueryValue
+				},
+			}
+		}
+		return null
+	}
+
 }

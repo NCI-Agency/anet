@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
 import 'utils'
 import Autocomplete from 'components/Autocomplete'
+import API from 'api'
 
 export default class AutocompleteFilter extends Component {
 	static propTypes = {
@@ -74,5 +75,30 @@ export default class AutocompleteFilter extends Component {
 			value.toQuery = this.toQuery
 			this.props.onChange(value)
 		}
+	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query[this.props.queryKey]) {
+			const getInstanceName = this.props.objectType.getInstanceName
+			const graphQlQuery = getInstanceName +
+				'(id:' + query[this.props.queryKey] + ') { ' + this.props.fields + '}'
+			return API.query(graphQlQuery).then(data => {
+				if (data[getInstanceName]) {
+					const toQueryValue = {[this.props.queryKey]: query[this.props.queryKey]}
+					return {
+						key: key,
+						value: {
+							...data[getInstanceName],
+							toQuery: () => toQueryValue
+						},
+					}
+				}
+				else {
+					return null
+				}
+			})
+		}
+		return null
 	}
 }

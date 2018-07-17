@@ -24,12 +24,10 @@ export default class SelectSearchFilter extends Component {
 	constructor(props) {
 		super(props)
 
-		let {value} = props
-
+		const value = props.value || {}
 		this.state = {
 			value: {
 				value: value.value || this.props.values[0] || ''
-
 			}
 		}
 
@@ -75,4 +73,20 @@ export default class SelectSearchFilter extends Component {
 			this.props.onChange(value)
 		}
 	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query[this.props.queryKey]) {
+			const toQueryValue = {[this.props.queryKey]: query[this.props.queryKey]}
+			return {
+				key: key,
+				value: {
+					value: query[this.props.queryKey],
+					toQuery: () => toQueryValue
+				},
+			}
+		}
+		return null
+	}
+
 }

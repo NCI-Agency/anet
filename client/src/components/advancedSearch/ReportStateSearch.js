@@ -34,8 +34,7 @@ export default class ReportStateSearch extends Component {
 	constructor(props) {
 		super(props)
 
-		let value = props.value || {}
-
+		const value = props.value || {}
 		this.state = {
 			value: {
 				state: value.state || [Report.STATE.DRAFT],
@@ -115,6 +114,7 @@ export default class ReportStateSearch extends Component {
 		return query
 	}
 
+
 	@autobind
 	updateFilter() {
 		if (this.props.asFormField) {
@@ -123,4 +123,23 @@ export default class ReportStateSearch extends Component {
 			this.props.onChange(value)
 		}
 	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query.state) {
+			const value = {state: query.state}
+			if (query.cancelledReason) {
+				value.cancelledReason = query.cancelledReason
+			}
+			return {
+				key: key,
+				value: {
+					...value,
+					toQuery: () => value
+				},
+			}
+		}
+		return null
+	}
+
 }

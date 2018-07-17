@@ -11,6 +11,7 @@ import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import Breadcrumbs from 'components/Breadcrumbs'
 import SavedSearchTable from 'components/SavedSearchTable'
+import searchFilters from 'components/SearchFilters'
 
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
@@ -55,7 +56,7 @@ class BaseHome extends Page {
 
 	constructor(props) {
 		super(props)
-
+		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
 			tileCounts: [],
 			savedSearches: [],
@@ -342,13 +343,37 @@ class BaseHome extends Page {
 	showSearch() {
 		let search = this.state.selectedSearch
 		if (search) {
-			let query = JSON.parse(search.query)
-			if (search.objectType) {
-				query.type = search.objectType.toLowerCase()
-			}
-			this.props.history.push({
-				pathname: '/search',
-				search: utils.formatQueryString(query)
+			const objType = SEARCH_OBJECT_TYPES[search.objectType]
+			const query = JSON.parse(search.query)
+			const filterDefs = this.ALL_FILTERS[objType].filters
+			var usedFilters = []
+			var promises = []
+			Object.keys(filterDefs).map(key => {
+				const fd = filterDefs[key]
+				const inst = new fd.component(fd.props || {})
+				const deser = inst.deserialize(query, key)
+				if (deser && deser.then instanceof Function) {
+					// deserialize returns a Promise
+					promises.push(deser)
+				}
+				else if (deser) {
+					// deserialize returns filter data
+					usedFilters.push(deser)
+				}
+			})
+			Promise.all(promises).then(dataList => {
+				dataList.forEach( (filterData, index) => {
+					// update filters
+					usedFilters.push(filterData)
+				})
+				this.props.setSearchQuery({
+					objectType: objType,
+					filters: usedFilters,
+					text: ""
+				})
+				this.props.history.push({
+					pathname: '/search'
+				})
 			})
 		}
 	}
