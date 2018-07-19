@@ -7,7 +7,7 @@ import _escape from 'lodash/escape'
 import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
-import L from 'leaflet'
+import {Map,Control,CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Settings from 'Settings'
 
@@ -37,7 +37,7 @@ class BaseLeaflet extends Component {
 			markerLayer: null
 		}
 
-		this.icon = L.icon({
+		this.icon = new Icon({
 			iconUrl:       MARKER_ICON,
 			iconRetinaUrl: MARKER_ICON_2X,
 			shadowUrl:     MARKER_SHADOW,
@@ -54,11 +54,13 @@ class BaseLeaflet extends Component {
 		return 'map-' + mapId
 	}
 
-
 	componentDidMount() {		
-		const mapOptions = Object.assign({zoomControl:true}, Settings.imagery.mapOptions, Settings.imagery.mapOptions.crs && { crs: L.CRS[Settings.imagery.mapOptions.crs] })
-		const map = L.map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,  Settings.imagery.mapOptions.homeView.zoomLevel)
-		const layerControl = L.control.layers({}, {}, {collapsed:false})
+		const mapOptions = Object.assign({zoomControl:true},
+										 Settings.imagery.mapOptions,
+										 Settings.imagery.mapOptions.crs && { crs: CRS[Settings.imagery.mapOptions.crs] })
+		const map = new Map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,
+															 Settings.imagery.mapOptions.homeView.zoomLevel)
+		const layerControl = new Control.Layers({}, {}, {collapsed:false})
 
 		layerControl.addTo(map)
 		this.addLayers(map,layerControl)
@@ -67,12 +69,11 @@ class BaseLeaflet extends Component {
 
 		let state = this.state
 		state.map = map
-		state.markerLayer = L.featureGroup([]).addTo(map)
+		state.markerLayer = new FeatureGroup([]).addTo(map)
 		this.setState(state, () => {
 			this.updateMarkerLayer(this.props.markers)
 		})
 	}
-
 
 	componentDidUpdate(prevProps, prevState) {
 		const prevMarkerIds = _sortBy(prevProps.markers.map(m => m.id))
@@ -97,7 +98,7 @@ class BaseLeaflet extends Component {
 		let markerLayer = this.state.markerLayer
 		markers.forEach(m => {
 			let latLng = (Location.hasCoordinates(m)) ? [m.lat, m.lng] : this.state.map.getCenter()
-			let marker = L.marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
+			let marker = new Marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
 			if (m.name) {
 				marker.bindPopup(_escape(m.name)) // escape HTML!
 			}
@@ -121,15 +122,14 @@ class BaseLeaflet extends Component {
 	}
 
 	@autobind
-
 	addLayers(map, layerControl) {
 		let defaultLayer = null
 		Settings.imagery.baseLayers.forEach(layerConfig => {
 			let layer = null
 			if (layerConfig.type === 'wms') {
-				layer = L.tileLayer.wms(layerConfig.url, layerConfig.options)
+				layer = new TileLayer.WMS(layerConfig.url, layerConfig.options)
 			} else if (layerConfig.type === 'osm' || layerConfig.type === 'tile') {
-				layer = L.tileLayer(layerConfig.url, layerConfig.options)
+				layer = new TileLayer(layerConfig.url, layerConfig.options)
 			}
 
 			if (layer) {
