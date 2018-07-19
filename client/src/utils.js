@@ -120,7 +120,7 @@ export default {
 		return '?' + encodeQuery(queryParams)
 	},
 
-	equalFunction: function(value1, value2) {
+	treatFunctionsAsEqual: function(value1, value2) {
 		if (typeof value1 === 'function' && typeof value2 === 'function') {
 			return true
 		}

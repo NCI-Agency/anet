@@ -186,7 +186,7 @@ class BaseInsightsShow extends Page {
           () => this.updateSearchQuery()
         )
       }
-      else if (!_isEqualWith(oldQueryParams, newQueryParams, utils.equalFunction)) {
+      else if (!_isEqualWith(oldQueryParams, newQueryParams, utils.treatFunctionsAsEqual)) {
         this.updateSearchQuery()
       }
     }

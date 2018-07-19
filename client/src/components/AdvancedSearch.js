@@ -60,7 +60,7 @@ class AdvancedSearch extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (!_isEqualWith(prevProps.query, this.props.query, utils.equalFunction)) {
+		if (!_isEqualWith(prevProps.query, this.props.query, utils.treatFunctionsAsEqual)) {
 			this.setState(this.props.query)
 		}
 		if (!_isEqual(prevProps.text, this.props.text)) {
