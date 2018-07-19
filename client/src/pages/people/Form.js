@@ -310,8 +310,8 @@ class BasePersonForm extends ValidatableFormWrapper {
 	}
 
 	getFullName(splitName, editName) {
-		if (editName.lastName) { splitName.lastName = editName.lastName }
-		if (editName.firstName) { splitName.firstName = editName.firstName }
+		if (editName.lastName !== undefined) { splitName.lastName = editName.lastName }
+		if (editName.firstName !== undefined) { splitName.firstName = editName.firstName }
 
 		return Person.fullName(splitName)
 	}

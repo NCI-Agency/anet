@@ -20,8 +20,9 @@ import {Location, Person, Task, Position, Organization} from 'models'
 import REMOVE_ICON from 'resources/delete.png'
 
 import { withRouter } from 'react-router-dom'
-import _isEqual from 'lodash/isEqual'
+import _isEqualWith from 'lodash/isEqualWith'
 import _cloneDeepWith from 'lodash/cloneDeepWith'
+import utils from 'utils'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -236,7 +237,7 @@ class AdvancedSearch extends Component {
 	constructor(props) {
 		super(props)
 
-		const query = props || {}
+		const query = props.query || {}
 		this.ALL_FILTERS = this.getFilters()
 		this.state = {
 			objectType: query.objectType || "Reports",
@@ -245,11 +246,14 @@ class AdvancedSearch extends Component {
 		}
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		if (props.query) {
-			return props.query
+	componentDidMount() {
+		this.setState(this.props.query)
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.query, this.props.query, utils.treatFunctionsAsEqual)) {
+			this.setState(this.props.query)
 		}
-		return null
 	}
 
 	render() {

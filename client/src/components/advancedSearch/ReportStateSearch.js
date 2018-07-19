@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 export default class ReportStateSearch extends Component {
 	constructor(props) {
@@ -14,12 +16,16 @@ export default class ReportStateSearch extends Component {
 				cancelledReason: value.cancelledReason || "",
 			}
 		}
+	}
 
+	componentDidMount() {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
+		}
 	}
 
 	render() {
