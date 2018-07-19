@@ -2,7 +2,8 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
 import {Checkbox} from 'react-bootstrap'
-import 'utils'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 import Autocomplete from 'components/Autocomplete'
 
@@ -33,12 +34,20 @@ export default class OrganizationFilter extends Component {
 			includeChildOrgs: props.value.includeChildOrgs || false,
 			queryParams: props.queryParams || {},
 		}
+	}
 
+	componentDidMount() {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({
+				value: this.props.value,
+				includeChildOrgs: this.props.value.includeChildOrgs,
+				queryParams: this.props.queryParams,
+			}, this.updateFilter)
+		}
 	}
 
 	render() {
