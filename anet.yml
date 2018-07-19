@@ -307,11 +307,13 @@ dictionary:
       homeView:
         location: [34.52, 69.16]
         zoomLevel: 10
+      leafletOptions:
+        attributionControl: false
     baseLayers:
       - name: OSM
         default: true
         type: tile
-        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
       - name: World Imagery Tiles
         default: false
         type: tile

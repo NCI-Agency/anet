@@ -346,6 +346,9 @@ properties:
             required:
               - location
               - zoomLevel
+          leafletOptions:
+            type: object
+            additionalProperties: true
         additionalProperties: false
         required:
           - homeView
