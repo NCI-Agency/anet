@@ -43,7 +43,6 @@ class AdvancedSearch extends Component {
 	constructor(props) {
 		super(props)
 
-		const query = props || {}
 		this.ALL_FILTERS = searchFilters.searchFilters(this.setOrganizationFilter)
 		this.state = {
 			objectType: "",
