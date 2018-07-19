@@ -32,6 +32,7 @@ import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 import ReactDOM from 'react-dom'
 
@@ -157,17 +158,21 @@ class Search extends Page {
 		}
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		const newAdvancedSearch = props.location.state && props.location.state.advancedSearch
-		if (state.advancedSearch !== newAdvancedSearch) {
-			return {advancedSearch: newAdvancedSearch}
+	componentDidMount() {
+		const advancedSearch = this.props.location.state ? this.props.location.state.advancedSearch : null
+		if (advancedSearch) {
+			this.setState({advancedSearch: advancedSearch}, this.loadData)
 		}
-		return null
+		else {
+			this.loadData()
+		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (this.state.advancedSearch !== prevState.advancedSearch) {
-			this.loadData()
+		const advancedSearch = this.props.location.state ? this.props.location.state.advancedSearch : null
+		const prevAdvancedSearch = prevProps.location.state ? prevProps.location.state.advancedSearch : null
+		if (!_isEqualWith(advancedSearch, prevAdvancedSearch, utils.treatFunctionsAsEqual)) {
+			this.setState({advancedSearch: advancedSearch}, this.loadData)
 		}
 		else {
 			super.componentDidUpdate(prevProps, prevState)
