@@ -9,6 +9,7 @@ import {setMessages} from 'components/Messages'
 import API from 'api'
 
 import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
@@ -96,13 +97,6 @@ export default class Page extends Component {
 		return this.renderPage()
 	}
 
-	@autobind
-	equalFunction(value1, value2) {
-		if (typeof value1 === 'function' && typeof value2 === 'function') {
-			return true
-		}
-	}
-
 	componentDidUpdate(prevProps, prevState) {
 		// Filter out React Router props before comparing; for the property names,
 		// see https://github.com/ReactTraining/react-router/issues/4424#issuecomment-285809552
@@ -111,7 +105,7 @@ export default class Page extends Component {
 		propFilter.push('pageProps')
 		const filteredNextProps = Object.without(this.props, ...propFilter)
 		const filteredProps = Object.without(prevProps, ...propFilter)
-		if (!_isEqualWith(filteredProps, filteredNextProps, this.equalFunction)) {
+		if (!_isEqualWith(filteredProps, filteredNextProps, utils.treatFunctionsAsEqual)) {
 			this.loadData()
 		} else {
 			// Location always has a new key. In order to check whether the location
@@ -119,7 +113,7 @@ export default class Page extends Component {
 			const locationFilterProps = ['key']
 			const nextPropsFilteredLocation = Object.without(this.props.location, ...locationFilterProps)
 			const propsFilteredLocation = Object.without(prevProps.location, ...locationFilterProps)
-			if (!_isEqualWith(propsFilteredLocation, nextPropsFilteredLocation, this.equalFunction)) {
+			if (!_isEqualWith(propsFilteredLocation, nextPropsFilteredLocation, utils.treatFunctionsAsEqual)) {
 				this.loadData()
 			}
 		}

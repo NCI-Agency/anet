@@ -118,6 +118,12 @@ export default {
 			return ''
 		}
 		return '?' + encodeQuery(queryParams)
+	},
+
+	treatFunctionsAsEqual: function(value1, value2) {
+		if (typeof value1 === 'function' && typeof value2 === 'function') {
+			return true
+		}
 	}
 }
 
