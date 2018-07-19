@@ -2,8 +2,8 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {FormControl} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import 'utils'
-
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 export default class TextInputFilter extends Component {
 	static propTypes = {
@@ -18,11 +18,16 @@ export default class TextInputFilter extends Component {
 		this.state = {
 			value: props.value || {value: ""}
 		}
+	}
+
+	componentDidMount() {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
+		}
 	}
 
 	render() {
