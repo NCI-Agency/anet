@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
-import 'utils'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 import Autocomplete from 'components/Autocomplete'
 import API from 'api'
 
@@ -34,12 +35,16 @@ export default class AutocompleteFilter extends Component {
 		this.state = {
 			value: props.value || {}
 		}
+	}
 
+	componentDidMount() {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
+		}
 	}
 
 	render() {

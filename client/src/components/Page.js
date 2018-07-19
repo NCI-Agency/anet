@@ -7,9 +7,8 @@ import NotFound from 'components/NotFound'
 import {setMessages} from 'components/Messages'
 
 import API from 'api'
-import utils from 'utils'
-
 import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'

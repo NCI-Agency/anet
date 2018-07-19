@@ -33,6 +33,7 @@ import ORGANIZATIONS_ICON from 'resources/organizations.png'
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 import ReactDOM from 'react-dom'
 

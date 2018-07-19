@@ -6,6 +6,8 @@ import DatePicker from 'react-16-bootstrap-date-picker'
 import {Row, Col} from 'react-bootstrap'
 import moment from 'moment'
 import _uniqueId from 'lodash/uniqueId'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 import {BETWEEN, BEFORE, AFTER, LAST_DAY, LAST_WEEK, LAST_MONTH, RANGE_TYPE_LABELS, dateToQuery, dateRangeStartKey, dateRangeEndKey} from 'dateUtils'
 
@@ -50,8 +52,6 @@ export default class DateRangeSearch extends Component {
 				last_month: _uniqueId('dateRange_'),
 			}
 		}
-
-		this.updateFilter()
 	}
 
 	selectMenu = (onlyBetween) => {
@@ -115,11 +115,14 @@ export default class DateRangeSearch extends Component {
 		)
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		if (props.value && props.value !== state.value) {
-			return {value: props.value}
+	componentDidMount() {
+		this.updateFilter()
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
 		}
-		return null
 	}
 
 	@autobind

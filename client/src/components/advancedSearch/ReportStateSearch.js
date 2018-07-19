@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
 import _map from 'lodash/map'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 const STATE_LABELS = {
 	[Report.STATE.DRAFT]: 'Draft',
@@ -48,9 +50,8 @@ export default class ReportStateSearch extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (prevProps.value !== this.props.value) {
-			let value = this.props.value
-			this.setState({value}, this.updateFilter)
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
 		}
 	}
 
