@@ -16,6 +16,8 @@ import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
 import _isEqualWith from 'lodash/isEqualWith'
 import _cloneDeepWith from 'lodash/cloneDeepWith'
+import _cloneDeep from 'lodash/cloneDeep'
+import _clone from 'lodash/clone'
 import utils from 'utils'
 
 import {Position, Organization} from 'models'
@@ -165,7 +167,7 @@ class AdvancedSearch extends Component {
 	@autobind
 	resolveToQuery(value) {
 		if (typeof value === 'function') {
-			return value()
+			return _clone(value())
 		}
 	}
 
@@ -190,7 +192,7 @@ class AdvancedSearch extends Component {
 
 const mapStateToProps = (state, ownProps) => {
 	return {
-		query: state.searchQuery,
+		query: _cloneDeep(state.searchQuery),
 		onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
 		searchObjectTypes: state.searchProps.searchObjectTypes
 	}
