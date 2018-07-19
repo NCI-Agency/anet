@@ -30,6 +30,7 @@ import utils from 'utils'
 
 import { SEARCH_OBJECT_TYPES } from 'actions'
 import {BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
+import {deserializeQueryParams} from 'searchUtils'
 
 function addToQuery(queryKey, value, isDate, isOrg) {
 	// Add toQuery function to a value object, to be used by getSearchQuery
@@ -344,37 +345,8 @@ class BaseHome extends Page {
 		let search = this.state.selectedSearch
 		if (search) {
 			const objType = SEARCH_OBJECT_TYPES[search.objectType]
-			const query = JSON.parse(search.query)
-			const filterDefs = this.ALL_FILTERS[objType].filters
-			var usedFilters = []
-			var promises = []
-			Object.keys(filterDefs).map(key => {
-				const fd = filterDefs[key]
-				const inst = new fd.component(fd.props || {})
-				const deser = inst.deserialize(query, key)
-				if (deser && deser.then instanceof Function) {
-					// deserialize returns a Promise
-					promises.push(deser)
-				}
-				else if (deser) {
-					// deserialize returns filter data
-					usedFilters.push(deser)
-				}
-			})
-			Promise.all(promises).then(dataList => {
-				dataList.forEach( (filterData, index) => {
-					// update filters
-					usedFilters.push(filterData)
-				})
-				this.props.setSearchQuery({
-					objectType: objType,
-					filters: usedFilters,
-					text: ""
-				})
-				this.props.history.push({
-					pathname: '/search'
-				})
-			})
+			const queryParams = JSON.parse(search.query)
+			deserializeQueryParams(objType, queryParams)
 		}
 	}
 
