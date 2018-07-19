@@ -2,10 +2,11 @@ import React from 'react'
 
 import searchFilters from 'components/SearchFilters'
 
-export function deserializeQueryParams(objType, queryParams) {
+export function deserializeQueryParams(objType, queryParams, callbackFunction) {
 	const ALL_FILTERS = searchFilters.searchFilters()
 	const filterDefs = ALL_FILTERS[objType].filters
-	var filters = []
+	var text = queryParams.text || ""
+	var usedFilters = []
 	var promises = []
 	Object.keys(filterDefs).map(filterKey => {
 		const fd = filterDefs[filterKey]
@@ -17,21 +18,14 @@ export function deserializeQueryParams(objType, queryParams) {
 		}
 		else if (deser) {
 			// deserialize returns filter data
-			filters.push(deser)
+			usedFilters.push(deser)
 		}
 	})
 	Promise.all(promises).then(dataList => {
 		dataList.forEach( (filterData, index) => {
 			// update filters
-			filters.push(filterData)
+			usedFilters.push(filterData)
 		})
-		this.props.setSearchQuery({
-			objectType: objType,
-			filters: filters,
-			text: ""
-		})
-		this.props.history.push({
-			pathname: '/search'
-		})
+		callbackFunction(objType, usedFilters, text)
 	})
 }

@@ -346,8 +346,20 @@ class BaseHome extends Page {
 		if (search) {
 			const objType = SEARCH_OBJECT_TYPES[search.objectType]
 			const queryParams = JSON.parse(search.query)
-			deserializeQueryParams(objType, queryParams)
+			deserializeQueryParams(objType, queryParams, this.deserializeCallback)
 		}
+	}
+
+	@autobind
+	deserializeCallback(objectType, filters, text) {
+		this.props.setSearchQuery({
+			objectType: objectType,
+			filters: filters,
+			text: text
+		})
+		this.props.history.push({
+			pathname: '/search'
+		})
 	}
 
 	@autobind
