@@ -7,21 +7,6 @@ const LEAVE_WARNING = 'Are you sure you wish to navigate away from the page? You
 
 class NavigationWarning extends Component {
 
-	constructor(props) {
-		super(props)
-
-		this.state = {
-			isBlocking: props.isBlocking,
-		}
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		if (props.isBlocking !== state.isBlocking) {
-			return { isBlocking: props.isBlocking }
-		}
-		return null
-	}
-
 	@autobind
 	onBeforeUnloadListener(event) {
 		if (this.state.isBlocking) {
@@ -40,7 +25,7 @@ class NavigationWarning extends Component {
 
 	render() {
 		return <Prompt
-			when={this.state.isBlocking}
+			when={this.props.isBlocking}
 			message={LEAVE_WARNING}
 		/>
 	}
