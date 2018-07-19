@@ -134,19 +134,19 @@ class BaseInsightsShow extends Page {
   get insightQueryParams() {
     const params = {
       [NOT_APPROVED_REPORTS]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.PENDING_APPROVAL}},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.PENDING_APPROVAL]}},
         {key: 'Update Date', isDate: true, queryKey: 'updatedAt', value: {relative: BEFORE,  end: this.state.referenceDate.toISOString()}},
       ],
       [CANCELLED_REPORTS]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.CANCELLED, cancelledReason: ''}},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.CANCELLED], cancelledReason: ''}},
         {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
       ],
       [REPORTS_BY_TASK]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.RELEASED}},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.RELEASED]}},
         {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
       ],
       [REPORTS_BY_DAY_OF_WEEK]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: Report.STATE.RELEASED}},
+        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.RELEASED]}},
         {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: BETWEEN,  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
         {key: 'includeEngagementDayOfWeek', isDate: false, queryKey: '', value: 1},
       ],
