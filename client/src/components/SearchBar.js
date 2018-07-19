@@ -50,9 +50,9 @@ class SearchBar extends Component {
 			<Form onSubmit={this.onSubmit}>
 				<InputGroup>
 					<FormControl value={this.state.searchTerms} placeholder={placeholder} onChange={this.onChange} id="searchBarInput" />
-					<InputGroup.Button>
+					{!this.state.showAdvancedSearch && <InputGroup.Button>
 						<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
-					</InputGroup.Button>
+					</InputGroup.Button>}
 				</InputGroup>
 			</Form>
 
