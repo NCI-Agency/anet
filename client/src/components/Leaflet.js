@@ -7,7 +7,7 @@ import _escape from 'lodash/escape'
 import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
-import {Map,Control,CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
+import {Map, Control, CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import Settings from 'Settings'
 
@@ -56,7 +56,7 @@ class BaseLeaflet extends Component {
 
 	componentDidMount() {		
 		const mapOptions = Object.assign({zoomControl:true},
-										 Settings.imagery.mapOptions,
+										 Settings.imagery.mapOptions.leafletOptions,
 										 Settings.imagery.mapOptions.crs && { crs: CRS[Settings.imagery.mapOptions.crs] })
 		const map = new Map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,
 															 Settings.imagery.mapOptions.homeView.zoomLevel)
@@ -67,12 +67,8 @@ class BaseLeaflet extends Component {
 
 		map.on('moveend', this.moveEnd)
 
-		let state = this.state
-		state.map = map
-		state.markerLayer = new FeatureGroup([]).addTo(map)
-		this.setState(state, () => {
-			this.updateMarkerLayer(this.props.markers)
-		})
+		const markerLayer = new FeatureGroup([]).addTo(map)
+		this.setState({...this.state, map, markerLayer})
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -86,6 +82,11 @@ class BaseLeaflet extends Component {
 				this.props.markers.findIndex(m => m.id === pm.id) === -1
 			)
 			this.updateMarkerLayer(markersToAdd, markersToRemove)
+		}
+
+		if (prevState.map !== this.state.map) {
+			this.updateMarkerLayer(this.props.markers)
+			this.state.map && this.state.map.invalidateSize() // TODO: Still not 100% convinced if this is the right place for this call
 		}
 	}
 
@@ -142,9 +143,7 @@ class BaseLeaflet extends Component {
 
 	render() {
 		return (
-			<div>
-				<div id={this.mapId} style={css} />
-			</div>
+			<div id={this.mapId} style={css} />
 		)
 	}
 
