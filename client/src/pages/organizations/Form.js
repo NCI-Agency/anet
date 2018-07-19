@@ -28,6 +28,7 @@ import { jumpToTop } from 'components/Page'
 class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		organization: PropTypes.object,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		currentUser: PropTypes.instanceOf(Person),
 	}
@@ -240,7 +241,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 	@autobind
 	onChange() {
 		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.organization, this.props.original),
 		})
 	}
 

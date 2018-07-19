@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
+import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 
 export default class SelectSearchFilter extends Component {
@@ -21,16 +22,19 @@ export default class SelectSearchFilter extends Component {
 
 		this.state = {
 			value: {
-				value: value.value || this.props.values[0] || ''
-
+				value: value.value || props.values[0] || ''
 			}
 		}
+	}
 
+	componentDidMount() {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
+		}
 	}
 
 	render() {

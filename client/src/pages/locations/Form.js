@@ -20,6 +20,7 @@ import { jumpToTop } from 'components/Page'
 class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		anetLocation: PropTypes.object.isRequired,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 	}
 
@@ -98,7 +99,7 @@ class LocationForm extends ValidatableFormWrapper {
 	@autobind
 	onChange() {
 		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.anetLocation, this.props.original),
 		})
 	}
 

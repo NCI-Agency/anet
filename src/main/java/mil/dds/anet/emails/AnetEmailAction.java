@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public abstract class AnetEmailAction {
 
+	protected static final int MAX_REPORT_INTENT_LENGTH = 50;
+
 	String templateName;
 	String subject;
 	

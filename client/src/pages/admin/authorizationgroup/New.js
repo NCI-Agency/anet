@@ -19,6 +19,7 @@ class AuthorizationGroupNew extends Page {
 
 		this.state = {
 			authorizationGroup: new AuthorizationGroup(),
+			originalAuthorizationGroup : new AuthorizationGroup()
 		}
 	}
 
@@ -30,7 +31,7 @@ class AuthorizationGroupNew extends Page {
 				<Breadcrumbs items={[['Create new authorization group', AuthorizationGroup.pathForNew()]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
-				<AuthorizationGroupForm original={new AuthorizationGroup()} authorizationGroup={authorizationGroup} />
+				<AuthorizationGroupForm original={this.state.originalAuthorizationGroup} authorizationGroup={authorizationGroup} />
 			</div>
 		)
 	}

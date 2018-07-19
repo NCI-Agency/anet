@@ -39,6 +39,7 @@ import { jumpToTop } from 'components/Page'
 class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
 		report: PropTypes.instanceOf(Report).isRequired,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		onDelete: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
 		currentUser: PropTypes.instanceOf(Person),
@@ -47,6 +48,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 	constructor(props) {
 		super(props)
 
+		const { report, currentUser } = props
 		this.state = {
 			isBlocking: false,
 			recents: {
@@ -55,15 +57,15 @@ class BaseReportForm extends ValidatableFormWrapper {
 				tasks: [],
 				authorizationGroups: [],
 			},
-			reportTags: [],
+			reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name})),
 			suggestionList: [],
 
-			showReportText: !!props.report.reportText || !!props.report.reportSensitiveInformation,
-			isCancelled: (props.report.cancelledReason ? true : false),
+			showReportText: !!report.reportText || !!report.reportSensitiveInformation,
+			isCancelled: !!report.cancelledReason,
 			errors: {},
 
-			showAssignedPositionWarning: false,
-			showActivePositionWarning: false,
+			showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
+			showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
 
 			disableOnSubmit: false,
 
@@ -114,26 +116,28 @@ class BaseReportForm extends ValidatableFormWrapper {
 		window.clearTimeout(this.state.timeoutId)
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		const stateUpdate = {}
-		const { report, currentUser } = props
-		if (report.cancelledReason) {
-			Object.assign(stateUpdate, {isCancelled: true})
-		}
-		const reportTags = report.tags.map(tag => ({id: tag.id.toString(), text: tag.name}))
-		Object.assign(stateUpdate, {
-			showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
-			showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
-			reportTags: reportTags,
-		})
-		return stateUpdate
-	}
-
 	componentDidUpdate(prevProps, prevState) {
-		const showReportText = !!this.props.report.reportText || !!this.props.report.reportSensitiveInformation
-		const prevShowReportText = !!prevProps.report.reportText || !!prevProps.report.reportSensitiveInformation
+		const { report, currentUser } = this.props
+		const prevReport = prevProps.report
+		const prevCurrentUser = prevProps.currentUser
+		if (report.id !== prevReport.id) {
+			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name}))})
+		}
+		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
+		const prevShowReportText = !!prevReport.reportText || !!prevReport.reportSensitiveInformation
 		if (showReportText !== prevShowReportText) {
 			this.setState({showReportText: showReportText})
+		}
+		const isCancelled = !!report.cancelledReason
+		const prevIsCancelled = !!prevReport.cancelledReason
+		if (isCancelled !== prevIsCancelled) {
+			this.setState({isCancelled: isCancelled})
+		}
+		if (currentUser !== prevCurrentUser) {
+			this.setState({
+				showAssignedPositionWarning: !currentUser.hasAssignedPosition(),
+				showActivePositionWarning: currentUser.hasAssignedPosition() && !currentUser.hasActivePosition(),
+			})
 		}
 	}
 
@@ -522,7 +526,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		this.setState({
 			errors : this.validateReport(),
 			reportChanged: true,
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.report, this.props.original),
 		})
 	}
 
