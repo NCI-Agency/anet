@@ -36,8 +36,10 @@ export const INSIGHTS = [
   FUTURE_ENGAGEMENTS_BY_LOCATION, REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS
 ]
 
+const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false})
 export const INSIGHT_DETAILS = {
   [NOT_APPROVED_REPORTS]: {
+    searchProps: _SEARCH_PROPS,
     component: PendingApprovalReports,
     navTitle: 'Pending Approval Reports',
     title: 'Number of Pending Approval Reports',
@@ -45,6 +47,7 @@ export const INSIGHT_DETAILS = {
     showCalendar: true
   },
   [CANCELLED_REPORTS]: {
+    searchProps: _SEARCH_PROPS,
     component: CancelledEngagementReports,
     navTitle: 'Cancelled Engagement Reports',
     title: 'Number of Cancelled Engagement Reports',
@@ -52,6 +55,7 @@ export const INSIGHT_DETAILS = {
     showCalendar: true
   },
   [REPORTS_BY_TASK]: {
+    searchProps: _SEARCH_PROPS,
     component: ReportsByTask,
     navTitle: 'Reports by Task',
     title: 'Number of Reports by Task',
@@ -59,6 +63,7 @@ export const INSIGHT_DETAILS = {
     showCalendar: true
   },
   [REPORTS_BY_DAY_OF_WEEK]: {
+    searchProps: _SEARCH_PROPS,
     component: ReportsByDayOfWeek,
     navTitle: 'Reports by Day of the Week',
     title: 'Number of Reports by Day of the Week',
@@ -66,6 +71,7 @@ export const INSIGHT_DETAILS = {
     showCalendar: false
   },
   [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
+    searchProps: _SEARCH_PROPS,
     component: FutureEngagementsByLocation,
     navTitle: 'Future Engagements by Location',
     title: 'Number of Future Engagements by Location',
@@ -73,6 +79,7 @@ export const INSIGHT_DETAILS = {
     onlyShowBetween: true,
   },
   [ADVISOR_REPORTS]: {
+    searchProps: DEFAULT_SEARCH_PROPS,
     component: FilterableAdvisorReportsTable,
     navTitle: `${Settings.fields.advisor.person.name} Reports`,
     title: `${Settings.fields.advisor.person.name} Reports`,
@@ -118,7 +125,8 @@ class BaseInsightsShow extends Page {
   }
 
   constructor(props) {
-    super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false}))
+    const insightConfig = INSIGHT_DETAILS[props.match.params.insight]
+    super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, insightConfig.searchProps))
     this.state = {...this.insightDefaultDates}
   }
 
@@ -165,11 +173,18 @@ class BaseInsightsShow extends Page {
 
   @autobind
   updateSearchQuery() {
-    this.props.setSearchQuery({
-      text: '',
-      objectType: SEARCH_OBJECT_TYPES.REPORTS,
-      filters: this.insightQueryParams[this.props.match.params.insight]
-    })
+    const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
+    this.props.setSearchProps(Object.assign({}, insightConfig.searchProps))
+    if (insightConfig.searchProps.onSearchGoToSearchPage) {
+      this.props.clearSearchQuery()
+    }
+    else {
+      this.props.setSearchQuery({
+        text: '',
+        objectType: SEARCH_OBJECT_TYPES.REPORTS,
+        filters: this.insightQueryParams[this.props.match.params.insight]
+      })
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -195,9 +210,6 @@ class BaseInsightsShow extends Page {
   componentDidMount() {
     super.componentDidMount()
     this.updateSearchQuery()
-    this.props.setSearchProps({
-      searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS],
-    })
   }
 
   getDefaultPastDates = () => {
