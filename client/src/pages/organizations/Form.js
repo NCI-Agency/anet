@@ -23,6 +23,7 @@ import REMOVE_ICON from 'resources/delete.png'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
 
 class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -275,7 +276,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 }

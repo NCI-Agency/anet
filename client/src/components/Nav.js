@@ -2,17 +2,17 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
-import Scrollspy from 'react-scrollspy'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
-import NavWrap from 'components/NavWrap'
 
 import {Organization, Person} from 'models'
 import {INSIGHTS, INSIGHT_DETAILS} from 'pages/insights/Show'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
+
+import {ScrollLink, scrollSpy} from 'react-scroll'
 
 class BaseNav extends Component {
 	static propTypes = {
@@ -21,19 +21,8 @@ class BaseNav extends Component {
 		organizations: PropTypes.array,
 	}
 
-	constructor(props) {
-		super(props)
-		this.state = {
-			scrollspyOffset: 0
-		}
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		const scrollspyOffset = -(props.topbarOffset + 20)
-		if (state.scrollspyOffset !== scrollspyOffset) {
-			return {scrollspyOffset: scrollspyOffset}
-		}
-		return null
+	componentDidMount() {
+		scrollSpy.update()
 	}
 
 	render() {
@@ -56,42 +45,43 @@ class BaseNav extends Component {
 			myOrgId = myOrg && +myOrg.id
 		}
 
+		const ScrollLinkNavItem = ScrollLink(NavItem)
+		const AnchorNavItem = function(props) {
+			const {to, ...remainingProps} = props
+			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" offset={-120} {...remainingProps}>{props.children}</ScrollLinkNavItem>
+			//TODO: fix the need for offset
+		}
+
 		const orgSubNav = (
-			<NavWrap>
-				<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
-					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
-					<NavItem href="#info">Info</NavItem>
-					<NavItem href="#supportedPositions">Supported positions</NavItem>
-					<NavItem href="#vacantPositions">Vacant positions</NavItem>
-					<NavItem href="#approvals">Approvals</NavItem>
-					<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
-					<NavItem href="#reports">Reports</NavItem>
-				</Scrollspy>
-			</NavWrap>
+			<BSNav>
+				<AnchorNavItem to="info" >Info</AnchorNavItem>
+				<AnchorNavItem to="supportedPositions" >Supported positions</AnchorNavItem>
+				<AnchorNavItem to="vacantPositions" >Vacant positions</AnchorNavItem>
+				<AnchorNavItem to="approvals" >Approvals</AnchorNavItem>
+				<AnchorNavItem to="tasks" >{pluralize(Settings.fields.task.shortLabel)}</AnchorNavItem>
+				<AnchorNavItem to="reports" >Reports</AnchorNavItem>
+			</BSNav>
 		)
 
 		return (
-			<BSNav bsStyle="pills" stacked id="leftNav" className="nav-fixed">
+			<BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
 				<Link to="/">
 					<NavItem>Home</NavItem>
 				</Link>
 
-				<NavWrap id="search-nav"></NavWrap>
+				<BSNav id="search-nav"></BSNav>
 
 				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
 				{inMyReports &&
-					<NavWrap>
-						<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
-							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
-							<NavItem href="#draft-reports">Draft reports</NavItem>
-							<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>
-							<NavItem href="#pending-approval">Pending approval</NavItem>
-							<NavItem href="#published-reports">Published reports</NavItem>
-						</Scrollspy>
-					</NavWrap>
+					<BSNav>
+						<AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
+						<AnchorNavItem to="upcoming-engagements">Upcoming Engagements</AnchorNavItem>
+						<AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
+						<AnchorNavItem to="published-reports">Published reports</AnchorNavItem>
+					</BSNav>
 				}
 
 				{myOrg && <Link to={Organization.pathFor(myOrg)}>
@@ -127,12 +117,10 @@ class BaseNav extends Component {
 				}
 
 				{inAdmin &&
-					<NavWrap>
-						<ul className="nav">
-							<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
-							<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
-						</ul>
-					</NavWrap>
+					<BSNav>
+						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
+						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
+					</BSNav>
 				}
 				
 				{externalDocumentationUrl && externalDocumentationUrlText &&

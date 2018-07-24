@@ -27,34 +27,16 @@ class BaseTopBar extends Component {
     constructor(props) {
         super(props)
         this.state = { 
-            bodyPaddingTop: 0,
             bannerVisibility: false
         }
-        this.updateBodyPaddingTop = this.updateBodyPaddingTop.bind(this)
     }
 
     componentDidMount() {
-        this.updateBodyPaddingTop()
-        window.addEventListener("resize", this.updateBodyPaddingTop)
         this.updateBannerVisibility()
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener("resize", this.updateBodyPaddingTop)
     }
 
     componentDidUpdate() {
-        this.updateBodyPaddingTop()
         this.updateBannerVisibility()
-    }
-
-    updateBodyPaddingTop() {
-        let topbarPaddingHeight = document.getElementById('topbar').offsetHeight + 20
-        if (this.state.bodyPaddingTop !== topbarPaddingHeight){
-            document.body.style.paddingTop =`${topbarPaddingHeight}px` 
-            this.props.updateTopbarOffset(topbarPaddingHeight)
-            this.setState({ bodyPaddingTop: topbarPaddingHeight })
-        }
     }
 
     updateBannerVisibility(){
@@ -86,11 +68,11 @@ class BaseTopBar extends Component {
 
     render() {
         return (
-            <div id="topbar" className="navbar navbar-fixed-top">
+            <div style={{ flex:'0 0 auto'}}>
                 {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
                 <SecurityBanner location={this.props.location} />
-                <Header minimalHeader={this.props.minimalHeader} />
+                <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
             </div>
         )
     }

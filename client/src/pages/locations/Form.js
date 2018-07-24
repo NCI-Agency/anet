@@ -15,6 +15,7 @@ import {Location} from 'models'
 
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
 
 class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -121,7 +122,7 @@ class LocationForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 
