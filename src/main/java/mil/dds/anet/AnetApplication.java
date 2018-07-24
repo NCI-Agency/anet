@@ -54,6 +54,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import mil.dds.anet.auth.AnetAuthenticationFilter;
 import mil.dds.anet.auth.AnetDevAuthenticator;
+import mil.dds.anet.auth.TimedNegotiateSecurityFilter;
 import mil.dds.anet.auth.UrlParamsAuthFilter;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
@@ -175,8 +176,10 @@ public class AnetApplication extends Application<AnetConfiguration> {
 				new ChainedAuthFilter<>(Arrays.asList(new AuthFilter[] {urlParamsAuthFilter, basicAuthFilter}))));
 		} else { 
 			//In Production require Windows AD Authentication.
-			Filter nsf = new NegotiateSecurityFilter();
-			FilterRegistration nsfReg = environment.servlets().addFilter("NegotiateSecurityFilter", nsf);
+			final Filter nsf = configuration.isTimeWaffleRequests()
+					? new TimedNegotiateSecurityFilter(metricRegistry)
+					: new NegotiateSecurityFilter();
+			final FilterRegistration nsfReg = environment.servlets().addFilter("NegotiateSecurityFilter", nsf);
 			nsfReg.setInitParameters(configuration.getWaffleConfig());
 			nsfReg.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
 			environment.jersey().register(new AuthDynamicFeature(new AnetAuthenticationFilter(engine, metricRegistry)));

@@ -24,6 +24,8 @@ public class AnetConfiguration extends Configuration {
 
 	private Map<String, Object> dictionary;
 
+	private boolean timeWaffleRequests;
+
 	@NotNull
 	private Map<String,String> waffleConfig = new HashMap<String,String>();
 
@@ -72,6 +74,14 @@ public class AnetConfiguration extends Configuration {
 			builder.put(entry.getKey(), ImmutableMap.copyOf(entry.getValue()));
 		}
 		this.views = builder.build();
+	}
+
+	public boolean isTimeWaffleRequests() {
+		return timeWaffleRequests;
+	}
+
+	public void setTimeWaffleRequests(boolean timeWaffleRequests) {
+		this.timeWaffleRequests = timeWaffleRequests;
 	}
 
 	public Map<String, String> getWaffleConfig() {
