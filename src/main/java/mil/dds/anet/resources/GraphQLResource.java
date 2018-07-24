@@ -42,6 +42,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.annotation.Timed;
 import com.github.underscore.lodash.$;
 import com.google.common.base.Joiner;
@@ -88,10 +89,11 @@ public class GraphQLResource {
 	private GraphQL graphql;
 	private List<IGraphQLResource> resources;
 	private boolean developmentMode;
-	
-	
-	public GraphQLResource(List<IGraphQLResource> resources, boolean developmentMode) {
+	private final MetricRegistry metricRegistry;
+
+	public GraphQLResource(List<IGraphQLResource> resources, MetricRegistry metricRegistry, boolean developmentMode) {
 		this.resources = resources;
+		this.metricRegistry = metricRegistry;
 		this.developmentMode = developmentMode;
 
 		buildGraph();
@@ -116,7 +118,7 @@ public class GraphQLResource {
 			GraphQLObjectType objectType = buildTypeFromBean(name, beanClazz);
 
 			//Build a Fetcher that uses this resource to 'find' objects of this type.
-			AnetResourceDataFetcher fetcher = new AnetResourceDataFetcher(resource);
+			AnetResourceDataFetcher fetcher = new AnetResourceDataFetcher(resource, metricRegistry);
 
 			GraphQLFieldDefinition.Builder fieldBuilder = GraphQLFieldDefinition.newFieldDefinition()
 				.type(objectType)
@@ -127,7 +129,7 @@ public class GraphQLResource {
 			queryTypeBuilder.field(fieldBuilder.build());
 
 			//Build a field for returning lists from this resource.
-			AnetResourceDataFetcher listFetcher = new AnetResourceDataFetcher(resource, true);
+			AnetResourceDataFetcher listFetcher = new AnetResourceDataFetcher(resource, metricRegistry, true);
 			if (listFetcher.validArguments().size() > 0) {
 				Class<?> listClass = resource.getBeanListClass();
 				GraphQLOutputType listType;
