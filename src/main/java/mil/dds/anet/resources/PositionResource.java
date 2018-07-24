@@ -21,6 +21,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -66,6 +68,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/")
 	public PositionList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, 
@@ -74,6 +77,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{uuid}")
 	@GraphQLFetcher
 	public Position getByUuid(@PathParam("uuid") String uuid) {
@@ -90,6 +94,7 @@ public class PositionResource implements IGraphQLResource {
 	 * @return the same Position object with the UUID field filled in.
 	 */
 	@POST
+	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public Position createPosition(@Auth Person user, Position p) {
@@ -115,6 +120,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/updateAssociatedPosition")
 	@RolesAllowed("SUPER_USER")
 	public Response updateAssociatedPosition(@Auth Person user, Position pos) {
@@ -139,6 +145,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updatePosition(@Auth Person user, Position pos) {
@@ -179,6 +186,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{uuid}/person")
 	public Person getAdvisorInPosition(@PathParam("uuid") String positionUuid, @QueryParam("atTime") Long atTimeMillis) {
 		Position p = Position.createWithUuid(positionUuid);
@@ -188,6 +196,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/{uuid}/person")
 	@RolesAllowed("SUPER_USER")
 	public Response putPersonInPosition(@Auth Person user, @PathParam("uuid") String positionUuid, Person p) {
@@ -200,6 +209,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@DELETE
+	@Timed
 	@Path("/{uuid}/person")
 	@RolesAllowed("SUPER_USER")
 	public Response deletePersonFromPosition(@Auth Person user, @PathParam("uuid") String positionUuid) {
@@ -213,6 +223,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{uuid}/associated")
 	public PositionList getAssociatedPositions(@PathParam("uuid") String positionUuid) {
 		Position b = Position.createWithUuid(positionUuid);
@@ -221,6 +232,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/{uuid}/associated")
 	@RolesAllowed("SUPER_USER")
 	public Response associatePositions(@PathParam("uuid") String positionUuid, Position b, @Auth Person user) {
@@ -247,6 +259,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@DELETE
+	@Timed
 	@Path("/{uuid}/associated/{positionUuid}")
 	@RolesAllowed("SUPER_USER")
 	public Response deletePositionAssociation(@PathParam("uuid") String positionUuid, @PathParam("positionUuid") String associatedPositionUuid, @Auth Person user) {
@@ -262,6 +275,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{uuid}/history")
 	public List<PersonPositionHistory> getPositionHistory(@PathParam("uuid") String positionUuid) {
 		Position position = dao.getByUuid(positionUuid);
@@ -270,6 +284,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@Path("/search")
 	public PositionList search(@Context HttpServletRequest request) {
 		try {
@@ -280,6 +295,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@GraphQLFetcher
 	@Path("/search")
 	public PositionList search(@GraphQLParam("query") PositionSearchQuery query) {
@@ -288,6 +304,7 @@ public class PositionResource implements IGraphQLResource {
 
 	
 	@DELETE
+	@Timed
 	@Path("/{uuid}")
 	public Response deletePosition(@PathParam("uuid") String positionUuid) {
 		Position p = dao.getByUuid(positionUuid);
