@@ -107,8 +107,6 @@ export default class OrganizationFilter extends Component {
 	updateFilter() {
 		if (this.props.asFormField) {
 			let {value} = this.state
-			value.includeChildOrgs = this.state.includeChildOrgs
-			value.toQuery = this.toQuery
 			if (typeof value === 'object') {
 				value.includeChildOrgs = this.state.includeChildOrgs
 				value.toQuery = this.toQuery
