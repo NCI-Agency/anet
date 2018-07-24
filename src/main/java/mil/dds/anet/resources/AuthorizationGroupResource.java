@@ -19,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
@@ -45,6 +47,7 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/")
 	public AuthorizationGroupList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
@@ -52,6 +55,7 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/{id}")
 	public AuthorizationGroup getById(@PathParam("id") int id) {
@@ -63,6 +67,7 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@GraphQLFetcher
 	@Path("/search")
 	public AuthorizationGroupList search(@GraphQLParam("query") AuthorizationGroupSearchQuery query) {
@@ -70,12 +75,14 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/search")
 	public AuthorizationGroupList search(@Context HttpServletRequest request) {
 		return search(ResponseUtils.convertParamsToBean(request, AuthorizationGroupSearchQuery.class));
 	}
 
 	@POST
+	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
 	public AuthorizationGroup createNewAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
@@ -89,6 +96,7 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/update")
 	@RolesAllowed("ADMINISTRATOR")
 	public Response updateAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
@@ -132,6 +140,7 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	 * @param maxResults maximum number of results to return, defaults to 3
 	 */
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/recents")
 	public AuthorizationGroupList recents(@Auth Person user,

@@ -16,6 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
@@ -41,6 +43,7 @@ public class LocationResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/")
 	public LocationList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
@@ -48,6 +51,7 @@ public class LocationResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/{id}")
 	public Location getById(@PathParam("id") int id) { 
@@ -58,6 +62,7 @@ public class LocationResource implements IGraphQLResource {
 	
 	
 	@POST
+	@Timed
 	@GraphQLFetcher
 	@Path("/search")
 	public LocationList search(@GraphQLParam("query") LocationSearchQuery query) {
@@ -65,12 +70,14 @@ public class LocationResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@Path("/search")
 	public LocationList search(@Context HttpServletRequest request) {
 		return search(ResponseUtils.convertParamsToBean(request, LocationSearchQuery.class));
 	}
 	
 	@POST
+	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public Location createNewLocation(@Auth Person user, Location l) {
@@ -84,6 +91,7 @@ public class LocationResource implements IGraphQLResource {
 	}
 	
 	@POST
+	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateLocation(@Auth Person user, Location l) {
@@ -97,6 +105,7 @@ public class LocationResource implements IGraphQLResource {
 	 * @param maxResults maximum number of results to return, defaults to 3
 	 */
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/recents")
 	public LocationList recents(@Auth Person user,
