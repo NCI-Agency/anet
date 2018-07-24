@@ -141,7 +141,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 				<Autocomplete valueKey="name"
 					placeholder="Search for the approver's position"
 					objectType={Position}
-					fields="id, name, code, type, person { id, name, rank }"
+					fields="uuid, name, code, type, person { uuid, name, rank }"
 					template={position => 
 						<span> {position.person && <span> <LinkTo person={position.person} isLink={false}/> - </span>} <LinkTo position={position} isLink={false}/> {position.code && <span> - {position.code} </span>} </span>
 					}
@@ -159,7 +159,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 					</thead>
 					<tbody>
 						{approvers.map((approver, approverIndex) =>
-							<tr key={approver.id} id={`step_${index}_approver_${approverIndex}`} >
+							<tr key={approver.uuid} id={`step_${index}_approver_${approverIndex}`} >
 								<td><LinkTo person={approver.person} target="_blank" /></td>
 								<td><LinkTo position={approver} target="_blank" /></td>
 								<td onClick={this.removeApprover.bind(this, approver, index)}>
@@ -175,7 +175,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 
 	@autobind
 	addApprover(index, position) {
-		if (!position || !position.id) {
+		if (!position || !position.uuid) {
 			return
 		}
 
@@ -192,7 +192,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 	removeApprover(approver, index) {
 		let step = this.props.organization.approvalSteps[index]
 		let approvers = step.approvers
-		let approverIndex = approvers.findIndex(m => m.id === approver.id )
+		let approverIndex = approvers.findIndex(m => m.uuid === approver.uuid )
 
 		if (approverIndex !== -1) {
 			approvers.splice(approverIndex, 1)
@@ -253,7 +253,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		}
 
 		if (organization.parentOrg) {
-			organization.parentOrg = {id: organization.parentOrg.id}
+			organization.parentOrg = {uuid: organization.parentOrg.uuid}
 		}
 
 		let url = `/api/organizations/${this.props.edit ? 'update' : 'new'}`
@@ -264,8 +264,8 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 					throw response.code
 				}
 
-				if (response.id) {
-					organization.id = response.id
+				if (response.uuid) {
+					organization.uuid = response.uuid
 				}
 				this.props.history.replace(Organization.pathForEdit(organization))
 				this.props.history.push({

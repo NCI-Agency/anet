@@ -122,7 +122,7 @@ export default class Page extends Component {
 	render() {
 		if (this.state.notFound) {
 			let modelName = this.constructor.modelName
-			let text = modelName ? `${modelName} #${this.props.match.params.id}` : `Page`
+			let text = modelName ? `${modelName} #${this.props.match.params.uuid}` : `Page`
 			return <NotFound text={`${text} not found.`} />
 		} else if (this.state.invalidRequest) {
 			return <NotFound text="There was an error processing this request. Please contact an administrator." />

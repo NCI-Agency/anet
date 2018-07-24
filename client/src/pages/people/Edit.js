@@ -33,12 +33,12 @@ class BasePersonEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/*GraphQL*/ `
-			person(id:${props.match.params.id}) {
-				id,
+			person(uuid:"${props.match.params.uuid}") {
+				uuid,
 				name, rank, role, emailAddress, phoneNumber, status, domainUsername,
 				biography, country, gender, endOfTourDate,
 				position {
-					id, name
+					uuid, name
 				}
 			}
 		`).then(data => {

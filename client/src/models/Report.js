@@ -147,13 +147,13 @@ export default class Report extends Model {
 	}
 
 	addAttendee(newAttendee) {
-		if (!newAttendee || !newAttendee.id) {
+		if (!newAttendee || !newAttendee.uuid) {
 			return
 		}
 
 		let attendees = this.attendees
 
-		if (attendees.find(attendee => attendee.id === newAttendee.id)) {
+		if (attendees.find(attendee => attendee.uuid === newAttendee.uuid)) {
 			return
 		}
 

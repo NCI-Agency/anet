@@ -1,20 +1,20 @@
-report(id:${reportId}) {
-    id, intent, engagementDate, atmosphere, atmosphereDetails
+report(uuid:"${reportUuid}") {
+    uuid, intent, engagementDate, atmosphere, atmosphereDetails
     keyOutcomes, nextSteps, reportText, 
 
     state
 
-    location { id, name }
+    location { uuid, name }
     author {
-        id, name
+        uuid, name
         position {
             organization {
                 shortName, longName
                 approvalSteps {
-                    id, name,
+                    uuid, name,
                     approvers {
-                        id, name,
-                        person { id, name rank }
+                        uuid, name,
+                        person { uuid, name rank }
                     }
                 }
             }
@@ -22,32 +22,32 @@ report(id:${reportId}) {
     }
 
     attendees {
-        id, name, role, primary
-        position { id, name }
+        uuid, name, role, primary
+        position { uuid, name }
     }
-    primaryAdvisor { id }
-    primaryPrincipal { id }
+    primaryAdvisor { uuid }
+    primaryPrincipal { uuid }
 
-    tasks { id, shortName, longName, responsibleOrg { id, shortName} }
+    tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
 
     comments {
-        id, text, createdAt, updatedAt
-        author { id, name, rank }
+        uuid, text, createdAt, updatedAt
+        author { uuid, name, rank }
     }
 
-    principalOrg { id, shortName, longName }
-    advisorOrg { id, shortName, longName }
+    principalOrg { uuid, shortName, longName }
+    advisorOrg { uuid, shortName, longName }
 
     approvalStatus {
         type, createdAt
-        step { id , name
-            approvers { id, name, person { id, name } }
+        step { uuid , name
+            approvers { uuid, name, person { uuid, name } }
         },
-        person { id, name, rank}
+        person { uuid, name, rank}
     }
 
-    approvalStep { name, approvers { id } }
+    approvalStep { name, approvers { uuid } }
 
-    tags { id, name, description }
+    tags { uuid, name, description }
 
 }

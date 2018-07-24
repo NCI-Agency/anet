@@ -73,7 +73,7 @@ test('Draft and submit a report', async t => {
     await pageHelpers.assertReportShowStatusText(t, "This is a DRAFT report and hasn't been submitted.")
 
     let currentPathname = await t.context.getCurrentPathname()
-    t.regex(currentPathname, /reports\/\d+/, 'URL is updated to reports/show page')
+    t.regex(currentPathname, /reports\/[0-9a-f-]+/, 'URL is updated to reports/show page')
 
     let $submitReportButton = await $('#submitReportButton')
     await $submitReportButton.click()

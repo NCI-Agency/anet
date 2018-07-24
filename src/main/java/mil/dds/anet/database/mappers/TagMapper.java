@@ -3,11 +3,11 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.joda.time.DateTime;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Tag;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class TagMapper implements ResultSetMapper<Tag> {
@@ -15,11 +15,9 @@ public class TagMapper implements ResultSetMapper<Tag> {
 	@Override
 	public Tag map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
 		final Tag t = new Tag();
-		t.setId(rs.getInt("id"));
+		DaoUtils.setCommonBeanFields(t, rs, null);
 		t.setName(rs.getString("name"));
 		t.setDescription(rs.getString("description"));
-		t.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
-		t.setUpdatedAt(new DateTime(rs.getTimestamp("updatedAt")));
 		t.setLoadLevel(LoadLevel.PROPERTIES);
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 

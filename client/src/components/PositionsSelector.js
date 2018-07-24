@@ -57,20 +57,20 @@ export default class PositionsSelector extends Component {
 		return <Form.Field.ExtraCol className="shortcut-list">
 			<h5>Recent positions</h5>
 			{shortcuts.map(position =>
-				<Button key={position.id} bsStyle="link" onClick={this.addPosition.bind(this, position)}>Add {position.name}</Button>
+				<Button key={position.uuid} bsStyle="link" onClick={this.addPosition.bind(this, position)}>Add {position.name}</Button>
 			)}
 		</Form.Field.ExtraCol>
 	}
 
 	@autobind
 	addPosition(newPosition) {
-		if (!newPosition || !newPosition.id) {
+		if (!newPosition || !newPosition.uuid) {
 			return
 		}
 
 		let positions = this.props.positions
 
-		if (!positions.find(position => position.id === newPosition.id)) {
+		if (!positions.find(position => position.uuid === newPosition.uuid)) {
 			positions.push(newPosition)
 		}
 
@@ -80,7 +80,7 @@ export default class PositionsSelector extends Component {
 	@autobind
 	removePosition(oldPosition) {
 		let positions = this.props.positions
-		let index = positions.findIndex(position => position.id === oldPosition.id)
+		let index = positions.findIndex(position => position.uuid === oldPosition.uuid)
 
 		if (index !== -1) {
 			positions.splice(index, 1)

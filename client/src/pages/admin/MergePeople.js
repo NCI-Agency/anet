@@ -36,8 +36,8 @@ class MergePeople extends Page {
 		let {winner, loser, copyPosition, error, success} = this.state
 		let errors = this.validate()
 
-		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status,
-			position { id, name, organization { id, shortName, longName, identificationCode }},
+		let personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status,
+			position { uuid, name, organization { uuid, shortName, longName, identificationCode }},
 			authoredReports(pageNum:0,pageSize:1) { totalCount }
 			attendedReports(pageNum:0,pageSize:1) { totalCount }`
 
@@ -78,12 +78,12 @@ class MergePeople extends Page {
 					</Row>
 					<Row>
 						<Col md={6}>
-							{loser.id &&
+							{loser.uuid &&
 								<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
 							}
 						</Col>
 						<Col md={6}>
-							{winner.id &&
+							{winner.uuid &&
 								<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
 							}
 						</Col>
@@ -144,11 +144,11 @@ class MergePeople extends Page {
 		let {winner, loser} = this.state
 		let errors = []
 
-		if (!winner.id || !loser.id) {
+		if (!winner.uuid || !loser.uuid) {
 			errors.push("You must select two people")
 			return errors
 		}
-		if (winner.id === loser.id) {
+		if (winner.uuid === loser.uuid) {
 			errors.push("You selected the same person twice!")
 		}
 		if (winner.role !== loser.role) {
@@ -163,6 +163,7 @@ class MergePeople extends Page {
 	showPersonDetails(person) {
 		return <Form static formFor={person} >
 			<Form.Field id="id" />
+			<Form.Field id="uuid" />
 			<Form.Field id="name" />
 			<Form.Field id="status">{person.humanNameOfStatus()}</Form.Field>
 			<Form.Field id="role">{person.humanNameOfRole()}</Form.Field>
@@ -193,7 +194,7 @@ class MergePeople extends Page {
 		event.preventDefault()
 
 		let {winner, loser, copyPosition} = this.state
-        API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
+        API.send(`/api/people/merge?winner=${winner.uuid}&loser=${loser.uuid}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
             .then(() => {
 				this.props.history.push({
 					pathname: Person.pathFor(this.state.winner),

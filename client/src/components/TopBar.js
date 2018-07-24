@@ -68,8 +68,9 @@ class BaseTopBar extends Component {
 
     render() {
         return (
+
             <div style={{ flex:'0 0 auto'}}>
-                {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
+                {this.props.currentUser && this.props.position && this.props.position.uuid === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
                 <SecurityBanner location={this.props.location} />
                 <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>

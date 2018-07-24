@@ -29,10 +29,10 @@ class OrganizationNew extends Page {
 
 	fetchData(props) {
 		const qs = utils.parseQueryString(props.location.search)
-		if (qs.parentOrgId) {
+		if (qs.parentOrgUuid) {
 			return API.query(/* GraphQL */`
-				organization(id: ${qs.parentOrgId}) {
-					id, shortName, longName, identificationCode, type
+				organization(uuid:"${qs.parentOrgUuid}") {
+					uuid, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
 				let {organization, originalOrganization} = this.state

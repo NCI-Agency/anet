@@ -31,12 +31,12 @@ class BaseOnboardingEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			person(id:${props.currentUser.id}) {
-				id,
+			person(uuid:"${props.currentUser.uuid}") {
+				uuid,
 				name, rank, role, emailAddress, phoneNumber, status
 				biography, country, gender, endOfTourDate, domainUsername
 				position {
-					id, name
+					uuid, name
 				}
 			}
 		`).then(data => {

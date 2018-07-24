@@ -27,12 +27,12 @@ public class Position extends AbstractAnetBean {
 	List<PersonPositionHistory> previousPeople;
 	Boolean isApprover;
 
-	public static Position createWithId(Integer id) {
-		Position b = new Position();
-		b.setId(id);
+	public static Position createWithUuid(String uuid) {
+		final Position b = new Position();
+		b.setUuid(uuid);
 		return b;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -72,7 +72,7 @@ public class Position extends AbstractAnetBean {
 		}
 		if (organization.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) {
 			this.organization = AnetObjectEngine.getInstance()
-					.getOrganizationDao().getById(organization.getId());
+					.getOrganizationDao().getByUuid(organization.getUuid());
 		}
 		return organization;
 	}
@@ -128,7 +128,7 @@ public class Position extends AbstractAnetBean {
 		if (location == null || location.getLoadLevel() == null) { return location; } 
 		if (location.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
 			this.location = AnetObjectEngine.getInstance()
-					.getLocationDao().getById(location.getId());
+					.getLocationDao().getByUuid(location.getUuid());
 		}
 		return location;
 	}
@@ -159,25 +159,25 @@ public class Position extends AbstractAnetBean {
 	}
 	
 	@Override
-	public boolean equals(Object o) { 
+	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
-			return false; 
+			return false;
 		}
 		Position other = (Position) o;
-		return Objects.equals(id, other.getId()) 
-			&& Objects.equals(name, other.getName()) 
-			&& Objects.equals(code,  other.getCode()) 
-			&& Objects.equals(type, other.getType()) 
-			&& idEqual(organization, other.getOrganization());
+		return Objects.equals(uuid, other.getUuid())
+			&& Objects.equals(name, other.getName())
+			&& Objects.equals(code,  other.getCode())
+			&& Objects.equals(type, other.getType())
+			&& uuidEqual(organization, other.getOrganization());
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, name, code, type, organization);
+	public int hashCode() {
+		return Objects.hash(uuid, name, code, type, organization);
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("[id:%s name:%s orgId:%d]", id, name, DaoUtils.getId(organization));
+	public String toString() {
+		return String.format("[uuid:%s name:%s orgUuid:%s]", uuid, name, DaoUtils.getUuid(organization));
 	}
 }

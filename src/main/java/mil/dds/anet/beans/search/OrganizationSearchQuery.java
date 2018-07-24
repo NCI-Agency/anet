@@ -11,7 +11,7 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
 	OrganizationType type;
 	
 	//Search for organizations with a specific parent Org. 
-	Integer parentOrgId;
+	String parentOrgUuid;
 	//Include descedants recursively from the specified parent. 
 	//If true will include all orgs in the tree of the parentOrg
 	// Including the parent Org. 
@@ -36,12 +36,12 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
 		this.type = type;
 	}
 	
-	public Integer getParentOrgId() {
-		return parentOrgId;
+	public String getParentOrgUuid() {
+		return parentOrgUuid;
 	}
 
-	public void setParentOrgId(Integer parentOrgId) {
-		this.parentOrgId = parentOrgId;
+	public void setParentOrgUuid(String parentOrgUuid) {
+		this.parentOrgUuid = parentOrgUuid;
 	}
 
 	public Boolean getParentOrgRecursively() {

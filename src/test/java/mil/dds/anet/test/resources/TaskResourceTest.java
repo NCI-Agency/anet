@@ -33,34 +33,34 @@ public class TaskResourceTest extends AbstractResourceTest {
 
 		Task a = httpQuery("/api/tasks/new", admin)
 			.post(Entity.json(TestData.createTask("TestF1", "Do a thing with a person", "Test-EF")), Task.class);
-		assertThat(a.getId()).isNotNull();
+		assertThat(a.getUuid()).isNotNull();
 				
 		Task b = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(TestData.createTask("TestM1", "Teach a person how to fish", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
-		assertThat(b.getId()).isNotNull();
+		assertThat(b.getUuid()).isNotNull();
 		
 		Task c = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(TestData.createTask("TestM2", "Watch the person fishing", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
-		assertThat(c.getId()).isNotNull();
+		assertThat(c.getUuid()).isNotNull();
 		
 		Task d = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(TestData.createTask("TestM3", "Have the person go fishing without you", "Test-Milestone", a, null, TaskStatus.ACTIVE)), Task.class);
-		assertThat(d.getId()).isNotNull();
+		assertThat(d.getUuid()).isNotNull();
 		
 		Task e = httpQuery("/api/tasks/new", admin)
 				.post(Entity.json(TestData.createTask("TestF2", "Be a thing in a test case", "Test-EF", null, null, TaskStatus.ACTIVE)), Task.class);
-		assertThat(e.getId()).isNotNull();
+		assertThat(e.getUuid()).isNotNull();
 		
-		Task returned = httpQuery("/api/tasks/" + a.getId(), admin).get(Task.class);
+		Task returned = httpQuery("/api/tasks/" + a.getUuid(), admin).get(Task.class);
 		assertThat(returned).isEqualTo(a);
-		returned = httpQuery("/api/tasks/" + b.getId(), admin).get(Task.class);
+		returned = httpQuery("/api/tasks/" + b.getUuid(), admin).get(Task.class);
 		assertThat(returned).isEqualTo(b);		
 		
 		//modify a task. 
 		a.setLongName("Do a thing with a person modified");
 		Response resp = httpQuery("/api/tasks/update", admin).post(Entity.json(a));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		returned = httpQuery("/api/tasks/" + a.getId(), jack).get(Task.class);
+		returned = httpQuery("/api/tasks/" + a.getUuid(), jack).get(Task.class);
 		assertThat(returned.getLongName()).isEqualTo(a.getLongName());
 
 		//Assign the Task to the AO
@@ -71,11 +71,11 @@ public class TaskResourceTest extends AbstractResourceTest {
 		a.setResponsibleOrg(ef8);
 		resp = httpQuery("/api/tasks/update", admin).post(Entity.json(a));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		returned = httpQuery("/api/tasks/" + a.getId(), jack).get(Task.class);
-		assertThat(returned.getResponsibleOrg().getId()).isEqualTo(ef8.getId());
+		returned = httpQuery("/api/tasks/" + a.getUuid(), jack).get(Task.class);
+		assertThat(returned.getResponsibleOrg().getUuid()).isEqualTo(ef8.getUuid());
 		
 		//Fetch the tasks off the organization
-		List<Task> tasks = httpQuery("/api/organizations/" + ef8.getId() + "/tasks", jack).get(TaskList.class).getList();
+		List<Task> tasks = httpQuery("/api/organizations/" + ef8.getUuid() + "/tasks", jack).get(TaskList.class).getList();
 		assertThat(tasks).contains(a);
 		
 		//Search for the task: 
@@ -84,7 +84,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		a.setStatus(TaskStatus.INACTIVE);
 		resp = httpQuery("/api/tasks/update", admin).post(Entity.json(a));
 		assertThat(resp.getStatus()).isEqualTo(200);
-		returned = httpQuery("/api/tasks/" + a.getId(), jack).get(Task.class);
+		returned = httpQuery("/api/tasks/" + a.getUuid(), jack).get(Task.class);
 		assertThat(returned.getStatus()).isEqualTo(TaskStatus.INACTIVE);
 	}
 	
@@ -107,16 +107,16 @@ public class TaskResourceTest extends AbstractResourceTest {
 		assertThat(ef2).isNotNull();
 		
 		query.setText(null);
-		query.setResponsibleOrgId(ef2.getId());
+		query.setResponsibleOrgUuid(ef2.getUuid());
 		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream()
-				.filter(p -> p.getResponsibleOrg().getId().equals(ef2.getId()))
+				.filter(p -> p.getResponsibleOrg().getUuid().equals(ef2.getUuid()))
 				.count())
 			.isEqualTo(searchResults.size());
 		
 		//Search by category
-		query.setResponsibleOrgId(null);
+		query.setResponsibleOrgUuid(null);
 		query.setText("expenses");
 		query.setCategory("Milestone");
 		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();

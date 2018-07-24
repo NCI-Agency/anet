@@ -21,11 +21,11 @@ a {
 
 Hi ${report.author.name},
 
-<p>Your report, <a href="${serverUrl}/reports/${report.id?c}"><em><strong>"${reportIntent}"</strong></em></a>, has been approved and added to the daily rollup. </p>
+<p>Your report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, has been approved and added to the daily rollup. </p>
 
 <p>You can view the daily rollup by <a href="${serverUrl}/rollup">clicking here</a>.</p>
 
-<p>You can view your report by <a href="${serverUrl}/reports/${report.id?c}">clicking here</a>.</p>
+<p>You can view your report by <a href="${serverUrl}/reports/${report.uuid}">clicking here</a>.</p>
 
 ANET Support Team
 <#if SUPPORT_EMAIL_ADDR??>

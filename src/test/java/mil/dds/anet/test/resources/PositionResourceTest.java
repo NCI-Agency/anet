@@ -44,7 +44,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 	@Test
 	public void positionTest() { 
 		final Person jack = getJackJackson();
-		assertThat(jack.getId()).isNotNull();
+		assertThat(jack.getUuid()).isNotNull();
 		assertThat(jack.getPosition()).isNotNull();
 		final Position jacksOldPosition = jack.getPosition();
 		
@@ -57,20 +57,20 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//Assign to an AO
 		Organization ao = httpQuery("/api/organizations/new", admin)
 				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
-		test.setOrganization(Organization.createWithId(ao.getId()));
+		test.setOrganization(Organization.createWithUuid(ao.getUuid()));
 
 		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);
 		assertThat(created.getName()).isEqualTo(test.getName());
 		
-		Position returned = httpQuery(String.format("/api/positions/%d",created.getId()), jack).get(Position.class);
-		assertThat(returned.getOrganization().getId()).isEqualTo(ao.getId());
+		Position returned = httpQuery(String.format("/api/positions/%s", created.getUuid()), jack).get(Position.class);
+		assertThat(returned.getOrganization().getUuid()).isEqualTo(ao.getUuid());
 		
 		//Assign a person into the position
-		Response resp = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).post(Entity.json(jack));
+		Response resp = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).post(Entity.json(jack));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		Person curr = httpQuery(String.format("/api/positions/%d/person",returned.getId()), admin).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(jack.getId());
+		Person curr = httpQuery(String.format("/api/positions/%s/person", returned.getUuid()), admin).get(Person.class);
+		assertThat(curr.getUuid()).isEqualTo(jack.getUuid());
 		
 		final DateTime jacksTime = DateTime.now();
 		try {
@@ -83,41 +83,41 @@ public class PositionResourceTest extends AbstractResourceTest {
 		Person steve = getSteveSteveson();
 		final Position stevesCurrentPosition = steve.loadPosition();
 		assertThat(stevesCurrentPosition).isNotNull();
-		resp = httpQuery(String.format("/api/positions/%d/person", returned.getId()), admin).post(Entity.json(steve));
+		resp = httpQuery(String.format("/api/positions/%s/person", returned.getUuid()), admin).post(Entity.json(steve));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Verify that the new person is in the position
-		curr = httpQuery(String.format("/api/positions/%d/person",returned.getId()), jack).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(steve.getId());
+		curr = httpQuery(String.format("/api/positions/%s/person", returned.getUuid()), jack).get(Person.class);
+		assertThat(curr.getUuid()).isEqualTo(steve.getUuid());
 		
 		//Verify that the previous person is now no longer in a position
-		returned = httpQuery(String.format("/api/people/%d/position", jack.getId()), jack).get(Position.class);
+		returned = httpQuery(String.format("/api/people/%s/position", jack.getUuid()), jack).get(Position.class);
 		assertThat(returned).isEqualTo(null);		
 		
 		//delete the person from this position
-		resp = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).delete();
+		resp = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		curr = httpQuery(String.format("/api/positions/%d/person",created.getId()), jack).get(Person.class);
+		curr = httpQuery(String.format("/api/positions/%s/person",created.getUuid()), jack).get(Person.class);
 		assertThat(curr).isNull();
 		
 		//Put steve back in his old position
-		resp = httpQuery(String.format("/api/positions/%d/person", stevesCurrentPosition.getId()), admin).post(Entity.json(steve));
+		resp = httpQuery(String.format("/api/positions/%s/person", stevesCurrentPosition.getUuid()), admin).post(Entity.json(steve));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		curr = httpQuery(String.format("/api/positions/%d/person",stevesCurrentPosition.getId()), jack).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(steve.getId());
+		curr = httpQuery(String.format("/api/positions/%s/person",stevesCurrentPosition.getUuid()), jack).get(Person.class);
+		assertThat(curr.getUuid()).isEqualTo(steve.getUuid());
 		
 		//pull for the person at a previous time. 
-		Person prev = httpQuery(String.format("/api/positions/%d/person?atTime=%d", created.getId(), jacksTime.getMillis()), jack)
+		Person prev = httpQuery(String.format("/api/positions/%s/person?atTime=%d", created.getUuid(), jacksTime.getMillis()), jack)
 				.get(Person.class);
 		assertThat(prev).isNotNull();
-		assertThat(prev.getId()).isEqualTo(jack.getId());
+		assertThat(prev.getUuid()).isEqualTo(jack.getUuid());
 		
-		returned = httpQuery(String.format("/api/positions/%d",created.getId()), jack).get(Position.class);
+		returned = httpQuery(String.format("/api/positions/%s", created.getUuid()), jack).get(Position.class);
 		List<PersonPositionHistory> history = returned.loadPreviousPeople();
 		assertThat(history.size()).isEqualTo(2);
-		assertThat(history.get(0).getPosition().getId()).isEqualTo(returned.getId());
+		assertThat(history.get(0).getPosition().getUuid()).isEqualTo(returned.getUuid());
 		assertThat(history.get(0).getPerson()).isEqualTo(jack);
 		assertThat(history.get(0).getStartTime()).isNotNull();
 		assertThat(history.get(0).getEndTime()).isNotNull();
@@ -140,55 +140,55 @@ public class PositionResourceTest extends AbstractResourceTest {
 		prinPos.setStatus(PositionStatus.ACTIVE);
 		
 		Person principal = getRogerRogwell();
-		assertThat(principal.getId()).isNotNull();
+		assertThat(principal.getUuid()).isNotNull();
 		Position tashkil = httpQuery("/api/positions/new", admin).post(Entity.json(prinPos), Position.class);
-		assertThat(tashkil.getId()).isNotNull();
+		assertThat(tashkil.getUuid()).isNotNull();
 		
 		//put the principal in a tashkil
-		resp = httpQuery(String.format("/api/positions/%d/person", tashkil.getId()), admin).post(Entity.json(principal));
+		resp = httpQuery(String.format("/api/positions/%s/person", tashkil.getUuid()), admin).post(Entity.json(principal));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//assign the tashkil to the position
-		resp = httpQuery(String.format("/api/positions/%d/associated", created.getId()), admin).post(Entity.json(tashkil));
+		resp = httpQuery(String.format("/api/positions/%s/associated", created.getUuid()), admin).post(Entity.json(tashkil));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//verify that we can pull the tashkil from the position
-		PositionList retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(PositionList.class);
+		PositionList retT = httpQuery(String.format("/api/positions/%s/associated", created.getUuid()), jack).get(PositionList.class);
 		assertThat(retT.getList().size()).isEqualTo(1);
 		assertThat(retT.getList()).contains(tashkil);
 		
 		//delete the tashkil from this position
-		resp = httpQuery(String.format("/api/positions/%d/associated/%d", created.getId(), tashkil.getId()), admin).delete();
+		resp = httpQuery(String.format("/api/positions/%s/associated/%s", created.getUuid(), tashkil.getUuid()), admin).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//verify that it's now gone. 
-		retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(PositionList.class);
+		retT = httpQuery(String.format("/api/positions/%s/associated", created.getUuid()), jack).get(PositionList.class);
 		assertThat(retT.getList().size()).isEqualTo(0);
 		
 		//remove the principal from the tashkil
-		resp = httpQuery(String.format("/api/positions/%d/person", tashkil.getId()), admin).delete();
+		resp = httpQuery(String.format("/api/positions/%s/person", tashkil.getUuid()), admin).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Try to delete this position, it should fail because the tashkil is active
-		resp = httpQuery(String.format("/api/positions/%d",  tashkil.getId()), admin).delete();
+		resp = httpQuery(String.format("/api/positions/%s",  tashkil.getUuid()), admin).delete();
 		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 		
 		tashkil.setStatus(PositionStatus.INACTIVE);
 		resp = httpQuery("/api/positions/update", admin).post(Entity.json(tashkil));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		resp = httpQuery(String.format("/api/positions/%d",  tashkil.getId()), admin).delete();
+		resp = httpQuery(String.format("/api/positions/%s",  tashkil.getUuid()), admin).delete();
 		assertThat(resp.getStatus()).isEqualTo(200);
 	
-		resp = httpQuery(String.format("/api/positions/%d",tashkil.getId()), jack).get();
+		resp = httpQuery(String.format("/api/positions/%s",tashkil.getUuid()), jack).get();
 		assertThat(resp.getStatus()).isEqualTo(Status.NOT_FOUND.getStatusCode());
 
 		//Put jack back in his old position
-		resp = httpQuery(String.format("/api/positions/%d/person", jacksOldPosition.getId()), admin).post(Entity.json(jack));
+		resp = httpQuery(String.format("/api/positions/%s/person", jacksOldPosition.getUuid()), admin).post(Entity.json(jack));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
-		curr = httpQuery(String.format("/api/positions/%d/person", jacksOldPosition.getId()), admin).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(jack.getId());
+		curr = httpQuery(String.format("/api/positions/%s/person", jacksOldPosition.getUuid()), admin).get(Person.class);
+		assertThat(curr.getUuid()).isEqualTo(jack.getUuid());
 	}
 		
 	
@@ -208,14 +208,14 @@ public class PositionResourceTest extends AbstractResourceTest {
 		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);
 		assertThat(created.getName()).isEqualTo(test.getName());
 		assertThat(created.getCode()).isEqualTo(test.getCode());
-		assertThat(created.getId()).isNotNull();
+		assertThat(created.getUuid()).isNotNull();
 		
 		//Change Name/Code
 		created.setName("Deputy Chief of Donuts");
 		Response resp = httpQuery("/api/positions/update", admin).post(Entity.json(created));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		Position returned = httpQuery(String.format("/api/positions/%d",created.getId()), jack).get(Position.class);
+		Position returned = httpQuery(String.format("/api/positions/%s", created.getUuid()), jack).get(Position.class);
 		assertThat(returned.getName()).isEqualTo(created.getName());
 		assertThat(returned.getCode()).isEqualTo(created.getCode());
 		
@@ -224,18 +224,18 @@ public class PositionResourceTest extends AbstractResourceTest {
 		Position stevesCurrPos = steve.loadPosition();
 		assertThat(stevesCurrPos).isNotNull();
 		
-		resp = httpQuery(String.format("/api/positions/%d/person",created.getId()), admin).post(Entity.json(steve));
+		resp = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).post(Entity.json(steve));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
-		Person returnedPrincipal = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).get(Person.class);
-		assertThat(returnedPrincipal.getId()).isEqualTo(steve.getId());
+		Person returnedPrincipal = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).get(Person.class);
+		assertThat(returnedPrincipal.getUuid()).isEqualTo(steve.getUuid());
 		
 		//Put steve back in his originial position
-		resp = httpQuery(String.format("/api/positions/%d/person",stevesCurrPos.getId()), admin).post(Entity.json(steve));
+		resp = httpQuery(String.format("/api/positions/%s/person", stevesCurrPos.getUuid()), admin).post(Entity.json(steve));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Ensure the old position is now empty
-		returnedPrincipal = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).get(Person.class);
+		returnedPrincipal = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).get(Person.class);
 		assertThat(returnedPrincipal).isNull();
 		
 		
@@ -289,10 +289,10 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		query.setText("Advisor");
 		query.setType(null);
-		query.setOrganizationId(ef1.getId());
+		query.setOrganizationUuid(ef1.getUuid());
 		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
 		assertThat(searchResults.stream()
-				.filter(p -> p.getOrganization().getId() == ef1.getId())
+				.filter(p -> p.getOrganization().getUuid() == ef1.getUuid())
 				.collect(Collectors.toList()))
 			.hasSameElementsAs(searchResults);
 		
@@ -359,7 +359,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		newb.setStatus(PersonStatus.ACTIVE);
 		
 		newb = httpQuery("/api/people/new", admin).post(Entity.json(newb), Person.class);
-		assertThat(newb.getId()).isNotNull();
+		assertThat(newb.getUuid()).isNotNull();
 		
 		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
 				.get(OrganizationList.class);
@@ -373,40 +373,40 @@ public class PositionResourceTest extends AbstractResourceTest {
 		newbPosition.setPerson(newb);
 		
 		newbPosition = httpQuery("/api/positions/new", admin).post(Entity.json(newbPosition), Position.class);
-		assertThat(newbPosition.getId()).isNotNull();
+		assertThat(newbPosition.getUuid()).isNotNull();
 		
 		//Ensure that the position contains the person
-		Position returned = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
-		assertThat(returned.getId()).isNotNull();
+		Position returned = httpQuery("/api/positions/" + newbPosition.getUuid(), admin).get(Position.class);
+		assertThat(returned.getUuid()).isNotNull();
 		assertThat(returned.loadPerson()).isNotNull();
-		assertThat(returned.loadPerson().getId()).isEqualTo(newb.getId());
+		assertThat(returned.loadPerson().getUuid()).isEqualTo(newb.getUuid());
 		
 		//Ensure that the person is assigned to this position. 
 		assertThat(newb.loadPosition()).isNotNull();
-		assertThat(newb.loadPosition().getId()).isEqualTo(returned.getId());
+		assertThat(newb.loadPosition().getUuid()).isEqualTo(returned.getUuid());
 		
 		//Assign somebody else to this position. 
 		Person prin2 = new Person();
 		prin2.setName("2nd Principal in PrincipalTest");
 		prin2.setRole(Role.PRINCIPAL);
 		prin2 = httpQuery("/api/people/new", admin).post(Entity.json(prin2),Person.class);
-		assertThat(prin2.getId()).isNotNull();
+		assertThat(prin2.getUuid()).isNotNull();
 		assertThat(prin2.loadPosition()).isNull();
 		
-		prin2.setPosition(Position.createWithId(newbPosition.getId()));
+		prin2.setPosition(Position.createWithUuid(newbPosition.getUuid()));
 		Response resp = httpQuery("/api/people/update", admin).post(Entity.json(prin2));
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Reload this person to check their position was set. 
-		prin2 = httpQuery("/api/people/" + prin2.getId(), admin).get(Person.class);
+		prin2 = httpQuery("/api/people/" + prin2.getUuid(), admin).get(Person.class);
 		assertThat(prin2).isNotNull();
 		assertThat(prin2.loadPosition()).isNotNull();
-		assertThat(prin2.loadPosition().getId()).isEqualTo(newbPosition.getId());
+		assertThat(prin2.loadPosition().getUuid()).isEqualTo(newbPosition.getUuid());
 		
 		//Check with a different API endpoint. 
-		Person currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
+		Person currHolder = httpQuery("/api/positions/" + newbPosition.getUuid() + "/person", admin).get(Person.class);
 		assertThat(currHolder).isNotNull();
-		assertThat(currHolder.getId()).isEqualTo(prin2.getId());
+		assertThat(currHolder.getUuid()).isEqualTo(prin2.getUuid());
 		
 		//Slow the test down a bit
 		try {
@@ -419,27 +419,27 @@ public class PositionResourceTest extends AbstractResourceTest {
 		pos2.setType(PositionType.PRINCIPAL);
 		pos2.setOrganization(orgs.getList().get(0));
 		pos2.setStatus(PositionStatus.ACTIVE);
-		pos2.setPerson(Person.createWithId(prin2.getId()));
+		pos2.setPerson(Person.createWithUuid(prin2.getUuid()));
 		
 		pos2 = httpQuery("/api/positions/new", admin).post(Entity.json(pos2), Position.class);
-		assertThat(pos2.getId()).isNotNull();
+		assertThat(pos2.getUuid()).isNotNull();
 		
-		returned = httpQuery("/api/positions/" + pos2.getId(), admin).get(Position.class);
+		returned = httpQuery("/api/positions/" + pos2.getUuid(), admin).get(Position.class);
 		assertThat(returned).isNotNull();
 		assertThat(returned.getName()).isEqualTo(pos2.getName());
 		assertThat(returned.loadPerson()).isNotNull();
-		assertThat(returned.loadPerson().getId()).isEqualTo(prin2.getId());
+		assertThat(returned.loadPerson().getUuid()).isEqualTo(prin2.getUuid());
 		
 		//Make sure prin2 got moved out of newbPosition
-		currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
+		currHolder = httpQuery("/api/positions/" + newbPosition.getUuid() + "/person", admin).get(Person.class);
 		assertThat(currHolder).isNull();
 		
 		//Pull the history of newbPosition
-		newbPosition = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
+		newbPosition = httpQuery("/api/positions/" + newbPosition.getUuid(), admin).get(Position.class);
 		List<PersonPositionHistory> history = newbPosition.loadPreviousPeople();
 		assertThat(history.size()).isEqualTo(2);
-		assertThat(history.get(0).getPerson().getId()).isEqualTo(newb.getId());
-		assertThat(history.get(1).getPerson().getId()).isEqualTo(prin2.getId());
+		assertThat(history.get(0).getPerson().getUuid()).isEqualTo(newb.getUuid());
+		assertThat(history.get(1).getPerson().getUuid()).isEqualTo(prin2.getUuid());
 		
 		
 		

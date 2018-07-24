@@ -1,3 +1,3 @@
 locationList(f:recents) {
-	list { id, name }
+	list { uuid, name }
 }

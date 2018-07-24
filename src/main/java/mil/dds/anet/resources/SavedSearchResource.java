@@ -42,7 +42,7 @@ public class SavedSearchResource implements IGraphQLResource  {
 	@Timed
 	@Path("/new")
 	public SavedSearch saveSearch(@Auth Person user, SavedSearch search) {
-		search.setOwner(Person.createWithId(user.getId()));
+		search.setOwner(Person.createWithUuid(user.getUuid()));
 		try {
 			return dao.insert(search);
 		} catch (UnableToExecuteStatementException e) {
@@ -60,9 +60,9 @@ public class SavedSearchResource implements IGraphQLResource  {
 	
 	@DELETE
 	@Timed
-	@Path("/{id}")
-	public Response delete(@Auth Person user, @PathParam("id") Integer id) { 
-		int numDeleted = dao.deleteSavedSearch(id, user);
+	@Path("/{uuid}")
+	public Response delete(@Auth Person user, @PathParam("uuid") String uuid) {
+		int numDeleted = dao.deleteSavedSearch(uuid, user);
 		if (numDeleted == 1) { 
 			return Response.ok().build();
 		} else { 

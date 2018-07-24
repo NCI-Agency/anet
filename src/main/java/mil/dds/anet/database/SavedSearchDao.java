@@ -1,10 +1,7 @@
 package mil.dds.anet.database;
 
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 
 import mil.dds.anet.beans.Person;
@@ -21,54 +18,50 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 		this.dbHandle = h;
 	}
 	
-	@Override
 	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
-	
-	@Override
-	public SavedSearch getById(int id) { 
-		return dbHandle.createQuery("/* getSavedSearchById */ SELECT * from \"savedSearches\" where id = :id")
-				.bind("id", id)
+
+	public SavedSearch getByUuid(String uuid) {
+		return dbHandle.createQuery("/* getSavedSearchByUuid */ SELECT * from \"savedSearches\" where uuid = :uuid")
+				.bind("uuid", uuid)
 				.map(new SavedSearchMapper())
 				.first();
 	}
 
 	public List<SavedSearch> getSearchesByOwner(Person owner) { 
-		return dbHandle.createQuery("/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerId\" = :ownerId")
-			.bind("ownerId", owner.getId())
+		return dbHandle.createQuery("/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
+			.bind("ownerUuid", owner.getUuid())
 			.map(new SavedSearchMapper())
 			.list();
 	}
 	
-	@Override
 	public SavedSearch insert(SavedSearch obj) {
-		obj.setCreatedAt(DateTime.now());
-		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
-				+ "(\"ownerId\", name, \"objectType\", query) "
-				+ "VALUES (:ownerId, :name, :objectType, :query)")
+		DaoUtils.setInsertFields(obj);
+		dbHandle.createStatement("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
+				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
+				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
 			.bindFromProperties(obj)
-			.bind("ownerId", obj.getOwner().getId())
+			.bind("ownerUuid", obj.getOwner().getUuid())
 			.bind("objectType", DaoUtils.getEnumId(obj.getObjectType()))
-			.executeAndReturnGeneratedKeys();
-		obj.setId(DaoUtils.getGeneratedId(keys));
+			.execute();
 		return obj;
 	}
 
-	@Override
 	public int update(SavedSearch obj) {
+		DaoUtils.setUpdateFields(obj);
 		return dbHandle.createStatement("/* updateSavedSearch */ UPDATE \"savedSearches\" "
 				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
-				+ "WHERE id = :id")
+				+ "WHERE uuid = :uuid")
 			.bindFromProperties(obj)
 			.execute();
 	}
 
-	public int deleteSavedSearch(Integer id, Person owner) {
+	public int deleteSavedSearch(String uuid, Person owner) {
 		return dbHandle.createStatement("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
-				+ "WHERE id = :id AND \"ownerId\" = :ownerId")
-			.bind("id", id)
-			.bind("ownerId", owner.getId())
+				+ "WHERE uuid = :uuid AND \"ownerUuid\" = :ownerUuid")
+			.bind("uuid", uuid)
+			.bind("ownerUuid", owner.getUuid())
 			.execute();
 	}
 	

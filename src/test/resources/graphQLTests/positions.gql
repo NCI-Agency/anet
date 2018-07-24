@@ -1,10 +1,10 @@
-position(id:${positionId}) {
-    id, name, type, code,
-    organization { id, shortName, longName },
-    person { id, name, rank },
+position(uuid:"${positionUuid}") {
+    uuid, name, type, code,
+    organization { uuid, shortName, longName },
+    person { uuid, name, rank },
     associatedPositions {
-        id, name,
-        person { id, name }
+        uuid, name,
+        person { uuid, name }
     },
-    location { id, name }
+    location { uuid, name }
 }

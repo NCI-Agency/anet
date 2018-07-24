@@ -42,14 +42,14 @@ export default class ValidatableFormWrapper extends Component {
 		const {canSubmitWithError} = props
 		// individual form fields can be marked as submittable even with errors, so we have three levels of error state:
 		// 0: no error, 1: warning, 2: error that should prevent submit
-		const onError = () => this.setState({formErrors: {...this.state.formErrors, [props.id]: canSubmitWithError ? 1 : 2}})
-		const onValid = () => this.setState({formErrors: {...this.state.formErrors, [props.id]: 0}})
+		const onError = () => this.setState({formErrors: {...this.state.formErrors, [props.uuid]: canSubmitWithError ? 1 : 2}})
+		const onValid = () => this.setState({formErrors: {...this.state.formErrors, [props.uuid]: 0}})
 
 		return <Form.Field {...Object.without(props, 'required', 'humanName', 'validateBeforeUserTouches')}
 			validateBeforeUserTouches={this.state.afterSubmit || props.validateBeforeUserTouches}
 			onError={onError}
 			onValid={onValid}
-			humanName={props.humanName || props.label || utils.sentenceCase(props.id)}
+			humanName={props.humanName || props.label || utils.sentenceCase(props.uuid)}
 			required={_get(props, 'required', true)} />
 	}
 }

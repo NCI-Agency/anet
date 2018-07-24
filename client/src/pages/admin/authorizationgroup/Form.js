@@ -98,8 +98,8 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		this.setState({isBlocking: false})
 		API.send(url, authGroup, {disableSubmits: true})
 			.then(response => {
-				if (response.id) {
-					authGroup.id = response.id
+				if (response.uuid) {
+					authGroup.uuid = response.uuid
 				}
 				this.props.history.push({
 					pathname: AuthorizationGroup.pathFor(authGroup),

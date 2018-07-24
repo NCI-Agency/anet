@@ -33,12 +33,12 @@ public class ReportPerson extends Person {
 	public int hashCode() { 
 		return super.hashCode() * ((primary) ? 7 : -7);
 	}
-	
-	public static ReportPerson createWithId(Integer id) {
-		ReportPerson rp = new ReportPerson();
-		rp.setId(id);
+
+	public static ReportPerson createWithUuid(String uuid) {
+		final ReportPerson rp = new ReportPerson();
+		rp.setUuid(uuid);
 		rp.setLoadLevel(LoadLevel.ID_ONLY);
 		return rp;
 	}
-	
+
 }

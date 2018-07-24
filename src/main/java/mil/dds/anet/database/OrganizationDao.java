@@ -2,10 +2,7 @@ package mil.dds.anet.database;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
@@ -25,9 +22,9 @@ import mil.dds.anet.utils.Utils;
 
 public class OrganizationDao extends AnetBaseDao<Organization> {
 
-	private static String[] fields = {"id", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgId"};
+	private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgUuid"};
 	private static String tableName = "organizations";
-	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 	
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
@@ -38,20 +35,19 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		Long manualRowCount = getSqliteRowCount();
 		return OrganizationList.fromQuery(query, pageNum, pageSize, manualRowCount);
 	}
-	
-	public Organization getById(int id) { 
-		Query<Organization> query = dbHandle.createQuery(
-				"/* getOrgById */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id = :id")
-			.bind("id",id)
-			.map(new OrganizationMapper());
-		List<Organization> results = query.list();
-		return (results.size() == 0) ? null : results.get(0);
+
+	public Organization getByUuid(String uuid) {
+		return dbHandle.createQuery(
+				"/* getOrgByUuid */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid = :uuid")
+				.bind("uuid", uuid)
+				.map(new OrganizationMapper())
+				.first();
 	}
-	
+
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
 		return dbHandle.createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS
 				+ " FROM organizations "
-				+ "WHERE \"parentOrgId\" IS NULL "
+				+ "WHERE \"parentOrgUuid\" IS NULL "
 				+ "AND status = :status "
 				+ "AND type = :type")
 			.bind("status", DaoUtils.getEnumId(OrganizationStatus.ACTIVE))
@@ -63,13 +59,14 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	@UseStringTemplate3StatementLocator
 	public interface OrgListQueries {
 		@Mapper(OrganizationMapper.class)
-		@SqlQuery("SELECT id AS organizations_id"
+		@SqlQuery("SELECT uuid AS organizations_uuid"
+				+ ", uuid AS uuid"
 				+ ", \"shortName\" AS organizations_shortName"
 				+ ", \"longName\" AS organizations_longName"
 				+ ", status AS organizations_status"
 				+ ", \"identificationCode\" AS organizations_identificationCode"
 				+ ", type AS organizations_type"
-				+ ", \"parentOrgId\" AS organizations_parentOrgId"
+				+ ", \"parentOrgUuid\" AS organizations_parentOrgUuid"
 				+ ", \"createdAt\" AS organizations_createdAt"
 				+ ", \"updatedAt\" AS organizations_updatedAt"
 				+ " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
@@ -84,31 +81,27 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	}
 
 	public Organization insert(Organization org) {
-		org.setCreatedAt(DateTime.now());
-		org.setUpdatedAt(org.getCreatedAt());
-		
-		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* insertOrg */ INSERT INTO organizations (\"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgId\") "
-				+ "VALUES (:shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgId)")
+		DaoUtils.setInsertFields(org);
+		dbHandle.createStatement(
+				"/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\") "
+				+ "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid)")
 			.bindFromProperties(org)
 			.bind("status", DaoUtils.getEnumId(org.getStatus()))
 			.bind("type", DaoUtils.getEnumId(org.getType()))
-			.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))
-			.executeAndReturnGeneratedKeys();
-		
-		org.setId(DaoUtils.getGeneratedId(keys));
+			.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
+			.execute();
 		return org;
 	}
 	
 	public int update(Organization org) {
-		org.setUpdatedAt(DateTime.now());
+		DaoUtils.setUpdateFields(org);
 		int numRows = dbHandle.createStatement("/* updateOrg */ UPDATE organizations "
 				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
-				+ "\"updatedAt\" = :updatedAt, \"parentOrgId\" = :parentOrgId where id = :id")
+				+ "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid where uuid = :uuid")
 				.bindFromProperties(org)
 				.bind("status", DaoUtils.getEnumId(org.getStatus()))
 				.bind("type", DaoUtils.getEnumId(org.getType()))
-				.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))
+				.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
 				.execute();
 			
 		return numRows;

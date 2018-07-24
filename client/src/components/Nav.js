@@ -39,10 +39,10 @@ class BaseNav extends Component {
 		const inInsights = path.indexOf('/insights') === 0
 
 		const myOrg = currentUser.position ? currentUser.position.organization : null
-		let orgId, myOrgId
+		let orgUuid, myOrgUuid
 		if (inOrg) {
-			orgId = +path.split('/')[2]
-			myOrgId = myOrg && +myOrg.id
+			orgUuid = path.split('/')[2]
+			myOrgUuid = myOrg && myOrg.uuid
 		}
 
 		const ScrollLinkNavItem = ScrollLink(NavItem)
@@ -71,7 +71,7 @@ class BaseNav extends Component {
 
 				<BSNav id="search-nav"></BSNav>
 
-				{currentUser.id && <Link to={{pathname: '/reports/mine'}}>
+				{currentUser.uuid && <Link to={{pathname: '/reports/mine'}}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
@@ -88,17 +88,17 @@ class BaseNav extends Component {
 					<NavItem id="my-organization">My organization <br /><small>{myOrg.shortName}</small></NavItem>
 				</Link>}
 
-				{inOrg && orgId === myOrgId && orgSubNav}
+				{inOrg && orgUuid === myOrgUuid && orgSubNav}
 
-				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="organizations" active={inOrg && orgId !== myOrgId}>
+				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="organizations" active={inOrg && orgUuid !== myOrgUuid}>
 					{Organization.map(organizations, org =>
-						<LinkTo organization={org} componentClass={Link} key={org.id}>
+						<LinkTo organization={org} componentClass={Link} key={org.uuid}>
 							<MenuItem>{org.shortName}</MenuItem>
 						</LinkTo>
 					)}
 				</NavDropdown>
 
-				{inOrg && orgId !== myOrgId && orgSubNav}
+				{inOrg && orgUuid !== myOrgUuid && orgSubNav}
 
 				<Link to="/rollup">
 					<NavItem>Daily rollup</NavItem>

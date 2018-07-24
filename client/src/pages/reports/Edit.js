@@ -37,19 +37,19 @@ class BaseReportEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			report(id:${props.match.params.id}) {
-				id, intent, engagementDate, atmosphere, atmosphereDetails, state
+			report(uuid:"${props.match.params.uuid}") {
+				uuid, intent, engagementDate, atmosphere, atmosphereDetails, state
 				keyOutcomes, reportText, nextSteps, cancelledReason,
-				author { id, name },
-				location { id, name },
+				author { uuid, name },
+				location { uuid, name },
 				attendees {
-					id, name, role, primary
-					position { id, name, organization { id, shortName} }
+					uuid, name, role, primary
+					position { uuid, name, organization { uuid, shortName} }
 				}
-				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
-				tags { id, name, description }
-				reportSensitiveInformation { id, text }
-				authorizationGroups { id, name, description }
+				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
+				tags { uuid, name, description }
+				reportSensitiveInformation { uuid, text }
+				authorizationGroups { uuid, name, description }
 			}
 		`).then(data => {
 			function getReportFromData() {
@@ -70,23 +70,23 @@ class BaseReportEdit extends Page {
 		const onConfirmDeleteProps = {
 				onConfirmDelete: this.onConfirmDelete,
 				objectType: "report",
-				objectDisplay: `#${this.state.report.id}`,
+				objectDisplay: `#${this.state.report.uuid}`,
 				bsStyle: "warning",
 				buttonLabel: "Delete this report"
 		}
 
 		return (
 			<div className="report-edit">
-				<Breadcrumbs items={[['Report #' + report.id, '/reports/' + report.id], ['Edit', '/reports/' + report.id + '/edit']]} />
+				<Breadcrumbs items={[['Report #' + report.uuid, '/reports/' + report.uuid], ['Edit', '/reports/' + report.uuid + '/edit']]} />
 
-				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
+				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.uuid}`} onDelete={canDelete && onConfirmDeleteProps} />
 			</div>
 		)
 	}
 
 	@autobind
 	onConfirmDelete() {
-		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
+		API.send(`/api/reports/${this.state.report.uuid}/delete`, {}, {method: 'DELETE'}).then(data => {
 			this.props.history.push({
 				pathname: '/',
 				state: {success: 'Report deleted'}

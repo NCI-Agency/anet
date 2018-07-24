@@ -18,7 +18,7 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 const d3 = require('d3')
 const chartByDayOfWeekId = 'reports_by_day_of_week'
 const GQL_CHART_FIELDS =  /* GraphQL */`
-  id
+  uuid
   engagementDayOfWeek
 `
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
@@ -106,7 +106,7 @@ class ReportsByDayOfWeek extends Component {
       // Set the order in which to display the days of the week
       let displayOrderDaysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
       let simplifiedValues = values[0].reportList.list ?
-          values[0].reportList.list.map(d => {return {reportId: d.id, dayOfWeek: d.engagementDayOfWeek}}) :
+          values[0].reportList.list.map(d => {return {reportId: d.uuid, dayOfWeek: d.engagementDayOfWeek}}) :
           []
       this.setState({
         isLoading: false,

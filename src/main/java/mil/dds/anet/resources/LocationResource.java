@@ -53,9 +53,9 @@ public class LocationResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@GraphQLFetcher
-	@Path("/{id}")
-	public Location getById(@PathParam("id") int id) { 
-		Location loc = dao.getById(id);
+	@Path("/{uuid}")
+	public Location getByUuid(@PathParam("uuid") String uuid) {
+		Location loc = dao.getByUuid(uuid);
 		if (loc == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return loc;
 	}

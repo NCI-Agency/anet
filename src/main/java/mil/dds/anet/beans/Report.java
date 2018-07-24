@@ -82,7 +82,7 @@ public class Report extends AbstractAnetBean {
 		if (approvalStep == null || approvalStep.getLoadLevel() == null) { return approvalStep; } 
 		if (approvalStep.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
 			this.approvalStep = AnetObjectEngine.getInstance()
-				.getApprovalStepDao().getById(approvalStep.getId());
+				.getApprovalStepDao().getByUuid(approvalStep.getUuid());
 		}
 		return approvalStep;
 	}
@@ -130,7 +130,7 @@ public class Report extends AbstractAnetBean {
 		if (location == null || location.getLoadLevel() == null) { return location; } 
 		if (location.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
 			this.location = AnetObjectEngine.getInstance()
-					.getLocationDao().getById(location.getId());
+					.getLocationDao().getByUuid(location.getUuid());
 		}
 		return location;
 	}
@@ -196,8 +196,8 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLFetcher("attendees")
 	public List<ReportPerson> loadAttendees() { 
-		if (attendees == null && id != null) {
-			attendees = AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(id);
+		if (attendees == null && uuid != null) {
+			attendees = AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(uuid);
 		}
 		return attendees;
 	}
@@ -288,7 +288,7 @@ public class Report extends AbstractAnetBean {
 	public Person loadAuthor() {
 		if (author == null || author.getLoadLevel() == null) { return author; } 
 		if (author.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.author = AnetObjectEngine.getInstance().getPersonDao().getById(author.getId());
+			this.author = AnetObjectEngine.getInstance().getPersonDao().getByUuid(author.getUuid());
 		}
 		return author;
 	}
@@ -316,7 +316,7 @@ public class Report extends AbstractAnetBean {
 	public Organization loadAdvisorOrg() { 
 		if (advisorOrg == null || advisorOrg.getLoadLevel() == null) { return advisorOrg; } 
 		if (advisorOrg.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.advisorOrg = AnetObjectEngine.getInstance().getOrganizationDao().getById(advisorOrg.getId());
+			this.advisorOrg = AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(advisorOrg.getUuid());
 		}
 		return advisorOrg;
 	}
@@ -334,7 +334,7 @@ public class Report extends AbstractAnetBean {
 	public Organization loadPrincipalOrg() { 
 		if (principalOrg == null || principalOrg.getLoadLevel() == null) { return principalOrg; } 
 		if (principalOrg.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.principalOrg = AnetObjectEngine.getInstance().getOrganizationDao().getById(principalOrg.getId());
+			this.principalOrg = AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(principalOrg.getUuid());
 		}
 		return principalOrg;
 	}
@@ -364,7 +364,7 @@ public class Report extends AbstractAnetBean {
 	@GraphQLFetcher("approvalStatus")
 	public List<ApprovalAction> loadApprovalStatus() { 
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		List<ApprovalAction> actions = engine.getApprovalActionDao().getActionsForReport(this.getId());
+		List<ApprovalAction> actions = engine.getApprovalActionDao().getActionsForReport(this.getUuid());
 		
 		if (this.getState() == ReportState.RELEASED) {
 			//Compact to only get the most recent event for each step.
@@ -375,7 +375,7 @@ public class Report extends AbstractAnetBean {
 			ApprovalAction last = actions.get(0);
 			List<ApprovalAction> compacted = new LinkedList<ApprovalAction>();
 			for (ApprovalAction action : actions) {
-				if (action.getStep() != null && last.getStep() != null && action.getStep().getId().equals(last.getStep().getId()) == false) { 
+				if (action.getStep() != null && last.getStep() != null && action.getStep().getUuid().equals(last.getStep().getUuid()) == false) {
 					compacted.add(last);
 				}
 				last = action;
@@ -387,28 +387,28 @@ public class Report extends AbstractAnetBean {
 		Organization ao = engine.getOrganizationForPerson(getAuthor());
 		if (ao == null) {
 			//use the default approval workflow.
-			String defaultOrgId = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
-			if (defaultOrgId == null) { 
+			String defaultOrgUuid = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
+			if (defaultOrgUuid == null) {
 				throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
 			}
-			ao = Organization.createWithId(Integer.parseInt(defaultOrgId));
+			ao = Organization.createWithUuid(defaultOrgUuid);
 		}
 		
 		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(ao);
 		if (steps == null || steps.size() == 0) {
 			//No approval steps for this organization
-			String defaultOrgId = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
-			if (defaultOrgId == null) { 
+			String defaultOrgUuid = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
+			if (defaultOrgUuid == null) {
 				throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
 			}
-			steps = engine.getApprovalStepsForOrg(Organization.createWithId(Integer.parseInt(defaultOrgId)));
+			steps = engine.getApprovalStepsForOrg(Organization.createWithUuid(defaultOrgUuid));
 		}
 				
 		List<ApprovalAction> workflow = new LinkedList<ApprovalAction>();
 		for (ApprovalStep step : steps) { 
 			//If there is an Action for this step, grab the last one (date wise)
 			Optional<ApprovalAction> existing = actions.stream().filter(a -> 
-					Objects.equals(step.getId(), DaoUtils.getId(a.getStep()))
+					Objects.equals(step.getUuid(), DaoUtils.getUuid(a.getStep()))
 				).max(new Comparator<ApprovalAction>() {
 					public int compare(ApprovalAction a, ApprovalAction b) {
 						return a.getCreatedAt().compareTo(b.getCreatedAt());
@@ -429,8 +429,8 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLFetcher("tags")
 	public List<Tag> loadTags() {
-		if (tags == null && id != null) {
-			tags = AnetObjectEngine.getInstance().getReportDao().getTagsForReport(id);
+		if (tags == null && uuid != null) {
+			tags = AnetObjectEngine.getInstance().getReportDao().getTagsForReport(uuid);
 		}
 		return tags;
 	}
@@ -446,7 +446,7 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLFetcher("reportSensitiveInformation")
 	public ReportSensitiveInformation loadReportSensitiveInformation() {
-		if (reportSensitiveInformation == null && id != null) {
+		if (reportSensitiveInformation == null && uuid != null) {
 			reportSensitiveInformation = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().getForReport(this, user);
 		}
 		return reportSensitiveInformation;
@@ -475,8 +475,8 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLFetcher("authorizationGroups")
 	public List<AuthorizationGroup> loadAuthorizationGroups() {
-		if (authorizationGroups == null && id != null) {
-			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(id);
+		if (authorizationGroups == null && uuid != null) {
+			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(uuid);
 		}
 		return authorizationGroups;
 	}
@@ -496,13 +496,13 @@ public class Report extends AbstractAnetBean {
 			return false;
 		}
 		Report r = (Report) other;
-		return Objects.equals(r.getId(), id)
+		return Objects.equals(r.getUuid(), uuid)
 				&& Objects.equals(r.getState(), state)
-				&& idEqual(r.getApprovalStep(), approvalStep)
+				&& uuidEqual(r.getApprovalStep(), approvalStep)
 				&& Objects.equals(r.getCreatedAt(), createdAt)
 				&& Objects.equals(r.getUpdatedAt(), updatedAt)
 				&& Objects.equals(r.getEngagementDate(), engagementDate)
-				&& idEqual(r.getLocation(), location)
+				&& uuidEqual(r.getLocation(), location)
 				&& Objects.equals(r.getIntent(), intent)
 				&& Objects.equals(r.getExsum(), exsum)
 				&& Objects.equals(r.getAtmosphere(), atmosphere)
@@ -511,7 +511,7 @@ public class Report extends AbstractAnetBean {
 				&& Objects.equals(r.getTasks(), tasks)
 				&& Objects.equals(r.getReportText(), reportText)
 				&& Objects.equals(r.getNextSteps(), nextSteps)
-				&& idEqual(r.getAuthor(), author)
+				&& uuidEqual(r.getAuthor(), author)
 				&& Objects.equals(r.getComments(), comments)
 				&& Objects.equals(r.getTags(), tags)
 				&& Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
@@ -519,22 +519,22 @@ public class Report extends AbstractAnetBean {
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, state, approvalStep, createdAt, updatedAt, 
-			location, intent, exsum, attendees, tasks, reportText, 
+	public int hashCode() {
+		return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt,
+			location, intent, exsum, attendees, tasks, reportText,
 			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate,
 			tags, reportSensitiveInformation, authorizationGroups);
 	}
 
-	public static Report createWithId(Integer id) {
-		Report r = new Report();
-		r.setId(id);
+	public static Report createWithUuid(String uuid) {
+		final Report r = new Report();
+		r.setUuid(uuid);
 		r.setLoadLevel(LoadLevel.ID_ONLY);
 		return r;
 	}
-	
+
 	@Override
-	public String toString() { 
-		return String.format("[id:%d, intent:%s]", id, intent);
+	public String toString() {
+		return String.format("[uuid:%s, intent:%s]", uuid, intent);
 	}
 }

@@ -17,9 +17,9 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 const d3 = require('d3')
 const chartId = 'future_engagements_by_location'
 const GQL_CHART_FIELDS =  /* GraphQL */`
-  id
+  uuid
   engagementDate
-  location { id, name }
+  location { uuid, name }
 `
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(HorizontalBarChart))
 
@@ -110,7 +110,7 @@ class FutureEngagementsByLocation extends Component {
     // Query used by the chart
     const chartQuery = this.runChartQuery(this.chartQueryParams())
     const noLocation = {
-      id: -1,
+      uuid: "-1",
       name: 'No location allocated'
     }
     Promise.all([chartQuery]).then(values => {
@@ -126,7 +126,7 @@ class FutureEngagementsByLocation extends Component {
       })
       let categoriesWithData = d3.nest()
         .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
-        .key(function(d) { return d.location.id })
+        .key(function(d) { return d.location.uuid })
         .rollup(function(leaves) { return leaves.length })
         .entries(reportsList)
       let groupedData = allCategories.map((d)=> {
@@ -144,7 +144,7 @@ class FutureEngagementsByLocation extends Component {
       )
       graphData.leavesLabels = reportsList.reduce(
         function(prev, curr) {
-          prev[curr.location.id] = curr.location.name
+          prev[curr.location.uuid] = curr.location.name
           return prev
         },
         {}
@@ -172,7 +172,7 @@ class FutureEngagementsByLocation extends Component {
         // fetch is independent of the engagementDate time value
         engagementDateStart: moment(this.state.focusedDate).startOf('day').valueOf(),
         engagementDateEnd: moment(this.state.focusedDate).endOf('day').valueOf(),
-        locationId: this.state.focusedLocation.key
+        locationUuid: this.state.focusedLocation.key
       })
     }
     // Query used by the reports collection

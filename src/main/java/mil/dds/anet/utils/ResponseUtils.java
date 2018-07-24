@@ -99,6 +99,9 @@ public class ResponseUtils {
 		if (cause != null) {
 			final String message = cause.getMessage();
 			if (message != null && (message.contains(" duplicate ") || message.contains(" UNIQUE constraint "))) {
+				logger.error("Duplicate found", e);
+				logger.error("Caused by", cause);
+				logger.error("With message: {}", message);
 				return new WebApplicationException(userMessage, Status.CONFLICT);
 			}
 		}

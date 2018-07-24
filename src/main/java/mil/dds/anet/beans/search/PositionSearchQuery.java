@@ -10,13 +10,13 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 	public enum PositionSearchSortBy { CREATED_AT, NAME, CODE }
 
 	Boolean matchPersonName;
-	Integer organizationId;
+	String organizationUuid;
 	Boolean includeChildrenOrgs;
 	List<PositionType> type;
 	Boolean isFilled;
-	Integer locationId;
+	String locationUuid;
 	PositionStatus status;
-	private Integer authorizationGroupId;
+	private String authorizationGroupUuid;
 	
 	private PositionSearchSortBy sortBy;
 	private SortOrder sortOrder;
@@ -34,12 +34,12 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 		this.matchPersonName = matchPersonName;
 	}
 	
-	public Integer getOrganizationId() {
-		return organizationId;
+	public String getOrganizationUuid() {
+		return organizationUuid;
 	}
 	
-	public void setOrganizationId(Integer orgId) {
-		this.organizationId = orgId;
+	public void setOrganizationUuid(String orgUuid) {
+		this.organizationUuid = orgUuid;
 	}
 	
 	public Boolean getIncludeChildrenOrgs() {
@@ -66,12 +66,12 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 		this.isFilled = isFilled;
 	}
 	
-	public Integer getLocationId() {
-		return locationId;
+	public String getLocationUuid() {
+		return locationUuid;
 	}
 	
-	public void setLocationId(Integer locationId) {
-		this.locationId = locationId;
+	public void setLocationUuid(String locationUuid) {
+		this.locationUuid = locationUuid;
 	}
 	
 	public PositionStatus getStatus() {
@@ -82,12 +82,12 @@ public class PositionSearchQuery extends AbstractSearchQuery {
 		this.status = status;
 	}
 
-	public Integer getAuthorizationGroupId() {
-		return authorizationGroupId;
+	public String getAuthorizationGroupUuid() {
+		return authorizationGroupUuid;
 	}
 
-	public void setAuthorizationGroupId(Integer authorizationGroupId) {
-		this.authorizationGroupId = authorizationGroupId;
+	public void setAuthorizationGroupUuid(String authorizationGroupUuid) {
+		this.authorizationGroupUuid = authorizationGroupUuid;
 	}
 
 	public PositionSearchSortBy getSortBy() {

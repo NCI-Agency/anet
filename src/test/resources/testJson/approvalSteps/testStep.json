@@ -1,6 +1,6 @@
 {
-	"id" : 42,
-	"advisorOrganizationId" : 22,
+	"uuid" : "42",
+	"advisorOrganizationUuid" : "22",
 	"approvers" : [],
-	"nextStepId" : 9292
+	"nextStepUuid" : "9292"
 }

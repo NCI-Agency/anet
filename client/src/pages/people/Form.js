@@ -57,7 +57,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 	componentDidUpdate(prevProps, prevState) {
 		const { person } = this.props
 		const prevPerson = prevProps.person
-		if (person.id !== prevPerson.id) {
+		if (person.uuid !== prevPerson.uuid) {
 			const splitName = Person.parseFullName(person.name)
 			this.setState({
 				fullName: Person.fullName(splitName),
@@ -94,7 +94,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.id
+		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
 		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && person.domainUsername
 		const ranks = Settings.fields.person.ranks || []
 
@@ -388,8 +388,8 @@ class BasePersonForm extends ValidatableFormWrapper {
 						pathname: '/',
 					})
 				} else {
-					if (response.id) {
-						person.id = response.id
+					if (response.uuid) {
+						person.uuid = response.uuid
 					}
 					this.props.history.replace(Person.pathForEdit(person))
 					this.props.history.push({

@@ -60,7 +60,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 
 		//Verify the AO name is updated.
-		Organization updated = httpQuery(String.format("/api/organizations/%d",created.getId()), jack)
+		Organization updated = httpQuery(String.format("/api/organizations/%s", created.getUuid()), jack)
 				.get(Organization.class);
 		assertThat(updated.getLongName()).isEqualTo(created.getLongName());
 
@@ -69,30 +69,30 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		b1.setOrganization(updated);
 		b1.setCode(b1.getCode() + "_" + DateTime.now().getMillis());
 		b1 = httpQuery("/api/positions/new", admin).post(Entity.json(b1), Position.class);
-		assertThat(b1.getId()).isNotNull();
-		assertThat(b1.getOrganization().getId()).isEqualTo(updated.getId());
+		assertThat(b1.getUuid()).isNotNull();
+		assertThat(b1.getOrganization().getUuid()).isEqualTo(updated.getUuid());
 
 		b1.setOrganization(updated);
 		resp = httpQuery("/api/positions/update", admin).post(Entity.json(b1));
 		assertThat(resp.getStatus()).isEqualTo(200);
 
-		Position ret = httpQuery(String.format("/api/positions/%d", b1.getId()), admin).get(Position.class);
+		Position ret = httpQuery(String.format("/api/positions/%s", b1.getUuid()), admin).get(Position.class);
 		assertThat(ret.getOrganization()).isNotNull();
-		assertThat(ret.getOrganization().getId()).isEqualTo(updated.getId());
+		assertThat(ret.getOrganization().getUuid()).isEqualTo(updated.getUuid());
 
 		//Create a child organizations
 		Organization child = new Organization();
-		child.setParentOrg(Organization.createWithId(created.getId()));
+		child.setParentOrg(Organization.createWithUuid(created.getUuid()));
 		child.setShortName("AO McChild");
 		child.setLongName("Child McAo");
 		child.setStatus(OrganizationStatus.ACTIVE);
 		child.setType(OrganizationType.ADVISOR_ORG);
 		child = httpQuery("/api/organizations/new", admin)
 				.post(Entity.json(child), Organization.class);
-		assertThat(child.getId()).isNotNull();
+		assertThat(child.getUuid()).isNotNull();
 
 		OrganizationSearchQuery query = new OrganizationSearchQuery();
-		query.setParentOrgId(created.getId());
+		query.setParentOrgUuid(created.getUuid());
 		OrganizationList children = httpQuery("/api/organizations/search", admin)
 			.post(Entity.json(query), OrganizationList.class);
 		assertThat(children.getList()).hasSize(1).contains(child);
@@ -106,7 +106,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Verify approval step was saved. 
-		updated = httpQuery(String.format("/api/organizations/%d",child.getId()), jack).get(Organization.class);
+		updated = httpQuery(String.format("/api/organizations/%s", child.getUuid()), jack).get(Organization.class);
 		List<ApprovalStep> returnedSteps = updated.loadApprovalSteps();
 		assertThat(returnedSteps.size()).isEqualTo(1);
 		assertThat(returnedSteps.get(0).loadApprovers()).contains(b1);
@@ -117,7 +117,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		task.setLongName("Verify that you can update Tasks on a Organization");
 		task.setStatus(TaskStatus.ACTIVE);
 		task = httpQuery("/api/tasks/new", admin).post(Entity.json(task), Task.class);
-		assertThat(task.getId()).isNotNull();
+		assertThat(task.getUuid()).isNotNull();
 		
 		child.setTasks(ImmutableList.of(task));
 		child.setApprovalSteps(null);
@@ -125,10 +125,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Verify task was saved. 
-		updated = httpQuery(String.format("/api/organizations/%d",child.getId()), jack).get(Organization.class);
+		updated = httpQuery(String.format("/api/organizations/%s", child.getUuid()), jack).get(Organization.class);
 		assertThat(updated.loadTasks()).isNotNull();
 		assertThat(updated.loadTasks().size()).isEqualTo(1);
-		assertThat(updated.loadTasks().get(0).getId()).isEqualTo(task.getId());
+		assertThat(updated.loadTasks().get(0).getUuid()).isEqualTo(task.getUuid());
 		
 		//Change the approval steps. 
 		step1.setApprovers(ImmutableList.of(admin.loadPosition()));
@@ -141,7 +141,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//Verify approval steps updated correct. 
-		updated = httpQuery(String.format("/api/organizations/%d",child.getId()), jack).get(Organization.class);
+		updated = httpQuery(String.format("/api/organizations/%s", child.getUuid()), jack).get(Organization.class);
 		returnedSteps = updated.loadApprovalSteps();
 		assertThat(returnedSteps.size()).isEqualTo(2);
 		assertThat(returnedSteps.get(0).getName()).isEqualTo(step1.getName());
