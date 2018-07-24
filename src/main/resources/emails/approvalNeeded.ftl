@@ -22,7 +22,7 @@
 Dear ${approvalStepName},
 <br><br>
 <div>
-  ${report.author.name}'s report, <em><strong>${report.intent}</strong></em>, is ready for your review.<br>
+  ${report.author.name}'s report, <a href="${serverUrl}/reports/${report.id?c}"><em><strong>"${reportIntent}"</strong></em></a>, is ready for your review.<br>
   Using <a href="${serverUrl}/reports/${report.id?c}" />this link</a>,
   you can either <em>Approve</em>, <em>Reject</em> or <em>Edit</em> the report.
 </div>
@@ -131,7 +131,7 @@ Dear ${approvalStepName},
 
 <div class="row">
   <div class="col-md-8">
-    <p><strong>Meeting purpose:</strong> ${(report.intent)!}</p>
+    <p><strong>Meeting goal:</strong> ${report.intent}</p>
     <#if report.keyOutcomes??>
       <p><strong>Key outcomes:</strong> ${(report.keyOutcomes)!}</p>
     </#if>

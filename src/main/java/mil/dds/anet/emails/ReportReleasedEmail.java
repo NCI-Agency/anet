@@ -3,6 +3,8 @@ package mil.dds.anet.emails;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Report;
 
@@ -20,6 +22,7 @@ public class ReportReleasedEmail extends AnetEmailAction {
 		
 		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("report", r);
+		context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
 		return context;
 	}
 

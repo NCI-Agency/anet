@@ -7,9 +7,8 @@ import NotFound from 'components/NotFound'
 import {setMessages} from 'components/Messages'
 
 import API from 'api'
-import utils from 'utils'
-
 import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
@@ -125,7 +124,7 @@ export default class Page extends Component {
 		propFilter.push('pageProps')
 		const filteredNextProps = Object.without(this.props, ...propFilter)
 		const filteredProps = Object.without(prevProps, ...propFilter)
-		if (!_isEqualWith(filteredProps, filteredNextProps, utils.equalFunction)) {
+		if (!_isEqualWith(filteredProps, filteredNextProps, utils.treatFunctionsAsEqual)) {
 			this.loadData()
 		} else {
 			// Location always has a new key. In order to check whether the location
@@ -133,7 +132,7 @@ export default class Page extends Component {
 			const locationFilterProps = ['key']
 			const nextPropsFilteredLocation = Object.without(this.props.location, ...locationFilterProps)
 			const propsFilteredLocation = Object.without(prevProps.location, ...locationFilterProps)
-			if (!_isEqualWith(propsFilteredLocation, nextPropsFilteredLocation, utils.equalFunction)) {
+			if (!_isEqualWith(propsFilteredLocation, nextPropsFilteredLocation, utils.treatFunctionsAsEqual)) {
 				this.loadData()
 			}
 		}

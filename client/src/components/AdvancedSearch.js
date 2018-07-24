@@ -16,6 +16,8 @@ import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
 import _isEqualWith from 'lodash/isEqualWith'
 import _cloneDeepWith from 'lodash/cloneDeepWith'
+import _cloneDeep from 'lodash/cloneDeep'
+import _clone from 'lodash/clone'
 import utils from 'utils'
 
 import {Position, Organization} from 'models'
@@ -43,8 +45,7 @@ class AdvancedSearch extends Component {
 	constructor(props) {
 		super(props)
 
-		const query = props || {}
-		this.ALL_FILTERS = searchFilters.searchFilters()
+		this.ALL_FILTERS = searchFilters.searchFilters(this.setOrganizationFilter)
 		this.state = {
 			objectType: "",
 			text: "",
@@ -61,7 +62,7 @@ class AdvancedSearch extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (!_isEqualWith(prevProps.query, this.props.query, utils.equalFunction)) {
+		if (!_isEqualWith(prevProps.query, this.props.query, utils.treatFunctionsAsEqual)) {
 			this.setState(this.props.query)
 		}
 		if (!_isEqual(prevProps.text, this.props.text)) {
@@ -95,7 +96,7 @@ class AdvancedSearch extends Component {
 				<FormControl defaultValue={this.props.text} className="hidden" />
 
 				{filters.map(filter =>
-					filterDefs[filter.key] && <SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
+					filterDefs[filter.key] && <SearchFilter key={filter.key} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
 				)}
 
 				<Row>
@@ -166,7 +167,7 @@ class AdvancedSearch extends Component {
 	@autobind
 	resolveToQuery(value) {
 		if (typeof value === 'function') {
-			return value()
+			return _clone(value())
 		}
 	}
 
@@ -191,7 +192,7 @@ class AdvancedSearch extends Component {
 
 const mapStateToProps = (state, ownProps) => {
 	return {
-		query: state.searchQuery,
+		query: _cloneDeep(state.searchQuery),
 		onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
 		searchObjectTypes: state.searchProps.searchObjectTypes
 	}
@@ -206,25 +207,29 @@ export default connect(mapStateToProps, mapDispatchToProps)(withRouter(AdvancedS
 
 class SearchFilter extends Component {
 	static propTypes = {
-		label: PropTypes.string,
 		onRemove: PropTypes.func,
-		query: PropTypes.object,
 		filter: PropTypes.object,
+		organizationFilter: PropTypes.object,
+		element: PropTypes.shape({
+			component: PropTypes.func.isRequired,
+			props: PropTypes.object,
+		})
 	}
 
 	render() {
-		let {label, onRemove, query, filter, children, element} = this.props
-		if (query) {
-			label = filter.key
-			children = React.cloneElement(
-				element,
-				{value: filter.value || "", onChange: this.onChange}
-			)
-		}
+		const {onRemove, filter, element} = this.props
+		const label = filter.key
+		const ChildComponent = element.component
 
 		return <FormGroup>
 			<Col xs={3}><ControlLabel>{label}</ControlLabel></Col>
-			<Col xs={8}>{children}</Col>
+			<Col xs={8}>
+				<ChildComponent
+					value={filter.value || ""}
+					onChange={this.onChange}
+					{...element.props}
+				/>
+			</Col>
 			<Col xs={1}>
 				<Button bsStyle="link" onClick={() => onRemove(this.props.filter)}>
 					<img src={REMOVE_ICON} height={14} alt="Remove this filter" />

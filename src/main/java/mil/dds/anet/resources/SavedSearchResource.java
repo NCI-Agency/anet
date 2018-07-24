@@ -15,6 +15,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -37,6 +39,7 @@ public class SavedSearchResource implements IGraphQLResource  {
 	}
 	
 	@POST
+	@Timed
 	@Path("/new")
 	public SavedSearch saveSearch(@Auth Person user, SavedSearch search) {
 		search.setOwner(Person.createWithId(user.getId()));
@@ -48,6 +51,7 @@ public class SavedSearchResource implements IGraphQLResource  {
 	}
 	
 	@GET
+	@Timed
 	@GraphQLFetcher("mine")
 	@Path("/mine")
 	public List<SavedSearch> getMySearches(@Auth Person user) { 
@@ -55,6 +59,7 @@ public class SavedSearchResource implements IGraphQLResource  {
 	}
 	
 	@DELETE
+	@Timed
 	@Path("/{id}")
 	public Response delete(@Auth Person user, @PathParam("id") Integer id) { 
 		int numDeleted = dao.deleteSavedSearch(id, user);

@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
+import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 
 export default class SelectSearchFilter extends Component {
@@ -24,20 +25,22 @@ export default class SelectSearchFilter extends Component {
 	constructor(props) {
 		super(props)
 
-		let {value} = props
-
+		const value = props.value || {}
 		this.state = {
 			value: {
-				value: value.value || this.props.values[0] || ''
-
+				value: value.value || props.values[0] || ''
 			}
 		}
+	}
 
+	componentDidMount() {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
+		}
 	}
 
 	render() {
@@ -75,4 +78,20 @@ export default class SelectSearchFilter extends Component {
 			this.props.onChange(value)
 		}
 	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query[this.props.queryKey]) {
+			const toQueryValue = {[this.props.queryKey]: query[this.props.queryKey]}
+			return {
+				key: key,
+				value: {
+					value: query[this.props.queryKey],
+					toQuery: () => toQueryValue
+				},
+			}
+		}
+		return null
+	}
+
 }

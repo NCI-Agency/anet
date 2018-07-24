@@ -22,6 +22,7 @@ import LinkTo from 'components/LinkTo'
 class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
 		position: PropTypes.object.isRequired,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		error: PropTypes.object,
 		success: PropTypes.object,
@@ -149,9 +150,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 	@autobind
 	onChange() {
 		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.position, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -171,7 +171,6 @@ class BasePositionForm extends ValidatableFormWrapper {
 
 		let url = `/api/positions/${edit ? 'update' : 'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, position, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {

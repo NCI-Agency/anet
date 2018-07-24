@@ -6,6 +6,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -30,6 +32,7 @@ public class HomeResource {
 	 * the initial bundle. 
 	 */
 	@GET
+	@Timed
 	@Path("{path: .*}")
 	@Produces(MediaType.TEXT_HTML)
 	public IndexView reactIndex(@Auth Person p) {
@@ -38,7 +41,6 @@ public class HomeResource {
 		
 		view.setSecurityBannerText(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		view.setSecurityBannerColor(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-		view.setMapLayers(engine.getAdminSetting(AdminSettingKeys.MAP_LAYERS));
 		
 		return view;
 	}

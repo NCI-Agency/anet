@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
-import 'utils'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 import Autocomplete from 'components/Autocomplete'
+import API from 'api'
 
 export default class AutocompleteFilter extends Component {
 	static propTypes = {
@@ -33,12 +35,16 @@ export default class AutocompleteFilter extends Component {
 		this.state = {
 			value: props.value || {}
 		}
+	}
 
+	componentDidMount() {
 		this.updateFilter()
 	}
 
-	componentDidUpdate() {
-		this.updateFilter()
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
+		}
 	}
 
 	render() {
@@ -74,5 +80,30 @@ export default class AutocompleteFilter extends Component {
 			value.toQuery = this.toQuery
 			this.props.onChange(value)
 		}
+	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query[this.props.queryKey]) {
+			const getInstanceName = this.props.objectType.getInstanceName
+			const graphQlQuery = getInstanceName +
+				'(id:' + query[this.props.queryKey] + ') { ' + this.props.fields + '}'
+			return API.query(graphQlQuery).then(data => {
+				if (data[getInstanceName]) {
+					const toQueryValue = {[this.props.queryKey]: query[this.props.queryKey]}
+					return {
+						key: key,
+						value: {
+							...data[getInstanceName],
+							toQuery: () => toQueryValue
+						},
+					}
+				}
+				else {
+					return null
+				}
+			})
+		}
+		return null
 	}
 }

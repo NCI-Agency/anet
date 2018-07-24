@@ -7,8 +7,9 @@ import _escape from 'lodash/escape'
 import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
-import L from 'leaflet'
+import {Map, Control, CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import Settings from 'Settings'
 
 import MARKER_ICON from 'resources/leaflet/marker-icon.png'
 import MARKER_ICON_2X from 'resources/leaflet/marker-icon-2x.png'
@@ -33,12 +34,10 @@ class BaseLeaflet extends Component {
 		this.state = {
 			map: null,
 			center: null,
-			layerControl: null,
-			markerLayer: null,
-			hasLayers: false
+			markerLayer: null
 		}
 
-		this.icon = L.icon({
+		this.icon = new Icon({
 			iconUrl:       MARKER_ICON,
 			iconRetinaUrl: MARKER_ICON_2X,
 			shadowUrl:     MARKER_SHADOW,
@@ -55,54 +54,24 @@ class BaseLeaflet extends Component {
 		return 'map-' + mapId
 	}
 
-	componentDidMount() {
-		let map = L.map(this.mapId, {zoomControl:true}).setView([34.52, 69.16], 10)
-/*
-		let nexrad = L.tileLayer.wms("http://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r.cgi", {
-		    layers: 'nexrad-n0r-900913',
-		    format: 'image/png',
-		    transparent: true,
-		    attribution: "Weather data © 2012 IEM Nexrad"
-		});
-		let nmra = L.tileLayer.wms("https://mrdata.usgs.gov/services/nmra", {
-			layers: 'USNationalMineralAssessment1998',
-			format: 'image/png',
-			transparent: true
-		})
+	componentDidMount() {		
+		const mapOptions = Object.assign({zoomControl:true},
+										 Settings.imagery.mapOptions.leafletOptions,
+										 Settings.imagery.mapOptions.crs && { crs: CRS[Settings.imagery.mapOptions.crs] })
+		const map = new Map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,
+															 Settings.imagery.mapOptions.homeView.zoomLevel)
+		const layerControl = new Control.Layers({}, {}, {collapsed:false})
 
-		let osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
-		let baseLayers = { "Nexrad" : nexrad, "NMRA" : nmra, "OSM" : osm}
-*/
-		let layerControl = L.control.layers({}, {})
 		layerControl.addTo(map)
+		this.addLayers(map,layerControl)
 
 		map.on('moveend', this.moveEnd)
 
-		let state = this.state
-		state.map = map
-		state.layerControl = layerControl
-		state.markerLayer = L.featureGroup([]).addTo(map)
-		this.setState(state, () => {
-			this.tryAddLayers()
-			this.updateMarkerLayer(this.props.markers)
-		})
-	}
-
-	@autobind
-	tryAddLayers() {
-		if (this.state.hasLayers === false) {
-			this.addLayers()
-		}
-	}
-
-	componentWillUnmount() {
-		this.setState({hasLayers:false})
+		const markerLayer = new FeatureGroup([]).addTo(map)
+		this.setState({...this.state, map, markerLayer})
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		this.tryAddLayers()
-
 		const prevMarkerIds = _sortBy(prevProps.markers.map(m => m.id))
 		const markerIds = _sortBy(this.props.markers.map(m => m.id))
 		if (!_isEqual(prevMarkerIds, markerIds)) {
@@ -113,6 +82,11 @@ class BaseLeaflet extends Component {
 				this.props.markers.findIndex(m => m.id === pm.id) === -1
 			)
 			this.updateMarkerLayer(markersToAdd, markersToRemove)
+		}
+
+		if (prevState.map !== this.state.map) {
+			this.updateMarkerLayer(this.props.markers)
+			this.state.map && this.state.map.invalidateSize() // TODO: Still not 100% convinced if this is the right place for this call
 		}
 	}
 
@@ -125,7 +99,7 @@ class BaseLeaflet extends Component {
 		let markerLayer = this.state.markerLayer
 		markers.forEach(m => {
 			let latLng = (Location.hasCoordinates(m)) ? [m.lat, m.lng] : this.state.map.getCenter()
-			let marker = L.marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
+			let marker = new Marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
 			if (m.name) {
 				marker.bindPopup(_escape(m.name)) // escape HTML!
 			}
@@ -141,7 +115,6 @@ class BaseLeaflet extends Component {
 			markerLayer.removeLayer(ml)
 		})
 
-
 		if (newMarkers.length > 0) {
 			if (markerLayer.getBounds() && markerLayer.getBounds().isValid()) {
 				this.state.map.fitBounds(markerLayer.getBounds(), {maxZoom: 15})
@@ -150,41 +123,27 @@ class BaseLeaflet extends Component {
 	}
 
 	@autobind
-	addLayers() {
-		const { appSettings } = this.props || {}
-		let rawLayers = appSettings.MAP_LAYERS
-		if (!rawLayers || rawLayers.length === 0) {
-			return
-		}
-
-		let mapLayers = JSON.parse(rawLayers)
-
+	addLayers(map, layerControl) {
 		let defaultLayer = null
-		mapLayers.forEach(l => {
+		Settings.imagery.baseLayers.forEach(layerConfig => {
 			let layer = null
-			if (l.type === 'wms') {
-				layer = L.tileLayer.wms(l.url, {
-					layers: l.layer,
-					format: l.format || 'image/png'
-				})
-			} else if (l.type === 'osm') {
-				layer = L.tileLayer(l.url)
+			if (layerConfig.type === 'wms') {
+				layer = new TileLayer.WMS(layerConfig.url, layerConfig.options)
+			} else if (layerConfig.type === 'osm' || layerConfig.type === 'tile') {
+				layer = new TileLayer(layerConfig.url, layerConfig.options)
 			}
 
 			if (layer) {
-				this.state.layerControl.addBaseLayer(layer, l.name)
+				layerControl.addBaseLayer(layer, layerConfig.name)
 			}
-			if (l.default) { defaultLayer = layer  }
+			if (layerConfig.default) { defaultLayer = layer  }
 		})
-		if (defaultLayer) { this.state.map.addLayer(defaultLayer) }
-		this.setState({hasLayers:true})
+		if (defaultLayer) { map.addLayer(defaultLayer) }
 	}
 
 	render() {
 		return (
-			<div>
-				<div id={this.mapId} style={css} />
-			</div>
+			<div id={this.mapId} style={css} />
 		)
 	}
 

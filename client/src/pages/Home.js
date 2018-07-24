@@ -11,6 +11,7 @@ import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import Breadcrumbs from 'components/Breadcrumbs'
 import SavedSearchTable from 'components/SavedSearchTable'
+import searchFilters from 'components/SearchFilters'
 
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
@@ -29,6 +30,7 @@ import utils from 'utils'
 
 import { SEARCH_OBJECT_TYPES } from 'actions'
 import {BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
+import {deserializeQueryParams} from 'searchUtils'
 
 function addToQuery(queryKey, value, isDate, isOrg) {
 	// Add toQuery function to a value object, to be used by getSearchQuery
@@ -55,7 +57,7 @@ class BaseHome extends Page {
 
 	constructor(props) {
 		super(props)
-
+		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
 			tileCounts: [],
 			savedSearches: [],
@@ -101,7 +103,7 @@ class BaseHome extends Page {
 			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]},
 			filters: [
 				{key: "State", value: { state: [Report.STATE.PENDING_APPROVAL] }},
-				{key: "Author", value: currentUser}
+				{key: "Author", queryKey: 'authorId', value: currentUser}
 			],
 		}
 	}
@@ -111,7 +113,7 @@ class BaseHome extends Page {
 			title: "Reports pending my approval",
 			query: { pendingApprovalOf: currentUser.id },
 			filters: [
-			  {key: "Approver", value: currentUser} // FIXME: no advanced filter for this condition
+			  {key: "Pending approval of", queryKey: 'pendingApprovalOf', value: currentUser}
 			],
 		}
 	}
@@ -342,15 +344,22 @@ class BaseHome extends Page {
 	showSearch() {
 		let search = this.state.selectedSearch
 		if (search) {
-			let query = JSON.parse(search.query)
-			if (search.objectType) {
-				query.type = search.objectType.toLowerCase()
-			}
-			this.props.history.push({
-				pathname: '/search',
-				search: utils.formatQueryString(query)
-			})
+			const objType = SEARCH_OBJECT_TYPES[search.objectType]
+			const queryParams = JSON.parse(search.query)
+			deserializeQueryParams(objType, queryParams, this.deserializeCallback)
 		}
+	}
+
+	@autobind
+	deserializeCallback(objectType, filters, text) {
+		this.props.setSearchQuery({
+			objectType: objectType,
+			filters: filters,
+			text: text
+		})
+		this.props.history.push({
+			pathname: '/search'
+		})
 	}
 
 	@autobind
