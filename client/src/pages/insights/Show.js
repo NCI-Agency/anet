@@ -36,7 +36,12 @@ export const INSIGHTS = [
   FUTURE_ENGAGEMENTS_BY_LOCATION, REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS
 ]
 
-const _SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {onSearchGoToSearchPage: false})
+const _SEARCH_PROPS = Object.assign(
+	{},
+	DEFAULT_SEARCH_PROPS,
+	{onSearchGoToSearchPage: false, searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]}
+)
+
 export const INSIGHT_DETAILS = {
   [NOT_APPROVED_REPORTS]: {
     searchProps: _SEARCH_PROPS,
