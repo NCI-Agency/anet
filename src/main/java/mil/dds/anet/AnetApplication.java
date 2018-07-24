@@ -23,11 +23,16 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import waffle.servlet.NegotiateSecurityFilter;
 
 import com.google.common.collect.ImmutableList;
 
@@ -49,6 +54,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import mil.dds.anet.auth.AnetAuthenticationFilter;
 import mil.dds.anet.auth.AnetDevAuthenticator;
+import mil.dds.anet.auth.TimedNegotiateSecurityFilter;
 import mil.dds.anet.auth.UrlParamsAuthFilter;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
@@ -71,13 +77,14 @@ import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.utils.AnetDbLogger;
 import mil.dds.anet.utils.HttpsRedirectFilter;
 import mil.dds.anet.views.ViewResponseFilter;
-import waffle.servlet.NegotiateSecurityFilter;
 
 public class AnetApplication extends Application<AnetConfiguration> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 	private static final ObjectMapper jsonMapper = new ObjectMapper();
+
+	private MetricRegistry metricRegistry;
 
 	public static void main(String[] args) throws Exception {
 		new AnetApplication().run(args);
@@ -130,7 +137,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 				return configuration.getViews();
 			}
 		});
-		
+
+		metricRegistry = bootstrap.getMetricRegistry();
 	}
 
 	@Override
@@ -155,24 +163,26 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		if (configuration.isDevelopmentMode()) {
 			// In development mode chain URL params (used during testing) and basic HTTP Authentication
 			final UrlParamsAuthFilter<Person> urlParamsAuthFilter = new UrlParamsAuthFilter.Builder<Person>()
-				.setAuthenticator(new AnetDevAuthenticator(engine))
-				.setAuthorizer(new AnetAuthenticationFilter(engine)) //Acting only as Authz.
+				.setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
+				.setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)) //Acting only as Authz.
 				.setRealm("ANET")
 				.buildAuthFilter();
 			final BasicCredentialAuthFilter<Person> basicAuthFilter = new BasicCredentialAuthFilter.Builder<Person>()
-				.setAuthenticator(new AnetDevAuthenticator(engine))
-				.setAuthorizer(new AnetAuthenticationFilter(engine)) //Acting only as Authz.
+				.setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
+				.setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)) //Acting only as Authz.
 				.setRealm("ANET")
 				.buildAuthFilter();
 			environment.jersey().register(new AuthDynamicFeature(
 				new ChainedAuthFilter<>(Arrays.asList(new AuthFilter[] {urlParamsAuthFilter, basicAuthFilter}))));
 		} else { 
 			//In Production require Windows AD Authentication.
-			Filter nsf = new NegotiateSecurityFilter();
-			FilterRegistration nsfReg = environment.servlets().addFilter("NegotiateSecurityFilter", nsf);
+			final Filter nsf = configuration.isTimeWaffleRequests()
+					? new TimedNegotiateSecurityFilter(metricRegistry)
+					: new NegotiateSecurityFilter();
+			final FilterRegistration nsfReg = environment.servlets().addFilter("NegotiateSecurityFilter", nsf);
 			nsfReg.setInitParameters(configuration.getWaffleConfig());
 			nsfReg.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
-			environment.jersey().register(new AuthDynamicFeature(new AnetAuthenticationFilter(engine)));
+			environment.jersey().register(new AuthDynamicFeature(new AnetAuthenticationFilter(engine, metricRegistry)));
 		}
 		
 		if (configuration.getRedirectToHttps()) { 
@@ -239,7 +249,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 				positionResource, locationResource,
 				orgResource, asResource, taskResource,
 				adminResource, savedSearchResource, tagResource, authorizationGroupResource),
-			configuration.isDevelopmentMode()));
+			metricRegistry, configuration.isDevelopmentMode()));
 	}
 
 	protected static JSONObject getDictionary(AnetConfiguration configuration)

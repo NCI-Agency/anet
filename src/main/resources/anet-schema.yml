@@ -326,9 +326,58 @@ properties:
       examples:
       - "*.nato.int"
       - dds.mil
+  imagery:
+    type: object
+    additionalProperties: false
+    properties:
+      mapOptions:
+        type: object
+        properties:
+          crs:
+            type: string
+          homeView:
+            type: object
+            properties:
+              location:
+                type: array
+              zoomLevel:
+                type: number
+            additionalProperties: false
+            required:
+              - location
+              - zoomLevel
+          leafletOptions:
+            type: object
+            additionalProperties: true
+        additionalProperties: false
+        required:
+          - homeView
+      baseLayers:
+        type: array
+        uniqueItems: true
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            name: 
+              type: string
+            default:
+              type: boolean
+            type:
+              type: string
+            url:
+              type: string
+            options:
+              type: object
+              additionalProperties: true
+          required:
+            - name
+            - type
 required:
 - SUPPORT_EMAIL_ADDR
 - fields
 - pinned_ORGs
 - non_reporting_ORGs
 - domainNames
+- imagery

@@ -20,13 +20,6 @@ class OrganizationAdvisorsTable extends Component {
         this.handleSelectAllRows = this.handleSelectAllRows.bind(this)
     }
 
-    static getDerivedStateFromProps(props, state) {
-        if (!_isEqual(props.data, state.data)) {
-            return { data: props.data }
-        }
-        return null
-    }
-
     handleSelectRow(index) {
         let data = this.state.data.slice()
         data[index].selected =  this.toggleRowSelection(index)

@@ -94,7 +94,7 @@ On the ANET server:
 - Run through verification testing to ensure there are no issues
 
 # ANET Configuration
-ANET is configured primarily through the `anet.yml` file. This file follows the Dropwizard configuration format ( http://www.dropwizard.io/1.0.6/docs/manual/core.html#configuration ). Here is a description of the configuration options custom to ANET:
+ANET is configured primarily through the `anet.yml` file. This file follows the Dropwizard configuration format ( https://www.dropwizard.io/1.3.5/docs/manual/core.html#configuration ). Here is a description of the configuration options custom to ANET:
 
 - **developmentMode**: This flag controls several options on the server that are helpful when developing
 	- Authentication: When development mode is `true`, ANET will use basic Authentication checking only that the username provided is equal to the `domainUsername` column of a valid user in the database. In the event that there is not a matching user, but the provided password is equal to the username, ANET will simulate the first-time log in of a new user (ie a user who passes windows authentication but has never logged into ANET before).
@@ -112,7 +112,7 @@ ANET is configured primarily through the `anet.yml` file. This file follows the 
 	- **nbOfHoursForStaleEmails**: When defined, the number of hours it takes for a pending email to be treatead as stale and discarded. When not defined, emails are never discarded
 - **emailFromAddr**: This is the email address that emails from ANET will be sent from.
 - **serverUrl**: The URL for the ANET server, ie: `"https://anet.dds.mil"`.
-- **database**: The configuration for your database. ANET supports either sqlite for development, or Microsoft SQL Server for production.  Additonal Instructions can be found here instructions here: http://www.dropwizard.io/1.0.6/docs/manual/jdbi.html for avaiable configuration options for the database connection. 
+- **database**: The configuration for your database. ANET supports either sqlite for development, or Microsoft SQL Server for production.  Additonal Instructions can be found here instructions here: https://www.dropwizard.io/1.3.5/docs/manual/jdbi.html for avaiable configuration options for the database connection. 
 	- **driverClass**: the java driver for the database. Use com.microsoft.sqlserver.jdbc.SQLServerDriver for MS SQL
 	- **user**: The username with access to the database. Not needed when Windows Authentication is used.
 	- **password**: The password to the database. Not needed when Windows Authentication is used.
@@ -128,6 +128,10 @@ database:
 #  properties:
 #   date_string_format: 
 #   date_class:
+```
+- **timeWaffleRequests**: set to `true` to report timings of Waffle request methods:
+```
+timeWaffleRequests: false
 ```
 
 - **waffleConfig**: ANET uses the open source `waffle` library to perform Windows Authentication ( https://github.com/Waffle/waffle ). It can be configured to authenticate via AD in the following manner:
@@ -151,7 +155,7 @@ If needed, see https://github.com/Waffle/waffle/blob/master/Docs/ServletSingleSi
 
 Finally, you can define a deployment-specific dictionary inside the `anet.yml` file.
 Currently, the recognized entries in the dictionary (and suggested values for each of them) are:
-```
+```yaml
 dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
   fields:
@@ -285,11 +289,35 @@ dictionary:
     - nato.int
     - dds.mil
     - "*.isaf.nato.int"
+  imagery:
+    mapOptions:
+      crs: EPSG3857
+      homeView:
+        location: [34.52, 69.16]
+        zoomLevel: 10
+    baseLayers:
+      - name: OSM
+        default: true
+        type: tile
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      - name: World Imagery Tiles
+        default: false
+        type: tile
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        options:
+          tms: false
+      - name: World WMS
+        default: false
+        type: wms
+        url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+        options:
+          layers: GEBCO_LATEST
+          format: "image/png"
 ```
 As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 
 # How to enable SSL
-Below is a subset from the complete Dropwizard Documentation that can be found here: http://www.dropwizard.io/1.0.5/docs/manual/core.html#ssl
+Below is a subset from the complete Dropwizard Documentation that can be found here: https://www.dropwizard.io/1.3.5/docs/manual/core.html#ssl
 
 SSL support is built into Dropwizard. You will need to provide your own java keystore, which is outside the scope of this document (keytool is the command you need, and Jetty’s documentation can get you started). There is a test keystore you can use in the Dropwizard example project.
 
@@ -321,19 +349,62 @@ If needed, self-signed certificates can be created and used as follows:
 
 # How to configure imagery.
 
-ANET uses Leaflet as a map viewer.  You can use any tile sources that work with Leaflet in ANET. In a development environment, or anywhere with access to the internet, you can configure ANET to use OSM tiles by setting the `MAP_LAYERS` Admin Setting to 
+ANET uses Leaflet as a map viewer.  You can use any map sources that work with Leaflet in ANET. You can start by specifying the coordinate system to use in the `crs` option below:
+```yaml
+  imagery:
+    mapOptions:
+      crs: EPSG3857
+      homeView:
+        location: [34.52, 69.16]
+        zoomLevel: 10
 
-```
-[{"name":"OSM","default" : true, "url":"http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", "type":"osm"}]
+```      
+Typically this is a choice between `EPSG3857` and `EPSG4326`. Please consult the specification of the maps you are about to consult. `homeView` defines the default starting location and zoom level of the map.
+_hint:_ If you are planning to use a WMS service, in a browser you can inspect the results of https://wmsURL?request=GetCapabilities&service=WMS to determine the desired coordinate system
+
+CRS	Description (courtesy of https://leafletjs.com/reference-1.3.0.html#crs)
+
+| CRS        |  Description|
+| ---------: |-------------|
+| EPSG3395   | Rarely used by some commercial tile providers. Uses Elliptical Mercator projection. |
+| EPSG3857   | The most common CRS for online maps, used by almost all free and commercial tile providers. Uses Spherical Mercator projection. Set in by default in Map's crs option. |
+| EPSG4326   | A common CRS among GIS enthusiasts. Uses simple Equirectangular projection. Leaflet 1.0.x complies with the TMS coordinate scheme for EPSG:4326, which is a breaking change from 0.7.x behaviour. If you are using a TileLayer with this CRS, ensure that there are two 256x256 pixel tiles covering the whole earth at zoom level zero, and that the tile coordinate origin is (-180,+90), or (-180,-90) for TileLayers with the tms option set. |
+| Earth      | Serves as the base for CRS that are global such that they cover the earth. Can only be used as the base for other CRS and cannot be used directly, since it does not have a code, projection or transformation. distance() returns meters. |
+| Simple     | A simple CRS that maps longitude and latitude into x and y directly. May be used for maps of flat surfaces (e.g. game maps). Note that the y axis should still be inverted (going from bottom to top). distance() returns simple euclidean distance. |
+
+You can configure ANET to use tiled or WMS maps by adding to the `baseLayers` under `imagery` portion of `anet.yml` 
+
+for OSM-type providers:
+```yaml
+      - name: OSM
+        default: true
+        type: tile
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 ```
 
-For both offline and online installations, to configure ANET with a WMS server, use the following format:
+for WMS-type providers:
+```yaml
+      - name: World WMS
+        default: false
+        type: wms
+        url: "https://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv"
+        options:
+          layers: GEBCO_LATEST
+          format: "image/png"
 ```
-[{"name":"WMS Service","default" : true, "url":"http://wmsURL", "type":"wms", "format":"image/png", "layer":"layerName"}]
-```
-_hint:_ In a browser you can inspect the results of http://wmsURL?request=GetCapabilities&service=WMS to determine the desired format and layerName
+_hint:_ In a browser you can inspect the results of https://wmsURL?request=GetCapabilities&service=WMS to determine the desired format and layerName
 
-If desired, you can alse configure a local imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
+and for WMTS-type providers:
+```yaml
+      - name: World Imagery Tiles
+        default: false
+        type: tile
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        options:
+          tms: false
+```
+
+If desired, you can alse configure a local tiled imagery cache with a downloaded tile set.  Your offline imagery set should be in the form of `{z}/{x}/{y}.png` or similar.  If you download tiles from OpenStreetMaps, this is the format you'll get them in. 
 
 1. In the ANET home directory (the same directory as `bin`, `lib` and `docs`) create a directory called `maps`. Inside that, create a directory called `imagery`. 
 1. Copy your imagery set into the `imagery` directory.  You should end up with a file structure that looks like `maps/imagery/{0,1,2,...}/{0,1,2...}/{0,1,2,3...}.png`
@@ -350,9 +421,12 @@ CLASSPATH=$APP_HOME/maps/:$CLASSPATH
 ```
 
 This will put the imagery folder on the server's classpath.  ANET looks for a folder called imagery and will serve those tiles up on the `/imagery` path. 
-1. To use this new tile source, set the `MAP_LAYERS` admin setting to 
-```
-[{"name":"OSM","default" : true, "url":"http://<your-anet-server-url>/imagery/{z}/{x}/{y}.png", "type":"osm"}]
+1. To use this new tile source, add under `baseLayers`:
+```yaml
+      - name: OSM
+        default: true
+        type: tile
+        url: "https://<your-anet-server-url>/imagery/{z}/{x}/{y}.png"
 ```
 
-Maps should now magically work!  You can test this by going to the url `http://<your-anet-server>/imagery/0/0/0.png` and hopefully seeing a tile appear. 
+Maps should now magically work!  You can test this by going to the url `https://<your-anet-server>/imagery/0/0/0.png` and hopefully seeing a tile appear. 

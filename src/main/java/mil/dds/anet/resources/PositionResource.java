@@ -21,6 +21,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -66,6 +68,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/")
 	public PositionList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, 
@@ -74,6 +77,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{id}")
 	@GraphQLFetcher
 	public Position getById(@PathParam("id") int id) {
@@ -90,6 +94,7 @@ public class PositionResource implements IGraphQLResource {
 	 * @return the same Position object with the ID field filled in.
 	 */
 	@POST
+	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public Position createPosition(@Auth Person user, Position p) {
@@ -115,6 +120,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/updateAssociatedPosition")
 	@RolesAllowed("SUPER_USER")
 	public Response updateAssociatedPosition(@Auth Person user, Position pos) {
@@ -139,6 +145,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updatePosition(@Auth Person user, Position pos) {
@@ -179,6 +186,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{id}/person")
 	public Person getAdvisorInPosition(@PathParam("id") int positionId, @QueryParam("atTime") Long atTimeMillis) {
 		Position p = Position.createWithId(positionId);
@@ -188,6 +196,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/{id}/person")
 	@RolesAllowed("SUPER_USER")
 	public Response putPersonInPosition(@Auth Person user, @PathParam("id") int positionId, Person p) {
@@ -200,6 +209,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@DELETE
+	@Timed
 	@Path("/{id}/person")
 	@RolesAllowed("SUPER_USER")
 	public Response deletePersonFromPosition(@Auth Person user, @PathParam("id") int positionId) {
@@ -213,6 +223,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{id}/associated")
 	public PositionList getAssociatedPositions(@PathParam("id") int positionId) {
 		Position b = Position.createWithId(positionId);
@@ -221,6 +232,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/{id}/associated")
 	@RolesAllowed("SUPER_USER")
 	public Response associatePositions(@PathParam("id") int positionId, Position b, @Auth Person user) {
@@ -247,6 +259,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@DELETE
+	@Timed
 	@Path("/{id}/associated/{positionId}")
 	@RolesAllowed("SUPER_USER")
 	public Response deletePositionAssociation(@PathParam("id") int positionId, @PathParam("positionId") int associatedPositionId, @Auth Person user) {
@@ -262,6 +275,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/{id}/history")
 	public List<PersonPositionHistory> getPositionHistory(@PathParam("id") int positionId) { 
 		Position position = dao.getById(positionId);
@@ -270,6 +284,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@Path("/search")
 	public PositionList search(@Context HttpServletRequest request) {
 		try {
@@ -280,6 +295,7 @@ public class PositionResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@GraphQLFetcher
 	@Path("/search")
 	public PositionList search(@GraphQLParam("query") PositionSearchQuery query) {
@@ -288,6 +304,7 @@ public class PositionResource implements IGraphQLResource {
 
 	
 	@DELETE
+	@Timed
 	@Path("/{id}")
 	public Response deletePosition(@PathParam("id") int positionId) { 
 		Position p = dao.getById(positionId);

@@ -45,7 +45,6 @@ class BaseOrganizationShow extends Page {
 			reports: null,
 			tasks: null,
 			reportsFilter: NO_REPORT_FILTER,
-			action: props.match.params.action
 		}
 
 		this.reportsPageNum = 0
@@ -55,13 +54,6 @@ class BaseOrganizationShow extends Page {
 		this.LongNameWithLabel = DictionaryField(Form.Field)
 
 		setMessages(props,this.state)
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		if (props.match.params.action !== state.action) {
-			return {action: props.match.params.action}
-		}
-		return null
 	}
 
 	componentDidUpdate(prevProps, prevState) {

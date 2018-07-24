@@ -19,6 +19,7 @@ import NavigationWarning from 'components/NavigationWarning'
 class AuthorizationGroupForm extends ValidatableFormWrapper {
 	static propTypes = {
 		authorizationGroup: PropTypes.object.isRequired,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool
 	}
 
@@ -84,9 +85,8 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 	@autobind
 	onChange() {
 		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.authorizationGroup, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -95,7 +95,6 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		let edit = this.props.edit
 		let url = `/api/authorizationGroups/${edit ? 'update'  :'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, authGroup, {disableSubmits: true})
 			.then(response => {
 				if (response.id) {

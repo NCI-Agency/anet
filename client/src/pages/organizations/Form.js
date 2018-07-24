@@ -27,6 +27,7 @@ import NavigationWarning from 'components/NavigationWarning'
 class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
 		organization: PropTypes.object,
+		original: PropTypes.object.isRequired,
 		edit: PropTypes.bool,
 		currentUser: PropTypes.instanceOf(Person),
 	}
@@ -239,9 +240,8 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 	@autobind
 	onChange() {
 		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.state.report, this.props.original),
+			isBlocking: this.formHasUnsavedChanges(this.props.organization, this.props.original),
 		})
-		this.forceUpdate()
 	}
 
 	@autobind
@@ -257,7 +257,6 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 
 		let url = `/api/organizations/${this.props.edit ? 'update' : 'new'}`
 		this.setState({isBlocking: false})
-		this.forceUpdate()
 		API.send(url, organization, {disableSubmits: true})
 			.then(response => {
 				if (response.code) {

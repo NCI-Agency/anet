@@ -17,9 +17,17 @@ export const RANGE_TYPE_LABELS = {
 	[LAST_MONTH]: 'Last 30 days',
 }
 
+export function dateRangeStartKey(queryKey) {
+	return queryKey ? queryKey + 'Start' : 'start'
+}
+
+export function dateRangeEndKey(queryKey) {
+	return queryKey ? queryKey + 'End' : 'end'
+}
+
 export function dateToQuery(queryKey, value) {
-	let startKey = queryKey ? queryKey + 'Start' : 'start'
-	let endKey = queryKey ? queryKey + 'End' : 'end'
+	let startKey = dateRangeStartKey(queryKey)
+	let endKey = dateRangeEndKey(queryKey)
 
 	if (value.relative === BETWEEN) {
 		// Between start and end date

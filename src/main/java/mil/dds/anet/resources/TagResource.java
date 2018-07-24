@@ -16,6 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -41,6 +43,7 @@ public class TagResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/")
 	public TagList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
@@ -48,6 +51,7 @@ public class TagResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/{id}")
 	public Tag getById(@PathParam("id") int id) {
@@ -59,6 +63,7 @@ public class TagResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@GraphQLFetcher
 	@Path("/search")
 	public TagList search(@GraphQLParam("query") TagSearchQuery query) {
@@ -66,12 +71,14 @@ public class TagResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/search")
 	public TagList search(@Context HttpServletRequest request) {
 		return search(ResponseUtils.convertParamsToBean(request, TagSearchQuery.class));
 	}
 
 	@POST
+	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public Tag createNewTag(@Auth Person user, Tag t) {
@@ -85,6 +92,7 @@ public class TagResource implements IGraphQLResource {
 	}
 
 	@POST
+	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateTag(@Auth Person user, Tag t) {

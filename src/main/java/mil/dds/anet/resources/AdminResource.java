@@ -12,6 +12,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.codahale.metrics.annotation.Timed;
+
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.config.AnetConfiguration;
@@ -34,6 +36,7 @@ public class AdminResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/")
 	public List<AdminSetting> getAll() { 
@@ -41,6 +44,7 @@ public class AdminResource implements IGraphQLResource {
 	}
 	
 	@POST
+	@Timed
 	@Path("/save")
 	@RolesAllowed("ADMINISTRATOR")
 	public Response save(List<AdminSetting> settings) {
@@ -52,6 +56,7 @@ public class AdminResource implements IGraphQLResource {
 	}
 
 	@GET
+	@Timed
 	@Path("/dictionary")
 	public Map<String, Object> getDictionary() {
 		return config.getDictionary();

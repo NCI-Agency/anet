@@ -6,8 +6,10 @@ import DatePicker from 'react-16-bootstrap-date-picker'
 import {Row, Col} from 'react-bootstrap'
 import moment from 'moment'
 import _uniqueId from 'lodash/uniqueId'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
-import {BETWEEN, BEFORE, AFTER, LAST_DAY, LAST_WEEK, LAST_MONTH, RANGE_TYPE_LABELS, dateToQuery} from 'dateUtils'
+import {BETWEEN, BEFORE, AFTER, LAST_DAY, LAST_WEEK, LAST_MONTH, RANGE_TYPE_LABELS, dateToQuery, dateRangeStartKey, dateRangeEndKey} from 'dateUtils'
 
 const dateRangeValue = PropTypes.shape({
 	relative: PropTypes.string,
@@ -34,8 +36,7 @@ export default class DateRangeSearch extends Component {
 
 	constructor(props) {
 		super(props)
-		let {value} = props
-
+		const value = props.value || {}
 		this.state = {
 			value: {
 				relative: value.relative || BETWEEN,
@@ -51,8 +52,6 @@ export default class DateRangeSearch extends Component {
 				last_month: _uniqueId('dateRange_'),
 			}
 		}
-
-		this.updateFilter()
 	}
 
 	selectMenu = (onlyBetween) => {
@@ -116,11 +115,14 @@ export default class DateRangeSearch extends Component {
 		)
 	}
 
-	static getDerivedStateFromProps(props, state) {
-		if (props.value && props.value !== state.value) {
-			return {value: props.value}
+	componentDidMount() {
+		this.updateFilter()
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
 		}
-		return null
 	}
 
 	@autobind
@@ -158,5 +160,46 @@ export default class DateRangeSearch extends Component {
 			value.toQuery = this.toQuery
 			this.props.onChange(value)
 		}
+	}
+
+	@autobind
+	deserialize(query, key) {
+		const startKey = dateRangeStartKey(this.props.queryKey)
+		const endKey = dateRangeEndKey(this.props.queryKey)
+		const toQueryValue = {}
+		const filterValue = {}
+		if (query[startKey] && query[endKey]) {
+			filterValue.relative = BETWEEN
+			filterValue.start = moment(query[startKey]).toISOString()
+			filterValue.end = moment(query[endKey]).toISOString()
+			toQueryValue[startKey] = query[startKey]
+			toQueryValue[endKey] = query[endKey]
+		}
+		else if (query[startKey]) {
+			toQueryValue[startKey] = query[startKey]
+			const lastValues = [LAST_DAY, LAST_WEEK, LAST_MONTH]
+			if (lastValues.indexOf( +query[startKey] ) !== -1) {
+				filterValue.relative = query[startKey]
+			}
+			else {
+				filterValue.relative = AFTER
+				filterValue.start = moment(query[startKey]).toISOString()
+			}
+		}
+		else if (query[endKey]) {
+			filterValue.relative = BEFORE
+			filterValue.end = moment(query[endKey]).toISOString()
+			toQueryValue[endKey] = query[endKey]
+		}
+		if (Object.keys(filterValue).length) {
+			return {
+				key: key,
+				value: {
+					...filterValue,
+					toQuery: () => toQueryValue
+				}
+			}
+		}
+		return null
 	}
 }

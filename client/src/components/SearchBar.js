@@ -50,9 +50,9 @@ class SearchBar extends Component {
 			<Form onSubmit={this.onSubmit}>
 				<InputGroup>
 					<FormControl value={this.state.searchTerms} placeholder={placeholder} onChange={this.onChange} id="searchBarInput" />
-					<InputGroup.Button>
+					{!this.state.showAdvancedSearch && <InputGroup.Button>
 						<Button onClick={this.onSubmit} id="searchBarSubmit"><img src={SEARCH_ICON} height={16} alt="Search" /></Button>
-					</InputGroup.Button>
+					</InputGroup.Button>}
 				</InputGroup>
 			</Form>
 
@@ -124,18 +124,26 @@ export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SearchBar
 class SearchFilterDisplay extends Component {
 	static propTypes = {
 		filter: PropTypes.object,
-		element: PropTypes.node,
+		element: PropTypes.shape({
+			component: PropTypes.func.isRequired,
+			props: PropTypes.object,
+		}),
 		showSeparator: PropTypes.bool,
 	}
 
 	render() {
 		const {filter, element} = this.props
 		const label = filter.key
-		const children = React.cloneElement(
-			element,
-			{value: filter.value || "", asFormField: false}
-		)
+		const ChildComponent = element.component
 		const sep = this.props.showSeparator ? ", " : ""
-		return <React.Fragment><b>{label}</b>: <em>{children}</em>{sep}</React.Fragment>
+		return <React.Fragment>
+			<b>{label}</b>:	<em>
+				<ChildComponent
+					value={filter.value || ""}
+					asFormField={false}
+					{...element.props}
+				/>
+			</em>{sep}
+		</React.Fragment>
 	}
 }

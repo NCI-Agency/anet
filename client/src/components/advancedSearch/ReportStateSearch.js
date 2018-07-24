@@ -3,6 +3,8 @@ import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
 import _map from 'lodash/map'
+import _isEqualWith from 'lodash/isEqualWith'
+import utils from 'utils'
 
 const STATE_LABELS = {
 	[Report.STATE.DRAFT]: 'Draft',
@@ -34,8 +36,7 @@ export default class ReportStateSearch extends Component {
 	constructor(props) {
 		super(props)
 
-		let value = props.value || {}
-
+		const value = props.value || {}
 		this.state = {
 			value: {
 				state: value.state || [Report.STATE.DRAFT],
@@ -49,9 +50,8 @@ export default class ReportStateSearch extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (prevProps.value !== this.props.value) {
-			let value = this.props.value
-			this.setState({value}, this.updateFilter)
+		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
+			this.setState({value: this.props.value}, this.updateFilter)
 		}
 	}
 
@@ -115,6 +115,7 @@ export default class ReportStateSearch extends Component {
 		return query
 	}
 
+
 	@autobind
 	updateFilter() {
 		if (this.props.asFormField) {
@@ -123,4 +124,23 @@ export default class ReportStateSearch extends Component {
 			this.props.onChange(value)
 		}
 	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query.state) {
+			const value = {state: query.state}
+			if (query.cancelledReason) {
+				value.cancelledReason = query.cancelledReason
+			}
+			return {
+				key: key,
+				value: {
+					...value,
+					toQuery: () => value
+				},
+			}
+		}
+		return null
+	}
+
 }

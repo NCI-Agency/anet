@@ -3,6 +3,8 @@ package mil.dds.anet.emails;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
@@ -15,7 +17,7 @@ public class ReportRejectionEmail extends AnetEmailAction {
 	
 	public ReportRejectionEmail() { 
 		templateName = "/emails/reportRejection.ftl";
-		subject = "ANET Report Rejected";
+		subject = "ANET Report Returned to You for Editing";
 	}
 	
 	@Override
@@ -26,6 +28,7 @@ public class ReportRejectionEmail extends AnetEmailAction {
 		
 		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("report", r);
+		context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
 		context.put("rejector", rejector);
 		context.put("comment", comment);
 		return context;

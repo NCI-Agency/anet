@@ -80,6 +80,7 @@ public class TaskResource implements IGraphQLResource {
 	}
 	
 	@POST
+	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMIN")
 	public Task createNewTask(@Auth Person user, Task p) {
@@ -97,6 +98,7 @@ public class TaskResource implements IGraphQLResource {
 	
 	/* Updates shortName, longName, category, and customFieldRef1Id */
 	@POST
+	@Timed
 	@Path("/update")
 	@RolesAllowed("ADMIN")
 	public Response updateTask(@Auth Person user, Task p) { 
@@ -123,6 +125,7 @@ public class TaskResource implements IGraphQLResource {
 	}
 	
 	@POST
+	@Timed
 	@GraphQLFetcher
 	@Path("/search")
 	public TaskList search(@GraphQLParam("query") TaskSearchQuery query) {
@@ -130,6 +133,7 @@ public class TaskResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@Path("/search")
 	public TaskList search(@Context HttpServletRequest request) {
 		try { 
@@ -144,6 +148,7 @@ public class TaskResource implements IGraphQLResource {
 	 * @param maxResults maximum number of results to return, defaults to 3
 	 */
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/recents")
 	public TaskList recents(@Auth Person user,
