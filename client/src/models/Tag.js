@@ -10,6 +10,8 @@ export default class Tag extends Model {
 		description: null
 	}
 
+	static autocompleteQuery = "id, name"
+
 	toString() {
 		return this.name
 	}

@@ -11,7 +11,7 @@ import PositionTypeSearchFilter from 'components/advancedSearch/PositionTypeSear
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 import TextInputFilter from 'components/advancedSearch/TextInputFilter'
 
-import {Location, Person, Task, Position, Organization} from 'models'
+import {Location, Person, Task, Position, Organization, Tag} from 'models'
 
 const taskFilters = props => {
 	const taskFiltersObj = {
@@ -165,9 +165,10 @@ export default {
 					component: AutocompleteFilter,
 					props: {
 						queryKey: "locationId",
+						objectType: Location,
 						valueKey: "name",
+						fields: Location.autocompleteQuery,
 						placeholder: "Filter reports by location...",
-						url: "/api/locations/search",
 					}
 				},
 				State: {
@@ -184,9 +185,10 @@ export default {
 					component: AutocompleteFilter,
 					props: {
 						queryKey: "tagId",
+						objectType: Tag,
 						valueKey: "name",
+						fields: Tag.autocompleteQuery,
 						placeholder: "Filter reports by tag...",
-						url: "/api/tags/search",
 					}
 				}
 			}
@@ -198,9 +200,9 @@ export default {
 			props: {
 				queryKey: "taskId",
 				objectType: Task,
+				valueKey: "shortName",
 				fields: Task.autocompleteQuery,
 				template: Task.autocompleteTemplate,
-				valueKey: "shortName",
 				placeholder: `Filter reports by ${taskShortLabel}...`,
 			}
 		}
@@ -234,9 +236,10 @@ export default {
 					component: AutocompleteFilter,
 					props: {
 						queryKey: "locationId",
+						objectType: Location,
 						valueKey: "name",
+						fields: Location.autocompleteQuery,
 						placeholder: "Filter by location...",
-						url: "/api/locations/search",
 					}
 				},
 				Nationality: {
@@ -299,9 +302,10 @@ export default {
 					component: AutocompleteFilter,
 					props: {
 						queryKey: "locationId",
+						objectType: Location,
 						valueKey: "name",
+						fields: Location.autocompleteQuery,
 						placeholder: "Filter by location...",
-						url: "/api/locations/search",
 					}
 				},
 				"Is filled?": {
