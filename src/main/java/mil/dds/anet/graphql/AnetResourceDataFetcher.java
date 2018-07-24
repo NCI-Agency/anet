@@ -20,6 +20,9 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 
@@ -47,15 +50,17 @@ public class AnetResourceDataFetcher implements DataFetcher {
 	List<Method> validMethods;
 	IGraphQLResource resource;
 	List<GraphQLArgument> validArgs;
-	
+	private final MetricRegistry metricRegistry;
+
 	public static ObjectMapper mapper = new ObjectMapper();
 	
-	public AnetResourceDataFetcher(IGraphQLResource resource) { 
-		this(resource, false);
+	public AnetResourceDataFetcher(IGraphQLResource resource, MetricRegistry metricRegistry) {
+		this(resource, metricRegistry, false);
 	}
 	
-	public AnetResourceDataFetcher(IGraphQLResource resource, boolean isListFetcher) {
+	public AnetResourceDataFetcher(IGraphQLResource resource, MetricRegistry metricRegistry, boolean isListFetcher) {
 		this.resource = resource;
+		this.metricRegistry = metricRegistry;
 		fetchers = new HashMap<String,Method>();
 		validMethods = new LinkedList<Method>();
 		arguments = new HashMap<String,GraphQLArgument>();
@@ -149,7 +154,16 @@ public class AnetResourceDataFetcher implements DataFetcher {
 		if (method == null) {
 			throw new WebApplicationException("No fetcher method exists for the supplied arguments");
 		}
-		
+
+		final Timer timer;
+		if (method.isAnnotationPresent(Timed.class)) {
+			final String metric = method.getAnnotation(Timed.class).name();
+			final String metricName = metric.trim().isEmpty() ? method.getName() : metric;
+			timer = metricRegistry.timer(MetricRegistry.name(method.getDeclaringClass(), metricName));
+		} else {
+			timer = null;
+		}
+
 		//Check authorization
 		if (method.isAnnotationPresent(RolesAllowed.class)) { 
 			Person user = (Person) ((Map<String,Object>)environment.getContext()).get("auth");
@@ -158,6 +172,8 @@ public class AnetResourceDataFetcher implements DataFetcher {
 			}
 		}
 		
+		@SuppressWarnings("resource")
+		final Timer.Context context = (timer == null) ? null : timer.time();
 		List<Object> args = fetchParameters(method, environment);
 		try { 
 			return method.invoke(resource, args.toArray());
@@ -172,6 +188,11 @@ public class AnetResourceDataFetcher implements DataFetcher {
 				throw new WebApplicationException(e.getCause().getMessage(), e);
 			} else {
 				throw new WebApplicationException(e.getMessage());
+			}
+		}
+		finally {
+			if (context != null) {
+				context.stop();
 			}
 		}
 	}
