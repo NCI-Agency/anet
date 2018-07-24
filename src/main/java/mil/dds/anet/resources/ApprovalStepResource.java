@@ -16,6 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.codahale.metrics.annotation.Timed;
+
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
@@ -42,6 +44,7 @@ public class ApprovalStepResource implements IGraphQLResource {
 	}
 	
 	@GET
+	@Timed
 	@GraphQLFetcher
 	@Path("/byOrganization")
 	public List<ApprovalStep> getStepsForOrg(@QueryParam("orgId") int orgId) {
@@ -51,6 +54,7 @@ public class ApprovalStepResource implements IGraphQLResource {
 	}
 	
 	@POST
+	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public ApprovalStep createNewStep(@Auth Person user, ApprovalStep as) {
@@ -59,6 +63,7 @@ public class ApprovalStepResource implements IGraphQLResource {
 	}
 	
 	@POST
+	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateSteps(@Auth Person user, ApprovalStep as) {
@@ -88,6 +93,7 @@ public class ApprovalStepResource implements IGraphQLResource {
 	}
 	
 	@DELETE
+	@Timed
 	@Path("/{id}")
 	@RolesAllowed("SUPER_USER")
 	public Response deleteStep(@Auth Person user, @PathParam("id") int id) {

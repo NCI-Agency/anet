@@ -42,6 +42,9 @@ emailFromAddr: "Anet Testing <hunter+anet@dds.mil>"
 # Should not include an ending slash! 
 serverUrl: "http://localhost:3000"
 
+# Whether to time Waffle requests
+timeWaffleRequests: true
+
 # Configuration for Waffle. This is the system that ANET uses to perform windows authentication
 # See https://github.com/Waffle/waffle
 waffleConfig:

@@ -129,6 +129,10 @@ database:
 #   date_string_format: 
 #   date_class:
 ```
+- **timeWaffleRequests**: set to `true` to report timings of Waffle request methods:
+```
+timeWaffleRequests: false
+```
 
 - **waffleConfig**: ANET uses the open source `waffle` library to perform Windows Authentication ( https://github.com/Waffle/waffle ). It can be configured to authenticate via AD in the following manner:
 

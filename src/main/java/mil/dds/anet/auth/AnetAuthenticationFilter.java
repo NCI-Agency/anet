@@ -15,6 +15,9 @@ import javax.ws.rs.core.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+
 import io.dropwizard.auth.Authorizer;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -28,58 +31,74 @@ public class AnetAuthenticationFilter implements ContainerRequestFilter, Authori
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	AnetObjectEngine engine;
-	
-	public AnetAuthenticationFilter(AnetObjectEngine engine) { 
+	private final AnetObjectEngine engine;
+	private final Timer timerFilter;
+	private final Timer timerAuthorize;
+
+	public AnetAuthenticationFilter(AnetObjectEngine engine, MetricRegistry metricRegistry) {
 		this.engine = engine;
+		this.timerFilter = metricRegistry.timer(MetricRegistry.name(this.getClass(), "filter"));
+		this.timerAuthorize = metricRegistry.timer(MetricRegistry.name(this.getClass(), "authorize"));
 	}
 	
 	@Override
 	public void filter(ContainerRequestContext ctx) throws IOException {
-		final SecurityContext secContext = ctx.getSecurityContext();
-		Principal p = secContext.getUserPrincipal();
-		if (p != null) { 
-			String domainUsername = p.getName();
-			List<Person> matches = engine.getPersonDao().findByDomainUsername(domainUsername);
-			Person person;
-			if (matches.size() == 0) { 
-				//First time this user has ever logged in. 
-				person = new Person();
-				person.setDomainUsername(domainUsername);
-				person.setName("");
-				person.setRole(Role.ADVISOR);
-				person.setStatus(PersonStatus.NEW_USER);
-				person = engine.getPersonDao().insert(person);
-			} else { 
-				person = matches.get(0);
+		final Timer.Context context = timerFilter.time();
+		try {
+			final SecurityContext secContext = ctx.getSecurityContext();
+			Principal p = secContext.getUserPrincipal();
+			if (p != null) {
+				String domainUsername = p.getName();
+				List<Person> matches = engine.getPersonDao().findByDomainUsername(domainUsername);
+				Person person;
+				if (matches.size() == 0) {
+					//First time this user has ever logged in.
+					person = new Person();
+					person.setDomainUsername(domainUsername);
+					person.setName("");
+					person.setRole(Role.ADVISOR);
+					person.setStatus(PersonStatus.NEW_USER);
+					person = engine.getPersonDao().insert(person);
+				} else {
+					person = matches.get(0);
+				}
+				
+				final Person user = person;
+				ctx.setSecurityContext(new SecurityContext() {
+					public Principal getUserPrincipal() {
+						return user;
+					}
+
+					public boolean isUserInRole(String role) {
+						return authorize(user, role);
+					}
+
+					public boolean isSecure() {
+						return secContext.isSecure();
+					}
+
+					public String getAuthenticationScheme() {
+						return secContext.getAuthenticationScheme();
+					}
+				});
+			} else {
+				throw new WebApplicationException("Unauthorized", Status.UNAUTHORIZED);
 			}
-			
-			final Person user = person;
-			ctx.setSecurityContext(new SecurityContext() {
-				public Principal getUserPrincipal() {
-					return user;
-				}
-				
-				public boolean isUserInRole(String role) {
-					return authorize(user, role);
-				}
-				
-				public boolean isSecure() {
-					return secContext.isSecure();
-				}
-				
-				public String getAuthenticationScheme() {
-					return secContext.getAuthenticationScheme();
-				}
-			});
-		} else { 
-			throw new WebApplicationException("Unauthorized", Status.UNAUTHORIZED);
+		}
+		finally {
+			context.stop();
 		}
 	}
 
 	@Override
 	public boolean authorize(Person principal, String role) {
-		return checkAuthorization(principal, role);
+		final Timer.Context context = timerAuthorize.time();
+		try {
+			return checkAuthorization(principal, role);
+		}
+		finally {
+			context.stop();
+		}
 	}
 	
 	/**

@@ -30,6 +30,9 @@ emailFromAddr: "Anet-Mail <anet-mail@m068.nato.int>"
 # Should not include an ending slash! 
 serverUrl: "http://anet.m068.nato.int"
 
+# Whether to time Waffle requests
+timeWaffleRequests: false
+
 # Configuration for Waffle. This is the system that ANET uses to perform windows authentication
 # See https://github.com/Waffle/waffle
 waffleConfig:
