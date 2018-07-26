@@ -20,6 +20,7 @@ export function deserializeQueryParams(objType, queryParams, callbackFunction) {
 			// deserialize returns filter data
 			usedFilters.push(deser)
 		}
+		return null
 	})
 	Promise.all(promises).then(dataList => {
 		dataList.forEach( (filterData, index) => {
