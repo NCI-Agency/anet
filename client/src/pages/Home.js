@@ -29,7 +29,7 @@ import { connect } from 'react-redux'
 import utils from 'utils'
 
 import { SEARCH_OBJECT_TYPES } from 'actions'
-import {LAST_WEEK, BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
+import {LAST_WEEK, AFTER, dateToQuery} from 'dateUtils'
 import {deserializeQueryParams} from 'searchUtils'
 
 function addToQuery(queryKey, value, isDate, isOrg) {
