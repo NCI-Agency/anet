@@ -156,6 +156,12 @@ export default {
 						queryKey: "releasedAt",
 					}
 				},
+				"Creation Date": {
+					component: DateRangeSearch,
+					props: {
+						queryKey: "createdAt",
+					}
+				},
 				"Update Date": {
 					component: DateRangeSearch,
 					props: {

@@ -29,7 +29,7 @@ import { connect } from 'react-redux'
 import utils from 'utils'
 
 import { SEARCH_OBJECT_TYPES } from 'actions'
-import {BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
+import {LAST_WEEK, BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
 import {deserializeQueryParams} from 'searchUtils'
 
 function addToQuery(queryKey, value, isDate, isOrg) {
@@ -131,18 +131,17 @@ class BaseHome extends Page {
 
 	myOrgRecent(currentUser) {
 		if (!currentUser.position || !currentUser.position.organization) { return { query: {}} }
-		let lastWeek = moment().subtract(7, 'days').startOf('day')
 		return {
 			title: currentUser.position.organization.shortName + "'s reports in the last 7 days",
 			query: {
 				orgId: currentUser.position.organization.id,
 				includeOrgChildren: false,
-				createdAtStart: lastWeek.valueOf(),
+				createdAtStart: LAST_WEEK,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			},
 			filters: [
 				{key: "Organization", isOrg: true, queryKey: 'orgId', value: currentUser.position.organization},
-				{key: 'createdAtStart', isDate: true, queryKey: 'createdAt', value: {relative: AFTER,  start: lastWeek.toISOString()}}, // FIXME: no advanced filter for this condition
+				{key: 'Creation Date', isDate: true, queryKey: 'createdAt', value: {relative: LAST_WEEK}},
 				{key: "State", value: { state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL] }},
 			]
 		}
