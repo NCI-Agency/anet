@@ -29,24 +29,8 @@ import { connect } from 'react-redux'
 import utils from 'utils'
 
 import { SEARCH_OBJECT_TYPES } from 'actions'
-import {LAST_WEEK, AFTER, dateToQuery} from 'dateUtils'
+import {LAST_WEEK, AFTER} from 'dateUtils'
 import {deserializeQueryParams} from 'searchUtils'
-
-function addToQuery(queryKey, value, isDate, isOrg) {
-	// Add toQuery function to a value object, to be used by getSearchQuery
-	return {
-		...value,
-		toQuery: () => {
-			return isDate
-			? dateToQuery(queryKey, value)
-			: isOrg
-				? {[queryKey]: value.id, includeOrgChildren: false}
-				: queryKey
-					? {[queryKey]: value.id}
-					: value
-		}
-	}
-}
 
 class BaseHome extends Page {
 
@@ -82,19 +66,12 @@ class BaseHome extends Page {
 	allDraft() { return {
 		title: "All draft reports",
 		query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] },
-		filters: [
-			{key: "State", value: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }}
-		],
 	}}
 
 	myDraft(currentUser) {
 		return {
 			title: "My draft reports",
 			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id },
-			filters: [
-				{key: "Author", queryKey: 'authorId', value: currentUser},
-				{key: "State", value: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }}
-			],
 		}
 	}
 
@@ -102,10 +79,6 @@ class BaseHome extends Page {
 		return {
 			title: "My reports pending approval",
 			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]},
-			filters: [
-				{key: "Author", queryKey: 'authorId', value: currentUser},
-				{key: "State", value: { state: [Report.STATE.PENDING_APPROVAL] }}
-			],
 		}
 	}
 
@@ -113,9 +86,6 @@ class BaseHome extends Page {
 		return {
 			title: "Reports pending my approval",
 			query: { pendingApprovalOf: currentUser.id },
-			filters: [
-			  {key: "Pending Approval Of", queryKey: 'pendingApprovalOf', value: currentUser}
-			],
 		}
 	}
 
@@ -123,9 +93,6 @@ class BaseHome extends Page {
 		return {
 			title: "All reports pending approval",
 			query: { state: [Report.STATE.PENDING_APPROVAL] },
-			filters: [
-				{key: "State", value: { state: [Report.STATE.PENDING_APPROVAL] }}
-			],
 		}
 	}
 
@@ -139,11 +106,6 @@ class BaseHome extends Page {
 				createdAtStart: LAST_WEEK,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			},
-			filters: [
-				{key: "Organization", isOrg: true, queryKey: 'orgId', value: currentUser.position.organization},
-				{key: 'Creation Date', isDate: true, queryKey: 'createdAt', value: {relative: LAST_WEEK}},
-				{key: "State", value: { state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL] }},
-			]
 		}
 	}
 
@@ -157,10 +119,6 @@ class BaseHome extends Page {
 				state: [Report.STATE.FUTURE],
 				sortOrder: 'ASC'
 			},
-			filters: [
-				{key: "Organization", isOrg: true, queryKey: 'orgId', value: currentUser.position.organization},
-				{key: "State", value: { state: [Report.STATE.FUTURE] }},
-			]
 		}
 	}
 
@@ -168,9 +126,6 @@ class BaseHome extends Page {
 		return {
 			title: "All upcoming engagements",
 			query: { state: [Report.STATE.FUTURE], sortOrder: 'ASC' },
-			filters: [
-				{key: "State", value: { state: [Report.STATE.FUTURE] }},
-			]
 		}
 	}
 
@@ -178,10 +133,6 @@ class BaseHome extends Page {
 		return {
 			title: "Reports with sensitive information",
 			query: { state: [Report.STATE.RELEASED], sensitiveInfo: true },
-			filters: [
-				{key: "State", value: { state: [Report.STATE.RELEASED] }},
-				{key: "Sensitive Info", value: { sensitiveInfo: true }}
-			]
 		}
 	}
 
@@ -311,15 +262,7 @@ class BaseHome extends Page {
 
 	@autobind
 	onClickDashboard(queryDetails, event) {
-		const searchFilters = queryDetails.filters.map(
-			filter => {if (typeof filter.value === 'object') { filter.value = addToQuery(filter.queryKey, filter.value, filter.isDate || false, filter.isOrg || false) }; return filter}
-		)
-		// We update the Redux state
-		const queryState = {objectType: SEARCH_OBJECT_TYPES.REPORTS, filters: searchFilters, text: ''}
-		this.props.setSearchQuery(queryState)
-		this.props.history.push({
-			pathname: '/search'
-		})
+		deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback)
 		event.preventDefault()
 		event.stopPropagation()
 	}
@@ -343,6 +286,7 @@ class BaseHome extends Page {
 
 	@autobind
 	deserializeCallback(objectType, filters, text) {
+		// We update the Redux state
 		this.props.setSearchQuery({
 			objectType: objectType,
 			filters: filters,
