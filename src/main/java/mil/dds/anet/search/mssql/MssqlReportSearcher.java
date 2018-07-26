@@ -74,8 +74,6 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("freetextQuery", text);
 		}
 
-		sql.append(", people");  // join condition added at the end
-
 		if (query.getAuthorId() != null) {
 			whereClauses.add("reports.authorId = :authorId");
 			args.put("authorId", query.getAuthorId());
@@ -219,6 +217,15 @@ public class MssqlReportSearcher implements IReportSearcher {
 					+ "WHERE ra.authorizationGroupId IN (" + authorizationGroupIds + "))");
 		}
 
+		if (query.getSensitiveInfo()) {
+			sql.append(" LEFT JOIN reportAuthorizationGroups ra ON ra.reportId = reports.id");
+			sql.append(" LEFT JOIN authorizationGroups ag ON ag.id = ra.authorizationGroupId");
+			sql.append(" LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupId = ag.id");
+			sql.append(" LEFT JOIN positions pos ON pos.id = agp.positionId");
+			whereClauses.add("pos.currentPersonId = :userId");
+			args.put("userId", user.getId());
+		}
+
 		if (query.getAttendeePositionId() != null) {
 			// Search for reports attended by people serving in that position at the engagement date
 			whereClauses.add("reports.id IN ( SELECT r.id FROM reports r "
@@ -249,6 +256,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
 			args.put("userId", user.getId());
 		}
+
+		sql.append(", people");  // join condition added at the end
 
 		sql.append(" WHERE ");
 		whereClauses.add(0, "reports.authorId = people.id");  // add join condition at the front

@@ -10,6 +10,7 @@ import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import PositionTypeSearchFilter from 'components/advancedSearch/PositionTypeSearchFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 import TextInputFilter from 'components/advancedSearch/TextInputFilter'
+import CheckboxSearchFilter from 'components/advancedSearch/CheckboxSearchFilter'
 
 import {Location, Person, Task, Position, Organization, Tag} from 'models'
 
@@ -190,7 +191,13 @@ export default {
 						fields: Tag.autocompleteQuery,
 						placeholder: "Filter reports by tag...",
 					}
-				}
+				},
+				"Sensitive info": {
+					component: CheckboxSearchFilter,
+					props: {
+						queryKey: "sensitiveInfo",
+					}
+				},
 			}
 		}
 
