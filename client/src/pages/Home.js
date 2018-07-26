@@ -114,7 +114,7 @@ class BaseHome extends Page {
 			title: "Reports pending my approval",
 			query: { pendingApprovalOf: currentUser.id },
 			filters: [
-			  {key: "Pending approval of", queryKey: 'pendingApprovalOf', value: currentUser}
+			  {key: "Pending Approval Of", queryKey: 'pendingApprovalOf', value: currentUser}
 			],
 		}
 	}
@@ -180,7 +180,7 @@ class BaseHome extends Page {
 			query: { state: [Report.STATE.RELEASED], sensitiveInfo: true },
 			filters: [
 				{key: "State", value: { state: [Report.STATE.RELEASED] }},
-				{key: "Sensitive info", value: { sensitiveInfo: true }}
+				{key: "Sensitive Info", value: { sensitiveInfo: true }}
 			]
 		}
 	}

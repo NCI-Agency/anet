@@ -102,7 +102,7 @@ export default {
 						placeholder: "Filter reports by attendee...",
 					}
 				},
-				"Pending approval of": {
+				"Pending Approval Of": {
 					component: AutocompleteFilter,
 					props: {
 						queryKey: "pendingApprovalOf",
@@ -198,7 +198,7 @@ export default {
 						placeholder: "Filter reports by tag...",
 					}
 				},
-				"Sensitive info": {
+				"Sensitive Info": {
 					component: CheckboxSearchFilter,
 					props: {
 						queryKey: "sensitiveInfo",
@@ -275,7 +275,7 @@ export default {
 						values: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE],
 					}
 				},
-				"Organization type": {
+				"Organization Type": {
 					component: SelectSearchFilter,
 					props: {
 						queryKey: "type",
@@ -288,7 +288,7 @@ export default {
 
 		filters.Positions = {
 			filters: {
-				"Position type": {
+				"Position Type": {
 					component: PositionTypeSearchFilter,
 					props: {
 						queryKey: "type",
@@ -322,7 +322,7 @@ export default {
 						placeholder: "Filter by location...",
 					}
 				},
-				"Is filled?": {
+				"Is Filled?": {
 					component: SelectSearchFilter,
 					props: {
 						queryKey: "isFilled",
