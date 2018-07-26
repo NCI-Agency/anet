@@ -54,7 +54,6 @@ export default class OrganizationFilter extends Component {
 			this.setState({
 				value: this.props.value,
 				includeChildOrgs: this.props.value.includeChildOrgs,
-				queryParams: this.props.queryParams,
 			}, this.updateFilter)
 		}
 	}

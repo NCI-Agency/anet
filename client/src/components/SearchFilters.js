@@ -74,7 +74,7 @@ const taskFilters = props => {
 }
 
 export default {
-	searchFilters: function(organizationFilterRef) {
+	searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
 		const filters = {}
 		filters.Reports = {
 			filters: {
@@ -281,6 +281,7 @@ export default {
 						queryKey: "type",
 						values: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
 						labels: [Settings.fields.advisor.position.name, Settings.fields.principal.position.name],
+						ref: positionTypeFilterRef,
 					}
 				},
 				Organization: {

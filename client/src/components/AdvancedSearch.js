@@ -22,6 +22,19 @@ import utils from 'utils'
 
 import {Position, Organization} from 'models'
 
+
+function updateOrganizationFilterState(organizationFilter, positionType) {
+	if (organizationFilter) {
+		if (positionType === Position.TYPE.PRINCIPAL) {
+			organizationFilter.setState({queryParams: {type: Organization.TYPE.PRINCIPAL_ORG}})
+		} else if (positionType === Position.TYPE.ADVISOR) {
+			organizationFilter.setState({queryParams: {type: Organization.TYPE.ADVISOR_ORG}})
+		} else {
+			organizationFilter.setState({queryParams: {}})
+		}
+	}
+}
+
 class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
@@ -38,14 +51,27 @@ class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	setOrganizationFilter(el) {
-		this.setState({organizationFilter: el})
+	setPositionTypeFilter(positionTypeFilter) {
+		this.updateOrganizationFilter(positionTypeFilter, this.state.organizationFilter)
+		this.setState({positionTypeFilter: positionTypeFilter})
+	}
+
+	@autobind
+	setOrganizationFilter(organizationFilter) {
+		this.updateOrganizationFilter(this.state.positionTypeFilter, organizationFilter)
+		this.setState({organizationFilter: organizationFilter})
+	}
+
+	@autobind
+	updateOrganizationFilter(positionTypeFilter, organizationFilter) {
+		const positionType = positionTypeFilter ? positionTypeFilter.state.value.value : ""
+		updateOrganizationFilterState(organizationFilter, positionType)
 	}
 
 	constructor(props) {
 		super(props)
 
-		this.ALL_FILTERS = searchFilters.searchFilters(this.setOrganizationFilter)
+		this.ALL_FILTERS = searchFilters.searchFilters(this.setPositionTypeFilter, this.setOrganizationFilter)
 		this.state = {
 			objectType: "",
 			text: "",
@@ -152,10 +178,7 @@ class AdvancedSearch extends Component {
 		if (filter.key === "Organization") {
 			this.setOrganizationFilter(null)
 		} else if (filter.key === "Position type") {
-			let organizationFilter = this.state.organizationFilter
-			if (organizationFilter) {
-				organizationFilter.setState({queryParams: {}})
-			}
+			this.setPositionTypeFilter(null)
 		}
 	}
 
@@ -240,21 +263,11 @@ class SearchFilter extends Component {
 
 	@autobind
 	onChange(value) {
-		let filter = this.props.filter
+		const filter = this.props.filter
 		filter.value = value
 
 		if (filter.key === "Position type") {
-			let organizationFilter = this.props.organizationFilter
-			if (organizationFilter) {
-				let positionType = filter.value.value || ""
-				if (positionType === Position.TYPE.PRINCIPAL) {
-					organizationFilter.setState({queryParams: {type: Organization.TYPE.PRINCIPAL_ORG}})
-				} else if (positionType === Position.TYPE.ADVISOR) {
-					organizationFilter.setState({queryParams: {type: Organization.TYPE.ADVISOR_ORG}})
-				} else {
-					organizationFilter.setState({queryParams: {}})
-				}
-			}
+			updateOrganizationFilterState(this.props.organizationFilter, filter.value.value || "")
 		}
 	}
 }
