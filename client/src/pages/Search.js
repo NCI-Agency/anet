@@ -11,7 +11,6 @@ import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
-import AdvancedSearch from 'components/AdvancedSearch'
 import PositionTable from 'components/PositionTable'
 
 import API from 'api'
