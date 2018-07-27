@@ -11,7 +11,6 @@ import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
 import Form from 'components/Form'
 import Messages from 'components/Messages'
-import AdvancedSearch from 'components/AdvancedSearch'
 import PositionTable from 'components/PositionTable'
 
 import API from 'api'
@@ -210,7 +209,7 @@ class Search extends Page {
 		const noResults = numResults === 0
 
 		const qs = utils.parseQueryString(this.props.location.search)
-		const queryType = this.state.queryType || qs.type || 'everything'
+		const queryType = this.state.queryType || 'everything'
 
 		const taskShortLabel = Settings.fields.task.shortLabel
 
@@ -269,7 +268,7 @@ class Search extends Page {
 
 				<Messages error={error} success={success} />
 
-				{qs.text && <h2 className="only-show-for-print">Search query: '{qs.text}'</h2>}
+				{this.state.query && <h2 className="only-show-for-print">Search query: '{this.state.query}'</h2>}
 
 				{noResults &&
 					<Alert bsStyle="warning">

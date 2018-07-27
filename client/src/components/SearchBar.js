@@ -91,12 +91,14 @@ class SearchBar extends Component {
 
 	@autobind
 	onSubmit(event) {
-		// We only update the Redux state on submit
-		this.props.setSearchQuery({text: this.state.searchTerms})
-		if (this.props.onSearchGoToSearchPage) {
-			this.props.history.push({
-				pathname: '/search'
-			})
+		if (!this.state.showAdvancedSearch) {
+			// We only update the Redux state on submit
+			this.props.setSearchQuery({text: this.state.searchTerms})
+			if (this.props.onSearchGoToSearchPage) {
+				this.props.history.push({
+					pathname: '/search'
+				})
+			}
 		}
 		event.preventDefault()
 		event.stopPropagation()

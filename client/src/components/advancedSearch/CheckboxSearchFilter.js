@@ -1,14 +1,11 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import {Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import _isEqualWith from 'lodash/isEqualWith'
-import utils from 'utils'
 
-export default class SelectSearchFilter extends Component {
+export default class CheckboxSearchFilter extends Component {
 	static propTypes = {
 		queryKey: PropTypes.string.isRequired,
-		values: PropTypes.array.isRequired,
-		labels: PropTypes.array,
 
 		//Passed by the SearchFilterDisplay row
 		asFormField: PropTypes.bool,
@@ -25,10 +22,9 @@ export default class SelectSearchFilter extends Component {
 	constructor(props) {
 		super(props)
 
-		const value = props.value || {}
 		this.state = {
 			value: {
-				value: value.value || props.values[0] || ''
+				value: true
 			}
 		}
 	}
@@ -37,32 +33,14 @@ export default class SelectSearchFilter extends Component {
 		this.updateFilter()
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
-			this.setState({value: this.props.value}, this.updateFilter)
-		}
-	}
-
 	render() {
-		let values = this.props.values
-		let labels = this.props.labels || values.map(v => utils.sentenceCase(v))
+		const msg = "Authorized for me"
 		return (
 			!this.props.asFormField ?
-				<React.Fragment>{labels[values.indexOf( this.state.value.value )]}</React.Fragment>
+				<React.Fragment>{msg}</React.Fragment>
 			:
-				<select value={this.state.value.value} onChange={this.onChange} >
-					{values.map((v,idx) =>
-						<option key={idx} value={v}>{labels[idx]}</option>
-					)}
-				</select>
+				<Checkbox readOnly checked={this.state.value.value}>{msg}</Checkbox>
 		)
-	}
-
-	@autobind
-	onChange(event) {
-		let {value} = this.state
-		value.value = event.target.value
-		this.setState({value}, this.updateFilter)
 	}
 
 	@autobind
