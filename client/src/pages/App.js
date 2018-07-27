@@ -66,6 +66,7 @@ class App extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		pageProps: PropTypes.object,
+		searchProps: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -283,7 +284,8 @@ class App extends Page {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-	pageProps: state.pageProps
+	pageProps: state.pageProps,
+	searchProps: state.searchProps
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App))

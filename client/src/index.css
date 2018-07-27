@@ -266,7 +266,7 @@ span.asLink:focus {
 	text-decoration: none;
 }
 
-a.home-tile {
+button.home-tile.btn {
 	display: table-cell;
 	width: 20%;
 	float: none;
@@ -282,6 +282,9 @@ a.home-tile {
 
 .home-tile:hover {
 	background: #dae3ee;
+}
+.home-tile:hover, .home-tile:focus {
+	text-decoration: none;
 }
 
 .person-icon, .position-icon {
@@ -671,6 +674,10 @@ header.searchPagination {
 .advanced-search select {
 	height: 32px;
 }
+.advanced-search select[multiple] {
+	height: 64px;
+}
+
 .only-show-for-print {
 	display: none;
 }

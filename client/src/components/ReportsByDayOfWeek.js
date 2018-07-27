@@ -10,6 +10,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
@@ -27,8 +29,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 class ReportsByDayOfWeek extends Component {
   static propTypes = {
-    startDate: PropTypes.object.isRequired,
-    endDate: PropTypes.object.isRequired,
+    queryParams: PropTypes.object,
     showLoading: PropTypes.func.isRequired,
     hideLoading: PropTypes.func.isRequired,
   }
@@ -44,28 +45,13 @@ class ReportsByDayOfWeek extends Component {
     }
   }
 
-  get queryParams() {
-    return {
-      state: [Report.STATE.RELEASED],
-      releasedAtStart: this.props.startDate.valueOf(),
-      releasedAtEnd: this.props.endDate.valueOf(),
-      includeEngagementDayOfWeek: 1,
-    }
-  }
-
-  get startDateLongStr() { return this.props.startDate.format('DD MMM YYYY') }
-
-  get endDateLongStr() { return this.props.endDate.format('DD MMM YYYY') }
-
   render() {
     const focusDetails = this.getFocusDetails()
     return (
       <div>
-        <p className="help-text">{`Number of published reports between ${this.startDateLongStr} and ${this.endDateLongStr}, grouped by day of the week`}</p>
+        <p className="help-text">{`Grouped by day of the week`}</p>
         <p className="chart-description">
-          {`Displays the number of published reports which have been released
-            between ${this.startDateLongStr} and ${this.endDateLongStr}.
-            The reports are grouped by day of the week. In order to see the list
+          {`The reports are grouped by day of the week. In order to see the list
             of published reports for a day of the week, click on the bar
             corresponding to the day of the week.`}
         </p>
@@ -119,7 +105,9 @@ class ReportsByDayOfWeek extends Component {
       let daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
       // Set the order in which to display the days of the week
       let displayOrderDaysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-      let simplifiedValues = values[0].reportList.list.map(d => {return {reportId: d.id, dayOfWeek: d.engagementDayOfWeek}})
+      let simplifiedValues = values[0].reportList.list ?
+          values[0].reportList.list.map(d => {return {reportId: d.id, dayOfWeek: d.engagementDayOfWeek}}) :
+          []
       this.setState({
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
@@ -149,7 +137,7 @@ class ReportsByDayOfWeek extends Component {
 
   chartQueryParams = () => {
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
@@ -167,7 +155,7 @@ class ReportsByDayOfWeek extends Component {
 
   reportsQueryParams = () => {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -214,19 +202,14 @@ class ReportsByDayOfWeek extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.datePropsChanged(prevProps)) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
-        focusedDayOfWeek: ''  // reset focus when changing the date
+        focusedDayOfWeek: ''  // reset focus when changing the queryParams
       }, () => this.fetchData())
     }
   }
 
-  datePropsChanged = (otherProps) => {
-    const startDateChanged = otherProps.startDate.valueOf() !== this.props.startDate.valueOf()
-    const endDateChanged = otherProps.endDate.valueOf() !== this.props.endDate.valueOf()
-    return startDateChanged || endDateChanged
-  }
 }
 
 export default connect(null, mapDispatchToProps)(ReportsByDayOfWeek)

@@ -9,6 +9,7 @@ import AFG_ICON from 'resources/afg_small.png'
 export default class Position extends Model {
 	static resourceName = 'Position'
 	static listName = 'positionList'
+	static getInstanceName = 'position'
 
 	static STATUS = {
 		ACTIVE: 'ACTIVE',

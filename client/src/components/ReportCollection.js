@@ -43,7 +43,7 @@ export default class ReportCollection extends Component {
 			totalCount: PropTypes.number,
 			pageNum: PropTypes.number,
 			pageSize: PropTypes.number,
-			list: PropTypes.array.isRequired,
+			list: PropTypes.array,
 		}),
 		goToPage: PropTypes.func,
 		mapId: PropTypes.string,
