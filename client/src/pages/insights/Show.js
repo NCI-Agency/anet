@@ -22,7 +22,7 @@ import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
-import {BETWEEN, BEFORE, AFTER, dateToQuery} from 'dateUtils'
+import {deserializeQueryParams} from 'searchUtils'
 
 export const NOT_APPROVED_REPORTS = 'not-approved-reports'
 export const CANCELLED_REPORTS = 'cancelled-reports'
@@ -104,14 +104,6 @@ const dateRangeFilterCss = {
   marginTop: '20px'
 }
 
-function addToQuery(queryKey, value, isDate) {
-  // Add toQuery function to a value object, to be used by getSearchQuery
-  return {
-    ...value,
-    toQuery: () => {return isDate ? dateToQuery(queryKey, value) : value}
-  }
-}
-
 class BaseInsightsShow extends Page {
 
   static propTypes = {
@@ -145,35 +137,42 @@ class BaseInsightsShow extends Page {
   }
 
   get insightQueryParams() {
-    const params = {
-      [NOT_APPROVED_REPORTS]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.PENDING_APPROVAL]}},
-        {key: 'Update Date', isDate: true, queryKey: 'updatedAt', value: {relative: BEFORE,  end: this.state.referenceDate.toISOString()}},
-      ],
-      [CANCELLED_REPORTS]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.CANCELLED], cancelledReason: ''}},
-        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
-      ],
-      [REPORTS_BY_TASK]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.RELEASED]}},
-        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: AFTER,  start: this.state.referenceDate.toISOString()}},
-      ],
-      [REPORTS_BY_DAY_OF_WEEK]: [
-        {key: 'State', isDate: false, queryKey: 'state', value: {state: [Report.STATE.RELEASED]}},
-        {key: 'Release Date', isDate: true, queryKey: 'releasedAt', value: {relative: BETWEEN,  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
-        {key: 'includeEngagementDayOfWeek', isDate: false, queryKey: '', value: 1},
-      ],
-      [FUTURE_ENGAGEMENTS_BY_LOCATION]: [
-        {key: 'Engagement Date', isDate: true, queryKey: 'engagementDate', value: {relative: BETWEEN,  start: this.state.startDate.toISOString(), end: this.state.endDate.toISOString()}},
-      ],
-      [ADVISOR_REPORTS]: [],
+    return {
+      [NOT_APPROVED_REPORTS]: {
+        state: [Report.STATE.PENDING_APPROVAL],
+        updatedAtEnd: this.state.referenceDate.endOf('day').valueOf()
+      },
+      [CANCELLED_REPORTS]: {
+        state: [Report.STATE.CANCELLED],
+        cancelledReason: '',
+        releasedAtStart: this.state.referenceDate.startOf('day').valueOf()
+      },
+      [REPORTS_BY_TASK]: {
+        state: [Report.STATE.RELEASED],
+        releasedAtStart: this.state.referenceDate.startOf('day').valueOf()
+      },
+      [REPORTS_BY_DAY_OF_WEEK]: {
+        state: [Report.STATE.RELEASED],
+        releasedAtStart: this.state.startDate.startOf('day').valueOf(),
+        releasedAtEnd: this.state.endDate.endOf('day').valueOf(),
+        includeEngagementDayOfWeek: 1
+      },
+      [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
+        engagementDateStart: this.state.startDate.startOf('day').valueOf(),
+        engagementDateEnd: this.state.endDate.endOf('day').valueOf()
+      },
+      [ADVISOR_REPORTS]: {},
     }
-    let insightParams = {}
-    Object.keys(params).forEach(function(key, index) {
-      insightParams[key] = params[key].map(
-        filter => {if (typeof filter.value === 'object') { filter.value = addToQuery(filter.queryKey, filter.value, filter.isDate || false) }; return filter})
+  }
+
+  @autobind
+  deserializeCallback(objectType, filters, text) {
+    // We update the Redux state
+    this.props.setSearchQuery({
+      objectType: objectType,
+      filters: filters,
+      text: text
     })
-    return insightParams
   }
 
   @autobind
@@ -184,11 +183,10 @@ class BaseInsightsShow extends Page {
       this.props.clearSearchQuery()
     }
     else {
-      this.props.setSearchQuery({
-        text: '',
-        objectType: SEARCH_OBJECT_TYPES.REPORTS,
-        filters: this.insightQueryParams[this.props.match.params.insight]
-      })
+      deserializeQueryParams(
+        SEARCH_OBJECT_TYPES.REPORTS,
+        this.insightQueryParams[this.props.match.params.insight],
+        this.deserializeCallback)
     }
   }
 
