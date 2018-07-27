@@ -16,7 +16,7 @@ test('Home Page', async t => {
     await t.context.get('/')
 
     // Use a CSS selector to find an element that we care about on the page.
-    let [$reportsPending, $draftReports, $orgReports, $upcomingEngagements] = await $$('.home-tile h1')
+    let [$draftReports, $reportsPending, $orgReports, $upcomingEngagements] = await $$('.home-tile h1')
 
     await assertElementTextIsInt(t, $reportsPending)
     await assertElementTextIsInt(t, $draftReports)

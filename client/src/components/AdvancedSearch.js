@@ -2,296 +2,139 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Button, DropdownButton, MenuItem, Row, Col, Form, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
-import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
-import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'
-import AutocompleteFilter from 'components/advancedSearch/AutocompleteFilter'
-import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
-import PositionTypeSearchFilter from 'components/advancedSearch/PositionTypeSearchFilter'
-import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
-import TextInputFilter from 'components/advancedSearch/TextInputFilter'
-
-import {Location, Person, Task, Position, Organization} from 'models'
+import searchFilters from 'components/SearchFilters'
 
 import REMOVE_ICON from 'resources/delete.png'
 
+import { setSearchQuery } from 'actions'
+import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
+import _isEqual from 'lodash/isEqual'
 import _isEqualWith from 'lodash/isEqualWith'
 import _cloneDeepWith from 'lodash/cloneDeepWith'
+import _cloneDeep from 'lodash/cloneDeep'
+import _clone from 'lodash/clone'
 import utils from 'utils'
 
-const taskFilters = props => {
-	const taskFiltersObj = {
-		Organization: <OrganizationFilter
-						queryKey="responsibleOrgId"
-						queryIncludeChildOrgsKey="includeChildrenOrgs"/>,
-		Status: <SelectSearchFilter
-						queryKey="status"
-						values={[Task.STATUS.ACTIVE, Task.STATUS.INACTIVE]}
-						labels={["Active", "Inactive"]}/>
-	}
-	const projectedCompletion = Settings.fields.task.projectedCompletion
-	if (projectedCompletion)
-		taskFiltersObj[projectedCompletion.label] = <DateRangeSearch
-			queryKey="projectedCompletion" />
-	const plannedCompletion = Settings.fields.task.plannedCompletion
-	if (plannedCompletion)
-		taskFiltersObj[plannedCompletion.label] = <DateRangeSearch
-			queryKey="plannedCompletion" />
-	const customEnum1 = Settings.fields.task.customFieldEnum1
-	if (customEnum1)
-		taskFiltersObj[customEnum1.label] = <SelectSearchFilter
-			queryKey="projectStatus"
-			values={Object.keys(customEnum1.enum)}
-			labels={Object.values(customEnum1.enum)} />
-	const customField = Settings.fields.task.customField
-	if (customField)
-		taskFiltersObj[customField.label] = <TextInputFilter
-			queryKey="customField" />
+import {Position, Organization} from 'models'
 
-	return taskFiltersObj
+
+function updateOrganizationFilterState(organizationFilter, positionType) {
+	if (organizationFilter) {
+		if (positionType === Position.TYPE.PRINCIPAL) {
+			organizationFilter.setState({queryParams: {type: Organization.TYPE.PRINCIPAL_ORG}})
+		} else if (positionType === Position.TYPE.ADVISOR) {
+			organizationFilter.setState({queryParams: {type: Organization.TYPE.ADVISOR_ORG}})
+		} else {
+			organizationFilter.setState({queryParams: {}})
+		}
+	}
 }
 
 class AdvancedSearch extends Component {
 	static propTypes = {
 		onSearch: PropTypes.func,
+		onCancel: PropTypes.func,
+		setSearchQuery: PropTypes.func.isRequired,
+		query: PropTypes.shape({
+			text: PropTypes.string,
+			filters: PropTypes.any,
+			objectType: PropTypes.string
+		}),
+		onSearchGoToSearchPage: PropTypes.bool,
+		searchObjectTypes: PropTypes.array,
+		text: PropTypes.string,
 	}
 
 	@autobind
-	setOrganizationFilter(el) {
-		this.setState({organizationFilter: el})
+	setPositionTypeFilter(positionTypeFilter) {
+		this.updateOrganizationFilter(positionTypeFilter, this.state.organizationFilter)
+		this.setState({positionTypeFilter: positionTypeFilter})
 	}
 
 	@autobind
-	getFilters() {
-		const filters = {}
-		filters.Reports = {
-			filters: {
-				Author: <AutocompleteFilter
-					queryKey="authorId"
-					objectType={Person}
-					valueKey="name"
-					fields={Person.autocompleteQuery}
-					template={Person.autocompleteTemplate}
-					queryParams={{role: Person.ROLE.ADVISOR}}
-					placeholder="Filter reports by author..."
-				/>,
-				Attendee: <AutocompleteFilter
-					queryKey="attendeeId"
-					objectType={Person}
-					valueKey="name"
-					fields={Person.autocompleteQuery}
-					template={Person.autocompleteTemplate}
-					placeholder="Filter reports by attendee..."
-				/>,
-				"Author Position": <AutocompleteFilter
-					queryKey="authorPositionId"
-					objectType={Position}
-					valueKey="name"
-					fields={Position.autocompleteQuery}
-					template={Position.autocompleteTemplate}
-					queryParams={{type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]}}
-					placeholder="Filter reports by author position..."
-				/>,
-				"Attendee Position": <AutocompleteFilter
-					queryKey="attendeePositionId"
-					objectType={Position}
-					valueKey="name"
-					fields={Position.autocompleteQuery}
-					template={Position.autocompleteTemplate}
-					placeholder="Filter reports by attendee position..."
-				/>,
-				Organization: <OrganizationFilter
-					queryKey="orgId"
-					queryIncludeChildOrgsKey="includeOrgChildren"
-				/>,
-				"Engagement Date": <DateRangeSearch queryKey="engagementDate" />,
-				"Release Date": <DateRangeSearch queryKey="releasedAt" />,
-				Location: <AutocompleteFilter
-					queryKey="locationId"
-					valueKey="name"
-					placeholder="Filter reports by location..."
-					url="/api/locations/search"
-				/>,
-				State: <ReportStateSearch />,
-				Atmospherics: <SelectSearchFilter
-					queryKey="atmosphere"
-					values={["POSITIVE","NEUTRAL","NEGATIVE"]}
-				/>,
-				Tag: <AutocompleteFilter
-					queryKey="tagId"
-					valueKey="name"
-					placeholder="Filter reports by tag..."
-					url="/api/tags/search"
-				/>,
-			}
-		}
+	setOrganizationFilter(organizationFilter) {
+		this.updateOrganizationFilter(this.state.positionTypeFilter, organizationFilter)
+		this.setState({organizationFilter: organizationFilter})
+	}
 
-		const taskShortLabel = Settings.fields.task.shortLabel
-		filters.Reports.filters[taskShortLabel] =
-			<AutocompleteFilter
-				queryKey="taskId"
-				objectType={Task}
-				fields={Task.autocompleteQuery}
-				template={Task.autocompleteTemplate}
-				valueKey="shortName"
-				placeholder={`Filter reports by ${taskShortLabel}...`}
-			/>
-
-
-		const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
-		filters.People = {
-			filters: {
-				Organization: <OrganizationFilter
-					queryKey="orgId"
-					queryIncludeChildOrgsKey="includeChildOrgs"
-				/>,
-				Role: <SelectSearchFilter
-					queryKey="role"
-					values={[Person.ROLE.ADVISOR,Person.ROLE.PRINCIPAL]}
-					labels={[Settings.fields.advisor.person.name, Settings.fields.principal.person.name]}
-				/>,
-				Status: <SelectSearchFilter
-					queryKey="status"
-					values={[Person.STATUS.ACTIVE, Person.STATUS.INACTIVE, Person.STATUS.NEW_USER]}
-				/>,
-				Location: <AutocompleteFilter
-					queryKey="locationId"
-					valueKey="name"
-					placeholder="Filter by location..."
-					url="/api/locations/search"
-				/>,
-				Nationality: <SelectSearchFilter
-					queryKey="country"
-					values={countries}
-					labels={countries}
-				/>,
-			}
-		}
-
-		filters.Organizations = {
-			filters: {
-				Status: <SelectSearchFilter
-					queryKey="status"
-					values={[Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE]}
-				/>,
-				"Organization type": <SelectSearchFilter
-					queryKey="type"
-					values={[Organization.TYPE.ADVISOR_ORG, Organization.TYPE.PRINCIPAL_ORG]}
-					labels={[Settings.fields.advisor.org.name, Settings.fields.principal.org.name]}
-				  />,
-			}
-		}
-
-		filters.Positions = {
-			filters: {
-				"Position type": <PositionTypeSearchFilter
-					queryKey="type"
-					values={[Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL]}
-					labels={[Settings.fields.advisor.position.name, Settings.fields.principal.position.name]}
-				/>,
-				Organization: <OrganizationFilter
-					queryKey="organizationId"
-					queryIncludeChildOrgsKey="includeChildrenOrgs"
-					ref={this.setOrganizationFilter}
-				/>,
-				Status: <SelectSearchFilter
-					queryKey="status"
-					values={[Position.STATUS.ACTIVE, Position.STATUS.INACTIVE]}
-				/>,
-				Location: <AutocompleteFilter
-					queryKey="locationId"
-					valueKey="name"
-					placeholder="Filter by location..."
-					url="/api/locations/search"
-				/>,
-				"Is filled?": <SelectSearchFilter
-					queryKey="isFilled"
-					values={["true","false"]}
-					labels={["Yes","No"]}
-				/>,
-			}
-		}
-
-		filters.Locations = {
-			filters: {
-				Status: <SelectSearchFilter
-					queryKey="status"
-					values={[Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]}
-				/>,
-			}
-		}
-
-		//Task filters
-		filters[pluralize(taskShortLabel)] = {
-			filters: taskFilters()
-		}
-
-		return filters
+	@autobind
+	updateOrganizationFilter(positionTypeFilter, organizationFilter) {
+		const positionType = positionTypeFilter ? positionTypeFilter.state.value.value : ""
+		updateOrganizationFilterState(organizationFilter, positionType)
 	}
 
 	constructor(props) {
 		super(props)
 
-		const query = props.query || {}
-		this.ALL_FILTERS = this.getFilters()
+		this.ALL_FILTERS = searchFilters.searchFilters(this.setPositionTypeFilter, this.setOrganizationFilter)
 		this.state = {
-			objectType: query.objectType || "Reports",
-			text: query.text || "",
-			filters: query.filters || [],
+			objectType: "",
+			text: "",
+			filters: [],
 		}
 	}
 
 	componentDidMount() {
-		this.setState(this.props.query)
+		this.setState({
+			objectType: this.props.query.objectType,
+			text: this.props.text,
+			filters: this.props.query.filters ? this.props.query.filters.slice() : [],
+		})
 	}
 
 	componentDidUpdate(prevProps, prevState) {
 		if (!_isEqualWith(prevProps.query, this.props.query, utils.treatFunctionsAsEqual)) {
 			this.setState(this.props.query)
 		}
+		if (!_isEqual(prevProps.text, this.props.text)) {
+			this.setState({text: this.props.text})
+		}
 	}
 
 	render() {
 		const {objectType, text, filters} = this.state
 		//console.log("RENDER AdvancedSearch", objectType, text, filters)
-		const filterDefs = this.ALL_FILTERS[this.state.objectType].filters
+		const filterDefs = this.state.objectType ? this.ALL_FILTERS[this.state.objectType].filters : {}
 		const existingKeys = filters.map(f => f.key)
 		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
-
 		return <div className="advanced-search form-horizontal">
 			<Form onSubmit={this.onSubmit}>
-				<FormGroup style={{textAlign: "center"}}>
-					<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
-						{Object.keys(this.ALL_FILTERS).map(type =>
-							<Button key={type} value={type}>{type}</Button>
-						)}
-					</ButtonToggleGroup>
+				<FormGroup>
+					<Col xs={11} style={{textAlign: "center"}}>
+						<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
+							{Object.keys(this.ALL_FILTERS).map(type =>
+							this.props.searchObjectTypes.indexOf(type) !== -1 && <Button key={type} value={type}>{type}</Button>
+							)}
+						</ButtonToggleGroup>
+					</Col>
+					<Col xs={1}>
+						<Button bsStyle="link" onClick={this.clearObjectType}>
+							<img src={REMOVE_ICON} height={14} alt="Clear type" />
+						</Button>
+					</Col>
 				</FormGroup>
 
-				<SearchFilter label="Search term" onRemove={() => this.setState({text: ""})}>
-					<FormControl value={text} onChange={this.setText} />
-				</SearchFilter>
+				<FormControl defaultValue={this.props.text} className="hidden" />
 
 				{filters.map(filter =>
-					<SearchFilter key={filter.key} query={this.state} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
+					filterDefs[filter.key] && <SearchFilter key={filter.key} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
 				)}
 
 				<Row>
-					<Col xs={5} xsOffset={3}>
-						{moreFiltersAvailable ?
+					<Col xs={6} xsOffset={3}>
+					{!this.state.objectType ? "To add filters, first pick a type above" :
+						!moreFiltersAvailable ? "No additional filters available" :
 							<DropdownButton bsStyle="link" title="+ Add another filter" onSelect={this.addFilter} id="addFilterDropdown">
 								{Object.keys(filterDefs).map(filterKey =>
 									<MenuItem disabled={existingKeys.indexOf(filterKey) > -1} eventKey={filterKey} key={filterKey} >{filterKey}</MenuItem>
 								)}
 							</DropdownButton>
-							:
-							"No additional filters available"
-						}
+					    }
 					</Col>
 				</Row>
 
@@ -311,27 +154,31 @@ class AdvancedSearch extends Component {
 	}
 
 	@autobind
+	clearObjectType() {
+		this.changeObjectType("")
+	}
+
+	@autobind
 	addFilter(filterKey) {
 		if (filterKey) {
 			let {filters} = this.state
-			filters.push({key: filterKey})
-			this.setState({filters})
+			const newFilters = filters.slice()
+			newFilters.push({key: filterKey})
+			this.setState({filters: newFilters})
 		}
 	}
 
 	@autobind
 	removeFilter(filter) {
 		let {filters} = this.state
-		filters.splice(filters.indexOf(filter), 1)
-		this.setState({filters})
+		const newFilters = filters.slice()
+		newFilters.splice(newFilters.indexOf(filter), 1)
+		this.setState({filters: newFilters})
 
 		if (filter.key === "Organization") {
 			this.setOrganizationFilter(null)
 		} else if (filter.key === "Position type") {
-			let organizationFilter = this.state.organizationFilter
-			if (organizationFilter) {
-				organizationFilter.setState({queryParams: {}})
-			}
+			this.setPositionTypeFilter(null)
 		}
 	}
 
@@ -343,51 +190,69 @@ class AdvancedSearch extends Component {
 	@autobind
 	resolveToQuery(value) {
 		if (typeof value === 'function') {
-			return value()
+			return _clone(value())
 		}
 	}
 
 	@autobind
 	onSubmit(event) {
+		if (typeof this.props.onSearch === 'function') {
+			this.props.onSearch()
+		}
 		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
 		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
-		if (!this.props.onSearch || this.props.onSearch(queryState) !== false) {
+		// We only update the Redux state on submit
+		this.props.setSearchQuery(queryState)
+		if (this.props.onSearchGoToSearchPage) {
 			this.props.history.push({
-				pathname: '/search',
-				state: {advancedSearch: queryState}
+				pathname: '/search'
 			})
-			event.preventDefault()
-			event.stopPropagation()
 		}
+		event.preventDefault()
+		event.stopPropagation()
 	}
 }
 
-export default withRouter(AdvancedSearch)
+const mapStateToProps = (state, ownProps) => {
+	return {
+		query: _cloneDeep(state.searchQuery),
+		onSearchGoToSearchPage: state.searchProps.onSearchGoToSearchPage,
+		searchObjectTypes: state.searchProps.searchObjectTypes
+	}
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+	setSearchQuery: advancedSearchQuery => dispatch(setSearchQuery(advancedSearchQuery))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(AdvancedSearch))
+
 
 class SearchFilter extends Component {
 	static propTypes = {
-		label: PropTypes.string,
 		onRemove: PropTypes.func,
-
-		query: PropTypes.object,
 		filter: PropTypes.object,
+		organizationFilter: PropTypes.object,
+		element: PropTypes.shape({
+			component: PropTypes.func.isRequired,
+			props: PropTypes.object,
+		})
 	}
 
 	render() {
-		let {label, onRemove, query, filter, children, element} = this.props
-
-		if (query) {
-			label = filter.key
-			children = React.cloneElement(
-				element,
-				{value: filter.value || "", onChange: this.onChange}
-			)
-		}
-
+		const {onRemove, filter, element} = this.props
+		const label = filter.key
+		const ChildComponent = element.component
 
 		return <FormGroup>
 			<Col xs={3}><ControlLabel>{label}</ControlLabel></Col>
-			<Col xs={8}>{children}</Col>
+			<Col xs={8}>
+				<ChildComponent
+					value={filter.value || ""}
+					onChange={this.onChange}
+					{...element.props}
+				/>
+			</Col>
 			<Col xs={1}>
 				<Button bsStyle="link" onClick={() => onRemove(this.props.filter)}>
 					<img src={REMOVE_ICON} height={14} alt="Remove this filter" />
@@ -398,21 +263,11 @@ class SearchFilter extends Component {
 
 	@autobind
 	onChange(value) {
-		let filter = this.props.filter
+		const filter = this.props.filter
 		filter.value = value
 
 		if (filter.key === "Position type") {
-			let organizationFilter = this.props.organizationFilter
-			if (organizationFilter) {
-				let positionType = filter.value.value || ""
-				if (positionType === Position.TYPE.PRINCIPAL) {
-					organizationFilter.setState({queryParams: {type: Organization.TYPE.PRINCIPAL_ORG}})
-				} else if (positionType === Position.TYPE.ADVISOR) {
-					organizationFilter.setState({queryParams: {type: Organization.TYPE.ADVISOR_ORG}})
-				} else {
-					organizationFilter.setState({queryParams: {}})
-				}
-			}
+			updateOrganizationFilterState(this.props.organizationFilter, filter.value.value || "")
 		}
 	}
 }

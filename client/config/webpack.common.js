@@ -27,8 +27,14 @@ module.exports = {
             {
                 test: /\.hbs$/,
                 loader: 'handlebars-loader'
-            },
-            {
+            }, {
+                test: /\.js.flow$/,
+                loader: 'ignore-loader'
+            }, {
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: 'javascript/auto',
+            }, {
                 enforce: "pre",
                 test: /\.js$/,
                 exclude: /node_modules/,

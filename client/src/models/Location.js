@@ -3,6 +3,7 @@ import Model from 'components/Model'
 export default class Location extends Model {
 	static resourceName = 'Location'
 	static listName = 'locationList'
+	static getInstanceName = 'location'
 
 	static STATUS = {
 		ACTIVE: 'ACTIVE',
@@ -15,6 +16,8 @@ export default class Location extends Model {
 		lat: null,
 		lng: null
 	}
+
+	static autocompleteQuery = "id, name"
 
 	static hasCoordinates(location) {
 		return location && typeof location.lat === 'number' && typeof location.lng === 'number'

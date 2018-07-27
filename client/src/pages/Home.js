@@ -11,6 +11,7 @@ import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import Breadcrumbs from 'components/Breadcrumbs'
 import SavedSearchTable from 'components/SavedSearchTable'
+import searchFilters from 'components/SearchFilters'
 
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
@@ -27,6 +28,10 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import utils from 'utils'
 
+import { SEARCH_OBJECT_TYPES } from 'actions'
+import {LAST_WEEK, AFTER} from 'dateUtils'
+import {deserializeQueryParams} from 'searchUtils'
+
 class BaseHome extends Page {
 
 	static propTypes = {
@@ -36,12 +41,11 @@ class BaseHome extends Page {
 
 	constructor(props) {
 		super(props)
-
+		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
 			tileCounts: [],
 			savedSearches: [],
 			selectedSearch: null,
-			userAuthGroups: []
 		}
 	}
 
@@ -50,7 +54,7 @@ class BaseHome extends Page {
 	}
 
 	approverQueries(currentUser) {
-		return [ this.pendingMe(currentUser), this.myDraft(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser),
+		return [ this.myDraft(currentUser), this.pendingMe(currentUser), this.myOrgRecent(currentUser), this.myOrgFuture(currentUser),
 		         this.mySensitiveInfo() ]
 	}
 
@@ -61,47 +65,47 @@ class BaseHome extends Page {
 
 	allDraft() { return {
 		title: "All draft reports",
-		query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] }
+		query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED] },
 	}}
 
 	myDraft(currentUser) {
 		return {
 			title: "My draft reports",
-			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id }
+			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id },
 		}
 	}
 
 	myPending(currentUser) {
 		return {
 			title: "My reports pending approval",
-			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]}
+			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]},
 		}
 	}
 
 	pendingMe(currentUser) {
 		return {
 			title: "Reports pending my approval",
-			query: { pendingApprovalOf: currentUser.id }
+			query: { pendingApprovalOf: currentUser.id },
 		}
 	}
 
 	allPending() {
 		return {
 			title: "All reports pending approval",
-			query: { state: [Report.STATE.PENDING_APPROVAL] }
+			query: { state: [Report.STATE.PENDING_APPROVAL] },
 		}
 	}
 
 	myOrgRecent(currentUser) {
 		if (!currentUser.position || !currentUser.position.organization) { return { query: {}} }
-		let lastWeek = moment().subtract(7, 'days').startOf('day').valueOf()
 		return {
 			title: currentUser.position.organization.shortName + "'s reports in the last 7 days",
 			query: {
-				advisorOrgId: currentUser.position.organization.id,
-				createdAtStart: lastWeek,
+				orgId: currentUser.position.organization.id,
+				includeOrgChildren: false,
+				createdAtStart: "" + LAST_WEEK,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
-			}
+			},
 		}
 	}
 
@@ -110,24 +114,25 @@ class BaseHome extends Page {
 		return {
 			title: currentUser.position.organization.shortName + "'s upcoming engagements",
 			query: {
-				advisorOrgId: currentUser.position.organization.id,
+				orgId: currentUser.position.organization.id,
+				includeOrgChildren: false,
 				state: [Report.STATE.FUTURE],
 				sortOrder: 'ASC'
-			}
+			},
 		}
 	}
 
 	allUpcoming() {
 		return {
 			title: "All upcoming engagements",
-			query: { state: [Report.STATE.FUTURE], sortOrder: 'ASC' }
+			query: { state: [Report.STATE.FUTURE], sortOrder: 'ASC' },
 		}
 	}
 
 	mySensitiveInfo() {
 		return {
 			title: "Reports with sensitive information",
-			query: { state: [Report.STATE.RELEASED], authorizationGroupId: (this.state.userAuthGroups.length ? this.state.userAuthGroups.map(f => f.id) : [-1]) }
+			query: { state: [Report.STATE.RELEASED], sensitiveInfo: true },
 		}
 	}
 
@@ -145,45 +150,35 @@ class BaseHome extends Page {
 		//If we don't have the currentUser yet (ie page is still loading, don't run these queries)
 		const { currentUser } = props
 		if (!currentUser || !currentUser._loaded) { return }
-		// Get current user authorization groups (needed for reports query 5)
-		const userAuthGroupsGraphQL = /* GraphQL */`
-			userAuthGroups: authorizationGroupList(f:search, query:$queryUserAuthGroups) {totalCount, list { id }}`
-		return API.query(
-				userAuthGroupsGraphQL,
-				{queryUserAuthGroups: {positionId: currentUser.position ? currentUser.position.id : -1}},
-				"($queryUserAuthGroups: AuthorizationGroupSearchQuery)")
-			.then(data => {
-				this.setState({userAuthGroups: data.userAuthGroups.list})
-				//queries will contain the five queries that will show up on the home tiles
-				//Based on the users role. They are all report searches
-				let queries = this.getQueriesForUser(currentUser)
-				//Run those five queries
-				let graphQL = /* GraphQL */`
-					tileOne: reportList(f:search, query:$queryOne) { totalCount},
-					tileTwo: reportList(f:search, query: $queryTwo) { totalCount},
-					tileThree: reportList(f:search, query: $queryThree) { totalCount },
-					tileFour: reportList(f:search, query: $queryFour) { totalCount },
-					tileFive: reportList(f:search, query: $queryFive) { totalCount },
-					savedSearches: savedSearchs(f:mine) {id, name, objectType, query}`
-				let variables = {
-					queryOne: queries[0].query,
-					queryTwo: queries[1].query,
-					queryThree: queries[2].query,
-					queryFour: queries[3].query,
-					queryFive: queries[4].query
-				}
-				API.query(graphQL, variables,
-					"($queryOne: ReportSearchQuery, $queryTwo: ReportSearchQuery, $queryThree: ReportSearchQuery, $queryFour: ReportSearchQuery," +
-					"$queryFive: ReportSearchQuery)")
-				.then(data => {
-					let selectedSearch = data.savedSearches && data.savedSearches.length > 0 ? data.savedSearches[0] : null
-					this.setState({
-						tileCounts: [data.tileOne.totalCount, data.tileTwo.totalCount, data.tileThree.totalCount, data.tileFour.totalCount, data.tileFive.totalCount],
-						savedSearches: data.savedSearches,
-						selectedSearch: selectedSearch
-					})
+		//queries will contain the five queries that will show up on the home tiles
+		//Based on the users role. They are all report searches
+		let queries = this.getQueriesForUser(currentUser)
+		//Run those five queries
+		let graphQL = /* GraphQL */`
+			tileOne: reportList(f:search, query:$queryOne) { totalCount},
+			tileTwo: reportList(f:search, query: $queryTwo) { totalCount},
+			tileThree: reportList(f:search, query: $queryThree) { totalCount },
+			tileFour: reportList(f:search, query: $queryFour) { totalCount },
+			tileFive: reportList(f:search, query: $queryFive) { totalCount },
+			savedSearches: savedSearchs(f:mine) {id, name, objectType, query}`
+		let variables = {
+			queryOne: queries[0].query,
+			queryTwo: queries[1].query,
+			queryThree: queries[2].query,
+			queryFour: queries[3].query,
+			queryFive: queries[4].query
+		}
+		API.query(graphQL, variables,
+			"($queryOne: ReportSearchQuery, $queryTwo: ReportSearchQuery, $queryThree: ReportSearchQuery, $queryFour: ReportSearchQuery," +
+			"$queryFive: ReportSearchQuery)")
+		.then(data => {
+			let selectedSearch = data.savedSearches && data.savedSearches.length > 0 ? data.savedSearches[0] : null
+			this.setState({
+				tileCounts: [data.tileOne.totalCount, data.tileTwo.totalCount, data.tileThree.totalCount, data.tileFour.totalCount, data.tileFive.totalCount],
+				savedSearches: data.savedSearches,
+				selectedSearch: selectedSearch
 			})
-		})
+	})
 	}
 
 	render() {
@@ -225,11 +220,10 @@ class BaseHome extends Page {
 					<Grid fluid>
 						<Row>
 							{queries.map((query, index) =>{
-								query.query.type = "reports"
-									return <Link to={{pathname: '/search', search: utils.formatQueryString(query.query)}} className="home-tile" key={index}>
+									return <Button bsStyle="link" onClick={this.onClickDashboard.bind(this, query)} className="home-tile" key={index}>
 										<h1>{this.state.tileCounts[index]}</h1>
 										{query.title}
-									</Link>
+									</Button>
 							})}
 						</Row>
 					</Grid>
@@ -267,6 +261,13 @@ class BaseHome extends Page {
 	}
 
 	@autobind
+	onClickDashboard(queryDetails, event) {
+		deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback)
+		event.preventDefault()
+		event.stopPropagation()
+	}
+
+	@autobind
 	onSaveSearchSelect(event) {
 		let id = event && event.target ? event.target.value : event
 		let search = this.state.savedSearches.find(el => Number(el.id) === Number(id))
@@ -277,15 +278,23 @@ class BaseHome extends Page {
 	showSearch() {
 		let search = this.state.selectedSearch
 		if (search) {
-			let query = JSON.parse(search.query)
-			if (search.objectType) {
-				query.type = search.objectType.toLowerCase()
-			}
-			this.props.history.push({
-				pathname: '/search',
-				search: utils.formatQueryString(query)
-			})
+			const objType = SEARCH_OBJECT_TYPES[search.objectType]
+			const queryParams = JSON.parse(search.query)
+			deserializeQueryParams(objType, queryParams, this.deserializeCallback)
 		}
+	}
+
+	@autobind
+	deserializeCallback(objectType, filters, text) {
+		// We update the Redux state
+		this.props.setSearchQuery({
+			objectType: objectType,
+			filters: filters,
+			text: text
+		})
+		this.props.history.push({
+			pathname: '/search'
+		})
 	}
 
 	@autobind

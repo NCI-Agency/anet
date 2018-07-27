@@ -1,17 +1,16 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {FormControl} from 'react-bootstrap'
+import {Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
-import _isEqualWith from 'lodash/isEqualWith'
-import utils from 'utils'
 
-export default class TextInputFilter extends Component {
+export default class CheckboxSearchFilter extends Component {
 	static propTypes = {
 		queryKey: PropTypes.string.isRequired,
 
 		//Passed by the SearchFilterDisplay row
 		asFormField: PropTypes.bool,
-		//Passed by the SearchFilter row
+
+		//From SearchFilter row
 		//value
 		//onChange
 	}
@@ -22,8 +21,11 @@ export default class TextInputFilter extends Component {
 
 	constructor(props) {
 		super(props)
+
 		this.state = {
-			value: props.value || {value: ""}
+			value: {
+				value: true
+			}
 		}
 	}
 
@@ -31,29 +33,14 @@ export default class TextInputFilter extends Component {
 		this.updateFilter()
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
-			this.setState({value: this.props.value}, this.updateFilter)
-		}
-	}
-
 	render() {
+		const msg = "Authorized for me"
 		return (
 			!this.props.asFormField ?
-				<React.Fragment>{this.state.value.value}</React.Fragment>
+				<React.Fragment>{msg}</React.Fragment>
 			:
-				<FormControl
-					value={this.state.value.value}
-					onChange={this.onChange}
-				/>
+				<Checkbox readOnly checked={this.state.value.value}>{msg}</Checkbox>
 		)
-	}
-
-	@autobind
-	onChange(event) {
-		let {value} = this.state
-		value.value = event.target.value
-		this.setState({value}, this.updateFilter)
 	}
 
 	@autobind

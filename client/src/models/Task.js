@@ -5,11 +5,11 @@ import Settings from 'Settings'
 
 export default class Task extends Model {
 	static resourceName = 'Task'
+	static listName = 'taskList'
+	static getInstanceName = 'task'
 	static displayName() {
 		return Settings.fields.task.shortLabel
 	}
-
-	static listName = 'taskList'
 
 	static STATUS = {
 		ACTIVE: 'ACTIVE',

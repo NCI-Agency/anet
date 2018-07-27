@@ -1,18 +1,45 @@
 import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 import {Report} from 'models'
+import _map from 'lodash/map'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 
+const STATE_LABELS = {
+	[Report.STATE.DRAFT]: 'Draft',
+	[Report.STATE.PENDING_APPROVAL]: 'Pending Approval',
+	[Report.STATE.RELEASED]: 'Released',
+	[Report.STATE.CANCELLED]: 'Cancelled',
+	[Report.STATE.FUTURE]: 'Upcoming Engagement',
+	[Report.STATE.REJECTED]: 'Rejected',
+}
+const CANCELLATION_REASON_LABELS = {
+	[Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR]: 'Advisor',
+	[Report.CANCELLATION_REASON.CANCELLED_BY_PRINCIPAL]: 'Principal',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_TRANSPORTATION]: 'Transportation',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_FORCE_PROTECTION]: 'Force Protection',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_ROUTES]: 'Routes',
+	[Report.CANCELLATION_REASON.CANCELLED_DUE_TO_THREAT]: 'Threat',
+}
+
 export default class ReportStateSearch extends Component {
+	static propTypes = {
+		//Passed by the SearchFilterDisplay row
+		asFormField: PropTypes.bool,
+	}
+
+	static defaultProps = {
+		asFormField: true
+	}
+
 	constructor(props) {
 		super(props)
 
-		let value = props.value || {}
-
+		const value = props.value || {}
 		this.state = {
 			value: {
-				state: value.state || Report.STATE.DRAFT,
+				state: value.state || [Report.STATE.DRAFT],
 				cancelledReason: value.cancelledReason || "",
 			}
 		}
@@ -29,35 +56,44 @@ export default class ReportStateSearch extends Component {
 	}
 
 	render() {
-		let {value} = this.state
-
-		return <div>
-			<select value={value.state} onChange={this.changeState}>
-				<option value={ Report.STATE.DRAFT }>Draft</option>
-				<option value={ Report.STATE.PENDING_APPROVAL }>Pending Approval</option>
-				<option value={ Report.STATE.RELEASED }>Released</option>
-				<option value={ Report.STATE.CANCELLED }>Cancelled</option>
-				<option value={ Report.STATE.FUTURE }>Upcoming Engagement</option>
-			</select>
-
-			{value.state === Report.STATE.CANCELLED && <span>
-				due to <select value={value.cancelledReason} onChange={this.changeCancelledReason}>
-					<option value="">Everything</option>
-					<option value="CANCELLED_BY_ADVISOR">Advisor</option>
-					<option value="CANCELLED_BY_PRINCIPAL">Principal</option>
-					<option value="CANCELLED_DUE_TO_TRANSPORTATION">Transportation</option>
-					<option value="CANCELLED_DUE_TO_FORCE_PROTECTION">Force Protection</option>
-					<option value="CANCELLED_DUE_TO_ROUTES">Routes</option>
-					<option value="CANCELLED_DUE_TO_THREAT">Threat</option>
-				</select>
-			</span>}
-		</div>
+		const {value} = this.state
+		const labels = value.state.map(s => STATE_LABELS[s])
+		const onlyCancelled = value.state.length === 1 && value.state[0] === Report.STATE.CANCELLED
+		let stateDisplay = labels.join(" or ")
+		if (onlyCancelled && value.cancelledReason) {
+			stateDisplay = stateDisplay.concat(" due to ")
+			stateDisplay = stateDisplay.concat(CANCELLATION_REASON_LABELS[Report.CANCELLATION_REASON[value.cancelledReason]])
+		}
+		return (
+			!this.props.asFormField ?
+				stateDisplay
+			:
+				<div>
+					<select value={value.state} onChange={this.changeState} multiple={true}>
+						{
+							Object.keys(STATE_LABELS).map(key =>
+								<option key={key} value={key}>{ STATE_LABELS[key] }</option>
+							)
+						}
+					</select>
+					{onlyCancelled && <span style={{verticalAlign: 'top', paddingLeft: '8px'}}>
+						due to <select value={value.cancelledReason} onChange={this.changeCancelledReason}>
+							<option value="">Everything</option>
+							{
+								Object.keys(CANCELLATION_REASON_LABELS).map(key =>
+									<option key={key} value={key}>{ CANCELLATION_REASON_LABELS[key] }</option>
+								)
+							}
+						</select>
+					</span>}
+				</div>
+		)
 	}
 
 	@autobind
 	changeState(event) {
 		let value = this.state.value
-		value.state = event.target.value
+		value.state = _map(event.target.selectedOptions, o => o.value)
 		this.setState({value}, this.updateFilter)
 	}
 
@@ -72,14 +108,39 @@ export default class ReportStateSearch extends Component {
 	toQuery() {
 		let value = this.state.value
 		let query = {state: value.state}
-		if (value.cancelledReason) { query.cancelledReason = value.cancelledReason }
+		const onlyCancelled = value.state.length === 1 && value.state[0] === Report.STATE.CANCELLED
+		if (onlyCancelled && value.cancelledReason) {
+			query.cancelledReason = value.cancelledReason
+		}
 		return query
 	}
 
+
 	@autobind
 	updateFilter() {
-		let value = this.state.value
-		value.toQuery = this.toQuery
-		this.props.onChange(value)
+		if (this.props.asFormField) {
+			let {value} = this.state
+			value.toQuery = this.toQuery
+			this.props.onChange(value)
+		}
 	}
+
+	@autobind
+	deserialize(query, key) {
+		if (query.state) {
+			const value = {state: query.state}
+			if (query.cancelledReason) {
+				value.cancelledReason = query.cancelledReason
+			}
+			return {
+				key: key,
+				value: {
+					...value,
+					toQuery: () => value
+				},
+			}
+		}
+		return null
+	}
+
 }

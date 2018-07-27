@@ -125,7 +125,7 @@ class BaseRollupShow extends Page {
 			pageNum: this.state.reportsPageNum,
 			pageSize: 10,
 		}
-
+		Object.assign(rollupQuery, this.getSearchQuery(props))
 		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
@@ -466,6 +466,10 @@ class BaseRollupShow extends Page {
 	}
 }
 
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
+
 const RollupShow = (props) => (
 	<AppContext.Consumer>
 		{context =>
@@ -474,4 +478,4 @@ const RollupShow = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(withRouter(RollupShow))
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(RollupShow))

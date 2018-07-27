@@ -7,31 +7,50 @@ import NotFound from 'components/NotFound'
 import {setMessages} from 'components/Messages'
 
 import API from 'api'
-
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
-import { setPageProps, DEFAULT_PAGE_PROPS } from 'actions'
+import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
 	hideLoading: () => dispatch(hideLoading()),
-	setPageProps: pageProps => dispatch(setPageProps(pageProps))
+	setPageProps: pageProps => dispatch(setPageProps(pageProps)),
+	setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
+	setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
+	clearSearchQuery: () => dispatch(clearSearchQuery()),
 })
 
 export const propTypes = {
 	showLoading: PropTypes.func.isRequired,
 	hideLoading: PropTypes.func.isRequired,
 	setPageProps: PropTypes.func.isRequired,
+	setSearchProps: PropTypes.func.isRequired,
+	setSearchQuery: PropTypes.func.isRequired,
+	onSearchGoToSearchPage: PropTypes.bool,
+	searchQuery: PropTypes.shape({
+		text: PropTypes.string,
+		filters: PropTypes.any,
+		objectType: PropTypes.string
+	}),
+	clearSearchQuery: PropTypes.func.isRequired,
 }
 
 export default class Page extends Component {
 
-	constructor(props, pageProps) {
+	constructor(props, pageProps, searchProps) {
 		super(props)
+		const pp = pageProps || DEFAULT_PAGE_PROPS
+		const sp = searchProps || DEFAULT_SEARCH_PROPS
 		if (typeof props.setPageProps === 'function') {
-			props.setPageProps(pageProps || DEFAULT_PAGE_PROPS)
+			props.setPageProps(pp)
+		}
+		if (typeof props.setSearchProps === 'function') {
+			props.setSearchProps(sp)
+		}
+		if (typeof props.clearSearchQuery === 'function' && sp.clearSearchQuery) {
+			props.clearSearchQuery()
 		}
 
 		this.state = {
@@ -124,6 +143,30 @@ export default class Page extends Component {
 		setMessages(this.props, this.state)
 		this.loadData()
 	}
+
+	@autobind
+	getSearchQuery(props) {
+		let {searchQuery} = props || this.props
+		let query = {text: searchQuery.text}
+		if (searchQuery.filters) {
+			searchQuery.filters.forEach(filter => {
+				if (filter.value) {
+					if (filter.value.toQuery) {
+						const toQuery = typeof filter.value.toQuery === 'function'
+							? filter.value.toQuery()
+							: filter.value.toQuery
+						Object.assign(query, toQuery)
+					} else {
+						query[filter.key] = filter.value
+					}
+				}
+			})
+		}
+		console.log('SEARCH advanced query', query)
+
+		return query
+	}
+
 }
 
 Page.propTypes = propTypes
