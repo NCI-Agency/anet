@@ -168,7 +168,7 @@ dictionary:
       shortLabel: Task
       longLabel: Tasks and Milestones
       plannedCompletion:
-        label: 'Planned completion'
+        label: 'Planned Completion'
         placeholder: 'Fill in the planned completion date'
       projectedCompletion:
         label: Date of Completion

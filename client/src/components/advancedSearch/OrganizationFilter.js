@@ -53,18 +53,21 @@ export default class OrganizationFilter extends Component {
 		if (!_isEqualWith(prevProps.value, this.props.value, utils.treatFunctionsAsEqual)) {
 			this.setState({
 				value: this.props.value,
-				includeChildOrgs: this.props.value.includeChildOrgs,
-				queryParams: this.props.queryParams,
+				includeChildOrgs: this.props.value.includeChildOrgs || false,
 			}, this.updateFilter)
 		}
 	}
 
 	render() {
 		let autocompleteProps = Object.without(this.props, 'value', 'queryKey', 'queryIncludeChildOrgsKey', 'queryParams', 'asFormField')
+		let msg = this.props.value.shortName
+		if (msg && this.state.includeChildOrgs) {
+			msg += ", including sub-organizations"
+		}
 
 		return (
 			!this.props.asFormField ?
-				<React.Fragment>{this.props.value.shortName}</React.Fragment>
+				<React.Fragment>{msg}</React.Fragment>
 			:
 				<div>
 					<Autocomplete

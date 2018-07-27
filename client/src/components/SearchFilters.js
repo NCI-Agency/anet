@@ -10,6 +10,7 @@ import OrganizationFilter from 'components/advancedSearch/OrganizationFilter'
 import PositionTypeSearchFilter from 'components/advancedSearch/PositionTypeSearchFilter'
 import SelectSearchFilter from 'components/advancedSearch/SelectSearchFilter'
 import TextInputFilter from 'components/advancedSearch/TextInputFilter'
+import CheckboxSearchFilter from 'components/advancedSearch/CheckboxSearchFilter'
 
 import {Location, Person, Task, Position, Organization, Tag} from 'models'
 
@@ -74,7 +75,7 @@ const taskFilters = props => {
 }
 
 export default {
-	searchFilters: function(organizationFilterRef) {
+	searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
 		const filters = {}
 		filters.Reports = {
 			filters: {
@@ -101,7 +102,7 @@ export default {
 						placeholder: "Filter reports by attendee...",
 					}
 				},
-				"Pending approval of": {
+				"Pending Approval Of": {
 					component: AutocompleteFilter,
 					props: {
 						queryKey: "pendingApprovalOf",
@@ -155,6 +156,12 @@ export default {
 						queryKey: "releasedAt",
 					}
 				},
+				"Creation Date": {
+					component: DateRangeSearch,
+					props: {
+						queryKey: "createdAt",
+					}
+				},
 				"Update Date": {
 					component: DateRangeSearch,
 					props: {
@@ -190,7 +197,13 @@ export default {
 						fields: Tag.autocompleteQuery,
 						placeholder: "Filter reports by tag...",
 					}
-				}
+				},
+				"Sensitive Info": {
+					component: CheckboxSearchFilter,
+					props: {
+						queryKey: "sensitiveInfo",
+					}
+				},
 			}
 		}
 
@@ -262,7 +275,7 @@ export default {
 						values: [Organization.STATUS.ACTIVE, Organization.STATUS.INACTIVE],
 					}
 				},
-				"Organization type": {
+				"Organization Type": {
 					component: SelectSearchFilter,
 					props: {
 						queryKey: "type",
@@ -275,12 +288,13 @@ export default {
 
 		filters.Positions = {
 			filters: {
-				"Position type": {
+				"Position Type": {
 					component: PositionTypeSearchFilter,
 					props: {
 						queryKey: "type",
 						values: [Position.TYPE.ADVISOR, Position.TYPE.PRINCIPAL],
 						labels: [Settings.fields.advisor.position.name, Settings.fields.principal.position.name],
+						ref: positionTypeFilterRef,
 					}
 				},
 				Organization: {
@@ -308,7 +322,7 @@ export default {
 						placeholder: "Filter by location...",
 					}
 				},
-				"Is filled?": {
+				"Is Filled?": {
 					component: SelectSearchFilter,
 					props: {
 						queryKey: "isFilled",
