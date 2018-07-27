@@ -9,11 +9,16 @@ import FutureEngagementsByLocation from 'components/FutureEngagementsByLocation'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import Fieldset from 'components/Fieldset'
-import CalendarButton from 'components/CalendarButton'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
+import ProgramSummaryView from 'components/ProgramSummaryView'
+
+import OrganizationView from 'components/OrganizationView'
+import FULLSCREEN_ICON from 'resources/fullscreen.png'
+import Fullscreen from "react-full-screen"
+import {Button} from 'react-bootstrap'
 
 import {Report} from 'models'
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
@@ -30,10 +35,12 @@ export const REPORTS_BY_TASK = 'reports-by-task'
 export const REPORTS_BY_DAY_OF_WEEK = 'reports-by-day-of-week'
 export const FUTURE_ENGAGEMENTS_BY_LOCATION = 'future-engagements-by-location'
 export const ADVISOR_REPORTS = 'advisor-reports'
+export const PROGRAM_SUMMARY_VIEW = 'program-summary-view'
+export const ORGANIZATION_VIEW = 'organization-view'
 
 export const INSIGHTS = [
-  NOT_APPROVED_REPORTS, CANCELLED_REPORTS, REPORTS_BY_TASK,
-  FUTURE_ENGAGEMENTS_BY_LOCATION, REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS
+  NOT_APPROVED_REPORTS, CANCELLED_REPORTS, REPORTS_BY_TASK, FUTURE_ENGAGEMENTS_BY_LOCATION, 
+  REPORTS_BY_DAY_OF_WEEK, ADVISOR_REPORTS, PROGRAM_SUMMARY_VIEW, ORGANIZATION_VIEW
 ]
 
 const _SEARCH_PROPS = Object.assign(
@@ -91,6 +98,20 @@ export const INSIGHT_DETAILS = {
     dateRange: false,
     showCalendar: false
   },
+  [PROGRAM_SUMMARY_VIEW]: {
+    component: ProgramSummaryView,
+    navTitle: 'Program summary view',
+    title: 'Program summary view',
+    dateRange: false,
+    onlyShowBetween: false,
+  },
+  [ORGANIZATION_VIEW]: {
+    component: OrganizationView,
+    navTitle: 'Organization view',
+    title: 'Organization view',
+    dateRange: false,
+    onlyShowBetween: false,
+  },
 }
 
 const PREFIX_FUTURE = 'future'
@@ -124,7 +145,11 @@ class BaseInsightsShow extends Page {
   constructor(props) {
     const insightConfig = INSIGHT_DETAILS[props.match.params.insight]
     super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, insightConfig.searchProps))
-    this.state = {...this.insightDefaultDates}
+    this.state = {isFull: false,...this.insightDefaultDates}
+  }
+
+  toggleFull = () => {
+    this.setState( {...this.state, isFull: !this.state.isFull} )
   }
 
   get insightDefaultDates() {
@@ -162,6 +187,8 @@ class BaseInsightsShow extends Page {
         engagementDateEnd: this.state.endDate.endOf('day').valueOf()
       },
       [ADVISOR_REPORTS]: {},
+      [PROGRAM_SUMMARY_VIEW]: {},
+      [ORGANIZATION_VIEW]: {},
     }
   }
 
@@ -278,23 +305,26 @@ class BaseInsightsShow extends Page {
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.props.match.params.insight
     const queryParams = this.getSearchQuery()
+    const fullscreenButton = <Button onClick={this.toggleFull} style={calendarButtonCss}><img src={FULLSCREEN_ICON} height={16} alt="Switch to fullscreen mode" /></Button>
 
     return (
       <div>
         <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
-
         {this.state.referenceDate &&
-          <Fieldset id={this.props.match.params.insight} title={
-            <span>
-              {insightConfig.title}
-            </span>
-            }>
-            <InsightComponent
-              queryParams={queryParams}
-              date={this.state.referenceDate.clone()}
-            />
-          </Fieldset>
+          <Fullscreen enabled={this.state.isFull}
+            onChange={isFull => this.setState({isFull})}>
+            <Fieldset id={this.props.match.params.insight} title={
+              <span>
+                {insightConfig.title}{fullscreenButton}
+              </span>
+              }>
+              <InsightComponent
+                queryParams={queryParams}
+                date={this.state.referenceDate.clone()}
+              />
+            </Fieldset>
+          </Fullscreen>
         }
       </div>
     )
