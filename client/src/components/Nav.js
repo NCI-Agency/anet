@@ -48,7 +48,7 @@ class BaseNav extends Component {
 		const ScrollLinkNavItem = ScrollLink(NavItem)
 		const AnchorNavItem = function(props) {
 			const {to, ...remainingProps} = props
-			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} smooth={true} duration={500} containerId="main-viewport" offset={-120} {...remainingProps}>{props.children}</ScrollLinkNavItem>
+			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} hashSpy={true} smooth={true} duration={500} containerId="main-viewport" offset={-120} {...remainingProps}>{props.children}</ScrollLinkNavItem>
 			//TODO: fix the need for offset
 		}
 
