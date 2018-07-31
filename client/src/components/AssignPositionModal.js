@@ -156,6 +156,8 @@ class BaseAssignPositionModal extends Component {
 
 	@autobind
 	close() {
+		// Reset state before closing (cancel)
+		this.setState({position: this.props.person.position})
 		this.props.onCancel()
 	}
 
