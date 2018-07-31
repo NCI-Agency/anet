@@ -160,6 +160,11 @@ class BaseEditAssociatedPositionsModal extends Component {
 
 	@autobind
 	close() {
+		// Reset state before closing (cancel)
+		this.setState({
+			error: null,
+			associatedPositions: this.props.position.associatedPositions.slice()
+		})
 		this.props.onCancel()
 	}
 }
