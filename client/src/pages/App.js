@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Grid, Row, Col} from 'react-bootstrap'
+import autobind from 'autobind-decorator'
 
 import LoadingBar from 'react-redux-loading-bar'
 import TopBar from 'components/TopBar'
@@ -87,8 +88,8 @@ class App extends Page {
 		super.componentDidMount()
 		// We want to hide the floating menu on navigation events
 		this.unlistenHistory = this.props.history.listen((location, action) => {
-			this.setState({floatingMenu: false})
-		  })
+			this.showFloatingMenu(false)
+		})
 	}
 
 	componentWillUnmount() {
@@ -141,6 +142,11 @@ class App extends Page {
 		data.adminSettings.forEach(setting => settings[setting.key] = setting.value)
 
 		return {currentUser, settings, organizations}
+	}
+
+	@autobind
+	showFloatingMenu(floatingMenu) {
+		this.setState({floatingMenu: floatingMenu})
 	}
 
 	render() {
@@ -252,14 +258,15 @@ class App extends Page {
 				appSettings: this.state.settings,
 				currentUser: this.state.currentUser,
 				loadAppData: this.loadData,
+				showFloatingMenu: this.showFloatingMenu,
 			}}>
 				<div className="anet" style={{ display:'flex', flexDirection:'column'}}>
 					<TopBar
 						updateTopbarOffset={this.updateTopbarOffset}
 						minimalHeader={this.props.pageProps.minimalHeader}
 						location={this.props.location}
-						toggleMenuAction={()=>{
-							this.setState({floatingMenu: !this.state.floatingMenu})
+						toggleMenuAction={() => {
+							this.showFloatingMenu(!this.state.floatingMenu)
 						}} />
 
 					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
@@ -272,7 +279,11 @@ class App extends Page {
 						}
 						<div style={{ display:'flex', flexDirection:'column', flex:'1 1 auto'}}>
 							<Element className="primary-content" id="main-viewport">
-								<div className={ this.state.floatingMenu === false ? "": "glass-pane" } onClick={() => {this.setState({floatingMenu: false})}}></div>
+								<div
+									className={ this.state.floatingMenu === false ? null : "glass-pane" }
+									onClick={() => {
+										this.showFloatingMenu(false)
+									}} />
 								{routing}
 							</Element>
 						</div>

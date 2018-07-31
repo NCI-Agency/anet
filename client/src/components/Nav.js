@@ -18,6 +18,7 @@ class BaseNav extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
+		showFloatingMenu: PropTypes.func,
 		organizations: PropTypes.array,
 	}
 
@@ -45,10 +46,25 @@ class BaseNav extends Component {
 			myOrgId = myOrg && +myOrg.id
 		}
 
+		const showFloatingMenu = this.props.showFloatingMenu
 		const ScrollLinkNavItem = ScrollLink(NavItem)
 		const AnchorNavItem = function(props) {
 			const {to, ...remainingProps} = props
-			return <ScrollLinkNavItem activeClass="active" to={to} spy={true} hashSpy={true} smooth={true} duration={500} containerId="main-viewport" offset={-120} {...remainingProps}>{props.children}</ScrollLinkNavItem>
+			return <ScrollLinkNavItem
+					activeClass="active"
+					to={to}
+					spy={true}
+					hashSpy={true}
+					smooth={true}
+					duration={500}
+					containerId="main-viewport"
+					offset={-120}
+					onClick={() => {
+						showFloatingMenu(false)
+					}}
+					{...remainingProps}>
+						{props.children}
+				</ScrollLinkNavItem>
 			//TODO: fix the need for offset
 		}
 
@@ -148,7 +164,7 @@ class BaseNav extends Component {
 const Nav = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} showFloatingMenu={context.showFloatingMenu} {...props} />
 		}
 	</AppContext.Consumer>
 )
