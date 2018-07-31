@@ -709,6 +709,11 @@ header.searchPagination {
 	padding-top: 18px;
 }
 
+.scroll-anchor-container {
+	/* trick so we don't have no man's land between two scroll anchor containers */
+	padding-bottom: 1px;
+}
+
 @keyframes flash {
 	50% {
 		background: #fff;
