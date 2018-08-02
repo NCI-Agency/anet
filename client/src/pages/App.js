@@ -10,7 +10,7 @@ import Nav from 'components/Nav'
 import API from 'api'
 import {Person, Organization} from 'models'
 
-import {Route, Switch} from 'react-router'
+import {Route, Switch, Redirect} from 'react-router'
 import Home from 'pages/Home'
 import Search from 'pages/Search'
 import RollupShow from 'pages/rollup/Show'
@@ -229,10 +229,14 @@ class App extends Page {
 			<Route
 				path="/onboarding"
 				render={({ match: { url } }) => (
-				<Switch>
-					<Route exact path={`${url}/`} component={OnboardingShow} />
-					<Route path={`${url}/edit`} component={OnboardingEdit} />
-				</Switch>
+					this.state.currentUser.isNewUser() ? (
+						<Switch>
+							<Route exact path={`${url}/`} component={OnboardingShow} />
+							<Route path={`${url}/edit`} component={OnboardingEdit} />
+						</Switch>
+					) : ( // Redirect to home if user account exists already. Some users bookmark the onboarding - the very first page they hit
+						<Redirect to="/"/>
+					)
 			)}
 			/>
 
