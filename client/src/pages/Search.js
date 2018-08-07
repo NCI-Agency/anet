@@ -521,7 +521,7 @@ class Search extends Page {
 
 	@autobind
 	exportSearchResults() {
-		this._dataFetcher(this._exportSearchResultsCallback, 0)
+		this._dataFetcher(this.props, this._exportSearchResultsCallback, 0)
 	}
 
 	@autobind
