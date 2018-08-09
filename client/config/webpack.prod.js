@@ -17,6 +17,17 @@ module.exports = merge(common, {
   },
   optimization: {
     minimize: true,
+    minimizer: [
+      new UglifyJSPlugin({
+        uglifyOptions: {
+          compress: {
+            // hack to make codemirror work with uglifyjs: https://github.com/webpack/webpack/issues/6760
+            inline: 1,
+          },
+          parallel: true,
+        }
+      })
+    ],
     splitChunks: {
       cacheGroups: {
         commons: { test: /[\\/]node_modules[\\/]/, name: "vendors", chunks: "all" }
