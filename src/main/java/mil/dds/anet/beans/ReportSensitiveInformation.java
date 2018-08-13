@@ -1,5 +1,7 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLQuery;
+
 import java.util.Objects;
 
 import mil.dds.anet.views.AbstractAnetBean;
@@ -7,22 +9,14 @@ import mil.dds.anet.views.AbstractAnetBean;
 public class ReportSensitiveInformation extends AbstractAnetBean {
 
 	private String text;
-	private int reportId;
 
+	@GraphQLQuery(name="text")
 	public String getText() {
 		return text;
 	}
 
 	public void setText(String text) {
 		this.text = text;
-	}
-
-	public int getReportId() {
-		return reportId;
-	}
-
-	public void setReportId(int reportId) {
-		this.reportId = reportId;
 	}
 
 	@Override
@@ -32,18 +26,17 @@ public class ReportSensitiveInformation extends AbstractAnetBean {
 		}
 		final ReportSensitiveInformation rsi = (ReportSensitiveInformation) o;
 		return Objects.equals(rsi.getId(), id)
-				&& Objects.equals(rsi.getText(), text)
-				&& Objects.equals(rsi.getReportId(), reportId);
+				&& Objects.equals(rsi.getText(), text);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, text, reportId);
+		return Objects.hash(id, text);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("[id:%d, reportId:%d]", id, reportId);
+		return String.format("[id:%d]", id);
 	}
 
 }

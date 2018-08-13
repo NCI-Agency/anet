@@ -62,7 +62,7 @@ class BasePersonShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}`)
-			.addVariable("authorQuery", "ReportSearchQuery", query)
+			.addVariable("authorQuery", "ReportSearchQueryInput", query)
 		return part
 	}
 
@@ -78,7 +78,7 @@ class BasePersonShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}`)
-			.addVariable("attendeeQuery", "ReportSearchQuery", query)
+			.addVariable("attendeeQuery", "ReportSearchQueryInput", query)
 		return part
 	}
 

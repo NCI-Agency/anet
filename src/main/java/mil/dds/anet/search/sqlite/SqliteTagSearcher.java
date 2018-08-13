@@ -1,8 +1,11 @@
 package mil.dds.anet.search.sqlite;
 
+import java.util.ArrayList;
+
 import org.skife.jdbi.v2.Handle;
 
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.Tag;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.search.ITagSearcher;
@@ -11,10 +14,8 @@ import mil.dds.anet.utils.Utils;
 public class SqliteTagSearcher implements ITagSearcher {
 
 	@Override
-	public TagList runSearch(TagSearchQuery query, Handle dbHandle) {
-		final TagList result = new TagList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
+	public AnetBeanList<Tag> runSearch(TagSearchQuery query, Handle dbHandle) {
+		final AnetBeanList<Tag> result = new AnetBeanList<Tag>(query.getPageNum(), query.getPageSize(), new ArrayList<Tag>());
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
 		if (!doFullTextSearch) {

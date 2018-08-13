@@ -1,21 +1,21 @@
 package mil.dds.anet.views;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+
 import java.util.Objects;
 
 import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import mil.dds.anet.graphql.GraphQLIgnore;
-import mil.dds.anet.graphql.IGraphQLBean;
-
-public abstract class AbstractAnetBean implements IGraphQLBean {
+public abstract class AbstractAnetBean {
 
 	protected LoadLevel loadLevel;
 	protected Integer id;
 	protected DateTime createdAt;
 	protected DateTime updatedAt;
- 
+
 	public AbstractAnetBean() { 
 		id = null;
 	}
@@ -26,8 +26,8 @@ public abstract class AbstractAnetBean implements IGraphQLBean {
 		}
 	}
 	
-	@GraphQLIgnore
 	@JsonIgnore
+	@GraphQLIgnore
 	public LoadLevel getLoadLevel() { 
 		return loadLevel;
 	}
@@ -36,6 +36,7 @@ public abstract class AbstractAnetBean implements IGraphQLBean {
 		this.loadLevel = ll;
 	}
 	
+	@GraphQLQuery(name="id")
 	public Integer getId() { 
 		return id;
 	}
@@ -44,6 +45,7 @@ public abstract class AbstractAnetBean implements IGraphQLBean {
 		this.id = id;
 	}
 	
+	@GraphQLQuery(name="createdAt")
 	public DateTime getCreatedAt() {
 		return createdAt;
 	}
@@ -52,6 +54,7 @@ public abstract class AbstractAnetBean implements IGraphQLBean {
 		this.createdAt = createdAt;
 	}
 
+	@GraphQLQuery(name="updatedAt")
 	public DateTime getUpdatedAt() {
 		return updatedAt;
 	}

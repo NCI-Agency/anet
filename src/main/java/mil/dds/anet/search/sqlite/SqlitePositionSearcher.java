@@ -1,5 +1,6 @@
 package mil.dds.anet.search.sqlite;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +9,8 @@ import java.util.Map;
 import org.skife.jdbi.v2.Handle;
 
 import jersey.repackaged.com.google.common.base.Joiner;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
+import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
@@ -21,7 +23,7 @@ import mil.dds.anet.utils.Utils;
 public class SqlitePositionSearcher implements IPositionSearcher {
 	
 	@Override
-	public PositionList runSearch(PositionSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqlitePositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS 
 				+ " FROM positions WHERE positions.id IN (SELECT positions.id FROM positions ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
@@ -33,10 +35,8 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 		
 		sql.append(" WHERE ");
 		List<String> whereClauses = new LinkedList<String>();
-		PositionList result = new PositionList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-		
+		final AnetBeanList<Position> result = new AnetBeanList<Position>(query.getPageNum(), query.getPageSize(), new ArrayList<Position>());
+
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
 		if (doFullTextSearch) {

@@ -177,12 +177,12 @@ class FutureEngagementsByLocation extends Component {
     }
     // Query used by the reports collection
     let reportsQuery = API.query(/* GraphQL */`
-        reportList(f:search, query:$reportsQueryParams) {
+        reportList(query:$reportsQueryParams) {
           pageNum, pageSize, totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
           }
         }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQuery)')
+      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
     Promise.all([reportsQuery]).then(values => {
       this.setState({
         updateChart: false,  // only update the report list
@@ -203,12 +203,12 @@ class FutureEngagementsByLocation extends Component {
 
   runChartQuery = (chartQueryParams) => {
     return API.query(/* GraphQL */`
-    reportList(f:search, query:$chartQueryParams) {
+    reportList(query:$chartQueryParams) {
       totalCount, list {
         ${GQL_CHART_FIELDS}
       }
     }
-  `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+  `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
   }
 
   @autobind

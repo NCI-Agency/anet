@@ -10,14 +10,14 @@ import graphql.schema.GraphQLScalarType;
 
 public class GraphQLDateTimeType extends GraphQLScalarType {
 
-	private static final Coercing coercing = new Coercing() {
+	private static final Coercing<DateTime, Long> coercing = new Coercing<DateTime, Long>() {
 		@Override
-		public Object serialize(Object input) {
+		public Long serialize(Object input) {
 			return ((DateTime) input).getMillis();
 		}
 
 		@Override
-		public Object parseValue(Object input) {
+		public DateTime parseValue(Object input) {
 			if (input instanceof Long) {
 				return new DateTime((Long)input);
 			} else {
@@ -26,7 +26,7 @@ public class GraphQLDateTimeType extends GraphQLScalarType {
 		}
 
 		@Override
-		public Object parseLiteral(Object input) {
+		public DateTime parseLiteral(Object input) {
 			if (input.getClass().equals(IntValue.class)) {
 				BigInteger value = ((IntValue) input).getValue();
 				return new DateTime(value.longValue());

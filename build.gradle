@@ -61,7 +61,9 @@ dependencies {
 	compile 'ch.qos.logback:logback-core:1.2.3'
 	compile 'ch.qos.logback:logback-access:1.2.3'
 	compile 'com.github.waffle:waffle-jna:1.9.1'
-	compile 'com.graphql-java:graphql-java:2.2.0'
+	compile 'com.graphql-java:graphql-java:9.2'
+	compile 'com.graphql-java:java-dataloader:2.0.2'
+	compile 'io.leangen.graphql:spqr:0.9.7'
 	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
 
 	// Used for converting GraphQL request output to XML:

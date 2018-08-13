@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.OrganizationSearchQuery.OrganizationSearchSortBy;
@@ -23,7 +24,7 @@ import mil.dds.anet.utils.Utils;
 public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 
 	@Override
-	public OrganizationList runSearch(OrganizationSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlOrganizationSearch */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS);
@@ -76,12 +77,8 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 			sqlArgs.put("parentOrgId", query.getParentOrgId());
 		}
 
-		final OrganizationList result = new OrganizationList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return result;
+			return new AnetBeanList<Organization>(query.getPageNum(), query.getPageSize(), new ArrayList<Organization>());
 		}
 
 		sql.append(" WHERE ");
@@ -119,7 +116,7 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 
 		final Query<Organization> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
 			.map(new OrganizationMapper());
-		return OrganizationList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
+		return new AnetBeanList<Organization>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
 	}
 
 }

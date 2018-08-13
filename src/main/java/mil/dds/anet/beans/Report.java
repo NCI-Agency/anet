@@ -1,10 +1,16 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -17,11 +23,10 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.IdFetcher;
 
 public class Report extends AbstractAnetBean {
 
@@ -77,16 +82,13 @@ public class Report extends AbstractAnetBean {
 		this.approvalStep = approvalStep;
 	}
 
-	@GraphQLFetcher("approvalStep")
-	public ApprovalStep loadApprovalStep() { 
-		if (approvalStep == null || approvalStep.getLoadLevel() == null) { return approvalStep; } 
-		if (approvalStep.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.approvalStep = AnetObjectEngine.getInstance()
-				.getApprovalStepDao().getById(approvalStep.getId());
-		}
-		return approvalStep;
+	@GraphQLQuery(name="approvalStep")
+	public CompletableFuture<ApprovalStep> loadApprovalStep(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<ApprovalStep>().load(context, "approvalSteps", approvalStep)
+				.thenApply(o -> { approvalStep = o; return o; });
 	}
 	
+	@GraphQLQuery(name="state")
 	public ReportState getState() {
 		return state;
 	}	
@@ -95,6 +97,7 @@ public class Report extends AbstractAnetBean {
 		this.state = state;
 	}
 
+	@GraphQLQuery(name="releasedAt")
 	public DateTime getReleasedAt() {
 		return releasedAt;
 	}
@@ -103,6 +106,7 @@ public class Report extends AbstractAnetBean {
 		this.releasedAt = releasedAt;
 	}
 
+	@GraphQLQuery(name="engagementDate")
 	public DateTime getEngagementDate() {
 		return engagementDate;
 	}
@@ -117,6 +121,7 @@ public class Report extends AbstractAnetBean {
 	 *
 	 * @return Integer engagement day of week
 	 */
+	@GraphQLQuery(name="engagementDayOfWeek")
 	public Integer getEngagementDayOfWeek() {
 		return engagementDayOfWeek;
 	}
@@ -125,14 +130,10 @@ public class Report extends AbstractAnetBean {
 		this.engagementDayOfWeek = engagementDayOfWeek;
 	}
 
-	@GraphQLFetcher("location")
-	public Location loadLocation() {
-		if (location == null || location.getLoadLevel() == null) { return location; } 
-		if (location.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.location = AnetObjectEngine.getInstance()
-					.getLocationDao().getById(location.getId());
-		}
-		return location;
+	@GraphQLQuery(name="location")
+	public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Location>().load(context, "locations", location)
+				.thenApply(o -> { location = o; return o; });
 	}
 
 	public void setLocation(Location location) {
@@ -144,10 +145,12 @@ public class Report extends AbstractAnetBean {
 		return location;
 	}
 
+	@GraphQLQuery(name="intent")
 	public String getIntent() {
 		return intent;
 	}
 
+	@GraphQLQuery(name="exsum")
 	public String getExsum() {
 		return exsum;
 	}
@@ -156,6 +159,7 @@ public class Report extends AbstractAnetBean {
 		this.exsum = Utils.trimStringReturnNull(exsum);
 	}
 
+	@GraphQLQuery(name="atmosphere")
 	public Atmosphere getAtmosphere() {
 		return atmosphere;
 	}
@@ -164,6 +168,7 @@ public class Report extends AbstractAnetBean {
 		this.atmosphere = atmosphere;
 	}
 
+	@GraphQLQuery(name="atmosphereDetails")
 	public String getAtmosphereDetails() {
 		return atmosphereDetails;
 	}
@@ -172,6 +177,7 @@ public class Report extends AbstractAnetBean {
 		this.atmosphereDetails = Utils.trimStringReturnNull(atmosphereDetails);
 	}
 
+	@GraphQLQuery(name="cancelledReason")
 	public ReportCancelledReason getCancelledReason() {
 		return cancelledReason;
 	}
@@ -184,22 +190,10 @@ public class Report extends AbstractAnetBean {
 		this.intent = Utils.trimStringReturnNull(intent);
 	}
 
-	public void loadAll() {
-		this.loadPrincipalOrg();
-		this.loadAdvisorOrg();
-		this.loadLocation();
-		this.loadPrimaryAdvisor();
-		this.loadPrimaryPrincipal();
-		this.loadTasks();
-		this.loadAuthorizationGroups();
-	}
-
-	@GraphQLFetcher("attendees")
-	public List<ReportPerson> loadAttendees() { 
-		if (attendees == null && id != null) {
-			attendees = AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(id);
-		}
-		return attendees;
+	@GraphQLQuery(name="attendees")
+	public CompletableFuture<List<ReportPerson>> loadAttendees(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(context, id)
+				.thenApply(o -> { attendees = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -211,26 +205,26 @@ public class Report extends AbstractAnetBean {
 		this.attendees = attendees;
 	}
 
-	@GraphQLFetcher("primaryAdvisor")
-	public ReportPerson loadPrimaryAdvisor() {
-		if (primaryAdvisor == null) {
-			loadAttendees(); //Force the load of attendees
-			this.primaryAdvisor = attendees.stream().filter(p ->
-				p.isPrimary() && p.getRole().equals(Role.ADVISOR)
-			).findFirst().orElse(null);
-		}
-		return primaryAdvisor;
+	@GraphQLQuery(name="primaryAdvisor")
+	public CompletableFuture<ReportPerson> loadPrimaryAdvisor(@GraphQLRootContext Map<String, Object> context) {
+		return loadAttendees(context) //Force the load of attendees
+				.thenApply(l ->
+		{
+			primaryAdvisor = l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.ADVISOR))
+					.findFirst().orElse(null);
+			return primaryAdvisor;
+		});
 	}
 
-	@GraphQLFetcher("primaryPrincipal")
-	public ReportPerson loadPrimaryPrincipal() {
-		if (primaryPrincipal == null) {
-			loadAttendees(); //Force the load of attendees
-			this.primaryPrincipal = attendees.stream().filter(p ->
-				p.isPrimary() && p.getRole().equals(Role.PRINCIPAL)
-			).findFirst().orElse(null);
-		}
-		return primaryPrincipal;
+	@GraphQLQuery(name="primaryPrincipal")
+	public CompletableFuture<ReportPerson> loadPrimaryPrincipal(@GraphQLRootContext Map<String, Object> context) {
+		return loadAttendees(context) //Force the load of attendees
+				.thenApply(l ->
+		{
+			primaryPrincipal = l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.PRINCIPAL))
+					.findFirst().orElse(null);
+			return primaryPrincipal;
+		});
 	}
 
 	@GraphQLIgnore
@@ -243,12 +237,10 @@ public class Report extends AbstractAnetBean {
 		return primaryPrincipal;
 	}
 	
-	@GraphQLFetcher("tasks")
-	public List<Task> loadTasks() {
-		if (tasks == null) { 
-			tasks = AnetObjectEngine.getInstance().getReportDao().getTasksForReport(this);
-		}
-		return tasks;
+	@GraphQLQuery(name="tasks")
+	public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getReportDao().getTasksForReport(context, id)
+				.thenApply(o -> { tasks = o; return o; });
 	}
 
 	public void setTasks(List<Task> tasks) {
@@ -260,6 +252,7 @@ public class Report extends AbstractAnetBean {
 		return tasks;
 	}
 
+	@GraphQLQuery(name="keyOutcomes")
 	public String getKeyOutcomes() {
 		return keyOutcomes;
 	}
@@ -268,6 +261,7 @@ public class Report extends AbstractAnetBean {
 		this.keyOutcomes = Utils.trimStringReturnNull(keyOutcomes);
 	}
 
+	@GraphQLQuery(name="reportText")
 	public String getReportText() {
 		return reportText;
 	}
@@ -276,6 +270,7 @@ public class Report extends AbstractAnetBean {
 		this.reportText = Utils.trimStringReturnNull(reportText);
 	}
 
+	@GraphQLQuery(name="nextSteps")
 	public String getNextSteps() {
 		return nextSteps;
 	}
@@ -284,13 +279,10 @@ public class Report extends AbstractAnetBean {
 		this.nextSteps = Utils.trimStringReturnNull(nextSteps);
 	}
 
-	@GraphQLFetcher("author")
-	public Person loadAuthor() {
-		if (author == null || author.getLoadLevel() == null) { return author; } 
-		if (author.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.author = AnetObjectEngine.getInstance().getPersonDao().getById(author.getId());
-		}
-		return author;
+	@GraphQLQuery(name="author")
+	public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Person>().load(context, "people", author)
+				.thenApply(o -> { author = o; return o; });
 	}
 
 	@JsonSetter("author")
@@ -312,13 +304,10 @@ public class Report extends AbstractAnetBean {
 		this.advisorOrg = advisorOrg;
 	}
 
-	@GraphQLFetcher("advisorOrg")
-	public Organization loadAdvisorOrg() { 
-		if (advisorOrg == null || advisorOrg.getLoadLevel() == null) { return advisorOrg; } 
-		if (advisorOrg.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.advisorOrg = AnetObjectEngine.getInstance().getOrganizationDao().getById(advisorOrg.getId());
-		}
-		return advisorOrg;
+	@GraphQLQuery(name="advisorOrg")
+	public CompletableFuture<Organization> loadAdvisorOrg(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Organization>().load(context, "organizations", advisorOrg)
+				.thenApply(o -> { advisorOrg = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -330,16 +319,13 @@ public class Report extends AbstractAnetBean {
 		this.principalOrg = principalOrg;
 	}
 
-	@GraphQLFetcher("principalOrg")
-	public Organization loadPrincipalOrg() { 
-		if (principalOrg == null || principalOrg.getLoadLevel() == null) { return principalOrg; } 
-		if (principalOrg.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.principalOrg = AnetObjectEngine.getInstance().getOrganizationDao().getById(principalOrg.getId());
-		}
-		return principalOrg;
+	@GraphQLQuery(name="principalOrg")
+	public CompletableFuture<Organization> loadPrincipalOrg(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Organization>().load(context, "organizations", principalOrg)
+				.thenApply(o -> { principalOrg = o; return o; });
 	}
 	
-	@GraphQLFetcher("comments")
+	@GraphQLQuery(name="comments") // TODO: batch load? (used in reports/{Minimal,Show}.js
 	public List<Comment> loadComments() {
 		if (comments == null) {
 			comments = AnetObjectEngine.getInstance().getCommentDao().getCommentsForReport(this);
@@ -361,10 +347,10 @@ public class Report extends AbstractAnetBean {
 	 * There will be an approval action for each approval step for this report
 	 * With information about the 
 	 */
-	@GraphQLFetcher("approvalStatus")
-	public List<ApprovalAction> loadApprovalStatus() { 
+	@GraphQLQuery(name="approvalStatus") // TODO: batch load (used in ReportCollection.js)
+	public List<ApprovalAction> loadApprovalStatus() {
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		List<ApprovalAction> actions = engine.getApprovalActionDao().getActionsForReport(this.getId());
+		List<ApprovalAction> actions = engine.getApprovalActionDao().getActionsForReport(this.getId()); // queries db!
 		
 		if (this.getState() == ReportState.RELEASED) {
 			//Compact to only get the most recent event for each step.
@@ -384,7 +370,7 @@ public class Report extends AbstractAnetBean {
 			return compacted;
 		}
 		
-		Organization ao = engine.getOrganizationForPerson(getAuthor());
+		Organization ao = engine.getOrganizationForPerson(getAuthor()); // queries db!
 		if (ao == null) {
 			//use the default approval workflow.
 			String defaultOrgId = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
@@ -394,14 +380,14 @@ public class Report extends AbstractAnetBean {
 			ao = Organization.createWithId(Integer.parseInt(defaultOrgId));
 		}
 		
-		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(ao);
+		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(ao); // queries db!
 		if (steps == null || steps.size() == 0) {
 			//No approval steps for this organization
 			String defaultOrgId = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
 			if (defaultOrgId == null) { 
 				throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
 			}
-			steps = engine.getApprovalStepsForOrg(Organization.createWithId(Integer.parseInt(defaultOrgId)));
+			steps = engine.getApprovalStepsForOrg(Organization.createWithId(Integer.parseInt(defaultOrgId))); // queries db!
 		}
 				
 		List<ApprovalAction> workflow = new LinkedList<ApprovalAction>();
@@ -427,12 +413,10 @@ public class Report extends AbstractAnetBean {
 		return workflow;
 	}
 
-	@GraphQLFetcher("tags")
-	public List<Tag> loadTags() {
-		if (tags == null && id != null) {
-			tags = AnetObjectEngine.getInstance().getReportDao().getTagsForReport(id);
-		}
-		return tags;
+	@GraphQLQuery(name="tags")
+	public CompletableFuture<List<Tag>> loadTags(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getReportDao().getTagsForReport(context, id)
+				.thenApply(o -> { tags = o; return o; });
 	}
 
 	@GraphQLIgnore
@@ -444,12 +428,10 @@ public class Report extends AbstractAnetBean {
 		this.tags = tags;
 	}
 
-	@GraphQLFetcher("reportSensitiveInformation")
-	public ReportSensitiveInformation loadReportSensitiveInformation() {
-		if (reportSensitiveInformation == null && id != null) {
-			reportSensitiveInformation = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().getForReport(this, user);
-		}
-		return reportSensitiveInformation;
+	@GraphQLQuery(name="reportSensitiveInformation")
+	public CompletableFuture<ReportSensitiveInformation> loadReportSensitiveInformation(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getReportSensitiveInformationDao().getForReport(context, this, user)
+				.thenApply(o -> { reportSensitiveInformation = o; return o; });
 	}
 
 	@GraphQLIgnore
@@ -473,7 +455,7 @@ public class Report extends AbstractAnetBean {
 		this.user = user;
 	}
 
-	@GraphQLFetcher("authorizationGroups")
+	@GraphQLQuery(name="authorizationGroups") // TODO: batch load? (used in reports/{Edit,Show}.js)
 	public List<AuthorizationGroup> loadAuthorizationGroups() {
 		if (authorizationGroups == null && id != null) {
 			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(id);
