@@ -93,7 +93,8 @@ export default class ReportStateSearch extends Component {
 	@autobind
 	changeState(event) {
 		let value = this.state.value
-		value.state = _map(event.target.selectedOptions, o => o.value)
+		const selectedOptions = event.target.selectedOptions || Array.from(event.target.options).filter(o => o.selected)
+		value.state = _map(selectedOptions, o => o.value)
 		this.setState({value}, this.updateFilter)
 	}
 
