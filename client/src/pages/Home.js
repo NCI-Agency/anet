@@ -155,12 +155,12 @@ class BaseHome extends Page {
 		let queries = this.getQueriesForUser(currentUser)
 		//Run those five queries
 		let graphQL = /* GraphQL */`
-			tileOne: reportList(f:search, query:$queryOne) { totalCount},
-			tileTwo: reportList(f:search, query: $queryTwo) { totalCount},
-			tileThree: reportList(f:search, query: $queryThree) { totalCount },
-			tileFour: reportList(f:search, query: $queryFour) { totalCount },
-			tileFive: reportList(f:search, query: $queryFive) { totalCount },
-			savedSearches: savedSearchs(f:mine) {id, name, objectType, query}`
+			tileOne: reportList(query:$queryOne) { totalCount},
+			tileTwo: reportList(query: $queryTwo) { totalCount},
+			tileThree: reportList(query: $queryThree) { totalCount },
+			tileFour: reportList(query: $queryFour) { totalCount },
+			tileFive: reportList(query: $queryFive) { totalCount },
+			savedSearches: mySearches {id, name, objectType, query}`
 		let variables = {
 			queryOne: queries[0].query,
 			queryTwo: queries[1].query,
@@ -169,8 +169,8 @@ class BaseHome extends Page {
 			queryFive: queries[4].query
 		}
 		API.query(graphQL, variables,
-			"($queryOne: ReportSearchQuery, $queryTwo: ReportSearchQuery, $queryThree: ReportSearchQuery, $queryFour: ReportSearchQuery," +
-			"$queryFive: ReportSearchQuery)")
+			"($queryOne: ReportSearchQueryInput, $queryTwo: ReportSearchQueryInput, $queryThree: ReportSearchQueryInput, $queryFour: ReportSearchQueryInput," +
+			"$queryFive: ReportSearchQueryInput)")
 		.then(data => {
 			let selectedSearch = data.savedSearches && data.savedSearches.length > 0 ? data.savedSearches[0] : null
 			this.setState({

@@ -97,7 +97,7 @@ class App extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			person(f:me) {
+			me {
 				id, name, role, emailAddress, rank, status
 				position {
 					id, name, type, status, isApprover
@@ -105,15 +105,15 @@ class App extends Page {
 				}
 			}
 
-			adminSettings(f:getAll) {
+			adminSettings {
 				key, value
 			}
 
-			organizationList(f:getTopLevelOrgs, type: ADVISOR_ORG) {
+			organizationTopLevelOrgs(type: ADVISOR_ORG) {
 				list { id, shortName }
 			}
 		`).then(data => {
-			data.person._loaded = true
+			data.me._loaded = true
 			this.setState(this.processData(data), () => {
 				// if this is a new user, redirect to the create profile page
 				if (this.state.currentUser.isNewUser()) {
@@ -125,8 +125,8 @@ class App extends Page {
 	}
 
 	processData(data) {
-		const currentUser = new Person(data.person)
-		let organizations = (data.organizationList && data.organizationList.list) || []
+		const currentUser = new Person(data.me)
+		let organizations = (data.organizationTopLevelOrgs && data.organizationTopLevelOrgs.list) || []
 		organizations = Organization.fromArray(organizations)
 		organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
 

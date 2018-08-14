@@ -55,7 +55,7 @@ class BaseMyReports extends Page {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
-			}`).addVariable(partName + "Query", "ReportSearchQuery", query)
+			}`).addVariable(partName + "Query", "ReportSearchQueryInput", query)
 	}
 
 	fetchData(props) {

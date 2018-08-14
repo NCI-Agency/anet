@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
 import org.junit.Test;
@@ -14,8 +15,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.test.TestData;
 
@@ -64,7 +64,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		assertThat(returned.getLongName()).isEqualTo(a.getLongName());
 
 		//Assign the Task to the AO
-		List<Organization> orgs = httpQuery("/api/organizations/search?text=EF8", jack).get(OrganizationList.class).getList();
+		List<Organization> orgs = httpQuery("/api/organizations/search?text=EF8", jack).get(new GenericType<AnetBeanList<Organization>>(){}).getList();
 		Organization ef8 = orgs.stream().filter(o -> o.getShortName().equals("EF8")).findFirst().get();
 		assertThat(ef8).isNotNull();
 		
@@ -75,7 +75,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		assertThat(returned.getResponsibleOrg().getId()).isEqualTo(ef8.getId());
 		
 		//Fetch the tasks off the organization
-		List<Task> tasks = httpQuery("/api/organizations/" + ef8.getId() + "/tasks", jack).get(TaskList.class).getList();
+		List<Task> tasks = httpQuery("/api/organizations/" + ef8.getId() + "/tasks", jack).get(new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(tasks).contains(a);
 		
 		//Search for the task: 
@@ -94,7 +94,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		
 		TaskSearchQuery query = new TaskSearchQuery();
 		query.setText("Budget");
-		List<Task> searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
+		List<Task> searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream()
 				.filter(p -> p.getLongName().toLowerCase().contains("budget"))
@@ -102,13 +102,13 @@ public class TaskResourceTest extends AbstractResourceTest {
 			.isEqualTo(searchResults.size());
 		
 		//Search for a task by the organization
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%202", jack).get(OrganizationList.class);
+		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=EF%202", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		Organization ef2 = orgs.getList().stream().filter(o -> o.getShortName().equals("EF 2")).findFirst().get();
 		assertThat(ef2).isNotNull();
 		
 		query.setText(null);
 		query.setResponsibleOrgId(ef2.getId());
-		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream()
 				.filter(p -> p.getResponsibleOrg().getId().equals(ef2.getId()))
@@ -119,19 +119,19 @@ public class TaskResourceTest extends AbstractResourceTest {
 		query.setResponsibleOrgId(null);
 		query.setText("expenses");
 		query.setCategory("Milestone");
-		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		//Autocomplete
 		query = new TaskSearchQuery();
 		query.setText("1.1*");
-		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1")).count()).isEqualTo(1);
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1.A")).count()).isEqualTo(1);
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1.B")).count()).isEqualTo(1);
 		
 		query.setText("1.1.A*");
-		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), TaskList.class).getList();
+		searchResults = httpQuery("/api/tasks/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(searchResults.stream().filter(p -> p.getShortName().equals("1.1.A")).count()).isEqualTo(1);
 	}
 	
@@ -139,7 +139,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 	public void getAllTasksTest() { 
 		Person jack = getJackJackson();
 		
-		TaskList list = httpQuery("/api/tasks/", jack).get(TaskList.class);
+		AnetBeanList<Task> list = httpQuery("/api/tasks/", jack).get(new GenericType<AnetBeanList<Task>>(){});
 		assertThat(list).isNotNull();
 		assertThat(list.getList()).isNotEmpty();
 	}

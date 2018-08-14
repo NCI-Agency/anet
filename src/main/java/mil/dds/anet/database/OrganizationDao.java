@@ -17,7 +17,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -28,15 +28,19 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	private static String[] fields = {"id", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgId"};
 	private static String tableName = "organizations";
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
-	
+
+	private final IdBatcher<Organization> idBatcher;
+
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
+		final String idBatcherSql = "/* batch.getOrgsByIds */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
 	}
 	
-	public OrganizationList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
 		Query<Organization> query = getPagedQuery(pageNum, pageSize, new OrganizationMapper());
 		Long manualRowCount = getSqliteRowCount();
-		return OrganizationList.fromQuery(query, pageNum, pageSize, manualRowCount);
+		return new AnetBeanList<Organization>(query, pageNum, pageSize, manualRowCount);
 	}
 	
 	public Organization getById(int id) { 
@@ -47,7 +51,12 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		List<Organization> results = query.list();
 		return (results.size() == 0) ? null : results.get(0);
 	}
-	
+
+	@Override
+	public List<Organization> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
+	}
+
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
 		return dbHandle.createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS
 				+ " FROM organizations "
@@ -114,7 +123,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return numRows;
 	}
 
-	public OrganizationList search(OrganizationSearchQuery query) {
+	public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher()
 				.runSearch(query, dbHandle);
 	} 

@@ -144,12 +144,12 @@ class BaseRollupShow extends Page {
 		let graphQuery = API.fetch(graphQueryUrl)
 
 		let reportQuery = API.query(/* GraphQL */`
-			reportList(f:search, query:$rollupQuery) {
+			reportList(query:$rollupQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}
-		`, {rollupQuery}, '($rollupQuery: ReportSearchQuery)')
+		`, {rollupQuery}, '($rollupQuery: ReportSearchQueryInput)')
 
 		const pinned_ORGs = Settings.pinned_ORGs
 

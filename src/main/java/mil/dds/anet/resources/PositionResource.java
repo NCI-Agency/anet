@@ -1,6 +1,7 @@
 package mil.dds.anet.resources;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -24,18 +25,17 @@ import org.joda.time.DateTime;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.PositionDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -45,42 +45,30 @@ import mil.dds.anet.utils.Utils;
 @Path("/api/positions")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class PositionResource implements IGraphQLResource {
+public class PositionResource {
 
+	AnetObjectEngine engine;
 	PositionDao dao;
 
 	public PositionResource(AnetObjectEngine engine) {
+		this.engine = engine;
 		this.dao = engine.getPositionDao();
-	}
-
-	@Override
-	public String getDescription() {
-		return "Positions";
-	}
-
-	@Override
-	public Class<Position> getBeanClass() {
-		return Position.class;
-	}
-	
-	public Class<PositionList> getBeanListClass() {
-		return PositionList.class;
 	}
 
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="positions")
 	@Path("/")
-	public PositionList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, 
-			@DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+	public AnetBeanList<Position> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") int pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") int pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	}
 
 	@GET
 	@Timed
 	@Path("/{id}")
-	@GraphQLFetcher
-	public Position getById(@PathParam("id") int id) {
+	@GraphQLQuery(name="position")
+	public Position getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
 		Position p = dao.getById(id);
 		if (p == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return p;
@@ -225,10 +213,10 @@ public class PositionResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@Path("/{id}/associated")
-	public PositionList getAssociatedPositions(@PathParam("id") int positionId) {
+	public AnetBeanList<Position> getAssociatedPositions(@PathParam("id") int positionId) {
 		Position b = Position.createWithId(positionId);
 
-		return new PositionList(dao.getAssociatedPositions(b));
+		return new AnetBeanList<Position>(dao.getAssociatedPositions(b));
 	}
 
 	@POST
@@ -277,16 +265,20 @@ public class PositionResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@Path("/{id}/history")
-	public List<PersonPositionHistory> getPositionHistory(@PathParam("id") int positionId) { 
+	public List<PersonPositionHistory> getPositionHistory(@PathParam("id") int positionId) {
 		Position position = dao.getById(positionId);
 		if (position == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
-		return dao.getPositionHistory(position);
+		try {
+			return dao.getPositionHistory(engine.getContext(), position).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to get PositionHistory", e);
+		}
 	}
 	
 	@GET
 	@Timed
 	@Path("/search")
-	public PositionList search(@Context HttpServletRequest request) {
+	public AnetBeanList<Position> search(@Context HttpServletRequest request) {
 		try {
 			return search(ResponseUtils.convertParamsToBean(request, PositionSearchQuery.class));
 		} catch (IllegalArgumentException e) {
@@ -296,9 +288,9 @@ public class PositionResource implements IGraphQLResource {
 
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="positionList")
 	@Path("/search")
-	public PositionList search(@GraphQLParam("query") PositionSearchQuery query) {
+	public AnetBeanList<Position> search(@GraphQLArgument(name="query") PositionSearchQuery query) {
 		return dao.search(query);
 	}
 

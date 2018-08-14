@@ -1,6 +1,7 @@
 package mil.dds.anet.resources;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.PermitAll;
@@ -22,28 +23,29 @@ import javax.ws.rs.core.Response.Status;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.PersonDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
 @Path("/api/people")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class PersonResource implements IGraphQLResource {
+public class PersonResource {
 	
 	private PersonDao dao;
 	private AnetConfiguration config;
@@ -51,21 +53,6 @@ public class PersonResource implements IGraphQLResource {
 	public PersonResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.dao = engine.getPersonDao();
 		this.config = config;
-	}
-	
-	@Override
-	public Class<Person> getBeanClass() {
-		return Person.class; 
-	} 
-	
-	@Override
-	public Class<PersonList> getBeanListClass() {
-		return PersonList.class;
-	}
-	
-	@Override
-	public String getDescription() {
-		return "People"; 
 	}
 	
 	/**
@@ -76,9 +63,10 @@ public class PersonResource implements IGraphQLResource {
 	 */
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="people")
 	@Path("/")
-	public PersonList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+	public AnetBeanList<Person> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") int pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100")  int pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	}
 	
@@ -88,8 +76,8 @@ public class PersonResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@Path("/{id}")
-	@GraphQLFetcher
-	public Person getById(@PathParam("id") int id) { 
+	@GraphQLQuery(name="person")
+	public Person getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
 		Person p = dao.getById(id);
 		if (p == null) { throw new WebApplicationException("No such person", Status.NOT_FOUND); }
 		return p;
@@ -234,16 +222,16 @@ public class PersonResource implements IGraphQLResource {
 	 */
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="personList")
 	@Path("/search")
-	public PersonList search(@GraphQLParam("query") PersonSearchQuery query) {
+	public AnetBeanList<Person> search(@GraphQLArgument(name="query") PersonSearchQuery query) {
 		return dao.search(query);
 	}
 	
 	@GET
 	@Timed
 	@Path("/search")
-	public PersonList search(@Context HttpServletRequest request) {
+	public AnetBeanList<Person> search(@Context HttpServletRequest request) {
 		try { 
 			return search(ResponseUtils.convertParamsToBean(request, PersonSearchQuery.class));
 		} catch (IllegalArgumentException e) { 
@@ -268,11 +256,12 @@ public class PersonResource implements IGraphQLResource {
 	 */
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="personRecents")
 	@Path("/recents")
-	public PersonList recents(@Auth Person user,
-			@DefaultValue("3") @QueryParam("maxResults") int maxResults) {
-		return new PersonList(dao.getRecentPeople(user, maxResults));
+	public AnetBeanList<Person> recents(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@DefaultValue("3") @QueryParam("maxResults") @GraphQLArgument(name="maxResults", defaultValue="3") int maxResults) {
+		user = DaoUtils.getUser(context, user);
+		return new AnetBeanList<Person>(dao.getRecentPeople(user, maxResults));
 	}
 	
 	/**
@@ -280,9 +269,10 @@ public class PersonResource implements IGraphQLResource {
 	 */
 	@GET
 	@Timed
-	@GraphQLFetcher("me")
+	@GraphQLQuery(name="me")
 	@Path("/me")
-	public Person getCurrentUser(@Auth Person user) { 
+	public Person getCurrentUser(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user) {
+		user = DaoUtils.getUser(context, user);
 		return user;
 	}
 	

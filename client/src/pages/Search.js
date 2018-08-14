@@ -41,42 +41,42 @@ const SEARCH_CONFIG = {
 		listName : 'reports: reportList',
 		sortBy: 'ENGAGEMENT_DATE',
 		sortOrder: 'DESC',
-		variableType: 'ReportSearchQuery',
+		variableType: 'ReportSearchQueryInput',
 		fields : ReportCollection.GQL_REPORT_FIELDS
 	},
 	people : {
 		listName : 'people: personList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
-		variableType: 'PersonSearchQuery',
+		variableType: 'PersonSearchQueryInput',
 		fields: 'id, name, rank, emailAddress, role , position { id, name, organization { id, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
-		variableType: 'PositionSearchQuery',
+		variableType: 'PositionSearchQueryInput',
 		fields: 'id , name, code, type, status, organization { id, shortName}, person { id, name, rank }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
-		variableType: 'TaskSearchQuery',
+		variableType: 'TaskSearchQueryInput',
 		fields: 'id, shortName, longName'
 	},
 	locations : {
 		listName: 'locations: locationList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
-		variableType: 'LocationSearchQuery',
+		variableType: 'LocationSearchQueryInput',
 		fields : 'id, name, lat, lng'
 	},
 	organizations : {
 		listName: 'organizations: organizationList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
-		variableType: 'OrganizationSearchQuery',
+		variableType: 'OrganizationSearchQueryInput',
 		fields: 'id, shortName, longName, identificationCode, type'
 	}
 }
@@ -157,7 +157,7 @@ class Search extends Page {
 			subQuery.sortOrder = config.sortOrder
 		}
 		let part = new GQL.Part(/* GraphQL */`
-			${config.listName} (f:search, query:$${type}Query) {
+			${config.listName} (query:$${type}Query) {
 				pageNum, pageSize, totalCount, list { ${config.fields} }
 			}
 			`).addVariable(type + "Query", config.variableType, subQuery)

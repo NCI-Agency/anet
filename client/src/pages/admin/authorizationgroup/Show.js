@@ -45,7 +45,7 @@ class BaseAuthorizationGroupShow extends Page {
 			paginatedPositions: positionList(query:$positionQuery) {
 				pageNum, pageSize, totalCount, list { id , name, code, type, status, organization { id, shortName}, person { id, name } }
 			}`)
-			.addVariable("positionQuery", "PositionSearchQuery", positionQuery)
+			.addVariable("positionQuery", "PositionSearchQueryInput", positionQuery)
 		return positionsPart
 	}
 
@@ -61,7 +61,7 @@ class BaseAuthorizationGroupShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}`)
-			.addVariable("reportQuery", "ReportSearchQuery", reportQuery)
+			.addVariable("reportQuery", "ReportSearchQueryInput", reportQuery)
 		return reportsPart
 	}
 

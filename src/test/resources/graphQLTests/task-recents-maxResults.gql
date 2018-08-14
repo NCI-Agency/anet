@@ -1,3 +1,3 @@
-taskList(f:recents, maxResults:${maxResults}) {
+taskRecents(maxResults:${maxResults}) {
 	list { id, shortName, longName }
 }
