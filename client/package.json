@@ -36,6 +36,7 @@
     "faker": "^4.1.0",
     "file-loader": "^1.1.11",
     "git-describe": "^4.0.3",
+    "graphql-cli": "^2.16.5",
     "handlebars": "^4.0.11",
     "handlebars-loader": "^1.7.0",
     "html-loader": "^0.5.5",
@@ -108,7 +109,8 @@
     "test": "npm run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "wdio": "wdio -b http://localhost:8080 ./config/wdio.config.js",
     "wdio:watch": "wdio ./config/wdio.config.js --watch",
-    "load-test": "artillery run tests/load/load.yml"
+    "load-test": "artillery run tests/load/load.yml",
+    "graphql": "graphql"
   },
   "jest": {
     "moduleFileExtensions": [
