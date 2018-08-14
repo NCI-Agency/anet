@@ -1,5 +1,7 @@
 package mil.dds.anet.resources;
 
+import io.leangen.graphql.annotations.GraphQLQuery;
+
 import java.util.List;
 import java.util.Map;
 
@@ -18,14 +20,11 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.IGraphQLResource;
-import mil.dds.anet.views.AbstractAnetBean;
 
 @Path("/api/admin")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class AdminResource implements IGraphQLResource {
+public class AdminResource {
 
 	private AdminDao dao;
 	private AnetConfiguration config;
@@ -37,7 +36,7 @@ public class AdminResource implements IGraphQLResource {
 	
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="adminSettings")
 	@Path("/")
 	public List<AdminSetting> getAll() { 
 		return dao.getAllSettings();
@@ -61,22 +60,5 @@ public class AdminResource implements IGraphQLResource {
 	public Map<String, Object> getDictionary() {
 		return config.getDictionary();
 	}
-
-	@Override
-	public String getDescription() {
-		return "Admin Resources";
-	}
-	
-	@Override
-	public Class<? extends AbstractAnetBean> getBeanClass() {
-		return AdminSetting.class;
-	}
-	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public Class<List> getBeanListClass() {
-		return List.class;
-	}
-	
 	
 }

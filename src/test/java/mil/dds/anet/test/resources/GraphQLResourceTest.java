@@ -9,6 +9,7 @@ import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -35,7 +36,8 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 	}
 	
 	@Test
-	public void test() {
+	public void test()
+		throws ExecutionException, InterruptedException {
 		final Person jack = getJackJackson();
 		final Person steve = getSteveSteveson();
 		File testDir = new File("src/test/resources/graphQLTests/");
@@ -45,7 +47,7 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 		Map<String,Object> variables = new HashMap<String,Object>();
 		variables.put("personId", jack.getId().toString());
 		variables.put("positionId", jack.loadPosition().getId());
-		variables.put("orgId", steve.loadPosition().loadOrganization().getId());
+		variables.put("orgId", steve.loadPosition().loadOrganization(context).get().getId());
 		variables.put("searchQuery", "hospital");
 		variables.put("reportId", jack.loadAttendedReports(0, 20).getList().get(0).getId());
 		variables.put("pageNum", 0);

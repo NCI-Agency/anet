@@ -3,6 +3,7 @@ package mil.dds.anet.threads;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -53,9 +54,13 @@ public class FutureEngagementWorker implements Runnable {
 				FutureEngagementUpdated action = new FutureEngagementUpdated();
 				action.setReport(r);
 				email.setAction(action);
-				email.setToAddresses(Collections.singletonList(r.loadAuthor().getEmailAddress()));
-				AnetEmailWorker.sendEmailAsync(email);
-				dao.updateToDraftState(r);
+				try {
+					email.addToAddress(r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
+					AnetEmailWorker.sendEmailAsync(email);
+					dao.updateToDraftState(r);
+				} catch (InterruptedException | ExecutionException e) {
+					logger.error("failed to load Author", e);
+				}
 			} catch (Exception e) { 
 				logger.error("Exception when updating", e);
 			}

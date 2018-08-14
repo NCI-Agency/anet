@@ -4,11 +4,10 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
-import mil.dds.anet.graphql.IGraphQLBean;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.DaoUtils.DbType;
 
-public abstract class AnetBaseDao<T extends IGraphQLBean> implements IAnetDao<T> {
+public abstract class AnetBaseDao<T> implements IAnetDao<T> {
 
 	protected Handle dbHandle;
 	protected String getAllSql;

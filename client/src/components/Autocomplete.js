@@ -183,10 +183,10 @@ export default class Autocomplete extends Component {
 		} else {
 			let resourceName = this.props.objectType.resourceName
 			let listName = this.props.objectType.listName
-			let graphQlQuery = listName + '(f:search, query: $query) { '
+			let graphQlQuery = listName + ' (query: $query) { '
 					+ 'list { ' + this.props.fields + '}'
 					+ '}'
-			let variableDef = '($query: ' + resourceName + 'SearchQuery)'
+			let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
 			let queryVars = {text: value.value + "*", pageSize: 25}
 			if (this.props.queryParams) {
 				Object.assign(queryVars, this.props.queryParams)

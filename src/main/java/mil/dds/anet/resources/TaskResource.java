@@ -1,5 +1,6 @@
 package mil.dds.anet.resources;
 
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.security.PermitAll;
@@ -21,15 +22,15 @@ import javax.ws.rs.core.Response.Status;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.TaskDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -38,7 +39,7 @@ import mil.dds.anet.utils.ResponseUtils;
 @Path("/api/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class TaskResource implements IGraphQLResource {
+public class TaskResource {
 
 	TaskDao dao;
 	
@@ -46,34 +47,19 @@ public class TaskResource implements IGraphQLResource {
 		this.dao = engine.getTaskDao();
 	}
 	
-	@Override
-	public Class<Task> getBeanClass() {
-		return Task.class;
-	}
-	
-	public Class<TaskList> getBeanListClass() {
-		return TaskList.class;
-	}
-	
-	@Override
-	public String getDescription() {
-		return "Tasks";
-	}
-	
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="tasks")
 	@Path("/")
-	public TaskList getAll(@Auth Person p, 
-			@DefaultValue("0") @QueryParam("pageNum") Integer pageNum, 
-			@DefaultValue("100") @QueryParam("pageSize") Integer pageSize) {
+	public AnetBeanList<Task> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0")Integer pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") Integer pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	}
 	
 	@GET
-	@GraphQLFetcher
+	@GraphQLQuery(name="task")
 	@Path("/{id}")
-	public Task getById(@PathParam("id") int id) {
+	public Task getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
 		Task p =  dao.getById(id);
 		if (p == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
 		return p;
@@ -126,16 +112,16 @@ public class TaskResource implements IGraphQLResource {
 	
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="taskList")
 	@Path("/search")
-	public TaskList search(@GraphQLParam("query") TaskSearchQuery query) {
+	public AnetBeanList<Task> search(@GraphQLArgument(name="query") TaskSearchQuery query) {
 		return dao.search(query);
 	}
 	
 	@GET
 	@Timed
 	@Path("/search")
-	public TaskList search(@Context HttpServletRequest request) {
+	public AnetBeanList<Task> search(@Context HttpServletRequest request) {
 		try { 
 			return search(ResponseUtils.convertParamsToBean(request, TaskSearchQuery.class));
 		} catch (IllegalArgumentException e) { 
@@ -149,10 +135,11 @@ public class TaskResource implements IGraphQLResource {
 	 */
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="taskRecents")
 	@Path("/recents")
-	public TaskList recents(@Auth Person user,
-			@DefaultValue("3") @QueryParam("maxResults") int maxResults) {
-		return new TaskList(dao.getRecentTasks(user, maxResults));
+	public AnetBeanList<Task> recents(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@DefaultValue("3") @QueryParam("maxResults") @GraphQLArgument(name="maxResults", defaultValue="3") int maxResults) {
+		user = DaoUtils.getUser(context, user);
+		return new AnetBeanList<Task>(dao.getRecentTasks(user, maxResults));
 	}
 }

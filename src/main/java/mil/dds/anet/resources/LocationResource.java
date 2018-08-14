@@ -1,5 +1,7 @@
 package mil.dds.anet.resources;
 
+import java.util.Map;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -19,22 +21,23 @@ import javax.ws.rs.core.Response.Status;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.LocationDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
 @Path("/api/locations")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class LocationResource implements IGraphQLResource {
+public class LocationResource {
 
 	private LocationDao dao;
 	
@@ -44,17 +47,18 @@ public class LocationResource implements IGraphQLResource {
 	
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="locations")
 	@Path("/")
-	public LocationList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+	public AnetBeanList<Location> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") int pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") int pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	}
 	
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="location")
 	@Path("/{id}")
-	public Location getById(@PathParam("id") int id) { 
+	public Location getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
 		Location loc = dao.getById(id);
 		if (loc == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return loc;
@@ -63,16 +67,16 @@ public class LocationResource implements IGraphQLResource {
 	
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="locationList")
 	@Path("/search")
-	public LocationList search(@GraphQLParam("query") LocationSearchQuery query) {
+	public AnetBeanList<Location> search(@GraphQLArgument(name="query") LocationSearchQuery query) {
 		return dao.search(query);
 	}
 	
 	@GET
 	@Timed
 	@Path("/search")
-	public LocationList search(@Context HttpServletRequest request) {
+	public AnetBeanList<Location> search(@Context HttpServletRequest request) {
 		return search(ResponseUtils.convertParamsToBean(request, LocationSearchQuery.class));
 	}
 	
@@ -106,26 +110,12 @@ public class LocationResource implements IGraphQLResource {
 	 */
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="locationRecents")
 	@Path("/recents")
-	public LocationList recents(@Auth Person user,
-			@DefaultValue("3") @QueryParam("maxResults") int maxResults) {
-		return new LocationList(dao.getRecentLocations(user, maxResults));
-	}
-	
-	@Override
-	public String getDescription() {
-		return "Locations"; 
-	}
-
-	@Override
-	public Class<Location> getBeanClass() {
-		return Location.class;
-	}
-	
-	@Override
-	public Class<LocationList> getBeanListClass() {
-		return LocationList.class;
+	public AnetBeanList<Location> recents(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@DefaultValue("3") @QueryParam("maxResults") @GraphQLArgument(name="maxResults", defaultValue="3") int maxResults) {
+		user = DaoUtils.getUser(context, user);
+		return new AnetBeanList<Location>(dao.getRecentLocations(user, maxResults));
 	}
 	
 }

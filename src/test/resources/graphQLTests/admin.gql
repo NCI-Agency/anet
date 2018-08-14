@@ -1,1 +1,1 @@
-adminSettings(f:getAll) { key, value }
+adminSettings { key, value }

@@ -37,7 +37,7 @@ export default class SavedSearchTable extends Component {
 		query.sortOrder = query.sortOrder || 'DESC'
 		let fields = ReportCollection.GQL_REPORT_FIELDS
 		API.query(/*GraphQL */`
-			reports: reportList(f:search, query: $query) {
+			reports: reportList(query: $query) {
 				pageNum, pageSize, totalCount, list {
 					${fields}
 				}

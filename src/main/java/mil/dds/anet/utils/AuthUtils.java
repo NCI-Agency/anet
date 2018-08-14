@@ -2,6 +2,7 @@ package mil.dds.anet.utils;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -57,12 +58,18 @@ public class AuthUtils {
 		if (org.getId().equals(position.getOrganization().getId())) { return true; }
 		
 		//As a last check, load the descendant orgs. 
-		Optional<Organization> orgMatch =  position.loadOrganization()
-				.loadAllDescendants()
-				.stream()
-				.filter(o -> o.getId().equals(org.getId()))
-				.findFirst();
-		return orgMatch.isPresent();
+		try {
+			Organization posOrg = position.loadOrganization(AnetObjectEngine.getInstance().getContext()).get();
+			Optional<Organization> orgMatch =  posOrg
+					.loadAllDescendants()
+					.stream()
+					.filter(o -> o.getId().equals(org.getId()))
+					.findFirst();
+			return orgMatch.isPresent();
+		} catch (InterruptedException | ExecutionException e) {
+			logger.error("failed to load Organization", e);
+			return false;
+		}
 	}
 	
 	public static void assertSuperUserForOrg(Person user, Organization org) {

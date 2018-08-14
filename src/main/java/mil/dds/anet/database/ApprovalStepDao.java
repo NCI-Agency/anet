@@ -3,6 +3,7 @@ package mil.dds.anet.database;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -13,20 +14,31 @@ import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ApprovalStepMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 
-	Handle dbHandle;
-	
+	private final Handle dbHandle;
+	private final IdBatcher<ApprovalStep> idBatcher;
+	private final ForeignKeyBatcher<Position> approversBatcher;
+
 	public ApprovalStepDao(Handle h) {
 		this.dbHandle = h;
+		final String idBatcherSql = "/* batch.getApprovalStepsByIds */ SELECT * from \"approvalSteps\" where id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<ApprovalStep>(dbHandle, idBatcherSql, new ApprovalStepMapper());
+
+		final String approversBatcherSql = "/* batch.getApproversForStep */ SELECT \"approvalStepId\", " + PositionDao.POSITIONS_FIELDS
+				+ " FROM approvers "
+				+ "LEFT JOIN positions ON \"positions\".\"id\" = approvers.\"positionId\" "
+				+ "WHERE \"approvalStepId\" IN ( %1$s )";
+		this.approversBatcher = new ForeignKeyBatcher<Position>(h, approversBatcherSql, new PositionMapper(), "approvalStepId");
 	}
 	
-	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
+	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -45,6 +57,15 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 		List<ApprovalStep> results = query.list();
 		if (results.size() == 0) { return null; }
 		return results.get(0);
+	}
+
+	@Override
+	public List<ApprovalStep> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
+	}
+
+	public List<List<Position>> getApprovers(List<Integer> foreignKeys) {
+		return approversBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	@Override
@@ -145,13 +166,9 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	/**
 	 * Returns the list of positions that can approve for a given step. 
 	 */
-	public List<Position> getApproversForStep(ApprovalStep as) {
-		return dbHandle.createQuery("/* getApproversForStep */ SELECT " + PositionDao.POSITIONS_FIELDS + " FROM positions "
-				+ "WHERE id IN "
-				+ "(SELECT \"positionId\" from approvers where \"approvalStepId\" = :approvalStepId)")
-			.bind("approvalStepId", as.getId())
-			.map(new PositionMapper())
-			.list();
+	public CompletableFuture<List<Position>> getApproversForStep(Map<String, Object> context, Integer approvalStepId) {
+		return new ForeignKeyFetcher<Position>()
+				.load(context, "approvalStep.approvers", approvalStepId);
 	}
 
 	public int addApprover(ApprovalStep step, Position position) {
