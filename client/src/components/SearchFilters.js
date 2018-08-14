@@ -351,5 +351,11 @@ export default {
 		}
 
 		return filters
+	},
+	// filters not being displayed in the advanced search but being used in the search
+	extraFilters: function(positionTypeFilterRef, organizationFilterRef) {
+		const filters = {}
+		filters.Reports = ["includeEngagementDayOfWeek", "sortOrder"]
+		return filters
 	}
 }
