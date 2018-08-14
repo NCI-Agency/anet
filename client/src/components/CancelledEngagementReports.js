@@ -11,6 +11,8 @@ import ReportCollection from 'components/ReportCollection'
 
 import {Report} from 'models'
 
+import _isEqual from 'lodash/isEqual'
+
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
@@ -31,7 +33,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
  */
 class CancelledEngagementReports extends Component {
   static propTypes = {
-    date: PropTypes.object,
+    queryParams: PropTypes.object,
     showLoading: PropTypes.func.isRequired,
     hideLoading: PropTypes.func.isRequired,
   }
@@ -49,26 +51,15 @@ class CancelledEngagementReports extends Component {
     }
   }
 
-  get queryParams() {
-    return {
-      state: [Report.STATE.CANCELLED],
-      releasedAtStart: this.props.date.valueOf(),
-    }
-  }
-
-  get referenceDateLongStr() { return this.props.date.format('DD MMM YYYY') }
-
   render() {
     const focusDetails = this.getFocusDetails()
     return (
       <div>
-        <p className="help-text">{`Number of cancelled engagement reports released since ${this.referenceDateLongStr}, grouped by ${Settings.fields.advisor.org.name}`}</p>
+        <p className="help-text">{`Grouped by ${Settings.fields.advisor.org.name}`}</p>
         <p className="chart-description">
-          {`Displays the number of cancelled engagement reports released since
-            ${this.referenceDateLongStr}. The reports are grouped by ${Settings.fields.advisor.org.name}.
-            In order to see the list of cancelled engagement
-            reports for an organization, click on the bar corresponding to the
-            organization.`}
+          {`The reports are grouped by ${Settings.fields.advisor.org.name}. In order to see the
+            list of cancelled engagement reports for an organization, click on
+            the bar corresponding to the organization.`}
         </p>
         <BarChartWithLoader
           chartId={chartByOrgUuid}
@@ -79,12 +70,12 @@ class CancelledEngagementReports extends Component {
           onBarClick={this.goToOrg}
           updateChart={this.state.updateChart}
           isLoading={this.state.isLoading} />
-        <p className="help-text">{`Number of cancelled engagement reports since ${this.referenceDateLongStr}, grouped by reason for cancellation`}</p>
+        <p className="help-text">{`Grouped by reason for cancellation`}</p>
         <p className="chart-description">
-          {`Displays the number of cancelled engagement reports released since
-            ${this.referenceDateLongStr}. The reports are grouped by reason for cancellation. In order to see the list of cancelled engagement
-            reports for a reason for cancellation, click on the bar corresponding
-            to the reason for cancellation.`}
+          {`The reports are grouped by reason for cancellation. In order to see
+            the list of cancelled engagement reports for a reason for
+            cancellation, click on the bar corresponding to the reason for
+            cancellation.`}
         </p>
         <BarChartWithLoader
           chartId={chartByReasonId}
@@ -108,10 +99,10 @@ class CancelledEngagementReports extends Component {
   }
 
   getReasonDisplayName(reason) {
-    return reason.replace("CANCELLED_", "")
+    return reason ? reason.replace("CANCELLED_", "")
       .replace(/_/g, " ")
       .toLocaleLowerCase()
-      .replace(/(\b\w)/gi, function(m) {return m.toUpperCase()})
+      .replace(/(\b\w)/gi, function(m) {return m.toUpperCase()}) : ''
   }
 
   getFocusDetails() {
@@ -140,24 +131,24 @@ class CancelledEngagementReports extends Component {
     this.props.showLoading()
     const pinned_ORGs = Settings.pinned_ORGs
     const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.queryParams)
+    Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart
     const chartQuery = API.query(/* GraphQL */`
-        reportList(f:search, query:$chartQueryParams) {
+        reportList(query:$chartQueryParams) {
           totalCount, list {
             ${GQL_CHART_FIELDS}
           }
         }
-      `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+      `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
     const noAdvisorOrg = {
       uuid: "-1",
       shortName: `No ${Settings.fields.advisor.org.name}`
     }
     Promise.all([chartQuery]).then(values => {
-      let reportsList = values[0].reportList.list
+      let reportsList = values[0].reportList.list || []
       reportsList = reportsList
         .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
       this.setState({
@@ -189,7 +180,7 @@ class CancelledEngagementReports extends Component {
 
   fetchOrgData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -199,12 +190,12 @@ class CancelledEngagementReports extends Component {
     }
     // Query used by the reports collection
     const reportsQuery = API.query(/* GraphQL */`
-        reportList(f:search, query:$reportsQueryParams) {
+        reportList(query:$reportsQueryParams) {
           pageNum, pageSize, totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
           }
         }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQuery)')
+      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
     Promise.all([reportsQuery]).then(values => {
       this.setState({
         updateChart: false,  // only update the report list
@@ -215,7 +206,7 @@ class CancelledEngagementReports extends Component {
 
   fetchReasonData() {
     const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.queryParams)
+    Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
       pageSize: 10
@@ -225,12 +216,12 @@ class CancelledEngagementReports extends Component {
     }
     // Query used by the reports collection
     const reportsQuery = API.query(/* GraphQL */`
-        reportList(f:search, query:$reportsQueryParams) {
+        reportList(query:$reportsQueryParams) {
           pageNum, pageSize, totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
           }
         }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQuery)')
+      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
     Promise.all([reportsQuery]).then(values => {
       this.setState({
         reports: values[0].reportList
@@ -275,15 +266,11 @@ class CancelledEngagementReports extends Component {
     }
   }
 
-  componentDidMount() {
-    this.fetchData()
-  }
-
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.date.valueOf() !== this.props.date.valueOf()) {
+    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
-        focusedReason: '',  // reset focus when changing the date
+        focusedReason: '',  // reset focus when changing the queryParams
         focusedOrg: ''
       }, () => this.fetchData())
     }

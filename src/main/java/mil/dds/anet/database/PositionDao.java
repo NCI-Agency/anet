@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -22,12 +24,13 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class PositionDao extends AnetBaseDao<Position> {
 
@@ -36,15 +39,30 @@ public class PositionDao extends AnetBaseDao<Position> {
 			"status", "locationUuid" };
 	private static String tableName = "positions";
 	public static String POSITIONS_FIELDS  = DaoUtils.buildFieldAliases(tableName, fields, true);
-	
+
+	private final IdBatcher<Position> idBatcher;
+	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
+
 	public PositionDao(Handle h) { 
 		super(h, "positions", tableName, POSITIONS_FIELDS, null);
+		final String idBatcherSql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS + ", " + PersonDao.PERSON_FIELDS
+				+ "FROM positions LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid "
+				+ "WHERE positions.uuid IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Position>(h, idBatcherSql, new PositionMapper());
+
+		final String personPositionHistoryBatcherSql = "/* batch.getPositionHistory */ SELECT \"peoplePositions\".\"positionUuid\" AS \"positionUuid\", "
+				+ "\"peoplePositions\".\"personUuid\" AS \"personUuid\", "
+				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
+				+ PersonDao.PERSON_FIELDS + " FROM \"peoplePositions\" "
+				+ "LEFT JOIN people ON \"peoplePositions\".\"personUuid\" = people.uuid "
+				+ "WHERE \"positionUuid\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "positionUuid");
 	}
 	
-	public PositionList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Position> getAll(int pageNum, int pageSize) {
 		Query<Position> query = getPagedQuery(pageNum, pageSize, new PositionMapper());
 		Long manualRowCount = getSqliteRowCount();
-		return PositionList.fromQuery(query, pageNum, pageSize, manualRowCount);
+		return new AnetBeanList<Position>(query, pageNum, pageSize, manualRowCount);
 	}
 	
 	public Position insert(Position p) {
@@ -91,6 +109,15 @@ public class PositionDao extends AnetBaseDao<Position> {
 				.bind("uuid", uuid)
 				.map(new PositionMapper())
 				.first();
+	}
+
+	@Override
+	public List<Position> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
+	}
+
+	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
+		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	/*
@@ -325,28 +352,29 @@ public class PositionDao extends AnetBaseDao<Position> {
 			.list();
 	}
 	
-	public PositionList search(PositionSearchQuery query) { 
+	public AnetBeanList<Position> search(PositionSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPositionSearcher().runSearch(query, dbHandle);
 	}
 
-	public List<PersonPositionHistory> getPositionHistory(Position position) {
-		PersonPositionHistoryMapper mapper = new PersonPositionHistoryMapper(position);
-		List<PersonPositionHistory> results = dbHandle.createQuery("/* getPositionHistory */ SELECT \"peoplePositions\".\"personUuid\" AS \"personUuid\", "
-				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
-				+ PersonDao.PERSON_FIELDS + " FROM \"peoplePositions\" "
-				+ "LEFT JOIN people ON \"peoplePositions\".\"personUuid\" = people.uuid "
-				+ "WHERE \"positionUuid\" = :positionUuid ORDER BY \"peoplePositions\".\"createdAt\" ASC")
-			.bind("positionUuid", DaoUtils.getUuid(position))
-			.map(mapper)
-			.list();
-		
-		results.add(mapper.getCurrentPerson());
-		
-		//Remove all null entries. 
-		results = results.stream().filter(pph -> pph != null).collect(Collectors.toList());
-		return results;
-		
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Position position) {
+		return new ForeignKeyFetcher<PersonPositionHistory>()
+				.load(context, "position.personPositionHistory", position.getUuid())
+				.thenApply(l ->
+		{
+			// Derive start and end times; assumes list is in chronological order
+			PersonPositionHistory pphPrev = null;
+			for (final PersonPositionHistory pph : l) {
+				pph.setStartTime(pph.getCreatedAt());
+				if (pphPrev != null) {
+					pphPrev.setEndTime(pph.getStartTime());
+				}
+				pphPrev = pph;
+			}
+			// Remove all null entries
+			l = l.stream().filter(pph -> (pph != null && pph.getPerson() != null)).collect(Collectors.toList());
+			return l;
+		});
 	}
 
 	public Boolean getIsApprover(Position position) {

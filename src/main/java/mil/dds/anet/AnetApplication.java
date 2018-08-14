@@ -244,12 +244,12 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		environment.jersey().register(tagResource);
 		environment.jersey().register(authorizationGroupResource);
 		environment.jersey().register(new ViewResponseFilter(configuration));
-		environment.jersey().register(new GraphQLResource(
-			ImmutableList.of(reportResource, personResource,
-				positionResource, locationResource,
-				orgResource, asResource, taskResource,
-				adminResource, savedSearchResource, tagResource, authorizationGroupResource),
-			metricRegistry, configuration.isDevelopmentMode()));
+		environment.jersey().register(new GraphQLResource(engine,
+				ImmutableList.of(reportResource, personResource,
+						positionResource, locationResource,
+						orgResource, asResource, taskResource,
+						adminResource, savedSearchResource, tagResource, authorizationGroupResource),
+						metricRegistry, configuration.isDevelopmentMode()));
 	}
 
 	protected static JSONObject getDictionary(AnetConfiguration configuration)

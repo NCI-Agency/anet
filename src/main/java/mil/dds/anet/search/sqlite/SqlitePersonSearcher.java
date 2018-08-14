@@ -1,5 +1,6 @@
 package mil.dds.anet.search.sqlite;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +10,7 @@ import org.skife.jdbi.v2.Handle;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
@@ -53,7 +54,7 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 	}
 
 	@Override
-	public PersonList runSearch(PersonSearchQuery query, Handle dbHandle) { 
+	public AnetBeanList<Person> runSearch(PersonSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqlitePersonSearch */ SELECT " + PersonDao.PERSON_FIELDS 
 				+ " FROM people WHERE people.uuid IN (SELECT people.uuid FROM people ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
@@ -64,9 +65,7 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		
 		sql.append(" WHERE ");
 		List<String> whereClauses = new LinkedList<String>();
-		PersonList result = new PersonList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
+		final AnetBeanList<Person> result = new AnetBeanList<Person>(query.getPageNum(), query.getPageSize(), new ArrayList<Person>());
 		
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());

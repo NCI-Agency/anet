@@ -2,7 +2,10 @@ package mil.dds.anet.database;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
+import org.joda.time.DateTime;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
@@ -10,10 +13,11 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
@@ -23,12 +27,18 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
 	private Handle dbHandle;
+	private final ForeignKeyBatcher<ReportSensitiveInformation> reportIdBatcher;
 
 	public ReportSensitiveInformationDao(Handle h) {
 		this.dbHandle = h;
+		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
+				+ " FROM \"" + tableName + "\""
+				+ " WHERE \"reportUuid\" IN ( %1$s )";
+		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
 	}
 
-	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
+	@Override
+	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -36,6 +46,16 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public List<ReportSensitiveInformation> getByIds(List<String> reportUuids) {
+		throw new UnsupportedOperationException();
+	}
+
+	public List<List<ReportSensitiveInformation>> getReportSensitiveInformation(List<String> foreignKeys) {
+		return reportIdBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	@Override
 	public ReportSensitiveInformation insert(ReportSensitiveInformation rsi) {
 		throw new UnsupportedOperationException();
 	}
@@ -44,13 +64,13 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return null;
 		}
-		rsi.setReportUuid(report.getUuid());
 		DaoUtils.setInsertFields(rsi);
 		dbHandle.createStatement(
 				"/* insertReportsSensitiveInformation */ INSERT INTO \"" + tableName + "\" "
 					+ " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
 				.bindFromProperties(rsi)
+				.bind("reportUuid", report.getUuid())
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
 		return rsi;
@@ -65,8 +85,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			return 0;
 		}
 		// Update relevant fields, but do not allow the reportUuid to be updated by the query!
-		rsi.setReportUuid(report.getUuid());
-		DaoUtils.setUpdateFields(rsi);
+		rsi.setUpdatedAt(DateTime.now());
 		final int numRows = dbHandle.createStatement(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
 					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
@@ -82,25 +101,26 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 				: update(rsi, user, report);
 	}
 
-	public ReportSensitiveInformation getForReport(Report report, Person user) {
+	public CompletableFuture<ReportSensitiveInformation> getForReport(Map<String, Object> context, Report report, Person user) {
 		if (!isAuthorized(user, report)) {
-			return null;
+			return CompletableFuture.supplyAsync(new Supplier<ReportSensitiveInformation>() {
+				@Override
+				public ReportSensitiveInformation get() {
+					return null;
+				}});
 		}
-		final Query<ReportSensitiveInformation> query = dbHandle.createQuery(
-				"/* getReportSensitiveInformationByReportUuid */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
-					+ " FROM \"" + tableName + "\""
-					+ " WHERE \"reportUuid\" = :reportUuid")
-			.bind("reportUuid", report.getUuid())
-			.map(new ReportSensitiveInformationMapper());
-		final List<ReportSensitiveInformation> results = query.list();
-		ReportSensitiveInformation rsi = (results.size() == 0) ? null : results.get(0);
-		if (rsi != null) {
-			AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);
-		} else {
-			rsi = new ReportSensitiveInformation();
-			rsi.setReportUuid(report.getUuid());
-		}
-		return rsi;
+		return new ForeignKeyFetcher<ReportSensitiveInformation>()
+				.load(context, "report.reportSensitiveInformation", report.getUuid())
+				.thenApply(l ->
+		{
+			ReportSensitiveInformation rsi = (l == null || l.size() == 0) ? null : l.get(0);
+			if (rsi != null) {
+				AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);
+			} else {
+				rsi = new ReportSensitiveInformation();
+			}
+			return rsi;
+		});
 	}
 
 	/**

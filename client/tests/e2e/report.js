@@ -91,9 +91,9 @@ test('Draft and submit a report', async t => {
     )
 
     await t.context.get('/', 'rebecca')
-    let $homeTile = await $('.home-tile')
-    await t.context.driver.wait(until.elementIsVisible($homeTile))
-    await $homeTile.click()
+    let [$draftReports, $reportsPending, $orgReports, $upcomingEngagements] = await $$('.home-tile')
+    await t.context.driver.wait(until.elementIsVisible($reportsPending))
+    await $reportsPending.click()
 
     let $firstReadReportButton = await $('.read-report-button')
     let reportHref = await $firstReadReportButton.getAttribute('href')

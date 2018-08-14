@@ -45,6 +45,7 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 	private String authorPositionUuid;
 	private String attendeePositionUuid;
 	private List<String> authorizationGroupUuid;
+	private Boolean sensitiveInfo;
 
 	private ReportSearchSortBy sortBy;
 	private SortOrder sortOrder;
@@ -277,6 +278,14 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 
 	public void setAuthorizationGroupUuid(List<String> authorizationGroupUuid) {
 		this.authorizationGroupUuid = authorizationGroupUuid;
+	}
+
+	public boolean getSensitiveInfo() {
+		return Boolean.TRUE.equals(sensitiveInfo);
+	}
+
+	public void setSensitiveInfo(Boolean sensitiveInfo) {
+		this.sensitiveInfo = sensitiveInfo;
 	}
 
 	public ReportSearchSortBy getSortBy() {

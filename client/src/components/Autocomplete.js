@@ -5,6 +5,7 @@ import Autosuggest from 'react-autosuggest'
 import autobind from 'autobind-decorator'
 import _debounce from 'lodash/debounce'
 import _isEqual from 'lodash/isEqual'
+import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
 import utils from 'utils'
@@ -51,6 +52,7 @@ export default class Autocomplete extends Component {
 		super(props)
 
 		this.fetchSuggestionsDebounced = _debounce(this.fetchSuggestions, 200)
+		this.noSuggestions = <span><i>No suggestions found</i></span>
 
 		const selectedUuids = this._getSelectedUuids(props)
 		const value = this._getValue(props)
@@ -58,9 +60,7 @@ export default class Autocomplete extends Component {
 
 		this.state = {
 			suggestions: [],
-			noSuggestions: false,
 			selectedUuids: selectedUuids,
-			value: value,
 			stringValue: stringValue,
 			originalStringValue: stringValue,
 		}
@@ -106,19 +106,20 @@ export default class Autocomplete extends Component {
 		inputProps.onChange = this.onInputChange
 		inputProps.onBlur = this.onInputBlur
 		const { valueKey } = this.props
+		const renderSuggestion = this.props.template ? this.renderSuggestionTemplate : this.renderSuggestion
 
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
 			<img src={SEARCH_ICON} className="form-control-icon" alt="" onClick={this.focus} />
 
 			<Autosuggest
-				suggestions={this.state.noSuggestions ? [{}] : this.state.suggestions}
+				suggestions={this.state.suggestions}
 				onSuggestionsFetchRequested={this.fetchSuggestionsDebounced}
 				onSuggestionsClearRequested={this.clearSuggestions}
 				onSuggestionSelected={this.onSuggestionSelected}
 				getSuggestionValue={this.getStringValue.bind(this, valueKey)}
 				inputProps={inputProps}
 				renderInputComponent={this.renderInputComponent}
-				renderSuggestion={this.renderSuggestion}
+				renderSuggestion={renderSuggestion}
 				focusInputOnSuggestionClick={false}
 			/>
 		</div>
@@ -126,16 +127,16 @@ export default class Autocomplete extends Component {
 
 	@autobind
 	renderSuggestion(suggestion) {
-		if (this.state.noSuggestions) {
-			return <span><i>No suggestions found</i></span>
-		}
+		return _isEmpty(suggestion)
+				? this.noSuggestions
+				: <span>{this.getStringValue(suggestion, this.props.valueKey)}</span>
+	}
 
-		let template = this.props.template
-		if (template) {
-			return template(suggestion)
-		} else {
-			return <span>{this.getStringValue(suggestion, this.props.valueKey)}</span>
-		}
+	@autobind
+	renderSuggestionTemplate(suggestion) {
+		return _isEmpty(suggestion)
+				? this.noSuggestions
+				: this.props.template(suggestion)
 	}
 
 	@autobind
@@ -156,8 +157,10 @@ export default class Autocomplete extends Component {
 		if (this.state.selectedUuids) {
 			list = list.filter(suggestion => suggestion && suggestion.uuid && this.state.selectedUuids.indexOf(suggestion.uuid) === -1)
 		}
-		let noSuggestions = list.length === 0
-		this.setState({suggestions: list, noSuggestions})
+		if (!list.length) {
+			list = [{}] // use an empty object so we render the 'noSuggestions' text
+		}
+		this.setState({suggestions: list})
 	}
 
 	@autobind
@@ -180,10 +183,10 @@ export default class Autocomplete extends Component {
 		} else {
 			let resourceName = this.props.objectType.resourceName
 			let listName = this.props.objectType.listName
-			let graphQlQuery = listName + '(f:search, query: $query) { '
+			let graphQlQuery = listName + ' (query: $query) { '
 					+ 'list { ' + this.props.fields + '}'
 					+ '}'
-			let variableDef = '($query: ' + resourceName + 'SearchQuery)'
+			let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
 			let queryVars = {text: value.value + "*", pageSize: 25}
 			if (this.props.queryParams) {
 				Object.assign(queryVars, this.props.queryParams)
@@ -206,11 +209,8 @@ export default class Autocomplete extends Component {
 		event.preventDefault()
 
 		let stringValue = this.props.clearOnSelect ? '' : suggestionValue
-//		if (this.state.noSuggestions && stringValue !== ''){
-//			return
-//		}
 		this.currentSelected = suggestion
-		this.setState({value: suggestion, stringValue})
+		this.setState({stringValue: stringValue})
 
 		if (this.props.onChange) {
 			this.props.onChange(suggestion)
@@ -256,7 +256,7 @@ export default class Autocomplete extends Component {
 		if (val) {
 			if (val === this.state.originalStringValue) { return }
 
-			this.setState({value: val, stringValue: val})
+			this.setState({stringValue: val})
 			if (this.props.onErrorChange) {
 				this.props.onErrorChange(true, val)
 			} else if (this.props.onChange) {

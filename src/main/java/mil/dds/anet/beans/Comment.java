@@ -1,5 +1,7 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLQuery;
+
 import java.util.Objects;
 
 import mil.dds.anet.utils.Utils;
@@ -12,6 +14,7 @@ public class Comment extends AbstractAnetBean {
 	private Person author;
 	private String text;
 
+	@GraphQLQuery(name="reportUuid")
 	public String getReportUuid() {
 		return reportUuid;
 	}
@@ -20,6 +23,7 @@ public class Comment extends AbstractAnetBean {
 		this.reportUuid = reportUuid;
 	}
 
+	@GraphQLQuery(name="author")
 	public Person getAuthor() {
 		return author;
 	}
@@ -28,6 +32,7 @@ public class Comment extends AbstractAnetBean {
 		this.author = author;
 	}
 
+	@GraphQLQuery(name="text")
 	public String getText() {
 		return text;
 	}

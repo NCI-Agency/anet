@@ -17,7 +17,6 @@ public class ReportSensitiveInformationMapper implements ResultSetMapper<ReportS
 		final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
 		DaoUtils.setCommonBeanFields(rsi, rs, "reportsSensitiveInformation");
 		rsi.setText(rs.getString("reportsSensitiveInformation_text"));
-		rsi.setReportUuid(rs.getString("reportsSensitiveInformation_reportUuid"));
 		rsi.setLoadLevel(LoadLevel.PROPERTIES);
 		return rsi;
 	}

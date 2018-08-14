@@ -1,6 +1,7 @@
 package mil.dds.anet.resources;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.DELETE;
@@ -18,19 +19,20 @@ import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.SavedSearchDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.IGraphQLBean;
-import mil.dds.anet.graphql.IGraphQLResource;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
 @Path("/api/savedSearches")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class SavedSearchResource implements IGraphQLResource  {
+public class SavedSearchResource {
 
 	SavedSearchDao dao;
 	
@@ -52,9 +54,10 @@ public class SavedSearchResource implements IGraphQLResource  {
 	
 	@GET
 	@Timed
-	@GraphQLFetcher("mine")
+	@GraphQLQuery(name="mySearches")
 	@Path("/mine")
-	public List<SavedSearch> getMySearches(@Auth Person user) { 
+	public List<SavedSearch> getMySearches(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user) {
+		user = DaoUtils.getUser(context, user);
 		return dao.getSearchesByOwner(user);
 	}
 	
@@ -68,20 +71,5 @@ public class SavedSearchResource implements IGraphQLResource  {
 		} else { 
 			return Response.status(Status.NOT_FOUND).build();
 		}
-	}
-	
-	@Override
-	public String getDescription() {
-		return "Saved Searches";
-	}
-
-	@Override
-	public Class<? extends IGraphQLBean> getBeanClass() {
-		return SavedSearch.class;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	public Class<List> getBeanListClass() {
-		return List.class;
 	}
 }

@@ -9,7 +9,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -17,13 +17,16 @@ import mil.dds.anet.utils.DaoUtils;
 @RegisterMapper(LocationMapper.class)
 public class LocationDao implements IAnetDao<Location> {
 
-	Handle dbHandle;
-	
+	private final Handle dbHandle;
+	private final IdBatcher<Location> idBatcher;
+
 	public LocationDao(Handle h) { 
 		this.dbHandle = h;
+		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, new LocationMapper());
 	}
 	
-	public LocationList getAll(int pageNum, int pageSize) { 
+	public AnetBeanList<Location> getAll(int pageNum, int pageSize) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getAllLocations */ SELECT locations.*, COUNT(*) OVER() AS totalCount "
@@ -38,7 +41,7 @@ public class LocationDao implements IAnetDao<Location> {
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum)
 				.map(new LocationMapper());
-		return LocationList.fromQuery(query, pageNum, pageSize);
+		return new AnetBeanList<Location>(query, pageNum, pageSize, null);
 	}
 
 	public Location getByUuid(String uuid) {
@@ -48,6 +51,12 @@ public class LocationDao implements IAnetDao<Location> {
 				.first();
 	}
 
+	@Override
+	public List<Location> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
+	}
+
+	@Override
 	public Location insert(Location l) {
 		DaoUtils.setInsertFields(l);
 		dbHandle.createStatement(
@@ -95,7 +104,7 @@ public class LocationDao implements IAnetDao<Location> {
 				.list();
 	}
 
-	public LocationList search(LocationSearchQuery query) {
+	public AnetBeanList<Location> search(LocationSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getLocationSearcher().runSearch(query, dbHandle);
 	}

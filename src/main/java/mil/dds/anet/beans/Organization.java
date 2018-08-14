@@ -1,19 +1,22 @@
 package mil.dds.anet.beans;
 
-import java.util.List;
-import java.util.Objects;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 
-import org.joda.time.DateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
-import mil.dds.anet.graphql.GraphQLParam;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.IdFetcher;
 
 public class Organization extends AbstractAnetBean {
 
@@ -36,6 +39,7 @@ public class Organization extends AbstractAnetBean {
 	List<Organization> descendants; /* All descendants (children of children..)*/
 	List<Task> tasks; 
 	
+	@GraphQLQuery(name="shortName")
 	public String getShortName() {
 		return shortName;
 	}
@@ -44,6 +48,7 @@ public class Organization extends AbstractAnetBean {
 		this.shortName = Utils.trimStringReturnNull(shortName);
 	}
 
+	@GraphQLQuery(name="longName")
 	public String getLongName() { 
 		return longName;
 	}
@@ -52,6 +57,7 @@ public class Organization extends AbstractAnetBean {
 		this.longName = Utils.trimStringReturnNull(longName);
 	}
 	
+	@GraphQLQuery(name="status")
 	public OrganizationStatus getStatus() {
 		return status;
 	}
@@ -60,6 +66,7 @@ public class Organization extends AbstractAnetBean {
 		this.status = status;
 	}
 
+	@GraphQLQuery(name="identificationCode")
 	public String getIdentificationCode() {
 		return identificationCode;
 	}
@@ -68,14 +75,10 @@ public class Organization extends AbstractAnetBean {
 		this.identificationCode = Utils.trimStringReturnNull(identificationCode);
 	}
 
-	@GraphQLFetcher("parentOrg")
-	public Organization loadParentOrg() { 
-		if (parentOrg == null || parentOrg.getLoadLevel() == null) { return parentOrg; }
-		if (parentOrg.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.parentOrg = AnetObjectEngine.getInstance()
-					.getOrganizationDao().getByUuid(parentOrg.getUuid());
-		}
-		return parentOrg;
+	@GraphQLQuery(name="parentOrg")
+	public CompletableFuture<Organization> loadParentOrg(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Organization>().load(context, "organizations", parentOrg)
+				.thenApply(o -> { parentOrg = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -87,6 +90,7 @@ public class Organization extends AbstractAnetBean {
 		this.parentOrg = parentOrg;
 	}
 	
+	@GraphQLQuery(name="type")
 	public OrganizationType getType() {
 		return type;
 	}
@@ -95,23 +99,7 @@ public class Organization extends AbstractAnetBean {
 		this.type = type;
 	}
 	
-	public DateTime getCreatedAt() {
-		return createdAt;
-	}
-	
-	public void setCreatedAt(DateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-	
-	public DateTime getUpdatedAt() {
-		return updatedAt;
-	}
-	
-	public void setUpdatedAt(DateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-	
-	@GraphQLFetcher("positions")
+	@GraphQLQuery(name="positions") // TODO: batch load? (used in organizations/Show.js)
 	public List<Position> loadPositions() {
 		if (positions == null) {
 			positions = AnetObjectEngine.getInstance()
@@ -120,7 +108,7 @@ public class Organization extends AbstractAnetBean {
 		return positions;
 	}
 	
-	@GraphQLFetcher("approvalSteps")
+	@GraphQLQuery(name="approvalSteps") // TODO: batch load? (used in organizations/{Edit,Show}.js, reports/{Minimal,Show}.js
 	public List<ApprovalStep> loadApprovalSteps() { 
 		if (approvalSteps == null) { 
 			approvalSteps = AnetObjectEngine.getInstance()
@@ -138,7 +126,7 @@ public class Organization extends AbstractAnetBean {
 		this.approvalSteps = steps;
 	}
 	
-	@GraphQLFetcher("childrenOrgs")
+	@GraphQLQuery(name="childrenOrgs") // TODO: batch load? (used in organizations/Show.js)
 	public List<Organization> loadChildrenOrgs() { 
 		if (childrenOrgs == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
@@ -150,7 +138,7 @@ public class Organization extends AbstractAnetBean {
 		return childrenOrgs;
 	}
 	
-	@GraphQLFetcher("allDescendantOrgs")
+	@GraphQLQuery(name="allDescendantOrgs") // TODO: batch load? (used in App.js for me → position → organization)
 	public List<Organization> loadAllDescendants() { 
 		if (descendants == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
@@ -162,7 +150,7 @@ public class Organization extends AbstractAnetBean {
 		return descendants;
 	}
 	
-	@GraphQLFetcher("tasks")
+	@GraphQLQuery(name="tasks") // TODO: batch load? (used in organizations/Edit.js)
 	public List<Task> loadTasks() { 
 		if (tasks == null) { 
 			tasks = AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationUuid(this.getUuid());
@@ -179,8 +167,9 @@ public class Organization extends AbstractAnetBean {
 		this.tasks = tasks;
 	}
 	
-	@GraphQLFetcher("reports")
-	public ReportList fetchReports(@GraphQLParam("pageNum") int pageNum, @GraphQLParam("pageSize") int pageSize) {
+	@GraphQLQuery(name="reports") // TODO: batch load? (appears to be unused)
+	public AnetBeanList<Report> fetchReports(@GraphQLArgument(name="pageNum") int pageNum,
+			@GraphQLArgument(name="pageSize") int pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);

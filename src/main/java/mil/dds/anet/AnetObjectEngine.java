@@ -2,13 +2,16 @@ package mil.dds.anet;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.dataloader.DataLoaderRegistry;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.TransactionCallback;
@@ -40,6 +43,7 @@ import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
@@ -62,9 +66,11 @@ public class AnetObjectEngine {
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
+	private final Map<String, Object> context;
 
 	ISearcher searcher;
-	
+	private final DataLoaderRegistry dataLoaderRegistry;
+
 	private static AnetObjectEngine instance; 
 	
 	private final Handle dbHandle;
@@ -88,6 +94,10 @@ public class AnetObjectEngine {
 		emailDao = new EmailDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
+		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
+		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
+		context = new HashMap<>();
+		context.put("dataLoaderRegistry", dataLoaderRegistry);
 
 		instance = this;
 	}
@@ -207,7 +217,14 @@ public class AnetObjectEngine {
 	
 	public boolean canUserApproveStep(String userUuid, String approvalStepUuid) {
 		ApprovalStep as = asDao.getByUuid(approvalStepUuid);
-		for (Position approverPosition: as.loadApprovers()) {
+		final List<Position> approvers;
+		try {
+			approvers = as.loadApprovers(context).get();
+		} catch (InterruptedException | ExecutionException e) {
+			logger.error("failed to load Approvers", e);
+			return false;
+		}
+		for (Position approverPosition: approvers) {
 			//approverPosition.getPerson() has the currentPersonUuid already loaded, so this is safe.
 			if (Objects.equals(userUuid, DaoUtils.getUuid(approverPosition.getPerson()))) { return true; }
 		}
@@ -247,5 +264,9 @@ public class AnetObjectEngine {
 	
 	public String getAdminSetting(AdminSettingKeys key) { 
 		return adminDao.getSetting(key);
+	}
+
+	public Map<String, Object> getContext() {
+		return context;
 	}
 }

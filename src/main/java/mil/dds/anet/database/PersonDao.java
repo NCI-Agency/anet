@@ -11,7 +11,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PersonMapper;
@@ -27,15 +27,19 @@ public class PersonDao extends AnetBaseDao<Person> {
 	private static String tableName = "people";
 	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 	public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(tableName, fields, false);
-	
+
+	private final IdBatcher<Person> idBatcher;
+
 	public PersonDao(Handle h) { 
 		super(h, "Person", tableName, PERSON_FIELDS, null);
+		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, new PersonMapper());
 	}
 	
-	public PersonList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
 		Query<Person> query = getPagedQuery(pageNum, pageSize, new PersonMapper());
 		Long manualCount = getSqliteRowCount();
-		return PersonList.fromQuery(query, pageNum, pageSize, manualCount);
+		return new AnetBeanList<Person>(query, pageNum, pageSize, manualCount);
 	}
 
 	public Person getByUuid(String uuid) {
@@ -43,6 +47,11 @@ public class PersonDao extends AnetBaseDao<Person> {
 				.bind("uuid",  uuid)
 				.map(new PersonMapper())
 				.first();
+	}
+
+	@Override
+	public List<Person> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
 	}
 
 	public Person insert(Person p) {
@@ -91,7 +100,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 			.execute();
 	}
 	
-	public PersonList search(PersonSearchQuery query) {
+	public AnetBeanList<Person> search(PersonSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPersonSearcher().runSearch(query, dbHandle);
 	}

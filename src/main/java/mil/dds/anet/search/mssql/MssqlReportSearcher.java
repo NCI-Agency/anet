@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +18,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
@@ -33,7 +34,7 @@ import mil.dds.anet.utils.Utils;
 
 public class MssqlReportSearcher implements IReportSearcher {
 
-	public ReportList runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder();
@@ -74,8 +75,6 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			args.put("freetextQuery", text);
 		}
-
-		sql.append(", people");  // join condition added at the end
 
 		if (query.getAuthorUuid() != null) {
 			whereClauses.add("reports.authorUuid = :authorUuid");
@@ -235,12 +234,17 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("attendeePositionUuid", query.getAttendeePositionUuid());
 		}
 
-		final ReportList results = new ReportList();
-		results.setPageNum(query.getPageNum());
-		results.setPageSize(query.getPageSize());
+		if (query.getSensitiveInfo()) {
+			sql.append(" LEFT JOIN reportAuthorizationGroups ra ON ra.reportUuid = reports.uuid");
+			sql.append(" LEFT JOIN authorizationGroups ag ON ag.uuid = ra.authorizationGroupUuid");
+			sql.append(" LEFT JOIN authorizationGroupPositions agp ON agp.authorizationGroupUuid = ag.uuid");
+			sql.append(" LEFT JOIN positions pos ON pos.uuid = agp.positionUuid");
+			whereClauses.add("pos.currentPersonUuid = :userUuid");
+			args.put("userUuid", user.getUuid());
+		}
 
 		if (whereClauses.isEmpty()) {
-			return results;
+			return new AnetBeanList<Report>(query.getPageNum(), query.getPageSize(), new ArrayList<Report>());
 		}
 
 		//Apply a filter to restrict access to other's draft reports
@@ -255,6 +259,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
 			args.put("userUuid", user.getUuid());
 		}
+
+		sql.append(", people");  // join condition added at the end
 
 		sql.append(" WHERE ");
 		whereClauses.add(0, "reports.authorUuid = people.uuid");  // add join condition at the front
@@ -294,7 +300,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 
 		final Query<Report> map = MssqlSearcher.addPagination(query, dbHandle, sql, args)
 				.map(new ReportMapper());
-		return ReportList.fromQuery(user, map, query.getPageNum(), query.getPageSize());
+		return AnetBeanList.getReportList(user, map, query.getPageNum(), query.getPageSize());
 
 	}
 

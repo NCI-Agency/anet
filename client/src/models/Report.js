@@ -5,6 +5,7 @@ import {Organization, Person, Position} from 'models'
 export default class Report extends Model {
 	static resourceName = 'Report'
 	static listName = 'reportList'
+	static getInstanceName = 'report'
 
 	static STATE = {
 		DRAFT: 'DRAFT',
@@ -13,6 +14,15 @@ export default class Report extends Model {
 		REJECTED: 'REJECTED',
 		CANCELLED: 'CANCELLED',
 		FUTURE: 'FUTURE'
+	}
+
+	static CANCELLATION_REASON = {
+		CANCELLED_BY_ADVISOR: 'CANCELLED_BY_ADVISOR',
+		CANCELLED_BY_PRINCIPAL: 'CANCELLED_BY_PRINCIPAL',
+		CANCELLED_DUE_TO_TRANSPORTATION: 'CANCELLED_DUE_TO_TRANSPORTATION',
+		CANCELLED_DUE_TO_FORCE_PROTECTION: 'CANCELLED_DUE_TO_FORCE_PROTECTION',
+		CANCELLED_DUE_TO_ROUTES: 'CANCELLED_DUE_TO_ROUTES',
+		CANCELLED_DUE_TO_THREAT: 'CANCELLED_DUE_TO_THREAT',
 	}
 
 	static schema = {

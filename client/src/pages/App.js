@@ -10,7 +10,7 @@ import Nav from 'components/Nav'
 import API from 'api'
 import {Person, Organization} from 'models'
 
-import {Route, Switch} from 'react-router'
+import {Route, Switch, Redirect} from 'react-router'
 import Home from 'pages/Home'
 import Search from 'pages/Search'
 import RollupShow from 'pages/rollup/Show'
@@ -65,6 +65,7 @@ class App extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		pageProps: PropTypes.object,
+		searchProps: PropTypes.object,
 	}
 
 	constructor(props) {
@@ -96,7 +97,7 @@ class App extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			person(f:me) {
+			me {
 				uuid, name, role, emailAddress, rank, status
 				position {
 					uuid, name, type, status, isApprover
@@ -104,15 +105,15 @@ class App extends Page {
 				}
 			}
 
-			adminSettings(f:getAll) {
+			adminSettings {
 				key, value
 			}
 
-			organizationList(f:getTopLevelOrgs, type: ADVISOR_ORG) {
+			organizationTopLevelOrgs(type: ADVISOR_ORG) {
 				list { uuid, shortName }
 			}
 		`).then(data => {
-			data.person._loaded = true
+			data.me._loaded = true
 			this.setState(this.processData(data), () => {
 				// if this is a new user, redirect to the create profile page
 				if (this.state.currentUser.isNewUser()) {
@@ -124,8 +125,8 @@ class App extends Page {
 	}
 
 	processData(data) {
-		const currentUser = new Person(data.person)
-		let organizations = (data.organizationList && data.organizationList.list) || []
+		const currentUser = new Person(data.me)
+		let organizations = (data.organizationTopLevelOrgs && data.organizationTopLevelOrgs.list) || []
 		organizations = Organization.fromArray(organizations)
 		organizations.sort((a, b) => a.shortName.localeCompare(b.shortName))
 
@@ -228,10 +229,14 @@ class App extends Page {
 			<Route
 				path="/onboarding"
 				render={({ match: { url } }) => (
-				<Switch>
-					<Route exact path={`${url}/`} component={OnboardingShow} />
-					<Route path={`${url}/edit`} component={OnboardingEdit} />
-				</Switch>
+					this.state.currentUser.isNewUser() ? (
+						<Switch>
+							<Route exact path={`${url}/`} component={OnboardingShow} />
+							<Route path={`${url}/edit`} component={OnboardingEdit} />
+						</Switch>
+					) : ( // Redirect to home if user account exists already. Some users bookmark the onboarding - the very first page they hit
+						<Redirect to="/"/>
+					)
 			)}
 			/>
 
@@ -277,7 +282,8 @@ class App extends Page {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-	pageProps: state.pageProps
+	pageProps: state.pageProps,
+	searchProps: state.searchProps
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App))

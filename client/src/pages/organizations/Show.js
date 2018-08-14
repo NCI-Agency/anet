@@ -80,7 +80,7 @@ class BaseOrganizationShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}`)
-			.addVariable("reportQuery", "ReportSearchQuery", reportQuery)
+			.addVariable("reportQuery", "ReportSearchQueryInput", reportQuery)
 		return reportsPart
 	}
 
@@ -97,7 +97,7 @@ class BaseOrganizationShow extends Page {
 					uuid, shortName, longName
 				}
 			}`)
-			.addVariable("taskQuery", "TaskSearchQuery", taskQuery)
+			.addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
 		return taskPart
 	}
 

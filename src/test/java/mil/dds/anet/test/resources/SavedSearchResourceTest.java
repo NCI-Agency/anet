@@ -14,9 +14,10 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.dropwizard.client.JerseyClientBuilder;
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.SavedSearch;
@@ -52,7 +53,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ObjectMapper mapper = new ObjectMapper();
 
 		ReportSearchQuery query = mapper.readValue(created.getQuery(), ReportSearchQuery.class);
-		ReportList results = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		AnetBeanList<Report> results = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results.getList()).isNotEmpty();
 		
 		//Delete it
@@ -86,7 +87,7 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ObjectMapper mapper = new ObjectMapper();
 
 		LocationSearchQuery query = mapper.readValue(created.getQuery(), LocationSearchQuery.class);
-		LocationList results = httpQuery("/api/locations/search", jack).post(Entity.json(query), LocationList.class);
+		AnetBeanList<Location> results = httpQuery("/api/locations/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Location>>(){});
 		assertThat(results.getList()).isNotEmpty();
 
 		//Delete it

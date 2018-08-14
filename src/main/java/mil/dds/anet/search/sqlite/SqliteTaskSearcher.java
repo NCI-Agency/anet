@@ -1,5 +1,6 @@
 package mil.dds.anet.search.sqlite;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +9,8 @@ import java.util.Map;
 import org.skife.jdbi.v2.Handle;
 
 import jersey.repackaged.com.google.common.base.Joiner;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.ITaskSearcher;
@@ -18,16 +20,14 @@ import mil.dds.anet.utils.Utils;
 public class SqliteTaskSearcher implements ITaskSearcher {
 
 	@Override
-	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Task> runSearch(TaskSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqliteTaskSearch */ SELECT tasks.* FROM tasks");
 		Map<String,Object> args = new HashMap<String,Object>();
 		
 		sql.append(" WHERE ");
 		List<String> whereClauses = new LinkedList<String>();
 		String commonTableExpression = null;
-		TaskList result =  new TaskList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
+		final AnetBeanList<Task> result = new AnetBeanList<Task>(query.getPageNum(), query.getPageSize(), new ArrayList<Task>());
 		
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());

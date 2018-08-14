@@ -6,7 +6,7 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.ApprovalAction;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ApprovalActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 
@@ -59,7 +59,8 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 			.list();
 	}
 	
-	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
+	@Override
+	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -67,6 +68,12 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public List<ApprovalAction> getByIds(List<String> uuids) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public int update(ApprovalAction obj) {
 		throw new UnsupportedOperationException();
 	}

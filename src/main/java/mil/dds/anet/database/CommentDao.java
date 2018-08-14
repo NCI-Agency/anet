@@ -6,7 +6,7 @@ import org.skife.jdbi.v2.Handle;
 
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Report;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.CommentMapper;
 import mil.dds.anet.utils.DaoUtils;
 
@@ -16,13 +16,19 @@ public class CommentDao implements IAnetDao<Comment> {
 	private static String tableName = "comments";
 	public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
-	Handle dbHandle;
-	
+	private final Handle dbHandle;
+	private final IdBatcher<Comment> idBatcher;
+
 	public CommentDao(Handle dbHandle) { 
 		this.dbHandle = dbHandle;
+		final String idBatcherSql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
+				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
+				+ "WHERE comments.uuid IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Comment>(dbHandle, idBatcherSql, new CommentMapper());
 	}
 	
-	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
+	@Override
+	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -35,6 +41,12 @@ public class CommentDao implements IAnetDao<Comment> {
 			.first();
 	}
 
+	@Override
+	public List<Comment> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
+	}
+
+	@Override
 	public Comment insert(Comment c) {
 		DaoUtils.setInsertFields(c);
 		dbHandle.createStatement("/* insertComment */ "

@@ -62,6 +62,7 @@ class BasePositionShow extends Page {
 				associatedPositions {
 					uuid, name,
 					person { uuid, name, rank }
+					organization { uuid, shortName }
 				},
 				previousPeople { startTime, endTime, person { uuid, name, rank }}
 				location { uuid, name }

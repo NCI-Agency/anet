@@ -7,13 +7,14 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.test.TestData;
 
 public class LocationResourceTest extends AbstractResourceTest {
@@ -40,7 +41,7 @@ public class LocationResourceTest extends AbstractResourceTest {
 		// so we search for a record in the base data set. 
 		List<Location> results = httpQuery(String.format("/api/locations/search?text=%s", 
 				URLEncoder.encode("Police", "UTF-8")),admin)
-				.get(LocationList.class).getList();
+				.get(new GenericType<AnetBeanList<Location>>(){}).getList();
 		assertThat(results.size()).isGreaterThan(0);
 		//assertThat(results).contains(created);
 		

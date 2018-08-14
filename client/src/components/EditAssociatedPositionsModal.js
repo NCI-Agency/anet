@@ -6,6 +6,7 @@ import {Modal, Button, Table} from 'react-bootstrap'
 import {Position,Person} from 'models'
 import API from 'api'
 import Settings from 'Settings'
+import _isEqual from 'lodash/isEqual'
 
 import Messages from'components/Messages'
 import AppContext from 'components/AppContext'
@@ -26,6 +27,12 @@ class BaseEditAssociatedPositionsModal extends Component {
 		this.state = {
 			error: null,
 			associatedPositions: props.position.associatedPositions.slice()
+		}
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqual(prevProps.position.associatedPositions, this.props.position.associatedPositions)) {
+			this.setState({associatedPositions: this.props.position.associatedPositions.slice()})
 		}
 	}
 
@@ -153,6 +160,11 @@ class BaseEditAssociatedPositionsModal extends Component {
 
 	@autobind
 	close() {
+		// Reset state before closing (cancel)
+		this.setState({
+			error: null,
+			associatedPositions: this.props.position.associatedPositions.slice()
+		})
 		this.props.onCancel()
 	}
 }

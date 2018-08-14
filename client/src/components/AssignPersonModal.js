@@ -145,6 +145,8 @@ export default class AssignPersonModal extends Component {
 
 	@autobind
 	close() {
+		// Reset state before closing (cancel)
+		this.setState({person: this.props.position.person})
 		this.props.onCancel()
 	}
 

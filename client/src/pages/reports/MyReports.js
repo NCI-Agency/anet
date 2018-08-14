@@ -43,18 +43,19 @@ class BaseMyReports extends Page {
 
 	@autobind
 	getPart(partName, state, authorUuid) {
-		let query = {
+		const queryConstPart = {
 			pageSize: 10,
 			pageNum: this.pageNums[partName],
 			authorUuid: authorUuid,
 			state: state
 		}
+		const query = Object.assign({}, this.getSearchQuery(), queryConstPart)
 		return new GQL.Part(/* GraphQL */ `
 			${partName}: reportList(query: $${partName}Query) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
-			}`).addVariable(partName + "Query", "ReportSearchQuery", query)
+			}`).addVariable(partName + "Query", "ReportSearchQueryInput", query)
 	}
 
 	fetchData(props) {
@@ -113,6 +114,9 @@ class BaseMyReports extends Page {
 	}
 }
 
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
 const MyReports = (props) => (
 	<AppContext.Consumer>
 		{context =>
@@ -121,4 +125,4 @@ const MyReports = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(MyReports)
+export default connect(mapStateToProps, mapDispatchToProps)(MyReports)

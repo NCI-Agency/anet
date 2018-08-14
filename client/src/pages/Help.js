@@ -41,7 +41,7 @@ class BaseHelp extends Page {
 
 		let orgUuid = currentUser.position.organization.uuid
 		return API.query(/* GraphQL */`
-			positionList(f:search,query:{type:[${Position.TYPE.SUPER_USER},${Position.TYPE.ADMINISTRATOR}],status:${Position.STATUS.ACTIVE},organizationUuid:${orgUuid}}) {
+			positionList(query:{type:[${Position.TYPE.SUPER_USER},${Position.TYPE.ADMINISTRATOR}],status:${Position.STATUS.ACTIVE},organizationUuid:${orgUuid}}) {
 				list {
 					person { rank, name, emailAddress }
 				}

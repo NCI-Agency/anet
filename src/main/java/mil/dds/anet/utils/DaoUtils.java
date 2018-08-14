@@ -5,8 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-
 
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.Handle;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -161,5 +162,12 @@ public class DaoUtils {
 	public static Double getOptionalDouble(final ResultSet rs, final String columnName) throws SQLException {
 	    final Double value = rs.getDouble(columnName);
 	    return rs.wasNull() ? null : value;
+	}
+
+	public static Person getUser(Map<String, Object> context, Person user) {
+		if (context != null) {
+			user = (Person) context.get("user");
+		}
+		return user;
 	}
 }

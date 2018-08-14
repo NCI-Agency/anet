@@ -14,7 +14,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -26,14 +26,18 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	private static String tableName = "organizations";
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 	
+	private final IdBatcher<Organization> idBatcher;
+
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
+		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
 	}
 	
-	public OrganizationList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
 		Query<Organization> query = getPagedQuery(pageNum, pageSize, new OrganizationMapper());
 		Long manualRowCount = getSqliteRowCount();
-		return OrganizationList.fromQuery(query, pageNum, pageSize, manualRowCount);
+		return new AnetBeanList<Organization>(query, pageNum, pageSize, manualRowCount);
 	}
 
 	public Organization getByUuid(String uuid) {
@@ -42,6 +46,11 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 				.bind("uuid", uuid)
 				.map(new OrganizationMapper())
 				.first();
+	}
+
+	@Override
+	public List<Organization> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
 	}
 
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
@@ -107,7 +116,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return numRows;
 	}
 
-	public OrganizationList search(OrganizationSearchQuery query) {
+	public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher()
 				.runSearch(query, dbHandle);
 	} 

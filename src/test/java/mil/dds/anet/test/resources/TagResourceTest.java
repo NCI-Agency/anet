@@ -9,6 +9,7 @@ import java.util.List;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
 import org.junit.Rule;
@@ -17,7 +18,7 @@ import org.junit.rules.ExpectedException;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 
 public class TagResourceTest extends AbstractResourceTest {
 
@@ -67,16 +68,16 @@ public class TagResourceTest extends AbstractResourceTest {
 	@Test
 	public void tagListTest() throws UnsupportedEncodingException {
 		// All
-		final TagList tagList = httpQuery("/api/tags/", admin).get(TagList.class);
+		final AnetBeanList<Tag> tagList = httpQuery("/api/tags/", admin).get(new GenericType<AnetBeanList<Tag>>(){});
 		assertThat(tagList).isNotNull();
 	}
 
 	@Test
 	public void tagSearchTest() throws UnsupportedEncodingException {
 		// Search for a tag from the initial data
-		final TagList tagList  = httpQuery(String.format("/api/tags/search?text=%s",
+		final AnetBeanList<Tag> tagList  = httpQuery(String.format("/api/tags/search?text=%s",
 				URLEncoder.encode("bribery", "UTF-8")), admin)
-				.get(TagList.class);
+				.get(new GenericType<AnetBeanList<Tag>>(){});
 		assertThat(tagList).isNotNull();
 		final List<Tag> tags = tagList.getList();
 		assertThat(tags).isNotNull();

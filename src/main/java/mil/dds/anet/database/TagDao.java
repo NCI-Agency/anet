@@ -1,12 +1,14 @@
 package mil.dds.anet.database;
 
+import java.util.List;
+
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -14,13 +16,16 @@ import mil.dds.anet.utils.DaoUtils;
 @RegisterMapper(TagMapper.class)
 public class TagDao implements IAnetDao<Tag> {
 
-	private Handle dbHandle;
+	private final Handle dbHandle;
+	private final IdBatcher<Tag> idBatcher;
 
 	public TagDao(Handle h) {
 		this.dbHandle = h;
+		final String idBatcherSql = "/* batch.getTagsByUuids */ SELECT * from tags where uuid IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Tag>(h, idBatcherSql, new TagMapper());
 	}
 
-	public TagList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Tag> getAll(int pageNum, int pageSize) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getAllTags */ SELECT tags.*, COUNT(*) OVER() AS totalCount "
@@ -35,7 +40,7 @@ public class TagDao implements IAnetDao<Tag> {
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum)
 				.map(new TagMapper());
-		return TagList.fromQuery(query, pageNum, pageSize);
+		return new AnetBeanList<Tag>(query, pageNum, pageSize, null);
 	}
 
 	public Tag getByUuid(String uuid) {
@@ -45,6 +50,12 @@ public class TagDao implements IAnetDao<Tag> {
 				.first();
 	}
 
+	@Override
+	public List<Tag> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
+	}
+
+	@Override
 	public Tag insert(Tag t) {
 		DaoUtils.setInsertFields(t);
 		dbHandle.createStatement(
@@ -63,7 +74,7 @@ public class TagDao implements IAnetDao<Tag> {
 				.execute();
 	}
 
-	public TagList search(TagSearchQuery query) {
+	public AnetBeanList<Tag> search(TagSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getTagSearcher().runSearch(query, dbHandle);
 	}

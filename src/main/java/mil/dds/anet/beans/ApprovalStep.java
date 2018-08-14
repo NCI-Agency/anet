@@ -1,11 +1,15 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -16,12 +20,10 @@ public class ApprovalStep extends AbstractAnetBean {
 	String advisorOrganizationUuid;
 	String name;
 
-	@GraphQLFetcher("approvers")
-	public List<Position> loadApprovers() { 
-		if (approvers == null) { 
-			approvers = AnetObjectEngine.getInstance().getApprovalStepDao().getApproversForStep(this);
-		}
-		return approvers;
+	@GraphQLQuery(name="approvers")
+	public CompletableFuture<List<Position>> loadApprovers(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getApprovalStepDao().getApproversForStep(context, uuid)
+				.thenApply(o -> { approvers = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -33,6 +35,7 @@ public class ApprovalStep extends AbstractAnetBean {
 		this.approvers = approvers;
 	}
 
+	@GraphQLQuery(name="nextStepUuid")
 	public String getNextStepUuid() {
 		return nextStepUuid;
 	}
@@ -41,6 +44,7 @@ public class ApprovalStep extends AbstractAnetBean {
 		this.nextStepUuid = nextStepUuid;
 	}
 	
+	@GraphQLQuery(name="advisorOrganizationUuid")
 	public String getAdvisorOrganizationUuid() {
 		return advisorOrganizationUuid;
 	}
@@ -49,6 +53,7 @@ public class ApprovalStep extends AbstractAnetBean {
 		this.advisorOrganizationUuid = advisorOrganizationUuid;
 	}
 	
+	@GraphQLQuery(name="name")
 	public String getName() {
 		return name;
 	}

@@ -1,11 +1,20 @@
 package mil.dds.anet.beans;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import javax.ws.rs.WebApplicationException;
+
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import org.joda.time.DateTime;
 
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.IGraphQLBean;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.IdFetcher;
 
 /**
  * used to represent a person in a position at a particular time.
@@ -13,13 +22,21 @@ import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
  *  
  * @author hpitelka
  */
-public class PersonPositionHistory implements IGraphQLBean {
+public class PersonPositionHistory extends AbstractAnetBean {
 
 	Person person;
 	Position position;
 	DateTime startTime;
 	DateTime endTime;
-	
+
+	@Override
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getUuid() {
+		throw new WebApplicationException("no UUID field on PersonPositionHistory");
+	}
+
+	@GraphQLIgnore
 	public Person getPerson() {
 		return person;
 	}
@@ -28,15 +45,13 @@ public class PersonPositionHistory implements IGraphQLBean {
 		this.person = person;
 	}
 	
-	@GraphQLFetcher("person")
-	public Person loadPerson() { 
-		if (person == null || person.getLoadLevel() == null) { return person; } 
-		if (person.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.person = AnetObjectEngine.getInstance().getPersonDao().getByUuid(person.getUuid());
-		}
-		return person;
+	@GraphQLQuery(name="person")
+	public CompletableFuture<Person> loadPerson(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Person>().load(context, "people", person)
+				.thenApply(o -> { person = o; return o; });
 	}
 	
+	@GraphQLIgnore
 	public Position getPosition() {
 		return position;
 	}
@@ -45,15 +60,13 @@ public class PersonPositionHistory implements IGraphQLBean {
 		this.position = position;
 	}
 	
-	@GraphQLFetcher("position")
-	public Position loadPosition() {
-		if (position == null || position.getLoadLevel() == null) { return position; } 
-		if (position.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.position = AnetObjectEngine.getInstance().getPositionDao().getByUuid(position.getUuid());
-		}
-		return position;
+	@GraphQLQuery(name="position")
+	public CompletableFuture<Position> loadPosition(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Position>().load(context, "positions", position)
+				.thenApply(o -> { position = o; return o; });
 	}
 	
+	@GraphQLQuery(name="startTime")
 	public DateTime getStartTime() {
 		return startTime;
 	}
@@ -62,6 +75,7 @@ public class PersonPositionHistory implements IGraphQLBean {
 		this.startTime = startTime;
 	}
 	
+	@GraphQLQuery(name="endTime")
 	public DateTime getEndTime() {
 		return endTime;
 	}
