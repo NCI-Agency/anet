@@ -1,0 +1,23 @@
+{
+    "dataSource": "prs",
+    "prefix": "",
+    "onlyMilestones": false,
+    "groupBy": {
+        "Features:": ["feature", "epic"],
+        "Enhancements:": ["enhancement"],
+        "Bug fixes:": ["bug"],
+        "Framework improvements:": ["debt"],
+        "Dependencies upgrades": ["dependencies"]
+    },
+    "changelogFilename": "CHANGELOG.md",
+    "template": {
+        "commit": "- [{{message}}]({{url}}) - @{{author}}",
+        "issue": "- {{name}} [{{text}}]({{url}}) \n {{body}}",
+        "label": "[**{{label}}**]",
+        "noLabel": "closed",
+        "group": "\n#### {{heading}}\n",
+        "changelogTitle": "# ANET Changelog\n\n",
+        "release": "## ANET {{release}} ({{date}})\n{{body}}",
+        "releaseSeparator": "\n---\n\n"
+    }
+}
