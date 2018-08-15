@@ -489,8 +489,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned2.getIntent()).isEqualTo(r.getIntent());
 		assertThat(returned2.getLocation().getId()).isEqualTo(loc.getId());
 		assertThat(returned2.loadTasks(context).get()).isEmpty(); //yes this does a DB load :(
-		assertThat(returned2.loadAttendees(context).get()).hasSize(3);
-		assertThat(returned2.loadAttendees(context).get().contains(roger));
+		final List<ReportPerson> returned2Attendees = returned2.loadAttendees(context).get();
+		assertThat(returned2Attendees).hasSize(3);
+		assertThat(returned2Attendees.contains(roger));
 
 		//Elizabeth submits the report
 		resp = httpQuery("/api/reports/" + returned.getId() + "/submit", elizabeth).post(Entity.json(null));
@@ -513,8 +514,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		Report returned4 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
 		assertThat(returned4.getReportText()).endsWith("Bob!!");
-		assertThat(returned4.loadAttendees(context).get()).hasSize(2);
-		assertThat(returned4.loadAttendees(context).get()).contains(PersonTest.personToPrimaryReportPerson(nick));
+		final List<ReportPerson> returned4Attendees = returned4.loadAttendees(context).get();
+		assertThat(returned4Attendees).hasSize(2);
+		assertThat(returned4Attendees).contains(PersonTest.personToPrimaryReportPerson(nick));
 		assertThat(returned4.loadTasks(context).get()).hasSize(2);
 
 		resp = httpQuery("/api/reports/" + returned.getId() + "/approve", bob).post(null);

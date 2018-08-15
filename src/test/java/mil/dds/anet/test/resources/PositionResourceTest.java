@@ -381,8 +381,9 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//Ensure that the position contains the person
 		Position returned = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
 		assertThat(returned.getId()).isNotNull();
-		assertThat(returned.loadPerson(context).get()).isNotNull();
-		assertThat(returned.loadPerson(context).get().getId()).isEqualTo(newb.getId());
+		final Person returnedPerson = returned.loadPerson(context).get();
+		assertThat(returnedPerson).isNotNull();
+		assertThat(returnedPerson.getId()).isEqualTo(newb.getId());
 		
 		//Ensure that the person is assigned to this position. 
 		assertThat(newb.loadPosition()).isNotNull();
@@ -430,8 +431,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 		returned = httpQuery("/api/positions/" + pos2.getId(), admin).get(Position.class);
 		assertThat(returned).isNotNull();
 		assertThat(returned.getName()).isEqualTo(pos2.getName());
-		assertThat(returned.loadPerson(context).get()).isNotNull();
-		assertThat(returned.loadPerson(context).get().getId()).isEqualTo(prin2.getId());
+		assertThat(returnedPerson).isNotNull();
+		assertThat(returnedPerson.getId()).isEqualTo(prin2.getId());
 		
 		//Make sure prin2 got moved out of newbPosition
 		currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
