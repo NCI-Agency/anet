@@ -79,7 +79,6 @@ public class Location extends AbstractAnetBean {
 	public static Location createWithId(Integer id) {
 		Location l = new Location();
 		l.setId(id);
-		l.setLoadLevel(LoadLevel.ID_ONLY);
 		return l;
 	}
 	

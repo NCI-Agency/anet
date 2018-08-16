@@ -60,7 +60,6 @@ import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportsResourceTest extends AbstractResourceTest {
 
@@ -968,7 +967,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				.get(new GenericType<List<RollupGraph>>() {});
 
 		final Position pos = admin.loadPosition();
-		pos.getOrganization().setLoadLevel(LoadLevel.ID_ONLY);
 		final Organization org = pos.loadOrganization(context).get();
 		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")
@@ -1032,7 +1030,6 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				.get(new GenericType<List<RollupGraph>>() {});
 
 		final Position pos = elizabeth.loadPosition();
-		pos.getOrganization().setLoadLevel(LoadLevel.ID_ONLY);
 		final Organization org = pos.loadOrganization(context).get();
 		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")

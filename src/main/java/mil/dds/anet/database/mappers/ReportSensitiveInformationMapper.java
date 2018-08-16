@@ -8,7 +8,6 @@ import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportSensitiveInformationMapper implements ResultSetMapper<ReportSensitiveInformation> {
 
@@ -19,7 +18,6 @@ public class ReportSensitiveInformationMapper implements ResultSetMapper<ReportS
 		rsi.setText(rs.getString("reportsSensitiveInformation_text"));
 		rsi.setCreatedAt(new DateTime(rs.getTimestamp("reportsSensitiveInformation_createdAt")));
 		rsi.setUpdatedAt(new DateTime(rs.getTimestamp("reportsSensitiveInformation_updatedAt")));
-		rsi.setLoadLevel(LoadLevel.PROPERTIES);
 		return rsi;
 	}
 

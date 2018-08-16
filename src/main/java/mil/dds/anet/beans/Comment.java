@@ -69,7 +69,6 @@ public class Comment extends AbstractAnetBean {
 	public static Comment createWithId(Integer id) {
 		Comment c = new Comment();
 		c.setId(id);
-		c.setLoadLevel(LoadLevel.ID_ONLY);
 		return c;
 	}
 	

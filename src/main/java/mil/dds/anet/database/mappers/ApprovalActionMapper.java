@@ -12,7 +12,6 @@ import mil.dds.anet.beans.ApprovalAction.ApprovalType;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ApprovalActionMapper implements ResultSetMapper<ApprovalAction> {
 
@@ -29,7 +28,6 @@ public class ApprovalActionMapper implements ResultSetMapper<ApprovalAction> {
 		
 		aa.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 		aa.setType(MapperUtils.getEnumIdx(rs, "type", ApprovalType.class));
-		aa.setLoadLevel(LoadLevel.PROPERTIES);
 	
 		return aa;
 	}
