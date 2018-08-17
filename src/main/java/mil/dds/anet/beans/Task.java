@@ -149,7 +149,6 @@ public class Task extends AbstractAnetBean {
 	public static Task createWithId(Integer id) { 
 		Task p = new Task();
 		p.setId(id);
-		p.setLoadLevel(LoadLevel.ID_ONLY);
 		return p;
 	}
 

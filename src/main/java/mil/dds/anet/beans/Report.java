@@ -511,7 +511,6 @@ public class Report extends AbstractAnetBean {
 	public static Report createWithId(Integer id) {
 		Report r = new Report();
 		r.setId(id);
-		r.setLoadLevel(LoadLevel.ID_ONLY);
 		return r;
 	}
 	

@@ -1,39 +1,19 @@
 package mil.dds.anet.views;
 
-import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 
 import java.util.Objects;
 
 import org.joda.time.DateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public abstract class AbstractAnetBean {
 
-	protected LoadLevel loadLevel;
 	protected Integer id;
 	protected DateTime createdAt;
 	protected DateTime updatedAt;
 
 	public AbstractAnetBean() { 
 		id = null;
-	}
-		
-	public static enum LoadLevel { ID_ONLY, PROPERTIES, INCLUDE;
-		public boolean contains(LoadLevel other) { 
-			return other.ordinal() <= this.ordinal();
-		}
-	}
-	
-	@JsonIgnore
-	@GraphQLIgnore
-	public LoadLevel getLoadLevel() { 
-		return loadLevel;
-	}
-	
-	public void setLoadLevel(LoadLevel ll) { 
-		this.loadLevel = ll;
 	}
 	
 	@GraphQLQuery(name="id")

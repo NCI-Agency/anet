@@ -182,7 +182,6 @@ public class Organization extends AbstractAnetBean {
 	public static Organization createWithId(Integer id) { 
 		Organization ao = new Organization();
 		ao.setId(id);
-		ao.setLoadLevel(LoadLevel.ID_ONLY);
 		return ao;
 	}
 	
