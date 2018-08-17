@@ -109,7 +109,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		
 		//Verify approval step was saved. 
 		updated = httpQuery(String.format("/api/organizations/%d",child.getId()), jack).get(Organization.class);
-		List<ApprovalStep> returnedSteps = updated.loadApprovalSteps();
+		List<ApprovalStep> returnedSteps = updated.loadApprovalSteps(context).get();
 		assertThat(returnedSteps.size()).isEqualTo(1);
 		assertThat(returnedSteps.get(0).loadApprovers(context).get()).contains(b1);
 		
@@ -144,7 +144,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		
 		//Verify approval steps updated correct. 
 		updated = httpQuery(String.format("/api/organizations/%d",child.getId()), jack).get(Organization.class);
-		returnedSteps = updated.loadApprovalSteps();
+		returnedSteps = updated.loadApprovalSteps(context).get();
 		assertThat(returnedSteps.size()).isEqualTo(2);
 		assertThat(returnedSteps.get(0).getName()).isEqualTo(step1.getName());
 		assertThat(returnedSteps.get(0).loadApprovers(context).get()).containsExactly(admin.loadPosition());

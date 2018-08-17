@@ -146,7 +146,7 @@ public class DaoUtils {
 	}
 
 	public static Person getUser(Map<String, Object> context, Person user) {
-		if (context != null) {
+		if (context != null && context.containsKey("user")) {
 			user = (Person) context.get("user");
 		}
 		return user;

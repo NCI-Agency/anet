@@ -1,12 +1,12 @@
 package mil.dds.anet;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -170,9 +170,23 @@ public class AnetObjectEngine {
 		return searcher;
 	}
 
-	public Organization getOrganizationForPerson(Person person) { 
-		if (person == null) { return null; } 
-		return personDao.getOrganizationForPerson(person.getId());
+	public Integer getDefaultOrgId() {
+		try {
+			final String defaultOrgSetting = getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
+			return Integer.parseInt(defaultOrgSetting);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context, Person person) {
+		if (person == null) {
+			return CompletableFuture.supplyAsync(() -> null);
+		}
+		return orgDao.getOrganizationsForPerson(context, person.getId())
+				.<Organization>thenApply(l -> {
+					return l.isEmpty() ? null : l.get(0);
+				});
 	}
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
@@ -195,17 +209,18 @@ public class AnetObjectEngine {
 		});
 	}
 
-	public List<ApprovalStep> getApprovalStepsForOrg(Organization ao) {
-		logger.debug("Fetching steps for {}", ao);
-		Collection<ApprovalStep> unordered = asDao.getByAdvisorOrganizationId(ao.getId());
-		
+	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, Integer aoId) {
+		return asDao.getByAdvisorOrganizationId(context, aoId)
+				.thenApply(unordered -> orderSteps(unordered));
+	}
+
+	private List<ApprovalStep> orderSteps(List<ApprovalStep> unordered) {
 		int numSteps = unordered.size();
-		logger.debug("Found total of {} steps", numSteps);
 		LinkedList<ApprovalStep> ordered = new LinkedList<ApprovalStep>();
 		Integer nextStep = null;
-		for (int i = 0;i < numSteps;i++) { 
-			for (ApprovalStep as : unordered) { 
-				if (Objects.equals(as.getNextStepId(), nextStep)) { 
+		for (int i = 0;i < numSteps;i++) {
+			for (ApprovalStep as : unordered) {
+				if (Objects.equals(as.getNextStepId(), nextStep)) {
 					ordered.addFirst(as);
 					nextStep = as.getId();
 					break;
@@ -215,13 +230,12 @@ public class AnetObjectEngine {
 		return ordered;
 	}
 	
-	public boolean canUserApproveStep(Integer userId, int approvalStepId) { 
+	public boolean canUserApproveStep(Map<String, Object> context, Integer userId, int approvalStepId) {
 		ApprovalStep as = asDao.getById(approvalStepId);
 		final List<Position> approvers;
 		try {
 			approvers = as.loadApprovers(context).get();
 		} catch (InterruptedException | ExecutionException e) {
-			logger.error("failed to load Approvers", e);
 			return false;
 		}
 		for (Position approverPosition: approvers) {
