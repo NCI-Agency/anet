@@ -11,12 +11,10 @@ import org.skife.jdbi.v2.TransactionCallback;
 import org.skife.jdbi.v2.TransactionStatus;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.utils.DaoUtils;
 
@@ -109,30 +107,6 @@ public class PersonDao extends AnetBaseDao<Person> {
 	public AnetBeanList<Person> search(PersonSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPersonSearcher().runSearch(query, dbHandle);
-	}
-	
-	public Organization getOrganizationForPerson(int personId) {
-		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql = "/* getOrganizationForPerson */ SELECT TOP(1) " + OrganizationDao.ORGANIZATION_FIELDS 
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" = :personId AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC";
-		} else { 
-			sql = "/* getOrganizationForPerson */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" = :personId AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
-		}
-		
-		Query<Organization> query = dbHandle.createQuery(sql)
-			.bind("personId", personId)
-			.map(new OrganizationMapper());
-		List<Organization> rs = query.list();
-		if (rs.size() == 0) { return null; } 
-		return rs.get(0);
 	}
 
 	public List<Person> findByDomainUsername(String domainUsername) {
