@@ -3,6 +3,7 @@ package mil.dds.anet.database;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.GeneratedKeys;
@@ -22,6 +23,7 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class OrganizationDao extends AnetBaseDao<Organization> {
 
@@ -30,11 +32,25 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 
 	private final IdBatcher<Organization> idBatcher;
+	private final ForeignKeyBatcher<Organization> personIdBatcher;
 
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
 		final String idBatcherSql = "/* batch.getOrgsByIds */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
+
+		final String personIdBatcherSql = DaoUtils.isMsSql(dbHandle)
+				? "/* batch.getOrganizationForPerson */ SELECT TOP(1) \"peoplePositions\".\"personId\", " + ORGANIZATION_FIELDS
+					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
+					+ "\"peoplePositions\".\"personId\" IN ( %1$s ) AND \"peoplePositions\".\"positionId\" = positions.id "
+					+ "AND positions.\"organizationId\" = organizations.id "
+					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC"
+				: "/* batch.getOrganizationForPerson */ SELECT \"peoplePositions\".\"personId\", " + ORGANIZATION_FIELDS
+					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
+					+ "\"peoplePositions\".\"personId\" IN ( %1$s )  AND \"peoplePositions\".\"positionId\" = positions.id "
+					+ "AND positions.\"organizationId\" = organizations.id "
+					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
+		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, new OrganizationMapper(), "personId");
 	}
 	
 	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
@@ -55,6 +71,15 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	@Override
 	public List<Organization> getByIds(List<Integer> ids) {
 		return idBatcher.getByIds(ids);
+	}
+
+	public List<List<Organization>> getOrganizations(List<Integer> foreignKeys) {
+		return personIdBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	public CompletableFuture<List<Organization>> getOrganizationsForPerson(Map<String, Object> context, Integer personId) {
+		return new ForeignKeyFetcher<Organization>()
+				.load(context, "person.organizations", personId);
 	}
 
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
@@ -126,5 +151,5 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher()
 				.runSearch(query, dbHandle);
-	} 
+	}
 }

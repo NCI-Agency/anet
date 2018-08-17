@@ -1,6 +1,5 @@
 package mil.dds.anet.database;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +24,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	private final Handle dbHandle;
 	private final IdBatcher<ApprovalStep> idBatcher;
 	private final ForeignKeyBatcher<Position> approversBatcher;
+	private final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher;
 
 	public ApprovalStepDao(Handle h) {
 		this.dbHandle = h;
@@ -36,19 +36,20 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 				+ "LEFT JOIN positions ON \"positions\".\"id\" = approvers.\"positionId\" "
 				+ "WHERE \"approvalStepId\" IN ( %1$s )";
 		this.approversBatcher = new ForeignKeyBatcher<Position>(h, approversBatcherSql, new PositionMapper(), "approvalStepId");
+
+		final String organizationIdBatcherSql = "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationId\" IN ( %1$s )";
+		this.organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(h, organizationIdBatcherSql, new ApprovalStepMapper(), "advisorOrganizationId");
 	}
 	
 	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
-	
-	public Collection<ApprovalStep> getByAdvisorOrganizationId(int aoId) {
-		Query<ApprovalStep> query = dbHandle.createQuery("/* getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationId\" = :aoId")
-				.bind("aoId", aoId)
-				.map(new ApprovalStepMapper());
-		return query.list();
+
+	public CompletableFuture<List<ApprovalStep>> getByAdvisorOrganizationId(Map<String, Object> context, Integer aoId) {
+		return new ForeignKeyFetcher<ApprovalStep>()
+				.load(context, "organization.approvalSteps", aoId);
 	}
-	
+
 	@Override
 	public ApprovalStep getById(int id) {
 		Query<ApprovalStep> query = dbHandle.createQuery("/* getApprovalStepById */ SELECT * from \"approvalSteps\" where id = :id")
@@ -66,6 +67,10 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 
 	public List<List<Position>> getApprovers(List<Integer> foreignKeys) {
 		return approversBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	public List<List<ApprovalStep>> getApprovalSteps(List<Integer> foreignKeys) {
+		return organizationIdBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	@Override

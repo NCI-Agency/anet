@@ -106,13 +106,10 @@ public class Organization extends AbstractAnetBean {
 		return positions;
 	}
 	
-	@GraphQLQuery(name="approvalSteps") // TODO: batch load? (used in organizations/{Edit,Show}.js, reports/{Minimal,Show}.js
-	public List<ApprovalStep> loadApprovalSteps() { 
-		if (approvalSteps == null) { 
-			approvalSteps = AnetObjectEngine.getInstance()
-					.getApprovalStepsForOrg(this);
-		}
-		return approvalSteps;
+	@GraphQLQuery(name="approvalSteps")
+	public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance()
+				.getApprovalStepsForOrg(context, id).thenApply(o -> { approvalSteps = o; return o; });
 	}
 	
 	@GraphQLIgnore
