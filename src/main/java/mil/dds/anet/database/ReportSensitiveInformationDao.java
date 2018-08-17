@@ -3,7 +3,6 @@ package mil.dds.anet.database;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.Handle;
@@ -103,11 +102,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 
 	public CompletableFuture<ReportSensitiveInformation> getForReport(Map<String, Object> context, Report report, Person user) {
 		if (!isAuthorized(user, report)) {
-			return CompletableFuture.supplyAsync(new Supplier<ReportSensitiveInformation>() {
-				@Override
-				public ReportSensitiveInformation get() {
-					return null;
-				}});
+			return CompletableFuture.supplyAsync(() -> null);
 		}
 		return new ForeignKeyFetcher<ReportSensitiveInformation>()
 				.load(context, "report.reportSensitiveInformation", report.getUuid())

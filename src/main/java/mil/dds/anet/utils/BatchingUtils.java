@@ -31,7 +31,8 @@ public final class BatchingUtils {
 	public static DataLoaderRegistry registerDataLoaders(AnetObjectEngine engine, boolean batchingEnabled, boolean cachingEnabled) {
 		final DataLoaderOptions dataLoaderOptions = DataLoaderOptions.newOptions()
 				.setBatchingEnabled(batchingEnabled)
-				.setCachingEnabled(cachingEnabled);
+				.setCachingEnabled(cachingEnabled)
+				.setMaxBatchSize(1000);
 		final DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
 	
 		dataLoaderRegistry.register("approvalSteps", new DataLoader<>(new BatchLoader<String, ApprovalStep>() {

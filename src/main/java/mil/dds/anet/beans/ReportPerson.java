@@ -39,7 +39,6 @@ public class ReportPerson extends Person {
 	public static ReportPerson createWithUuid(String uuid) {
 		final ReportPerson rp = new ReportPerson();
 		rp.setUuid(uuid);
-		rp.setLoadLevel(LoadLevel.ID_ONLY);
 		return rp;
 	}
 

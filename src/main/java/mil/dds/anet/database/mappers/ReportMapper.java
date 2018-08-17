@@ -17,7 +17,6 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportMapper implements ResultSetMapper<Report> {
 
@@ -62,7 +61,6 @@ public class ReportMapper implements ResultSetMapper<Report> {
 		Person author = Person.createWithUuid((rs.getString("reports_authorUuid")));
 		PersonMapper.fillInFields(author, rs);
 		r.setAuthor(author);
-		r.setLoadLevel(LoadLevel.PROPERTIES);
 		
 		String advisorOrgUuid = rs.getString("reports_advisorOrganizationUuid");
 		if (advisorOrgUuid != null) {

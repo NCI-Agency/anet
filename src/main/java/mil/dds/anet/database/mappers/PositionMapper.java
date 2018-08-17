@@ -13,7 +13,6 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class PositionMapper implements ResultSetMapper<Position> {
 
@@ -55,7 +54,6 @@ public class PositionMapper implements ResultSetMapper<Position> {
 			p.setLocation(Location.createWithUuid(locationUuid));
 		}
 		
-		p.setLoadLevel(LoadLevel.PROPERTIES);
 		return p;
 	}
 

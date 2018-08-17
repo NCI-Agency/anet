@@ -8,7 +8,6 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class TagMapper implements ResultSetMapper<Tag> {
 
@@ -18,7 +17,6 @@ public class TagMapper implements ResultSetMapper<Tag> {
 		DaoUtils.setCommonBeanFields(t, rs, null);
 		t.setName(rs.getString("name"));
 		t.setDescription(rs.getString("description"));
-		t.setLoadLevel(LoadLevel.PROPERTIES);
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
 			ctx.setAttribute("totalCount", rs.getInt("totalCount"));

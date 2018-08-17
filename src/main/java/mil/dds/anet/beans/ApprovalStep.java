@@ -87,7 +87,6 @@ public class ApprovalStep extends AbstractAnetBean {
 	public static ApprovalStep createWithUuid(String uuid) {
 		final ApprovalStep step = new ApprovalStep();
 		step.setUuid(uuid);
-		step.setLoadLevel(LoadLevel.ID_ONLY);
 		return step;
 	}
 	

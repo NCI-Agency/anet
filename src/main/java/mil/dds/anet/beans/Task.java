@@ -149,7 +149,6 @@ public class Task extends AbstractAnetBean {
 	public static Task createWithUuid(String uuid) {
 		final Task p = new Task();
 		p.setUuid(uuid);
-		p.setLoadLevel(LoadLevel.ID_ONLY);
 		return p;
 	}
 

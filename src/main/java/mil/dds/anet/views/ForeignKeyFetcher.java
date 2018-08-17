@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
@@ -14,11 +13,7 @@ public class ForeignKeyFetcher<T extends AbstractAnetBean> {
 		final DataLoaderRegistry dlr = (DataLoaderRegistry) context.get("dataLoaderRegistry");
 		final DataLoader<String, List<T>> dl = dlr.getDataLoader(dataLoader);
 		return (foreignKey == null)
-				? CompletableFuture.supplyAsync(new Supplier<List<T>>() {
-					@Override
-					public List<T> get() {
-						return new ArrayList<T>();
-					}})
+				? CompletableFuture.supplyAsync(() ->  new ArrayList<T>())
 				: dl.load(foreignKey);
 	}
 }

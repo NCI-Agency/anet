@@ -13,7 +13,6 @@ import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class PersonMapper implements ResultSetMapper<Person> {
 
@@ -53,7 +52,6 @@ public class PersonMapper implements ResultSetMapper<Person> {
 		a.setDomainUsername(r.getString("people_domainUsername"));
 		a.setPendingVerification(r.getBoolean("people_pendingVerification"));
 		
-		a.setLoadLevel(LoadLevel.PROPERTIES);
 		return a;
 	}
 }

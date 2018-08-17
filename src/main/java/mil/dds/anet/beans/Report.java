@@ -511,7 +511,6 @@ public class Report extends AbstractAnetBean {
 	public static Report createWithUuid(String uuid) {
 		final Report r = new Report();
 		r.setUuid(uuid);
-		r.setLoadLevel(LoadLevel.ID_ONLY);
 		return r;
 	}
 

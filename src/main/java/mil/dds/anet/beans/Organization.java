@@ -184,7 +184,6 @@ public class Organization extends AbstractAnetBean {
 	public static Organization createWithUuid(String uuid) {
 		final Organization ao = new Organization();
 		ao.setUuid(uuid);
-		ao.setLoadLevel(LoadLevel.ID_ONLY);
 		return ao;
 	}
 	

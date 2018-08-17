@@ -8,7 +8,6 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportSensitiveInformationMapper implements ResultSetMapper<ReportSensitiveInformation> {
 
@@ -17,7 +16,6 @@ public class ReportSensitiveInformationMapper implements ResultSetMapper<ReportS
 		final ReportSensitiveInformation rsi = new ReportSensitiveInformation();
 		DaoUtils.setCommonBeanFields(rsi, rs, "reportsSensitiveInformation");
 		rsi.setText(rs.getString("reportsSensitiveInformation_text"));
-		rsi.setLoadLevel(LoadLevel.PROPERTIES);
 		return rsi;
 	}
 

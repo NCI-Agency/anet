@@ -2,7 +2,6 @@ package mil.dds.anet.views;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
@@ -14,11 +13,7 @@ public class IdFetcher<T extends AbstractAnetBean> {
 		final DataLoaderRegistry dlr = (DataLoaderRegistry) context.get("dataLoaderRegistry");
 		final DataLoader<String, T> dl = dlr.getDataLoader(dataLoader);
 		return (DaoUtils.getUuid(bean) == null)
-				? CompletableFuture.supplyAsync(new Supplier<T>() {
-					@Override
-					public T get() {
-						return null;
-					}})
+				? CompletableFuture.supplyAsync(() -> null)
 				: dl.load(bean.getUuid());
 	}
 }

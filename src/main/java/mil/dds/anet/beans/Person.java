@@ -225,7 +225,6 @@ public class Person extends AbstractAnetBean implements Principal {
 		if (uuid == null) { return null; }
 		final Person p = new Person();
 		p.setUuid(uuid);
-		p.setLoadLevel(LoadLevel.ID_ONLY);
 		return p;
 	}
 

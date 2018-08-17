@@ -69,7 +69,6 @@ public class Comment extends AbstractAnetBean {
 	public static Comment createWithUuid(String uuid) {
 		final Comment c = new Comment();
 		c.setUuid(uuid);
-		c.setLoadLevel(LoadLevel.ID_ONLY);
 		return c;
 	}
 

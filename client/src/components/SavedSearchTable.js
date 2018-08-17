@@ -42,7 +42,7 @@ export default class SavedSearchTable extends Component {
 					${fields}
 				}
 			}
-		`, {query}, '($query: ReportSearchQuery)').then(data =>
+		`, {query}, '($query: ReportSearchQueryInput)').then(data =>
 			this.setState({reports: data.reports})
 		)
 	}

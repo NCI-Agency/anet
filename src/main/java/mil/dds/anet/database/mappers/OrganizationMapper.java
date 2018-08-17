@@ -10,7 +10,6 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class OrganizationMapper implements ResultSetMapper<Organization> {
 
@@ -28,8 +27,6 @@ public class OrganizationMapper implements ResultSetMapper<Organization> {
 		if (parentOrgUuid != null) {
 			org.setParentOrg(Organization.createWithUuid(parentOrgUuid));
 		}
-		
-		org.setLoadLevel(LoadLevel.PROPERTIES);
 		
 		if (MapperUtils.containsColumnNamed(r, "totalCount")) { 
 			ctx.setAttribute("totalCount", r.getInt("totalCount"));

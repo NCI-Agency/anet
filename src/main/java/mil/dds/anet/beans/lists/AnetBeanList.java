@@ -2,19 +2,14 @@ package mil.dds.anet.beans.lists;
 
 import io.leangen.graphql.annotations.GraphQLQuery;
 
-import java.lang.invoke.MethodHandles;
 import java.util.List;
 
 import org.skife.jdbi.v2.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 
 public class AnetBeanList<T> {
-
-	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	List<T> list;
 	Integer pageNum;
@@ -42,7 +37,6 @@ public class AnetBeanList<T> {
 		} else if (resultSize == 0) {
 			setTotalCount(0);
 		} else {
-			logger.debug("Bulk query context attributes are {}", query.getContext().getAttributes());
 			Integer foundCount = (Integer) query.getContext().getAttribute("totalCount");
 			setTotalCount(foundCount == null ? resultSize : foundCount);
 		}
