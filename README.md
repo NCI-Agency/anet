@@ -17,7 +17,7 @@ In making this software available to the open source community, it is our hope t
 
 
 ## Setting up your development environment
-This repository is structured in two main, disparate components: the frontend and the backend. The frontend is a react.js based JavaScript application that communicates with the backend via XMLHttpRequest (ajax). The backend is a Java application based the Dropwizard framework that runs on a JVM and utilizes Microsoft SQL Server for its database.
+This repository is structured in two main, disparate components: the frontend and the backend. The frontend is a react.js based JavaScript application that communicates with the backend via XMLHttpRequest (ajax). The backend is a Java application based on the Dropwizard framework that runs on a JVM and utilizes Microsoft SQL Server for its database.
 
 
 We recommend reading through the documentation in the following order:
