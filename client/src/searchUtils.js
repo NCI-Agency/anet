@@ -8,7 +8,7 @@ export function deserializeQueryParams(objType, queryParams, callbackFunction) {
 	var promises = []
 	if (objType) {
 		const EXTRA_FILTERS = searchFilters.extraFilters()
-		const extraFilterDefs = EXTRA_FILTERS[objType]
+		const extraFilterDefs = EXTRA_FILTERS[objType] || []
 		extraFilterDefs.map(filterKey => {
 			if (queryParams.hasOwnProperty(filterKey)) {
 				usedFilters.push({key: filterKey, value: queryParams[filterKey]})
