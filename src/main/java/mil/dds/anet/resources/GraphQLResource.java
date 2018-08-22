@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.PermitAll;
@@ -142,23 +144,7 @@ public class GraphQLResource {
 			buildGraph();
 		}
 
-		final DataLoaderRegistry dataLoaderRegistry
-			= BatchingUtils.registerDataLoaders(engine, true, true);
-		final DataLoaderDispatcherInstrumentation dispatcherInstrumentation
-			= new DataLoaderDispatcherInstrumentation(dataLoaderRegistry);
-
-		final Map<String, Object> context = new HashMap<>();
-		context.put("user", user);
-		context.put("dataLoaderRegistry", dataLoaderRegistry);
-		final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-				.query(query)
-				.context(context)
-				.variables(variables)
-				.build();
-		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
-				.instrumentation(dispatcherInstrumentation)
-				.build();
-		final ExecutionResult executionResult = graphql.execute(executionInput);
+		final ExecutionResult executionResult = dispatchRequest(user, query, variables);
 		final Map<String, Object> result = new LinkedHashMap<>();
 		if (executionResult.getErrors().size() > 0) {
 			WebApplicationException actual = null;
@@ -193,6 +179,41 @@ public class GraphQLResource {
 					.header("Content-Disposition", "attachment; filename=" + "anet_export.xslx").build();
 		} else {
 			return Response.ok(result, MediaType.APPLICATION_JSON).build();
+		}
+	}
+
+	private ExecutionResult dispatchRequest(Person user, String query, Map<String, Object> variables) {
+		final DataLoaderRegistry dataLoaderRegistry
+			= BatchingUtils.registerDataLoaders(engine, true, true);
+		final DataLoaderDispatcherInstrumentation dispatcherInstrumentation
+			= new DataLoaderDispatcherInstrumentation(dataLoaderRegistry);
+
+		final Map<String, Object> context = new HashMap<>();
+		context.put("user", user);
+		context.put("dataLoaderRegistry", dataLoaderRegistry);
+		final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+				.query(query)
+				.context(context)
+				.variables(variables)
+				.build();
+		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
+				.instrumentation(dispatcherInstrumentation)
+				.build();
+		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
+		final Runnable dispatcher = () -> {
+			while (!request.isDone()) {
+				CompletableFuture.allOf(
+						dataLoaderRegistry.getDataLoaders()
+						.stream()
+						.map(dl -> (CompletableFuture<?>)dl.dispatch())
+						.toArray(CompletableFuture<?>[]::new));
+			}
+		};
+		dispatcher.run();
+		try {
+			return request.get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to complete graphql request", e);
 		}
 	}
 

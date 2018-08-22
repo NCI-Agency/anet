@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
@@ -77,10 +78,22 @@ public final class BatchingUtils {
 				return CompletableFuture.supplyAsync(() -> engine.getOrganizationDao().getByIds(keys));
 			}
 		}, dataLoaderOptions));
+		dataLoaderRegistry.register("organization.approvalSteps", new DataLoader<>(new BatchLoader<Integer, List<ApprovalStep>>() {
+			@Override
+			public CompletionStage<List<List<ApprovalStep>>> load(List<Integer> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getApprovalStepDao().getApprovalSteps(foreignKeys));
+			}
+		}, dataLoaderOptions));
 		dataLoaderRegistry.register("people", new DataLoader<>(new BatchLoader<Integer, Person>() {
 			@Override
 			public CompletionStage<List<Person>> load(List<Integer> keys) {
 				return CompletableFuture.supplyAsync(() -> engine.getPersonDao().getByIds(keys));
+			}
+		}, dataLoaderOptions));
+		dataLoaderRegistry.register("person.organizations", new DataLoader<>(new BatchLoader<Integer, List<Organization>>() {
+			@Override
+			public CompletionStage<List<List<Organization>>> load(List<Integer> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getOrganizationDao().getOrganizations(foreignKeys));
 			}
 		}, dataLoaderOptions));
 		dataLoaderRegistry.register("positions", new DataLoader<>(new BatchLoader<Integer, Position>() {
@@ -99,6 +112,12 @@ public final class BatchingUtils {
 			@Override
 			public CompletionStage<List<Report>> load(List<Integer> keys) {
 				return CompletableFuture.supplyAsync(() -> engine.getReportDao().getByIds(keys));
+			}
+		}, dataLoaderOptions));
+		dataLoaderRegistry.register("report.approvalActions", new DataLoader<>(new BatchLoader<Integer, List<ApprovalAction>>() {
+			@Override
+			public CompletionStage<List<List<ApprovalAction>>> load(List<Integer> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getApprovalActionDao().getApprovalActions(foreignKeys));
 			}
 		}, dataLoaderOptions));
 		dataLoaderRegistry.register("report.attendees", new DataLoader<>(new BatchLoader<Integer, List<ReportPerson>>() {
