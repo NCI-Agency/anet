@@ -85,7 +85,7 @@
     "prop-types": "^15.6.2",
     "react": "^16.4.2",
     "react-16-bootstrap-date-picker": "^5.1.2",
-    "react-autosuggest": "^9.3.4",
+    "react-autosuggest": "^9.4.0",
     "react-bootstrap": "^0.32.1",
     "react-confirm-bootstrap": "^5.3.0",
     "react-dom": "^16.4.2",
