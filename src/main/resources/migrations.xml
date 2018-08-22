@@ -1429,6 +1429,13 @@
 	<changeSet id="fill-uuid-foreignKey-columns" author="gjvoosten">
 		<!-- Fill uuid references for all tables -->
 		<sql>
+			UPDATE "adminSettings" SET value = (
+				SELECT uuid FROM organizations
+				WHERE organizations.id = CAST(value AS int)
+			)
+			WHERE "key" = 'DEFAULT_APPROVAL_ORGANIZATION';
+		</sql>
+		<sql>
 			UPDATE "approvalActions" SET "approvalStepUuid" = (
 				SELECT uuid FROM "approvalSteps"
 				WHERE "approvalSteps".id = "approvalActions"."approvalStepId"
