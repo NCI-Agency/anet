@@ -106,12 +106,16 @@ class LocationForm extends ValidatableFormWrapper {
 	onSubmit(event) {
 		let loc = this.props.anetLocation
 		let edit = this.props.edit
-		let url = `/api/locations/${edit ? 'update'  :'new'}`
+		const operation = edit ? 'updateLocation' : 'createNewLocation'
+		let graphql = operation + '(location: $location)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { location: loc }
+		const variableDef = '($location: LocationInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, loc, {disableSubmits: true})
-			.then(response => {
-				if (response.id) {
-					loc.id = response.id
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				if (data[operation].id) {
+					loc.id = data[operation].id
 				}
 				this.props.history.push({
 					pathname: Location.pathFor(loc),

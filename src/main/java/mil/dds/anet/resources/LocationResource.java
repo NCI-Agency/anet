@@ -22,6 +22,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
@@ -85,13 +86,22 @@ public class LocationResource {
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public Location createNewLocation(@Auth Person user, Location l) {
+		return createNewLocationCommon(user, l);
+	}
+
+	private Location createNewLocationCommon(Person user, Location l) {
 		if (l.getName() == null || l.getName().trim().length() == 0) { 
 			throw new WebApplicationException("Location name must not be empty", Status.BAD_REQUEST);
 		}
 		l = dao.insert(l);
 		AnetAuditLogger.log("Location {} created by {}", l, user);
 		return l;
-		
+	}
+
+	@GraphQLMutation(name="createNewLocation")
+	@RolesAllowed("SUPER_USER")
+	public Location createNewLocation(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="location") Location l) {
+		return createNewLocationCommon(DaoUtils.getUserFromContext(context), l);
 	}
 	
 	@POST
@@ -99,9 +109,24 @@ public class LocationResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateLocation(@Auth Person user, Location l) {
+		updateLocationCommon(user, l);
+		return Response.ok().build();
+	}
+
+	private int updateLocationCommon(Person user, Location l) {
 		int numRows = dao.update(l);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+		}
 		AnetAuditLogger.log("Location {} updated by {}", l, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+		return numRows;
+	}
+
+	@GraphQLMutation(name="updateLocation")
+	@RolesAllowed("SUPER_USER")
+	public Integer updateLocation(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="location") Location l) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateLocationCommon(DaoUtils.getUserFromContext(context), l);
 	}
 
 	/**
