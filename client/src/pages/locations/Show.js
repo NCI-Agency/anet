@@ -49,7 +49,7 @@ class BaseLocationShow extends Page {
 
 		let locationQuery = new GQL.Part(/* GraphQL */`
 			location(id:${props.match.params.id}) {
-				id, name, lat, lng
+				id, name, lat, lng, status
 			}
 		`)
 
