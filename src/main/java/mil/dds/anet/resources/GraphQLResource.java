@@ -6,13 +6,11 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.DefaultValue;
@@ -76,7 +74,6 @@ public class GraphQLResource {
 	private static final String OUTPUT_XLSX = "xlsx";
 	private static final String MEDIATYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	private static final String RESULT_KEY_DATA = "data";
-	private static final String RESULT_KEY_ERRORS = "errors";
 
 	private final AnetObjectEngine engine;
 	private List<Object> resources;
@@ -145,7 +142,7 @@ public class GraphQLResource {
 		}
 
 		final ExecutionResult executionResult = dispatchRequest(user, query, variables);
-		final Map<String, Object> result = new LinkedHashMap<>();
+		final Map<String, Object> result = executionResult.toSpecification();
 		if (executionResult.getErrors().size() > 0) {
 			WebApplicationException actual = null;
 			for (GraphQLError error : executionResult.getErrors()) {
@@ -158,9 +155,6 @@ public class GraphQLResource {
 				}
 			}
 
-			result.put(RESULT_KEY_ERRORS, executionResult.getErrors().stream()
-					.map(e -> e.getMessage())
-					.collect(Collectors.toList()));
 			Status status = (actual != null)
 				?
 				Status.fromStatusCode(actual.getResponse().getStatus())
@@ -169,7 +163,6 @@ public class GraphQLResource {
 			logger.warn("Errors: {}", executionResult.getErrors());
 			return Response.status(status).entity(result).build();
 		}
-		result.put(RESULT_KEY_DATA, executionResult.getData());
 		if (OUTPUT_XML.equals(output)) {
 			// TODO: Decide if we indeed want pretty-printed XML:
 			final String xml = ResponseUtils.toPrettyString($.toXml(result), 2);
