@@ -23,6 +23,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
@@ -70,6 +71,10 @@ public class TaskResource {
 	@Path("/new")
 	@RolesAllowed("ADMIN")
 	public Task createNewTask(@Auth Person user, Task p) {
+		return createNewTaskCommon(user, p);
+	}
+
+	private Task createNewTaskCommon(Person user, Task p) {
 		if (AuthUtils.isAdmin(user) == false) { 
 			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getId() == null) { 
 				throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
@@ -81,6 +86,12 @@ public class TaskResource {
 		AnetAuditLogger.log("Task {} created by {}", p, user);
 		return p;
 	}
+
+	@GraphQLMutation(name="createNewTask")
+	@RolesAllowed("ADMIN")
+	public Task createNewTask(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="task") Task p) {
+		return createNewTaskCommon(DaoUtils.getUserFromContext(context), p);
+	}
 	
 	/* Updates shortName, longName, category, and customFieldRef1Id */
 	@POST
@@ -88,6 +99,11 @@ public class TaskResource {
 	@Path("/update")
 	@RolesAllowed("ADMIN")
 	public Response updateTask(@Auth Person user, Task p) { 
+		updateTaskCommon(user, p);
+		return Response.ok().build();
+	}
+
+	private int updateTaskCommon(Person user, Task p) {
 		//Admins can edit all Tasks, SuperUsers can edit tasks within their EF. 
 		if (AuthUtils.isAdmin(user) == false) { 
 			Task existing = dao.getById(p.getId());
@@ -107,7 +123,14 @@ public class TaskResource {
 			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
 		}
 		AnetAuditLogger.log("Task {} updatedby {}", p, user);
-		return Response.ok().build();
+		return numRows;
+	}
+
+	@GraphQLMutation(name="updateTask")
+	@RolesAllowed("ADMIN")
+	public Integer updateTask(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="task") Task p) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateTaskCommon(DaoUtils.getUserFromContext(context), p);
 	}
 	
 	@POST

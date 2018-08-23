@@ -171,16 +171,16 @@ class BaseTaskForm extends ValidatableFormWrapper {
 			task.customFieldRef1 = {id: task.customFieldRef1.id}
 		}
 
-		let url = `/api/tasks/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updateTask' : 'createNewTask'
+		let graphql = operation + '(task: $task)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { task: task }
+		const variableDef = '($task: TaskInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, task, {disableSubmits: true})
-			.then(response => {
-				if (response.code) {
-					throw response.code
-				}
-
-				if (response.id) {
-					task.id = response.id
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				if (data[operation].id) {
+					task.id = data[operation].id
 				}
 				this.props.history.replace(Task.pathForEdit(task))
 				this.props.history.push({
