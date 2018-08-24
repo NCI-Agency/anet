@@ -47,6 +47,7 @@ import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
@@ -56,6 +57,7 @@ import mil.dds.anet.beans.ApprovalAction.ApprovalType;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
@@ -720,11 +722,20 @@ public class ReportResource {
 	@Timed
 	@Path("/{id}/delete")
 	public Response deleteReport(@Auth Person user, @PathParam("id") int reportId) {
+		deleteReportCommon(user, reportId);
+		return Response.ok().build();
+	}
+
+	private Integer deleteReportCommon(Person user, int reportId) {
 		final Report report = dao.getById(reportId, user);
 		assertCanDeleteReport(report, user);
 
-		dao.deleteReport(report);
-		return Response.ok().build();
+		return dao.deleteReport(report);
+	}
+
+	@GraphQLMutation(name="deleteReport")
+	public Integer deleteReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="reportId") int reportId) {
+		return deleteReportCommon(DaoUtils.getUserFromContext(context), reportId);
 	}
 
 	private void assertCanDeleteReport(Report report, Person user) {

@@ -86,15 +86,20 @@ class BaseReportEdit extends Page {
 
 	@autobind
 	onConfirmDelete() {
-		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-			this.props.history.push({
-				pathname: '/',
-				state: {success: 'Report deleted'}
+		const operation = 'deleteReport'
+		let graphql = operation + '(reportId: $reportId)'
+		const variables = { reportId: this.state.report.id }
+		const variableDef = '($reportId: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.props.history.push({
+					pathname: '/',
+					state: {success: 'Report deleted'}
+				})
+			}).catch(error => {
+				this.setState({error: error})
+				window.scrollTo(0, 0)
 			})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
 	}
 }
 
