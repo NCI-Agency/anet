@@ -728,6 +728,8 @@ public class ReportResource {
 
 	private Integer deleteReportCommon(Person user, int reportId) {
 		final Report report = dao.getById(reportId, user);
+		if (report == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
+
 		assertCanDeleteReport(report, user);
 
 		return dao.deleteReport(report);
