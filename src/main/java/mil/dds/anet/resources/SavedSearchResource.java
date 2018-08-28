@@ -20,12 +20,14 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.SavedSearchDao;
+import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
@@ -43,15 +45,27 @@ public class SavedSearchResource {
 	@POST
 	@Timed
 	@Path("/new")
-	public SavedSearch saveSearch(@Auth Person user, SavedSearch search) {
+	public SavedSearch createNewSavedSearch(@Auth Person user, SavedSearch search) {
+		return createNewSavedSearchCommon(user, search);
+	}
+
+	private SavedSearch createNewSavedSearchCommon(Person user, SavedSearch search) {
 		search.setOwner(Person.createWithId(user.getId()));
+		SavedSearch created;
 		try {
-			return dao.insert(search);
+			created = dao.insert(search);
 		} catch (UnableToExecuteStatementException e) {
 			throw ResponseUtils.handleSqlException(e, "Duplicate name for saved search");
 		}
+		AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
+		return created;
 	}
-	
+
+	@GraphQLMutation(name="createNewSavedSearch")
+	public SavedSearch createNewSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="search") SavedSearch search) {
+		return createNewSavedSearchCommon(DaoUtils.getUserFromContext(context), search);
+	}
+
 	@GET
 	@Timed
 	@GraphQLQuery(name="mySearches")

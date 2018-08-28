@@ -485,20 +485,24 @@ class Search extends Page {
 		if (this.props.searchQuery.objectType) {
 			search.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
-
-		API.send('/api/savedSearches/new', search, {disableSubmits: true})
-			.then(response => {
-				if (response.code) throw response.code
-				this.setState({
-					success: 'Search successfully saved!',
-					error: null,
-					saveSearch: {show: false}
-				})
-				window.scrollTo(0, 0)
-			}).catch(response => {
+		const operation = 'createNewSavedSearch'
+		let graphql = operation + '(search: $search) { id }'
+		const variables = { search: search }
+		const variableDef = '($search: SavedSearchInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				if (data[operation].id) {
+					this.setState({
+						success: 'Search successfully saved!',
+						error: null,
+						saveSearch: {show: false}
+					})
+					window.scrollTo(0, 0)
+				}
+			}).catch(error => {
 				this.setState({
 					success: null,
-					error: response,
+					error: error,
 					saveSearch: {show: false}
 				})
 				window.scrollTo(0, 0)
