@@ -1591,7 +1591,7 @@ babel-register@^6.26.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.15"
 
-babel-runtime@6.26.0, babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.2.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.25.0, babel-runtime@^6.26.0, babel-runtime@~6.26.0:
+babel-runtime@^6.11.6, babel-runtime@^6.18.0, babel-runtime@^6.2.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.25.0, babel-runtime@^6.26.0, babel-runtime@~6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   dependencies:
@@ -10462,13 +10462,13 @@ wdio-dot-reporter@^0.0.10, wdio-dot-reporter@~0.0.8:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/wdio-dot-reporter/-/wdio-dot-reporter-0.0.10.tgz#facfb7c9c5984149951f59cbc3cd0752101cf0e0"
 
-wdio-mocha-framework@^0.6.2:
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/wdio-mocha-framework/-/wdio-mocha-framework-0.6.2.tgz#f1d66d0857eccc0c4ae5d2cf91ca289ae7432aef"
+wdio-mocha-framework@^0.6.3:
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/wdio-mocha-framework/-/wdio-mocha-framework-0.6.3.tgz#36706122cc8dda927901ac05e3c96116f66a7aa4"
   dependencies:
     babel-runtime "^6.23.0"
     mocha "^5.0.0"
-    wdio-sync "0.7.1"
+    wdio-sync "0.7.2"
 
 wdio-spec-reporter@^0.1.5:
   version "0.1.5"
@@ -10478,11 +10478,11 @@ wdio-spec-reporter@^0.1.5:
     chalk "^2.3.0"
     humanize-duration "~3.15.0"
 
-wdio-sync@0.7.1:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/wdio-sync/-/wdio-sync-0.7.1.tgz#00847fbbce16826c3225618f4259d28b60a42483"
+wdio-sync@0.7.2:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/wdio-sync/-/wdio-sync-0.7.2.tgz#13b7a2b2c123af15515b7eadc7b8d92b62d92966"
   dependencies:
-    babel-runtime "6.26.0"
+    babel-runtime "^6.26.0"
     fibers "~2.0.0"
     object.assign "^4.0.3"
 

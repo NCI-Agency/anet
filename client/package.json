@@ -52,7 +52,7 @@
     "wdio": "^2.0.2",
     "wdio-chromedriver-service": "^0.1.1",
     "wdio-dot-reporter": "^0.0.10",
-    "wdio-mocha-framework": "^0.6.2",
+    "wdio-mocha-framework": "^0.6.3",
     "wdio-spec-reporter": "^0.1.5",
     "webdriverio": "^4.13.2",
     "webpack": "^4.17.1",
