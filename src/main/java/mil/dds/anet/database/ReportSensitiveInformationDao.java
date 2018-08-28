@@ -18,6 +18,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterMapper(ReportSensitiveInformationMapper.class)
@@ -118,7 +119,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 				.load(context, "report.reportSensitiveInformation", report.getId())
 				.thenApply(l ->
 		{
-			ReportSensitiveInformation rsi = (l == null || l.size() == 0) ? null : l.get(0);
+			ReportSensitiveInformation rsi = Utils.isEmptyOrNull(l) ? null : l.get(0);
 			if (rsi != null) {
 				AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);
 			} else {

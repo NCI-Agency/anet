@@ -22,7 +22,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.AuthorizationGroup;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -347,70 +346,91 @@ public class Report extends AbstractAnetBean {
 	 * There will be an approval action for each approval step for this report
 	 * With information about the 
 	 */
-	@GraphQLQuery(name="approvalStatus") // TODO: batch load (used in ReportCollection.js)
-	public List<ApprovalAction> loadApprovalStatus() {
+	@GraphQLQuery(name="approvalStatus")
+	public CompletableFuture<List<ApprovalAction>> loadApprovalStatus(@GraphQLRootContext Map<String, Object> context) {
+		final CompletableFuture<List<ApprovalAction>> result;
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		List<ApprovalAction> actions = engine.getApprovalActionDao().getActionsForReport(this.getId()); // queries db!
-		
-		if (this.getState() == ReportState.RELEASED) {
-			//Compact to only get the most recent event for each step.
-			if (actions.size() == 0) { 
-				//Magically released, probably imported this way. 
-				return actions;
-			}
-			ApprovalAction last = actions.get(0);
-			List<ApprovalAction> compacted = new LinkedList<ApprovalAction>();
-			for (ApprovalAction action : actions) {
-				if (action.getStep() != null && last.getStep() != null && action.getStep().getId().equals(last.getStep().getId()) == false) { 
-					compacted.add(last);
-				}
-				last = action;
-			}
-			compacted.add(actions.get(actions.size() - 1));
-			return compacted;
+		final CompletableFuture<List<ApprovalAction>> actionsForReport = engine.getApprovalActionDao().getActionsForReport(context, id);
+		if (state == ReportState.RELEASED) {
+			result = actionsForReport
+					.thenApply(actions -> compactActions(actions));
+		} else {
+			final CompletableFuture<Organization> organizationForAuthor = engine.getOrganizationForPerson(context, author);
+			result = CompletableFuture.allOf(actionsForReport, organizationForAuthor)
+					.thenApply(futures -> {
+				final List<ApprovalAction> actions = actionsForReport.join();
+				final Organization ao = organizationForAuthor.join();
+				final CompletableFuture<List<ApprovalStep>> orgSteps = getWorkflowForOrg(context, engine, DaoUtils.getId(ao));
+				final Integer defaultOrgId = engine.getDefaultOrgId();
+				final CompletableFuture<List<ApprovalStep>> defaultSteps = getDefaultWorkflow(context, engine, defaultOrgId);
+				return CompletableFuture.allOf(orgSteps, defaultSteps)
+						.thenApply(futuresSteps -> {
+					List<ApprovalStep> steps = orgSteps.join();
+					if (steps == null || steps.size() == 0) {
+						steps = defaultSteps.join();
+					}
+					return createWorkflow(actions, steps);
+				}).join();
+			});
 		}
-		
-		Organization ao = engine.getOrganizationForPerson(getAuthor()); // queries db!
-		if (ao == null) {
-			//use the default approval workflow.
-			String defaultOrgId = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
-			if (defaultOrgId == null) { 
-				throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
-			}
-			ao = Organization.createWithId(Integer.parseInt(defaultOrgId));
+		return result;
+	}
+
+	private List<ApprovalAction> compactActions(List<ApprovalAction> actions) {
+		//Compact to only get the most recent event for each step.
+		if (actions.size() == 0) {
+			//Magically released, probably imported this way.
+			return actions;
 		}
-		
-		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(ao); // queries db!
-		if (steps == null || steps.size() == 0) {
-			//No approval steps for this organization
-			String defaultOrgId = engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
-			if (defaultOrgId == null) { 
-				throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
+		ApprovalAction last = actions.get(0);
+		final List<ApprovalAction> compacted = new LinkedList<ApprovalAction>();
+		for (final ApprovalAction action : actions) {
+			if (action.getStep() != null && last.getStep() != null && action.getStep().getId().equals(last.getStep().getId()) == false) {
+				compacted.add(last);
 			}
-			steps = engine.getApprovalStepsForOrg(Organization.createWithId(Integer.parseInt(defaultOrgId))); // queries db!
+			last = action;
 		}
-				
-		List<ApprovalAction> workflow = new LinkedList<ApprovalAction>();
-		for (ApprovalStep step : steps) { 
+		compacted.add(actions.get(actions.size() - 1));
+		return compacted;
+	}
+
+	private List<ApprovalAction> createWorkflow(List<ApprovalAction> actions, List<ApprovalStep> steps) {
+		final List<ApprovalAction> workflow = new LinkedList<ApprovalAction>();
+		for (final ApprovalStep step : steps) {
 			//If there is an Action for this step, grab the last one (date wise)
-			Optional<ApprovalAction> existing = actions.stream().filter(a -> 
-					Objects.equals(step.getId(), DaoUtils.getId(a.getStep()))
+			final Optional<ApprovalAction> existing = actions.stream().filter(a ->
+					Objects.equals(DaoUtils.getId(step), DaoUtils.getId(a.getStep()))
 				).max(new Comparator<ApprovalAction>() {
 					public int compare(ApprovalAction a, ApprovalAction b) {
 						return a.getCreatedAt().compareTo(b.getCreatedAt());
 					}
 				});
-			ApprovalAction action;
-			if (existing.isPresent()) { 
+			final ApprovalAction action;
+			if (existing.isPresent()) {
 				action = existing.get();
-			} else { 
+			} else {
 				//If not then create a new one and attach this step
-				action = new ApprovalAction();		
+				action = new ApprovalAction();
 			}
 			action.setStep(step);
 			workflow.add(action);
 		}
 		return workflow;
+	}
+
+	private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context, AnetObjectEngine engine, Integer aoId) {
+		if (aoId == null) {
+			return CompletableFuture.supplyAsync(() -> null);
+		}
+
+		return engine.getApprovalStepsForOrg(context, aoId);
+	}
+
+	private CompletableFuture<List<ApprovalStep>> getDefaultWorkflow(Map<String, Object> context, AnetObjectEngine engine, Integer defaultOrgId) {
+		if (defaultOrgId == null) {
+			throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
+		}
+		return getWorkflowForOrg(context, engine, defaultOrgId);
 	}
 
 	@GraphQLQuery(name="tags")

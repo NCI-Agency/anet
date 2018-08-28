@@ -170,7 +170,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		}
 	}
 	
-	@GraphQLQuery(name="authoredReports") // TODO: batch load? (used in people/Show.js)
+	@GraphQLQuery(name="authoredReports") // TODO: batch load? (used in people/Show.js, admin/MergePeople.js)
 	public AnetBeanList<Report> loadAuthoredReports(@GraphQLArgument(name="pageNum") Integer pageNum,
 			@GraphQLArgument(name="pageSize") Integer pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();
@@ -180,7 +180,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 	
-	@GraphQLQuery(name="attendedReports") // TODO: batch load? (appears to be unused)
+	@GraphQLQuery(name="attendedReports") // TODO: batch load? (used in admin/MergePeople.js)
 	public AnetBeanList<Report> loadAttendedReports(@GraphQLArgument(name="pageNum") Integer pageNum,
 			@GraphQLArgument(name="pageSize") Integer pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();

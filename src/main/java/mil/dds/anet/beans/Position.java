@@ -104,7 +104,7 @@ public class Position extends AbstractAnetBean {
 		this.person = p;
 	}
 	
-	@GraphQLQuery(name="associatedPositions") // TODO: batch load? (used in positions/{Edit,Show}.js, {organizations,people}/Show.js, people/Show.js)
+	@GraphQLQuery(name="associatedPositions") // TODO: batch load? (used in positions/{Edit,Show}.js, {organizations,people}/Show.js)
 	public List<Position> loadAssociatedPositions() { 
 		if (associatedPositions == null) { 
 			associatedPositions = AnetObjectEngine.getInstance()

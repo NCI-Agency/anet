@@ -6,11 +6,11 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.DefaultValue;
@@ -74,7 +74,6 @@ public class GraphQLResource {
 	private static final String OUTPUT_XLSX = "xlsx";
 	private static final String MEDIATYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	private static final String RESULT_KEY_DATA = "data";
-	private static final String RESULT_KEY_ERRORS = "errors";
 
 	private final AnetObjectEngine engine;
 	private List<Object> resources;
@@ -142,6 +141,41 @@ public class GraphQLResource {
 			buildGraph();
 		}
 
+		final ExecutionResult executionResult = dispatchRequest(user, query, variables);
+		final Map<String, Object> result = executionResult.toSpecification();
+		if (executionResult.getErrors().size() > 0) {
+			WebApplicationException actual = null;
+			for (GraphQLError error : executionResult.getErrors()) {
+				if (error instanceof ExceptionWhileDataFetching) {
+					ExceptionWhileDataFetching exception = (ExceptionWhileDataFetching) error;
+					if (exception.getException() instanceof WebApplicationException) {
+						actual = (WebApplicationException) exception.getException();
+						break;
+					}
+				}
+			}
+
+			Status status = (actual != null)
+				?
+				Status.fromStatusCode(actual.getResponse().getStatus())
+				:
+				Status.INTERNAL_SERVER_ERROR;
+			logger.warn("Errors: {}", executionResult.getErrors());
+			return Response.status(status).entity(result).build();
+		}
+		if (OUTPUT_XML.equals(output)) {
+			// TODO: Decide if we indeed want pretty-printed XML:
+			final String xml = ResponseUtils.toPrettyString($.toXml(result), 2);
+			return Response.ok(xml, MediaType.APPLICATION_XML).build();
+		} else if (OUTPUT_XLSX.equals(output)) {
+			return Response.ok(new XSSFWorkbookStreamingOutput(createWorkbook(result)), MEDIATYPE_XLSX)
+					.header("Content-Disposition", "attachment; filename=" + "anet_export.xslx").build();
+		} else {
+			return Response.ok(result, MediaType.APPLICATION_JSON).build();
+		}
+	}
+
+	private ExecutionResult dispatchRequest(Person user, String query, Map<String, Object> variables) {
 		final DataLoaderRegistry dataLoaderRegistry
 			= BatchingUtils.registerDataLoaders(engine, true, true);
 		final DataLoaderDispatcherInstrumentation dispatcherInstrumentation
@@ -158,41 +192,24 @@ public class GraphQLResource {
 		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
 				.instrumentation(dispatcherInstrumentation)
 				.build();
-		final ExecutionResult executionResult = graphql.execute(executionInput);
-		final Map<String, Object> result = new LinkedHashMap<>();
-		if (executionResult.getErrors().size() > 0) {
-			WebApplicationException actual = null;
-			for (GraphQLError error : executionResult.getErrors()) {
-				if (error instanceof ExceptionWhileDataFetching) {
-					ExceptionWhileDataFetching exception = (ExceptionWhileDataFetching) error;
-					if (exception.getException() instanceof WebApplicationException) {
-						actual = (WebApplicationException) exception.getException();
-						break;
-					}
-				}
+		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
+		final Runnable dispatcher = () -> {
+			while (!request.isDone()) {
+				// Dispatch all our data loaders until the request is done;
+				// we have data loaders at various depths (one dependent on another),
+				// e.g. in {@link Report#loadApprovalStatus}
+				CompletableFuture.allOf(
+						dataLoaderRegistry.getDataLoaders()
+						.stream()
+						.map(dl -> (CompletableFuture<?>)dl.dispatch())
+						.toArray(CompletableFuture<?>[]::new));
 			}
-
-			result.put(RESULT_KEY_ERRORS, executionResult.getErrors().stream()
-					.map(e -> e.getMessage())
-					.collect(Collectors.toList()));
-			Status status = (actual != null)
-				?
-				Status.fromStatusCode(actual.getResponse().getStatus())
-				:
-				Status.INTERNAL_SERVER_ERROR;
-			logger.warn("Errors: {}", executionResult.getErrors());
-			return Response.status(status).entity(result).build();
-		}
-		result.put(RESULT_KEY_DATA, executionResult.getData());
-		if (OUTPUT_XML.equals(output)) {
-			// TODO: Decide if we indeed want pretty-printed XML:
-			final String xml = ResponseUtils.toPrettyString($.toXml(result), 2);
-			return Response.ok(xml, MediaType.APPLICATION_XML).build();
-		} else if (OUTPUT_XLSX.equals(output)) {
-			return Response.ok(new XSSFWorkbookStreamingOutput(createWorkbook(result)), MEDIATYPE_XLSX)
-					.header("Content-Disposition", "attachment; filename=" + "anet_export.xslx").build();
-		} else {
-			return Response.ok(result, MediaType.APPLICATION_JSON).build();
+		};
+		dispatcher.run();
+		try {
+			return request.get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to complete graphql request", e);
 		}
 	}
 
