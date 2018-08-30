@@ -10,6 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -74,16 +75,25 @@ public class SavedSearchResource {
 		user = DaoUtils.getUser(context, user);
 		return dao.getSearchesByOwner(user);
 	}
-	
-	@DELETE
-	@Timed
-	@Path("/{id}")
-	public Response delete(@Auth Person user, @PathParam("id") Integer id) { 
-		int numDeleted = dao.deleteSavedSearch(id, user);
-		if (numDeleted == 1) { 
-			return Response.ok().build();
-		} else { 
-			return Response.status(Status.NOT_FOUND).build();
-		}
-	}
+
+    @DELETE
+    @Timed
+    @Path("/{id}")
+    public Response deleteSavedSearch(@Auth Person user, @PathParam("id") Integer id) {
+        deleteSavedSearchCommon(user, id);
+        return Response.ok().build();
+    }
+
+    private Integer deleteSavedSearchCommon(Person user, int savedSearchId) {
+        int numDeleted = dao.deleteSavedSearch(savedSearchId, user);
+        if (numDeleted < 1) {
+            throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
+        }
+        return numDeleted;
+    }
+
+    @GraphQLMutation(name="deleteSavedSearch")
+    public Integer deleteSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="savedSearchId") int savedSearchId) {
+        return deleteSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearchId);
+    }
 }
