@@ -169,12 +169,16 @@ class BasePositionForm extends ValidatableFormWrapper {
 		position.person = (position.person && position.person.id) ? {id: position.person.id} : {}
 		position.code = position.code || null //Need to null out empty position codes
 
-		let url = `/api/positions/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updatePosition' : 'createPosition'
+		let graphql = operation + '(position: $position)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { position: position }
+		const variableDef = '($position: PositionInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, position, {disableSubmits: true})
-			.then(response => {
-				if (response.id) {
-					position.id = response.id
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				if (data[operation].id) {
+					position.id = data[operation].id
 				}
 				this.props.history.replace(Position.pathForEdit(position))
 				this.props.history.push({
@@ -183,8 +187,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 						success: 'Saved Position',
 					}
 				})
-			}).catch(error => {
-				this.setState({error: error})
+			}).catch(response => {
+				this.setState({error: response})
 				window.scrollTo(0, 0)
 			})
 	}

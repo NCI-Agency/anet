@@ -1,6 +1,7 @@
 package mil.dds.anet.resources;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
@@ -26,8 +27,11 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
@@ -74,37 +78,54 @@ public class PositionResource {
 		return p;
 	}
 
+	private void validatePosition(@Auth Person user, Position pos) {
+		if (pos.getName() == null || pos.getName().trim().length() == 0) {
+			throw new WebApplicationException("Position Name must not be null", Status.BAD_REQUEST);
+		}
+		if (pos.getType() == null) {
+			throw new WebApplicationException("Position type must be defined", Status.BAD_REQUEST);
+		}
+		if (pos.getOrganization() == null || pos.getOrganization().getId() == null) {
+			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST);
+		}
+		if (pos.getType() == PositionType.ADMINISTRATOR || pos.getType() == PositionType.SUPER_USER) {
+			AuthUtils.assertAdministrator(user);
+		}
+		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
+	}
+
+	@POST
+	@Timed
+	@Path("/new")
+	@RolesAllowed("SUPER_USER")
+	public Position createPosition(@Auth Person user, Position pos) {
+		return createPositionCommon(user, pos);
+	}
+
 	/**
-	 * Creates a new position in the database. Must have Type and Organization with ID specified.
+	 * Creates a new position in the database. Must have Name, Type and Organization with ID specified.
 	 * Optionally can provide:
 	 * - position.person : If a person ID is provided in the Person object, that person will be put in this position.
 	 * @param position the position to create
 	 * @return the same Position object with the ID field filled in.
 	 */
-	@POST
-	@Timed
-	@Path("/new")
+	private Position createPositionCommon(Person user, Position pos) {
+		validatePosition(user, pos);
+
+		Position position = dao.insert(pos);
+
+		if (pos.getPerson() != null) {
+			dao.setPersonInPosition(pos.getPerson(), position);
+		}
+
+		AnetAuditLogger.log("Position {} created by {}", position, user);
+		return position;
+	}
+
+	@GraphQLMutation(name="createPosition")
 	@RolesAllowed("SUPER_USER")
-	public Position createPosition(@Auth Person user, Position p) {
-		if (p.getName() == null || p.getName().trim().length() == 0) {
-			throw new WebApplicationException("Position Name must not be null", Status.BAD_REQUEST);
-		}
-		if (p.getType() == null) { throw new WebApplicationException("Position type must be defined", Status.BAD_REQUEST); }
-		if (p.getOrganization() == null || p.getOrganization().getId() == null) { 
-			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST); 
-		}
-		if (p.getType() == PositionType.ADMINISTRATOR || p.getType() == PositionType.SUPER_USER) { AuthUtils.assertAdministrator(user); }
-		
-		AuthUtils.assertSuperUserForOrg(user, p.getOrganization());
-
-		Position created = dao.insert(p);
-		
-		if (p.getPerson() != null) { 
-			dao.setPersonInPosition(p.getPerson(), created);
-		}
-
-		AnetAuditLogger.log("Position {} created by {}", p, user);
-		return created;
+	public Position createPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="position") Position pos) {
+		return createPositionCommon(DaoUtils.getUserFromContext(context), pos);
 	}
 
 	@POST
@@ -137,11 +158,12 @@ public class PositionResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updatePosition(@Auth Person user, Position pos) {
-		if (pos.getType() == PositionType.ADMINISTRATOR || pos.getType() == PositionType.SUPER_USER) { AuthUtils.assertAdministrator(user); }
-		if (DaoUtils.getId(pos.getOrganization()) == null) { 
-			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST); 
-		}
-		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
+		updatePositionCommon(user, pos);
+		return Response.ok().build();
+	}
+
+	private int updatePositionCommon(Person user, Position pos) {
+		validatePosition(user, pos);
 
 		final int numRows = dao.update(pos);
 
@@ -169,8 +191,18 @@ public class PositionResource {
 			}
 		}
 
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+		}
 		AnetAuditLogger.log("Position {} edited by {}", pos, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+		return numRows;
+	}
+
+	@GraphQLMutation(name="updatePosition")
+	@RolesAllowed("SUPER_USER")
+	public Integer updatePosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="position") Position pos) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updatePositionCommon(DaoUtils.getUserFromContext(context), pos);
 	}
 
 	@GET
@@ -303,7 +335,7 @@ public class PositionResource {
 		if (p == null) { return Response.status(Status.NOT_FOUND).build(); } 
 		
 		//if there is a person in this position, reject
-		if (p.getPerson() != null) { 
+		if (p.getPerson() != null) {
 			throw new WebApplicationException("Cannot delete a position that current has a person", Status.BAD_REQUEST); 
 		} 
 		
