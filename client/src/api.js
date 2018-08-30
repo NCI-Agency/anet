@@ -15,11 +15,16 @@ const API = {
 		return window.fetch(pathName, params)
 					.then(response => {
 						let isOk = response.ok
-
 						if (response.headers.get('content-type') === 'application/json') {
 							let respBody = response.json()
 							if (!isOk) {
 								return respBody.then(r => {
+									// When the result returns a list of errors we only show the first one
+									if (r.errors) {
+										for (let i = 0; i < r.errors.length; i++) {
+											r.error = r.errors[0].message
+										}
+									}
 									r.status = response.status
 									r.statusText = response.statusText
 									if (!r.message) { r.message = r.error || 'You do not have permissions to perform this action' }
