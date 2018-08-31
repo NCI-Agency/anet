@@ -148,9 +148,9 @@ public class PositionDao extends AnetBaseDao<Position> {
 		}
 	}
 	
-	public void setPersonInPosition(Person person, Position position) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public Integer setPersonInPosition(Person person, Position position) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
 				//If this person is in a position already, we need to remove them. 
 				Position currPos = dbHandle.createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS 
@@ -177,14 +177,14 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("personId", person.getId())
 					.bind("positionId", position.getId())
 					.execute();
-				dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
+				// GraphQL mutations *have* to return something, so we return the number of inserted rows
+				return new Integer(dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, :personId, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("personId", person.getId())
 					.bind("createdAt", now.plusMillis(1)) // Need to ensure this timestamp is greater than previous INSERT. 
-					.execute();
-				return null;
+					.execute());
 			}
 		});
 		

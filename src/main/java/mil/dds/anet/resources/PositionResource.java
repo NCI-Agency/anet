@@ -223,13 +223,26 @@ public class PositionResource {
 	@Timed
 	@Path("/{id}/person")
 	@RolesAllowed("SUPER_USER")
-	public Response putPersonInPosition(@Auth Person user, @PathParam("id") int positionId, Person p) {
-		Position pos = dao.getById(positionId);
+	public Response putPersonInPosition(@Auth Person user, @PathParam("id") int positionId, Person person) {
+		putPersonInPositionCommon(user, positionId, person);
+		return Response.ok().build();
+	}
+
+	public Integer putPersonInPositionCommon(Person user, int positionId, Person person) {
+		final Position pos = dao.getById(positionId);
+		if (pos == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
-		dao.setPersonInPosition(p, pos);
-		AnetAuditLogger.log("Person {} put in Position {} by {}", p, pos, user);
-		return Response.ok().build();
+		int numRows = dao.setPersonInPosition(person, pos);
+		AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
+		return numRows;
+	}
+
+	@GraphQLMutation(name="putPersonInPosition")
+	@RolesAllowed("SUPER_USER")
+	public Integer putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="positionId") int positionId, @GraphQLArgument(name="person") Person person) {
+		return putPersonInPositionCommon(DaoUtils.getUserFromContext(context), positionId, person);
 	}
 
 	@DELETE
