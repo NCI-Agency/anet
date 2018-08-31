@@ -202,7 +202,7 @@ class BasePositionShow extends Page {
 
 				{canDelete && <div className="submit-buttons"><div>
 					<ConfirmDelete
-						onConfirmDelete={this.deletePosition}
+						onConfirmDelete={this.onConfirmDelete}
 						objectType="position"
 						objectDisplay={'#' + this.state.position.id}
 						bsStyle="warning"
@@ -251,15 +251,21 @@ class BasePositionShow extends Page {
 	}
 
 	@autobind
-	deletePosition() {
-		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
-			this.props.history.push({
-				pathname: '/',
-				state: {success: 'Position Deleted'}
+	onConfirmDelete() {
+		const operation = 'deletePosition'
+		let graphql = operation + '(positionId: $positionId)'
+		const variables = { positionId: this.state.position.id }
+		const variableDef = '($positionId: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.props.history.push({
+					pathname: '/',
+					state: {success: 'Position deleted'}
+				})
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				window.scrollTo(0, 0)
 			})
-		}, data => {
-			this.setState({success: null, error: data})
-		})
 	}
 }
 

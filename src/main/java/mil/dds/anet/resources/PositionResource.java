@@ -330,30 +330,38 @@ public class PositionResource {
 		return dao.search(query);
 	}
 
-	
 	@DELETE
 	@Timed
 	@Path("/{id}")
-	public Response deletePosition(@PathParam("id") int positionId) { 
-		Position p = dao.getById(positionId);
-		if (p == null) { return Response.status(Status.NOT_FOUND).build(); } 
+	public Response deletePosition(@PathParam("id") int positionId) {
+		deletePositionCommon(positionId);
+		return Response.ok().build();
+	}
+
+	private Integer deletePositionCommon(int positionId) {
+		final Position position = dao.getById(positionId);
+		if (position == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		
 		//if there is a person in this position, reject
-		if (p.getPerson() != null) {
+		if (position.getPerson() != null) {
 			throw new WebApplicationException("Cannot delete a position that current has a person", Status.BAD_REQUEST); 
 		} 
 		
-		//if position is active, reject. 
-		if (PositionStatus.ACTIVE.equals(p.getStatus())) { 
+		//if position is active, reject
+		if (PositionStatus.ACTIVE.equals(position.getStatus())) {
 			throw new WebApplicationException("Cannot delete an active position", Status.BAD_REQUEST);
 		}
 		
 		//if this position has any history, we'll just delete it
-		//if this position is in an approval chain, we just delete it 
-		//if this position is in an organization, just remove it.
-		//if this position has any associated positions, just remove them.
-		dao.deletePosition(p);
-		return Response.ok().build();
+		//if this position is in an approval chain, we just delete it
+		//if this position is in an organization, just remove it
+		//if this position has any associated positions, just remove them
+		return dao.deletePosition(position);
+	}
+
+	@GraphQLMutation(name="deletePosition")
+	public Integer deletePosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="positionId") int positionId) {
+		return deletePositionCommon(positionId);
 	}
 
 }
