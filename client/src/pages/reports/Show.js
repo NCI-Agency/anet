@@ -38,6 +38,8 @@ class BaseReportShow extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			report: new Report({id: props.match.params.id}),
 			newComment: new Comment(),
 			approvalComment: new Comment(),
@@ -417,7 +419,7 @@ class BaseReportShow extends Page {
 					state: {success: 'Report deleted'}
 				})
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				window.scrollTo(0, 0)
 			})
 	}

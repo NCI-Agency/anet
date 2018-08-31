@@ -49,6 +49,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 		const { report, currentUser } = props
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			recents: {
 				persons: [],

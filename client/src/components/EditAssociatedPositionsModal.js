@@ -25,6 +25,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
+			success: null,
 			error: null,
 			associatedPositions: props.position.associatedPositions.slice()
 		}
@@ -154,7 +155,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 			.then(resp =>
 				this.props.onSuccess()
 			).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 			})
 	}
 

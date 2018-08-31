@@ -43,6 +43,8 @@ class BaseHome extends Page {
 		super(props)
 		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
+			success: null,
+			error: null,
 			tileCounts: [],
 			savedSearches: [],
 			selectedSearch: null,
@@ -311,8 +313,9 @@ class BaseHome extends Page {
 				savedSearches.splice(index, 1)
 				let nextSelect = savedSearches.length > 0 ? savedSearches[0] : null
 				this.setState({ savedSearches: savedSearches, selectedSearch : nextSelect })
-			}).catch(response => {
-				this.setState({success:null, error: response})
+			}).catch(error => {
+				this.setState({success:null, error: error})
+				window.scrollTo(0, 0)
 			})
 	}
 

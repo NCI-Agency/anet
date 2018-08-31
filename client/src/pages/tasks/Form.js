@@ -52,6 +52,8 @@ class BaseTaskForm extends ValidatableFormWrapper {
 		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 		}
 	}
@@ -190,7 +192,7 @@ class BaseTaskForm extends ValidatableFormWrapper {
 					}
 				})
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				window.scrollTo(0, 0)
 			})
 	}

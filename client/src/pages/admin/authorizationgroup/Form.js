@@ -27,6 +27,8 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			errors: {},
 		}
@@ -107,7 +109,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 					}
 				})
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				window.scrollTo(0, 0)
 			})
 	}

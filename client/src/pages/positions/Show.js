@@ -41,6 +41,8 @@ class BasePositionShow extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			position: new Position( {
 				id: props.match.params.id,
 				previousPeople: [],

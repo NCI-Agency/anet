@@ -30,6 +30,8 @@ class BaseReportEdit extends Page {
 		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
+			success: null,
+			error: null,
 			report: new Report(),
 			originalReport: new Report(),
 		}
@@ -97,7 +99,7 @@ class BaseReportEdit extends Page {
 					state: {success: 'Report deleted'}
 				})
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				window.scrollTo(0, 0)
 			})
 	}

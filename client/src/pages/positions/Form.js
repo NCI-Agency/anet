@@ -33,6 +33,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			errors: {},
 		}
@@ -187,8 +189,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 						success: 'Saved Position',
 					}
 				})
-			}).catch(response => {
-				this.setState({error: response})
+			}).catch(error => {
+				this.setState({success: null, error: error})
 				window.scrollTo(0, 0)
 			})
 	}

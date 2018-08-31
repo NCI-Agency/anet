@@ -35,8 +35,9 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 	constructor(props) {
 		super(props)
 		this.state = {
-			isBlocking: false,
+			success: null,
 			error: null,
+			isBlocking: false,
 			showAddApprovalStepAlert: false,
 		}
 		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
@@ -274,7 +275,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 					}
 				})
 			}).catch(error => {
-				this.setState({error})
+				this.setState({success: null, error: error})
 				window.scrollTo(0, 0)
 			})
 	}

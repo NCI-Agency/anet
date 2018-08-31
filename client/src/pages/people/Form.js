@@ -43,10 +43,11 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const { person } = props
 		const splitName = Person.parseFullName(person.name)
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			fullName: Person.fullName(splitName),
 			splitName: splitName,
-			error: null,
 			originalStatus: person.status,
 			showWrongPersonModal: false,
 			wrongPersonOptionValue: null,
@@ -399,7 +400,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 					})
 				}
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				window.scrollTo(0, 0)
 			})
 	}

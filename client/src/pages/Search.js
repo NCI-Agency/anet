@@ -119,6 +119,8 @@ class Search extends Page {
 		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {clearSearchQuery: false}))
 
 		Object.assign(this.state, {
+			success: null,
+			error: null,
 			query: props.searchQuery.text || null,
 			queryType: null,
 			pageNum: {
@@ -138,8 +140,6 @@ class Search extends Page {
 				locations: null,
 				tasks: null,
 			},
-			error: null,
-			success: null,
 		})
 	}
 
@@ -184,8 +184,8 @@ class Search extends Page {
 	_fetchDataCallback(parts) {
 		return GQL.run(parts).then(data => {
 			this.setState({success: null, error: null, results: data})
-		}).catch(response =>
-			this.setState({success: null, error: response})
+		}).catch(error =>
+			this.setState({success: null, error: error})
 		)
 	}
 
@@ -347,8 +347,8 @@ class Search extends Page {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
 			this.setState({results})
-		}).catch(response =>
-			this.setState({error: response})
+		}).catch(error =>
+			this.setState({success: null, error: error})
 		)
 	}
 
@@ -499,10 +499,10 @@ class Search extends Page {
 					})
 					window.scrollTo(0, 0)
 				}
-			}).catch(response => {
+			}).catch(error => {
 				this.setState({
 					success: null,
-					error: response,
+					error: error,
 					saveSearch: {show: false}
 				})
 				window.scrollTo(0, 0)
@@ -518,8 +518,8 @@ class Search extends Page {
 	_exportSearchResultsCallback(parts) {
 		GQL.runExport(parts, "xlsx").then(blob => {
 			FileSaver.saveAs(blob, "anet_export.xlsx")
-		}).catch(response =>
-			this.setState({error: response})
+		}).catch(error =>
+			this.setState({success: null, error: error})
 		)
 	}
 
