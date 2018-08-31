@@ -77,7 +77,7 @@ public class PositionResource {
 		return p;
 	}
 
-	private void validatePosition(@Auth Person user, Position pos) {
+	private void validatePosition(Person user, Position pos) {
 		if (pos.getName() == null || pos.getName().trim().length() == 0) {
 			throw new WebApplicationException("Position Name must not be null", Status.BAD_REQUEST);
 		}
@@ -87,6 +87,9 @@ public class PositionResource {
 		if (pos.getOrganization() == null || pos.getOrganization().getId() == null) {
 			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST);
 		}
+	}
+
+	private void assertCanUpdatePosition(Person user, Position pos) {
 		if (pos.getType() == PositionType.ADMINISTRATOR || pos.getType() == PositionType.SUPER_USER) {
 			AuthUtils.assertAdministrator(user);
 		}
@@ -109,6 +112,7 @@ public class PositionResource {
 	 * @return the same Position object with the ID field filled in.
 	 */
 	private Position createPositionCommon(Person user, Position pos) {
+		assertCanUpdatePosition(user, pos);
 		validatePosition(user, pos);
 
 		Position position = dao.insert(pos);
@@ -162,6 +166,7 @@ public class PositionResource {
 	}
 
 	private int updatePositionCommon(Person user, Position pos) {
+		assertCanUpdatePosition(user, pos);
 		validatePosition(user, pos);
 
 		final int numRows = dao.update(pos);
