@@ -119,6 +119,7 @@ class LocationForm extends ValidatableFormWrapper {
 				if (data[operation].id) {
 					loc.id = data[operation].id
 				}
+				this.props.history.replace(Location.pathForEdit(loc))
 				this.props.history.push({
 					pathname: Location.pathFor(loc),
 					state: {
