@@ -60,6 +60,8 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
+import '../components/Nav.css'
+
 class App extends Page {
 
 	static propTypes = {
@@ -243,7 +245,7 @@ class App extends Page {
 			<Route path="*" component={PageMissing} />
 		</Switch>
 
-		const navWidths = {sm: 4, md: 3, lg: 2}
+		const navWidths = {sm: 3, md: 2, lg: 2}
 		const primaryWidths = (this.props.pageProps.useNavigation === true)
 				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
 				: {sm: 12, md: 12, lg: 12}
@@ -264,13 +266,13 @@ class App extends Page {
 					<Grid fluid componentClass="section">
 						<Row>
 							{this.props.pageProps.useNavigation === true &&
-								<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
+								<Col sm={navWidths.sm} md={navWidths.md} className="hide-for-print nav-sidebar">
 									<Nav
 										organizations={this.state.organizations}
 										topbarOffset={this.state.topbarOffset} />
 								</Col>
 							}
-							<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
+							<Col sm={primaryWidths.sm} md={primaryWidths.md} smOffset={navWidths.sm} mdOffset={navWidths.md} className="primary-content">
 								{routing}
 							</Col>
 						</Row>

@@ -269,21 +269,33 @@ span.asLink:focus {
 	text-decoration: none;
 }
 
+.home-tile-container {
+	display: table;
+	width: 100%;
+}
 button.home-tile.btn {
 	display: table-cell;
-	width: 20%;
+	width: 100%;
 	float: none;
 	vertical-align: top;
 	text-align: center;
 	padding: 10px;
 	color: #5c5c5c;
 	text-decoration: none;
+	word-wrap: break-word;
+	white-space: normal;
+}
+@media (min-width: 700px) {
+	button.home-tile.btn {
+		width: 20%;
+	}
 }
 .home-tile h1 {
 	font-weight: 900;
 }
 
 .home-tile:hover {
+	height: 100%;
 	background: #dae3ee;
 }
 .home-tile:hover, .home-tile:focus {
