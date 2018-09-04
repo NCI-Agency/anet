@@ -25,6 +25,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
@@ -91,14 +92,23 @@ public class AuthorizationGroupResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
-	public AuthorizationGroup createNewAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
+	public AuthorizationGroup createAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
+		return createAuthorizationGroupCommon(user, t);
+	}
+
+	private AuthorizationGroup createAuthorizationGroupCommon(Person user, AuthorizationGroup t) {
 		if (t.getName() == null || t.getName().trim().length() == 0) {
 			throw new WebApplicationException("AuthorizationGroup name must not be empty", Status.BAD_REQUEST);
 		}
 		t = dao.insert(t);
 		AnetAuditLogger.log("AuthorizationGroup {} created by {}", t, user);
 		return t;
+	}
 
+	@GraphQLMutation(name="createAuthorizationGroup")
+	@RolesAllowed("ADMINISTRATOR")
+	public AuthorizationGroup createAuthorizationGroup(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="authorizationGroup") AuthorizationGroup t) {
+		return createAuthorizationGroupCommon(DaoUtils.getUserFromContext(context), t);
 	}
 
 	@POST
@@ -106,7 +116,15 @@ public class AuthorizationGroupResource {
 	@Path("/update")
 	@RolesAllowed("ADMINISTRATOR")
 	public Response updateAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
+		updateAuthorizationGroupCommon(user, t);
+		return Response.ok().build();
+	}
+
+	private Integer updateAuthorizationGroupCommon(Person user, AuthorizationGroup t) {
 		int numRows = dao.update(t);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+		}
 		// Update positions:
 		if (t.getPositions() != null) {
 			try {
@@ -127,7 +145,14 @@ public class AuthorizationGroupResource {
 			}
 		}
 		AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+		return numRows;
+	}
+
+	@GraphQLMutation(name="updateAuthorizationGroup")
+	@RolesAllowed("ADMINISTRATOR")
+	public Integer updateAuthorizationGroup(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="authorizationGroup") AuthorizationGroup t) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateAuthorizationGroupCommon(DaoUtils.getUserFromContext(context), t);
 	}
 
 	/**
