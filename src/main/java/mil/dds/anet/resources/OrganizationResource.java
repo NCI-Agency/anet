@@ -82,7 +82,7 @@ public class OrganizationResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
-	public Organization createNewOrganization(Organization org, @Auth Person user) {
+	public Organization createNewOrganization(@Auth Person user, Organization org) {
 		AuthUtils.assertAdministrator(user);
 		final Organization outer;
 		outer = engine.getDbHandle().inTransaction(new TransactionCallback<Organization>() {
@@ -136,7 +136,7 @@ public class OrganizationResource {
 	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
-	public Response updateOrganization(Organization org, @Auth Person user) { 
+	public Response updateOrganization(@Auth Person user, Organization org) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(new TransactionCallback<Response>() {
 			public Response inTransaction(Handle conn, TransactionStatus status) throws Exception {
