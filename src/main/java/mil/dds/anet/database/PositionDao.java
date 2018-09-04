@@ -308,11 +308,11 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return query.list();
 	}
 
-	public void associatePosition(Position a, Position b) {
+	public int associatePosition(Position a, Position b) {
 		DateTime now = DateTime.now();
 		Integer idOne = Math.min(a.getId(), b.getId());
 		Integer idTwo = Math.max(a.getId(), b.getId());
-		dbHandle.createStatement("/* associatePosition */ INSERT INTO \"positionRelationships\" "
+		return dbHandle.createStatement("/* associatePosition */ INSERT INTO \"positionRelationships\" "
 				+ "(\"positionId_a\", \"positionId_b\", \"createdAt\", \"updatedAt\", deleted) "
 				+ "VALUES (:positionId_a, :positionId_b, :createdAt, :updatedAt, :deleted)")
 			.bind("positionId_a", idOne)

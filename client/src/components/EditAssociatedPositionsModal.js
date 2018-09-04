@@ -150,10 +150,12 @@ class BaseEditAssociatedPositionsModal extends Component {
 		position.associatedPositions = this.state.associatedPositions
 		delete position.previousPeople
 		delete position.person //prevent any changes to person.
-
-		API.send('/api/positions/updateAssociatedPosition', position)
-			.then(resp =>
-				this.props.onSuccess()
+		const graphql = 'updateAssociatedPosition(position: $position)'
+		const variables = { position: position }
+		const variableDef = '($position: PositionInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(
+				data => this.props.onSuccess()
 			).catch(error => {
 				this.setState({success: null, error: error})
 			})

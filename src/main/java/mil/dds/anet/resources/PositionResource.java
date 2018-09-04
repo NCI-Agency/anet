@@ -136,24 +136,36 @@ public class PositionResource {
 	@Path("/updateAssociatedPosition")
 	@RolesAllowed("SUPER_USER")
 	public Response updateAssociatedPosition(@Auth Person user, Position pos) {
+		updateAssociatedPositionCommon(user, pos);
+		return Response.ok().build();
+	}
+
+	public Integer updateAssociatedPositionCommon(Person user, Position pos) {
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
 		final Position current = dao.getById(pos.getId());
-		if (current != null) {
-			// Run the diff and see if anything changed and update.
-			if (pos.getAssociatedPositions() != null) {
-				Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
-						newPosition -> {
-							dao.associatePosition(newPosition, pos);
-						},
-						oldPositionId -> {
-							dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
-						});
-				AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
-			}
-		}
+		if (current == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 
-		return (current == null) ? Response.status(Status.NOT_FOUND).build() : Response.ok().build();
+		// Run the diff and see if anything changed and update.
+		if (pos.getAssociatedPositions() != null) {
+			Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
+					newPosition -> {
+						dao.associatePosition(newPosition, pos);
+					},
+					oldPositionId -> {
+						dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
+					});
+			AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
+			return 1;
+		}
+		return 0;
+	}
+
+	@GraphQLMutation(name="updateAssociatedPosition")
+	@RolesAllowed("SUPER_USER")
+	public Integer updateAssociatedPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="position") Position pos) {
+		// GraphQL mutations *have* to return something
+		return updateAssociatedPositionCommon(DaoUtils.getUserFromContext(context), pos);
 	}
 
 	@POST
