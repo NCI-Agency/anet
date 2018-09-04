@@ -11,6 +11,7 @@ html {
 }
 
 body {
+	font-family: -apple-system, BlinkMacSystemFont, “Segoe UI”, Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
 	background: #f2f2f2;
 }
 
@@ -187,8 +188,14 @@ fieldset.danger {
 	background-color: #e0e0e0;
 }
 
-.header .logo img, .header input, .header button {
-	height: 38px;
+.header .logo img {
+	max-height: 38px;
+	min-height: 24px;
+	min-width: 108px;
+}
+
+.header .create-button {
+	padding-bottom: 8px;
 }
 
 .header button {
@@ -688,7 +695,7 @@ header.searchPagination {
 
 .general-banner {
 	padding: 7px;
-	margin-bottom: 0;	
+	margin-bottom: 0;
 	border-radius: 0;
 	border: 1px solid transparent;
 	animation: flash 1s forwards ease-in 0.5s 3 normal;
@@ -733,9 +740,9 @@ header.searchPagination {
 	}
 
 	/* If we don't have this, then every link will be printed with its href afterwards. So "CIV Erin Erinson" will be printed as:
-	 
+
 	 		CIV Erin Erinson (/people/256)
-	 
+
 	   My intuition is that this is useless visual clutter, but maybe it would be useful to people.
 	 */
 	a[href]:after {
