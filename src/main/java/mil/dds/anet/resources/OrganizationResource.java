@@ -2,6 +2,7 @@ package mil.dds.anet.resources;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -30,7 +31,9 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
@@ -77,12 +80,26 @@ public class OrganizationResource {
 	public AnetBeanList<Organization> getTopLevelOrgs(@QueryParam("type") @GraphQLArgument(name="type") OrganizationType type) {
 		return new AnetBeanList<Organization>(dao.getTopLevelOrgs(type));
 	}
-	
+
+	@GET
+	@Timed
+	@GraphQLQuery(name="organization")
+	@Path("/{id}")
+	public Organization getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
+		Organization org = dao.getById(id);
+		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); }
+		return org;
+	}
+
 	@POST
 	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
-	public Organization createNewOrganization(@Auth Person user, Organization org) {
+	public Organization createOrganization(@Auth Person user, Organization org) {
+		return createOrganizationCommon(user, org);
+	}
+
+	private Organization createOrganizationCommon(Person user, Organization org) {
 		AuthUtils.assertAdministrator(user);
 		final Organization outer;
 		outer = engine.getDbHandle().inTransaction(new TransactionCallback<Organization>() {
@@ -112,20 +129,16 @@ public class OrganizationResource {
 				return created;
 			}
 		});
-		AnetAuditLogger.log("Organization {} created by {}", org, user);
+		AnetAuditLogger.log("Organization {} created by {}", outer, user);
 		return outer;
 	}
-	
-	@GET
-	@Timed
-	@GraphQLQuery(name="organization")
-	@Path("/{id}")
-	public Organization getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		Organization org = dao.getById(id);
-		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
-		return org;
+
+	@GraphQLMutation(name="createOrganization")
+	@RolesAllowed("ADMINISTRATOR")
+	public Organization createOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org) {
+		return createOrganizationCommon(DaoUtils.getUserFromContext(context), org);
 	}
-	
+
 	/**
 	 * Primary endpoint to update all aspects of an Organization.
 	 * - Organization (shortName, longName, identificationCode)
@@ -137,9 +150,14 @@ public class OrganizationResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateOrganization(@Auth Person user, Organization org) {
+		updateOrganizationCommon(user, org);
+		return Response.ok().build();
+	}
+
+	private int updateOrganizationCommon(Person user, Organization org) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Response>() {
-			public Response inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//Verify correct Organization
 				AuthUtils.assertSuperUserForOrg(user, org);
 				final int numRows;
@@ -147,6 +165,10 @@ public class OrganizationResource {
 					numRows = dao.update(org);
 				} catch (UnableToExecuteStatementException e) {
 					throw ResponseUtils.handleSqlException(e, "Duplicate identification code");
+				}
+
+				if (numRows == 0) {
+					throw new WebApplicationException("Couldn't process organization update", Status.NOT_FOUND);
 				}
 
 				if (org.getTasks() != null || org.getApprovalSteps() != null) {
@@ -189,11 +211,18 @@ public class OrganizationResource {
 				}
 
 				AnetAuditLogger.log("Organization {} edited by {}", org, user);
-				return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+				return numRows;
 			}
 		});
 	}
-	
+
+	@GraphQLMutation(name="updateOrganization")
+	@RolesAllowed("SUPER_USER")
+	public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateOrganizationCommon(DaoUtils.getUserFromContext(context), org);
+	}
+
 	@POST
 	@Timed
 	@GraphQLQuery(name="organizationList")

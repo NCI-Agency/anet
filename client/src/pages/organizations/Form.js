@@ -251,27 +251,29 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		for (var i = 0; i < this.props.organization.approvalSteps.length; i++) {
 			organization = Object.without(organization, 'approvalStepName' + i)
 		}
-
 		if (organization.parentOrg) {
 			organization.parentOrg = {id: organization.parentOrg.id}
 		}
-
-		let url = `/api/organizations/${this.props.edit ? 'update' : 'new'}`
+		let edit = this.props.edit
+		const operation = edit ? 'updateOrganization' : 'createOrganization'
+		let graphql = operation + '(organization: $organization)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { organization: organization }
+		const variableDef = '($organization: OrganizationInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, organization, {disableSubmits: true})
-			.then(response => {
-				if (response.code) {
-					throw response.code
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				if (data.code) {
+					throw data.code
 				}
-
-				if (response.id) {
-					organization.id = response.id
+				if (data[operation].id) {
+					organization.id = data[operation].id
 				}
 				this.props.history.replace(Organization.pathForEdit(organization))
 				this.props.history.push({
 					pathname: Organization.pathFor(organization),
 					state: {
-						success: 'Organization saved successfully',
+						success: 'Organization saved',
 					}
 				})
 			}).catch(error => {
