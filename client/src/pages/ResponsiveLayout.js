@@ -33,6 +33,8 @@ const styles = theme => ({
 		zIndex: theme.zIndex.drawer + 1,
 	},
 	navIconHide: {
+		height: 38,
+		color: '#337ab7',
 		[theme.breakpoints.up('md')]: {
 			display: 'none',
 		},
