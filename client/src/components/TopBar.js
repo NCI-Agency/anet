@@ -4,7 +4,6 @@ import React, {Component} from 'react'
 import NoPositionBanner from 'components/NoPositionBanner'
 import GeneralBanner from 'components/GeneralBanner'
 import SecurityBanner from 'components/SecurityBanner'
-import Header from 'components/Header'
 import {Person} from 'models'
 import AppContext from 'components/AppContext'
 
@@ -26,7 +25,7 @@ class BaseTopBar extends Component {
 
     constructor(props) {
         super(props)
-        this.state = { 
+        this.state = {
             bodyPaddingTop: 0,
             bannerVisibility: false
         }
@@ -49,9 +48,9 @@ class BaseTopBar extends Component {
     }
 
     updateBodyPaddingTop() {
-        let topbarPaddingHeight = document.getElementById('topbar').offsetHeight + 20
+        let topbarPaddingHeight = document.getElementById('topbar').offsetHeight
         if (this.state.bodyPaddingTop !== topbarPaddingHeight){
-            document.body.style.paddingTop =`${topbarPaddingHeight}px` 
+            document.body.style.paddingTop =`${topbarPaddingHeight}px`
             this.props.updateTopbarOffset(topbarPaddingHeight)
             this.setState({ bodyPaddingTop: topbarPaddingHeight })
         }
@@ -69,7 +68,7 @@ class BaseTopBar extends Component {
         }
         if (visibilitySetting === visible.USERS_AND_SUPER_USERS && (currentUser || currentUser.isSuperUser())) {
             output = true
-        } 
+        }
         if (this.state.bannerVisibility !== output) {
             this.setState({ bannerVisibility: output})
         }
@@ -90,7 +89,7 @@ class BaseTopBar extends Component {
                 {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                 <GeneralBanner options={this.bannerOptions()} />
                 <SecurityBanner location={this.props.location} />
-                <Header minimalHeader={this.props.minimalHeader} />
+                {this.props.children}
             </div>
         )
     }
