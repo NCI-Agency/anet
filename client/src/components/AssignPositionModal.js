@@ -150,7 +150,6 @@ class BaseAssignPositionModal extends Component {
 			person: {id: this.props.person.id}
 		}
 		const variableDef = '($positionId: Int!, $person: PersonInput!)'
-		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef)
 			.then(
 				data => this.props.onSuccess()
