@@ -140,7 +140,7 @@ public class PositionResource {
 		return Response.ok().build();
 	}
 
-	public Integer updateAssociatedPositionCommon(Person user, Position pos) {
+	private int updateAssociatedPositionCommon(Person user, Position pos) {
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
 		final Position current = dao.getById(pos.getId());
@@ -208,7 +208,7 @@ public class PositionResource {
 		}
 
 		if (numRows == 0) {
-			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+			throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
 		}
 		AnetAuditLogger.log("Position {} edited by {}", pos, user);
 		return numRows;
@@ -240,7 +240,7 @@ public class PositionResource {
 		return Response.ok().build();
 	}
 
-	public Integer putPersonInPositionCommon(Person user, int positionId, Person person) {
+	private int putPersonInPositionCommon(Person user, int positionId, Person person) {
 		final Position pos = dao.getById(positionId);
 		if (pos == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());

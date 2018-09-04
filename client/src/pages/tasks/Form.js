@@ -188,7 +188,7 @@ class BaseTaskForm extends ValidatableFormWrapper {
 				this.props.history.push({
 					pathname: Task.pathFor(task),
 					state: {
-						success: 'Saved successfully',
+						success: 'Task saved',
 					}
 				})
 			}).catch(error => {

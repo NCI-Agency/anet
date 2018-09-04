@@ -186,7 +186,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 				this.props.history.push({
 					pathname: Position.pathFor(position),
 					state: {
-						success: 'Saved Position',
+						success: 'Position saved',
 					}
 				})
 			}).catch(error => {

@@ -493,7 +493,7 @@ class Search extends Page {
 			.then(data => {
 				if (data[operation].id) {
 					this.setState({
-						success: 'Search successfully saved!',
+						success: 'Search saved',
 						error: null,
 						saveSearch: {show: false}
 					})

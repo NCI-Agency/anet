@@ -120,7 +120,7 @@ public class TaskResource {
 		
 		int numRows = dao.update(p);
 		if (numRows == 0) { 
-			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+			throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
 		}
 		AnetAuditLogger.log("Task {} updatedby {}", p, user);
 		return numRows;

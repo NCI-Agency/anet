@@ -110,7 +110,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 				this.props.history.push({
 					pathname: AuthorizationGroup.pathFor(authGroup),
 					state: {
-						success: 'Saved authorization group',
+						success: 'Authorization group saved',
 					}
 				})
 			}).catch(error => {

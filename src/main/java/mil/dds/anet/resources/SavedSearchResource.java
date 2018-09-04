@@ -84,7 +84,7 @@ public class SavedSearchResource {
         return Response.ok().build();
     }
 
-    private Integer deleteSavedSearchCommon(Person user, int savedSearchId) {
+    private int deleteSavedSearchCommon(Person user, int savedSearchId) {
         int numDeleted = dao.deleteSavedSearch(savedSearchId, user);
         if (numDeleted < 1) {
             throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);

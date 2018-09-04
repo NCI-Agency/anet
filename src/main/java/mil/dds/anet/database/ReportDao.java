@@ -397,7 +397,7 @@ public class ReportDao implements IAnetDao<Report> {
 	 * Deletes a given report from the database. 
 	 * Ensures consistency by removing all references to a report before deleting a report. 
 	 */
-	public Integer deleteReport(final Report report) {
+	public int deleteReport(final Report report) {
 		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				// Delete tags

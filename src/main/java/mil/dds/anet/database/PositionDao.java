@@ -390,7 +390,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return count.longValue() > 0;
 	}
 
-	public Integer deletePosition(final Position p) {
+	public int deletePosition(final Position p) {
 		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//if this position has any history, we'll just delete it

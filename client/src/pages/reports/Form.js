@@ -592,7 +592,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				this.props.history.push({
 					pathname: Report.pathFor(this.props.report),
 					state: {
-						success: 'Report saved successfully',
+						success: 'Report saved',
 					}
 				})
 			})

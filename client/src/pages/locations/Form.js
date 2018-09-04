@@ -123,7 +123,7 @@ class LocationForm extends ValidatableFormWrapper {
 				this.props.history.push({
 					pathname: Location.pathFor(loc),
 					state: {
-						success: 'Saved Location',
+						success: 'Location saved',
 					}
 				})
 			}).catch(error => {

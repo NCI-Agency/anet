@@ -120,10 +120,10 @@ public class AuthorizationGroupResource {
 		return Response.ok().build();
 	}
 
-	private Integer updateAuthorizationGroupCommon(Person user, AuthorizationGroup t) {
+	private int updateAuthorizationGroupCommon(Person user, AuthorizationGroup t) {
 		int numRows = dao.update(t);
 		if (numRows == 0) {
-			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+			throw new WebApplicationException("Couldn't process authorization group update", Status.NOT_FOUND);
 		}
 		// Update positions:
 		if (t.getPositions() != null) {

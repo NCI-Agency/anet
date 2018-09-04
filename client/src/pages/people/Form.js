@@ -395,7 +395,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 					this.props.history.push({
 						pathname: Person.pathFor(person),
 						state: {
-							success: 'Person saved successfully',
+							success: 'Person saved',
 						}
 					})
 				}

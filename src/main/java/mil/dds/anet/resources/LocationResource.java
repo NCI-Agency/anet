@@ -116,7 +116,7 @@ public class LocationResource {
 	private int updateLocationCommon(Person user, Location l) {
 		int numRows = dao.update(l);
 		if (numRows == 0) {
-			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+			throw new WebApplicationException("Couldn't process location update", Status.NOT_FOUND);
 		}
 		AnetAuditLogger.log("Location {} updated by {}", l, user);
 		return numRows;
