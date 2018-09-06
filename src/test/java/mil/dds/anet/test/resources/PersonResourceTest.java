@@ -3,6 +3,7 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
 import org.joda.time.DateTime;
@@ -19,8 +20,7 @@ import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
@@ -66,7 +66,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
 		
 		//Test creating a person with a position already set. 
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(OrganizationList.class);
+		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 
@@ -139,22 +139,22 @@ public class PersonResourceTest extends AbstractResourceTest {
 		PersonSearchQuery query = new PersonSearchQuery();
 		query.setText("bob");
 
-		PersonList searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		AnetBeanList<Person> searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getTotalCount()).isGreaterThan(0);
 		assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob")).findFirst()).isNotEmpty();
 
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%201&type=ADVISOR_ORG", jack).get(OrganizationList.class);
+		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=EF%201&type=ADVISOR_ORG", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1.1")).findFirst().get();
 
 		query.setText(null);
 		query.setOrgId(org.getId());
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 
 		query.setOrgId(null);
 		query.setStatus(ImmutableList.of(PersonStatus.INACTIVE));
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(p -> p.getStatus() == PersonStatus.INACTIVE).count())
 			.isEqualTo(searchResults.getList().size());
@@ -164,32 +164,32 @@ public class PersonResourceTest extends AbstractResourceTest {
 		query.setStatus(null);
 		query.setOrgId(org.getId());
 		//First don't include child orgs and then increase the scope and verify results increase.
-		final PersonList parentOnlyResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		final AnetBeanList<Person> parentOnlyResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 
 		query.setIncludeChildOrgs(true);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList()).containsAll(parentOnlyResults.getList());
 
 		query.setIncludeChildOrgs(true);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 
 		query.setOrgId(null);
 		query.setText("advisor"); //Search against biographies
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getList().size()).isGreaterThan(1);
 
 		query.setText(null);
 		query.setRole(Role.ADVISOR);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getList().size()).isGreaterThan(1);
 		
 		query.setRole(null);
 		query.setText("e");
 		query.setSortBy(PersonSearchSortBy.NAME);
 		query.setSortOrder(SortOrder.DESC); 
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		String prevName = null;
 		for (Person p : searchResults.getList()) { 
 			if (prevName != null) { assertThat(p.getName().compareToIgnoreCase(prevName)).isLessThanOrEqualTo(0); } 
@@ -200,20 +200,20 @@ public class PersonResourceTest extends AbstractResourceTest {
 		query = new PersonSearchQuery();
 		query.setText("A Dvisor");
 		query.setRole(Role.ADVISOR);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		long matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		//Search for same person from an autocomplete box. 
 		query.setText("A Dvisor*");
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		
 		//Search by email Address
 		query.setText("hunter+arthur@dds.mil");
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), PersonList.class);
+		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
 		matchCount = searchResults.getList().stream().filter(p -> p.getEmailAddress().equals("hunter+arthur@dds.mil")).count();
 		assertThat(matchCount).isEqualTo(1);
 		//TODO: should we enforce that this query returns ONLY arthur?  I think not since we're using the plus addressing for testing.. 
@@ -224,15 +224,15 @@ public class PersonResourceTest extends AbstractResourceTest {
 	public void getAllPeopleTest() { 
 		Person liz = getElizabethElizawell();
 		
-		PersonList results = httpQuery("/api/people/", liz).get(PersonList.class);
+		AnetBeanList<Person> results = httpQuery("/api/people/", liz).get(new GenericType<AnetBeanList<Person>>(){});
 		assertThat(results.getTotalCount()).isGreaterThan(0);
 		
-		PersonList pageOne = httpQuery("/api/people?pageNum=0&pageSize=2", liz).get(PersonList.class);
+		AnetBeanList<Person> pageOne = httpQuery("/api/people?pageNum=0&pageSize=2", liz).get(new GenericType<AnetBeanList<Person>>(){});
 		assertThat(pageOne.getTotalCount()).isEqualTo(results.getTotalCount());
 		assertThat(pageOne.getList().size()).isEqualTo(2);
 		assertThat(results.getList()).containsAll(pageOne.getList());
 		
-		PersonList pageTwo = httpQuery("/api/people?pageNum=1&pageSize=2", liz).get(PersonList.class);
+		AnetBeanList<Person> pageTwo = httpQuery("/api/people?pageNum=1&pageSize=2", liz).get(new GenericType<AnetBeanList<Person>>(){});
 		assertThat(pageTwo.getTotalCount()).isEqualTo(results.getTotalCount());
 		assertThat(pageTwo.getList().size()).isEqualTo(2);
 		assertThat(results.getList()).containsAll(pageTwo.getList());
@@ -308,7 +308,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 	@Test
 	public void testInactivatePerson() {
 		final Person jack = getJackJackson();
-		final OrganizationList orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(OrganizationList.class);
+		final AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		final Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 		assertThat(org.getId()).isNotNull();

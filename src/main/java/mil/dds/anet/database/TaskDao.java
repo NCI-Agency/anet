@@ -14,7 +14,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -22,13 +22,16 @@ import mil.dds.anet.utils.DaoUtils;
 @RegisterMapper(TaskMapper.class)
 public class TaskDao implements IAnetDao<Task> {
 
-	Handle dbHandle;
-	
+	private final Handle dbHandle;
+	private final IdBatcher<Task> idBatcher;
+
 	public TaskDao(Handle h) { 
 		this.dbHandle = h; 
+		final String idBatcherSql = "/* batch.getTasksByIds */ SELECT * from tasks where id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, new TaskMapper());
 	}
 	
-	public TaskList getAll(int pageNum, int pageSize) { 
+	public AnetBeanList<Task> getAll(int pageNum, int pageSize) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) { 
 			sql = "/* getAllTasks */ SELECT tasks.*, COUNT(*) OVER() AS totalCount "
@@ -40,7 +43,7 @@ public class TaskDao implements IAnetDao<Task> {
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum)
 				.map(new TaskMapper());
-		return TaskList.fromQuery(query, pageNum, pageSize);
+		return new AnetBeanList<Task>(query, pageNum, pageSize, null);
 	}
 	
 	@Override
@@ -52,7 +55,12 @@ public class TaskDao implements IAnetDao<Task> {
 		if (results.size() == 0) { return null; } 
 		return results.get(0);
 	}
-	
+
+	@Override
+	public List<Task> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
+	}
+
 	@Override
 	public Task insert(Task p) {
 		p.setCreatedAt(DateTime.now());
@@ -103,7 +111,7 @@ public class TaskDao implements IAnetDao<Task> {
 			.list();
 	}
 
-	public TaskList search(TaskSearchQuery query) {
+	public AnetBeanList<Task> search(TaskSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getTaskSearcher().runSearch(query, dbHandle);
 	}

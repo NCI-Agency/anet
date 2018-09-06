@@ -1,7 +1,10 @@
 package mil.dds.anet.resources;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -12,6 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -19,21 +23,22 @@ import javax.ws.rs.core.Response.Status;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.database.ApprovalStepDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.Utils;
 
 @Path("/api/approvalSteps")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class ApprovalStepResource implements IGraphQLResource {
+public class ApprovalStepResource {
 
 	AnetObjectEngine engine;
 	ApprovalStepDao dao;
@@ -45,14 +50,20 @@ public class ApprovalStepResource implements IGraphQLResource {
 	
 	@GET
 	@Timed
-	@GraphQLFetcher
 	@Path("/byOrganization")
-	public List<ApprovalStep> getStepsForOrg(@QueryParam("orgId") int orgId) {
-		Organization ao = new Organization();
-		ao.setId(orgId);
-		return engine.getApprovalStepsForOrg(ao);
+	public List<ApprovalStep> getStepsForOrg(@QueryParam("orgId") Integer orgId) {
+		try {
+			return getStepsForOrg(engine.getContext(), orgId).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load ApprovalStepsForOrg", e);
+		}
 	}
-	
+
+	@GraphQLQuery(name="approvalStepsForOrg")
+	public CompletableFuture<List<ApprovalStep>> getStepsForOrg(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="orgId") Integer orgId) {
+		return engine.getApprovalStepsForOrg(context, orgId);
+	}
+
 	@POST
 	@Timed
 	@Path("/new")
@@ -86,9 +97,13 @@ public class ApprovalStepResource implements IGraphQLResource {
 		}
 	
 		if (newStep.getApprovers() != null) { 
-			Utils.addRemoveElementsById(oldStep.loadApprovers(), newStep.getApprovers(), 
-				newPosition -> engine.getApprovalStepDao().addApprover(newStep, newPosition), 
-				oldPositionId -> engine.getApprovalStepDao().removeApprover(newStep, Position.createWithId(oldPositionId)));
+			try {
+				Utils.addRemoveElementsById(oldStep.loadApprovers(engine.getContext()).get(), newStep.getApprovers(),
+					newPosition -> engine.getApprovalStepDao().addApprover(newStep, newPosition),
+					oldPositionId -> engine.getApprovalStepDao().removeApprover(newStep, Position.createWithId(oldPositionId)));
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Approvers", e);
+			}
 		}
 	}
 	
@@ -101,21 +116,5 @@ public class ApprovalStepResource implements IGraphQLResource {
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(step.getAdvisorOrganizationId()));
 		boolean success = engine.executeInTransaction(dao::deleteStep, id);
 		return (success) ? Response.ok().build() : Response.status(Status.NOT_ACCEPTABLE).build();
-	}
-
-	@Override
-	public Class<ApprovalStep> getBeanClass() {
-		return ApprovalStep.class;
-	}
-	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public Class<List> getBeanListClass() {
-		return List.class;
-	}
-	
-	@Override
-	public String getDescription() {
-		return "Approval Steps";
 	}
 }

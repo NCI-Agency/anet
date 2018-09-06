@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,7 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.beans.search.LocationSearchQuery.LocationSearchSortBy;
@@ -23,7 +24,7 @@ import mil.dds.anet.utils.Utils;
 public class MssqlLocationSearcher implements ILocationSearcher {
 
 	@Override
-	public LocationList runSearch(LocationSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Location> runSearch(LocationSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlLocationSearch */ SELECT locations.*");
@@ -50,12 +51,8 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
-		final LocationList result = new LocationList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return result;
+			return new AnetBeanList<Location>(query.getPageNum(), query.getPageSize(), new ArrayList<Location>());
 		}
 
 		sql.append(" WHERE ");
@@ -86,7 +83,7 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 
 		final Query<Location> map = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
 			.map(new LocationMapper());
-		return LocationList.fromQuery(map, query.getPageNum(), query.getPageSize());
+		return new AnetBeanList<Location>(map, query.getPageNum(), query.getPageSize(), null);
 	}
 
 }

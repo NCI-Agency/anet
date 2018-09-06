@@ -3,9 +3,11 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -24,8 +26,7 @@ import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
@@ -42,7 +43,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 	}
 	
 	@Test
-	public void positionTest() { 
+	public void positionTest()
+		throws ExecutionException, InterruptedException {
 		final Person jack = getJackJackson();
 		assertThat(jack.getId()).isNotNull();
 		assertThat(jack.getPosition()).isNotNull();
@@ -115,7 +117,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		assertThat(prev.getId()).isEqualTo(jack.getId());
 		
 		returned = httpQuery(String.format("/api/positions/%d",created.getId()), jack).get(Position.class);
-		List<PersonPositionHistory> history = returned.loadPreviousPeople();
+		List<PersonPositionHistory> history = returned.loadPreviousPeople(context).get();
 		assertThat(history.size()).isEqualTo(2);
 		assertThat(history.get(0).getPosition().getId()).isEqualTo(returned.getId());
 		assertThat(history.get(0).getPerson()).isEqualTo(jack);
@@ -129,8 +131,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		
 		//Create a principal
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
-				.get(OrganizationList.class);
+		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
+				.get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 			
 		Position prinPos = new Position();
@@ -153,7 +155,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//verify that we can pull the tashkil from the position
-		PositionList retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(PositionList.class);
+		AnetBeanList<Position> retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(new GenericType<AnetBeanList<Position>>(){});
 		assertThat(retT.getList().size()).isEqualTo(1);
 		assertThat(retT.getList()).contains(tashkil);
 		
@@ -162,7 +164,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		assertThat(resp.getStatus()).isEqualTo(200);
 		
 		//verify that it's now gone. 
-		retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(PositionList.class);
+		retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(new GenericType<AnetBeanList<Position>>(){});
 		assertThat(retT.getList().size()).isEqualTo(0);
 		
 		//remove the principal from the tashkil
@@ -199,8 +201,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//Create Position
 		Position test = PositionTest.getTestPosition();
 		test.setCode(test.getCode() + "_" + DateTime.now().getMillis());
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
-			.get(OrganizationList.class);
+		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
+			.get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		
 		test.setOrganization(orgs.getList().get(0));
@@ -249,12 +251,12 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		//Search by name
 		query.setText("Advisor");
-		List<Position> searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		List<Position> searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		//Search by name & is not filled
 		query.setIsFilled(false);
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream().filter(p -> (p.getPerson() == null)).collect(Collectors.toList()))
 			.hasSameElementsAs(searchResults);
@@ -262,7 +264,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//Search by name and is filled and type
 		query.setIsFilled(true);
 		query.setType(ImmutableList.of(PositionType.ADVISOR));
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream()
 				.filter(p -> (p.getPerson() != null))
@@ -272,15 +274,15 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		//Search for text= advisor and type = admin should be empty. 
 		query.setType(ImmutableList.of(PositionType.ADMINISTRATOR));
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults).isEmpty();
 		
 		query.setText("Administrator");
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		//Search by organization
-		List<Organization> orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%201", jack).get(OrganizationList.class).getList();
+		List<Organization> orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%201", jack).get(new GenericType<AnetBeanList<Organization>>(){}).getList();
 		assertThat(orgs.size()).isGreaterThan(0);
 		Organization ef11 = orgs.stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1.1")).findFirst().get();
 		Organization ef1 = orgs.stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
@@ -290,21 +292,21 @@ public class PositionResourceTest extends AbstractResourceTest {
 		query.setText("Advisor");
 		query.setType(null);
 		query.setOrganizationId(ef1.getId());
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults.stream()
 				.filter(p -> p.getOrganization().getId() == ef1.getId())
 				.collect(Collectors.toList()))
 			.hasSameElementsAs(searchResults);
 		
 		query.setIncludeChildrenOrgs(true);
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		query.setIncludeChildrenOrgs(false);
 		query.setText("a");
 		query.setSortBy(PositionSearchSortBy.NAME);
 		query.setSortOrder(SortOrder.DESC); 
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		String prevName = null;
 		for (Position p : searchResults) { 
 			if (prevName != null) { assertThat(p.getName().compareToIgnoreCase(prevName)).isLessThanOrEqualTo(0); } 
@@ -313,7 +315,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		query.setSortBy(PositionSearchSortBy.CODE);
 		query.setSortOrder(SortOrder.ASC); 
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		String prevCode = null;
 		for (Position p : searchResults) { 
 			if (prevCode != null) { assertThat(p.getCode().compareToIgnoreCase(prevCode)).isGreaterThanOrEqualTo(0); } 
@@ -323,7 +325,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//search by status. 
 		query = new PositionSearchQuery();
 		query.setStatus(PositionStatus.INACTIVE);
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Position>>(){}).getList();
 		assertThat(searchResults.size()).isGreaterThan(0);
 		assertThat(searchResults.stream().filter(p -> p.getStatus().equals(PositionStatus.INACTIVE)).count()).isEqualTo(searchResults.size());
 	}
@@ -336,9 +338,9 @@ public class PositionResourceTest extends AbstractResourceTest {
 		int pageSize = 10;
 		int totalReturned = 0;
 		int firstTotalCount = 0;
-		PositionList list = null;
+		AnetBeanList<Position> list = null;
 		do { 
-			list = httpQuery("/api/positions/?pageNum=" + pageNum + "&pageSize=" + pageSize, jack).get(PositionList.class);
+			list = httpQuery("/api/positions/?pageNum=" + pageNum + "&pageSize=" + pageSize, jack).get(new GenericType<AnetBeanList<Position>>(){});
 			assertThat(list).isNotNull();
 			assertThat(list.getPageNum()).isEqualTo(pageNum);
 			assertThat(list.getPageSize()).isEqualTo(pageSize);
@@ -351,7 +353,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 	}
 	
 	@Test
-	public void createPositionTest() {
+	public void createPositionTest()
+		throws ExecutionException, InterruptedException {
 		//Create a new position and designate the person upfront
 		Person newb = new Person();
 		newb.setName("PositionTest Person");
@@ -361,8 +364,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 		newb = httpQuery("/api/people/new", admin).post(Entity.json(newb), Person.class);
 		assertThat(newb.getId()).isNotNull();
 		
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
-				.get(OrganizationList.class);
+		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
+				.get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		
 		Position newbPosition = new Position();
@@ -378,8 +381,9 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//Ensure that the position contains the person
 		Position returned = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
 		assertThat(returned.getId()).isNotNull();
-		assertThat(returned.loadPerson()).isNotNull();
-		assertThat(returned.loadPerson().getId()).isEqualTo(newb.getId());
+		final Person returnedPerson = returned.loadPerson(context).get();
+		assertThat(returnedPerson).isNotNull();
+		assertThat(returnedPerson.getId()).isEqualTo(newb.getId());
 		
 		//Ensure that the person is assigned to this position. 
 		assertThat(newb.loadPosition()).isNotNull();
@@ -427,8 +431,9 @@ public class PositionResourceTest extends AbstractResourceTest {
 		returned = httpQuery("/api/positions/" + pos2.getId(), admin).get(Position.class);
 		assertThat(returned).isNotNull();
 		assertThat(returned.getName()).isEqualTo(pos2.getName());
-		assertThat(returned.loadPerson()).isNotNull();
-		assertThat(returned.loadPerson().getId()).isEqualTo(prin2.getId());
+		final Person returnedPerson2 = returned.loadPerson(context).get();
+		assertThat(returnedPerson2).isNotNull();
+		assertThat(returnedPerson2.getId()).isEqualTo(prin2.getId());
 		
 		//Make sure prin2 got moved out of newbPosition
 		currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
@@ -436,7 +441,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		//Pull the history of newbPosition
 		newbPosition = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
-		List<PersonPositionHistory> history = newbPosition.loadPreviousPeople();
+		List<PersonPositionHistory> history = newbPosition.loadPreviousPeople(context).get();
 		assertThat(history.size()).isEqualTo(2);
 		assertThat(history.get(0).getPerson().getId()).isEqualTo(newb.getId());
 		assertThat(history.get(1).getPerson().getId()).isEqualTo(prin2.getId());

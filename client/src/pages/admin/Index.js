@@ -29,7 +29,7 @@ class BaseAdminIndex extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			adminSettings(f:getAll) { key, value }
+			adminSettings { key, value }
 		`).then(data => {
 			let settings = {}
 			data.adminSettings.forEach(setting => settings[setting.key] = setting.value)

@@ -10,7 +10,6 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class OrganizationMapper implements ResultSetMapper<Organization> {
 
@@ -31,7 +30,6 @@ public class OrganizationMapper implements ResultSetMapper<Organization> {
 		
 		org.setCreatedAt(new DateTime(r.getTimestamp("organizations_createdAt")));
 		org.setUpdatedAt(new DateTime(r.getTimestamp("organizations_updatedAt")));
-		org.setLoadLevel(LoadLevel.PROPERTIES);
 		
 		if (MapperUtils.containsColumnNamed(r, "totalCount")) { 
 			ctx.setAttribute("totalCount", r.getInt("totalCount"));

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Entity;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.assertj.core.api.Assertions;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
+import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.beans.Position;
@@ -48,20 +51,14 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.LocationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportsResourceTest extends AbstractResourceTest {
 
@@ -77,7 +74,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void createReport() {
+	public void createReport()
+		throws ExecutionException, InterruptedException {
 		//Create a report writer
 		final Person author = getJackJackson();
 
@@ -87,7 +85,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		principal.setPrimary(true);
 		Position principalPosition = principal.loadPosition();
 		assertThat(principalPosition).isNotNull();
-		Organization principalOrg = principalPosition.loadOrganization();
+		Organization principalOrg = principalPosition.loadOrganization(context).get();
 		assertThat(principalOrg).isNotNull();
 
 		//Create an Advising Organization for the report writer
@@ -221,17 +219,17 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.getLocation().getId()).isEqualTo(loc.getId());
 
 		//verify the principals on this report
-		assertThat(returned.loadAttendees()).contains(principal);
+		assertThat(returned.loadAttendees(context).get()).contains(principal);
 		returned.setAttendees(null); //Annoying, but required to make future .equals checks pass, because we just caused a lazy load.
 
 		//verify the tasks on this report
-		assertThat(returned.loadTasks()).contains(action);
+		assertThat(returned.loadTasks(context).get()).contains(action);
 		returned.setTasks(null);
 
 		//Verify this shows up on the approvers list of pending documents
 		ReportSearchQuery pendingQuery = new ReportSearchQuery();
 		pendingQuery.setPendingApprovalOf(approver1.getId());
-		ReportList pending = httpQuery("/api/reports/search", approver1).post(Entity.json(pendingQuery), ReportList.class);
+		AnetBeanList<Report> pending = httpQuery("/api/reports/search", approver1).post(Entity.json(pendingQuery), new GenericType<AnetBeanList<Report>>(){});
 		int id = returned.getId();
 		Report expected = pending.getList().stream().filter(re -> re.getId().equals(id)).findFirst().get();
 		assertThat(expected).isEqualTo(returned);
@@ -240,18 +238,18 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Run a search for this users pending approvals
 		ReportSearchQuery searchQuery = new ReportSearchQuery();
 		searchQuery.setPendingApprovalOf(approver1.getId());
-		pending = httpQuery("/api/reports/search", approver1).post(Entity.json(searchQuery), ReportList.class);
+		pending = httpQuery("/api/reports/search", approver1).post(Entity.json(searchQuery), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(pending.getList().size()).isGreaterThan(0);
 
 		//Check on Report status for who needs to approve
-		List<ApprovalAction> approvalStatus = returned.loadApprovalStatus();
+		List<ApprovalAction> approvalStatus = returned.loadApprovalStatus(context).get();
 		assertThat(approvalStatus.size()).isEqualTo(2);
 		ApprovalAction approvalAction = approvalStatus.get(0);
 		assertThat(approvalAction.getPerson()).isNull(); //Because this hasn't been approved yet.
 		assertThat(approvalAction.getCreatedAt()).isNull();
-		assertThat(approvalAction.loadStep()).isEqualTo(steps.get(0));
+		assertThat(approvalAction.loadStep(context).get()).isEqualTo(steps.get(0));
 		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.loadStep()).isEqualTo(steps.get(1));
+		assertThat(approvalAction.loadStep(context).get()).isEqualTo(steps.get(1));
 
 		//Reject the report
 		resp = httpQuery(String.format("/api/reports/%d/reject", created.getId()), approver1)
@@ -292,14 +290,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.getApprovalStep()).isNull();
 
 		//check on report status to see that it got approved.
-		approvalStatus = returned.loadApprovalStatus();
+		approvalStatus = returned.loadApprovalStatus(context).get();
 		assertThat(approvalStatus.size()).isEqualTo(2);
 		approvalAction = approvalStatus.get(0);
 		assertThat(approvalAction.getPerson().getId()).isEqualTo(approver1.getId());
 		assertThat(approvalAction.getCreatedAt()).isNotNull();
-		assertThat(approvalAction.loadStep()).isEqualTo(steps.get(0));
+		assertThat(approvalAction.loadStep(context).get()).isEqualTo(steps.get(0));
 		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.loadStep()).isEqualTo(steps.get(1));
+		assertThat(approvalAction.loadStep(context).get()).isEqualTo(steps.get(1));
 
 		//Post a comment on the report because it's awesome
 		Comment commentOne = httpQuery(String.format("/api/reports/%d/comments", created.getId()), author)
@@ -320,18 +318,18 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Verify this report shows up in the daily rollup
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setReleasedAtStart(DateTime.now().minusDays(1));
-		ReportList rollup = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		AnetBeanList<Report> rollup = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(rollup.getTotalCount()).isGreaterThan(0);
 		assertThat(rollup.getList()).contains(returned);
 
 		//Pull recent People, Tasks, and Locations and verify that the records from the last report are there.
-		List<Person> recentPeople = httpQuery("/api/people/recents", author).get(PersonList.class).getList();
+		List<Person> recentPeople = httpQuery("/api/people/recents", author).get(new GenericType<AnetBeanList<Person>>(){}).getList();
 		assertThat(recentPeople).contains(principalPerson);
 
-		List<Task> recentTasks = httpQuery("/api/tasks/recents", author).get(TaskList.class).getList();
+		List<Task> recentTasks = httpQuery("/api/tasks/recents", author).get(new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(recentTasks).contains(action);
 
-		List<Location> recentLocations = httpQuery("/api/locations/recents", author).get(LocationList.class).getList();
+		List<Location> recentLocations = httpQuery("/api/locations/recents", author).get(new GenericType<AnetBeanList<Location>>(){}).getList();
 		assertThat(recentLocations).contains(loc);
 
 		//Go and delete the entire approval chain!
@@ -341,7 +339,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		Organization updatedOrg = httpQuery("/api/organizations/" + advisorOrg.getId(), admin).get(Organization.class);
 		assertThat(updatedOrg).isNotNull();
-		assertThat(updatedOrg.loadApprovalSteps()).hasSize(0);
+		assertThat(updatedOrg.loadApprovalSteps(context).get()).hasSize(0);
 	}
 
 	public static Comment commentFromText(String string) {
@@ -351,7 +349,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void testDefaultApprovalFlow() {
+	public void testDefaultApprovalFlow() throws NumberFormatException, InterruptedException, ExecutionException {
 		final Person jack = getJackJackson();
 		final Person roger = getRogerRogwell();
 
@@ -390,7 +388,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
 
 		//Find the default ApprovalSteps
-		Integer defaultOrgId = Integer.parseInt(AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION));
+		Integer defaultOrgId = AnetObjectEngine.getInstance().getDefaultOrgId();
 		assertThat(defaultOrgId).isNotNull();
 		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgId=" + defaultOrgId, jack)
 				.get(new GenericType<List<ApprovalStep>>() {});
@@ -409,7 +407,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		billet.setStatus(PositionStatus.ACTIVE);
 
 		//Put billet in EF1
-		OrganizationList results = httpQuery("/api/organizations/search?text=EF%201&type=ADVISOR_ORG", nick).get(OrganizationList.class);
+		AnetBeanList<Organization> results = httpQuery("/api/organizations/search?text=EF%201&type=ADVISOR_ORG", nick).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(results.getList().size()).isGreaterThan(0);
 		Organization ef1 = null;
 		for (Organization org : results.getList()) {
@@ -443,7 +441,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void reportEditTest() {
+	public void reportEditTest()
+		throws ExecutionException, InterruptedException {
 		//Elizabeth writes a report about meeting with Roger
 		final Person elizabeth = getElizabethElizawell();
 		final Person roger = getRogerRogwell();
@@ -452,12 +451,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Fetch some objects from the DB that we'll use later.
 		List<Location> locSearchResults = httpQuery("/api/locations/search?text=Police", elizabeth)
-				.get(LocationList.class).getList();
+				.get(new GenericType<AnetBeanList<Location>>(){}).getList();
 		assertThat(locSearchResults.size()).isGreaterThan(0);
 		final Location loc = locSearchResults.get(0);
 
-		TaskList taskSearchResults = httpQuery("/api/tasks/search?text=Budgeting", elizabeth)
-				.get(TaskList.class);
+		AnetBeanList<Task> taskSearchResults = httpQuery("/api/tasks/search?text=Budgeting", elizabeth)
+				.get(new GenericType<AnetBeanList<Task>>(){});
 		assertThat(taskSearchResults.getTotalCount()).isGreaterThan(2);
 
 		Report r = new Report();
@@ -487,9 +486,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report returned2 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
 		assertThat(returned2.getIntent()).isEqualTo(r.getIntent());
 		assertThat(returned2.getLocation().getId()).isEqualTo(loc.getId());
-		assertThat(returned2.loadTasks()).isEmpty(); //yes this does a DB load :(
-		assertThat(returned2.loadAttendees()).hasSize(3);
-		assertThat(returned2.loadAttendees().contains(roger));
+		assertThat(returned2.loadTasks(context).get()).isEmpty(); //yes this does a DB load :(
+		final List<ReportPerson> returned2Attendees = returned2.loadAttendees(context).get();
+		assertThat(returned2Attendees).hasSize(3);
+		assertThat(returned2Attendees.contains(roger));
 
 		//Elizabeth submits the report
 		resp = httpQuery("/api/reports/" + returned.getId() + "/submit", elizabeth).post(Entity.json(null));
@@ -500,7 +500,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Bob gets the approval (EF1 Approvers)
 		ReportSearchQuery pendingQuery = new ReportSearchQuery();
 		pendingQuery.setPendingApprovalOf(bob.getId());
-		ReportList pendingBobsApproval = httpQuery("/api/reports/search", bob).post(Entity.json(pendingQuery), ReportList.class);
+		AnetBeanList<Report> pendingBobsApproval = httpQuery("/api/reports/search", bob).post(Entity.json(pendingQuery), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(pendingBobsApproval.getList().stream().anyMatch(rpt -> rpt.getId().equals(returned3.getId()))).isTrue();
 
 		//Bob edits the report (change reportText, remove Person, add a Task)
@@ -512,34 +512,36 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		Report returned4 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
 		assertThat(returned4.getReportText()).endsWith("Bob!!");
-		assertThat(returned4.loadAttendees()).hasSize(2);
-		assertThat(returned4.loadAttendees()).contains(PersonTest.personToPrimaryReportPerson(nick));
-		assertThat(returned4.loadTasks()).hasSize(2);
+		final List<ReportPerson> returned4Attendees = returned4.loadAttendees(context).get();
+		assertThat(returned4Attendees).hasSize(2);
+		assertThat(returned4Attendees).contains(PersonTest.personToPrimaryReportPerson(nick));
+		assertThat(returned4.loadTasks(context).get()).hasSize(2);
 
 		resp = httpQuery("/api/reports/" + returned.getId() + "/approve", bob).post(null);
 		assertThat(resp.getStatus()).isEqualTo(200);
 	}
 
 	@Test
-	public void searchTest() {
+	public void searchTest()
+		throws ExecutionException, InterruptedException {
 		final Person jack =  getJackJackson();
 		final Person steve = getSteveSteveson();
 		ReportSearchQuery query = new ReportSearchQuery();
 
 		//Search based on report Text body
 		query.setText("spreadsheet");
-		ReportList searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		AnetBeanList<Report> searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 
 		//Search based on summary
 		query.setText("Amherst");
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 
 		//Search by Author
 		query.setText(null);
 		query.setAuthorId(jack.getId());
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream()
 				.filter(r -> (r.getAuthor().getId().equals(jack.getId()))).count())
@@ -549,7 +551,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Search by Author with Date Filtering
 		query.setEngagementDateStart(new DateTime(2016,6,1,0,0));
 		query.setEngagementDateEnd(new DateTime(2016,6,15,0,0,0));
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().size()).isLessThan(numResults);
 
@@ -558,29 +560,43 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setEngagementDateEnd(null);
 		query.setAuthorId(null);
 		query.setAttendeeId(steve.getId());
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
-		assertThat(searchResults.getList().stream().filter(r ->
-			r.loadAttendees().stream().anyMatch(rp ->
-				(rp.getId().equals(steve.getId()))
-			))).hasSameSizeAs(searchResults.getList());
+		assertThat(searchResults.getList().stream().filter(r -> {
+			try {
+				return r.loadAttendees(context).get()
+					.stream()
+					.anyMatch(rp -> (rp.getId().equals(steve.getId())));
+			}
+			catch (Exception e) {
+				Assertions.fail("error", e);
+				return false;
+			}
+		})).hasSameSizeAs(searchResults.getList());
 
-		List<Task> taskResults = httpQuery("/api/tasks/search?text=1.1.A", jack).get(TaskList.class).getList();
+		List<Task> taskResults = httpQuery("/api/tasks/search?text=1.1.A", jack).get(new GenericType<AnetBeanList<Task>>(){}).getList();
 		assertThat(taskResults).isNotEmpty();
 		Task task = taskResults.get(0);
 
 		//Search by Task
 		query.setAttendeeId(null);
 		query.setTaskId(task.getId());
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
-		assertThat(searchResults.getList().stream().filter(r ->
-				r.loadTasks().stream().anyMatch(p ->
-					p.getId().equals(task.getId()))
-			)).hasSameSizeAs(searchResults.getList());
+		assertThat(searchResults.getList().stream().filter(r -> {
+			try {
+				return r.loadTasks(context).get()
+						.stream()
+						.anyMatch(p -> p.getId().equals(task.getId()));
+			}
+			catch (Exception e) {
+				Assertions.fail("error", e);
+				return false;
+			}
+		})).hasSameSizeAs(searchResults.getList());
 
 		//Search by direct organization
-		OrganizationList orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=EF%201", jack).get(OrganizationList.class);
+		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=EF%201", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization ef11 = orgs.getList().stream().filter(o -> o.getShortName().equals("EF 1.1")).findFirst().get();
 		assertThat(ef11.getShortName()).isEqualToIgnoringCase("EF 1.1");
@@ -588,42 +604,58 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query = new ReportSearchQuery();
 		query.setAdvisorOrgId(ef11.getId());
 		query.setIncludeAdvisorOrgChildren(false);
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
-		assertThat(searchResults.getList().stream().filter(r ->
-				r.loadAdvisorOrg().getId().equals(ef11.getId())
-			)).hasSameSizeAs(searchResults.getList());
+		assertThat(searchResults.getList().stream().filter(r -> {
+			try {
+				return r.loadAdvisorOrg(context).get()
+					.getId()
+					.equals(ef11.getId());
+			}
+			catch (Exception e) {
+				Assertions.fail("error", e);
+				return false;
+			}
+		})).hasSameSizeAs(searchResults.getList());
 
 		//Search by parent organization
-		orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%201", jack).get(OrganizationList.class);
+		orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%201", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization ef1 = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
 		assertThat(ef1.getShortName()).isEqualToIgnoringCase("EF 1");
 
 		query.setAdvisorOrgId(ef1.getId());
 		query.setIncludeAdvisorOrgChildren(true);
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		//#TODO: figure out how to verify the results?
 
 		//Check search for just an org, when we don't know if it's advisor or principal.
 		query.setOrgId(ef11.getId());
 		query.setAdvisorOrgId(null);
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
-		assertThat(searchResults.getList().stream().filter(r ->
-				r.loadAdvisorOrg().getId().equals(ef11.getId())
-			)).hasSameSizeAs(searchResults.getList());
+		assertThat(searchResults.getList().stream().filter(r -> {
+			try {
+				return r.loadAdvisorOrg(context).get()
+					.getId()
+					.equals(ef11.getId());
+			}
+			catch (Exception e) {
+				Assertions.fail("error", e);
+				return false;
+			}
+		})).hasSameSizeAs(searchResults.getList());
 
 
 		//Search by location
-		List<Location> locs = httpQuery("/api/locations/search?text=Cabot", jack).get(LocationList.class).getList();
+		List<Location> locs = httpQuery("/api/locations/search?text=Cabot", jack).get(new GenericType<AnetBeanList<Location>>(){}).getList();
 		assertThat(locs.size() == 0);
 		Location cabot = locs.get(0);
 
 		query = new ReportSearchQuery();
 		query.setLocationId(cabot.getId());
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
 				r.getLocation().getId().equals(cabot.getId())
@@ -632,16 +664,16 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Search by Status.
 		query.setLocationId(null);
 		query.setState(ImmutableList.of(ReportState.CANCELLED));
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		final int numCancelled = searchResults.getTotalCount();
 
 		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.RELEASED));
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getTotalCount()).isGreaterThan(numCancelled);
 
-		orgs = httpQuery("/api/organizations/search?type=PRINCIPAL_ORG&text=Defense", jack).get(OrganizationList.class);
+		orgs = httpQuery("/api/organizations/search?type=PRINCIPAL_ORG&text=Defense", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization mod = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("MoD")).findFirst().get();
 		assertThat(mod.getShortName()).isEqualToIgnoringCase("MoD");
@@ -649,16 +681,24 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Search by Principal Organization
 		query.setState(null);
 		query.setPrincipalOrgId(mod.getId());
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
-		assertThat(searchResults.getList().stream().filter(r ->
-				r.loadPrincipalOrg().getId().equals(mod.getId())
-			)).hasSameSizeAs(searchResults.getList());
+		assertThat(searchResults.getList().stream().filter(r -> {
+			try {
+				return r.loadPrincipalOrg(context).get()
+					.getId()
+					.equals(mod.getId());
+			}
+			catch (Exception e) {
+				Assertions.fail("error", e);
+				return false;
+			}
+		})).hasSameSizeAs(searchResults.getList());
 
 		//Search by Principal Parent Organization
 		query.setPrincipalOrgId(mod.getId());
 		query.setIncludePrincipalOrgChildren(true);
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isNotEmpty();
 		//TODO: figure out how to verify the results?
 
@@ -666,7 +706,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setText("spreadsheet");
 		query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
 		query.setSortOrder(SortOrder.ASC);
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		DateTime prev = new DateTime(0L);
 		for (Report res : searchResults.getList()) {
 			assertThat(res.getEngagementDate()).isGreaterThan(prev);
@@ -676,11 +716,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Search for report text with stopwords
 		query = new ReportSearchQuery();
 		query.setText("Hospital usage of Drugs");
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList().stream().filter(r -> r.getIntent().contains("Hospital usage of Drugs")).count()).isGreaterThan(0);
 
 		///find EF 2.2
-		orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%202.2", jack).get(OrganizationList.class);
+		orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%202.2", jack).get(new GenericType<AnetBeanList<Organization>>(){});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization ef22 = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 2.2")).findFirst().get();
 		assertThat(ef22.getShortName()).isEqualToIgnoringCase("EF 2.2");
@@ -690,7 +730,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query = new ReportSearchQuery();
 		query.setAdvisorOrgId(mod.getId());
 		query.setPrincipalOrgId(ef22.getId());
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList().stream().filter(r ->
 			r.getAdvisorOrg().getId().equals(ef22.getId()) && r.getPrincipalOrg().getId().equals(mod.getId())
 			).count()).isEqualTo(searchResults.getList().size());
@@ -698,7 +738,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//this might fail if there are any children of ef22 or mod, but there aren't in the base data set.
 		query.setIncludeAdvisorOrgChildren(true);
 		query.setIncludePrincipalOrgChildren(true);
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList().stream().filter(r ->
 			r.getAdvisorOrg().getId().equals(ef22.getId()) && r.getPrincipalOrg().getId().equals(mod.getId())
 			).count()).isEqualTo(searchResults.getList().size());
@@ -706,7 +746,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Search by Atmosphere
 		query = new ReportSearchQuery();
 		query.setAtmosphere(Atmosphere.NEGATIVE);
-		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), ReportList.class);
+		searchResults = httpQuery("/api/reports/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList().stream().filter(r -> r.getAtmosphere().equals(Atmosphere.NEGATIVE)
 			).count()).isEqualTo(searchResults.getList().size());
 	}
@@ -716,7 +756,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		// Search by empty list of authorization groups should not return reports
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setAuthorizationGroupId(Collections.emptyList());
-		ReportList searchResults = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		AnetBeanList<Report> searchResults = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(searchResults.getList()).isEmpty();
 
 		// Search by list of authorization groups
@@ -724,7 +764,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final Set<Integer> agIdSet = new HashSet<Integer>(agIds);
 		query = new ReportSearchQuery();
 		query.setAuthorizationGroupId(agIds);
-		final List<Report> reportList = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class).getList();
+		final List<Report> reportList = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){}).getList();
 
 		for (final Report report : reportList) {
 			assertThat(report.loadAuthorizationGroups()).isNotNull();
@@ -749,33 +789,33 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setUpdatedAtStart(startDate);
 		query.setUpdatedAtEnd(endDate);
 		query.setPageSize(0);
-		ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		AnetBeanList<Report> results = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results.getList().size()).isEqualTo(1);
 		DateTime actualReportDate = results.getList().get(0).getUpdatedAt();
 
 		// Greater than startDate and equal to endDate
 		query.setUpdatedAtStart(startDate);
 		query.setUpdatedAtEnd(actualReportDate);
-		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results.getList().size()).isEqualTo(1);
 
 		// Equal to startDate and smaller than endDate
 		query.setUpdatedAtStart(actualReportDate);
 		query.setUpdatedAtEnd(endDate);
-		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results.getList().size()).isEqualTo(1);
 
 		// Equal to startDate and equal to endDate
 		query.setUpdatedAtStart(actualReportDate);
 		query.setUpdatedAtEnd(actualReportDate);
-		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results.getList().size()).isEqualTo(1);
 
 		// A day before the startDate and startDate (no results expected)
 		query.setUpdatedAtStart(startDate.minusDays(1));
 		query.setUpdatedAtEnd(startDate);
 		query.setPageSize(0);
-		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		results = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results.getList().size()).isEqualTo(0);
 	}
 
@@ -786,7 +826,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setAuthorPositionId(adminPos.getId());
 
 		//Search by author position
-		final ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		final AnetBeanList<Report> results = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results).isNotNull();
 		assertThat(results.getList().size()).isGreaterThan(0);
 	}
@@ -799,7 +839,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setAttendeePositionId(adminPos.getId());
 
 		//Search by attendee position
-		final ReportList results = httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+		final AnetBeanList<Report> results = httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(results).isNotNull();
 		assertThat(results.getList().size()).isGreaterThan(0);
 	}
@@ -867,7 +907,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Bob gets the approval (EF1 Approvers)
 		ReportSearchQuery pendingQuery = new ReportSearchQuery();
 		pendingQuery.setPendingApprovalOf(bob.getId());
-		ReportList pendingBobsApproval = httpQuery("/api/reports/search", bob).post(Entity.json(pendingQuery), ReportList.class);
+		AnetBeanList<Report> pendingBobsApproval = httpQuery("/api/reports/search", bob).post(Entity.json(pendingQuery), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(pendingBobsApproval.getList().stream().anyMatch(rpt -> rpt.getId().equals(returned.getId()))).isTrue();
 
 		//Bob should approve this report.
@@ -880,7 +920,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void dailyRollupGraphNonReportingTest() {
+	public void dailyRollupGraphNonReportingTest()
+		throws ExecutionException, InterruptedException {
 		Person steve = getSteveSteveson();
 
 		Report r = new Report();
@@ -925,8 +966,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				.get(new GenericType<List<RollupGraph>>() {});
 
 		final Position pos = admin.loadPosition();
-		pos.getOrganization().setLoadLevel(LoadLevel.ID_ONLY);
-		final Organization org = pos.loadOrganization();
+		final Organization org = pos.loadOrganization(context).get();
 		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
@@ -941,7 +981,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void dailyRollupGraphReportingTest() {
+	public void dailyRollupGraphReportingTest()
+		throws ExecutionException, InterruptedException {
 		final Person elizabeth = getElizabethElizawell();
 		final Person bob = getBobBobtown();
 		Person steve = getSteveSteveson();
@@ -988,14 +1029,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				.get(new GenericType<List<RollupGraph>>() {});
 
 		final Position pos = elizabeth.loadPosition();
-		pos.getOrganization().setLoadLevel(LoadLevel.ID_ONLY);
-		final Organization org = pos.loadOrganization();
+		final Organization org = pos.loadOrganization(context).get();
 		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
 		//Elizabeth's organization should have one more report RELEASED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-		final int orgId = org.loadParentOrg().getId();
+		final int orgId = org.loadParentOrg(context).get().getId();
 		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
 		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
 		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getId().equals(orgId)).findFirst();
@@ -1004,21 +1044,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void testTagSearch() {
+	public void testTagSearch() throws InterruptedException, ExecutionException {
 		final ReportSearchQuery tagQuery = new ReportSearchQuery();
 		tagQuery.setText("bribery");
-		final ReportList taggedReportList = httpQuery("/api/reports/search", admin).post(Entity.json(tagQuery), ReportList.class);
+		final AnetBeanList<Report> taggedReportList = httpQuery("/api/reports/search", admin).post(Entity.json(tagQuery), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(taggedReportList).isNotNull();
 		final List<Report> taggedReports = taggedReportList.getList();
 		for (Report rpt : taggedReports) {
-			rpt.loadTags();
-			assertThat(rpt.getTags()).isNotNull();
-			assertThat(rpt.getTags().stream().filter(o -> o.getName().equals("bribery"))).isNotEmpty();
+			final List<Tag> tags = rpt.loadTags(context).get();
+			assertThat(tags).isNotNull();
+			assertThat(tags.stream().filter(o -> o.getName().equals("bribery"))).isNotEmpty();
 		}
 	}
 
 	@Test
-	public void testSensitiveInformationByAuthor() {
+	public void testSensitiveInformationByAuthor()
+		throws ExecutionException, InterruptedException {
 		final Person elizabeth = getElizabethElizawell();
 		final Report r = new Report();
 		r.setAuthor(elizabeth);
@@ -1035,21 +1076,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final Report returned2 = httpQuery("/api/reports/" + returned.getId(), elizabeth).get(Report.class);
 		// elizabeth should be allowed to see it
 		returned2.setUser(elizabeth);
-		assertThat(returned2.loadReportSensitiveInformation()).isNotNull();
+		assertThat(returned2.loadReportSensitiveInformation(context).get()).isNotNull();
 		assertThat(returned2.getReportSensitiveInformation().getText()).isEqualTo(rsi.getText());
 
 		final Person jack = getJackJackson();
 		final Report returned3 = httpQuery("/api/reports/" + returned.getId(), jack).get(Report.class);
 		// jack should not be allowed to see it
 		returned3.setUser(jack);
-		assertThat(returned3.loadReportSensitiveInformation()).isNull();
+		assertThat(returned3.loadReportSensitiveInformation(context).get()).isNull();
 	}
 
 	@Test
-	public void testSensitiveInformationByAuthorizationGroup() {
+	public void testSensitiveInformationByAuthorizationGroup()
+		throws ExecutionException, InterruptedException {
 		final PersonSearchQuery erinQuery = new PersonSearchQuery();
 		erinQuery.setText("erin");
-		final PersonList erinSearchResults = httpQuery("/api/people/search", admin).post(Entity.json(erinQuery), PersonList.class);
+		final AnetBeanList<Person> erinSearchResults = httpQuery("/api/people/search", admin).post(Entity.json(erinQuery), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(erinSearchResults.getTotalCount()).isGreaterThan(0);
 		final Optional<Person> erinResult = erinSearchResults.getList().stream().filter(p -> p.getName().equals("ERINSON, Erin")).findFirst();
 		assertThat(erinResult).isNotEmpty();
@@ -1058,50 +1100,50 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final ReportSearchQuery reportQuery = new ReportSearchQuery();
 		reportQuery.setText("Test Cases are good");
 		reportQuery.setSortOrder(SortOrder.ASC); // otherwise test-case-created data can crowd the actual report we want out of the first page
-		final ReportList reportSearchResults = httpQuery("/api/reports/search", erin).post(Entity.json(reportQuery), ReportList.class);
+		final AnetBeanList<Report> reportSearchResults = httpQuery("/api/reports/search", erin).post(Entity.json(reportQuery), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(reportSearchResults.getTotalCount()).isGreaterThan(0);
 		final Optional<Report> reportResult = reportSearchResults.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
 		assertThat(reportResult).isNotEmpty();
 		final Report report = reportResult.get();
 		report.setUser(erin);
 		// erin is the author, so should be able to see the sensitive information
-		assertThat(report.loadReportSensitiveInformation()).isNotNull();
+		assertThat(report.loadReportSensitiveInformation(context).get()).isNotNull();
 		assertThat(report.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
 
 		final PersonSearchQuery reinaQuery = new PersonSearchQuery();
 		reinaQuery.setText("reina");
-		final PersonList searchResults = httpQuery("/api/people/search", admin).post(Entity.json(reinaQuery), PersonList.class);
+		final AnetBeanList<Person> searchResults = httpQuery("/api/people/search", admin).post(Entity.json(reinaQuery), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults.getTotalCount()).isGreaterThan(0);
 		final Optional<Person> reinaResult = searchResults.getList().stream().filter(p -> p.getName().equals("REINTON, Reina")).findFirst();
 		assertThat(reinaResult).isNotEmpty();
 		final Person reina = reinaResult.get();
 
-		final ReportList reportSearchResults2 = httpQuery("/api/reports/search", reina).post(Entity.json(reportQuery), ReportList.class);
+		final AnetBeanList<Report> reportSearchResults2 = httpQuery("/api/reports/search", reina).post(Entity.json(reportQuery), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(reportSearchResults2.getTotalCount()).isGreaterThan(0);
 		final Optional<Report> reportResult2 = reportSearchResults2.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
 		assertThat(reportResult2).isNotEmpty();
 		final Report report2 = reportResult2.get();
 		report2.setUser(reina);
 		// reina is in the authorization group, so should be able to see the sensitive information
-		assertThat(report2.loadReportSensitiveInformation()).isNotNull();
+		assertThat(report2.loadReportSensitiveInformation(context).get()).isNotNull();
 		assertThat(report2.getReportSensitiveInformation().getText()).isEqualTo("Need to know only");
 
 		final PersonSearchQuery elizabethQuery = new PersonSearchQuery();
 		elizabethQuery.setText("elizabeth");
-		final PersonList searchResults3 = httpQuery("/api/people/search", admin).post(Entity.json(elizabethQuery), PersonList.class);
+		final AnetBeanList<Person> searchResults3 = httpQuery("/api/people/search", admin).post(Entity.json(elizabethQuery), new GenericType<AnetBeanList<Person>>(){});
 		assertThat(searchResults3.getTotalCount()).isGreaterThan(0);
 		final Optional<Person> elizabethResult3 = searchResults3.getList().stream().filter(p -> p.getName().equals("ELIZAWELL, Elizabeth")).findFirst();
 		assertThat(elizabethResult3).isNotEmpty();
 		final Person elizabeth = elizabethResult3.get();
 
-		final ReportList reportSearchResults3 = httpQuery("/api/reports/search", elizabeth).post(Entity.json(reportQuery), ReportList.class);
+		final AnetBeanList<Report> reportSearchResults3 = httpQuery("/api/reports/search", elizabeth).post(Entity.json(reportQuery), new GenericType<AnetBeanList<Report>>(){});
 		assertThat(reportSearchResults3.getTotalCount()).isGreaterThan(0);
 		final Optional<Report> reportResult3 = reportSearchResults3.getList().stream().filter(r -> reportQuery.getText().equals(r.getKeyOutcomes())).findFirst();
 		assertThat(reportResult3).isNotEmpty();
 		final Report report3 = reportResult3.get();
 		report3.setUser(elizabeth);
 		// elizabeth is not in the authorization group, so should not be able to see the sensitive information
-		assertThat(report3.loadReportSensitiveInformation()).isNull();
+		assertThat(report3.loadReportSensitiveInformation(context).get()).isNull();
 	}
 
 	private ReportSearchQuery setupQueryEngagementDayOfWeek() {
@@ -1110,14 +1152,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		return query;
 	}
 
-	private ReportList runSearchQuery(ReportSearchQuery query) {
-		return httpQuery("/api/reports/search", admin).post(Entity.json(query), ReportList.class);
+	private AnetBeanList<Report> runSearchQuery(ReportSearchQuery query) {
+		return httpQuery("/api/reports/search", admin).post(Entity.json(query), new GenericType<AnetBeanList<Report>>(){});
 	}
 
 	@Test
 	public void testEngagementDayOfWeekNotIncludedInResults() {
 		final ReportSearchQuery query = setupQueryEngagementDayOfWeek();
-		final ReportList reportResults = runSearchQuery(query);
+		final AnetBeanList<Report> reportResults = runSearchQuery(query);
 
 		assertThat(reportResults).isNotNull();
 
@@ -1132,7 +1174,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final ReportSearchQuery query = setupQueryEngagementDayOfWeek();
 		query.setIncludeEngagementDayOfWeek(true);
 
-		final ReportList reportResults = runSearchQuery(query);
+		final AnetBeanList<Report> reportResults = runSearchQuery(query);
 		assertThat(reportResults).isNotNull();
 
 		final List<Integer> daysOfWeek = Arrays.asList(1,2,3,4,5,6,7);
@@ -1148,7 +1190,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setEngagementDayOfWeek(1);
 		query.setIncludeEngagementDayOfWeek(true);
 
-		final ReportList reportResults = runSearchQuery(query);
+		final AnetBeanList<Report> reportResults = runSearchQuery(query);
 		assertThat(reportResults).isNotNull();
 
 		final List<Report> reports = reportResults.getList();
@@ -1163,7 +1205,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		query.setEngagementDayOfWeek(0);
 		query.setIncludeEngagementDayOfWeek(true);
 
-		final ReportList reportResults = runSearchQuery(query);
+		final AnetBeanList<Report> reportResults = runSearchQuery(query);
 		assertThat(reportResults).isNotNull();
 
 		final List<Report> reports = reportResults.getList();

@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,7 @@ import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
@@ -32,7 +33,7 @@ import mil.dds.anet.utils.Utils;
 
 public class MssqlReportSearcher implements IReportSearcher {
 
-	public ReportList runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder();
@@ -236,12 +237,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("attendeePositionId", query.getAttendeePositionId());
 		}
 
-		final ReportList results = new ReportList();
-		results.setPageNum(query.getPageNum());
-		results.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return results;
+			return new AnetBeanList<Report>(query.getPageNum(), query.getPageSize(), new ArrayList<Report>());
 		}
 
 		//Apply a filter to restrict access to other's draft reports
@@ -297,7 +294,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 
 		final Query<Report> map = MssqlSearcher.addPagination(query, dbHandle, sql, args)
 				.map(new ReportMapper());
-		return ReportList.fromQuery(user, map, query.getPageNum(), query.getPageSize());
+		return AnetBeanList.getReportList(user, map, query.getPageNum(), query.getPageSize());
 
 	}
 

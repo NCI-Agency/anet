@@ -1,14 +1,17 @@
 package mil.dds.anet;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.dataloader.DataLoaderRegistry;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.TransactionCallback;
@@ -40,6 +43,7 @@ import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
@@ -62,9 +66,11 @@ public class AnetObjectEngine {
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
+	private final Map<String, Object> context;
 
 	ISearcher searcher;
-	
+	private final DataLoaderRegistry dataLoaderRegistry;
+
 	private static AnetObjectEngine instance; 
 	
 	private final Handle dbHandle;
@@ -88,6 +94,10 @@ public class AnetObjectEngine {
 		emailDao = new EmailDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
+		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
+		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
+		context = new HashMap<>();
+		context.put("dataLoaderRegistry", dataLoaderRegistry);
 
 		instance = this;
 	}
@@ -160,9 +170,21 @@ public class AnetObjectEngine {
 		return searcher;
 	}
 
-	public Organization getOrganizationForPerson(Person person) { 
-		if (person == null) { return null; } 
-		return personDao.getOrganizationForPerson(person.getId());
+	public Integer getDefaultOrgId() {
+		try {
+			final String defaultOrgSetting = getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
+			return Integer.parseInt(defaultOrgSetting);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context, Person person) {
+		if (person == null) {
+			return CompletableFuture.supplyAsync(() -> null);
+		}
+		return orgDao.getOrganizationsForPerson(context, person.getId())
+				.thenApply(l -> l.isEmpty() ? null : l.get(0));
 	}
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
@@ -185,17 +207,18 @@ public class AnetObjectEngine {
 		});
 	}
 
-	public List<ApprovalStep> getApprovalStepsForOrg(Organization ao) {
-		logger.debug("Fetching steps for {}", ao);
-		Collection<ApprovalStep> unordered = asDao.getByAdvisorOrganizationId(ao.getId());
-		
+	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, Integer aoId) {
+		return asDao.getByAdvisorOrganizationId(context, aoId)
+				.thenApply(unordered -> orderSteps(unordered));
+	}
+
+	private List<ApprovalStep> orderSteps(List<ApprovalStep> unordered) {
 		int numSteps = unordered.size();
-		logger.debug("Found total of {} steps", numSteps);
 		LinkedList<ApprovalStep> ordered = new LinkedList<ApprovalStep>();
 		Integer nextStep = null;
-		for (int i = 0;i < numSteps;i++) { 
-			for (ApprovalStep as : unordered) { 
-				if (Objects.equals(as.getNextStepId(), nextStep)) { 
+		for (int i = 0;i < numSteps;i++) {
+			for (ApprovalStep as : unordered) {
+				if (Objects.equals(as.getNextStepId(), nextStep)) {
 					ordered.addFirst(as);
 					nextStep = as.getId();
 					break;
@@ -205,9 +228,15 @@ public class AnetObjectEngine {
 		return ordered;
 	}
 	
-	public boolean canUserApproveStep(Integer userId, int approvalStepId) { 
+	public boolean canUserApproveStep(Map<String, Object> context, Integer userId, int approvalStepId) {
 		ApprovalStep as = asDao.getById(approvalStepId);
-		for (Position approverPosition: as.loadApprovers()) {
+		final List<Position> approvers;
+		try {
+			approvers = as.loadApprovers(context).get();
+		} catch (InterruptedException | ExecutionException e) {
+			return false;
+		}
+		for (Position approverPosition: approvers) {
 			//approverPosition.getPerson() has the currentPersonId already loaded, so this is safe. 
 			if (Objects.equals(userId, DaoUtils.getId(approverPosition.getPerson()))) { return true; } 
 		}
@@ -247,5 +276,9 @@ public class AnetObjectEngine {
 	
 	public String getAdminSetting(AdminSettingKeys key) { 
 		return adminDao.getSetting(key);
+	}
+
+	public Map<String, Object> getContext() {
+		return context;
 	}
 }

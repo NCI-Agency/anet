@@ -1,17 +1,20 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.joda.time.DateTime;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.IdFetcher;
 
 public class ApprovalAction extends AbstractAnetBean {
 
@@ -25,18 +28,14 @@ public class ApprovalAction extends AbstractAnetBean {
 	@Override
 	@JsonIgnore
 	@GraphQLIgnore
-	public Integer getId() { 
-		throw new WebApplicationException("no ID field on Approval Action");
+	public Integer getId() {
+		throw new WebApplicationException("no ID field on ApprovalAction");
 	}
 
-	@GraphQLFetcher("step")
-	public ApprovalStep loadStep() {
-		if (step == null || step.getLoadLevel() == null) { return step; }
-		if (step.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.step = AnetObjectEngine.getInstance()
-					.getApprovalStepDao().getById(step.getId());
-		}
-		return step;
+	@GraphQLQuery(name="step")
+	public CompletableFuture<ApprovalStep> loadStep(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<ApprovalStep>().load(context, "approvalSteps", step)
+				.thenApply(o -> { step = o; return o; });
 	}
 	
 	public void setStep(ApprovalStep step) {
@@ -57,16 +56,13 @@ public class ApprovalAction extends AbstractAnetBean {
 		this.person = person;
 	}
 	
-	@GraphQLFetcher("person")
-	public Person loadPerson() { 
-		if (person == null || person.getLoadLevel() == null) { return person; } 
-		if (person.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.person = AnetObjectEngine.getInstance()
-				.getPersonDao().getById(person.getId());
-		}
-		return person;
+	@GraphQLQuery(name="person")
+	public CompletableFuture<Person> loadPerson(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Person>().load(context, "people", person)
+				.thenApply(o -> { person = o; return o; });
 	}
 	
+	@GraphQLQuery(name="report")
 	public Report getReport() {
 		return report;
 	}
@@ -75,14 +71,7 @@ public class ApprovalAction extends AbstractAnetBean {
 		this.report = report;
 	}
 	
-	public DateTime getCreatedAt() {
-		return createdAt;
-	}
-	
-	public void setCreatedAt(DateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-	
+	@GraphQLQuery(name="type")
 	public ApprovalType getType() {
 		return type;
 	}
@@ -111,6 +100,6 @@ public class ApprovalAction extends AbstractAnetBean {
 	
 	@Override
 	public String toString() { 
-		return String.format("[ApprovalAction: step:%d, type:%s, person:%d, report:%d]", step.getId(), type, person.getId(), report.getId());
+		return String.format("[ApprovalAction: step:%d, type:%s, person:%d, report:%d]", DaoUtils.getId(step), type, DaoUtils.getId(person), DaoUtils.getId(report));
 	}
 }

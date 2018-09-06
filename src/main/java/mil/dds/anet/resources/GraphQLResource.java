@@ -3,16 +3,14 @@ package mil.dds.anet.resources;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.dataloader.DataLoaderRegistry;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,28 +47,19 @@ import com.github.underscore.lodash.$;
 import com.google.common.base.Joiner;
 
 import graphql.ExceptionWhileDataFetching;
+import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
+import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation;
 import graphql.schema.GraphQLSchema;
 import io.dropwizard.auth.Auth;
-import mil.dds.anet.beans.ApprovalAction;
-import mil.dds.anet.beans.Comment;
+import io.leangen.graphql.GraphQLSchemaGenerator;
+import io.leangen.graphql.generator.mapping.common.ScalarMapper;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.PersonPositionHistory;
-import mil.dds.anet.beans.ReportPerson;
-import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
-import mil.dds.anet.graphql.AnetResourceDataFetcher;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
-import mil.dds.anet.graphql.IGraphQLBean;
-import mil.dds.anet.graphql.IGraphQLResource;
-import mil.dds.anet.utils.GraphQLUtils;
+import mil.dds.anet.graphql.DateTimeMapper;
+import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
@@ -84,14 +74,15 @@ public class GraphQLResource {
 	private static final String OUTPUT_XLSX = "xlsx";
 	private static final String MEDIATYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	private static final String RESULT_KEY_DATA = "data";
-	private static final String RESULT_KEY_ERRORS = "errors";
 
-	private GraphQL graphql;
-	private List<IGraphQLResource> resources;
+	private final AnetObjectEngine engine;
+	private List<Object> resources;
 	private boolean developmentMode;
-	private final MetricRegistry metricRegistry;
+	private final MetricRegistry metricRegistry; // FIXME: use a statistics collector for DataLoader?
+	private GraphQLSchema graphqlSchema;
 
-	public GraphQLResource(List<IGraphQLResource> resources, MetricRegistry metricRegistry, boolean developmentMode) {
+	public GraphQLResource(AnetObjectEngine engine, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {
+		this.engine = engine;
 		this.resources = resources;
 		this.metricRegistry = metricRegistry;
 		this.developmentMode = developmentMode;
@@ -107,121 +98,15 @@ public class GraphQLResource {
 	 *     GraphQLFetcher
 	 */
 	private void buildGraph() {
-		GraphQLObjectType.Builder queryTypeBuilder = GraphQLObjectType.newObject()
-			.name("query")
-			.description("The root level query type for ANET");
-
-		//Go through all of the resources to build object types for each.
-		for (IGraphQLResource resource : resources) {
-			Class<? extends IGraphQLBean> beanClazz = resource.getBeanClass();
-			String name = GraphQLUtils.lowerCaseFirstLetter(beanClazz.getSimpleName());
-			GraphQLObjectType objectType = buildTypeFromBean(name, beanClazz);
-
-			//Build a Fetcher that uses this resource to 'find' objects of this type.
-			AnetResourceDataFetcher fetcher = new AnetResourceDataFetcher(resource, metricRegistry);
-
-			GraphQLFieldDefinition.Builder fieldBuilder = GraphQLFieldDefinition.newFieldDefinition()
-				.type(objectType)
-				.name(name)
-				.description(resource.getDescription())
-				.argument(fetcher.validArguments())
-				.dataFetcher(fetcher);
-			queryTypeBuilder.field(fieldBuilder.build());
-
-			//Build a field for returning lists from this resource.
-			AnetResourceDataFetcher listFetcher = new AnetResourceDataFetcher(resource, metricRegistry, true);
-			if (listFetcher.validArguments().size() > 0) {
-				Class<?> listClass = resource.getBeanListClass();
-				GraphQLOutputType listType;
-				String listName;
-				if (List.class.isAssignableFrom(listClass)) {
-					listName = name + "s";
-					listType = new GraphQLList(objectType);
-				} else if (AbstractAnetBeanList.class.isAssignableFrom(listClass)) {
-					listName = GraphQLUtils.lowerCaseFirstLetter(listClass.getSimpleName());
-					listType = buildTypeFromBean(listName, (Class<AbstractAnetBeanList>) listClass);
-				} else {
-					throw new IllegalArgumentException("List Class from resource " + name + " is not a List or AbstractAnetBeanList");
-				}
-				GraphQLFieldDefinition listField = GraphQLFieldDefinition.newFieldDefinition()
-					.type(listType)
-					.name(listName)
-					.argument(listFetcher.validArguments())
-					.dataFetcher(listFetcher)
-					.build();
-				queryTypeBuilder.field(listField);
-			}
+		final GraphQLSchemaGenerator schemaBuilder = new GraphQLSchemaGenerator()
+			.withBasePackages("mil.dds.anet")
+			.withTypeMappers((config, defaults) -> defaults
+				.insertBefore(ScalarMapper.class, new DateTimeMapper()));
+		for (final Object resource : resources) {
+			schemaBuilder.withOperationsFromSingleton(resource);
 		}
 
-		//TODO: find a way to not have to do this.
-		queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
-				.type(buildTypeFromBean("reportPerson", ReportPerson.class))
-				.name("reportPerson")
-				.build());
-		queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
-				.type(buildTypeFromBean("comment", Comment.class))
-				.name("comment")
-				.build());
-		queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
-				.type(buildTypeFromBean("approvalAction", ApprovalAction.class))
-				.name("approvalAction")
-				.build());
-		queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
-				.type(buildTypeFromBean("personPositionHistory", PersonPositionHistory.class))
-				.name("personPositionHistory")
-				.build());
-		queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
-				.type(buildTypeFromBean("reportSensitiveInformation", ReportSensitiveInformation.class))
-				.name("reportSensitiveInformation")
-				.build());
-
-		GraphQLObjectType queryType = queryTypeBuilder.build();
-		GraphQLSchema schmea = GraphQLSchema.newSchema()
-			.query(queryType)
-			.build();
-		graphql = new GraphQL(schmea);
-	}
-
-	/**
-	 * Constructs the GraphQL Type from a bean (ie Report, Person, Position...)
-	 * Scans all 'getter' methods, and those annotated with @GraphQLFetcher
-	 */
-	private GraphQLObjectType buildTypeFromBean(String name, Class<? extends IGraphQLBean> beanClazz) {
-		GraphQLObjectType.Builder builder = GraphQLObjectType.newObject()
-			.name(name);
-
-		//Find all of the methods to use as Fields. Either getters, or @GraphQLFetcher annotated
-		//Get a set of all unique names.
-		Map<String,Type> methodReturnTypes = new HashMap<String,Type>();
-		for (Method m : beanClazz.getMethods()) {
-			String methodName = null;
-			if (m.isAnnotationPresent(GraphQLIgnore.class)) { continue; }
-			if (m.getName().startsWith("get")) {
-				if (m.getName().equalsIgnoreCase("getClass")) { continue; }
-				methodName = GraphQLUtils.lowerCaseFirstLetter(m.getName().substring(3));
-			} else if (m.getName().startsWith("is")) {
-				methodName = GraphQLUtils.lowerCaseFirstLetter(m.getName().substring(2));
-			} else if (m.isAnnotationPresent(GraphQLFetcher.class)) {
-				methodName = m.getAnnotation(GraphQLFetcher.class).value();
-			}
-
-			if (methodName != null) {
-				methodReturnTypes.put(methodName, m.getGenericReturnType());
-			}
-		}
-
-		for (Map.Entry<String, Type> entry : methodReturnTypes.entrySet()) {
-			String fieldName = entry.getKey();
-			Type retType = entry.getValue();
-			try {
-				builder.field(GraphQLUtils.buildFieldWithArgs(fieldName, retType, beanClazz));
-			} catch (Exception e) {
-				throw new RuntimeException(String.format("Unable to build GraphQL field %s on bean %s, error was %s",
-						fieldName, beanClazz.getName(), e.getMessage()), e);
-			}
-		}
-
-		return builder.build();
+		graphqlSchema = schemaBuilder.generate();
 	}
 
 	@POST
@@ -256,11 +141,8 @@ public class GraphQLResource {
 			buildGraph();
 		}
 
-		Map<String, Object> context = new HashMap<String,Object>();
-		context.put("auth", user);
-
-		ExecutionResult executionResult = graphql.execute(query, context, variables);
-		Map<String, Object> result = new LinkedHashMap<>();
+		final ExecutionResult executionResult = dispatchRequest(user, query, variables);
+		final Map<String, Object> result = executionResult.toSpecification();
 		if (executionResult.getErrors().size() > 0) {
 			WebApplicationException actual = null;
 			for (GraphQLError error : executionResult.getErrors()) {
@@ -273,9 +155,6 @@ public class GraphQLResource {
 				}
 			}
 
-			result.put(RESULT_KEY_ERRORS, executionResult.getErrors().stream()
-					.map(e -> e.getMessage())
-					.collect(Collectors.toList()));
 			Status status = (actual != null)
 				?
 				Status.fromStatusCode(actual.getResponse().getStatus())
@@ -284,7 +163,6 @@ public class GraphQLResource {
 			logger.warn("Errors: {}", executionResult.getErrors());
 			return Response.status(status).entity(result).build();
 		}
-		result.put(RESULT_KEY_DATA, executionResult.getData());
 		if (OUTPUT_XML.equals(output)) {
 			// TODO: Decide if we indeed want pretty-printed XML:
 			final String xml = ResponseUtils.toPrettyString($.toXml(result), 2);
@@ -296,7 +174,45 @@ public class GraphQLResource {
 			return Response.ok(result, MediaType.APPLICATION_JSON).build();
 		}
 	}
-	
+
+	private ExecutionResult dispatchRequest(Person user, String query, Map<String, Object> variables) {
+		final DataLoaderRegistry dataLoaderRegistry
+			= BatchingUtils.registerDataLoaders(engine, true, true);
+		final DataLoaderDispatcherInstrumentation dispatcherInstrumentation
+			= new DataLoaderDispatcherInstrumentation(dataLoaderRegistry);
+
+		final Map<String, Object> context = new HashMap<>();
+		context.put("user", user);
+		context.put("dataLoaderRegistry", dataLoaderRegistry);
+		final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+				.query(query)
+				.context(context)
+				.variables(variables)
+				.build();
+		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
+				.instrumentation(dispatcherInstrumentation)
+				.build();
+		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
+		final Runnable dispatcher = () -> {
+			while (!request.isDone()) {
+				// Dispatch all our data loaders until the request is done;
+				// we have data loaders at various depths (one dependent on another),
+				// e.g. in {@link Report#loadApprovalStatus}
+				CompletableFuture.allOf(
+						dataLoaderRegistry.getDataLoaders()
+						.stream()
+						.map(dl -> (CompletableFuture<?>)dl.dispatch())
+						.toArray(CompletableFuture<?>[]::new));
+			}
+		};
+		dispatcher.run();
+		try {
+			return request.get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to complete graphql request", e);
+		}
+	}
+
 	/**
 	 * Converts the supplied result object to a {@link XSSFWorkbook}.
 	 * 

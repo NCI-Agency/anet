@@ -41,7 +41,7 @@ class BaseLocationShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}
-		`).addVariable("reportsQuery", "ReportSearchQuery", {
+		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
 			locationId: props.match.params.id,
@@ -49,7 +49,7 @@ class BaseLocationShow extends Page {
 
 		let locationQuery = new GQL.Part(/* GraphQL */`
 			location(id:${props.match.params.id}) {
-				id, name, lat, lng
+				id, name, lat, lng, status
 			}
 		`)
 

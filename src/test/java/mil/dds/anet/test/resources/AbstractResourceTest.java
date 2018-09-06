@@ -3,11 +3,14 @@ package mil.dds.anet.test.resources;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -21,11 +24,13 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.util.Duration;
 import mil.dds.anet.AnetApplication;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.utils.BatchingUtils;
 
 public abstract class AbstractResourceTest {
 
@@ -44,10 +49,13 @@ public abstract class AbstractResourceTest {
 	}
 
 	protected Person admin;
+	protected Map<String, Object> context;
 
 	@Before
 	public void setUp() {
 		admin = findOrPutPersonInDb(PersonTest.getArthurDmin());
+		context = new HashMap<>();
+		context.put("dataLoaderRegistry", BatchingUtils.registerDataLoaders(AnetObjectEngine.getInstance(), false, false));
 	}
 
 	/* 
@@ -87,7 +95,7 @@ public abstract class AbstractResourceTest {
 		} else { 
 			PersonSearchQuery query = new PersonSearchQuery();
 			query.setText(stub.getName());
-			List<Person> ret = httpQuery("/api/people/search",PersonTest.getJackJacksonStub()).post(Entity.json(query),PersonList.class).getList();
+			List<Person> ret = httpQuery("/api/people/search",PersonTest.getJackJacksonStub()).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){}).getList();
 			for (Person p : ret) { 
 				if (p.getEmailAddress().equals(stub.getEmailAddress())) { return p; } 
 			}

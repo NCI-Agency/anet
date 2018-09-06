@@ -8,21 +8,24 @@ import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.mappers.SavedSearchMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 public class SavedSearchDao implements IAnetDao<SavedSearch> {
 
-	Handle dbHandle;
-	
+	private final Handle dbHandle;
+	private final IdBatcher<SavedSearch> idBatcher;
+
 	public SavedSearchDao(Handle h) { 
 		this.dbHandle = h;
+		final String idBatcherSql = "/* batch.getSavedSearchesByIds */ SELECT * from \"savedSearches\" where id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<SavedSearch>(h, idBatcherSql, new SavedSearchMapper());
 	}
 	
 	@Override
-	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
+	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -32,6 +35,11 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 				.bind("id", id)
 				.map(new SavedSearchMapper())
 				.first();
+	}
+
+	@Override
+	public List<SavedSearch> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
 	}
 
 	public List<SavedSearch> getSearchesByOwner(Person owner) { 

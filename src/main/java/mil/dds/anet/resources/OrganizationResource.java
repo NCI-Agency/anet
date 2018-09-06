@@ -29,19 +29,17 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
@@ -51,7 +49,7 @@ import mil.dds.anet.utils.Utils;
 @Path("/api/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class OrganizationResource implements IGraphQLResource {
+public class OrganizationResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -63,35 +61,21 @@ public class OrganizationResource implements IGraphQLResource {
 		this.engine = engine;
 	}
 	
-	@Override
-	public Class<Organization> getBeanClass() {
-		return Organization.class; 
-	}
-	
-	public Class<OrganizationList> getBeanListClass() {
-		return OrganizationList.class; 
-	}
-	
-	@Override
-	public String getDescription() {
-		return "Organizations";
-	}
-	
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="organizations")
 	@Path("/")
-	public OrganizationList getAll(@DefaultValue("0") @QueryParam("pageNum") Integer pageNum, 
-			@DefaultValue("100") @QueryParam("pageSize") Integer pageSize) {
+	public AnetBeanList<Organization> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") Integer pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") Integer pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	} 
 
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="organizationTopLevelOrgs")
 	@Path("/topLevel")
-	public OrganizationList getTopLevelOrgs(@QueryParam("type") OrganizationType type) { 
-		return new OrganizationList(dao.getTopLevelOrgs(type));
+	public AnetBeanList<Organization> getTopLevelOrgs(@QueryParam("type") @GraphQLArgument(name="type") OrganizationType type) {
+		return new AnetBeanList<Organization>(dao.getTopLevelOrgs(type));
 	}
 	
 	@POST
@@ -134,9 +118,9 @@ public class OrganizationResource implements IGraphQLResource {
 	
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="organization")
 	@Path("/{id}")
-	public Organization getById(@PathParam("id") int id) {
+	public Organization getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
 		Organization org = dao.getById(id);
 		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
 		return org;
@@ -182,7 +166,7 @@ public class OrganizationResource implements IGraphQLResource {
 							validateApprovalStep(step);
 							step.setAdvisorOrganizationId(org.getId());
 						}
-						List<ApprovalStep> existingSteps = existing.loadApprovalSteps();
+						List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).get();
 
 						Utils.addRemoveElementsById(existingSteps, org.getApprovalSteps(),
 								newStep -> engine.getApprovalStepDao().insert(newStep),
@@ -212,16 +196,16 @@ public class OrganizationResource implements IGraphQLResource {
 	
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="organizationList")
 	@Path("/search")
-	public OrganizationList search(@GraphQLParam("query") OrganizationSearchQuery query) {
+	public AnetBeanList<Organization> search(@GraphQLArgument(name="query") OrganizationSearchQuery query) {
 		return dao.search(query);
 	}
 	
 	@GET
 	@Timed
 	@Path("/search")
-	public OrganizationList search(@Context HttpServletRequest request) {
+	public AnetBeanList<Organization> search(@Context HttpServletRequest request) {
 		try {
 			return search(ResponseUtils.convertParamsToBean(request, OrganizationSearchQuery.class));
 		} catch (IllegalArgumentException e) {
@@ -232,15 +216,15 @@ public class OrganizationResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@Path("/{id}/tasks")
-	public TaskList getTasks(@PathParam("id") Integer orgId) { 
-		return new TaskList(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
+	public AnetBeanList<Task> getTasks(@PathParam("id") Integer orgId) {
+		return new AnetBeanList<Task>(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
 	}
 
 	private void validateApprovalStep(ApprovalStep step) {
 		if (Utils.isEmptyOrNull(step.getName())) {
 			throw new WebApplicationException("A name is required for every approval step", Status.BAD_REQUEST);
 		}
-		if (Utils.isEmptyOrNull(step.loadApprovers())) {
+		if (Utils.isEmptyOrNull(step.getApprovers())) {
 			throw new WebApplicationException("An approver is required for every approval step", Status.BAD_REQUEST);
 		}
 	}

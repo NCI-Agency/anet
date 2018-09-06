@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,7 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.AuthorizationGroup;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery.AuthorizationGroupSearchSortBy;
@@ -23,7 +24,7 @@ import mil.dds.anet.utils.Utils;
 public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearcher {
 
 	@Override
-	public AuthorizationGroupList runSearch(AuthorizationGroupSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlAuthorizationGroupSearch */ SELECT authorizationGroups.*");
@@ -62,12 +63,8 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 			sqlArgs.put("positionId", query.getPositionId());
 		}
 
-		final AuthorizationGroupList result = new AuthorizationGroupList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return result;
+			return new AnetBeanList<AuthorizationGroup>(query.getPageNum(), query.getPageSize(), new ArrayList<AuthorizationGroup>());
 		}
 
 		sql.append(" WHERE ");
@@ -98,7 +95,7 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 
 		final Query<AuthorizationGroup> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
 			.map(new AuthorizationGroupMapper());
-		return AuthorizationGroupList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
+		return new AnetBeanList<AuthorizationGroup>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
 	}
 
 }

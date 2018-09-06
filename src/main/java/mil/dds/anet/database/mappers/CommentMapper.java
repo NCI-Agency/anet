@@ -9,7 +9,6 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class CommentMapper implements ResultSetMapper<Comment> {
 
@@ -33,7 +32,6 @@ public class CommentMapper implements ResultSetMapper<Comment> {
 		c.setText(r.getString("text"));
 		c.setCreatedAt(new DateTime(r.getTimestamp("c_createdAt")));
 		c.setUpdatedAt(new DateTime(r.getTimestamp("c_updatedAt")));
-		c.setLoadLevel(LoadLevel.PROPERTIES);
 		return c;
 	}
 

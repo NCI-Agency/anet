@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,6 +46,9 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalAction;
@@ -63,7 +67,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
@@ -75,19 +79,17 @@ import mil.dds.anet.emails.ReportEditedEmail;
 import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.emails.ReportRejectionEmail;
 import mil.dds.anet.emails.ReportReleasedEmail;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
 @Path("/api/reports")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class ReportResource implements IGraphQLResource {
+public class ReportResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -109,36 +111,24 @@ public class ReportResource implements IGraphQLResource {
 
 	}
 
-	@Override
-	public String getDescription() {
-		return "Reports";
-	}
-
-	@Override
-	public Class<Report> getBeanClass() {
-		return Report.class;
-	}
-
-	@Override
-	public Class<ReportList> getBeanListClass() {
-		return ReportList.class;
-	}
-
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="reports")
 	@Path("/")
-	public ReportList getAll(@Auth Person user,
-			@DefaultValue("0") @QueryParam("pageNum") Integer pageNum,
-			@DefaultValue("100") @QueryParam("pageSize") Integer pageSize) {
+	public AnetBeanList<Report> getAll(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") Integer pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") Integer pageSize) {
+		user = DaoUtils.getUser(context, user);
 		return dao.getAll(pageNum, pageSize, user);
 	}
 
 	@GET
 	@Timed
 	@Path("/{id}")
-	@GraphQLFetcher
-	public Report getById(@Auth Person user, @PathParam("id") Integer id) {
+	@GraphQLQuery(name="report")
+	public Report getById(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@PathParam("id") @GraphQLArgument(name="id") Integer id) {
+		user = DaoUtils.getUser(context, user);
 		final Report r = dao.getById(id, user);
 		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return r;
@@ -164,13 +154,21 @@ public class ReportResource implements IGraphQLResource {
 
 		Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
 		if (r.getAdvisorOrg() == null && primaryAdvisor != null) {
-			logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
-			r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
+			try {
+				logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
+				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor).get());
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Organization for PrimaryAdvisor", e);
+			}
 		}
 		Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
 		if (r.getPrincipalOrg() == null && primaryPrincipal != null) {
-			logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
-			r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
+			try {
+				logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
+				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal).get());
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Organization for PrimaryPrincipal", e);
+			}
 		}
 
 		if (shouldBeFuture(r)) {
@@ -198,21 +196,29 @@ public class ReportResource implements IGraphQLResource {
 		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
 
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
-			boolean canApprove = engine.canUserApproveStep(editor.getId(), existing.getApprovalStep().getId());
+			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getId(), existing.getApprovalStep().getId());
 			if (canApprove) {
 				AnetEmail email = new AnetEmail();
 				ReportEditedEmail action = new ReportEditedEmail();
 				action.setReport(existing);
 				action.setEditor(editor);
 				email.setAction(action);
-				email.setToAddresses(Collections.singletonList(existing.loadAuthor().getEmailAddress()));
-				AnetEmailWorker.sendEmailAsync(email);
+				try {
+					email.setToAddresses(Collections.singletonList(existing.loadAuthor(engine.getContext()).get().getEmailAddress()));
+					AnetEmailWorker.sendEmailAsync(email);
+				} catch (InterruptedException | ExecutionException e) {
+					throw new WebApplicationException("failed to load Author", e);
+				}
 			}
 		}
 
 		// Possibly load sensitive information; needed in case of autoSave by the client form
 		r.setUser(editor);
-		r.loadReportSensitiveInformation();
+		try {
+			r.loadReportSensitiveInformation(engine.getContext()).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load ReportSensitiveInformation", e);
+		}
 
 		// Return the report in the response; used in autoSave by the client form
 		return Response.ok(r).build();
@@ -246,17 +252,29 @@ public class ReportResource implements IGraphQLResource {
 
 		//If there is a change to the primary advisor, change the advisor Org.
 		Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
-		if (Utils.idEqual(primaryAdvisor, existing.loadPrimaryAdvisor()) == false || existing.getAdvisorOrg() == null) {
-			r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
-		} else {
-			r.setAdvisorOrg(existing.getAdvisorOrg());
+		ReportPerson exstingPrimaryAdvisor;
+		try {
+			exstingPrimaryAdvisor = existing.loadPrimaryAdvisor(engine.getContext()).get();
+			if (Utils.idEqual(primaryAdvisor, exstingPrimaryAdvisor) == false || existing.getAdvisorOrg() == null) {
+				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor).get());
+			} else {
+				r.setAdvisorOrg(existing.getAdvisorOrg());
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load PrimaryAdvisor", e);
 		}
 
 		Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
-		if (Utils.idEqual(primaryPrincipal, existing.loadPrimaryPrincipal()) ==  false || existing.getPrincipalOrg() == null) {
-			r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
-		} else {
-			r.setPrincipalOrg(existing.getPrincipalOrg());
+		ReportPerson existingPrimaryPrincipal;
+		try {
+			existingPrimaryPrincipal = existing.loadPrimaryPrincipal(engine.getContext()).get();
+			if (Utils.idEqual(primaryPrincipal, existingPrimaryPrincipal) ==  false || existing.getPrincipalOrg() == null) {
+				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal).get());
+			} else {
+				r.setPrincipalOrg(existing.getPrincipalOrg());
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load PrimaryPrincipal", e);
 		}
 
 		r.setReportText(Utils.sanitizeHtml(r.getReportText()));
@@ -266,56 +284,68 @@ public class ReportResource implements IGraphQLResource {
 
 		//Update Attendees:
 		if (r.getAttendees() != null) {
-			//Fetch the people associated with this report
-			List<ReportPerson> existingPeople = dao.getAttendeesForReport(r.getId());
-			//Find any differences and fix them.
-			for (ReportPerson rp : r.getAttendees()) {
-				Optional<ReportPerson> existingPerson = existingPeople.stream().filter(el -> el.getId().equals(rp.getId())).findFirst();
-				if (existingPerson.isPresent()) {
-					if (existingPerson.get().isPrimary() != rp.isPrimary()) {
-						dao.updateAttendeeOnReport(rp, r);
+			try {
+				//Fetch the people associated with this report
+				List<ReportPerson> existingPeople = dao.getAttendeesForReport(engine.getContext(), r.getId()).get();
+				//Find any differences and fix them.
+				for (ReportPerson rp : r.getAttendees()) {
+					Optional<ReportPerson> existingPerson = existingPeople.stream().filter(el -> el.getId().equals(rp.getId())).findFirst();
+					if (existingPerson.isPresent()) {
+						if (existingPerson.get().isPrimary() != rp.isPrimary()) {
+							dao.updateAttendeeOnReport(rp, r);
+						}
+						existingPeople.remove(existingPerson.get());
+					} else {
+						dao.addAttendeeToReport(rp, r);
 					}
-					existingPeople.remove(existingPerson.get());
-				} else {
-					dao.addAttendeeToReport(rp, r);
 				}
-			}
-			//Any attendees left in existingPeople needs to be removed.
-			for (ReportPerson rp : existingPeople) {
-				dao.removeAttendeeFromReport(rp, r);
+				//Any attendees left in existingPeople needs to be removed.
+				for (ReportPerson rp : existingPeople) {
+					dao.removeAttendeeFromReport(rp, r);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Attendees", e);
 			}
 		}
 
 		//Update Tasks:
 		if (r.getTasks() != null) {
-			List<Task> existingTasks = dao.getTasksForReport(r);
-			List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
-			for (Task p : r.getTasks()) {
-				int idx = existingTaskIds.indexOf(p.getId());
-				if (idx == -1) {
-					dao.addTaskToReport(p, r);
-				} else {
-					existingTaskIds.remove(idx);
+			try {
+				List<Task> existingTasks = dao.getTasksForReport(engine.getContext(), r.getId()).get();
+				List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
+				for (Task p : r.getTasks()) {
+					int idx = existingTaskIds.indexOf(p.getId());
+					if (idx == -1) {
+						dao.addTaskToReport(p, r);
+					} else {
+						existingTaskIds.remove(idx);
+					}
 				}
-			}
-			for (Integer id : existingTaskIds) {
-				dao.removeTaskFromReport(Task.createWithId(id), r);
+				for (Integer id : existingTaskIds) {
+					dao.removeTaskFromReport(Task.createWithId(id), r);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Tasks", e);
 			}
 		}
 
 		// Update Tags:
 		if (r.getTags() != null) {
-			List<Tag> existingTags = dao.getTagsForReport(r.getId());
-			for (final Tag t : r.getTags()) {
-				Optional<Tag> existingTag = existingTags.stream().filter(el -> el.getId().equals(t.getId())).findFirst();
-				if (existingTag.isPresent()) {
-					existingTags.remove(existingTag.get());
-				} else {
-					dao.addTagToReport(t, r);
+			try {
+				List<Tag> existingTags = dao.getTagsForReport(engine.getContext(), r.getId()).get();
+				for (final Tag t : r.getTags()) {
+					Optional<Tag> existingTag = existingTags.stream().filter(el -> el.getId().equals(t.getId())).findFirst();
+					if (existingTag.isPresent()) {
+						existingTags.remove(existingTag.get());
+					} else {
+						dao.addTagToReport(t, r);
+					}
 				}
-			}
-			for (Tag t : existingTags) {
-				dao.removeTagFromReport(t, r);
+				for (Tag t : existingTags) {
+					dao.removeTagFromReport(t, r);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Attendees", e);
 			}
 		}
 
@@ -337,7 +367,11 @@ public class ReportResource implements IGraphQLResource {
 
 		// Possibly load sensitive information; needed in case of autoSave by the client form
 		r.setUser(editor);
-		r.loadReportSensitiveInformation();
+		try {
+			r.loadReportSensitiveInformation(engine.getContext()).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load ReportSensitiveInformation", e);
+		}
 
 		// Return the report in the response; used in autoSave by the client form
 		return existing;
@@ -361,7 +395,7 @@ public class ReportResource implements IGraphQLResource {
 				report.setState(ReportState.DRAFT);
 				report.setApprovalStep(null);
 			} else {
-				boolean canApprove = engine.canUserApproveStep(editor.getId(), report.getApprovalStep().getId());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getId(), report.getApprovalStep().getId());
 				if (!canApprove) {
 					throw new WebApplicationException(permError + "Must be the author or the current approver", Status.FORBIDDEN);
 				}
@@ -387,18 +421,28 @@ public class ReportResource implements IGraphQLResource {
 
 		// TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
 		if (r.getAdvisorOrg() == null) {
-			ReportPerson advisor = r.loadPrimaryAdvisor();
-			if (advisor == null) {
-				throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
+			ReportPerson advisor;
+			try {
+				advisor = r.loadPrimaryAdvisor(engine.getContext()).get();
+				if (advisor == null) {
+					throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
+				}
+				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), advisor).get());
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load PrimaryAdvisor", e);
 			}
-			r.setAdvisorOrg(engine.getOrganizationForPerson(advisor));
 		}
 		if (r.getPrincipalOrg() == null) {
-			ReportPerson principal = r.loadPrimaryPrincipal();
-			if (principal == null) {
-				throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
+			ReportPerson principal;
+			try {
+				principal = r.loadPrimaryPrincipal(engine.getContext()).get();
+				if (principal == null) {
+					throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
+				}
+				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), principal).get());
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load PrimaryPrincipal", e);
 			}
-			r.setPrincipalOrg(engine.getOrganizationForPerson(principal));
 		}
 
 		if (r.getEngagementDate() == null) {
@@ -407,14 +451,25 @@ public class ReportResource implements IGraphQLResource {
 			throw new WebApplicationException("You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
 		}
 
-		Organization org = engine.getOrganizationForPerson(r.getAuthor());
-		if (org == null) {
-			// Author missing Org, use the Default Approval Workflow
-			org = Organization.createWithId(
-				Integer.parseInt(engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION)));
+		final Integer orgId;
+		try {
+			final Organization org = engine.getOrganizationForPerson(engine.getContext(), r.getAuthor()).get();
+			if (org == null) {
+				// Author missing Org, use the Default Approval Workflow
+				orgId = engine.getDefaultOrgId();
+			} else {
+				orgId = org.getId();
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Organization for Author", e);
 		}
-		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(org);
-		throwExceptionNoApprovalSteps(steps);
+		List<ApprovalStep> steps = null;
+		try {
+			steps = engine.getApprovalStepsForOrg(engine.getContext(), orgId).get();
+			throwExceptionNoApprovalSteps(steps);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Organization for Author", e);
+		}
 
 		//Push the report into the first step of this workflow
 		r.setApprovalStep(steps.get(0));
@@ -422,7 +477,7 @@ public class ReportResource implements IGraphQLResource {
 		final int numRows = engine.executeInTransaction(dao::update, r, user);
 		sendApprovalNeededEmail(r);
 		logger.info("Putting report {} into step {} because of org {} on author {}",
-				r.getId(), steps.get(0).getId(), org.getId(), r.getAuthor().getId());
+				r.getId(), steps.get(0).getId(), orgId, r.getAuthor().getId());
 
 		if (numRows != 1) {
 			throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
@@ -445,16 +500,31 @@ public class ReportResource implements IGraphQLResource {
 	}
 
 	private void sendApprovalNeededEmail(Report r) {
-		ApprovalStep step = r.loadApprovalStep();
-		List<Position> approvers = step.loadApprovers();
+		final ApprovalStep step;
+		try {
+			step = r.loadApprovalStep(engine.getContext()).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load ApprovalStep", e);
+		}
+		final List<Position> approvers;
+		try {
+			approvers = step.loadApprovers(engine.getContext()).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Approvers", e);
+		}
 		AnetEmail approverEmail = new AnetEmail();
 		ApprovalNeededEmail action = new ApprovalNeededEmail();
 		action.setReport(r);
 		approverEmail.setAction(action);
-
 		approverEmail.setToAddresses(approvers.stream()
 				.filter(a -> a.getPerson() != null)
-				.map(a -> a.loadPerson().getEmailAddress())
+				.map(a -> {
+					try {
+						return a.loadPerson(engine.getContext()).get().getEmailAddress();
+					} catch (InterruptedException | ExecutionException e) {
+						throw new WebApplicationException("failed to load Person", e);
+					}
+				})
 				.collect(Collectors.toList()));
 		AnetEmailWorker.sendEmailAsync(approverEmail);
 	}
@@ -473,14 +543,14 @@ public class ReportResource implements IGraphQLResource {
 				if (r == null) {
 					throw new WebApplicationException("Report not found", Status.NOT_FOUND);
 				}
-				final ApprovalStep step = r.loadApprovalStep();
+				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				if (step == null) {
 					logger.info("Report ID {} does not currently need an approval", r.getId());
 					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
 				}
 
 				//Verify that this user can approve for this step.
-				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getId(), step.getId());
 				if (canApprove == false) {
 					logger.info("User ID {} cannot approve report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
@@ -523,9 +593,13 @@ public class ReportResource implements IGraphQLResource {
 		AnetEmail email = new AnetEmail();
 		ReportReleasedEmail action = new ReportReleasedEmail();
 		action.setReport(r);
-		email.addToAddress(r.loadAuthor().getEmailAddress());
 		email.setAction(action);
-		AnetEmailWorker.sendEmailAsync(email);
+		try {
+			email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
+			AnetEmailWorker.sendEmailAsync(email);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Author", e);
+		}
 	}
 
 	/**
@@ -543,14 +617,14 @@ public class ReportResource implements IGraphQLResource {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				final Report r = dao.getById(id, approver);
 				if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
-				final ApprovalStep step = r.loadApprovalStep();
+				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				if (step == null) {
 					logger.info("Report ID {} does not currently need an approval", r.getId());
 					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
 				}
 
 				//Verify that this user can reject for this step.
-				boolean canApprove = engine.canUserApproveStep(approver.getId(), step.getId());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getId(), step.getId());
 				if (canApprove == false) {
 					logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
@@ -587,9 +661,13 @@ public class ReportResource implements IGraphQLResource {
 		action.setRejector(rejector);
 		action.setComment(rejectionComment);
 		AnetEmail email = new AnetEmail();
-		email.setToAddresses(Collections.singletonList(r.loadAuthor().getEmailAddress()));
 		email.setAction(action);
-		AnetEmailWorker.sendEmailAsync(email);
+		try {
+			email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
+			AnetEmailWorker.sendEmailAsync(email);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Author", e);
+		}
 	}
 
 	@POST
@@ -608,9 +686,13 @@ public class ReportResource implements IGraphQLResource {
 		NewReportCommentEmail action = new NewReportCommentEmail();
 		action.setReport(r);
 		action.setComment(comment);
-		email.setToAddresses(Collections.singletonList(r.loadAuthor().getEmailAddress()));
 		email.setAction(action);
-		AnetEmailWorker.sendEmailAsync(email);
+		try {
+			email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
+			AnetEmailWorker.sendEmailAsync(email);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Author", e);
+		}
 	}
 
 	@GET
@@ -679,19 +761,26 @@ public class ReportResource implements IGraphQLResource {
 	@GET
 	@Timed
 	@Path("/search")
-	public ReportList search(@Auth Person user, @Context HttpServletRequest request) {
+	public AnetBeanList<Report> search(@Auth Person user, @Context HttpServletRequest request) {
 		try {
-			return search(ResponseUtils.convertParamsToBean(request, ReportSearchQuery.class), user);
+			return search(user, ResponseUtils.convertParamsToBean(request, ReportSearchQuery.class));
 		} catch (IllegalArgumentException e) {
 			throw new WebApplicationException(e.getMessage(), e.getCause(), Status.BAD_REQUEST);
 		}
 	}
 
+	// Note: Split off from the GraphQL Query, as Jersey would otherwise complain about the @GraphQLRootContext
 	@POST
 	@Timed
-	@GraphQLFetcher
 	@Path("/search")
-	public ReportList search(@GraphQLParam("query") ReportSearchQuery query, @Auth Person user) {
+	public AnetBeanList<Report> search(@Auth Person user, ReportSearchQuery query) {
+		return search(null, user, query);
+	}
+
+	@GraphQLQuery(name="reportList")
+	public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@GraphQLArgument(name="query") ReportSearchQuery query) {
+		user = DaoUtils.getUser(context, user);
 		return dao.search(query, user);
 	}
 
@@ -786,6 +875,7 @@ public class ReportResource implements IGraphQLResource {
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> fields = (Map<String, Object>) config.getDictionary().get("fields");
 
+		context.put("context", engine.getContext());
 		context.put("serverUrl", config.getServerUrl());
 		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));

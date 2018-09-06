@@ -79,30 +79,30 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	componentDidMount() {
 		API.query(/* GraphQL */`
-			locationList(f:recents, maxResults:6) {
+			locationRecents(maxResults:6) {
 				list { id, name }
 			}
-			personList(f:recents, maxResults:6) {
+			personRecents(maxResults:6) {
 				list { id, name, rank, role, position { id, name, organization {id, shortName}} }
 			}
-			taskList(f:recents, maxResults:6) {
+			taskRecents(maxResults:6) {
 				list { id, shortName, longName }
 			}
-			authorizationGroupList(f:recents, maxResults:6) {
+			authorizationGroupRecents(maxResults:6) {
 				list { id, name, description }
 			}
-			tagList(f:getAll) {
+			tags {
 				list { id, name, description }
 			}
 		`).then(data => {
 			let newState = {
 				recents: {
-					locations: data.locationList.list,
-					persons: data.personList.list,
-					tasks: data.taskList.list,
-					authorizationGroups: data.authorizationGroupList.list,
+					locations: data.locationRecents.list,
+					persons: data.personRecents.list,
+					tasks: data.taskRecents.list,
+					authorizationGroups: data.authorizationGroupRecents.list,
 				},
-				suggestionList: data.tagList.list.map(tag => ({id: tag.id.toString(), text: tag.name})),
+				suggestionList: data.tags.list.map(tag => ({id: tag.id.toString(), text: tag.name})),
 			}
 			this.setState(newState)
 		})
@@ -555,7 +555,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		delete report.primaryPrincipal
 		delete report.primaryAdvisor
 		report.attendees = report.attendees.map(a =>
-			Object.without(a, 'position')
+			Object.without(a, 'position', '_loaded')
 		)
 
 		if (report.location) {

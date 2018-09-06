@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.GeneratedKeys;
@@ -13,10 +14,12 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportSensitiveInformationMapper;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
@@ -26,19 +29,33 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 
 	private Handle dbHandle;
+	private final ForeignKeyBatcher<ReportSensitiveInformation> reportIdBatcher;
 
 	public ReportSensitiveInformationDao(Handle h) {
 		this.dbHandle = h;
+		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportIds */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
+				+ " FROM \"" + tableName + "\""
+				+ " WHERE \"reportId\" IN ( %1$s )";
+		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportId");
 	}
 
 	@Override
-	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
+	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ReportSensitiveInformation getById(@Bind("id") int id) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<ReportSensitiveInformation> getByIds(List<Integer> reportIds) {
+		throw new UnsupportedOperationException();
+	}
+
+	public List<List<ReportSensitiveInformation>> getReportSensitiveInformation(List<Integer> foreignKeys) {
+		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	@Override
@@ -50,7 +67,6 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return null;
 		}
-		rsi.setReportId(report.getId());
 		rsi.setCreatedAt(DateTime.now());
 		rsi.setUpdatedAt(DateTime.now());
 		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
@@ -58,7 +74,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 					+ " (text, \"reportId\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:text, :reportId, :createdAt, :updatedAt)")
 				.bind("text", rsi.getText())
-				.bind("reportId", rsi.getReportId())
+				.bind("reportId", report.getId())
 				.bind("createdAt", rsi.getCreatedAt())
 				.bind("updatedAt", rsi.getUpdatedAt())
 				.executeAndReturnGeneratedKeys();
@@ -77,7 +93,6 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			return 0;
 		}
 		// Update relevant fields, but do not allow the reportId to be updated by the query!
-		rsi.setReportId(report.getId());
 		rsi.setUpdatedAt(DateTime.now());
 		final int numRows = dbHandle.createStatement(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
@@ -96,25 +111,22 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 				: update(rsi, user, report);
 	}
 
-	public ReportSensitiveInformation getForReport(Report report, Person user) {
+	public CompletableFuture<ReportSensitiveInformation> getForReport(Map<String, Object> context, Report report, Person user) {
 		if (!isAuthorized(user, report)) {
-			return null;
+			return CompletableFuture.supplyAsync(() -> null);
 		}
-		final Query<ReportSensitiveInformation> query = dbHandle.createQuery(
-				"/* getReportSensitiveInformationByReportId */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
-					+ " FROM \"" + tableName + "\""
-					+ " WHERE \"reportId\" = :reportId")
-			.bind("reportId", report.getId())
-			.map(new ReportSensitiveInformationMapper());
-		final List<ReportSensitiveInformation> results = query.list();
-		ReportSensitiveInformation rsi = (results.size() == 0) ? null : results.get(0);
-		if (rsi != null) {
-			AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);
-		} else {
-			rsi = new ReportSensitiveInformation();
-			rsi.setReportId(report.getId());
-		}
-		return rsi;
+		return new ForeignKeyFetcher<ReportSensitiveInformation>()
+				.load(context, "report.reportSensitiveInformation", report.getId())
+				.thenApply(l ->
+		{
+			ReportSensitiveInformation rsi = Utils.isEmptyOrNull(l) ? null : l.get(0);
+			if (rsi != null) {
+				AnetAuditLogger.log("ReportSensitiveInformation {} retrieved by {} ", rsi, user);
+			} else {
+				rsi = new ReportSensitiveInformation();
+			}
+			return rsi;
+		});
 	}
 
 	/**
