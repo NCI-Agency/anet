@@ -371,15 +371,17 @@ class BasePersonForm extends ValidatableFormWrapper {
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
 		person.name = Person.fullName(this.state.splitName, true)
-
-		let url = `/api/people/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updatePerson' : 'createPerson'
+		let graphql = operation + '(person: $person)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { person: person }
+		const variableDef = '($person: PersonInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, person, {disableSubmits: true})
-			.then(response => {
-				if (response.code) {
-					throw response.code
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				if (data.code) {
+					throw data.code
 				}
-
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
@@ -388,8 +390,8 @@ class BasePersonForm extends ValidatableFormWrapper {
 						pathname: '/',
 					})
 				} else {
-					if (response.id) {
-						person.id = response.id
+					if (data[operation].id) {
+						person.id = data[operation].id
 					}
 					this.props.history.replace(Person.pathForEdit(person))
 					this.props.history.push({

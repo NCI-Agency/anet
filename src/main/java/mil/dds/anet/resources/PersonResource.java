@@ -24,6 +24,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
@@ -83,7 +84,7 @@ public class PersonResource {
 		return p;
 	}
 	
-	
+
 	/**
 	 * Creates a new {@link Person} object as supplied in http entity. 
 	 * Optional: 
@@ -95,7 +96,11 @@ public class PersonResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
-	public Person createNewPerson(@Auth Person user, Person p) {
+	public Person createPerson(@Auth Person user, Person p) {
+		return createPersonCommon(user, p);
+	}
+
+	private Person createPersonCommon(Person user, Person p) {
 		if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
 			validateEmail(p.getEmailAddress());
 		}
@@ -115,10 +120,36 @@ public class PersonResource {
 			AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(created, created.getPosition());
 		}
 		
-		AnetAuditLogger.log("Person {} created by {}", p, user);
+		AnetAuditLogger.log("Person {} created by {}", created, user);
 		return created;
 	}
-	
+
+	@GraphQLMutation(name="createPerson")
+	@RolesAllowed("SUPER_USER")
+	public Person createPerson(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="person") Person p) {
+		return createPersonCommon(DaoUtils.getUserFromContext(context), p);
+	}
+
+	private boolean canEditPerson(Person editor, Person subject) {
+		if (editor.getId().equals(subject.getId())) {
+			return true;
+		}
+		Position editorPos = editor.getPosition();
+		if (editorPos == null) { return false; }
+		if (editorPos.getType() == PositionType.ADMINISTRATOR) { return true; }
+		if (editorPos.getType() == PositionType.SUPER_USER) {
+			//Super Users can edit any principal
+			if (subject.getRole().equals(Role.PRINCIPAL)) { return true; }
+			//Ensure that the editor is the Super User for the subject's organization.
+			Position subjectPos = subject.loadPosition();
+			if (subjectPos == null) {
+				//Super Users can edit position-less people.
+				return true;
+			}
+			return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganization());
+		}
+		return false;
+	}
 	/**
 	 * Will update a person record with the {@link Person} entity provided in the http entity. 
 	 * All fields will be updated, so you must pass the complete Person object.
@@ -136,8 +167,13 @@ public class PersonResource {
 	@Timed
 	@Path("/update")
 	public Response updatePerson(@Auth Person user, Person p) {
+		updatePersonCommon(user, p);
+		return Response.ok().build();
+	}
+
+	private int updatePersonCommon(Person user, Person p) {
 		Person existing = dao.getById(p.getId());
-		if (canEditPerson(user, existing) == false) { 
+		if (canEditPerson(user, existing) == false) {
 			throw new WebApplicationException("You do not have permissions to edit this person", Status.FORBIDDEN);
 		}
 
@@ -145,7 +181,7 @@ public class PersonResource {
 			validateEmail(p.getEmailAddress());
 		}
 		
-		//Swap the position first in order to do the authentication check. 
+		//Swap the position first in order to do the authentication check.
 		if (p.getPosition() != null) {
 			//Maybe update position? 
 			Position existingPos = existing.loadPosition();
@@ -189,32 +225,19 @@ public class PersonResource {
 		
 		p.setBiography(Utils.sanitizeHtml(p.getBiography()));
 		int numRows = dao.update(p);
-		
-		AnetAuditLogger.log("Person {} edited by {}", p, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
-	}
-	
-	private boolean canEditPerson(Person editor, Person subject) { 
-		if (editor.getId().equals(subject.getId())) { 
-			return true;
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
 		}
-		Position editorPos = editor.getPosition();
-		if (editorPos == null) { return false; } 
-		if (editorPos.getType() == PositionType.ADMINISTRATOR) { return true; } 
-		if (editorPos.getType() == PositionType.SUPER_USER) { 
-			//Super Users can edit any principal
-			if (subject.getRole().equals(Role.PRINCIPAL)) { return true; }
-			//Ensure that the editor is the Super User for the subject's organization.
-			Position subjectPos = subject.loadPosition();
-			if (subjectPos == null) { 
-				//Super Users can edit position-less people. 
-				return true; 
-			}
-			return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganization());
-		}
-		return false;
+		AnetAuditLogger.log("Person {} updated by {}", p, user);
+		return numRows;
 	}
-	
+
+	@GraphQLMutation(name="updatePerson")
+	public Integer updatePerson(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="person") Person p) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updatePersonCommon(DaoUtils.getUserFromContext(context), p);
+	}
+
 	/**
 	 * Searches people in the ANET database.
 	 * @param query the search term
