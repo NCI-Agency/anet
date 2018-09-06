@@ -379,9 +379,6 @@ class BasePersonForm extends ValidatableFormWrapper {
 		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
-				if (data.code) {
-					throw data.code
-				}
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'

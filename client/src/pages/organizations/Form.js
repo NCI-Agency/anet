@@ -263,9 +263,6 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
-				if (data.code) {
-					throw data.code
-				}
 				if (data[operation].id) {
 					organization.id = data[operation].id
 				}
