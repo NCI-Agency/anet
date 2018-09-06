@@ -210,7 +210,7 @@ public class OrganizationResource {
 					}
 				}
 
-				AnetAuditLogger.log("Organization {} edited by {}", org, user);
+				AnetAuditLogger.log("Organization {} updated by {}", org, user);
 				return numRows;
 			}
 		});

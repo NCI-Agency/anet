@@ -68,7 +68,7 @@ public class ApprovalStepResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
-	public ApprovalStep createNewStep(@Auth Person user, ApprovalStep as) {
+	public ApprovalStep createStep(@Auth Person user, ApprovalStep as) {
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(as.getAdvisorOrganizationId()));
 		return engine.executeInTransaction(dao::insertAtEnd, as);
 	}

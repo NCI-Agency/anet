@@ -108,7 +108,7 @@ class LocationForm extends ValidatableFormWrapper {
 	onSubmit(event) {
 		let loc = this.props.anetLocation
 		let edit = this.props.edit
-		const operation = edit ? 'updateLocation' : 'createNewLocation'
+		const operation = edit ? 'updateLocation' : 'createLocation'
 		let graphql = operation + '(location: $location)'
 		graphql += edit ? '' : ' { id }'
 		const variables = { location: loc }

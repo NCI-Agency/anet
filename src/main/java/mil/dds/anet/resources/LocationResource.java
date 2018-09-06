@@ -85,11 +85,11 @@ public class LocationResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
-	public Location createNewLocation(@Auth Person user, Location l) {
-		return createNewLocationCommon(user, l);
+	public Location createLocation(@Auth Person user, Location l) {
+		return createLocationCommon(user, l);
 	}
 
-	private Location createNewLocationCommon(Person user, Location l) {
+	private Location createLocationCommon(Person user, Location l) {
 		if (l.getName() == null || l.getName().trim().length() == 0) { 
 			throw new WebApplicationException("Location name must not be empty", Status.BAD_REQUEST);
 		}
@@ -98,10 +98,10 @@ public class LocationResource {
 		return l;
 	}
 
-	@GraphQLMutation(name="createNewLocation")
+	@GraphQLMutation(name="createLocation")
 	@RolesAllowed("SUPER_USER")
-	public Location createNewLocation(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="location") Location l) {
-		return createNewLocationCommon(DaoUtils.getUserFromContext(context), l);
+	public Location createLocation(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="location") Location l) {
+		return createLocationCommon(DaoUtils.getUserFromContext(context), l);
 	}
 	
 	@POST

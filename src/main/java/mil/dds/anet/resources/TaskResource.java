@@ -70,11 +70,11 @@ public class TaskResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMIN")
-	public Task createNewTask(@Auth Person user, Task p) {
-		return createNewTaskCommon(user, p);
+	public Task createTask(@Auth Person user, Task p) {
+		return createTaskCommon(user, p);
 	}
 
-	private Task createNewTaskCommon(Person user, Task p) {
+	private Task createTaskCommon(Person user, Task p) {
 		if (AuthUtils.isAdmin(user) == false) { 
 			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getId() == null) { 
 				throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
@@ -87,10 +87,10 @@ public class TaskResource {
 		return p;
 	}
 
-	@GraphQLMutation(name="createNewTask")
+	@GraphQLMutation(name="createTask")
 	@RolesAllowed("ADMIN")
-	public Task createNewTask(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="task") Task p) {
-		return createNewTaskCommon(DaoUtils.getUserFromContext(context), p);
+	public Task createTask(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="task") Task p) {
+		return createTaskCommon(DaoUtils.getUserFromContext(context), p);
 	}
 	
 	/* Updates shortName, longName, category, and customFieldRef1Id */

@@ -173,7 +173,7 @@ class BaseTaskForm extends ValidatableFormWrapper {
 			task.customFieldRef1 = {id: task.customFieldRef1.id}
 		}
 
-		const operation = edit ? 'updateTask' : 'createNewTask'
+		const operation = edit ? 'updateTask' : 'createTask'
 		let graphql = operation + '(task: $task)'
 		graphql += edit ? '' : ' { id }'
 		const variables = { task: task }

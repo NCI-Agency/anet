@@ -81,7 +81,7 @@ public class TagResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
-	public Tag createNewTag(@Auth Person user, Tag t) {
+	public Tag createTag(@Auth Person user, Tag t) {
 		if (t.getName() == null || t.getName().trim().length() == 0) {
 			throw new WebApplicationException("Tag name must not be empty", Status.BAD_REQUEST);
 		}

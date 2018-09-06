@@ -46,11 +46,11 @@ public class SavedSearchResource {
 	@POST
 	@Timed
 	@Path("/new")
-	public SavedSearch createNewSavedSearch(@Auth Person user, SavedSearch search) {
-		return createNewSavedSearchCommon(user, search);
+	public SavedSearch createSavedSearch(@Auth Person user, SavedSearch search) {
+		return createSavedSearchCommon(user, search);
 	}
 
-	private SavedSearch createNewSavedSearchCommon(Person user, SavedSearch search) {
+	private SavedSearch createSavedSearchCommon(Person user, SavedSearch search) {
 		search.setOwner(Person.createWithId(user.getId()));
 		SavedSearch created;
 		try {
@@ -62,9 +62,9 @@ public class SavedSearchResource {
 		return created;
 	}
 
-	@GraphQLMutation(name="createNewSavedSearch")
-	public SavedSearch createNewSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="search") SavedSearch search) {
-		return createNewSavedSearchCommon(DaoUtils.getUserFromContext(context), search);
+	@GraphQLMutation(name="createSavedSearch")
+	public SavedSearch createSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="search") SavedSearch search) {
+		return createSavedSearchCommon(DaoUtils.getUserFromContext(context), search);
 	}
 
 	@GET

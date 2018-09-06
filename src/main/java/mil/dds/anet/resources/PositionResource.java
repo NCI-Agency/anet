@@ -210,7 +210,7 @@ public class PositionResource {
 		if (numRows == 0) {
 			throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
 		}
-		AnetAuditLogger.log("Position {} edited by {}", pos, user);
+		AnetAuditLogger.log("Position {} updated by {}", pos, user);
 		return numRows;
 	}
 

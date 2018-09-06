@@ -485,7 +485,7 @@ class Search extends Page {
 		if (this.props.searchQuery.objectType) {
 			search.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
-		const operation = 'createNewSavedSearch'
+		const operation = 'createSavedSearch'
 		let graphql = operation + '(search: $search) { id }'
 		const variables = { search: search }
 		const variableDef = '($search: SavedSearchInput!)'

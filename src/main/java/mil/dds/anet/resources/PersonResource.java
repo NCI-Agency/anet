@@ -130,7 +130,7 @@ public class PersonResource {
 		return createPersonCommon(DaoUtils.getUserFromContext(context), p);
 	}
 
-	private boolean canEditPerson(Person editor, Person subject) {
+	private boolean canUpdatePerson(Person editor, Person subject) {
 		if (editor.getId().equals(subject.getId())) {
 			return true;
 		}
@@ -173,7 +173,7 @@ public class PersonResource {
 
 	private int updatePersonCommon(Person user, Person p) {
 		Person existing = dao.getById(p.getId());
-		if (canEditPerson(user, existing) == false) {
+		if (canUpdatePerson(user, existing) == false) {
 			throw new WebApplicationException("You do not have permissions to edit this person", Status.FORBIDDEN);
 		}
 

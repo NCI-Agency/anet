@@ -149,7 +149,7 @@ public class ReportResource {
 	@POST
 	@Timed
 	@Path("/new")
-	public Report createNewReport(@Auth Person author, Report r) {
+	public Report createReport(@Auth Person author, Report r) {
 		if (r.getState() == null) { r.setState(ReportState.DRAFT); }
 		if (r.getAuthor() == null) { r.setAuthor(author); }
 
@@ -238,7 +238,7 @@ public class ReportResource {
 		r.setState(existing.getState());
 		r.setApprovalStep(existing.getApprovalStep());
 		r.setAuthor(existing.getAuthor());
-		assertCanEditReport(r, editor);
+		assertCanUpdateReport(r, editor);
 
 		//If this report is in draft and in the future, set state to Future.
 		if (ReportState.DRAFT.equals(r.getState()) && shouldBeFuture(r)) {
@@ -378,7 +378,7 @@ public class ReportResource {
 		return existing;
 	}
 
-	private void assertCanEditReport(Report report, Person editor) {
+	private void assertCanUpdateReport(Report report, Person editor) {
 		String permError = "You do not have permission to edit this report. ";
 		switch (report.getState()) {
 		case DRAFT:
