@@ -26,6 +26,8 @@ class MergePeople extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			winner: {},
 			loser: {},
 			copyPosition: false
@@ -33,7 +35,7 @@ class MergePeople extends Page {
 	}
 
 	render() {
-		let {winner, loser, copyPosition, error, success} = this.state
+		let {winner, loser, copyPosition} = this.state
 		let errors = this.validate()
 
 		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status,
@@ -44,7 +46,7 @@ class MergePeople extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['Merge People Tool', '/admin/mergePeople']]} />
-				<Messages error={error} success={success} />
+				<Messages error={this.state.error} success={this.state.success} />
 
 				<h2 className="form-header">Merge People Tool</h2>
 				<Alert bsStyle="warning">
