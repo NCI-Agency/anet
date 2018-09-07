@@ -65,18 +65,19 @@ class BaseAdminIndex extends Page {
 	onSubmit(event) {
 		event.stopPropagation()
 		event.preventDefault()
-
-		let json = Object.map(this.state.settings, (key, value) => ({key, value}))
-
-        API.send('/api/admin/save', json, {disableSubmits: true})
-            .then(() => {
+		// settings as JSON
+		let settings = Object.map(this.state.settings, (key, value) => ({key, value}))
+		let graphql = 'saveAdminSettings(settings: $settings)'
+		const variables = { settings: settings }
+		const variableDef = '($settings: [AdminSettingInput]!)'
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
 				this.props.loadAppData()
-			})
-			.catch(error => {
-                this.setState({error})
-                window.scrollTo(0, 0)
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				window.scrollTo(0, 0)
 				console.error(error)
-            })
+			})
 	}
 
 }
