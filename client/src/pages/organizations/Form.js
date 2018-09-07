@@ -261,7 +261,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		const variables = { organization: organization }
 		const variableDef = '($organization: OrganizationInput!)'
 		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef)
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				if (data[operation].id) {
 					organization.id = data[operation].id

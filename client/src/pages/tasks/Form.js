@@ -179,7 +179,7 @@ class BaseTaskForm extends ValidatableFormWrapper {
 		const variables = { task: task }
 		const variableDef = '($task: TaskInput!)'
 		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef)
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				if (data[operation].id) {
 					task.id = data[operation].id

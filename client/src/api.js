@@ -57,17 +57,17 @@ const API = {
 		return API.fetch(url, params)
 	},
 
-	_queryCommon(query, variables, variableDef, output, isMutation) {
+	_queryCommon(query, variables, variableDef, output, isMutation, params) {
 		variables = variables || {}
 		variableDef = variableDef || ''
 		const queryType = isMutation ? 'mutation' : 'query'
 		query = queryType + ' ' + variableDef + ' { ' + query + ' }'
 		output = output || ''
-		return API.send('/graphql', {query, variables, output})
+		return API.send('/graphql', {query, variables, output}, params)
 	},
 
-	mutation(query, variables, variableDef) {
-		return API._queryCommon(query, variables, variableDef, undefined, true).then(json => json.data)
+	mutation(query, variables, variableDef, params) {
+		return API._queryCommon(query, variables, variableDef, undefined, true, params).then(json => json.data)
 	},
 
 	query(query, variables, variableDef) {

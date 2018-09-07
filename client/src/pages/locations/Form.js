@@ -114,7 +114,7 @@ class LocationForm extends ValidatableFormWrapper {
 		const variables = { location: loc }
 		const variableDef = '($location: LocationInput!)'
 		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef)
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				if (data[operation].id) {
 					loc.id = data[operation].id

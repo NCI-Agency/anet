@@ -574,7 +574,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		if (disableSubmits) {
 			this.setState({disableOnSubmit: disableSubmits})
 		}
-		return API.mutation(graphql, variables, variableDef)
+		return API.mutation(graphql, variables, variableDef, {disableSubmits: disableSubmits})
 	}
 
 	@autobind

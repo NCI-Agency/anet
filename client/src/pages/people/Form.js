@@ -377,7 +377,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const variables = { person: person }
 		const variableDef = '($person: PersonInput!)'
 		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef)
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				if (isNew) {
 					localStorage.clear()

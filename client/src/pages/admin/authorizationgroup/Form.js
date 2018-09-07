@@ -101,7 +101,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		const variables = { authorizationGroup: authGroup }
 		const variableDef = '($authorizationGroup: AuthorizationGroupInput!)'
 		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef)
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				if (data[operation].id) {
 					authGroup.id = data[operation].id

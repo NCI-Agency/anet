@@ -177,7 +177,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 		const variables = { position: position }
 		const variableDef = '($position: PositionInput!)'
 		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef)
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				if (data[operation].id) {
 					position.id = data[operation].id
