@@ -182,6 +182,9 @@ public class PositionResource {
 		validatePosition(user, pos);
 
 		final int numRows = dao.update(pos);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process position update", Status.NOT_FOUND);
+		}
 
 		if (pos.getPerson() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
 			final Position current = dao.getById(pos.getId());

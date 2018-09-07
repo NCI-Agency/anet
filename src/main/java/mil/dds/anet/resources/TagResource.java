@@ -96,9 +96,12 @@ public class TagResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateTag(@Auth Person user, Tag t) {
-		int numRows = dao.update(t);
+		final int numRows = dao.update(t);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process tag update", Status.NOT_FOUND);
+		}
 		AnetAuditLogger.log("Tag {} updated by {}", t, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+		return Response.ok().build();
 	}
 
 }

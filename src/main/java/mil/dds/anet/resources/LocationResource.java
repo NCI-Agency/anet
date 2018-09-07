@@ -114,7 +114,7 @@ public class LocationResource {
 	}
 
 	private int updateLocationCommon(Person user, Location l) {
-		int numRows = dao.update(l);
+		final int numRows = dao.update(l);
 		if (numRows == 0) {
 			throw new WebApplicationException("Couldn't process location update", Status.NOT_FOUND);
 		}

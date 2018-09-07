@@ -118,7 +118,7 @@ public class TaskResource {
 			}
 		}
 		
-		int numRows = dao.update(p);
+		final int numRows = dao.update(p);
 		if (numRows == 0) { 
 			throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
 		}

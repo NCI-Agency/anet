@@ -224,7 +224,7 @@ public class PersonResource {
 		}
 		
 		p.setBiography(Utils.sanitizeHtml(p.getBiography()));
-		int numRows = dao.update(p);
+		final int numRows = dao.update(p);
 		if (numRows == 0) {
 			throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
 		}
