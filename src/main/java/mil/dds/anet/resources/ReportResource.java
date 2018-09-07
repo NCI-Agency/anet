@@ -150,6 +150,10 @@ public class ReportResource {
 	@Timed
 	@Path("/new")
 	public Report createReport(@Auth Person author, Report r) {
+		return createReportCommon(author, r);
+	}
+
+	private Report createReportCommon(Person author, Report r) {
 		if (r.getState() == null) { r.setState(ReportState.DRAFT); }
 		if (r.getAuthor() == null) { r.setAuthor(author); }
 
@@ -182,17 +186,19 @@ public class ReportResource {
 		return r;
 	}
 
-	private Person findPrimaryAttendee(Report r, Role role) {
-		if (r.getAttendees() == null) { return null; }
-		return r.getAttendees().stream().filter(p ->
-				p.isPrimary() && p.getRole().equals(role)
-			).findFirst().orElse(null);
+	@GraphQLMutation(name="createReport")
+	public Report createReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="report") Report r) {
+		return createReportCommon(DaoUtils.getUserFromContext(context), r);
 	}
 
 	@POST
 	@Timed
 	@Path("/update")
-	public Response editReport(@Auth Person editor, Report r, @DefaultValue("true") @QueryParam("sendEditEmail") Boolean sendEmail) {
+	public Report updateReport(@Auth Person editor, Report r, @DefaultValue("true") @QueryParam("sendEditEmail") boolean sendEmail) {
+		return updateReportCommon(editor, r, sendEmail);
+	}
+
+	private Report updateReportCommon(Person editor, Report r, Boolean sendEmail) {
 		// perform all modifications to the report and its tasks and steps in a single transaction, returning the original state of the report
 		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
 
@@ -222,7 +228,20 @@ public class ReportResource {
 		}
 
 		// Return the report in the response; used in autoSave by the client form
-		return Response.ok(r).build();
+		return r;
+	}
+
+	@GraphQLMutation(name="updateReport")
+	public Report updateReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="report") Report r, @GraphQLArgument(name="sendEditEmail", defaultValue="true") boolean sendEmail) {
+		// GraphQL mutations *have* to return something, we return the report, used in autoSave
+		return updateReportCommon(DaoUtils.getUserFromContext(context), r, sendEmail);
+	}
+
+	private Person findPrimaryAttendee(Report r, Role role) {
+		if (r.getAttendees() == null) { return null; }
+		return r.getAttendees().stream().filter(p ->
+				p.isPrimary() && p.getRole().equals(role)
+			).findFirst().orElse(null);
 	}
 
 	/** Perform all modifications to the report and its tasks and steps, returning the original state of the report.  Should be wrapped in
@@ -281,7 +300,10 @@ public class ReportResource {
 		r.setReportText(Utils.sanitizeHtml(r.getReportText()));
 
 		// begin DB modifications
-		dao.update(r, editor);
+		int numRows = dao.update(r, editor);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process report update", Status.NOT_FOUND);
+		}
 
 		//Update Attendees:
 		if (r.getAttendees() != null) {
@@ -346,7 +368,7 @@ public class ReportResource {
 					dao.removeTagFromReport(t, r);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				throw new WebApplicationException("failed to load Attendees", e);
+				throw new WebApplicationException("failed to load Tags", e);
 			}
 		}
 
