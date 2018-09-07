@@ -191,20 +191,28 @@ class MergePeople extends Page {
 	submit(event) {
 		event.stopPropagation()
 		event.preventDefault()
-
 		let {winner, loser, copyPosition} = this.state
-        API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
-            .then(() => {
-				this.props.history.push({
-					pathname: Person.pathFor(this.state.winner),
-					state: {success: 'People successfully merged'}
-				})
-			})
-			.catch(error => {
-                this.setState({error})
-                window.scrollTo(0, 0)
+		let operation = 'mergePeople'
+		let graphql = operation + '(winnerId: $winnerId, loserId: $loserId, copyPosition: $copyPosition)'
+		const variables = {
+				winnerId: winner.id,
+				loserId: loser.id,
+				copyPosition: copyPosition
+		}
+		const variableDef = '($winnerId: Int!,$loserId: Int!,$copyPosition: Boolean!,)'
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation]) {
+					this.props.history.push({
+						pathname: Person.pathFor(this.state.winner),
+						state: {success: 'People merged'}
+					})
+				}
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				window.scrollTo(0, 0)
 				console.error(error)
-            })
+			})
 	}
 
 }

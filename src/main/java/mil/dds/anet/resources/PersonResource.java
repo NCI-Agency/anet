@@ -298,42 +298,49 @@ public class PersonResource {
 		user = DaoUtils.getUser(context, user);
 		return user;
 	}
-	
+
 	@POST
 	@Timed
 	@Path("/merge")
 	@RolesAllowed("ADMINISTRATOR")
-	public Response mergePeople(@Auth Person user, 
-			@QueryParam("winner") int winnerId, 
-			@QueryParam("loser") int loserId, 
+	public Response mergePeople(@Auth Person user,
+			@QueryParam("winner") int winnerId,
+			@QueryParam("loser") int loserId,
 			@QueryParam("copyPosition") @DefaultValue("false") Boolean copyPosition) {
-		
-		if (loserId == winnerId) { return Response.status(Status.NOT_ACCEPTABLE).build(); } 
+		mergePeopleCommon(user, winnerId, loserId, copyPosition);
+		return Response.ok().build();
+	}
+
+	private int mergePeopleCommon(Person user, int winnerId, int loserId, Boolean copyPosition) {
+		if (loserId == winnerId) {
+			throw new WebApplicationException("You selected the same person twice", Status.NOT_ACCEPTABLE);
+		}
 		Person winner = dao.getById(winnerId);
+		if (winner == null) {
+			throw new WebApplicationException("Winner not found", Status.NOT_FOUND);
+		}
 		Person loser = dao.getById(loserId);
-		
-		if (winner == null || loser == null) { 
-			return Response.status(Status.NOT_FOUND).build();
+		if (loser == null) {
+			throw new WebApplicationException("Loser not found", Status.NOT_FOUND);
 		}
-		
-		if (winner.getRole().equals(loser.getRole()) == false) { 
-			return Response.status(Status.NOT_ACCEPTABLE).build();
+		if (winner.getRole().equals(loser.getRole()) == false) {
+			throw new WebApplicationException("You can only merge people of the same role", Status.NOT_ACCEPTABLE);
 		}
-		if (winner.getPosition() != null && copyPosition) { 
-			return Response.status(Status.NOT_ACCEPTABLE).build();
+		if (winner.getPosition() != null && copyPosition) {
+			throw new WebApplicationException("Winner already has a position", Status.NOT_ACCEPTABLE);
 		}
-		
+
 		loser.loadPosition();
 		winner.loadPosition();
-		
+
 		//Remove the loser from their position.
 		Position loserPosition = loser.getPosition();
 		if (loserPosition != null) { 
 			AnetObjectEngine.getInstance().getPositionDao()
 				.removePersonFromPosition(loserPosition);
 		}
-		
-		dao.mergePeople(winner, loser, copyPosition);
+
+		int merged = dao.mergePeople(winner, loser, copyPosition);
 		AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
 		
 		if (loserPosition != null && copyPosition) { 
@@ -348,7 +355,17 @@ public class PersonResource {
 				.setPersonInPosition(winner, winner.getPosition());
 		}
 		
-		return Response.ok().build();
+		return merged;
+	}
+
+	@GraphQLMutation(name="mergePeople")
+	@RolesAllowed("ADMINISTRATOR")
+	public Integer mergePeople(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="winnerId") int winnerId,
+			@GraphQLArgument(name="loserId") int loserId,
+			@GraphQLArgument(name="copyPosition", defaultValue="false") boolean copyPosition) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return mergePeopleCommon(DaoUtils.getUserFromContext(context), winnerId, loserId, copyPosition);
 	}
 
 	private void validateEmail(String emailInput) {
