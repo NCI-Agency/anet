@@ -469,8 +469,8 @@ ${sender.name} sent you a report from ANET:
     </div>
   </#if>
 
-  <#if report.loadApprovalStatus()??>
-    <#assign approvalStatus = report.loadApprovalStatus()>
+  <#assign approvalStatus = report.loadApprovalStatus(context).get()>
+  <#if approvalStatus??>
     <div id="approvals">
       <h2 class="legend">
         <span class="title-text">Approval State</span>
