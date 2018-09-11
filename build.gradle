@@ -135,6 +135,14 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 	args = ['run', 'build']
 }
 
+task dbInit(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	args = ["init", anetConfig]
+	standardInput = System.in
+}
+
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)

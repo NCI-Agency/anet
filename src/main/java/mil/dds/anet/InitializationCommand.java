@@ -84,6 +84,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		Organization adminOrg = new Organization();
 		adminOrg.setType(OrganizationType.ADVISOR_ORG);
 		adminOrg.setShortName(scanner.nextLine());
+		adminOrg.setStatus(Organization.OrganizationStatus.ACTIVE);
 		adminOrg = engine.getOrganizationDao().insert(adminOrg);
 		System.out.println("... Organization " + adminOrg.getId() + " Saved!");
 		
