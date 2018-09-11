@@ -728,12 +728,27 @@ public class ReportResource {
 	@POST
 	@Timed
 	@Path("/{id}/comments")
-	public Comment postNewComment(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
+	public Comment addComment(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
+		return addCommentCommon(author, reportId, comment);
+	}
+
+	public Comment addCommentCommon(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
 		comment.setReportId(reportId);
 		comment.setAuthor(author);
 		comment = engine.getCommentDao().insert(comment);
+		if (comment == null) {
+			throw new WebApplicationException("Couldn't process adding new comment");
+		}
 		sendNewCommentEmail(dao.getById(reportId, author), comment);
 		return comment;
+	}
+
+	@GraphQLMutation(name="addComment")
+	public Comment addComment(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="reportId") int reportId,
+			@GraphQLArgument(name="comment") Comment comment) {
+		// GraphQL mutations *have* to return something
+		return addCommentCommon(DaoUtils.getUserFromContext(context), reportId, comment);
 	}
 
 	private void sendNewCommentEmail(Report r, Comment comment) {

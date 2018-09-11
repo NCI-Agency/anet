@@ -531,15 +531,19 @@ class BaseReportShow extends Page {
 
 	@autobind
 	submitComment(event){
-		API.send(`/api/reports/${this.state.report.id}/comments`,
-			this.state.newComment)
-		.then(data => {
-			this.updateReport()
-			this.setState({newComment:new Comment()})
-		}, data => {
-			this.handleError(data)
-		})
-
+		let graphql = 'addComment(reportId: $reportId,comment: $comment) { id }'
+		const variables = {
+			reportId: this.state.report.id,
+			comment: this.state.newComment
+		}
+		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({newComment:new Comment(), error:null, success: 'Comment saved'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 		event.stopPropagation()
 		event.preventDefault()
 	}
