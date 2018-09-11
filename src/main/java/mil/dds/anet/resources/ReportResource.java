@@ -300,7 +300,7 @@ public class ReportResource {
 		r.setReportText(Utils.sanitizeHtml(r.getReportText()));
 
 		// begin DB modifications
-		int numRows = dao.update(r, editor);
+		final int numRows = dao.update(r, editor);
 		if (numRows == 0) {
 			throw new WebApplicationException("Couldn't process report update", Status.NOT_FOUND);
 		}
@@ -559,6 +559,10 @@ public class ReportResource {
 	@Timed
 	@Path("/{id}/approve")
 	public Report approveReport(@Auth Person approver, @PathParam("id") int id, Comment comment) {
+		return approveReportCommon(approver, id, comment);
+	}
+
+	public Report approveReportCommon(Person approver, int id, Comment comment) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
@@ -597,7 +601,10 @@ public class ReportResource {
 				} else {
 					sendApprovalNeededEmail(r);
 				}
-				dao.update(r, approver);
+				final int numRows = dao.update(r, approver);
+				if (numRows == 0) {
+					throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
+				}
 
 				//Add the comment
 				if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
@@ -606,10 +613,19 @@ public class ReportResource {
 					engine.getCommentDao().insert(comment);
 				}
 
-				AnetAuditLogger.log("report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				AnetAuditLogger.log("Report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
 				return r;
 			}
 		});
+	}
+
+	@GraphQLMutation(name="approveReport")
+	@RolesAllowed("SUPER_USER")
+	public Report approveReport(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="reportId") int id,
+			@GraphQLArgument(name="comment") Comment comment) {
+		// GraphQL mutations *have* to return something
+		return approveReportCommon(DaoUtils.getUserFromContext(context), id, comment);
 	}
 
 	private void sendReportReleasedEmail(Report r) {

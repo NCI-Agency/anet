@@ -567,15 +567,22 @@ class BaseReportShow extends Page {
 	@autobind
 	approveReport() {
 		let comment = (this.state.approvalComment.text.length > 0) ? this.state.approvalComment : {}
-		API.send(`/api/reports/${this.state.report.id}/approve`, comment).then(data => {
-			let lastApproval = (this.state.report.approvalStep.nextStepId === null)
-			this.updateReport()
-			let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
-			this.setState({error:null, success: message})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
+		let graphql = 'approveReport(reportId: $reportId,comment: $comment) { id }'
+		const variables = {
+			reportId: this.state.report.id,
+			comment: comment
+		}
+		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				let lastApproval = (this.state.report.approvalStep.nextStepId === null)
+				this.updateReport()
+				let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
+				this.setState({error:null, success: message})
+			}).catch(error => {
+				this.setState({success:null})
+				this.handleError(error)
+			})
 	}
 
 	@autobind
