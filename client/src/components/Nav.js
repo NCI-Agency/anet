@@ -138,7 +138,7 @@ class BaseNav extends Component {
 						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
 					</BSNav>
 				}
-				
+
 				{externalDocumentationUrl && externalDocumentationUrlText &&
 					<NavItem href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</NavItem>
 				}

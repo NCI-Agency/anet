@@ -7,13 +7,17 @@ html {
    * So we add this style to force IE11 & Edge to use a "normal", non-overlapping, non-auto-hiding scrollbar.
    * See https://github.com/twbs/bootstrap/issues/18543
    */
-  -ms-overflow-style: scrollbar;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  height: 100%;
 }
 
 body {
 	font-family: -apple-system, BlinkMacSystemFont, “Segoe UI”, Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
 	background: #f2f2f2;
+	height: 100%;
 	overflow: hidden;
+	margin: 0;
+	box-sizing: border-box;
 }
 
 .anet {
@@ -177,6 +181,11 @@ fieldset.danger {
 	max-height: 400px;
 }
 
+.dropdown-menu > li > a {
+	white-space: normal;
+	border-bottom: 1px solid #f2f2f2;
+}
+
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
 	background-color: #e0e0e0;
 }
@@ -331,12 +340,8 @@ li#search-nav .nav > li a {
 	padding-right: 4px;
 }
 
-.nav-fixed {
-	flex:0 0 auto;
-	padding:8px;
-}
-
 .nav-overlay {
+	margin-top: -125px;
 	padding:8px;
 	border: 1px solid #e0e0e0;
 	height: 100%;
@@ -766,11 +771,7 @@ header.searchPagination {
 }
 
 .primary-content {
-	flex:1 1 auto;
-	overflow-y:auto;
-	overflow-x:hidden;
-	padding-right: 10px;
-	padding-left: 10px;
+	width: 100%;
 }
 
 .glass-pane {

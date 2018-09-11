@@ -256,15 +256,17 @@ class App extends Page {
 			<Route path="*" component={PageMissing} />
 		</Switch>
 
-		const primaryWidths = {sm: 12, md: 12, lg: 12}
+		const heightTopBar = 125
 		return (
-			<AppContext.Provider value={{
-				appSettings: this.state.settings,
-				currentUser: this.state.currentUser,
-				loadAppData: this.loadData,
-				showFloatingMenu: this.showFloatingMenu,
-			}}>
-				<div className="anet" style={{ display:'flex', flexDirection:'column'}}>
+			<AppContext.Provider
+				value={{
+					appSettings: this.state.settings,
+					currentUser: this.state.currentUser,
+					loadAppData: this.loadData,
+					showFloatingMenu: this.showFloatingMenu,
+				}}
+			>
+				<div className="anet">
 					<TopBar
 						updateTopbarOffset={this.updateTopbarOffset}
 						minimalHeader={this.props.pageProps.minimalHeader}
@@ -273,21 +275,30 @@ class App extends Page {
 							this.showFloatingMenu(!this.state.floatingMenu)
 						}} />
 
-					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
-
-					<div style={{width:"100%", flex:'1 1 auto', display:'flex', flexDirection:'row', overflowY:'hidden', position:'relative' }}>
+					<div style={{height: '100%', display: 'flex', overflow: 'hidden', paddingTop: heightTopBar}}>
+					<LoadingBar showFastActions style={{marginTop: -8, backgroundColor: '#29d'}} />
+						<div
+							style={{marginTop: -heightTopBar}}
+							className={ this.state.floatingMenu === false ? null : "glass-pane" }
+							onClick={() => {
+								this.showFloatingMenu(false)
+							}}
+						/>
 						{(this.props.pageProps.useNavigation === true || this.state.floatingMenu === true) &&
-						<div className={ this.state.floatingMenu === false ? "hidden-xs nav-fixed" : "nav-overlay"}>
-							<Nav organizations={this.state.organizations} />
-						</div>
+							<div className={ this.state.floatingMenu === false ? "hidden-xs" : "nav-overlay"}>
+								<div style={{height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0}}>
+									<div className="sidebarOverflow" style={{flexGrow: 1, overflowY: 'auto', minWidth: 200, paddingLeft: 8, paddingRight: 8}}>
+										<Nav organizations={this.state.organizations} />
+									</div>
+								</div>
+							</div>
 						}
-						<div style={{ display:'flex', flexDirection:'column', flex:'1 1 auto'}}>
-							<Element className="primary-content" id="main-viewport">
-								<div
-									className={ this.state.floatingMenu === false ? null : "glass-pane" }
-									onClick={() => {
-										this.showFloatingMenu(false)
-									}} />
+						<div style={{height: '100%', width: '100%', display:'flex', flexDirection:'column'}}>
+							<Element
+								style={{flexGrow: 1, overflowY: 'auto', paddingLeft: 15, paddingRight: 15}}
+								name="mainViewport"
+								id="main-viewport"
+							>
 								{routing}
 							</Element>
 						</div>

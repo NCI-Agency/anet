@@ -26,7 +26,7 @@ class BaseTopBar extends Component {
 
     constructor(props) {
         super(props)
-        this.state = { 
+        this.state = {
             bannerVisibility: false
         }
     }
@@ -51,7 +51,7 @@ class BaseTopBar extends Component {
         }
         if (visibilitySetting === visible.USERS_AND_SUPER_USERS && (currentUser || currentUser.isSuperUser())) {
             output = true
-        } 
+        }
         if (this.state.bannerVisibility !== output) {
             this.setState({ bannerVisibility: output})
         }
@@ -68,11 +68,13 @@ class BaseTopBar extends Component {
 
     render() {
         return (
-            <div style={{ flex:'0 0 auto'}}>
-                {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
-                <GeneralBanner options={this.bannerOptions()} />
-                <SecurityBanner location={this.props.location} />
-                <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
+            <div style={{ display: 'block', width: '100%', position: 'fixed'}}>
+                <div>
+                    {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
+                    <GeneralBanner options={this.bannerOptions()} />
+                    <SecurityBanner location={this.props.location} />
+                    <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
+                </div>
             </div>
         )
     }
