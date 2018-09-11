@@ -620,7 +620,6 @@ public class ReportResource {
 	}
 
 	@GraphQLMutation(name="approveReport")
-	@RolesAllowed("SUPER_USER")
 	public Report approveReport(@GraphQLRootContext Map<String, Object> context,
 			@GraphQLArgument(name="reportId") int id,
 			@GraphQLArgument(name="comment") Comment comment) {
@@ -651,11 +650,17 @@ public class ReportResource {
 	@Timed
 	@Path("/{id}/reject")
 	public Report rejectReport(@Auth Person approver, @PathParam("id") int id, Comment reason) {
+		return rejectReportCommon(approver, id, reason);
+	}
+
+	public Report rejectReportCommon(Person approver, int id, Comment reason) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				final Report r = dao.getById(id, approver);
-				if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
+				if (r == null) {
+					throw new WebApplicationException("Report not found", Status.NOT_FOUND);
+				}
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				if (step == null) {
 					logger.info("Report ID {} does not currently need an approval", r.getId());
@@ -680,7 +685,10 @@ public class ReportResource {
 				//Update the report
 				r.setApprovalStep(null);
 				r.setState(ReportState.REJECTED);
-				dao.update(r, approver);
+				final int numRows = dao.update(r, approver);
+				if (numRows == 0) {
+					throw new WebApplicationException("Couldn't process report rejection", Status.NOT_FOUND);
+				}
 
 				//Add the comment
 				reason.setReportId(r.getId());
@@ -692,6 +700,14 @@ public class ReportResource {
 				return r;
 			}
 		});
+	}
+
+	@GraphQLMutation(name="rejectReport")
+	public Report rejectReport(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="reportId") int id,
+			@GraphQLArgument(name="comment") Comment reason) {
+		// GraphQL mutations *have* to return something
+		return rejectReportCommon(DaoUtils.getUserFromContext(context), id, reason);
 	}
 
 	private void sendReportRejectEmail(Report r, Person rejector, Comment rejectionComment) {

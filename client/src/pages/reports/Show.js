@@ -552,13 +552,19 @@ class BaseReportShow extends Page {
 		}
 
 		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
-		API.send(`/api/reports/${this.state.report.id}/reject`, this.state.approvalComment).then(data => {
-			this.updateReport()
-			this.setState({success:'Successfully rejected report'})
-			this.setState({error:null})
-		}, data => {
-			this.handleError(data)
-		})
+		let graphql = 'rejectReport(reportId: $reportId,comment: $comment) { id }'
+		const variables = {
+			reportId: this.state.report.id,
+			comment: this.state.approvalComment
+		}
+		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({error:null, success: 'Successfully rejected report'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 	}
 
 	@autobind
@@ -577,7 +583,6 @@ class BaseReportShow extends Page {
 				let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
 				this.setState({error:null, success: message})
 			}).catch(error => {
-				this.setState({success:null})
 				this.handleError(error)
 			})
 	}
