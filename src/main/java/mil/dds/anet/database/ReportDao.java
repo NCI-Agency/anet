@@ -420,9 +420,9 @@ public class ReportDao implements IAnetDao<Report> {
 
 				//Delete report
 				// GraphQL mutations *have* to return something, so we return the number of deleted report rows
-				return new Integer(dbHandle.createStatement("/* deleteReport.report */ DELETE FROM reports where id = :reportId")
+				return dbHandle.createStatement("/* deleteReport.report */ DELETE FROM reports where id = :reportId")
 					.bind("reportId", report.getId())
-					.execute());
+					.execute();
 			}
 		});
 		

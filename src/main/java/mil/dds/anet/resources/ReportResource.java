@@ -443,7 +443,7 @@ public class ReportResource {
 		return submitReportCommon(user, id);
 	}
 
-	public Report submitReportCommon(Person user, int id) {
+	private Report submitReportCommon(Person user, int id) {
 		final Report r = dao.getById(id, user);
 		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
@@ -574,7 +574,7 @@ public class ReportResource {
 		return approveReportCommon(approver, id, comment);
 	}
 
-	public Report approveReportCommon(Person approver, int id, Comment comment) {
+	private Report approveReportCommon(Person approver, int id, Comment comment) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
@@ -663,7 +663,7 @@ public class ReportResource {
 		return rejectReportCommon(approver, id, reason);
 	}
 
-	public Report rejectReportCommon(Person approver, int id, Comment reason) {
+	private Report rejectReportCommon(Person approver, int id, Comment reason) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
@@ -740,7 +740,7 @@ public class ReportResource {
 		return addCommentCommon(author, reportId, comment);
 	}
 
-	public Comment addCommentCommon(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
+	private Comment addCommentCommon(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
 		comment.setReportId(reportId);
 		comment.setAuthor(author);
 		comment = engine.getCommentDao().insert(comment);
