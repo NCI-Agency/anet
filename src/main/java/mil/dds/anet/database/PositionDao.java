@@ -148,7 +148,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 		}
 	}
 	
-	public Integer setPersonInPosition(Person person, Position position) {
+	public int setPersonInPosition(Person person, Position position) {
 		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
@@ -178,21 +178,21 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("positionId", position.getId())
 					.execute();
 				// GraphQL mutations *have* to return something, so we return the number of inserted rows
-				return new Integer(dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
+				return dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, :personId, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("personId", person.getId())
 					.bind("createdAt", now.plusMillis(1)) // Need to ensure this timestamp is greater than previous INSERT. 
-					.execute());
+					.execute();
 			}
 		});
 		
 	}
 	
-	public void removePersonFromPosition(Position position) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int removePersonFromPosition(Position position) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
 				dbHandle.createStatement("/* positionRemovePerson.update */ UPDATE positions "
 						+ "SET \"currentPersonId\" = :personId, \"updatedAt\" = :updatedAt "
@@ -223,13 +223,12 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("createdAt", now)
 					.execute();
 			
-				dbHandle.createStatement("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
+				return dbHandle.createStatement("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, null, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("createdAt", now)
 					.execute();
-				return null;
 			}
 		});
 	}

@@ -265,13 +265,26 @@ public class PositionResource {
 	@Path("/{id}/person")
 	@RolesAllowed("SUPER_USER")
 	public Response deletePersonFromPosition(@Auth Person user, @PathParam("id") int positionId) {
+		deletePersonFromPositionCommon(user, positionId);
+		return Response.ok().build();
+	}
+
+	private int deletePersonFromPositionCommon(Person user, int positionId) {
 		Position pos = dao.getById(positionId);
-		if (pos == null) { return Response.status(Status.NOT_FOUND).build(); } 
+		if (pos == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
-		dao.removePersonFromPosition(pos);
+		final int numRows = dao.removePersonFromPosition(pos);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process delete person from position", Status.NOT_FOUND);
+		}
 		AnetAuditLogger.log("Person removed from Position id#{} by {}", positionId, user);
-		return Response.ok().build();
+		return numRows;
+	}
+
+	@GraphQLMutation(name="deletePersonFromPosition")
+	public int deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="positionId") int positionId) {
+		return deletePersonFromPositionCommon(DaoUtils.getUserFromContext(context), positionId);
 	}
 
 	@GET
@@ -366,7 +379,7 @@ public class PositionResource {
 		return Response.ok().build();
 	}
 
-	private Integer deletePositionCommon(int positionId) {
+	private int deletePositionCommon(int positionId) {
 		final Position position = dao.getById(positionId);
 		if (position == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		

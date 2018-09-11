@@ -132,12 +132,16 @@ class BaseAssignPositionModal extends Component {
 
 	@autobind
 	remove() {
-		let position = this.props.person.position
-		API.fetch('/api/positions/' + position.id + '/person', { method: 'DELETE'}
-			).then(resp =>
-				this.props.onSuccess()
+		let graphql = 'deletePersonFromPosition(positionId: $positionId)'
+		const variables = {
+			positionId: this.props.person.position.id,
+		}
+		const variableDef = '($positionId: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(
+				data => this.props.onSuccess()
 			).catch(error => {
-				//halp
+				this.setState({error: error})
 			})
 	}
 
