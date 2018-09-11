@@ -443,26 +443,47 @@ class BaseRollupShow extends Page {
 			toAddresses: r.to,
 			comment: email.comment
 		}
-		let emailUrl = `/api/reports/rollup/email?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
+		let graphql = 'emailRollup(startDate: $startDate,endDate: $endDate'
+		const variables = {
+				startDate: this.rollupStart.valueOf(),
+				endDate: this.rollupEnd.valueOf()
+		}
+		let variableDef = '($startDate: Long!, $endDate: Long!'
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				emailUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
+				graphql += ',principalOrganizationId: $principalOrganizationId'
+				variables.principalOrganizationId = this.state.focusedOrg.id
+				variableDef += ',$principalOrganizationId: Int!'
 			} else {
-				emailUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`
+				graphql += ',advisorOrganizationId: $advisorOrganizationId'
+				variables.advisorOrganizationId = this.state.focusedOrg.id
+				variableDef += ',$advisorOrganizationId: Int!'
 			}
 		}
 		if (this.state.orgType) {
-			emailUrl += `&orgType=${this.state.orgType}`
+			graphql += ',orgType: $orgType'
+			variables.orgType = this.state.orgType
+			variableDef += ',$orgType: OrganizationTypeInput!'
 		}
+		graphql += ',email: $email)'
+		variables.email = emailDelivery
+		variableDef += ',$email: AnetEmailInput!)'
 
-
-		API.send(emailUrl, emailDelivery).then (() =>
-			this.setState({
-				success: 'Email successfully sent',
-				showEmailModal: false,
-				email: {}
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.setState({
+					success: 'Email successfully sent',
+					error:null,
+					showEmailModal: false,
+					email: {}
+				})
+			}).catch(error => {
+				this.setState({
+					showEmailModal: false,
+					email: {}
+				})
+				this.handleError(error)
 			})
-		)
 	}
 }
 

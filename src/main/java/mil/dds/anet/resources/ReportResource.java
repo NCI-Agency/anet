@@ -940,6 +940,14 @@ public class ReportResource {
 			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
 			@QueryParam("principalOrganizationId") Integer principalOrgId,
 			AnetEmail email) {
+		emailRollupCommon(user, start, end, orgType,
+			advisorOrgId, principalOrgId, email);
+		return Response.ok().build();
+	}
+
+	public int emailRollupCommon(Person user,
+			Long start, Long end, OrganizationType orgType,
+			Integer advisorOrgId, Integer principalOrgId, AnetEmail email) {
 		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
@@ -950,8 +958,20 @@ public class ReportResource {
 
 		email.setAction(action);
 		AnetEmailWorker.sendEmailAsync(email);
+		return 1;
+	}
 
-		return Response.ok().build();
+	@GraphQLMutation(name="emailRollup")
+	public int emailRollup(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="startDate") Long start,
+			@GraphQLArgument(name="endDate") Long end,
+			@GraphQLArgument(name="orgType") OrganizationType orgType,
+			@GraphQLArgument(name="advisorOrganizationId") Integer advisorOrgId,
+			@GraphQLArgument(name="principalOrganizationId") Integer principalOrgId,
+			@GraphQLArgument(name="email") AnetEmail email) {
+		// GraphQL mutations *have* to return something, we return an integer
+		return emailRollupCommon(DaoUtils.getUserFromContext(context), start,
+			end, orgType, advisorOrgId, principalOrgId, email);
 	}
 
 	/* Used to generate an HTML view of the daily rollup email
