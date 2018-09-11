@@ -285,6 +285,7 @@ button.home-tile.btn {
 	padding: 10px;
 	color: #5c5c5c;
 	text-decoration: none;
+	white-space: normal;
 }
 .home-tile h1 {
 	font-weight: 900;
