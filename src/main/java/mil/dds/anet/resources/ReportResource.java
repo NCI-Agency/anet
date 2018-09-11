@@ -131,7 +131,7 @@ public class ReportResource {
 			@PathParam("id") @GraphQLArgument(name="id") Integer id) {
 		user = DaoUtils.getUser(context, user);
 		final Report r = dao.getById(id, user);
-		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
+		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		return r;
 	}
 
@@ -254,6 +254,7 @@ public class ReportResource {
 		//Verify this person has access to edit this report
 		//Either they are the author, or an approver for the current step.
 		final Report existing = dao.getById(r.getId(), editor);
+		if (existing == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		r.setState(existing.getState());
 		r.setApprovalStep(existing.getApprovalStep());
 		r.setAuthor(existing.getAuthor());
@@ -444,6 +445,7 @@ public class ReportResource {
 
 	public Report submitReportCommon(Person user, int id) {
 		final Report r = dao.getById(id, user);
+		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
 		// TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
@@ -577,9 +579,7 @@ public class ReportResource {
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				final Report r = dao.getById(id, approver);
-				if (r == null) {
-					throw new WebApplicationException("Report not found", Status.NOT_FOUND);
-				}
+				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				if (step == null) {
 					logger.info("Report ID {} does not currently need an approval", r.getId());
@@ -668,9 +668,7 @@ public class ReportResource {
 		return dbHandle.inTransaction(new TransactionCallback<Report>() {
 			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				final Report r = dao.getById(id, approver);
-				if (r == null) {
-					throw new WebApplicationException("Report not found", Status.NOT_FOUND);
-				}
+				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				if (step == null) {
 					logger.info("Report ID {} does not currently need an approval", r.getId());
@@ -749,7 +747,9 @@ public class ReportResource {
 		if (comment == null) {
 			throw new WebApplicationException("Couldn't process adding new comment");
 		}
-		sendNewCommentEmail(dao.getById(reportId, author), comment);
+		final Report r = dao.getById(reportId, author);
+		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
+		sendNewCommentEmail(r, comment);
 		return comment;
 	}
 
