@@ -537,7 +537,6 @@ class BaseReportShow extends Page {
 			this.updateReport()
 			this.setState({newComment:new Comment()})
 		}, data => {
-			this.setState({success:null})
 			this.handleError(data)
 		})
 
@@ -548,7 +547,6 @@ class BaseReportShow extends Page {
 	@autobind
 	rejectReport() {
 		if (this.state.approvalComment.text.length === 0){
-			this.setState({success:null})
 			this.handleError({message:'Please include a comment when rejecting a report.'})
 			return
 		}
@@ -559,7 +557,6 @@ class BaseReportShow extends Page {
 			this.setState({success:'Successfully rejected report'})
 			this.setState({error:null})
 		}, data => {
-			this.setState({success:null})
 			this.handleError(data)
 		})
 	}
@@ -612,7 +609,7 @@ class BaseReportShow extends Page {
 
 	@autobind
 	handleError(response) {
-		this.setState({error: response})
+		this.setState({success: null, error: response})
 		window.scrollTo(0, 0)
 	}
 
