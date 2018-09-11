@@ -287,7 +287,7 @@ class App extends Page {
 						{(this.props.pageProps.useNavigation === true || this.state.floatingMenu === true) &&
 							<div className={ this.state.floatingMenu === false ? "hidden-xs" : "nav-overlay"}>
 								<div style={{height: '100%', display: 'flex', flexDirection: 'column', flexShrink: 0}}>
-									<div className="sidebarOverflow" style={{flexGrow: 1, overflowY: 'auto', minWidth: 200, paddingLeft: 8, paddingRight: 8}}>
+									<div style={{flexGrow: 1, overflowY: 'auto', minWidth: 200, paddingLeft: 8, paddingRight: 8}}>
 										<Nav organizations={this.state.organizations} />
 									</div>
 								</div>
