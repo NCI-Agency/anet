@@ -21,7 +21,7 @@ describe('Create new Person form page', () => {
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
-            expect(alertMessage).to.equal('Person saved successfully')
+            expect(alertMessage).to.equal('Person saved')
         })
         it('Should not save a principle without a valid email address', () => {
             CreatePerson.openAsSuperUser()
@@ -41,7 +41,7 @@ describe('Create new Person form page', () => {
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
-            expect(alertMessage).to.equal('Person saved successfully')
+            expect(alertMessage).to.equal('Person saved')
         })
     })
 
@@ -73,7 +73,7 @@ describe('Create new Person form page', () => {
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
-            expect(alertMessage).to.equal('Person saved successfully')
+            expect(alertMessage).to.equal('Person saved')
         })
     })
 })
