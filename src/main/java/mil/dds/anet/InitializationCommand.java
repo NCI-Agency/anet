@@ -16,6 +16,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -105,6 +106,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		System.out.print("Your Domain Username >>");
 		admin.setDomainUsername(scanner.nextLine());
 		admin.setRole(Role.ADVISOR);
+		admin.setStatus(PersonStatus.ACTIVE);
 		admin = engine.getPersonDao().insert(admin);
 		engine.getPositionDao().setPersonInPosition(admin, adminPos);
 		System.out.println("... Person " + admin.getId() + " Saved!");
