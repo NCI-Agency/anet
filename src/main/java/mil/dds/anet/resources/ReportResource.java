@@ -439,6 +439,10 @@ public class ReportResource {
 	@Timed
 	@Path("/{id}/submit")
 	public Report submitReport(@Auth Person user, @PathParam("id") int id) {
+		return submitReportCommon(user, id);
+	}
+
+	public Report submitReportCommon(Person user, int id) {
 		final Report r = dao.getById(id, user);
 		logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
@@ -508,6 +512,12 @@ public class ReportResource {
 
 		AnetAuditLogger.log("report {} submitted by author {} (id: {})", r.getId(), r.getAuthor().getName(), r.getAuthor().getId());
 		return r;
+	}
+
+	@GraphQLMutation(name="submitReport")
+	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="reportId") int id) {
+		// GraphQL mutations *have* to return something, we return the report
+		return submitReportCommon(DaoUtils.getUserFromContext(context), id);
 	}
 
 	/***

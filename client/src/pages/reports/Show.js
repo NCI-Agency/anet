@@ -520,13 +520,18 @@ class BaseReportShow extends Page {
 
 	@autobind
 	submitDraft() {
-		API.send(`/api/reports/${this.state.report.id}/submit`).then(data => {
-			this.updateReport()
-			this.setState({error:null})
-			this.setState({success:'Successfully submitted report'})
-		}, data => {
-			this.handleError(data)
-		})
+		let graphql = 'submitReport(reportId: $reportId) { id }'
+		const variables = {
+			reportId: this.state.report.id
+		}
+		const variableDef = '($reportId: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({error:null, success: 'Report submitted'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 	}
 
 	@autobind
