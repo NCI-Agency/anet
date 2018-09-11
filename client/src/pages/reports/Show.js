@@ -509,13 +509,27 @@ class BaseReportShow extends Page {
 			comment: email.comment
 		}
 
-		API.send(`/api/reports/${this.state.report.id}/email`, emailDelivery).then (() =>
-			this.setState({
-				success: 'Email successfully sent',
-				showEmailModal: false,
-				email: {}
+		let graphql = 'emailReport(reportId: $reportId,email: $email)'
+		const variables = {
+			reportId: this.state.report.id,
+			email: emailDelivery
+		}
+		const variableDef = '($reportId: Int!,$email: AnetEmailInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.setState({
+					success: 'Email successfully sent',
+					error:null,
+					showEmailModal: false,
+					email: {}
+				})
+			}).catch(error => {
+				this.setState({
+					showEmailModal: false,
+					email: {}
+				})
+				this.handleError(error)
 			})
-		)
 	}
 
 	@autobind

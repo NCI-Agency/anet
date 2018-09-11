@@ -800,8 +800,13 @@ public class ReportResource {
 	@Timed
 	@Path("/{id}/email")
 	public Response emailReport(@Auth Person user, @PathParam("id") int reportId, AnetEmail email) {
+		emailReportCommon(user, reportId, email);
+		return Response.ok().build();
+	}
+
+	private int emailReportCommon(Person user, int reportId, AnetEmail email) {
 		final Report r = dao.getById(reportId, user);
-		if (r == null) { return Response.status(Status.NOT_FOUND).build(); }
+		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 
 		ReportEmail action = new ReportEmail();
 		action.setReport(Report.createWithId(reportId));
@@ -809,7 +814,15 @@ public class ReportResource {
 		action.setComment(email.getComment());
 		email.setAction(action);
 		AnetEmailWorker.sendEmailAsync(email);
-		return Response.ok().build();
+		return 1;
+	}
+
+	@GraphQLMutation(name="emailReport")
+	public int emailReport(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="reportId") int reportId,
+			@GraphQLArgument(name="email") AnetEmail email) {
+		// GraphQL mutations *have* to return something, we return an integer
+		return emailReportCommon(DaoUtils.getUserFromContext(context), reportId, email);
 	}
 
 	/*
