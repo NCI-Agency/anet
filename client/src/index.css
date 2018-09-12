@@ -342,15 +342,17 @@ li#search-nav .nav > li a {
 }
 
 .nav-overlay {
-	margin-top: -125px;
-	padding:8px;
+	display: flex;
+	flex: 1 0 auto;
 	border: 1px solid #e0e0e0;
 	height: 100%;
 	position: absolute;
 	background: #f2f2f2;
+	padding: 5px 8px 115px;
+	top: 117px;
 	left: 0;
-	z-index: 9999;
-	overflow-y:auto;
+	z-index: 99;
+	overflow-y: auto;
 }
 
 .report-sub-form .form-group {
@@ -773,13 +775,4 @@ header.searchPagination {
 
 .primary-content {
 	width: 100%;
-}
-
-.glass-pane {
-	position: absolute;
-	background: rgba(0, 0, 0, 0.6);
-    width: 100%;
-    height: 100vh;
-	left: 0;
-	z-index: 9998;
 }
