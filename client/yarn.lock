@@ -8597,6 +8597,14 @@ react-scroll@^1.7.9:
     lodash.throttle "^4.1.1"
     prop-types "^15.5.8"
 
+react-scrollspy@^3.3.5:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/react-scrollspy/-/react-scrollspy-3.3.5.tgz#e3e605bfc153a23f5fdf1279dd9f397d6e76e228"
+  dependencies:
+    babel-runtime "^6.26.0"
+    classnames "^2.2.5"
+    prop-types "^15.5.10"
+
 react-tag-input@^5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/react-tag-input/-/react-tag-input-5.1.2.tgz#d8afbb073f71ac38a12364c970cef9df00016c1d"
