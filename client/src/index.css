@@ -165,6 +165,7 @@ fieldset.danger {
 .btn.btn-link {
 	overflow: visible;
 	width: 100%;
+	white-space: normal;
 }
 
 .btn-group .radio-inline, .btn-group-vertical .radio-inline {
