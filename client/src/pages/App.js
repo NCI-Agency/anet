@@ -1,18 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Page, { mapDispatchToProps, propTypes as pagePropTypes } from 'components/Page'
-import autobind from 'autobind-decorator'
-
-import LoadingBar from 'react-redux-loading-bar'
-import TopBar from 'components/TopBar'
-import Nav from 'components/Nav'
-import { Element } from 'react-scroll'
+import ResponsiveLayout from 'components/ResponsiveLayout'
 
 import API from 'api'
 import { Person, Organization } from 'models'
 import AppContext from 'components/AppContext'
 import Routing from 'pages/Routing'
-import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
 
@@ -31,23 +25,9 @@ class App extends Page {
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
-			floatingMenu: false
 		}
 
 		Object.assign(this.state, this.processData(window.ANET_DATA))
-	}
-
-	componentDidMount() {
-		super.componentDidMount()
-		// We want to hide the floating menu on navigation events
-		this.unlistenHistory = this.props.history.listen((location, action) => {
-			this.showFloatingMenu(false)
-		})
-	}
-
-	componentWillUnmount() {
-		super.componentWillUnmount()
-		this.unlistenHistory()
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -96,61 +76,9 @@ class App extends Page {
 		return {currentUser, settings, organizations}
 	}
 
-	@autobind
-	showFloatingMenu(floatingMenu) {
-		this.setState({floatingMenu: floatingMenu})
-	}
-
 	render() {
-		const { currentUser, settings, floatingMenu, organizations } = this.state
-		const { pageProps, location } = this.props
-		const heightTopBar = 125
-
-		const container = {
-			height: '100%',
-			display: 'flex',
-			overflow: 'hidden',
-			paddingTop: heightTopBar
-		}
-		const mainViewportContainer = {
-			height: '100%',
-			width: '100%',
-			display:'flex',
-			flexDirection:'column'
-		}
-		const mainViewport = {
-			flexGrow: 1,
-			overflowY: 'auto',
-			paddingLeft: 15,
-			paddingRight: 15
-		}
-		const sidebarContainer = {
-			height: '100%',
-			display: 'flex',
-			flexDirection: 'column',
-			flexShrink: 0
-		}
-		const sidebar = {
-			flexGrow: 1,
-			overflowY: 'auto',
-			minWidth: 200,
-			paddingTop: 10,
-			paddingLeft: 8,
-			paddingRight: 8
-		}
-		const glassPane = {
-			position: 'absolute',
-			backgroundColor: `rgba(0, 0, 0, 0.6)`,
-			width: '100%',
-			height: '100vh',
-			marginTop: -8,
-			left: 0,
-			zIndex: 99,
-		}
-		const loadingBar = {
-			marginTop: -8,
-			backgroundColor: '#29d'
-		}
+		const { currentUser, settings, organizations } = this.state
+		const { pageProps, history, location } = this.props
 
 		return (
 			<AppContext.Provider
@@ -158,46 +86,16 @@ class App extends Page {
 					appSettings: settings,
 					currentUser: currentUser,
 					loadAppData: this.loadData,
-					showFloatingMenu: this.showFloatingMenu,
 				}}
 			>
-				<div className="anet">
-					<TopBar
-						updateTopbarOffset={this.updateTopbarOffset}
-						minimalHeader={pageProps.minimalHeader}
-						location={location}
-						toggleMenuAction={() => {
-							this.showFloatingMenu(!floatingMenu)
-						}} />
-
-					<div style={container}>
-						<LoadingBar showFastActions style={loadingBar} />
-						<div
-							style={floatingMenu === false ? null : glassPane}
-							onClick={() => {
-								this.showFloatingMenu(false)
-							}}
-						/>
-						{(pageProps.useNavigation === true || floatingMenu === true) &&
-							<div className={ floatingMenu === false ? "hidden-xs" : "nav-overlay"}>
-								<div style={sidebarContainer}>
-									<div style={sidebar}>
-										<Nav organizations={organizations} />
-									</div>
-								</div>
-							</div>
-						}
-						<div style={mainViewportContainer}>
-							<Element
-								style={mainViewport}
-								name="mainViewport"
-								id="main-viewport"
-							>
-								<Routing/>
-							</Element>
-						</div>
-					</div>
-				</div>
+				<ResponsiveLayout
+					pageProps={pageProps}
+					pageHistory={history}
+					location={location}
+					sidebarData={organizations}
+				>
+					<Routing/>
+				</ResponsiveLayout>
 			</AppContext.Provider>
 		)
 	}
@@ -208,4 +106,4 @@ const mapStateToProps = (state, ownProps) => ({
 	searchProps: state.searchProps
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App))
+export default connect(mapStateToProps, mapDispatchToProps)(App)
