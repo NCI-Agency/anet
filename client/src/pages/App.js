@@ -1,10 +1,8 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {Grid, Row, Col} from 'react-bootstrap'
 
-import LoadingBar from 'react-redux-loading-bar'
-import TopBar from 'components/TopBar'
+import ResponsiveLayout from 'pages/ResponsiveLayout'
 import Nav from 'components/Nav'
 
 import API from 'api'
@@ -59,6 +57,7 @@ import OnboardingEdit from 'pages/onboarding/Edit'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+
 
 class App extends Page {
 
@@ -243,10 +242,6 @@ class App extends Page {
 			<Route path="*" component={PageMissing} />
 		</Switch>
 
-		const navWidths = {sm: 4, md: 3, lg: 2}
-		const primaryWidths = (this.props.pageProps.useNavigation === true)
-				? {sm: 12 - navWidths.sm, md: 12 - navWidths.md, lg: 12 - navWidths.lg}
-				: {sm: 12, md: 12, lg: 12}
 		return (
 			<AppContext.Provider value={{
 				appSettings: this.state.settings,
@@ -254,27 +249,16 @@ class App extends Page {
 				loadAppData: this.loadData,
 			}}>
 				<div className="anet">
-					<TopBar
+					<ResponsiveLayout
+						useNavigation={this.props.pageProps.useNavigation === true}
+						drawerContent={this.state.organizations}
+						topbarOffset={this.state.topbarOffset}
 						updateTopbarOffset={this.updateTopbarOffset}
-						minimalHeader={this.props.pageProps.minimalHeader}
-						location={this.props.location} />
-
-					<LoadingBar showFastActions style={{ backgroundColor: '#29d', marginTop: '-20px' }} />
-
-					<Grid fluid componentClass="section">
-						<Row>
-							{this.props.pageProps.useNavigation === true &&
-								<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
-									<Nav
-										organizations={this.state.organizations}
-										topbarOffset={this.state.topbarOffset} />
-								</Col>
-							}
-							<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
-								{routing}
-							</Col>
-						</Row>
-					</Grid>
+						minimalHeader={this.props.minimalHeader}
+						location={this.props.location}
+					>
+						{routing}
+						</ResponsiveLayout>
 				</div>
 			</AppContext.Provider>
 		)

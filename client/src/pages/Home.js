@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-bootstrap'
+import {Grid, Row, FormControl, FormGroup, ControlLabel, Button, Col} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
 import moment from 'moment'
 import autobind from 'autobind-decorator'
@@ -219,12 +219,14 @@ class BaseHome extends Page {
 				<Fieldset className="home-tile-row" title="My ANET snapshot">
 					<Grid fluid>
 						<Row>
-							{queries.map((query, index) =>{
-									return <Button bsStyle="link" onClick={this.onClickDashboard.bind(this, query)} className="home-tile" key={index}>
-										<h1>{this.state.tileCounts[index]}</h1>
-										{query.title}
-									</Button>
-							})}
+							<Col xs={12} bsStyle="home-tile-container">
+								{queries.map((query, index) =>{
+										return <Button bsStyle="link" onClick={this.onClickDashboard.bind(this, query)} className="home-tile" key={index}>
+											<h1>{this.state.tileCounts[index]}</h1>
+											{query.title}
+										</Button>
+								})}
+							</Col>
 						</Row>
 					</Grid>
 				</Fieldset>
