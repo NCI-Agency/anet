@@ -68,7 +68,7 @@ class BaseTopBar extends Component {
 
     render() {
         return (
-            <div style={{ display: 'block', width: '100%', position: 'fixed'}}>
+            <div style={{ display: 'block', width: '100%', position: 'fixed', zIndex: 100}}>
                 <div>
                     {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                     <GeneralBanner options={this.bannerOptions()} />
