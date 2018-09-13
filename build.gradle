@@ -9,9 +9,9 @@ apply plugin: 'com.moowork.node'
 apply plugin: "org.sonarqube"
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 
-// if localSettings.gradle does not exist lets create one with some sensible defaults
-if (!file('localSettings.gradle').exists()) {
-	new File('localSettings.gradle').text ="""
+sourceCompatibility = 1.8
+
+// Defaults for variables
 run.environment("DB_DRIVER", "sqlserver")
 run.environment("ANET_DB_SERVER", "localhost")
 run.environment("ANET_DB_NAME", "testAnet")
@@ -19,12 +19,11 @@ run.environment("ANET_DB_USERNAME", "anetUser")
 run.environment("ANET_DB_PASSWORD", "Test-P@ssw0rd")
 run.environment("ANET_SA_PASSWORD", "SA-P@ssw0rd")
 run.environment("ANET_DB_PORT", "1433")
-"""
+
+// If defined, load alternatives for variables
+if (file('localSettings.gradle').exists()) {
+	apply from: 'localSettings.gradle'
 }
-
-apply from: 'localSettings.gradle'
-
-sourceCompatibility = 1.8
 
 // In this section you declare where to find the dependencies of your project
 repositories {
