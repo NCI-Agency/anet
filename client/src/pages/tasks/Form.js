@@ -103,9 +103,11 @@ class BaseTaskForm extends ValidatableFormWrapper {
 						</RequiredField>
 
 						<Form.Field id="responsibleOrg" label="Responsible organization">
-							<Autocomplete valueKey="shortName"
+							<Autocomplete
+								objectType={Organization}
+								valueKey="shortName"
+								fields={Organization.autocompleteQuery}
 								placeholder={`Select a responsible organization for this ${taskShortLabel}`}
-								url="/api/organizations/search"
 								queryParams={orgSearchQuery}
 							/>
 						</Form.Field>

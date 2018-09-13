@@ -73,10 +73,13 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<Form.Field id="parentOrg" label="Parent organization">
-					<Autocomplete valueKey="shortName" disabled={isPrincipalOrg && !isAdmin}
+					<Autocomplete
+						objectType={Organization}
+						valueKey="shortName"
+						fields={Organization.autocompleteQuery}
 						placeholder="Start typing to search for a higher level organization..."
-						url="/api/organizations/search"
 						queryParams={{status: Organization.STATUS.ACTIVE, type: organization.type}}
+						disabled={isPrincipalOrg && !isAdmin}
 					/>
 				</Form.Field>
 
