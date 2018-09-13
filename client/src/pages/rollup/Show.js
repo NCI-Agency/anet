@@ -115,7 +115,7 @@ class BaseRollupShow extends Page {
 			return
 		}
 
-		const rollupQuery = {
+		const rollupReportsQuery = {
 			state: [Report.STATE.RELEASED], //Specifically excluding cancelled engagements.
 			releasedAtStart: this.rollupStart.valueOf(),
 			releasedAtEnd: this.rollupEnd.valueOf(),
@@ -125,38 +125,54 @@ class BaseRollupShow extends Page {
 			pageNum: this.state.reportsPageNum,
 			pageSize: 10,
 		}
-		Object.assign(rollupQuery, this.getSearchQuery(props))
-		let graphQueryUrl = `/api/reports/rollupGraph?startDate=${rollupQuery.releasedAtStart}&endDate=${rollupQuery.releasedAtEnd}`
+		Object.assign(rollupReportsQuery, this.getSearchQuery(props))
+
+		let rollupGraphQuery = 'rollupGraph(startDate: $startDate, endDate: $endDate'
+		let rollupGraphVariableDef = '($startDate: Long!, $endDate: Long!'
+		const rollupGraphVariables = {
+			startDate: rollupReportsQuery.releasedAtStart,
+			endDate: rollupReportsQuery.releasedAtEnd,
+		}
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				rollupQuery.principalOrgId = this.state.focusedOrg.id
-				rollupQuery.includePrincipalOrgChildren = true
-				graphQueryUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
+				rollupReportsQuery.principalOrgId = this.state.focusedOrg.id
+				rollupReportsQuery.includePrincipalOrgChildren = true
+				rollupGraphQuery += ' ,principalOrganizationId: $principalOrganizationId'
+				rollupGraphVariableDef += ' ,$principalOrganizationId: Int!'
+				rollupGraphVariables.principalOrganizationId = this.state.focusedOrg.id
 			} else {
-				rollupQuery.advisorOrgId = this.state.focusedOrg.id
-				rollupQuery.includeAdvisorOrgChildren = true
-				graphQueryUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`
+				rollupReportsQuery.advisorOrgId = this.state.focusedOrg.id
+				rollupReportsQuery.includeAdvisorOrgChildren = true
+				rollupGraphQuery += ' ,advisorOrganizationId: $advisorOrganizationId'
+				rollupGraphVariableDef += ' ,$advisorOrganizationId: Int!'
+				rollupGraphVariables.advisorOrganizationId = this.state.focusedOrg.id
 			}
 		} else if (this.state.orgType) {
-			graphQueryUrl += `&orgType=${this.state.orgType}`
+			rollupGraphQuery += ' ,orgType: $orgType'
+			rollupGraphVariableDef += ' ,$orgType: OrganizationTypeInput!'
+			rollupGraphVariables.orgType = this.state.orgType
 		}
-
-		let graphQuery = API.fetch(graphQueryUrl)
+		rollupGraphQuery += ') {org {id shortName} released cancelled}'
+		rollupGraphVariableDef += ')'
 
 		let reportQuery = API.query(/* GraphQL */`
-			reportList(query:$rollupQuery) {
+			reportList(query:$rollupReportsQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}
-		`, {rollupQuery}, '($rollupQuery: ReportSearchQueryInput)')
+		`, {rollupReportsQuery}, '($rollupReportsQuery: ReportSearchQueryInput)')
+
+		let graphQuery = API.query(/* GraphQL */
+				rollupGraphQuery, rollupGraphVariables, rollupGraphVariableDef
+		)
 
 		const pinned_ORGs = Settings.pinned_ORGs
 
 		return Promise.all([reportQuery, graphQuery]).then(values => {
 			this.setState({
 				reports: values[0].reportList,
-				graphData: values[1]
+				graphData: values[1].rollupGraph
 					.map(d => {d.org = d.org || {id: -1, shortName: "Other"}; return d})
 					.sort((a, b) => {
 						let a_index = pinned_ORGs.indexOf(a.org.shortName)

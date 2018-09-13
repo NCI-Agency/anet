@@ -899,12 +899,14 @@ public class ReportResource {
 	 */
 	@GET
 	@Timed
+	@GraphQLQuery(name="rollupGraph")
 	@Path("/rollupGraph")
-	public List<RollupGraph> getDailyRollupGraph(@QueryParam("startDate") Long start,
-			@QueryParam("endDate") Long end,
-			@QueryParam("orgType") OrganizationType orgType,
-			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
-			@QueryParam("principalOrganizationId") Integer principalOrgId) {
+	public List<RollupGraph> getDailyRollupGraph(
+			@QueryParam("startDate") @GraphQLArgument(name="startDate") Long start,
+			@QueryParam("endDate") @GraphQLArgument(name="endDate") Long end,
+			@QueryParam("orgType") @GraphQLArgument(name="orgType") OrganizationType orgType,
+			@QueryParam("advisorOrganizationId") @GraphQLArgument(name="advisorOrganizationId") Integer advisorOrgId,
+			@QueryParam("principalOrganizationId") @GraphQLArgument(name="principalOrganizationId") Integer principalOrgId) {
 		DateTime startDate = new DateTime(start);
 		DateTime endDate = new DateTime(end);
 
@@ -928,7 +930,6 @@ public class ReportResource {
 		Collections.sort(dailyRollupGraph, rollupGraphComparator);
 
 		return dailyRollupGraph;
-
 	}
 
 	@POST
