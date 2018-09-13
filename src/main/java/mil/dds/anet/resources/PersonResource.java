@@ -269,7 +269,8 @@ public class PersonResource {
 	@GET
 	@Timed
 	@Path("/{id}/position")
-	public Position getPositionForPerson(@PathParam("personId") int personId) { 
+	public Position getPositionForPerson(@PathParam("personId") int personId) {
+		//TODO: it doesn't seem to be used
 		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(Person.createWithId(personId));
 	}
 	

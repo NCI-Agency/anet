@@ -228,6 +228,7 @@ public class PositionResource {
 	@Timed
 	@Path("/{id}/person")
 	public Person getAdvisorInPosition(@PathParam("id") int positionId, @QueryParam("atTime") Long atTimeMillis) {
+		//TODO: it doesn't seem to be used
 		Position p = Position.createWithId(positionId);
 
 		DateTime dtg = (atTimeMillis == null) ? DateTime.now() : new DateTime(atTimeMillis);

@@ -69,6 +69,7 @@ public class ApprovalStepResource {
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
 	public ApprovalStep createStep(@Auth Person user, ApprovalStep as) {
+		//TODO: it doesn't seem to be used
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(as.getAdvisorOrganizationId()));
 		return engine.executeInTransaction(dao::insertAtEnd, as);
 	}
@@ -78,6 +79,7 @@ public class ApprovalStepResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateSteps(@Auth Person user, ApprovalStep as) {
+		//TODO: it doesn't seem to be used
 		ApprovalStep existingStep = dao.getById(as.getId());
 		int orgId = existingStep.getAdvisorOrganizationId();
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(orgId));
@@ -112,6 +114,7 @@ public class ApprovalStepResource {
 	@Path("/{id}")
 	@RolesAllowed("SUPER_USER")
 	public Response deleteStep(@Auth Person user, @PathParam("id") int id) {
+		//TODO: it doesn't seem to be used
 		ApprovalStep step = dao.getById(id);
 		AuthUtils.assertSuperUserForOrg(user, Organization.createWithId(step.getAdvisorOrganizationId()));
 		boolean success = engine.executeInTransaction(dao::deleteStep, id);

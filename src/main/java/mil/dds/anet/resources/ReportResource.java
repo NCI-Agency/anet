@@ -779,6 +779,7 @@ public class ReportResource {
 	@Timed
 	@Path("/{id}/comments")
 	public List<Comment> getCommentsForReport(@PathParam("id") int reportId) {
+		//TODO: it doesn't seem to be used
 		return engine.getCommentDao().getCommentsForReport(Report.createWithId(reportId));
 	}
 
