@@ -114,9 +114,12 @@ class BaseTaskForm extends ValidatableFormWrapper {
 
 						{customFieldRef1 &&
 							<this.TaskCustomFieldRef1 dictProps={customFieldRef1} id="customFieldRef1">
-								<Autocomplete valueKey="shortName"
+								<Autocomplete
+									objectType={Task}
+									valueKey="shortName"
+									fields={Task.autocompleteQuery}
+									template={Task.autocompleteTemplate}
 									placeholder={customFieldRef1.placeholder}
-									url="/api/tasks/search"
 									queryParams={{}}
 								/>
 							</this.TaskCustomFieldRef1>
