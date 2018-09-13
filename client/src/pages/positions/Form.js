@@ -136,9 +136,10 @@ class BasePositionForm extends ValidatableFormWrapper {
 				<Fieldset title="Additional information">
 					<Form.Field id="location">
 						<Autocomplete
+							objectType={Location}
 							valueKey="name"
+							fields={Location.autocompleteQuery}
 							placeholder="Start typing to find a location where this Position will operate from..."
-							url="/api/locations/search"
 							queryParams={{status: Location.STATUS.ACTIVE}}
 						/>
 					</Form.Field>

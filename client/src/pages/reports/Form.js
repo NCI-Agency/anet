@@ -236,10 +236,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 					<Form.Field id="location" addon={LOCATION_ICON} validationState={errors.location} className="location-form-group"
 						postInputGroupChildren={errors.location && invalidInputWarningMessage}>
 						<Autocomplete
+							objectType={Location}
 							valueKey="name"
+							fields={Location.autocompleteQuery}
 							placeholder="Start typing to search for the location where this happened..."
 							queryParams={{status: Location.STATUS.ACTIVE}}
-							url="/api/locations/search"
 						/>
 						{recents.locations && recents.locations.length > 0 &&
 							<Form.Field.ExtraCol className="shortcut-list">
