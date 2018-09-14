@@ -3,9 +3,11 @@ package mil.dds.anet.resources;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,6 +53,8 @@ import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.AdvisorReportsEntry;
+import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.ApprovalAction.ApprovalType;
@@ -1034,24 +1038,44 @@ public class ReportResource {
 	 */
 	@GET
 	@Timed
+	@GraphQLQuery(name="advisorReportInsights")
 	@Path("/insights/advisors")
 	@RolesAllowed("SUPER_USER")
-	public List<Map<String, Object>> getAdvisorReportInsights(
-		@DefaultValue("3") 	@QueryParam("weeksAgo") int weeksAgo,
-		@DefaultValue("-1") @QueryParam("orgId") int orgId) {
+	public List<AdvisorReportsEntry> getAdvisorReportInsights(
+		@DefaultValue("3") 	@QueryParam("weeksAgo") @GraphQLArgument(name="weeksAgo", defaultValue="3") int weeksAgo,
+		@DefaultValue("-1") @QueryParam("orgId") @GraphQLArgument(name="orgId", defaultValue="-1") int orgId) {
 
 		DateTime now = DateTime.now();
 		DateTime weekStart = now.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay();
 		DateTime startDate = weekStart.minusWeeks(weeksAgo);
 		final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgId);
-
+		// Organization is given, group by person
+		String topLevelField = "name";
+		String groupCol = "personid";
 		if (orgId < 0) {
-			final Set<String> tlf = Stream.of("organizationshortname").collect(Collectors.toSet());
-			return Utils.resultGrouper(list, "stats", "organizationid", tlf);
-		} else {
-			final Set<String> tlf = Stream.of("name").collect(Collectors.toSet());
-			return Utils.resultGrouper(list, "stats", "personId", tlf);
+			// No organization is given, group by organization, we are in the top level
+			topLevelField = "organizationshortname";
+			groupCol = "organizationid";
 		}
+		final Set<String> tlf = Stream.of(topLevelField).collect(Collectors.toSet());
+		final List<Map<String, Object>> groupedResults = Utils.resultGrouper(list, "stats", groupCol, tlf);
+		List<AdvisorReportsEntry> result = new LinkedList<AdvisorReportsEntry>();
+		for (Map<String, Object> group : groupedResults) {
+			AdvisorReportsEntry entry = new AdvisorReportsEntry();
+			entry.setId((int) group.get(groupCol));
+			entry.setName((String) group.get(topLevelField));
+			List<AdvisorReportsStats> stats = new LinkedList<AdvisorReportsStats>();
+			for (Map<String, Object> groupSt : (ArrayList<Map<String, Object>>) group.get("stats")) {
+				AdvisorReportsStats st = new AdvisorReportsStats();
+				st.setWeek((int) groupSt.get("week"));
+				st.setNrReportsSubmitted((int) groupSt.get("nrreportssubmitted"));
+				st.setNrEngagementsAttended((int) groupSt.get("nrengagementsattended"));
+				stats.add(st);
+			}
+			entry.setStats(stats);
+			result.add(entry);
+		}
+		return result;
 	}
 
 	private Map<Integer, Organization> getOrgsByShortNames(List<String> orgShortNames) {

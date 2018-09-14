@@ -21,11 +21,12 @@ class AdvisorReportsModal extends Component {
     }
 
     fetchAdvisors(orgId) {
-        let query = `${advisorsQueryUrl}?orgId=${orgId}`
-        let advisorsQuery = API.fetch(query)
-        Promise.resolve(advisorsQuery).then(value => {
+        let advisorsQuery = API.query(/* GraphQL */`
+          advisorReportInsights(orgId: $orgId) { id name stats { week nrReportsSubmitted nrEngagementsAttended }}
+        `, {orgId: orgId}, '($orgId: Int!)')
+        Promise.resolve(advisorsQuery).then(data => {
             this.setState({
-                advisors: value
+                advisors: data.advisorReportInsights
             })
         })
     }

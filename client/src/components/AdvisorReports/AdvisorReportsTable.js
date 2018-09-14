@@ -11,7 +11,7 @@ const AdvisorReportsTable = (props) => {
         return (<AdvisorReportsRow
             row={ advisor }
             columnGroups={ props.columnGroups }
-            key={ _uniqueId(`${advisor.personId}_`) } />)
+            key={ _uniqueId(`${advisor.id}_`) } />)
     })
     return(
         <Table striped bordered condensed hover responsive>
