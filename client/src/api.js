@@ -21,9 +21,7 @@ const API = {
 								return respBody.then(r => {
 									// When the result returns a list of errors we only show the first one
 									if (r.errors) {
-										for (let i = 0; i < r.errors.length; i++) {
-											r.error = r.errors[0].message
-										}
+										r.error = r.errors[0].message
 									}
 									r.status = response.status
 									r.statusText = response.statusText

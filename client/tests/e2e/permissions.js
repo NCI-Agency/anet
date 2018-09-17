@@ -180,7 +180,7 @@ async function validationEditPositionOnCurrentPage(t, validateTrue) {
       await assertElementText(t, await $('.alert'), 'Position saved')
     }
     else {
-      await assertElementText(t, await $('.alert'), 'Forbidden: You do not have permissions to do this')
+      await assertElementText(t, await $('.alert'), 'Forbidden: Exception while fetching data (/updatePosition) : You do not have permissions to do this')
     }
 }
 

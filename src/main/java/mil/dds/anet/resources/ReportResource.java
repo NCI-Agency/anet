@@ -823,7 +823,7 @@ public class ReportResource {
 	}
 
 	@GraphQLMutation(name="emailReport")
-	public int emailReport(@GraphQLRootContext Map<String, Object> context,
+	public Integer emailReport(@GraphQLRootContext Map<String, Object> context,
 			@GraphQLArgument(name="reportId") int reportId,
 			@GraphQLArgument(name="email") AnetEmail email) {
 		// GraphQL mutations *have* to return something, we return an integer
@@ -968,7 +968,7 @@ public class ReportResource {
 	}
 
 	@GraphQLMutation(name="emailRollup")
-	public int emailRollup(@GraphQLRootContext Map<String, Object> context,
+	public Integer emailRollup(@GraphQLRootContext Map<String, Object> context,
 			@GraphQLArgument(name="startDate") Long start,
 			@GraphQLArgument(name="endDate") Long end,
 			@GraphQLArgument(name="orgType") OrganizationType orgType,

@@ -69,7 +69,7 @@ public class AdminResource {
 
 	@GraphQLMutation(name="saveAdminSettings")
 	@RolesAllowed("ADMINISTRATOR")
-	public int saveAdminSettings(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="settings") List<AdminSetting> settings) {
+	public Integer saveAdminSettings(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="settings") List<AdminSetting> settings) {
 		return saveAdminSettingsCommon(DaoUtils.getUserFromContext(context), settings);
 	}
 

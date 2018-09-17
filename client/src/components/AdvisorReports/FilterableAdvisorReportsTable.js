@@ -11,7 +11,6 @@ import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const DEFAULT_WEEKS_AGO = 3
-const advisorReportsQueryUrl = `/api/reports/insights/advisors` // ?weeksAgo=3 default set at 3 weeks ago
 const OrganizationAdvisorsTableWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(OrganizationAdvisorsTable))
 
 class FilterableAdvisorReportsTable extends Component {
@@ -38,8 +37,8 @@ class FilterableAdvisorReportsTable extends Component {
     componentDidMount() {
       this.setState( {isLoading: true} )
       this.props.showLoading()
-      let advisorReportsQuery = API.query(/* GraphQL */`advisorReportInsights { id name stats { week nrReportsSubmitted nrEngagementsAttended }}`)
-      Promise.resolve(advisorReportsQuery).then(data => {
+      API.query(/* GraphQL */`advisorReportInsights { id name stats { week nrReportsSubmitted nrEngagementsAttended }}`)
+        .then(data => {
           this.setState({
               isLoading: false,
               data: data.advisorReportInsights

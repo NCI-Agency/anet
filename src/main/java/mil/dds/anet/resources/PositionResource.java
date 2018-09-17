@@ -284,7 +284,7 @@ public class PositionResource {
 	}
 
 	@GraphQLMutation(name="deletePersonFromPosition")
-	public int deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="positionId") int positionId) {
+	public Integer deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="positionId") int positionId) {
 		return deletePersonFromPositionCommon(DaoUtils.getUserFromContext(context), positionId);
 	}
 

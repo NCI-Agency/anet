@@ -52,14 +52,13 @@ public class SavedSearchResource {
 
 	private SavedSearch createSavedSearchCommon(Person user, SavedSearch search) {
 		search.setOwner(Person.createWithId(user.getId()));
-		SavedSearch created;
 		try {
-			created = dao.insert(search);
+			final SavedSearch created = dao.insert(search);
+			AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
+			return created;
 		} catch (UnableToExecuteStatementException e) {
 			throw ResponseUtils.handleSqlException(e, "Duplicate name for saved search");
 		}
-		AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
-		return created;
 	}
 
 	@GraphQLMutation(name="createSavedSearch")
@@ -86,7 +85,7 @@ public class SavedSearchResource {
 
     private int deleteSavedSearchCommon(Person user, int savedSearchId) {
         int numDeleted = dao.deleteSavedSearch(savedSearchId, user);
-        if (numDeleted < 1) {
+        if (numDeleted == 0) {
             throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
         }
         return numDeleted;

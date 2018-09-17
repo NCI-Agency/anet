@@ -23,7 +23,7 @@ public class GraphQLDateTimeType extends GraphQLScalarType {
 				return new DateTime((Long)input);
 			}
 			else if (input instanceof String) {
-				return DateTime.parse(input.toString(), ISODateTimeFormat.dateTimeParser());
+				return DateTime.parse((String)input, ISODateTimeFormat.dateTimeParser());
 			}
 			else {
 				return new DateTime(Long.parseLong(input.toString()));
