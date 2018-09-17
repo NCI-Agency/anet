@@ -39,9 +39,9 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		final String idBatcherSql = "/* batch.getOrgsByIds */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
 
-		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT \"positions\".\"currentPersonId\" AS personId, " + ORGANIZATION_FIELDS
+		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonId\" AS \"personId\", " + ORGANIZATION_FIELDS
 					+ "FROM organizations, positions WHERE "
-					+ "\"positions\".\"currentPersonId\" IN ( %1$s ) AND positions.\"organizationId\" = organizations.id";
+					+ "positions.\"currentPersonId\" IN ( %1$s ) AND positions.\"organizationId\" = organizations.id";
 		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, new OrganizationMapper(), "personId");
 	}
 	
