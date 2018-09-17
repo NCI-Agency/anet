@@ -105,7 +105,7 @@ class BaseHome extends Page {
 			query: {
 				orgId: currentUser.position.organization.id,
 				includeOrgChildren: false,
-				createdAtStart: "" + LAST_WEEK,
+				createdAtStart: LAST_WEEK,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			},
 		}
