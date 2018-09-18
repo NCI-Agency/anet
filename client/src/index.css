@@ -344,15 +344,14 @@ li#search-nav .nav > li a {
 
 .nav-overlay {
 	display: flex;
-	flex: 1 0 auto;
+	flex: 0 0 auto;
 	border: 1px solid #e0e0e0;
 	height: 100%;
-	position: absolute;
 	background: #f2f2f2;
 	padding: 5px 8px 115px;
 	left: 0;
 	z-index: 99;
-	overflow-y: auto;
+	overflow-y: scroll;
 }
 
 .report-sub-form .form-group {

@@ -86,7 +86,7 @@ class BaseTopBar extends Component {
     render() {
         return (
             <div
-                style={{ display: 'block', width: '100%', position: 'fixed', zIndex: 100}}
+                style={{ flex:'0 0 auto', zIndex: 100}}
                 ref={this.topbarDiv}
             >
                 <div>
