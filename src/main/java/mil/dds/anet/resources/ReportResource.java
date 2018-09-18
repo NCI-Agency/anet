@@ -980,19 +980,37 @@ public class ReportResource {
 			end, orgType, advisorOrgId, principalOrgId, email);
 	}
 
-	/* Used to generate an HTML view of the daily rollup email
-	 *
+	/**
+	 * Generate an HTML view of the daily rollup email
 	 */
 	@GET
 	@Timed
 	@Path("/rollup")
 	@Produces(MediaType.TEXT_HTML)
-	public Response showRollupEmail(@Auth Person user, @QueryParam("startDate") Long start,
+	public Response showRollupEmail(@QueryParam("startDate") Long start,
 			@QueryParam("endDate") Long end,
 			@QueryParam("orgType") OrganizationType orgType,
 			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
 			@QueryParam("principalOrganizationId") Integer principalOrgId,
 			@QueryParam("showText") @DefaultValue("false") Boolean showReportText) {
+		return Response.ok(showRollupEmailCommon(start, end, orgType, advisorOrgId,
+				principalOrgId, showReportText), MediaType.TEXT_HTML_TYPE).build();
+	}
+
+	@GraphQLQuery(name="showRollupEmail")
+	public String showRollupEmailGraphQL(@GraphQLArgument(name="startDate") Long start,
+			@GraphQLArgument(name="endDate") Long end,
+			@GraphQLArgument(name="orgType") OrganizationType orgType,
+			@GraphQLArgument(name="advisorOrganizationId") Integer advisorOrgId,
+			@GraphQLArgument(name="principalOrganizationId") Integer principalOrgId,
+			@GraphQLArgument(name="showText", defaultValue="false") Boolean showReportText) {
+		return showRollupEmailCommon(start, end, orgType, advisorOrgId,
+				principalOrgId, showReportText);
+	}
+
+	private String showRollupEmailCommon(Long start, Long end,
+			OrganizationType orgType, Integer advisorOrgId,
+			Integer principalOrgId, Boolean showReportText) {
 		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
@@ -1024,7 +1042,7 @@ public class ReportResource {
 			StringWriter writer = new StringWriter();
 			temp.process(context, writer);
 
-			return Response.ok(writer.toString(), MediaType.TEXT_HTML_TYPE).build();
+			return writer.toString();
 		} catch (Exception e) {
 			throw new WebApplicationException(e);
 		}

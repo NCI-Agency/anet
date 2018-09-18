@@ -406,43 +406,38 @@ class BaseRollupShow extends Page {
 	}
 
 	@autobind
-	previewUrl() {
-		// orgType drives chart
-		// principalOrganizationId or advisorOrganizationId drive drill down.
-		let rollupUrl = `/api/reports/rollup?startDate=${this.rollupStart.valueOf()}&endDate=${this.rollupEnd.valueOf()}`
-		if (this.state.focusedOrg) {
-			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				rollupUrl += `&principalOrganizationId=${this.state.focusedOrg.id}`
-			} else {
-				rollupUrl += `&advisorOrganizationId=${this.state.focusedOrg.id}`
-			}
-		}
-		if (this.state.orgType) {
-			rollupUrl += `&orgType=${this.state.orgType}`
-		}
-
-		return rollupUrl
-	}
-
-	@autobind
 	printPreview() {
 		this.showPreview(true)
 	}
 
 	@autobind
 	showPreview(print) {
-		API.fetch(this.previewUrl(), {}, 'text/*').then(response => {
-			response.text().then(text => {
-				let rollupWindow = window.open("", "rollup")
-				let doc = rollupWindow.document
-				doc.clear()
-				doc.open()
-				doc.write(text)
-				doc.close()
-				if (print === true) {
-					rollupWindow.print()
-				}
-			})
+		let graphQL = /* GraphQL */`
+			showRollupEmail(
+				startDate: ${this.rollupStart.valueOf()},
+				endDate: ${this.rollupEnd.valueOf()}
+		`
+		if (this.state.focusedOrg) {
+			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
+				graphQL += `, principalOrganizationId: ${this.state.focusedOrg.id}`
+			} else {
+				graphQL += `, advisorOrganizationId: ${this.state.focusedOrg.id}`
+			}
+		}
+		if (this.state.orgType) {
+			graphQL += `, orgType: ${this.state.orgType}`
+		}
+		graphQL += `)`
+		API.query(graphQL).then(data => {
+			let rollupWindow = window.open("", "rollup")
+			let doc = rollupWindow.document
+			doc.clear()
+			doc.open()
+			doc.write(data.showRollupEmail)
+			doc.close()
+			if (print === true) {
+				rollupWindow.print()
+			}
 		})
 	}
 
