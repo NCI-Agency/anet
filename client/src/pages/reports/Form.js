@@ -82,7 +82,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				list { id, name }
 			}
 			personRecents(maxResults:6) {
-				list { id, name, rank, role, position { id, name, organization {id, shortName}} }
+				list { id, name, rank, role, position { id, name, organization {id, shortName}, location {id, name} } }
 			}
 			taskRecents(maxResults:6) {
 				list { id, shortName, longName }
@@ -319,6 +319,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Location</th>
 									<th>Org</th>
 									<th></th>
 								</tr>
@@ -328,7 +329,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									this.renderAttendeeRow(person, idx)
 								)}
 
-								<tr className="attendee-divider-row"><td colSpan={5}><hr /></td></tr>
+								<tr className="attendee-divider-row"><td colSpan={6}><hr /></td></tr>
 
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
@@ -455,6 +456,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				<LinkTo person={person}/>
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 			<td onClick={this.removeAttendee.bind(this, person)} id={'attendeeDelete_' + person.role + "_" + idx} >
 				<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
