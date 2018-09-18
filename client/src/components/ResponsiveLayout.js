@@ -7,12 +7,10 @@ import Nav from 'components/Nav'
 import { Element } from 'react-scroll'
 
 
-const heightTopBar = 125
 const container = {
 	height: '100%',
 	display: 'flex',
 	overflow: 'hidden',
-	paddingTop: heightTopBar
 }
 const mainViewportContainer = {
 	height: '100%',
@@ -45,12 +43,12 @@ const glassPane = {
 	backgroundColor: `rgba(0, 0, 0, 0.6)`,
 	width: '100%',
 	height: '100vh',
-	marginTop: -8,
+	marginTop: -5,
 	left: 0,
 	zIndex: 99,
 }
 const loadingBar = {
-	marginTop: -8,
+	marginTop: -5,
 	backgroundColor: '#29d'
 }
 
@@ -70,7 +68,8 @@ class ResponsiveLayout extends Component {
 		super(props)
 
 		this.state = {
-			floatingMenu: false
+			floatingMenu: false,
+			topbarHeight: 0,
 		}
 	}
 
@@ -85,25 +84,29 @@ class ResponsiveLayout extends Component {
 		this.unlistenHistory()
 	}
 
+	handleTopbarHeight = (topbarHeight) => {
+		this.setState({topbarHeight})
+	}
+
 	showFloatingMenu = (floatingMenu) => {
 		this.setState({floatingMenu: floatingMenu})
 	}
 
 	render() {
-		const { floatingMenu } = this.state
+		const { floatingMenu, topbarHeight } = this.state
 		const { pageProps, location, sidebarData, children } = this.props
 
 		return (
 			<div className="anet">
 				<TopBar
-					updateTopbarOffset={this.updateTopbarOffset}
+					topbarHeight={this.handleTopbarHeight}
 					minimalHeader={pageProps.minimalHeader}
 					location={location}
 					toggleMenuAction={() => {
 						this.showFloatingMenu(!floatingMenu)
 					}} />
 
-				<div style={container}>
+				<div style={{...container, paddingTop: topbarHeight}}>
 					<LoadingBar showFastActions style={loadingBar} />
 					<div
 						style={floatingMenu === false ? null : glassPane}
@@ -115,7 +118,7 @@ class ResponsiveLayout extends Component {
 						<div className={ floatingMenu === false ? "hidden-xs" : "nav-overlay"}>
 							<div style={sidebarContainer}>
 								<div style={sidebar}>
-									{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} />}
+									{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
 								</div>
 							</div>
 						</div>

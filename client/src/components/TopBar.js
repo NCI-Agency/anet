@@ -21,22 +21,39 @@ const visible = {
 class BaseTopBar extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
-		appSettings: PropTypes.object,
+        appSettings: PropTypes.object,
+        topbarHeight: PropTypes.func.isRequired,
 	}
 
     constructor(props) {
         super(props)
         this.state = {
-            bannerVisibility: false
+            bannerVisibility: false,
+            height: 0,
         }
+        this.topbarDiv = React.createRef()
     }
 
     componentDidMount() {
+        this.handleTopbarHeight()
         this.updateBannerVisibility()
+        window.addEventListener("resize", this.handleTopbarHeight)
     }
 
     componentDidUpdate() {
+        this.handleTopbarHeight()
         this.updateBannerVisibility()
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.handleTopbarHeight)
+    }
+
+    handleTopbarHeight = () => {
+        const height = this.topbarDiv.current.clientHeight
+        if(height !== undefined && height !== this.state.height) {
+            this.setState({ height }, () => this.props.topbarHeight(this.state.height))
+        }
     }
 
     updateBannerVisibility(){
@@ -68,7 +85,10 @@ class BaseTopBar extends Component {
 
     render() {
         return (
-            <div style={{ display: 'block', width: '100%', position: 'fixed', zIndex: 100}}>
+            <div
+                style={{ display: 'block', width: '100%', position: 'fixed', zIndex: 100}}
+                ref={this.topbarDiv}
+            >
                 <div>
                     {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
                     <GeneralBanner options={this.bannerOptions()} />

@@ -20,6 +20,7 @@ class BaseNav extends Component {
 		appSettings: PropTypes.object,
 		showFloatingMenu: PropTypes.func,
 		organizations: PropTypes.array,
+		topbarOffset: PropTypes.number.isRequired,
 	}
 
 	componentDidMount() {
@@ -27,7 +28,7 @@ class BaseNav extends Component {
 	}
 
 	render() {
-		const { currentUser } = this.props
+		const { currentUser, topbarOffset } = this.props
 		const { organizations } = this.props || []
 		const { appSettings } = this.props || {}
 		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -58,7 +59,7 @@ class BaseNav extends Component {
 					smooth={true}
 					duration={500}
 					containerId="main-viewport"
-					offset={-120}
+					offset={-topbarOffset}
 					onClick={() => {
 						showFloatingMenu(false)
 					}}

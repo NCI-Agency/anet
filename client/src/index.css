@@ -350,7 +350,6 @@ li#search-nav .nav > li a {
 	position: absolute;
 	background: #f2f2f2;
 	padding: 5px 8px 115px;
-	top: 117px;
 	left: 0;
 	z-index: 99;
 	overflow-y: auto;
