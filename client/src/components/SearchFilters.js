@@ -14,6 +14,9 @@ import CheckboxSearchFilter from 'components/advancedSearch/CheckboxSearchFilter
 
 import {Location, Person, Task, Position, Organization, Tag} from 'models'
 
+export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
+export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
+
 const taskFilters = props => {
 	const taskFiltersObj = {
 		Organization: {
@@ -288,7 +291,7 @@ export default {
 
 		filters.Positions = {
 			filters: {
-				"Position Type": {
+				[POSTITION_POSITION_TYPE_FILTER_KEY]: {
 					component: PositionTypeSearchFilter,
 					props: {
 						queryKey: "type",
@@ -297,7 +300,7 @@ export default {
 						ref: positionTypeFilterRef,
 					}
 				},
-				Organization: {
+				[POSTITION_ORGANIZATION_FILTER_KEY]: {
 					component: OrganizationFilter,
 					props: {
 						queryKey: "organizationId",
