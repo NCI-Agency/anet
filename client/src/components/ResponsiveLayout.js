@@ -7,7 +7,13 @@ import Nav from 'components/Nav'
 import { Element } from 'react-scroll'
 
 
-const container = {
+const anetContainer = {
+	display: 'flex',
+	flexDirection: 'column',
+	height:'100vh',
+	overflow: 'hidden'
+}
+const contentContainer = {
 	flex:'1 1 auto',
 	display:'flex',
 	flexDirection:'row'
@@ -17,11 +23,6 @@ const mainViewportContainer = {
 	overflowY: 'scroll',
 	paddingLeft: 18,
 	paddingRight: 18
-}
-const mainViewport = {
-	flexGrow: 1,
-	overflowY: 'auto',
-
 }
 const sidebarContainer = {
 	flex:'0 0 auto',
@@ -92,7 +93,7 @@ class ResponsiveLayout extends Component {
 		const { pageProps, location, sidebarData, children } = this.props
 
 		return (
-			<div className="anet" style={{display: 'flex', flexDirection: 'column', height:'100vh', overflow: 'hidden'}}>
+			<div style={anetContainer} className="anet" >
 				<TopBar
 					topbarHeight={this.handleTopbarHeight}
 					minimalHeader={pageProps.minimalHeader}
@@ -100,7 +101,7 @@ class ResponsiveLayout extends Component {
 					toggleMenuAction={() => {
 						this.showFloatingMenu(!floatingMenu)
 					}} />
-				<div style={container}>
+				<div style={contentContainer}>
 					<LoadingBar showFastActions style={loadingBar} />
 					<div
 						style={floatingMenu === false ? null : glassPane}
