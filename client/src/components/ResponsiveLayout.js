@@ -111,10 +111,8 @@ class ResponsiveLayout extends Component {
 					/>
 					{(pageProps.useNavigation === true || floatingMenu === true) &&
 						<div style={sidebarContainer} className={ floatingMenu === false ? "hidden-xs" : "nav-overlay"}>
-							<div>
 								<div style={sidebar}>
 									{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
-								</div>
 							</div>
 						</div>
 					}
