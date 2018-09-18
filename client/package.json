@@ -81,7 +81,7 @@
     "moment": "^2.22.2",
     "object-assign": "^4.1.1",
     "pluralize": "^7.0.0",
-    "promise": "^8.0.1",
+    "promise": "^8.0.2",
     "prop-types": "^15.6.2",
     "react": "^16.5.0",
     "react-16-bootstrap-date-picker": "^5.1.2",
