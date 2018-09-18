@@ -41,7 +41,7 @@ export default class Header extends Component {
 
 						{ !this.props.minimalHeader &&
 							<Col xs={3} sm={2} md={2} lg={1}>
-								<div className="pull-right">
+								<div style={{paddingRight: 5}} className="pull-right">
 									<CreateButton />
 								</div>
 							</Col>

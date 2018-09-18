@@ -21,8 +21,8 @@ const mainViewportContainer = {
 const mainViewport = {
 	flexGrow: 1,
 	overflowY: 'auto',
-	paddingLeft: 15,
-	paddingRight: 15
+	paddingLeft: 18,
+	paddingRight: 18
 }
 const sidebarContainer = {
 	height: '100%',
