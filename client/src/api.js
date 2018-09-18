@@ -52,7 +52,26 @@ const API = {
 		params.headers = params.headers || {}
 		params.headers['Content-Type'] = 'application/json'
 
-		return API.fetch(url, params)
+		let promise = API.fetch(url, params)
+		let buttons = document.querySelectorAll('[type=submit]')
+		let toggleButtons =  function(onOff) {
+			for (let button of buttons) {
+				button.disabled = !onOff
+			}
+		}
+
+		if (params.disableSubmits) {
+			toggleButtons(false)
+
+			promise.then(response => {
+				toggleButtons(true)
+				return response
+			}, response => {
+				toggleButtons(true)
+				return response
+			})
+		}
+		return promise
 	},
 
 	_queryCommon(query, variables, variableDef, output, isMutation, params) {
