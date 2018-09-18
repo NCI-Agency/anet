@@ -14,13 +14,14 @@ const container = {
 }
 const mainViewportContainer = {
 	flex:'1 1 auto',
-	overflowY: 'scroll'
+	overflowY: 'scroll',
+	paddingLeft: 18,
+	paddingRight: 18
 }
 const mainViewport = {
 	flexGrow: 1,
 	overflowY: 'auto',
-	paddingLeft: 18,
-	paddingRight: 18
+
 }
 const sidebarContainer = {
 	flex:'0 0 auto',
@@ -116,15 +117,13 @@ class ResponsiveLayout extends Component {
 							</div>
 						</div>
 					}
-					<div style={mainViewportContainer}>
-						<Element
-							style={mainViewport}
-							name="mainViewport"
-							id="main-viewport"
-						>
-							{children}
-						</Element>
-					</div>
+					<Element
+						style={mainViewportContainer}
+						name="mainViewport"
+						id="main-viewport"
+					>
+						{children}
+					</Element>
 				</div>
 			</div>
 		)
