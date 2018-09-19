@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, { Component } from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {ListGroup, ListGroupItem} from 'react-bootstrap'
+import {ListGroup, ListGroupItem, Nav, NavItem} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
+import pluralize from 'pluralize'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Fieldset from 'components/Fieldset'
@@ -11,6 +12,7 @@ import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
 import DictionaryField from '../../HOC/DictionaryField'
+import SubNav from 'components/SubNav'
 
 import GuidedTour from 'components/GuidedTour'
 import {orgTour} from 'pages/HopscotchTour'
@@ -25,6 +27,7 @@ import GQL from 'graphqlapi'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
+import Scrollspy from 'react-scrollspy'
 
 const NO_REPORT_FILTER = 'NO_FILTER'
 
@@ -165,9 +168,32 @@ class BaseOrganizationShow extends Page {
 
 		const superUsers = org.positions.filter(pos => pos.status !== Position.STATUS.INACTIVE && (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
+		const myOrg = currentUser && currentUser.position ? currentUser.position.organization : null
+		const isMyOrg = myOrg && (org.id === myOrg.id)
+		const orgSubNav = (
+			<Nav>
+				<Scrollspy className="nav" currentClassName="active" offset={this.props.scrollspyOffset}
+				items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
+					<NavItem href="#info">Info</NavItem>
+					<NavItem href="#supportedPositions">Supported positions</NavItem>
+					<NavItem href="#vacantPositions">Vacant positions</NavItem>
+					{!isPrincipalOrg && <NavItem href="#approvals">Approvals</NavItem>}
+					{org.isTaskEnabled() && <NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem> }
+					<NavItem href="#reports">Reports</NavItem>
+				</Scrollspy>
+			</Nav>
+		)
 
 		return (
 			<div>
+				<SubNav subnavElemId="myorg-nav">
+					{isMyOrg && orgSubNav}
+				</SubNav>
+
+				<SubNav subnavElemId="org-nav">
+					{!isMyOrg && orgSubNav}
+				</SubNav>
+
 				{currentUser.isSuperUser() && <div className="pull-right">
 					<GuidedTour
 						title="Take a guided tour of this organization's page."
@@ -235,8 +261,8 @@ class BaseOrganizationShow extends Page {
 					</Fieldset>
 
 					<OrganizationLaydown organization={org} />
-					<OrganizationApprovals organization={org} />
-					{ org.isTaskEnabled() &&
+					{!isPrincipalOrg && <OrganizationApprovals organization={org} />}
+					{org.isTaskEnabled() &&
 						<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
 					}
 
@@ -274,10 +300,12 @@ class BaseOrganizationShow extends Page {
 
 }
 
+
+
 const OrganizationShow = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseOrganizationShow currentUser={context.currentUser} {...props} />
+			<BaseOrganizationShow currentUser={context.currentUser} scrollspyOffset={context.scrollspyOffset} {...props} />
 		}
 	</AppContext.Consumer>
 )

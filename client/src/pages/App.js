@@ -76,16 +76,25 @@ class App extends Page {
 			currentUser: new Person(),
 			settings: {},
 			organizations: [],
-			topbarOffset: 0
+			topbarOffset: 0,
+			scrollspyOffset: 0
 		}
 
 		this.updateTopbarOffset = this.updateTopbarOffset.bind(this)
+		this.updateScrollspyOffset = this.updateScrollspyOffset.bind(this)
 		Object.assign(this.state, this.processData(window.ANET_DATA))
 	}
 
 	updateTopbarOffset(topbarOffset) {
 		if (this.state.topbarOffset !== topbarOffset){
-			this.setState({ topbarOffset: topbarOffset })
+			this.setState({ topbarOffset: topbarOffset }, this.updateScrollspyOffset)
+		}
+	}
+
+	updateScrollspyOffset() {
+		const scrollspyOffset = -(this.state.topbarOffset + 20)
+		if (this.state.scrollspyOffset !== scrollspyOffset) {
+			this.setState({scrollspyOffset: scrollspyOffset})
 		}
 	}
 
@@ -252,6 +261,7 @@ class App extends Page {
 				appSettings: this.state.settings,
 				currentUser: this.state.currentUser,
 				loadAppData: this.loadData,
+				scrollspyOffset: this.state.scrollspyOffset
 			}}>
 				<div className="anet">
 					<TopBar
@@ -265,9 +275,7 @@ class App extends Page {
 						<Row>
 							{this.props.pageProps.useNavigation === true &&
 								<Col sm={navWidths.sm} md={navWidths.md} lg={navWidths.lg} className="hide-for-print">
-									<Nav
-										organizations={this.state.organizations}
-										topbarOffset={this.state.topbarOffset} />
+									<Nav organizations={this.state.organizations} />
 								</Col>
 							}
 							<Col sm={primaryWidths.sm} md={primaryWidths.md} lg={primaryWidths.lg} className="primary-content">
