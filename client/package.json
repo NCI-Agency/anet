@@ -88,7 +88,7 @@
     "react-autosuggest": "^9.4.1",
     "react-bootstrap": "^0.32.4",
     "react-confirm-bootstrap": "^5.3.0",
-    "react-dom": "^16.5.1",
+    "react-dom": "^16.5.2",
     "react-redux": "^5.0.7",
     "react-redux-loading-bar": "^4.0.7",
     "react-router": "^4.3.1",
