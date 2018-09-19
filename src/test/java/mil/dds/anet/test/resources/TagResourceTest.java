@@ -16,7 +16,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
 
@@ -24,12 +23,6 @@ public class TagResourceTest extends AbstractResourceTest {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-
-	public TagResourceTest() {
-		if (client == null) {
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
-		}
-	}
 
 	@Test
 	public void tagCreateTest() throws UnsupportedEncodingException {

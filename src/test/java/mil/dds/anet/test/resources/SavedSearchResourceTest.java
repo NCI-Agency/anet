@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -25,12 +24,6 @@ import mil.dds.anet.beans.search.SavedSearch.SearchObjectType;
 
 public class SavedSearchResourceTest extends AbstractResourceTest {
 
-	public SavedSearchResourceTest() { 
-		if (client == null) { 
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
-		}
-	}
-	
 	@Test
 	public void testSavedSearches() throws IOException { 
 		Person jack = getJackJackson();

@@ -16,8 +16,6 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.util.Duration;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
@@ -35,13 +33,6 @@ import mil.dds.anet.test.beans.PositionTest;
 
 public class PositionResourceTest extends AbstractResourceTest {
 
-	public PositionResourceTest() { 
-		if (client == null) { 
-			config.setTimeout(Duration.seconds(30L));
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("positions test client");
-		}
-	}
-	
 	@Test
 	public void positionTest()
 		throws ExecutionException, InterruptedException {

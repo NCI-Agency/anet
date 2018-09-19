@@ -11,8 +11,6 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.util.Duration;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
@@ -27,14 +25,6 @@ import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 
 public class PersonResourceTest extends AbstractResourceTest {
-
-	public PersonResourceTest() {
-		if (client == null) {
-			config.setConnectionTimeout(Duration.seconds(10));
-			config.setTimeout(Duration.seconds(30));
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("person test client");
-		}
-	}
 
 	@Test
 	public void testCreatePerson() {

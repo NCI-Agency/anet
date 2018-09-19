@@ -10,7 +10,6 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
@@ -21,12 +20,6 @@ import mil.dds.anet.test.TestData;
 
 public class TaskResourceTest extends AbstractResourceTest {
 
-	public TaskResourceTest() { 
-		if (client == null) { 
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("task test client");
-		}
-	}
-	
 	@Test
 	public void taskTest() { 
 		final Person jack = getJackJackson();

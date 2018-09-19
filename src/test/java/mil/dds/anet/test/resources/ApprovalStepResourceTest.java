@@ -13,19 +13,12 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.test.beans.OrganizationTest;
 
 public class ApprovalStepResourceTest extends AbstractResourceTest {
-
-	public ApprovalStepResourceTest() { 
-		if (client == null) { 
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("approval step test client");
-		}
-	}
 	
 	@Test
 	public void approvalTest() {

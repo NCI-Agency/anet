@@ -22,19 +22,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Person;
 
 public class GraphQLResourceTest extends AbstractResourceTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	public GraphQLResourceTest() { 
-		if (client == null) { 
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("graphql test client");
-		}
-	}
-	
 	@Test
 	public void test()
 		throws ExecutionException, InterruptedException {

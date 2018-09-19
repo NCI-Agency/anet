@@ -18,7 +18,6 @@ import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
@@ -36,12 +35,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-
-	public OrganizationResourceTest() {
-		if (client == null) {
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("ao test client");
-		}
-	}
 
 	@Test
 	public void createAO() throws InterruptedException, ExecutionException {
