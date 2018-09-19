@@ -12,6 +12,7 @@ public final class GraphQLHelper<T extends AbstractAnetBean, S extends AbstractS
 
 	private static final String getWithParamFmt = "query ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { %4$s } }";
 	private static final String getFmt = "query { payload: %1$s { %2$s } }";
+	private static final String getAllFmt = "query { payload: %1$s { pageNum pageSize totalCount list { %2$s } } }";
 	private static final String createFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { id } }";
 	private static final String updateFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) }";
 	private static final String searchFmt = "query ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { pageNum pageSize totalCount list { %4$s } } }";
@@ -47,6 +48,14 @@ public final class GraphQLHelper<T extends AbstractAnetBean, S extends AbstractS
 	public T getObject(Person user, String getQuery, String fields, GenericType<GraphQLResponse<T>> responseType) {
 		final String q = String.format(getFmt, getQuery, fields);
 		return graphQLObjectRequest.doGraphQLQuery(user, q, null, null, responseType);
+	}
+
+	/**
+	 * @return all objects of the requested type
+	 */
+	public AnetBeanList<T> getAllObjects(Person user, String getQuery, String fields, GenericType<GraphQLResponse<AnetBeanList<T>>> responseType) {
+		final String q = String.format(getAllFmt, getQuery, fields);
+		return graphQLSearchRequest.doGraphQLQuery(user, q, null, null, responseType);
 	}
 
 	/**
