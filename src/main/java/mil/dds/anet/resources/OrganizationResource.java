@@ -241,14 +241,6 @@ public class OrganizationResource {
 			throw new WebApplicationException(e.getMessage(), e.getCause(), Status.BAD_REQUEST);
 		}
 	}
-	
-	@GET
-	@Timed
-	@Path("/{id}/tasks")
-	public AnetBeanList<Task> getTasks(@PathParam("id") Integer orgId) {
-		//TODO: it doesn't seem to be used
-		return new AnetBeanList<Task>(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
-	}
 
 	private void validateApprovalStep(ApprovalStep step) {
 		if (Utils.isEmptyOrNull(step.getName())) {
