@@ -409,9 +409,9 @@ class BaseReportShow extends Page {
 	@autobind
 	onConfirmDelete() {
 		const operation = 'deleteReport'
-		let graphql = operation + '(reportId: $reportId)'
-		const variables = { reportId: this.state.report.id }
-		const variableDef = '($reportId: Int!)'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: this.state.report.id }
+		const variableDef = '($id: Int!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.props.history.push({
@@ -509,12 +509,12 @@ class BaseReportShow extends Page {
 			comment: email.comment
 		}
 
-		let graphql = 'emailReport(reportId: $reportId,email: $email)'
+		let graphql = 'emailReport(id: $id, email: $email)'
 		const variables = {
-			reportId: this.state.report.id,
+			id: this.state.report.id,
 			email: emailDelivery
 		}
-		const variableDef = '($reportId: Int!,$email: AnetEmailInput!)'
+		const variableDef = '($id: Int!, $email: AnetEmailInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.setState({
@@ -534,11 +534,11 @@ class BaseReportShow extends Page {
 
 	@autobind
 	submitDraft() {
-		let graphql = 'submitReport(reportId: $reportId) { id }'
+		let graphql = 'submitReport(id: $id) { id }'
 		const variables = {
-			reportId: this.state.report.id
+			id: this.state.report.id
 		}
-		const variableDef = '($reportId: Int!)'
+		const variableDef = '($id: Int!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.updateReport()
@@ -550,12 +550,12 @@ class BaseReportShow extends Page {
 
 	@autobind
 	submitComment(event){
-		let graphql = 'addComment(reportId: $reportId,comment: $comment) { id }'
+		let graphql = 'addComment(id: $id, comment: $comment) { id }'
 		const variables = {
-			reportId: this.state.report.id,
+			id: this.state.report.id,
 			comment: this.state.newComment
 		}
-		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.updateReport()
@@ -575,12 +575,12 @@ class BaseReportShow extends Page {
 		}
 
 		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
-		let graphql = 'rejectReport(reportId: $reportId,comment: $comment) { id }'
+		let graphql = 'rejectReport(id: $id, comment: $comment) { id }'
 		const variables = {
-			reportId: this.state.report.id,
+			id: this.state.report.id,
 			comment: this.state.approvalComment
 		}
-		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.updateReport()
@@ -593,12 +593,12 @@ class BaseReportShow extends Page {
 	@autobind
 	approveReport() {
 		let comment = (this.state.approvalComment.text.length > 0) ? this.state.approvalComment : {}
-		let graphql = 'approveReport(reportId: $reportId,comment: $comment) { id }'
+		let graphql = 'approveReport(id: $id, comment: $comment) { id }'
 		const variables = {
-			reportId: this.state.report.id,
+			id: this.state.report.id,
 			comment: comment
 		}
-		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				let lastApproval = (this.state.report.approvalStep.nextStepId === null)

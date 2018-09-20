@@ -89,9 +89,9 @@ class BaseReportEdit extends Page {
 	@autobind
 	onConfirmDelete() {
 		const operation = 'deleteReport'
-		let graphql = operation + '(reportId: $reportId)'
-		const variables = { reportId: this.state.report.id }
-		const variableDef = '($reportId: Int!)'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: this.state.report.id }
+		const variableDef = '($id: Int!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.props.history.push({

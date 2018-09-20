@@ -257,7 +257,7 @@ public class PositionResource {
 	@GraphQLMutation(name="putPersonInPosition")
 	@RolesAllowed("SUPER_USER")
 	public Integer putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="positionId") int positionId, @GraphQLArgument(name="person") Person person) {
+			@GraphQLArgument(name="id") int positionId, @GraphQLArgument(name="person") Person person) {
 		return putPersonInPositionCommon(DaoUtils.getUserFromContext(context), positionId, person);
 	}
 
@@ -284,7 +284,7 @@ public class PositionResource {
 	}
 
 	@GraphQLMutation(name="deletePersonFromPosition")
-	public Integer deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="positionId") int positionId) {
+	public Integer deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int positionId) {
 		return deletePersonFromPositionCommon(DaoUtils.getUserFromContext(context), positionId);
 	}
 
@@ -402,7 +402,7 @@ public class PositionResource {
 	}
 
 	@GraphQLMutation(name="deletePosition")
-	public Integer deletePosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="positionId") int positionId) {
+	public Integer deletePosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int positionId) {
 		return deletePositionCommon(positionId);
 	}
 

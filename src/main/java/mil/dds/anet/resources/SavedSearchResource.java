@@ -46,14 +46,14 @@ public class SavedSearchResource {
 	@POST
 	@Timed
 	@Path("/new")
-	public SavedSearch createSavedSearch(@Auth Person user, SavedSearch search) {
-		return createSavedSearchCommon(user, search);
+	public SavedSearch createSavedSearch(@Auth Person user, SavedSearch savedSearch) {
+		return createSavedSearchCommon(user, savedSearch);
 	}
 
-	private SavedSearch createSavedSearchCommon(Person user, SavedSearch search) {
-		search.setOwner(Person.createWithId(user.getId()));
+	private SavedSearch createSavedSearchCommon(Person user, SavedSearch savedSearch) {
+		savedSearch.setOwner(Person.createWithId(user.getId()));
 		try {
-			final SavedSearch created = dao.insert(search);
+			final SavedSearch created = dao.insert(savedSearch);
 			AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
 			return created;
 		} catch (UnableToExecuteStatementException e) {
@@ -62,8 +62,8 @@ public class SavedSearchResource {
 	}
 
 	@GraphQLMutation(name="createSavedSearch")
-	public SavedSearch createSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="search") SavedSearch search) {
-		return createSavedSearchCommon(DaoUtils.getUserFromContext(context), search);
+	public SavedSearch createSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="savedSearch") SavedSearch savedSearch) {
+		return createSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearch);
 	}
 
 	@GET
@@ -92,7 +92,7 @@ public class SavedSearchResource {
     }
 
     @GraphQLMutation(name="deleteSavedSearch")
-    public Integer deleteSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="savedSearchId") int savedSearchId) {
+    public Integer deleteSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int savedSearchId) {
         return deleteSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearchId);
     }
 }

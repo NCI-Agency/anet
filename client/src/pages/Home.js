@@ -304,9 +304,9 @@ class BaseHome extends Page {
 		const search = this.state.selectedSearch
 		const index = this.state.savedSearches.findIndex(s => s.id === search.id)
 		const operation = 'deleteSavedSearch'
-		let graphql = operation + '(savedSearchId: $savedSearchId)'
-		const variables = { savedSearchId: search.id }
-		const variableDef = '($savedSearchId: Int!)'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: search.id }
+		const variableDef = '($id: Int!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				let savedSearches = this.state.savedSearches

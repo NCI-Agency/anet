@@ -471,8 +471,8 @@ class Search extends Page {
 
 	@autobind
 	onChangeSaveSearch() {
-		let search = this.state.saveSearch
-		this.setState({saveSearch: search})
+		let savedSearch = this.state.saveSearch
+		this.setState({saveSearch: savedSearch})
 	}
 
 	@autobind
@@ -480,15 +480,15 @@ class Search extends Page {
 		event.stopPropagation()
 		event.preventDefault()
 
-		const search = Object.without(this.state.saveSearch, 'show')
-		search.query = JSON.stringify(this.getSearchQuery())
+		const savedSearch = Object.without(this.state.saveSearch, 'show')
+		savedSearch.query = JSON.stringify(this.getSearchQuery())
 		if (this.props.searchQuery.objectType) {
-			search.objectType = this.props.searchQuery.objectType.toUpperCase()
+			savedSearch.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
 		const operation = 'createSavedSearch'
-		let graphql = operation + '(search: $search) { id }'
-		const variables = { search: search }
-		const variableDef = '($search: SavedSearchInput!)'
+		let graphql = operation + '(savedSearch: $savedSearch) { id }'
+		const variables = { savedSearch: savedSearch }
+		const variableDef = '($savedSearch: SavedSearchInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				if (data[operation].id) {

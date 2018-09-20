@@ -121,11 +121,11 @@ export default class AssignPersonModal extends Component {
 
 	@autobind
 	remove() {
-		let graphql = 'deletePersonFromPosition(positionId: $positionId)'
+		let graphql = 'deletePersonFromPosition(id: $id)'
 		const variables = {
-			positionId: this.props.position.id,
+			id: this.props.position.id,
 		}
-		const variableDef = '($positionId: Int!)'
+		const variableDef = '($id: Int!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(
 				data => this.props.onSuccess()
@@ -137,12 +137,12 @@ export default class AssignPersonModal extends Component {
 	@autobind
 	save() {
 		const operation = 'putPersonInPosition'
-		let graphql = operation + '(positionId: $positionId, person: $person)'
+		let graphql = operation + '(id: $id, person: $person)'
 		const variables = {
-			positionId: this.props.position.id,
+			id: this.props.position.id,
 			person: {id: this.state.person.id}
 		}
-		const variableDef = '($positionId: Int!, $person: PersonInput!)'
+		const variableDef = '($id: Int!, $person: PersonInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(
 				data => this.props.onSuccess()

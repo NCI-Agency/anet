@@ -521,7 +521,7 @@ public class ReportResource {
 	}
 
 	@GraphQLMutation(name="submitReport")
-	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="reportId") int id) {
+	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int id) {
 		// GraphQL mutations *have* to return something, we return the report
 		return submitReportCommon(DaoUtils.getUserFromContext(context), id);
 	}
@@ -635,7 +635,7 @@ public class ReportResource {
 
 	@GraphQLMutation(name="approveReport")
 	public Report approveReport(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="reportId") int id,
+			@GraphQLArgument(name="id") int id,
 			@GraphQLArgument(name="comment") Comment comment) {
 		// GraphQL mutations *have* to return something
 		return approveReportCommon(DaoUtils.getUserFromContext(context), id, comment);
@@ -716,7 +716,7 @@ public class ReportResource {
 
 	@GraphQLMutation(name="rejectReport")
 	public Report rejectReport(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="reportId") int id,
+			@GraphQLArgument(name="id") int id,
 			@GraphQLArgument(name="comment") Comment reason) {
 		// GraphQL mutations *have* to return something
 		return rejectReportCommon(DaoUtils.getUserFromContext(context), id, reason);
@@ -759,7 +759,7 @@ public class ReportResource {
 
 	@GraphQLMutation(name="addComment")
 	public Comment addComment(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="reportId") int reportId,
+			@GraphQLArgument(name="id") int reportId,
 			@GraphQLArgument(name="comment") Comment comment) {
 		// GraphQL mutations *have* to return something
 		return addCommentCommon(DaoUtils.getUserFromContext(context), reportId, comment);
@@ -824,7 +824,7 @@ public class ReportResource {
 
 	@GraphQLMutation(name="emailReport")
 	public Integer emailReport(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="reportId") int reportId,
+			@GraphQLArgument(name="id") int reportId,
 			@GraphQLArgument(name="email") AnetEmail email) {
 		// GraphQL mutations *have* to return something, we return an integer
 		return emailReportCommon(DaoUtils.getUserFromContext(context), reportId, email);
@@ -851,7 +851,7 @@ public class ReportResource {
 	}
 
 	@GraphQLMutation(name="deleteReport")
-	public Integer deleteReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="reportId") int reportId) {
+	public Integer deleteReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int reportId) {
 		return deleteReportCommon(DaoUtils.getUserFromContext(context), reportId);
 	}
 

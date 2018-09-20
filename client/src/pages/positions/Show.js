@@ -255,9 +255,9 @@ class BasePositionShow extends Page {
 	@autobind
 	onConfirmDelete() {
 		const operation = 'deletePosition'
-		let graphql = operation + '(positionId: $positionId)'
-		const variables = { positionId: this.state.position.id }
-		const variableDef = '($positionId: Int!)'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: this.state.position.id }
+		const variableDef = '($id: Int!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.props.history.push({
