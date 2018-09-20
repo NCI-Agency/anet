@@ -15,12 +15,7 @@ import mil.dds.anet.test.TestData;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
-	private final GraphQLHelper<Location, LocationSearchQuery> graphQLHelper;
-
-	public LocationResourceTest() {
-		super();
-		graphQLHelper = new GraphQLHelper<>(client, RULE.getLocalPort());
-	}
+	private static final String FIELDS = "id name status lat lng";
 
 	@Test
 	public void locationTestGraphQL()
@@ -29,7 +24,7 @@ public class LocationResourceTest extends AbstractResourceTest {
 		final Location l = TestData.createLocation("The Boat Dock", 43.21, -87.65);
 		final Integer lId = graphQLHelper.createObject(admin, "createLocation", "location", "LocationInput", l, new GenericType<GraphQLResponse<Location>>() {});
 		assertThat(lId).isNotNull();
-		final Location created = graphQLHelper.getObjectById(admin, "location", "id name status lat lng", lId, new GenericType<GraphQLResponse<Location>>() {});
+		final Location created = graphQLHelper.getObjectById(admin, "location", FIELDS, lId, new GenericType<GraphQLResponse<Location>>() {});
 		assertThat(created.getName()).isEqualTo(l.getName());
 		assertThat(created).isNotEqualTo(l);
 
@@ -42,14 +37,13 @@ public class LocationResourceTest extends AbstractResourceTest {
 		final AnetBeanList<Location> searchObjects = graphQLHelper.searchObjects(admin, "locationList", "query", "LocationSearchQueryInput",
 				"id name lat lng", query, new GenericType<GraphQLResponse<AnetBeanList<Location>>>() {});
 		assertThat(searchObjects).isNotNull();
-		assertThat(searchObjects.getList()).isNotNull();
-		assertThat(searchObjects.getList().size()).isGreaterThan(0);
+		assertThat(searchObjects.getList()).isNotEmpty();
 
 		//Update
 		created.setName("Down by the Bay");
 		final Integer nrUpdated = graphQLHelper.updateObject(admin, "updateLocation", "location", "LocationInput", created);
 		assertThat(nrUpdated).isEqualTo(1);
-		final Location updated = graphQLHelper.getObjectById(admin, "location", "id name status lat lng", lId, new GenericType<GraphQLResponse<Location>>() {});
+		final Location updated = graphQLHelper.getObjectById(admin, "location", FIELDS, lId, new GenericType<GraphQLResponse<Location>>() {});
 		assertThat(updated).isEqualTo(created);
 	}
 

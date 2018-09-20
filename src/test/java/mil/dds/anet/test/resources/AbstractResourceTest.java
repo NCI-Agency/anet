@@ -48,13 +48,13 @@ public abstract class AbstractResourceTest {
 	protected Person admin;
 	protected Map<String, Object> context;
 
-	private final GraphQLHelper<Person, PersonSearchQuery> graphQLHelper;
+	protected final GraphQLHelper graphQLHelper;
 
 	public AbstractResourceTest() {
 		if (client == null) {
 			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
 		}
-		graphQLHelper = new GraphQLHelper<>(client, RULE.getLocalPort());
+		graphQLHelper = new GraphQLHelper(client, RULE.getLocalPort());
 	}
 
 	@Before

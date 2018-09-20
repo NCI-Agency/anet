@@ -14,17 +14,17 @@ import javax.ws.rs.core.MediaType;
 
 import mil.dds.anet.beans.Person;
 
-public class GraphQLRequest<T> {
+public class GraphQLClient {
 
 	private final Client client;
 	private int localPort;
 
-	public GraphQLRequest(Client client, int localPort) {
+	public GraphQLClient(Client client, int localPort) {
 		this.client = client;
 		this.localPort = localPort;
 	}
 
-	public T doGraphQLQuery(Person user, String query, String paramName, Object param, GenericType<GraphQLResponse<T>> responseType) {
+	public <T> T doGraphQLQuery(Person user, String query, String paramName, Object param, GenericType<GraphQLResponse<T>> responseType) {
 		final Map<String, Object> graphQLQuery = new HashMap<String,Object>();
 		graphQLQuery.put("query", query);
 		final Map<String,Object> variables = new HashMap<String,Object>();
