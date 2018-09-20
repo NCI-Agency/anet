@@ -39,17 +39,9 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		final String idBatcherSql = "/* batch.getOrgsByIds */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
 
-		final String personIdBatcherSql = DaoUtils.isMsSql(dbHandle)
-				? "/* batch.getOrganizationForPerson */ SELECT TOP(1) \"peoplePositions\".\"personId\", " + ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" IN ( %1$s ) AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC"
-				: "/* batch.getOrganizationForPerson */ SELECT \"peoplePositions\".\"personId\", " + ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" IN ( %1$s )  AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
+		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonId\" AS \"personId\", " + ORGANIZATION_FIELDS
+					+ "FROM organizations, positions WHERE "
+					+ "positions.\"currentPersonId\" IN ( %1$s ) AND positions.\"organizationId\" = organizations.id";
 		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, new OrganizationMapper(), "personId");
 	}
 	
