@@ -1,4 +1,4 @@
-package mil.dds.anet.test.resources;
+package mil.dds.anet.test.resources.utils;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.GenericType;

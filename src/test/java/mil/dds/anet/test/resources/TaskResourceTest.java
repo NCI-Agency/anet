@@ -16,6 +16,7 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.test.TestData;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class TaskResourceTest extends AbstractResourceTest {
 

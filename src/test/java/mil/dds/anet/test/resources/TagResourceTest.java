@@ -15,6 +15,7 @@ import org.junit.rules.ExpectedException;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class TagResourceTest extends AbstractResourceTest {
 

@@ -26,6 +26,8 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.test.resources.utils.GraphQLHelper;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 import mil.dds.anet.utils.BatchingUtils;
 
 public abstract class AbstractResourceTest {

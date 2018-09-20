@@ -1,4 +1,4 @@
-package mil.dds.anet.test.resources;
+package mil.dds.anet.test.resources.utils;
 
 public class GraphQLResponse<T> {
 	private GraphQLData<T> data;

@@ -12,6 +12,7 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.test.TestData;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class LocationResourceTest extends AbstractResourceTest {
 
