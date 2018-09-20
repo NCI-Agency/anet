@@ -7,7 +7,6 @@ html {
    * So we add this style to force IE11 & Edge to use a "normal", non-overlapping, non-auto-hiding scrollbar.
    * See https://github.com/twbs/bootstrap/issues/18543
    */
-  -ms-overflow-style: -ms-autohiding-scrollbar;
   height: 100%;
 }
 

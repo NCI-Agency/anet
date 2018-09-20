@@ -16,24 +16,32 @@ const anetContainer = {
 const contentContainer = {
 	flex:'1 1 auto',
 	display:'flex',
-	flexDirection:'row'
+	flexDirection:'row',
+	minWidth: 0,
+	minHeight: 0,
+	overflow: 'hidden',
 }
 const mainViewportContainer = {
 	flex:'1 1 auto',
-	overflowY: 'scroll',
+	overflowY: 'auto',
+	overflowX: 'hidden',
+	paddingTop: 5,
 	paddingLeft: 18,
-	paddingRight: 18
+	paddingRight: 18,
 }
 const sidebarContainer = {
 	flex:'0 0 auto',
-	overflowY: 'scroll'
+	overflowY: 'auto',
+	overflowX: 'hidden',
+	msOverflowStyle: '-ms-autohiding-scrollbar',
+	paddingRight: 18,
+	paddingLeft: 15,
+	marginBottom: 5,
 }
 const sidebar = {
 	flexGrow: 1,
 	minWidth: 200,
-	paddingTop: 10,
-	paddingLeft: 8,
-	paddingRight: 8
+	paddingTop: 15,
 }
 const glassPane = {
 	position: 'absolute',
