@@ -3,6 +3,8 @@ package mil.dds.anet.resources;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -37,11 +39,13 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -204,7 +208,7 @@ public class OrganizationResource {
 								engine.getApprovalStepDao().update(curr);
 							} else {
 								//Check for updates to name, nextStepId and approvers.
-								ApprovalStepResource.updateStep(curr, existingStep);
+								updateStep(curr, existingStep);
 							}
 						}
 					}
@@ -214,6 +218,28 @@ public class OrganizationResource {
 				return numRows;
 			}
 		});
+	}
+
+	//Helper method that diffs the name/members of an approvalStep
+	private void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
+		final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+		final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
+		newStep.setId(oldStep.getId()); //Always want to make changes to the existing group
+		if (!newStep.getName().equals(oldStep.getName())) {
+			approvalStepDao.update(newStep);
+		} else if (!Objects.equals(newStep.getNextStepId(), oldStep.getNextStepId())) {
+			approvalStepDao.update(newStep);
+		}
+
+		if (newStep.getApprovers() != null) {
+			try {
+				Utils.addRemoveElementsById(oldStep.loadApprovers(engine.getContext()).get(), newStep.getApprovers(),
+					newPosition -> approvalStepDao.addApprover(newStep, newPosition),
+					oldPositionId -> approvalStepDao.removeApprover(newStep, Position.createWithId(oldPositionId)));
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Approvers", e);
+			}
+		}
 	}
 
 	@GraphQLMutation(name="updateOrganization")

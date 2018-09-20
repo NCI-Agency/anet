@@ -3,6 +3,7 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -59,6 +60,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class ReportsResourceTest extends AbstractResourceTest {
 
@@ -144,31 +146,32 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(checkit).isEqualTo(author);
 
 		//Create Approval workflow for Advising Organization
-		ApprovalStep approval = new ApprovalStep();
+		final List<ApprovalStep> approvalSteps = new ArrayList<>();
+		final ApprovalStep approval = new ApprovalStep();
 		approval.setName("Test Group for Approving");
 		approval.setAdvisorOrganizationId(advisorOrg.getId());
 		approval.setApprovers(ImmutableList.of(approver1Pos));
-
-		approval = httpQuery("/api/approvalSteps/new", admin)
-				.post(Entity.json(approval), ApprovalStep.class);
-		assertThat(approval.getId()).isNotNull();
+		approvalSteps.add(approval);
 
 		//Adding a new approval step to an AO automatically puts it at the end of the approval process.
-		ApprovalStep releaseApproval = new ApprovalStep();
+		final ApprovalStep releaseApproval = new ApprovalStep();
 		releaseApproval.setName("Test Group of Releasers");
 		releaseApproval.setAdvisorOrganizationId(advisorOrg.getId());
 		releaseApproval.setApprovers(ImmutableList.of(approver2Pos));
-		releaseApproval = httpQuery("/api/approvalSteps/new", admin)
-				.post(Entity.json(releaseApproval), ApprovalStep.class);
-		assertThat(releaseApproval.getId()).isNotNull();
+		approvalSteps.add(releaseApproval);
+		advisorOrg.setApprovalSteps(approvalSteps);
 
+		final Integer nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization", "OrganizationInput", advisorOrg);
+		assertThat(nrUpdated).isEqualTo(1);
 		//Pull the approval workflow for this AO
-		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgId=" + advisorOrg.getId(), admin)
-				.get(new GenericType<List<ApprovalStep>>() {});
+		final Organization orgWithSteps = graphQLHelper.getObjectById(admin, "organization", "id approvalSteps { id name nextStepId advisorOrganizationId }", advisorOrg.getId(), new GenericType<GraphQLResponse<Organization>>() {});
+		final List<ApprovalStep> steps = orgWithSteps.getApprovalSteps();
 		assertThat(steps.size()).isEqualTo(2);
-		assertThat(steps.get(0).getId()).isEqualTo(approval.getId());
-		assertThat(steps.get(0).getNextStepId()).isEqualTo(releaseApproval.getId());
-		assertThat(steps.get(1).getId()).isEqualTo(releaseApproval.getId());
+		assertThat(steps.get(0).getName()).isEqualTo(approval.getName());
+		assertThat(steps.get(0).getNextStepId()).isEqualTo(steps.get(1).getId());
+		assertThat(steps.get(1).getName()).isEqualTo(releaseApproval.getName());
+		approval.setId(steps.get(0).getId());
+		releaseApproval.setId(steps.get(1).getId());
 
 		//Ensure the approver is an approver
 		assertThat(approver1Pos.loadIsApprover()).isTrue();
@@ -390,8 +393,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Find the default ApprovalSteps
 		Integer defaultOrgId = AnetObjectEngine.getInstance().getDefaultOrgId();
 		assertThat(defaultOrgId).isNotNull();
-		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgId=" + defaultOrgId, jack)
-				.get(new GenericType<List<ApprovalStep>>() {});
+		final Organization orgWithSteps = graphQLHelper.getObjectById(jack, "organization", "id approvalSteps { id nextStepId }", defaultOrgId, new GenericType<GraphQLResponse<Organization>>() {});
+		final List<ApprovalStep> steps = orgWithSteps.getApprovalSteps();
 		assertThat(steps).isNotNull();
 		assertThat(steps).hasSize(1);
 		assertThat(returned.getApprovalStep().getId()).isEqualTo(steps.get(0).getId());

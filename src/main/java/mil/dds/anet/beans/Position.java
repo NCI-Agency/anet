@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -143,6 +145,7 @@ public class Position extends AbstractAnetBean {
 				.thenApply(o -> { previousPeople = o; return o; });
 	}
 
+	@JsonIgnore
 	@GraphQLIgnore
 	public List<PersonPositionHistory> getPreviousPeople() {
 		return previousPeople;
