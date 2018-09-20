@@ -1,5 +1,7 @@
 package mil.dds.anet.test.resources.utils;
 
+import java.util.List;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.GenericType;
 
@@ -55,6 +57,14 @@ public final class GraphQLHelper {
 	}
 
 	/**
+	 * @return all list of objects of the requested type
+	 */
+	public <T extends AbstractAnetBean> List<T> getObjectList(Person user, String getQuery, String fields, GenericType<GraphQLResponse<List<T>>> responseType) {
+		final String q = String.format(getFmt, getQuery, fields);
+		return graphQLClient.doGraphQLQuery(user, q, null, null, responseType);
+	}
+
+	/**
 	 * @return id of the newly created object
 	 */
 	public <T extends AbstractAnetBean> Integer createObject(Person user, String createQuery, String paramName, String paramType, T param, GenericType<GraphQLResponse<T>> responseType) {
@@ -69,6 +79,14 @@ public final class GraphQLHelper {
 	public <T extends AbstractAnetBean> Integer updateObject(Person user, String updateQuery, String paramName, String paramType, T param) {
 		final String q = String.format(updateFmt, paramName, paramType, updateQuery);
 		return graphQLClient.doGraphQLQuery(user, q, paramName, param, new GenericType<GraphQLResponse<Integer>>() {});
+	}
+
+	/**
+	 * @return the number of objects deleted
+	 */
+	public <T extends AbstractAnetBean> Integer deleteObject(Person user, String deleteQuery, Integer id) {
+		final String q = String.format(updateFmt, "id", "Int", deleteQuery);
+		return graphQLClient.doGraphQLQuery(user, q, "id", id, new GenericType<GraphQLResponse<Integer>>() {});
 	}
 
 	/**
