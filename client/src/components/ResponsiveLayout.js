@@ -36,7 +36,7 @@ const sidebarContainer = {
 	msOverflowStyle: '-ms-autohiding-scrollbar',
 	paddingRight: 18,
 	paddingLeft: 15,
-	marginBottom: 5,
+	paddingBottom: 5,
 }
 const sidebar = {
 	flexGrow: 1,
