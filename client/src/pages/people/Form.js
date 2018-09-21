@@ -299,9 +299,9 @@ class BasePersonForm extends ValidatableFormWrapper {
 					{this.renderCountrySelectOptions(countries)}
 				</RequiredField>
 
-				<Form.Field id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON}>
+				<RequiredField  id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON} required={isAdvisor} addOnBlur={true}>
 					<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
-				</Form.Field>
+				</RequiredField>
 
 				<Form.Field id="biography" componentClass={TextEditor} className="biography" />
 			</Fieldset>
