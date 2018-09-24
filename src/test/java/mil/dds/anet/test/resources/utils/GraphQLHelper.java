@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources.utils;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.GenericType;
@@ -79,6 +80,13 @@ public final class GraphQLHelper {
 	public <T extends AbstractAnetBean> Integer updateObject(Person user, String updateQuery, String paramName, String paramType, T param) {
 		final String q = String.format(updateFmt, paramName, paramType, updateQuery);
 		return graphQLClient.doGraphQLQuery(user, q, paramName, param, new GenericType<GraphQLResponse<Integer>>() {});
+	}
+
+	/**
+	 * @return the number of objects updated
+	 */
+	public <T extends AbstractAnetBean> Integer updateObject(Person user, String updateQuery, Map<String,Object> variables) {
+		return graphQLClient.doGraphQLQuery(user, updateQuery, variables, new GenericType<GraphQLResponse<Integer>>() {});
 	}
 
 	/**

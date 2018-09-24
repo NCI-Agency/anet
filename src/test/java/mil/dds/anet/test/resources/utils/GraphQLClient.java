@@ -25,12 +25,16 @@ public class GraphQLClient {
 	}
 
 	public <T> T doGraphQLQuery(Person user, String query, String paramName, Object param, GenericType<GraphQLResponse<T>> responseType) {
-		final Map<String, Object> graphQLQuery = new HashMap<String,Object>();
-		graphQLQuery.put("query", query);
 		final Map<String,Object> variables = new HashMap<String,Object>();
 		if (paramName != null) {
 			variables.put(paramName, param);
 		}
+		return doGraphQLQuery(user, query, variables, responseType);
+	}
+
+	public <T> T doGraphQLQuery(Person user, String query, Map<String,Object> variables, GenericType<GraphQLResponse<T>> responseType) {
+		final Map<String, Object> graphQLQuery = new HashMap<String,Object>();
+		graphQLQuery.put("query", query);
 		graphQLQuery.put("variables", variables);
 		final GraphQLResponse<T> response = httpQuery("graphql", user)
 					.post(Entity.json(graphQLQuery), responseType);
