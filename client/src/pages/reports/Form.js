@@ -8,7 +8,7 @@ import 'components/reactTags.css'
 
 import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
-import TextEditor from 'components/TextEditor'
+import RichTextEditor from 'components/RichTextEditor'
 import AuthorizationGroupsSelector from 'components/AuthorizationGroupsSelector'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
@@ -258,7 +258,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 					</Form.Field>
 
 					{!isCancelled &&
-						<Form.Field id="atmosphere" className="atmosphere-form-group" label="Atmospherics"> 
+						<Form.Field id="atmosphere" className="atmosphere-form-group" label="Atmospherics">
 							<ButtonToggleGroup>
 								<Button value="POSITIVE" id="positiveAtmos">Positive</Button>
 								<Button value="NEUTRAL" id="neutralAtmos">Neutral</Button>
@@ -382,11 +382,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 					<Collapse in={this.state.showReportText}>
 						<div>
-							<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
+							<Form.Field id="reportText" className="reportTextField" componentClass={RichTextEditor} />
 
 							{(report.reportSensitiveInformation || !this.props.edit) &&
 								<div>
-									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
+									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={RichTextEditor}
 										value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
 										onChange={this.updateReportSensitiveInformation} />
 									<AuthorizationGroupsSelector
