@@ -26,6 +26,7 @@ import TriggerableConfirm from 'components/TriggerableConfirm'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import _isEmpty from 'lodash/isEmpty'
 
 class BasePersonForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -94,7 +95,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.id
-		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && person.domainUsername
+		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
 		const ranks = Settings.fields.person.ranks || []
 
 		const countries = this.countries(person)
