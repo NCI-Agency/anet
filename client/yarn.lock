@@ -3736,9 +3736,9 @@ eslint-module-utils@^2.2.0:
     debug "^2.6.8"
     pkg-dir "^1.0.0"
 
-eslint-plugin-flowtype@^2.50.0:
-  version "2.50.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-2.50.0.tgz#953e262fa9b5d0fa76e178604892cf60dfb916da"
+eslint-plugin-flowtype@^2.50.1:
+  version "2.50.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-2.50.1.tgz#36d4c961ac8b9e9e1dc091d3fba0537dad34ae8a"
   dependencies:
     lodash "^4.17.10"
 
@@ -9255,12 +9255,6 @@ sane@^2.0.0:
 sax@>=0.6.0, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
-
-schedule@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/schedule/-/schedule-0.4.0.tgz#fa20cfd0bfbf91c47d02272fd7096780d3170bbb"
-  dependencies:
-    object-assign "^4.1.1"
 
 schedule@^0.5.0:
   version "0.5.0"
