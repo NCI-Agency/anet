@@ -19,21 +19,7 @@ class BaseNav extends Component {
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
 		organizations: PropTypes.array,
-	}
-
-	constructor(props) {
-		super(props)
-		this.state = {
-			scrollspyOffset: 0
-		}
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		const scrollspyOffset = -(props.topbarOffset + 20)
-		if (state.scrollspyOffset !== scrollspyOffset) {
-			return {scrollspyOffset: scrollspyOffset}
-		}
-		return null
+		scrollspyOffset: PropTypes.number,
 	}
 
 	render() {
@@ -56,20 +42,6 @@ class BaseNav extends Component {
 			myOrgId = myOrg && +myOrg.id
 		}
 
-		const orgSubNav = (
-			<NavWrap>
-				<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
-					items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
-					<NavItem href="#info">Info</NavItem>
-					<NavItem href="#supportedPositions">Supported positions</NavItem>
-					<NavItem href="#vacantPositions">Vacant positions</NavItem>
-					<NavItem href="#approvals">Approvals</NavItem>
-					<NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem>
-					<NavItem href="#reports">Reports</NavItem>
-				</Scrollspy>
-			</NavWrap>
-		)
-
 		return (
 			<BSNav bsStyle="pills" stacked id="leftNav" className="nav-fixed">
 				<Link to="/">
@@ -84,7 +56,7 @@ class BaseNav extends Component {
 
 				{inMyReports &&
 					<NavWrap>
-						<Scrollspy className="nav" currentClassName="active" offset={this.state.scrollspyOffset}
+						<Scrollspy className="nav" currentClassName="active" offset={this.props.scrollspyOffset}
 							items={ ['draft-reports', 'upcoming-engagements', 'pending-approval', 'published-reports'] }>
 							<NavItem href="#draft-reports">Draft reports</NavItem>
 							<NavItem href="#upcoming-engagements">Upcoming Engagements</NavItem>
@@ -98,7 +70,7 @@ class BaseNav extends Component {
 					<NavItem id="my-organization">My organization <br /><small>{myOrg.shortName}</small></NavItem>
 				</Link>}
 
-				{inOrg && orgId === myOrgId && orgSubNav}
+				<NavWrap id="myorg-nav"></NavWrap>
 
 				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="organizations" active={inOrg && orgId !== myOrgId}>
 					{Organization.map(organizations, org =>
@@ -108,7 +80,7 @@ class BaseNav extends Component {
 					)}
 				</NavDropdown>
 
-				{inOrg && orgId !== myOrgId && orgSubNav}
+				<NavWrap id="org-nav"></NavWrap>
 
 				<Link to="/rollup">
 					<NavItem>Daily rollup</NavItem>
@@ -160,7 +132,7 @@ class BaseNav extends Component {
 const Nav = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} scrollspyOffset={context.scrollspyOffset} {...props} />
 		}
 	</AppContext.Consumer>
 )
