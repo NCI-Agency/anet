@@ -8568,9 +8568,9 @@ react-prop-types@^0.4.0:
   dependencies:
     warning "^3.0.0"
 
-react-redux-loading-bar@^4.0.7:
-  version "4.0.7"
-  resolved "https://registry.yarnpkg.com/react-redux-loading-bar/-/react-redux-loading-bar-4.0.7.tgz#f3b87455d26e359c70fb9852fae9e997b287970b"
+react-redux-loading-bar@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/react-redux-loading-bar/-/react-redux-loading-bar-4.0.8.tgz#e84d59d1517b79f53b0f39c8ddb40682af648c1b"
   dependencies:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.2"
@@ -9255,12 +9255,6 @@ sane@^2.0.0:
 sax@>=0.6.0, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
-
-schedule@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/schedule/-/schedule-0.4.0.tgz#fa20cfd0bfbf91c47d02272fd7096780d3170bbb"
-  dependencies:
-    object-assign "^4.1.1"
 
 schedule@^0.5.0:
   version "0.5.0"
