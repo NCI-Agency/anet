@@ -17,6 +17,7 @@ class CreatePerson extends Page {
     get endOfTourDate()         { return browser.element('#endOfTourDate') }
     get biography()             { return browser.element('.biography .text-editor p') }
     get submitButton()          { return browser.element('#formBottomSubmit') }
+    get endOfTourDay()          { return browser.element('#date-picker-popover-0 div table tbody tr td[data-day="7"]') }
 
     openAsSuperUser() {
         super.openAsSuperUser(Page_URL)
