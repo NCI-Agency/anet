@@ -18,6 +18,7 @@ public final class GraphQLHelper {
 	private static final String getAllFmt = "query { payload: %1$s { pageNum pageSize totalCount list { %2$s } } }";
 	private static final String createFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { id } }";
 	private static final String updateFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) }";
+	private static final String updateObjectFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { %4$s } }";
 	private static final String searchFmt = "query ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { pageNum pageSize totalCount list { %4$s } } }";
 
 	private final GraphQLClient graphQLClient;
@@ -58,11 +59,18 @@ public final class GraphQLHelper {
 	}
 
 	/**
-	 * @return all list of objects of the requested type
+	 * @return a list of objects of the requested type
 	 */
 	public <T extends AbstractAnetBean> List<T> getObjectList(Person user, String getQuery, String fields, GenericType<GraphQLResponse<List<T>>> responseType) {
 		final String q = String.format(getFmt, getQuery, fields);
 		return graphQLClient.doGraphQLQuery(user, q, null, null, responseType);
+	}
+
+	/**
+	 * @return a list of objects of the requested type matching the variables
+	 */
+	public <T> List<T> getObjectList(Person user, String getQuery, Map<String,Object> variables, GenericType<GraphQLResponse<List<T>>> responseType) {
+		return graphQLClient.doGraphQLQuery(user, getQuery, variables, responseType);
 	}
 
 	/**
@@ -83,10 +91,25 @@ public final class GraphQLHelper {
 	}
 
 	/**
+	 * @return the updated object
+	 */
+	public <T extends AbstractAnetBean> T updateObject(Person user, String updateQuery, String paramName, String fields, String paramType, Object param, GenericType<GraphQLResponse<T>> responseType) {
+		final String q = String.format(updateObjectFmt, paramName, paramType, updateQuery, fields);
+		return graphQLClient.doGraphQLQuery(user, q, paramName, param, responseType);
+	}
+
+	/**
 	 * @return the number of objects updated
 	 */
 	public <T extends AbstractAnetBean> Integer updateObject(Person user, String updateQuery, Map<String,Object> variables) {
 		return graphQLClient.doGraphQLQuery(user, updateQuery, variables, new GenericType<GraphQLResponse<Integer>>() {});
+	}
+
+	/**
+	 * @return the updated object
+	 */
+	public <T extends AbstractAnetBean> T updateObject(Person user, String updateQuery, Map<String,Object> variables, GenericType<GraphQLResponse<T>> responseType) {
+		return graphQLClient.doGraphQLQuery(user, updateQuery, variables, responseType);
 	}
 
 	/**

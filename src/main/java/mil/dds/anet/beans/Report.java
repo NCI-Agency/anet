@@ -71,6 +71,7 @@ public class Report extends AbstractAnetBean {
 	// The user who instantiated this; needed to determine access to sensitive information
 	private Person user;
 	private List<AuthorizationGroup> authorizationGroups;
+	private List<ApprovalAction> approvalStatus;
 
 	@GraphQLIgnore
 	public ApprovalStep getApprovalStep() {
@@ -226,11 +227,13 @@ public class Report extends AbstractAnetBean {
 		});
 	}
 
+	@JsonIgnore
 	@GraphQLIgnore
 	public ReportPerson getPrimaryAdvisor() {
 		return primaryAdvisor;
 	}
 
+	@JsonIgnore
 	@GraphQLIgnore
 	public ReportPerson getPrimaryPrincipal() {
 		return primaryPrincipal;
@@ -374,6 +377,15 @@ public class Report extends AbstractAnetBean {
 			});
 		}
 		return result;
+	}
+
+	@GraphQLIgnore
+	public List<ApprovalAction> getApprovalStatus() {
+		return approvalStatus;
+	}
+
+	public void setApprovalStatus(List<ApprovalAction> approvalStatus) {
+		this.approvalStatus = approvalStatus;
 	}
 
 	private List<ApprovalAction> compactActions(List<ApprovalAction> actions) {

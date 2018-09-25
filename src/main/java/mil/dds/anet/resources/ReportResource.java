@@ -883,13 +883,16 @@ public class ReportResource {
 	@Timed
 	@Path("/search")
 	public AnetBeanList<Report> search(@Auth Person user, ReportSearchQuery query) {
-		return search(null, user, query);
+		return searchCommon(user, query);
 	}
 
 	@GraphQLQuery(name="reportList")
-	public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+	public AnetBeanList<Report> search(@GraphQLRootContext Map<String, Object> context,
 			@GraphQLArgument(name="query") ReportSearchQuery query) {
-		user = DaoUtils.getUser(context, user);
+		return searchCommon(DaoUtils.getUserFromContext(context), query);
+	}
+
+	private AnetBeanList<Report> searchCommon(Person user, ReportSearchQuery query) {
 		return dao.search(query, user);
 	}
 
