@@ -2532,9 +2532,9 @@ configstore@^3.0.0:
     write-file-atomic "^2.0.0"
     xdg-basedir "^3.0.0"
 
-confusing-browser-globals@2.0.0-next.b2fd8db8:
-  version "2.0.0-next.b2fd8db8"
-  resolved "https://registry.yarnpkg.com/confusing-browser-globals/-/confusing-browser-globals-2.0.0-next.b2fd8db8.tgz#76206be12de4e1ac8b07e8b71b6daea697ba8d73"
+confusing-browser-globals@2.0.0-next.2150693d:
+  version "2.0.0-next.2150693d"
+  resolved "https://registry.yarnpkg.com/confusing-browser-globals/-/confusing-browser-globals-2.0.0-next.2150693d.tgz#255bc54421fd7b08d6c2f31c9a67e9d7c34a3f86"
 
 connect-history-api-fallback@^1.3.0:
   version "1.5.0"
@@ -3706,11 +3706,11 @@ escodegen@^1.9.0:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-react-app@^3.0.0-next.66cc7a90:
-  version "3.0.0-next.b2fd8db8"
-  resolved "https://registry.yarnpkg.com/eslint-config-react-app/-/eslint-config-react-app-3.0.0-next.b2fd8db8.tgz#9c53f55bcfe11c03ff7075d9c4f113beca85191d"
+eslint-config-react-app@^3.0.0-next.2150693d:
+  version "3.0.0-next.2150693d"
+  resolved "https://registry.yarnpkg.com/eslint-config-react-app/-/eslint-config-react-app-3.0.0-next.2150693d.tgz#ef3bb2d3544c2b3af989df018b519f2a09e06ad9"
   dependencies:
-    confusing-browser-globals "2.0.0-next.b2fd8db8"
+    confusing-browser-globals "2.0.0-next.2150693d"
 
 eslint-import-resolver-node@^0.3.1:
   version "0.3.2"
@@ -9255,12 +9255,6 @@ sane@^2.0.0:
 sax@>=0.6.0, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
-
-schedule@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/schedule/-/schedule-0.4.0.tgz#fa20cfd0bfbf91c47d02272fd7096780d3170bbb"
-  dependencies:
-    object-assign "^4.1.1"
 
 schedule@^0.5.0:
   version "0.5.0"
