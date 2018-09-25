@@ -39,10 +39,10 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 		
 		Map<String,Object> variables = new HashMap<String,Object>();
 		variables.put("personId", jack.getId().toString());
-		variables.put("positionId", jack.loadPosition().getId());
+		variables.put("positionId", steve.loadPosition().getId());
 		variables.put("orgId", steve.loadPosition().loadOrganization(context).get().getId());
 		variables.put("searchQuery", "hospital");
-		variables.put("reportId", jack.loadAttendedReports(0, 20).getList().get(0).getId());
+		variables.put("reportId", jack.loadAttendedReports(0, 1).getList().get(0).getId());
 		variables.put("pageNum", 0);
 		variables.put("pageSize", 10);
 		variables.put("maxResults", 6);
