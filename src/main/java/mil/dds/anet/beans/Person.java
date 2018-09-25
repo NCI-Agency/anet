@@ -3,10 +3,14 @@ package mil.dds.anet.beans;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 
@@ -37,6 +41,8 @@ public class Person extends AbstractAnetBean implements Principal {
 	private String domainUsername;
 		
 	private Optional<Position> position;
+
+	private List<PersonPositionHistory> previousPositions;
 	
 	public Person() { 
 		this.pendingVerification = false; //Defaults 
@@ -169,7 +175,22 @@ public class Person extends AbstractAnetBean implements Principal {
 			this.position = Optional.of(position);
 		}
 	}
-	
+
+	@GraphQLQuery(name="previousPositions")
+	public CompletableFuture<List<PersonPositionHistory>> loadPreviousPositions(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, this)
+				.thenApply(o -> { previousPositions = o; return o; });
+	}
+
+	@GraphQLIgnore
+	public List<PersonPositionHistory> getPreviousPositions() {
+		return previousPositions;
+	}
+
+	public void setPreviousPositions(List<PersonPositionHistory> previousPositions) {
+		this.previousPositions = previousPositions;
+	}
+
 	@GraphQLQuery(name="authoredReports") // TODO: batch load? (used in people/Show.js, admin/MergePeople.js)
 	public AnetBeanList<Report> loadAuthoredReports(@GraphQLArgument(name="pageNum") Integer pageNum,
 			@GraphQLArgument(name="pageSize") Integer pageSize) {
