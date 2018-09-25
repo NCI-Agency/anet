@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom'
 export default class SubNav extends Component {
 
 	static propTypes = {
-		subnavElemId: PropTypes.string.Required,
+		subnavElemId: PropTypes.string.isRequired,
 	}
 
 	constructor(props) {
