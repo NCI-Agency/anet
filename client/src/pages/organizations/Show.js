@@ -36,6 +36,7 @@ class BaseOrganizationShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
+		scrollspyOffset: PropTypes.number,
 	}
 
 	static modelName = 'Organization'
@@ -183,7 +184,6 @@ class BaseOrganizationShow extends Page {
 				</Scrollspy>
 			</Nav>
 		)
-
 		return (
 			<div>
 				<SubNav subnavElemId="myorg-nav">
