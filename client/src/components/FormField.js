@@ -5,7 +5,6 @@ import deepEqual from 'deep-equal'
 import autobind from 'autobind-decorator'
 import {FormGroup, Col, ControlLabel, FormControl, InputGroup, HelpBlock} from 'react-bootstrap'
 import FormContext from 'components/FormContext'
-import _uniqueId from 'lodash/uniqueId'
 
 class FormFieldExtraCol extends Component {
 	render() {
