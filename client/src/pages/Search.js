@@ -114,6 +114,7 @@ class Search extends Page {
 			},
 			error: null,
 			success: null,
+			didSearch: false,
 		})
 	}
 
@@ -157,9 +158,9 @@ class Search extends Page {
 	@autobind
 	_fetchDataCallback(parts) {
 		return GQL.run(parts).then(data => {
-			this.setState({success: null, error: null, results: data})
+			this.setState({success: null, error: null, results: data, didSearch: true})
 		}).catch(response =>
-			this.setState({success: null, error: response})
+			this.setState({success: null, error: response, didSearch: true})
 		)
 	}
 
@@ -244,7 +245,7 @@ class Search extends Page {
 
 				{this.state.query && <h2 className="only-show-for-print">Search query: '{this.state.query}'</h2>}
 
-				{noResults &&
+				{this.state.didSearch && noResults &&
 					<Alert bsStyle="warning">
 						<b>No search results found!</b>
 					</Alert>
