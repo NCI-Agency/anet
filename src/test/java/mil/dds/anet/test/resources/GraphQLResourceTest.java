@@ -7,12 +7,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
@@ -125,5 +128,18 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 			.isFalse();
 		assertThat(resp.containsKey("data")).as("Missing Data on " + f.getName(), resp).isTrue();
 	}
-	
+
+	/*
+	 * Helper method to build httpQuery with authentication and Accept headers.
+	 */
+	private Builder httpQuery(String path, Person authUser) {
+		final String authString = Base64.getEncoder()
+				.encodeToString((authUser.getDomainUsername() + ":").getBytes());
+		return client
+				.target(String.format("http://localhost:%d%s", RULE.getLocalPort(), path))
+				.request()
+				.header("Authorization", "Basic " + authString)
+				.header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
+	}
+
 }

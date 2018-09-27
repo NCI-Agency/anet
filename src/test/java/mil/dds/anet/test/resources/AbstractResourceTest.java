@@ -1,16 +1,12 @@
 package mil.dds.anet.test.resources;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,45 +34,29 @@ public abstract class AbstractResourceTest {
 	public static final DropwizardAppRule<AnetConfiguration> RULE =
 		new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
 	
-	public static Client client;
-	public static JerseyClientConfiguration config = new JerseyClientConfiguration();
-	
-	static { 
+	private static JerseyClientConfiguration config = new JerseyClientConfiguration();
+	static {
 		config.setTimeout(Duration.seconds(60L));
 		config.setConnectionTimeout(Duration.seconds(30L));
 		config.setConnectionRequestTimeout(Duration.seconds(30L));
 	}
 
-	protected Person admin;
-	protected Map<String, Object> context;
+	protected static Client client;
+	protected static GraphQLHelper graphQLHelper;
 
-	protected final GraphQLHelper graphQLHelper;
+	protected final Person admin;
+	protected final Map<String, Object> context;
 
 	public AbstractResourceTest() {
 		if (client == null) {
 			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
 		}
-		graphQLHelper = new GraphQLHelper(client, RULE.getLocalPort());
-	}
-
-	@Before
-	public void setUp() {
+		if (graphQLHelper == null) {
+			graphQLHelper = new GraphQLHelper(client, RULE.getLocalPort());
+		}
 		admin = findOrPutPersonInDb(PersonTest.getArthurDmin());
 		context = new HashMap<>();
 		context.put("dataLoaderRegistry", BatchingUtils.registerDataLoaders(AnetObjectEngine.getInstance(), false, false));
-	}
-	
-	/*
-	 * Helper method to build httpQuery with authentication and Accept headers. 
-	 */
-	public Builder httpQuery(String path, Person authUser) {
-		String authString = Base64.getEncoder().encodeToString(
-				(authUser.getDomainUsername() + ":").getBytes());
-		return client
-				.target(String.format("http://localhost:%d%s", RULE.getLocalPort(), path))
-				.request()
-				.header("Authorization", "Basic " + authString)
-				.header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
 	}
 	
 	/*
