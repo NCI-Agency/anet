@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.GeneratedKeys;
@@ -12,11 +13,14 @@ import org.skife.jdbi.v2.TransactionStatus;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class PersonDao extends AnetBaseDao<Person> {
 
@@ -29,11 +33,19 @@ public class PersonDao extends AnetBaseDao<Person> {
 	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 
 	private final IdBatcher<Person> idBatcher;
+	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
 
 	public PersonDao(Handle h) { 
 		super(h, "Person", tableName, PERSON_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPeopleByIds */ SELECT " + PERSON_FIELDS + " FROM people WHERE id IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, new PersonMapper());
+		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT \"peoplePositions\".\"positionId\" AS \"positionId\", "
+				+ "\"peoplePositions\".\"personId\" AS \"personId\", "
+				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
+				+ PositionDao.POSITIONS_FIELDS + " FROM \"peoplePositions\" "
+				+ "LEFT JOIN positions ON \"peoplePositions\".\"positionId\" = positions.id "
+				+ "WHERE \"personId\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "personId");
 	}
 	
 	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
@@ -54,6 +66,10 @@ public class PersonDao extends AnetBaseDao<Person> {
 	@Override
 	public List<Person> getByIds(List<Integer> ids) {
 		return idBatcher.getByIds(ids);
+	}
+
+	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<Integer> foreignKeys) {
+		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	public Person insert(Person p) {
@@ -209,5 +225,14 @@ public class PersonDao extends AnetBaseDao<Person> {
 		});
 		return true;	
 	}
-	
+
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Person person) {
+		return new ForeignKeyFetcher<PersonPositionHistory>()
+				.load(context, "person.personPositionHistory", person.getId())
+				.thenApply(l ->
+		{
+			return PersonPositionHistory.getDerivedHistory(l);
+		});
+	}
+
 }
