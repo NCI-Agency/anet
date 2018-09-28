@@ -32,6 +32,8 @@ class BaseAuthorizationGroupShow extends Page {
 			positions: null,
 			reports: null
 		}
+		this.positionsPageNum = 0
+		this.reportsPageNum = 0
 		setMessages(props,this.state)
 	}
 

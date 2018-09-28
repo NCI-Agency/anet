@@ -44,6 +44,7 @@ class CancelledEngagementReports extends Component {
     this.state = {
       graphDataByOrg: [],
       graphDataByReason: [],
+      reportsPageNum: 0,
       focusedOrg: '',
       focusedReason: '',
       updateChart: true,  // whether the chart needs to be updated

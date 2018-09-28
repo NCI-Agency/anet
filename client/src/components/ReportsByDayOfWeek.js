@@ -39,6 +39,7 @@ class ReportsByDayOfWeek extends Component {
 
     this.state = {
       graphDataByDayOfWeek: [],
+      reportsPageNum: 0,
       focusedDayOfWeek: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false

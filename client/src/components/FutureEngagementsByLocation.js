@@ -39,6 +39,7 @@ class FutureEngagementsByLocation extends Component {
 
     this.state = {
       graphData: {},
+      reportsPageNum: 0,
       focusedDate: '',
       focusedLocation: '',
       updateChart: true,  // whether the chart needs to be updated

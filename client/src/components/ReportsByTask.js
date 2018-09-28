@@ -41,6 +41,7 @@ class ReportsByTask extends Component {
 
     this.state = {
       graphDataByTask: [],
+      reportsPageNum: 0,
       focusedTask: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false

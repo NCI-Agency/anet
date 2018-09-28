@@ -29,7 +29,8 @@ class BaseLocationShow extends Page {
 	constructor(props) {
 		super(props)
 		this.state = {
-			location: new Location()
+			location: new Location(),
+			reportsPageNum: 0
 		}
 		setMessages(props,this.state)
 	}
