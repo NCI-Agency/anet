@@ -224,6 +224,7 @@ export default {
 		}
 
 		const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
+		const ranks = Settings.fields.person.ranks || []
 		filters.People = {
 			filters: {
 				Organization: {
@@ -256,6 +257,14 @@ export default {
 						valueKey: "name",
 						fields: Location.autocompleteQuery,
 						placeholder: "Filter by location...",
+					}
+				},
+				Rank: {
+					component: SelectSearchFilter,
+					props: {
+						queryKey: "rank",
+						values: ranks,
+						labels: ranks,
 					}
 				},
 				Nationality: {

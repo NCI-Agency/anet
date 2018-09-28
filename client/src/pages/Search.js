@@ -29,6 +29,8 @@ import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
+import SubNav from 'components/SubNav'
+
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -81,34 +83,6 @@ const SEARCH_CONFIG = {
 	}
 }
 
-class SearchNav extends Component {
-
-	constructor(props) {
-		super(props)
-
-		this.state = {
-			searchNavElem: document.getElementById('search-nav'),
-		}
-	}
-
-	componentDidMount() {
-		const elem = document.getElementById('search-nav')
-		if (elem !== this.state.searchNavElem) {
-			this.setState({searchNavElem: elem})
-		}
-	}
-
-	render() {
-		return (this.state.searchNavElem &&
-			ReactDOM.createPortal(
-				this.props.children,
-				this.state.searchNavElem
-			)
-		)
-	}
-
-}
-
 class Search extends Page {
 
 	static propTypes = {
@@ -121,6 +95,7 @@ class Search extends Page {
 		Object.assign(this.state, {
 			success: null,
 			error: null,
+			didSearch: false,
 			query: props.searchQuery.text || null,
 			queryType: null,
 			pageNum: {
@@ -183,9 +158,9 @@ class Search extends Page {
 	@autobind
 	_fetchDataCallback(parts) {
 		return GQL.run(parts).then(data => {
-			this.setState({success: null, error: null, results: data})
+			this.setState({success: null, error: null, results: data, didSearch: true})
 		}).catch(error =>
-			this.setState({success: null, error: error})
+			this.setState({success: null, error: error, didSearch: true})
 		)
 	}
 
@@ -215,7 +190,7 @@ class Search extends Page {
 
 		return (
 			<div>
-				<SearchNav>
+				<SubNav subnavElemId="search-nav">
 					<div><Button onClick={this.props.history.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
 					<Nav stacked bsStyle="pills" activeKey={queryType} onSelect={this.onSelectQueryType}>
 						<NavItem eventKey="everything" disabled={!numResults}>
@@ -253,7 +228,7 @@ class Search extends Page {
 							{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
 						</NavItem>
 					</Nav>
-				</SearchNav>
+				</SubNav>
 
 				<div className="pull-right">
 					{!noResults &&
@@ -270,7 +245,7 @@ class Search extends Page {
 
 				{this.state.query && <h2 className="only-show-for-print">Search query: '{this.state.query}'</h2>}
 
-				{noResults &&
+				{this.state.didSearch && noResults &&
 					<Alert bsStyle="warning">
 						<b>No search results found!</b>
 					</Alert>

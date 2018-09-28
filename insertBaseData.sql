@@ -50,16 +50,16 @@ DELETE FROM tags;
 DELETE FROM authorizationGroups;
 
 --Advisors
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
-	VALUES ('JACKSON, Jack', 0, 0, 'hunter+jack@dds.mil', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', 'jack', 'Germany', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
-	VALUES ('ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@dds.mil', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', 'United States of America', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
-	VALUES ('ERINSON, Erin', 0, 0, 'hunter+erin@dds.mil', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can release her own reports', 'erin', 'Australia', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
-	VALUES ('REINTON, Reina', 0, 0, 'hunter+reina@dds.mil', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, updatedAt)
-	VALUES ('DVISOR, A', 0, 0, 'hunter+aDvisor@dds.mil', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'Canada', 'FEMALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES ('JACKSON, Jack', 0, 0, 'hunter+jack@dds.mil', '123-456-78960', 'OF-9', 'Jack is an advisor in EF 2.1', 'jack', 'Germany', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES ('ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@dds.mil', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES ('ERINSON, Erin', 0, 0, 'hunter+erin@dds.mil', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can release her own reports', 'erin', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES ('REINTON, Reina', 0, 0, 'hunter+reina@dds.mil', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES ('DVISOR, A', 0, 0, 'hunter+aDvisor@dds.mil', '+444-44-4444', 'OF-2', 'A Divisor was born for this job', 'advisor', 'Canada', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Principals
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES ('STEVESON, Steve', 0, 1, 'hunter+steve@dds.mil', '+011-232-12324', 'LtCol', 'this is a sample person who could be a Principal!', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -68,25 +68,25 @@ INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biograp
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES ('TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@dds.mil', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Super Users
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, updatedAt)
-	VALUES ('BOBTOWN, Bob', 0, 0, 'hunter+bob@dds.mil', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, updatedAt)
-	VALUES ('HENDERSON, Henry', 0, 0, 'hunter+henry@dds.mil', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, createdAt, updatedAt)
-	VALUES ('JACOBSON, Jacob', 0, 0, 'hunter+jacob@dds.mil', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', 'Italy', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, createdAt, updatedAt)
-	VALUES ('BECCABON, Rebecca', 0, 0, 'hunter+rebecca@dds.mil', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', 'Germany', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, updatedAt)
-	VALUES ('ANDERSON, Andrew', 0, 0, 'hunter+andrew@dds.mil', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, endOfTourDate, createdAt, updatedAt)
+	VALUES ('BOBTOWN, Bob', 0, 0, 'hunter+bob@dds.mil', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, endOfTourDate, createdAt, updatedAt)
+	VALUES ('HENDERSON, Henry', 0, 0, 'hunter+henry@dds.mil', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, endOfTourDate, createdAt, updatedAt)
+	VALUES ('JACOBSON, Jacob', 0, 0, 'hunter+jacob@dds.mil', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', 'Italy', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, endOfTourDate, createdAt, updatedAt)
+	VALUES ('BECCABON, Rebecca', 0, 0, 'hunter+rebecca@dds.mil', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', 'Germany', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, endOfTourDate, updatedAt)
+	VALUES ('ANDERSON, Andrew', 0, 0, 'hunter+andrew@dds.mil', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Administrator
-INSERT INTO people (name, status, role, emailAddress, domainUsername, rank, country, biography, createdAt, updatedAt)
-	VALUES ('DMIN, Arthur', '0', '0', 'hunter+arthur@dds.mil', 'arthur', 'CIV', 'Albania', 'An administrator', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, domainUsername, rank, country, biography, endOfTourDate, createdAt, updatedAt)
+	VALUES ('DMIN, Arthur', '0', '0', 'hunter+arthur@dds.mil', 'arthur', 'CIV', 'Albania', 'An administrator', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 --People
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, createdAt, updatedAt)
 	VALUES ('HUNTMAN, Hunter', 0, 1, 'hunter+hunter@dds.mil', '+1-412-9314', 'CIV', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, updatedAt)
-	VALUES ('NICHOLSON, Nick', 0, 0, 'hunter+nick@dds.mil', '+1-202-7324', 'CIV', '', 'nick', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, endOfTourDate, createdAt, updatedAt)
+	VALUES ('NICHOLSON, Nick', 0, 0, 'hunter+nick@dds.mil', '+1-202-7324', 'CIV', '', 'nick', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (name, status, role, emailAddress, phoneNumber, rank, biography, createdAt, updatedAt)
 	VALUES ('SHARTON, Shardul', 1, 1, 'hunter+shardul@dds.mil', '+99-9999-9999', 'CIV', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 

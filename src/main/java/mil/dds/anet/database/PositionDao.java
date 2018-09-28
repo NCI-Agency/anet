@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -365,18 +364,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 				.load(context, "position.personPositionHistory", position.getId())
 				.thenApply(l ->
 		{
-			// Derive start and end times; assumes list is in chronological order
-			PersonPositionHistory pphPrev = null;
-			for (final PersonPositionHistory pph : l) {
-				pph.setStartTime(pph.getCreatedAt());
-				if (pphPrev != null) {
-					pphPrev.setEndTime(pph.getStartTime());
-				}
-				pphPrev = pph;
-			}
-			// Remove all null entries
-			l = l.stream().filter(pph -> (pph != null && pph.getPerson() != null)).collect(Collectors.toList());
-			return l;
+			return PersonPositionHistory.getDerivedHistory(l);
 		});
 	}
 
