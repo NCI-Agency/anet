@@ -40,6 +40,8 @@ describe('Edit position page', () => {
         expect(alertMessage).to.equal('Position saved')
 
         EditPosition.open()
+        EditPosition.form.waitForExist()
+        EditPosition.form.waitForVisible()
         EditPosition.typeAdvisorButton.waitForVisible()
         expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.include('active')
         EditPosition.typePrincipalButton.waitForVisible()
