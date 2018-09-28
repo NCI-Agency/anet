@@ -39,7 +39,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/authorizationGroups")
+@Path("/old-api/authorizationGroups")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class AuthorizationGroupResource {

@@ -45,7 +45,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
-@Path("/api/positions")
+@Path("/old-api/positions")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class PositionResource {

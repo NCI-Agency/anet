@@ -44,14 +44,14 @@ public class AdminResource {
 	@GET
 	@Timed
 	@GraphQLQuery(name="adminSettings")
-	@Path("/")
+	@Path("/old")
 	public List<AdminSetting> getAll() { 
 		return dao.getAllSettings();
 	}
 	
 	@POST
 	@Timed
-	@Path("/save")
+	@Path("/old-save")
 	@RolesAllowed("ADMINISTRATOR")
 	public Response saveAdminSettings(@Auth Person user, List<AdminSetting> settings) {
 		saveAdminSettingsCommon(user, settings);

@@ -37,7 +37,7 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/tasks")
+@Path("/old-api/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class TaskResource {

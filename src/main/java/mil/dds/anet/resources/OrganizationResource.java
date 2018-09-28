@@ -53,7 +53,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
-@Path("/api/organizations")
+@Path("/old-api/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class OrganizationResource {

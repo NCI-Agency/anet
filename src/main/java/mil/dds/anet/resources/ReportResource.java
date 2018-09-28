@@ -91,7 +91,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
-@Path("/api/reports")
+@Path("/old-api/reports")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class ReportResource {

@@ -35,7 +35,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/tags")
+@Path("/old-api/tags")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class TagResource {

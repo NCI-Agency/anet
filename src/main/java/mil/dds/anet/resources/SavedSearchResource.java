@@ -32,7 +32,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/savedSearches")
+@Path("/old-api/savedSearches")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class SavedSearchResource {
