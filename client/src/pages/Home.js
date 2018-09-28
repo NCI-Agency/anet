@@ -163,6 +163,10 @@ class BaseHome extends Page {
 			tileFour: reportList(query: $queryFour) { totalCount },
 			tileFive: reportList(query: $queryFive) { totalCount },
 			savedSearches: mySearches {id, name, objectType, query}`
+		queries.forEach(q => {
+			q.query.pageNum = 0
+			q.query.pageSize = 1  // we're only interested in the totalCount, so just get at most one report
+		})
 		let variables = {
 			queryOne: queries[0].query,
 			queryTwo: queries[1].query,

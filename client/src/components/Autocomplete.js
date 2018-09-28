@@ -171,7 +171,7 @@ export default class Autocomplete extends Component {
 				+ 'list { ' + this.props.fields + '}'
 				+ '}'
 		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-		let queryVars = {text: value.value + "*", pageSize: 25}
+		let queryVars = {text: value.value + "*", pageNum: 0, pageSize: 25}
 		if (this.props.queryParams) {
 			Object.assign(queryVars, this.props.queryParams)
 		}

@@ -137,19 +137,19 @@ class BaseRollupShow extends Page {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
 				rollupReportsQuery.principalOrgId = this.state.focusedOrg.id
 				rollupReportsQuery.includePrincipalOrgChildren = true
-				rollupGraphQuery += ' ,principalOrganizationId: $principalOrganizationId'
-				rollupGraphVariableDef += ' ,$principalOrganizationId: Int!'
+				rollupGraphQuery += ', principalOrganizationId: $principalOrganizationId'
+				rollupGraphVariableDef += ', $principalOrganizationId: Int!'
 				rollupGraphVariables.principalOrganizationId = this.state.focusedOrg.id
 			} else {
 				rollupReportsQuery.advisorOrgId = this.state.focusedOrg.id
 				rollupReportsQuery.includeAdvisorOrgChildren = true
 				rollupGraphQuery += ' ,advisorOrganizationId: $advisorOrganizationId'
-				rollupGraphVariableDef += ' ,$advisorOrganizationId: Int!'
+				rollupGraphVariableDef += ', $advisorOrganizationId: Int!'
 				rollupGraphVariables.advisorOrganizationId = this.state.focusedOrg.id
 			}
 		} else if (this.state.orgType) {
-			rollupGraphQuery += ' ,orgType: $orgType'
-			rollupGraphVariableDef += ' ,$orgType: OrganizationTypeInput!'
+			rollupGraphQuery += ', orgType: $orgType'
+			rollupGraphVariableDef += ', $orgType: OrganizationType!'
 			rollupGraphVariables.orgType = this.state.orgType
 		}
 		rollupGraphQuery += ') {org {id shortName} released cancelled}'
@@ -454,7 +454,7 @@ class BaseRollupShow extends Page {
 			toAddresses: r.to,
 			comment: email.comment
 		}
-		let graphql = 'emailRollup(startDate: $startDate,endDate: $endDate'
+		let graphql = 'emailRollup(startDate: $startDate, endDate: $endDate'
 		const variables = {
 				startDate: this.rollupStart.valueOf(),
 				endDate: this.rollupEnd.valueOf()
@@ -462,23 +462,23 @@ class BaseRollupShow extends Page {
 		let variableDef = '($startDate: Long!, $endDate: Long!'
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				graphql += ',principalOrganizationId: $principalOrganizationId'
+				graphql += ', principalOrganizationId: $principalOrganizationId'
 				variables.principalOrganizationId = this.state.focusedOrg.id
-				variableDef += ',$principalOrganizationId: Int!'
+				variableDef += ', $principalOrganizationId: Int!'
 			} else {
 				graphql += ',advisorOrganizationId: $advisorOrganizationId'
 				variables.advisorOrganizationId = this.state.focusedOrg.id
-				variableDef += ',$advisorOrganizationId: Int!'
+				variableDef += ', $advisorOrganizationId: Int!'
 			}
 		}
 		if (this.state.orgType) {
-			graphql += ',orgType: $orgType'
+			graphql += ', orgType: $orgType'
 			variables.orgType = this.state.orgType
-			variableDef += ',$orgType: OrganizationTypeInput!'
+			variableDef += ', $orgType: OrganizationType!'
 		}
-		graphql += ',email: $email)'
+		graphql += ', email: $email)'
 		variables.email = emailDelivery
-		variableDef += ',$email: AnetEmailInput!)'
+		variableDef += ', $email: AnetEmailInput!)'
 
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
