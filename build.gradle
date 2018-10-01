@@ -40,7 +40,7 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.3.5'
 	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.3.5'
 	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.3.5'
-	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1' // optional dependency of jdbi
+	compile group: 'org.antlr', name: 'stringtemplate', version: '4.0.2' // optional dependency of jdbi
 
 	compile 'org.xerial:sqlite-jdbc:3.19.3' //If using SQLite
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
