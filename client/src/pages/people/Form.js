@@ -26,6 +26,7 @@ import TriggerableConfirm from 'components/TriggerableConfirm'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
 import _isEmpty from 'lodash/isEmpty'
 
 class BasePersonForm extends ValidatableFormWrapper {
@@ -401,7 +402,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 				}
 			}).catch(error => {
 				this.setState({error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

@@ -22,6 +22,7 @@ import CALENDAR_ICON from 'resources/calendar.png'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
 
 const customEnumButtons = (list) => {
 	let buttons = []
@@ -191,7 +192,7 @@ class BaseTaskForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 }

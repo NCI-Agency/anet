@@ -38,6 +38,7 @@ import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 import ReactDOM from 'react-dom'
+import { jumpToTop } from 'components/Page'
 
 import AppContext from 'components/AppContext'
 import Scrollspy from 'react-scrollspy'
@@ -469,14 +470,14 @@ class BaseSearch extends Page {
 					error: null,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			}).catch(response => {
 				this.setState({
 					success: null,
 					error: response,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

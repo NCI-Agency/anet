@@ -12,6 +12,7 @@ import {BrowserRouter} from 'react-router-dom'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import rootReducer from './reducers'
+import { jumpToTop } from 'components/Page'
 
 import App from 'pages/App'
 
@@ -31,7 +32,3 @@ ReactDOM.render((
 		</BrowserRouter>
 	</Provider>
 ), document.getElementById('root'))
-
-function jumpToTop() {
-	window.scrollTo(0,0)
-}
