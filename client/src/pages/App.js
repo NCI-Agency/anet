@@ -43,6 +43,7 @@ class App extends Page {
 				position {
 					id, name, type, status, isApprover
 					organization { id, shortName , allDescendantOrgs { id }}
+					location {id, name}
 				}
 			}
 

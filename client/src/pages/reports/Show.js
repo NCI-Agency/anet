@@ -74,7 +74,7 @@ class BaseReportShow extends Page {
 
 				attendees {
 					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status, organization { id, shortName} }
+					position { id, name, status, organization { id, shortName}, location {id, name} }
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -263,6 +263,7 @@ class BaseReportShow extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Location</th>
 									<th>Org</th>
 								</tr>
 							</thead>
@@ -271,7 +272,7 @@ class BaseReportShow extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={5}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -451,6 +452,7 @@ class BaseReportShow extends Page {
 				<LinkTo person={person} />
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}

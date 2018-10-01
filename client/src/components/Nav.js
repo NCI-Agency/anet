@@ -105,9 +105,9 @@ class BaseNav extends Component {
 					<NavItem id="my-organization">My organization <br /><small>{myOrg.shortName}</small></NavItem>
 				</Link>}
 
-				{inOrg && orgId === myOrgId && orgSubNav}
+				<BSNav id="myorg-nav"></BSNav>
 
-				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="organizations" active={inOrg && orgId !== myOrgId}>
+				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="advisor-organizations" active={inOrg && orgId !== myOrgId}>
 					{Organization.map(organizations, org =>
 						<LinkTo organization={org} componentClass={Link} key={org.id}>
 							<MenuItem>{org.shortName}</MenuItem>
@@ -115,7 +115,7 @@ class BaseNav extends Component {
 					)}
 				</NavDropdown>
 
-				{inOrg && orgId !== myOrgId && orgSubNav}
+				<BSNav id="org-nav"></BSNav>
 
 				<Link to="/rollup">
 					<NavItem>Daily rollup</NavItem>
