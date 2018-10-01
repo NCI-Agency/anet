@@ -29,6 +29,7 @@ if (file('localSettings.gradle').exists()) {
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
+	maven { url "https://repo.spring.io/plugins-release" }
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -289,7 +290,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:3.2.3'
+		classpath 'com.bmuschko:gradle-docker-plugin:3.6.1'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
 	}
