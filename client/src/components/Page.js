@@ -129,7 +129,11 @@ export default class Page extends Component {
 		} else {
 			// Location always has a new key. In order to check whether the location
 			// really changed filter out the key.
-			const locationFilterProps = ['key']
+			// When location has a changed has we do not need to reload the data.
+			// We do not make use of the location state, therefore we ignore it for now
+			// as otherwise a change from no state to empty state would result in
+			// reloading the data and we do not want that.
+			const locationFilterProps = ['key', 'hash', 'state']
 			const nextPropsFilteredLocation = Object.without(this.props.location, ...locationFilterProps)
 			const propsFilteredLocation = Object.without(prevProps.location, ...locationFilterProps)
 			if (!_isEqualWith(propsFilteredLocation, nextPropsFilteredLocation, utils.treatFunctionsAsEqual)) {
