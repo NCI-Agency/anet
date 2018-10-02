@@ -422,7 +422,7 @@ class BaseReportShow extends Page {
 				})
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 
