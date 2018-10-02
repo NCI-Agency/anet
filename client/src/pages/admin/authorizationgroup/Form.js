@@ -9,6 +9,7 @@ import Messages from 'components/Messages'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import PositionsSelector from 'components/PositionsSelector'
+import { jumpToTop } from 'components/Page'
 
 import API from 'api'
 import {AuthorizationGroup, Position} from 'models'
@@ -115,7 +116,7 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

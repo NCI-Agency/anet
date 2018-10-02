@@ -18,9 +18,11 @@ export default class SavedSearchTable extends Component {
 		this.state = {
 			reports: []
 		}
+	}
 
-		if (props.search) {
-			this.runSearch(props.search)
+	componentDidMount() {
+		if (this.props.search) {
+			this.runSearch(this.props.search)
 		}
 	}
 
@@ -32,7 +34,7 @@ export default class SavedSearchTable extends Component {
 
 	@autobind
 	runSearch(search) {
-		const objType = SEARCH_OBJECT_TYPES[search.objectType]
+		const objType = SEARCH_OBJECT_TYPES[search.objectType] || SEARCH_OBJECT_TYPES.REPORTS
 		if (objType !== SEARCH_OBJECT_TYPES.REPORTS) {
 			// This table only shows reports
 			this.setState({reports: {list: []}})

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
@@ -77,11 +77,11 @@ class BaseAdminIndex extends Page {
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				this.setState({success: 'Admin settings saved', error: null})
-				window.scrollTo(0, 0)
+				jumpToTop()
 				this.props.loadAppData()
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 				console.error(error)
 			})
 	}

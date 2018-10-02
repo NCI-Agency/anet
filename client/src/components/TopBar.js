@@ -21,39 +21,38 @@ const visible = {
 class BaseTopBar extends Component {
 	static propTypes = {
 		currentUser: PropTypes.instanceOf(Person),
-		appSettings: PropTypes.object,
+        appSettings: PropTypes.object,
+        topbarHeight: PropTypes.func.isRequired,
 	}
 
     constructor(props) {
         super(props)
-        this.state = { 
-            bodyPaddingTop: 0,
-            bannerVisibility: false
+        this.state = {
+            bannerVisibility: false,
+            height: 0,
         }
-        this.updateBodyPaddingTop = this.updateBodyPaddingTop.bind(this)
+        this.topbarDiv = React.createRef()
     }
 
     componentDidMount() {
-        this.updateBodyPaddingTop()
-        window.addEventListener("resize", this.updateBodyPaddingTop)
+        this.handleTopbarHeight()
+        this.updateBannerVisibility()
+        window.addEventListener("resize", this.handleTopbarHeight)
+    }
+
+    componentDidUpdate() {
+        this.handleTopbarHeight()
         this.updateBannerVisibility()
     }
 
     componentWillUnmount() {
-        window.removeEventListener("resize", this.updateBodyPaddingTop)
+        window.removeEventListener("resize", this.handleTopbarHeight)
     }
 
-    componentDidUpdate() {
-        this.updateBodyPaddingTop()
-        this.updateBannerVisibility()
-    }
-
-    updateBodyPaddingTop() {
-        let topbarPaddingHeight = document.getElementById('topbar').offsetHeight + 20
-        if (this.state.bodyPaddingTop !== topbarPaddingHeight){
-            document.body.style.paddingTop =`${topbarPaddingHeight}px` 
-            this.props.updateTopbarOffset(topbarPaddingHeight)
-            this.setState({ bodyPaddingTop: topbarPaddingHeight })
+    handleTopbarHeight = () => {
+        const height = this.topbarDiv.current.clientHeight
+        if(height !== undefined && height !== this.state.height) {
+            this.setState({ height }, () => this.props.topbarHeight(this.state.height))
         }
     }
 
@@ -69,7 +68,7 @@ class BaseTopBar extends Component {
         }
         if (visibilitySetting === visible.USERS_AND_SUPER_USERS && (currentUser || currentUser.isSuperUser())) {
             output = true
-        } 
+        }
         if (this.state.bannerVisibility !== output) {
             this.setState({ bannerVisibility: output})
         }
@@ -86,11 +85,16 @@ class BaseTopBar extends Component {
 
     render() {
         return (
-            <div id="topbar" className="navbar navbar-fixed-top">
-                {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
-                <GeneralBanner options={this.bannerOptions()} />
-                <SecurityBanner location={this.props.location} />
-                <Header minimalHeader={this.props.minimalHeader} />
+            <div
+                style={{ flex:'0 0 auto', zIndex: 100}}
+                ref={this.topbarDiv}
+            >
+                <div>
+                    {this.props.currentUser && this.props.position && this.props.position.id === 0 && !this.props.isNewUser() && <NoPositionBanner />}
+                    <GeneralBanner options={this.bannerOptions()} />
+                    <SecurityBanner location={this.props.location} />
+                    <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
+                </div>
             </div>
         )
     }

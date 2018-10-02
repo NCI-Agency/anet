@@ -9,6 +9,7 @@ import Settings from 'Settings'
 
 import {Position, Person} from 'models'
 import AppContext from 'components/AppContext'
+import {Element} from 'react-scroll'
 
 class BaseOrganizationLaydown extends Component {
 	static propTypes = {
@@ -35,7 +36,7 @@ class BaseOrganizationLaydown extends Component {
 		const positionsNeedingAttention = org.positions.filter(position => !position.person )
 		const supportedPositions = org.positions.filter(position => positionsNeedingAttention.indexOf(position) === -1)
 
-		return <div id="laydown" data-jumptarget>
+		return <Element name="laydown">
 			<Fieldset id="supportedPositions" title="Supported positions" action={<div>
 				{isSuperUser && <LinkTo position={Position.pathForNew({organizationId: org.id})} button>
 					Create position
@@ -55,7 +56,7 @@ class BaseOrganizationLaydown extends Component {
 				{this.renderPositionTable(positionsNeedingAttention)}
 				{positionsNeedingAttention.length === 0 && <em>There are no vacant positions</em>}
 			</Fieldset>
-		</div>
+		</Element>
 	}
 
 	renderPositionTable(positions) {

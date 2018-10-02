@@ -34,6 +34,7 @@ import NavigationWarning from 'components/NavigationWarning'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
+import { jumpToTop } from 'components/Page'
 
 class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -604,7 +605,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 			}).catch(error => {
 				// FIXME: should disableOnSubmit be set here?
 				this.setState({success: null, error: error, disableOnSubmit: false})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 
