@@ -2,6 +2,8 @@ package mil.dds.anet.database;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
@@ -19,6 +21,7 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class OrganizationDao extends AnetBaseDao<Organization> {
 
@@ -27,11 +30,17 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 	
 	private final IdBatcher<Organization> idBatcher;
+	private final ForeignKeyBatcher<Organization> personIdBatcher;
 
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
 		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
+
+		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", " + ORGANIZATION_FIELDS
+					+ "FROM organizations, positions WHERE "
+					+ "positions.\"currentPersonUuid\" IN ( %1$s ) AND positions.\"organizationUuid\" = organizations.uuid";
+		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, new OrganizationMapper(), "personUuid");
 	}
 	
 	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
@@ -51,6 +60,15 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	@Override
 	public List<Organization> getByIds(List<String> uuids) {
 		return idBatcher.getByIds(uuids);
+	}
+
+	public List<List<Organization>> getOrganizations(List<String> foreignKeys) {
+		return personIdBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	public CompletableFuture<List<Organization>> getOrganizationsForPerson(Map<String, Object> context, String personUuid) {
+		return new ForeignKeyFetcher<Organization>()
+				.load(context, "person.organizations", personUuid);
 	}
 
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
@@ -119,5 +137,5 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher()
 				.runSearch(query, dbHandle);
-	} 
+	}
 }

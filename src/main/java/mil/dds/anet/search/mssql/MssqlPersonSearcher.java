@@ -96,6 +96,11 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 			}
 		}
 
+		if (query.getRank() != null && query.getRank().trim().length() > 0) {
+			whereClauses.add(" people.rank = :rank ");
+			sqlArgs.put("rank", query.getRank());
+		}
+
 		if (query.getCountry() != null && query.getCountry().trim().length() > 0) {
 			whereClauses.add(" people.country = :country ");
 			sqlArgs.put("country", query.getCountry());

@@ -1,21 +1,27 @@
 package mil.dds.anet.database;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ApprovalActionMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 
 	Handle dbHandle;
-	
+	private final ForeignKeyBatcher<ApprovalAction> reportIdBatcher;
+
 	public ApprovalActionDao(Handle db) { 
 		this.dbHandle = db;
+		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"approvalActions\" "
+				+ "WHERE \"reportUuid\" IN ( %1$s ) ORDER BY \"createdAt\" ASC";
+		this.reportIdBatcher = new ForeignKeyBatcher<ApprovalAction>(db, reportIdBatcherSql, new ApprovalActionMapper(), "reportUuid");
 	}
 	
 	public ApprovalAction insert(ApprovalAction action) {
@@ -36,12 +42,9 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 * Returns all approval actions ever taken for a particular report. 
 	 * Ordered by their date ascending (earliest to most recent). 
 	 */
-	public List<ApprovalAction> getActionsForReport(String reportUuid) {
-		Query<ApprovalAction> query = dbHandle.createQuery("/* getReportApprovals */ SELECT * FROM \"approvalActions\" "
-				+ "WHERE \"reportUuid\" = :reportUuid ORDER BY \"createdAt\" ASC")
-			.bind("reportUuid", reportUuid)
-			.map(new ApprovalActionMapper());
-		return query.list();
+	public CompletableFuture<List<ApprovalAction>> getActionsForReport(Map<String, Object> context, String reportUuid) {
+		return new ForeignKeyFetcher<ApprovalAction>()
+				.load(context, "report.approvalActions", reportUuid);
 	}
 
 	/**
@@ -76,5 +79,9 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	@Override
 	public int update(ApprovalAction obj) {
 		throw new UnsupportedOperationException();
+	}
+
+	public List<List<ApprovalAction>> getApprovalActions(List<String> foreignKeys) {
+		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 }

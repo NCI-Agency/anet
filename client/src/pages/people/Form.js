@@ -26,6 +26,8 @@ import TriggerableConfirm from 'components/TriggerableConfirm'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
+import _isEmpty from 'lodash/isEmpty'
 
 class BasePersonForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -94,7 +96,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
-		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && person.domainUsername
+		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
 		const ranks = Settings.fields.person.ranks || []
 
 		const countries = this.countries(person)
@@ -299,9 +301,9 @@ class BasePersonForm extends ValidatableFormWrapper {
 					{this.renderCountrySelectOptions(countries)}
 				</RequiredField>
 
-				<Form.Field id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON}>
+				<RequiredField  id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON} required={isAdvisor} addOnBlur={true}>
 					<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
-				</Form.Field>
+				</RequiredField>
 
 				<Form.Field id="biography" componentClass={TextEditor} className="biography" />
 			</Fieldset>
@@ -400,7 +402,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 				}
 			}).catch(error => {
 				this.setState({error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

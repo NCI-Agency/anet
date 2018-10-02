@@ -34,7 +34,7 @@ test('Draft and submit a report', async t => {
         'Clicking an attendee autocomplete suggestion empties the autocomplete field.'
     )
 
-    let [$principalPrimaryCheckbox, $principalName, $principalPosition, $principalOrg] = 
+    let [$principalPrimaryCheckbox, $principalName, $principalPosition, $principalLocation, $principalOrg] =
         await $$('#attendeesTable tbody tr:last-child td')
 
     t.is(
@@ -274,7 +274,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     let $attendeesRows = await $$('#attendeesTable tbody tr')
     t.is($attendeesRows.length, 2, 'Attendees table starts with 2 body rows')
 
-    let [$advisorPrimaryCheckbox, $advisorName, $advisorPosition, $advisorOrg] = 
+    let [$advisorPrimaryCheckbox, $advisorName, $advisorPosition, $advisorLocation, $advisorOrg] =
         await $$('#attendeesTable tbody tr:first-child td')
     
     t.is(

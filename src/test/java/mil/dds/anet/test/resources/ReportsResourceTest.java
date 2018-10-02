@@ -56,7 +56,6 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
-import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.test.TestData;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PersonTest;
@@ -243,7 +242,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(pending.getList().size()).isGreaterThan(0);
 
 		//Check on Report status for who needs to approve
-		List<ApprovalAction> approvalStatus = returned.loadApprovalStatus();
+		List<ApprovalAction> approvalStatus = returned.loadApprovalStatus(context).get();
 		assertThat(approvalStatus.size()).isEqualTo(2);
 		ApprovalAction approvalAction = approvalStatus.get(0);
 		assertThat(approvalAction.getPerson()).isNull(); //Because this hasn't been approved yet.
@@ -291,7 +290,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.getApprovalStep()).isNull();
 
 		//check on report status to see that it got approved.
-		approvalStatus = returned.loadApprovalStatus();
+		approvalStatus = returned.loadApprovalStatus(context).get();
 		assertThat(approvalStatus.size()).isEqualTo(2);
 		approvalAction = approvalStatus.get(0);
 		assertThat(approvalAction.getPerson().getUuid()).isEqualTo(approver1.getUuid());
@@ -340,7 +339,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		Organization updatedOrg = httpQuery("/api/organizations/" + advisorOrg.getUuid(), admin).get(Organization.class);
 		assertThat(updatedOrg).isNotNull();
-		assertThat(updatedOrg.loadApprovalSteps()).hasSize(0);
+		assertThat(updatedOrg.loadApprovalSteps(context).get()).hasSize(0);
 	}
 
 	public static Comment commentFromText(String string) {
@@ -350,7 +349,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 	}
 
 	@Test
-	public void testDefaultApprovalFlow() {
+	public void testDefaultApprovalFlow() throws NumberFormatException, InterruptedException, ExecutionException {
 		final Person jack = getJackJackson();
 		final Person roger = getRogerRogwell();
 
@@ -389,7 +388,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
 
 		//Find the default ApprovalSteps
-		String defaultOrgUuid = AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
+		String defaultOrgUuid = AnetObjectEngine.getInstance().getDefaultOrgUuid();
 		assertThat(defaultOrgUuid).isNotNull();
 		List<ApprovalStep> steps = httpQuery("/api/approvalSteps/byOrganization?orgUuid=" + defaultOrgUuid, jack)
 				.get(new GenericType<List<ApprovalStep>>() {});

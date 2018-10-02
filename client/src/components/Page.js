@@ -11,6 +11,7 @@ import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
+import { animateScroll, Link } from 'react-scroll'
 import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -36,6 +37,20 @@ export const propTypes = {
 	}),
 	clearSearchQuery: PropTypes.func.isRequired,
 }
+
+export const AnchorLink = function(props) {
+	const {to, ...remainingProps} = props
+	return <Link to={to} smooth={true} duration={500} containerId="main-viewport" {...remainingProps}>{props.children}</Link>
+}
+
+
+export function jumpToTop() {
+	animateScroll.scrollToTop({
+		duration: 500,
+		delay: 100,
+		smooth: "easeInOutQuint",
+		containerId: "main-viewport"})
+	}
 
 export default class Page extends Component {
 
@@ -129,7 +144,11 @@ export default class Page extends Component {
 		} else {
 			// Location always has a new key. In order to check whether the location
 			// really changed filter out the key.
-			const locationFilterProps = ['key']
+			// When location has a changed has we do not need to reload the data.
+			// We do not make use of the location state, therefore we ignore it for now
+			// as otherwise a change from no state to empty state would result in
+			// reloading the data and we do not want that.
+			const locationFilterProps = ['key', 'hash', 'state']
 			const nextPropsFilteredLocation = Object.without(this.props.location, ...locationFilterProps)
 			const propsFilteredLocation = Object.without(prevProps.location, ...locationFilterProps)
 			if (!_isEqualWith(propsFilteredLocation, nextPropsFilteredLocation, utils.treatFunctionsAsEqual)) {
@@ -139,7 +158,6 @@ export default class Page extends Component {
 	}
 
 	componentDidMount() {
-		window.scrollTo(0,0)
 		setMessages(this.props, this.state)
 		this.loadData()
 	}

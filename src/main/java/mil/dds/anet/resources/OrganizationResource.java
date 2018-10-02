@@ -166,7 +166,7 @@ public class OrganizationResource {
 							validateApprovalStep(step);
 							step.setAdvisorOrganizationUuid(org.getUuid());
 						}
-						List<ApprovalStep> existingSteps = existing.loadApprovalSteps();
+						List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).get();
 
 						Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
 								newStep -> engine.getApprovalStepDao().insert(newStep),

@@ -154,13 +154,21 @@ public class ReportResource {
 
 		Person primaryAdvisor = findPrimaryAttendee(r, Role.ADVISOR);
 		if (r.getAdvisorOrg() == null && primaryAdvisor != null) {
-			logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
-			r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
+			try {
+				logger.debug("Setting advisor org for new report based on {}", primaryAdvisor);
+				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor).get());
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Organization for PrimaryAdvisor", e);
+			}
 		}
 		Person primaryPrincipal = findPrimaryAttendee(r, Role.PRINCIPAL);
 		if (r.getPrincipalOrg() == null && primaryPrincipal != null) {
-			logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
-			r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
+			try {
+				logger.debug("Setting principal org for new report based on {}", primaryPrincipal);
+				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal).get());
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Organization for PrimaryPrincipal", e);
+			}
 		}
 
 		if (shouldBeFuture(r)) {
@@ -188,7 +196,7 @@ public class ReportResource {
 		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
 
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
-			boolean canApprove = engine.canUserApproveStep(editor.getUuid(), existing.getApprovalStep().getUuid());
+			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(), existing.getApprovalStep().getUuid());
 			if (canApprove) {
 				AnetEmail email = new AnetEmail();
 				ReportEditedEmail action = new ReportEditedEmail();
@@ -248,7 +256,7 @@ public class ReportResource {
 		try {
 			exstingPrimaryAdvisor = existing.loadPrimaryAdvisor(engine.getContext()).get();
 			if (Utils.uuidEqual(primaryAdvisor, exstingPrimaryAdvisor) == false || existing.getAdvisorOrg() == null) {
-				r.setAdvisorOrg(engine.getOrganizationForPerson(primaryAdvisor));
+				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor).get());
 			} else {
 				r.setAdvisorOrg(existing.getAdvisorOrg());
 			}
@@ -261,7 +269,7 @@ public class ReportResource {
 		try {
 			existingPrimaryPrincipal = existing.loadPrimaryPrincipal(engine.getContext()).get();
 			if (Utils.uuidEqual(primaryPrincipal, existingPrimaryPrincipal) ==  false || existing.getPrincipalOrg() == null) {
-				r.setPrincipalOrg(engine.getOrganizationForPerson(primaryPrincipal));
+				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal).get());
 			} else {
 				r.setPrincipalOrg(existing.getPrincipalOrg());
 			}
@@ -387,7 +395,7 @@ public class ReportResource {
 				report.setState(ReportState.DRAFT);
 				report.setApprovalStep(null);
 			} else {
-				boolean canApprove = engine.canUserApproveStep(editor.getUuid(), report.getApprovalStep().getUuid());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(), report.getApprovalStep().getUuid());
 				if (!canApprove) {
 					throw new WebApplicationException(permError + "Must be the author or the current approver", Status.FORBIDDEN);
 				}
@@ -419,7 +427,7 @@ public class ReportResource {
 				if (advisor == null) {
 					throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
 				}
-				r.setAdvisorOrg(engine.getOrganizationForPerson(advisor));
+				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), advisor).get());
 			} catch (InterruptedException | ExecutionException e) {
 				throw new WebApplicationException("failed to load PrimaryAdvisor", e);
 			}
@@ -431,7 +439,7 @@ public class ReportResource {
 				if (principal == null) {
 					throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
 				}
-				r.setPrincipalOrg(engine.getOrganizationForPerson(principal));
+				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), principal).get());
 			} catch (InterruptedException | ExecutionException e) {
 				throw new WebApplicationException("failed to load PrimaryPrincipal", e);
 			}
@@ -443,14 +451,25 @@ public class ReportResource {
 			throw new WebApplicationException("You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
 		}
 
-		Organization org = engine.getOrganizationForPerson(r.getAuthor());
-		if (org == null) {
-			// Author missing Org, use the Default Approval Workflow
-			org = Organization.createWithUuid(
-				engine.getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION));
+		final String orgUuid;
+		try {
+			final Organization org = engine.getOrganizationForPerson(engine.getContext(), r.getAuthor()).get();
+			if (org == null) {
+				// Author missing Org, use the Default Approval Workflow
+				orgUuid = engine.getDefaultOrgUuid();
+			} else {
+				orgUuid = org.getUuid();
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Organization for Author", e);
 		}
-		List<ApprovalStep> steps = engine.getApprovalStepsForOrg(org);
-		throwExceptionNoApprovalSteps(steps);
+		List<ApprovalStep> steps = null;
+		try {
+			steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+			throwExceptionNoApprovalSteps(steps);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Organization for Author", e);
+		}
 
 		//Push the report into the first step of this workflow
 		r.setApprovalStep(steps.get(0));
@@ -458,7 +477,7 @@ public class ReportResource {
 		final int numRows = engine.executeInTransaction(dao::update, r, user);
 		sendApprovalNeededEmail(r);
 		logger.info("Putting report {} into step {} because of org {} on author {}",
-				r.getUuid(), steps.get(0).getUuid(), org.getUuid(), r.getAuthor().getUuid());
+				r.getUuid(), steps.get(0).getUuid(), orgUuid, r.getAuthor().getUuid());
 
 		if (numRows != 1) {
 			throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
@@ -531,7 +550,7 @@ public class ReportResource {
 				}
 
 				//Verify that this user can approve for this step.
-				boolean canApprove = engine.canUserApproveStep(approver.getUuid(), step.getUuid());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
 					logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
@@ -605,7 +624,7 @@ public class ReportResource {
 				}
 
 				//Verify that this user can reject for this step.
-				boolean canApprove = engine.canUserApproveStep(approver.getUuid(), step.getUuid());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
 					logger.info("User UUID {} cannot reject report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);

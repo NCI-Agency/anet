@@ -12,6 +12,7 @@ import javax.ws.rs.WebApplicationException;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.IdFetcher;
 
@@ -99,6 +100,6 @@ public class ApprovalAction extends AbstractAnetBean {
 	
 	@Override
 	public String toString() { 
-		return String.format("[ApprovalAction: step:%s, type:%s, person:%s, report:%s]", step.getUuid(), type, person.getUuid(), report.getUuid());
+		return String.format("[ApprovalAction: step:%s, type:%s, person:%s, report:%s]", DaoUtils.getUuid(step), type, DaoUtils.getUuid(person), DaoUtils.getUuid(report));
 	}
 }

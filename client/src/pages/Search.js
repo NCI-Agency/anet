@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge} from 'react-bootstrap'
@@ -29,12 +30,18 @@ import TASKS_ICON from 'resources/tasks.png'
 import POSITIONS_ICON from 'resources/positions.png'
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
+import SubNav from 'components/SubNav'
+
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 import ReactDOM from 'react-dom'
+import { jumpToTop } from 'components/Page'
+
+import AppContext from 'components/AppContext'
+import Scrollspy from 'react-scrollspy'
 
 const SEARCH_CONFIG = {
 	reports : {
@@ -81,38 +88,11 @@ const SEARCH_CONFIG = {
 	}
 }
 
-class SearchNav extends Component {
-
-	constructor(props) {
-		super(props)
-
-		this.state = {
-			searchNavElem: document.getElementById('search-nav'),
-		}
-	}
-
-	componentDidMount() {
-		const elem = document.getElementById('search-nav')
-		if (elem !== this.state.searchNavElem) {
-			this.setState({searchNavElem: elem})
-		}
-	}
-
-	render() {
-		return (this.state.searchNavElem &&
-			ReactDOM.createPortal(
-				this.props.children,
-				this.state.searchNavElem
-			)
-		)
-	}
-
-}
-
-class Search extends Page {
+class BaseSearch extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
+		scrollspyOffset: PropTypes.number,
 	}
 
 	constructor(props) {
@@ -120,7 +100,6 @@ class Search extends Page {
 
 		Object.assign(this.state, {
 			query: props.searchQuery.text || null,
-			queryType: null,
 			pageNum: {
 				reports: 0,
 				people: 0,
@@ -140,6 +119,7 @@ class Search extends Page {
 			},
 			error: null,
 			success: null,
+			didSearch: false,
 		})
 	}
 
@@ -183,9 +163,9 @@ class Search extends Page {
 	@autobind
 	_fetchDataCallback(parts) {
 		return GQL.run(parts).then(data => {
-			this.setState({success: null, error: null, results: data})
+			this.setState({success: null, error: null, results: data, didSearch: true})
 		}).catch(response =>
-			this.setState({success: null, error: response})
+			this.setState({success: null, error: response, didSearch: true})
 		)
 	}
 
@@ -209,51 +189,47 @@ class Search extends Page {
 		const noResults = numResults === 0
 
 		const qs = utils.parseQueryString(this.props.location.search)
-		const queryType = this.state.queryType || 'everything'
 
 		const taskShortLabel = Settings.fields.task.shortLabel
-
 		return (
 			<div>
-				<SearchNav>
+				<SubNav subnavElemId="search-nav">
 					<div><Button onClick={this.props.history.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
-					<Nav stacked bsStyle="pills" activeKey={queryType} onSelect={this.onSelectQueryType}>
-						<NavItem eventKey="everything" disabled={!numResults}>
-							<img src={EVERYTHING_ICON} alt="" /> Everything
-							{numResults > 0 && <Badge pullRight>{numResults}</Badge>}
-						</NavItem>
+					<Nav stacked bsStyle="pills">
+						<Scrollspy className="nav" currentClassName="active" offset={this.props.scrollspyOffset}
+							items={ ['organizations', 'people', 'positions', 'tasks', 'locations', 'reports'] }>
+							<NavItem href="#organizations" disabled={!numOrganizations}>
+								<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
+								{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
+							</NavItem>
 
-						<NavItem eventKey="organizations" disabled={!numOrganizations}>
-							<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
-							{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
-						</NavItem>
+							<NavItem href="#people" disabled={!numPeople}>
+								<img src={PEOPLE_ICON} alt="" /> People
+								{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
+							</NavItem>
 
-						<NavItem eventKey="people" disabled={!numPeople}>
-							<img src={PEOPLE_ICON} alt="" /> People
-							{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
-						</NavItem>
+							<NavItem href="#positions" disabled={!numPositions}>
+								<img src={POSITIONS_ICON} alt="" /> Positions
+								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
+							</NavItem>
 
-						<NavItem eventKey="positions" disabled={!numPositions}>
-							<img src={POSITIONS_ICON} alt="" /> Positions
-							{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
-						</NavItem>
+							<NavItem href="#tasks" disabled={!numTasks}>
+								<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
+								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
+							</NavItem>
 
-						<NavItem eventKey="tasks" disabled={!numTasks}>
-							<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
-							{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
-						</NavItem>
+							<NavItem href="#locations" disabled={!numLocations}>
+								<img src={LOCATIONS_ICON} alt="" /> Locations
+								{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
+							</NavItem>
 
-						<NavItem eventKey="locations" disabled={!numLocations}>
-							<img src={LOCATIONS_ICON} alt="" /> Locations
-							{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
-						</NavItem>
-
-						<NavItem eventKey="reports" disabled={!numReports}>
-							<img src={REPORTS_ICON} alt="" /> Reports
-							{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
-						</NavItem>
+							<NavItem href="#reports" disabled={!numReports}>
+								<img src={REPORTS_ICON} alt="" /> Reports
+								{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
+							</NavItem>
+						</Scrollspy>
 					</Nav>
-				</SearchNav>
+				</SubNav>
 
 				<div className="pull-right">
 					{!noResults &&
@@ -270,43 +246,43 @@ class Search extends Page {
 
 				{this.state.query && <h2 className="only-show-for-print">Search query: '{this.state.query}'</h2>}
 
-				{noResults &&
+				{this.state.didSearch && noResults &&
 					<Alert bsStyle="warning">
 						<b>No search results found!</b>
 					</Alert>
 				}
 
-				{numOrganizations > 0 && (queryType === 'everything' || queryType === 'organizations') &&
-					<Fieldset title="Organizations">
+				{numOrganizations > 0 &&
+					<Fieldset id="organizations" title="Organizations">
 						{this.renderOrgs()}
 					</Fieldset>
 				}
 
-				{numPeople > 0 && (queryType === 'everything' || queryType === 'people') &&
-					<Fieldset title="People" >
+				{numPeople > 0 &&
+					<Fieldset id="people" title="People" >
 						{this.renderPeople()}
 					</Fieldset>
 				}
 
-				{numPositions > 0 && (queryType === 'everything' || queryType === 'positions') &&
-					<Fieldset title="Positions">
+				{numPositions > 0 &&
+					<Fieldset id="positions" title="Positions">
 						{this.renderPositions()}
 					</Fieldset>
 				}
 
-				{numTasks > 0 && (queryType === 'everything' || queryType === 'tasks') &&
-					<Fieldset title={pluralize(taskShortLabel)}>
+				{numTasks > 0 &&
+					<Fieldset id="tasks" title={pluralize(taskShortLabel)}>
 						{this.renderTasks()}
 					</Fieldset>
 				}
 
-				{numLocations > 0 && (queryType === 'everything' || queryType === 'locations') &&
-					<Fieldset title="Locations">
+				{numLocations > 0 &&
+					<Fieldset id="locations" title="Locations">
 						{this.renderLocations()}
 					</Fieldset>
 				}
-				{numReports > 0 && (queryType === 'everything' || queryType === 'reports') &&
-					<Fieldset title="Reports">
+				{numReports > 0 &&
+					<Fieldset id="reports" title="Reports">
 						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} />
 					</Fieldset>
 				}
@@ -494,14 +470,14 @@ class Search extends Page {
 					error: null,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			}).catch(response => {
 				this.setState({
 					success: null,
 					error: response,
 					saveSearch: {show: false}
 				})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 
@@ -528,16 +504,18 @@ class Search extends Page {
 	closeSaveModal() {
 		this.setState({saveSearch: {show: false}})
 	}
-
-	@autobind
-	onSelectQueryType(type) {
-		this.setState({queryType: type}, () => this.loadData())
-	}
-
 }
 
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery,
 })
+
+const Search = (props) => (
+	<AppContext.Consumer>
+		{context =>
+			<BaseSearch scrollspyOffset={context.scrollspyOffset} {...props} />
+		}
+	</AppContext.Consumer>
+)
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Search))

@@ -1,6 +1,8 @@
 package mil.dds.anet.database;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
@@ -8,14 +10,15 @@ import org.skife.jdbi.v2.TransactionCallback;
 import org.skife.jdbi.v2.TransactionStatus;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class PersonDao extends AnetBaseDao<Person> {
 
@@ -29,11 +32,19 @@ public class PersonDao extends AnetBaseDao<Person> {
 	public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(tableName, fields, false);
 
 	private final IdBatcher<Person> idBatcher;
+	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
 
 	public PersonDao(Handle h) { 
 		super(h, "Person", tableName, PERSON_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, new PersonMapper());
+		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT \"peoplePositions\".\"positionUuid\" AS \"positionUuid\", "
+				+ "\"peoplePositions\".\"personUuid\" AS \"personUuid\", "
+				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
+				+ PositionDao.POSITIONS_FIELDS + " FROM \"peoplePositions\" "
+				+ "LEFT JOIN positions ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
+				+ "WHERE \"personUuid\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "personUuid");
 	}
 	
 	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
@@ -52,6 +63,10 @@ public class PersonDao extends AnetBaseDao<Person> {
 	@Override
 	public List<Person> getByIds(List<String> uuids) {
 		return idBatcher.getByIds(uuids);
+	}
+
+	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
+		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	public Person insert(Person p) {
@@ -103,30 +118,6 @@ public class PersonDao extends AnetBaseDao<Person> {
 	public AnetBeanList<Person> search(PersonSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPersonSearcher().runSearch(query, dbHandle);
-	}
-	
-	public Organization getOrganizationForPerson(String personUuid) {
-		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql = "/* getOrganizationForPerson */ SELECT TOP(1) " + OrganizationDao.ORGANIZATION_FIELDS 
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personUuid\" = :personUuid AND \"peoplePositions\".\"positionUuid\" = positions.uuid "
-					+ "AND positions.\"organizationUuid\" = organizations.uuid "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC";
-		} else { 
-			sql = "/* getOrganizationForPerson */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personUuid\" = :personUuid AND \"peoplePositions\".\"positionUuid\" = positions.uuid "
-					+ "AND positions.\"organizationUuid\" = organizations.uuid "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
-		}
-		
-		Query<Organization> query = dbHandle.createQuery(sql)
-			.bind("personUuid", personUuid)
-			.map(new OrganizationMapper());
-		List<Organization> rs = query.list();
-		if (rs.size() == 0) { return null; } 
-		return rs.get(0);
 	}
 
 	public List<Person> findByDomainUsername(String domainUsername) {
@@ -229,5 +220,14 @@ public class PersonDao extends AnetBaseDao<Person> {
 		});
 		return true;	
 	}
-	
+
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Person person) {
+		return new ForeignKeyFetcher<PersonPositionHistory>()
+				.load(context, "person.personPositionHistory", person.getUuid())
+				.thenApply(l ->
+		{
+			return PersonPositionHistory.getDerivedHistory(l);
+		});
+	}
+
 }

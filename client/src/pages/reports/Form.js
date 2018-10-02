@@ -34,6 +34,7 @@ import NavigationWarning from 'components/NavigationWarning'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
+import { jumpToTop } from 'components/Page'
 
 class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -82,7 +83,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				list { uuid, name }
 			}
 			personRecents(maxResults:6) {
-				list { uuid, name, rank, role, position { uuid, name, organization {uuid, shortName}} }
+				list { uuid, name, rank, role, position { uuid, name, organization {uuid, shortName}, location {uuid, name} } }
 			}
 			taskRecents(maxResults:6) {
 				list { uuid, shortName, longName }
@@ -319,6 +320,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Location</th>
 									<th>Org</th>
 									<th></th>
 								</tr>
@@ -328,7 +330,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									this.renderAttendeeRow(person, idx)
 								)}
 
-								<tr className="attendee-divider-row"><td colSpan={5}><hr /></td></tr>
+								<tr className="attendee-divider-row"><td colSpan={6}><hr /></td></tr>
 
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
@@ -455,6 +457,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				<LinkTo person={person}/>
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 			<td onClick={this.removeAttendee.bind(this, person)} id={'attendeeDelete_' + person.role + "_" + idx} >
 				<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
@@ -599,7 +602,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 					error: {message: response.message || response.error},
 					disableOnSubmit: false
 				})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

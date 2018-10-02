@@ -176,7 +176,7 @@ class BaseRollupShow extends Page {
 	render() {
 		return (
 			<div>
-				<Breadcrumbs items={[[`Rollup for ${this.dateStr}`, 'rollup/']]} />
+				<Breadcrumbs items={[[`Rollup for ${this.dateStr}`, '/rollup']]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset title={

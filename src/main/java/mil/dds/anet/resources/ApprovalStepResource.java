@@ -1,7 +1,9 @@
 package mil.dds.anet.resources;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
@@ -23,6 +25,7 @@ import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
@@ -47,14 +50,20 @@ public class ApprovalStepResource {
 	
 	@GET
 	@Timed
-	@GraphQLQuery(name="approvalStepsForOrg")
 	@Path("/byOrganization")
 	public List<ApprovalStep> getStepsForOrg(@QueryParam("orgUuid") @GraphQLArgument(name="orgUuid") String orgUuid) {
-		Organization ao = new Organization();
-		ao.setUuid(orgUuid);
-		return engine.getApprovalStepsForOrg(ao);
+		try {
+			return getStepsForOrg(engine.getContext(), orgUuid).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load ApprovalStepsForOrg", e);
+		}
 	}
-	
+
+	@GraphQLQuery(name="approvalStepsForOrg")
+	public CompletableFuture<List<ApprovalStep>> getStepsForOrg(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="orgUuid") String orgUuid) {
+		return engine.getApprovalStepsForOrg(context, orgUuid);
+	}
+
 	@POST
 	@Timed
 	@Path("/new")

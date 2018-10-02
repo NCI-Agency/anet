@@ -9,7 +9,7 @@ class NavigationWarning extends Component {
 
 	@autobind
 	onBeforeUnloadListener(event) {
-		if (this.state.isBlocking) {
+		if (this.props.isBlocking) {
 			event.returnValue = LEAVE_WARNING
 			event.preventDefault()
 		}

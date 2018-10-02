@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -81,7 +80,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 				.bind("status", DaoUtils.getEnumId(p.getStatus()))
 				.bind("locationUuid", DaoUtils.getUuid(p.getLocation()))
 				.execute();
-			//Specifically don't set currentPersonId here because we'll handle that later in setPersonInPosition();
+			//Specifically don't set currentPersonUuid here because we'll handle that later in setPersonInPosition();
 		} catch (UnableToExecuteStatementException e) {
 			checkForUniqueCodeViolation(e);
 			throw e;
@@ -362,18 +361,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 				.load(context, "position.personPositionHistory", position.getUuid())
 				.thenApply(l ->
 		{
-			// Derive start and end times; assumes list is in chronological order
-			PersonPositionHistory pphPrev = null;
-			for (final PersonPositionHistory pph : l) {
-				pph.setStartTime(pph.getCreatedAt());
-				if (pphPrev != null) {
-					pphPrev.setEndTime(pph.getStartTime());
-				}
-				pphPrev = pph;
-			}
-			// Remove all null entries
-			l = l.stream().filter(pph -> (pph != null && pph.getPerson() != null)).collect(Collectors.toList());
-			return l;
+			return PersonPositionHistory.getDerivedHistory(l);
 		});
 	}
 

@@ -24,6 +24,7 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { jumpToTop, AnchorLink } from 'components/Page'
 
 class BaseReportShow extends Page {
 
@@ -73,7 +74,7 @@ class BaseReportShow extends Page {
 
 				attendees {
 					uuid, name, role, primary, rank, status, endOfTourDate
-					position { uuid, name, status, organization { uuid, shortName} }
+					position { uuid, name, status, organization { uuid, shortName}, location {uuid, name} }
 				}
 				primaryAdvisor { uuid }
 				primaryPrincipal { uuid }
@@ -192,7 +193,7 @@ class BaseReportShow extends Page {
 				{report.isPending() &&
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p>
+						<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
 					</Fieldset>
 				}
 
@@ -262,6 +263,7 @@ class BaseReportShow extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Location</th>
 									<th>Org</th>
 								</tr>
 							</thead>
@@ -270,7 +272,7 @@ class BaseReportShow extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={5}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -450,6 +452,7 @@ class BaseReportShow extends Page {
 				<LinkTo person={person} />
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
@@ -593,13 +596,13 @@ class BaseReportShow extends Page {
 	@autobind
 	updateReport(json) {
 		this.fetchData(this.props)
-		window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind
 	handleError(response) {
 		this.setState({error: response})
-		window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 

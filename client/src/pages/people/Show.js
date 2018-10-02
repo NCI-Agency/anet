@@ -38,6 +38,7 @@ class BasePersonShow extends Page {
 		this.state = {
 			person: new Person({
 				uuid: props.match.params.uuid,
+				previousPositions: [],
 			}),
 			authoredReports: null,
 			attendedReports: null,
@@ -101,7 +102,8 @@ class BasePersonShow extends Page {
 						organization { uuid, shortName }
 					}
 				}
-			}`)
+				previousPositions { startTime, endTime, position { uuid, name }}
+		}`)
 		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.uuid)
 		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.uuid)
 
@@ -239,6 +241,28 @@ class BasePersonShow extends Page {
 							/>
 						</Fieldset>
 					}
+
+					<Fieldset title="Previous positions" id="previous-positions">
+						<Table>
+							<thead>
+								<tr>
+									<th>Position</th>
+									<th>Dates</th>
+								</tr>
+							</thead>
+							<tbody>
+								{person.previousPositions.map( (pp, idx) =>
+									<tr key={idx} id={`previousPosition_${idx}`}>
+										<td><LinkTo position={pp.position} /></td>
+										<td>
+											{moment(pp.startTime).format('D MMM YYYY')} - &nbsp;
+											{pp.endTime && moment(pp.endTime).format('D MMM YYYY')}
+										</td>
+									</tr>
+								)}
+							</tbody>
+						</Table>
+					</Fieldset>
 				</Form>
 			</div>
 		)
