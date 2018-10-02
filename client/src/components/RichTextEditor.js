@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Editor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js'
+import {CompositeDecorator, Editor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js'
 import { convertFromHTML, convertToHTML } from 'draft-convert'
 import 'draft-js/dist/Draft.css'
 import './RichTextEditor.css'
@@ -12,7 +12,13 @@ class RichTextEditor extends Component {
 	}
 	constructor(props) {
 		super(props)
-		this.state = {editorState: EditorState.createEmpty(), isLoaded: false, value: ''}
+		const decorator = new CompositeDecorator([
+			{
+				strategy: findImageEntities,
+				component: Image,
+			},
+		])
+		this.state = {editorState: EditorState.createEmpty(decorator), isLoaded: false, value: ''}
 
 		this.focus = () => this.refs.editor.focus()
 		this.onChange = (editorState) => this.setState({editorState}, this.handleOnChangeHTML(editorState))
@@ -28,7 +34,7 @@ class RichTextEditor extends Component {
 	componentDidUpdate() {
 		const { value } = this.props
 		if(value !== undefined && value.length > 0) {
-			this.setEditorStateFromHTML(value)
+			//this.setEditorStateFromHTML(value)
 		}
 	}
 
@@ -49,7 +55,6 @@ class RichTextEditor extends Component {
 				),
 			}
 		)
-
 	}
 
 	_handleKeyCommand(command, editorState) {
@@ -126,7 +131,7 @@ class RichTextEditor extends Component {
 						onChange={this.onChange}
 						placeholder="..."
 						ref="editor"
-						spellCheck={true}
+						spellCheck
 					/>
 				</div>
 			</div>
@@ -140,6 +145,81 @@ function getBlockStyle(block) {
 		case 'blockquote': return 'RichEditor-blockquote'
 		default: return null
 	}
+}
+
+function findImageEntities(contentBlock, callback, contentState) {
+	contentBlock.findEntityRanges(
+		(character) => {
+			const entityKey = character.getEntity()
+			return (
+				entityKey !== null &&
+				contentState.getEntity(entityKey).getType() === 'IMAGE'
+			)
+		},
+		callback
+	)
+}
+
+function toDataURL(src, callback) {
+	var xhttp = new XMLHttpRequest()
+
+	xhttp.onload = function() {
+			var fileReader = new FileReader()
+			fileReader.onloadend = function() {
+					callback(fileReader.result)
+			}
+			fileReader.readAsDataURL(xhttp.response)
+	}
+
+	xhttp.responseType = 'blob'
+	xhttp.open('GET', src, true)
+	xhttp.send()
+}
+
+const Image = (props) => {
+	const {
+		height,
+		src,
+		width,
+		alt,
+	} = props.contentState.getEntity(props.entityKey).getData()
+
+	toDataURL(src, (dataUrl) => {
+		console.log(dataUrl)
+	})
+
+	return (
+		<img src={src} height={height} width={width} alt={alt} />
+	)
+}
+
+const ImageCanvas = (props) => {
+		const {
+			height,
+			src,
+			width,
+			alt,
+		} = props.contentState.getEntity(props.entityKey).getData()
+
+		const image = document.createElement('img')
+		image.crossOrigin = "Anonymous"
+		image.src = src
+		image.width = width
+		image.height = height
+		image.alt = alt
+
+		image.onload = function() {
+			const canvas = document.createElement('canvas')
+			const context = canvas.getContext('2d')
+			canvas.height = height
+			canvas.width = width
+			context.drawImage(image, 0, 0)
+			return canvas.toDataURL('image/jpeg')
+		}
+
+		return (
+			<img src={image.onload()} height={height} width={width} alt={alt} />
+		)
 }
 
 class StyleButton extends React.Component {
