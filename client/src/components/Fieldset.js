@@ -11,7 +11,7 @@ export default class Fieldset extends Component {
 	render() {
 		let {id, title, action, ...props} = this.props
 
-		return <Element name={id} className="scroll-anchor-container">
+		return <Element id={id} name={id} className="scroll-anchor-container">
 			<h2 className="legend">
 				<span className="title-text">{title}</span>
 				{action && <small>{action}</small>}
