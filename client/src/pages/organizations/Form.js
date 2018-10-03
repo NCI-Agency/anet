@@ -52,6 +52,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
+		const submitText = (isPrincipalOrg && !isAdmin) ? false : "Save organization"
 
 		return <div>
 			<NavigationWarning isBlocking={this.state.isBlocking} />
@@ -59,7 +60,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 			<ValidatableForm formFor={organization}
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
-			submitText="Save organization"
+			submitText={submitText}
 			horizontal>
 
 			<Messages error={this.state.error} />
@@ -80,13 +81,13 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 					/>
 				</Form.Field>
 
-				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
+				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" disabled={isPrincipalOrg && !isAdmin} />
 				<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName" disabled={isPrincipalOrg && !isAdmin} />
 
 				<Form.Field id="status" >
 					<ButtonToggleGroup>
-						<Button id="statusActiveButton" value={ Organization.STATUS.ACTIVE }>Active</Button>
-						<Button id="statusInactiveButton" value={ Organization.STATUS.INACTIVE }>Inactive</Button>
+						<Button id="statusActiveButton" disabled={isPrincipalOrg && !isAdmin} value={ Organization.STATUS.ACTIVE }>Active</Button>
+						<Button id="statusInactiveButton" disabled={isPrincipalOrg && !isAdmin} value={ Organization.STATUS.INACTIVE }>Inactive</Button>
 					</ButtonToggleGroup>
 				</Form.Field>
 
