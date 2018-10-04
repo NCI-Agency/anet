@@ -292,7 +292,7 @@ buildscript {
 		classpath "org.kordamp:markdown-gradle-plugin:1.1.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:3.6.1'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
-		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1"
+		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2"
 	}
 }
 
