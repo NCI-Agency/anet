@@ -44,7 +44,7 @@ dependencies {
 	compile group: 'org.antlr', name: 'stringtemplate', version: '3.2.1' // optional dependency of jdbi
 
 	compile 'org.xerial:sqlite-jdbc:3.25.2' //If using SQLite
-	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5' // If using postgresql
 
 	compile 'javax.mail:mail:1.4.7'
 	compile 'ch.qos.logback:logback-classic:1.2.3'
