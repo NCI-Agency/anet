@@ -249,8 +249,8 @@ async function validateSuperUserPrincipalOrgPermissions(t) {
   'Field principalOrgButton of a principal organization should be disabled for super users')
   await assertElementDisabled(t, '#parentOrg',
     'Field parentOrganization of a principal organization should be disabled for super users')
-  await assertElementEnabled(t, '#shortName',
-      'Field shortName of a principal organization should be enabled for super users')
+  await assertElementDisabled(t, '#shortName',
+      'Field shortName of a principal organization should be disabled for super users')
   await assertElementDisabled(t, '#longName',
       'Field longName of a principal organization should be disabled for super users')
   await assertElementDisabled(t, '#identificationCode',
