@@ -108,7 +108,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 			id: "firstName",
 			type: "text",
 			display: "inline",
-			placeholder: "First name(s)",
+			placeholder: "First name(s) - Lower-case except for the first letter of each name",
 			value: this.state.splitName.firstName,
 			onChange: this.handleOnChangeFirstName
 		}
