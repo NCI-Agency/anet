@@ -121,12 +121,12 @@ class BasePositionForm extends ValidatableFormWrapper {
 					{position.type !== Position.TYPE.PRINCIPAL &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
-								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.name}</Button>
+								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.type}</Button>
 								{isAdmin &&
-									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.name}</Button>
+									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.type}</Button>
 								}
 								{isAdmin &&
-									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.name}</Button>
+									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.type}</Button>
 								}
 							</ButtonToggleGroup>
 						</Form.Field>

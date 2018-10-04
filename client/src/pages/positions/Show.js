@@ -74,7 +74,7 @@ class BasePositionShow extends Page {
 
 	render() {
 		const position = this.state.position
-		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name // TODO: shouldn't this be Position.humanNameOfType instead of a person title?
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
 		const { currentUser } = this.props
 		const canEdit =
