@@ -187,6 +187,7 @@ const Image = (props) => {
 	toDataURL(src, (dataUrl) => {
 		console.log(dataUrl)
 	})
+
 	return (
 		<img src={src} height={height} width={width} alt={alt} />
 	)
