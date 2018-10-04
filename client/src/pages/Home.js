@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
 import moment from 'moment'
@@ -43,6 +43,8 @@ class BaseHome extends Page {
 		super(props)
 		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
+			success: null,
+			error: null,
 			tileCounts: [],
 			savedSearches: [],
 			selectedSearch: null,
@@ -103,7 +105,7 @@ class BaseHome extends Page {
 			query: {
 				orgUuid: currentUser.position.organization.uuid,
 				includeOrgChildren: false,
-				createdAtStart: "" + LAST_WEEK,
+				createdAtStart: LAST_WEEK,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			},
 		}
@@ -161,6 +163,10 @@ class BaseHome extends Page {
 			tileFour: reportList(query: $queryFour) { totalCount },
 			tileFive: reportList(query: $queryFive) { totalCount },
 			savedSearches: mySearches {uuid, name, objectType, query}`
+		queries.forEach(q => {
+			q.query.pageNum = 0
+			q.query.pageSize = 1  // we're only interested in the totalCount, so just get at most one report
+		})
 		let variables = {
 			queryOne: queries[0].query,
 			queryTwo: queries[1].query,
@@ -301,16 +307,22 @@ class BaseHome extends Page {
 	onConfirmDelete() {
 		const search = this.state.selectedSearch
 		const index = this.state.savedSearches.findIndex(s => s.uuid === search.uuid)
-		API.send(`/api/savedSearches/${search.uuid}`, {}, {method: 'DELETE'})
+		const operation = 'deleteSavedSearch'
+		let graphql = operation + '(uuid: $uuid)'
+		const variables = { uuid: search.uuid }
+		const variableDef = '($uuid: String!)'
+		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				let savedSearches = this.state.savedSearches
 				savedSearches.splice(index, 1)
 				let nextSelect = savedSearches.length > 0 ? savedSearches[0] : null
 				this.setState({ savedSearches: savedSearches, selectedSearch : nextSelect })
-			}, data => {
-				this.setState({success:null, error: data})
+			}).catch(error => {
+				this.setState({success:null, error: error})
+				jumpToTop()
 			})
 	}
+
 }
 
 const Home = (props) => (

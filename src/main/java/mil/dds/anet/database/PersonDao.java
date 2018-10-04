@@ -162,9 +162,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 				.list();
 	}
 
-	public boolean mergePeople(Person winner, Person loser, Boolean copyPosition) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int mergePeople(Person winner, Person loser, Boolean copyPosition) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//delete duplicates where other is primary, or where neither is primary
 				dbHandle.createStatement("DELETE FROM \"reportPeople\" WHERE ("
 						+ "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
@@ -211,14 +211,12 @@ public class PersonDao extends AnetBaseDao<Person> {
 					.execute();
 		
 				//delete the person!
-				dbHandle.createStatement("DELETE FROM people WHERE uuid = :loserUuid")
+				return dbHandle.createStatement("DELETE FROM people WHERE uuid = :loserUuid")
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-				
-				return null;
 			}
 		});
-		return true;	
+
 	}
 
 	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Person person) {

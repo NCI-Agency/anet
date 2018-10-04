@@ -104,6 +104,7 @@ class PendingApprovalReports extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart

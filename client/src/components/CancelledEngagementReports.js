@@ -44,6 +44,7 @@ class CancelledEngagementReports extends Component {
     this.state = {
       graphDataByOrg: [],
       graphDataByReason: [],
+      reportsPageNum: 0,
       focusedOrg: '',
       focusedReason: '',
       updateChart: true,  // whether the chart needs to be updated
@@ -133,6 +134,7 @@ class CancelledEngagementReports extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart

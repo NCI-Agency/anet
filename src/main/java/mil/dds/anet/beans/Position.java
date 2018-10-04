@@ -148,6 +148,10 @@ public class Position extends AbstractAnetBean {
 		return previousPeople;
 	}
 
+	public void setPreviousPeople(List<PersonPositionHistory> previousPeople) {
+		this.previousPeople = previousPeople;
+	}
+
 	@GraphQLQuery(name="isApprover")
 	public Boolean loadIsApprover() { 
 		if (this.isApprover == null) { 

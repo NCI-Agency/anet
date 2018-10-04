@@ -406,9 +406,9 @@ public class ReportDao implements IAnetDao<Report> {
 	 * Deletes a given report from the database. 
 	 * Ensures consistency by removing all references to a report before deleting a report. 
 	 */
-	public void deleteReport(final Report report) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int deleteReport(final Report report) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				// Delete tags
 				dbHandle.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", report.getUuid());
 
@@ -428,9 +428,10 @@ public class ReportDao implements IAnetDao<Report> {
 				dbHandle.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", report.getUuid());
 
 				//Delete report
-				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where uuid = ?", report.getUuid());
-
-				return null;
+				// GraphQL mutations *have* to return something, so we return the number of deleted report rows
+				return dbHandle.createStatement("/* deleteReport.report */ DELETE FROM reports where uuid = :reportUuid")
+					.bind("reportUuid", report.getUuid())
+					.execute();
 			}
 		});
 		

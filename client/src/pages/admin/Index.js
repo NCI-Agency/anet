@@ -6,6 +6,7 @@ import autobind from 'autobind-decorator'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Form from 'components/Form'
+import Messages from 'components/Messages'
 
 import API from 'api'
 
@@ -23,6 +24,8 @@ class BaseAdminIndex extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			settings: {},
 		}
 	}
@@ -43,6 +46,7 @@ class BaseAdminIndex extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['Admin settings', '/admin']]} />
+				<Messages success={this.state.success} error={this.state.error} />
 
 				<Form formFor={settings} horizontal submitText="Save settings" onChange={this.onChange} onSubmit={this.onSubmit}>
 					<Fieldset title="Site settings">
@@ -65,18 +69,21 @@ class BaseAdminIndex extends Page {
 	onSubmit(event) {
 		event.stopPropagation()
 		event.preventDefault()
-
-		let json = Object.map(this.state.settings, (key, value) => ({key, value}))
-
-        API.send('/api/admin/save', json, {disableSubmits: true})
-            .then(() => {
+		// settings as JSON
+		let settings = Object.map(this.state.settings, (key, value) => ({key, value}))
+		let graphql = 'saveAdminSettings(settings: $settings)'
+		const variables = { settings: settings }
+		const variableDef = '($settings: [AdminSettingInput]!)'
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				this.setState({success: 'Admin settings saved', error: null})
+				jumpToTop()
 				this.props.loadAppData()
-			})
-			.catch(error => {
-                this.setState({error})
-                jumpToTop()
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
 				console.error(error)
-            })
+			})
 	}
 
 }

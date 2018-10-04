@@ -45,10 +45,11 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const { person } = props
 		const splitName = Person.parseFullName(person.name)
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			fullName: Person.fullName(splitName),
 			splitName: splitName,
-			error: null,
 			originalStatus: person.status,
 			showWrongPersonModal: false,
 			wrongPersonOptionValue: null,
@@ -108,7 +109,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 			id: "firstName",
 			type: "text",
 			display: "inline",
-			placeholder: "First name(s)",
+			placeholder: "First name(s) - Lower-case except for the first letter of each name",
 			value: this.state.splitName.firstName,
 			onChange: this.handleOnChangeFirstName
 		}
@@ -372,15 +373,14 @@ class BasePersonForm extends ValidatableFormWrapper {
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
 		person.name = Person.fullName(this.state.splitName, true)
-
-		let url = `/api/people/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updatePerson' : 'createPerson'
+		let graphql = operation + '(person: $person)'
+		graphql += edit ? '' : ' { uuid }'
+		const variables = { person: person }
+		const variableDef = '($person: PersonInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, person, {disableSubmits: true})
-			.then(response => {
-				if (response.code) {
-					throw response.code
-				}
-
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
@@ -389,19 +389,19 @@ class BasePersonForm extends ValidatableFormWrapper {
 						pathname: '/',
 					})
 				} else {
-					if (response.uuid) {
-						person.uuid = response.uuid
+					if (data[operation].uuid) {
+						person.uuid = data[operation].uuid
 					}
 					this.props.history.replace(Person.pathForEdit(person))
 					this.props.history.push({
 						pathname: Person.pathFor(person),
 						state: {
-							success: 'Person saved successfully',
+							success: 'Person saved',
 						}
 					})
 				}
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				jumpToTop()
 			})
 	}

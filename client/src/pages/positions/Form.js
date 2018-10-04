@@ -34,6 +34,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			errors: {},
 		}
@@ -119,12 +121,12 @@ class BasePositionForm extends ValidatableFormWrapper {
 					{position.type !== Position.TYPE.PRINCIPAL &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
-								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.name}</Button>
+								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.type}</Button>
 								{isAdmin &&
-									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.name}</Button>
+									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.type}</Button>
 								}
 								{isAdmin &&
-									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.name}</Button>
+									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.type}</Button>
 								}
 							</ButtonToggleGroup>
 						</Form.Field>
@@ -135,9 +137,10 @@ class BasePositionForm extends ValidatableFormWrapper {
 				<Fieldset title="Additional information">
 					<Form.Field id="location">
 						<Autocomplete
+							objectType={Location}
 							valueKey="name"
+							fields={Location.autocompleteQuery}
 							placeholder="Start typing to find a location where this Position will operate from..."
-							url="/api/locations/search"
 							queryParams={{status: Location.STATUS.ACTIVE}}
 						/>
 					</Form.Field>
@@ -170,22 +173,26 @@ class BasePositionForm extends ValidatableFormWrapper {
 		position.person = (position.person && position.person.uuid) ? {uuid: position.person.uuid} : {}
 		position.code = position.code || null //Need to null out empty position codes
 
-		let url = `/api/positions/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updatePosition' : 'createPosition'
+		let graphql = operation + '(position: $position)'
+		graphql += edit ? '' : ' { uuid }'
+		const variables = { position: position }
+		const variableDef = '($position: PositionInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, position, {disableSubmits: true})
-			.then(response => {
-				if (response.uuid) {
-					position.uuid = response.uuid
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation].uuid) {
+					position.uuid = data[operation].uuid
 				}
 				this.props.history.replace(Position.pathForEdit(position))
 				this.props.history.push({
 					pathname: Position.pathFor(position),
 					state: {
-						success: 'Saved Position',
+						success: 'Position saved',
 					}
 				})
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				jumpToTop()
 			})
 	}

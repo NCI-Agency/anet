@@ -2,18 +2,22 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.ws.rs.client.Entity;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.Response;
 
 import org.joda.time.DateTime;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.util.Duration;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
@@ -22,25 +26,27 @@ import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
-	public PersonResourceTest() {
-		if (client == null) {
-			config.setConnectionTimeout(Duration.seconds(10));
-			config.setTimeout(Duration.seconds(30));
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("person test client");
-		}
-	}
+	private static final String POSITION_FIELDS = "uuid name";
+	private static final String PERSON_FIELDS = "uuid name status role emailAddress phoneNumber rank biography country"
+			+ " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
+	private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testCreatePerson() {
 		final Person jack = getJackJackson();
 
-		Person retPerson = httpQuery(String.format("/api/people/%s", jack.getUuid()), jack).get(Person.class);
+		Person retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, jack.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson).isEqualTo(jack);
 		assertThat(retPerson.getUuid()).isEqualTo(jack.getUuid());
 
@@ -52,21 +58,27 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson.setGender("Female");
 		newPerson.setCountry("Canada");
 		newPerson.setEndOfTourDate(new DateTime(2020,4,1,0,0,0));
-		newPerson = httpQuery("/api/people/new", admin).post(Entity.json(newPerson), Person.class);
+		String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				newPerson, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(newPersonUuid).isNotNull();
+		newPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPersonUuid, new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(newPerson.getUuid()).isNotNull();
 		assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
 
 		newPerson.setName("testCreatePerson updated name");
 		newPerson.setCountry("The Commonwealth of Canada");
-		Response resp = httpQuery("/api/people/update", admin)
-				.post(Entity.json(newPerson));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		Integer nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson);
+		assertThat(nrUpdated).isEqualTo(1);
 
-		retPerson = httpQuery(String.format("/api/people/%s", newPerson.getUuid()), jack).get(Person.class);
+		retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, newPerson.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
 		
 		//Test creating a person with a position already set. 
-		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(new GenericType<AnetBeanList<Organization>>(){});
+		final OrganizationSearchQuery query = new OrganizationSearchQuery();
+		query.setText("EF 6");
+		query.setType(OrganizationType.ADVISOR_ORG);
+		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query", "OrganizationSearchQueryInput",
+				"uuid shortName", query, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 
@@ -75,7 +87,10 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPos.setName("Test Position");
 		newPos.setOrganization(org);
 		newPos.setStatus(PositionStatus.ACTIVE);
-		newPos = httpQuery("/api/positions/new", admin).post(Entity.json(newPos), Position.class);
+		String newPosUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				newPos, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(newPosUuid).isNotNull();
+		newPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, newPosUuid, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(newPos.getUuid()).isNotNull();
 		
 		Person newPerson2 = new Person();
@@ -84,13 +99,13 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson2.setStatus(PersonStatus.ACTIVE);
 		newPerson2.setDomainUsername("namey_" + DateTime.now().getMillis());
 		newPerson2.setPosition(newPos);
-		newPerson2 = httpQuery("/api/people/new", admin).post(Entity.json(newPerson2), Person.class);
+		String newPerson2Uuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				newPerson2, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(newPerson2Uuid).isNotNull();
+		newPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2Uuid, new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(newPerson2.getUuid()).isNotNull();
-		
-		retPerson = httpQuery("/api/people/" + newPerson2.getUuid(), admin).get(Person.class);
-		assertThat(retPerson).isNotNull();
-		assertThat(retPerson.loadPosition()).isNotNull();
-		assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos.getUuid());
+		assertThat(newPerson2.getPosition()).isNotNull();
+		assertThat(newPerson2.getPosition().getUuid()).isEqualTo(newPos.getUuid());
 		
 		//Change this person w/ a new position, and ensure it gets changed. 
 		
@@ -99,35 +114,38 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPos2.setName("A Second Test Position");
 		newPos2.setOrganization(org);
 		newPos2.setStatus(PositionStatus.ACTIVE);
-		newPos2 = httpQuery("/api/positions/new", admin).post(Entity.json(newPos2), Position.class);
+		String newPos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				newPos2, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(newPos2Uuid).isNotNull();
+		newPos2 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, newPos2Uuid, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(newPos2.getUuid()).isNotNull();
 		
 		newPerson2.setName("Changey McChangeface");
 		newPerson2.setPosition(newPos2);
 		//A person cannot change their own position
-		resp = httpQuery("/api/people/update", newPerson2).post(Entity.json(newPerson2));
-		assertThat(resp.getStatus()).isEqualTo(javax.ws.rs.core.Response.Status.FORBIDDEN.getStatusCode());
+		thrown.expect(ForbiddenException.class);
+		graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson2);
 		
-		resp = httpQuery("/api/people/update", admin).post(Entity.json(newPerson2));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson2);
+		assertThat(nrUpdated).isEqualTo(1);
 		
-		retPerson = httpQuery("/api/people/" + newPerson2.getUuid(), admin).get(Person.class);
+		retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson).isNotNull();
 		assertThat(retPerson.getName()).isEqualTo(newPerson2.getName());
-		assertThat(retPerson.loadPosition()).isNotNull();
+		assertThat(retPerson.getPosition()).isNotNull();
 		assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos2.getUuid());
 		
 		//Now newPerson2 who is a super user, should NOT be able to edit newPerson
 		//Because they are not in newPerson2's organization. 
-		resp = httpQuery("/api/people/update", newPerson2).post(Entity.json(newPerson));
-		assertThat(resp.getStatus()).isEqualTo(javax.ws.rs.core.Response.Status.FORBIDDEN.getStatusCode());
+		thrown.expect(ForbiddenException.class);
+		graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson);
 		
 		//Add some scary HTML to newPerson2's profile and ensure it gets stripped out. 
 		newPerson2.setBiography("<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
-		resp = httpQuery("/api/people/update", admin).post(Entity.json(newPerson2));
-		assertThat(resp.getStatus()).isEqualTo(200);
-		
-		retPerson = httpQuery("/api/people/" + newPerson2.getUuid(), admin).get(Person.class);
+		nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson2);
+		assertThat(nrUpdated).isEqualTo(1);
+
+		retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson.getBiography()).contains("<b>Hello world</b>");
 		assertThat(retPerson.getBiography()).doesNotContain("<script>window.alert");
 	}
@@ -139,22 +157,29 @@ public class PersonResourceTest extends AbstractResourceTest {
 		PersonSearchQuery query = new PersonSearchQuery();
 		query.setText("bob");
 
-		AnetBeanList<Person> searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		AnetBeanList<Person> searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(searchResults.getTotalCount()).isGreaterThan(0);
 		assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob")).findFirst()).isNotEmpty();
 
-		AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=EF%201&type=ADVISOR_ORG", jack).get(new GenericType<AnetBeanList<Organization>>(){});
+		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
+		queryOrgs.setText("EF 1");
+		queryOrgs.setType(OrganizationType.ADVISOR_ORG);
+		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query", "OrganizationSearchQueryInput",
+				"uuid shortName", queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 1.1")).findFirst().get();
 
 		query.setText(null);
 		query.setOrgUuid(org.getUuid());
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
 
 		query.setOrgUuid(null);
 		query.setStatus(ImmutableList.of(PersonStatus.INACTIVE));
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(p -> p.getStatus() == PersonStatus.INACTIVE).count())
 			.isEqualTo(searchResults.getList().size());
@@ -164,32 +189,38 @@ public class PersonResourceTest extends AbstractResourceTest {
 		query.setStatus(null);
 		query.setOrgUuid(org.getUuid());
 		//First don't include child orgs and then increase the scope and verify results increase.
-		final AnetBeanList<Person> parentOnlyResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		final AnetBeanList<Person> parentOnlyResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 
 		query.setIncludeChildOrgs(true);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList()).containsAll(parentOnlyResults.getList());
 
 		query.setIncludeChildOrgs(true);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
 
 		query.setOrgUuid(null);
 		query.setText("advisor"); //Search against biographies
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(searchResults.getList().size()).isGreaterThan(1);
 
 		query.setText(null);
 		query.setRole(Role.ADVISOR);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(searchResults.getList().size()).isGreaterThan(1);
 		
 		query.setRole(null);
 		query.setText("e");
 		query.setSortBy(PersonSearchSortBy.NAME);
 		query.setSortOrder(SortOrder.DESC); 
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		String prevName = null;
 		for (Person p : searchResults.getList()) { 
 			if (prevName != null) { assertThat(p.getName().compareToIgnoreCase(prevName)).isLessThanOrEqualTo(0); } 
@@ -200,20 +231,23 @@ public class PersonResourceTest extends AbstractResourceTest {
 		query = new PersonSearchQuery();
 		query.setText("A Dvisor");
 		query.setRole(Role.ADVISOR);
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		long matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		//Search for same person from an autocomplete box. 
 		query.setText("A Dvisor*");
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		matchCount = searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
 		assertThat(matchCount).isEqualTo(1);
 		
 		
 		//Search by email Address
 		query.setText("hunter+arthur@dds.mil");
-		searchResults = httpQuery("/api/people/search", jack).post(Entity.json(query), new GenericType<AnetBeanList<Person>>(){});
+		searchResults = graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		matchCount = searchResults.getList().stream().filter(p -> p.getEmailAddress().equals("hunter+arthur@dds.mil")).count();
 		assertThat(matchCount).isEqualTo(1);
 		//TODO: should we enforce that this query returns ONLY arthur?  I think not since we're using the plus addressing for testing.. 
@@ -224,15 +258,18 @@ public class PersonResourceTest extends AbstractResourceTest {
 	public void getAllPeopleTest() { 
 		Person liz = getElizabethElizawell();
 		
-		AnetBeanList<Person> results = httpQuery("/api/people/", liz).get(new GenericType<AnetBeanList<Person>>(){});
+		AnetBeanList<Person> results = graphQLHelper.getAllObjects(liz, "people",
+				FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(results.getTotalCount()).isGreaterThan(0);
 		
-		AnetBeanList<Person> pageOne = httpQuery("/api/people?pageNum=0&pageSize=2", liz).get(new GenericType<AnetBeanList<Person>>(){});
+		AnetBeanList<Person> pageOne = graphQLHelper.getAllObjects(liz, "people (pageNum: 0, pageSize: 2)",
+				FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(pageOne.getTotalCount()).isEqualTo(results.getTotalCount());
 		assertThat(pageOne.getList().size()).isEqualTo(2);
 		assertThat(results.getList()).containsAll(pageOne.getList());
 		
-		AnetBeanList<Person> pageTwo = httpQuery("/api/people?pageNum=1&pageSize=2", liz).get(new GenericType<AnetBeanList<Person>>(){});
+		AnetBeanList<Person> pageTwo = graphQLHelper.getAllObjects(liz, "people (pageNum: 1, pageSize: 2)",
+				FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
 		assertThat(pageTwo.getTotalCount()).isEqualTo(results.getTotalCount());
 		assertThat(pageTwo.getList().size()).isEqualTo(2);
 		assertThat(results.getList()).containsAll(pageTwo.getList());
@@ -246,7 +283,10 @@ public class PersonResourceTest extends AbstractResourceTest {
 		Person loser = new Person();
 		loser.setRole(Role.ADVISOR);
 		loser.setName("Loser for Merging");
-		loser = httpQuery("/api/people/new", admin).post(Entity.json(loser), Person.class);
+		String loserUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				loser, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(loserUuid).isNotNull();
+		loser = graphQLHelper.getObjectById(admin, "person", FIELDS, loserUuid, new GenericType<GraphQLResponse<Person>>() {});
 		
 		//Create a Position
 		Position test = new Position();
@@ -255,52 +295,75 @@ public class PersonResourceTest extends AbstractResourceTest {
 		test.setStatus(PositionStatus.ACTIVE);
 		
 		//Assign to an AO
-		Organization ao = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
-		test.setOrganization(Organization.createWithUuid(ao.getUuid()));
+		final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+				OrganizationTest.getTestAO(true), new GenericType<GraphQLResponse<Organization>>() {});
+		test.setOrganization(Organization.createWithUuid(aoUuid));
 
-		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);
+		String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				test, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(createdUuid).isNotNull();
+		Position created = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, createdUuid, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(created.getName()).isEqualTo(test.getName());
 		
 		//Assign the loser into the position
-		Response resp = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).post(Entity.json(loser));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		Map<String, Object> variables = new HashMap<>();
+		variables.put("uuid", created.getUuid());
+		variables.put("person", loser);
+		Integer nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Create a second person
 		Person winner = new Person();
 		winner.setRole(Role.ADVISOR);
 		winner.setName("Winner for Merging");
-		winner = httpQuery("/api/people/new", admin).post(Entity.json(winner), Person.class);
-		
-		resp = httpQuery(String.format("/api/people/merge?winner=%s&loser=%s", winner.getUuid(), loser.getUuid()), admin).post(null);
-		assertThat(resp.getStatus()).isEqualTo(200);
+		String winnerUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				winner, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(winnerUuid).isNotNull();
+		winner = graphQLHelper.getObjectById(admin, "person", FIELDS, winnerUuid, new GenericType<GraphQLResponse<Person>>() {});
+
+		variables = new HashMap<>();
+		variables.put("winnerUuid", winnerUuid);
+		variables.put("loserUuid", loserUuid);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($winnerUuid: String!, $loserUuid: String!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Assert that loser is gone. 
-		resp = httpQuery("/api/people/" + loser.getUuid(), admin).get();
-		assertThat(resp.getStatus()).isEqualTo(404);
+		thrown.expect(NotFoundException.class);
+		graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		
 		//Assert that the position is empty. 
-		Person curr = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).get(Person.class);
-		assertThat(curr).isNull();
+		Position winnerPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(winnerPos.getPerson()).isNull();
 		
 		//Re-create loser and put into the position. 
 		loser = new Person();
 		loser.setRole(Role.ADVISOR);
 		loser.setName("Loser for Merging");
-		loser = httpQuery("/api/people/new", admin).post(Entity.json(loser), Person.class);
-		resp = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).post(Entity.json(loser));
-		assertThat(resp.getStatus()).isEqualTo(200);
-		
-		resp = httpQuery(String.format("/api/people/merge?winner=%s&loser=%s&copyPosition=true", winner.getUuid(), loser.getUuid()), admin).post(null);
-		assertThat(resp.getStatus()).isEqualTo(200);
+		loserUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				loser, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(loserUuid).isNotNull();
+		loser = graphQLHelper.getObjectById(admin, "person", FIELDS, loserUuid, new GenericType<GraphQLResponse<Person>>() {});
+
+		variables = new HashMap<>();
+		variables.put("uuid", created.getUuid());
+		variables.put("person", loser);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
+
+		variables = new HashMap<>();
+		variables.put("winnerUuid", winnerUuid);
+		variables.put("loserUuid", loserUuid);
+		variables.put("copyPosition", true);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($winnerUuid: String!, $loserUuid: String!, $copyPosition: Bool!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Assert that loser is gone. 
-		resp = httpQuery("/api/people/" + loser.getUuid(), admin).get();
-		assertThat(resp.getStatus()).isEqualTo(404);
+		thrown.expect(NotFoundException.class);
+		graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		
 		//Assert that the winner is in the position. 
-		curr = httpQuery(String.format("/api/positions/%s/person", created.getUuid()), admin).get(Person.class);
-		assertThat(curr).isEqualTo(winner);
+		winnerPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(winnerPos.getPerson()).isEqualTo(winner);
 		
 		
 	}
@@ -308,7 +371,11 @@ public class PersonResourceTest extends AbstractResourceTest {
 	@Test
 	public void testInactivatePerson() {
 		final Person jack = getJackJackson();
-		final AnetBeanList<Organization> orgs = httpQuery("/api/organizations/search?text=EF%206&type=ADVISOR_ORG", jack).get(new GenericType<AnetBeanList<Organization>>(){});
+		final OrganizationSearchQuery query = new OrganizationSearchQuery();
+		query.setText("EF 6");
+		query.setType(OrganizationType.ADVISOR_ORG);
+		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query", "OrganizationSearchQueryInput",
+				"uuid shortName", query, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		final Organization org = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
 		assertThat(org.getUuid()).isNotNull();
@@ -318,7 +385,10 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPos.setName("Test Position");
 		newPos.setOrganization(org);
 		newPos.setStatus(PositionStatus.ACTIVE);
-		final Position retPos = httpQuery("/api/positions/new", admin).post(Entity.json(newPos), Position.class);
+		String retPosUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				newPos, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(retPosUuid).isNotNull();
+		Position retPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, retPosUuid, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(retPos.getUuid()).isNotNull();
 
 		final Person newPerson = new Person();
@@ -326,16 +396,19 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson.setRole(Role.ADVISOR);
 		newPerson.setStatus(PersonStatus.ACTIVE);
 		newPerson.setDomainUsername("namey_" + DateTime.now().getMillis());
-		newPerson.setPosition(newPos);
-		final Person retPerson = httpQuery("/api/people/new", admin).post(Entity.json(newPerson), Person.class);
+		newPerson.setPosition(retPos);
+		String retPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				newPerson, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(retPersonUuid).isNotNull();
+		Person retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, retPersonUuid, new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson.getUuid()).isNotNull();
 		assertThat(retPerson.getPosition()).isNotNull();
 
 		retPerson.setStatus(PersonStatus.INACTIVE);
-		final Response resp = httpQuery("/api/people/update", admin).post(Entity.json(retPerson));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		Integer nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", retPerson);
+		assertThat(nrUpdated).isEqualTo(1);
 
-		final Person retPerson2 = httpQuery(String.format("/api/people/%s", retPerson.getUuid()), admin).get(Person.class);
+		final Person retPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS, retPerson.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson2.getDomainUsername()).isNull();
 		assertThat(retPerson2.getPosition()).isNull();
 	}

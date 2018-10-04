@@ -41,6 +41,7 @@ class ReportsByTask extends Component {
 
     this.state = {
       graphDataByTask: [],
+      reportsPageNum: 0,
       focusedTask: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
@@ -104,6 +105,7 @@ class ReportsByTask extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart

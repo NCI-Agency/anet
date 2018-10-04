@@ -59,7 +59,7 @@ class OrganizationAdvisorsTable extends Component {
         let nothingFound = <tr className="nothing-found"><td colSpan="8">No organizations found...</td></tr>
         let search = rows.filter( (element) => {
             let props = element.props.row
-            let orgName = props.organizationShortName.toLowerCase()
+            let orgName = props.name.toLowerCase()
             return orgName.indexOf( filterText.toLowerCase() ) !== -1
         })
         return ( search.length > 0 ) ? search : nothingFound
@@ -69,8 +69,8 @@ class OrganizationAdvisorsTable extends Component {
         return data.map( (organization, index) => {
             let checked = (organization.selected === undefined) ? false : organization.selected
             let modalLink = <AdvisorReportsModal 
-                                name={ organization.organizationShortName }
-                                uuid={ organization.organizationUuid }
+                                name={ organization.name }
+                                id={ organization.uuid }
                                 columnGroups={ this.props.columnGroups } />
 
             return <AdvisorReportsRow
