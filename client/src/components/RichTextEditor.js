@@ -15,10 +15,12 @@ class RichTextEditor extends Component {
 		const decorator = new CompositeDecorator([
 			{
 				strategy: findImageEntities,
-				component: Image,
+				component: ImageCanvas,
 			},
 		])
-		this.state = {editorState: EditorState.createEmpty(decorator), isLoaded: false, value: ''}
+
+		const editorState = EditorState.createEmpty(decorator)
+		this.state = {editorState, decorator, isLoaded: false, value: ''}
 
 		this.focus = () => this.refs.editor.focus()
 		this.onChange = (editorState) => this.setState({editorState}, this.handleOnChangeHTML(editorState))
@@ -34,7 +36,7 @@ class RichTextEditor extends Component {
 	componentDidUpdate() {
 		const { value } = this.props
 		if(value !== undefined && value.length > 0) {
-			//this.setEditorStateFromHTML(value)
+			this.setEditorStateFromHTML(value)
 		}
 	}
 
@@ -43,16 +45,14 @@ class RichTextEditor extends Component {
 		this.props.onChange(html)
 	}
 
-	_setEditorStateFromHTML(value) {
+	_setEditorStateFromHTML(html) {
 		if(this.state.isLoaded) { return }
-
-		const contentState = convertFromHTML(value)
+		const contentState = convertFromHTML(html)
+		const editorState = EditorState.createWithContent(contentState, this.state.decorator)
 		this.setState(
 			{
 				isLoaded: true,
-				editorState: EditorState.createWithContent(
-					contentState,
-				),
+				editorState,
 			}
 		)
 	}
@@ -179,15 +179,14 @@ function toDataURL(src, callback) {
 const Image = (props) => {
 	const {
 		height,
-		src,
 		width,
+		src,
 		alt,
 	} = props.contentState.getEntity(props.entityKey).getData()
 
 	toDataURL(src, (dataUrl) => {
 		console.log(dataUrl)
 	})
-
 	return (
 		<img src={src} height={height} width={width} alt={alt} />
 	)
@@ -216,9 +215,9 @@ const ImageCanvas = (props) => {
 			context.drawImage(image, 0, 0)
 			return canvas.toDataURL('image/jpeg')
 		}
-
+		const dataSrc = image.onload()
 		return (
-			<img src={image.onload()} height={height} width={width} alt={alt} />
+			<img src={src} height={height} width={width} alt={alt} />
 		)
 }
 
