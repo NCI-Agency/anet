@@ -38,7 +38,7 @@ class MergePeople extends Page {
 		let {winner, loser, copyPosition} = this.state
 		let errors = this.validate()
 
-		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status,
+		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status, rank,
 			position { id, name, organization { id, shortName, longName, identificationCode }},
 			authoredReports(pageNum:0,pageSize:1) { totalCount }
 			attendedReports(pageNum:0,pageSize:1) { totalCount }`
@@ -65,6 +65,9 @@ class MergePeople extends Page {
 								placeholder="Select the duplicate person"
 								objectType={Person}
 								fields={personFields}
+								template={person =>
+									<LinkTo person={person} isLink={false} />
+								}
 								onChange={this.selectLoser}
 							/>
 						</Col>
@@ -74,6 +77,9 @@ class MergePeople extends Page {
 								placeholder="Select the OTHER duplicate person"
 								objectType={Person}
 								fields={personFields}
+								template={person =>
+									<LinkTo person={person} isLink={false} />
+								}
 								onChange={this.selectWinner}
 							/>
 						</Col>
