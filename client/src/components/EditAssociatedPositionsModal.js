@@ -25,6 +25,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
+			success: null,
 			error: null,
 			associatedPositions: props.position.associatedPositions.slice()
 		}
@@ -149,12 +150,14 @@ class BaseEditAssociatedPositionsModal extends Component {
 		position.associatedPositions = this.state.associatedPositions
 		delete position.previousPeople
 		delete position.person //prevent any changes to person.
-
-		API.send('/api/positions/updateAssociatedPosition', position)
-			.then(resp =>
-				this.props.onSuccess()
+		const graphql = 'updateAssociatedPosition(position: $position)'
+		const variables = { position: position }
+		const variableDef = '($position: PositionInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(
+				data => this.props.onSuccess()
 			).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 			})
 	}
 

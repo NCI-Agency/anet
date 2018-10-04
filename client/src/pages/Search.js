@@ -99,6 +99,9 @@ class BaseSearch extends Page {
 		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {clearSearchQuery: false}))
 
 		Object.assign(this.state, {
+			success: null,
+			error: null,
+			didSearch: false,
 			query: props.searchQuery.text || null,
 			pageNum: {
 				reports: 0,
@@ -117,9 +120,6 @@ class BaseSearch extends Page {
 				locations: null,
 				tasks: null,
 			},
-			error: null,
-			success: null,
-			didSearch: false,
 		})
 	}
 
@@ -164,8 +164,8 @@ class BaseSearch extends Page {
 	_fetchDataCallback(parts) {
 		return GQL.run(parts).then(data => {
 			this.setState({success: null, error: null, results: data, didSearch: true})
-		}).catch(response =>
-			this.setState({success: null, error: response, didSearch: true})
+		}).catch(error =>
+			this.setState({success: null, error: error, didSearch: true})
 		)
 	}
 
@@ -323,8 +323,8 @@ class BaseSearch extends Page {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
 			this.setState({results})
-		}).catch(response =>
-			this.setState({error: response})
+		}).catch(error =>
+			this.setState({success: null, error: error})
 		)
 	}
 
@@ -447,8 +447,8 @@ class BaseSearch extends Page {
 
 	@autobind
 	onChangeSaveSearch() {
-		let search = this.state.saveSearch
-		this.setState({saveSearch: search})
+		let savedSearch = this.state.saveSearch
+		this.setState({saveSearch: savedSearch})
 	}
 
 	@autobind
@@ -456,25 +456,29 @@ class BaseSearch extends Page {
 		event.stopPropagation()
 		event.preventDefault()
 
-		const search = Object.without(this.state.saveSearch, 'show')
-		search.query = JSON.stringify(this.getSearchQuery())
+		const savedSearch = Object.without(this.state.saveSearch, 'show')
+		savedSearch.query = JSON.stringify(this.getSearchQuery())
 		if (this.props.searchQuery.objectType) {
-			search.objectType = this.props.searchQuery.objectType.toUpperCase()
+			savedSearch.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
-
-		API.send('/api/savedSearches/new', search, {disableSubmits: true})
-			.then(response => {
-				if (response.code) throw response.code
-				this.setState({
-					success: 'Search successfully saved!',
-					error: null,
-					saveSearch: {show: false}
-				})
-				jumpToTop()
-			}).catch(response => {
+		const operation = 'createSavedSearch'
+		let graphql = operation + '(savedSearch: $savedSearch) { id }'
+		const variables = { savedSearch: savedSearch }
+		const variableDef = '($savedSearch: SavedSearchInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				if (data[operation].id) {
+					this.setState({
+						success: 'Search saved',
+						error: null,
+						saveSearch: {show: false}
+					})
+					jumpToTop()
+				}
+			}).catch(error => {
 				this.setState({
 					success: null,
-					error: response,
+					error: error,
 					saveSearch: {show: false}
 				})
 				jumpToTop()
@@ -490,8 +494,8 @@ class BaseSearch extends Page {
 	_exportSearchResultsCallback(parts) {
 		GQL.runExport(parts, "xlsx").then(blob => {
 			FileSaver.saveAs(blob, "anet_export.xlsx")
-		}).catch(response =>
-			this.setState({error: response})
+		}).catch(error =>
+			this.setState({success: null, error: error})
 		)
 	}
 

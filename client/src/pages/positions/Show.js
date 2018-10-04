@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import {Link} from 'react-router-dom'
 import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
@@ -41,6 +41,8 @@ class BasePositionShow extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			position: new Position( {
 				id: props.match.params.id,
 				previousPeople: [],
@@ -202,7 +204,7 @@ class BasePositionShow extends Page {
 
 				{canDelete && <div className="submit-buttons"><div>
 					<ConfirmDelete
-						onConfirmDelete={this.deletePosition}
+						onConfirmDelete={this.onConfirmDelete}
 						objectType="position"
 						objectDisplay={'#' + this.state.position.id}
 						bsStyle="warning"
@@ -251,15 +253,21 @@ class BasePositionShow extends Page {
 	}
 
 	@autobind
-	deletePosition() {
-		API.send(`/api/positions/${this.state.position.id}`, {}, {method: 'DELETE'}).then(data => {
-			this.props.history.push({
-				pathname: '/',
-				state: {success: 'Position Deleted'}
+	onConfirmDelete() {
+		const operation = 'deletePosition'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: this.state.position.id }
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.props.history.push({
+					pathname: '/',
+					state: {success: 'Position deleted'}
+				})
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
 			})
-		}, data => {
-			this.setState({success: null, error: data})
-		})
 	}
 }
 

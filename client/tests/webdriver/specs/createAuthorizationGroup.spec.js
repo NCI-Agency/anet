@@ -14,6 +14,7 @@ describe('Create authorization group form page', () => {
 
     describe('When creating an authorization group', () => {
         it('Should save an authorization group with only a name', () => {
+            CreateAuthorizationGroup.name.waitForVisible()
             CreateAuthorizationGroup.name.setValue('authorization group 1')
             CreateAuthorizationGroup.description.setValue('this is just a test authorization group')
             CreateAuthorizationGroup.statusActiveButton.waitForVisible()
@@ -33,7 +34,7 @@ describe('Create authorization group form page', () => {
             CreateAuthorizationGroup.submitForm()
             CreateAuthorizationGroup.waitForAlertSuccessToLoad()
             const alertMessage = CreateAuthorizationGroup.alertSuccess.getText()
-            expect(alertMessage).to.equal('Saved authorization group')
+            expect(alertMessage).to.equal('Authorization group saved')
         })
     })
 })

@@ -19,7 +19,8 @@ export default class Messages extends Component {
 		return (
 			<div>
 				{this.props.error && <Alert bsStyle="danger">
-					{this.props.error.statusText}: {this.props.error.message}
+					{this.props.error.statusText && `${this.props.error.statusText}: `}
+					{this.props.error.message}
 				</Alert>}
 				{this.props.success && <Alert bsStyle="success">
 					{this.props.success}

@@ -11,7 +11,6 @@ import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 const DEFAULT_WEEKS_AGO = 3
-const advisorReportsQueryUrl = `/api/reports/insights/advisors` // ?weeksAgo=3 default set at 3 weeks ago
 const OrganizationAdvisorsTableWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(OrganizationAdvisorsTable))
 
 class FilterableAdvisorReportsTable extends Component {
@@ -36,17 +35,17 @@ class FilterableAdvisorReportsTable extends Component {
     }
 
     componentDidMount() {
-        this.setState( {isLoading: true} )
-        this.props.showLoading()
-        let advisorReportsQuery = API.fetch(advisorReportsQueryUrl)
-        Promise.resolve(advisorReportsQuery).then(value => {
-            this.setState({
-                isLoading: false,
-                data: value
-            })
-            this.props.hideLoading()
-        })
-    }
+      this.setState( {isLoading: true} )
+      this.props.showLoading()
+      API.query(/* GraphQL */`advisorReportInsights { id name stats { week nrReportsSubmitted nrEngagementsAttended }}`)
+        .then(data => {
+          this.setState({
+              isLoading: false,
+              data: data.advisorReportInsights
+          })
+          this.props.hideLoading()
+      })
+  }
 
     handleFilterTextInput(filterText) {
         this.setState({ filterText: filterText })
@@ -108,14 +107,14 @@ class FilterableAdvisorReportsTable extends Component {
 
         data.forEach( (item) => {
             let stats = item.stats
-            result += item.organizationshortname
+            result += item.name
             weekColumns.forEach( (column, index) => {
                 result += columnDelimiter
 
                 if (stats[index]) {
-                    result += stats[index].nrreportssubmitted
+                    result += stats[index].nrReportsSubmitted
                     result += columnDelimiter
-                    result += stats[index].nrengagementsattended
+                    result += stats[index].nrEngagementsAttended
                 } else {
                     result += '0,0'
                 }

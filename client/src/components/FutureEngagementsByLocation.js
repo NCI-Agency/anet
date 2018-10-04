@@ -39,6 +39,7 @@ class FutureEngagementsByLocation extends Component {
 
     this.state = {
       graphData: {},
+      reportsPageNum: 0,
       focusedDate: '',
       focusedLocation: '',
       updateChart: true,  // whether the chart needs to be updated
@@ -196,6 +197,7 @@ class FutureEngagementsByLocation extends Component {
     const queryParams = this.props.queryParams
     Object.assign(chartQueryParams, queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     return chartQueryParams

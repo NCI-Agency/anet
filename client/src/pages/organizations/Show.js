@@ -88,7 +88,7 @@ class BaseOrganizationShow extends Page {
 		return reportsPart
 	}
 
-	gettaskQueryPart(orgId) {
+	getTaskQueryPart(orgId) {
 		let taskQuery = {
 			pageNum: this.tasksPageNum,
 			status: Task.STATUS.ACTIVE,
@@ -124,7 +124,7 @@ class BaseOrganizationShow extends Page {
 				}
 			}`)
 		let reportsPart = this.getReportQueryPart(props.match.params.id)
-		let tasksPart = this.gettaskQueryPart(props.match.params.id)
+		let tasksPart = this.getTaskQueryPart(props.match.params.id)
 
 		return this.runGQL([orgPart, reportsPart, tasksPart])
 	}
@@ -262,8 +262,8 @@ class BaseOrganizationShow extends Page {
 
 					<OrganizationLaydown organization={org} />
 					{!isPrincipalOrg && <OrganizationApprovals organization={org} />}
-					{org.isTaskEnabled() &&
-						<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goTotasksPage}/>
+					{ org.isTaskEnabled() &&
+						<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goToTasksPage}/>
 					}
 
 					<Fieldset id="reports" title={`Reports from ${org.shortName}`}>
@@ -290,9 +290,9 @@ class BaseOrganizationShow extends Page {
 	}
 
 	@autobind
-	goTotasksPage(pageNum) {
+	goToTasksPage(pageNum) {
 		this.tasksPageNum = pageNum
-		let taskQueryPart = this.gettaskQueryPart(this.state.organization.id)
+		let taskQueryPart = this.getTaskQueryPart(this.state.organization.id)
 		GQL.run([taskQueryPart]).then(data =>
 			this.setState({tasks: data.tasks})
 		)

@@ -23,6 +23,7 @@ import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
@@ -36,7 +37,7 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/tasks")
+@Path("/old-api/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class TaskResource {
@@ -69,7 +70,11 @@ public class TaskResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMIN")
-	public Task createNewTask(@Auth Person user, Task p) {
+	public Task createTask(@Auth Person user, Task p) {
+		return createTaskCommon(user, p);
+	}
+
+	private Task createTaskCommon(Person user, Task p) {
 		if (AuthUtils.isAdmin(user) == false) { 
 			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getId() == null) { 
 				throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
@@ -81,6 +86,12 @@ public class TaskResource {
 		AnetAuditLogger.log("Task {} created by {}", p, user);
 		return p;
 	}
+
+	@GraphQLMutation(name="createTask")
+	@RolesAllowed("ADMIN")
+	public Task createTask(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="task") Task p) {
+		return createTaskCommon(DaoUtils.getUserFromContext(context), p);
+	}
 	
 	/* Updates shortName, longName, category, and customFieldRef1Id */
 	@POST
@@ -88,6 +99,11 @@ public class TaskResource {
 	@Path("/update")
 	@RolesAllowed("ADMIN")
 	public Response updateTask(@Auth Person user, Task p) { 
+		updateTaskCommon(user, p);
+		return Response.ok().build();
+	}
+
+	private int updateTaskCommon(Person user, Task p) {
 		//Admins can edit all Tasks, SuperUsers can edit tasks within their EF. 
 		if (AuthUtils.isAdmin(user) == false) { 
 			Task existing = dao.getById(p.getId());
@@ -102,12 +118,19 @@ public class TaskResource {
 			}
 		}
 		
-		int numRows = dao.update(p);
+		final int numRows = dao.update(p);
 		if (numRows == 0) { 
-			throw new WebApplicationException("Couldn't process update", Status.NOT_FOUND);
+			throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
 		}
 		AnetAuditLogger.log("Task {} updatedby {}", p, user);
-		return Response.ok().build();
+		return numRows;
+	}
+
+	@GraphQLMutation(name="updateTask")
+	@RolesAllowed("ADMIN")
+	public Integer updateTask(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="task") Task p) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateTaskCommon(DaoUtils.getUserFromContext(context), p);
 	}
 	
 	@POST

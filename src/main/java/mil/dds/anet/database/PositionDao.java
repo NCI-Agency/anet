@@ -147,9 +147,9 @@ public class PositionDao extends AnetBaseDao<Position> {
 		}
 	}
 	
-	public void setPersonInPosition(Person person, Position position) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int setPersonInPosition(Person person, Position position) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
 				//If this person is in a position already, we need to remove them. 
 				Position currPos = dbHandle.createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS 
@@ -176,22 +176,22 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("personId", person.getId())
 					.bind("positionId", position.getId())
 					.execute();
-				dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
+				// GraphQL mutations *have* to return something, so we return the number of inserted rows
+				return dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, :personId, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("personId", person.getId())
 					.bind("createdAt", now.plusMillis(1)) // Need to ensure this timestamp is greater than previous INSERT. 
 					.execute();
-				return null;
 			}
 		});
 		
 	}
 	
-	public void removePersonFromPosition(Position position) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int removePersonFromPosition(Position position) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
 				dbHandle.createStatement("/* positionRemovePerson.update */ UPDATE positions "
 						+ "SET \"currentPersonId\" = :personId, \"updatedAt\" = :updatedAt "
@@ -222,13 +222,12 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("createdAt", now)
 					.execute();
 			
-				dbHandle.createStatement("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
+				return dbHandle.createStatement("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, null, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("createdAt", now)
 					.execute();
-				return null;
 			}
 		});
 	}
@@ -307,11 +306,11 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return query.list();
 	}
 
-	public void associatePosition(Position a, Position b) {
+	public int associatePosition(Position a, Position b) {
 		DateTime now = DateTime.now();
 		Integer idOne = Math.min(a.getId(), b.getId());
 		Integer idTwo = Math.max(a.getId(), b.getId());
-		dbHandle.createStatement("/* associatePosition */ INSERT INTO \"positionRelationships\" "
+		return dbHandle.createStatement("/* associatePosition */ INSERT INTO \"positionRelationships\" "
 				+ "(\"positionId_a\", \"positionId_b\", \"createdAt\", \"updatedAt\", deleted) "
 				+ "VALUES (:positionId_a, :positionId_b, :createdAt, :updatedAt, :deleted)")
 			.bind("positionId_a", idOne)
@@ -378,7 +377,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return count.longValue() > 0;
 	}
 
-	public Integer deletePosition(final Position p) {
+	public int deletePosition(final Position p) {
 		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//if this position has any history, we'll just delete it

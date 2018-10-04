@@ -45,10 +45,11 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const { person } = props
 		const splitName = Person.parseFullName(person.name)
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			fullName: Person.fullName(splitName),
 			splitName: splitName,
-			error: null,
 			originalStatus: person.status,
 			showWrongPersonModal: false,
 			wrongPersonOptionValue: null,
@@ -372,15 +373,14 @@ class BasePersonForm extends ValidatableFormWrapper {
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
 		person.name = Person.fullName(this.state.splitName, true)
-
-		let url = `/api/people/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updatePerson' : 'createPerson'
+		let graphql = operation + '(person: $person)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { person: person }
+		const variableDef = '($person: PersonInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, person, {disableSubmits: true})
-			.then(response => {
-				if (response.code) {
-					throw response.code
-				}
-
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
@@ -389,19 +389,19 @@ class BasePersonForm extends ValidatableFormWrapper {
 						pathname: '/',
 					})
 				} else {
-					if (response.id) {
-						person.id = response.id
+					if (data[operation].id) {
+						person.id = data[operation].id
 					}
 					this.props.history.replace(Person.pathForEdit(person))
 					this.props.history.push({
 						pathname: Person.pathFor(person),
 						state: {
-							success: 'Person saved successfully',
+							success: 'Person saved',
 						}
 					})
 				}
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				jumpToTop()
 			})
 	}

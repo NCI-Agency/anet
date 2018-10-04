@@ -26,6 +26,8 @@ class MergePeople extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			winner: {},
 			loser: {},
 			copyPosition: false
@@ -33,7 +35,7 @@ class MergePeople extends Page {
 	}
 
 	render() {
-		let {winner, loser, copyPosition, error, success} = this.state
+		let {winner, loser, copyPosition} = this.state
 		let errors = this.validate()
 
 		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status,
@@ -44,7 +46,7 @@ class MergePeople extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['Merge People Tool', '/admin/mergePeople']]} />
-				<Messages error={error} success={success} />
+				<Messages error={this.state.error} success={this.state.success} />
 
 				<h2 className="form-header">Merge People Tool</h2>
 				<Alert bsStyle="warning">
@@ -191,20 +193,28 @@ class MergePeople extends Page {
 	submit(event) {
 		event.stopPropagation()
 		event.preventDefault()
-
 		let {winner, loser, copyPosition} = this.state
-        API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
-            .then(() => {
-				this.props.history.push({
-					pathname: Person.pathFor(this.state.winner),
-					state: {success: 'People successfully merged'}
-				})
-			})
-			.catch(error => {
-                this.setState({error})
-                jumpToTop()
+		let operation = 'mergePeople'
+		let graphql = operation + '(winnerId: $winnerId, loserId: $loserId, copyPosition: $copyPosition)'
+		const variables = {
+				winnerId: winner.id,
+				loserId: loser.id,
+				copyPosition: copyPosition
+		}
+		const variableDef = '($winnerId: Int!,$loserId: Int!,$copyPosition: Boolean!,)'
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation]) {
+					this.props.history.push({
+						pathname: Person.pathFor(this.state.winner),
+						state: {success: 'People merged'}
+					})
+				}
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
 				console.error(error)
-            })
+			})
 	}
 
 }

@@ -37,7 +37,7 @@ export default class Person extends Model {
 		rank: '',
 		gender: 'MALE',
 		phoneNumber: '',
-		endOfTourDate: '',
+		endOfTourDate: null,
 		biography: '',
 		get role() { return Person.ROLE.PRINCIPAL },
 		position: {},

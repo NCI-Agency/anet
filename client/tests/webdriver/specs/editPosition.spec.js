@@ -37,9 +37,11 @@ describe('Edit position page', () => {
         EditPosition.submitForm()
         EditPosition.waitForAlertSuccessToLoad()
         const alertMessage = EditPosition.alertSuccess.getText()
-        expect(alertMessage).to.equal('Saved Position')
+        expect(alertMessage).to.equal('Position saved')
 
         EditPosition.open()
+        EditPosition.form.waitForExist()
+        EditPosition.form.waitForVisible()
         EditPosition.typeAdvisorButton.waitForVisible()
         expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.include('active')
         EditPosition.typePrincipalButton.waitForVisible()
@@ -54,7 +56,7 @@ describe('Edit position page', () => {
         EditPosition.orgAutocomplete.click()
         EditPosition.submitForm()
         EditPosition.waitForAlertSuccessToLoad()
-        expect(EditPosition.alertSuccess.getText()).to.equal('Saved Position')
+        expect(EditPosition.alertSuccess.getText()).to.equal('Position saved')
     })
   })
 

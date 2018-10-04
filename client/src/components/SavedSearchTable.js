@@ -44,6 +44,8 @@ export default class SavedSearchTable extends Component {
 			// Add default sorting (if not specified/saved in the query); see SEARCH_CONFIG in pages/Search.js
 			query.sortBy = query.sortBy || 'ENGAGEMENT_DATE'
 			query.sortOrder = query.sortOrder || 'DESC'
+			query.pageNum = query.pageNum || 0
+			query.pageSize = query.pageSize || 10
 			let fields = ReportCollection.GQL_REPORT_FIELDS
 			API.query(/*GraphQL */`
 				reports: reportList(query: $query) {

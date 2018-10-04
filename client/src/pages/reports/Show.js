@@ -39,6 +39,8 @@ class BaseReportShow extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			report: new Report({id: props.match.params.id}),
 			newComment: new Comment(),
 			approvalComment: new Comment(),
@@ -408,15 +410,20 @@ class BaseReportShow extends Page {
 
 	@autobind
 	onConfirmDelete() {
-		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-			this.props.history.push({
-				pathname: '/',
-				state: {success: 'Report deleted'}
+		const operation = 'deleteReport'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: this.state.report.id }
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.props.history.push({
+					pathname: '/',
+					state: {success: 'Report deleted'}
+				})
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
 			})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
 	}
 
 	@autobind
@@ -505,38 +512,60 @@ class BaseReportShow extends Page {
 			comment: email.comment
 		}
 
-		API.send(`/api/reports/${this.state.report.id}/email`, emailDelivery).then (() =>
-			this.setState({
-				success: 'Email successfully sent',
-				showEmailModal: false,
-				email: {}
+		let graphql = 'emailReport(id: $id, email: $email)'
+		const variables = {
+			id: this.state.report.id,
+			email: emailDelivery
+		}
+		const variableDef = '($id: Int!, $email: AnetEmailInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.setState({
+					success: 'Email successfully sent',
+					error:null,
+					showEmailModal: false,
+					email: {}
+				})
+			}).catch(error => {
+				this.setState({
+					showEmailModal: false,
+					email: {}
+				})
+				this.handleError(error)
 			})
-		)
 	}
 
 	@autobind
 	submitDraft() {
-		API.send(`/api/reports/${this.state.report.id}/submit`).then(data => {
-			this.updateReport()
-			this.setState({error:null})
-			this.setState({success:'Successfully submitted report'})
-		}, data => {
-			this.handleError(data)
-		})
+		let graphql = 'submitReport(id: $id) { id }'
+		const variables = {
+			id: this.state.report.id
+		}
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({error:null, success: 'Report submitted'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 	}
 
 	@autobind
 	submitComment(event){
-		API.send(`/api/reports/${this.state.report.id}/comments`,
-			this.state.newComment)
-		.then(data => {
-			this.updateReport()
-			this.setState({newComment:new Comment()})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
-
+		let graphql = 'addComment(id: $id, comment: $comment) { id }'
+		const variables = {
+			id: this.state.report.id,
+			comment: this.state.newComment
+		}
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({newComment:new Comment(), error:null, success: 'Comment saved'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 		event.stopPropagation()
 		event.preventDefault()
 	}
@@ -544,34 +573,44 @@ class BaseReportShow extends Page {
 	@autobind
 	rejectReport() {
 		if (this.state.approvalComment.text.length === 0){
-			this.setState({success:null})
 			this.handleError({message:'Please include a comment when rejecting a report.'})
 			return
 		}
 
 		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
-		API.send(`/api/reports/${this.state.report.id}/reject`, this.state.approvalComment).then(data => {
-			this.updateReport()
-			this.setState({success:'Successfully rejected report'})
-			this.setState({error:null})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
+		let graphql = 'rejectReport(id: $id, comment: $comment) { id }'
+		const variables = {
+			id: this.state.report.id,
+			comment: this.state.approvalComment
+		}
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({error:null, success: 'Successfully rejected report'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 	}
 
 	@autobind
 	approveReport() {
 		let comment = (this.state.approvalComment.text.length > 0) ? this.state.approvalComment : {}
-		API.send(`/api/reports/${this.state.report.id}/approve`, comment).then(data => {
-			let lastApproval = (this.state.report.approvalStep.nextStepId === null)
-			this.updateReport()
-			let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
-			this.setState({error:null, success: message})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
+		let graphql = 'approveReport(id: $id, comment: $comment) { id }'
+		const variables = {
+			id: this.state.report.id,
+			comment: comment
+		}
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				let lastApproval = (this.state.report.approvalStep.nextStepId === null)
+				this.updateReport()
+				let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
+				this.setState({error:null, success: message})
+			}).catch(error => {
+				this.handleError(error)
+			})
 	}
 
 	@autobind
@@ -601,7 +640,7 @@ class BaseReportShow extends Page {
 
 	@autobind
 	handleError(response) {
-		this.setState({error: response})
+		this.setState({success: null, error: response})
 		jumpToTop()
 	}
 

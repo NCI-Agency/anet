@@ -34,6 +34,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			errors: {},
 		}
@@ -135,9 +137,10 @@ class BasePositionForm extends ValidatableFormWrapper {
 				<Fieldset title="Additional information">
 					<Form.Field id="location">
 						<Autocomplete
+							objectType={Location}
 							valueKey="name"
+							fields={Location.autocompleteQuery}
 							placeholder="Start typing to find a location where this Position will operate from..."
-							url="/api/locations/search"
 							queryParams={{status: Location.STATUS.ACTIVE}}
 						/>
 					</Form.Field>
@@ -170,22 +173,26 @@ class BasePositionForm extends ValidatableFormWrapper {
 		position.person = (position.person && position.person.id) ? {id: position.person.id} : {}
 		position.code = position.code || null //Need to null out empty position codes
 
-		let url = `/api/positions/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updatePosition' : 'createPosition'
+		let graphql = operation + '(position: $position)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { position: position }
+		const variableDef = '($position: PositionInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, position, {disableSubmits: true})
-			.then(response => {
-				if (response.id) {
-					position.id = response.id
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation].id) {
+					position.id = data[operation].id
 				}
 				this.props.history.replace(Position.pathForEdit(position))
 				this.props.history.push({
 					pathname: Position.pathFor(position),
 					state: {
-						success: 'Saved Position',
+						success: 'Position saved',
 					}
 				})
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				jumpToTop()
 			})
 	}

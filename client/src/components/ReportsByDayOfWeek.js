@@ -39,6 +39,7 @@ class ReportsByDayOfWeek extends Component {
 
     this.state = {
       graphDataByDayOfWeek: [],
+      reportsPageNum: 0,
       focusedDayOfWeek: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
@@ -139,6 +140,7 @@ class ReportsByDayOfWeek extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     return chartQueryParams

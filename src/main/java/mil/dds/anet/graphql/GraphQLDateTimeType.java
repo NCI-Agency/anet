@@ -3,6 +3,7 @@ package mil.dds.anet.graphql;
 import java.math.BigInteger;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 
 import graphql.language.IntValue;
 import graphql.schema.Coercing;
@@ -20,7 +21,11 @@ public class GraphQLDateTimeType extends GraphQLScalarType {
 		public DateTime parseValue(Object input) {
 			if (input instanceof Long) {
 				return new DateTime((Long)input);
-			} else {
+			}
+			else if (input instanceof String) {
+				return DateTime.parse((String)input, ISODateTimeFormat.dateTimeParser());
+			}
+			else {
 				return new DateTime(Long.parseLong(input.toString()));
 			}
 		}

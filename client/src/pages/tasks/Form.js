@@ -53,6 +53,8 @@ class BaseTaskForm extends ValidatableFormWrapper {
 		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 		}
 	}
@@ -102,18 +104,23 @@ class BaseTaskForm extends ValidatableFormWrapper {
 						</RequiredField>
 
 						<Form.Field id="responsibleOrg" label="Responsible organization">
-							<Autocomplete valueKey="shortName"
+							<Autocomplete
+								objectType={Organization}
+								valueKey="shortName"
+								fields={Organization.autocompleteQuery}
 								placeholder={`Select a responsible organization for this ${taskShortLabel}`}
-								url="/api/organizations/search"
 								queryParams={orgSearchQuery}
 							/>
 						</Form.Field>
 
 						{customFieldRef1 &&
 							<this.TaskCustomFieldRef1 dictProps={customFieldRef1} id="customFieldRef1">
-								<Autocomplete valueKey="shortName"
+								<Autocomplete
+									objectType={Task}
+									valueKey="shortName"
+									fields={Task.autocompleteQuery}
+									template={Task.autocompleteTemplate}
 									placeholder={customFieldRef1.placeholder}
-									url="/api/tasks/search"
 									queryParams={{}}
 								/>
 							</this.TaskCustomFieldRef1>
@@ -172,26 +179,26 @@ class BaseTaskForm extends ValidatableFormWrapper {
 			task.customFieldRef1 = {id: task.customFieldRef1.id}
 		}
 
-		let url = `/api/tasks/${edit ? 'update' : 'new'}`
+		const operation = edit ? 'updateTask' : 'createTask'
+		let graphql = operation + '(task: $task)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { task: task }
+		const variableDef = '($task: TaskInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, task, {disableSubmits: true})
-			.then(response => {
-				if (response.code) {
-					throw response.code
-				}
-
-				if (response.id) {
-					task.id = response.id
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation].id) {
+					task.id = data[operation].id
 				}
 				this.props.history.replace(Task.pathForEdit(task))
 				this.props.history.push({
 					pathname: Task.pathFor(task),
 					state: {
-						success: 'Saved successfully',
+						success: 'Task saved',
 					}
 				})
 			}).catch(error => {
-				this.setState({error: error})
+				this.setState({success: null, error: error})
 				jumpToTop()
 			})
 	}
