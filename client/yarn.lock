@@ -9890,10 +9890,10 @@ react-scrollspy@^3.3.5:
     classnames "^2.2.5"
     prop-types "^15.5.10"
 
-react-tag-input@^5.2.2:
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/react-tag-input/-/react-tag-input-5.2.2.tgz#403bd7dfde66f56efaa271310af1f181bdf3c0f6"
-  integrity sha512-6V+gUf3K9f7uXFVB3UAOJww+lOzkT0YAZfyg2KmWHYv/WehgTiQHKKK4P3i1sRSCGBD61LK1RGzLpYtH8LKFqQ==
+react-tag-input@^5.2.3:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/react-tag-input/-/react-tag-input-5.2.3.tgz#f04d73a81765323b9b515c58ac22550b3dfcf791"
+  integrity sha512-NpAwKCHGtpkU9bjyCrhfrJe1Iqr5btuf6ukHpiUA0hoJ1JseNb9dGF3YNHANvqYIZDihulXj2Ix07oRdzsDE5A==
   dependencies:
     core-js "2.5.5"
     lodash "4.17.11"
