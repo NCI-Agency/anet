@@ -8,7 +8,6 @@ import _isEqual from 'lodash/isEqual'
 import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
-import utils from 'utils'
 
 import './Autocomplete.css'
 

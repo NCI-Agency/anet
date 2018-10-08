@@ -26,7 +26,6 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import utils from 'utils'
 
 import { SEARCH_OBJECT_TYPES } from 'actions'
 import {LAST_WEEK, AFTER} from 'dateUtils'

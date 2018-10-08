@@ -3,7 +3,6 @@ import './index.css'
 
 import 'core-js/shim'
 import 'locale-compare-polyfill'
-import './utils'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
