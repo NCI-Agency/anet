@@ -115,6 +115,10 @@ export default {
 			return true
 		}
 	},
+
+	getReference: function(obj) {
+		return (obj && obj.uuid) ? {uuid: obj.uuid} : {}
+	},
 }
 
 Object.forEach = function(source, func) {

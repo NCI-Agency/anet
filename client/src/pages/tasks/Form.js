@@ -23,6 +23,7 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 const customEnumButtons = (list) => {
 	let buttons = []
@@ -172,13 +173,8 @@ class BaseTaskForm extends ValidatableFormWrapper {
 	@autobind
 	onSubmit(event) {
 		let {task, edit} = this.props
-		if (task.responsibleOrg) {
-			task.responsibleOrg = {uuid: task.responsibleOrg.uuid}
-		}
-		if (task.customFieldRef1) {
-			task.customFieldRef1 = {uuid: task.customFieldRef1.uuid}
-		}
-
+		task.responsibleOrg = utils.getReference(task.responsibleOrg)
+		task.customFieldRef1 = utils.getReference(task.customFieldRef1)
 		const operation = edit ? 'updateTask' : 'createTask'
 		let graphql = operation + '(task: $task)'
 		graphql += edit ? '' : ' { uuid }'

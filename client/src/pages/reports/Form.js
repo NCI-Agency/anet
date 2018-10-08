@@ -35,6 +35,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
 import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -559,9 +560,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		report.attendees = report.attendees.map(a =>
 			Object.without(a, 'position', '_loaded')
 		)
-		if (report.location) {
-			report.location = {uuid: report.location.uuid}
-		}
+		report.location = utils.getReference(report.location)
 		if (!this.state.isCancelled) {
 			delete report.cancelledReason
 		}

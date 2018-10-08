@@ -19,6 +19,7 @@ import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import LinkTo from 'components/LinkTo'
 import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -168,9 +169,9 @@ class BasePositionForm extends ValidatableFormWrapper {
 		// Remove permissions property, was added temporarily in order to be able
 		// to select a specific advisor type.
 		delete position.permissions
-		position.location = {uuid: position.location.uuid}
-		position.organization = {uuid: position.organization.uuid}
-		position.person = (position.person && position.person.uuid) ? {uuid: position.person.uuid} : {}
+		position.location = utils.getReference(position.location)
+		position.organization = utils.getReference(position.organization)
+		position.person = utils.getReference(position.person)
 		position.code = position.code || null //Need to null out empty position codes
 
 		const operation = edit ? 'updatePosition' : 'createPosition'
