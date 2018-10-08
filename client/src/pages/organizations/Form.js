@@ -24,6 +24,7 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -256,9 +257,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		for (var i = 0; i < this.props.organization.approvalSteps.length; i++) {
 			organization = Object.without(organization, 'approvalStepName' + i)
 		}
-		if (organization.parentOrg) {
-			organization.parentOrg = {id: organization.parentOrg.id}
-		}
+		organization.parentOrg = utils.getReference(organization.parentOrg)
 		let edit = this.props.edit
 		const operation = edit ? 'updateOrganization' : 'createOrganization'
 		let graphql = operation + '(organization: $organization)'
