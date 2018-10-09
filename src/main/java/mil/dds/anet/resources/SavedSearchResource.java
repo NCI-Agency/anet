@@ -32,7 +32,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/savedSearches")
+@Path("/old-api/savedSearches")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class SavedSearchResource {
@@ -46,14 +46,14 @@ public class SavedSearchResource {
 	@POST
 	@Timed
 	@Path("/new")
-	public SavedSearch createSavedSearch(@Auth Person user, SavedSearch search) {
-		return createSavedSearchCommon(user, search);
+	public SavedSearch createSavedSearch(@Auth Person user, SavedSearch savedSearch) {
+		return createSavedSearchCommon(user, savedSearch);
 	}
 
-	private SavedSearch createSavedSearchCommon(Person user, SavedSearch search) {
-		search.setOwner(Person.createWithId(user.getId()));
+	private SavedSearch createSavedSearchCommon(Person user, SavedSearch savedSearch) {
+		savedSearch.setOwner(Person.createWithUuid(user.getUuid()));
 		try {
-			final SavedSearch created = dao.insert(search);
+			final SavedSearch created = dao.insert(savedSearch);
 			AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
 			return created;
 		} catch (UnableToExecuteStatementException e) {
@@ -62,8 +62,8 @@ public class SavedSearchResource {
 	}
 
 	@GraphQLMutation(name="createSavedSearch")
-	public SavedSearch createSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="search") SavedSearch search) {
-		return createSavedSearchCommon(DaoUtils.getUserFromContext(context), search);
+	public SavedSearch createSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="savedSearch") SavedSearch savedSearch) {
+		return createSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearch);
 	}
 
 	@GET
@@ -75,24 +75,24 @@ public class SavedSearchResource {
 		return dao.getSearchesByOwner(user);
 	}
 
-    @DELETE
-    @Timed
-    @Path("/{id}")
-    public Response deleteSavedSearch(@Auth Person user, @PathParam("id") Integer id) {
-        deleteSavedSearchCommon(user, id);
-        return Response.ok().build();
-    }
+	@DELETE
+	@Timed
+	@Path("/{uuid}")
+	public Response deleteSavedSearch(@Auth Person user, @PathParam("uuid") String uuid) {
+	    deleteSavedSearchCommon(user, uuid);
+	    return Response.ok().build();
+	}
 
-    private int deleteSavedSearchCommon(Person user, int savedSearchId) {
-        int numDeleted = dao.deleteSavedSearch(savedSearchId, user);
-        if (numDeleted == 0) {
-            throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
-        }
-        return numDeleted;
-    }
+	private int deleteSavedSearchCommon(Person user, String savedSearchUuid) {
+	    int numDeleted = dao.deleteSavedSearch(savedSearchUuid, user);
+	    if (numDeleted == 0) {
+		throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
+	    }
+	    return numDeleted;
+	}
 
-    @GraphQLMutation(name="deleteSavedSearch")
-    public Integer deleteSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="savedSearchId") int savedSearchId) {
-        return deleteSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearchId);
-    }
+	@GraphQLMutation(name="deleteSavedSearch")
+	public Integer deleteSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String savedSearchUuid) {
+	    return deleteSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearchUuid);
+	}
 }

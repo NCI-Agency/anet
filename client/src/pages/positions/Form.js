@@ -18,6 +18,8 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import LinkTo from 'components/LinkTo'
+import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -53,7 +55,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 		} else {
 			orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 			if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
-				orgSearchQuery.parentOrgId = currentUser.position.organization.id
+				orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
 				orgSearchQuery.parentOrgRecursively = true
 			}
 		}
@@ -65,7 +67,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.id
+		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.uuid
 
 		return (
 			<div>
@@ -104,7 +106,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
-							fields="id, longName, shortName, identificationCode, type"
+							fields="uuid, longName, shortName, identificationCode, type"
 							template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
@@ -120,12 +122,12 @@ class BasePositionForm extends ValidatableFormWrapper {
 					{position.type !== Position.TYPE.PRINCIPAL &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
-								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.name}</Button>
+								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.type}</Button>
 								{isAdmin &&
-									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.name}</Button>
+									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.type}</Button>
 								}
 								{isAdmin &&
-									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.name}</Button>
+									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.type}</Button>
 								}
 							</ButtonToggleGroup>
 						</Form.Field>
@@ -167,21 +169,21 @@ class BasePositionForm extends ValidatableFormWrapper {
 		// Remove permissions property, was added temporarily in order to be able
 		// to select a specific advisor type.
 		delete position.permissions
-		position.location = {id: position.location.id}
-		position.organization = {id: position.organization.id}
-		position.person = (position.person && position.person.id) ? {id: position.person.id} : {}
+		position.location = utils.getReference(position.location)
+		position.organization = utils.getReference(position.organization)
+		position.person = utils.getReference(position.person)
 		position.code = position.code || null //Need to null out empty position codes
 
 		const operation = edit ? 'updatePosition' : 'createPosition'
 		let graphql = operation + '(position: $position)'
-		graphql += edit ? '' : ' { id }'
+		graphql += edit ? '' : ' { uuid }'
 		const variables = { position: position }
 		const variableDef = '($position: PositionInput!)'
 		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
-				if (data[operation].id) {
-					position.id = data[operation].id
+				if (data[operation].uuid) {
+					position.uuid = data[operation].uuid
 				}
 				this.props.history.replace(Position.pathForEdit(position))
 				this.props.history.push({
@@ -192,7 +194,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

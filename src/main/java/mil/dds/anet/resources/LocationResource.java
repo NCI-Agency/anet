@@ -35,7 +35,7 @@ import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/locations")
+@Path("/old-api/locations")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class LocationResource {
@@ -58,9 +58,9 @@ public class LocationResource {
 	@GET
 	@Timed
 	@GraphQLQuery(name="location")
-	@Path("/{id}")
-	public Location getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		Location loc = dao.getById(id);
+	@Path("/{uuid}")
+	public Location getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+		Location loc = dao.getByUuid(uuid);
 		if (loc == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return loc;
 	}

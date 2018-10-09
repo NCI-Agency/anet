@@ -34,6 +34,8 @@ import NavigationWarning from 'components/NavigationWarning'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
+import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 class BaseReportForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -58,7 +60,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				tasks: [],
 				authorizationGroups: [],
 			},
-			reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name})),
+			reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name})),
 			suggestionList: [],
 
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation,
@@ -81,19 +83,19 @@ class BaseReportForm extends ValidatableFormWrapper {
 	componentDidMount() {
 		API.query(/* GraphQL */`
 			locationRecents(maxResults:6) {
-				list { id, name }
+				list { uuid, name }
 			}
 			personRecents(maxResults:6) {
-				list { id, name, rank, role, position { id, name, organization {id, shortName}} }
+				list { uuid, name, rank, role, position { uuid, name, organization {uuid, shortName}, location {uuid, name} } }
 			}
 			taskRecents(maxResults:6) {
-				list { id, shortName, longName }
+				list { uuid, shortName, longName }
 			}
 			authorizationGroupRecents(maxResults:6) {
-				list { id, name, description }
+				list { uuid, name, description }
 			}
 			tags {
-				list { id, name, description }
+				list { uuid, name, description }
 			}
 		`).then(data => {
 			let newState = {
@@ -103,7 +105,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 					tasks: data.taskRecents.list,
 					authorizationGroups: data.authorizationGroupRecents.list,
 				},
-				suggestionList: data.tags.list.map(tag => ({id: tag.id.toString(), text: tag.name})),
+				suggestionList: data.tags.list.map(tag => ({id: tag.uuid.toString(), text: tag.name})),
 			}
 			this.setState(newState)
 		})
@@ -121,8 +123,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 		const { report, currentUser } = this.props
 		const prevReport = prevProps.report
 		const prevCurrentUser = prevProps.currentUser
-		if (report.id !== prevReport.id) {
-			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name}))})
+		if (report.uuid !== prevReport.uuid) {
+			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name}))})
 		}
 		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
 		const prevShowReportText = !!prevReport.reportText || !!prevReport.reportSensitiveInformation
@@ -171,7 +173,6 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	render() {
 		const { report, onDelete, currentUser } = this.props
-		const { edit } = this.props
 		const {recents, suggestionList, errors, isCancelled, showAssignedPositionWarning, showActivePositionWarning} = this.state
 
 		const hasErrors = Object.keys(errors).length > 0
@@ -322,6 +323,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Location</th>
 									<th>Org</th>
 									<th></th>
 								</tr>
@@ -331,7 +333,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									this.renderAttendeeRow(person, idx)
 								)}
 
-								<tr className="attendee-divider-row"><td colSpan={5}><hr /></td></tr>
+								<tr className="attendee-divider-row"><td colSpan={6}><hr /></td></tr>
 
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), (person, idx) =>
 									this.renderAttendeeRow(person, idx)
@@ -343,7 +345,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 							<Form.Field.ExtraCol className="shortcut-list">
 								<h5>Recent attendees</h5>
 								{Person.map(recents.persons, person =>
-									<Button key={person.id} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add <LinkTo person={person} isLink={false}/></Button>
+									<Button key={person.uuid} bsStyle="link" onClick={this.addAttendee.bind(this, person)}>Add <LinkTo person={person} isLink={false}/></Button>
 								)}
 							</Form.Field.ExtraCol>
 						}
@@ -382,7 +384,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 						<div>
 							<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
 
-							{(report.reportSensitiveInformation || !edit) &&
+							{(report.reportSensitiveInformation || !this.props.edit) &&
 								<div>
 									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
 										value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
@@ -448,7 +450,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	renderAttendeeRow(person, idx) {
-		return <tr key={person.id}>
+		return <tr key={person.uuid}>
 			<td className="primary-attendee">
 				<Checkbox checked={person.primary} onChange={this.setPrimaryAttendee.bind(this, person)} id={'attendeePrimary_' + person.role + "_" + idx}/>
 			</td>
@@ -458,6 +460,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				<LinkTo person={person}/>
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 			<td onClick={this.removeAttendee.bind(this, person)} id={'attendeeDelete_' + person.role + "_" + idx} >
 				<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
@@ -546,28 +549,31 @@ class BaseReportForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
+	isEditMode() {
+		// We're in edit mode when the form was started as an edit form, or when the report got an id after autosave
+		return this.props.edit || this.props.report.id
+	}
+
+	@autobind
 	saveReport(disableSubmits) {
 		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
-		report.tags = this.state.reportTags.map(tag => ({id: tag.id}))
-		if(report.primaryAdvisor) { report.attendees.find(a => a.id === report.primaryAdvisor.id).isPrimary = true }
-		if(report.primaryPrincipal) { report.attendees.find(a => a.id === report.primaryPrincipal.id).isPrimary = true }
+		report.tags = this.state.reportTags.map(tag => ({uuid: tag.uuid}))
+		if(report.primaryAdvisor) { report.attendees.find(a => a.uuid === report.primaryAdvisor.uuid).isPrimary = true }
+		if(report.primaryPrincipal) { report.attendees.find(a => a.uuid === report.primaryPrincipal.uuid).isPrimary = true }
 		delete report.primaryPrincipal
 		delete report.primaryAdvisor
 		report.attendees = report.attendees.map(a =>
 			Object.without(a, 'position', '_loaded')
 		)
-		if (report.location) {
-			report.location = {id: report.location.id}
-		}
+		report.location = utils.getReference(report.location)
 		if (!this.state.isCancelled) {
 			delete report.cancelledReason
 		}
-		let edit = this.props.edit
-		let graphql = 'createReport(report: $report) { id }'
+		let graphql = 'createReport(report: $report) { uuid }'
 		let variableDef = '($report: ReportInput!)'
 		let variables = {report: report}
-		if (edit) {
-			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) {id}'
+		if (this.isEditMode()) {
+			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { uuid }'
 			variableDef = '($report: ReportInput!, $sendEditEmail: Boolean!)'
 			variables.sendEditEmail = disableSubmits
 		}
@@ -580,13 +586,13 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
-		const operation = this.props.edit ? 'updateReport' : 'createReport'
+		const operation = this.isEditMode() ? 'updateReport' : 'createReport'
 		this.setState({isBlocking: false})
 		this.saveReport(true)
 			.then(data => {
-				if (data[operation].id) {
+				if (data[operation].uuid) {
 					// FIXME: do not change the value of the props
-					this.props.report.id = data[operation].id
+					this.props.report.uuid = data[operation].uuid
 				}
 				// this updates the current page URL on model/new to be the edit page,
 				// so that if you press back after saving a new model, it takes you
@@ -602,13 +608,13 @@ class BaseReportForm extends ValidatableFormWrapper {
 			}).catch(error => {
 				// FIXME: should disableOnSubmit be set here?
 				this.setState({success: null, error: error, disableOnSubmit: false})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 
 	@autobind
 	autoSave() {
-		const operation = this.props.edit ? 'updateReport' : 'createReport'
+		const operation = this.isEditMode() ? 'updateReport' : 'createReport'
 		// Only auto-save if the report has changed
 		if (this.state.reportChanged === false) {
 			// Just re-schedule the auto-save timer
@@ -617,9 +623,9 @@ class BaseReportForm extends ValidatableFormWrapper {
 		} else {
 			this.saveReport(false)
 				.then(data => {
-					if (data[operation].id) {
+					if (data[operation].uuid) {
 						// FIXME: do not change the value of the props
-						this.props.report.id = data[operation].id
+						this.props.report.uuid = data[operation].uuid
 					}
 					if (data[operation].reportSensitiveInformation) {
 						this.props.report.reportSensitiveInformation = data[operation].reportSensitiveInformation

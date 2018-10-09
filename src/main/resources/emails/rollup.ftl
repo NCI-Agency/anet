@@ -101,7 +101,7 @@ a {
 				<h3>${advisor.name}</h3>
 				<#list advisor.nonCancelled as report>
 					<#if ! (report.cancelledReason??)>
-						${counter}. Report #${report.id?c} <#assign counter = counter + 1>
+						${counter}. Report #${report.uuid} <#assign counter = counter + 1>
 						<@renderReport report />
 						<#sep><hr /></#sep>
 					</#if>
@@ -157,7 +157,7 @@ a {
     <#list tasks as task>
     <div class="row">
         <div class="col-xs-12">
-            <#-- <a href="${serverUrl}/tasks/${task.id}"> -->
+            <#-- <a href="${serverUrl}/tasks/${task.uuid}"> -->
 <!--                <img height="20" alt="Task" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAXCAYAAAD+4+QTAAAABmJLR0QA/wDWABipT60nAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QERBQskHTWEPAAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAGnSURBVEjHzZUxqsJAEIZnAtlgFYM22huJd9AriHYK2uoBFG+QRi+TSgtNoZUi2wUxsRMU21zgf5XyghoTUd5bGLbYnf3499+ZZQCgLw8lbcJ2u01PQYoxnU5RrVYxm83SpCGVEtd1abVakeu631GyXq9RKBRARCgWi9hsNp9X4jgOnc9nYmY6nU7kOM5nlRyPR+i6DiK6RTabxeVySaSEHz3h5XJJvu/TbrejIAhov9+T7/vEzATgNpumSeVymUqlElmWRaZpUq1Wi1di2zY0TUMmk4GmaRBCQFVVMHNEBRGBmcHMUFUVQohInm3bESV319Xr9aAoysOD44KZoSgK+v3+3XU99KTT6UAIkRjEzBBCoNvtPvTkqfGtVisR6Apot9tPjY99XfV6PRGk0Wi8XyfNZjNRGbzaFwuRUhIzv4RIKd+HeJ73EsLM5Hne+5DD4UC/a7VSqdBoNCLLsiL7giB4v61cW4lhGJhMJpG18XgMwzBARNB1Pdb4p5D5fI5cLofhcBh7wGAwQD6fx2KxSA+RUiIMw0QNMAxDSCnTNcg//+P/LeQHMm6FWr8JMB8AAAAASUVORK5CYII=" /> -->
                 <strong>${fields.task.shortLabel}:</strong> ${(task.shortName)!} ${(task.longName)!}
             <#-- </a> -->
@@ -180,7 +180,7 @@ a {
         </div>
     </div>
 
-    <a href="${serverUrl}/reports/${report.id?c}/min" >
+    <a href="${serverUrl}/reports/${report.uuid}/min" >
     	Read full report
     </a>
 </#macro>

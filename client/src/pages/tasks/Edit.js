@@ -33,12 +33,12 @@ class TaskEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			task(id:${props.match.params.id}) {
-				id, shortName, longName, status,
+			task(uuid:"${props.match.params.uuid}") {
+				uuid, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
-				responsibleOrg {id,shortName, longName, identificationCode},
-				customFieldRef1 { id, shortName, longName }
+				responsibleOrg { uuid, shortName, longName, identificationCode },
+				customFieldRef1 { uuid, shortName, longName }
 			}
 		`).then(data => {
 			if (data.task.plannedCompletion) {

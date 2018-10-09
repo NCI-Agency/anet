@@ -38,7 +38,7 @@ class BaseGuidedTour extends Component {
 	}
 
 	componentDidUpdate() {
-		if (!this.runningTour && this.props.autostart && this.props.currentUser.id) {
+		if (!this.runningTour && this.props.autostart && this.propd.currentUser.uuid) {
 			this.startTour()
 		}
 	}

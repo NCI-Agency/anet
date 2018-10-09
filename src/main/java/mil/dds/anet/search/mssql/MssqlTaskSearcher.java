@@ -41,7 +41,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (tasks, (longName), :containsQuery) c_tasks"
-					+ " ON tasks.id = c_tasks.[Key]");
+					+ " ON tasks.uuid = c_tasks.[Key]");
 			whereClauses.add("(c_tasks.rank IS NOT NULL"
 					+ " OR tasks.shortName LIKE :likeQuery)");
 			args.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
@@ -49,18 +49,18 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		}
 
 		String commonTableExpression = null;
-		if (query.getResponsibleOrgId() != null) {
+		if (query.getResponsibleOrgUuid() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-				commonTableExpression = "WITH parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
 					+ ") ";
-				whereClauses.add(" organizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add(" organizationUuid IN (SELECT uuid from parent_orgs)");
 			} else {
-				whereClauses.add("organizationId = :orgId");
+				whereClauses.add("organizationUuid = :orgUuid");
 			}
-			args.put("orgId", query.getResponsibleOrgId());
+			args.put("orgUuid", query.getResponsibleOrgUuid());
 		}
 
 		if (query.getCategory() != null) {
@@ -131,7 +131,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tasks", "shortName", "longName"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tasks", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tasks", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 

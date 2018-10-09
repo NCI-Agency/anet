@@ -42,13 +42,13 @@ This is an attempt to describe the complete start to finish of how a request mak
   GET     / (mil.dds.anet.resources.HomeResource)
   POST    /advisorOrganizations/new (mil.dds.anet.resources.AdvisorOrganizationResource)
   POST    /advisorOrganizations/update (mil.dds.anet.resources.AdvisorOrganizationResource)
-  GET     /advisorOrganizations/{id} (mil.dds.anet.resources.AdvisorOrganizationResource)
+  GET     /advisorOrganizations/{uuid} (mil.dds.anet.resources.AdvisorOrganizationResource)
   ..... (continued) ....
 ```
 
 1. This tells you the URL, and then the class that will serve that URL.
 1. Parameters into those methods are autowired in based on the HTTP request
-  - `@PathParam` will pull a named parameter out of the `@Path` annotation on the method (e.g. `/api/people/{id}`)
+  - `@PathParam` will pull a named parameter out of the `@Path` annotation on the method (e.g. `/api/people/{uuid}`)
   - `@QueryParam` will pull a named parameter out of the URL query string (e.g. `?foo=bar`)
   - Objects without annotations will be deserialized by Jackson from the HTTP entity
   - `@Auth` will pull the current logged in user
@@ -61,12 +61,15 @@ This is an attempt to describe the complete start to finish of how a request mak
   - These objects can be serialized back into JSON if they are returned by a method that is annotated with `@Produces(MediaType.APPLICATION_JSON)`
 
 ```java
-@GET
-@Path("/{id}")
-@Produces(MediaType.APPLICATION_JSON)
-public Report getReportById(@PathParam("id") int id) {
-  return dao.getById(id);
-}
+	@GET
+	@Timed
+	@Path("/{uuid}")
+	@GraphQLFetcher
+	public Report getByUuid(@Auth Person user, @PathParam("uuid") String uuid) {
+		final Report r = dao.getByUuid(uuid, user);
+		if (r == null) { throw new WebApplicationException(Status.NOT_FOUND); }
+		return r;
+	}
 ```
 
 # How the GraphQL API Works
@@ -74,26 +77,26 @@ GraphQL is the mechanism by which most data is fetched to be displayed in the we
 
 1. All GraphQL queries go to the `GraphQLResource#graphql()` method.  This resource is initalized by being passed all of the other REST Resources within ANET.
 1. The GraphQLResource will scan through all of the other REST Resources and look for methods that are annotated with the `@GraphQLFetcher` annotation. This annotation tells GraphQL that it can use this method as a "entry point" into the ANET Graph.
-  - "The Anet Graph" is the term we'll use to describe all of the data within ANET and the relationships between the different object types. e.g.: A Person with id 123 has a Position which belongs to an Organization... and so on.
+  - "The Anet Graph" is the term we'll use to describe all of the data within ANET and the relationships between the different object types. e.g.: A Person with uuid d95d8573-b45f-4eb6-ae30-e2299d3195bd has a Position which belongs to an Organization... and so on.
   - You can always pass the `f:` argument (f is for Function) to call a Resource method, this will use either the value passed to the `@GraphQLFetcher`, or the name of the method if no value is passed.
-1. Once you have an object that was returned from a Resource (these are the Beans), you can call any of the 'get' methods on that object to fetch fields.  To put this all together, the query `person(id:123) { id, name}` will look for a method on PersonResource that takes a parameter of name `id`, and then when it gets the `Person` object back, it will call the `getId()` and `getName()` methods on that Person object to fetch those fields.
-1. Each of the primary objects within ANET (The Beans, or Person, Position, Organization, Report, Task), knows about its relationships to other objects.  Similar to the above example, if you query graphql with `person(id:123) { postion {name }}` it will find the person with id 123, and then call the `getPosition()` method on the Person object to fetch that relationship.
-  - This is an example of how GraphQL saves us a round-trip to the server versus using a strict REST api, where the client would have to call '/people/123' and then '/positions/XXX'.
+1. Once you have an object that was returned from a Resource (these are the Beans), you can call any of the 'get' methods on that object to fetch fields.  To put this all together, the query `person(uuid:"d95d8573-b45f-4eb6-ae30-e2299d3195bd") { uuid, name}` will look for a method on PersonResource that takes a parameter of name `uuid`, and then when it gets the `Person` object back, it will call the `getUuid()` and `getName()` methods on that Person object to fetch those fields.
+1. Each of the primary objects within ANET (The Beans, or Person, Position, Organization, Report, Task), knows about its relationships to other objects.  Similar to the above example, if you query graphql with `person(uuid:"d95d8573-b45f-4eb6-ae30-e2299d3195bd") { postion {name }}` it will find the person with uuid d95d8573-b45f-4eb6-ae30-e2299d3195bd, and then call the `getPosition()` method on the Person object to fetch that relationship.
+  - This is an example of how GraphQL saves us a round-trip to the server versus using a strict REST api, where the client would have to call '/people/d95d8573-b45f-4eb6-ae30-e2299d3195bd' and then '/positions/XXX'.
 1. For any method where arguments are required, the GraphQLResource scans all of the methods in Resources and Bean classes to look for what arguments are required and then will look for those arguments passed via the GraphQL query.
   - In a REST Resource, we use the existing `@PathParam` and `@QueryParam` annotations to pull the name of the parameters.
   - In the Bean classes, we use `@GraphQLParam` to annotate the name of the parameters.
 
 Here's a sample GraphQL query and how ANET processes it:
 ```
-person(id:123) {
-  id,
+person(uuid:"d95d8573-b45f-4eb6-ae30-e2299d3195bd") {
+  uuid,
   name,
   position {
-    id,
+    uuid,
     name,
   },
   authoredReports(pageNum:0, pageSize:10) {
-    id,
+    uuid,
     intent
   }
 }
@@ -102,8 +105,8 @@ person(id:123) {
 1. Because you POST'd this to `/graphql`, Dropwizard will take the JSON and deserialize it into a `Map<String, Object>` and pass it to the GraphQL method.
 1. The `graphql-java` library will parse the structure and validate the input.
 1. The `person` keyword will tell GraphQL that you want to access the `person` object type at the root level. This goes to the `PersonResource`.
-1. The `AnetResourceDataFetcher` is the class that will get asked to load the person object. It looks at all of the methods on `PersonResource` that are annotated with `@GraphQLFetcher` and figures out which one has the right arguments to call. In this case it will be `getById(int id)`.  That method is called and it will do a database load and return the person.
-1. GraphQL next looks at the fields on the Person that we need to load, in this case `id, name, position, authoredReports`.  For each of these fields, they were defined on the person type by the `GraphQLResource.buildTypeFromBean` method, which scans a Bean class for getter methods and wires them up to be used later.  In this case it will look for methods called `getId()`, `getName()`.  For `authoredReports` and `positions` it will find the methods `loadAuthoredReports()` and `loadPosition` because they are annotated with `@GraphQLFetcher`.
+1. The `AnetResourceDataFetcher` is the class that will get asked to load the person object. It looks at all of the methods on `PersonResource` that are annotated with `@GraphQLFetcher` and figures out which one has the right arguments to call. In this case it will be `getByUuid(String uuid)`.  That method is called and it will do a database load and return the person.
+1. GraphQL next looks at the fields on the Person that we need to load, in this case `uuid, name, position, authoredReports`.  For each of these fields, they were defined on the person type by the `GraphQLResource.buildTypeFromBean` method, which scans a Bean class for getter methods and wires them up to be used later.  In this case it will look for methods called `getUuid()`, `getName()`.  For `authoredReports` and `positions` it will find the methods `loadAuthoredReports()` and `loadPosition` because they are annotated with `@GraphQLFetcher`.
   - As a convention, methods starting with `get` will never perform a database load and always return the value currently in memory.  `load` functions will execute a database query if necessary in order to return the correct value.
 1. Each of these methods are called and the values returned.
 1. For `getAuthoredReports`, when `buildTypeFromBean()` was scanning the Person Bean it noticed that this method required arguments, so it kept track of those.  When you try to call this method it will inspect the query to see if you passed the correct arguments. If so it will pass those arguments, and if not then it will throw an error.

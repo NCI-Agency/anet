@@ -23,6 +23,8 @@ import REMOVE_ICON from 'resources/delete.png'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -52,6 +54,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
+		const submitText = (isPrincipalOrg && !isAdmin) ? false : "Save organization"
 
 		return <div>
 			<NavigationWarning isBlocking={this.state.isBlocking} />
@@ -59,7 +62,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 			<ValidatableForm formFor={organization}
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
-			submitText="Save organization"
+			submitText={submitText}
 			horizontal>
 
 			<Messages error={this.state.error} />
@@ -83,13 +86,13 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 					/>
 				</Form.Field>
 
-				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
+				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" disabled={isPrincipalOrg && !isAdmin} />
 				<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName" disabled={isPrincipalOrg && !isAdmin} />
 
 				<Form.Field id="status" >
 					<ButtonToggleGroup>
-						<Button id="statusActiveButton" value={ Organization.STATUS.ACTIVE }>Active</Button>
-						<Button id="statusInactiveButton" value={ Organization.STATUS.INACTIVE }>Inactive</Button>
+						<Button id="statusActiveButton" disabled={isPrincipalOrg && !isAdmin} value={ Organization.STATUS.ACTIVE }>Active</Button>
+						<Button id="statusInactiveButton" disabled={isPrincipalOrg && !isAdmin} value={ Organization.STATUS.INACTIVE }>Inactive</Button>
 					</ButtonToggleGroup>
 				</Form.Field>
 
@@ -144,7 +147,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 				<Autocomplete valueKey="name"
 					placeholder="Search for the approver's position"
 					objectType={Position}
-					fields="id, name, code, type, person { id, name, rank }"
+					fields="uuid, name, code, type, person { uuid, name, rank }"
 					template={position => 
 						<span> {position.person && <span> <LinkTo person={position.person} isLink={false}/> - </span>} <LinkTo position={position} isLink={false}/> {position.code && <span> - {position.code} </span>} </span>
 					}
@@ -162,7 +165,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 					</thead>
 					<tbody>
 						{approvers.map((approver, approverIndex) =>
-							<tr key={approver.id} id={`step_${index}_approver_${approverIndex}`} >
+							<tr key={approver.uuid} id={`step_${index}_approver_${approverIndex}`} >
 								<td><LinkTo person={approver.person} target="_blank" /></td>
 								<td><LinkTo position={approver} target="_blank" /></td>
 								<td onClick={this.removeApprover.bind(this, approver, index)}>
@@ -178,7 +181,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 
 	@autobind
 	addApprover(index, position) {
-		if (!position || !position.id) {
+		if (!position || !position.uuid) {
 			return
 		}
 
@@ -195,7 +198,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 	removeApprover(approver, index) {
 		let step = this.props.organization.approvalSteps[index]
 		let approvers = step.approvers
-		let approverIndex = approvers.findIndex(m => m.id === approver.id )
+		let approverIndex = approvers.findIndex(m => m.uuid === approver.uuid )
 
 		if (approverIndex !== -1) {
 			approvers.splice(approverIndex, 1)
@@ -254,20 +257,18 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		for (var i = 0; i < this.props.organization.approvalSteps.length; i++) {
 			organization = Object.without(organization, 'approvalStepName' + i)
 		}
-		if (organization.parentOrg) {
-			organization.parentOrg = {id: organization.parentOrg.id}
-		}
+		organization.parentOrg = utils.getReference(organization.parentOrg)
 		let edit = this.props.edit
 		const operation = edit ? 'updateOrganization' : 'createOrganization'
 		let graphql = operation + '(organization: $organization)'
-		graphql += edit ? '' : ' { id }'
+		graphql += edit ? '' : ' { uuid }'
 		const variables = { organization: organization }
 		const variableDef = '($organization: OrganizationInput!)'
 		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
-				if (data[operation].id) {
-					organization.id = data[operation].id
+				if (data[operation].uuid) {
+					organization.uuid = data[operation].uuid
 				}
 				this.props.history.replace(Organization.pathForEdit(organization))
 				this.props.history.push({
@@ -278,7 +279,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 				})
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 }

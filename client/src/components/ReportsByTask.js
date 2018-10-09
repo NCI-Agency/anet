@@ -21,8 +21,8 @@ import pluralize from 'pluralize'
 const d3 = require('d3')
 const chartByTaskId = 'reports_by_task'
 const GQL_CHART_FIELDS =  /* GraphQL */`
-  id
-  tasks { id, shortName }
+  uuid
+  tasks { uuid, shortName }
 `
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 
@@ -41,6 +41,7 @@ class ReportsByTask extends Component {
 
     this.state = {
       graphDataByTask: [],
+      reportsPageNum: 0,
       focusedTask: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
@@ -61,7 +62,7 @@ class ReportsByTask extends Component {
         <BarChartWithLoader
           chartId={chartByTaskId}
           data={this.state.graphDataByTask}
-          xProp='task.id'
+          xProp='task.uuid'
           yProp='reportsCount'
           xLabel='task.shortName'
           onBarClick={this.goToTask}
@@ -104,6 +105,7 @@ class ReportsByTask extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart
@@ -116,15 +118,15 @@ class ReportsByTask extends Component {
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
     const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
     const noTask = {
-      id: -1,
+      uuid: "-1",
       shortName: noTaskMessage,
       longName: noTaskMessage
     }
     Promise.all([chartQuery]).then(values => {
-      let simplifiedValues = values[0].reportList.list ? values[0].reportList.list.map(d => {return {reportId: d.id, tasks: d.tasks.map(p => p.id)}}): []
+      let simplifiedValues = values[0].reportList.list ? values[0].reportList.list.map(d => {return {reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid)}}): []
       let tasks = values[0].reportList.list ? values[0].reportList.list.map(d => d.tasks) : []
       tasks = [].concat.apply([], tasks)
-        .filter((item, index, d) => d.findIndex(t => {return t.id === item.id }) === index)
+        .filter((item, index, d) => d.findIndex(t => {return t.uuid === item.uuid }) === index)
         .sort((a, b) => a.shortName.localeCompare(b.shortName))
       // add No Task item, in order to relate to reports without Tasks
       tasks.push(noTask)
@@ -135,7 +137,7 @@ class ReportsByTask extends Component {
           .map(d => {
             let r = {}
             r.task = d
-            r.reportsCount = (d.id ? simplifiedValues.filter(item => item.tasks.indexOf(d.id) > -1).length : simplifiedValues.filter(item => item.tasks.length === 0).length)
+            r.reportsCount = (d.uuid ? simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1).length : simplifiedValues.filter(item => item.tasks.length === 0).length)
             return r}),
       })
       this.props.hideLoading()
@@ -151,7 +153,7 @@ class ReportsByTask extends Component {
       pageSize: 10
     })
     if (this.state.focusedTask) {
-      Object.assign(reportsQueryParams, {taskId: this.state.focusedTask.id})
+      Object.assign(reportsQueryParams, {taskUuid: this.state.focusedTask.uuid})
     }
     // Query used by the reports collection
     const reportsQuery = API.query(/* GraphQL */`
@@ -187,7 +189,7 @@ class ReportsByTask extends Component {
     this.resetChartSelection(chartByTaskId)
     if (item) {
       // highlight the bar corresponding to the selected task
-      d3.select('#' + chartByTaskId + ' #bar_' + item.task.id).attr('class', 'selected-bar')
+      d3.select('#' + chartByTaskId + ' #bar_' + item.task.uuid).attr('class', 'selected-bar')
     }
   }
 

@@ -6,18 +6,18 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 
 public class AdvisorReportsEntry {
 
-	int id;
+	String uuid;
 	String name;
 	List<AdvisorReportsStats> stats;
 	
 	
-	@GraphQLQuery(name="id")
-	public int getId() {
-		return id;
+	@GraphQLQuery(name="uuid")
+	public String getUuid() {
+		return uuid;
 	}
 	
-	public void setId(int id) {
-		this.id = id;
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 	
 	@GraphQLQuery(name="name")

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.TransactionCallback;
@@ -38,14 +36,14 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 
 	public AuthorizationGroupDao(Handle h) {
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getAuthorizationGroupsByIds */ SELECT * from \"authorizationGroups\" where id IN ( %1$s )";
+		final String idBatcherSql = "/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( %1$s )";
 		this.idBatcher = new IdBatcher<AuthorizationGroup>(h, idBatcherSql, new AuthorizationGroupMapper());
 
-		final String positionsBatcherSql = "/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupId\", " + PositionDao.POSITIONS_FIELDS
+		final String positionsBatcherSql = "/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM positions, \"authorizationGroupPositions\" "
-				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupId\" IN ( %1$s ) "
-				+ "AND \"authorizationGroupPositions\".\"positionId\" = positions.id";
-		this.positionsBatcher = new ForeignKeyBatcher<Position>(h, positionsBatcherSql, new PositionMapper(), "authorizationGroupId");
+				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupUuid\" IN ( %1$s ) "
+				+ "AND \"authorizationGroupPositions\".\"positionUuid\" = positions.uuid";
+		this.positionsBatcher = new ForeignKeyBatcher<Position>(h, positionsBatcherSql, new PositionMapper(), "authorizationGroupUuid");
 	}
 
 	public AnetBeanList<AuthorizationGroup> getAll(int pageNum, int pageSize) {
@@ -66,22 +64,19 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 		return new AnetBeanList<AuthorizationGroup>(query, pageNum, pageSize, null);
 	}
 
-	@Override
-	public AuthorizationGroup getById(int id) {
-		final Query<AuthorizationGroup> query = dbHandle.createQuery("/* getAuthorizationGroupById */ SELECT * from \"authorizationGroups\" where id = :id")
-			.bind("id", id)
-			.map(new AuthorizationGroupMapper());
-		final List<AuthorizationGroup> results = query.list();
-		if (results.size() == 0) { return null; }
-		return results.get(0);
+	public AuthorizationGroup getByUuid(String uuid) {
+		return dbHandle.createQuery("/* getAuthorizationGroupByUuid */ SELECT * from \"authorizationGroups\" where uuid = :uuid")
+				.bind("uuid", uuid)
+				.map(new AuthorizationGroupMapper())
+				.first();
 	}
 
 	@Override
-	public List<AuthorizationGroup> getByIds(List<Integer> ids) {
-		return idBatcher.getByIds(ids);
+	public List<AuthorizationGroup> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
 	}
 
-	public List<List<Position>> getPositions(List<Integer> foreignKeys) {
+	public List<List<Position>> getPositions(List<String> foreignKeys) {
 		return positionsBatcher.getByForeignKeys(foreignKeys);
 	}
 
@@ -90,22 +85,17 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 		return dbHandle.inTransaction(new TransactionCallback<AuthorizationGroup>() {
 			@Override
 			public AuthorizationGroup inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				a.setCreatedAt(DateTime.now());
-				a.setUpdatedAt(DateTime.now());
-				final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-						"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (name, description, \"createdAt\", \"updatedAt\", status) "
-							+ "VALUES (:name, :description, :createdAt, :updatedAt, :status)")
-					.bind("name", a.getName())
-					.bind("description", a.getDescription())
-					.bind("createdAt", a.getCreatedAt())
-					.bind("updatedAt", a.getUpdatedAt())
+				DaoUtils.setInsertFields(a);
+				dbHandle.createStatement(
+						"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
+							+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
+					.bindFromProperties(a)
 					.bind("status", DaoUtils.getEnumId(a.getStatus()))
-					.executeAndReturnGeneratedKeys();
-				a.setId(DaoUtils.getGeneratedId(keys));
+					.execute();
 		
 				final AuthorizationGroupBatch ab = dbHandle.attach(AuthorizationGroupBatch.class);
 				if (a.getPositions() != null) {
-					ab.insertAuthorizationGroupPositions(a.getId(), a.getPositions());
+					ab.insertAuthorizationGroupPositions(a.getUuid(), a.getPositions());
 				}
 				return a;
 			}
@@ -113,22 +103,19 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public interface AuthorizationGroupBatch {
-		@SqlBatch("INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupId\", \"positionId\") VALUES (:authorizationGroupId, :id)")
-		void insertAuthorizationGroupPositions(@Bind("authorizationGroupId") Integer authorizationGroupId,
+		@SqlBatch("INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupUuid\", \"positionUuid\") VALUES (:authorizationGroupUuid, :uuid)")
+		void insertAuthorizationGroupPositions(@Bind("authorizationGroupUuid") String authorizationGroupUuid,
 				@BindBean List<Position> positions);
 	}
 
-	@Override
 	public int update(AuthorizationGroup a) {
 		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
 			@Override
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
+				DaoUtils.setUpdateFields(a);
 				return dbHandle.createStatement("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
-							+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE id = :id")
-						.bind("id", a.getId())
-						.bind("name", a.getName())
-						.bind("description", a.getDescription())
-						.bind("updatedAt", DateTime.now())
+							+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
+						.bindFromProperties(a)
 						.bind("status", DaoUtils.getEnumId(a.getStatus()))
 						.execute();
 			}
@@ -136,24 +123,24 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public int addPositionToAuthorizationGroup(Position p, AuthorizationGroup a) {
-		return dbHandle.createStatement("/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupId\", \"positionId\") "
-				+ "VALUES (:authorizationGroupId, :positionId)")
-			.bind("authorizationGroupId", a.getId())
-			.bind("positionId", p.getId())
+		return dbHandle.createStatement("/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupUuid\", \"positionUuid\") "
+				+ "VALUES (:authorizationGroupUuid, :positionUuid)")
+			.bind("authorizationGroupUuid", a.getUuid())
+			.bind("positionUuid", p.getUuid())
 			.execute();
 	}
 
 	public int removePositionFromAuthorizationGroup(Position p, AuthorizationGroup a) {
 		return dbHandle.createStatement("/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupPositions\" "
-				+ "WHERE \"authorizationGroupId\" = :authorizationGroupId AND \"positionId\" = :positionId")
-				.bind("authorizationGroupId", a.getId())
-				.bind("positionId", p.getId())
+				+ "WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid AND \"positionUuid\" = :positionUuid")
+				.bind("authorizationGroupUuid", a.getUuid())
+				.bind("positionUuid", p.getUuid())
 				.execute();
 	}
 
-	public CompletableFuture<List<Position>> getPositionsForAuthorizationGroup(Map<String, Object> context, Integer authorizationGroupId) {
+	public CompletableFuture<List<Position>> getPositionsForAuthorizationGroup(Map<String, Object> context, String authorizationGroupUuid) {
 		return new ForeignKeyFetcher<Position>()
-				.load(context, "authorizationGroup.positions", authorizationGroupId);
+				.load(context, "authorizationGroup.positions", authorizationGroupUuid);
 	}
 
 	public AnetBeanList<AuthorizationGroup> search(AuthorizationGroupSearchQuery query) {
@@ -164,31 +151,31 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	public List<AuthorizationGroup> getRecentAuthorizationGroups(Person author, int maxResults) {
 		final String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".id IN ("
-					+ "SELECT TOP(:maxResults) \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+			sql = "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".uuid IN ("
+					+ "SELECT TOP(:maxResults) \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
 					+ "FROM reports "
-					+ "JOIN \"reportAuthorizationGroups\" ON reports.id = \"reportAuthorizationGroups\".\"reportId\" "
-					+ "JOIN \"authorizationGroups\" ON \"authorizationGroups\".id = \"reportAuthorizationGroups\".\"authorizationGroupId\" "
-					+ "WHERE reports.\"authorId\" = :authorId "
+					+ "JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\" "
+					+ "JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid = \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
+					+ "WHERE reports.\"authorUuid\" = :authorUuid "
 					+ "AND \"authorizationGroups\".status = :activeStatus "
-					+ "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+					+ "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
-			sql =  "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".id IN ("
-					+ "SELECT \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+			sql =  "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".uuid IN ("
+					+ "SELECT \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
 					+ "FROM reports "
-					+ "JOIN \"reportAuthorizationGroups\" ON reports.id = \"reportAuthorizationGroups\".\"reportId\" "
-					+ "JOIN \"authorizationGroups\" ON \"authorizationGroups\".id = \"reportAuthorizationGroups\".\"authorizationGroupId\" "
-					+ "WHERE reports.\"authorId\" = :authorId "
+					+ "JOIN \"reportAuthorizationGroups\" ON reports.uuid = \"reportAuthorizationGroups\".\"reportUuid\" "
+					+ "JOIN \"authorizationGroups\" ON \"authorizationGroups\".uuid = \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
+					+ "WHERE reports.\"authorUuid\" = :authorUuid "
 					+ "AND \"authorizationGroups\".status = :activeStatus "
-					+ "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupId\" "
+					+ "GROUP BY \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
 		return dbHandle.createQuery(sql)
-				.bind("authorId", author.getId())
+				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.bind("activeStatus", DaoUtils.getEnumId(AuthorizationGroupStatus.ACTIVE))
 				.map(new AuthorizationGroupMapper())
@@ -198,10 +185,10 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
 		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS  + ", " + PersonDao.PERSON_FIELDS
 				+ " FROM reports, people, \"reportAuthorizationGroups\" "
-				+ "WHERE reports.\"authorId\" = people.id "
-				+ "AND \"reportAuthorizationGroups\".\"authorizationGroupId\" = :authorizationGroupId "
-				+ "AND \"reportAuthorizationGroups\".\"reportId\" = reports.id")
-				.bind("authorizationGroupId", a.getId())
+				+ "WHERE reports.\"authorUuid\" = people.uuid "
+				+ "AND \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = :authorizationGroupUuid "
+				+ "AND \"reportAuthorizationGroups\".\"reportUuid\" = reports.uuid")
+				.bind("authorizationGroupUuid", a.getUuid())
 				.map(new ReportMapper())
 				.list();
 	}

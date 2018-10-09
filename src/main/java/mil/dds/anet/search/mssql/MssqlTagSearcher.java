@@ -42,9 +42,9 @@ public class MssqlTagSearcher implements ITagSearcher {
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
-					+ " ON tags.id = c_tags.[Key]"
+					+ " ON tags.uuid = c_tags.[Key]"
 					+ " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
-					+ " ON tags.id = f_tags.[Key]");
+					+ " ON tags.uuid = f_tags.[Key]");
 			whereClauses.add("c_tags.rank IS NOT NULL");
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			sqlArgs.put("freetextQuery", text);
@@ -76,7 +76,7 @@ public class MssqlTagSearcher implements ITagSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tags", "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tags", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tags", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 

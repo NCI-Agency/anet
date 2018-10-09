@@ -1,7 +1,9 @@
 package mil.dds.anet.beans;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -32,8 +34,8 @@ public class PersonPositionHistory extends AbstractAnetBean {
 	@Override
 	@JsonIgnore
 	@GraphQLIgnore
-	public Integer getId() {
-		throw new WebApplicationException("no ID field on PersonPositionHistory");
+	public String getUuid() {
+		throw new WebApplicationException("no UUID field on PersonPositionHistory");
 	}
 
 	@GraphQLIgnore
@@ -84,4 +86,18 @@ public class PersonPositionHistory extends AbstractAnetBean {
 		this.endTime = endTime;
 	}
 
+	public static List<PersonPositionHistory> getDerivedHistory(List<PersonPositionHistory> history) {
+		// Derive the start and end times; assumes list is in chronological order
+		PersonPositionHistory pphPrev = null;
+		for (final PersonPositionHistory pph : history) {
+			pph.setStartTime(pph.getCreatedAt());
+			if (pphPrev != null) {
+				pphPrev.setEndTime(pph.getStartTime());
+			}
+			pphPrev = pph;
+		}
+		// Remove all null entries
+		history = history.stream().filter(pph -> (pph != null && pph.getPerson() != null)).collect(Collectors.toList());
+		return history;
+	}
 }

@@ -1,29 +1,29 @@
-organization(id:${orgId}) {
-	id, shortName, longName, type
-	parentOrg { id, shortName, longName }
-	tasks { id, longName, shortName }
-	childrenOrgs { id, shortName, longName },
+organization(uuid:"${orgUuid}") {
+	uuid, shortName, longName, type
+	parentOrg { uuid, shortName, longName }
+	tasks { uuid, longName, shortName }
+	childrenOrgs { uuid, shortName, longName },
 	positions {
-		id, name, code
-		person { id, name }
+		uuid, name, code
+		person { uuid, name }
 		associatedPositions {
-			id, name, code
-			person { id, name }
+			uuid, name, code
+			person { uuid, name }
 		}
 	},
 	reports(pageNum:0, pageSize:25) {
 		list { 
-			id, intent, engagementDate, keyOutcomes, nextSteps
-			author { id, name },
-			primaryAdvisor { id, name } ,
-			primaryPrincipal {id, name },
-			advisorOrg { id, shortName, longName }
-			principalOrg { id, shortName, longName }
-			location { id, name, lat, lng }
+			uuid, intent, engagementDate, keyOutcomes, nextSteps
+			author { uuid, name },
+			primaryAdvisor { uuid, name } ,
+			primaryPrincipal { uuid, name },
+			advisorOrg { uuid, shortName, longName }
+			principalOrg { uuid, shortName, longName }
+			location { uuid, name, lat, lng }
 		}
 	},
 	approvalSteps {
-		id, name, approvers { id, name, person { id, name}}
+		uuid, name, approvers { uuid, name, person { uuid, name }}
 	},
 }
 

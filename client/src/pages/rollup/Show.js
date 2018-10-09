@@ -135,24 +135,24 @@ class BaseRollupShow extends Page {
 		}
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				rollupReportsQuery.principalOrgId = this.state.focusedOrg.id
+				rollupReportsQuery.principalOrgUuid = this.state.focusedOrg.uuid
 				rollupReportsQuery.includePrincipalOrgChildren = true
-				rollupGraphQuery += ' ,principalOrganizationId: $principalOrganizationId'
-				rollupGraphVariableDef += ' ,$principalOrganizationId: Int!'
-				rollupGraphVariables.principalOrganizationId = this.state.focusedOrg.id
+				rollupGraphQuery += ', principalOrganizationUuid: $principalOrganizationUuid'
+				rollupGraphVariableDef += ', $principalOrganizationUuid: String!'
+				rollupGraphVariables.principalOrganizationUuid = this.state.focusedOrg.uuid
 			} else {
-				rollupReportsQuery.advisorOrgId = this.state.focusedOrg.id
+				rollupReportsQuery.advisorOrgUuid = this.state.focusedOrg.uuid
 				rollupReportsQuery.includeAdvisorOrgChildren = true
-				rollupGraphQuery += ' ,advisorOrganizationId: $advisorOrganizationId'
-				rollupGraphVariableDef += ' ,$advisorOrganizationId: Int!'
-				rollupGraphVariables.advisorOrganizationId = this.state.focusedOrg.id
+				rollupGraphQuery += ' ,advisorOrganizationUuid: $advisorOrganizationUuid'
+				rollupGraphVariableDef += ', $advisorOrganizationUuid: String!'
+				rollupGraphVariables.advisorOrganizationUuid = this.state.focusedOrg.uuid
 			}
 		} else if (this.state.orgType) {
-			rollupGraphQuery += ' ,orgType: $orgType'
-			rollupGraphVariableDef += ' ,$orgType: OrganizationTypeInput!'
+			rollupGraphQuery += ', orgType: $orgType'
+			rollupGraphVariableDef += ', $orgType: OrganizationType!'
 			rollupGraphVariables.orgType = this.state.orgType
 		}
-		rollupGraphQuery += ') {org {id shortName} released cancelled}'
+		rollupGraphQuery += ') {org {uuid shortName} released cancelled}'
 		rollupGraphVariableDef += ')'
 
 		let reportQuery = API.query(/* GraphQL */`
@@ -173,13 +173,13 @@ class BaseRollupShow extends Page {
 			this.setState({
 				reports: values[0].reportList,
 				graphData: values[1].rollupGraph
-					.map(d => {d.org = d.org || {id: -1, shortName: "Other"}; return d})
+					.map(d => {d.org = d.org || {uuid: "-1", shortName: "Other"}; return d})
 					.sort((a, b) => {
 						let a_index = pinned_ORGs.indexOf(a.org.shortName)
 						let b_index = pinned_ORGs.indexOf(b.org.shortName)
 						if (a_index<0) {
 							let nameOrder = a.org.shortName.localeCompare(b.org.shortName)
-							return (b_index<0) ?  (nameOrder === 0 ? a.org.id - b.org.id : nameOrder)  : 1
+							return (b_index<0) ?  (nameOrder === 0 ? a.org.uuid - b.org.uuid : nameOrder)  : 1
 						}
 						else {
 							return (b_index<0) ? -1 : a_index-b_index
@@ -192,7 +192,7 @@ class BaseRollupShow extends Page {
 	render() {
 		return (
 			<div>
-				<Breadcrumbs items={[[`Rollup for ${this.dateStr}`, 'rollup/']]} />
+				<Breadcrumbs items={[[`Rollup for ${this.dateStr}`, '/rollup']]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset title={
@@ -280,8 +280,8 @@ class BaseRollupShow extends Page {
 		let yLabels = {}
 		let yScale = d3.scaleBand()
 						.domain(graphData.map(function(d) {
-							yLabels[d.org.id] = d.org.shortName
-							return d.org.id
+							yLabels[d.org.uuid] = d.org.shortName
+							return d.org.uuid
 						}))
 						.range([0, height])
 
@@ -419,9 +419,9 @@ class BaseRollupShow extends Page {
 		`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				graphQL += `, principalOrganizationId: ${this.state.focusedOrg.id}`
+				graphQL += `, principalOrganizationUuid: ${this.state.focusedOrg.uuid}`
 			} else {
-				graphQL += `, advisorOrganizationId: ${this.state.focusedOrg.id}`
+				graphQL += `, advisorOrganizationUuid: ${this.state.focusedOrg.uuid}`
 			}
 		}
 		if (this.state.orgType) {
@@ -454,7 +454,7 @@ class BaseRollupShow extends Page {
 			toAddresses: r.to,
 			comment: email.comment
 		}
-		let graphql = 'emailRollup(startDate: $startDate,endDate: $endDate'
+		let graphql = 'emailRollup(startDate: $startDate, endDate: $endDate'
 		const variables = {
 				startDate: this.rollupStart.valueOf(),
 				endDate: this.rollupEnd.valueOf()
@@ -462,23 +462,23 @@ class BaseRollupShow extends Page {
 		let variableDef = '($startDate: Long!, $endDate: Long!'
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				graphql += ',principalOrganizationId: $principalOrganizationId'
-				variables.principalOrganizationId = this.state.focusedOrg.id
-				variableDef += ',$principalOrganizationId: Int!'
+				graphql += ', principalOrganizationUuid: $principalOrganizationUuid'
+				variables.principalOrganizationUuid = this.state.focusedOrg.uuid
+				variableDef += ', $principalOrganizationUuid: String!'
 			} else {
-				graphql += ',advisorOrganizationId: $advisorOrganizationId'
-				variables.advisorOrganizationId = this.state.focusedOrg.id
-				variableDef += ',$advisorOrganizationId: Int!'
+				graphql += ',advisorOrganizationUuid: $advisorOrganizationUuid'
+				variables.advisorOrganizationUuid = this.state.focusedOrg.uuid
+				variableDef += ', $advisorOrganizationUuid: String!'
 			}
 		}
 		if (this.state.orgType) {
-			graphql += ',orgType: $orgType'
+			graphql += ', orgType: $orgType'
 			variables.orgType = this.state.orgType
-			variableDef += ',$orgType: OrganizationTypeInput!'
+			variableDef += ', $orgType: OrganizationType!'
 		}
-		graphql += ',email: $email)'
+		graphql += ', email: $email)'
 		variables.email = emailDelivery
-		variableDef += ',$email: AnetEmailInput!)'
+		variableDef += ', $email: AnetEmailInput!)'
 
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {

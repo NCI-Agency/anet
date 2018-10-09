@@ -41,7 +41,7 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
-					+ " ON locations.id = c_locations.[Key]");
+					+ " ON locations.uuid = c_locations.[Key]");
 			whereClauses.add("c_locations.rank IS NOT NULL");
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 		}
@@ -77,7 +77,7 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "locations", "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "locations", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 

@@ -285,7 +285,7 @@ class BaseInsightsShow extends Page {
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
-          <Fieldset id={this.props.match.params.insight} data-jumptarget title={
+          <Fieldset id={this.props.match.params.insight} title={
             <span>
               {insightConfig.title}
             </span>

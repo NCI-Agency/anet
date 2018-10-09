@@ -28,8 +28,8 @@ class LocationEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			location(id:${props.match.params.id}) {
-				id, name, status, lat, lng
+			location(uuid:"${props.match.params.uuid}") {
+				uuid, name, status, lat, lng
 			}
 		`).then(data => {
 			this.setState({location: new Location(data.location), originalLocation : new Location(data.location) })

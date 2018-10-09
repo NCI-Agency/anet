@@ -8,23 +8,23 @@ import org.joda.time.DateTime;
 
 public abstract class AbstractAnetBean {
 
-	protected Integer id;
+	protected String uuid;
 	protected DateTime createdAt;
 	protected DateTime updatedAt;
 
 	public AbstractAnetBean() { 
-		id = null;
+		uuid = null;
 	}
-	
-	@GraphQLQuery(name="id")
-	public Integer getId() { 
-		return id;
+
+	@GraphQLQuery(name="uuid")
+	public String getUuid() {
+		return uuid;
 	}
-	
-	public void setId(Integer id) { 
-		this.id = id;
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
-	
+
 	@GraphQLQuery(name="createdAt")
 	public DateTime getCreatedAt() {
 		return createdAt;
@@ -43,14 +43,14 @@ public abstract class AbstractAnetBean {
 		this.updatedAt = updatedAt;
 	}
 	
-	/*Determines if two beans are "id" equal. 
-	 * That is they have the same Id. (or are null)
+	/*Determines if two beans are "uuid" equal.
+	 * That is they have the same uuid. (or are null)
 	 */
-	public static boolean idEqual(AbstractAnetBean a, AbstractAnetBean b) { 
+	public static boolean uuidEqual(AbstractAnetBean a, AbstractAnetBean b) {
 		if (a == null && b == null) { return true; }
 		if (a == null || b == null) { return false; }
-		if (a.getId() != null && b.getId() != null) { 
-			return Objects.equals(a.getId(), b.getId());
+		if (a.getUuid() != null && b.getUuid() != null) {
+			return Objects.equals(a.getUuid(), b.getUuid());
 		}
 		return a.equals(b);
 	}

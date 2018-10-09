@@ -1,12 +1,12 @@
 {
-	"id": null,
+	"uuid": null,
 	"approvalStep" : null,
 	"state" : "DRAFT",
 	"createdAt": 1453753380000,
 	"updatedAt": 1453753380000,
 	"engagementDate" : 1453753380000,
 	"location": {
-		"id": null,
+		"uuid": null,
 		"name": "The Boat Dock",
 		"status": "ACTIVE",
 		"lat": 32.456,
@@ -14,7 +14,7 @@
 	},
 	"intent": "Check up with Steve",
 	"attendees": [{
-		"id": null,
+		"uuid": null,
 		"name": "STEVESON, Steve",
 		"status": "ACTIVE",
 		"role" : "PRINCIPAL",
@@ -27,13 +27,13 @@
 		"primary" : true
 	}],
 	"tasks": [{
-		"id": null,
+		"uuid": null,
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
 		"customFieldRef1": null
 	}, {
-		"id": null,
+		"uuid": null,
 		"shortName": "F-1",
 		"longName": "Run the bases",
 		"category": "Functional Area",
@@ -44,7 +44,7 @@
 	"reportText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
 	"nextSteps": "Go for a boat ride with Steve tomorrow",
 	"author": {
-		"id": null,
+		"uuid": null,
 		"name": "JACKSON, Jack",
 		"status": "ACTIVE",
 		"role" : "ADVISOR",
@@ -58,9 +58,9 @@
 		"endOfTourDate" : 1498780800000
 	},
 	"comments": [{
-		"id": null,
+		"uuid": null,
 		"author": {
-			"id": null,
+			"uuid": null,
 			"name": "JACKSON, Jack",
 			"status": "ACTIVE",
 			"role" : "ADVISOR",
@@ -76,29 +76,29 @@
 		"createdAt": 1453815803000,
 		"updatedAt": null,
 		"text": "I really like this report, it's awesome!!!",
-		"reportId" : null
+		"reportUuid" : null
 	}],
 	"tags": [{
-		"id": null,
+		"uuid": null,
 		"name": "name1",
 		"description": "desc1"
 	}, {
-		"id": null,
+		"uuid": null,
 		"name": "name2",
 		"description": "desc2"
 	}],
 	"reportSensitiveInformation": {
-		"id": null,
+		"uuid": null,
 		"text": "For your eyes only",
 		"createdAt": null,
 		"updatedAt": null
 	},
 	"authorizationGroups": [{
-		"id": null,
+		"uuid": null,
 		"name": "sensitive info positions group",
 		"description": "desc",
 		"positions": [{
-			"id": null,
+			"uuid": null,
 			"name": "Head of donut operations",
 			"code": "DNT-001",
 			"organization": null,

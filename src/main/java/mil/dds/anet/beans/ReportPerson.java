@@ -35,11 +35,11 @@ public class ReportPerson extends Person {
 	public int hashCode() { 
 		return Objects.hash(super.hashCode(), primary);
 	}
-	
-	public static ReportPerson createWithId(Integer id) {
-		ReportPerson rp = new ReportPerson();
-		rp.setId(id);
+
+	public static ReportPerson createWithUuid(String uuid) {
+		final ReportPerson rp = new ReportPerson();
+		rp.setUuid(uuid);
 		return rp;
 	}
-	
+
 }

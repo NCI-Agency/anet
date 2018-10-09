@@ -1,13 +1,13 @@
 import querystring from 'querystring'
 
 const API = {
-	fetch(pathName, params, accept) {
+	_fetch(pathName, params, accept) {
 		params = params || {}
 		params.credentials = 'same-origin'
 
 		params.headers = params.headers || {}
 		params.headers.Accept = accept || 'application/json'
-		const authHeader = API.getAuthHeader()
+		const authHeader = API._getAuthHeader()
 		if (authHeader) {
 			params.headers[authHeader[0]] = authHeader[1]
 		}
@@ -43,7 +43,7 @@ const API = {
 					})
 	},
 
-	send(url, data, params) {
+	_send(url, data, params) {
 		params = params || {}
 		params.disableSubmits = typeof params.disableSubmits === 'undefined' ? true : params.disableSubmits
 		params.method = params.method || 'POST'
@@ -52,7 +52,7 @@ const API = {
 		params.headers = params.headers || {}
 		params.headers['Content-Type'] = 'application/json'
 
-		let promise = API.fetch(url, params)
+		let promise = API._fetch(url, params)
 		let buttons = document.querySelectorAll('[type=submit]')
 		let toggleButtons =  function(onOff) {
 			for (let button of buttons) {
@@ -80,7 +80,7 @@ const API = {
 		const queryType = isMutation ? 'mutation' : 'query'
 		query = queryType + ' ' + variableDef + ' { ' + query + ' }'
 		output = output || ''
-		return API.send('/graphql', {query, variables, output}, params)
+		return API._send('/graphql', {query, variables, output}, params)
 	},
 
 	mutation(query, variables, variableDef, params) {
@@ -104,13 +104,13 @@ const API = {
 	 */
 	logOnServer(severity, url, lineNr, message)
 	{
-		API.send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
+		API._send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
 	},
 
 	loadFileAjaxSync(filePath, mimeType) {
 		let xmlhttp=new XMLHttpRequest()
 		xmlhttp.open("GET",filePath,false)
-		const authHeader = API.getAuthHeader()
+		const authHeader = API._getAuthHeader()
 		if (authHeader) {
 			xmlhttp.setRequestHeader(authHeader[0], authHeader[1])
 		}
@@ -147,7 +147,7 @@ const API = {
 		return url
 	},
 
-	getAuthHeader: function() {
+	_getAuthHeader: function() {
 		const creds = API._getAuthParams()
 		if (creds) {
 			return ['Authorization', 'Basic ' + Buffer.from(`${creds.user}:${creds.pass}`).toString('base64')]

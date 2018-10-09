@@ -26,25 +26,25 @@ public class IdBatcher<T extends AbstractAnetBean> {
 		this.mapper = mapper;
 	}
 
-	public List<T> getByIds(List<Integer> ids) {
+	public List<T> getByIds(List<String> uuids) {
 		final Map<String, Object> args = new HashMap<String, Object>();
 		final List<String> argNames = new LinkedList<String>();
-		for (int i = 0; i < ids.size(); i++) {
-			final String arg = "id" + i;
+		for (int i = 0; i < uuids.size(); i++) {
+			final String arg = "uuid" + i;
 			argNames.add(":" + arg);
-			args.put(arg, ids.get(i));
+			args.put(arg, uuids.get(i));
 		}
-		final String queryIds = ids.isEmpty() ? "-1" : Joiner.on(", ").join(argNames);
+		final String queryIds = uuids.isEmpty() ? "-1" : Joiner.on(", ").join(argNames);
 		final Query<T> query = dbHandle.createQuery(String.format(sql, queryIds))
 				.bindFromMap(args)
 				.map(mapper);
-		final Map<Integer, T> map = new HashMap<>();
+		final Map<String, T> map = new HashMap<>();
 		for (final T obj : query.list()) {
-			map.put(obj.getId(), obj);
+			map.put(obj.getUuid(), obj);
 		}
 		final List<T> result = new ArrayList<>();
-		for (final int id : ids) {
-			result.add(map.get(id));
+		for (final String uuid : uuids) {
+			result.add(map.get(uuid));
 		}
 		return result;
 	}

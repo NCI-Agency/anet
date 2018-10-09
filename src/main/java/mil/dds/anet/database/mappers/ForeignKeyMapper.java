@@ -19,7 +19,7 @@ public class ForeignKeyMapper<T> implements ResultSetMapper<ForeignKeyTuple<T>> 
 	@Override
 	public ForeignKeyTuple<T> map(int index, ResultSet rs, StatementContext ctx)
 			throws SQLException {
-		final Integer foreignKey = rs.getInt(foreignKeyName);
+		final String foreignKey = rs.getString(foreignKeyName);
 		final T object = objectMapper.map(index, rs, ctx);
 		return new ForeignKeyTuple<T>(foreignKey, object);
 	}

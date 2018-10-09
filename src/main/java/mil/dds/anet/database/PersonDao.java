@@ -2,9 +2,8 @@ package mil.dds.anet.database;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.TransactionCallback;
@@ -12,28 +11,40 @@ import org.skife.jdbi.v2.TransactionStatus;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class PersonDao extends AnetBaseDao<Person> {
 
-	private static String[] fields = {"id","name","status","role",
+	private static String[] fields = {"uuid","name","status","role",
 			"emailAddress","phoneNumber","rank","biography",
 			"country", "gender", "endOfTourDate",
 			"domainUsername","pendingVerification","createdAt",
 			"updatedAt"};
 	private static String tableName = "people";
-	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
+	public static String PERSON_FIELDS_NOAS = DaoUtils.buildFieldAliases(tableName, fields, false);
 
 	private final IdBatcher<Person> idBatcher;
+	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
 
 	public PersonDao(Handle h) { 
 		super(h, "Person", tableName, PERSON_FIELDS, null);
-		final String idBatcherSql = "/* batch.getPeopleByIds */ SELECT " + PERSON_FIELDS + " FROM people WHERE id IN ( %1$s )";
+		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, new PersonMapper());
+		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT \"peoplePositions\".\"positionUuid\" AS \"positionUuid\", "
+				+ "\"peoplePositions\".\"personUuid\" AS \"personUuid\", "
+				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
+				+ PositionDao.POSITIONS_FIELDS + " FROM \"peoplePositions\" "
+				+ "LEFT JOIN positions ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
+				+ "WHERE \"personUuid\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "personUuid");
 	}
 	
 	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
@@ -42,28 +53,29 @@ public class PersonDao extends AnetBaseDao<Person> {
 		return new AnetBeanList<Person>(query, pageNum, pageSize, manualCount);
 	}
 
-	public Person getById(int id) { 
-		Query<Person> query = dbHandle.createQuery("/* personGetById */ SELECT " + PERSON_FIELDS + " FROM people WHERE id = :id")
-				.bind("id",  id)
-				.map(new PersonMapper());
-		List<Person> rs = query.list();
-		if (rs.size() == 0) { return null; } 
-		return rs.get(0);
+	public Person getByUuid(String uuid) {
+		return dbHandle.createQuery("/* personGetByUuid */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid = :uuid")
+				.bind("uuid",  uuid)
+				.map(new PersonMapper())
+				.first();
 	}
 
 	@Override
-	public List<Person> getByIds(List<Integer> ids) {
-		return idBatcher.getByIds(ids);
+	public List<Person> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
+	}
+
+	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
+		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	public Person insert(Person p) {
-		p.setCreatedAt(DateTime.now());
-		p.setUpdatedAt(DateTime.now());
+		DaoUtils.setInsertFields(p);
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* personInsert */ INSERT INTO people " 
-				+ "(name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
+				+ "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
 				+ "gender, country, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
-				+ "VALUES (:name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
+				+ "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
 				+ ":gender, :country, ");
 		if (DaoUtils.isMsSql(dbHandle)) {
 			//MsSql requires an explicit CAST when datetime2 might be NULL. 
@@ -73,17 +85,16 @@ public class PersonDao extends AnetBaseDao<Person> {
 		}
 		sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
 
-		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement(sql.toString())
+		dbHandle.createStatement(sql.toString())
 			.bindFromProperties(p)
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
-			.executeAndReturnGeneratedKeys();
-		p.setId(DaoUtils.getGeneratedId(keys));
+			.execute();
 		return p;
 	}
 	
 	public int update(Person p) {
-		p.setUpdatedAt(DateTime.now());
+		DaoUtils.setUpdateFields(p);
 		StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
 				+ "SET name = :name, status = :status, role = :role, "
 				+ "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
@@ -96,7 +107,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 		} else {
 			sql.append("\"endOfTourDate\" = :endOfTourDate ");
 		}
-		sql.append("WHERE id = :id");
+		sql.append("WHERE uuid = :uuid");
 		return dbHandle.createStatement(sql.toString())
 			.bindFromProperties(p)
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
@@ -111,7 +122,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 
 	public List<Person> findByDomainUsername(String domainUsername) {
 		return dbHandle.createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITIONS_FIELDS 
-				+ "FROM people LEFT JOIN positions ON people.id = positions.\"currentPersonId\" "
+				+ "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
 				+ "WHERE people.\"domainUsername\" = :domainUsername "
 				+ "AND people.status != :inactiveStatus")
 			.bind("domainUsername", domainUsername)
@@ -124,28 +135,28 @@ public class PersonDao extends AnetBaseDao<Person> {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
-				+ "FROM people WHERE people.id IN ( "
-					+ "SELECT top(:maxResults) \"reportPeople\".\"personId\" "
-					+ "FROM reports JOIN \"reportPeople\" ON reports.id = \"reportPeople\".\"reportId\" "
-					+ "WHERE \"authorId\" = :authorId "
-					+ "AND \"personId\" != :authorId "
-					+ "GROUP BY \"personId\" "
+				+ "FROM people WHERE people.uuid IN ( "
+					+ "SELECT top(:maxResults) \"reportPeople\".\"personUuid\" "
+					+ "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
+					+ "WHERE \"authorUuid\" = :authorUuid "
+					+ "AND \"personUuid\" != :authorUuid "
+					+ "GROUP BY \"personUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
 			sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
-				+ "FROM people WHERE people.id IN ( "
-					+ "SELECT \"reportPeople\".\"personId\" "
-					+ "FROM reports JOIN \"reportPeople\" ON reports.id = \"reportPeople\".\"reportId\" "
-					+ "WHERE \"authorId\" = :authorId "
-					+ "AND \"personId\" != :authorId "
-					+ "GROUP BY \"personId\" "
+				+ "FROM people WHERE people.uuid IN ( "
+					+ "SELECT \"reportPeople\".\"personUuid\" "
+					+ "FROM reports JOIN \"reportPeople\" ON reports.uuid = \"reportPeople\".\"reportUuid\" "
+					+ "WHERE \"authorUuid\" = :authorUuid "
+					+ "AND \"personUuid\" != :authorUuid "
+					+ "GROUP BY \"personUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
 		return dbHandle.createQuery(sql)
-				.bind("authorId", author.getId())
+				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.map(new PersonMapper())
 				.list();
@@ -156,56 +167,65 @@ public class PersonDao extends AnetBaseDao<Person> {
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//delete duplicates where other is primary, or where neither is primary
 				dbHandle.createStatement("DELETE FROM \"reportPeople\" WHERE ("
-						+ "\"personId\" = :loserId AND \"reportId\" IN ("
-							+ "SELECT \"reportId\" FROM \"reportPeople\" WHERE \"personId\" = :winnerId AND \"isPrimary\" = :isPrimary"
+						+ "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
+							+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
 						+ ")) OR ("
-						+ "\"personId\" = :winnerId AND \"reportId\" IN ("
-							+ "SELECT \"reportId\" FROM \"reportPeople\" WHERE \"personId\" = :loserId AND \"isPrimary\" = :isPrimary"
+						+ "\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
+							+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
 						+ ")) OR ("
-						+ "\"personId\" = :loserId AND \"isPrimary\" != :isPrimary AND \"reportId\" IN ("
-							+ "SELECT \"reportId\" FROM \"reportPeople\" WHERE \"personId\" = :winnerId AND \"isPrimary\" != :isPrimary"
+						+ "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("
+							+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" != :isPrimary"
 						+ "))")
-					.bind("winnerId", winner.getId())
-					.bind("loserId", loser.getId())
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
 					.bind("isPrimary", true)
 					.execute();
 				//update report attendance, should now be unique
-				dbHandle.createStatement("UPDATE \"reportPeople\" SET \"personId\" = :winnerId WHERE \"personId\" = :loserId")
-					.bind("winnerId", winner.getId())
-					.bind("loserId", loser.getId())
+				dbHandle.createStatement("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
 					.execute();
 				
 				// update approvals this person might have done
-				dbHandle.createStatement("UPDATE \"approvalActions\" SET \"personId\" = :winnerId WHERE \"personId\" = :loserId")
-					.bind("winnerId", winner.getId())
-					.bind("loserId", loser.getId())
+				dbHandle.createStatement("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
 					.execute();
 				
 				// report author update
-				dbHandle.createStatement("UPDATE reports SET \"authorId\" = :winnerId WHERE \"authorId\" = :loserId")
-					.bind("winnerId", winner.getId())
-					.bind("loserId", loser.getId())
+				dbHandle.createStatement("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
 					.execute();
 			
 				// comment author update
-				dbHandle.createStatement("UPDATE comments SET \"authorId\" = :winnerId WHERE \"authorId\" = :loserId")
-					.bind("winnerId", winner.getId())
-					.bind("loserId", loser.getId())
+				dbHandle.createStatement("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
 					.execute();
 				
 				// update position history
-				dbHandle.createStatement("UPDATE \"peoplePositions\" SET \"personId\" = :winnerId WHERE \"personId\" = :loserId")
-					.bind("winnerId", winner.getId())
-					.bind("loserId", loser.getId())
+				dbHandle.createStatement("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
 					.execute();
 		
 				//delete the person!
-				return dbHandle.createStatement("DELETE FROM people WHERE id = :loserId")
-					.bind("loserId", loser.getId())
+				return dbHandle.createStatement("DELETE FROM people WHERE uuid = :loserUuid")
+					.bind("loserUuid", loser.getUuid())
 					.execute();
 			}
 		});
 
 	}
-	
+
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Person person) {
+		return new ForeignKeyFetcher<PersonPositionHistory>()
+				.load(context, "person.personPositionHistory", person.getUuid())
+				.thenApply(l ->
+		{
+			return PersonPositionHistory.getDerivedHistory(l);
+		});
+	}
+
 }

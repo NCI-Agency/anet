@@ -1,15 +1,15 @@
 package mil.dds.anet.database.mappers;
 
 public class ForeignKeyTuple<T> {
-	private final int foreignKey;
+	private final String foreignKey;
 	private final T object;
 
-	public ForeignKeyTuple(int foreignKey, T object) {
+	public ForeignKeyTuple(String foreignKey, T object) {
 		this.foreignKey = foreignKey;
 		this.object = object;
 	}
 
-	public int getForeignKey() {
+	public String getForeignKey() {
 		return foreignKey;
 	}
 

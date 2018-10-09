@@ -3,10 +3,14 @@ package mil.dds.anet.beans;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 
@@ -37,6 +41,8 @@ public class Person extends AbstractAnetBean implements Principal {
 	private String domainUsername;
 		
 	private Optional<Position> position;
+
+	private List<PersonPositionHistory> previousPositions;
 	
 	public Person() { 
 		this.pendingVerification = false; //Defaults 
@@ -169,14 +175,29 @@ public class Person extends AbstractAnetBean implements Principal {
 			this.position = Optional.of(position);
 		}
 	}
-	
+
+	@GraphQLQuery(name="previousPositions")
+	public CompletableFuture<List<PersonPositionHistory>> loadPreviousPositions(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, this)
+				.thenApply(o -> { previousPositions = o; return o; });
+	}
+
+	@GraphQLIgnore
+	public List<PersonPositionHistory> getPreviousPositions() {
+		return previousPositions;
+	}
+
+	public void setPreviousPositions(List<PersonPositionHistory> previousPositions) {
+		this.previousPositions = previousPositions;
+	}
+
 	@GraphQLQuery(name="authoredReports") // TODO: batch load? (used in people/Show.js, admin/MergePeople.js)
 	public AnetBeanList<Report> loadAuthoredReports(@GraphQLArgument(name="pageNum") Integer pageNum,
 			@GraphQLArgument(name="pageSize") Integer pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
-		query.setAuthorId(id);
+		query.setAuthorUuid(uuid);
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 	
@@ -186,46 +207,46 @@ public class Person extends AbstractAnetBean implements Principal {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
-		query.setAttendeeId(id);
+		query.setAttendeeUuid(uuid);
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 	
 	@Override
-	public boolean equals(Object o) { 
+	public boolean equals(Object o) {
 		if (o == null || !(o instanceof Person)) {
 			return false;
         }
 		Person other = (Person) o;
-		boolean b = Objects.equals(id, other.getId()) 
-			&& Objects.equals(other.getName(), name) 
-			&& Objects.equals(other.getStatus(), status) 
-			&& Objects.equals(other.getRole(), role) 
-			&& Objects.equals(other.getEmailAddress(), emailAddress) 
-			&& Objects.equals(other.getPhoneNumber(), phoneNumber) 
-			&& Objects.equals(other.getRank(), rank) 
-			&& Objects.equals(other.getBiography(), biography) 
-			&& Objects.equals(other.getPendingVerification(), pendingVerification) 
-			&& (createdAt != null) ? (createdAt.isEqual(other.getCreatedAt())) : (other.getCreatedAt() == null) 
+		boolean b = Objects.equals(uuid, other.getUuid())
+			&& Objects.equals(other.getName(), name)
+			&& Objects.equals(other.getStatus(), status)
+			&& Objects.equals(other.getRole(), role)
+			&& Objects.equals(other.getEmailAddress(), emailAddress)
+			&& Objects.equals(other.getPhoneNumber(), phoneNumber)
+			&& Objects.equals(other.getRank(), rank)
+			&& Objects.equals(other.getBiography(), biography)
+			&& Objects.equals(other.getPendingVerification(), pendingVerification)
+			&& (createdAt != null) ? (createdAt.isEqual(other.getCreatedAt())) : (other.getCreatedAt() == null)
 			&& (updatedAt != null) ? (updatedAt.isEqual(other.getUpdatedAt())) : (other.getUpdatedAt() == null);
 		return b;
  	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, name, status, role, emailAddress,
+	public int hashCode() {
+		return Objects.hash(uuid, name, status, role, emailAddress,
 			phoneNumber, rank, biography, createdAt, updatedAt, pendingVerification);
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("[id:%d, name:%s, emailAddress:%s]", id, name, emailAddress);
+	public String toString() {
+		return String.format("[uuid:%s, name:%s, emailAddress:%s]", uuid, name, emailAddress);
 	}
-	
-	public static Person createWithId(Integer id) {
-		if (id == null) { return null; } 
-		Person p = new Person();
-		p.setId(id);
+
+	public static Person createWithUuid(String uuid) {
+		if (uuid == null) { return null; }
+		final Person p = new Person();
+		p.setUuid(uuid);
 		return p;
 	}
-	
+
 }

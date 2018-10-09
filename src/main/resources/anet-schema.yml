@@ -155,8 +155,15 @@ properties:
                 description: Used in the UI where a position inside an advisor organization is shown.
                 examples:
                 - NATO Billet
+              type:
+                type: string
+                title: The permissions type of this field
+                description: Used in the UI for the type/permissions of an advisor position.
+                examples:
+                - ANET User
             required:
             - name
+            - type
           org:
             type: object
             additionalProperties: false
@@ -222,8 +229,15 @@ properties:
                 description: Used in the UI where a position inside a principal organization is shown.
                 examples:
                 - Afghan Tashkil
+              type:
+                type: string
+                title: The permissions type of this field
+                description: Used in the UI for the type/permissions of a principal position.
+                examples:
+                - Afghan Partner
             required:
             - name
+            - type
           org:
             type: object
             additionalProperties: false
@@ -253,14 +267,14 @@ properties:
             type: object
             additionalProperties: false
             properties:
-              name:
+              type:
                 type: string
-                title: The name of this field
-                description: The name of the super user role.
+                title: The permissions type of this field
+                description: Used in the UI for the type/permissions of a super user position.
                 examples:
                 - ANET Super User
             required:
-            - name
+            - type
         required:
         - position
       administrator:
@@ -271,14 +285,14 @@ properties:
             type: object
             additionalProperties: false
             properties:
-              name:
+              type:
                 type: string
-                title: The name of this field
-                description: The name of the administrator role.
+                title: The permissions type of this field
+                description: Used in the UI for the type/permissions of an administrator position.
                 examples:
                 - ANET Administrator
             required:
-            - name
+            - type
         required:
         - position
     required:

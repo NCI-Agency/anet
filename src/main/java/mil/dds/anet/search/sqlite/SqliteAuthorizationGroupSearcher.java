@@ -40,11 +40,11 @@ public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSear
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
-		if (query.getPositionId() != null) {
+		if (query.getPositionUuid() != null) {
 			// Search for authorization groups related to a given position
-			whereClauses.add("id IN ( SELECT \"authorizationGroupId\" FROM \"authorizationGroupPositions\" "
-							+ "WHERE \"positionId\" = :positionId) ");
-			sqlArgs.put("positionId", query.getPositionId());
+			whereClauses.add("uuid IN ( SELECT \"authorizationGroupUuid\" FROM \"authorizationGroupPositions\" "
+							+ "WHERE \"positionUuid\" = :positionUuid) ");
+			sqlArgs.put("positionUuid", query.getPositionUuid());
 		}
 
 		final AnetBeanList<AuthorizationGroup> result = new AnetBeanList<AuthorizationGroup>(query.getPageNum(), query.getPageSize(), new ArrayList<AuthorizationGroup>());
@@ -69,7 +69,7 @@ public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSear
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 

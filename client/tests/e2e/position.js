@@ -47,7 +47,7 @@ test('Move someone in and out of a position', async t => {
     let $positionToFillLink = await $positionToFillCell.findElement(By.css('a'))
     await $positionToFillLink.click()
     let currentPathname = await t.context.getCurrentPathname()
-    t.regex(currentPathname, /positions\/\d+/, 'URL is updated to positions/show page')
+    t.regex(currentPathname, /positions\/[0-9a-f-]+/, 'URL is updated to positions/show page')
 
     await assertElementText(t, await $('.legend .title-text'), positionName)
     await assertElementText(t, await $('.position-empty-message'), `${positionName} is currently empty.`)
@@ -69,7 +69,7 @@ test('Move someone in and out of a position', async t => {
     let $personLink = await $('h4.assigned-person-name a')
     await $personLink.click()
     currentPathname = await t.context.getCurrentPathname()
-    t.regex(currentPathname, /people\/\d+/, 'URL is updated to people/show page')
+    t.regex(currentPathname, /people\/[0-9a-f-]+/, 'URL is updated to people/show page')
 
     await assertElementText(t, await $('.position-name'), positionName)
 

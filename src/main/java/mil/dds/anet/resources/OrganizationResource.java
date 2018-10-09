@@ -3,6 +3,8 @@ package mil.dds.anet.resources;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -37,11 +39,13 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -49,7 +53,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
-@Path("/api/organizations")
+@Path("/old-api/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class OrganizationResource {
@@ -84,9 +88,9 @@ public class OrganizationResource {
 	@GET
 	@Timed
 	@GraphQLQuery(name="organization")
-	@Path("/{id}")
-	public Organization getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		Organization org = dao.getById(id);
+	@Path("/{uuid}")
+	public Organization getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+		Organization org = dao.getByUuid(uuid);
 		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return org;
 	}
@@ -122,7 +126,7 @@ public class OrganizationResource {
 					//Create the approval steps
 					for (ApprovalStep step : org.getApprovalSteps()) {
 						validateApprovalStep(step);
-						step.setAdvisorOrganizationId(created.getId());
+						step.setAdvisorOrganizationUuid(created.getUuid());
 						engine.getApprovalStepDao().insertAtEnd(step);
 					}
 				}
@@ -173,38 +177,38 @@ public class OrganizationResource {
 
 				if (org.getTasks() != null || org.getApprovalSteps() != null) {
 					//Load the existing org, so we can check for differences.
-					Organization existing = dao.getById(org.getId());
+					Organization existing = dao.getByUuid(org.getUuid());
 
 					if (org.getTasks() != null) {
 						logger.debug("Editing tasks for {}", org);
-						Utils.addRemoveElementsById(existing.loadTasks(), org.getTasks(),
+						Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
 								newTask -> engine.getTaskDao().setResponsibleOrgForTask(newTask, existing),
-								oldTaskId -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithId(oldTaskId), null));
+								oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithUuid(oldTaskUuid), null));
 					}
 
 					if (org.getApprovalSteps() != null) {
 						logger.debug("Editing approval steps for {}", org);
 						for (ApprovalStep step : org.getApprovalSteps()) {
 							validateApprovalStep(step);
-							step.setAdvisorOrganizationId(org.getId());
+							step.setAdvisorOrganizationUuid(org.getUuid());
 						}
 						List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).get();
 
-						Utils.addRemoveElementsById(existingSteps, org.getApprovalSteps(),
+						Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
 								newStep -> engine.getApprovalStepDao().insert(newStep),
-								oldStepId -> engine.getApprovalStepDao().deleteStep(oldStepId));
+								oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
 
 						for (int i = 0;i < org.getApprovalSteps().size();i++) {
 							ApprovalStep curr = org.getApprovalSteps().get(i);
 							ApprovalStep next = (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
-							curr.setNextStepId(DaoUtils.getId(next));
-							ApprovalStep existingStep = Utils.getById(existingSteps, curr.getId());
-							//If this step didn't exist before, we still need to set the nextStepId on it, but don't need to do a deep update.
+							curr.setNextStepUuid(DaoUtils.getUuid(next));
+							ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
+							//If this step didn't exist before, we still need to set the nextStepUuid on it, but don't need to do a deep update.
 							if (existingStep == null) {
 								engine.getApprovalStepDao().update(curr);
 							} else {
-								//Check for updates to name, nextStepId and approvers.
-								ApprovalStepResource.updateStep(curr, existingStep);
+								//Check for updates to name, nextStepUuid and approvers.
+								updateStep(curr, existingStep);
 							}
 						}
 					}
@@ -214,6 +218,28 @@ public class OrganizationResource {
 				return numRows;
 			}
 		});
+	}
+
+	//Helper method that diffs the name/members of an approvalStep
+	private void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
+		final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+		final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
+		newStep.setUuid(oldStep.getUuid()); //Always want to make changes to the existing group
+		if (!newStep.getName().equals(oldStep.getName())) {
+			approvalStepDao.update(newStep);
+		} else if (!Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid())) {
+			approvalStepDao.update(newStep);
+		}
+
+		if (newStep.getApprovers() != null) {
+			try {
+				Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).get(), newStep.getApprovers(),
+					newPosition -> approvalStepDao.addApprover(newStep, newPosition),
+					oldPositionUuid -> approvalStepDao.removeApprover(newStep, Position.createWithUuid(oldPositionUuid)));
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Approvers", e);
+			}
+		}
 	}
 
 	@GraphQLMutation(name="updateOrganization")
@@ -240,14 +266,6 @@ public class OrganizationResource {
 		} catch (IllegalArgumentException e) {
 			throw new WebApplicationException(e.getMessage(), e.getCause(), Status.BAD_REQUEST);
 		}
-	}
-	
-	@GET
-	@Timed
-	@Path("/{id}/tasks")
-	public AnetBeanList<Task> getTasks(@PathParam("id") Integer orgId) {
-		//TODO: it doesn't seem to be used
-		return new AnetBeanList<Task>(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
 	}
 
 	private void validateApprovalStep(ApprovalStep step) {

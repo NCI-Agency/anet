@@ -20,6 +20,8 @@ import mil.dds.anet.views.IdFetcher;
 
 public class Organization extends AbstractAnetBean {
 
+	public static final String DUMMY_ORG_UUID = "-1"; // pseudo uuid to represent all/top-level organization(s)
+
 	public static enum OrganizationStatus { ACTIVE, INACTIVE }
 	public static enum OrganizationType { ADVISOR_ORG, PRINCIPAL_ORG }
 	
@@ -109,7 +111,7 @@ public class Organization extends AbstractAnetBean {
 	@GraphQLQuery(name="approvalSteps")
 	public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(@GraphQLRootContext Map<String, Object> context) {
 		return AnetObjectEngine.getInstance()
-				.getApprovalStepsForOrg(context, id).thenApply(o -> { approvalSteps = o; return o; });
+				.getApprovalStepsForOrg(context, uuid).thenApply(o -> { approvalSteps = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -126,7 +128,7 @@ public class Organization extends AbstractAnetBean {
 		if (childrenOrgs == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
 			query.setPageSize(Integer.MAX_VALUE);
-			query.setParentOrgId(id);
+			query.setParentOrgUuid(uuid);
 			query.setParentOrgRecursively(false);
 			childrenOrgs = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
 		}
@@ -138,7 +140,7 @@ public class Organization extends AbstractAnetBean {
 		if (descendants == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
 			query.setPageSize(Integer.MAX_VALUE);
-			query.setParentOrgId(id);
+			query.setParentOrgUuid(uuid);
 			query.setParentOrgRecursively(true);
 			descendants = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
 		}
@@ -148,7 +150,7 @@ public class Organization extends AbstractAnetBean {
 	@GraphQLQuery(name="tasks") // TODO: batch load? (used in organizations/Edit.js)
 	public List<Task> loadTasks() { 
 		if (tasks == null) { 
-			tasks = AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(this.getId());
+			tasks = AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationUuid(this.getUuid());
 		}
 		return tasks;
 	}
@@ -169,40 +171,40 @@ public class Organization extends AbstractAnetBean {
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
 		if (this.getType() == OrganizationType.ADVISOR_ORG) { 
-			query.setAdvisorOrgId(id);
+			query.setAdvisorOrgUuid(uuid);
 		} else { 
-			query.setPrincipalOrgId(id);
+			query.setPrincipalOrgUuid(uuid);
 		}
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
-	
-	public static Organization createWithId(Integer id) { 
-		Organization ao = new Organization();
-		ao.setId(id);
+
+	public static Organization createWithUuid(String uuid) {
+		final Organization ao = new Organization();
+		ao.setUuid(uuid);
 		return ao;
 	}
 	
 	@Override
-	public boolean equals(Object o) { 
-		if (o == null || o.getClass() != this.getClass()) { 
+	public boolean equals(Object o) {
+		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		Organization other = (Organization) o;
-		return Objects.equals(other.getId(), id) 
-				&& Objects.equals(other.getShortName(), shortName) 
-				&& Objects.equals(other.getLongName(), longName) 
+		return Objects.equals(other.getUuid(), uuid)
+				&& Objects.equals(other.getShortName(), shortName)
+				&& Objects.equals(other.getLongName(), longName)
 				&& Objects.equals(other.getStatus(), status)
 				&& Objects.equals(other.getIdentificationCode(), identificationCode)
 				&& Objects.equals(other.getType(), type);
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, shortName, longName, status, identificationCode, type, createdAt, updatedAt);
+	public int hashCode() {
+		return Objects.hash(uuid, shortName, longName, status, identificationCode, type, createdAt, updatedAt);
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("[id:%d shortName:%s longName:%s identificationCode:%s type:%s]", id, shortName, longName, identificationCode, type);
+	public String toString() {
+		return String.format("[uuid:%s shortName:%s longName:%s identificationCode:%s type:%s]", uuid, shortName, longName, identificationCode, type);
 	}
 }

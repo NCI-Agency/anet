@@ -15,7 +15,7 @@ export default class OrganizationFilter extends Component {
 		//An Autocomplete filter allows users to search the ANET database
 		// for existing records and use that records ID as the search term.
 		// the filterKey property tells this filter what property to set on the
-		// search query. (ie authorId, organizationId, etc)
+		// search query. (ie authorUuid, organizationUuid, etc)
 		queryKey: PropTypes.string.isRequired,
 		queryIncludeChildOrgsKey: PropTypes.string.isRequired,
 
@@ -102,7 +102,7 @@ export default class OrganizationFilter extends Component {
 	@autobind
 	toQuery() {
 		return {
-			[this.props.queryKey]: this.state.value.id,
+			[this.props.queryKey]: this.state.value.uuid,
 			[this.props.queryIncludeChildOrgsKey]: this.state.includeChildOrgs,
 		}
 	}
@@ -124,7 +124,7 @@ export default class OrganizationFilter extends Component {
 		if (query[this.props.queryKey]) {
 			let getInstanceName = Organization.getInstanceName
 			let graphQlQuery = getInstanceName +
-				'(id:' + query[this.props.queryKey] + ') { id, shortName }'
+				'(uuid:"' + query[this.props.queryKey] + '") { uuid, shortName }'
 			return API.query(graphQlQuery).then(data => {
 				if (data[getInstanceName]) {
 					const toQueryValue = {[this.props.queryKey]: query[this.props.queryKey]}

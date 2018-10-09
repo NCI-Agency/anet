@@ -25,7 +25,7 @@ export default class AuthorizationGroup extends Model {
 		get status() { return AuthorizationGroup.STATUS.ACTIVE }
 	}
 
-	static autocompleteQuery = "id, name, description"
+	static autocompleteQuery = "uuid, name, description"
 	static autocompleteTemplate(group) {
 		return <span>{[group.name, group.description].join(' - ')}</span>
 	}
@@ -44,8 +44,8 @@ export default class AuthorizationGroup extends Model {
 		}
 
 		let resourceName = utils.resourceize(this.resourceName)
-		let id = instance.id
-		let url = ['', 'admin', resourceName, id].join('/')
+		let uuid = instance.uuid
+		let url = ['', 'admin', resourceName, uuid].join('/')
 
 		if (query) {
 			url += '?' + encodeQuery(query)

@@ -12,6 +12,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.utils.DaoUtils;
 
 public class PersonMapper implements ResultSetMapper<Person> {
 
@@ -19,7 +20,7 @@ public class PersonMapper implements ResultSetMapper<Person> {
 	public Person map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
 		Person p = fillInFields(new Person(), rs);
 		
-		if (MapperUtils.containsColumnNamed(rs, "positions_id")) { 
+		if (MapperUtils.containsColumnNamed(rs, "positions_uuid")) {
 			p.setPosition(PositionMapper.fillInFields(new Position(), rs));
 		}
 		
@@ -31,8 +32,8 @@ public class PersonMapper implements ResultSetMapper<Person> {
 	
 	public static <T extends Person> T fillInFields(T a, ResultSet r) throws SQLException {
 		//This hits when we do a join but there's no Person record. 
-		if (r.getObject("people_id") == null) { return null; }
-		a.setId(r.getInt("people_id"));
+		if (r.getObject("people_uuid") == null) { return null; }
+		DaoUtils.setCommonBeanFields(a, r, "people");
 		a.setName(r.getString("people_name"));
 		a.setStatus(MapperUtils.getEnumIdx(r, "people_status", PersonStatus.class));
 		a.setRole(MapperUtils.getEnumIdx(r, "people_role", Role.class));
@@ -50,8 +51,6 @@ public class PersonMapper implements ResultSetMapper<Person> {
 		a.setBiography(r.getString("people_biography"));
 		a.setDomainUsername(r.getString("people_domainUsername"));
 		a.setPendingVerification(r.getBoolean("people_pendingVerification"));
-		a.setCreatedAt(new DateTime(r.getTimestamp("people_createdAt")));
-		a.setUpdatedAt(new DateTime(r.getTimestamp("people_updatedAt")));	
 		
 		return a;
 	}

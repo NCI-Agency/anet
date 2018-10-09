@@ -16,13 +16,13 @@ class AdvisorReportsModal extends Component {
     }
 
     handleModalOpen() {
-        this.fetchAdvisors(this.props.id)
+        this.fetchAdvisors(this.props.uuid)
     }
 
-    fetchAdvisors(orgId) {
+    fetchAdvisors(orgUuid) {
         API.query(/* GraphQL */`
-          advisorReportInsights(orgId: $orgId) { id name stats { week nrReportsSubmitted nrEngagementsAttended }}
-        `, {orgId: orgId}, '($orgId: Int!)')
+          advisorReportInsights(orgUuid: $orgUuid) { uuid name stats { week nrReportsSubmitted nrEngagementsAttended }}
+        `, {orgUuid: orgUuid}, '($orgUuid: String!)')
           .then(data => {
             this.setState({
                 advisors: data.advisorReportInsights

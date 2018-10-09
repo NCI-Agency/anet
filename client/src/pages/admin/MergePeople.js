@@ -1,5 +1,5 @@
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -38,8 +38,8 @@ class MergePeople extends Page {
 		let {winner, loser, copyPosition} = this.state
 		let errors = this.validate()
 
-		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status,
-			position { id, name, organization { id, shortName, longName, identificationCode }},
+		let personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
+			position { uuid, name, organization { uuid, shortName, longName, identificationCode }},
 			authoredReports(pageNum:0,pageSize:1) { totalCount }
 			attendedReports(pageNum:0,pageSize:1) { totalCount }`
 
@@ -65,6 +65,9 @@ class MergePeople extends Page {
 								placeholder="Select the duplicate person"
 								objectType={Person}
 								fields={personFields}
+								template={person =>
+									<LinkTo person={person} isLink={false} />
+								}
 								onChange={this.selectLoser}
 							/>
 						</Col>
@@ -74,18 +77,21 @@ class MergePeople extends Page {
 								placeholder="Select the OTHER duplicate person"
 								objectType={Person}
 								fields={personFields}
+								template={person =>
+									<LinkTo person={person} isLink={false} />
+								}
 								onChange={this.selectWinner}
 							/>
 						</Col>
 					</Row>
 					<Row>
 						<Col md={6}>
-							{loser.id &&
+							{loser.uuid &&
 								<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
 							}
 						</Col>
 						<Col md={6}>
-							{winner.id &&
+							{winner.uuid &&
 								<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
 							}
 						</Col>
@@ -146,11 +152,11 @@ class MergePeople extends Page {
 		let {winner, loser} = this.state
 		let errors = []
 
-		if (!winner.id || !loser.id) {
+		if (!winner.uuid || !loser.uuid) {
 			errors.push("You must select two people")
 			return errors
 		}
-		if (winner.id === loser.id) {
+		if (winner.uuid === loser.uuid) {
 			errors.push("You selected the same person twice!")
 		}
 		if (winner.role !== loser.role) {
@@ -164,7 +170,7 @@ class MergePeople extends Page {
 	@autobind
 	showPersonDetails(person) {
 		return <Form static formFor={person} >
-			<Form.Field id="id" />
+			<Form.Field id="uuid" />
 			<Form.Field id="name" />
 			<Form.Field id="status">{person.humanNameOfStatus()}</Form.Field>
 			<Form.Field id="role">{person.humanNameOfRole()}</Form.Field>
@@ -195,13 +201,13 @@ class MergePeople extends Page {
 		event.preventDefault()
 		let {winner, loser, copyPosition} = this.state
 		let operation = 'mergePeople'
-		let graphql = operation + '(winnerId: $winnerId, loserId: $loserId, copyPosition: $copyPosition)'
+		let graphql = operation + '(winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition)'
 		const variables = {
-				winnerId: winner.id,
-				loserId: loser.id,
+				winnerUuid: winner.uuid,
+				loserUuid: loser.uuid,
 				copyPosition: copyPosition
 		}
-		const variableDef = '($winnerId: Int!,$loserId: Int!,$copyPosition: Boolean!,)'
+		const variableDef = '($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!)'
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
 				if (data[operation]) {
@@ -212,7 +218,7 @@ class MergePeople extends Page {
 				}
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 				console.error(error)
 			})
 	}

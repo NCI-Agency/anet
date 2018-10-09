@@ -24,6 +24,7 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { jumpToTop, AnchorLink } from 'components/Page'
 
 class BaseReportShow extends Page {
 
@@ -40,7 +41,7 @@ class BaseReportShow extends Page {
 		this.state = {
 			success: null,
 			error: null,
-			report: new Report({id: props.match.params.id}),
+			report: new Report({uuid: props.match.params.uuid}),
 			newComment: new Comment(),
 			approvalComment: new Comment(),
 			showEmailModal: false,
@@ -50,23 +51,23 @@ class BaseReportShow extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			report(id:${props.match.params.id}) {
-				id, intent, engagementDate, atmosphere, atmosphereDetails
+			report(uuid:"${props.match.params.uuid}") {
+				uuid, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
 				state
 
-				location { id, name }
+				location { uuid, name }
 				author {
-					id, name, rank,
+					uuid, name, rank,
 					position {
 						organization {
 							shortName, longName, identificationCode
 							approvalSteps {
-								id, name,
+								uuid, name,
 								approvers {
-									id, name,
-									person { id, name rank }
+									uuid, name,
+									person { uuid, name rank }
 								}
 							}
 						}
@@ -74,35 +75,35 @@ class BaseReportShow extends Page {
 				}
 
 				attendees {
-					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status, organization { id, shortName} }
+					uuid, name, role, primary, rank, status, endOfTourDate
+					position { uuid, name, status, organization { uuid, shortName}, location {uuid, name} }
 				}
-				primaryAdvisor { id }
-				primaryPrincipal { id }
+				primaryAdvisor { uuid }
+				primaryPrincipal { uuid }
 
-				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
 
 				comments {
-					id, text, createdAt, updatedAt
-					author { id, name, rank }
+					uuid, text, createdAt, updatedAt
+					author { uuid, name, rank }
 				}
 
-				principalOrg { id, shortName, longName, identificationCode, type }
-				advisorOrg { id, shortName, longName, identificationCode, type }
+				principalOrg { uuid, shortName, longName, identificationCode, type }
+				advisorOrg { uuid, shortName, longName, identificationCode, type }
 
 				approvalStatus {
 					type, createdAt
-					step { id , name
-						approvers { id, name, person { id, name, rank } }
+					step { uuid , name
+						approvers { uuid, name, person { uuid, name, rank } }
 					},
-					person { id, name, rank}
+					person { uuid, name, rank}
 				}
 
-				approvalStep { name, approvers { id }, nextStepId }
+				approvalStep { name, approvers { uuid }, nextStepUuid }
 
-				tags { id, name, description }
-				reportSensitiveInformation { id, text }
-				authorizationGroups { id, name, description }
+				tags { uuid, name, description }
+				reportSensitiveInformation { uuid, text }
+				authorizationGroups { uuid, name, description }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -159,7 +160,7 @@ class BaseReportShow extends Page {
 
 		return (
 			<div className="report-show">
-				<Breadcrumbs items={[['Report #' + report.id, Report.pathFor(report)]]} />
+				<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				{report.isReleased() &&
@@ -194,7 +195,7 @@ class BaseReportShow extends Page {
 				{report.isPending() &&
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p>
+						<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
 					</Fieldset>
 				}
 
@@ -213,7 +214,7 @@ class BaseReportShow extends Page {
 				{this.renderEmailModal()}
 
 				<Form static formFor={report} horizontal>
-					<Fieldset title={`Report #${report.id}`} className="show-report-overview" action={<div>
+					<Fieldset title={`Report #${report.uuid}`} className="show-report-overview" action={<div>
 						{canEmail && <Button onClick={this.toggleEmailModal}>Email report</Button>}
 						{canEdit && <LinkTo report={report} edit button="primary">Edit</LinkTo>}
 						{canSubmit && errors.length === 0 && <Button bsStyle="primary" onClick={this.submitDraft}>Submit report</Button>}
@@ -244,7 +245,7 @@ class BaseReportShow extends Page {
 							</Form.Field>
 						}
 						<Form.Field id="tags" label="Tags">
-							{report.tags && report.tags.map((tag,i) => <Tag key={tag.id} tag={tag} />)}
+							{report.tags && report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}
 						</Form.Field>
 						<Form.Field id="author" label="Report author">
 							<LinkTo person={report.author} />
@@ -264,6 +265,7 @@ class BaseReportShow extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Location</th>
 									<th>Org</th>
 								</tr>
 							</thead>
@@ -272,7 +274,7 @@ class BaseReportShow extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={5}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -291,7 +293,7 @@ class BaseReportShow extends Page {
 
 							<tbody>
 								{Task.map(report.tasks, (task, idx) =>
-									<tr key={task.id} id={"task_" + idx}>
+									<tr key={task.uuid} id={"task_" + idx}>
 										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
 										<td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>
 									</tr>
@@ -322,7 +324,7 @@ class BaseReportShow extends Page {
 										<tbody>
 											{report.authorizationGroups.map(ag => {
 												return (
-													<tr key={ag.id}>
+													<tr key={ag.uuid}>
 														<td>{ag.name}</td>
 														<td>{ag.description}</td>
 													</tr>
@@ -370,7 +372,7 @@ class BaseReportShow extends Page {
 						{report.comments.map(comment => {
 							let createdAt = moment(comment.createdAt)
 							return (
-								<p key={comment.id}>
+								<p key={comment.uuid}>
 									<LinkTo person={comment.author} />
 									<span title={createdAt.format('L LT')}> {createdAt.fromNow()}: </span>
 									"{comment.text}"
@@ -396,7 +398,7 @@ class BaseReportShow extends Page {
 						<ConfirmDelete
 							onConfirmDelete={this.onConfirmDelete}
 							objectType="report"
-							objectDisplay={'#' + this.state.report.id}
+							objectDisplay={'#' + this.state.report.uuid}
 							bsStyle="warning"
 							buttonLabel="Delete report"
 							className="pull-right" />
@@ -409,9 +411,9 @@ class BaseReportShow extends Page {
 	@autobind
 	onConfirmDelete() {
 		const operation = 'deleteReport'
-		let graphql = operation + '(reportId: $reportId)'
-		const variables = { reportId: this.state.report.id }
-		const variableDef = '($reportId: Int!)'
+		let graphql = operation + '(uuid: $uuid)'
+		const variables = { uuid: this.state.report.uuid }
+		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.props.history.push({
@@ -420,7 +422,7 @@ class BaseReportShow extends Page {
 				})
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 
@@ -448,7 +450,7 @@ class BaseReportShow extends Page {
 
 	@autobind
 	renderAttendeeRow(person) {
-		return <tr key={person.id}>
+		return <tr key={person.uuid}>
 			<td className="primary-attendee">
 				{person.primary && <Checkbox readOnly checked />}
 			</td>
@@ -457,6 +459,7 @@ class BaseReportShow extends Page {
 				<LinkTo person={person} />
 			</td>
 			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
@@ -509,12 +512,12 @@ class BaseReportShow extends Page {
 			comment: email.comment
 		}
 
-		let graphql = 'emailReport(reportId: $reportId,email: $email)'
+		let graphql = 'emailReport(uuid: $uuid, email: $email)'
 		const variables = {
-			reportId: this.state.report.id,
+			uuid: this.state.report.uuid,
 			email: emailDelivery
 		}
-		const variableDef = '($reportId: Int!,$email: AnetEmailInput!)'
+		const variableDef = '($uuid: String!, $email: AnetEmailInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.setState({
@@ -534,11 +537,11 @@ class BaseReportShow extends Page {
 
 	@autobind
 	submitDraft() {
-		let graphql = 'submitReport(reportId: $reportId) { id }'
+		let graphql = 'submitReport(uuid: $uuid) { uuid }'
 		const variables = {
-			reportId: this.state.report.id
+			uuid: this.state.report.uuid
 		}
-		const variableDef = '($reportId: Int!)'
+		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.updateReport()
@@ -550,12 +553,12 @@ class BaseReportShow extends Page {
 
 	@autobind
 	submitComment(event){
-		let graphql = 'addComment(reportId: $reportId,comment: $comment) { id }'
+		let graphql = 'addComment(uuid: $uuid, comment: $comment) { uuid }'
 		const variables = {
-			reportId: this.state.report.id,
+			uuid: this.state.report.uuid,
 			comment: this.state.newComment
 		}
-		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		const variableDef = '($uuid: String!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.updateReport()
@@ -575,12 +578,12 @@ class BaseReportShow extends Page {
 		}
 
 		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
-		let graphql = 'rejectReport(reportId: $reportId,comment: $comment) { id }'
+		let graphql = 'rejectReport(uuid: $uuid, comment: $comment) { uuid }'
 		const variables = {
-			reportId: this.state.report.id,
+			uuid: this.state.report.uuid,
 			comment: this.state.approvalComment
 		}
-		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		const variableDef = '($uuid: String!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.updateReport()
@@ -593,12 +596,12 @@ class BaseReportShow extends Page {
 	@autobind
 	approveReport() {
 		let comment = (this.state.approvalComment.text.length > 0) ? this.state.approvalComment : {}
-		let graphql = 'approveReport(reportId: $reportId,comment: $comment) { id }'
+		let graphql = 'approveReport(uuid: $uuid, comment: $comment) { uuid }'
 		const variables = {
-			reportId: this.state.report.id,
+			uuid: this.state.report.uuid,
 			comment: comment
 		}
-		const variableDef = '($reportId: Int!,$comment: CommentInput!)'
+		const variableDef = '($uuid: String!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				let lastApproval = (this.state.report.approvalStep.nextStepId === null)
@@ -632,13 +635,13 @@ class BaseReportShow extends Page {
 	@autobind
 	updateReport(json) {
 		this.fetchData(this.props)
-		window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind
 	handleError(response) {
 		this.setState({success: null, error: response})
-		window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 

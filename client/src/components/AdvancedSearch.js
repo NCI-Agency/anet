@@ -6,7 +6,8 @@ import autobind from 'autobind-decorator'
 import Settings from 'Settings'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
-import searchFilters from 'components/SearchFilters'
+import searchFilters , { POSTITION_POSITION_TYPE_FILTER_KEY, POSTITION_ORGANIZATION_FILTER_KEY } from 'components/SearchFilters'
+
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -175,9 +176,9 @@ class AdvancedSearch extends Component {
 		newFilters.splice(newFilters.indexOf(filter), 1)
 		this.setState({filters: newFilters})
 
-		if (filter.key === "Organization") {
+		if (filter.key === POSTITION_ORGANIZATION_FILTER_KEY) {
 			this.setOrganizationFilter(null)
-		} else if (filter.key === "Position type") {
+		} else if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
 			this.setPositionTypeFilter(null)
 		}
 	}
@@ -266,7 +267,7 @@ class SearchFilter extends Component {
 		const filter = this.props.filter
 		filter.value = value
 
-		if (filter.key === "Position type") {
+		if (filter.key === POSTITION_POSITION_TYPE_FILTER_KEY) {
 			updateOrganizationFilterState(this.props.organizationFilter, filter.value.value || "")
 		}
 	}

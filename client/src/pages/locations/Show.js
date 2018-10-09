@@ -29,7 +29,8 @@ class BaseLocationShow extends Page {
 	constructor(props) {
 		super(props)
 		this.state = {
-			location: new Location()
+			location: new Location(),
+			reportsPageNum: 0
 		}
 		setMessages(props,this.state)
 	}
@@ -44,12 +45,12 @@ class BaseLocationShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			locationId: props.match.params.id,
+			locationUuid: props.match.params.uuid,
 		})
 
 		let locationQuery = new GQL.Part(/* GraphQL */`
-			location(id:${props.match.params.id}) {
-				id, name, lat, lng, status
+			location(uuid:"${props.match.params.uuid}") {
+				uuid, name, lat, lng, status
 			}
 		`)
 

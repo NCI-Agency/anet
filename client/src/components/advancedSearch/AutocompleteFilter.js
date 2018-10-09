@@ -11,7 +11,7 @@ export default class AutocompleteFilter extends Component {
 		//An Autocomplete filter allows users to search the ANET database
 		// for existing records and use that records ID as the search term.
 		// the filterKey property tells this filter what property to set on the
-		// search query. (ie authorId, organizationId, etc)
+		// search query. (ie authorUuid, organizationUuid, etc)
 		queryKey: PropTypes.string.isRequired,
 
 		//Passed by the SearchFilter row
@@ -70,7 +70,7 @@ export default class AutocompleteFilter extends Component {
 
 	@autobind
 	toQuery() {
-		return {[this.props.queryKey]: this.state.value && this.state.value.id}
+		return {[this.props.queryKey]: this.state.value && this.state.value.uuid}
 	}
 
 	@autobind
@@ -87,7 +87,7 @@ export default class AutocompleteFilter extends Component {
 		if (query[this.props.queryKey]) {
 			const getInstanceName = this.props.objectType.getInstanceName
 			const graphQlQuery = getInstanceName +
-				'(id:' + query[this.props.queryKey] + ') { ' + this.props.fields + '}'
+				'(uuid:"' + query[this.props.queryKey] + '") { ' + this.props.fields + '}'
 			return API.query(graphQlQuery).then(data => {
 				if (data[getInstanceName]) {
 					const toQueryValue = {[this.props.queryKey]: query[this.props.queryKey]}

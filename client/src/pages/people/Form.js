@@ -26,6 +26,8 @@ import TriggerableConfirm from 'components/TriggerableConfirm'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
+import _isEmpty from 'lodash/isEmpty'
 
 class BasePersonForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -57,7 +59,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 	componentDidUpdate(prevProps, prevState) {
 		const { person } = this.props
 		const prevPerson = prevProps.person
-		if (person.id !== prevPerson.id) {
+		if (person.uuid !== prevPerson.uuid) {
 			const splitName = Person.parseFullName(person.name)
 			this.setState({
 				fullName: Person.fullName(splitName),
@@ -94,8 +96,8 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.id
-		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && person.domainUsername
+		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
+		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
 		const ranks = Settings.fields.person.ranks || []
 
 		const countries = this.countries(person)
@@ -107,7 +109,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 			id: "firstName",
 			type: "text",
 			display: "inline",
-			placeholder: "First name(s)",
+			placeholder: "First name(s) - Lower-case except for the first letter of each name",
 			value: this.state.splitName.firstName,
 			onChange: this.handleOnChangeFirstName
 		}
@@ -300,9 +302,9 @@ class BasePersonForm extends ValidatableFormWrapper {
 					{this.renderCountrySelectOptions(countries)}
 				</RequiredField>
 
-				<Form.Field id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON}>
+				<RequiredField  id="endOfTourDate" label="End of tour" addon={CALENDAR_ICON} required={isAdvisor} addOnBlur={true}>
 					<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
-				</Form.Field>
+				</RequiredField>
 
 				<Form.Field id="biography" componentClass={TextEditor} className="biography" />
 			</Fieldset>
@@ -373,7 +375,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 		person.name = Person.fullName(this.state.splitName, true)
 		const operation = edit ? 'updatePerson' : 'createPerson'
 		let graphql = operation + '(person: $person)'
-		graphql += edit ? '' : ' { id }'
+		graphql += edit ? '' : ' { uuid }'
 		const variables = { person: person }
 		const variableDef = '($person: PersonInput!)'
 		this.setState({isBlocking: false})
@@ -387,8 +389,8 @@ class BasePersonForm extends ValidatableFormWrapper {
 						pathname: '/',
 					})
 				} else {
-					if (data[operation].id) {
-						person.id = data[operation].id
+					if (data[operation].uuid) {
+						person.uuid = data[operation].uuid
 					}
 					this.props.history.replace(Person.pathForEdit(person))
 					this.props.history.push({
@@ -400,7 +402,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 				}
 			}).catch(error => {
 				this.setState({success: null, error: error})
-				window.scrollTo(0, 0)
+				jumpToTop()
 			})
 	}
 

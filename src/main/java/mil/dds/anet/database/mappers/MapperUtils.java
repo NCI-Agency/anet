@@ -43,7 +43,7 @@ public class MapperUtils {
 	
 	public static boolean containsColumnNamed(ResultSet rs, String colName) throws SQLException {
 		ResultSetMetaData metaData = rs.getMetaData();
-		for (int i = 1;i <= metaData.getColumnCount(); i++) {
+		for (int i = 1; i <= metaData.getColumnCount(); i++) {
 			if (colName.equals(metaData.getColumnName(i))) { 
 				return true;
 			}

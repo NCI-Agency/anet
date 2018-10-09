@@ -18,12 +18,12 @@ public class ApprovalActionMapper implements ResultSetMapper<ApprovalAction> {
 	@Override
 	public ApprovalAction map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
 		ApprovalAction aa = new ApprovalAction();
-		aa.setPerson(Person.createWithId(MapperUtils.getInteger(rs, "personId")));
-		aa.setReport(Report.createWithId(MapperUtils.getInteger(rs, "reportId")));
+		aa.setPerson(Person.createWithUuid(rs.getString("personUuid")));
+		aa.setReport(Report.createWithUuid(rs.getString("reportUuid")));
 		
-		Integer approvalStepId = MapperUtils.getInteger(rs, "approvalStepId");
-		if (approvalStepId != null) { 
-			aa.setStep(ApprovalStep.createWithId(approvalStepId));
+		String approvalStepUuid = rs.getString("approvalStepUuid");
+		if (approvalStepUuid != null) {
+			aa.setStep(ApprovalStep.createWithUuid(approvalStepUuid));
 		}
 		
 		aa.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));

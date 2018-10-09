@@ -35,11 +35,11 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
 		this.foreignKeyName = foreignKeyName;
 	}
 
-	public List<List<T>> getByForeignKeys(List<Integer> foreignKeys) {
+	public List<List<T>> getByForeignKeys(List<String> foreignKeys) {
 		final Map<String, Object> args = new HashMap<String, Object>();
 		final List<String> argNames = new LinkedList<String>();
 		for (int i = 0; i < foreignKeys.size(); i++) {
-			final String arg = "id" + i;
+			final String arg = "uuid" + i;
 			argNames.add(":" + arg);
 			args.put(arg, foreignKeys.get(i));
 		}
@@ -47,10 +47,10 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
 		final Query<ForeignKeyTuple<T>> query = dbHandle.createQuery(String.format(sql, queryKeys))
 				.bindFromMap(args)
 				.map(mapper);
-		final Map<Integer, List<T>> map = new HashMap<>();
+		final Map<String, List<T>> map = new HashMap<>();
 		for (final ForeignKeyTuple<T> obj : query.list()) {
 			try {
-				final Integer foreignKey = obj.getForeignKey();
+				final String foreignKey = obj.getForeignKey();
 				List<T> list = map.get(foreignKey);
 				if (list == null) {
 					list = new ArrayList<>(); 
@@ -62,7 +62,7 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
 			}
 		}
 		final List<List<T>> result = new ArrayList<>();
-		for (final int foreignKey : foreignKeys) {
+		for (final String foreignKey : foreignKeys) {
 			final List<T> l = map.get(foreignKey);
 			result.add((l == null) ? new ArrayList<T>() : l);
 		}

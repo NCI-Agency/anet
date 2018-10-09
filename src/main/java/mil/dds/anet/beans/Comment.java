@@ -9,18 +9,18 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Comment extends AbstractAnetBean {
 
-	private Integer reportId;
+	private String reportUuid;
 	
 	private Person author;
 	private String text;
 
-	@GraphQLQuery(name="reportId")
-	public Integer getReportId() {
-		return reportId;
+	@GraphQLQuery(name="reportUuid")
+	public String getReportUuid() {
+		return reportUuid;
 	}
 
-	public void setReportId(Integer reportId) {
-		this.reportId = reportId;
+	public void setReportUuid(String reportUuid) {
+		this.reportUuid = reportUuid;
 	}
 
 	@GraphQLQuery(name="author")
@@ -43,33 +43,33 @@ public class Comment extends AbstractAnetBean {
 	
 	
 	@Override
-	public boolean equals(Object o) { 
+	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
 		Comment c = (Comment) o;
-		return Objects.equals(c.getId(), id) 
-				&& idEqual(c.getAuthor(), author) 
-				&& Objects.equals(c.getText(), text) 
-				&& Objects.equals(c.getReportId(), reportId) 
-				&& Objects.equals(c.getUpdatedAt(), updatedAt) 
+		return Objects.equals(c.getUuid(), uuid)
+				&& uuidEqual(c.getAuthor(), author)
+				&& Objects.equals(c.getText(), text)
+				&& Objects.equals(c.getReportUuid(), reportUuid)
+				&& Objects.equals(c.getUpdatedAt(), updatedAt)
 				&& Objects.equals(c.getCreatedAt(), createdAt);
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, author, createdAt, text, reportId, updatedAt);
+	public int hashCode() {
+		return Objects.hash(uuid, author, createdAt, text, reportUuid, updatedAt);
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("[%d] - [Author:%d,Report:%d] - (%s)", id, author.getId(), reportId, text);
+	public String toString() {
+		return String.format("[%s] - [Author:%s,Report:%d] - (%s)", uuid, author.getUuid(), reportUuid, text);
 	}
 
-	public static Comment createWithId(Integer id) {
-		Comment c = new Comment();
-		c.setId(id);
+	public static Comment createWithUuid(String uuid) {
+		final Comment c = new Comment();
+		c.setUuid(uuid);
 		return c;
 	}
-	
+
 }

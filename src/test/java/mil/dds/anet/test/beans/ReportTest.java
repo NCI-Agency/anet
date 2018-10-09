@@ -63,7 +63,7 @@ public class ReportTest extends BeanTester<Report> {
 		c.setCreatedAt(new DateTime(1453815803000L, ISOChronology.getInstanceUTC()));
 		c.setAuthor(PersonTest.getJackJacksonStub());
 		c.setText("I really like this report, it's awesome!!!");
-		c.setReportId(null);
+		c.setReportUuid(null);
 		LinkedList<Comment> comments = new LinkedList<Comment>();
 		comments.add(c);
 		r.setComments(comments);
@@ -104,8 +104,8 @@ public class ReportTest extends BeanTester<Report> {
 	
 	@Test
 	public void staticCreatorTest() { 
-		Report r = Report.createWithId(4);
-		assertThat(r.getId()).isEqualTo(4);
+		Report r = Report.createWithUuid("4");
+		assertThat(r.getUuid()).isEqualTo("4");
 		assertThat(r.getReportText()).isNull();
 		assertThat(r.getApprovalStep()).isNull();
 		assertThat(r.getNextSteps()).isNull();

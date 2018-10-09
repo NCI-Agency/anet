@@ -262,6 +262,7 @@ dictionary:
           - United States of America
       position:
         name: NATO Billet
+        type: ANET User
       org:
         name: Advisor Organization
         allOrgName: All EFs / AOs
@@ -278,6 +279,7 @@ dictionary:
           - Afghanistan
       position:
         name: Afghan Tashkil
+        type: Afghan Partner
       org:
         name: Afghan Government Organization
         longName:
@@ -288,10 +290,10 @@ dictionary:
           placeholder: the six character code
     superUser:
       position:
-        name: ANET Super User
+        type: ANET Super User
     administrator:
       position:
-        name: ANET Administrator
+        type: ANET Administrator
   pinned_ORGs:
     - Key Leader Engagement
   non_reporting_ORGs:

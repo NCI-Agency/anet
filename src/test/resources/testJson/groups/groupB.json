@@ -1,7 +1,7 @@
 {
 	"name" : "Group Bravo",
 	"members" : {
-		{"id" : 2},
-		{"id" : 3}
+		{"uuid" : "2"},
+		{"uuid" : "3"}
 	}
 }

@@ -8,9 +8,9 @@ public interface IAnetDao<T> {
 
 	public AnetBeanList<?> getAll(int pageNum, int pageSize);
 	
-	public T getById(int id);
+	public T getByUuid(String uuid);
 
-	public List<T> getByIds(List<Integer> ids);
+	public List<T> getByIds(List<String> uuids);
 	
 	public T insert(T obj);
 	

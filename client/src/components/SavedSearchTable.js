@@ -18,21 +18,23 @@ export default class SavedSearchTable extends Component {
 		this.state = {
 			reports: []
 		}
+	}
 
-		if (props.search) {
-			this.runSearch(props.search)
+	componentDidMount() {
+		if (this.props.search) {
+			this.runSearch(this.props.search)
 		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (this.props.search && (prevProps.search.id !== this.props.search.id)) {
+		if (this.props.search && (prevProps.search.uuid !== this.props.search.uuid)) {
 			this.runSearch(this.props.search)
 		}
 	}
 
 	@autobind
 	runSearch(search) {
-		const objType = SEARCH_OBJECT_TYPES[search.objectType]
+		const objType = SEARCH_OBJECT_TYPES[search.objectType] || SEARCH_OBJECT_TYPES.REPORTS
 		if (objType !== SEARCH_OBJECT_TYPES.REPORTS) {
 			// This table only shows reports
 			this.setState({reports: {list: []}})
@@ -42,6 +44,8 @@ export default class SavedSearchTable extends Component {
 			// Add default sorting (if not specified/saved in the query); see SEARCH_CONFIG in pages/Search.js
 			query.sortBy = query.sortBy || 'ENGAGEMENT_DATE'
 			query.sortOrder = query.sortOrder || 'DESC'
+			query.pageNum = query.pageNum || 0
+			query.pageSize = query.pageSize || 10
 			let fields = ReportCollection.GQL_REPORT_FIELDS
 			API.query(/*GraphQL */`
 				reports: reportList(query: $query) {

@@ -18,11 +18,11 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 
 const d3 = require('d3')
-const chartByOrgId = 'cancelled_reports_by_org'
+const chartByOrgUuid = 'cancelled_reports_by_org'
 const chartByReasonId = 'cancelled_reports_by_reason'
 const GQL_CHART_FIELDS =  /* GraphQL */`
-  id
-  advisorOrg { id, shortName }
+  uuid
+  advisorOrg { uuid, shortName }
   cancelledReason
 `
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
@@ -44,6 +44,7 @@ class CancelledEngagementReports extends Component {
     this.state = {
       graphDataByOrg: [],
       graphDataByReason: [],
+      reportsPageNum: 0,
       focusedOrg: '',
       focusedReason: '',
       updateChart: true,  // whether the chart needs to be updated
@@ -62,9 +63,9 @@ class CancelledEngagementReports extends Component {
             the bar corresponding to the organization.`}
         </p>
         <BarChartWithLoader
-          chartId={chartByOrgId}
+          chartId={chartByOrgUuid}
           data={this.state.graphDataByOrg}
-          xProp='advisorOrg.id'
+          xProp='advisorOrg.uuid'
           yProp='cancelledByOrg'
           xLabel='advisorOrg.shortName'
           onBarClick={this.goToOrg}
@@ -133,6 +134,7 @@ class CancelledEngagementReports extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart
@@ -144,7 +146,7 @@ class CancelledEngagementReports extends Component {
         }
       `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
     const noAdvisorOrg = {
-      id: -1,
+      uuid: "-1",
       shortName: `No ${Settings.fields.advisor.org.name}`
     }
     Promise.all([chartQuery]).then(values => {
@@ -155,8 +157,8 @@ class CancelledEngagementReports extends Component {
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
         graphDataByOrg: reportsList
-          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.id === item.advisorOrg.id }) === index)
-          .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.id === d.advisorOrg.id).length; return d})
+          .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.uuid === item.advisorOrg.uuid }) === index)
+          .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.uuid === d.advisorOrg.uuid).length; return d})
           .sort((a, b) => {
             let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
             let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
@@ -186,7 +188,7 @@ class CancelledEngagementReports extends Component {
       pageSize: 10
     })
     if (this.state.focusedOrg) {
-      Object.assign(reportsQueryParams, {advisorOrgId: this.state.focusedOrg.id})
+      Object.assign(reportsQueryParams, {advisorOrgUuid: this.state.focusedOrg.uuid})
     }
     // Query used by the reports collection
     const reportsQuery = API.query(/* GraphQL */`
@@ -245,10 +247,10 @@ class CancelledEngagementReports extends Component {
     this.setState({updateChart: false, reportsPageNum: 0, focusedReason: '', focusedOrg: (item ? item.advisorOrg : '')}, () => this.fetchOrgData())
     // remove highlighting of the bars
     this.resetChartSelection(chartByReasonId)
-    this.resetChartSelection(chartByOrgId)
+    this.resetChartSelection(chartByOrgUuid)
     if (item) {
       // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartByOrgId + ' #bar_' + item.advisorOrg.id).attr('class', 'selected-bar')
+      d3.select('#' + chartByOrgUuid + ' #bar_' + item.advisorOrg.uuid).attr('class', 'selected-bar')
     }
   }
 
@@ -259,7 +261,7 @@ class CancelledEngagementReports extends Component {
     this.setState({updateChart: false, reportsPageNum: 0, focusedReason: (item ? item.cancelledReason : ''), focusedOrg: ''}, () => this.fetchReasonData())
     // remove highlighting of the bars
     this.resetChartSelection(chartByReasonId)
-    this.resetChartSelection(chartByOrgId)
+    this.resetChartSelection(chartByOrgUuid)
     if (item) {
       // highlight the bar corresponding to the selected organization
       d3.select('#' + chartByReasonId + ' #bar_' + item.cancelledReason).attr('class', 'selected-bar')

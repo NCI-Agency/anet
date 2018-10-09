@@ -16,6 +16,7 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
@@ -84,8 +85,9 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		Organization adminOrg = new Organization();
 		adminOrg.setType(OrganizationType.ADVISOR_ORG);
 		adminOrg.setShortName(scanner.nextLine());
+		adminOrg.setStatus(Organization.OrganizationStatus.ACTIVE);
 		adminOrg = engine.getOrganizationDao().insert(adminOrg);
-		System.out.println("... Organization " + adminOrg.getId() + " Saved!");
+		System.out.println("... Organization " + adminOrg.getUuid() + " Saved!");
 		
 		//Create First Position
 		System.out.print("Name of Administrator Position >>");
@@ -95,7 +97,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		adminPos.setName(scanner.nextLine());
 		adminPos.setStatus(Position.PositionStatus.ACTIVE);
 		adminPos = engine.getPositionDao().insert(adminPos);
-		System.out.println("... Position " + adminPos.getId() + " Saved!");
+		System.out.println("... Position " + adminPos.getUuid() + " Saved!");
 		
 		//Create First User
 		System.out.print("Your Name [LAST NAME, First name(s)] >>");
@@ -104,20 +106,21 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		System.out.print("Your Domain Username >>");
 		admin.setDomainUsername(scanner.nextLine());
 		admin.setRole(Role.ADVISOR);
+		admin.setStatus(PersonStatus.ACTIVE);
 		admin = engine.getPersonDao().insert(admin);
 		engine.getPositionDao().setPersonInPosition(admin, adminPos);
-		System.out.println("... Person " + admin.getId() + " Saved!");
+		System.out.println("... Person " + admin.getUuid() + " Saved!");
 		
 		//Set Default Approval Chain.
 		System.out.println("Setting you as the default approver...");
 		AdminSetting defaultOrg = new AdminSetting();
 		defaultOrg.setKey(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION.name());
-		defaultOrg.setValue(adminOrg.getId().toString());
+		defaultOrg.setValue(adminOrg.getUuid());
 		engine.getAdminDao().saveSetting(defaultOrg);
 		
 		ApprovalStep defaultStep = new ApprovalStep();
 		defaultStep.setName("Default Approver");
-		defaultStep.setAdvisorOrganizationId(adminOrg.getId());
+		defaultStep.setAdvisorOrganizationUuid(adminOrg.getUuid());
 		defaultStep.setApprovers(ImmutableList.of(adminPos));
 		engine.getApprovalStepDao().insert(defaultStep);
 		System.out.println("DONE!");

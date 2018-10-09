@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
@@ -27,30 +25,22 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class OrganizationDao extends AnetBaseDao<Organization> {
 
-	private static String[] fields = {"id", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgId"};
+	private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgUuid"};
 	private static String tableName = "organizations";
-	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
-
+	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
+	
 	private final IdBatcher<Organization> idBatcher;
 	private final ForeignKeyBatcher<Organization> personIdBatcher;
 
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
-		final String idBatcherSql = "/* batch.getOrgsByIds */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id IN ( %1$s )";
+		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( %1$s )";
 		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
 
-		final String personIdBatcherSql = DaoUtils.isMsSql(dbHandle)
-				? "/* batch.getOrganizationForPerson */ SELECT TOP(1) \"peoplePositions\".\"personId\", " + ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" IN ( %1$s ) AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC"
-				: "/* batch.getOrganizationForPerson */ SELECT \"peoplePositions\".\"personId\", " + ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" IN ( %1$s )  AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
-		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, new OrganizationMapper(), "personId");
+		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", " + ORGANIZATION_FIELDS
+					+ "FROM organizations, positions WHERE "
+					+ "positions.\"currentPersonUuid\" IN ( %1$s ) AND positions.\"organizationUuid\" = organizations.uuid";
+		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, new OrganizationMapper(), "personUuid");
 	}
 	
 	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
@@ -58,34 +48,33 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		Long manualRowCount = getSqliteRowCount();
 		return new AnetBeanList<Organization>(query, pageNum, pageSize, manualRowCount);
 	}
-	
-	public Organization getById(int id) { 
-		Query<Organization> query = dbHandle.createQuery(
-				"/* getOrgById */ SELECT " + ORGANIZATION_FIELDS + " from organizations where id = :id")
-			.bind("id",id)
-			.map(new OrganizationMapper());
-		List<Organization> results = query.list();
-		return (results.size() == 0) ? null : results.get(0);
+
+	public Organization getByUuid(String uuid) {
+		return dbHandle.createQuery(
+				"/* getOrgByUuid */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid = :uuid")
+				.bind("uuid", uuid)
+				.map(new OrganizationMapper())
+				.first();
 	}
 
 	@Override
-	public List<Organization> getByIds(List<Integer> ids) {
-		return idBatcher.getByIds(ids);
+	public List<Organization> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
 	}
 
-	public List<List<Organization>> getOrganizations(List<Integer> foreignKeys) {
+	public List<List<Organization>> getOrganizations(List<String> foreignKeys) {
 		return personIdBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	public CompletableFuture<List<Organization>> getOrganizationsForPerson(Map<String, Object> context, Integer personId) {
+	public CompletableFuture<List<Organization>> getOrganizationsForPerson(Map<String, Object> context, String personUuid) {
 		return new ForeignKeyFetcher<Organization>()
-				.load(context, "person.organizations", personId);
+				.load(context, "person.organizations", personUuid);
 	}
 
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
 		return dbHandle.createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS
 				+ " FROM organizations "
-				+ "WHERE \"parentOrgId\" IS NULL "
+				+ "WHERE \"parentOrgUuid\" IS NULL "
 				+ "AND status = :status "
 				+ "AND type = :type")
 			.bind("status", DaoUtils.getEnumId(OrganizationStatus.ACTIVE))
@@ -97,13 +86,14 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	@UseStringTemplate3StatementLocator
 	public interface OrgListQueries {
 		@Mapper(OrganizationMapper.class)
-		@SqlQuery("SELECT id AS organizations_id"
+		@SqlQuery("SELECT uuid AS organizations_uuid"
+				+ ", uuid AS uuid"
 				+ ", \"shortName\" AS organizations_shortName"
 				+ ", \"longName\" AS organizations_longName"
 				+ ", status AS organizations_status"
 				+ ", \"identificationCode\" AS organizations_identificationCode"
 				+ ", type AS organizations_type"
-				+ ", \"parentOrgId\" AS organizations_parentOrgId"
+				+ ", \"parentOrgUuid\" AS organizations_parentOrgUuid"
 				+ ", \"createdAt\" AS organizations_createdAt"
 				+ ", \"updatedAt\" AS organizations_updatedAt"
 				+ " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
@@ -118,31 +108,27 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	}
 
 	public Organization insert(Organization org) {
-		org.setCreatedAt(DateTime.now());
-		org.setUpdatedAt(org.getCreatedAt());
-		
-		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* insertOrg */ INSERT INTO organizations (\"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgId\") "
-				+ "VALUES (:shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgId)")
+		DaoUtils.setInsertFields(org);
+		dbHandle.createStatement(
+				"/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\") "
+				+ "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid)")
 			.bindFromProperties(org)
 			.bind("status", DaoUtils.getEnumId(org.getStatus()))
 			.bind("type", DaoUtils.getEnumId(org.getType()))
-			.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))
-			.executeAndReturnGeneratedKeys();
-		
-		org.setId(DaoUtils.getGeneratedId(keys));
+			.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
+			.execute();
 		return org;
 	}
 	
 	public int update(Organization org) {
-		org.setUpdatedAt(DateTime.now());
+		DaoUtils.setUpdateFields(org);
 		int numRows = dbHandle.createStatement("/* updateOrg */ UPDATE organizations "
 				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
-				+ "\"updatedAt\" = :updatedAt, \"parentOrgId\" = :parentOrgId where id = :id")
+				+ "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid where uuid = :uuid")
 				.bindFromProperties(org)
 				.bind("status", DaoUtils.getEnumId(org.getStatus()))
 				.bind("type", DaoUtils.getEnumId(org.getType()))
-				.bind("parentOrgId", DaoUtils.getId(org.getParentOrg()))
+				.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
 				.execute();
 			
 		return numRows;

@@ -17,7 +17,7 @@ export default class Location extends Model {
 		lng: null
 	}
 
-	static autocompleteQuery = "id, name"
+	static autocompleteQuery = "uuid, name"
 
 	static hasCoordinates(location) {
 		return location && typeof location.lat === 'number' && typeof location.lng === 'number'
