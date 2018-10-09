@@ -173,7 +173,6 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	render() {
 		const { report, onDelete, currentUser } = this.props
-		const { edit } = this.props
 		const {recents, suggestionList, errors, isCancelled, showAssignedPositionWarning, showActivePositionWarning} = this.state
 
 		const hasErrors = Object.keys(errors).length > 0
@@ -385,7 +384,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 						<div>
 							<Form.Field id="reportText" className="reportTextField" componentClass={RichTextEditor} />
 
-							{(report.reportSensitiveInformation || !edit) &&
+							{(report.reportSensitiveInformation || !this.props.edit) &&
 								<div>
 									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={RichTextEditor}
 										value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
@@ -550,6 +549,12 @@ class BaseReportForm extends ValidatableFormWrapper {
 	}
 
 	@autobind
+	isEditMode() {
+		// We're in edit mode when the form was started as an edit form, or when the report got an id after autosave
+		return this.props.edit || this.props.report.id
+	}
+
+	@autobind
 	saveReport(disableSubmits) {
 		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
 		report.tags = this.state.reportTags.map(tag => ({id: tag.id}))
@@ -564,12 +569,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 		if (!this.state.isCancelled) {
 			delete report.cancelledReason
 		}
-		let edit = this.props.edit
 		let graphql = 'createReport(report: $report) { id }'
 		let variableDef = '($report: ReportInput!)'
 		let variables = {report: report}
-		if (edit) {
-			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) {id}'
+		if (this.isEditMode()) {
+			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { id }'
 			variableDef = '($report: ReportInput!, $sendEditEmail: Boolean!)'
 			variables.sendEditEmail = disableSubmits
 		}
@@ -582,7 +586,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	onSubmit(event) {
-		const operation = this.props.edit ? 'updateReport' : 'createReport'
+		const operation = this.isEditMode() ? 'updateReport' : 'createReport'
 		this.setState({isBlocking: false})
 		this.saveReport(true)
 			.then(data => {
@@ -610,7 +614,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 	@autobind
 	autoSave() {
-		const operation = this.props.edit ? 'updateReport' : 'createReport'
+		const operation = this.isEditMode() ? 'updateReport' : 'createReport'
 		// Only auto-save if the report has changed
 		if (this.state.reportChanged === false) {
 			// Just re-schedule the auto-save timer
