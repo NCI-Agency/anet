@@ -7,7 +7,7 @@ const webpack = require('webpack')
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
 const path = require('path')
 
-module.exports = merge(common, {
+const clientConfig = merge(common[0], {
   bail: true,
   devtool: 'source-map',
   output: {
@@ -60,3 +60,14 @@ module.exports = merge(common, {
         }
   }),
 ]})
+
+const simConfig =  merge(common[1], {
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'anet.sim.js'
+  }
+})
+
+
+// module.exports = [ clientConfig, simConfig ]
+module.exports = [  simConfig ]

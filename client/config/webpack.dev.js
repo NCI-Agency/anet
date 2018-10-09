@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const proxy = require('../package.json').proxy
 
-module.exports = merge(common, {
+module.exports = merge(common[0], {
     // not using source maps due to https://github.com/facebook/create-react-app/issues/343#issuecomment-237241875
     // switched from 'eval' to 'cheap-module-source-map' to address https://github.com/facebook/create-react-app/issues/920
     devtool: 'cheap-module-source-map',
