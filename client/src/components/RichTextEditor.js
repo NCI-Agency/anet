@@ -40,6 +40,13 @@ class RichTextEditor extends Component {
 		}
 	}
 
+	componentDidMount() {
+		const { value } = this.props
+		if(value !== undefined && value.length > 0) {
+			this.setEditorStateFromHTML(value)
+		}
+	}
+
 	_handleOnChangeHTML(editorState) {
 		const html = convertToHTML(editorState.getCurrentContent())
 		this.props.onChange(html)
@@ -207,17 +214,21 @@ const ImageCanvas = (props) => {
 		image.height = height
 		image.alt = alt
 
-		image.onload = function() {
-			const canvas = document.createElement('canvas')
-			const context = canvas.getContext('2d')
-			canvas.height = height
-			canvas.width = width
-			context.drawImage(image, 0, 0)
-			return canvas.toDataURL('image/jpeg')
+		let imgSrc = src
+		if (!src.startsWith('data:')) {
+			// Convert to in-line data
+			image.onload = function() {
+				const canvas = document.createElement('canvas')
+				const context = canvas.getContext('2d')
+				canvas.height = height
+				canvas.width = width
+				context.drawImage(image, 0, 0)
+				return canvas.toDataURL('image/jpeg')
+			}
+			imgSrc = image.onload()
 		}
-		const dataSrc = image.onload()
 		return (
-			<img src={src} height={height} width={width} alt={alt} />
+			<img src={imgSrc} height={height} width={width} alt={alt} />
 		)
 }
 
