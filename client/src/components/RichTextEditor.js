@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import {CompositeDecorator, Editor, EditorState, RichUtils, getDefaultKeyBinding } from 'draft-js'
-import { convertFromHTML, convertToHTML } from 'draft-convert'
+import {ContentState, CompositeDecorator, Editor, EditorState, RichUtils, convertFromHTML, getDefaultKeyBinding } from 'draft-js'
+import { convertToHTML } from 'draft-convert'
 import 'draft-js/dist/Draft.css'
 import './RichTextEditor.css'
 
@@ -15,13 +15,15 @@ class RichTextEditor extends Component {
 		const decorator = new CompositeDecorator([
 			{
 				strategy: findImageEntities,
-				component: ImageCanvas,
+				component: ReactImage,
 			},
 		])
 
-		const editorState = EditorState.createEmpty(decorator)
-		this.state = {editorState, decorator, isLoaded: false, value: ''}
-
+		this.state = {
+			editorState: EditorState.createEmpty(decorator),
+			decorator,
+			isLoaded: false,
+		}
 		this.focus = () => this.refs.editor.focus()
 		this.onChange = (editorState) => this.setState({editorState}, this.handleOnChangeHTML(editorState))
 
@@ -48,13 +50,26 @@ class RichTextEditor extends Component {
 	}
 
 	_handleOnChangeHTML(editorState) {
-		const html = convertToHTML(editorState.getCurrentContent())
+		const html = convertToHTML({
+			entityToHTML: (entity, originalText) => {
+				if (entity.type === 'IMAGE') {
+					const { src, width, height, alt } = entity.data
+					return <img src={imageDataSrc(src)} width={width} height={height} alt={alt} />
+				}
+				return originalText
+			}
+		})(editorState.getCurrentContent())
 		this.props.onChange(html)
 	}
 
 	_setEditorStateFromHTML(html) {
-		if(this.state.isLoaded) { return }
-		const contentState = convertFromHTML(html)
+		if (this.state.isLoaded) { return }
+		const blocksFromHTML = convertFromHTML(html)
+		if (blocksFromHTML.contentBlocks === null) { return }
+		const contentState = ContentState.createFromBlockArray(
+			blocksFromHTML.contentBlocks,
+			blocksFromHTML.entityMap,
+		)
 		const editorState = EditorState.createWithContent(contentState, this.state.decorator)
 		this.setState(
 			{
@@ -167,68 +182,30 @@ function findImageEntities(contentBlock, callback, contentState) {
 	)
 }
 
-function toDataURL(src, callback) {
-	var xhttp = new XMLHttpRequest()
-
-	xhttp.onload = function() {
-			var fileReader = new FileReader()
-			fileReader.onloadend = function() {
-					callback(fileReader.result)
-			}
-			fileReader.readAsDataURL(xhttp.response)
+function imageDataSrc(src) {
+	const canvas = document.createElement('canvas')
+	const image = new Image()
+	image.onload = function() {
+		const ctx = canvas.getContext('2d')
+		canvas.width = image.naturalWidth
+		canvas.height = image.naturalHeight
+		ctx.drawImage(image, 0, 0)
 	}
-
-	xhttp.responseType = 'blob'
-	xhttp.open('GET', src, true)
-	xhttp.send()
+	image.crossOrigin = "Anonymous"
+	image.src = src
+	// Convert to in-line data
+	return !src.startsWith('data:') ? canvas.toDataURL('image/jpeg') : src
 }
 
-const Image = (props) => {
-	const {
-		height,
-		width,
-		src,
-		alt,
-	} = props.contentState.getEntity(props.entityKey).getData()
-
-	toDataURL(src, (dataUrl) => {
-		console.log(dataUrl)
-	})
-	return (
-		<img src={src} height={height} width={width} alt={alt} />
-	)
-}
-
-const ImageCanvas = (props) => {
+const ReactImage = (props) => {
 		const {
 			height,
 			src,
 			width,
 			alt,
 		} = props.contentState.getEntity(props.entityKey).getData()
-
-		const image = document.createElement('img')
-		image.crossOrigin = "Anonymous"
-		image.src = src
-		image.width = width
-		image.height = height
-		image.alt = alt
-
-		let imgSrc = src
-		if (!src.startsWith('data:')) {
-			// Convert to in-line data
-			image.onload = function() {
-				const canvas = document.createElement('canvas')
-				const context = canvas.getContext('2d')
-				canvas.height = height
-				canvas.width = width
-				context.drawImage(image, 0, 0)
-				return canvas.toDataURL('image/jpeg')
-			}
-			imgSrc = image.onload()
-		}
 		return (
-			<img src={imgSrc} height={height} width={width} alt={alt} />
+			<img src={imageDataSrc(src)} height={height} width={width} alt={alt} />
 		)
 }
 
