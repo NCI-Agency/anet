@@ -551,7 +551,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 	@autobind
 	isEditMode() {
 		// We're in edit mode when the form was started as an edit form, or when the report got an id after autosave
-		return this.props.edit || this.props.report.id
+		return this.props.edit || this.props.report.uuid
 	}
 
 	@autobind
