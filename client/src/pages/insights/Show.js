@@ -63,7 +63,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: ReportsByTask,
     navTitle: 'Reports by Task',
-    title: 'Number of Reports by Task',
+    title: '',
     dateRange: false,
     showCalendar: true
   },

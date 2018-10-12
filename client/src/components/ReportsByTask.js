@@ -1,12 +1,10 @@
-import PropTypes from 'prop-types'
 import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 import API from 'api'
 import autobind from 'autobind-decorator'
-import {Button} from 'react-bootstrap'
 
 import BarChart from 'components/BarChart'
-import Fieldset from 'components/Fieldset'
-import ReportCollection from 'components/ReportCollection'
+import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE} from 'components/ReportCollection'
 
 import {Report} from 'models'
 
@@ -15,6 +13,9 @@ import _isEqual from 'lodash/isEqual'
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import Settings from 'Settings'
+
+import ContainerDimensions from 'react-container-dimensions'
+import MosaicLayout from 'components/MosaicLayout'
 
 import pluralize from 'pluralize'
 
@@ -25,6 +26,12 @@ const GQL_CHART_FIELDS =  /* GraphQL */`
   tasks { uuid, shortName }
 `
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
+
+const GQL_MAP_FIELDS =  /* GraphQL */`
+  uuid
+  intent
+  location { uuid, name, lat, lng },
+`
 
 /*
  * Component displaying a chart with number of reports per Task.
@@ -38,6 +45,34 @@ class ReportsByTask extends Component {
 
   constructor(props) {
     super(props)
+    this.taskShortLabel = Settings.fields.task.shortLabel
+    this.VISUALIZATIONS = [
+      {
+        id: 'rbt-chart',
+        title: `Chart by ${this.taskShortLabel}`,
+        renderer: this.getBarChart,
+      },
+      {
+        id: 'rbt-collection',
+        title: `Reports by ${this.taskShortLabel}`,
+        renderer: this.getReportCollection,
+      },
+      {
+        id: 'rbt-map',
+        title: `Map by ${this.taskShortLabel}`,
+        renderer: this.getReportMap,
+      },
+    ]
+    this.INITIAL_NODE = {
+      direction: 'column',
+      first: {
+        direction: 'row',
+        first: this.VISUALIZATIONS[0].id,
+        second: this.VISUALIZATIONS[1].id,
+      },
+      second: this.VISUALIZATIONS[2].id,
+    }
+    this.SELECTED_BAR_CLASS = 'selected-bar'
 
     this.state = {
       graphDataByTask: [],
@@ -48,18 +83,13 @@ class ReportsByTask extends Component {
     }
   }
 
-  render() {
-    const focusDetails = this.getFocusDetails()
-    const taskShortLabel = Settings.fields.task.shortLabel
-    return (
-      <div>
-        <p className="help-text">{`Grouped by ${taskShortLabel}`}</p>
-        <p className="chart-description">
-          {`The reports are grouped by ${taskShortLabel}. In order to see the
-            list of published reports for a ${taskShortLabel}, click on the bar
-            corresponding to the ${taskShortLabel}.`}
-        </p>
+  @autobind
+  getBarChart(id) {
+    return <div className="non-scrollable">
+      <ContainerDimensions>{({width, height}) => { return (
         <BarChartWithLoader
+          width={width}
+          height={height}
           chartId={chartByTaskId}
           data={this.state.graphDataByTask}
           xProp='task.uuid'
@@ -67,55 +97,60 @@ class ReportsByTask extends Component {
           xLabel='task.shortName'
           onBarClick={this.goToTask}
           updateChart={this.state.updateChart}
+          selectedBarClass={this.SELECTED_BAR_CLASS}
+          selectedBar={this.state.focusedTask ? 'bar_' + this.state.focusedTask.uuid : ''}
           isLoading={this.state.isLoading}
-        />
-        <Fieldset
-          title={`Reports by ${taskShortLabel} ${focusDetails.titleSuffix}`}
-          id='cancelled-reports-details'
-          action={!focusDetails.resetFnc
-            ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
-          } >
-          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
-        </Fieldset>
-      </div>
-    )
+        />)}
+      }</ContainerDimensions>
+    </div>
   }
 
-  getFocusDetails() {
-    let titleSuffix = ''
-    let resetFnc = ''
-    let resetButtonLabel = ''
-    const allTasks = `All ${pluralize(Settings.fields.task.shortLabel)}`
+  @autobind
+  getReportCollection(id)
+  {
+    return <div className="scrollable">
+      <ReportCollection
+        paginatedReports={this.state.reports}
+        goToPage={this.goToReportsPage}
+        viewFormats={[FORMAT_SUMMARY, FORMAT_TABLE]}
+      />
+    </div>
+  }
 
-    if (this.state.focusedTask) {
-      titleSuffix = `for ${this.state.focusedTask.shortName}`
-      resetFnc = 'goToTask'
-      resetButtonLabel = allTasks
-    }
-    return {
-      titleSuffix: titleSuffix,
-      resetFnc: resetFnc,
-      resetButtonLabel: resetButtonLabel
-    }
+  @autobind
+  getReportMap(id)
+  {
+    return <div className="non-scrollable">
+      <ContainerDimensions>{({width, height}) => { return (
+        <ReportCollection
+          width={width}
+          height={height}
+          marginBottom={0}
+          reports={this.state.allReports}
+          viewFormats={[FORMAT_MAP]}
+        />)}
+      }</ContainerDimensions>
+    </div>
+  }
+
+  render() {
+    return (
+      <MosaicLayout
+        visualizations={this.VISUALIZATIONS}
+        initialNode={this.INITIAL_NODE}
+        description={`The reports are grouped by ${this.taskShortLabel}. In order to see the
+                      list of published reports for a ${this.taskShortLabel}, click on the bar
+                      corresponding to the ${this.taskShortLabel}.`}
+        additionalStateToWatch={this.state}
+      />
+    )
   }
 
   fetchData() {
     this.setState( {isLoading: true} )
     this.props.showLoading()
-    const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.props.queryParams)
-    Object.assign(chartQueryParams, {
-      pageNum: 0,
-      pageSize: 0,  // retrieve all the filtered reports
-    })
     // Query used by the chart
-    const chartQuery = API.query(/* GraphQL */`
-        reportList(query:$chartQueryParams) {
-          totalCount, list {
-            ${GQL_CHART_FIELDS}
-          }
-        }
-      `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
+    const chartQuery = this.runChartQuery(this.chartQueryParams())
     const noTaskMessage = `No ${Settings.fields.task.shortLabel}`
     const noTask = {
       uuid: "-1",
@@ -146,29 +181,57 @@ class ReportsByTask extends Component {
   }
 
   fetchTaskData() {
+    // Query used by the reports collection
+    const reportsQuery = this.runReportsQuery(this.reportsQueryParams())
+    const allReportsQuery = this.runReportsQuery(this.reportsQueryParams(0))
+    Promise.all([reportsQuery, allReportsQuery]).then(values => {
+      this.setState({
+        updateChart: false,  // only update the report list
+        reports: values[0].reportList,
+        allReports: values[1].reportList.list
+      })
+    })
+  }
+
+  chartQueryParams = () => {
+    const chartQueryParams = {}
+    Object.assign(chartQueryParams, this.props.queryParams)
+    Object.assign(chartQueryParams, {
+      pageNum: 0,
+      pageSize: 0,  // retrieve all the filtered reports
+    })
+    return chartQueryParams
+  }
+
+  runChartQuery = (chartQueryParams) => {
+    return API.query(/* GraphQL */`
+      reportList(query:$chartQueryParams) {
+        totalCount, list {
+          ${GQL_CHART_FIELDS}
+        }
+      }`, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
+  }
+
+  reportsQueryParams = (pageSize) => {
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
       pageNum: this.state.reportsPageNum,
-      pageSize: 10
+      pageSize: (pageSize === undefined) ? 10 : pageSize
     })
     if (this.state.focusedTask) {
       Object.assign(reportsQueryParams, {taskUuid: this.state.focusedTask.uuid})
     }
-    // Query used by the reports collection
-    const reportsQuery = API.query(/* GraphQL */`
-        reportList(query:$reportsQueryParams) {
-          pageNum, pageSize, totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
-          }
+    return reportsQueryParams
+  }
+
+  runReportsQuery = (reportsQueryParams) => {
+    return API.query(/* GraphQL */`
+      reportList(query:$reportsQueryParams) {
+        pageNum, pageSize, totalCount, list {
+          ${ReportCollection.GQL_REPORT_FIELDS}
         }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
-    Promise.all([reportsQuery]).then(values => {
-      this.setState({
-        updateChart: false,  // only update the report list
-        reports: values[0].reportList
-      })
-    })
+      }`, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
   }
 
   @autobind
@@ -176,23 +239,29 @@ class ReportsByTask extends Component {
     this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchTaskData())
   }
 
-  resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('class', '')
-  }
-
   @autobind
   goToTask(item) {
+    const taskItem = item ? item.task : ''
+    this.updateTaskHighlight(taskItem, true)
     // Note: we set updateChart to false as we do not want to re-render the chart
     // when changing the focus task.
-    this.setState({updateChart: false, reportsPageNum: 0, focusedTask: (item ? item.task : '')}, () => this.fetchTaskData())
-    // remove highlighting of the bars
-    this.resetChartSelection(chartByTaskId)
-    if (item) {
-      // highlight the bar corresponding to the selected task
-      d3.select('#' + chartByTaskId + ' #bar_' + item.task.uuid).attr('class', 'selected-bar')
+    if (!taskItem || taskItem === this.state.focusedTask) {
+      this.setState({updateChart: false, reportsPageNum: 0, focusedTask: ''}, () => this.fetchTaskData())
+    } else {
+      this.setState({updateChart: false, reportsPageNum: 0, focusedTask: taskItem}, () => this.fetchTaskData())
+      this.updateTaskHighlight(taskItem, false)
     }
   }
 
+  updateTaskHighlight(focusedTask, clear) {
+    if (clear) {
+      // remove highlighting of the bars
+      d3.selectAll('#' + chartByTaskId + ' rect').classed(this.SELECTED_BAR_CLASS, false)
+    } else if (focusedTask) {
+      // highlight the bar corresponding to the selected task
+      d3.select('#' + chartByTaskId + ' #bar_' + focusedTask.uuid).classed(this.SELECTED_BAR_CLASS, true)
+    }
+  }
 
   componentDidMount() {
     this.fetchData()
