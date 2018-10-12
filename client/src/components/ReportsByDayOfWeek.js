@@ -14,16 +14,7 @@ import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 import ContainerDimensions from 'react-container-dimensions'
-import { createBalancedTreeFromLeaves, getLeaves, getNodeAtPath, getOtherDirection, getPathToCorner, updateTree,
-	Corner, Mosaic, MosaicWindow } from 'react-mosaic-component'
-import { Classes } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import classNames from 'classnames'
-import _dropRight from 'lodash/dropRight'
-import '@blueprintjs/core/lib/css/blueprint.css'
-import '@blueprintjs/icons/lib/css/blueprint-icons.css'
-import 'react-mosaic-component/react-mosaic-component.css'
-import 'pages/insights/mosaic.css'
+import MosaicLayout from 'components/MosaicLayout'
 
 const d3 = require('d3')
 const chartByDayOfWeekId = 'reports_by_day_of_week'
@@ -52,32 +43,35 @@ class ReportsByDayOfWeek extends Component {
 
   constructor(props) {
     super(props)
-    this.VISUALIZATIONS = {
-      'rbdow-chart': {
+    this.VISUALIZATIONS = [
+      {
+        id: 'rbdow-chart',
         title: 'Chart by day of the week',
         renderer: this.getBarChart,
       },
-      'rbdow-collection': {
+      {
+        id: 'rbdow-collection',
         title: 'Reports by day of the week',
         renderer: this.getReportCollection,
       },
-      'rbdow-map': {
+      {
+        id: 'rbdow-map',
         title: 'Map by day of the week',
         renderer: this.getReportMap,
       },
+    ]
+    this.INITIAL_NODE = {
+      direction: 'column',
+      first: {
+        direction: 'row',
+        first: this.VISUALIZATIONS[0].id,
+        second: this.VISUALIZATIONS[1].id,
+      },
+      second: this.VISUALIZATIONS[2].id,
     }
     this.SELECTED_BAR_CLASS = 'selected-bar'
 
     this.state = {
-      currentNode: {
-        direction: 'column',
-        first: {
-          direction: 'row',
-          first: Object.keys(this.VISUALIZATIONS)[0],
-          second: Object.keys(this.VISUALIZATIONS)[1],
-        },
-        second: Object.keys(this.VISUALIZATIONS)[2],
-      },
       graphDataByDayOfWeek: [],
       reportsPageNum: 0,
       focusedDayOfWeek: '',
@@ -139,109 +133,16 @@ class ReportsByDayOfWeek extends Component {
   }
 
   render() {
-    return <div>
-      <p className="chart-description">
-        {`The reports are grouped by day of the week. In order to see the list
-          of published reports for a day of the week, click on the bar
-          corresponding to the day of the week.`}
-      </p>
-      {this.renderNavBar()}
-      <div id="insightContainer">
-      <Mosaic
-        value={this.state.currentNode}
-        onChange={this.updateCurrentNode}
-        renderTile={(id, path) => (
-          <MosaicWindow
-            title={this.VISUALIZATIONS[id].title}
-            path={path}
-            {...this.state}>
-            {this.VISUALIZATIONS[id].renderer(id)}
-          </MosaicWindow>
-        )}
-      />
-      </div>
-    </div>
-  }
-
-  @autobind
-  updateCurrentNode(currentNode) {
-    this.setState({ currentNode })
-  }
-
-  @autobind
-  renderNavBar() {
     return (
-      <div className={classNames(Classes.NAVBAR)}>
-        <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)}>
-          <span className="actions-label">Actions:</span>
-          <button
-            className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.GRID_VIEW))}
-            onClick={this.autoArrange}
-          >
-            Auto Arrange
-          </button>
-          {this.renderChartButtons()}
-        </div>
-      </div>
+      <MosaicLayout
+        visualizations={this.VISUALIZATIONS}
+        initialNode={this.INITIAL_NODE}
+        description={`The reports are grouped by day of the week. In order to see the list
+                      of published reports for a day of the week, click on the bar
+                      corresponding to the day of the week.`}
+        additionalStateToWatch={this.state}
+      />
     )
-  }
-
-  renderChartButtons() {
-    const buttons = []
-    const leaves = getLeaves(this.state.currentNode)
-    Object.forEach(this.VISUALIZATIONS, viz => {
-      if (!leaves.includes(viz)) {
-        buttons.push(
-          <button
-            key={viz}
-            className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.ARROW_TOP_RIGHT))}
-            onClick={this.addChart.bind(this, viz)}
-          >
-            {this.VISUALIZATIONS[viz].title}
-          </button>
-        )
-      }
-    })
-    return buttons
-  }
-
-  autoArrange = () => {
-    const leaves = getLeaves(this.state.currentNode)
-    this.updateCurrentNode(createBalancedTreeFromLeaves(leaves))
-  }
-
-  addChart = (viz) => {
-    let { currentNode } = this.state
-    if (!currentNode) {
-     currentNode = viz
-    } else {
-      const path = getPathToCorner(currentNode, Corner.TOP_RIGHT)
-      const parent = getNodeAtPath(currentNode, _dropRight(path))
-      const destination = getNodeAtPath(currentNode, path)
-      const direction = parent ? getOtherDirection(parent.direction) : 'row'
-      let first
-      let second
-      if (direction === 'row') {
-        first = destination
-        second = viz
-      } else {
-        first = viz
-        second = destination
-      }
-      currentNode = updateTree(currentNode, [
-        {
-          path,
-          spec: {
-            $set: {
-              direction,
-              first,
-              second,
-            },
-          },
-        },
-      ])
-    }
-    this.updateCurrentNode(currentNode)
   }
 
   getFocusDetails() {

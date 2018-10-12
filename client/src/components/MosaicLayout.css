@@ -1,21 +1,17 @@
-#insightContainer {
+#mosaic-container {
   height: 60vh;
   width: 100%;
   margin: 0;
 }
 
-#insightContainer .scrollable {
+#mosaic-container .scrollable {
   height: 100%;
   overflow-y: scroll;
 }
 
-#insightContainer .non-scrollable {
+#mosaic-container .non-scrollable {
   height: 100%;
   overflow: hidden;
-}
-
-#reports-by-day-of-week fieldset {
-  margin-bottom: 0;
 }
 
 .actions-label {
