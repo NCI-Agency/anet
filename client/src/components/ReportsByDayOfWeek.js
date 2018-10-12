@@ -105,7 +105,6 @@ class ReportsByDayOfWeek extends Component {
   @autobind
   getReportCollection(id)
   {
-    const focusDetails = this.getFocusDetails()
     return <div className="scrollable">
       <ReportCollection
         paginatedReports={this.state.reports}
@@ -118,7 +117,6 @@ class ReportsByDayOfWeek extends Component {
   @autobind
   getReportMap(id)
   {
-    const focusDetails = this.getFocusDetails()
     return <div className="non-scrollable">
       <ContainerDimensions>{({width, height}) => { return (
         <ReportCollection
@@ -145,22 +143,6 @@ class ReportsByDayOfWeek extends Component {
     )
   }
 
-  getFocusDetails() {
-    let titleSuffix = 'all days of the week'
-    let resetFnc = ''
-    let resetButtonLabel = ''
-    if (this.state.focusedDayOfWeek) {
-      titleSuffix = this.state.focusedDayOfWeek.dayOfWeekString
-      resetFnc = 'goToDayOfWeek'
-      resetButtonLabel = 'All days of the week'
-    }
-    return {
-      titleSuffix: titleSuffix,
-      resetFnc: resetFnc,
-      resetButtonLabel: resetButtonLabel
-    }
-  }
-
   fetchData() {
     this.setState( {isLoading: true} )
     this.props.showLoading()
@@ -180,7 +162,7 @@ class ReportsByDayOfWeek extends Component {
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
         graphDataByDayOfWeek: displayOrderDaysOfWeek
-          .map((d, i) => {
+          .map(d => {
             let r = {}
             r.dayOfWeekInt = daysOfWeekInt[daysOfWeek.indexOf(d)]
             r.dayOfWeekString = d
