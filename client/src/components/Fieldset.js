@@ -12,10 +12,12 @@ export default class Fieldset extends Component {
 		let {id, title, action, ...props} = this.props
 
 		return <Element id={id} name={id} className="scroll-anchor-container">
+			{(title || action) &&
 			<h2 className="legend">
 				<span className="title-text">{title}</span>
 				{action && <small>{action}</small>}
 			</h2>
+			}
 
 			<fieldset {...props} />
 		</Element>
