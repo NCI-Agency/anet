@@ -23,6 +23,8 @@ function getPropValue(obj, prop) {
 
 class BarChart extends Component {
   static propTypes = {
+    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     chartId: PropTypes.string,
     data: PropTypes.array,
     xProp: PropTypes.string.isRequired,
@@ -30,11 +32,16 @@ class BarChart extends Component {
     xLabel: PropTypes.string,
     barClass: PropTypes.string,
     onBarClick: PropTypes.func,
+    selectedBarClass: PropTypes.string,
+    selectedBar: PropTypes.string,
     updateChart: PropTypes.bool
   }
 
   static defaultProps = {
-    barClass: 'bar',
+    width: '100%',
+    barClass: 'bars-group',
+    selectedBarClass: 'selected-bar',
+    selectedBar: '',
     updateChart: true
   }
 
@@ -49,6 +56,10 @@ class BarChart extends Component {
 
   componentDidUpdate() {
     this.createBarChart()
+  }
+
+  isNumeric(value) {
+    return typeof value === 'number'
   }
 
   createBarChart() {
@@ -87,7 +98,6 @@ class BarChart extends Component {
       tmpSVG.selectAll('.get_max_width_y_label')
         .data(chartData)
         .enter().append('text')
-        .attr('class', 'y-axis')
         .text(yText)
         .each(yLabelWidth)
         .remove()
@@ -103,8 +113,8 @@ class BarChart extends Component {
 
     let chart = d3.select(this.node)
     let chartBox = this.node.getBoundingClientRect()
-    let chartWidth = chartBox.right - chartBox.left
-    let chartHeight = 0.7 * chartWidth
+    let chartWidth = this.isNumeric(this.props.width) ? this.props.width : (chartBox.right - chartBox.left)
+    let chartHeight = this.isNumeric(this.props.height) ? this.props.height : (0.7 * chartWidth)
     let xWidth = chartWidth - marginLeft - MARGIN.right
     let yHeight = chartHeight - MARGIN.top - marginBottom
 
@@ -134,13 +144,15 @@ class BarChart extends Component {
     chart.append('g')
       .call(yAxis)
 
-    let bar = chart.selectAll('.bar')
+    const selectedBar = this.props.selectedBar
+    let bar = chart.selectAll('.' + this.props.barClass)
       .data(chartData)
       .enter()
       .append('g')
-      .classed('bars-group', true)
+      .classed(this.props.barClass, true)
       .append('rect')
       .attr('id', function(d, i) { return 'bar_' + getPropValue(d, xProp) })
+      .classed(this.props.selectedBarClass, function(d, i) { return this.id === selectedBar })
       .attr('x', function(d) { return xScale(getPropValue(d, xProp)) })
       .attr('y', function(d) { return yScale(getPropValue(d, yProp)) })
       .attr('width', xScale.bandwidth())
@@ -153,14 +165,16 @@ class BarChart extends Component {
   }
 
   render() {
-    return <svg id={this.props.chartId} ref={node => this.node = node} width="100%"></svg>
+    return <svg id={this.props.chartId} ref={node => this.node = node} width={this.props.width} height={this.props.height}></svg>
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     // Make sure the chart is only re-rendered if the state or properties have
     // changed. This because we do not want to re-render the chart only in order
     // to highlight a bar in the chart.
-    if (nextProps && !nextProps.updateChart) {
+    if (nextProps && !nextProps.updateChart
+        && nextProps.width === this.props.width
+        && nextProps.height === this.props.height) {
       return false
     }
     return true
