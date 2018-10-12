@@ -1,5 +1,5 @@
 #insightContainer {
-  height: 600px;
+  height: 60vh;
   width: 100%;
   margin: 0;
 }
@@ -12,4 +12,16 @@
 #insightContainer .non-scrollable {
   height: 100%;
   overflow: hidden;
+}
+
+#reports-by-day-of-week fieldset {
+  margin-bottom: 0;
+}
+
+.actions-label {
+  margin-right: 3px;
+}
+
+.bp3-button {
+  margin-left: 2px;
 }
