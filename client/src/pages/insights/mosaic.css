@@ -1,0 +1,15 @@
+#insightContainer {
+  height: 600px;
+  width: 100%;
+  margin: 0;
+}
+
+#insightContainer .scrollable {
+  height: 100%;
+  overflow-y: scroll;
+}
+
+#insightContainer .non-scrollable {
+  height: 100%;
+  overflow: hidden;
+}
