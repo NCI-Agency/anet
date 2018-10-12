@@ -71,7 +71,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: ReportsByDayOfWeek,
     navTitle: 'Reports by Day of the Week',
-    title: 'Number of Reports by Day of the Week',
+    title: '',
     dateRange: true,
     showCalendar: false
   },
@@ -281,15 +281,11 @@ class BaseInsightsShow extends Page {
 
     return (
       <div>
-        <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
+        <Breadcrumbs items={[['Insights ' + insightConfig.navTitle, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
-          <Fieldset id={this.props.match.params.insight} title={
-            <span>
-              {insightConfig.title}
-            </span>
-            }>
+          <Fieldset id={this.props.match.params.insight} title={insightConfig.title}>
             <InsightComponent
               queryParams={queryParams}
               date={this.state.referenceDate.clone()}
