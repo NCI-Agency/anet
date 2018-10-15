@@ -55,7 +55,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: CancelledEngagementReports,
     navTitle: 'Cancelled Engagement Reports',
-    title: 'Number of Cancelled Engagement Reports',
+    title: '',
     dateRange: false,
     showCalendar: true
   },

@@ -137,26 +137,28 @@ export default class ReportsVisualisation extends Component {
   }
 
   @autobind
-  goToSelection(item) {
-    this.updateHighlight(item, true)
+  goToSelection(item, chartId) {
+    chartId = chartId || this.chartId
+    this.updateHighlight(null, true, chartId)
     // Note: we set updateChart to false as we do not want to re-render the chart
     // when changing the focus.
     if (!item || item === this.state.focusedSelection) {
       this.setState({updateChart: false, reportsPageNum: 0, focusedSelection: ''}, () => this.fetchReportData(true))
     } else {
       this.setState({updateChart: false, reportsPageNum: 0, focusedSelection: item}, () => this.fetchReportData(true))
-      this.updateHighlight(item, false)
+      this.updateHighlight(item, false, chartId)
     }
   }
 
   @autobind
-  updateHighlight(focusedSelectionId, clear) {
+  updateHighlight(focusedSelectionId, clear, chartId) {
+    chartId = chartId || this.chartId
     if (clear) {
       // remove highlighting of the bars
-      d3.selectAll('#' + this.chartId + ' rect').classed(this.selectedBarClass, false)
+      d3.selectAll('#' + chartId + ' rect').classed(this.selectedBarClass, false)
     } else if (focusedSelectionId) {
       // highlight the bar corresponding to the selected day of the week
-      d3.select('#' + this.chartId + ' #bar_' + focusedSelectionId).classed(this.selectedBarClass, true)
+      d3.select('#' + chartId + ' #bar_' + focusedSelectionId).classed(this.selectedBarClass, true)
     }
   }
 
