@@ -17,7 +17,7 @@ import ContainerDimensions from 'react-container-dimensions'
 import MosaicLayout from 'components/MosaicLayout'
 
 const d3 = require('d3')
-const chartByDayOfWeekId = 'reports_by_day_of_week'
+const chartId = 'reports_by_day_of_week'
 const GQL_CHART_FIELDS =  /* GraphQL */`
   uuid
   engagementDayOfWeek
@@ -29,6 +29,8 @@ const GQL_MAP_FIELDS =  /* GraphQL */`
   intent
   location { uuid, name, lat, lng },
 `
+
+const Context = React.createContext()
 
 /*
  * Component displaying a chart with number of reports released within a certain
@@ -72,9 +74,11 @@ class ReportsByDayOfWeek extends Component {
     this.SELECTED_BAR_CLASS = 'selected-bar'
 
     this.state = {
-      graphDataByDayOfWeek: [],
+      graphData: [],
+      reports: {},
+      allReports: [],
       reportsPageNum: 0,
-      focusedDayOfWeek: '',
+      focusedSelection: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
@@ -82,65 +86,70 @@ class ReportsByDayOfWeek extends Component {
 
   @autobind
   getBarChart(id) {
-    return <div className="non-scrollable">
-      <ContainerDimensions>{({width, height}) => { return (
-        <BarChartWithLoader
-          width={width}
-          height={height}
-          chartId={chartByDayOfWeekId}
-          data={this.state.graphDataByDayOfWeek}
-          xProp='dayOfWeekInt'
-          yProp='reportsCount'
-          xLabel='dayOfWeekString'
-          onBarClick={this.goToDayOfWeek}
-          updateChart={this.state.updateChart}
-          selectedBarClass={this.SELECTED_BAR_CLASS}
-          selectedBar={this.state.focusedDayOfWeek ? 'bar_' + this.state.focusedDayOfWeek.dayOfWeekInt : ''}
-          isLoading={this.state.isLoading}
-        />)}
-      }</ContainerDimensions>
-    </div>
+    return <Context.Consumer>{context => (
+      <div className="non-scrollable">
+        <ContainerDimensions>{({width, height}) => (
+          <BarChartWithLoader
+            width={width}
+            height={height}
+            chartId={chartId}
+            data={context.graphData}
+            xProp='dayOfWeekInt'
+            yProp='reportsCount'
+            xLabel='dayOfWeekString'
+            onBarClick={this.goToSelection}
+            updateChart={context.updateChart}
+            selectedBarClass={this.SELECTED_BAR_CLASS}
+            selectedBar={context.focusedSelection ? 'bar_' + context.focusedSelection.dayOfWeekInt : ''}
+            isLoading={context.isLoading}
+          />
+        )}</ContainerDimensions>
+      </div>
+    )}</Context.Consumer>
   }
 
   @autobind
   getReportCollection(id)
   {
-    return <div className="scrollable">
-      <ReportCollection
-        paginatedReports={this.state.reports}
-        goToPage={this.goToReportsPage}
-        viewFormats={[FORMAT_SUMMARY, FORMAT_TABLE]}
-      />
-    </div>
+    return <Context.Consumer>{context => (
+      <div className="scrollable">
+        <ReportCollection
+          paginatedReports={context.reports}
+          goToPage={this.goToReportsPage}
+          viewFormats={[FORMAT_SUMMARY, FORMAT_TABLE]}
+        />
+      </div>
+    )}</Context.Consumer>
   }
 
   @autobind
   getReportMap(id)
   {
-    return <div className="non-scrollable">
-      <ContainerDimensions>{({width, height}) => { return (
-        <ReportCollection
-          width={width}
-          height={height}
-          marginBottom={0}
-          reports={this.state.allReports}
-          viewFormats={[FORMAT_MAP]}
-        />)}
-      }</ContainerDimensions>
-    </div>
+    return <Context.Consumer>{context => (
+      <div className="non-scrollable">
+        <ContainerDimensions>{({width, height}) => (
+          <ReportCollection
+            width={width}
+            height={height}
+            marginBottom={0}
+            reports={context.allReports}
+            viewFormats={[FORMAT_MAP]}
+          />
+        )}</ContainerDimensions>
+      </div>
+    )}</Context.Consumer>
   }
 
   render() {
-    return (
+    return <Context.Provider value={this.state}>
       <MosaicLayout
         visualizations={this.VISUALIZATIONS}
         initialNode={this.INITIAL_NODE}
         description={`The reports are grouped by day of the week. In order to see the list
                       of published reports for a day of the week, click on the bar
                       corresponding to the day of the week.`}
-        additionalStateToWatch={this.state}
       />
-    )
+    </Context.Provider>
   }
 
   fetchData() {
@@ -161,7 +170,7 @@ class ReportsByDayOfWeek extends Component {
       this.setState({
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
-        graphDataByDayOfWeek: displayOrderDaysOfWeek
+        graphData: displayOrderDaysOfWeek
           .map(d => {
             let r = {}
             r.dayOfWeekInt = daysOfWeekInt[daysOfWeek.indexOf(d)]
@@ -171,19 +180,27 @@ class ReportsByDayOfWeek extends Component {
       })
       this.props.hideLoading()
     })
-    this.fetchDayOfWeekData()
+    this.fetchReportData(true)
   }
 
-  fetchDayOfWeekData() {
+  fetchReportData(includeAll) {
     // Query used by the reports collection
-    const reportsQuery = this.runReportsQuery(this.reportsQueryParams())
-    const allReportsQuery = this.runReportsQuery(this.reportsQueryParams(0))
-    Promise.all([reportsQuery, allReportsQuery]).then(values => {
-      this.setState({
+    const queries = [this.runReportsQuery(this.reportsQueryParams(false), false)]
+    if (includeAll) {
+      // Query used by the map
+      queries.push(this.runReportsQuery(this.reportsQueryParams(true), true))
+    }
+    Promise.all(queries).then(values => {
+      const stateUpdate = {
         updateChart: false,  // only update the report list
-        reports: values[0].reportList,
-        allReports: values[1].reportList.list
-      })
+        reports: values[0].reportList
+      }
+      if (includeAll) {
+        Object.assign(stateUpdate, {
+          allReports: values[1].reportList.list
+        })
+      }
+      this.setState(stateUpdate)
     })
   }
 
@@ -206,69 +223,66 @@ class ReportsByDayOfWeek extends Component {
       }`, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
   }
 
-  reportsQueryParams = (pageSize) => {
+  reportsQueryParams = (forMap) => {
+    const pageSize = forMap ? 0 : 10
+    const pageNum = forMap ? 0 : this.state.reportsPageNum
     const reportsQueryParams = {}
     Object.assign(reportsQueryParams, this.props.queryParams)
     Object.assign(reportsQueryParams, {
-      pageNum: this.state.reportsPageNum,
-      pageSize: (pageSize === undefined) ? 10 : pageSize
+      pageNum,
+      pageSize
     })
-    if (this.state.focusedDayOfWeek) {
-      Object.assign(reportsQueryParams, {engagementDayOfWeek: this.state.focusedDayOfWeek.dayOfWeekInt})
+    if (this.state.focusedSelection) {
+      Object.assign(reportsQueryParams, {engagementDayOfWeek: this.state.focusedSelection.dayOfWeekInt})
     }
     return reportsQueryParams
   }
 
-  runReportsQuery = (reportsQueryParams) => {
+  runReportsQuery = (reportsQueryParams, forMap) => {
     return API.query(/* GraphQL */`
       reportList(query:$reportsQueryParams) {
         pageNum, pageSize, totalCount, list {
-          ${ReportCollection.GQL_REPORT_FIELDS}
+          ${forMap ? GQL_MAP_FIELDS : ReportCollection.GQL_REPORT_FIELDS}
         }
       }`, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
   }
 
   @autobind
   goToReportsPage(newPage) {
-    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchDayOfWeekData())
+    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchReportData(false))
   }
 
   @autobind
-  goToDayOfWeek(item) {
-    this.updateDayOfWeekHighlight(item, true)
+  goToSelection(item) {
+    this.updateHighlight(item, true)
     // Note: we set updateChart to false as we do not want to re-render the chart
-    // when changing the focus day of the week.
-    if (!item || item === this.state.focusedDayOfWeek) {
-      this.setState({updateChart: false, reportsPageNum: 0, focusedDayOfWeek: ''}, () => this.fetchDayOfWeekData())
+    // when changing the focus.
+    if (!item || item === this.state.focusedSelection) {
+      this.setState({updateChart: false, reportsPageNum: 0, focusedSelection: ''}, () => this.fetchReportData(true))
     } else {
-      this.setState({updateChart: false, reportsPageNum: 0, focusedDayOfWeek: item}, () => this.fetchDayOfWeekData())
-      this.updateDayOfWeekHighlight(item, false)
+      this.setState({updateChart: false, reportsPageNum: 0, focusedSelection: item}, () => this.fetchReportData(true))
+      this.updateHighlight(item, false)
     }
   }
 
-  updateDayOfWeekHighlight(focusedDayOfWeek, clear) {
+  updateHighlight(focusedSelection, clear) {
     if (clear) {
       // remove highlighting of the bars
-      d3.selectAll('#' + chartByDayOfWeekId + ' rect').classed(this.SELECTED_BAR_CLASS, false)
-    } else if (focusedDayOfWeek) {
+      d3.selectAll('#' + chartId + ' rect').classed(this.SELECTED_BAR_CLASS, false)
+    } else if (focusedSelection) {
       // highlight the bar corresponding to the selected day of the week
-      d3.select('#' + chartByDayOfWeekId + ' #bar_' + focusedDayOfWeek.dayOfWeekInt).classed(this.SELECTED_BAR_CLASS, true)
+      d3.select('#' + chartId + ' #bar_' + focusedSelection.dayOfWeekInt).classed(this.SELECTED_BAR_CLASS, true)
     }
-  }
-
-  componentDidMount() {
-    this.fetchData()
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
         reportsPageNum: 0,
-        focusedDayOfWeek: ''  // reset focus when changing the queryParams
+        focusedSelection: ''  // reset focus when changing the queryParams
       }, () => this.fetchData())
     }
   }
-
 }
 
 export default connect(null, mapDispatchToProps)(ReportsByDayOfWeek)

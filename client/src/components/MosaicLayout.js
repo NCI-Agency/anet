@@ -24,7 +24,6 @@ export default class MosaicLayout extends Component {
     ).isRequired,
     initialNode: PropTypes.object, // FIXME: actually MosaicNode
     description: PropTypes.string,
-    additionalStateToWatch: PropTypes.object,
   }
 
   constructor(props) {
@@ -48,8 +47,7 @@ export default class MosaicLayout extends Component {
           const viz = this.props.visualizations.find(viz => viz.id === id)
           return <MosaicWindow
             title={viz.title}
-            path={path}
-            {...this.props.additionalStateToWatch}>
+            path={path}>
             {viz.renderer(id)}
           </MosaicWindow>
         }}
