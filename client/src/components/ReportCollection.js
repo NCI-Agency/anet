@@ -15,7 +15,7 @@ export const FORMAT_SUMMARY = 'summary'
 export const FORMAT_TABLE = 'table'
 export const FORMAT_MAP = 'map'
 
-const GQL_REPORT_FIELDS =  /* GraphQL */`
+export const GQL_REPORT_FIELDS =  /* GraphQL */`
 	uuid, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
 	author { uuid, name, rank }
