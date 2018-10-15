@@ -47,7 +47,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: PendingApprovalReports,
     navTitle: 'Pending Approval Reports',
-    title: 'Number of Pending Approval Reports',
+    title: '',
     dateRange: false,
     showCalendar: true
   },

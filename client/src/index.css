@@ -125,6 +125,7 @@ fieldset.danger {
 	border: 2px solid red;
 }
 
+#not-approved-reports fieldset,
 #reports-by-task fieldset,
 #reports-by-day-of-week fieldset {
   margin-bottom: 0;
