@@ -14,6 +14,7 @@ import org.skife.jdbi.v2.Query;
 
 import com.google.common.base.Joiner;
 
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -164,8 +165,12 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getLocationUuid() != null) {
-			whereClauses.add("locationUuid = :locationUuid");
-			args.put("locationUuid", query.getLocationUuid());
+			if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
+				whereClauses.add("locationUuid IS NULL");
+			} else {
+				whereClauses.add("locationUuid = :locationUuid");
+				args.put("locationUuid", query.getLocationUuid());
+			}
 		}
 
 		if (query.getPendingApprovalOf() != null) {

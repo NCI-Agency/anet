@@ -9,6 +9,8 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Location extends AbstractAnetBean {
 
+	public static final String DUMMY_LOCATION_UUID = "-1"; // pseudo uuid to represent 'no location'
+
 	public static enum LocationStatus { ACTIVE, INACTIVE }
 
 	private String name;
