@@ -79,7 +79,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: FutureEngagementsByLocation,
     navTitle: 'Future Engagements by Location',
-    title: 'Number of Future Engagements by Location',
+    title: '',
     dateRange: true,
     onlyShowBetween: true,
   },

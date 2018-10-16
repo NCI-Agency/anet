@@ -126,6 +126,7 @@ fieldset.danger {
 }
 
 #cancelled-reports fieldset,
+#future-engagements-by-location fieldset,
 #not-approved-reports fieldset,
 #reports-by-task fieldset,
 #reports-by-day-of-week fieldset {
