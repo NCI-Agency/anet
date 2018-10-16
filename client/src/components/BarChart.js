@@ -107,7 +107,7 @@ class BarChart extends Component {
     // The left margin depends on the width of the y-axis labels.
     // We add extra margin to make sure that if the label is different because
     // of the automatic formatting the labels are still displayed on the chart.
-    let marginLeft = maxYLabelWidth + 50
+    let marginLeft = maxYLabelWidth + 40
     // The bottom margin depends on the width of the x-axis labels.
     let marginBottom = maxXLabelWidth
 
