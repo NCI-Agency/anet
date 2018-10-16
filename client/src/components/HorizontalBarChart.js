@@ -36,13 +36,20 @@ class HorizontalBarChart extends Component {
       }]
   */
   static propTypes = {
+    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     chartId: PropTypes.string,
     data: PropTypes.object,
     onBarClick: PropTypes.func,
+    selectedBarClass: PropTypes.string,
+    selectedBar: PropTypes.string,
     updateChart: PropTypes.bool
   }
 
   static defaultProps = {
+    width: '100%',
+    selectedBarClass: 'selected-bar',
+    selectedBar: '',
     updateChart: true
   }
 
@@ -59,12 +66,16 @@ class HorizontalBarChart extends Component {
     this.createBarChart()
   }
 
+  isNumeric(value) {
+    return typeof value === 'number'
+  }
+
   createBarChart() {
     const BAR_HEIGHT = 24
     const BAR_PADDING = 8
     const MARGIN = {top: 20, right: 20}  // left and bottom MARGINs are dynamic
-    let box = this.node.getBoundingClientRect()
-    let chartWidth = box.right - box.left
+    let chartBox = this.node.getBoundingClientRect()
+    let chartWidth = this.isNumeric(this.props.width) ? this.props.width : (chartBox.right - chartBox.left)
     let chartData = this.props.data.data
     let categoryLabels = this.props.data.categoryLabels
     let leavesLabels = this.props.data.leavesLabels
@@ -107,17 +118,17 @@ class HorizontalBarChart extends Component {
     // The left margin depends on the width of the y-axis labels.
     // We add extra margin to make sure that if the label is different because
     // of the automatic formatting the labels are still displayed on the chart.
-    let marginLeft = maxYLabelWidth + 50
+    let marginLeft = maxYLabelWidth + 40
     // The bottom margin depends on the width of the x-axis labels.
     let marginBottom = maxXLabelWidth + 20
     let xWidth = chartWidth - marginLeft - MARGIN.right
 
     let categoryDomain = []
-    let cummulative = 0
+    let cumulative = 0
     chartData.forEach(function(val, i) {
       // per category, how many elements, including the elements of the previous categories
-      val.cummulative = cummulative
-      cummulative += val.values.length
+      val.cumulative = cumulative
+      cumulative += val.values.length
       val.values.forEach(function(values) {
         values.parentKey = val.key
         categoryDomain.push(i)
@@ -172,7 +183,7 @@ class HorizontalBarChart extends Component {
         return 'category-' + (i % 2)
       })
       .attr('transform', function(d) {
-        return 'translate(1,' + yCategoryScale((d.cummulative * yScale.bandwidth())) + ')'
+        return 'translate(1,' + yCategoryScale((d.cumulative * yScale.bandwidth())) + ')'
       })
 
     categoryGroup.selectAll('.category-label')
@@ -198,6 +209,7 @@ class HorizontalBarChart extends Component {
         return 'translate(0,' + yCategoryScale((i * yScale.bandwidth())) + ')'
       })
 
+    const selectedBar = this.props.selectedBar
     barsGroup.selectAll('.bar')
       .data(function(d) {
         return [d]
@@ -207,6 +219,7 @@ class HorizontalBarChart extends Component {
       .append('rect')
       .attr('class', 'bar')
       .attr('id', function(d, i) { return 'bar_' + d.key + d.parentKey })
+      .classed(this.props.selectedBarClass, function(d, i) { return this.id === selectedBar })
       .attr('x', 0)
       .attr('y', yCategoryScale(BAR_PADDING))
       .attr('width', d => xScale(d.value))
@@ -237,14 +250,16 @@ class HorizontalBarChart extends Component {
   }
 
   render() {
-    return <svg id={this.props.chartId} ref={node => this.node = node} width='100%'></svg>
+    return <svg id={this.props.chartId} ref={node => this.node = node} width={this.props.width} height={this.props.height}></svg>
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     // Make sure the chart is only re-rendered if the state or properties have
     // changed. This because we do not want to re-render the chart only in order
     // to highlight a bar in the chart.
-    if (nextProps && !nextProps.updateChart) {
+    if (nextProps && !nextProps.updateChart
+        && nextProps.width === this.props.width
+        && nextProps.height === this.props.height) {
       return false
     }
     return true
