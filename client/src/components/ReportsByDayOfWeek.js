@@ -10,6 +10,7 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
+import { IconNames } from '@blueprintjs/icons'
 
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 const Context = React.createContext()
@@ -32,16 +33,19 @@ class ReportsByDayOfWeek extends ReportsVisualisation {
     this.VISUALIZATIONS = [
       {
         id: 'rbdow-chart',
+        icons: [IconNames.GROUPED_BAR_CHART],
         title: 'Chart by day of the week',
         renderer: this.getBarChart,
       },
       {
         id: 'rbdow-collection',
+        icons: [IconNames.PANEL_TABLE],
         title: 'Reports by day of the week',
         renderer: this.getReportCollection,
       },
       {
         id: 'rbdow-map',
+        icons: [IconNames.MAP],
         title: 'Map by day of the week',
         renderer: this.getReportMap,
       },

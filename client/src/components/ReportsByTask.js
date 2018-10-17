@@ -11,6 +11,7 @@ import Settings from 'Settings'
 
 import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
+import { IconNames } from '@blueprintjs/icons'
 
 import pluralize from 'pluralize'
 
@@ -35,16 +36,19 @@ class ReportsByTask extends ReportsVisualisation {
     this.VISUALIZATIONS = [
       {
         id: 'rbt-chart',
+        icons: [IconNames.GROUPED_BAR_CHART],
         title: `Chart by ${this.taskShortLabel}`,
         renderer: this.getBarChart,
       },
       {
         id: 'rbt-collection',
+        icons: [IconNames.PANEL_TABLE],
         title: `Reports by ${this.taskShortLabel}`,
         renderer: this.getReportCollection,
       },
       {
         id: 'rbt-map',
+        icons: [IconNames.MAP],
         title: `Map by ${this.taskShortLabel}`,
         renderer: this.getReportMap,
       },

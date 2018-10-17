@@ -12,6 +12,7 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
+import { IconNames } from '@blueprintjs/icons'
 import Settings from 'Settings'
 
 const d3 = require('d3')
@@ -40,21 +41,25 @@ class CancelledEngagementReports extends ReportsVisualisation {
     this.VISUALIZATIONS = [
       {
         id: 'cer-chart-by-org',
+        icons: [IconNames.GROUPED_BAR_CHART, IconNames.DIAGRAM_TREE],
         title: `Chart by ${this.advisorOrgLabel}`,
         renderer: this.getBarChartByOrg,
       },
       {
         id: 'cer-chart-by-reason',
+        icons: [IconNames.GROUPED_BAR_CHART, IconNames.COMMENT],
         title: `Chart by reason for cancellation`,
         renderer: this.getBarChartByReason,
       },
       {
         id: 'cer-collection',
+        icons: [IconNames.PANEL_TABLE],
         title: `Reports`,
         renderer: this.getReportCollection,
       },
       {
         id: 'cer-map',
+        icons: [IconNames.MAP],
         title: `Map`,
         renderer: this.getReportMap,
       },

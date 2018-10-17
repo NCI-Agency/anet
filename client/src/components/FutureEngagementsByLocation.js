@@ -12,6 +12,7 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
 import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
+import { IconNames } from '@blueprintjs/icons'
 
 const d3 = require('d3')
 
@@ -37,16 +38,19 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
     this.VISUALIZATIONS = [
       {
         id: 'febl-chart',
+        icons: [IconNames.HORIZONTAL_BAR_CHART],
         title: `Chart by date and location`,
         renderer: this.getBarChart,
       },
       {
         id: 'febl-collection',
+        icons: [IconNames.PANEL_TABLE],
         title: `Reports by date and location`,
         renderer: this.getReportCollection,
       },
       {
         id: 'febl-map',
+        icons: [IconNames.MAP],
         title: `Map by date and location`,
         renderer: this.getReportMap,
       },

@@ -18,6 +18,7 @@ export default class MosaicLayout extends Component {
   static propTypes = {
     visualizations: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.string.isRequired,
+        icons: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired, // icon names from @blueprintjs/icons IconNames
         title: PropTypes.string.isRequired,
         renderer: PropTypes.func.isRequired,
       })
@@ -62,13 +63,11 @@ export default class MosaicLayout extends Component {
     return (
       <div className={classNames(Classes.NAVBAR)}>
         <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)}>
-          <span className="actions-label">Actions:</span>
+          <span className={classNames(Classes.ICON_LARGE, Classes.iconClass(IconNames.MENU))} />
           <button
             className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.GRID_VIEW))}
             onClick={this.autoArrange}
-          >
-            Auto Arrange
-          </button>
+            title="Auto Arrange" />
           {this.renderButtons()}
         </div>
       </div>
@@ -83,10 +82,10 @@ export default class MosaicLayout extends Component {
         buttons.push(
           <button
             key={viz.id}
-            className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.ARROW_TOP_RIGHT))}
+            className={classNames(Classes.BUTTON)}
             onClick={this.addChart.bind(this, viz.id)}
-          >
-            {viz.title}
+            title={viz.title}>
+            {viz.icons.map((icon, i) => <span key={i} className={classNames(Classes.ICON_STANDARD, Classes.iconClass(icon))} />)}
           </button>
         )
       }

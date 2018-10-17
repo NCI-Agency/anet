@@ -19,12 +19,8 @@
   overflow: hidden;
 }
 
-.actions-label {
-  margin-right: 3px;
-}
-
 .bp3-button {
-  margin-left: 2px;
+  margin-left: 5px;
 }
 
 @media print {

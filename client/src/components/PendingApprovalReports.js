@@ -11,6 +11,7 @@ import Settings from 'Settings'
 
 import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
+import { IconNames } from '@blueprintjs/icons'
 
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
 const Context = React.createContext()
@@ -35,16 +36,19 @@ class PendingApprovalReports extends ReportsVisualisation {
     this.VISUALIZATIONS = [
       {
         id: 'par-chart',
+        icons: [IconNames.GROUPED_BAR_CHART],
         title: `Chart by ${this.advisorOrgLabel}`,
         renderer: this.getBarChart,
       },
       {
         id: 'par-collection',
+        icons: [IconNames.PANEL_TABLE],
         title: `Reports by ${this.advisorOrgLabel}`,
         renderer: this.getReportCollection,
       },
       {
         id: 'par-map',
+        icons: [IconNames.MAP],
         title: `Map by ${this.advisorOrgLabel}`,
         renderer: this.getReportMap,
       },
