@@ -278,15 +278,17 @@ class BaseInsightsShow extends Page {
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.props.match.params.insight
     const queryParams = this.getSearchQuery()
+    const flexStyle = {display: 'flex', flexDirection: 'column', height: '100%', flex: 1}
 
     return (
-      <div>
+      <div style={flexStyle}>
         <Breadcrumbs items={[['Insights ' + insightConfig.navTitle, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
-          <Fieldset id={this.props.match.params.insight} title={insightConfig.title}>
+          <Fieldset id={this.props.match.params.insight} title={insightConfig.title} style={flexStyle}>
             <InsightComponent
+              style={flexStyle}
               queryParams={queryParams}
               date={this.state.referenceDate.clone()}
             />

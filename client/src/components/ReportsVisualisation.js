@@ -13,6 +13,13 @@ const d3 = require('d3')
 
 const Context = React.createContext()
 
+export const propTypes = {
+  queryParams: PropTypes.object,
+  showLoading: PropTypes.func.isRequired,
+  hideLoading: PropTypes.func.isRequired,
+  style: PropTypes.object,
+}
+
 export default class ReportsVisualisation extends Component {
 
   get chartId() {
@@ -53,6 +60,7 @@ export default class ReportsVisualisation extends Component {
 
   render() {
     return <MosaicLayout
+        style={this.props.style}
         visualizations={this.visualizations}
         initialNode={this.initialLayout}
         description={this.description}

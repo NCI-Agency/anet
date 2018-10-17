@@ -24,6 +24,7 @@ export default class MosaicLayout extends Component {
     ).isRequired,
     initialNode: PropTypes.object, // FIXME: actually MosaicNode
     description: PropTypes.string,
+    style: PropTypes.object,
   }
 
   constructor(props) {
@@ -34,12 +35,12 @@ export default class MosaicLayout extends Component {
   }
 
   render() {
-    return <div>
+    return <div className="mosaic-box" style={this.props.style}>
       {this.props.description &&
         <p className="chart-description">{this.props.description}</p>
       }
       {this.renderNavBar()}
-      <div id="mosaic-container">
+      <div className="mosaic-container">
       <Mosaic
         value={this.state.currentNode}
         onChange={this.updateCurrentNode}

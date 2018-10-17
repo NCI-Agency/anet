@@ -10,7 +10,7 @@ import moment from 'moment'
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
-import ReportsVisualisation from 'components/ReportsVisualisation'
+import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
 
 const d3 = require('d3')
@@ -23,11 +23,7 @@ const Context = React.createContext()
  * location. Locations are grouped per date.
  */
 class FutureEngagementsByLocation extends ReportsVisualisation {
-  static propTypes = {
-    queryParams: PropTypes.object,
-    showLoading: PropTypes.func.isRequired,
-    hideLoading: PropTypes.func.isRequired,
-  }
+  static propTypes = {...rvPropTypes}
 
   constructor(props) {
     super(props)

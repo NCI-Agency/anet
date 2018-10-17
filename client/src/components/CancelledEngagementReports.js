@@ -10,7 +10,7 @@ import _cloneDeep from 'lodash/cloneDeep'
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
-import ReportsVisualisation from 'components/ReportsVisualisation'
+import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
 import Settings from 'Settings'
 
@@ -24,11 +24,7 @@ const Context = React.createContext()
  * the given date.
  */
 class CancelledEngagementReports extends ReportsVisualisation {
-  static propTypes = {
-    queryParams: PropTypes.object,
-    showLoading: PropTypes.func.isRequired,
-    hideLoading: PropTypes.func.isRequired,
-  }
+  static propTypes = {...rvPropTypes}
 
   constructor(props) {
     super(props)

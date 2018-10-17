@@ -1,21 +1,20 @@
-#mosaic-container {
-  height: 60vh;
-  width: 100%;
-  margin: 0;
+.mosaic-container {
+  flex: 1;
+  min-height: 200px;
 }
 
-#mosaic-container .scrollable {
+.mosaic-container .scrollable {
   height: 100%;
   overflow: auto;
 }
 
-#mosaic-container .scrollable-y {
+.mosaic-container .scrollable-y {
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-#mosaic-container .non-scrollable {
+.mosaic-container .non-scrollable {
   height: 100%;
   overflow: hidden;
 }

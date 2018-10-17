@@ -9,7 +9,7 @@ import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import Settings from 'Settings'
 
-import ReportsVisualisation from 'components/ReportsVisualisation'
+import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
 
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
@@ -21,11 +21,7 @@ const Context = React.createContext()
  * presentation forms: chart, summary, table and map.
  */
 class PendingApprovalReports extends ReportsVisualisation {
-  static propTypes = {
-    queryParams: PropTypes.object,
-    showLoading: PropTypes.func.isRequired,
-    hideLoading: PropTypes.func.isRequired,
-  }
+  static propTypes = {...rvPropTypes}
 
   constructor(props) {
     super(props)
