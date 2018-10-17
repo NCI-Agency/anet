@@ -1,4 +1,5 @@
-import React from 'react'
+import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 
 import {Route, Switch, Redirect} from 'react-router'
 import Home from 'pages/Home'
@@ -46,7 +47,16 @@ import InsightsShow from  'pages/insights/Show'
 import OnboardingShow from 'pages/onboarding/Show'
 import OnboardingEdit from 'pages/onboarding/Edit'
 
-const Routing = () => (
+import AppContext from 'components/AppContext'
+import {Person} from 'models'
+
+class BaseRouting extends Component {
+  static propTypes = {
+	currentUser: PropTypes.instanceOf(Person),
+  }
+
+  render() {
+	return (
 	<Switch>
 		<Route exact path="/" component={Home} />
 		<Route path="/search" component={Search} />
@@ -139,7 +149,7 @@ const Routing = () => (
 		<Route
 			path="/onboarding"
 			render={({ match: { url } }) => (
-				this.state.currentUser.isNewUser() ? (
+				this.props.currentUser.isNewUser() ? (
 					<Switch>
 						<Route exact path={`${url}/`} component={OnboardingShow} />
 						<Route path={`${url}/edit`} component={OnboardingEdit} />
@@ -151,6 +161,16 @@ const Routing = () => (
 		/>
 		<Route path="*" component={PageMissing} />
 	</Switch>
+	)
+  }
+}
+
+const Routing = (props) => (
+  <AppContext.Consumer>
+	{context =>
+	  <BaseRouting currentUser={context.currentUser} {...props} />
+	}
+  </AppContext.Consumer>
 )
 
 export default Routing
