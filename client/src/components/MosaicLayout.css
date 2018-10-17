@@ -27,3 +27,9 @@
 .bp3-button {
   margin-left: 2px;
 }
+
+@media print {
+  .mosaic-preview {
+    display: none;
+  }
+}
