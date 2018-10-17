@@ -165,7 +165,7 @@ class BaseNav extends Component {
 const Nav = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} showFloatingMenu={context.showFloatingMenu} {...props} />
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )

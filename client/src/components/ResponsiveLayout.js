@@ -112,15 +112,15 @@ class ResponsiveLayout extends Component {
 				<div style={contentContainer}>
 					<LoadingBar showFastActions style={loadingBar} />
 					<div
-						style={floatingMenu === false ? null : glassPane}
+						style={floatingMenu ? glassPane : null}
 						onClick={() => {
 							this.showFloatingMenu(false)
 						}}
 					/>
-					{(pageProps.useNavigation === true || floatingMenu === true) &&
-						<div style={sidebarContainer} className={ floatingMenu === false ? "hidden-xs" : "nav-overlay"}>
-								<div style={sidebar}>
-									{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
+					{(pageProps.useNavigation || floatingMenu) &&
+						<div style={sidebarContainer} className={ floatingMenu ? "nav-overlay" : "hidden-xs"}>
+							<div style={sidebar}>
+								{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
 							</div>
 						</div>
 					}
