@@ -145,13 +145,13 @@ class BarChart extends Component {
       .call(yAxis)
 
     const selectedBar = this.props.selectedBar
-    let bar = chart.selectAll('.' + this.props.barClass)
+    let bar = chart.selectAll(`.${this.props.barClass}`)
       .data(chartData)
       .enter()
       .append('g')
       .classed(this.props.barClass, true)
       .append('rect')
-      .attr('id', function(d, i) { return 'bar_' + getPropValue(d, xProp) })
+      .attr('id', function(d, i) { return `bar_${getPropValue(d, xProp)}` })
       .classed(this.props.selectedBarClass, function(d, i) { return this.id === selectedBar })
       .attr('x', function(d) { return xScale(getPropValue(d, xProp)) })
       .attr('y', function(d) { return yScale(getPropValue(d, yProp)) })

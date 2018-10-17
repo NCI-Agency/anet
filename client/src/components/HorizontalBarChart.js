@@ -73,7 +73,7 @@ class HorizontalBarChart extends Component {
   createBarChart() {
     const BAR_HEIGHT = 24
     const BAR_PADDING = 8
-    const MARGIN = {top: 20, right: 20}  // left and bottom MARGINs are dynamic
+    const MARGIN = {top: 30, right: 20}  // left and bottom MARGINs are dynamic
     let chartBox = this.node.getBoundingClientRect()
     let chartWidth = this.isNumeric(this.props.width) ? this.props.width : (chartBox.right - chartBox.left)
     let chartData = this.props.data.data
@@ -152,6 +152,8 @@ class HorizontalBarChart extends Component {
       .range([0, xWidth])
       .domain([0, d3.max(xLabels)])
 
+    let xAxisTop = d3.axisTop()
+      .scale(xScale)
     let xAxis = d3.axisBottom()
       .scale(xScale)
 
@@ -163,11 +165,15 @@ class HorizontalBarChart extends Component {
       .attr('width', chartWidth)
       .attr('height', chartHeight)
       .append('g')
-      .attr('transform', 'translate(' + marginLeft + ',' + MARGIN.top + ')')
+      .attr('transform', `translate(${marginLeft}, ${MARGIN.top})`)
 
     chart.append('g')
       .attr('class', 'x axis')
-      .attr('transform', 'translate(0,' + yHeight + ')')
+      .call(xAxisTop)
+
+    chart.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', `translate(0, ${yHeight})`)
       .call(xAxis)
 
     chart.append('g')
@@ -179,10 +185,10 @@ class HorizontalBarChart extends Component {
       .enter()
       .append('g')
       .attr('class', function(d, i) {
-        return 'category-' + (i % 2)
+        return `category-${i % 2}`
       })
       .attr('transform', function(d) {
-        return 'translate(1,' + yCategoryScale((d.cumulative * yScale.bandwidth())) + ')'
+        return `translate(1, ${yCategoryScale(d.cumulative * yScale.bandwidth())})`
       })
 
     categoryGroup.selectAll('.category-label')
@@ -194,7 +200,7 @@ class HorizontalBarChart extends Component {
         let x = -2
         let y = yCategoryScale((d.values.length * yScale.bandwidth() +
           BAR_PADDING) / 2)
-        return 'translate(' + x + ',' + y + ')'
+        return `translate(${x}, ${y})`
       })
       .text(d => categoryLabels[d.key])
       .attr('text-anchor', 'end')
@@ -205,7 +211,7 @@ class HorizontalBarChart extends Component {
       .append('g')
       .attr('class', 'category-bars-group')
       .attr('transform', function(d, i) {
-        return 'translate(0,' + yCategoryScale((i * yScale.bandwidth())) + ')'
+        return `translate(0, ${yCategoryScale(i * yScale.bandwidth())})`
       })
 
     const selectedBar = this.props.selectedBar
@@ -217,7 +223,7 @@ class HorizontalBarChart extends Component {
       .filter(d => d.value !== undefined)
       .append('rect')
       .attr('class', 'bar')
-      .attr('id', function(d, i) { return 'bar_' + d.key + d.parentKey })
+      .attr('id', function(d, i) { return `bar_${d.key}${d.parentKey}` })
       .classed(this.props.selectedBarClass, function(d, i) { return this.id === selectedBar })
       .attr('x', 0)
       .attr('y', yCategoryScale(BAR_PADDING))
@@ -232,7 +238,7 @@ class HorizontalBarChart extends Component {
       .attr('transform', function(d) {
         let x = 3
         let y = yCategoryScale((yScale.bandwidth() + BAR_PADDING) / 2)
-        return 'translate(' + x + ',' + y + ')'
+        return `translate(${x}, ${y})`
       })
       .text(d => leavesLabels[d.key])
       .attr('text-anchor', 'start')
