@@ -226,7 +226,11 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	containerName = "anet-mssql-server"
 	description = "Creates an ANET MS SQL DB container named " + containerName
 	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
-	env = ["ACCEPT_EULA=Y","SA_PASSWORD="+run.environment["ANET_SA_PASSWORD"],"DB_NAME="+run.environment["ANET_DB_NAME"],"DB_USER="+run.environment["ANET_DB_USERNAME"],"DB_USER_PASSWORD="+run.environment["ANET_DB_PASSWORD"]]
+	withEnvVar('ACCEPT_EULA', 'Y')
+	withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
+	withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
+	withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
+	withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
 	portBindings = ["1433:"+run.environment["ANET_DB_PORT"]]
 }
 
@@ -290,7 +294,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:3.6.2'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.0.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2"
 	}
