@@ -49,10 +49,11 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 		}
 
 		if (doFullTextSearch) {
-			sql.append(" LEFT JOIN CONTAINSTABLE (positions, (name, code), :containsQuery) c_positions"
+			sql.append(" LEFT JOIN CONTAINSTABLE (positions, (name), :containsQuery) c_positions"
 					+ " ON positions.id = c_positions.[Key]");
 			final StringBuilder whereRank = new StringBuilder("("
-					+ "c_positions.rank IS NOT NULL");
+					+ "c_positions.rank IS NOT NULL"
+					+ " OR positions.code LIKE :likeQuery");
 			if (Boolean.TRUE.equals(query.getMatchPersonName())) {
 				sql.append(" LEFT JOIN CONTAINSTABLE(people, (name), :containsQuery) c_people"
 						+ " ON people.id = c_people.[Key]");
@@ -61,6 +62,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			whereRank.append(")");
 			whereClauses.add(whereRank.toString());
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
+			sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
 
 		if (query.getType() != null) {

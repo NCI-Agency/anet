@@ -459,7 +459,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 				<LinkTo person={person}/>
 			</td>
-			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 			<td onClick={this.removeAttendee.bind(this, person)} id={'attendeeDelete_' + person.role + "_" + idx} >

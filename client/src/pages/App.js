@@ -41,7 +41,7 @@ class App extends Page {
 			me {
 				id, name, role, emailAddress, rank, status
 				position {
-					id, name, type, status, isApprover
+					id, name, code, type, status, isApprover
 					organization { id, shortName , allDescendantOrgs { id }}
 					location {id, name}
 				}
