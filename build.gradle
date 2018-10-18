@@ -193,11 +193,12 @@ task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.t
 		}
 	}
 	inputDir =  project.file('build/install')
-	tags = ['ncia/anet-app-server:'+project.version]
+	def resultTags = ['ncia/anet-app-server:'+project.version]
 	if (projectBranch=="candidate")
-		tags << 'ncia/anet-app-server:'+projectBranch
+		resultTags << 'ncia/anet-app-server:'+projectBranch
 	if (projectBranch=="master")
-		tags << 'ncia/anet-app-server:latest'
+		resultTags << 'ncia/anet-app-server:latest'
+	tags = resultTags
 }
 
 task dockerPushCandidateImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
