@@ -27,7 +27,7 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-import { SEARCH_OBJECT_TYPES } from 'actions'
+import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import {LAST_WEEK, AFTER} from 'dateUtils'
 import {deserializeQueryParams} from 'searchUtils'
 
@@ -39,7 +39,7 @@ class BaseHome extends Page {
 	}
 
 	constructor(props) {
-		super(props)
+		super(props, DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS)
 		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
 			success: null,
