@@ -166,7 +166,11 @@ public class ReportDao implements IAnetDao<Report> {
 					.execute();
 
 				// Write sensitive information (if allowed)
-				final ReportSensitiveInformation rsi = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insert(r.getReportSensitiveInformation(), user, r);
+				ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
+				if (rsi != null) {
+					rsi.setText(Utils.sanitizeHtml(rsi.getText()));
+				}
+				rsi = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insert(rsi, user, r);
 				r.setReportSensitiveInformation(rsi);
 
 				final ReportBatch rb = dbHandle.attach(ReportBatch.class);
@@ -256,7 +260,11 @@ public class ReportDao implements IAnetDao<Report> {
 	 */
 	public int update(Report r, Person user) {
 		// Write sensitive information (if allowed)
-		AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insertOrUpdate(r.getReportSensitiveInformation(), user, r);
+		ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
+		if (rsi != null) {
+			rsi.setText(Utils.sanitizeHtml(rsi.getText()));
+		}
+		AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insertOrUpdate(rsi, user, r);
 
 		DaoUtils.setUpdateFields(r);
 

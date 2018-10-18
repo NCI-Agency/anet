@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -157,10 +158,15 @@ public class Utils {
 	
 	public static final PolicyFactory POLICY_DEFINITION = new HtmlPolicyBuilder()
 			.allowStandardUrlProtocols()
+			// Allow in-line image data
+			.allowUrlProtocols("data")
+			.allowAttributes("src").matching(Pattern.compile("^data:image/.*$")).onElements("img")
+			// Allow some image attributes
+			.allowAttributes("align", "alt", "border", "name", "height", "width", "hspace", "vspace").onElements("img")
 			// Allow title="..." on any element.
 			.allowAttributes("title").globally()
-			// Allow href="..." on <a> elements.
-			.allowAttributes("href").onElements("a")
+			// Allow href="..." on <a> elements (but not the 'data:' protocol!).
+			.allowAttributes("href").matching(Pattern.compile("^(?!data:).*$")).onElements("a")
 			// Defeat link spammers.
 			.requireRelNofollowOnLinks()
 			// The align attribute on <p> elements can have any value below.
@@ -171,7 +177,7 @@ public class Utils {
 			// These elements are allowed.
 			.allowElements("a", "p", "div", "i", "b", "u", "em", "blockquote", "tt", "strong", "br", 
 					"ul", "ol", "li","table","tr","td","thead","tbody","th","span","h1","h2","h3",
-					"h4","h5","h6","hr")
+					"h4","h5","h6","hr", "img")
 			.toFactory();
 	
 	public static String sanitizeHtml(String input) {
