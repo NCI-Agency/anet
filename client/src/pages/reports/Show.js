@@ -26,6 +26,9 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { jumpToTop, AnchorLink } from 'components/Page'
 
+import { SEARCH_OBJECT_TYPES } from 'actions'
+import {deserializeQueryParams} from 'searchUtils'
+
 class BaseReportShow extends Page {
 
 	static propTypes = {
@@ -443,7 +446,7 @@ class BaseReportShow extends Page {
 			<Button bsStyle="warning" onClick={this.rejectReport}>Reject with comment</Button>
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
-				<Button bsStyle="primary" onClick={this.approveReport} className="approve-button"><strong>Approve</strong></Button>
+				<Button bsStyle="primary" onClick={this.handleApproveReport} className="approve-button"><strong>Approve</strong></Button>
 			</div>
 		</Fieldset>
 	}
@@ -593,24 +596,56 @@ class BaseReportShow extends Page {
 			})
 	}
 
+	pendingMyApproval = (currentUser) => {
+		return {
+			title: "Reports pending my approval",
+			query: { pendingApprovalOf: currentUser.id },
+		}
+	}
+
+	deserializeCallback = (objectType, filters, text) => {
+		const { report } = this.state
+		const lastApproval = (report.approvalStep.nextStepId === null)
+		const message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
+		// We update the Redux state
+		this.props.setSearchQuery({
+			objectType: objectType,
+			filters: filters,
+			text: text
+		})
+		this.props.history.push({
+			pathname: '/search',
+			state: {
+				success: message,
+			}
+		})
+	}
+
 	@autobind
 	approveReport() {
-		let comment = (this.state.approvalComment.text.length > 0) ? this.state.approvalComment : {}
-		let graphql = 'approveReport(id: $id, comment: $comment) { id }'
+		const { approvalComment, report } = this.state
+		const comment = (approvalComment.text.length > 0) ? approvalComment : {}
+		const graphql = 'approveReport(id: $id, comment: $comment) { id }'
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
 		const variables = {
-			id: this.state.report.id,
+			id: report.id,
 			comment: comment
 		}
-		const variableDef = '($id: Int!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
-				let lastApproval = (this.state.report.approvalStep.nextStepId === null)
-				this.updateReport()
-				let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
-				this.setState({error:null, success: message})
-			}).catch(error => {
+				const { currentUser } = this.props
+				const queryDetails = this.pendingMyApproval(currentUser)
+				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback)
+			})
+			.catch(error => {
 				this.handleError(error)
 			})
+	}
+
+	handleApproveReport = (event) => {
+		this.approveReport()
+		event.preventDefault()
+		event.stopPropagation()
 	}
 
 	@autobind
