@@ -22,7 +22,7 @@ export const SEARCH_OBJECT_TYPES = {
 
 export const DEFAULT_SEARCH_PROPS = {
 	onSearchGoToSearchPage: true,
-	clearSearchQuery: true,
+	clearSearchQuery: false,
 	searchObjectTypes: [
 		SEARCH_OBJECT_TYPES.REPORTS,
 		SEARCH_OBJECT_TYPES.PEOPLE,
@@ -32,6 +32,7 @@ export const DEFAULT_SEARCH_PROPS = {
 		SEARCH_OBJECT_TYPES.TASKS
 	]
 }
+export const CLEAR_SEARCH_PROPS = Object.assign({}, DEFAULT_SEARCH_PROPS, {clearSearchQuery: true})
 export const DEFAULT_SEARCH_QUERY = {objectType: '', text: '', filters: []}
 
 /*
