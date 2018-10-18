@@ -621,12 +621,6 @@ class BaseReportShow extends Page {
 		})
 	}
 
-	handleHistoryApproveReport = (queryDetails, event) => {
-		deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback)
-		event.preventDefault()
-		event.stopPropagation()
-	}
-
 	@autobind
 	approveReport() {
 		const { approvalComment, report } = this.state
@@ -638,16 +632,20 @@ class BaseReportShow extends Page {
 			comment: comment
 		}
 		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				const { currentUser } = this.props
+				const queryDetails = this.pendingMyApproval(currentUser)
+				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback)
+			})
 			.catch(error => {
 				this.handleError(error)
 			})
 	}
 
 	handleApproveReport = (event) => {
-		const { currentUser } = this.props
-		const queryDetails = this.pendingMyApproval(currentUser)
 		this.approveReport()
-		this.handleHistoryApproveReport(queryDetails, event)
+		event.preventDefault()
+		event.stopPropagation()
 	}
 
 	@autobind
