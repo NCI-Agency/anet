@@ -11,7 +11,7 @@ export default class NotFound extends PureComponent {
 
 	render() {
 		return <div>
-            <h1 className="not-found-text">{this.props.text}</h1>
+            <h1 style={{ textAlign: 'center' }}>{this.props.text}</h1>
         </div>
 	}
 }
