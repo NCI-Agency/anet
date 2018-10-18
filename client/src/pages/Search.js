@@ -42,6 +42,9 @@ import { jumpToTop } from 'components/Page'
 
 import AppContext from 'components/AppContext'
 import Scrollspy from 'react-scrollspy'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import 'components/reactToastify.css'
 
 const SEARCH_CONFIG = {
 	reports : {
@@ -93,6 +96,16 @@ class BaseSearch extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		scrollspyOffset: PropTypes.number,
+	}
+
+	toastId = null;
+	successToastId = 'success-message';
+	errorToastId = 'error-message';
+	notify = (success) => {
+		if (!success) { return }
+		toast.success(success, {
+			toastId: this.successToastId
+		})
 	}
 
 	constructor(props) {
@@ -173,11 +186,13 @@ class BaseSearch extends Page {
 		return this._dataFetcher(props, this._fetchDataCallback)
 	}
 
-	render() {
-		const results = this.state.results
-		const error = this.state.error
-		const success = this.state.success
+	componentDidUpdate() {
+		const { success } = this.state
+		this.notify(success)
+	}
 
+	render() {
+		const { results, success, error } = this.state
 		const numReports = results.reports ? results.reports.totalCount : 0
 		const numPeople = results.people ? results.people.totalCount : 0
 		const numPositions = results.positions ? results.positions.totalCount : 0
@@ -193,6 +208,7 @@ class BaseSearch extends Page {
 		const taskShortLabel = Settings.fields.task.shortLabel
 		return (
 			<div>
+				<ToastContainer/>
 				<SubNav subnavElemId="search-nav">
 					<div><Button onClick={this.props.history.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
 					<Nav stacked bsStyle="pills">
