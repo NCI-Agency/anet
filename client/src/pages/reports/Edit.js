@@ -46,7 +46,7 @@ class BaseReportEdit extends Page {
 				location { id, name },
 				attendees {
 					id, name, role, primary
-					position { id, name, organization { id, shortName}, location {id, name} }
+					position { id, name, code, organization { id, shortName}, location {id, name} }
 				}
 				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 				tags { id, name, description }

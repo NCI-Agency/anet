@@ -76,7 +76,7 @@ class BaseReportShow extends Page {
 
 				attendees {
 					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status, organization { id, shortName}, location {id, name} }
+					position { id, name, code, status, organization { id, shortName}, location {id, name} }
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -458,7 +458,7 @@ class BaseReportShow extends Page {
 				<img src={person.iconUrl()} alt={person.role} height={20} width={20} className="person-icon" />
 				<LinkTo person={person} />
 			</td>
-			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>

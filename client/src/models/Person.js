@@ -43,12 +43,12 @@ export default class Person extends Model {
 		position: {},
 	}
 
-	static autocompleteQuery = "id, name, role, rank, position { id, name, organization { id, shortName }, location {id, name} }"
+	static autocompleteQuery = "id, name, role, rank, position { id, name, code, organization { id, shortName }, location {id, name} }"
 
 	static autocompleteTemplate(person) {
 		return <span>
 			<img src={(new Person(person)).iconUrl()} alt={person.role} height={20} className="person-icon" />
-			<LinkTo person={person} isLink={false}/> {person.position && (`- ( ${person.position.name}` + (person.position.location ? `, ${ person.position.location.name} )` : ` )` ) )}
+			<LinkTo person={person} isLink={false}/> {person.position && (`- (${person.position.name}` + (person.position.code ? `, ${person.position.code}` : ``) + (person.position.location ? `, ${ person.position.location.name}` : ``) + `)` )}
 		</span>
 	}
 
