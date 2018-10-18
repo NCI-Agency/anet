@@ -61,13 +61,4 @@ const clientConfig = merge(common[0], {
   }),
 ]})
 
-const simConfig =  merge(common[1], {
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'anet.sim.js'
-  }
-})
-
-
-// module.exports = [ clientConfig, simConfig ]
-module.exports = [  simConfig ]
+module.exports = clientConfig

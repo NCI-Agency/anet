@@ -1,5 +1,5 @@
 import { Report } from 'models'
-import { runGQL, fuzzy } from './simutils'
+import { runGQL, fuzzy } from '../simutils'
 import faker from 'faker'
 
 const populateReport = function (report) {

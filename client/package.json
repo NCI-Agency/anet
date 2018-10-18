@@ -5,7 +5,7 @@
   "proxy": "http://localhost:8080",
   "homepage": "/assets/client",
   "devDependencies": {
-    "artillery": "^1.6.0-24",
+    "aigle": "^1.12.0",
     "autobind-decorator": "^2.1.0",
     "autoprefixer": "^9.1.5",
     "ava": "^0.25.0",
@@ -113,9 +113,8 @@
     "test": "npm run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "wdio": "wdio -b http://localhost:8080 ./config/wdio.config.js",
     "wdio:watch": "wdio ./config/wdio.config.js --watch",
-    "load-test": "artillery run tests/load/load.yml",
     "graphql": "graphql",
-    "sim": "node --experimental-modules tests/sim/Simulator.mjs"
+    "sim": "NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js"
   },
   "jest": {
     "moduleFileExtensions": [
