@@ -1,6 +1,6 @@
-import React, {Component} from 'react'
+import React, { PureComponent } from 'react'
 
-export default class NotFound extends Component {
+export default class NotFound extends PureComponent {
     componentDidMount() {
         document.getElementsByTagName('html')[0].classList.add('not-found')
     }
