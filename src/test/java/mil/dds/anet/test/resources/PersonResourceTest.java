@@ -31,6 +31,7 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.utils.UtilsTest;
 
 public class PersonResourceTest extends AbstractResourceTest {
 
@@ -54,7 +55,8 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson.setName("testCreatePerson Person");
 		newPerson.setRole(Role.ADVISOR);
 		newPerson.setStatus(PersonStatus.ACTIVE);
-		newPerson.setBiography("Created buy the PersonResourceTest#testCreatePerson");
+		// set HTML of biography
+		newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
 		newPerson.setGender("Female");
 		newPerson.setCountry("Canada");
 		newPerson.setEndOfTourDate(new DateTime(2020,4,1,0,0,0));
@@ -64,14 +66,20 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPersonUuid, new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(newPerson.getUuid()).isNotNull();
 		assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
+		// check that HTML of biography is sanitized after create
+		assertThat(newPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
 
 		newPerson.setName("testCreatePerson updated name");
 		newPerson.setCountry("The Commonwealth of Canada");
+		// update HTML of biography
+		newPerson.setBiography(UtilsTest.getCombinedTestCase().getInput());
 		Integer nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson);
 		assertThat(nrUpdated).isEqualTo(1);
 
 		retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, newPerson.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
+		// check that HTML of biography is sanitized after update
+		assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
 		
 		//Test creating a person with a position already set. 
 		final OrganizationSearchQuery query = new OrganizationSearchQuery();
