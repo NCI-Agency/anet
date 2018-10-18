@@ -89,7 +89,7 @@ class BaseLocationShow extends Page {
 				</Form>
 
 				<Fieldset title="Reports at this location">
-					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
+					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} mapId="reports" />
 				</Fieldset>
 			</div>
 		)
