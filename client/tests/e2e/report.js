@@ -34,7 +34,7 @@ test('Draft and submit a report', async t => {
         'Clicking an attendee autocomplete suggestion empties the autocomplete field.'
     )
 
-    let [$principalPrimaryCheckbox, $principalName, $principalPosition, $principalOrg] = 
+    let [$principalPrimaryCheckbox, $principalName, $principalPosition, $principalLocation, $principalOrg] =
         await $$('#attendeesTable tbody tr:last-child td')
 
     t.is(
@@ -83,9 +83,10 @@ test('Draft and submit a report', async t => {
     let $approveButton = await $('.approve-button')
     await $approveButton.click()
 
+    const $notificationApproved = await t.context.driver.findElement(By.css('div[role=alert]'))
     await assertElementText(
         t, 
-        await $('.alert'), 
+        $notificationApproved,
         'Successfully approved report.', 
         'Clicking the approve button displays a message telling the user that the action was successful.'
     )
@@ -103,9 +104,10 @@ test('Draft and submit a report', async t => {
     let $rebeccaApproveButton = await $('.approve-button')
     await $rebeccaApproveButton.click()
 
+    const $notificationDailyRollup = await t.context.driver.findElement(By.css('div[role=alert]'))
     await assertElementText(
         t, 
-        await $('.alert'), 
+        $notificationDailyRollup,
         'Successfully approved report. It has been added to the daily rollup', 
         'When a report is approved, the user sees a message indicating that it has been added to the daily rollup'
     )
@@ -274,7 +276,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     let $attendeesRows = await $$('#attendeesTable tbody tr')
     t.is($attendeesRows.length, 2, 'Attendees table starts with 2 body rows')
 
-    let [$advisorPrimaryCheckbox, $advisorName, $advisorPosition, $advisorOrg] = 
+    let [$advisorPrimaryCheckbox, $advisorName, $advisorPosition, $advisorLocation, $advisorOrg] =
         await $$('#attendeesTable tbody tr:first-child td')
     
     t.is(

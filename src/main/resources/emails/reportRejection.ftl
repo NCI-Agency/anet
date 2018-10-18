@@ -24,7 +24,7 @@ Hi ${report.author.name},
 <p>Your report, <a href="${serverUrl}/reports/${report.id?c}"><em><strong>"${reportIntent}"</strong></em></a>, has been returned by ${rejector.name} &lt;${rejector.emailAddress}&gt;. The following comment was provided:</p>
 <p>"${comment.text}"</p>
 
-<p><strong>Engagement date and location:</strong> ${(report.engagementDate.toString('dd MMM yyyy'))!} @ ${(report.loadLocation().name)!}</p>
+<p><strong>Engagement date and location:</strong> ${(report.engagementDate.toString('dd MMM yyyy'))!} @ ${(report.loadLocation(context).get().name)!}</p>
 
 <p>You can edit and re-submit your report by <a href="${serverUrl}/reports/${report.id?c}">clicking here</a>.</p>
 

@@ -1,5 +1,7 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLQuery;
+
 import java.util.Objects;
 
 import mil.dds.anet.utils.Utils;
@@ -14,6 +16,7 @@ public class Location extends AbstractAnetBean {
 	private Double lat;
 	private Double lng;
 	
+	@GraphQLQuery(name="name")
 	public String getName() {
 		return name;
 	}
@@ -22,6 +25,7 @@ public class Location extends AbstractAnetBean {
 		this.name = Utils.trimStringReturnNull(name);
 	}
 	
+	@GraphQLQuery(name="status")
 	public LocationStatus getStatus() {
 		return status;
 	}
@@ -30,6 +34,7 @@ public class Location extends AbstractAnetBean {
 		this.status = status;
 	}
 
+	@GraphQLQuery(name="lat")
 	public Double getLat() {
 		return lat;
 	}
@@ -38,6 +43,7 @@ public class Location extends AbstractAnetBean {
 		this.lat = lat;
 	}
 	
+	@GraphQLQuery(name="lng")
 	public Double getLng() {
 		return lng;
 	}
@@ -73,7 +79,6 @@ public class Location extends AbstractAnetBean {
 	public static Location createWithId(Integer id) {
 		Location l = new Location();
 		l.setId(id);
-		l.setLoadLevel(LoadLevel.ID_ONLY);
 		return l;
 	}
 	

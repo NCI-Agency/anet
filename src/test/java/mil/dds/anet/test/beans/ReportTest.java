@@ -21,7 +21,6 @@ import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.test.TestData;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportTest extends BeanTester<Report> {
 
@@ -107,7 +106,6 @@ public class ReportTest extends BeanTester<Report> {
 	public void staticCreatorTest() { 
 		Report r = Report.createWithId(4);
 		assertThat(r.getId()).isEqualTo(4);
-		assertThat(r.getLoadLevel()).isEqualTo(LoadLevel.ID_ONLY);
 		assertThat(r.getReportText()).isNull();
 		assertThat(r.getApprovalStep()).isNull();
 		assertThat(r.getNextSteps()).isNull();

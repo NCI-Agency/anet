@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
 import moment from 'moment'
@@ -26,7 +26,6 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import utils from 'utils'
 
 import { SEARCH_OBJECT_TYPES } from 'actions'
 import {LAST_WEEK, AFTER} from 'dateUtils'
@@ -43,6 +42,8 @@ class BaseHome extends Page {
 		super(props)
 		this.ALL_FILTERS = searchFilters.searchFilters()
 		this.state = {
+			success: null,
+			error: null,
 			tileCounts: [],
 			savedSearches: [],
 			selectedSearch: null,
@@ -103,7 +104,7 @@ class BaseHome extends Page {
 			query: {
 				orgId: currentUser.position.organization.id,
 				includeOrgChildren: false,
-				createdAtStart: "" + LAST_WEEK,
+				createdAtStart: LAST_WEEK,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			},
 		}
@@ -155,12 +156,16 @@ class BaseHome extends Page {
 		let queries = this.getQueriesForUser(currentUser)
 		//Run those five queries
 		let graphQL = /* GraphQL */`
-			tileOne: reportList(f:search, query:$queryOne) { totalCount},
-			tileTwo: reportList(f:search, query: $queryTwo) { totalCount},
-			tileThree: reportList(f:search, query: $queryThree) { totalCount },
-			tileFour: reportList(f:search, query: $queryFour) { totalCount },
-			tileFive: reportList(f:search, query: $queryFive) { totalCount },
-			savedSearches: savedSearchs(f:mine) {id, name, objectType, query}`
+			tileOne: reportList(query:$queryOne) { totalCount},
+			tileTwo: reportList(query: $queryTwo) { totalCount},
+			tileThree: reportList(query: $queryThree) { totalCount },
+			tileFour: reportList(query: $queryFour) { totalCount },
+			tileFive: reportList(query: $queryFive) { totalCount },
+			savedSearches: mySearches {id, name, objectType, query}`
+		queries.forEach(q => {
+			q.query.pageNum = 0
+			q.query.pageSize = 1  // we're only interested in the totalCount, so just get at most one report
+		})
 		let variables = {
 			queryOne: queries[0].query,
 			queryTwo: queries[1].query,
@@ -169,8 +174,8 @@ class BaseHome extends Page {
 			queryFive: queries[4].query
 		}
 		API.query(graphQL, variables,
-			"($queryOne: ReportSearchQuery, $queryTwo: ReportSearchQuery, $queryThree: ReportSearchQuery, $queryFour: ReportSearchQuery," +
-			"$queryFive: ReportSearchQuery)")
+			"($queryOne: ReportSearchQueryInput, $queryTwo: ReportSearchQueryInput, $queryThree: ReportSearchQueryInput, $queryFour: ReportSearchQueryInput," +
+			"$queryFive: ReportSearchQueryInput)")
 		.then(data => {
 			let selectedSearch = data.savedSearches && data.savedSearches.length > 0 ? data.savedSearches[0] : null
 			this.setState({
@@ -301,16 +306,22 @@ class BaseHome extends Page {
 	onConfirmDelete() {
 		const search = this.state.selectedSearch
 		const index = this.state.savedSearches.findIndex(s => s.id === search.id)
-		API.send(`/api/savedSearches/${search.id}`, {}, {method: 'DELETE'})
+		const operation = 'deleteSavedSearch'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: search.id }
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				let savedSearches = this.state.savedSearches
 				savedSearches.splice(index, 1)
 				let nextSelect = savedSearches.length > 0 ? savedSearches[0] : null
 				this.setState({ savedSearches: savedSearches, selectedSearch : nextSelect })
-			}, data => {
-				this.setState({success:null, error: data})
+			}).catch(error => {
+				this.setState({success:null, error: error})
+				jumpToTop()
 			})
 	}
+
 }
 
 const Home = (props) => (

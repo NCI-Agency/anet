@@ -1,5 +1,5 @@
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Button, Modal, Checkbox} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
@@ -17,6 +17,7 @@ import {Report, Person, Task} from 'models'
 
 import { PAGE_PROPS_MIN_HEAD } from 'actions'
 import { connect } from 'react-redux'
+import { AnchorLink } from 'components/Page'
 
 class ReportMinimal extends Page {
 
@@ -123,7 +124,7 @@ class ReportMinimal extends Page {
 				{report.isPending() &&
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p>
+						<p>It won't be available in the ANET database until your <AnchorLink to="#approvals">approval organization</AnchorLink> marks it as approved.</p>
 					</Fieldset>
 				}
 
@@ -290,13 +291,13 @@ class ReportMinimal extends Page {
 	@autobind
 	updateReport(json) {
 		this.fetchData(this.props)
-		window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind
 	handleError(response) {
 		this.setState({error: response})
-		window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind

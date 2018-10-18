@@ -16,7 +16,6 @@ import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ReportMapper implements ResultSetMapper<Report> {
 
@@ -63,7 +62,6 @@ public class ReportMapper implements ResultSetMapper<Report> {
 		Person author = Person.createWithId((MapperUtils.getInteger(rs, "reports_authorId")));
 		PersonMapper.fillInFields(author, rs);
 		r.setAuthor(author);
-		r.setLoadLevel(LoadLevel.PROPERTIES);
 		
 		Integer advisorOrgId = MapperUtils.getInteger(rs, "reports_advisorOrganizationId");
 		if (advisorOrgId != null) { 

@@ -1,5 +1,11 @@
 package mil.dds.anet.resources;
 
+import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,16 +22,16 @@ import com.codahale.metrics.annotation.Timed;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.IGraphQLResource;
-import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.DaoUtils;
 
 @Path("/api/admin")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class AdminResource implements IGraphQLResource {
+public class AdminResource {
 
 	private AdminDao dao;
 	private AnetConfiguration config;
@@ -37,22 +43,34 @@ public class AdminResource implements IGraphQLResource {
 	
 	@GET
 	@Timed
-	@GraphQLFetcher
-	@Path("/")
+	@GraphQLQuery(name="adminSettings")
+	@Path("/old")
 	public List<AdminSetting> getAll() { 
 		return dao.getAllSettings();
 	}
 	
 	@POST
 	@Timed
-	@Path("/save")
+	@Path("/old-save")
 	@RolesAllowed("ADMINISTRATOR")
-	public Response save(List<AdminSetting> settings) {
-		for (AdminSetting setting : settings) {
-			dao.saveSetting(setting);
-		}
-
+	public Response saveAdminSettings(@Auth Person user, List<AdminSetting> settings) {
+		saveAdminSettingsCommon(user, settings);
 		return Response.ok().build();
+	}
+
+	private int saveAdminSettingsCommon(Person user, List<AdminSetting> settings) {
+		int numRows = 0;
+		for (AdminSetting setting : settings) {
+			numRows = dao.saveSetting(setting);
+		}
+		AnetAuditLogger.log("Admin settings updated by {}", user);
+		return numRows;
+	}
+
+	@GraphQLMutation(name="saveAdminSettings")
+	@RolesAllowed("ADMINISTRATOR")
+	public Integer saveAdminSettings(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="settings") List<AdminSetting> settings) {
+		return saveAdminSettingsCommon(DaoUtils.getUserFromContext(context), settings);
 	}
 
 	@GET
@@ -61,22 +79,5 @@ public class AdminResource implements IGraphQLResource {
 	public Map<String, Object> getDictionary() {
 		return config.getDictionary();
 	}
-
-	@Override
-	public String getDescription() {
-		return "Admin Resources";
-	}
-	
-	@Override
-	public Class<? extends AbstractAnetBean> getBeanClass() {
-		return AdminSetting.class;
-	}
-	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public Class<List> getBeanListClass() {
-		return List.class;
-	}
-	
 	
 }

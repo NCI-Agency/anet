@@ -1,15 +1,19 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 
-import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.IdFetcher;
 
 public class Task extends AbstractAnetBean {
 
@@ -35,6 +39,7 @@ public class Task extends AbstractAnetBean {
 		this.plannedCompletion = plannedCompletion;
 	}
 
+	@GraphQLQuery(name="plannedCompletion")
 	public DateTime getPlannedCompletion() {
 		return plannedCompletion;
 	}
@@ -43,10 +48,12 @@ public class Task extends AbstractAnetBean {
 		this.projectedCompletion = projectedCompletion;
 	}
 
+	@GraphQLQuery(name="projectedCompletion")
 	public DateTime getProjectedCompletion() {
 		return projectedCompletion;
 	}
 
+	@GraphQLQuery(name="shortName")
 	public String getShortName() {
 		return shortName;
 	}
@@ -55,6 +62,7 @@ public class Task extends AbstractAnetBean {
 		this.shortName = Utils.trimStringReturnNull(shortName);
 	}
 
+	@GraphQLQuery(name="longName")
 	public String getLongName() {
 		return longName;
 	}
@@ -63,6 +71,7 @@ public class Task extends AbstractAnetBean {
 		this.longName = Utils.trimStringReturnNull(longName);
 	}
 
+	@GraphQLQuery(name="customField")
 	public String getCustomField() {
 		return customField;
 	}
@@ -71,6 +80,7 @@ public class Task extends AbstractAnetBean {
 		this.customField = Utils.trimStringReturnNull(customField);
 	}
 
+	@GraphQLQuery(name="customFieldEnum1")
 	public String getCustomFieldEnum1() {
 		return customFieldEnum1;
 	}
@@ -79,6 +89,7 @@ public class Task extends AbstractAnetBean {
 		this.customFieldEnum1 = Utils.trimStringReturnNull(customFieldEnum1);
 	}
 
+	@GraphQLQuery(name="customFieldEnum2")
 	public String getCustomFieldEnum2() {
 		return customFieldEnum2;
 	}
@@ -87,6 +98,7 @@ public class Task extends AbstractAnetBean {
 		this.customFieldEnum2 = Utils.trimStringReturnNull(customFieldEnum2);
 	}
 
+	@GraphQLQuery(name="category")
 	public String getCategory() {
 		return category;
 	}
@@ -95,14 +107,10 @@ public class Task extends AbstractAnetBean {
 		this.category = Utils.trimStringReturnNull(category);
 	}
 
-	@GraphQLFetcher("customFieldRef1")
-	public Task loadCustomFieldRef1() {
-		if (customFieldRef1 == null || customFieldRef1.getLoadLevel() == null) { return customFieldRef1; }
-		if (customFieldRef1.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) {
-			this.customFieldRef1 = AnetObjectEngine.getInstance()
-					.getTaskDao().getById(customFieldRef1.getId());
-		}
-		return customFieldRef1;
+	@GraphQLQuery(name="customFieldRef1")
+	public CompletableFuture<Task> loadCustomFieldRef1(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Task>().load(context, "tasks", customFieldRef1)
+				.thenApply(o -> { customFieldRef1 = o; return o; });
 	}
 
 	public void setCustomFieldRef1(Task customFieldRef1) {
@@ -111,9 +119,10 @@ public class Task extends AbstractAnetBean {
 
 	@GraphQLIgnore
 	public Task getCustomFieldRef1() {
-		return this.customFieldRef1;
+		return customFieldRef1;
 	}
 
+	@GraphQLQuery(name="status")
 	public TaskStatus getStatus() {
 		return status;
 	}
@@ -126,14 +135,10 @@ public class Task extends AbstractAnetBean {
 		this.responsibleOrg = org;
 	}
 
-	@GraphQLFetcher("responsibleOrg")
-	public Organization loadResponsibleOrg() {
-		if (responsibleOrg == null || responsibleOrg.getLoadLevel() == null) { return responsibleOrg; } 
-		if (responsibleOrg.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.responsibleOrg = AnetObjectEngine.getInstance()
-					.getOrganizationDao().getById(responsibleOrg.getId());
-		}
-		return responsibleOrg;
+	@GraphQLQuery(name="responsibleOrg")
+	public CompletableFuture<Organization> loadResponsibleOrg(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Organization>().load(context, "organizations", responsibleOrg)
+				.thenApply(o -> { responsibleOrg = o; return o; });
 	}
 
 	@GraphQLIgnore
@@ -144,7 +149,6 @@ public class Task extends AbstractAnetBean {
 	public static Task createWithId(Integer id) { 
 		Task p = new Task();
 		p.setId(id);
-		p.setLoadLevel(LoadLevel.ID_ONLY);
 		return p;
 	}
 

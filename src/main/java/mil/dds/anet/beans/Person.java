@@ -1,23 +1,25 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
-import mil.dds.anet.graphql.GraphQLParam;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-@JsonIgnoreProperties({ "_loaded" })
 public class Person extends AbstractAnetBean implements Principal {
 
 	public static enum PersonStatus { ACTIVE, INACTIVE, NEW_USER }
@@ -39,11 +41,14 @@ public class Person extends AbstractAnetBean implements Principal {
 	private String domainUsername;
 		
 	private Optional<Position> position;
+
+	private List<PersonPositionHistory> previousPositions;
 	
 	public Person() { 
 		this.pendingVerification = false; //Defaults 
 	}
 	
+	@GraphQLQuery(name="name")
 	public String getName() {
 		return name;
 	}
@@ -52,6 +57,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.name = Utils.trimStringReturnNull(name);
 	}
 	
+	@GraphQLQuery(name="status")
 	public PersonStatus getStatus() {
 		return status;
 	}
@@ -60,6 +66,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.status = status;
 	}
 	
+	@GraphQLQuery(name="role")
 	public Role getRole() {
 		return role;
 	}
@@ -68,6 +75,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.role = role;
 	}
 
+	@GraphQLQuery(name="pendingVerification")
 	public Boolean getPendingVerification() {
 		return pendingVerification;
 	}
@@ -76,6 +84,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.pendingVerification = pendingVerification;
 	}
 
+	@GraphQLQuery(name="emailAddress")
 	public String getEmailAddress() {
 		return emailAddress;
 	}
@@ -84,6 +93,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.emailAddress = Utils.trimStringReturnNull(emailAddress);
 	}
 	
+	@GraphQLQuery(name="phoneNumber")
 	public String getPhoneNumber() {
 		return phoneNumber;
 	}
@@ -92,6 +102,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.phoneNumber = Utils.trimStringReturnNull(phoneNumber);
 	}
 	
+	@GraphQLQuery(name="gender")
 	public String getGender() {
 		return gender;
 	}
@@ -100,6 +111,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.gender = Utils.trimStringReturnNull(gender);
 	}
 
+	@GraphQLQuery(name="country")
 	public String getCountry() {
 		return country;
 	}
@@ -108,6 +120,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.country = Utils.trimStringReturnNull(country);
 	}
 
+	@GraphQLQuery(name="endOfTourDate")
 	public DateTime getEndOfTourDate() {
 		return endOfTourDate;
 	}
@@ -116,6 +129,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.endOfTourDate = endOfTourDate;
 	}
 
+	@GraphQLQuery(name="rank")
 	public String getRank() {
 		return rank;
 	}
@@ -124,6 +138,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.rank = Utils.trimStringReturnNull(rank);
 	}
 	
+	@GraphQLQuery(name="biography")
 	public String getBiography() {
 		return biography;
 	}
@@ -132,6 +147,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.biography = Utils.trimStringReturnNull(biography);
 	}
 
+	@GraphQLQuery(name="domainUsername")
 	public String getDomainUsername() {
 		return domainUsername;
 	}
@@ -140,7 +156,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		this.domainUsername = domainUsername;
 	}
 
-	@GraphQLFetcher("position")
+	@GraphQLQuery(name="position")
 	public Position loadPosition() {
 		if (position == null) {
 			position = Optional.ofNullable(AnetObjectEngine.getInstance()
@@ -159,9 +175,25 @@ public class Person extends AbstractAnetBean implements Principal {
 			this.position = Optional.of(position);
 		}
 	}
-	
-	@GraphQLFetcher("authoredReports")
-	public ReportList loadAuthoredReports(@GraphQLParam("pageNum") Integer pageNum, @GraphQLParam("pageSize") Integer pageSize) { 
+
+	@GraphQLQuery(name="previousPositions")
+	public CompletableFuture<List<PersonPositionHistory>> loadPreviousPositions(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, this)
+				.thenApply(o -> { previousPositions = o; return o; });
+	}
+
+	@GraphQLIgnore
+	public List<PersonPositionHistory> getPreviousPositions() {
+		return previousPositions;
+	}
+
+	public void setPreviousPositions(List<PersonPositionHistory> previousPositions) {
+		this.previousPositions = previousPositions;
+	}
+
+	@GraphQLQuery(name="authoredReports") // TODO: batch load? (used in people/Show.js, admin/MergePeople.js)
+	public AnetBeanList<Report> loadAuthoredReports(@GraphQLArgument(name="pageNum") Integer pageNum,
+			@GraphQLArgument(name="pageSize") Integer pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
@@ -169,8 +201,9 @@ public class Person extends AbstractAnetBean implements Principal {
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 	
-	@GraphQLFetcher("attendedReports")
-	public ReportList loadAttendedReports(@GraphQLParam("pageNum") Integer pageNum, @GraphQLParam("pageSize") Integer pageSize) { 
+	@GraphQLQuery(name="attendedReports") // TODO: batch load? (used in admin/MergePeople.js)
+	public AnetBeanList<Report> loadAttendedReports(@GraphQLArgument(name="pageNum") Integer pageNum,
+			@GraphQLArgument(name="pageSize") Integer pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
@@ -213,7 +246,6 @@ public class Person extends AbstractAnetBean implements Principal {
 		if (id == null) { return null; } 
 		Person p = new Person();
 		p.setId(id);
-		p.setLoadLevel(LoadLevel.ID_ONLY);
 		return p;
 	}
 	

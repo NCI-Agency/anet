@@ -1,11 +1,15 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -16,12 +20,10 @@ public class ApprovalStep extends AbstractAnetBean {
 	Integer advisorOrganizationId;
 	String name;
 
-	@GraphQLFetcher("approvers")
-	public List<Position> loadApprovers() { 
-		if (approvers == null) { 
-			approvers = AnetObjectEngine.getInstance().getApprovalStepDao().getApproversForStep(this);
-		}
-		return approvers;
+	@GraphQLQuery(name="approvers")
+	public CompletableFuture<List<Position>> loadApprovers(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getApprovalStepDao().getApproversForStep(context, id)
+				.thenApply(o -> { approvers = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -33,6 +35,7 @@ public class ApprovalStep extends AbstractAnetBean {
 		this.approvers = approvers;
 	}
 
+	@GraphQLQuery(name="nextStepId")
 	public Integer getNextStepId() {
 		return nextStepId;
 	}
@@ -41,6 +44,7 @@ public class ApprovalStep extends AbstractAnetBean {
 		this.nextStepId = nextStepId;
 	}
 	
+	@GraphQLQuery(name="advisorOrganizationId")
 	public Integer getAdvisorOrganizationId() {
 		return advisorOrganizationId;
 	}
@@ -49,6 +53,7 @@ public class ApprovalStep extends AbstractAnetBean {
 		this.advisorOrganizationId = advisorOrganizationId;
 	}
 	
+	@GraphQLQuery(name="name")
 	public String getName() {
 		return name;
 	}
@@ -82,7 +87,6 @@ public class ApprovalStep extends AbstractAnetBean {
 	public static ApprovalStep createWithId(Integer id) {
 		ApprovalStep step = new ApprovalStep();
 		step.setId(id);
-		step.setLoadLevel(LoadLevel.ID_ONLY);
 		return step;
 	}
 	

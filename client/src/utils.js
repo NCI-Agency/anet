@@ -15,16 +15,6 @@ export default {
 	resourceize: function(string) {
 		return pluralize(changeCase.camel(string))
 	},
-	createUrlParams: function (obj) {
-		let str = ''
-		Object.forEach(obj, (key, val) => {
-			if (str !== '') {
-				str += '&'
-			}
-			str += key + '=' + encodeURIComponent(val)
-		})
-		return str
-	},
 
 	handleEmailValidation: function(value, shouldValidate) {
 		const domainNames = Settings.domainNames.map(d => d.toLowerCase())
@@ -124,6 +114,10 @@ export default {
 		if (typeof value1 === 'function' && typeof value2 === 'function') {
 			return true
 		}
+	},
+
+	getReference: function(obj) {
+		return (obj && obj.id) ? {id: obj.id} : {}
 	},
 }
 

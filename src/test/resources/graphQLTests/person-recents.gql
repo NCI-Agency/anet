@@ -1,3 +1,3 @@
-personList(f:recents) {
+personRecents {
 	list { id, name, rank, role, position { id, name, organization {id, shortName}} }
 }

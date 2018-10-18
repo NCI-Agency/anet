@@ -38,9 +38,9 @@ Dear ${approvalStepName},
   <strong>Report number:</strong> #${(report.id)}
 </div>
 
-<#assign attendees = report.loadAttendees()>
+<#assign attendees = report.loadAttendees(context).get()>
 <div>
-  <strong>Advisor organization:</strong> ${(report.loadAdvisorOrg().shortName)!}
+  <strong>Advisor organization:</strong> ${(report.loadAdvisorOrg(context).get().shortName)!}
 </div>
 
 <div>
@@ -52,8 +52,8 @@ Dear ${approvalStepName},
           ${(attendee.name)!}
           <#if attendee.loadPosition()??>
             <#assign position = attendee.loadPosition()>
-            <#if position.loadOrganization()??>
-              <#assign organization = position.loadOrganization()>
+            <#if position.loadOrganization(context).get()??>
+              <#assign organization = position.getOrganization()>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
@@ -67,7 +67,7 @@ Dear ${approvalStepName},
 </div>
 
 <div>
-  <strong>Principal organization:</strong> ${(report.loadPrincipalOrg().shortName)!}
+  <strong>Principal organization:</strong> ${(report.loadPrincipalOrg(context).get().shortName)!}
 </div>
 
 <div>
@@ -79,8 +79,8 @@ Dear ${approvalStepName},
           ${(attendee.name)!}
           <#if attendee.loadPosition()??>
             <#assign position = attendee.loadPosition()>
-            <#if position.loadOrganization()??>
-              <#assign organization = position.loadOrganization()>
+            <#if position.loadOrganization(context).get()??>
+              <#assign organization = position.getOrganization()>
               <em>from</em> ${(organization.shortName)!}
             </#if>
           </#if>
@@ -100,8 +100,8 @@ Dear ${approvalStepName},
   </#if>
 </div>
 
-<#if report.loadTags()??>
-  <#assign tags = report.loadTags()>
+<#if report.loadTags(context).get()??>
+  <#assign tags = report.getTags()>
   <div>
     <strong>Tags:</strong>
     <ul>
@@ -115,10 +115,10 @@ Dear ${approvalStepName},
 </#if>
 
 <div>
-  <strong>Engagement date and location:</strong> ${(report.engagementDate.toString('dd MMM yyyy'))!} @ ${(report.loadLocation().name)!}
+  <strong>Engagement date and location:</strong> ${(report.engagementDate.toString('dd MMM yyyy'))!} @ ${(report.loadLocation(context).get().name)!}
 </div>
 
-<#assign tasks = report.loadTasks()>
+<#assign tasks = report.loadTasks(context).get()>
 <#list tasks as task>
 <div class="row">
   <div class="col-xs-12">

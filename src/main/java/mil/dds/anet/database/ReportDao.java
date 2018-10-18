@@ -1,11 +1,14 @@
 package mil.dds.anet.database;
 
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -35,7 +38,7 @@ import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
 import mil.dds.anet.beans.RollupGraph;
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
@@ -47,6 +50,7 @@ import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.search.sqlite.SqliteReportSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class ReportDao implements IAnetDao<Report> {
 
@@ -58,12 +62,38 @@ public class ReportDao implements IAnetDao<Report> {
 	private static final String tableName = "reports";
 	public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
 
-	private final Handle dbHandle;
+	final Handle dbHandle;
 	private final String weekFormat;
+	private final IdBatcher<Report> idBatcher;
+	private final ForeignKeyBatcher<ReportPerson> attendeesBatcher;
+	private final ForeignKeyBatcher<Tag> tagsBatcher;
+	private final ForeignKeyBatcher<Task> tasksBatcher;
 
 	public ReportDao(Handle db) {
 		this.dbHandle = db;
 		this.weekFormat = getWeekFormat(DaoUtils.getDbType(db));
+		final String idBatcherSql = "/* batch.getReportsByIds */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
+				+ "FROM reports, people "
+				+ "WHERE reports.id IN ( %1$s ) "
+				+ "AND reports.\"authorId\" = people.id";
+		this.idBatcher = new IdBatcher<Report>(db, idBatcherSql, new ReportMapper());
+
+		final String attendeesBatcherSql = "/* batch.getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS
+				+ ", \"reportPeople\".\"reportId\" , \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
+				+ "LEFT JOIN people ON \"reportPeople\".\"personId\" = people.id "
+				+ "WHERE \"reportPeople\".\"reportId\" IN ( %1$s )";
+		this.attendeesBatcher = new ForeignKeyBatcher<ReportPerson>(db, attendeesBatcherSql, new ReportPersonMapper(), "reportId");
+
+		final String tagsBatcherSql = "/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
+				+ "INNER JOIN tags ON \"reportTags\".\"tagId\" = tags.id "
+				+ "WHERE \"reportTags\".\"reportId\" IN ( %1$s )"
+				+ "ORDER BY tags.name";
+		this.tagsBatcher = new ForeignKeyBatcher<Tag>(db, tagsBatcherSql, new TagMapper(), "reportId");
+
+		final String tasksBatcherSql = "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
+				+ "WHERE \"reportTasks\".\"reportId\" IN ( %1$s ) "
+				+ "AND \"reportTasks\".\"taskId\" = tasks.id";
+		this.tasksBatcher = new ForeignKeyBatcher<Task>(db, tasksBatcherSql, new TaskMapper(), "reportId");
 	}
 
 	private String getWeekFormat(DaoUtils.DbType dbType) {
@@ -80,12 +110,12 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	@Override
-	public ReportList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Report> getAll(int pageNum, int pageSize) {
 		// Return the reports without sensitive information
 		return getAll(pageNum, pageSize, null);
 	}
 
-	public ReportList getAll(int pageNum, int pageSize, Person user) {
+	public AnetBeanList<Report> getAll(int pageNum, int pageSize, Person user) {
 		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle),
 				"Reports", "reports join people on reports.\"authorId\" = people.id", REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS,
 				"reports.\"createdAt\"");
@@ -93,7 +123,7 @@ public class ReportDao implements IAnetDao<Report> {
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum)
 			.map(new ReportMapper());
-		return ReportList.fromQuery(user, query, pageNum, pageSize);
+		return AnetBeanList.getReportList(user, query, pageNum, pageSize);
 	}
 
 	@Override
@@ -146,7 +176,7 @@ public class ReportDao implements IAnetDao<Report> {
 				if (r.getAttendees() != null) {
 					//Setify based on attendeeId to prevent violations of unique key constraint. 
 					Map<Integer,ReportPerson> attendeeMap = new HashMap<Integer,ReportPerson>();
-					r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getId(), rp));
+					r.getAttendees().stream().forEach(rp -> { attendeeMap.put(rp.getId(), rp); });
 					rb.insertReportAttendees(r.getId(), new ArrayList<ReportPerson>(attendeeMap.values()));
 				}
 
@@ -329,16 +359,10 @@ public class ReportDao implements IAnetDao<Report> {
 				.execute();
 	}
 
-	public List<ReportPerson> getAttendeesForReport(int reportId) {
-		return dbHandle.createQuery("/* getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS 
-				+ ", \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
-				+ "LEFT JOIN people ON \"reportPeople\".\"personId\" = people.id "
-				+ "WHERE \"reportPeople\".\"reportId\" = :reportId")
-			.bind("reportId", reportId)
-			.map(new ReportPersonMapper())
-			.list();
+	public CompletableFuture<List<ReportPerson>> getAttendeesForReport(@GraphQLRootContext Map<String, Object> context, Integer reportId) {
+		return new ForeignKeyFetcher<ReportPerson>()
+				.load(context, "report.attendees", reportId);
 	}
-
 
 	public List<AuthorizationGroup> getAuthorizationGroupsForReport(int reportId) {
 		return dbHandle.createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
@@ -349,31 +373,22 @@ public class ReportDao implements IAnetDao<Report> {
 				.list();
 	}
 
-	public List<Task> getTasksForReport(Report report) {
-		return dbHandle.createQuery("/* getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
-				+ "WHERE \"reportTasks\".\"reportId\" = :reportId "
-				+ "AND \"reportTasks\".\"taskId\" = tasks.id")
-				.bind("reportId", report.getId())
-				.map(new TaskMapper())
-				.list();
+	public CompletableFuture<List<Task>> getTasksForReport(@GraphQLRootContext Map<String, Object> context, Integer reportId) {
+		return new ForeignKeyFetcher<Task>()
+				.load(context, "report.tasks", reportId);
 	}
 
-	public List<Tag> getTagsForReport(int reportId) {
-		return dbHandle.createQuery("/* getTagsForReport */ SELECT * FROM \"reportTags\" "
-				+ "INNER JOIN tags ON \"reportTags\".\"tagId\" = tags.id "
-				+ "WHERE \"reportTags\".\"reportId\" = :reportId "
-				+ "ORDER BY tags.name")
-			.bind("reportId", reportId)
-			.map(new TagMapper())
-			.list();
+	public CompletableFuture<List<Tag>> getTagsForReport(@GraphQLRootContext Map<String, Object> context, Integer reportId) {
+		return new ForeignKeyFetcher<Tag>()
+				.load(context, "report.tags", reportId);
 	}
 
 	//Does an unauthenticated search. This will never return any DRAFT or REJECTED reports
-	public ReportList search(ReportSearchQuery query) { 
+	public AnetBeanList<Report> search(ReportSearchQuery query) {
 		return search(query, null);
 	}
 	
-	public ReportList search(ReportSearchQuery query, Person user) {
+	public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher().getReportSearcher()
 			.runSearch(query, dbHandle, user);
 	}
@@ -382,9 +397,9 @@ public class ReportDao implements IAnetDao<Report> {
 	 * Deletes a given report from the database. 
 	 * Ensures consistency by removing all references to a report before deleting a report. 
 	 */
-	public void deleteReport(final Report report) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int deleteReport(final Report report) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				// Delete tags
 				dbHandle.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportId\" = ?", report.getId());
 
@@ -404,9 +419,10 @@ public class ReportDao implements IAnetDao<Report> {
 				dbHandle.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportId\" = ?", report.getId());
 
 				//Delete report
-				dbHandle.execute("/* deleteReport.report */ DELETE FROM reports where id = ?", report.getId());
-
-				return null;
+				// GraphQL mutations *have* to return something, so we return the number of deleted report rows
+				return dbHandle.createStatement("/* deleteReport.report */ DELETE FROM reports where id = :reportId")
+					.bind("reportId", report.getId())
+					.execute();
 			}
 		});
 		
@@ -694,5 +710,22 @@ public class ReportDao implements IAnetDao<Report> {
 		}
 		
 		return result;
+	}
+
+	@Override
+	public List<Report> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
+	}
+
+	public List<List<ReportPerson>> getAttendees(List<Integer> foreignKeys) {
+		return attendeesBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	public List<List<Tag>> getTags(List<Integer> foreignKeys) {
+		return tagsBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	public List<List<Task>> getTasks(List<Integer> foreignKeys) {
+		return tasksBatcher.getByForeignKeys(foreignKeys);
 	}
 }

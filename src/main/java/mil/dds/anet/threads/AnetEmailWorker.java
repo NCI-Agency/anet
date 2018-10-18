@@ -171,6 +171,7 @@ public class AnetEmailWorker implements Runnable {
 
 		StringWriter writer = new StringWriter();
 		try {
+			context.put("context", engine.getContext());
 			context.put("serverUrl", serverUrl);
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));

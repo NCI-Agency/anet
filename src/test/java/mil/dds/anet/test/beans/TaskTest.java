@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class TaskTest extends BeanTester<Task> {
 
@@ -31,7 +30,6 @@ public class TaskTest extends BeanTester<Task> {
 	public void staticCreatorTest() { 
 		Task p = Task.createWithId(4);
 		assertThat(p.getId()).isEqualTo(4);
-		assertThat(p.getLoadLevel()).isEqualTo(LoadLevel.ID_ONLY);
 		assertThat(p.getLongName()).isNull();
 	}
 }

@@ -38,7 +38,8 @@ class GraphiQL extends Page {
 	}
 
 	render() {
-		return <div>
+		// TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
+		return <div style={{height:'600px'}}>
 			<Breadcrumbs items={[['Run GraphQL queries', '/graphiql']]} />
 			{GraphiQLreq ? <GraphiQLreq fetcher={this.fetch} /> : 'Loading...'}
 		</div>

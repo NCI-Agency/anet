@@ -3,32 +3,26 @@ package mil.dds.anet.test.resources;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.List;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.GenericType;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.TagSearchQuery;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class TagResourceTest extends AbstractResourceTest {
 
+	private static final String FIELDS = "id name description createdAt";
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
-
-	public TagResourceTest() {
-		if (client == null) {
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
-		}
-	}
 
 	@Test
 	public void tagCreateTest() throws UnsupportedEncodingException {
@@ -37,7 +31,9 @@ public class TagResourceTest extends AbstractResourceTest {
 		t.setDescription("desc");
 
 		// Create
-		final Tag created = httpQuery("/api/tags/new", admin).post(Entity.json(t), Tag.class);
+		final Integer tId = graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", t, new GenericType<GraphQLResponse<Tag>>() {});
+		assertThat(tId).isNotNull();
+		final Tag created = graphQLHelper.getObjectById(admin, "tag", FIELDS, tId, new GenericType<GraphQLResponse<Tag>>() {});
 		assertThat(created.getName()).isEqualTo(t.getName());
 		assertThat(created.getDescription()).isEqualTo(t.getDescription());
 		assertThat(created.getCreatedAt()).isNotNull();
@@ -45,42 +41,42 @@ public class TagResourceTest extends AbstractResourceTest {
 
 		// Update
 		created.setName("eman");
-		final Response resp = httpQuery("/api/tags/update", admin).post(Entity.json(created));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		final Integer nrUpdated = graphQLHelper.updateObject(admin, "updateTag", "tag", "TagInput", created);
+		assertThat(nrUpdated).isEqualTo(1);
 
 		// Get
-		final Tag returned = httpQuery(String.format("/api/tags/%d", created.getId()), admin).get(Tag.class);
-		assertThat(returned).isEqualTo(created);
+		final Tag updated = graphQLHelper.getObjectById(admin, "tag", FIELDS, tId, new GenericType<GraphQLResponse<Tag>>() {});
+		assertThat(updated).isEqualTo(created);
 	}
 
 	@Test
 	public void tagExceptionTest() throws UnsupportedEncodingException {
 		// Get with unknown id
 		thrown.expect(NotFoundException.class);
-		httpQuery(String.format("/api/tags/-1"), admin).get(Tag.class);
+		graphQLHelper.getObjectById(admin, "tag", FIELDS, -1, new GenericType<GraphQLResponse<Tag>>() {});
 
 		// Create with empty name
 		thrown.expect(BadRequestException.class);
-		httpQuery("/api/tags/new", admin).post(Entity.json(new Tag()), Tag.class);
+		graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", new Tag(), new GenericType<GraphQLResponse<Tag>>() {});
 	}
 
 	@Test
 	public void tagListTest() throws UnsupportedEncodingException {
 		// All
-		final TagList tagList = httpQuery("/api/tags/", admin).get(TagList.class);
+		final AnetBeanList<Tag> tagList = graphQLHelper.getAllObjects(admin, "tags",
+				FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Tag>>>() {});
 		assertThat(tagList).isNotNull();
 	}
 
 	@Test
 	public void tagSearchTest() throws UnsupportedEncodingException {
 		// Search for a tag from the initial data
-		final TagList tagList  = httpQuery(String.format("/api/tags/search?text=%s",
-				URLEncoder.encode("bribery", "UTF-8")), admin)
-				.get(TagList.class);
-		assertThat(tagList).isNotNull();
-		final List<Tag> tags = tagList.getList();
-		assertThat(tags).isNotNull();
-		assertThat(tags.size()).isGreaterThan(0);
+		final TagSearchQuery query = new TagSearchQuery();
+		query.setText("bribery");
+		final AnetBeanList<Tag> searchObjects = graphQLHelper.searchObjects(admin, "tagList", "query", "TagSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Tag>>>() {});
+		assertThat(searchObjects).isNotNull();
+		assertThat(searchObjects.getList()).isNotEmpty();
 	}
 
 }

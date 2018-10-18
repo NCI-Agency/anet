@@ -7,7 +7,6 @@ import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.ApprovalStep;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class ApprovalStepMapper implements ResultSetMapper<ApprovalStep> {
 
@@ -19,7 +18,6 @@ public class ApprovalStepMapper implements ResultSetMapper<ApprovalStep> {
 		step.setAdvisorOrganizationId(MapperUtils.getInteger(r, "advisorOrganizationId"));
 		step.setName(r.getString("name"));
 		
-		step.setLoadLevel(LoadLevel.PROPERTIES);
 		return step;
 	}
 

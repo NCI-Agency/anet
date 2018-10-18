@@ -1,7 +1,9 @@
 package mil.dds.anet.resources;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -22,43 +24,48 @@ import javax.ws.rs.core.Response.Status;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.AuthorizationGroupDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/authorizationGroups")
+@Path("/old-api/authorizationGroups")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class AuthorizationGroupResource implements IGraphQLResource {
+public class AuthorizationGroupResource {
 
+	private AnetObjectEngine engine;
 	private AuthorizationGroupDao dao;
 
 	public AuthorizationGroupResource(AnetObjectEngine engine) {
+		this.engine = engine;
 		this.dao = engine.getAuthorizationGroupDao();
 	}
 
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="authorizationGroups")
 	@Path("/")
-	public AuthorizationGroupList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+	public AnetBeanList<AuthorizationGroup> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") int pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") int pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	}
 
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="authorizationGroup")
 	@Path("/{id}")
-	public AuthorizationGroup getById(@PathParam("id") int id) {
+	public AuthorizationGroup getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
 		final AuthorizationGroup t = dao.getById(id);
 		if (t == null) {
 			throw new WebApplicationException(Status.NOT_FOUND);
@@ -68,16 +75,16 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="authorizationGroupList")
 	@Path("/search")
-	public AuthorizationGroupList search(@GraphQLParam("query") AuthorizationGroupSearchQuery query) {
+	public AnetBeanList<AuthorizationGroup> search(@GraphQLArgument(name="query") AuthorizationGroupSearchQuery query) {
 		return dao.search(query);
 	}
 
 	@GET
 	@Timed
 	@Path("/search")
-	public AuthorizationGroupList search(@Context HttpServletRequest request) {
+	public AnetBeanList<AuthorizationGroup> search(@Context HttpServletRequest request) {
 		return search(ResponseUtils.convertParamsToBean(request, AuthorizationGroupSearchQuery.class));
 	}
 
@@ -85,14 +92,23 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
-	public AuthorizationGroup createNewAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
+	public AuthorizationGroup createAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
+		return createAuthorizationGroupCommon(user, t);
+	}
+
+	private AuthorizationGroup createAuthorizationGroupCommon(Person user, AuthorizationGroup t) {
 		if (t.getName() == null || t.getName().trim().length() == 0) {
 			throw new WebApplicationException("AuthorizationGroup name must not be empty", Status.BAD_REQUEST);
 		}
 		t = dao.insert(t);
 		AnetAuditLogger.log("AuthorizationGroup {} created by {}", t, user);
 		return t;
+	}
 
+	@GraphQLMutation(name="createAuthorizationGroup")
+	@RolesAllowed("ADMINISTRATOR")
+	public AuthorizationGroup createAuthorizationGroup(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="authorizationGroup") AuthorizationGroup t) {
+		return createAuthorizationGroupCommon(DaoUtils.getUserFromContext(context), t);
 	}
 
 	@POST
@@ -100,39 +116,43 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	@Path("/update")
 	@RolesAllowed("ADMINISTRATOR")
 	public Response updateAuthorizationGroup(@Auth Person user, AuthorizationGroup t) {
-		int numRows = dao.update(t);
+		updateAuthorizationGroupCommon(user, t);
+		return Response.ok().build();
+	}
+
+	private int updateAuthorizationGroupCommon(Person user, AuthorizationGroup t) {
+		final int numRows = dao.update(t);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process authorization group update", Status.NOT_FOUND);
+		}
 		// Update positions:
 		if (t.getPositions() != null) {
-			final List<Position> existingPositions = dao.getPositionsForAuthorizationGroup(t);
-			for (final Position p : t.getPositions()) {
-				Optional<Position> existingPosition = existingPositions.stream().filter(el -> el.getId().equals(p.getId())).findFirst();
-				if (existingPosition.isPresent()) {
-					existingPositions.remove(existingPosition.get());
-				} else {
-					dao.addPositionToAuthorizationGroup(p, t);
+			try {
+				final List<Position> existingPositions = dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getId()).get();
+				for (final Position p : t.getPositions()) {
+					Optional<Position> existingPosition = existingPositions.stream().filter(el -> el.getId().equals(p.getId())).findFirst();
+					if (existingPosition.isPresent()) {
+						existingPositions.remove(existingPosition.get());
+					} else {
+						dao.addPositionToAuthorizationGroup(p, t);
+					}
 				}
-			}
-			for (final Position p : existingPositions) {
-				dao.removePositionFromAuthorizationGroup(p, t);
+				for (final Position p : existingPositions) {
+					dao.removePositionFromAuthorizationGroup(p, t);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Positions", e);
 			}
 		}
 		AnetAuditLogger.log("AuthorizationGroup {} updated by {}", t, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+		return numRows;
 	}
 
-	@Override
-	public String getDescription() {
-		return "AuthorizationGroups";
-	}
-
-	@Override
-	public Class<AuthorizationGroup> getBeanClass() {
-		return AuthorizationGroup.class;
-	}
-
-	@Override
-	public Class<AuthorizationGroupList> getBeanListClass() {
-		return AuthorizationGroupList.class;
+	@GraphQLMutation(name="updateAuthorizationGroup")
+	@RolesAllowed("ADMINISTRATOR")
+	public Integer updateAuthorizationGroup(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="authorizationGroup") AuthorizationGroup t) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateAuthorizationGroupCommon(DaoUtils.getUserFromContext(context), t);
 	}
 
 	/**
@@ -141,11 +161,12 @@ public class AuthorizationGroupResource implements IGraphQLResource {
 	 */
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="authorizationGroupRecents")
 	@Path("/recents")
-	public AuthorizationGroupList recents(@Auth Person user,
-			@DefaultValue("3") @QueryParam("maxResults") int maxResults) {
-		return new AuthorizationGroupList(dao.getRecentAuthorizationGroups(user, maxResults));
+	public AnetBeanList<AuthorizationGroup> recents(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@DefaultValue("3") @QueryParam("maxResults") @GraphQLArgument(name="maxResults", defaultValue="3") int maxResults) {
+		user = DaoUtils.getUser(context, user);
+		return new AnetBeanList<AuthorizationGroup>(dao.getRecentAuthorizationGroups(user, maxResults));
 	}
 
 }

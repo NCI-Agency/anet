@@ -1,17 +1,20 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.ReportList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
-import mil.dds.anet.graphql.GraphQLParam;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -24,6 +27,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 	private List<Position> positions;
 	private AuthorizationGroupStatus status;
 
+	@GraphQLQuery(name="name")
 	public String getName() {
 		return name;
 	}
@@ -32,6 +36,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		this.name = Utils.trimStringReturnNull(name);
 	}
 
+	@GraphQLQuery(name="description")
 	public String getDescription() {
 		return description;
 	}
@@ -40,12 +45,10 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		this.description = Utils.trimStringReturnNull(description);
 	}
 
-	@GraphQLFetcher("positions")
-	public List<Position> loadPositions() {
-		if (positions == null) {
-			positions = AnetObjectEngine.getInstance().getAuthorizationGroupDao().getPositionsForAuthorizationGroup(this);
-		}
-		return positions;
+	@GraphQLQuery(name="positions")
+	public CompletableFuture<List<Position>> loadPositions(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getAuthorizationGroupDao().getPositionsForAuthorizationGroup(context, id)
+				.thenApply(o -> { positions = o; return o; });
 	}
 
 	@GraphQLIgnore
@@ -57,6 +60,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		this.positions = positions;
 	}
 
+	@GraphQLQuery(name="status")
 	public AuthorizationGroupStatus getStatus() {
 		return status;
 	}
@@ -65,8 +69,9 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		this.status = status;
 	}
 
-	@GraphQLFetcher("reports")
-	public ReportList fetchReports(@GraphQLParam("pageNum") int pageNum, @GraphQLParam("pageSize") int pageSize) {
+	@GraphQLQuery(name="reports") // TODO: batch load? (appears to be unused)
+	public AnetBeanList<Report> fetchReports(@GraphQLArgument(name="pageNum") int pageNum,
+			@GraphQLArgument(name="pageSize") int pageSize) {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
@@ -74,8 +79,9 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 
-	@GraphQLFetcher("paginatedPositions")
-	public PositionList fetchPositions(@GraphQLParam("pageNum") int pageNum, @GraphQLParam("pageSize") int pageSize) {
+	@GraphQLQuery(name="paginatedPositions") // TODO: batch load? (appears to be unused)
+	public AnetBeanList<Position> fetchPositions(@GraphQLArgument(name="pageNum") int pageNum,
+			@GraphQLArgument(name="pageSize") int pageSize) {
 		PositionSearchQuery query = new PositionSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);

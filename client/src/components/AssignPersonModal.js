@@ -5,7 +5,9 @@ import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Person, Position} from 'models'
 import LinkTo from 'components/LinkTo'
+import Messages from 'components/Messages'
 import API from 'api'
+import _isEmpty from 'lodash/isEmpty'
 
 export default class AssignPersonModal extends Component {
 	static propTypes = {
@@ -18,13 +20,14 @@ export default class AssignPersonModal extends Component {
 	constructor(props) {
 		super(props)
 		this.state = {
+			error: null,
 			person: props.position && props.position.person
 		}
 	}
 
 	componentDidUpdate(prevProps, prevState) {
 		if (prevProps.position.person !== this.props.position.person) {
-			this.setState({person: this.props.position.person})
+			this.setState({person: this.props.position.person}, () => this.updateAlert())
 		}
 	}
 
@@ -105,11 +108,7 @@ export default class AssignPersonModal extends Component {
 								</tbody>
 							</Table>
 						}
-						{this.state.person && this.state.person.position && this.state.person.position.id !== position.id &&
-							<Alert bsStyle={"danger"}>
-								This person is currently in another position. By selecting this person, <b>{this.state.person.position.name}</b> will be left unfilled.
-							</Alert>
-						}
+						<Messages error={this.state.error} />
 					</Grid>
 				</Modal.Body>
 				<Modal.Footer>
@@ -122,37 +121,56 @@ export default class AssignPersonModal extends Component {
 
 	@autobind
 	remove() {
-		let position = this.props.position
-		API.fetch('/api/positions/' + position.id + '/person', { method: 'DELETE'}
-			).then(resp =>
-				this.props.onSuccess()
+		let graphql = 'deletePersonFromPosition(id: $id)'
+		const variables = {
+			id: this.props.position.id,
+		}
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(
+				data => this.props.onSuccess()
 			).catch(error => {
-				//halp
+				this.setState({error: error})
 			})
 	}
 
 	@autobind
 	save() {
-		let person = {id: this.state.person.id}
-		let position = this.props.position
-		API.send('/api/positions/' + position.id + '/person', person)
-			.then(resp =>
-				this.props.onSuccess()
+		const operation = 'putPersonInPosition'
+		let graphql = operation + '(id: $id, person: $person)'
+		const variables = {
+			id: this.props.position.id,
+			person: {id: this.state.person.id}
+		}
+		const variableDef = '($id: Int!, $person: PersonInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(
+				data => this.props.onSuccess()
 			).catch(error => {
-				//halp
+				this.setState({error: error})
 			})
 	}
 
 	@autobind
 	close() {
 		// Reset state before closing (cancel)
-		this.setState({person: this.props.position.person})
+		this.setState({person: this.props.position.person}, () => this.updateAlert())
 		this.props.onCancel()
 	}
 
 	@autobind
 	onPersonSelect(person) {
-		this.setState({person})
+		this.setState({person}, () => this.updateAlert())
+	}
+
+	@autobind
+	updateAlert() {
+		let error = null
+		if (!_isEmpty(this.state.person) && !_isEmpty(this.state.person.position) && this.state.person.position.id !== this.props.position.id) {
+			const errorMessage = <React.Fragment>This person is currently in another position. By selecting this person, <b>{this.state.person.position.name}</b> will be left unfilled.</React.Fragment>
+			error = {message: errorMessage}
+		}
+		this.setState({error: error})
 	}
 
 }

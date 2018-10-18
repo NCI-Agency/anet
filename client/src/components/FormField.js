@@ -76,6 +76,10 @@ class BaseFormField extends Component {
 		onChange: PropTypes.func,
 
 		maxCharacters: PropTypes.number,
+		// For fields having non default FormControl elements, specify whether to
+		// add an onBlur; this because the element might already have an own way to
+		// handle onBlur (for example the autocomplete field)
+		addOnBlur: PropTypes.bool,
 	}
 
 	render() {
@@ -94,7 +98,7 @@ class BaseFormField extends Component {
 
 		childProps = Object.without(
 			childProps,
-			'formFor', 'form', 'getter', 'horizontal', 'onError', 'onValid', 'humanName', 'maxCharacters', 'validateBeforeUserTouches', 'validate'
+			'formFor', 'form', 'getter', 'horizontal', 'onError', 'onValid', 'humanName', 'maxCharacters', 'validateBeforeUserTouches', 'validate', 'addOnBlur'
 		)
 		if (canSubmitWithError) {
 			childProps = Object.without(childProps, 'required')
@@ -126,6 +130,11 @@ class BaseFormField extends Component {
 		// Remove an ExtraCol from children first so we can manually append it
 		// as a column
 		children = React.Children.toArray(children)
+		const helpBlock = (
+			<HelpBlock className={validationState === 'error' || validationState === 'warning' ? '' : 'hidden'} >
+				{this.state.errorMessage}
+			</HelpBlock>
+		)
 		let extra = children.find(child => child.type === FormFieldExtraCol)
 		if (extra)
 			children.splice(children.indexOf(extra), 1)
@@ -137,16 +146,20 @@ class BaseFormField extends Component {
 		// if children are provided, render those, but special case them to
 		// automatically set value and children props
 		} else if (!this.props.componentClass && children.length) {
+			const isRequired = childProps.required || false
 			children = children.map(child => {
 				let propTypes = child.type.propTypes
-
 				// check to see if this is some kind of element where we
 				// can register an onChange handler, otherwise skip it
 				if (propTypes && !propTypes.onChange)
 					return child
 
 				let onChange = child.props.onChange || this.onChange
-				return React.cloneElement(child, {value: defaultValue, onChange: onChange, onInput: onChange})
+				let cloneElemProps = {value: defaultValue, onChange: onChange, onInput: onChange, required: isRequired}
+				if (this.props.addOnBlur) {
+					cloneElemProps.onBlur = this.onUserTouchedField
+				}
+				return React.cloneElement(child, cloneElemProps)
 			})
 
 		// otherwise render out a default FormControl input element
@@ -154,19 +167,12 @@ class BaseFormField extends Component {
 			if (children.length)
 				childProps.children = children
 
-			const formControl = <FormControl
+			children = <FormControl
 				{...childProps}
 				value={defaultValue}
 				onChange={this.onChange}
 				onInput={this.onChange}
 				onBlur={this.onUserTouchedField} />
-
-			children = <div>
-				{formControl}
-				<HelpBlock className={validationState === 'error' || validationState === 'warning' ? '' : 'hidden'} >
-					{this.state.errorMessage}
-				</HelpBlock>
-			</div>
 		}
 
 		if (icon) {
@@ -179,14 +185,19 @@ class BaseFormField extends Component {
 			if (addon.indexOf('.') !== -1) {
 				addon = <img src={addon} height={20} alt="" />
 			}
-
 			children = <div>
 				<InputGroup>
 					{children}
 					<InputGroup.Addon onClick={this.focus}>{addon}</InputGroup.Addon>
 				</InputGroup>
-				{postInputGroupChildren}
+				{postInputGroupChildren || helpBlock}
 			</div>
+		}
+		else {
+			children = <div>
+			{children}
+			{helpBlock}
+		</div>
 		}
 
 		const inline = display && display === 'inline'

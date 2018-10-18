@@ -4,7 +4,6 @@ import SimpleModal from 'components/SimpleModal'
 import AdvisorReportsTable from 'components/AdvisorReports/AdvisorReportsTable'
 
 import API from 'api'
-const advisorsQueryUrl = `/api/reports/insights/advisors` // ?weeksAgo=3 default set at 3 weeks ago
 
 
 class AdvisorReportsModal extends Component {
@@ -21,11 +20,12 @@ class AdvisorReportsModal extends Component {
     }
 
     fetchAdvisors(orgId) {
-        let query = `${advisorsQueryUrl}?orgId=${orgId}`
-        let advisorsQuery = API.fetch(query)
-        Promise.resolve(advisorsQuery).then(value => {
+        API.query(/* GraphQL */`
+          advisorReportInsights(orgId: $orgId) { id name stats { week nrReportsSubmitted nrEngagementsAttended }}
+        `, {orgId: orgId}, '($orgId: Int!)')
+          .then(data => {
             this.setState({
-                advisors: value
+                advisors: data.advisorReportInsights
             })
         })
     }

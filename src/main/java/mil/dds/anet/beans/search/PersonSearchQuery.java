@@ -13,6 +13,7 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 	Role role;
 	List<PersonStatus> status;
 	Boolean includeChildOrgs;
+	String rank;
 	String country;
 	
 	//Filter to people in positions at a certain location
@@ -63,6 +64,14 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 
 	public void setIncludeChildOrgs(Boolean includeChildOrgs) {
 		this.includeChildOrgs = includeChildOrgs;
+	}
+
+	public String getRank() {
+		return rank;
+	}
+
+	public void setRank(String rank) {
+		this.rank = rank;
 	}
 
 	public String getCountry() {

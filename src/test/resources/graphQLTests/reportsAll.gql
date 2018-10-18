@@ -1,4 +1,4 @@
-reportList(f:getAll, pageSize:100, pageNum:0) {
+reports(pageSize:100, pageNum:0) {
 	totalCount, list { 
 	    id, intent, state
 	    author {

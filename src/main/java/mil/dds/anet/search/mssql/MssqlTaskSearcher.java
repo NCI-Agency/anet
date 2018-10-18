@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery.TaskSearchSortBy;
@@ -22,7 +23,7 @@ import mil.dds.anet.utils.Utils;
 public class MssqlTaskSearcher implements ITaskSearcher {
 
 	@Override
-	public TaskList runSearch(TaskSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Task> runSearch(TaskSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*");
@@ -102,12 +103,8 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			args.put("customField", Utils.prepForLikeQuery(query.getCustomField()) + "%");
 		}
 
-		final TaskList result =  new TaskList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return result;
+			return new AnetBeanList<Task>(query.getPageNum(), query.getPageSize(), new ArrayList<Task>());
 		}
 
 		sql.append(" WHERE ");
@@ -144,7 +141,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 
 		final Query<Task> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
 			.map(new TaskMapper());
-		return TaskList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
+		return new AnetBeanList<Task>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
 	}
 
 }

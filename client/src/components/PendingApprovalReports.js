@@ -104,16 +104,17 @@ class PendingApprovalReports extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     // Query used by the chart
     const chartQuery = API.query(/* GraphQL */`
-        reportList(f:search, query:$chartQueryParams) {
+        reportList(query:$chartQueryParams) {
           totalCount, list {
             ${GQL_CHART_FIELDS}
           }
         }
-      `, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+      `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
     const noAdvisorOrg = {
       id: -1,
       shortName: `No ${Settings.fields.advisor.org.name}`
@@ -156,12 +157,12 @@ class PendingApprovalReports extends Component {
     }
     // Query used by the reports collection
     let reportsQuery = API.query(/* GraphQL */`
-        reportList(f:search, query:$reportsQueryParams) {
+        reportList(query:$reportsQueryParams) {
           pageNum, pageSize, totalCount, list {
             ${ReportCollection.GQL_REPORT_FIELDS}
           }
         }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQuery)')
+      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
     Promise.all([reportsQuery]).then(values => {
       this.setState({
         updateChart: false,  // only update the report list

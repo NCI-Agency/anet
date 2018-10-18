@@ -24,6 +24,10 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { jumpToTop, AnchorLink } from 'components/Page'
+
+import { SEARCH_OBJECT_TYPES } from 'actions'
+import {deserializeQueryParams} from 'searchUtils'
 
 class BaseReportShow extends Page {
 
@@ -38,6 +42,8 @@ class BaseReportShow extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			report: new Report({id: props.match.params.id}),
 			newComment: new Comment(),
 			approvalComment: new Comment(),
@@ -73,7 +79,7 @@ class BaseReportShow extends Page {
 
 				attendees {
 					id, name, role, primary, rank, status, endOfTourDate
-					position { id, name, status, organization { id, shortName} }
+					position { id, name, code, status, organization { id, shortName}, location {id, name} }
 				}
 				primaryAdvisor { id }
 				primaryPrincipal { id }
@@ -192,7 +198,7 @@ class BaseReportShow extends Page {
 				{report.isPending() &&
 					<Fieldset style={{textAlign: 'center'}}>
 						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <a href="#approvals">approval organization</a> marks it as approved.</p>
+						<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
 					</Fieldset>
 				}
 
@@ -262,6 +268,7 @@ class BaseReportShow extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
+									<th>Location</th>
 									<th>Org</th>
 								</tr>
 							</thead>
@@ -270,7 +277,7 @@ class BaseReportShow extends Page {
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
 									this.renderAttendeeRow(person)
 								)}
-								<tr><td colSpan={4}><hr className="attendee-divider" /></td></tr>
+								<tr><td colSpan={5}><hr className="attendee-divider" /></td></tr>
 								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
 									this.renderAttendeeRow(person)
 								)}
@@ -406,15 +413,20 @@ class BaseReportShow extends Page {
 
 	@autobind
 	onConfirmDelete() {
-		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-			this.props.history.push({
-				pathname: '/',
-				state: {success: 'Report deleted'}
+		const operation = 'deleteReport'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: this.state.report.id }
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.props.history.push({
+					pathname: '/',
+					state: {success: 'Report deleted'}
+				})
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
 			})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
 	}
 
 	@autobind
@@ -434,7 +446,7 @@ class BaseReportShow extends Page {
 			<Button bsStyle="warning" onClick={this.rejectReport}>Reject with comment</Button>
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
-				<Button bsStyle="primary" onClick={this.approveReport} className="approve-button"><strong>Approve</strong></Button>
+				<Button bsStyle="primary" onClick={this.handleApproveReport} className="approve-button"><strong>Approve</strong></Button>
 			</div>
 		</Fieldset>
 	}
@@ -449,7 +461,8 @@ class BaseReportShow extends Page {
 				<img src={person.iconUrl()} alt={person.role} height={20} width={20} className="person-icon" />
 				<LinkTo person={person} />
 			</td>
-			<td><LinkTo position={person.position} /></td>
+			<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
+			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
@@ -502,38 +515,60 @@ class BaseReportShow extends Page {
 			comment: email.comment
 		}
 
-		API.send(`/api/reports/${this.state.report.id}/email`, emailDelivery).then (() =>
-			this.setState({
-				success: 'Email successfully sent',
-				showEmailModal: false,
-				email: {}
+		let graphql = 'emailReport(id: $id, email: $email)'
+		const variables = {
+			id: this.state.report.id,
+			email: emailDelivery
+		}
+		const variableDef = '($id: Int!, $email: AnetEmailInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.setState({
+					success: 'Email successfully sent',
+					error:null,
+					showEmailModal: false,
+					email: {}
+				})
+			}).catch(error => {
+				this.setState({
+					showEmailModal: false,
+					email: {}
+				})
+				this.handleError(error)
 			})
-		)
 	}
 
 	@autobind
 	submitDraft() {
-		API.send(`/api/reports/${this.state.report.id}/submit`).then(data => {
-			this.updateReport()
-			this.setState({error:null})
-			this.setState({success:'Successfully submitted report'})
-		}, data => {
-			this.handleError(data)
-		})
+		let graphql = 'submitReport(id: $id) { id }'
+		const variables = {
+			id: this.state.report.id
+		}
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({error:null, success: 'Report submitted'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 	}
 
 	@autobind
 	submitComment(event){
-		API.send(`/api/reports/${this.state.report.id}/comments`,
-			this.state.newComment)
-		.then(data => {
-			this.updateReport()
-			this.setState({newComment:new Comment()})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
-
+		let graphql = 'addComment(id: $id, comment: $comment) { id }'
+		const variables = {
+			id: this.state.report.id,
+			comment: this.state.newComment
+		}
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({newComment:new Comment(), error:null, success: 'Comment saved'})
+			}).catch(error => {
+				this.handleError(error)
+			})
 		event.stopPropagation()
 		event.preventDefault()
 	}
@@ -541,34 +576,76 @@ class BaseReportShow extends Page {
 	@autobind
 	rejectReport() {
 		if (this.state.approvalComment.text.length === 0){
-			this.setState({success:null})
 			this.handleError({message:'Please include a comment when rejecting a report.'})
 			return
 		}
 
 		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
-		API.send(`/api/reports/${this.state.report.id}/reject`, this.state.approvalComment).then(data => {
-			this.updateReport()
-			this.setState({success:'Successfully rejected report'})
-			this.setState({error:null})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
+		let graphql = 'rejectReport(id: $id, comment: $comment) { id }'
+		const variables = {
+			id: this.state.report.id,
+			comment: this.state.approvalComment
+		}
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({error:null, success: 'Successfully rejected report'})
+			}).catch(error => {
+				this.handleError(error)
+			})
+	}
+
+	pendingMyApproval = (currentUser) => {
+		return {
+			title: "Reports pending my approval",
+			query: { pendingApprovalOf: currentUser.id },
+		}
+	}
+
+	deserializeCallback = (objectType, filters, text) => {
+		const { report } = this.state
+		const lastApproval = (report.approvalStep.nextStepId === null)
+		const message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
+		// We update the Redux state
+		this.props.setSearchQuery({
+			objectType: objectType,
+			filters: filters,
+			text: text
+		})
+		this.props.history.push({
+			pathname: '/search',
+			state: {
+				success: message,
+			}
 		})
 	}
 
 	@autobind
 	approveReport() {
-		let comment = (this.state.approvalComment.text.length > 0) ? this.state.approvalComment : {}
-		API.send(`/api/reports/${this.state.report.id}/approve`, comment).then(data => {
-			let lastApproval = (this.state.report.approvalStep.nextStepId === null)
-			this.updateReport()
-			let message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
-			this.setState({error:null, success: message})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
+		const { approvalComment, report } = this.state
+		const comment = (approvalComment.text.length > 0) ? approvalComment : {}
+		const graphql = 'approveReport(id: $id, comment: $comment) { id }'
+		const variableDef = '($id: Int!, $comment: CommentInput!)'
+		const variables = {
+			id: report.id,
+			comment: comment
+		}
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				const { currentUser } = this.props
+				const queryDetails = this.pendingMyApproval(currentUser)
+				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback)
+			})
+			.catch(error => {
+				this.handleError(error)
+			})
+	}
+
+	handleApproveReport = (event) => {
+		this.approveReport()
+		event.preventDefault()
+		event.stopPropagation()
 	}
 
 	@autobind
@@ -593,13 +670,13 @@ class BaseReportShow extends Page {
 	@autobind
 	updateReport(json) {
 		this.fetchData(this.props)
-		window.scrollTo(0, 0)
+		jumpToTop()
 	}
 
 	@autobind
 	handleError(response) {
-		this.setState({error: response})
-		window.scrollTo(0, 0)
+		this.setState({success: null, error: response})
+		jumpToTop()
 	}
 
 

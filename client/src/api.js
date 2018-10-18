@@ -1,13 +1,13 @@
 import querystring from 'querystring'
 
 const API = {
-	fetch(pathName, params, accept) {
+	_fetch(pathName, params, accept) {
 		params = params || {}
 		params.credentials = 'same-origin'
 
 		params.headers = params.headers || {}
 		params.headers.Accept = accept || 'application/json'
-		const authHeader = API.getAuthHeader()
+		const authHeader = API._getAuthHeader()
 		if (authHeader) {
 			params.headers[authHeader[0]] = authHeader[1]
 		}
@@ -15,11 +15,14 @@ const API = {
 		return window.fetch(pathName, params)
 					.then(response => {
 						let isOk = response.ok
-
 						if (response.headers.get('content-type') === 'application/json') {
 							let respBody = response.json()
 							if (!isOk) {
 								return respBody.then(r => {
+									// When the result returns a list of errors we only show the first one
+									if (r.errors) {
+										r.error = r.errors[0].message
+									}
 									r.status = response.status
 									r.statusText = response.statusText
 									if (!r.message) { r.message = r.error || 'You do not have permissions to perform this action' }
@@ -40,7 +43,7 @@ const API = {
 					})
 	},
 
-	send(url, data, params) {
+	_send(url, data, params) {
 		params = params || {}
 		params.disableSubmits = typeof params.disableSubmits === 'undefined' ? true : params.disableSubmits
 		params.method = params.method || 'POST'
@@ -49,15 +52,39 @@ const API = {
 		params.headers = params.headers || {}
 		params.headers['Content-Type'] = 'application/json'
 
-		return API.fetch(url, params)
+		let promise = API._fetch(url, params)
+		let buttons = document.querySelectorAll('[type=submit]')
+		let toggleButtons =  function(onOff) {
+			for (let button of buttons) {
+				button.disabled = !onOff
+			}
+		}
+
+		if (params.disableSubmits) {
+			toggleButtons(false)
+
+			promise.then(response => {
+				toggleButtons(true)
+				return response
+			}, response => {
+				toggleButtons(true)
+				return response
+			})
+		}
+		return promise
 	},
 
-	_queryCommon(query, variables, variableDef, output) {
+	_queryCommon(query, variables, variableDef, output, isMutation, params) {
 		variables = variables || {}
 		variableDef = variableDef || ''
-		query = 'query ' + variableDef + ' { ' + query + ' }'
+		const queryType = isMutation ? 'mutation' : 'query'
+		query = queryType + ' ' + variableDef + ' { ' + query + ' }'
 		output = output || ''
-		return API.send('/graphql', {query, variables, output})
+		return API._send('/graphql', {query, variables, output}, params)
+	},
+
+	mutation(query, variables, variableDef, params) {
+		return API._queryCommon(query, variables, variableDef, undefined, true, params).then(json => json.data)
 	},
 
 	query(query, variables, variableDef) {
@@ -77,13 +104,13 @@ const API = {
 	 */
 	logOnServer(severity, url, lineNr, message)
 	{
-		API.send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
+		API._send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
 	},
 
 	loadFileAjaxSync(filePath, mimeType) {
 		let xmlhttp=new XMLHttpRequest()
 		xmlhttp.open("GET",filePath,false)
-		const authHeader = API.getAuthHeader()
+		const authHeader = API._getAuthHeader()
 		if (authHeader) {
 			xmlhttp.setRequestHeader(authHeader[0], authHeader[1])
 		}
@@ -120,7 +147,7 @@ const API = {
 		return url
 	},
 
-	getAuthHeader: function() {
+	_getAuthHeader: function() {
 		const creds = API._getAuthParams()
 		if (creds) {
 			return ['Authorization', 'Basic ' + Buffer.from(`${creds.user}:${creds.pass}`).toString('base64')]

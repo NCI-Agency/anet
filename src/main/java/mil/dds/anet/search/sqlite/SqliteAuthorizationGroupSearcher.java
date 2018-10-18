@@ -1,5 +1,6 @@
 package mil.dds.anet.search.sqlite;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +11,7 @@ import jersey.repackaged.com.google.common.base.Joiner;
 import org.skife.jdbi.v2.Handle;
 
 import mil.dds.anet.beans.AuthorizationGroup;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery.AuthorizationGroupSearchSortBy;
@@ -22,7 +23,7 @@ import mil.dds.anet.utils.Utils;
 public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSearcher {
 
 	@Override
-	public AuthorizationGroupList runSearch(AuthorizationGroupSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* SqliteAuthorizationGroupSearch */ SELECT * FROM \"authorizationGroups\"");
@@ -46,9 +47,7 @@ public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSear
 			sqlArgs.put("positionId", query.getPositionId());
 		}
 
-		final AuthorizationGroupList result = new AuthorizationGroupList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
+		final AnetBeanList<AuthorizationGroup> result = new AnetBeanList<AuthorizationGroup>(query.getPageNum(), query.getPageSize(), new ArrayList<AuthorizationGroup>());
 
 		if (whereClauses.isEmpty()) {
 			return result;

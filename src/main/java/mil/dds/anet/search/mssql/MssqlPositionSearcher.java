@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
@@ -23,7 +24,7 @@ import mil.dds.anet.utils.Utils;
 public class MssqlPositionSearcher implements IPositionSearcher {
 
 	@Override
-	public PositionList runSearch(PositionSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlPositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS);
@@ -48,10 +49,11 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 		}
 
 		if (doFullTextSearch) {
-			sql.append(" LEFT JOIN CONTAINSTABLE (positions, (name, code), :containsQuery) c_positions"
+			sql.append(" LEFT JOIN CONTAINSTABLE (positions, (name), :containsQuery) c_positions"
 					+ " ON positions.id = c_positions.[Key]");
 			final StringBuilder whereRank = new StringBuilder("("
-					+ "c_positions.rank IS NOT NULL");
+					+ "c_positions.rank IS NOT NULL"
+					+ " OR positions.code LIKE :likeQuery");
 			if (Boolean.TRUE.equals(query.getMatchPersonName())) {
 				sql.append(" LEFT JOIN CONTAINSTABLE(people, (name), :containsQuery) c_people"
 						+ " ON people.id = c_people.[Key]");
@@ -60,6 +62,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			whereRank.append(")");
 			whereClauses.add(whereRank.toString());
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
+			sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
 
 		if (query.getType() != null) {
@@ -111,13 +114,8 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			sqlArgs.put("authorizationGroupId", query.getAuthorizationGroupId());
 		}
 
-		
-		final PositionList result = new PositionList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return result;
+			return new AnetBeanList<Position>(query.getPageNum(), query.getPageSize(), new ArrayList<Position>());
 		}
 
 		sql.append(" WHERE ");
@@ -155,7 +153,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 
 		final Query<Position> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
 			.map(new PositionMapper());
-		return PositionList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
+		return new AnetBeanList<Position>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
 	}
 
 }

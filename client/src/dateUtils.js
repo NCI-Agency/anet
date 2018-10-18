@@ -51,7 +51,7 @@ export function dateToQuery(queryKey, value) {
 	else {
 		// Time relative to now
 		return {
-			[startKey]: value.relative
+			[startKey]: parseInt(value.relative)
 		}
 	}
 }	

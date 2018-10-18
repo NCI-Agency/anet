@@ -28,14 +28,7 @@ cache:
 
 before_install:
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-  
-  - echo "run.environment(\"DB_DRIVER\", \"sqlserver\")" > localSettings.gradle
-  - echo "run.environment(\"ANET_SA_PASSWORD\", \"SA-P@ssw0rd\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_SERVER\", \"localhost\")"  >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_NAME\", \"testAnet\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_USERNAME\", \"anetUser\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_PASSWORD\", \"Test-P@ssw0rd\")" >> localSettings.gradle
-  - echo "run.environment(\"ANET_DB_PORT\", 1433)" >> localSettings.gradle
-
+  
 #By default travis runs gradle assemble in install. This is too early as we don't want to build yet
 install: true
 

@@ -15,6 +15,7 @@ import {Location} from 'models'
 
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
 
 class LocationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -27,6 +28,8 @@ class LocationForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 		}
 	}
@@ -106,22 +109,27 @@ class LocationForm extends ValidatableFormWrapper {
 	onSubmit(event) {
 		let loc = this.props.anetLocation
 		let edit = this.props.edit
-		let url = `/api/locations/${edit ? 'update'  :'new'}`
+		const operation = edit ? 'updateLocation' : 'createLocation'
+		let graphql = operation + '(location: $location)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { location: loc }
+		const variableDef = '($location: LocationInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, loc, {disableSubmits: true})
-			.then(response => {
-				if (response.id) {
-					loc.id = response.id
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation].id) {
+					loc.id = data[operation].id
 				}
+				this.props.history.replace(Location.pathForEdit(loc))
 				this.props.history.push({
 					pathname: Location.pathFor(loc),
 					state: {
-						success: 'Saved Location',
+						success: 'Location saved',
 					}
 				})
 			}).catch(error => {
-				this.setState({error: error})
-				window.scrollTo(0, 0)
+				this.setState({success: null, error: error})
+				jumpToTop()
 			})
 	}
 

@@ -1,14 +1,13 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {FormControl} from 'react-bootstrap'
-import Autosuggest from 'react-autosuggest'
+import Autosuggest from 'react-autosuggest-ie11-compatible'
 import autobind from 'autobind-decorator'
 import _debounce from 'lodash/debounce'
 import _isEqual from 'lodash/isEqual'
 import _isEmpty from 'lodash/isEmpty'
 
 import API from 'api'
-import utils from 'utils'
 
 import './Autocomplete.css'
 
@@ -101,7 +100,7 @@ export default class Autocomplete extends Component {
 	}
 
 	render() {
-		let inputProps = Object.without(this.props, 'url', 'clearOnSelect', 'valueKey', 'template', 'queryParams', 'objectType', 'fields', 'onErrorChange')
+		let inputProps = Object.without(this.props, 'clearOnSelect', 'valueKey', 'template', 'queryParams', 'objectType', 'fields', 'onErrorChange')
 		inputProps.value = this.state.stringValue
 		inputProps.onChange = this.onInputChange
 		inputProps.onBlur = this.onInputBlur
@@ -165,37 +164,19 @@ export default class Autocomplete extends Component {
 
 	@autobind
 	fetchSuggestions(value) {
-		if (this.props.url) {
-			let url = this.props.url + '?text=' + value.value + "*"
-
-			let queryParams = this.props.queryParams || {}
-			if (!queryParams.pageSize) {
-				queryParams.pageSize = 25
-			}
-
-			if (queryParams) {
-				url += '&' + utils.createUrlParams(queryParams)
-			}
-
-			API.fetch(url, {showLoader: false}).then(data => {
-				this._setFilteredSuggestions(data.list)
-			})
-		} else {
-			let resourceName = this.props.objectType.resourceName
-			let listName = this.props.objectType.listName
-			let graphQlQuery = listName + '(f:search, query: $query) { '
-					+ 'list { ' + this.props.fields + '}'
-					+ '}'
-			let variableDef = '($query: ' + resourceName + 'SearchQuery)'
-			let queryVars = {text: value.value + "*", pageSize: 25}
-			if (this.props.queryParams) {
-				Object.assign(queryVars, this.props.queryParams)
-			}
-
-			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-				this._setFilteredSuggestions(data[listName].list)
-			})
+		let resourceName = this.props.objectType.resourceName
+		let listName = this.props.objectType.listName
+		let graphQlQuery = listName + ' (query: $query) { '
+				+ 'list { ' + this.props.fields + '}'
+				+ '}'
+		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
+		let queryVars = {text: value.value + "*", pageNum: 0, pageSize: 25}
+		if (this.props.queryParams) {
+			Object.assign(queryVars, this.props.queryParams)
 		}
+		API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
+			this._setFilteredSuggestions(data[listName].list)
+		})
 	}
 
 	@autobind

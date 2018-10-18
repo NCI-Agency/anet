@@ -1,14 +1,18 @@
 package mil.dds.anet.emails;
 
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
@@ -21,6 +25,8 @@ import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 
 public class DailyRollupEmail extends AnetEmailAction {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd MMM YYYY");
 	public static String SHOW_REPORT_TEXT_FLAG = "showReportText";
@@ -139,7 +145,16 @@ public class DailyRollupEmail extends AnetEmailAction {
 		private List<ReportGrouping> groupReports(Map<Integer,Organization> orgIdToTopOrg, OrganizationType orgType) { 
 			Map<Integer, ReportGrouping> orgIdToReports = new HashMap<Integer,ReportGrouping>();
 			for (Report r : reports) {
-				Organization reportOrg = (orgType == OrganizationType.ADVISOR_ORG) ? r.loadAdvisorOrg() : r.loadPrincipalOrg();
+				final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
+				Organization reportOrg;
+				try {
+					reportOrg = (orgType == OrganizationType.ADVISOR_ORG)
+							? r.loadAdvisorOrg(context).get()
+							: r.loadPrincipalOrg(context).get();
+				} catch (InterruptedException | ExecutionException e) {
+					logger.error("failed to load AdvisorOrg/PrincipalOrg", e);
+					return null;
+				}
 				int topOrgId;
 				String topOrgName;
 				if (reportOrg == null) {

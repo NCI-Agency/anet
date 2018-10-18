@@ -158,7 +158,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
 
     await t.context.pageHelpers.clickFormBottomSubmit()
 
-    await assertElementText(t, await $('.alert'), 'Person saved successfully')
+    await assertElementText(t, await $('.alert'), 'Person saved')
     await assertElementText(t, await $('#biography p'), fakeBioText + originalBioText)
 }
 
@@ -177,10 +177,10 @@ async function validationEditPositionOnCurrentPage(t, validateTrue) {
     await $editButton.click()
     await t.context.pageHelpers.clickFormBottomSubmit()
     if (validateTrue) {
-      await assertElementText(t, await $('.alert'), 'Saved Position')
+      await assertElementText(t, await $('.alert'), 'Position saved')
     }
     else {
-      await assertElementText(t, await $('.alert'), 'Forbidden: You do not have permissions to do this')
+      await assertElementText(t, await $('.alert'), 'Forbidden: Exception while fetching data (/updatePosition) : You do not have permissions to do this')
     }
 }
 
@@ -249,8 +249,8 @@ async function validateSuperUserPrincipalOrgPermissions(t) {
   'Field principalOrgButton of a principal organization should be disabled for super users')
   await assertElementDisabled(t, '#parentOrg',
     'Field parentOrganization of a principal organization should be disabled for super users')
-  await assertElementEnabled(t, '#shortName',
-      'Field shortName of a principal organization should be enabled for super users')
+  await assertElementDisabled(t, '#shortName',
+      'Field shortName of a principal organization should be disabled for super users')
   await assertElementDisabled(t, '#longName',
       'Field longName of a principal organization should be disabled for super users')
   await assertElementDisabled(t, '#identificationCode',

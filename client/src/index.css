@@ -7,20 +7,20 @@ html {
    * So we add this style to force IE11 & Edge to use a "normal", non-overlapping, non-auto-hiding scrollbar.
    * See https://github.com/twbs/bootstrap/issues/18543
    */
-  -ms-overflow-style: scrollbar;
+  height: 100%;
 }
 
 body {
+	font-family: -apple-system, BlinkMacSystemFont, “Segoe UI”, Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
 	background: #f2f2f2;
+	height: 100%;
+	overflow: hidden;
+	margin: 0;
+	box-sizing: border-box;
 }
 
-/* this makes jump links work correctly with the header overlaying content */
-*[data-jumptarget]:before {
-  display: block;
-  content: " ";
-  margin-top: -152px;
-  height: 152px;
-  visibility: hidden;
+.anet {
+	height:100vh;
 }
 
 h5 {
@@ -29,6 +29,7 @@ h5 {
 
 .breadcrumb {
 	background: #f9f9f9;
+	margin-top: 10px;
 }
 
 button {
@@ -163,6 +164,7 @@ fieldset.danger {
 .btn.btn-link {
 	overflow: visible;
 	width: 100%;
+	white-space: normal;
 }
 
 .btn-group .radio-inline, .btn-group-vertical .radio-inline {
@@ -177,6 +179,11 @@ fieldset.danger {
 .dropdown-menu {
 	overflow-y: auto;
 	max-height: 400px;
+}
+
+.dropdown-menu > li > a {
+	white-space: normal;
+	border-bottom: 1px solid #f2f2f2;
 }
 
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
@@ -278,6 +285,7 @@ button.home-tile.btn {
 	padding: 10px;
 	color: #5c5c5c;
 	text-decoration: none;
+	white-space: normal;
 }
 .home-tile h1 {
 	font-weight: 900;
@@ -318,6 +326,7 @@ button.home-tile.btn {
 .nav .nav > li > a {
 	border-left: 4px solid rgba(0,0,0,0);
 	padding: 4px 0 4px 38px;
+	padding-right: 4px;
 }
 
 .nav .nav > li.active > a {
@@ -332,10 +341,13 @@ li#search-nav .nav > li a {
 	padding-right: 4px;
 }
 
-@media (min-width: 768px) {
-	.nav-fixed {
-		position: fixed;
-	}
+.nav-overlay {
+	border: 1px solid #e0e0e0;
+	flex-grow: 1;
+	background: #f2f2f2;
+	padding: 5px 8px 5px;
+	left: 0;
+	z-index: 99;
 }
 
 .report-sub-form .form-group {
@@ -676,7 +688,7 @@ header.searchPagination {
 
 .general-banner {
 	padding: 7px;
-	margin-bottom: 0;	
+	margin-bottom: 0;
 	border-radius: 0;
 	border: 1px solid transparent;
 	animation: flash 1s forwards ease-in 0.5s 3 normal;
@@ -701,6 +713,11 @@ header.searchPagination {
 	padding-top: 18px;
 }
 
+.scroll-anchor-container {
+	/* trick so we don't have no man's land between two scroll anchor containers */
+	padding-bottom: 1px;
+}
+
 @keyframes flash {
 	50% {
 		background: #fff;
@@ -721,9 +738,9 @@ header.searchPagination {
 	}
 
 	/* If we don't have this, then every link will be printed with its href afterwards. So "CIV Erin Erinson" will be printed as:
-	 
+
 	 		CIV Erin Erinson (/people/256)
-	 
+
 	   My intuition is that this is useless visual clutter, but maybe it would be useful to people.
 	 */
 	a[href]:after {
@@ -749,4 +766,8 @@ header.searchPagination {
 	.primary-content {
 		width: 100%
 	}
+}
+
+.primary-content {
+	width: 100%;
 }

@@ -3,7 +3,6 @@ import './index.css'
 
 import 'core-js/shim'
 import 'locale-compare-polyfill'
-import './utils'
 
 import React from 'react'
 import ReactDOM from 'react-dom'
@@ -12,6 +11,7 @@ import {BrowserRouter} from 'react-router-dom'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import rootReducer from './reducers'
+import { jumpToTop } from 'components/Page'
 
 import App from 'pages/App'
 
@@ -31,7 +31,3 @@ ReactDOM.render((
 		</BrowserRouter>
 	</Provider>
 ), document.getElementById('root'))
-
-function jumpToTop() {
-	window.scrollTo(0,0)
-}

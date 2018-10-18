@@ -1,5 +1,5 @@
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -26,6 +26,8 @@ class MergePeople extends Page {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			winner: {},
 			loser: {},
 			copyPosition: false
@@ -33,10 +35,10 @@ class MergePeople extends Page {
 	}
 
 	render() {
-		let {winner, loser, copyPosition, error, success} = this.state
+		let {winner, loser, copyPosition} = this.state
 		let errors = this.validate()
 
-		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status,
+		let personFields = `id, name, emailAddress, domainUsername, createdAt, role, status, rank,
 			position { id, name, organization { id, shortName, longName, identificationCode }},
 			authoredReports(pageNum:0,pageSize:1) { totalCount }
 			attendedReports(pageNum:0,pageSize:1) { totalCount }`
@@ -44,7 +46,7 @@ class MergePeople extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['Merge People Tool', '/admin/mergePeople']]} />
-				<Messages error={error} success={success} />
+				<Messages error={this.state.error} success={this.state.success} />
 
 				<h2 className="form-header">Merge People Tool</h2>
 				<Alert bsStyle="warning">
@@ -63,6 +65,9 @@ class MergePeople extends Page {
 								placeholder="Select the duplicate person"
 								objectType={Person}
 								fields={personFields}
+								template={person =>
+									<LinkTo person={person} isLink={false} />
+								}
 								onChange={this.selectLoser}
 							/>
 						</Col>
@@ -72,6 +77,9 @@ class MergePeople extends Page {
 								placeholder="Select the OTHER duplicate person"
 								objectType={Person}
 								fields={personFields}
+								template={person =>
+									<LinkTo person={person} isLink={false} />
+								}
 								onChange={this.selectWinner}
 							/>
 						</Col>
@@ -191,20 +199,28 @@ class MergePeople extends Page {
 	submit(event) {
 		event.stopPropagation()
 		event.preventDefault()
-
 		let {winner, loser, copyPosition} = this.state
-        API.send(`/api/people/merge?winner=${winner.id}&loser=${loser.id}&copyPosition=${copyPosition}`, {}, {disableSubmits: true})
-            .then(() => {
-				this.props.history.push({
-					pathname: Person.pathFor(this.state.winner),
-					state: {success: 'People successfully merged'}
-				})
-			})
-			.catch(error => {
-                this.setState({error})
-                window.scrollTo(0, 0)
+		let operation = 'mergePeople'
+		let graphql = operation + '(winnerId: $winnerId, loserId: $loserId, copyPosition: $copyPosition)'
+		const variables = {
+				winnerId: winner.id,
+				loserId: loser.id,
+				copyPosition: copyPosition
+		}
+		const variableDef = '($winnerId: Int!,$loserId: Int!,$copyPosition: Boolean!,)'
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation]) {
+					this.props.history.push({
+						pathname: Person.pathFor(this.state.winner),
+						state: {success: 'People merged'}
+					})
+				}
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
 				console.error(error)
-            })
+			})
 	}
 
 }

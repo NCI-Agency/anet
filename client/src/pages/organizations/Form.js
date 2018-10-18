@@ -23,6 +23,8 @@ import REMOVE_ICON from 'resources/delete.png'
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+import { jumpToTop } from 'components/Page'
+import utils from 'utils'
 
 class BaseOrganizationForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -35,8 +37,9 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 	constructor(props) {
 		super(props)
 		this.state = {
-			isBlocking: false,
+			success: null,
 			error: null,
+			isBlocking: false,
 			showAddApprovalStepAlert: false,
 		}
 		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
@@ -51,6 +54,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		const {ValidatableForm, RequiredField} = this
 
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
+		const submitText = (isPrincipalOrg && !isAdmin) ? false : "Save organization"
 
 		return <div>
 			<NavigationWarning isBlocking={this.state.isBlocking} />
@@ -58,7 +62,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 			<ValidatableForm formFor={organization}
 			onChange={this.onChange}
 			onSubmit={this.onSubmit}
-			submitText="Save organization"
+			submitText={submitText}
 			horizontal>
 
 			<Messages error={this.state.error} />
@@ -72,20 +76,23 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<Form.Field id="parentOrg" label="Parent organization">
-					<Autocomplete valueKey="shortName" disabled={isPrincipalOrg && !isAdmin}
+					<Autocomplete
+						objectType={Organization}
+						valueKey="shortName"
+						fields={Organization.autocompleteQuery}
 						placeholder="Start typing to search for a higher level organization..."
-						url="/api/organizations/search"
 						queryParams={{status: Organization.STATUS.ACTIVE, type: organization.type}}
+						disabled={isPrincipalOrg && !isAdmin}
 					/>
 				</Form.Field>
 
-				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" />
+				<RequiredField id="shortName" label="Name" placeholder="e.g. EF1.1" disabled={isPrincipalOrg && !isAdmin} />
 				<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName" disabled={isPrincipalOrg && !isAdmin} />
 
 				<Form.Field id="status" >
 					<ButtonToggleGroup>
-						<Button id="statusActiveButton" value={ Organization.STATUS.ACTIVE }>Active</Button>
-						<Button id="statusInactiveButton" value={ Organization.STATUS.INACTIVE }>Inactive</Button>
+						<Button id="statusActiveButton" disabled={isPrincipalOrg && !isAdmin} value={ Organization.STATUS.ACTIVE }>Active</Button>
+						<Button id="statusInactiveButton" disabled={isPrincipalOrg && !isAdmin} value={ Organization.STATUS.INACTIVE }>Inactive</Button>
 					</ButtonToggleGroup>
 				</Form.Field>
 
@@ -250,32 +257,29 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 		for (var i = 0; i < this.props.organization.approvalSteps.length; i++) {
 			organization = Object.without(organization, 'approvalStepName' + i)
 		}
-
-		if (organization.parentOrg) {
-			organization.parentOrg = {id: organization.parentOrg.id}
-		}
-
-		let url = `/api/organizations/${this.props.edit ? 'update' : 'new'}`
+		organization.parentOrg = utils.getReference(organization.parentOrg)
+		let edit = this.props.edit
+		const operation = edit ? 'updateOrganization' : 'createOrganization'
+		let graphql = operation + '(organization: $organization)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { organization: organization }
+		const variableDef = '($organization: OrganizationInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, organization, {disableSubmits: true})
-			.then(response => {
-				if (response.code) {
-					throw response.code
-				}
-
-				if (response.id) {
-					organization.id = response.id
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation].id) {
+					organization.id = data[operation].id
 				}
 				this.props.history.replace(Organization.pathForEdit(organization))
 				this.props.history.push({
 					pathname: Organization.pathFor(organization),
 					state: {
-						success: 'Organization saved successfully',
+						success: 'Organization saved',
 					}
 				})
 			}).catch(error => {
-				this.setState({error})
-				window.scrollTo(0, 0)
+				this.setState({success: null, error: error})
+				jumpToTop()
 			})
 	}
 }

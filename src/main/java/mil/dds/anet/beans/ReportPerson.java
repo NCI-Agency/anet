@@ -1,8 +1,9 @@
 package mil.dds.anet.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Objects;
 
-@JsonIgnoreProperties({ "_loaded" })
+import io.leangen.graphql.annotations.GraphQLQuery;
+
 public class ReportPerson extends Person {
 
 	boolean primary;
@@ -11,6 +12,7 @@ public class ReportPerson extends Person {
 		this.primary = false; // Default
 	}
 	
+	@GraphQLQuery(name="primary")
 	public boolean isPrimary() {
 		return primary;
 	}
@@ -18,7 +20,7 @@ public class ReportPerson extends Person {
 	public void setPrimary(boolean primary) {
 		this.primary = primary;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) { 
 		if (o == null || getClass() != o.getClass()) { 
@@ -26,18 +28,17 @@ public class ReportPerson extends Person {
 		}
 		ReportPerson rp = (ReportPerson) o;
 		return super.equals(o) 
-			&& primary == rp.isPrimary();
+			&& Objects.equals(rp.isPrimary(), primary);
 	}
 	
 	@Override
 	public int hashCode() { 
-		return super.hashCode() * ((primary) ? 7 : -7);
+		return Objects.hash(super.hashCode(), primary);
 	}
 	
 	public static ReportPerson createWithId(Integer id) {
 		ReportPerson rp = new ReportPerson();
 		rp.setId(id);
-		rp.setLoadLevel(LoadLevel.ID_ONLY);
 		return rp;
 	}
 	

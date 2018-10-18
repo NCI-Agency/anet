@@ -1,5 +1,6 @@
 package mil.dds.anet.search.sqlite;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +10,7 @@ import org.skife.jdbi.v2.Handle;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
@@ -20,16 +21,14 @@ import mil.dds.anet.utils.Utils;
 public class SqliteOrganizationSearcher implements IOrganizationSearcher {
 
 	@Override
-	public OrganizationList runSearch(OrganizationSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqliteOrganizationSearch */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
 				+ " FROM organizations WHERE organizations.id IN (SELECT organizations.id FROM organizations ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		
 		sql.append(" WHERE ");
 		List<String> whereClauses = new LinkedList<String>();
-		OrganizationList result = new OrganizationList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
+		final AnetBeanList<Organization> result = new AnetBeanList<Organization>(query.getPageNum(), query.getPageSize(), new ArrayList<Organization>());
 		
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());

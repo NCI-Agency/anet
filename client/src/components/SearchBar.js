@@ -11,7 +11,6 @@ import SEARCH_ICON from 'resources/search-alt.png'
 import { withRouter } from 'react-router-dom'
 import { setSearchQuery } from 'actions'
 import { connect } from 'react-redux'
-import utils from 'utils'
 
 class SearchBar extends Component {
 

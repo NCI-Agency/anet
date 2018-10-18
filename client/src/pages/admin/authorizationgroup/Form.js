@@ -9,6 +9,7 @@ import Messages from 'components/Messages'
 import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import PositionsSelector from 'components/PositionsSelector'
+import { jumpToTop } from 'components/Page'
 
 import API from 'api'
 import {AuthorizationGroup, Position} from 'models'
@@ -27,6 +28,8 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		super(props)
 
 		this.state = {
+			success: null,
+			error: null,
 			isBlocking: false,
 			errors: {},
 		}
@@ -93,22 +96,27 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 	onSubmit(event) {
 		let authGroup = this.props.authorizationGroup
 		let edit = this.props.edit
-		let url = `/api/authorizationGroups/${edit ? 'update'  :'new'}`
+		const operation = edit ? 'updateAuthorizationGroup' : 'createAuthorizationGroup'
+		let graphql = operation + '(authorizationGroup: $authorizationGroup)'
+		graphql += edit ? '' : ' { id }'
+		const variables = { authorizationGroup: authGroup }
+		const variableDef = '($authorizationGroup: AuthorizationGroupInput!)'
 		this.setState({isBlocking: false})
-		API.send(url, authGroup, {disableSubmits: true})
-			.then(response => {
-				if (response.id) {
-					authGroup.id = response.id
+		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
+			.then(data => {
+				if (data[operation].id) {
+					authGroup.id = data[operation].id
 				}
+				this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
 				this.props.history.push({
 					pathname: AuthorizationGroup.pathFor(authGroup),
 					state: {
-						success: 'Saved authorization group',
+						success: 'Authorization group saved',
 					}
 				})
 			}).catch(error => {
-				this.setState({error: error})
-				window.scrollTo(0, 0)
+				this.setState({success: null, error: error})
+				jumpToTop()
 			})
 	}
 

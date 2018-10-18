@@ -1,3 +1,3 @@
-personList(f:recents, maxResults:${maxResults}) {
+personRecents(maxResults:${maxResults}) {
 	list { id, name, rank, role, position { id, name, organization {id, shortName}} }
 }

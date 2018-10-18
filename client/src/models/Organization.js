@@ -1,3 +1,5 @@
+import React from 'react'
+
 import Model from 'components/Model'
 import Settings from 'Settings'
 
@@ -28,6 +30,8 @@ export default class Organization extends Model {
 		positions: [],
 		tasks: []
 	}
+
+	static autocompleteQuery = "id, shortName, longName, identificationCode"
 
 	isAdvisorOrg() {
 		return this.type === Organization.TYPE.ADVISOR_ORG

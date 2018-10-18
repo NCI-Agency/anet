@@ -39,6 +39,7 @@ class ReportsByDayOfWeek extends Component {
 
     this.state = {
       graphDataByDayOfWeek: [],
+      reportsPageNum: 0,
       focusedDayOfWeek: '',
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
@@ -139,6 +140,7 @@ class ReportsByDayOfWeek extends Component {
     const chartQueryParams = {}
     Object.assign(chartQueryParams, this.props.queryParams)
     Object.assign(chartQueryParams, {
+      pageNum: 0,
       pageSize: 0,  // retrieve all the filtered reports
     })
     return chartQueryParams
@@ -146,11 +148,11 @@ class ReportsByDayOfWeek extends Component {
 
   runChartQuery = (chartQueryParams) => {
     return API.query(/* GraphQL */`
-      reportList(f:search, query:$chartQueryParams) {
+      reportList(query:$chartQueryParams) {
         totalCount, list {
           ${GQL_CHART_FIELDS}
         }
-      }`, {chartQueryParams}, '($chartQueryParams: ReportSearchQuery)')
+      }`, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
   }
 
   reportsQueryParams = () => {
@@ -168,11 +170,11 @@ class ReportsByDayOfWeek extends Component {
 
   runReportsQuery = (reportsQueryParams) => {
     return API.query(/* GraphQL */`
-      reportList(f:search, query:$reportsQueryParams) {
+      reportList(query:$reportsQueryParams) {
         pageNum, pageSize, totalCount, list {
           ${ReportCollection.GQL_REPORT_FIELDS}
         }
-      }`, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQuery)')
+      }`, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
   }
 
   @autobind

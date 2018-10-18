@@ -14,6 +14,9 @@ import CheckboxSearchFilter from 'components/advancedSearch/CheckboxSearchFilter
 
 import {Location, Person, Task, Position, Organization, Tag} from 'models'
 
+export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
+export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
+
 const taskFilters = props => {
 	const taskFiltersObj = {
 		Organization: {
@@ -221,6 +224,7 @@ export default {
 		}
 
 		const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
+		const ranks = Settings.fields.person.ranks || []
 		filters.People = {
 			filters: {
 				Organization: {
@@ -253,6 +257,14 @@ export default {
 						valueKey: "name",
 						fields: Location.autocompleteQuery,
 						placeholder: "Filter by location...",
+					}
+				},
+				Rank: {
+					component: SelectSearchFilter,
+					props: {
+						queryKey: "rank",
+						values: ranks,
+						labels: ranks,
 					}
 				},
 				Nationality: {
@@ -288,7 +300,7 @@ export default {
 
 		filters.Positions = {
 			filters: {
-				"Position Type": {
+				[POSTITION_POSITION_TYPE_FILTER_KEY]: {
 					component: PositionTypeSearchFilter,
 					props: {
 						queryKey: "type",
@@ -297,7 +309,7 @@ export default {
 						ref: positionTypeFilterRef,
 					}
 				},
-				Organization: {
+				[POSTITION_ORGANIZATION_FILTER_KEY]: {
 					component: OrganizationFilter,
 					props: {
 						queryKey: "organizationId",
@@ -350,6 +362,12 @@ export default {
 			filters: taskFilters()
 		}
 
+		return filters
+	},
+	// filters not being displayed in the advanced search but being used in the search
+	extraFilters: function(positionTypeFilterRef, organizationFilterRef) {
+		const filters = {}
+		filters.Reports = ["includeEngagementDayOfWeek", "sortOrder"]
 		return filters
 	}
 }

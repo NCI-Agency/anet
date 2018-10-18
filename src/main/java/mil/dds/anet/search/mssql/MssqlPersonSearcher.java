@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.skife.jdbi.v2.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
@@ -23,7 +24,7 @@ import mil.dds.anet.utils.Utils;
 public class MssqlPersonSearcher implements IPersonSearcher {
 
 	@Override
-	public PersonList runSearch(PersonSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Person> runSearch(PersonSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlPersonSearch */ SELECT " + PersonDao.PERSON_FIELDS);
@@ -56,9 +57,11 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 					+ "c_people.rank IS NOT NULL"
 					+ " OR f_people.rank IS NOT NULL");
 			if (query.getMatchPositionName()) {
-				sql.append(" LEFT JOIN CONTAINSTABLE(positions, (name, code), :containsQuery) c_positions"
+				sql.append(" LEFT JOIN CONTAINSTABLE(positions, (name), :containsQuery) c_positions"
 						+ " ON positions.id = c_positions.[Key]");
-				whereRank.append(" OR c_positions.rank IS NOT NULL");
+				whereRank.append(" OR c_positions.rank IS NOT NULL"
+						+ " OR positions.code LIKE :likeQuery");
+				sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 			}
 			whereRank.append(")");
 			whereClauses.add(whereRank.toString());
@@ -83,6 +86,11 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 				}
 				whereClauses.add("people.status IN (" + Joiner.on(", ").join(argNames) + ")");
 			}
+		}
+
+		if (query.getRank() != null && query.getRank().trim().length() > 0) {
+			whereClauses.add(" people.rank = :rank ");
+			sqlArgs.put("rank", query.getRank());
 		}
 
 		if (query.getCountry() != null && query.getCountry().trim().length() > 0) {
@@ -115,12 +123,8 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 			sqlArgs.put("locationId", query.getLocationId());
 		}
 
-		final PersonList result = new PersonList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return result;
+			return new AnetBeanList<Person>(query.getPageNum(), query.getPageSize(), new ArrayList<Person>());
 		}
 
 		sql.append(" WHERE ");
@@ -158,7 +162,7 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 
 		final Query<Person> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
 			.map(new PersonMapper());
-		return PersonList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
+		return new AnetBeanList<Person>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
 	}
 
 }

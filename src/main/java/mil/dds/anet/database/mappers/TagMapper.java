@@ -8,7 +8,6 @@ import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class TagMapper implements ResultSetMapper<Tag> {
 
@@ -20,7 +19,6 @@ public class TagMapper implements ResultSetMapper<Tag> {
 		t.setDescription(rs.getString("description"));
 		t.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 		t.setUpdatedAt(new DateTime(rs.getTimestamp("updatedAt")));
-		t.setLoadLevel(LoadLevel.PROPERTIES);
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
 			ctx.setAttribute("totalCount", rs.getInt("totalCount"));

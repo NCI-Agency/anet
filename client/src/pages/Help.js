@@ -5,6 +5,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import Fieldset from 'components/Fieldset'
 
 import Settings from 'Settings'
+import GQL from 'graphqlapi'
 import API from 'api'
 import {Person, Position} from 'models'
 
@@ -39,14 +40,21 @@ class BaseHelp extends Page {
 			return
 		}
 
-		let orgId = currentUser.position.organization.id
-		return API.query(/* GraphQL */`
-			positionList(f:search,query:{type:[${Position.TYPE.SUPER_USER},${Position.TYPE.ADMINISTRATOR}],status:${Position.STATUS.ACTIVE},organizationId:${orgId}}) {
+		const positionQuery = {
+			pageNum: 0,
+			pageSize: 0,  // retrieve all these positions
+			type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR],
+			status: Position.STATUS.ACTIVE,
+			organizationId: currentUser.position.organization.id
+		}
+		const positionsPart = new GQL.Part(/* GraphQL */`
+			positionList(query: $positionQuery) {
 				list {
 					person { rank, name, emailAddress }
 				}
-			}
-		`).then(data => {
+			}`)
+			.addVariable("positionQuery", "PositionSearchQueryInput", positionQuery)
+		GQL.run([positionsPart]).then(data => {
 			const filledPositions = data.positionList.list.filter(position => position && position.person)
 			this.setState({
 				superUsers: filledPositions.map(position => position.person)

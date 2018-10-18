@@ -1,14 +1,19 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLIgnore;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.IdFetcher;
 
 public class Position extends AbstractAnetBean {
 
@@ -33,6 +38,7 @@ public class Position extends AbstractAnetBean {
 		return b;
 	}
 	
+	@GraphQLQuery(name="name")
 	public String getName() {
 		return name;
 	}
@@ -41,6 +47,7 @@ public class Position extends AbstractAnetBean {
 		this.name = Utils.trimStringReturnNull(name);
 	}
 	
+	@GraphQLQuery(name="code")
 	public String getCode() {
 		return code;
 	}
@@ -49,6 +56,7 @@ public class Position extends AbstractAnetBean {
 		this.code = Utils.trimStringReturnNull(code);
 	}
 
+	@GraphQLQuery(name="type")
 	public PositionType getType() {
 		return type;
 	}
@@ -57,6 +65,7 @@ public class Position extends AbstractAnetBean {
 		this.type = type;
 	}
 
+	@GraphQLQuery(name="status")
 	public PositionStatus getStatus() {
 		return status;
 	}
@@ -65,16 +74,10 @@ public class Position extends AbstractAnetBean {
 		this.status = status;
 	}
 
-	@GraphQLFetcher("organization")
-	public Organization loadOrganization() {
-		if (organization == null || organization.getLoadLevel() == null) { 
-			return organization; // just a bean, not a db object! 
-		}
-		if (organization.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) {
-			this.organization = AnetObjectEngine.getInstance()
-					.getOrganizationDao().getById(organization.getId());
-		}
-		return organization;
+	@GraphQLQuery(name="organization")
+	public CompletableFuture<Organization> loadOrganization(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Organization>().load(context, "organizations", organization)
+				.thenApply(o -> { organization = o; return o; });
 	}
 	
 	public void setOrganization(Organization ao) {
@@ -86,14 +89,10 @@ public class Position extends AbstractAnetBean {
 		return organization;
 	}
 	
-	@GraphQLFetcher("person")
-	public Person loadPerson() { 
-		if (person == null || person.getLoadLevel() == null) { return person; } 
-		if (person.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.person = AnetObjectEngine.getInstance()
-					.getPositionDao().getPersonInPositionNow(this);
-		}
-		return person;
+	@GraphQLQuery(name="person")
+	public CompletableFuture<Person> loadPerson(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Person>().load(context, "people", person)
+				.thenApply(o -> { person = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -105,7 +104,7 @@ public class Position extends AbstractAnetBean {
 		this.person = p;
 	}
 	
-	@GraphQLFetcher("associatedPositions")
+	@GraphQLQuery(name="associatedPositions") // TODO: batch load? (used in positions/{Edit,Show}.js, {organizations,people}/Show.js)
 	public List<Position> loadAssociatedPositions() { 
 		if (associatedPositions == null) { 
 			associatedPositions = AnetObjectEngine.getInstance()
@@ -123,14 +122,10 @@ public class Position extends AbstractAnetBean {
 		this.associatedPositions = associatedPositions;
 	}
 	
-	@GraphQLFetcher("location")
-	public Location loadLocation() { 
-		if (location == null || location.getLoadLevel() == null) { return location; } 
-		if (location.getLoadLevel().contains(LoadLevel.PROPERTIES) == false) { 
-			this.location = AnetObjectEngine.getInstance()
-					.getLocationDao().getById(location.getId());
-		}
-		return location;
+	@GraphQLQuery(name="location")
+	public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
+		return new IdFetcher<Location>().load(context, "locations", location)
+				.thenApply(o -> { location = o; return o; });
 	}
 	
 	@GraphQLIgnore
@@ -142,15 +137,22 @@ public class Position extends AbstractAnetBean {
 		this.location = location;
 	}
 	
-	@GraphQLFetcher("previousPeople")
-	public List<PersonPositionHistory> loadPreviousPeople() {
-		if (previousPeople == null) { 
-			this.previousPeople = AnetObjectEngine.getInstance().getPositionDao().getPositionHistory(this);
-		}
+	@GraphQLQuery(name="previousPeople")
+	public CompletableFuture<List<PersonPositionHistory>> loadPreviousPeople(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getPositionDao().getPositionHistory(context, this)
+				.thenApply(o -> { previousPeople = o; return o; });
+	}
+
+	@GraphQLIgnore
+	public List<PersonPositionHistory> getPreviousPeople() {
 		return previousPeople;
 	}
-	
-	@GraphQLFetcher("isApprover")
+
+	public void setPreviousPeople(List<PersonPositionHistory> previousPeople) {
+		this.previousPeople = previousPeople;
+	}
+
+	@GraphQLQuery(name="isApprover")
 	public Boolean loadIsApprover() { 
 		if (this.isApprover == null) { 
 			this.isApprover = AnetObjectEngine.getInstance().getPositionDao().getIsApprover(this);

@@ -2,47 +2,55 @@ package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.GenericType;
 
 import org.joda.time.DateTime;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.util.Duration;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
+import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
+import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class PositionResourceTest extends AbstractResourceTest {
 
-	public PositionResourceTest() { 
-		if (client == null) { 
-			config.setTimeout(Duration.seconds(30L));
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("positions test client");
-		}
-	}
-	
+	private static final String ORGANIZATION_FIELDS = "id shortName";
+	private static final String PERSON_FIELDS = "id name role";
+	private static final String POSITION_FIELDS = "id name code type status";
+	private static final String FIELDS = POSITION_FIELDS + " person { " + PERSON_FIELDS + " } organization { " + ORGANIZATION_FIELDS + " }";
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 	@Test
-	public void positionTest() { 
+	public void positionTest()
+		throws ExecutionException, InterruptedException {
 		final Person jack = getJackJackson();
 		assertThat(jack.getId()).isNotNull();
 		assertThat(jack.getPosition()).isNotNull();
@@ -55,22 +63,27 @@ public class PositionResourceTest extends AbstractResourceTest {
 		test.setStatus(PositionStatus.ACTIVE);
 		
 		//Assign to an AO
-		Organization ao = httpQuery("/api/organizations/new", admin)
-				.post(Entity.json(OrganizationTest.getTestAO(true)), Organization.class);
-		test.setOrganization(Organization.createWithId(ao.getId()));
+		final Integer aoId = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+				OrganizationTest.getTestAO(true), new GenericType<GraphQLResponse<Organization>>() {});
+		test.setOrganization(Organization.createWithId(aoId));
 
-		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);
+		Integer createdId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				test, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(createdId).isNotNull();
+		Position created = graphQLHelper.getObjectById(jack, "position", FIELDS, createdId, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(created.getName()).isEqualTo(test.getName());
-		
-		Position returned = httpQuery(String.format("/api/positions/%d",created.getId()), jack).get(Position.class);
-		assertThat(returned.getOrganization().getId()).isEqualTo(ao.getId());
+		assertThat(created.getOrganization().getId()).isEqualTo(aoId);
 		
 		//Assign a person into the position
-		Response resp = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).post(Entity.json(jack));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		Map<String, Object> variables = new HashMap<>();
+		variables.put("id", created.getId());
+		variables.put("person", jack);
+		Integer nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
-		Person curr = httpQuery(String.format("/api/positions/%d/person",returned.getId()), admin).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(jack.getId());
+		Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(currPos.getPerson()).isNotNull();
+		assertThat(currPos.getPerson().getId()).isEqualTo(jack.getId());
 		
 		final DateTime jacksTime = DateTime.now();
 		try {
@@ -83,41 +96,58 @@ public class PositionResourceTest extends AbstractResourceTest {
 		Person steve = getSteveSteveson();
 		final Position stevesCurrentPosition = steve.loadPosition();
 		assertThat(stevesCurrentPosition).isNotNull();
-		resp = httpQuery(String.format("/api/positions/%d/person", returned.getId()), admin).post(Entity.json(steve));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		variables = new HashMap<>();
+		variables.put("id", created.getId());
+		variables.put("person", steve);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Verify that the new person is in the position
-		curr = httpQuery(String.format("/api/positions/%d/person",returned.getId()), jack).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(steve.getId());
+		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(currPos.getPerson()).isNotNull();
+		assertThat(currPos.getPerson().getId()).isEqualTo(steve.getId());
 		
 		//Verify that the previous person is now no longer in a position
-		returned = httpQuery(String.format("/api/people/%d/position", jack.getId()), jack).get(Position.class);
-		assertThat(returned).isEqualTo(null);		
+		Person returnedPerson = graphQLHelper.getObjectById(jack, "person", PERSON_FIELDS + " position { " + POSITION_FIELDS + " }", jack.getId(), new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(returnedPerson.getPosition()).isNull();
 		
 		//delete the person from this position
-		resp = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).delete();
-		assertThat(resp.getStatus()).isEqualTo(200);
+		Integer nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", created.getId());
+		assertThat(nrDeleted).isEqualTo(1);
 		
-		curr = httpQuery(String.format("/api/positions/%d/person",created.getId()), jack).get(Person.class);
-		assertThat(curr).isNull();
+		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(currPos.getPerson()).isNull();
 		
 		//Put steve back in his old position
-		resp = httpQuery(String.format("/api/positions/%d/person", stevesCurrentPosition.getId()), admin).post(Entity.json(steve));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		variables = new HashMap<>();
+		variables.put("id", stevesCurrentPosition.getId());
+		variables.put("person", steve);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
-		curr = httpQuery(String.format("/api/positions/%d/person",stevesCurrentPosition.getId()), jack).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(steve.getId());
+		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, stevesCurrentPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(currPos.getPerson()).isNotNull();
+		assertThat(currPos.getPerson().getId()).isEqualTo(steve.getId());
 		
 		//pull for the person at a previous time. 
-		Person prev = httpQuery(String.format("/api/positions/%d/person?atTime=%d", created.getId(), jacksTime.getMillis()), jack)
-				.get(Person.class);
-		assertThat(prev).isNotNull();
-		assertThat(prev.getId()).isEqualTo(jack.getId());
+		Position retPos = graphQLHelper.getObjectById(jack, "position", POSITION_FIELDS + " previousPeople { createdAt startTime endTime person { id name } }", created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		final List<PersonPositionHistory> previousPeople = retPos.getPreviousPeople();
+		assertThat(previousPeople).isNotEmpty();
+		PersonPositionHistory last = null;
+		for (final PersonPositionHistory personPositionHistory : previousPeople) {
+			if (personPositionHistory.getCreatedAt().isBefore(jacksTime)
+					&& (last == null || personPositionHistory.getCreatedAt().isAfter(last.getCreatedAt()))) {
+				last = personPositionHistory;
+			}
+		}
+		assertThat(last).isNotNull();
+		assertThat(last.getPerson()).isNotNull();
+		assertThat(last.getPerson().getId()).isEqualTo(jack.getId());
 		
-		returned = httpQuery(String.format("/api/positions/%d",created.getId()), jack).get(Position.class);
-		List<PersonPositionHistory> history = returned.loadPreviousPeople();
+		created = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		List<PersonPositionHistory> history = created.loadPreviousPeople(context).get();
 		assertThat(history.size()).isEqualTo(2);
-		assertThat(history.get(0).getPosition().getId()).isEqualTo(returned.getId());
+		assertThat(history.get(0).getPosition().getId()).isEqualTo(created.getId());
 		assertThat(history.get(0).getPerson()).isEqualTo(jack);
 		assertThat(history.get(0).getStartTime()).isNotNull();
 		assertThat(history.get(0).getEndTime()).isNotNull();
@@ -129,8 +159,11 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		
 		//Create a principal
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
-				.get(OrganizationList.class);
+		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
+		queryOrgs.setText("Ministry");
+		queryOrgs.setType(OrganizationType.PRINCIPAL_ORG);
+		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(admin, "organizationList", "query", "OrganizationSearchQueryInput",
+				ORGANIZATION_FIELDS, queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 			
 		Position prinPos = new Position();
@@ -141,54 +174,68 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		Person principal = getRogerRogwell();
 		assertThat(principal.getId()).isNotNull();
-		Position tashkil = httpQuery("/api/positions/new", admin).post(Entity.json(prinPos), Position.class);
+		Integer tashkilId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				prinPos, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(tashkilId).isNotNull();
+		Position tashkil = graphQLHelper.getObjectById(admin, "position", FIELDS, tashkilId, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(tashkil.getId()).isNotNull();
 		
 		//put the principal in a tashkil
-		resp = httpQuery(String.format("/api/positions/%d/person", tashkil.getId()), admin).post(Entity.json(principal));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		variables = new HashMap<>();
+		variables.put("id", tashkil.getId());
+		variables.put("person", principal);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//assign the tashkil to the position
-		resp = httpQuery(String.format("/api/positions/%d/associated", created.getId()), admin).post(Entity.json(tashkil));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		final List<Position> associatedPositions = new ArrayList<>();
+		associatedPositions.add(tashkil);
+		created.setAssociatedPositions(associatedPositions);
+		nrUpdated = graphQLHelper.updateObject(admin, "updateAssociatedPosition", "position", "PositionInput", created);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//verify that we can pull the tashkil from the position
-		PositionList retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(PositionList.class);
-		assertThat(retT.getList().size()).isEqualTo(1);
-		assertThat(retT.getList()).contains(tashkil);
+		retPos = graphQLHelper.getObjectById(jack, "position", FIELDS + " associatedPositions { " + FIELDS + " }", created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(retPos.getAssociatedPositions().size()).isEqualTo(1);
+		assertThat(retPos.getAssociatedPositions()).contains(tashkil);
 		
 		//delete the tashkil from this position
-		resp = httpQuery(String.format("/api/positions/%d/associated/%d", created.getId(), tashkil.getId()), admin).delete();
-		assertThat(resp.getStatus()).isEqualTo(200);
+		retPos.getAssociatedPositions().remove(tashkil);
+		nrUpdated = graphQLHelper.updateObject(admin, "updateAssociatedPosition", "position", "PositionInput", retPos);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//verify that it's now gone. 
-		retT = httpQuery(String.format("/api/positions/%d/associated", created.getId()), jack).get(PositionList.class);
-		assertThat(retT.getList().size()).isEqualTo(0);
+		retPos = graphQLHelper.getObjectById(jack, "position", FIELDS + " associatedPositions { " + FIELDS + " }", created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(retPos.getAssociatedPositions().size()).isEqualTo(0);
 		
 		//remove the principal from the tashkil
-		resp = httpQuery(String.format("/api/positions/%d/person", tashkil.getId()), admin).delete();
-		assertThat(resp.getStatus()).isEqualTo(200);
+		nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", tashkil.getId());
+		assertThat(nrDeleted).isEqualTo(1);
 		
 		//Try to delete this position, it should fail because the tashkil is active
-		resp = httpQuery(String.format("/api/positions/%d",  tashkil.getId()), admin).delete();
-		assertThat(resp.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+		thrown.expect(BadRequestException.class);
+		graphQLHelper.deleteObject(admin, "deletePosition", tashkil.getId());
 		
 		tashkil.setStatus(PositionStatus.INACTIVE);
-		resp = httpQuery("/api/positions/update", admin).post(Entity.json(tashkil));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		nrUpdated = graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", tashkil);
+		assertThat(nrUpdated).isEqualTo(1);
 		
-		resp = httpQuery(String.format("/api/positions/%d",  tashkil.getId()), admin).delete();
-		assertThat(resp.getStatus()).isEqualTo(200);
-	
-		resp = httpQuery(String.format("/api/positions/%d",tashkil.getId()), jack).get();
-		assertThat(resp.getStatus()).isEqualTo(Status.NOT_FOUND.getStatusCode());
+		nrDeleted = graphQLHelper.deleteObject(admin, "deletePosition", tashkil.getId());
+		assertThat(nrDeleted).isEqualTo(1);
+
+		thrown.expect(NotFoundException.class);
+		graphQLHelper.getObjectById(jack, "position", FIELDS, tashkil.getId(), new GenericType<GraphQLResponse<Position>>() {});
 
 		//Put jack back in his old position
-		resp = httpQuery(String.format("/api/positions/%d/person", jacksOldPosition.getId()), admin).post(Entity.json(jack));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		variables = new HashMap<>();
+		variables.put("id", jacksOldPosition.getId());
+		variables.put("person", jack);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 
-		curr = httpQuery(String.format("/api/positions/%d/person", jacksOldPosition.getId()), admin).get(Person.class);
-		assertThat(curr.getId()).isEqualTo(jack.getId());
+		currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, jacksOldPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(currPos.getPerson()).isNotNull();
+		assertThat(currPos.getPerson().getId()).isEqualTo(jack.getId());
 	}
 		
 	
@@ -199,23 +246,28 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//Create Position
 		Position test = PositionTest.getTestPosition();
 		test.setCode(test.getCode() + "_" + DateTime.now().getMillis());
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
-			.get(OrganizationList.class);
+		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
+		queryOrgs.setText("Ministry");
+		queryOrgs.setType(OrganizationType.PRINCIPAL_ORG);
+		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(admin, "organizationList", "query", "OrganizationSearchQueryInput",
+				ORGANIZATION_FIELDS, queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		
 		test.setOrganization(orgs.getList().get(0));
 		
-		Position created = httpQuery("/api/positions/new", admin).post(Entity.json(test), Position.class);
+		Integer createdId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				test, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(createdId).isNotNull();
+		Position created = graphQLHelper.getObjectById(admin, "position", FIELDS, createdId, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(created.getName()).isEqualTo(test.getName());
 		assertThat(created.getCode()).isEqualTo(test.getCode());
 		assertThat(created.getId()).isNotNull();
 		
 		//Change Name/Code
 		created.setName("Deputy Chief of Donuts");
-		Response resp = httpQuery("/api/positions/update", admin).post(Entity.json(created));
-		assertThat(resp.getStatus()).isEqualTo(200);
-		
-		Position returned = httpQuery(String.format("/api/positions/%d",created.getId()), jack).get(Position.class);
+		Integer nrUpdated = graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", created);
+		assertThat(nrUpdated).isEqualTo(1);
+		Position returned = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(returned.getName()).isEqualTo(created.getName());
 		assertThat(returned.getCode()).isEqualTo(created.getCode());
 		
@@ -224,22 +276,26 @@ public class PositionResourceTest extends AbstractResourceTest {
 		Position stevesCurrPos = steve.loadPosition();
 		assertThat(stevesCurrPos).isNotNull();
 		
-		resp = httpQuery(String.format("/api/positions/%d/person",created.getId()), admin).post(Entity.json(steve));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		Map<String, Object> variables = new HashMap<>();
+		variables.put("id", created.getId());
+		variables.put("person", steve);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
-		Person returnedPrincipal = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).get(Person.class);
-		assertThat(returnedPrincipal.getId()).isEqualTo(steve.getId());
+		Position principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(principalPos.getPerson()).isNotNull();
+		assertThat(principalPos.getPerson().getId()).isEqualTo(steve.getId());
 		
 		//Put steve back in his originial position
-		resp = httpQuery(String.format("/api/positions/%d/person",stevesCurrPos.getId()), admin).post(Entity.json(steve));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		variables = new HashMap<>();
+		variables.put("id", stevesCurrPos.getId());
+		variables.put("person", steve);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Ensure the old position is now empty
-		returnedPrincipal = httpQuery(String.format("/api/positions/%d/person", created.getId()), admin).get(Person.class);
-		assertThat(returnedPrincipal).isNull();
-		
-		
-		
+		principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(principalPos.getPerson()).isNull();
 	}
 	
 	@Test
@@ -249,12 +305,14 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		//Search by name
 		query.setText("Advisor");
-		List<Position> searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		List<Position> searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		//Search by name & is not filled
 		query.setIsFilled(false);
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream().filter(p -> (p.getPerson() == null)).collect(Collectors.toList()))
 			.hasSameElementsAs(searchResults);
@@ -262,7 +320,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//Search by name and is filled and type
 		query.setIsFilled(true);
 		query.setType(ImmutableList.of(PositionType.ADVISOR));
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults).isNotEmpty();
 		assertThat(searchResults.stream()
 				.filter(p -> (p.getPerson() != null))
@@ -272,39 +331,48 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		//Search for text= advisor and type = admin should be empty. 
 		query.setType(ImmutableList.of(PositionType.ADMINISTRATOR));
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults).isEmpty();
 		
 		query.setText("Administrator");
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		//Search by organization
-		List<Organization> orgs = httpQuery("/api/organizations/search?type=ADVISOR_ORG&text=ef%201", jack).get(OrganizationList.class).getList();
-		assertThat(orgs.size()).isGreaterThan(0);
-		Organization ef11 = orgs.stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1.1")).findFirst().get();
-		Organization ef1 = orgs.stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
+		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
+		queryOrgs.setText("ef 1");
+		queryOrgs.setType(OrganizationType.ADVISOR_ORG);
+		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query", "OrganizationSearchQueryInput",
+				ORGANIZATION_FIELDS, queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
+		assertThat(orgs.getList().size()).isGreaterThan(0);
+		Organization ef11 = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1.1")).findFirst().get();
+		Organization ef1 = orgs.getList().stream().filter(o -> o.getShortName().equalsIgnoreCase("ef 1")).findFirst().get();
 		assertThat(ef11.getShortName()).isEqualToIgnoringCase("EF 1.1");
 		assertThat(ef1.getShortName()).isEqualTo("EF 1");
 		
 		query.setText("Advisor");
 		query.setType(null);
 		query.setOrganizationId(ef1.getId());
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults.stream()
 				.filter(p -> p.getOrganization().getId() == ef1.getId())
 				.collect(Collectors.toList()))
 			.hasSameElementsAs(searchResults);
 		
 		query.setIncludeChildrenOrgs(true);
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults).isNotEmpty();
 		
 		query.setIncludeChildrenOrgs(false);
 		query.setText("a");
 		query.setSortBy(PositionSearchSortBy.NAME);
 		query.setSortOrder(SortOrder.DESC); 
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		String prevName = null;
 		for (Position p : searchResults) { 
 			if (prevName != null) { assertThat(p.getName().compareToIgnoreCase(prevName)).isLessThanOrEqualTo(0); } 
@@ -313,7 +381,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		query.setSortBy(PositionSearchSortBy.CODE);
 		query.setSortOrder(SortOrder.ASC); 
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		String prevCode = null;
 		for (Position p : searchResults) { 
 			if (prevCode != null) { assertThat(p.getCode().compareToIgnoreCase(prevCode)).isGreaterThanOrEqualTo(0); } 
@@ -323,7 +392,8 @@ public class PositionResourceTest extends AbstractResourceTest {
 		//search by status. 
 		query = new PositionSearchQuery();
 		query.setStatus(PositionStatus.INACTIVE);
-		searchResults = httpQuery("/api/positions/search", jack).post(Entity.json(query), PositionList.class).getList();
+		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
+				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults.size()).isGreaterThan(0);
 		assertThat(searchResults.stream().filter(p -> p.getStatus().equals(PositionStatus.INACTIVE)).count()).isEqualTo(searchResults.size());
 	}
@@ -336,9 +406,10 @@ public class PositionResourceTest extends AbstractResourceTest {
 		int pageSize = 10;
 		int totalReturned = 0;
 		int firstTotalCount = 0;
-		PositionList list = null;
+		AnetBeanList<Position> list = null;
 		do { 
-			list = httpQuery("/api/positions/?pageNum=" + pageNum + "&pageSize=" + pageSize, jack).get(PositionList.class);
+			list = graphQLHelper.getAllObjects(jack, "positions (pageNum: " + pageNum + ", pageSize: " + pageSize + ")",
+					FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {});
 			assertThat(list).isNotNull();
 			assertThat(list.getPageNum()).isEqualTo(pageNum);
 			assertThat(list.getPageSize()).isEqualTo(pageSize);
@@ -351,18 +422,25 @@ public class PositionResourceTest extends AbstractResourceTest {
 	}
 	
 	@Test
-	public void createPositionTest() {
+	public void createPositionTest()
+		throws ExecutionException, InterruptedException {
 		//Create a new position and designate the person upfront
 		Person newb = new Person();
 		newb.setName("PositionTest Person");
 		newb.setRole(Role.PRINCIPAL);
 		newb.setStatus(PersonStatus.ACTIVE);
 		
-		newb = httpQuery("/api/people/new", admin).post(Entity.json(newb), Person.class);
+		Integer newbId = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				newb, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(newbId).isNotNull();
+		newb = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, newbId, new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(newb.getId()).isNotNull();
 		
-		OrganizationList orgs = httpQuery("/api/organizations/search?text=Ministry&type=PRINCIPAL_ORG", admin)
-				.get(OrganizationList.class);
+		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
+		queryOrgs.setText("Ministry");
+		queryOrgs.setType(OrganizationType.PRINCIPAL_ORG);
+		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(admin, "organizationList", "query", "OrganizationSearchQueryInput",
+				ORGANIZATION_FIELDS, queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		assertThat(orgs.getList().size()).isGreaterThan(0);
 		
 		Position newbPosition = new Position();
@@ -372,14 +450,18 @@ public class PositionResourceTest extends AbstractResourceTest {
 		newbPosition.setStatus(PositionStatus.ACTIVE);
 		newbPosition.setPerson(newb);
 		
-		newbPosition = httpQuery("/api/positions/new", admin).post(Entity.json(newbPosition), Position.class);
+		Integer newbPositionId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				newbPosition, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(newbPositionId).isNotNull();
+		newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPositionId, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(newbPosition.getId()).isNotNull();
 		
 		//Ensure that the position contains the person
-		Position returned = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
+		Position returned = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(returned.getId()).isNotNull();
-		assertThat(returned.loadPerson()).isNotNull();
-		assertThat(returned.loadPerson().getId()).isEqualTo(newb.getId());
+		final Person returnedPerson = returned.getPerson();
+		assertThat(returnedPerson).isNotNull();
+		assertThat(returnedPerson.getId()).isEqualTo(newb.getId());
 		
 		//Ensure that the person is assigned to this position. 
 		assertThat(newb.loadPosition()).isNotNull();
@@ -389,24 +471,27 @@ public class PositionResourceTest extends AbstractResourceTest {
 		Person prin2 = new Person();
 		prin2.setName("2nd Principal in PrincipalTest");
 		prin2.setRole(Role.PRINCIPAL);
-		prin2 = httpQuery("/api/people/new", admin).post(Entity.json(prin2),Person.class);
+		Integer prin2Id = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+				prin2, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(prin2Id).isNotNull();
+		prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2Id, new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(prin2.getId()).isNotNull();
 		assertThat(prin2.loadPosition()).isNull();
 		
 		prin2.setPosition(Position.createWithId(newbPosition.getId()));
-		Response resp = httpQuery("/api/people/update", admin).post(Entity.json(prin2));
-		assertThat(resp.getStatus()).isEqualTo(200);
+		Integer nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", prin2);
+		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Reload this person to check their position was set. 
-		prin2 = httpQuery("/api/people/" + prin2.getId(), admin).get(Person.class);
+		prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2.getId(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(prin2).isNotNull();
 		assertThat(prin2.loadPosition()).isNotNull();
 		assertThat(prin2.loadPosition().getId()).isEqualTo(newbPosition.getId());
 		
 		//Check with a different API endpoint. 
-		Person currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
-		assertThat(currHolder).isNotNull();
-		assertThat(currHolder.getId()).isEqualTo(prin2.getId());
+		Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(currPos.getPerson()).isNotNull();
+		assertThat(currPos.getPerson().getId()).isEqualTo(prin2.getId());
 		
 		//Slow the test down a bit
 		try {
@@ -421,28 +506,29 @@ public class PositionResourceTest extends AbstractResourceTest {
 		pos2.setStatus(PositionStatus.ACTIVE);
 		pos2.setPerson(Person.createWithId(prin2.getId()));
 		
-		pos2 = httpQuery("/api/positions/new", admin).post(Entity.json(pos2), Position.class);
+		Integer pos2Id = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+				pos2, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(pos2Id).isNotNull();
+		pos2 = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2Id, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(pos2.getId()).isNotNull();
 		
-		returned = httpQuery("/api/positions/" + pos2.getId(), admin).get(Position.class);
+		returned = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2.getId(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(returned).isNotNull();
 		assertThat(returned.getName()).isEqualTo(pos2.getName());
-		assertThat(returned.loadPerson()).isNotNull();
-		assertThat(returned.loadPerson().getId()).isEqualTo(prin2.getId());
+		final Person returnedPerson2 = returned.getPerson();
+		assertThat(returnedPerson2).isNotNull();
+		assertThat(returnedPerson2.getId()).isEqualTo(prin2.getId());
 		
 		//Make sure prin2 got moved out of newbPosition
-		currHolder = httpQuery("/api/positions/" + newbPosition.getId() + "/person", admin).get(Person.class);
-		assertThat(currHolder).isNull();
+		currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(currPos.getPerson()).isNull();
 		
 		//Pull the history of newbPosition
-		newbPosition = httpQuery("/api/positions/" + newbPosition.getId(), admin).get(Position.class);
-		List<PersonPositionHistory> history = newbPosition.loadPreviousPeople();
+		newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		List<PersonPositionHistory> history = newbPosition.loadPreviousPeople(context).get();
 		assertThat(history.size()).isEqualTo(2);
 		assertThat(history.get(0).getPerson().getId()).isEqualTo(newb.getId());
 		assertThat(history.get(1).getPerson().getId()).isEqualTo(prin2.getId());
-		
-		
-		
 	}
 	
 }

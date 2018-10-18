@@ -17,16 +17,18 @@ describe('Create new Person form page', () => {
             CreatePerson.openAsSuperUser()
             CreatePerson.form.waitForExist()
             CreatePerson.form.waitForVisible()
+            CreatePerson.lastName.waitForVisible()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
-            expect(alertMessage).to.equal('Person saved successfully')
+            expect(alertMessage).to.equal('Person saved')
         })
         it('Should not save a principle without a valid email address', () => {
             CreatePerson.openAsSuperUser()
             CreatePerson.form.waitForExist()
             CreatePerson.form.waitForVisible()
+            CreatePerson.lastName.waitForVisible()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
             CreatePerson.emailAddress.setValue('notValidEmail@')
             CreatePerson.submitForm()
@@ -41,7 +43,7 @@ describe('Create new Person form page', () => {
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
-            expect(alertMessage).to.equal('Person saved successfully')
+            expect(alertMessage).to.equal('Person saved')
         })
     })
 
@@ -58,6 +60,27 @@ describe('Create new Person form page', () => {
             warningMessage.waitForVisible()
             expect(warningMessage.getText()).to.equal('Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.')
         })
+        it('Should not save if endOfTourDate is not filled in', () => {
+            // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
+            CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
+            CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
+            CreatePerson.roleAdvisorButton.waitForExist()
+            CreatePerson.roleAdvisorButton.click()
+            CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
+            let errorMessage = browser.element('input#emailAddress + span.help-block')
+            errorMessage.waitForVisible(1000, true) // element should *not* be visible!
+            CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
+            CreatePerson.gender.selectByValue(CreatePerson.getRandomOption(CreatePerson.gender))
+            CreatePerson.country.selectByValue(CreatePerson.getRandomOption(CreatePerson.country))
+            // This makes sure the help-block is displayed after form submit
+            CreatePerson.endOfTourDate.setValue('')
+            CreatePerson.submitForm()
+            errorMessage = browser.element('input#endOfTourDate').$('..') .$('..').$('..').$('span.help-block')
+            errorMessage.waitForExist()
+            errorMessage.waitForVisible()
+            expect(errorMessage.getText()).to.equal('End of tour is required')
+        })
+
         it('Should save with a valid email address in uppercase', () => {
             // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
             CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
@@ -70,10 +93,14 @@ describe('Create new Person form page', () => {
             CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
             CreatePerson.gender.selectByValue(CreatePerson.getRandomOption(CreatePerson.gender))
             CreatePerson.country.selectByValue(CreatePerson.getRandomOption(CreatePerson.country))
+            CreatePerson.endOfTourDate.click()
+            CreatePerson.endOfTourDay.waitForExist()
+            // select a date
+            CreatePerson.endOfTourDay.click()
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
-            expect(alertMessage).to.equal('Person saved successfully')
+            expect(alertMessage).to.equal('Person saved')
         })
     })
 })

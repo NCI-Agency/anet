@@ -1,5 +1,7 @@
 package mil.dds.anet.resources;
 
+import java.util.Map;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -19,22 +21,24 @@ import javax.ws.rs.core.Response.Status;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.TagDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
+import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 
-@Path("/api/tags")
+@Path("/old-api/tags")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class TagResource implements IGraphQLResource {
+public class TagResource {
 
 	private TagDao dao;
 
@@ -44,17 +48,18 @@ public class TagResource implements IGraphQLResource {
 
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="tags")
 	@Path("/")
-	public TagList getAll(@DefaultValue("0") @QueryParam("pageNum") int pageNum, @DefaultValue("100") @QueryParam("pageSize") int pageSize) {
+	public AnetBeanList<Tag> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") int pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") int pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	}
 
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="tag")
 	@Path("/{id}")
-	public Tag getById(@PathParam("id") int id) {
+	public Tag getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
 		final Tag t = dao.getById(id);
 		if (t == null) {
 			throw new WebApplicationException(Status.NOT_FOUND);
@@ -64,16 +69,16 @@ public class TagResource implements IGraphQLResource {
 
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="tagList")
 	@Path("/search")
-	public TagList search(@GraphQLParam("query") TagSearchQuery query) {
+	public AnetBeanList<Tag> search(@GraphQLArgument(name="query") TagSearchQuery query) {
 		return dao.search(query);
 	}
 
 	@GET
 	@Timed
 	@Path("/search")
-	public TagList search(@Context HttpServletRequest request) {
+	public AnetBeanList<Tag> search(@Context HttpServletRequest request) {
 		return search(ResponseUtils.convertParamsToBean(request, TagSearchQuery.class));
 	}
 
@@ -81,14 +86,23 @@ public class TagResource implements IGraphQLResource {
 	@Timed
 	@Path("/new")
 	@RolesAllowed("SUPER_USER")
-	public Tag createNewTag(@Auth Person user, Tag t) {
+	public Tag createTag(@Auth Person user, Tag t) {
+		return createTagCommon(user, t);
+	}
+
+	@GraphQLMutation(name="createTag")
+	@RolesAllowed("SUPER_USER")
+	public Tag createTag(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="tag") Tag t) {
+		return createTagCommon(DaoUtils.getUserFromContext(context), t);
+	}
+
+	private Tag createTagCommon(Person user, Tag t) {
 		if (t.getName() == null || t.getName().trim().length() == 0) {
 			throw new WebApplicationException("Tag name must not be empty", Status.BAD_REQUEST);
 		}
 		t = dao.insert(t);
 		AnetAuditLogger.log("Tag {} created by {}", t, user);
 		return t;
-
 	}
 
 	@POST
@@ -96,24 +110,24 @@ public class TagResource implements IGraphQLResource {
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
 	public Response updateTag(@Auth Person user, Tag t) {
-		int numRows = dao.update(t);
+		updateTagCommon(user, t);
+		return Response.ok().build();
+	}
+
+	@GraphQLMutation(name="updateTag")
+	@RolesAllowed("SUPER_USER")
+	public Integer updateTag(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="tag") Tag t) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateTagCommon(DaoUtils.getUserFromContext(context), t);
+	}
+
+	private int updateTagCommon(Person user, Tag t) {
+		final int numRows = dao.update(t);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process tag update", Status.NOT_FOUND);
+		}
 		AnetAuditLogger.log("Tag {} updated by {}", t, user);
-		return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
-	}
-
-	@Override
-	public String getDescription() {
-		return "Tags";
-	}
-
-	@Override
-	public Class<Tag> getBeanClass() {
-		return Tag.class;
-	}
-
-	@Override
-	public Class<TagList> getBeanListClass() {
-		return TagList.class;
+		return numRows;
 	}
 
 }

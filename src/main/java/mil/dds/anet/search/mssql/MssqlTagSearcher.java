@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,7 @@ import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.Query;
 
 import mil.dds.anet.beans.Tag;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TagList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.beans.search.TagSearchQuery.TagSearchSortBy;
@@ -22,7 +23,7 @@ import mil.dds.anet.utils.Utils;
 public class MssqlTagSearcher implements ITagSearcher {
 
 	@Override
-	public TagList runSearch(TagSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Tag> runSearch(TagSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlTagSearch */ SELECT tags.*");
@@ -49,12 +50,8 @@ public class MssqlTagSearcher implements ITagSearcher {
 			sqlArgs.put("freetextQuery", text);
 		}
 
-		final TagList result = new TagList();
-		result.setPageNum(query.getPageNum());
-		result.setPageSize(query.getPageSize());
-
 		if (whereClauses.isEmpty()) {
-			return result;
+			return new AnetBeanList<Tag>(query.getPageNum(), query.getPageSize(), new ArrayList<Tag>());
 		}
 
 		sql.append(" WHERE ");
@@ -85,7 +82,7 @@ public class MssqlTagSearcher implements ITagSearcher {
 
 		final Query<Tag> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
 			.map(new TagMapper());
-		return TagList.fromQuery(sqlQuery, query.getPageNum(), query.getPageSize());
+		return new AnetBeanList<Tag>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
 	}
 
 }

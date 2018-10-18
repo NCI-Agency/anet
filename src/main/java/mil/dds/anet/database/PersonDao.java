@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.GeneratedKeys;
@@ -11,14 +12,15 @@ import org.skife.jdbi.v2.TransactionCallback;
 import org.skife.jdbi.v2.TransactionStatus;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Person.PersonStatus;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PersonList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
-import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class PersonDao extends AnetBaseDao<Person> {
 
@@ -29,15 +31,27 @@ public class PersonDao extends AnetBaseDao<Person> {
 			"updatedAt"};
 	private static String tableName = "people";
 	public static String PERSON_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
-	
+
+	private final IdBatcher<Person> idBatcher;
+	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
+
 	public PersonDao(Handle h) { 
 		super(h, "Person", tableName, PERSON_FIELDS, null);
+		final String idBatcherSql = "/* batch.getPeopleByIds */ SELECT " + PERSON_FIELDS + " FROM people WHERE id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, new PersonMapper());
+		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT \"peoplePositions\".\"positionId\" AS \"positionId\", "
+				+ "\"peoplePositions\".\"personId\" AS \"personId\", "
+				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
+				+ PositionDao.POSITIONS_FIELDS + " FROM \"peoplePositions\" "
+				+ "LEFT JOIN positions ON \"peoplePositions\".\"positionId\" = positions.id "
+				+ "WHERE \"personId\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "personId");
 	}
 	
-	public PersonList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
 		Query<Person> query = getPagedQuery(pageNum, pageSize, new PersonMapper());
 		Long manualCount = getSqliteRowCount();
-		return PersonList.fromQuery(query, pageNum, pageSize, manualCount);
+		return new AnetBeanList<Person>(query, pageNum, pageSize, manualCount);
 	}
 
 	public Person getById(int id) { 
@@ -48,7 +62,16 @@ public class PersonDao extends AnetBaseDao<Person> {
 		if (rs.size() == 0) { return null; } 
 		return rs.get(0);
 	}
-	
+
+	@Override
+	public List<Person> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
+	}
+
+	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<Integer> foreignKeys) {
+		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
+	}
+
 	public Person insert(Person p) {
 		p.setCreatedAt(DateTime.now());
 		p.setUpdatedAt(DateTime.now());
@@ -97,33 +120,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 			.execute();
 	}
 	
-	public PersonList search(PersonSearchQuery query) {
+	public AnetBeanList<Person> search(PersonSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPersonSearcher().runSearch(query, dbHandle);
-	}
-	
-	public Organization getOrganizationForPerson(int personId) {
-		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
-			sql = "/* getOrganizationForPerson */ SELECT TOP(1) " + OrganizationDao.ORGANIZATION_FIELDS 
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" = :personId AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC";
-		} else { 
-			sql = "/* getOrganizationForPerson */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
-					+ "FROM organizations, positions, \"peoplePositions\" WHERE "
-					+ "\"peoplePositions\".\"personId\" = :personId AND \"peoplePositions\".\"positionId\" = positions.id "
-					+ "AND positions.\"organizationId\" = organizations.id "
-					+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
-		}
-		
-		Query<Organization> query = dbHandle.createQuery(sql)
-			.bind("personId", personId)
-			.map(new OrganizationMapper());
-		List<Organization> rs = query.list();
-		if (rs.size() == 0) { return null; } 
-		return rs.get(0);
 	}
 
 	public List<Person> findByDomainUsername(String domainUsername) {
@@ -168,9 +167,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 				.list();
 	}
 
-	public boolean mergePeople(Person winner, Person loser, Boolean copyPosition) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int mergePeople(Person winner, Person loser, Boolean copyPosition) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//delete duplicates where other is primary, or where neither is primary
 				dbHandle.createStatement("DELETE FROM \"reportPeople\" WHERE ("
 						+ "\"personId\" = :loserId AND \"reportId\" IN ("
@@ -217,14 +216,21 @@ public class PersonDao extends AnetBaseDao<Person> {
 					.execute();
 		
 				//delete the person!
-				dbHandle.createStatement("DELETE FROM people WHERE id = :loserId")
+				return dbHandle.createStatement("DELETE FROM people WHERE id = :loserId")
 					.bind("loserId", loser.getId())
 					.execute();
-				
-				return null;
 			}
 		});
-		return true;	
+
 	}
-	
+
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Person person) {
+		return new ForeignKeyFetcher<PersonPositionHistory>()
+				.load(context, "person.personPositionHistory", person.getId())
+				.thenApply(l ->
+		{
+			return PersonPositionHistory.getDerivedHistory(l);
+		});
+	}
+
 }

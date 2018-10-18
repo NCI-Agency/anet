@@ -9,7 +9,6 @@ import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class AuthorizationGroupMapper implements ResultSetMapper<AuthorizationGroup> {
 
@@ -22,7 +21,6 @@ public class AuthorizationGroupMapper implements ResultSetMapper<AuthorizationGr
 		a.setStatus(MapperUtils.getEnumIdx(rs, "status", AuthorizationGroupStatus.class));
 		a.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 		a.setUpdatedAt(new DateTime(rs.getTimestamp("updatedAt")));
-		a.setLoadLevel(LoadLevel.PROPERTIES);
 
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
 			ctx.setAttribute("totalCount", rs.getInt("totalCount"));

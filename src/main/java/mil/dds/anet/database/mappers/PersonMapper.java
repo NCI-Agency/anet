@@ -12,7 +12,6 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
-import mil.dds.anet.views.AbstractAnetBean.LoadLevel;
 
 public class PersonMapper implements ResultSetMapper<Person> {
 
@@ -54,7 +53,6 @@ public class PersonMapper implements ResultSetMapper<Person> {
 		a.setCreatedAt(new DateTime(r.getTimestamp("people_createdAt")));
 		a.setUpdatedAt(new DateTime(r.getTimestamp("people_updatedAt")));	
 		
-		a.setLoadLevel(LoadLevel.PROPERTIES);
 		return a;
 	}
 }

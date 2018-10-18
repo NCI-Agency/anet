@@ -3,7 +3,7 @@ package mil.dds.anet.database;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -22,12 +22,13 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionType;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.PositionList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 public class PositionDao extends AnetBaseDao<Position> {
 
@@ -36,15 +37,30 @@ public class PositionDao extends AnetBaseDao<Position> {
 			"status", "locationId" };
 	private static String tableName = "positions";
 	public static String POSITIONS_FIELDS  = DaoUtils.buildFieldAliases(tableName, fields);
-	
+
+	private final IdBatcher<Position> idBatcher;
+	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
+
 	public PositionDao(Handle h) { 
 		super(h, "positions", tableName, POSITIONS_FIELDS, null);
+		final String idBatcherSql = "/* batch.getPositionsByIds */ SELECT " + POSITIONS_FIELDS + ", " + PersonDao.PERSON_FIELDS
+				+ "FROM positions LEFT JOIN people ON positions.\"currentPersonId\" = people.id "
+				+ "WHERE positions.id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Position>(h, idBatcherSql, new PositionMapper());
+
+		final String personPositionHistoryBatcherSql = "/* batch.getPositionHistory */ SELECT \"peoplePositions\".\"positionId\" AS \"positionId\", "
+				+ "\"peoplePositions\".\"personId\" AS \"personId\", "
+				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
+				+ PersonDao.PERSON_FIELDS + " FROM \"peoplePositions\" "
+				+ "LEFT JOIN people ON \"peoplePositions\".\"personId\" = people.id "
+				+ "WHERE \"positionId\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "positionId");
 	}
 	
-	public PositionList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<Position> getAll(int pageNum, int pageSize) {
 		Query<Position> query = getPagedQuery(pageNum, pageSize, new PositionMapper());
 		Long manualRowCount = getSqliteRowCount();
-		return PositionList.fromQuery(query, pageNum, pageSize, manualRowCount);
+		return new AnetBeanList<Position>(query, pageNum, pageSize, manualRowCount);
 	}
 	
 	public Position insert(Position p) {
@@ -97,7 +113,16 @@ public class PositionDao extends AnetBaseDao<Position> {
 		if (positions.size() == 0) { return null; } 
 		return positions.get(0);
 	}
-	
+
+	@Override
+	public List<Position> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
+	}
+
+	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<Integer> foreignKeys) {
+		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
+	}
+
 	/*
 	 * @return: number of rows updated. 
 	 */
@@ -122,9 +147,9 @@ public class PositionDao extends AnetBaseDao<Position> {
 		}
 	}
 	
-	public void setPersonInPosition(Person person, Position position) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int setPersonInPosition(Person person, Position position) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
 				//If this person is in a position already, we need to remove them. 
 				Position currPos = dbHandle.createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS 
@@ -151,22 +176,22 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("personId", person.getId())
 					.bind("positionId", position.getId())
 					.execute();
-				dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
+				// GraphQL mutations *have* to return something, so we return the number of inserted rows
+				return dbHandle.createStatement("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, :personId, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("personId", person.getId())
 					.bind("createdAt", now.plusMillis(1)) // Need to ensure this timestamp is greater than previous INSERT. 
 					.execute();
-				return null;
 			}
 		});
 		
 	}
 	
-	public void removePersonFromPosition(Position position) {
-		dbHandle.inTransaction(new TransactionCallback<Void>() {
-			public Void inTransaction(Handle conn, TransactionStatus status) throws Exception {
+	public int removePersonFromPosition(Position position) {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				DateTime now = DateTime.now();
 				dbHandle.createStatement("/* positionRemovePerson.update */ UPDATE positions "
 						+ "SET \"currentPersonId\" = :personId, \"updatedAt\" = :updatedAt "
@@ -197,13 +222,12 @@ public class PositionDao extends AnetBaseDao<Position> {
 					.bind("createdAt", now)
 					.execute();
 			
-				dbHandle.createStatement("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
+				return dbHandle.createStatement("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionId\", \"personId\", \"createdAt\") "
 						+ "VALUES (:positionId, null, :createdAt)")
 					.bind("positionId", position.getId())
 					.bind("createdAt", now)
 					.execute();
-				return null;
 			}
 		});
 	}
@@ -282,11 +306,11 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return query.list();
 	}
 
-	public void associatePosition(Position a, Position b) {
+	public int associatePosition(Position a, Position b) {
 		DateTime now = DateTime.now();
 		Integer idOne = Math.min(a.getId(), b.getId());
 		Integer idTwo = Math.max(a.getId(), b.getId());
-		dbHandle.createStatement("/* associatePosition */ INSERT INTO \"positionRelationships\" "
+		return dbHandle.createStatement("/* associatePosition */ INSERT INTO \"positionRelationships\" "
 				+ "(\"positionId_a\", \"positionId_b\", \"createdAt\", \"updatedAt\", deleted) "
 				+ "VALUES (:positionId_a, :positionId_b, :createdAt, :updatedAt, :deleted)")
 			.bind("positionId_a", idOne)
@@ -330,28 +354,18 @@ public class PositionDao extends AnetBaseDao<Position> {
 			.list();
 	}
 	
-	public PositionList search(PositionSearchQuery query) { 
+	public AnetBeanList<Position> search(PositionSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPositionSearcher().runSearch(query, dbHandle);
 	}
 
-	public List<PersonPositionHistory> getPositionHistory(Position position) {
-		PersonPositionHistoryMapper mapper = new PersonPositionHistoryMapper(position);
-		List<PersonPositionHistory> results = dbHandle.createQuery("/* getPositionHistory */ SELECT \"peoplePositions\".\"personId\" AS \"personId\", "
-				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
-				+ PersonDao.PERSON_FIELDS + " FROM \"peoplePositions\" "
-				+ "LEFT JOIN people ON \"peoplePositions\".\"personId\" = people.id "
-				+ "WHERE \"positionId\" = :positionId ORDER BY \"peoplePositions\".\"createdAt\" ASC")
-			.bind("positionId", DaoUtils.getId(position))
-			.map(mapper)
-			.list();
-		
-		results.add(mapper.getCurrentPerson());
-		
-		//Remove all null entries. 
-		results = results.stream().filter(pph -> pph != null).collect(Collectors.toList());
-		return results;
-		
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Position position) {
+		return new ForeignKeyFetcher<PersonPositionHistory>()
+				.load(context, "position.personPositionHistory", position.getId())
+				.thenApply(l ->
+		{
+			return PersonPositionHistory.getDerivedHistory(l);
+		});
 	}
 
 	public Boolean getIsApprover(Position position) {
@@ -363,7 +377,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return count.longValue() > 0;
 	}
 
-	public Integer deletePosition(final Position p) {
+	public int deletePosition(final Position p) {
 		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
 			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//if this position has any history, we'll just delete it

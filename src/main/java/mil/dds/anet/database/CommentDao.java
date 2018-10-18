@@ -9,20 +9,27 @@ import org.skife.jdbi.v2.Handle;
 
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Report;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.CommentMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 public class CommentDao implements IAnetDao<Comment> {
 
-	Handle dbHandle;
-	
+	private final Handle dbHandle;
+	private final IdBatcher<Comment> idBatcher;
+
 	public CommentDao(Handle dbHandle) { 
 		this.dbHandle = dbHandle;
+		final String idBatcherSql = "/* batch.getCommentsByIds */ SELECT comments.id AS c_id, "
+				+ "comments.\"createdAt\" AS c_createdAt, comments.\"updatedAt\" AS c_updatedAt, "
+				+ "comments.\"authorId\", comments.\"reportId\", comments.text, " + PersonDao.PERSON_FIELDS
+				+ "FROM comments LEFT JOIN people ON comments.\"authorId\" = people.id "
+				+ "WHERE comments.id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<Comment>(dbHandle, idBatcherSql, new CommentMapper());
 	}
 	
 	@Override
-	public AbstractAnetBeanList<?> getAll(int pageNum, int pageSize) {
+	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -39,6 +46,11 @@ public class CommentDao implements IAnetDao<Comment> {
 			.list();
 		if (results.size() == 0) { return null; } 
 		return results.get(0);
+	}
+
+	@Override
+	public List<Comment> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
 	}
 
 	@Override

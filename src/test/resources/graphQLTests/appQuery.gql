@@ -1,4 +1,4 @@
-person(f:me) {
+me {
     id, name, role
     position {
         id, name, type,
@@ -6,10 +6,10 @@ person(f:me) {
     }
 }
 
-adminSettings(f:getAll) {
+adminSettings {
     key, value
 }
-organizationList(f:getTopLevelOrgs, type: ADVISOR_ORG) {
+organizationTopLevelOrgs(type: ADVISOR_ORG) {
 	list { 
 	    id, shortName, longName
 	    parentOrg { id } 

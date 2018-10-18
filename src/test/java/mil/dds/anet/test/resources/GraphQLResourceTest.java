@@ -7,11 +7,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URLEncoder;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
@@ -21,21 +25,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
-import io.dropwizard.client.JerseyClientBuilder;
 import mil.dds.anet.beans.Person;
 
 public class GraphQLResourceTest extends AbstractResourceTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	public GraphQLResourceTest() { 
-		if (client == null) { 
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("graphql test client");
-		}
-	}
-	
 	@Test
-	public void test() {
+	public void test()
+		throws ExecutionException, InterruptedException {
 		final Person jack = getJackJackson();
 		final Person steve = getSteveSteveson();
 		File testDir = new File("src/test/resources/graphQLTests/");
@@ -44,10 +42,10 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 		
 		Map<String,Object> variables = new HashMap<String,Object>();
 		variables.put("personId", jack.getId().toString());
-		variables.put("positionId", jack.loadPosition().getId());
-		variables.put("orgId", steve.loadPosition().loadOrganization().getId());
+		variables.put("positionId", steve.loadPosition().getId());
+		variables.put("orgId", steve.loadPosition().loadOrganization(context).get().getId());
 		variables.put("searchQuery", "hospital");
-		variables.put("reportId", jack.loadAttendedReports(0, 20).getList().get(0).getId());
+		variables.put("reportId", jack.loadAttendedReports(0, 1).getList().get(0).getId());
 		variables.put("pageNum", 0);
 		variables.put("pageSize", 10);
 		variables.put("maxResults", 6);
@@ -130,5 +128,18 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 			.isFalse();
 		assertThat(resp.containsKey("data")).as("Missing Data on " + f.getName(), resp).isTrue();
 	}
-	
+
+	/*
+	 * Helper method to build httpQuery with authentication and Accept headers.
+	 */
+	private Builder httpQuery(String path, Person authUser) {
+		final String authString = Base64.getEncoder()
+				.encodeToString((authUser.getDomainUsername() + ":").getBytes());
+		return client
+				.target(String.format("http://localhost:%d%s", RULE.getLocalPort(), path))
+				.request()
+				.header("Authorization", "Basic " + authString)
+				.header("Accept", MediaType.APPLICATION_JSON_TYPE.toString());
+	}
+
 }

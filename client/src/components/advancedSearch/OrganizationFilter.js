@@ -73,14 +73,13 @@ export default class OrganizationFilter extends Component {
 					<Autocomplete
 						objectType={Organization}
 						valueKey="shortName"
-						url="/api/organizations/search"
+						fields={Organization.autocompleteQuery}
 						placeholder="Filter by organization..."
 						queryParams={this.state.queryParams}
 						{...autocompleteProps}
 						onChange={this.onAutocomplete}
 						value={this.state.value}
 					/>
-
 					<Checkbox inline checked={this.state.includeChildOrgs} onChange={this.changeIncludeChildren}>
 						Include sub-organizations
 					</Checkbox>
@@ -95,7 +94,9 @@ export default class OrganizationFilter extends Component {
 
 	@autobind
 	onAutocomplete(event) {
-		this.setState({value: event}, this.updateFilter)
+		if (typeof event === 'object') {
+			this.setState({value: event}, this.updateFilter)
+		}
 	}
 
 	@autobind

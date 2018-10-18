@@ -38,6 +38,7 @@ class BasePersonShow extends Page {
 		this.state = {
 			person: new Person({
 				id: props.match.params.id,
+				previousPositions: [],
 			}),
 			authoredReports: null,
 			attendedReports: null,
@@ -62,7 +63,7 @@ class BasePersonShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}`)
-			.addVariable("authorQuery", "ReportSearchQuery", query)
+			.addVariable("authorQuery", "ReportSearchQueryInput", query)
 		return part
 	}
 
@@ -78,7 +79,7 @@ class BasePersonShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}`)
-			.addVariable("attendeeQuery", "ReportSearchQuery", query)
+			.addVariable("attendeeQuery", "ReportSearchQueryInput", query)
 		return part
 	}
 
@@ -101,7 +102,8 @@ class BasePersonShow extends Page {
 						organization { id, shortName }
 					}
 				}
-			}`)
+				previousPositions { startTime, endTime, position { id, name }}
+		}`)
 		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.id)
 		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.id)
 
@@ -239,6 +241,28 @@ class BasePersonShow extends Page {
 							/>
 						</Fieldset>
 					}
+
+					<Fieldset title="Previous positions" id="previous-positions">
+						<Table>
+							<thead>
+								<tr>
+									<th>Position</th>
+									<th>Dates</th>
+								</tr>
+							</thead>
+							<tbody>
+								{person.previousPositions.map( (pp, idx) =>
+									<tr key={idx} id={`previousPosition_${idx}`}>
+										<td><LinkTo position={pp.position} /></td>
+										<td>
+											{moment(pp.startTime).format('D MMM YYYY')} - &nbsp;
+											{pp.endTime && moment(pp.endTime).format('D MMM YYYY')}
+										</td>
+									</tr>
+								)}
+							</tbody>
+						</Table>
+					</Fieldset>
 				</Form>
 			</div>
 		)

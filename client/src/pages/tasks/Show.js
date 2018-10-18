@@ -58,7 +58,7 @@ class BaseTaskShow extends Page {
 					${ReportCollection.GQL_REPORT_FIELDS}
 				}
 			}
-		`).addVariable("reportsQuery", "ReportSearchQuery", {
+		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
 			taskId: props.match.params.id,

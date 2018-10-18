@@ -1,4 +1,4 @@
-reportList (f:search, query:{text:"${searchQuery}"}) {
+reportList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
 	list { id, intent, engagementDate, keyOutcomes, nextSteps
         primaryAdvisor { id, name, position { organization { id, shortName, longName}}},
         primaryPrincipal { id, name, position { organization { id, shortName, longName}}},
@@ -9,19 +9,19 @@ reportList (f:search, query:{text:"${searchQuery}"}) {
 	}
 }
 
-personList(f:search, query:{text:"${searchQuery}"}) { 
+personList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
 	totalCount, list { id, name, rank, emailAddress }
 }
-positionList (f:search, query:{text:"${searchQuery}"}) { 
+positionList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
 	totalCount, list { id, name, type, organization{ id, shortName} , person { id, name}}
 }
-taskList (f:search, query:{text:"${searchQuery}"}) { 
+taskList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
 	totalCount, list { id, shortName, longName}
 }
-locationList (f:search, query:{text:"${searchQuery}"}) { 
+locationList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
 	totalCount, list { id, name, lat, lng}
 }
-organizationList (f:search, query:{text:"${searchQuery}"}) { 
+organizationList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
 	totalCount, list { id, shortName, longName }
 }
 

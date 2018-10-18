@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 import org.skife.jdbi.v2.GeneratedKeys;
@@ -20,23 +21,34 @@ import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.AuthorizationGroupList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterMapper(AuthorizationGroupMapper.class)
 public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 
-	private Handle dbHandle;
+	private final Handle dbHandle;
+	private final IdBatcher<AuthorizationGroup> idBatcher;
+	private final ForeignKeyBatcher<Position> positionsBatcher;
 
 	public AuthorizationGroupDao(Handle h) {
 		this.dbHandle = h;
+		final String idBatcherSql = "/* batch.getAuthorizationGroupsByIds */ SELECT * from \"authorizationGroups\" where id IN ( %1$s )";
+		this.idBatcher = new IdBatcher<AuthorizationGroup>(h, idBatcherSql, new AuthorizationGroupMapper());
+
+		final String positionsBatcherSql = "/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupId\", " + PositionDao.POSITIONS_FIELDS
+				+ " FROM positions, \"authorizationGroupPositions\" "
+				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupId\" IN ( %1$s ) "
+				+ "AND \"authorizationGroupPositions\".\"positionId\" = positions.id";
+		this.positionsBatcher = new ForeignKeyBatcher<Position>(h, positionsBatcherSql, new PositionMapper(), "authorizationGroupId");
 	}
 
-	public AuthorizationGroupList getAll(int pageNum, int pageSize) {
+	public AnetBeanList<AuthorizationGroup> getAll(int pageNum, int pageSize) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getAllAuthorizationGroups */ SELECT \"authorizationGroups\".*, COUNT(*) OVER() AS totalCount "
@@ -51,7 +63,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum)
 				.map(new AuthorizationGroupMapper());
-		return AuthorizationGroupList.fromQuery(query, pageNum, pageSize);
+		return new AnetBeanList<AuthorizationGroup>(query, pageNum, pageSize, null);
 	}
 
 	@Override
@@ -62,6 +74,15 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 		final List<AuthorizationGroup> results = query.list();
 		if (results.size() == 0) { return null; }
 		return results.get(0);
+	}
+
+	@Override
+	public List<AuthorizationGroup> getByIds(List<Integer> ids) {
+		return idBatcher.getByIds(ids);
+	}
+
+	public List<List<Position>> getPositions(List<Integer> foreignKeys) {
+		return positionsBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	@Override
@@ -130,16 +151,12 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				.execute();
 	}
 
-	public List<Position> getPositionsForAuthorizationGroup(AuthorizationGroup a) {
-		return dbHandle.createQuery("/* getPositionsForAuthorizationGroup */ SELECT " + PositionDao.POSITIONS_FIELDS + " FROM positions, \"authorizationGroupPositions\" "
-				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupId\" = :authorizationGroupId "
-				+ "AND \"authorizationGroupPositions\".\"positionId\" = positions.id")
-				.bind("authorizationGroupId", a.getId())
-				.map(new PositionMapper())
-				.list();
+	public CompletableFuture<List<Position>> getPositionsForAuthorizationGroup(Map<String, Object> context, Integer authorizationGroupId) {
+		return new ForeignKeyFetcher<Position>()
+				.load(context, "authorizationGroup.positions", authorizationGroupId);
 	}
 
-	public AuthorizationGroupList search(AuthorizationGroupSearchQuery query) {
+	public AnetBeanList<AuthorizationGroup> search(AuthorizationGroupSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getAuthorizationGroupSearcher().runSearch(query, dbHandle);
 	}

@@ -274,8 +274,8 @@ ${sender.name} sent you a report from ANET:
         <label for="location" class="col-sm-2 control-label">Location</label>
         <div class="col-sm-7">
           <div id="location" class="form-control-static">
-            <#if report.loadLocation()??>
-              <#assign location = report.loadLocation()>
+            <#if report.loadLocation(context).get()??>
+              <#assign location = report.getLocation()>
               <a href="/locations/${location.id?c}">${(location.name)!}</a>
             </#if>
           </div>
@@ -301,8 +301,8 @@ ${sender.name} sent you a report from ANET:
         </#if>
       </div>
 
-      <#if report.loadTags()??>
-        <#assign tags = report.loadTags()>
+      <#if report.loadTags(context).get()??>
+        <#assign tags = report.getTags()>
         <div class="form-group">
           <label for="tags" class="col-sm-2 control-label">Tags</label>
           <div class="col-sm-7">
@@ -328,8 +328,8 @@ ${sender.name} sent you a report from ANET:
         <label for="advisorOrg" class="col-sm-2 control-label">${fields.advisor.org.name}</label>
         <div class="col-sm-7">
           <div id="advisorOrg" class="form-control-static">
-            <#if report.loadAdvisorOrg()??>
-              <#assign advisorOrg = report.loadAdvisorOrg()>
+            <#if report.loadAdvisorOrg(context).get()??>
+              <#assign advisorOrg = report.getAdvisorOrg()>
               <a href="/organizations/${advisorOrg.id?c}">${(advisorOrg.shortName)!(advisorOrg.longName)!(advisorOrg.identificationCode)!}</a>
             </#if>
           </div>
@@ -340,8 +340,8 @@ ${sender.name} sent you a report from ANET:
         <label for="principalOrg" class="col-sm-2 control-label">${fields.principal.org.name}</label>
         <div class="col-sm-7">
           <div id="principalOrg" class="form-control-static">
-            <#if report.loadPrincipalOrg()??>
-              <#assign principalOrg = report.loadPrincipalOrg()>
+            <#if report.loadPrincipalOrg(context).get()??>
+              <#assign principalOrg = report.getPrincipalOrg()>
               <a href="/organizations/${principalOrg.id?c}">${(principalOrg.shortName)!(principalOrg.longName)!(principalOrg.identificationCode)!}</a>
             </#if>
           </div>
@@ -395,7 +395,7 @@ ${sender.name} sent you a report from ANET:
         </#macro>
 
         <tbody>
-          <#assign attendees = report.loadAttendees()>
+          <#assign attendees = report.loadAttendees(context).get()>
           <#list attendees as attendee>
             <#if attendee.role == "ADVISOR">
               <@renderAttendee attendee />
@@ -416,8 +416,8 @@ ${sender.name} sent you a report from ANET:
     </fieldset>
   </div>
 
-  <#if report.loadTasks()??>
-    <#assign tasks = report.loadTasks()>
+  <#if report.loadTasks(context).get()??>
+    <#assign tasks = report.getTasks()>
     <div>
       <h2 class="legend">
         <span class="title-text">${fields.task.longLabel}</span>
@@ -441,8 +441,8 @@ ${sender.name} sent you a report from ANET:
                 <a href="/tasks/${task.id?c}">${(task.shortName)!} - ${(task.longName)!}</a>
               </td>
               <td class="taskOrg">
-                <#if task.loadResponsibleOrg()??>
-                  <#assign responsibleOrg = task.loadResponsibleOrg()>
+                <#if task.loadResponsibleOrg(context).get()??>
+                  <#assign responsibleOrg = task.getResponsibleOrg()>
                   <a href="/organizations/${responsibleOrg.id?c}">${(responsibleOrg.shortName)!(responsibleOrg.longName)!(responsibleOrg.identificationCode)!}</a>
                 </#if>
               </td>
@@ -469,8 +469,8 @@ ${sender.name} sent you a report from ANET:
     </div>
   </#if>
 
-  <#if report.loadApprovalStatus()??>
-    <#assign approvalStatus = report.loadApprovalStatus()>
+  <#assign approvalStatus = report.loadApprovalStatus(context).get()>
+  <#if approvalStatus??>
     <div id="approvals">
       <h2 class="legend">
         <span class="title-text">Approval State</span>
@@ -494,15 +494,15 @@ ${sender.name} sent you a report from ANET:
             <div class="approval-status">
               ${type}
             </div>
-            <#if approvalAction.loadStep()??>
-              <#assign step = approvalAction.loadStep()>
+            <#if approvalAction.loadStep(context).get()??>
+              <#assign step = approvalAction.getStep()>
               <button type="button" class="${styleClass} btn-sm btn btn-default">
                 <span>
                   ${(step.name)!}
                 </span>
               </button>
-              <#if approvalAction.loadPerson()??>
-                <#assign person = approvalAction.loadPerson()>
+              <#if approvalAction.loadPerson(context).get()??>
+                <#assign person = approvalAction.getPerson()>
                 <div class="approval-details">
                   <span>By ${(person.name)!}</span><br>
                   <small>On ${(approvalAction.createdAt.toString('dd MMM yyyy'))!}

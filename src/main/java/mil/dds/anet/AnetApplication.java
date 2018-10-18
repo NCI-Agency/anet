@@ -59,7 +59,6 @@ import mil.dds.anet.auth.UrlParamsAuthFilter;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.resources.AdminResource;
-import mil.dds.anet.resources.ApprovalStepResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
 import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.resources.HomeResource;
@@ -221,7 +220,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		LocationResource locationResource = new LocationResource(engine);
 		OrganizationResource orgResource = new OrganizationResource(engine);
 		PositionResource positionResource = new PositionResource(engine);
-		ApprovalStepResource asResource = new ApprovalStepResource(engine);
 		ReportResource reportResource = new ReportResource(engine, configuration);
 		AdminResource adminResource = new AdminResource(engine, configuration);
 		HomeResource homeResource = new HomeResource(engine);
@@ -236,7 +234,6 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		environment.jersey().register(locationResource);
 		environment.jersey().register(orgResource);
 		environment.jersey().register(positionResource);
-		environment.jersey().register(asResource);
 		environment.jersey().register(reportResource);
 		environment.jersey().register(adminResource);
 		environment.jersey().register(homeResource);
@@ -244,12 +241,12 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		environment.jersey().register(tagResource);
 		environment.jersey().register(authorizationGroupResource);
 		environment.jersey().register(new ViewResponseFilter(configuration));
-		environment.jersey().register(new GraphQLResource(
-			ImmutableList.of(reportResource, personResource,
-				positionResource, locationResource,
-				orgResource, asResource, taskResource,
-				adminResource, savedSearchResource, tagResource, authorizationGroupResource),
-			metricRegistry, configuration.isDevelopmentMode()));
+		environment.jersey().register(new GraphQLResource(engine,
+				ImmutableList.of(reportResource, personResource,
+						positionResource, locationResource,
+						orgResource, taskResource,
+						adminResource, savedSearchResource, tagResource, authorizationGroupResource),
+						metricRegistry, configuration.isDevelopmentMode()));
 	}
 
 	protected static JSONObject getDictionary(AnetConfiguration configuration)

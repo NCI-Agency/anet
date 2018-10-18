@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import React from 'react'
-import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import moment from 'moment'
 import autobind from 'autobind-decorator'
 
@@ -30,6 +30,8 @@ class BaseReportEdit extends Page {
 		super(props, PAGE_PROPS_NO_NAV)
 
 		this.state = {
+			success: null,
+			error: null,
 			report: new Report(),
 			originalReport: new Report(),
 		}
@@ -44,7 +46,7 @@ class BaseReportEdit extends Page {
 				location { id, name },
 				attendees {
 					id, name, role, primary
-					position { id, name, organization { id, shortName} }
+					position { id, name, code, organization { id, shortName}, location {id, name} }
 				}
 				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
 				tags { id, name, description }
@@ -86,15 +88,20 @@ class BaseReportEdit extends Page {
 
 	@autobind
 	onConfirmDelete() {
-		API.send(`/api/reports/${this.state.report.id}/delete`, {}, {method: 'DELETE'}).then(data => {
-			this.props.history.push({
-				pathname: '/',
-				state: {success: 'Report deleted'}
+		const operation = 'deleteReport'
+		let graphql = operation + '(id: $id)'
+		const variables = { id: this.state.report.id }
+		const variableDef = '($id: Int!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.props.history.push({
+					pathname: '/',
+					state: {success: 'Report deleted'}
+				})
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
 			})
-		}, data => {
-			this.setState({success:null})
-			this.handleError(data)
-		})
 	}
 }
 

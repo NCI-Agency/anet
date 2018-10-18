@@ -2,6 +2,9 @@ package mil.dds.anet.resources;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -29,29 +32,31 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
+import io.leangen.graphql.annotations.GraphQLArgument;
+import io.leangen.graphql.annotations.GraphQLMutation;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.OrganizationList;
-import mil.dds.anet.beans.lists.AbstractAnetBeanList.TaskList;
+import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.OrganizationDao;
-import mil.dds.anet.graphql.GraphQLFetcher;
-import mil.dds.anet.graphql.GraphQLParam;
-import mil.dds.anet.graphql.IGraphQLResource;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
-@Path("/api/organizations")
+@Path("/old-api/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class OrganizationResource implements IGraphQLResource {
+public class OrganizationResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -63,42 +68,42 @@ public class OrganizationResource implements IGraphQLResource {
 		this.engine = engine;
 	}
 	
-	@Override
-	public Class<Organization> getBeanClass() {
-		return Organization.class; 
-	}
-	
-	public Class<OrganizationList> getBeanListClass() {
-		return OrganizationList.class; 
-	}
-	
-	@Override
-	public String getDescription() {
-		return "Organizations";
-	}
-	
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="organizations")
 	@Path("/")
-	public OrganizationList getAll(@DefaultValue("0") @QueryParam("pageNum") Integer pageNum, 
-			@DefaultValue("100") @QueryParam("pageSize") Integer pageSize) {
+	public AnetBeanList<Organization> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") Integer pageNum,
+			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100") Integer pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	} 
 
 	@GET
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="organizationTopLevelOrgs")
 	@Path("/topLevel")
-	public OrganizationList getTopLevelOrgs(@QueryParam("type") OrganizationType type) { 
-		return new OrganizationList(dao.getTopLevelOrgs(type));
+	public AnetBeanList<Organization> getTopLevelOrgs(@QueryParam("type") @GraphQLArgument(name="type") OrganizationType type) {
+		return new AnetBeanList<Organization>(dao.getTopLevelOrgs(type));
 	}
-	
+
+	@GET
+	@Timed
+	@GraphQLQuery(name="organization")
+	@Path("/{id}")
+	public Organization getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
+		Organization org = dao.getById(id);
+		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); }
+		return org;
+	}
+
 	@POST
 	@Timed
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
-	public Organization createNewOrganization(Organization org, @Auth Person user) {
+	public Organization createOrganization(@Auth Person user, Organization org) {
+		return createOrganizationCommon(user, org);
+	}
+
+	private Organization createOrganizationCommon(Person user, Organization org) {
 		AuthUtils.assertAdministrator(user);
 		final Organization outer;
 		outer = engine.getDbHandle().inTransaction(new TransactionCallback<Organization>() {
@@ -128,20 +133,16 @@ public class OrganizationResource implements IGraphQLResource {
 				return created;
 			}
 		});
-		AnetAuditLogger.log("Organization {} created by {}", org, user);
+		AnetAuditLogger.log("Organization {} created by {}", outer, user);
 		return outer;
 	}
-	
-	@GET
-	@Timed
-	@GraphQLFetcher
-	@Path("/{id}")
-	public Organization getById(@PathParam("id") int id) {
-		Organization org = dao.getById(id);
-		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
-		return org;
+
+	@GraphQLMutation(name="createOrganization")
+	@RolesAllowed("ADMINISTRATOR")
+	public Organization createOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org) {
+		return createOrganizationCommon(DaoUtils.getUserFromContext(context), org);
 	}
-	
+
 	/**
 	 * Primary endpoint to update all aspects of an Organization.
 	 * - Organization (shortName, longName, identificationCode)
@@ -152,10 +153,15 @@ public class OrganizationResource implements IGraphQLResource {
 	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
-	public Response updateOrganization(Organization org, @Auth Person user) { 
+	public Response updateOrganization(@Auth Person user, Organization org) {
+		updateOrganizationCommon(user, org);
+		return Response.ok().build();
+	}
+
+	private int updateOrganizationCommon(Person user, Organization org) {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Response>() {
-			public Response inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
+			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
 				//Verify correct Organization
 				AuthUtils.assertSuperUserForOrg(user, org);
 				final int numRows;
@@ -163,6 +169,10 @@ public class OrganizationResource implements IGraphQLResource {
 					numRows = dao.update(org);
 				} catch (UnableToExecuteStatementException e) {
 					throw ResponseUtils.handleSqlException(e, "Duplicate identification code");
+				}
+
+				if (numRows == 0) {
+					throw new WebApplicationException("Couldn't process organization update", Status.NOT_FOUND);
 				}
 
 				if (org.getTasks() != null || org.getApprovalSteps() != null) {
@@ -182,7 +192,7 @@ public class OrganizationResource implements IGraphQLResource {
 							validateApprovalStep(step);
 							step.setAdvisorOrganizationId(org.getId());
 						}
-						List<ApprovalStep> existingSteps = existing.loadApprovalSteps();
+						List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).get();
 
 						Utils.addRemoveElementsById(existingSteps, org.getApprovalSteps(),
 								newStep -> engine.getApprovalStepDao().insert(newStep),
@@ -198,49 +208,71 @@ public class OrganizationResource implements IGraphQLResource {
 								engine.getApprovalStepDao().update(curr);
 							} else {
 								//Check for updates to name, nextStepId and approvers.
-								ApprovalStepResource.updateStep(curr, existingStep);
+								updateStep(curr, existingStep);
 							}
 						}
 					}
 				}
 
-				AnetAuditLogger.log("Organization {} edited by {}", org, user);
-				return (numRows == 1) ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+				AnetAuditLogger.log("Organization {} updated by {}", org, user);
+				return numRows;
 			}
 		});
 	}
-	
+
+	//Helper method that diffs the name/members of an approvalStep
+	private void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
+		final AnetObjectEngine engine = AnetObjectEngine.getInstance();
+		final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
+		newStep.setId(oldStep.getId()); //Always want to make changes to the existing group
+		if (!newStep.getName().equals(oldStep.getName())) {
+			approvalStepDao.update(newStep);
+		} else if (!Objects.equals(newStep.getNextStepId(), oldStep.getNextStepId())) {
+			approvalStepDao.update(newStep);
+		}
+
+		if (newStep.getApprovers() != null) {
+			try {
+				Utils.addRemoveElementsById(oldStep.loadApprovers(engine.getContext()).get(), newStep.getApprovers(),
+					newPosition -> approvalStepDao.addApprover(newStep, newPosition),
+					oldPositionId -> approvalStepDao.removeApprover(newStep, Position.createWithId(oldPositionId)));
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Approvers", e);
+			}
+		}
+	}
+
+	@GraphQLMutation(name="updateOrganization")
+	@RolesAllowed("SUPER_USER")
+	public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org) {
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
+		return updateOrganizationCommon(DaoUtils.getUserFromContext(context), org);
+	}
+
 	@POST
 	@Timed
-	@GraphQLFetcher
+	@GraphQLQuery(name="organizationList")
 	@Path("/search")
-	public OrganizationList search(@GraphQLParam("query") OrganizationSearchQuery query) {
+	public AnetBeanList<Organization> search(@GraphQLArgument(name="query") OrganizationSearchQuery query) {
 		return dao.search(query);
 	}
 	
 	@GET
 	@Timed
 	@Path("/search")
-	public OrganizationList search(@Context HttpServletRequest request) {
+	public AnetBeanList<Organization> search(@Context HttpServletRequest request) {
 		try {
 			return search(ResponseUtils.convertParamsToBean(request, OrganizationSearchQuery.class));
 		} catch (IllegalArgumentException e) {
 			throw new WebApplicationException(e.getMessage(), e.getCause(), Status.BAD_REQUEST);
 		}
 	}
-	
-	@GET
-	@Timed
-	@Path("/{id}/tasks")
-	public TaskList getTasks(@PathParam("id") Integer orgId) { 
-		return new TaskList(AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationId(orgId));
-	}
 
 	private void validateApprovalStep(ApprovalStep step) {
 		if (Utils.isEmptyOrNull(step.getName())) {
 			throw new WebApplicationException("A name is required for every approval step", Status.BAD_REQUEST);
 		}
-		if (Utils.isEmptyOrNull(step.loadApprovers())) {
+		if (Utils.isEmptyOrNull(step.getApprovers())) {
 			throw new WebApplicationException("An approver is required for every approval step", Status.BAD_REQUEST);
 		}
 	}
