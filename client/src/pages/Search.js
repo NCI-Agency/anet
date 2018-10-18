@@ -98,7 +98,6 @@ class BaseSearch extends Page {
 		scrollspyOffset: PropTypes.number,
 	}
 
-	toastId = null;
 	successToastId = 'success-message';
 	errorToastId = 'error-message';
 	notify = (success) => {
