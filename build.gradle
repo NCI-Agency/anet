@@ -7,7 +7,6 @@ apply plugin: 'checkstyle'
 apply plugin: 'org.kordamp.markdown.convert'
 apply plugin: 'com.bmuschko.docker-remote-api'
 apply plugin: 'com.moowork.node'
-apply plugin: "org.sonarqube"
 apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport tasks
 
 sourceCompatibility = 1.8
@@ -309,7 +308,6 @@ buildscript {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:4.0.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
-		classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2"
 	}
 }
 
@@ -331,11 +329,4 @@ node {
 	nodeModulesDir = file("${project.projectDir}/client")
 	version = '8.11.2'
 	download = true
-}
-
-sonarqube {
-    properties {
-        property "sonar.sources", "src/main/java,client/src"
-        property "sonar.tests", "src/test/java,client/tests"
-    }
 }
