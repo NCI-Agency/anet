@@ -443,7 +443,7 @@ class BaseReportShow extends Page {
 				onChange={this.onChangeComment}
 			/>
 
-			<Button bsStyle="warning" onClick={this.rejectReport}>Reject with comment</Button>
+			<Button bsStyle="warning" onClick={this.handleRejectReport}>Reject with comment</Button>
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
 				<Button bsStyle="primary" onClick={this.handleApproveReport} className="approve-button"><strong>Approve</strong></Button>
@@ -589,11 +589,19 @@ class BaseReportShow extends Page {
 		const variableDef = '($id: Int!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
-				this.updateReport()
-				this.setState({error:null, success: 'Successfully rejected report'})
+				const { currentUser } = this.props
+				const queryDetails = this.pendingMyApproval(currentUser)
+				const message = 'Successfully rejected report.'
+				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback.bind(this, message))
 			}).catch(error => {
 				this.handleError(error)
 			})
+	}
+
+	handleRejectReport = (event) => {
+		this.rejectReport()
+		event.preventDefault()
+		event.stopPropagation()
 	}
 
 	pendingMyApproval = (currentUser) => {
@@ -603,10 +611,7 @@ class BaseReportShow extends Page {
 		}
 	}
 
-	deserializeCallback = (objectType, filters, text) => {
-		const { report } = this.state
-		const lastApproval = (report.approvalStep.nextStepId === null)
-		const message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
+	deserializeCallback = (message, objectType, filters, text) => {
 		// We update the Redux state
 		this.props.setSearchQuery({
 			objectType: objectType,
@@ -635,7 +640,10 @@ class BaseReportShow extends Page {
 			.then(data => {
 				const { currentUser } = this.props
 				const queryDetails = this.pendingMyApproval(currentUser)
-				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback)
+				const { report } = this.state
+				const lastApproval = (report.approvalStep.nextStepId === null)
+				const message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
+				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback.bind(this, message))
 			})
 			.catch(error => {
 				this.handleError(error)
@@ -668,7 +676,7 @@ class BaseReportShow extends Page {
 	}
 
 	@autobind
-	updateReport(json) {
+	updateReport() {
 		this.fetchData(this.props)
 		jumpToTop()
 	}
