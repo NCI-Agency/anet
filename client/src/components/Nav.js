@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { mapDispatchToProps, propTypes as pagePropTypes } from 'components/Page'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
-import {IndexLinkContainer as Link} from 'react-router-bootstrap'
+import {IndexLinkContainer as Link, LinkContainer} from 'react-router-bootstrap'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
@@ -131,15 +131,15 @@ class BaseNav extends Component {
 				}
 
 				{currentUser.isAdmin() &&
-					<Link to="/admin">
+					<LinkContainer to="/admin">
 						<NavItem>Admin</NavItem>
-					</Link>
+					</LinkContainer>
 				}
 
 				{inAdmin &&
 					<BSNav>
-						<Link to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></Link>
-						<Link to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></Link>
+						<LinkContainer to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></LinkContainer>
+						<LinkContainer to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></LinkContainer>
 					</BSNav>
 				}
 
@@ -177,4 +177,4 @@ const Nav = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Nav))
+export default connect(mapStateToProps, mapDispatchToProps, null, { pure: false })(withRouter(Nav))
