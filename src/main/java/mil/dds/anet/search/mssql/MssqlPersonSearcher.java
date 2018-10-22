@@ -67,9 +67,11 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 					+ "c_people.rank IS NOT NULL"
 					+ " OR f_people.rank IS NOT NULL");
 			if (query.getMatchPositionName()) {
-				sql.append(" LEFT JOIN CONTAINSTABLE(positions, (name, code), :containsQuery) c_positions"
+				sql.append(" LEFT JOIN CONTAINSTABLE(positions, (name), :containsQuery) c_positions"
 						+ " ON positions.uuid = c_positions.[Key]");
-				whereRank.append(" OR c_positions.rank IS NOT NULL");
+				whereRank.append(" OR c_positions.rank IS NOT NULL"
+						+ " OR positions.code LIKE :likeQuery");
+				sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 			}
 			whereRank.append(")");
 			whereClauses.add(whereRank.toString());

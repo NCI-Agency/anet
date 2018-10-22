@@ -869,17 +869,17 @@ autobind-decorator@^2.1.0:
   resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-2.1.0.tgz#4451240dbfeff46361c506575a63ed40f0e5bc68"
   integrity sha512-bgyxeRi1R2Q8kWpHsb1c+lXCulbIAHsyZRddaS+agAUX3hFUVZMociwvRgeZi1zWvfqEEjybSv4zxWvFV8ydQQ==
 
-autoprefixer@^9.1.5:
-  version "9.1.5"
-  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.1.5.tgz#8675fd8d1c0d43069f3b19a2c316f3524e4f6671"
-  integrity sha512-kk4Zb6RUc58ld7gdosERHMF3DzIYJc2fp5sX46qEsGXQQy5bXsu8qyLjoxuY1NuQ/cJuCYnx99BfjwnRggrYIw==
+autoprefixer@^9.2.0:
+  version "9.2.0"
+  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.2.0.tgz#e46f893882b19a160370e7bcd3ec6bbeaace4d10"
+  integrity sha512-OuxUyTvzRe9EvKyouPqfr8QUkQ0pH400NOFzI1LFINO8zwgJr7ZTybLql03P//LjR0iWile2lCoy2vRTRSFpMw==
   dependencies:
-    browserslist "^4.1.0"
-    caniuse-lite "^1.0.30000884"
+    browserslist "^4.2.1"
+    caniuse-lite "^1.0.30000890"
     normalize-range "^0.1.2"
     num2fraction "^1.2.2"
-    postcss "^7.0.2"
-    postcss-value-parser "^3.2.3"
+    postcss "^7.0.5"
+    postcss-value-parser "^3.3.1"
 
 ava-init@^0.2.0:
   version "0.2.1"
@@ -2197,14 +2197,14 @@ browserslist@^2.1.2:
     caniuse-lite "^1.0.30000792"
     electron-to-chromium "^1.3.30"
 
-browserslist@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.1.0.tgz#81cbb8e52dfa09918f93c6e051d779cb7360785d"
-  integrity sha512-kQBKB8hnq1SRfSpwHDpM1JNHAyk9fydW8hIDvndR2ijTFKIlBPEvkJkCt8JznOugdm12/YCaRgyq/sqDGz9PwA==
+browserslist@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.2.1.tgz#257a24c879d1cd4016348eee5c25de683260b21d"
+  integrity sha512-1oO0c7Zhejwd+LXihS89WqtKionSbz298rJZKJgfrHIZhrV8AC15gw553VcB0lcEugja7IhWD7iAlrsamfYVPA==
   dependencies:
-    caniuse-lite "^1.0.30000878"
-    electron-to-chromium "^1.3.61"
-    node-releases "^1.0.0-alpha.11"
+    caniuse-lite "^1.0.30000890"
+    electron-to-chromium "^1.3.79"
+    node-releases "^1.0.0-alpha.14"
 
 bser@^2.0.0:
   version "2.0.0"
@@ -2383,15 +2383,10 @@ caniuse-lite@^1.0.30000792:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000821.tgz#0f3223f1e048ed96451c56ca6cf197058c42cb93"
   integrity sha512-qyYay02wr/5k7PO86W+LKFaEUZfWIvT65PaXuPP16jkSpgZGIsSstHKiYAPVLjTj98j2WnWwZg8CjXPx7UIPYg==
 
-caniuse-lite@^1.0.30000878:
-  version "1.0.30000880"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000880.tgz#b7b6ceaf739e17d0dda0d89426cba4be16d07bb0"
-  integrity sha512-G2cDhHp0DshhwFJSurN7PByRTXgijs3eA3F9tGd5tf5vnTttDVuRI9bFna0WDMID4VYhGs2ob9U/K1A5+pm8pw==
-
-caniuse-lite@^1.0.30000884:
-  version "1.0.30000884"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000884.tgz#eb82a959698745033b26a4dcd34d89dba7cc6eb3"
-  integrity sha512-ibROerckpTH6U5zReSjbaitlH4gl5V4NWNCBzRNCa3GEDmzzkfStk+2k5mO4ZDM6pwtdjbZ3hjvsYhPGVLWgNw==
+caniuse-lite@^1.0.30000890:
+  version "1.0.30000892"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000892.tgz#344d2b51ee3ff5977537da4aa449c90eec40b759"
+  integrity sha512-X9rxMaWZNbJB5qjkDqPtNv/yfViTeUL6ILk0QJNxLV3OhKC5Acn5vxsuUvllR6B48mog8lmS+whwHq/QIYSL9w==
 
 capture-stack-trace@^1.0.0:
   version "1.0.0"
@@ -2565,10 +2560,10 @@ chrome-trace-event@^1.0.0:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^2.42.0:
-  version "2.42.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.42.0.tgz#49d8d314389e76e143a54451b85a8ddfcb1c6128"
-  integrity sha512-ypW3O2rjLCVQYf73ONFsLRArazecL3kj3dAHXPPF3vF5dGyi4NNerA1Hy3fctIvINRs9Ljo3N4l00S0UxiEOlQ==
+chromedriver@^2.43.0:
+  version "2.43.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.43.0.tgz#435d3e582e8383204827c1ffd8be80683da20330"
+  integrity sha512-W0aEk0ibNs7S4PA/vtH1xYcuAXc2474a1XjA9ERE1ZUSFo4NwJMtR7G8w+XP8mkaaxDYSOtiuDUAGW23cT6Gjg==
   dependencies:
     del "^3.0.0"
     extract-zip "^1.6.7"
@@ -2919,10 +2914,10 @@ configstore@^3.0.0:
     write-file-atomic "^2.0.0"
     xdg-basedir "^3.0.0"
 
-confusing-browser-globals@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/confusing-browser-globals/-/confusing-browser-globals-1.0.3.tgz#fefd5f993b4833fd814dc85633528d03df6e758c"
-  integrity sha512-I+wBkVHWYZtnYj3/Ix72w7zHn9kM3pJJ9IkegXa+V3Hlw91Q+1lVlIbwW81GpoH2mHfNr+HTEPdLzMEtbvzYhQ==
+confusing-browser-globals@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/confusing-browser-globals/-/confusing-browser-globals-1.0.4.tgz#7d3ae232117abdf158f968c1ebeeab42ea980991"
+  integrity sha512-oS1wYNQBHNxM7xnwetiG8X4QjEbWwSzQjcBTtsz0HTNLCTBsepo12z557p9I9F9gYCHaVGQ3rcJD/tQgprGlRA==
 
 connect-history-api-fallback@^1.3.0:
   version "1.5.0"
@@ -3011,10 +3006,10 @@ copy-descriptor@^0.1.0:
   resolved "https://registry.yarnpkg.com/copy-descriptor/-/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha1-Z29us8OZl8LuGsOpJP1hJHSPV40=
 
-copy-webpack-plugin@^4.5.2:
-  version "4.5.2"
-  resolved "https://registry.yarnpkg.com/copy-webpack-plugin/-/copy-webpack-plugin-4.5.2.tgz#d53444a8fea2912d806e78937390ddd7e632ee5c"
-  integrity sha512-zmC33E8FFSq3AbflTvqvPvBo621H36Afsxlui91d+QyZxPIuXghfnTsa1CuqiAaCPgJoSUWfTFbKJnadZpKEbQ==
+copy-webpack-plugin@^4.5.3:
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/copy-webpack-plugin/-/copy-webpack-plugin-4.5.3.tgz#14a224d205e46f7a79f7956028e1da6df2225ff2"
+  integrity sha512-VKCiNXQcc8zyznaepXfKpCH2cZD+/j3T3B+gsFY97P7qMlEsj34wr/sI9OCG7QPUUh7gAHVx3q8Q1rdQIDM4bA==
   dependencies:
     cacache "^10.0.4"
     find-cache-dir "^1.0.0"
@@ -4072,10 +4067,10 @@ electron-to-chromium@^1.3.30:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.41.tgz#7e33643e00cd85edfd17e04194f6d00e73737235"
   integrity sha1-fjNkPgDNhe39F+BBlPbQDnNzcjU=
 
-electron-to-chromium@^1.3.61:
-  version "1.3.62"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.62.tgz#2e8e2dc070c800ec8ce23ff9dfcceb585d6f9ed8"
-  integrity sha512-x09ndL/Gjnuk3unlAyoGyUg3wbs4w/bXurgL7wL913vXHAOWmMhrLf1VNGRaMLngmadd5Q8gsV9BFuIr6rP+Xg==
+electron-to-chromium@^1.3.79:
+  version "1.3.79"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.79.tgz#774718f06284a4bf8f578ac67e74508fe659f13a"
+  integrity sha512-LQdY3j4PxuUl6xfxiFruTSlCniTrTrzAd8/HfsLEMi0PUpaQ0Iy+Pr4N4VllDYjs0Hyu2lkTbvzqlG+PX9NsNw==
 
 element-resize-detector@^1.1.10:
   version "1.1.14"
@@ -4294,12 +4289,12 @@ escodegen@^1.9.0:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-react-app@^3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/eslint-config-react-app/-/eslint-config-react-app-3.0.3.tgz#490a7d8e04ae3055e78bb9aa3ee61781c14133b3"
-  integrity sha512-rw8p8XGNJl6x2Sg/BGWqOQ95FDhQLAELshDqAaqDUrksSZEQvSt16LDOau/xiZ7zFvxQ2umXPa/rgnwhCB4I4g==
+eslint-config-react-app@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/eslint-config-react-app/-/eslint-config-react-app-3.0.4.tgz#83f394d765e7d5af623d773e64609e9c9f2cbeb5"
+  integrity sha512-Fos37wkB5QNc8Qh7HUq/ChMUi1njLE78Y2U0RD3MOtYRtPNrMyYw1pLufb8GwNSphMSgRgOkIdakc3d0yXbWyQ==
   dependencies:
-    confusing-browser-globals "^1.0.3"
+    confusing-browser-globals "^1.0.4"
 
 eslint-import-resolver-node@^0.3.1:
   version "0.3.2"
@@ -8551,10 +8546,10 @@ node-pre-gyp@^0.9.0:
     semver "^5.3.0"
     tar "^4"
 
-node-releases@^1.0.0-alpha.11:
-  version "1.0.0-alpha.11"
-  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.0.0-alpha.11.tgz#73c810acc2e5b741a17ddfbb39dfca9ab9359d8a"
-  integrity sha512-CaViu+2FqTNYOYNihXa5uPS/zry92I3vPU4nCB6JB3OeZ2UGtOpF5gRwuN4+m3hbEcL47bOXyun1jX2iC+3uEQ==
+node-releases@^1.0.0-alpha.14:
+  version "1.0.0-alpha.14"
+  resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.0.0-alpha.14.tgz#da9e2780add4bbb59ad890af9e2018a1d9c0034b"
+  integrity sha512-G8nnF9cP9QPP/jUmYWw/uUUhumHmkm+X/EarCugYFjYm2uXRMFeOD6CVT3RLdoyCvDUNy51nirGfUItKWs/S1g==
   dependencies:
     semver "^5.3.0"
 
@@ -9412,10 +9407,15 @@ postcss-modules-values@^1.3.0:
     icss-replace-symbols "^1.1.0"
     postcss "^6.0.1"
 
-postcss-value-parser@^3.2.3, postcss-value-parser@^3.3.0:
+postcss-value-parser@^3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-3.3.0.tgz#87f38f9f18f774a4ab4c8a232f5c5ce8872a9d15"
   integrity sha1-h/OPnxj3dKSrTIojL1xc6IcqnRU=
+
+postcss-value-parser@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-3.3.1.tgz#9ff822547e2893213cf1c30efa51ac5fd1ba8281"
+  integrity sha512-pISE66AbVkp4fDQ7VHBwRNXzAAKJjw4Vw7nWI/+Q3vuly7SNfgYXvm6i5IgFylHGK5sP/xHAbB7N49OS4gWNyQ==
 
 postcss@^6.0.1, postcss@^6.0.23:
   version "6.0.23"
@@ -9426,7 +9426,7 @@ postcss@^6.0.1, postcss@^6.0.23:
     source-map "^0.6.1"
     supports-color "^5.4.0"
 
-postcss@^7.0.0, postcss@^7.0.2:
+postcss@^7.0.0:
   version "7.0.2"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.2.tgz#7b5a109de356804e27f95a960bef0e4d5bc9bb18"
   integrity sha512-fmaUY5370keLUTx+CnwRxtGiuFTcNBLQBqr1oE3WZ/euIYmGAo0OAgOhVJ3ByDnVmOR3PK+0V9VebzfjRIUcqw==
@@ -9434,6 +9434,15 @@ postcss@^7.0.0, postcss@^7.0.2:
     chalk "^2.4.1"
     source-map "^0.6.1"
     supports-color "^5.4.0"
+
+postcss@^7.0.5:
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.5.tgz#70e6443e36a6d520b0fd4e7593fcca3635ee9f55"
+  integrity sha512-HBNpviAUFCKvEh7NZhw1e8MBPivRszIiUnhrJ+sBFVSYSqubrzwX3KG51mYgcRHX8j/cAgZJedONZcm5jTBdgQ==
+  dependencies:
+    chalk "^2.4.1"
+    source-map "^0.6.1"
+    supports-color "^5.5.0"
 
 prelude-ls@~1.1.2:
   version "1.1.2"
