@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import { mapDispatchToProps, propTypes as pagePropTypes } from 'components/Page'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link} from 'react-router-bootstrap'
 import Settings from 'Settings'
@@ -11,11 +12,13 @@ import {INSIGHTS, INSIGHT_DETAILS} from 'pages/insights/Show'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
 
 import {ScrollLink, scrollSpy} from 'react-scroll'
 
 class BaseNav extends Component {
 	static propTypes = {
+		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
 		showFloatingMenu: PropTypes.func,
@@ -101,7 +104,7 @@ class BaseNav extends Component {
 					</BSNav>
 				}
 
-				{myOrg && <Link to={Organization.pathFor(myOrg)}>
+				{myOrg && <Link to={Organization.pathFor(myOrg)} onClick={this.props.clearSearchQuery}>
 					<NavItem id="my-organization">My organization <br /><small>{myOrg.shortName}</small></NavItem>
 				</Link>}
 
@@ -109,7 +112,7 @@ class BaseNav extends Component {
 
 				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="advisor-organizations" active={inOrg && orgId !== myOrgId}>
 					{Organization.map(organizations, org =>
-						<LinkTo organization={org} componentClass={Link} key={org.id}>
+						<LinkTo organization={org} componentClass={Link} key={org.id} onClick={this.props.clearSearchQuery}>
 							<MenuItem>{org.shortName}</MenuItem>
 						</LinkTo>
 					)}
@@ -162,6 +165,10 @@ class BaseNav extends Component {
 	}
 }
 
+const mapStateToProps = (state, ownProps) => ({
+	searchQuery: state.searchQuery
+})
+
 const Nav = (props) => (
 	<AppContext.Consumer>
 		{context =>
@@ -170,4 +177,4 @@ const Nav = (props) => (
 	</AppContext.Consumer>
 )
 
-export default withRouter(Nav)
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Nav))
