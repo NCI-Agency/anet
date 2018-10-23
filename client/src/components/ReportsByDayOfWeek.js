@@ -110,7 +110,7 @@ class ReportsByDayOfWeek extends ReportsVisualisation {
         <ReportCollection
           paginatedReports={context.reports}
           goToPage={this.goToReportsPage}
-          viewFormats={[FORMAT_SUMMARY, FORMAT_TABLE]}
+          viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY]}
         />
       </div>
     )}</Context.Consumer>
