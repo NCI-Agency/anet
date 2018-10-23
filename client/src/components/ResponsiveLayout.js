@@ -99,6 +99,7 @@ class ResponsiveLayout extends Component {
 	render() {
 		const { floatingMenu, topbarHeight } = this.state
 		const { pageProps, location, sidebarData, children } = this.props
+		const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
 
 		return (
 			<div style={anetContainer} className="anet" >
@@ -118,7 +119,10 @@ class ResponsiveLayout extends Component {
 						}}
 					/>
 					{(pageProps.useNavigation || floatingMenu) &&
-						<div style={sidebarContainer} className={ floatingMenu ? "nav-overlay" : "hidden-xs"}>
+						<div
+							style={sidebarContainer}
+							className={`main-sidebar ${sidebarClass}`}
+						>
 							<div style={sidebar}>
 								{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
 							</div>

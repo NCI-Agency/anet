@@ -32,7 +32,7 @@ import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
 import SubNav from 'components/SubNav'
 
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
+import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
@@ -108,7 +108,7 @@ class BaseSearch extends Page {
 	}
 
 	constructor(props) {
-		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {clearSearchQuery: false}))
+		super(props)
 
 		Object.assign(this.state, {
 			success: null,
@@ -185,7 +185,8 @@ class BaseSearch extends Page {
 		return this._dataFetcher(props, this._fetchDataCallback)
 	}
 
-	componentDidUpdate() {
+	componentDidMount() {
+		super.componentDidMount()
 		const { success } = this.state
 		this.notify(success)
 	}
@@ -257,7 +258,7 @@ class BaseSearch extends Page {
 
 				<Breadcrumbs items={[['Search results', '']]} />
 
-				<Messages error={error} success={success} />
+				<Messages error={error} /> {/* success is shown through toast */}
 
 				{this.state.query && <h2 className="only-show-for-print">Search query: '{this.state.query}'</h2>}
 
