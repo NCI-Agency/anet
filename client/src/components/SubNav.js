@@ -8,28 +8,13 @@ export default class SubNav extends Component {
 		subnavElemId: PropTypes.string.isRequired,
 	}
 
-	constructor(props) {
-		super(props)
-
-		this.state = {
-			subnavElem: document.getElementById(this.props.subnavElemId),
-		}
-	}
-
-	componentDidMount() {
-		const elem = document.getElementById(this.props.subnavElemId)
-		if (elem !== this.state.subnavElem) {
-			this.setState({subnavElem: elem})
-		}
-	}
-
 	render() {
-		return (this.state.subnavElem &&
+		const subnavElem = document.getElementById(this.props.subnavElemId)
+		return subnavElem &&
 			ReactDOM.createPortal(
 				this.props.children,
-				this.state.subnavElem
+				subnavElem
 			)
-		)
 	}
 
 }

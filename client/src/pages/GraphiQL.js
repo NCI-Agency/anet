@@ -3,7 +3,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 
 import Breadcrumbs from 'components/Breadcrumbs'
 
-import { PAGE_PROPS_NO_NAV } from 'actions'
+import { PAGE_PROPS_NO_NAV, CLEAR_SEARCH_PROPS } from 'actions'
 import { connect } from 'react-redux'
 
 var GraphiQLreq = null/* required later */
@@ -13,7 +13,7 @@ class GraphiQL extends Page {
 	static propTypes = {...pagePropTypes}
 
 	constructor(props) {
-		super(props, PAGE_PROPS_NO_NAV)
+		super(props, PAGE_PROPS_NO_NAV, CLEAR_SEARCH_PROPS)
 	}
 
 	componentDidMount() {

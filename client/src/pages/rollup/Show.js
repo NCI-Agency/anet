@@ -21,6 +21,7 @@ import utils from 'utils'
 import API from 'api'
 
 import AppContext from 'components/AppContext'
+import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
@@ -55,7 +56,7 @@ class BaseRollupShow extends Page {
 	get rollupEnd() { return moment(this.state.date).endOf('day').hour(18) } // 6:59:59pm today.
 
 	constructor(props) {
-		super(props)
+		super(props, DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS)
 
 		const qs = utils.parseQueryString(props.location.search)
 		this.state = {

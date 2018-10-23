@@ -32,7 +32,7 @@ import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
 import SubNav from 'components/SubNav'
 
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS } from 'actions'
+import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
@@ -42,6 +42,9 @@ import { jumpToTop } from 'components/Page'
 
 import AppContext from 'components/AppContext'
 import Scrollspy from 'react-scrollspy'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import 'components/reactToastify.css'
 
 const SEARCH_CONFIG = {
 	reports : {
@@ -95,8 +98,17 @@ class BaseSearch extends Page {
 		scrollspyOffset: PropTypes.number,
 	}
 
+	successToastId = 'success-message';
+	errorToastId = 'error-message';
+	notify = (success) => {
+		if (!success) { return }
+		toast.success(success, {
+			toastId: this.successToastId
+		})
+	}
+
 	constructor(props) {
-		super(props, Object.assign({}, DEFAULT_PAGE_PROPS), Object.assign({}, DEFAULT_SEARCH_PROPS, {clearSearchQuery: false}))
+		super(props)
 
 		Object.assign(this.state, {
 			success: null,
@@ -173,11 +185,14 @@ class BaseSearch extends Page {
 		return this._dataFetcher(props, this._fetchDataCallback)
 	}
 
-	render() {
-		const results = this.state.results
-		const error = this.state.error
-		const success = this.state.success
+	componentDidMount() {
+		super.componentDidMount()
+		const { success } = this.state
+		this.notify(success)
+	}
 
+	render() {
+		const { results, success, error } = this.state
 		const numReports = results.reports ? results.reports.totalCount : 0
 		const numPeople = results.people ? results.people.totalCount : 0
 		const numPositions = results.positions ? results.positions.totalCount : 0
@@ -193,6 +208,7 @@ class BaseSearch extends Page {
 		const taskShortLabel = Settings.fields.task.shortLabel
 		return (
 			<div>
+				<ToastContainer/>
 				<SubNav subnavElemId="search-nav">
 					<div><Button onClick={this.props.history.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
 					<Nav stacked bsStyle="pills">
@@ -242,7 +258,7 @@ class BaseSearch extends Page {
 
 				<Breadcrumbs items={[['Search results', '']]} />
 
-				<Messages error={error} success={success} />
+				<Messages error={error} /> {/* success is shown through toast */}
 
 				{this.state.query && <h2 className="only-show-for-print">Search query: '{this.state.query}'</h2>}
 
