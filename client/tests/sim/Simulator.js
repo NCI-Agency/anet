@@ -16,8 +16,8 @@ const simulate = async () => {
                 const story = faker.random.arrayElement(simpleScenario.stories)
 
                 if (story.userTypes.includes(userType.name) && ((1 / story.frequency) > Math.random())) {
-                    console.log(`${user.name}`.blue + ' is performing ' + `${story.name}`.green  )
-                    story.runnable(user)
+                    const jsonResult = await story.runnable(user)
+                    console.log(`${user.name}`.blue + ' performed ' + `${story.name}`.green + `-> ${JSON.stringify(jsonResult)}` )
                 }
             }
         })

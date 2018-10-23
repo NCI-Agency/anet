@@ -8,14 +8,14 @@ const simpleScenario =
         [
             {
                 name: "newUser",
-                frequency: 5,
+                frequency: 30,
                 userFunction: async function (value) {
                     const username = faker.internet.userName()
                     return { name: username, password: username }
                 }
             },
             {
-                name: "existingAvisor",
+                name: "existingAdvisor",
                 frequency: 1,
                 userFunction: async function (value) {
                     const json = await runGQL({name:"erin", password:"erin"},
@@ -24,6 +24,7 @@ const simpleScenario =
                     query {
                         personList(query: {pageSize: 0, pageNum: 0, status: ACTIVE, role: ADVISOR}) {
                           list {
+                            uuid
                             name
                             domainUsername
                           }
@@ -31,8 +32,8 @@ const simpleScenario =
                       }                    
                     `,
                     })
-                    const username = faker.random.arrayElement(json.data.personList.list).domainUsername
-                    return { name: username, password: username }
+                    const person = faker.random.arrayElement(json.data.personList.list)
+                    return { name: person.domainUsername, password: person.domainUsername, person: person }
                 }
             },
         ],
@@ -40,9 +41,9 @@ const simpleScenario =
         [
             {
                 name: "Create Report",
-                frequency: 5,
+                frequency: 2,
                 runnable: createReport,
-                userTypes: ["existingAvisor"]
+                userTypes: ["existingAdvisor"]
             },
             {
                 name: "Create profile",

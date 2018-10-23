@@ -5,9 +5,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 
 const commonConfig = {
-    resolve: {
-        modules: [paths.appSrc, "node_modules"]
-    },
     module: {
         rules: [
             {
@@ -71,6 +68,9 @@ const commonConfig = {
 
 
 const commonClientConfig = merge(commonConfig, {
+    resolve: {
+        modules: [paths.appSrc, "node_modules", "platform/web"]
+    },
     target: 'web',
     entry: {
         anet: [require.resolve('./polyfills'),'./src/index.js']
@@ -105,12 +105,15 @@ const commonClientConfig = merge(commonConfig, {
 })
 
 const commonSimConfig = merge(commonConfig, {
+    resolve: {
+        modules: [paths.appSrc, "node_modules", "platform/node"]
+    },
     target: 'node',
     node: {
         __dirname: true
     },
     entry: {
-        anet: ['./tests/sim/Simulator.js']
+        anet: [require.resolve('./polyfills_node'),'./tests/sim/Simulator.js']
     }
   })
 

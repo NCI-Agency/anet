@@ -1,12 +1,13 @@
 const merge = require('webpack-merge')
 const common = require('./webpack.common.js')
 const webpack = require('webpack')
-const path = require('path')
+const paths = require('./paths')
 
 module.exports = merge(common[1], {
+    devtool: 'eval-source-map',
     output: {
     pathinfo: true,
-    path: path.resolve(__dirname, 'dist'),
+    path: paths.clientBuild,
     filename: 'anet.sim.dev.js'
     },
     plugins: [
