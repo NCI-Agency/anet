@@ -31,7 +31,7 @@ export default class Organization extends Model {
 		tasks: []
 	}
 
-	static autocompleteQuery = "id, shortName, longName, identificationCode"
+	static autocompleteQuery = "uuid, shortName, longName, identificationCode"
 
 	isAdvisorOrg() {
 		return this.type === Organization.TYPE.ADVISOR_ORG
