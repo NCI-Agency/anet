@@ -417,10 +417,10 @@ ajv@^6.1.0:
     json-schema-traverse "^0.3.0"
     uri-js "^3.0.2"
 
-alloyeditor@^1.5.14:
-  version "1.5.14"
-  resolved "https://registry.yarnpkg.com/alloyeditor/-/alloyeditor-1.5.14.tgz#80cf69178686a6fe035af9064475955268c83b54"
-  integrity sha512-XpfEG/EtuxUYPCMz9B+84S1OHT5sX+bJeHxTTGHVjMG6m/F0zfdKXa3njCB88exsSSDAimYdWUUZfvJozF4odQ==
+alloyeditor@^1.5.15:
+  version "1.5.15"
+  resolved "https://registry.yarnpkg.com/alloyeditor/-/alloyeditor-1.5.15.tgz#8d1c88cb8431a3c73b9a5a74a5d2ccaa44dae280"
+  integrity sha512-m1iHwf0Ufj8g1hwOWuHBuCAG4YjWcYsHysCnPlhU/IcVKs7vMwXjZsPyWfx2X8aeXXImmSo4njpMEmJzMbZ/FQ==
 
 amdefine@>=0.0.4:
   version "1.0.1"
