@@ -4789,7 +4789,12 @@ fd-slicer@~1.0.1:
   dependencies:
     pend "~1.2.0"
 
-fibers@^2.0.0, fibers@~2.0.0:
+fibers@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/fibers/-/fibers-3.0.0.tgz#d898fc1a8c2e892efd0d547cfc06d9e82e88f12f"
+  integrity sha512-cAcOHOTbTMlcpNZvr94BNFsnBDBiEu9JP5MYcRLyl12HF/X0z3KvZyNzU9+BtI8lOIaV84PlDQJOKK3f5llJug==
+
+fibers@~2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/fibers/-/fibers-2.0.2.tgz#36db63ea61c543174e2264675fea8c2783371366"
   integrity sha512-HfVRxhYG7C8Jl9FqtrlElMR2z/8YiLQVDKf67MLY25Ic+ILx3ecmklfT1v3u+7P5/4vEFjuxaAFXhr2/Afwk5g==
@@ -12242,12 +12247,12 @@ wdio-sync@0.7.2:
     fibers "~2.0.0"
     object.assign "^4.0.3"
 
-wdio@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/wdio/-/wdio-2.0.2.tgz#218bfd98cdac37c0f24dcf25276cb132efba6de7"
-  integrity sha512-/E758txZm0xg1mU0xhHzapLKxig/I00WLxEYy5Mp1KjzQNDeRekMuRSA5B3seCkRPfFIT5bQpeV3vFTBSPauIg==
+wdio@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/wdio/-/wdio-3.0.0.tgz#1a2e0edaeea29b31241bf3d5590da211ec62a56d"
+  integrity sha512-cGg3pGJ/CFYyUWZKMEpoeacUc0c4lapfz8v/y7EikkCcoi17dvaetr5SSJezIhB4Wzgc5OVrtndXVqo0ZCd29Q==
   dependencies:
-    fibers "^2.0.0"
+    fibers "^3.0.0"
     selenium-standalone "~6.6.0"
     tcp-port-used "^0.1.2"
     webdriverio "^4.12.0"
