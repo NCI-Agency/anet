@@ -402,23 +402,8 @@ li#search-nav .nav > li a {
 	font-weight: bold;
 }
 
-.not-found section.container {
-	width: 100%;
-	max-width: none;
-	padding: 0;
-	margin: 0;
-}
-
-.not-found .not-found-text {
-	text-align: center;
-}
-
-.not-found .col-sm-3 {
+.not-found .main-sidebar {
 	display: none;
-}
-
-.not-found .col-sm-9 {
-	width: 100%;
 }
 
 .onboarding-new {

@@ -59,10 +59,10 @@ export default class Page extends Component {
 		const pp = pageProps || DEFAULT_PAGE_PROPS
 		const sp = searchProps || DEFAULT_SEARCH_PROPS
 		if (typeof props.setPageProps === 'function') {
-			props.setPageProps(pp)
+			props.setPageProps(Object.assign({}, pp))
 		}
 		if (typeof props.setSearchProps === 'function') {
-			props.setSearchProps(sp)
+			props.setSearchProps(Object.assign({}, sp))
 		}
 		if (typeof props.clearSearchQuery === 'function' && sp.clearSearchQuery) {
 			props.clearSearchQuery()
