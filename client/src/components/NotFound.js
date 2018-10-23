@@ -1,6 +1,6 @@
-import React, {Component} from 'react'
+import React, { PureComponent } from 'react'
 
-export default class NotFound extends Component {
+export default class NotFound extends PureComponent {
     componentDidMount() {
         document.getElementsByTagName('html')[0].classList.add('not-found')
     }
@@ -11,7 +11,7 @@ export default class NotFound extends Component {
 
 	render() {
 		return <div>
-            <h1 className="not-found-text">{this.props.text}</h1>
+            <h1 style={{ textAlign: 'center' }}>{this.props.text}</h1>
         </div>
 	}
 }
