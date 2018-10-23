@@ -43,7 +43,7 @@ export default class Person extends Model {
 		position: {},
 	}
 
-	static autocompleteQuery = "uuid, name, role, rank, position { id, name, code, organization { uuid, shortName }, location {uuid, name} }"
+	static autocompleteQuery = "uuid, name, role, rank, position { uuid, name, code, organization { uuid, shortName }, location {uuid, name} }"
 
 	static autocompleteTemplate(person) {
 		return <span>
