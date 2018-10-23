@@ -148,14 +148,18 @@ class HorizontalBarChart extends Component {
     let yCategoryDomain = yScale.bandwidth() * categoryDomain.length
     yCategoryScale.domain([yCategoryDomain, 0])
 
+    let xMax = d3.max(xLabels)
     let xScale = d3.scaleLinear()
       .range([0, xWidth])
-      .domain([0, d3.max(xLabels)])
+      .domain([0, xMax])
 
+    let xTicks = Math.min(xMax, 10)
     let xAxisTop = d3.axisTop()
       .scale(xScale)
+      .ticks(xTicks, 'd')
     let xAxis = d3.axisBottom()
       .scale(xScale)
+      .ticks(xTicks, 'd')
 
     let yAxis = d3.axisLeft()
       .scale(yCategoryScale)
@@ -198,8 +202,7 @@ class HorizontalBarChart extends Component {
       .attr('class', 'category-label')
       .attr('transform', function(d) {
         let x = -2
-        let y = yCategoryScale((d.values.length * yScale.bandwidth() +
-          BAR_PADDING) / 2)
+        let y = yCategoryScale((d.values.length * yScale.bandwidth() + BAR_PADDING) / 2)
         return `translate(${x}, ${y})`
       })
       .text(d => categoryLabels[d.key])

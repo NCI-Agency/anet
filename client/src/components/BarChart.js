@@ -73,8 +73,9 @@ class BarChart extends Component {
 
     let xScale = d3.scaleBand()
       .domain(chartData.map(function(d) { xLabels[getPropValue(d, xProp)] = getPropValue(d, xLabel); return getPropValue(d, xProp) }))
+    let yMax = d3.max(chartData, function(d) { return getPropValue(d, yProp) })
     let yScale = d3.scaleLinear()
-      .domain([0, d3.max(chartData, function(d) { return getPropValue(d, yProp) })])
+      .domain([0, yMax])
 
     // Calculate the maximum width of the axis labels
     let maxXLabelWidth = 0
@@ -124,7 +125,10 @@ class BarChart extends Component {
 
     let xAxis = d3.axisBottom(xScale)
       .tickFormat(function(d) { return xLabels[d] })
+
+    let yTicks = Math.min(yMax, 10)
     let yAxis = d3.axisLeft(yScale)
+      .ticks(yTicks, 'd')
 
     chart.selectAll('*').remove()
     chart = chart
