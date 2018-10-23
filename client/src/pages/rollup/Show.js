@@ -5,9 +5,11 @@ import {Modal, Alert, Button, HelpBlock, Popover, Overlay} from 'react-bootstrap
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 import pluralize from 'pluralize'
+import ContainerDimensions from 'react-container-dimensions'
 
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
+import DailyRollupChart from 'components/DailyRollupChart'
 import ReportCollection from 'components/ReportCollection'
 import CalendarButton from 'components/CalendarButton'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
@@ -24,8 +26,9 @@ import AppContext from 'components/AppContext'
 import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import LoaderHOC, {mapDispatchToProps as loaderMapDispatchToProps} from 'HOC/LoaderHOC'
 
-var d3 = null/* required later */
+const BarChartWithLoader = connect(null, loaderMapDispatchToProps)(LoaderHOC('isLoading')('data')(DailyRollupChart))
 
 const barColors = {
 	cancelled: '#EC971F',
@@ -58,6 +61,7 @@ class BaseRollupShow extends Page {
 	constructor(props) {
 		super(props, DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS)
 
+		this.chartId = 'daily_rollup_graph'
 		const qs = utils.parseQueryString(props.location.search)
 		this.state = {
 			date: moment(+props.date || +qs.date || undefined),
@@ -69,6 +73,8 @@ class BaseRollupShow extends Page {
 			maxReportAge: null,
 			hoveredBar: {org: {}},
 			orgType: Organization.TYPE.ADVISOR_ORG,
+			updateChart: true,  // whether the chart needs to be updated
+			isLoading: false
 		}
 		this.previewPlaceholderUrl = API.addAuthParams("/help")
 	}
@@ -92,22 +98,6 @@ class BaseRollupShow extends Page {
 		if (!this.state.date.isSame(prevState.date, 'day') || prevState.maxReportAge !== this.state.maxReportAge) {
 			this.loadData()
 		}
-		else {
-			this.renderGraph()
-		}
-	}
-
-	componentDidMount() {
-		super.componentDidMount()
-
-		if (d3) {
-			return
-		}
-
-		import('d3').then(importedModule => {
-			d3 = importedModule
-			this.forceUpdate()
-		})
 	}
 
 	fetchData(props) {
@@ -185,14 +175,18 @@ class BaseRollupShow extends Page {
 						else {
 							return (b_index<0) ? -1 : a_index-b_index
 						}
-					})
+					}),
+				updateChart: true,  // update chart after fetching the data
+				isLoading: false
 			})
 		})
 	}
 
 	render() {
+		const flexStyle = {display: 'flex', flexDirection: 'column', height: '100%', flex: 1}
+
 		return (
-			<div>
+			<div style={flexStyle}>
 				<Breadcrumbs items={[[`Rollup for ${this.dateStr}`, '/rollup']]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
@@ -206,9 +200,23 @@ class BaseRollupShow extends Page {
 						<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.printPreview}>Print</Button>
 						<Button onClick={this.toggleEmailModal} bsStyle="primary">Email rollup</Button>
 					</div>
-				}>
-					<p className="help-text">Number of reports released today per organization</p>
-					<svg ref={el => this.graph = el} style={{width: '100%'}} />
+				} style={flexStyle}>
+					<div className="mosaic-box" style={flexStyle}>
+						<p className="help-text">Number of reports released today per organization</p>
+						<ContainerDimensions>{({width}) => (
+							<BarChartWithLoader
+								width={width}
+								chartId={this.chartId}
+								data={this.state.graphData}
+								onBarClick={this.goToOrg}
+								showPopover={this.showPopover}
+								hidePopover={this.hidePopover}
+								updateChart={this.state.updateChart}
+								isLoading={this.state.isLoading}
+								barColors={barColors}
+							/>
+						)}</ContainerDimensions>
+					</div>
 
 					<Overlay
 						show={!!this.state.graphPopover}
@@ -252,94 +260,6 @@ class BaseRollupShow extends Page {
 		)
 	}
 
-	renderGraph() {
-		let graphData = this.state.graphData
-		if (!graphData || !d3) {
-			return
-		}
-
-		if (graphData === this.renderedGraph) {
-			return
-		}
-
-		this.renderedGraph = graphData
-
-		const BAR_HEIGHT = 24
-		const BAR_PADDING = 8
-		const MARGIN = {top: 0, right: 10, bottom: 20, left: 150}
-		let box = this.graph.getBoundingClientRect()
-		let boxWidth = box.right - box.left
-		let width = boxWidth - MARGIN.left - MARGIN.right
-		let height = (BAR_HEIGHT + BAR_PADDING) * graphData.length - BAR_PADDING
-
-		let maxNumberOfReports = Math.max.apply(Math, graphData.map(d => d.released + d.cancelled))
-
-		let xScale = d3.scaleLinear()
-						.domain([0, maxNumberOfReports])
-						.range([0, width])
-
-		let yLabels = {}
-		let yScale = d3.scaleBand()
-						.domain(graphData.map(function(d) {
-							yLabels[d.org.uuid] = d.org.shortName
-							return d.org.uuid
-						}))
-						.range([0, height])
-
-		let graph = d3.select(this.graph)
-		graph.selectAll('*').remove()
-
-		graph = graph.attr('width', width + MARGIN.left + MARGIN.right)
-					 .attr('height', height + MARGIN.top + MARGIN.bottom)
-					 .append('g')
-						.attr('transform', `translate(${MARGIN.left}, ${MARGIN.top})`)
-
-		let xAxis = d3.axisBottom(xScale).ticks(Math.min(maxNumberOfReports, 10), 'd')
-		let yAxis = d3.axisLeft(yScale)
-						.tickFormat(function(d) {
-							return yLabels[d]
-						})
-
-		graph.append('g').call(yAxis)
-		graph.append('g')
-				.attr('transform', `translate(0, ${height})`)
-				.call(xAxis)
-
-		let bar = graph.selectAll('.bar')
-			.data(graphData)
-			.enter().append('g')
-				.attr('transform', (d, i) => `translate(2, ${i * (BAR_HEIGHT + BAR_PADDING) - 1})`)
-				.classed('bar', true)
-				.on('click', d => this.goToOrg(d.org))
-				.on('mouseenter', d => this.setState({graphPopover: d3.event.target, hoveredBar: d}))
-				.on('mouseleave', d =>this.setState({graphPopover: null}))
-
-		bar.append('rect')
-				.attr('width', d => d.released && xScale(d.released) - 2)
-				.attr('height', BAR_HEIGHT)
-				.attr('fill', barColors.verified)
-
-		bar.append('text')
-				.attr('x', d => xScale(d.released) - 6)
-				.attr('y', BAR_HEIGHT / 2)
-				.attr('dy', '.35em')
-				.style('text-anchor', 'end')
-				.text(d => d.released || '')
-
-		bar.append('rect')
-				.attr('x', d => d.released && xScale(d.released) - 2)
-				.attr('width', d => d.cancelled && (xScale(d.cancelled) - (d.released ? 0 : 2)))
-				.attr('height', BAR_HEIGHT)
-				.attr('fill', barColors.cancelled)
-
-		bar.append('text')
-				.attr('x', d => xScale(d.released) + xScale(d.cancelled) - 6)
-				.attr('y', BAR_HEIGHT / 2)
-				.attr('dy', '.35em')
-				.style('text-anchor', 'end')
-				.text(d => d.cancelled || '')
-	}
-
 	@autobind
 	goToReportsPage(newPageNum) {
 		this.setState({reportsPageNum: newPageNum}, () => this.loadData())
@@ -347,12 +267,12 @@ class BaseRollupShow extends Page {
 
 	@autobind
 	goToOrg(org) {
-		this.setState({reportsPageNum: 0, focusedOrg: org, graphPopover: null}, () => this.loadData())
+		this.setState({reportsPageNum: 0, focusedOrg: org, graphPopover: null, isLoading: true}, () => this.loadData())
 	}
 
 	@autobind
 	changeOrgType(orgType) {
-		this.setState({orgType}, () => this.loadData())
+		this.setState({orgType, isLoading: true}, () => this.loadData())
 	}
 
 	@autobind
@@ -362,6 +282,16 @@ class BaseRollupShow extends Page {
 			pathname: 'rollup',
 			search: utils.formatQueryString({date: date.valueOf()})
 		})
+	}
+
+	@autobind
+	showPopover(graphPopover, hoveredBar) {
+		this.setState({graphPopover, hoveredBar})
+	}
+
+	@autobind
+	hidePopover() {
+		this.setState({graphPopover: null})
 	}
 
 	@autobind
