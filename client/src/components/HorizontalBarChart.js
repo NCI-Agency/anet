@@ -73,7 +73,10 @@ class HorizontalBarChart extends Component {
   createBarChart() {
     const BAR_HEIGHT = 24
     const BAR_PADDING = 8
-    const MARGIN = {top: 30, right: 20}  // left and bottom MARGINs are dynamic
+    const MARGIN = {
+      top: 30, right: 20,
+      left: 0, bottom: 20,  // left and bottom MARGINs are dynamic, these are extra margins
+    }
     let chartBox = this.node.getBoundingClientRect()
     let chartWidth = this.isNumeric(this.props.width) ? this.props.width : (chartBox.right - chartBox.left)
     let chartData = this.props.data.data
@@ -83,10 +86,7 @@ class HorizontalBarChart extends Component {
     let chart = d3.select(this.node)
     let xLabels = [].concat.apply(
       [],
-      chartData.map(
-        function(d, i) {
-          return d.values.map(d => d.value)
-        })
+      chartData.map(d => d.values.map(d => d.value))
     )
     let yLabels = Object.values(categoryLabels)
 
@@ -117,9 +117,9 @@ class HorizontalBarChart extends Component {
     tmpSVG.remove()
 
     // The left margin depends on the width of the y-axis labels.
-    let marginLeft = maxYLabelWidth
+    let marginLeft = maxYLabelWidth + MARGIN.left
     // The bottom margin depends on the width of the x-axis labels.
-    let marginBottom = maxXLabelWidth + 20
+    let marginBottom = maxXLabelWidth + MARGIN.bottom
     let xWidth = chartWidth - marginLeft - MARGIN.right
 
     let categoryDomain = []

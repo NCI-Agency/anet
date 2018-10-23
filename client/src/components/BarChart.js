@@ -63,7 +63,10 @@ class BarChart extends Component {
   }
 
   createBarChart() {
-    const MARGIN = {top: 20, right: 20}  // left and bottom margins are dynamic
+    const MARGIN = {
+      top: 20, right: 20,
+      left: 40, bottom: 0,  // left and bottom MARGINs are dynamic, these are extra margins
+    }
     let chartData = this.props.data
     let xProp = this.props.xProp  // data property to use for the x-axis domain
     let yProp = this.props.yProp  // data property to use for the y-axis domain
@@ -108,9 +111,9 @@ class BarChart extends Component {
     // The left margin depends on the width of the y-axis labels.
     // We add extra margin to make sure that if the label is different because
     // of the automatic formatting the labels are still displayed on the chart.
-    let marginLeft = maxYLabelWidth + 40
+    let marginLeft = maxYLabelWidth + MARGIN.left
     // The bottom margin depends on the width of the x-axis labels.
-    let marginBottom = maxXLabelWidth
+    let marginBottom = maxXLabelWidth + MARGIN.bottom
 
     let chart = d3.select(this.node)
     let chartBox = this.node.getBoundingClientRect()
