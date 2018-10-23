@@ -106,10 +106,9 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
   getBarChart(id) {
     return <Context.Consumer>{context => (
       <div className="scrollable-y">
-        <ContainerDimensions>{({width, height}) => (
+        <ContainerDimensions>{({width}) => (
           <BarChartWithLoader
             width={width}
-            height={height}
             chartId={this.chartId}
             data={context.graphData}
             onBarClick={this.goToSelection}
