@@ -24,15 +24,15 @@ class RichTextEditor extends Component {
 			decorator,
 			isLoaded: false,
 		}
-		this.focus = () => this.refs.editor.focus()
-		this.onChange = (editorState) => this.setState({editorState}, this.handleOnChangeHTML(editorState))
-
 		this.handleOnChangeHTML = this._handleOnChangeHTML.bind(this)
 		this.handleKeyCommand = this._handleKeyCommand.bind(this)
 		this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this)
 		this.toggleBlockType = this._toggleBlockType.bind(this)
 		this.toggleInlineStyle = this._toggleInlineStyle.bind(this)
 		this.setEditorStateFromHTML = this._setEditorStateFromHTML.bind(this)
+
+		this.focus = () => this.refs.editor.focus()
+		this.onChange = (editorState) => this.setState({editorState}, this.handleOnChangeHTML)
 	}
 
 	componentDidUpdate() {
@@ -49,7 +49,8 @@ class RichTextEditor extends Component {
 		}
 	}
 
-	_handleOnChangeHTML(editorState) {
+	_handleOnChangeHTML() {
+		const { editorState } = this.state
 		const html = convertToHTML({
 			entityToHTML: (entity, originalText) => {
 				if (entity.type === 'IMAGE') {
