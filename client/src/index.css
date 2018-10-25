@@ -125,6 +125,7 @@ fieldset.danger {
 	border: 2px solid red;
 }
 
+#daily-rollup fieldset,
 #cancelled-reports fieldset,
 #future-engagements-by-location fieldset,
 #not-approved-reports fieldset,

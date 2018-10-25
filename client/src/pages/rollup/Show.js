@@ -358,7 +358,7 @@ class BaseRollupShow extends Page {
 		const flexStyle = {display: 'flex', flexDirection: 'column', height: '100%', flex: 1}
 
 		return (
-			<div style={flexStyle}>
+			<div id="daily-rollup" style={flexStyle}>
 				<Breadcrumbs items={[[`Rollup for ${this.dateStr}`, '/rollup']]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
