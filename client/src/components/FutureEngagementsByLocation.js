@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
+import {Popover, Overlay} from 'react-bootstrap'
 import HorizontalBarChart from 'components/HorizontalBarChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE} from 'components/ReportCollection'
 
@@ -74,6 +75,8 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
       allReports: [],
       reportsPageNum: 0,
       focusedSelection: '',
+      graphPopover: null,
+      hoveredBar: null,
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
@@ -112,12 +115,26 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
             chartId={this.chartId}
             data={context.graphData}
             onBarClick={this.goToSelection}
+            showPopover={this.showPopover}
+            hidePopover={this.hidePopover}
             updateChart={context.updateChart}
             selectedBarClass={this.selectedBarClass}
             selectedBar={context.focusedSelection ? 'bar_' + context.focusedSelection.key + context.focusedSelection.parentKey : ''}
             isLoading={context.isLoading}
           />
         )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopover}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopover}
+        >
+          <Popover id="graph-popover" title={context.hoveredBar && context.graphData.categoryLabels[context.hoveredBar.parentKey]}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBar && `${context.graphData.leavesLabels[context.hoveredBar.key]}: ${context.hoveredBar.value}`}</p>
+          </Popover>
+        </Overlay>
       </div>
     )}</Context.Consumer>
   }

@@ -41,6 +41,8 @@ class HorizontalBarChart extends Component {
     chartId: PropTypes.string,
     data: PropTypes.object,
     onBarClick: PropTypes.func,
+    showPopover: PropTypes.func,
+    hidePopover: PropTypes.func,
     selectedBarClass: PropTypes.string,
     selectedBar: PropTypes.string,
     updateChart: PropTypes.bool
@@ -232,6 +234,8 @@ class HorizontalBarChart extends Component {
       .attr('y', yCategoryScale(BAR_PADDING))
       .attr('width', d => xScale(d.value))
       .attr('height', yCategoryScale(yScale.bandwidth() - BAR_PADDING))
+      .on('mouseenter', d => this.props.showPopover && this.props.showPopover(d3.event.target, d))
+      .on('mouseleave', d => this.props.hidePopover && this.props.hidePopover())
 
     barsGroup.selectAll('.bar-label')
       .data(function(d) { return [d] })

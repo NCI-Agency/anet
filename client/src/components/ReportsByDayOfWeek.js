@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
+import {Popover, Overlay} from 'react-bootstrap'
 import BarChart from 'components/BarChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE} from 'components/ReportCollection'
 
@@ -69,6 +70,8 @@ class ReportsByDayOfWeek extends ReportsVisualisation {
       allReports: [],
       reportsPageNum: 0,
       focusedSelection: '',
+      graphPopover: null,
+      hoveredBar: null,
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
@@ -92,12 +95,26 @@ class ReportsByDayOfWeek extends ReportsVisualisation {
             yProp='reportsCount'
             xLabel='dayOfWeekString'
             onBarClick={this.goToSelection}
+            showPopover={this.showPopover}
+            hidePopover={this.hidePopover}
             updateChart={context.updateChart}
             selectedBarClass={this.selectedBarClass}
             selectedBar={context.focusedSelection ? 'bar_' + context.focusedSelection.dayOfWeekInt : ''}
             isLoading={context.isLoading}
           />
         )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopover}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopover}
+        >
+          <Popover id="graph-popover" title={context.hoveredBar && context.hoveredBar.dayOfWeekString}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBar && context.hoveredBar.reportsCount}</p>
+          </Popover>
+        </Overlay>
       </div>
     )}</Context.Consumer>
   }

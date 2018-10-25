@@ -179,4 +179,14 @@ export default class ReportsVisualisation extends Component {
     }
   }
 
+  @autobind
+  showPopover(graphPopover, hoveredBar) {
+    this.setState({graphPopover, hoveredBar})
+  }
+
+  @autobind
+  hidePopover() {
+    this.setState({graphPopover: null, hoveredBar: null})
+  }
+
 }

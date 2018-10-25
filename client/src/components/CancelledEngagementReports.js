@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
+import {Popover, Overlay} from 'react-bootstrap'
 import BarChart from 'components/BarChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE} from 'components/ReportCollection'
 
@@ -87,6 +88,10 @@ class CancelledEngagementReports extends ReportsVisualisation {
       reportsPageNum: 0,
       focusedSelection: '',
       focusedIsOrg: true,
+      graphPopover: null,
+      hoveredBar: null,
+      graphPopoverByReason: null,
+      hoveredBarByReason: null,
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
@@ -112,12 +117,26 @@ class CancelledEngagementReports extends ReportsVisualisation {
             yProp='cancelledByOrg'
             xLabel='advisorOrg.shortName'
             onBarClick={this.goToOrg}
+            showPopover={this.showPopover}
+            hidePopover={this.hidePopover}
             updateChart={context.updateChart}
             selectedBarClass={this.selectedBarClass}
-            selectedBar={(context.focusedSelection && this.state.focusedIsOrg) ? 'bar_' + context.focusedSelection.advisorOrg.uuid : ''}
+            selectedBar={(context.focusedSelection && context.focusedIsOrg) ? 'bar_' + context.focusedSelection.advisorOrg.uuid : ''}
             isLoading={context.isLoading}
           />
         )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopover}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopover}
+        >
+          <Popover id="graph-popover" title={context.hoveredBar && context.hoveredBar.advisorOrg.shortName}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBar && context.hoveredBar.cancelledByOrg}</p>
+          </Popover>
+        </Overlay>
       </div>
     )}</Context.Consumer>
   }
@@ -136,14 +155,38 @@ class CancelledEngagementReports extends ReportsVisualisation {
             yProp='cancelledByReason'
             xLabel='reason'
             onBarClick={this.goToReason}
+            showPopover={this.showPopoverByReason}
+            hidePopover={this.hidePopoverByReason}
             updateChart={context.updateChart}
             selectedBarClass={this.selectedBarClass}
-            selectedBar={(context.focusedSelection && !this.state.focusedIsOrg) ? 'bar_' + context.focusedSelection.cancelledReason : ''}
+            selectedBar={(context.focusedSelection && !context.focusedIsOrg) ? 'bar_' + context.focusedSelection.cancelledReason : ''}
             isLoading={context.isLoading}
           />
         )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopoverByReason}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopoverByReason}
+        >
+          <Popover id="graph-popover-by-reason" title={context.hoveredBarByReason && context.hoveredBarByReason.reason}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBarByReason && context.hoveredBarByReason.cancelledByReason}</p>
+          </Popover>
+        </Overlay>
       </div>
     )}</Context.Consumer>
+  }
+
+  @autobind
+  showPopoverByReason(graphPopoverByReason, hoveredBarByReason) {
+    this.setState({graphPopoverByReason, hoveredBarByReason})
+  }
+
+  @autobind
+  hidePopoverByReason() {
+    this.setState({graphPopoverByReason: null, hoveredBarByReason: null})
   }
 
   @autobind

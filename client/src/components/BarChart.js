@@ -32,6 +32,8 @@ class BarChart extends Component {
     xLabel: PropTypes.string,
     barClass: PropTypes.string,
     onBarClick: PropTypes.func,
+    showPopover: PropTypes.func,
+    hidePopover: PropTypes.func,
     selectedBarClass: PropTypes.string,
     selectedBar: PropTypes.string,
     updateChart: PropTypes.bool
@@ -164,6 +166,8 @@ class BarChart extends Component {
       .attr('y', function(d) { return yScale(getPropValue(d, yProp)) })
       .attr('width', xScale.bandwidth())
       .attr('height', function(d) { return yHeight - yScale(getPropValue(d, yProp)) })
+      .on('mouseenter', d => this.props.showPopover && this.props.showPopover(d3.event.target, d))
+      .on('mouseleave', d => this.props.hidePopover && this.props.hidePopover())
     if (onBarClick) {
       bar.on('click', function(d) {
         onBarClick(d)

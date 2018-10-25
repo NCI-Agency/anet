@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
+import {Popover, Overlay} from 'react-bootstrap'
 import BarChart from 'components/BarChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE} from 'components/ReportCollection'
 
@@ -72,6 +73,8 @@ class PendingApprovalReports extends ReportsVisualisation {
       allReports: [],
       reportsPageNum: 0,
       focusedSelection: '',
+      graphPopover: null,
+      hoveredBar: null,
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
@@ -95,12 +98,26 @@ class PendingApprovalReports extends ReportsVisualisation {
             yProp='notApproved'
             xLabel='advisorOrg.shortName'
             onBarClick={this.goToSelection}
+            showPopover={this.showPopover}
+            hidePopover={this.hidePopover}
             updateChart={context.updateChart}
             selectedBarClass={this.selectedBarClass}
             selectedBar={context.focusedSelection ? 'bar_' + context.focusedSelection.advisorOrg.uuid : ''}
             isLoading={context.isLoading}
           />
         )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopover}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopover}
+        >
+          <Popover id="graph-popover" title={context.hoveredBar && context.hoveredBar.advisorOrg.shortName}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBar && context.hoveredBar.notApproved}</p>
+          </Popover>
+        </Overlay>
       </div>
     )}</Context.Consumer>
   }
