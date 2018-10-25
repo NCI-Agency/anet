@@ -30,22 +30,26 @@ class RichTextEditor extends Component {
 		this.toggleBlockType = this._toggleBlockType.bind(this)
 		this.toggleInlineStyle = this._toggleInlineStyle.bind(this)
 		this.setEditorStateFromHTML = this._setEditorStateFromHTML.bind(this)
+		this.initializeEditorState = this._initializeEditorState.bind(this)
 
 		this.focus = () => this.refs.editor.focus()
 		this.onChange = (editorState) => this.setState({editorState}, this.handleOnChangeHTML)
 	}
 
 	componentDidUpdate() {
-		const { value } = this.props
-		if(value !== undefined && value.length > 0) {
-			this.setEditorStateFromHTML(value)
-		}
+		this.initializeEditorState()
 	}
 
 	componentDidMount() {
+		this.initializeEditorState()
+	}
+
+	_initializeEditorState() {
+		const { isLoaded } = this.state
 		const { value } = this.props
-		if(value !== undefined && value.length > 0) {
-			this.setEditorStateFromHTML(value)
+		const valueString = value || ''
+		if (!isLoaded && valueString.length > 0) {
+			this.setState({isLoaded: true}, this.setEditorStateFromHTML(value))
 		}
 	}
 
@@ -64,20 +68,14 @@ class RichTextEditor extends Component {
 	}
 
 	_setEditorStateFromHTML(html) {
-		if (this.state.isLoaded) { return }
 		const blocksFromHTML = convertFromHTML(html)
 		if (blocksFromHTML.contentBlocks === null) { return }
 		const contentState = ContentState.createFromBlockArray(
 			blocksFromHTML.contentBlocks,
 			blocksFromHTML.entityMap,
 		)
-		const editorState = EditorState.createWithContent(contentState, this.state.decorator)
-		this.setState(
-			{
-				isLoaded: true,
-				editorState,
-			}
-		)
+		const editorState = EditorState.push(this.state.editorState, contentState, 'change-block-data')
+		this.onChange(editorState)
 	}
 
 	_handleKeyCommand(command, editorState) {
