@@ -225,9 +225,9 @@ class BaseRollupShow extends Page {
 						animation={false}
 						target={() => this.state.graphPopover}
 					>
-						<Popover id="graph-popover" title={this.state.hoveredBar.org.shortName}>
-							<p>Released: {this.state.hoveredBar.released}</p>
-							<p>Cancelled: {this.state.hoveredBar.cancelled}</p>
+						<Popover id="graph-popover" title={this.state.hoveredBar && this.state.hoveredBar.org.shortName}>
+							<p>Released: {this.state.hoveredBar && this.state.hoveredBar.released}</p>
+							<p>Cancelled: {this.state.hoveredBar && this.state.hoveredBar.cancelled}</p>
 							<p>Click to view details</p>
 						</Popover>
 					</Overlay>
@@ -267,7 +267,7 @@ class BaseRollupShow extends Page {
 
 	@autobind
 	goToOrg(org) {
-		this.setState({reportsPageNum: 0, focusedOrg: org, graphPopover: null, isLoading: true}, () => this.loadData())
+		this.setState({reportsPageNum: 0, focusedOrg: org, isLoading: true}, () => this.loadData())
 	}
 
 	@autobind
@@ -291,7 +291,7 @@ class BaseRollupShow extends Page {
 
 	@autobind
 	hidePopover() {
-		this.setState({graphPopover: null})
+		this.setState({graphPopover: null, hoveredBar: null})
 	}
 
 	@autobind
