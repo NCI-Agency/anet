@@ -85,8 +85,7 @@ module.exports = {
         new webpack.DefinePlugin({"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)}),
         new ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
         new CopyWebpackPlugin([
-            { from: 'public', ignore : ['index.html','alloy-editor/**/*'] },
-            { from: 'node_modules/alloyeditor/dist/alloy-editor', to: 'alloy-editor'}
+            { from: 'public', ignore : ['index.html'] },
         ])
         // new webpack.optimize.CommonsChunkPlugin({
         //     name: "dependencies",
