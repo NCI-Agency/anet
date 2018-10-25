@@ -98,7 +98,7 @@ class DailyRollupChart extends Component {
 
     // We use a dynamic yHeight, depending on how much data we have to display,
     // in order to make sure the chart is readable for lots of data
-    let yHeight = (BAR_HEIGHT + BAR_PADDING) * chartData.length + BAR_HEIGHT
+    let yHeight = (BAR_HEIGHT + BAR_PADDING) * chartData.length
     let chartHeight = yHeight + MARGIN.top + marginBottom
 
     let xMax = d3.max(xLabels)
@@ -145,7 +145,7 @@ class DailyRollupChart extends Component {
       .data(chartData)
       .enter()
       .append('g')
-      .attr('transform', (d, i) => `translate(2, ${i * (BAR_HEIGHT + BAR_PADDING) - 1})`)
+      .attr('transform', (d, i) => `translate(1, ${i * (BAR_HEIGHT + BAR_PADDING) + BAR_PADDING / 2})`)
       .classed('bar', true)
       .on('mouseenter', d => this.props.showPopover && this.props.showPopover(d3.event.target, d))
       .on('mouseleave', d => this.props.hidePopover && this.props.hidePopover())
@@ -156,7 +156,7 @@ class DailyRollupChart extends Component {
     }
 
     bar.append('rect')
-      .attr('width', d => d.released && xScale(d.released) - 2)
+      .attr('width', d => d.released && xScale(d.released))
       .attr('height', BAR_HEIGHT)
       .attr('fill', barColors.verified)
 
@@ -168,8 +168,8 @@ class DailyRollupChart extends Component {
       .text(d => d.released || '')
 
     bar.append('rect')
-      .attr('x', d => d.released && xScale(d.released) - 2)
-      .attr('width', d => d.cancelled && (xScale(d.cancelled) - (d.released ? 0 : 2)))
+      .attr('x', d => d.released && xScale(d.released))
+      .attr('width', d => d.cancelled && xScale(d.cancelled))
       .attr('height', BAR_HEIGHT)
       .attr('fill', barColors.cancelled)
 

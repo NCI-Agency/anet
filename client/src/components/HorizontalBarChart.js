@@ -138,7 +138,7 @@ class HorizontalBarChart extends Component {
 
     // We use a dynamic yHeight, depending on how much data we have to display,
     // in order to make sure the chart is readable for lots of data 
-    let yHeight = (BAR_HEIGHT + BAR_PADDING) * categoryDomain.length + BAR_HEIGHT
+    let yHeight = (BAR_HEIGHT + BAR_PADDING) * categoryDomain.length
     let chartHeight = yHeight + MARGIN.top + marginBottom
 
     let yCategoryScale = d3.scaleLinear()
@@ -233,7 +233,7 @@ class HorizontalBarChart extends Component {
       .attr('x', 0)
       .attr('y', yCategoryScale(BAR_PADDING))
       .attr('width', d => xScale(d.value))
-      .attr('height', yCategoryScale(yScale.bandwidth() - BAR_PADDING))
+      .attr('height', BAR_HEIGHT)
       .on('mouseenter', d => this.props.showPopover && this.props.showPopover(d3.event.target, d))
       .on('mouseleave', d => this.props.hidePopover && this.props.hidePopover())
 
