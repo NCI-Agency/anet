@@ -8,7 +8,9 @@ import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
 import {Map, Control, CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
+import { GestureHandling } from 'leaflet-gesture-handling'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
 import Settings from 'Settings'
 
 import MARKER_ICON from 'resources/leaflet/marker-icon.png'
@@ -62,7 +64,8 @@ class BaseLeaflet extends Component {
 	}
 
 	componentDidMount() {		
-		const mapOptions = Object.assign({zoomControl:true},
+		Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
+		const mapOptions = Object.assign({zoomControl:true, gestureHandling:true},
 										 Settings.imagery.mapOptions.leafletOptions,
 										 Settings.imagery.mapOptions.crs && { crs: CRS[Settings.imagery.mapOptions.crs] })
 		const map = new Map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,
