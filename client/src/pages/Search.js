@@ -59,7 +59,7 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PersonSearchQueryInput',
-		fields: 'id, name, rank, emailAddress, role , position { id, name, organization { id, shortName} }'
+		fields: 'id, name, rank, emailAddress, role , position { id, name, code, location { id, name }, organization { id, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
@@ -352,6 +352,7 @@ class BaseSearch extends Page {
 				<tr>
 						<th>Name</th>
 						<th>Position</th>
+						<th>Location</th>
 						<th>Org</th>
 					</tr>
 				</thead>
@@ -362,7 +363,8 @@ class BaseSearch extends Page {
 								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 								<LinkTo person={person}/>
 							</td>
-							<td>{person.position && <LinkTo position={person.position} />}</td>
+							<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
+							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
 						</tr>
 					)}
