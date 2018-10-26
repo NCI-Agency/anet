@@ -60,7 +60,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				tasks: [],
 				authorizationGroups: [],
 			},
-			reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name})),
+			reportTags: (report.tags || []).map(tag => ({id: tag.uuid, text: tag.name})),
 			suggestionList: [],
 
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation,
@@ -105,7 +105,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 					tasks: data.taskRecents.list,
 					authorizationGroups: data.authorizationGroupRecents.list,
 				},
-				suggestionList: data.tags.list.map(tag => ({id: tag.uuid.toString(), text: tag.name})),
+				suggestionList: data.tags.list.map(tag => ({id: tag.uuid, text: tag.name})),
 			}
 			this.setState(newState)
 		})
@@ -124,7 +124,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		const prevReport = prevProps.report
 		const prevCurrentUser = prevProps.currentUser
 		if (report.uuid !== prevReport.uuid) {
-			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name}))})
+			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.uuid, text: tag.name}))})
 		}
 		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
 		const prevShowReportText = !!prevReport.reportText || !!prevReport.reportSensitiveInformation
@@ -557,7 +557,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 	@autobind
 	saveReport(disableSubmits) {
 		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
-		report.tags = this.state.reportTags.map(tag => ({uuid: tag.uuid}))
+		report.tags = this.state.reportTags.map(tag => ({uuid: tag.id}))
 		if(report.primaryAdvisor) { report.attendees.find(a => a.uuid === report.primaryAdvisor.uuid).isPrimary = true }
 		if(report.primaryPrincipal) { report.attendees.find(a => a.uuid === report.primaryPrincipal.uuid).isPrimary = true }
 		delete report.primaryPrincipal
