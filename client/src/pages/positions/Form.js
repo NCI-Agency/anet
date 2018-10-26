@@ -21,6 +21,8 @@ import LinkTo from 'components/LinkTo'
 import { jumpToTop } from 'components/Page'
 import utils from 'utils'
 
+import WARNING_ICON from 'resources/warning.png'
+
 class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
 		position: PropTypes.object.isRequired,
@@ -45,6 +47,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 	render() {
 		let {position, error, success, edit} = this.props
 		error = this.props.error || (this.state && this.state.error)
+		const { errors } = this.state
+		const hasErrors = Object.keys(errors).length > 0
 
 		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
@@ -77,6 +81,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 				formFor={position}
 				onChange={this.onChange}
 				onSubmit={this.onSubmit}
+				submitDisabled={hasErrors}
 				submitText="Save position"
 				horizontal
 			>
@@ -102,7 +107,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 						</HelpBlock> }
 					</Form.Field>
 
-					<Form.Field id="organization">
+					<RequiredField id="organization" validationState={errors.organization}>
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
@@ -111,7 +116,12 @@ class BasePositionForm extends ValidatableFormWrapper {
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
 						/>
-					</Form.Field>
+
+						{errors.organization && <HelpBlock>
+							<img src={WARNING_ICON} alt="" height="20px" />
+							Organization not found in ANET Database.
+						</HelpBlock>}
+					</RequiredField>
 
 					<Form.Field id="code"
 						label={position.type === Position.TYPE.PRINCIPAL ? Settings.PRINCIPAL_POSITION_CODE_NAME : Settings.ADVISOR_POSITION_CODE_NAME}
@@ -151,12 +161,25 @@ class BasePositionForm extends ValidatableFormWrapper {
 		)
 	}
 
-
 	@autobind
 	onChange() {
 		this.setState({
+			errors : this.validatePosition(),
 			isBlocking: this.formHasUnsavedChanges(this.props.position, this.props.original),
 		})
+	}
+
+	@autobind
+	validatePosition() {
+		let position = this.props.position
+		let errors = this.state.errors
+		if (position.organization && (typeof position.organization !== 'object')) {
+			errors.organization = 'error'
+		} else {
+			delete errors.organization
+		}
+
+		return errors
 	}
 
 	@autobind
