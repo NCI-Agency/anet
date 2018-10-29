@@ -43,7 +43,7 @@ test('Draft and submit a report', async t => {
         'Principal primary attendee checkbox should be checked'
     )
     await assertElementText(t, $principalName, 'CIV TOPFERNESS, Christopf')
-    await assertElementText(t, $principalPosition, 'Planning Captain')
+    await assertElementText(t, $principalPosition, 'Planning Captain, MOD-FO-00004')
     await assertElementText(t, $principalOrg, 'MoD')
 
     let $tasksAutocomplete = await pageHelpers.chooseAutocompleteOption('#tasks', '1.1.B')
