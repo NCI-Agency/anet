@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response.Status;
 import org.joda.time.DateTime;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
-import org.jdbi.v3.core.result.ResultIterable;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
@@ -250,11 +249,11 @@ public class PositionDao extends AnetBaseDao<Position> {
 				+ "AND \"peoplePositions\".\"createdAt\" < :dtg "
 				+ "ORDER BY \"peoplePositions\".\"createdAt\" DESC LIMIT 1";
 		}
-		ResultIterable<Person> query = dbHandle.createQuery(sql)
+		List<Person> results = dbHandle.createQuery(sql)
 			.bind("positionUuid", b.getUuid())
 			.bind("dtg", dtg)
-			.map(new PersonMapper());
-		List<Person> results = query.list();
+			.map(new PersonMapper())
+			.list();
 		if (results.size() == 0) { return null; }
 		return results.get(0);
 	}
@@ -286,7 +285,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 	}
 
 	public List<Position> getAssociatedPositions(Position p) {
-		ResultIterable<Position> query = dbHandle.createQuery("/* getAssociatedPositions */ SELECT " 
+		return dbHandle.createQuery("/* getAssociatedPositions */ SELECT "
 				+ POSITIONS_FIELDS + ", people.* FROM positions "
 				+ "LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid "
 				+ "WHERE positions.uuid IN "
@@ -294,8 +293,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 				+ "OR positions.uuid IN (SELECT \"positionUuid_b\" FROM \"positionRelationships\" WHERE \"positionUuid_a\" = :positionUuid AND deleted = :deleted)")
 			.bind("positionUuid", p.getUuid())
 			.bind("deleted", false)
-			.map(new PositionMapper());
-		return query.list();
+			.map(new PositionMapper())
+			.list();
 	}
 
 	public int associatePosition(Position a, Position b) {
