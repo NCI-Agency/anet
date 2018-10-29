@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.customizers.Mapper;
-import org.skife.jdbi.v2.sqlobject.stringtemplate.UseStringTemplate3StatementLocator;
-import org.skife.jdbi.v2.unstable.BindIn;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.BindList;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
@@ -44,9 +43,9 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	}
 	
 	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
-		Query<Organization> query = getPagedQuery(pageNum, pageSize, new OrganizationMapper());
+		final Query query = getPagedQuery(pageNum, pageSize);
 		Long manualRowCount = getSqliteRowCount();
-		return new AnetBeanList<Organization>(query, pageNum, pageSize, manualRowCount);
+		return new AnetBeanList<Organization>(query, pageNum, pageSize, new OrganizationMapper(), manualRowCount);
 	}
 
 	public Organization getByUuid(String uuid) {
@@ -54,7 +53,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 				"/* getOrgByUuid */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid = :uuid")
 				.bind("uuid", uuid)
 				.map(new OrganizationMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -83,9 +82,8 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 			.list();
 	}
 
-	@UseStringTemplate3StatementLocator
 	public interface OrgListQueries {
-		@Mapper(OrganizationMapper.class)
+		@RegisterRowMapper(OrganizationMapper.class)
 		@SqlQuery("SELECT uuid AS organizations_uuid"
 				+ ", uuid AS uuid"
 				+ ", \"shortName\" AS organizations_shortName"
@@ -97,7 +95,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 				+ ", \"createdAt\" AS organizations_createdAt"
 				+ ", \"updatedAt\" AS organizations_updatedAt"
 				+ " FROM organizations WHERE \"shortName\" IN ( <shortNames> )")
-		public List<Organization> getOrgsByShortNames(@BindIn("shortNames") List<String> shortNames);
+		public List<Organization> getOrgsByShortNames(@BindList("shortNames") List<String> shortNames);
 	}
 
 	public List<Organization> getOrgsByShortNames(List<String> shortNames) {
@@ -109,10 +107,10 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 
 	public Organization insert(Organization org) {
 		DaoUtils.setInsertFields(org);
-		dbHandle.createStatement(
+		dbHandle.createUpdate(
 				"/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\") "
 				+ "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid)")
-			.bindFromProperties(org)
+			.bindBean(org)
 			.bind("status", DaoUtils.getEnumId(org.getStatus()))
 			.bind("type", DaoUtils.getEnumId(org.getType()))
 			.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
@@ -122,10 +120,10 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	
 	public int update(Organization org) {
 		DaoUtils.setUpdateFields(org);
-		int numRows = dbHandle.createStatement("/* updateOrg */ UPDATE organizations "
+		int numRows = dbHandle.createUpdate("/* updateOrg */ UPDATE organizations "
 				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
 				+ "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid where uuid = :uuid")
-				.bindFromProperties(org)
+				.bindBean(org)
 				.bind("status", DaoUtils.getEnumId(org.getStatus()))
 				.bind("type", DaoUtils.getEnumId(org.getType()))
 				.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))

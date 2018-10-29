@@ -3,17 +3,17 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Location.LocationStatus;
 import mil.dds.anet.utils.DaoUtils;
 
-public class LocationMapper implements ResultSetMapper<Location> {
+public class LocationMapper implements RowMapper<Location> {
 
 	@Override
-	public Location map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public Location map(ResultSet rs, StatementContext ctx) throws SQLException {
 		Location l = new Location();
 		DaoUtils.setCommonBeanFields(l, rs, null);
 		l.setName(rs.getString("name"));
@@ -23,7 +23,7 @@ public class LocationMapper implements ResultSetMapper<Location> {
 		l.setLng(DaoUtils.getOptionalDouble(rs, "lng"));
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
-			ctx.setAttribute("totalCount", rs.getInt("totalCount"));
+			ctx.define("totalCount", rs.getInt("totalCount"));
 		}
 		
 		return l;

@@ -11,9 +11,9 @@ import mil.dds.anet.database.mappers.ForeignKeyMapper;
 import mil.dds.anet.database.mappers.ForeignKeyTuple;
 import mil.dds.anet.views.AbstractAnetBean;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.result.ResultIterable;
+import org.jdbi.v3.core.mapper.RowMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
 	private final ForeignKeyMapper<T> mapper;
 	private final String foreignKeyName;
 
-	public ForeignKeyBatcher(Handle dbHandle, String sql, ResultSetMapper<T> objectMapper, String foreignKeyName) {
+	public ForeignKeyBatcher(Handle dbHandle, String sql, RowMapper<T> objectMapper, String foreignKeyName) {
 		this.dbHandle = dbHandle;
 		this.sql = sql;
 		this.mapper = new ForeignKeyMapper<>(foreignKeyName, objectMapper);
@@ -44,8 +44,8 @@ public class ForeignKeyBatcher<T extends AbstractAnetBean> {
 			args.put(arg, foreignKeys.get(i));
 		}
 		final String queryKeys = foreignKeys.isEmpty() ? "-1" : Joiner.on(", ").join(argNames);
-		final Query<ForeignKeyTuple<T>> query = dbHandle.createQuery(String.format(sql, queryKeys))
-				.bindFromMap(args)
+		final ResultIterable<ForeignKeyTuple<T>> query = dbHandle.createQuery(String.format(sql, queryKeys))
+				.bindMap(args)
 				.map(mapper);
 		final Map<String, List<T>> map = new HashMap<>();
 		for (final ForeignKeyTuple<T> obj : query.list()) {

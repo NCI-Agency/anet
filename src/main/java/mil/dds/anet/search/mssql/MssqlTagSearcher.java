@@ -8,8 +8,8 @@ import java.util.Map;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -80,9 +80,8 @@ public class MssqlTagSearcher implements ITagSearcher {
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
-		final Query<Tag> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
-			.map(new TagMapper());
-		return new AnetBeanList<Tag>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		return new AnetBeanList<Tag>(sqlQuery, query.getPageNum(), query.getPageSize(), new TagMapper(), null);
 	}
 
 }

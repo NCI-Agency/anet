@@ -11,8 +11,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
@@ -278,10 +278,9 @@ public class SqliteReportSearcher implements IReportSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 		
-		Query<Report> dbQuery = dbHandle.createQuery(sql.toString())
-				.bindFromMap(args)
-				.map(new ReportMapper());
-		AnetBeanList<Report> reportList = AnetBeanList.getReportList(user, dbQuery, query.getPageNum(), query.getPageSize());
+		final Query sqlQuery = dbHandle.createQuery(sql.toString())
+				.bindMap(args);
+		AnetBeanList<Report> reportList = AnetBeanList.getReportList(user, sqlQuery, query.getPageNum(), query.getPageSize(), new ReportMapper());
 		reportList.setTotalCount(reportList.getList().size());
 		return reportList;
 	}

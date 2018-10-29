@@ -4,8 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,7 @@ import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 import mil.dds.anet.beans.AnetEmail;
 
-public class AnetEmailMapper implements ResultSetMapper<AnetEmail> {
+public class AnetEmailMapper implements RowMapper<AnetEmail> {
 
 	private static final Logger logger = LoggerFactory.getLogger(AnetEmailMapper.class);
 
@@ -27,7 +27,7 @@ public class AnetEmailMapper implements ResultSetMapper<AnetEmail> {
 	}
 
 	@Override
-	public AnetEmail map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public AnetEmail map(ResultSet rs, StatementContext ctx) throws SQLException {
 		String jobSpec = rs.getString("jobSpec");
 		try {
 			AnetEmail email = mapper.readValue(jobSpec, AnetEmail.class);

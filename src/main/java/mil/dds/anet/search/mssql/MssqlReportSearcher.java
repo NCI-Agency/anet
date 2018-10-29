@@ -9,8 +9,8 @@ import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
 
@@ -298,9 +298,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Report> map = MssqlSearcher.addPagination(query, dbHandle, sql, args)
-				.map(new ReportMapper());
-		return AnetBeanList.getReportList(user, map, query.getPageNum(), query.getPageSize());
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args);
+		return AnetBeanList.getReportList(user, sqlQuery, query.getPageNum(), query.getPageSize(), new ReportMapper());
 
 	}
 

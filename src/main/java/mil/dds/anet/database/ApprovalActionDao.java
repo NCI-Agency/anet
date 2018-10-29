@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -26,7 +26,7 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	
 	public ApprovalAction insert(ApprovalAction action) {
 		DaoUtils.setInsertFields(action);
-		dbHandle.createStatement("/* insertApprovalAction */ INSERT INTO \"approvalActions\" "
+		dbHandle.createUpdate("/* insertApprovalAction */ INSERT INTO \"approvalActions\" "
 				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
 			.bind("approvalStepUuid", action.getStep().getUuid())

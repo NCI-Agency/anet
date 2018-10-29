@@ -5,18 +5,18 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
 import mil.dds.anet.utils.DaoUtils;
 
-public class TaskMapper implements ResultSetMapper<Task> {
+public class TaskMapper implements RowMapper<Task> {
 
 	@Override
-	public Task map(int index, ResultSet r, StatementContext ctx) throws SQLException {
+	public Task map(ResultSet r, StatementContext ctx) throws SQLException {
 		Task p = new Task();
 		DaoUtils.setCommonBeanFields(p, r, null);
 		p.setLongName(r.getString("longName"));
@@ -49,7 +49,7 @@ public class TaskMapper implements ResultSetMapper<Task> {
 		}
 		
 		if (MapperUtils.containsColumnNamed(r, "totalCount")) { 
-			ctx.setAttribute("totalCount", r.getInt("totalCount"));
+			ctx.define("totalCount", r.getInt("totalCount"));
 		}
 		
 		return p;

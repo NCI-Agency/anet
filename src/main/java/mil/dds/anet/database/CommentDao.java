@@ -2,7 +2,7 @@ package mil.dds.anet.database;
 
 import java.util.List;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Report;
@@ -38,7 +38,7 @@ public class CommentDao implements IAnetDao<Comment> {
 				+ "WHERE comments.uuid = :uuid")
 			.bind("uuid", uuid)
 			.map(new CommentMapper())
-			.first();
+			.findFirst().orElse(null);
 	}
 
 	@Override
@@ -49,10 +49,10 @@ public class CommentDao implements IAnetDao<Comment> {
 	@Override
 	public Comment insert(Comment c) {
 		DaoUtils.setInsertFields(c);
-		dbHandle.createStatement("/* insertComment */ "
+		dbHandle.createUpdate("/* insertComment */ "
 				+ "INSERT INTO comments (uuid, \"reportUuid\", \"authorUuid\", \"createdAt\", \"updatedAt\", text)"
 				+ "VALUES (:uuid, :reportUuid, :authorUuid, :createdAt, :updatedAt, :text)")
-			.bindFromProperties(c)
+			.bindBean(c)
 			.bind("authorUuid", DaoUtils.getUuid(c.getAuthor()))
 			.execute();
 		return c;
@@ -60,8 +60,8 @@ public class CommentDao implements IAnetDao<Comment> {
 
 	public int update(Comment c) {
 		DaoUtils.setUpdateFields(c);
-		return dbHandle.createStatement("/* updateComment */ UPDATE comments SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-			.bindFromProperties(c)
+		return dbHandle.createUpdate("/* updateComment */ UPDATE comments SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+			.bindBean(c)
 			.execute();
 	}
 
@@ -75,7 +75,7 @@ public class CommentDao implements IAnetDao<Comment> {
 	}
 
 	public int delete(String commentUuid) {
-		return dbHandle.createStatement("/* deleteComment */ DELETE FROM comments where uuid = :uuid")
+		return dbHandle.createUpdate("/* deleteComment */ DELETE FROM comments where uuid = :uuid")
 			.bind("uuid", commentUuid)
 			.execute();
 		

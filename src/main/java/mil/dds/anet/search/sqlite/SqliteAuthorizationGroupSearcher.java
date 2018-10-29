@@ -8,7 +8,7 @@ import java.util.Map;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -76,7 +76,7 @@ public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSear
 		sql.append(" LIMIT :limit OFFSET :offset");
 
 		final List<AuthorizationGroup> list = dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
+			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())
 			.map(new AuthorizationGroupMapper())

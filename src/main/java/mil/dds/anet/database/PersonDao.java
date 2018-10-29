@@ -4,10 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -48,16 +46,16 @@ public class PersonDao extends AnetBaseDao<Person> {
 	}
 	
 	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
-		Query<Person> query = getPagedQuery(pageNum, pageSize, new PersonMapper());
+		final Query query = getPagedQuery(pageNum, pageSize);
 		Long manualCount = getSqliteRowCount();
-		return new AnetBeanList<Person>(query, pageNum, pageSize, manualCount);
+		return new AnetBeanList<Person>(query, pageNum, pageSize, new PersonMapper(), manualCount);
 	}
 
 	public Person getByUuid(String uuid) {
 		return dbHandle.createQuery("/* personGetByUuid */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid = :uuid")
 				.bind("uuid",  uuid)
 				.map(new PersonMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -85,8 +83,8 @@ public class PersonDao extends AnetBaseDao<Person> {
 		}
 		sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
 
-		dbHandle.createStatement(sql.toString())
-			.bindFromProperties(p)
+		dbHandle.createUpdate(sql.toString())
+			.bindBean(p)
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
 			.execute();
@@ -108,8 +106,8 @@ public class PersonDao extends AnetBaseDao<Person> {
 			sql.append("\"endOfTourDate\" = :endOfTourDate ");
 		}
 		sql.append("WHERE uuid = :uuid");
-		return dbHandle.createStatement(sql.toString())
-			.bindFromProperties(p)
+		return dbHandle.createUpdate(sql.toString())
+			.bindBean(p)
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
 			.execute();
@@ -163,10 +161,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 	}
 
 	public int mergePeople(Person winner, Person loser, Boolean copyPosition) {
-		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
-			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				//delete duplicates where other is primary, or where neither is primary
-				dbHandle.createStatement("DELETE FROM \"reportPeople\" WHERE ("
+				h.createUpdate("DELETE FROM \"reportPeople\" WHERE ("
 						+ "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
 							+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
 						+ ")) OR ("
@@ -181,40 +178,39 @@ public class PersonDao extends AnetBaseDao<Person> {
 					.bind("isPrimary", true)
 					.execute();
 				//update report attendance, should now be unique
-				dbHandle.createStatement("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+				h.createUpdate("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
 				
 				// update approvals this person might have done
-				dbHandle.createStatement("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+				h.createUpdate("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
 				
 				// report author update
-				dbHandle.createStatement("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+				h.createUpdate("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
 			
 				// comment author update
-				dbHandle.createStatement("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+				h.createUpdate("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
 				
 				// update position history
-				dbHandle.createStatement("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+				h.createUpdate("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
 		
 				//delete the person!
-				return dbHandle.createStatement("DELETE FROM people WHERE uuid = :loserUuid")
+				return h.createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-			}
 		});
 
 	}

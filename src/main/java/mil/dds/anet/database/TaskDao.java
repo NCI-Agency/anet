@@ -2,9 +2,9 @@ package mil.dds.anet.database;
 
 import java.util.List;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
@@ -16,7 +16,7 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-@RegisterMapper(TaskMapper.class)
+@RegisterRowMapper(TaskMapper.class)
 public class TaskDao implements IAnetDao<Task> {
 
 	private final Handle dbHandle;
@@ -36,18 +36,17 @@ public class TaskDao implements IAnetDao<Task> {
 		} else { 
 			sql = "/* getAllTasks */ SELECT * from tasks ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
-		Query<Task> query = dbHandle.createQuery(sql)
+		final Query query = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
-				.bind("offset", pageSize * pageNum)
-				.map(new TaskMapper());
-		return new AnetBeanList<Task>(query, pageNum, pageSize, null);
+				.bind("offset", pageSize * pageNum);
+		return new AnetBeanList<Task>(query, pageNum, pageSize, new TaskMapper(), null);
 	}
 
 	public Task getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getTaskByUuid */ SELECT * from tasks where uuid = :uuid")
 				.bind("uuid", uuid)
 				.map(new TaskMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -58,12 +57,12 @@ public class TaskDao implements IAnetDao<Task> {
 	@Override
 	public Task insert(Task p) {
 		DaoUtils.setInsertFields(p);
-		dbHandle.createStatement("/* inserTask */ INSERT INTO tasks "
+		dbHandle.createUpdate("/* insertTask */ INSERT INTO tasks "
 				+ "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"organizationUuid\", \"createdAt\", \"updatedAt\", status, "
 				+ "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\") "
 				+ "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :organizationUuid, :createdAt, :updatedAt, :status, "
 				+ ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion)")
-			.bindFromProperties(p)
+			.bindBean(p)
 			.bind("customFieldRef1Uuid", DaoUtils.getUuid(p.getCustomFieldRef1()))
 			.bind("organizationUuid", DaoUtils.getUuid(p.getResponsibleOrg()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
@@ -73,13 +72,13 @@ public class TaskDao implements IAnetDao<Task> {
 	
 	public int update(Task p) { 
 		DaoUtils.setUpdateFields(p);
-		return dbHandle.createStatement("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
+		return dbHandle.createUpdate("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
 				+ "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, \"updatedAt\" = :updatedAt, "
 				+ "\"organizationUuid\" = :organizationUuid, status = :status, "
 				+ "\"customField\" = :customField, \"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
 				+ "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion "
 				+ "WHERE uuid = :uuid")
-			.bindFromProperties(p)
+			.bindBean(p)
 			.bind("customFieldRef1Uuid", DaoUtils.getUuid(p.getCustomFieldRef1()))
 			.bind("organizationUuid", DaoUtils.getUuid(p.getResponsibleOrg()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
@@ -88,7 +87,7 @@ public class TaskDao implements IAnetDao<Task> {
 	
 	public int setResponsibleOrgForTask(Task p, Organization org) { 
 		DaoUtils.setUpdateFields(p);
-		return dbHandle.createStatement("/* setReponsibleOrgForTask */ UPDATE tasks "
+		return dbHandle.createUpdate("/* setReponsibleOrgForTask */ UPDATE tasks "
 				+ "SET \"organizationUuid\" = :orgUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 			.bind("orgUuid", DaoUtils.getUuid(org))
 			.bind("uuid", p.getUuid())

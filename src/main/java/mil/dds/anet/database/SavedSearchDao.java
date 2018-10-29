@@ -2,7 +2,7 @@ package mil.dds.anet.database;
 
 import java.util.List;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -30,7 +30,7 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 		return dbHandle.createQuery("/* getSavedSearchByUuid */ SELECT * from \"savedSearches\" where uuid = :uuid")
 				.bind("uuid", uuid)
 				.map(new SavedSearchMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -47,10 +47,10 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 	
 	public SavedSearch insert(SavedSearch obj) {
 		DaoUtils.setInsertFields(obj);
-		dbHandle.createStatement("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
+		dbHandle.createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
 				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
 				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
-			.bindFromProperties(obj)
+			.bindBean(obj)
 			.bind("ownerUuid", obj.getOwner().getUuid())
 			.bind("objectType", DaoUtils.getEnumId(obj.getObjectType()))
 			.execute();
@@ -59,15 +59,15 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 
 	public int update(SavedSearch obj) {
 		DaoUtils.setUpdateFields(obj);
-		return dbHandle.createStatement("/* updateSavedSearch */ UPDATE \"savedSearches\" "
+		return dbHandle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
 				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
 				+ "WHERE uuid = :uuid")
-			.bindFromProperties(obj)
+			.bindBean(obj)
 			.execute();
 	}
 
 	public int deleteSavedSearch(String uuid, Person owner) {
-		return dbHandle.createStatement("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
+		return dbHandle.createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
 				+ "WHERE uuid = :uuid AND \"ownerUuid\" = :ownerUuid")
 			.bind("uuid", uuid)
 			.bind("ownerUuid", owner.getUuid())

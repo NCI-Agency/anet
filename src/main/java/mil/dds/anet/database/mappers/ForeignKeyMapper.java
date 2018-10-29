@@ -3,24 +3,24 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
-public class ForeignKeyMapper<T> implements ResultSetMapper<ForeignKeyTuple<T>> {
+public class ForeignKeyMapper<T> implements RowMapper<ForeignKeyTuple<T>> {
 
 	private final String foreignKeyName;
-	private final ResultSetMapper<T> objectMapper;
+	private final RowMapper<T> objectMapper;
 
-	public ForeignKeyMapper(String foreignKeyName, ResultSetMapper<T> objectMapper) {
+	public ForeignKeyMapper(String foreignKeyName, RowMapper<T> objectMapper) {
 		this.foreignKeyName = foreignKeyName;
 		this.objectMapper = objectMapper;
 	}
 	
 	@Override
-	public ForeignKeyTuple<T> map(int index, ResultSet rs, StatementContext ctx)
+	public ForeignKeyTuple<T> map(ResultSet rs, StatementContext ctx)
 			throws SQLException {
 		final String foreignKey = rs.getString(foreignKeyName);
-		final T object = objectMapper.map(index, rs, ctx);
+		final T object = objectMapper.map(rs, ctx);
 		return new ForeignKeyTuple<T>(foreignKey, object);
 	}
 

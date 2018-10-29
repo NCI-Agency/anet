@@ -2,9 +2,9 @@ package mil.dds.anet.database;
 
 import java.util.List;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
@@ -14,7 +14,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-@RegisterMapper(LocationMapper.class)
+@RegisterRowMapper(LocationMapper.class)
 public class LocationDao implements IAnetDao<Location> {
 
 	private final Handle dbHandle;
@@ -37,18 +37,17 @@ public class LocationDao implements IAnetDao<Location> {
 					+ "ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		
-		Query<Location> query = dbHandle.createQuery(sql)
+		final Query sqlQuery = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
-				.bind("offset", pageSize * pageNum)
-				.map(new LocationMapper());
-		return new AnetBeanList<Location>(query, pageNum, pageSize, null);
+				.bind("offset", pageSize * pageNum);
+		return new AnetBeanList<Location>(sqlQuery, pageNum, pageSize, new LocationMapper(), null);
 	}
 
 	public Location getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getLocationByUuid */ SELECT * from locations where uuid = :uuid")
 				.bind("uuid", uuid)
 				.map(new LocationMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -59,10 +58,10 @@ public class LocationDao implements IAnetDao<Location> {
 	@Override
 	public Location insert(Location l) {
 		DaoUtils.setInsertFields(l);
-		dbHandle.createStatement(
+		dbHandle.createUpdate(
 				"/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, :updatedAt)")
-			.bindFromProperties(l)
+			.bindBean(l)
 			.bind("status", DaoUtils.getEnumId(l.getStatus()))
 			.execute();
 		return l;
@@ -70,9 +69,9 @@ public class LocationDao implements IAnetDao<Location> {
 	
 	public int update(Location l) {
 		DaoUtils.setUpdateFields(l);
-		return dbHandle.createStatement("/* updateLocation */ UPDATE locations "
+		return dbHandle.createUpdate("/* updateLocation */ UPDATE locations "
 					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-				.bindFromProperties(l)
+				.bindBean(l)
 				.bind("status", DaoUtils.getEnumId(l.getStatus()))
 				.execute();
 	}

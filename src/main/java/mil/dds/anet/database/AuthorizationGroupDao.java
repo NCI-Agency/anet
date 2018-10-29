@@ -4,14 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.BindBean;
-import org.skife.jdbi.v2.sqlobject.SqlBatch;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
@@ -27,7 +25,7 @@ import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-@RegisterMapper(AuthorizationGroupMapper.class)
+@RegisterRowMapper(AuthorizationGroupMapper.class)
 public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 
 	private final Handle dbHandle;
@@ -57,18 +55,17 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 					+ "ORDER BY name ASC LIMIT :limit OFFSET :offset";
 		}
 
-		final Query<AuthorizationGroup> query = dbHandle.createQuery(sql)
+		final Query sqlQuery = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
-				.bind("offset", pageSize * pageNum)
-				.map(new AuthorizationGroupMapper());
-		return new AnetBeanList<AuthorizationGroup>(query, pageNum, pageSize, null);
+				.bind("offset", pageSize * pageNum);
+		return new AnetBeanList<AuthorizationGroup>(sqlQuery, pageNum, pageSize, new AuthorizationGroupMapper(), null);
 	}
 
 	public AuthorizationGroup getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getAuthorizationGroupByUuid */ SELECT * from \"authorizationGroups\" where uuid = :uuid")
 				.bind("uuid", uuid)
 				.map(new AuthorizationGroupMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -82,14 +79,12 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 
 	@Override
 	public AuthorizationGroup insert(AuthorizationGroup a) {
-		return dbHandle.inTransaction(new TransactionCallback<AuthorizationGroup>() {
-			@Override
-			public AuthorizationGroup inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				DaoUtils.setInsertFields(a);
-				dbHandle.createStatement(
+				dbHandle.createUpdate(
 						"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
 							+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
-					.bindFromProperties(a)
+					.bindBean(a)
 					.bind("status", DaoUtils.getEnumId(a.getStatus()))
 					.execute();
 		
@@ -98,7 +93,6 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 					ab.insertAuthorizationGroupPositions(a.getUuid(), a.getPositions());
 				}
 				return a;
-			}
 		});
 	}
 
@@ -109,21 +103,18 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public int update(AuthorizationGroup a) {
-		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
-			@Override
-			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				DaoUtils.setUpdateFields(a);
-				return dbHandle.createStatement("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
+				return dbHandle.createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
 							+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
-						.bindFromProperties(a)
+						.bindBean(a)
 						.bind("status", DaoUtils.getEnumId(a.getStatus()))
 						.execute();
-			}
 		});
 	}
 
 	public int addPositionToAuthorizationGroup(Position p, AuthorizationGroup a) {
-		return dbHandle.createStatement("/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupUuid\", \"positionUuid\") "
+		return dbHandle.createUpdate("/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupUuid\", \"positionUuid\") "
 				+ "VALUES (:authorizationGroupUuid, :positionUuid)")
 			.bind("authorizationGroupUuid", a.getUuid())
 			.bind("positionUuid", p.getUuid())
@@ -131,7 +122,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public int removePositionFromAuthorizationGroup(Position p, AuthorizationGroup a) {
-		return dbHandle.createStatement("/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupPositions\" "
+		return dbHandle.createUpdate("/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupPositions\" "
 				+ "WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid AND \"positionUuid\" = :positionUuid")
 				.bind("authorizationGroupUuid", a.getUuid())
 				.bind("positionUuid", p.getUuid())

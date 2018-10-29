@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
@@ -177,9 +177,8 @@ public class MssqlPersonSearcher implements IPersonSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Person> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
-			.map(new PersonMapper());
-		return new AnetBeanList<Person>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		return new AnetBeanList<Person>(sqlQuery, query.getPageNum(), query.getPageSize(), new PersonMapper(), null);
 	}
 
 }

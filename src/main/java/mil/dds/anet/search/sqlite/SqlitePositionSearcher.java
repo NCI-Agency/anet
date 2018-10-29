@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Position;
@@ -130,7 +130,7 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 		}
 		
 		result.setList(dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
+			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())
 			.map(new PositionMapper())

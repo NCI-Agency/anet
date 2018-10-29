@@ -14,14 +14,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.DefaultMapper;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.BindBean;
-import org.skife.jdbi.v2.sqlobject.SqlBatch;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.SqlBatch;
 
 import com.google.common.base.Joiner;
 
@@ -119,11 +117,10 @@ public class ReportDao implements IAnetDao<Report> {
 		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle),
 				"Reports", "reports join people on reports.\"authorUuid\" = people.uuid", REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS,
 				"reports.\"createdAt\"");
-		Query<Report> query = dbHandle.createQuery(sql)
+		final Query query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
-			.bind("offset", pageSize * pageNum)
-			.map(new ReportMapper());
-		return AnetBeanList.getReportList(user, query, pageNum, pageSize);
+			.bind("offset", pageSize * pageNum);
+		return AnetBeanList.getReportList(user, query, pageNum, pageSize, new ReportMapper());
 	}
 
 	public Report insert(Report r) {
@@ -132,9 +129,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public Report insert(Report r, Person user) {
-		return dbHandle.inTransaction(new TransactionCallback<Report>() {
-			@Override
-			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				DaoUtils.setInsertFields(r);
 
 				//MSSQL requires explicit CAST when a datetime2 might be NULL.
@@ -147,15 +142,15 @@ public class ReportDao implements IAnetDao<Report> {
 						+ "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
 						+ ":exsum, :reportText, :keyOutcomes, "
 						+ ":nextSteps, :authorUuid, ");
-				if (DaoUtils.isMsSql(dbHandle)) {
+				if (DaoUtils.isMsSql(h)) {
 					sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
 				} else {
 					sql.append(":engagementDate, :releasedAt, ");
 				}
 				sql.append(":atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
 
-				dbHandle.createStatement(sql.toString())
-					.bindFromProperties(r)
+				h.createUpdate(sql.toString())
+					.bindBean(r)
 					.bind("state", DaoUtils.getEnumId(r.getState()))
 					.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
 					.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
@@ -173,7 +168,7 @@ public class ReportDao implements IAnetDao<Report> {
 				rsi = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insert(rsi, user, r);
 				r.setReportSensitiveInformation(rsi);
 
-				final ReportBatch rb = dbHandle.attach(ReportBatch.class);
+				final ReportBatch rb = h.attach(ReportBatch.class);
 				if (r.getAttendees() != null) {
 					//Setify based on attendeeUuid to prevent violations of unique key constraint.
 					Map<String,ReportPerson> attendeeMap = new HashMap<>();
@@ -191,7 +186,6 @@ public class ReportDao implements IAnetDao<Report> {
 					rb.insertReportTags(r.getUuid(), r.getTags());
 				}
 				return r;
-			}
 		});
 	}
 
@@ -240,7 +234,7 @@ public class ReportDao implements IAnetDao<Report> {
 				+ "AND reports.\"authorUuid\" = people.uuid")
 				.bind("key", key)
 				.map(new ReportMapper())
-				.first();
+				.findFirst().orElse(null);
 		if (result == null) { return null; }
 		result.setUser(user);
 		return result;
@@ -283,8 +277,8 @@ public class ReportDao implements IAnetDao<Report> {
 				+ "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
 				+ "WHERE uuid = :uuid");
 
-		return dbHandle.createStatement(sql.toString())
-			.bindFromProperties(r)
+		return dbHandle.createUpdate(sql.toString())
+			.bindBean(r)
 			.bind("state", DaoUtils.getEnumId(r.getState()))
 			.bind("locationUuid", DaoUtils.getUuid(r.getLocation()))
 			.bind("authorUuid", DaoUtils.getUuid(r.getAuthor()))
@@ -302,7 +296,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int addAttendeeToReport(ReportPerson rp, Report r) {
-		return dbHandle.createStatement("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
+		return dbHandle.createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
 				+ "(\"personUuid\", \"reportUuid\", \"isPrimary\") VALUES (:personUuid, :reportUuid, :isPrimary)")
 			.bind("personUuid", rp.getUuid())
 			.bind("reportUuid", r.getUuid())
@@ -311,7 +305,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removeAttendeeFromReport(Person p, Report r) {
-		return dbHandle.createStatement("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
+		return dbHandle.createUpdate("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
 			.bind("reportUuid", r.getUuid())
 			.bind("personUuid", p.getUuid())
@@ -319,7 +313,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int updateAttendeeOnReport(ReportPerson rp, Report r) {
-		return dbHandle.createStatement("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
+		return dbHandle.createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
 				+ "SET \"isPrimary\" = :isPrimary WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
 			.bind("reportUuid", r.getUuid())
 			.bind("personUuid", rp.getUuid())
@@ -329,7 +323,7 @@ public class ReportDao implements IAnetDao<Report> {
 
 
 	public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
-		return dbHandle.createStatement("/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupUuid\", \"reportUuid\") "
+		return dbHandle.createUpdate("/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupUuid\", \"reportUuid\") "
 				+ "VALUES (:authorizationGroupUuid, :reportUuid)")
 			.bind("reportUuid", r.getUuid())
 			.bind("authorizationGroupUuid", a.getUuid())
@@ -337,7 +331,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
-		return dbHandle.createStatement("/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
+		return dbHandle.createUpdate("/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"authorizationGroupUuid\" = :authorizationGroupUuid")
 				.bind("reportUuid", r.getUuid())
 				.bind("authorizationGroupUuid", a.getUuid())
@@ -345,7 +339,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int addTaskToReport(Task p, Report r) {
-		return dbHandle.createStatement("/* addTaskToReport */ INSERT INTO \"reportTasks\" (\"taskUuid\", \"reportUuid\") "
+		return dbHandle.createUpdate("/* addTaskToReport */ INSERT INTO \"reportTasks\" (\"taskUuid\", \"reportUuid\") "
 				+ "VALUES (:taskUuid, :reportUuid)")
 			.bind("reportUuid", r.getUuid())
 			.bind("taskUuid", p.getUuid())
@@ -353,7 +347,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removeTaskFromReport(Task p, Report r) {
-		return dbHandle.createStatement("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
+		return dbHandle.createUpdate("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"taskUuid\" = :taskUuid")
 				.bind("reportUuid", r.getUuid())
 				.bind("taskUuid", p.getUuid())
@@ -361,7 +355,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int addTagToReport(Tag t, Report r) {
-		return dbHandle.createStatement("/* addTagToReport */ INSERT INTO \"reportTags\" (\"reportUuid\", \"tagUuid\") "
+		return dbHandle.createUpdate("/* addTagToReport */ INSERT INTO \"reportTags\" (\"reportUuid\", \"tagUuid\") "
 				+ "VALUES (:reportUuid, :tagUuid)")
 			.bind("reportUuid", r.getUuid())
 			.bind("tagUuid", t.getUuid())
@@ -369,7 +363,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public int removeTagFromReport(Tag t, Report r) {
-		return dbHandle.createStatement("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
+		return dbHandle.createUpdate("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"tagUuid\" = :tagUuid")
 				.bind("reportUuid", r.getUuid())
 				.bind("tagUuid", t.getUuid())
@@ -415,32 +409,30 @@ public class ReportDao implements IAnetDao<Report> {
 	 * Ensures consistency by removing all references to a report before deleting a report. 
 	 */
 	public int deleteReport(final Report report) {
-		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
-			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				// Delete tags
-				dbHandle.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", report.getUuid());
+				h.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", report.getUuid());
 
 				//Delete tasks
-				dbHandle.execute("/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?", report.getUuid());
+				h.execute("/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?", report.getUuid());
 				
 				//Delete attendees
-				dbHandle.execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?", report.getUuid());
+				h.execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?", report.getUuid());
 				
 				//Delete comments
-				dbHandle.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", report.getUuid());
+				h.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", report.getUuid());
 				
 				//Delete \"approvalActions\"
-				dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportUuid\" = ?", report.getUuid());
+				h.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportUuid\" = ?", report.getUuid());
 
 				//Delete relation to authorization groups
-				dbHandle.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", report.getUuid());
+				h.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", report.getUuid());
 
 				//Delete report
 				// GraphQL mutations *have* to return something, so we return the number of deleted report rows
-				return dbHandle.createStatement("/* deleteReport.report */ DELETE FROM reports where uuid = :reportUuid")
+				return h.createUpdate("/* deleteReport.report */ DELETE FROM reports where uuid = :reportUuid")
 					.bind("reportUuid", report.getUuid())
 					.execute();
-			}
 		});
 		
 	}
@@ -615,8 +607,8 @@ public class ReportDao implements IAnetDao<Report> {
 		sqlArgs.put("reportReleased", ReportState.RELEASED.ordinal());
 
 		return dbHandle.createQuery(String.format(sql.toString(), fmtArgs))
-			.bindFromMap(sqlArgs)
-			.map(new DefaultMapper(false))
+			.bindMap(sqlArgs)
+			.map(new MapMapper(false))
 			.list();
 	}
 
@@ -671,8 +663,8 @@ public class ReportDao implements IAnetDao<Report> {
 		sql.append("GROUP BY " + orgColumn + ", state");
 
 		return dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
-			.map(new DefaultMapper(false))
+			.bindMap(sqlArgs)
+			.map(new MapMapper(false))
 			.list();
 	}
 	

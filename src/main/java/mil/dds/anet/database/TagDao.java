@@ -2,9 +2,9 @@ package mil.dds.anet.database;
 
 import java.util.List;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Tag;
@@ -13,7 +13,7 @@ import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-@RegisterMapper(TagMapper.class)
+@RegisterRowMapper(TagMapper.class)
 public class TagDao implements IAnetDao<Tag> {
 
 	private final Handle dbHandle;
@@ -36,18 +36,17 @@ public class TagDao implements IAnetDao<Tag> {
 					+ "ORDER BY name ASC LIMIT :limit OFFSET :offset";
 		}
 
-		final Query<Tag> query = dbHandle.createQuery(sql)
+		final Query query = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
-				.bind("offset", pageSize * pageNum)
-				.map(new TagMapper());
-		return new AnetBeanList<Tag>(query, pageNum, pageSize, null);
+				.bind("offset", pageSize * pageNum);
+		return new AnetBeanList<Tag>(query, pageNum, pageSize, new TagMapper(), null);
 	}
 
 	public Tag getByUuid(String uuid) {
 		return dbHandle.createQuery("/* getTagByUuid */ SELECT * from tags where uuid = :uuid")
 				.bind("uuid", uuid)
 				.map(new TagMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -58,19 +57,19 @@ public class TagDao implements IAnetDao<Tag> {
 	@Override
 	public Tag insert(Tag t) {
 		DaoUtils.setInsertFields(t);
-		dbHandle.createStatement(
+		dbHandle.createUpdate(
 				"/* tagInsert */ INSERT INTO tags (uuid, name, description, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt)")
-			.bindFromProperties(t)
+			.bindBean(t)
 			.execute();
 		return t;
 	}
 
 	public int update(Tag t) {
 		DaoUtils.setUpdateFields(t);
-		return dbHandle.createStatement("/* updateTag */ UPDATE tags "
+		return dbHandle.createUpdate("/* updateTag */ UPDATE tags "
 					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-				.bindFromProperties(t)
+				.bindBean(t)
 				.execute();
 	}
 

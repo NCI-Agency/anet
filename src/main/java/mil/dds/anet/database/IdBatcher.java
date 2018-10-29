@@ -8,9 +8,9 @@ import java.util.Map;
 
 import mil.dds.anet.views.AbstractAnetBean;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.result.ResultIterable;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import com.google.common.base.Joiner;
 
@@ -18,9 +18,9 @@ public class IdBatcher<T extends AbstractAnetBean> {
 
 	private final Handle dbHandle;
 	private final String sql;
-	private final ResultSetMapper<T> mapper;
+	private final RowMapper<T> mapper;
 
-	public IdBatcher(Handle dbHandle, String sql, ResultSetMapper<T> mapper) {
+	public IdBatcher(Handle dbHandle, String sql, RowMapper<T> mapper) {
 		this.dbHandle = dbHandle;
 		this.sql = sql;
 		this.mapper = mapper;
@@ -35,8 +35,8 @@ public class IdBatcher<T extends AbstractAnetBean> {
 			args.put(arg, uuids.get(i));
 		}
 		final String queryIds = uuids.isEmpty() ? "-1" : Joiner.on(", ").join(argNames);
-		final Query<T> query = dbHandle.createQuery(String.format(sql, queryIds))
-				.bindFromMap(args)
+		final ResultIterable<T> query = dbHandle.createQuery(String.format(sql, queryIds))
+				.bindMap(args)
 				.map(mapper);
 		final Map<String, T> map = new HashMap<>();
 		for (final T obj : query.list()) {

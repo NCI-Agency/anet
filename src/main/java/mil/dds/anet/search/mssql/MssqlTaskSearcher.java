@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Task;
@@ -139,9 +139,8 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Task> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
-			.map(new TaskMapper());
-		return new AnetBeanList<Task>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args);
+		return new AnetBeanList<Task>(sqlQuery, query.getPageNum(), query.getPageSize(), new TaskMapper(), null);
 	}
 
 }
