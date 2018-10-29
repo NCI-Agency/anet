@@ -1,10 +1,9 @@
 package mil.dds.anet.database;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -33,14 +32,9 @@ public class IdBatcher<T extends AbstractAnetBean> {
 		final ResultIterable<T> query = dbHandle.createQuery(sql)
 				.bindList(paramName, args)
 				.map(mapper);
-		final Map<String, T> map = new HashMap<>();
-		for (final T obj : query.list()) {
-			map.put(obj.getUuid(), obj);
-		}
-		final List<T> result = new ArrayList<>();
-		for (final String uuid : uuids) {
-			result.add(map.get(uuid));
-		}
-		return result;
+		final Map<String, T> map = query.collect(Collectors.toMap(
+				obj -> obj.getUuid(), // key
+				obj -> obj)); //value
+		return uuids.stream().map(uuid -> map.get(uuid)).collect(Collectors.toList());
 	}
 }
