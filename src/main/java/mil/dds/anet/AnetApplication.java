@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.SqlStatements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,7 +153,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		logger.info("dictionary: {}", dictionary.toString(2));
 		
 		//We want to use our own custom DB logger in order to clean up the logs a bit. 
-		jdbi.setSQLLog(new AnetDbLogger());
+		final SqlStatements sqlStatements = jdbi.getConfig(SqlStatements.class);
+		sqlStatements.setSqlLogger(new AnetDbLogger());
 
 		//The Object Engine is the core place where we store all of the Dao's
 		//You can always grab the engine from anywhere with AnetObjectEngine.getInstance()
