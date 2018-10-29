@@ -1,8 +1,8 @@
 package mil.dds.anet.database;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,31 +12,26 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.result.ResultIterable;
 import org.jdbi.v3.core.mapper.RowMapper;
 
-import com.google.common.base.Joiner;
-
 public class IdBatcher<T extends AbstractAnetBean> {
+
+	private static final List<String> defaultIfEmpty = Arrays.asList("-1");
 
 	private final Handle dbHandle;
 	private final String sql;
+	private final String paramName;
 	private final RowMapper<T> mapper;
 
-	public IdBatcher(Handle dbHandle, String sql, RowMapper<T> mapper) {
+	public IdBatcher(Handle dbHandle, String sql, String paramName, RowMapper<T> mapper) {
 		this.dbHandle = dbHandle;
 		this.sql = sql;
+		this.paramName = paramName;
 		this.mapper = mapper;
 	}
 
 	public List<T> getByIds(List<String> uuids) {
-		final Map<String, Object> args = new HashMap<String, Object>();
-		final List<String> argNames = new LinkedList<String>();
-		for (int i = 0; i < uuids.size(); i++) {
-			final String arg = "uuid" + i;
-			argNames.add(":" + arg);
-			args.put(arg, uuids.get(i));
-		}
-		final String queryIds = uuids.isEmpty() ? "-1" : Joiner.on(", ").join(argNames);
-		final ResultIterable<T> query = dbHandle.createQuery(String.format(sql, queryIds))
-				.bindMap(args)
+		final List<String> args = uuids.isEmpty() ? defaultIfEmpty : uuids;
+		final ResultIterable<T> query = dbHandle.createQuery(sql)
+				.bindList(paramName, args)
 				.map(mapper);
 		final Map<String, T> map = new HashMap<>();
 		for (final T obj : query.list()) {

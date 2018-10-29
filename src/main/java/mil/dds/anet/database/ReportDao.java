@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -20,8 +21,6 @@ import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
-
-import com.google.common.base.Joiner;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
@@ -72,26 +71,26 @@ public class ReportDao implements IAnetDao<Report> {
 		this.weekFormat = getWeekFormat(DaoUtils.getDbType(db));
 		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM reports, people "
-				+ "WHERE reports.uuid IN ( %1$s ) "
+				+ "WHERE reports.uuid IN ( <uuids> ) "
 				+ "AND reports.\"authorUuid\" = people.uuid";
-		this.idBatcher = new IdBatcher<Report>(db, idBatcherSql, new ReportMapper());
+		this.idBatcher = new IdBatcher<Report>(db, idBatcherSql, "uuids", new ReportMapper());
 
 		final String attendeesBatcherSql = "/* batch.getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS
 				+ ", \"reportPeople\".\"reportUuid\" , \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
 				+ "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
-				+ "WHERE \"reportPeople\".\"reportUuid\" IN ( %1$s )";
-		this.attendeesBatcher = new ForeignKeyBatcher<ReportPerson>(db, attendeesBatcherSql, new ReportPersonMapper(), "reportUuid");
+				+ "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> )";
+		this.attendeesBatcher = new ForeignKeyBatcher<ReportPerson>(db, attendeesBatcherSql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
 
 		final String tagsBatcherSql = "/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
 				+ "INNER JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid "
-				+ "WHERE \"reportTags\".\"reportUuid\" IN ( %1$s )"
+				+ "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> )"
 				+ "ORDER BY tags.name";
-		this.tagsBatcher = new ForeignKeyBatcher<Tag>(db, tagsBatcherSql, new TagMapper(), "reportUuid");
+		this.tagsBatcher = new ForeignKeyBatcher<Tag>(db, tagsBatcherSql, "foreignKeys", new TagMapper(), "reportUuid");
 
 		final String tasksBatcherSql = "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
-				+ "WHERE \"reportTasks\".\"reportUuid\" IN ( %1$s ) "
+				+ "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
 				+ "AND \"reportTasks\".\"taskUuid\" = tasks.uuid";
-		this.tasksBatcher = new ForeignKeyBatcher<Task>(db, tasksBatcherSql, new TaskMapper(), "reportUuid");
+		this.tasksBatcher = new ForeignKeyBatcher<Task>(db, tasksBatcherSql, "foreignKeys", new TaskMapper(), "reportUuid");
 	}
 
 	private String getWeekFormat(DaoUtils.DbType dbType) {
@@ -626,6 +625,7 @@ public class ReportDao implements IAnetDao<Report> {
 			boolean missingOrgReports) { 
 		String orgColumn = String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationUuid" : "principalOrganizationUuid");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* RollupQuery */ SELECT " + orgColumn + " as \"orgUuid\", state, count(*) AS count ");
@@ -646,24 +646,21 @@ public class ReportDao implements IAnetDao<Report> {
 			sqlArgs.put("engagementDateStart", SqliteReportSearcher.sqlitePattern.print(getRollupEngagmentStart(start)));
 		}
 		
-		if (orgs != null) { 
-			List<String> sqlBind = new LinkedList<String>();
-			int orgNum = 0; 
-			for (Organization o : orgs) { 
-				sqlArgs.put("orgUuid" + orgNum, o.getUuid());
-				sqlBind.add(":orgUuid" + orgNum);
-				orgNum++;
-			}
-			String orgInSql = Joiner.on(',').join(sqlBind);
-			sql.append("AND " + orgColumn + " IN (" + orgInSql + ") ");
+		if (!Utils.isEmptyOrNull(orgs)) {
+			sql.append("AND " + orgColumn + " IN ( <orgUuids> ) ");
+			listArgs.put("orgUuids", orgs.stream().map(org -> org.getUuid()).collect(Collectors.toList()));
 		} else if (missingOrgReports) { 
 			sql.append(" AND " + orgColumn + " IS NULL ");
 		}
 		
 		sql.append("GROUP BY " + orgColumn + ", state");
 
-		return dbHandle.createQuery(sql.toString())
-			.bindMap(sqlArgs)
+		final Query q = dbHandle.createQuery(sql.toString())
+			.bindMap(sqlArgs);
+		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
+			q.bindList(listArg.getKey(), listArg.getValue());
+		}
+		return q
 			.map(new MapMapper(false))
 			.list();
 	}

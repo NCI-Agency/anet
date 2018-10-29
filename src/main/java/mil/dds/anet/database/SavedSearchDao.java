@@ -17,8 +17,8 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 
 	public SavedSearchDao(Handle h) { 
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<SavedSearch>(h, idBatcherSql, new SavedSearchMapper());
+		final String idBatcherSql = "/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<SavedSearch>(h, idBatcherSql, "uuids", new SavedSearchMapper());
 	}
 	
 	@Override

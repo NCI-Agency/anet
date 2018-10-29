@@ -27,17 +27,17 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 
 	public ApprovalStepDao(Handle h) {
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<ApprovalStep>(dbHandle, idBatcherSql, new ApprovalStepMapper());
+		final String idBatcherSql = "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<ApprovalStep>(dbHandle, idBatcherSql, "uuids", new ApprovalStepMapper());
 
 		final String approversBatcherSql = "/* batch.getApproversForStep */ SELECT \"approvalStepUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM approvers "
 				+ "LEFT JOIN positions ON \"positions\".\"uuid\" = approvers.\"positionUuid\" "
-				+ "WHERE \"approvalStepUuid\" IN ( %1$s )";
-		this.approversBatcher = new ForeignKeyBatcher<Position>(h, approversBatcherSql, new PositionMapper(), "approvalStepUuid");
+				+ "WHERE \"approvalStepUuid\" IN ( <foreignKeys> )";
+		this.approversBatcher = new ForeignKeyBatcher<Position>(h, approversBatcherSql, "foreignKeys", new PositionMapper(), "approvalStepUuid");
 
-		final String organizationIdBatcherSql = "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( %1$s )";
-		this.organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(h, organizationIdBatcherSql, new ApprovalStepMapper(), "advisorOrganizationUuid");
+		final String organizationIdBatcherSql = "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> )";
+		this.organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(h, organizationIdBatcherSql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid");
 	}
 	
 	public AnetBeanList<?> getAll(int pageNum, int pageSize) {

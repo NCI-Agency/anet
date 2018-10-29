@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import jersey.repackaged.com.google.common.base.Joiner;
 import mil.dds.anet.beans.Position;
@@ -27,6 +29,7 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 		StringBuilder sql = new StringBuilder("/* SqlitePositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS 
 				+ " FROM positions WHERE positions.uuid IN (SELECT positions.uuid FROM positions ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		String commonTableExpression = null;
 		
 		if (query.getMatchPersonName() != null && query.getMatchPersonName()) { 
@@ -51,13 +54,9 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 			sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
 		}
 		
-		if (query.getType() != null) { 
-			List<String> argNames = new LinkedList<String>();
-			for (int i = 0;i < query.getType().size();i++) { 
-				argNames.add(":state" + i);
-				sqlArgs.put("state" + i, DaoUtils.getEnumId(query.getType().get(i)));
-			}
-			whereClauses.add("positions.type IN (" + Joiner.on(", ").join(argNames) + ")");
+		if (!Utils.isEmptyOrNull(query.getType())) {
+			whereClauses.add("positions.type IN ( <types> )");
+			listArgs.put("types", query.getType().stream().map(type -> DaoUtils.getEnumId(type)).collect(Collectors.toList()));
 		}
 		
 		if (query.getOrganizationUuid() != null) {
@@ -129,12 +128,17 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 		
-		result.setList(dbHandle.createQuery(sql.toString())
+		final Query q = dbHandle.createQuery(sql.toString())
 			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
-			.bind("limit", query.getPageSize())
+			.bind("limit", query.getPageSize());
+		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
+			q.bindList(listArg.getKey(), listArg.getValue());
+		}
+		final List<Position> list = q
 			.map(new PositionMapper())
-			.list());
+			.list();
+		result.setList(list);
 		result.setTotalCount(result.getList().size()); // Sqlite cannot do true total counts, so this is a crutch.
 		return result;
 	}

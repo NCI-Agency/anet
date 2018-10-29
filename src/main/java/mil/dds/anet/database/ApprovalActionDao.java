@@ -20,8 +20,8 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	public ApprovalActionDao(Handle db) { 
 		this.dbHandle = db;
 		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"approvalActions\" "
-				+ "WHERE \"reportUuid\" IN ( %1$s ) ORDER BY \"createdAt\" ASC";
-		this.reportIdBatcher = new ForeignKeyBatcher<ApprovalAction>(db, reportIdBatcherSql, new ApprovalActionMapper(), "reportUuid");
+				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
+		this.reportIdBatcher = new ForeignKeyBatcher<ApprovalAction>(db, reportIdBatcherSql, "foreignKeys", new ApprovalActionMapper(), "reportUuid");
 	}
 	
 	public ApprovalAction insert(ApprovalAction action) {

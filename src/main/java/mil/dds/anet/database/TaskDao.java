@@ -24,8 +24,8 @@ public class TaskDao implements IAnetDao<Task> {
 
 	public TaskDao(Handle h) { 
 		this.dbHandle = h; 
-		final String idBatcherSql = "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, new TaskMapper());
+		final String idBatcherSql = "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, "uuids", new TaskMapper());
 	}
 	
 	public AnetBeanList<Task> getAll(int pageNum, int pageSize) {

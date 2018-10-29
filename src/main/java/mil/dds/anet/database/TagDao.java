@@ -21,8 +21,8 @@ public class TagDao implements IAnetDao<Tag> {
 
 	public TagDao(Handle h) {
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getTagsByUuids */ SELECT * from tags where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Tag>(h, idBatcherSql, new TagMapper());
+		final String idBatcherSql = "/* batch.getTagsByUuids */ SELECT * from tags where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Tag>(h, idBatcherSql, "uuids", new TagMapper());
 	}
 
 	public AnetBeanList<Tag> getAll(int pageNum, int pageSize) {

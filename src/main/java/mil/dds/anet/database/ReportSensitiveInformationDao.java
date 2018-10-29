@@ -34,8 +34,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		this.dbHandle = h;
 		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
 				+ " FROM \"" + tableName + "\""
-				+ " WHERE \"reportUuid\" IN ( %1$s )";
-		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
+				+ " WHERE \"reportUuid\" IN ( <foreignKeys> )";
+		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, "foreignKeys", new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
 	}
 
 	@Override

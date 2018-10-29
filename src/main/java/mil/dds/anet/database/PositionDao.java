@@ -46,16 +46,16 @@ public class PositionDao extends AnetBaseDao<Position> {
 		super(h, "positions", tableName, POSITIONS_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM positions LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid "
-				+ "WHERE positions.uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Position>(h, idBatcherSql, new PositionMapper());
+				+ "WHERE positions.uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Position>(h, idBatcherSql, "uuids", new PositionMapper());
 
 		final String personPositionHistoryBatcherSql = "/* batch.getPositionHistory */ SELECT \"peoplePositions\".\"positionUuid\" AS \"positionUuid\", "
 				+ "\"peoplePositions\".\"personUuid\" AS \"personUuid\", "
 				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
 				+ PersonDao.PERSON_FIELDS + " FROM \"peoplePositions\" "
 				+ "LEFT JOIN people ON \"peoplePositions\".\"personUuid\" = people.uuid "
-				+ "WHERE \"positionUuid\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
-		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "positionUuid");
+				+ "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "positionUuid");
 	}
 	
 	public AnetBeanList<Position> getAll(int pageNum, int pageSize) {

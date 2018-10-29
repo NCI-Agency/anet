@@ -34,15 +34,15 @@ public class PersonDao extends AnetBaseDao<Person> {
 
 	public PersonDao(Handle h) { 
 		super(h, "Person", tableName, PERSON_FIELDS, null);
-		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, new PersonMapper());
+		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, "uuids", new PersonMapper());
 		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT \"peoplePositions\".\"positionUuid\" AS \"positionUuid\", "
 				+ "\"peoplePositions\".\"personUuid\" AS \"personUuid\", "
 				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
 				+ PositionDao.POSITIONS_FIELDS + " FROM \"peoplePositions\" "
 				+ "LEFT JOIN positions ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
-				+ "WHERE \"personUuid\" IN ( %1$s ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
-		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, new PersonPositionHistoryMapper(), "personUuid");
+				+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
 	}
 	
 	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {

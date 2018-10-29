@@ -23,8 +23,8 @@ public class CommentDao implements IAnetDao<Comment> {
 		this.dbHandle = dbHandle;
 		final String idBatcherSql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
 				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
-				+ "WHERE comments.uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Comment>(dbHandle, idBatcherSql, new CommentMapper());
+				+ "WHERE comments.uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Comment>(dbHandle, idBatcherSql, "uuids", new CommentMapper());
 	}
 	
 	@Override

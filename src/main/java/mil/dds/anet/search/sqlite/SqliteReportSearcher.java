@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -71,6 +72,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		
 		String commonTableExpression = null;
 		Map<String,Object> args = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		List<String> whereClauses = new LinkedList<String>();
 		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses, this.dateTimeFormatter);
 		if (query.getAuthorUuid() != null) {
@@ -201,18 +203,9 @@ public class SqliteReportSearcher implements IReportSearcher {
 			args.put("approverUuid", query.getPendingApprovalOf());
 		}
 		
-		if (query.getState() != null && query.getState().size() > 0) {
-			if (query.getState().size() == 1) { 
-				whereClauses.add("reports.state = :state");
-				args.put("state", DaoUtils.getEnumId(query.getState().get(0)));
-			} else {
-				List<String> argNames = new LinkedList<String>();
-				for (int i = 0;i < query.getState().size();i++) { 
-					argNames.add(":state" + i);
-					args.put("state" + i, DaoUtils.getEnumId(query.getState().get(i)));
-				}
-				whereClauses.add("reports.state IN (" + Joiner.on(", ").join(argNames) + ")");
-			}
+		if (!Utils.isEmptyOrNull(query.getState())) {
+			whereClauses.add("reports.state IN ( <states> )");
+			listArgs.put("states", query.getState().stream().map(state -> DaoUtils.getEnumId(state)).collect(Collectors.toList()));
 		}
 		
 		if (query.getCancelledReason() != null) { 
@@ -280,6 +273,9 @@ public class SqliteReportSearcher implements IReportSearcher {
 		
 		final Query sqlQuery = dbHandle.createQuery(sql.toString())
 				.bindMap(args);
+		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
+			sqlQuery.bindList(listArg.getKey(), listArg.getValue());
+		}
 		AnetBeanList<Report> reportList = AnetBeanList.getReportList(user, sqlQuery, query.getPageNum(), query.getPageSize(), new ReportMapper());
 		reportList.setTotalCount(reportList.getList().size());
 		return reportList;

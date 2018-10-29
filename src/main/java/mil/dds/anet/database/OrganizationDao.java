@@ -33,13 +33,13 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 
 	public OrganizationDao(Handle dbHandle) { 
 		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
-		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, new OrganizationMapper());
+		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, "uuids", new OrganizationMapper());
 
 		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", " + ORGANIZATION_FIELDS
 					+ "FROM organizations, positions WHERE "
-					+ "positions.\"currentPersonUuid\" IN ( %1$s ) AND positions.\"organizationUuid\" = organizations.uuid";
-		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, new OrganizationMapper(), "personUuid");
+					+ "positions.\"currentPersonUuid\" IN ( <foreignKeys> ) AND positions.\"organizationUuid\" = organizations.uuid";
+		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, "foreignKeys", new OrganizationMapper(), "personUuid");
 	}
 	
 	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {

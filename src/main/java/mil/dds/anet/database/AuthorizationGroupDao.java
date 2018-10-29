@@ -34,14 +34,14 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 
 	public AuthorizationGroupDao(Handle h) {
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<AuthorizationGroup>(h, idBatcherSql, new AuthorizationGroupMapper());
+		final String idBatcherSql = "/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<AuthorizationGroup>(h, idBatcherSql, "uuids", new AuthorizationGroupMapper());
 
 		final String positionsBatcherSql = "/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM positions, \"authorizationGroupPositions\" "
-				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupUuid\" IN ( %1$s ) "
+				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupUuid\" IN ( <foreignKeys> ) "
 				+ "AND \"authorizationGroupPositions\".\"positionUuid\" = positions.uuid";
-		this.positionsBatcher = new ForeignKeyBatcher<Position>(h, positionsBatcherSql, new PositionMapper(), "authorizationGroupUuid");
+		this.positionsBatcher = new ForeignKeyBatcher<Position>(h, positionsBatcherSql, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
 	}
 
 	public AnetBeanList<AuthorizationGroup> getAll(int pageNum, int pageSize) {

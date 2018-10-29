@@ -22,8 +22,8 @@ public class LocationDao implements IAnetDao<Location> {
 
 	public LocationDao(Handle h) { 
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, new LocationMapper());
+		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, "uuids", new LocationMapper());
 	}
 	
 	public AnetBeanList<Location> getAll(int pageNum, int pageSize) {

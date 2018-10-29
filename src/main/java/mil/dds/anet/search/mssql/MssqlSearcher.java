@@ -1,5 +1,6 @@
 package mil.dds.anet.search.mssql;
 
+import java.util.List;
 import java.util.Map;
 
 import org.jdbi.v3.core.Handle;
@@ -26,6 +27,15 @@ public class MssqlSearcher extends Searcher {
 		if (query.getPageSize() > 0) {
 			q.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize());
+		}
+		return q;
+	}
+
+	protected static Query addPagination(AbstractSearchQuery query,
+			Handle dbHandle, StringBuilder sql, Map<String, Object> args, Map<String, List<?>> listArgs) {
+		final Query q = addPagination(query, dbHandle, sql, args);
+		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
+			q.bindList(listArg.getKey(), listArg.getValue());
 		}
 		return q;
 	}
