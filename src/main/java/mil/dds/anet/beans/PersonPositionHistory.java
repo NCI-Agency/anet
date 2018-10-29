@@ -97,7 +97,7 @@ public class PersonPositionHistory extends AbstractAnetBean {
 			pphPrev = pph;
 		}
 		// Remove all null entries
-		history = history.stream().filter(pph -> (pph != null && pph.getPerson() != null)).collect(Collectors.toList());
+		history = history.stream().filter(pph -> (pph != null && pph.getPerson() != null && pph.getPosition() != null)).collect(Collectors.toList());
 		return history;
 	}
 }
