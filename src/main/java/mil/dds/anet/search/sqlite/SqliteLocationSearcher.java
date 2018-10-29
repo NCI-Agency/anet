@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -50,7 +50,7 @@ public class SqliteLocationSearcher implements ILocationSearcher {
 		sql.append(" LIMIT :limit OFFSET :offset");
 		
 		final List<Location> list = dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
+			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())
 			.map(new LocationMapper())

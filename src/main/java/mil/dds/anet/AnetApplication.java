@@ -28,7 +28,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.SqlStatements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ import io.dropwizard.cli.ServerCommand;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.jdbi.DBIFactory;
+import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -144,15 +145,16 @@ public class AnetApplication extends Application<AnetConfiguration> {
 	public void run(AnetConfiguration configuration, Environment environment) {
 		//Get the Database connection up and running
 		logger.info("datasource url: {}", configuration.getDataSourceFactory().getUrl());
-		final DBIFactory factory = new DBIFactory();
-		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "anet-data-layer");
+		final JdbiFactory factory = new JdbiFactory();
+		final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "anet-data-layer");
 
 		// Check the dictionary
 		final JSONObject dictionary = getDictionary(configuration);
 		logger.info("dictionary: {}", dictionary.toString(2));
 		
 		//We want to use our own custom DB logger in order to clean up the logs a bit. 
-		jdbi.setSQLLog(new AnetDbLogger());
+		final SqlStatements sqlStatements = jdbi.getConfig(SqlStatements.class);
+		sqlStatements.setSqlLogger(new AnetDbLogger());
 
 		//The Object Engine is the core place where we store all of the Dao's
 		//You can always grab the engine from anywhere with AnetObjectEngine.getInstance()

@@ -35,9 +35,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -573,14 +571,15 @@ public class ReportResource {
 	@POST
 	@Timed
 	@Path("/{uuid}/approve")
-	public Report approveReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment comment) {
+	public Report approveReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment comment)
+			throws InterruptedException, ExecutionException, Exception {
 		return approveReportCommon(approver, uuid, comment);
 	}
 
-	private Report approveReportCommon(Person approver, String uuid, Comment comment) {
+	private Report approveReportCommon(Person approver, String uuid, Comment comment)
+			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Report>() {
-			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
@@ -628,14 +627,14 @@ public class ReportResource {
 
 				AnetAuditLogger.log("Report {} approved by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
 				return r;
-			}
 		});
 	}
 
 	@GraphQLMutation(name="approveReport")
 	public Report approveReport(@GraphQLRootContext Map<String, Object> context,
 			@GraphQLArgument(name="uuid") String uuid,
-			@GraphQLArgument(name="comment") Comment comment) {
+			@GraphQLArgument(name="comment") Comment comment)
+			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something
 		return approveReportCommon(DaoUtils.getUserFromContext(context), uuid, comment);
 	}
@@ -662,14 +661,15 @@ public class ReportResource {
 	@POST
 	@Timed
 	@Path("/{uuid}/reject")
-	public Report rejectReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment reason) {
+	public Report rejectReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment reason)
+			throws InterruptedException, ExecutionException, Exception {
 		return rejectReportCommon(approver, uuid, reason);
 	}
 
-	private Report rejectReportCommon(Person approver, String uuid, Comment reason) {
+	private Report rejectReportCommon(Person approver, String uuid, Comment reason)
+			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Report>() {
-			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
@@ -709,14 +709,14 @@ public class ReportResource {
 				sendReportRejectEmail(r, approver, reason);
 				AnetAuditLogger.log("report {} rejected by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
 				return r;
-			}
 		});
 	}
 
 	@GraphQLMutation(name="rejectReport")
 	public Report rejectReport(@GraphQLRootContext Map<String, Object> context,
 			@GraphQLArgument(name="uuid") String uuid,
-			@GraphQLArgument(name="comment") Comment reason) {
+			@GraphQLArgument(name="comment") Comment reason)
+			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something
 		return rejectReportCommon(DaoUtils.getUserFromContext(context), uuid, reason);
 	}

@@ -3,17 +3,17 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.AuthorizationGroup.AuthorizationGroupStatus;
 import mil.dds.anet.utils.DaoUtils;
 
-public class AuthorizationGroupMapper implements ResultSetMapper<AuthorizationGroup> {
+public class AuthorizationGroupMapper implements RowMapper<AuthorizationGroup> {
 
 	@Override
-	public AuthorizationGroup map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public AuthorizationGroup map(ResultSet rs, StatementContext ctx) throws SQLException {
 		final AuthorizationGroup a = new AuthorizationGroup();
 		DaoUtils.setCommonBeanFields(a, rs, null);
 		a.setName(rs.getString("name"));
@@ -21,7 +21,7 @@ public class AuthorizationGroupMapper implements ResultSetMapper<AuthorizationGr
 		a.setStatus(MapperUtils.getEnumIdx(rs, "status", AuthorizationGroupStatus.class));
 
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) {
-			ctx.setAttribute("totalCount", rs.getInt("totalCount"));
+			ctx.define("totalCount", rs.getInt("totalCount"));
 		}
 
 		return a;

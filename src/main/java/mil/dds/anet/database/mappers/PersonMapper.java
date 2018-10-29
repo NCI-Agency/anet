@@ -5,8 +5,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
@@ -14,10 +14,10 @@ import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.utils.DaoUtils;
 
-public class PersonMapper implements ResultSetMapper<Person> {
+public class PersonMapper implements RowMapper<Person> {
 
 	@Override
-	public Person map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public Person map(ResultSet rs, StatementContext ctx) throws SQLException {
 		Person p = fillInFields(new Person(), rs);
 		
 		if (MapperUtils.containsColumnNamed(rs, "positions_uuid")) {
@@ -25,7 +25,7 @@ public class PersonMapper implements ResultSetMapper<Person> {
 		}
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
-			ctx.setAttribute("totalCount", rs.getInt("totalCount"));
+			ctx.define("totalCount", rs.getInt("totalCount"));
 		}
 		return p;
 	}

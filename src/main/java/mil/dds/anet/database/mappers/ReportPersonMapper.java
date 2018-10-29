@@ -3,15 +3,15 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.ReportPerson;
 
-public class ReportPersonMapper implements ResultSetMapper<ReportPerson> {
+public class ReportPersonMapper implements RowMapper<ReportPerson> {
 
 	@Override
-	public ReportPerson map(int index, ResultSet r, StatementContext ctx) throws SQLException {
+	public ReportPerson map(ResultSet r, StatementContext ctx) throws SQLException {
 		ReportPerson rp = PersonMapper.fillInFields(new ReportPerson(), r);
 		rp.setPrimary(r.getBoolean("isPrimary"));
 		return rp;
