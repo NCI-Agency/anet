@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;

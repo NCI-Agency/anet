@@ -9,7 +9,7 @@ import java.util.Map;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
