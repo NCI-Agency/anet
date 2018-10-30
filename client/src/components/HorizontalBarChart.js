@@ -12,29 +12,58 @@ class HorizontalBarChart extends Component {
   /*
    * Example for the data property structure when displaying number of
    * engagements per location, grouped by day:
-   * [{
-      key: '25 Oct 2017',
-        values: [{
-          key: 'Location 1',
-          value: 11
-        }, {
-          key: 'Location 2',
-          value: 8
-        }]
-      }, {
-        key: '27 Oct 2017',
-          values: [{
-          key: '',
-          value: 0
-        }]
-      }, {
-        key: '28 Oct 2017',
-        values: [{
-          key: 'Location 4',
-          value: 3
-        }]
-      }]
-  */
+   *
+   *  this.props.data = {
+   *    categoryLabels: {
+   *      1540677600000: "28 Oct 2018",
+   *      1540767600000: "29 Oct 2018",
+   *      1540854000000: "30 Oct 2018",
+   *    },
+   *    leavesLabels: {
+   *      -1: "No location allocated",
+   *      a873c6dc-e0aa-47cd-b2b5-9e017f1293ac: "General Hospital",
+   *      1ee8cf79-7b20-4045-b349-2d354e10d41f: "Fort Amherst",
+   *      4d115293-0e8b-45ba-a632-a36136d5ed89: "MoD Headquarters Kabul"
+   *    },
+   *    data: [
+   *      {
+   *        key: 1540677600000,
+   *        values: [{}]
+   *      },
+   *      {
+   *        key: 1540767600000,
+   *        values: [
+   *          {
+   *            key: "a873c6dc-e0aa-47cd-b2b5-9e017f1293ac",
+   *            value: 2
+   *          }
+   *        ]
+   *      },
+   *      {
+   *        key: 1540854000000,
+   *        values: [
+   *          {
+   *            key: "-1",
+   *            value: 1
+   *          },
+   *          {
+   *            key: "a873c6dc-e0aa-47cd-b2b5-9e017f1293ac",
+   *            value: 1
+   *          },
+   *          {
+   *            key: "1ee8cf79-7b20-4045-b349-2d354e10d41f"
+   *            value: 1
+   *          },
+   *          {
+   *            key: "4d115293-0e8b-45ba-a632-a36136d5ed89",
+   *            value: 1
+   *          }
+   *        ]
+   *      }
+   *    ]
+   *  }
+   */
+
   static propTypes = {
     width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
