@@ -175,9 +175,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 
 		if (query.getLocationUuid() != null) {
 			if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
-				whereClauses.add("locationUuid IS NULL");
+				whereClauses.add("reports.locationUuid IS NULL");
 			} else {
-				whereClauses.add("locationUuid = :locationUuid");
+				whereClauses.add("reports.locationUuid = :locationUuid");
 				args.put("locationUuid", query.getLocationUuid());
 			}
 		}
