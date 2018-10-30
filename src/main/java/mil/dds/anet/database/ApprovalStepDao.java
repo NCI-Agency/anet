@@ -7,7 +7,8 @@ import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.mapper.MapMapper;
 
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Position;
@@ -26,17 +27,17 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 
 	public ApprovalStepDao(Handle h) {
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( %1$s )";
-		this.idBatcher = new IdBatcher<ApprovalStep>(dbHandle, idBatcherSql, new ApprovalStepMapper());
+		final String idBatcherSql = "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<ApprovalStep>(dbHandle, idBatcherSql, "uuids", new ApprovalStepMapper());
 
 		final String approversBatcherSql = "/* batch.getApproversForStep */ SELECT \"approvalStepUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM approvers "
 				+ "LEFT JOIN positions ON \"positions\".\"uuid\" = approvers.\"positionUuid\" "
-				+ "WHERE \"approvalStepUuid\" IN ( %1$s )";
-		this.approversBatcher = new ForeignKeyBatcher<Position>(h, approversBatcherSql, new PositionMapper(), "approvalStepUuid");
+				+ "WHERE \"approvalStepUuid\" IN ( <foreignKeys> )";
+		this.approversBatcher = new ForeignKeyBatcher<Position>(h, approversBatcherSql, "foreignKeys", new PositionMapper(), "approvalStepUuid");
 
-		final String organizationIdBatcherSql = "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( %1$s )";
-		this.organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(h, organizationIdBatcherSql, new ApprovalStepMapper(), "advisorOrganizationUuid");
+		final String organizationIdBatcherSql = "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> )";
+		this.organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(h, organizationIdBatcherSql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid");
 	}
 	
 	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
@@ -53,7 +54,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 		return dbHandle.createQuery("/* getApprovalStepByUuid */ SELECT * from \"approvalSteps\" where uuid = :uuid")
 				.bind("uuid", uuid)
 				.map(new ApprovalStepMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
@@ -72,10 +73,10 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	@Override
 	public ApprovalStep insert(ApprovalStep as) {
 		DaoUtils.setInsertFields(as);
-		dbHandle.createStatement(
+		dbHandle.createUpdate(
 				"/* insertApprovalStep */ INSERT into \"approvalSteps\" (uuid, name, \"nextStepUuid\", \"advisorOrganizationUuid\") "
 				+ "VALUES (:uuid, :name, :nextStepUuid, :advisorOrganizationUuid)")
-			.bindFromProperties(as)
+			.bindBean(as)
 			.execute();
 
 		if (as.getApprovers() != null) {
@@ -83,7 +84,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 				if (approver.getUuid() == null) {
 					throw new WebApplicationException("Invalid Position UUID of Null for Approver");
 				}
-				dbHandle.createStatement("/* insertApprovalStep.approvers */ "
+				dbHandle.createUpdate("/* insertApprovalStep.approvers */ "
 						+ "INSERT INTO approvers (\"positionUuid\", \"approvalStepUuid\") VALUES (:positionUuid, :stepUuid)")
 					.bind("positionUuid", approver.getUuid())
 					.bind("stepUuid", as.getUuid())
@@ -101,10 +102,10 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 		as = insert(as);
 		
 		//Add this Step to the current org list. 
-		dbHandle.createStatement("/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepUuid\" = :uuid "
+		dbHandle.createUpdate("/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepUuid\" = :uuid "
 				+ "WHERE \"advisorOrganizationUuid\" = :advisorOrganizationUuid "
 				+ "AND \"nextStepUuid\" IS NULL AND uuid != :uuid")
-			.bindFromProperties(as)
+			.bindBean(as)
 			.execute();
 		return as;
 	}
@@ -115,10 +116,10 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	 */
 	public int update(ApprovalStep as) {
 		DaoUtils.setUpdateFields(as);
-		return dbHandle.createStatement("/* updateApprovalStep */ UPDATE \"approvalSteps\" SET name = :name, "
+		return dbHandle.createUpdate("/* updateApprovalStep */ UPDATE \"approvalSteps\" SET name = :name, "
 				+ "\"nextStepUuid\" = :nextStepUuid, \"advisorOrganizationUuid\" = :advisorOrganizationUuid "
 				+ "WHERE uuid = :uuid")
-			.bindFromProperties(as)
+			.bindBean(as)
 			.execute();
 	}
 
@@ -128,7 +129,9 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	 */
 	public boolean deleteStep(String uuid) {
 		//ensure there is nothing currently on this step
-		List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepUuid\" = ?", uuid);
+		List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepUuid\" = ?", uuid)
+				.map(new MapMapper(false))
+				.list();
 		Map<String,Object> result = rs.get(0);
 		int count = ((Number) result.get("ct")).intValue();
 		if (count != 0) {
@@ -136,7 +139,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 		}
 
 		//fix up the linked list.
-		dbHandle.createStatement("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
+		dbHandle.createUpdate("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
 				+ "SET \"nextStepUuid\" = (SELECT \"nextStepUuid\" from \"approvalSteps\" where uuid = :stepToDeleteUuid) "
 				+ "WHERE \"nextStepUuid\" = :stepToDeleteUuid")
 			.bind("stepToDeleteUuid", uuid)
@@ -173,14 +176,14 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	}
 
 	public int addApprover(ApprovalStep step, Position position) {
-		return dbHandle.createStatement("/* addApprover */ INSERT INTO approvers (\"approvalStepUuid\", \"positionUuid\") VALUES (:stepUuid, :positionUuid)")
+		return dbHandle.createUpdate("/* addApprover */ INSERT INTO approvers (\"approvalStepUuid\", \"positionUuid\") VALUES (:stepUuid, :positionUuid)")
 				.bind("stepUuid", step.getUuid())
 				.bind("positionUuid", position.getUuid())
 				.execute();
 	}
 	
 	public int removeApprover(ApprovalStep step, Position position) {
-		return dbHandle.createStatement("/* removeApprover */ DELETE FROM approvers WHERE \"approvalStepUuid\" = :stepUuid AND \"positionUuid\" = :positionUuid")
+		return dbHandle.createUpdate("/* removeApprover */ DELETE FROM approvers WHERE \"approvalStepUuid\" = :stepUuid AND \"positionUuid\" = :positionUuid")
 				.bind("stepUuid", step.getUuid())
 				.bind("positionUuid", position.getUuid())
 				.execute();

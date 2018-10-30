@@ -1,12 +1,12 @@
 package mil.dds.anet;
 
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 
 import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.jdbi3.JdbiFactory;
 import net.sourceforge.argparse4j.inf.Namespace;
 import mil.dds.anet.config.AnetConfiguration;
 import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.jdbi.DBIFactory;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Subparser;
 
@@ -39,21 +39,21 @@ public class WaitForDBCommand extends ConfiguredCommand<AnetConfiguration> {
 	@Override
 	protected void run(Bootstrap<AnetConfiguration> bootstrap, Namespace namespace, AnetConfiguration configuration)
 		throws Exception {
-			final DBIFactory factory = new DBIFactory();
+			final JdbiFactory factory = new JdbiFactory();
 			final Environment environment = new Environment(bootstrap.getApplication().getName(),
 					bootstrap.getObjectMapper(),
 					bootstrap.getValidatorFactory().getValidator(),
 					bootstrap.getMetricRegistry(),
 					bootstrap.getClassLoader(),
 					bootstrap.getHealthCheckRegistry());
-			final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
+			final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
 
 		//We want to possibly wait for the database to be ready, and keep trying to connect
 		int remainingTries = namespace.getInt("dbConnectionNbAttempts").intValue();
 		final int delay = namespace.getInt("dbConnectionDelay").intValue();
 		while (remainingTries-- > 0) {
 			try {
-				jdbi.close(jdbi.open());
+				jdbi.open().close();
 				break;
 			}
 			catch (Exception exception) {

@@ -3,12 +3,12 @@ package mil.dds.anet;
 import java.util.List;
 import java.util.Scanner;
 
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 
 import com.google.common.collect.ImmutableList;
 
 import io.dropwizard.cli.ConfiguredCommand;
-import io.dropwizard.jdbi.DBIFactory;
+import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import mil.dds.anet.beans.AdminSetting;
@@ -38,14 +38,14 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 
 	@Override
 	protected void run(Bootstrap<AnetConfiguration> bootstrap, Namespace namespace, AnetConfiguration configuration) throws Exception {
-		final DBIFactory factory = new DBIFactory();
+		final JdbiFactory factory = new JdbiFactory();
 		final Environment environment = new Environment(bootstrap.getApplication().getName(),
 				bootstrap.getObjectMapper(),
 				bootstrap.getValidatorFactory().getValidator(),
 				bootstrap.getMetricRegistry(),
 				bootstrap.getClassLoader(),
 				bootstrap.getHealthCheckRegistry());
-		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
+		final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
 		final AnetObjectEngine engine = new AnetObjectEngine(jdbi);
 		
 		System.out.println("-------- WELCOME TO ANET! --------");

@@ -87,8 +87,8 @@ const API = {
 		return API._queryCommon(query, variables, variableDef, undefined, true, params).then(json => json.data)
 	},
 
-	query(query, variables, variableDef) {
-		return API._queryCommon(query, variables, variableDef).then(json => json.data)
+	query(query, variables, variableDef, params) {
+		return API._queryCommon(query, variables, variableDef, undefined, undefined, params).then(json => json.data)
 	},
 
 	queryExport(query, variables, variableDef, output) {

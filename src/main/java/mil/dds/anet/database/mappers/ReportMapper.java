@@ -5,8 +5,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Location;
@@ -18,10 +18,10 @@ import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.utils.DaoUtils;
 
-public class ReportMapper implements ResultSetMapper<Report> {
+public class ReportMapper implements RowMapper<Report> {
 
 	@Override
-	public Report map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public Report map(ResultSet rs, StatementContext ctx) throws SQLException {
 		Report r = new Report();
 		DaoUtils.setCommonBeanFields(r, rs, "reports");
 		
@@ -73,7 +73,7 @@ public class ReportMapper implements ResultSetMapper<Report> {
 		}
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
-			ctx.setAttribute("totalCount", rs.getInt("totalCount"));
+			ctx.define("totalCount", rs.getInt("totalCount"));
 		}
 		if (MapperUtils.containsColumnNamed(rs, "engagementDayOfWeek")) {
 			r.setEngagementDayOfWeek(rs.getInt("engagementDayOfWeek"));

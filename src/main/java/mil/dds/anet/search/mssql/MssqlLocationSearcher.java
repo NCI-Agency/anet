@@ -6,10 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -81,9 +81,8 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
-		final Query<Location> map = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
-			.map(new LocationMapper());
-		return new AnetBeanList<Location>(map, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		return new AnetBeanList<Location>(sqlQuery, query.getPageNum(), query.getPageSize(), new LocationMapper(), null);
 	}
 
 }

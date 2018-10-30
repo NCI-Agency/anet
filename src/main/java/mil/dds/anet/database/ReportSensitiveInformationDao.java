@@ -5,9 +5,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -19,7 +20,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-@RegisterMapper(ReportSensitiveInformationMapper.class)
+@RegisterRowMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
 
 	private static final String[] fields = { "uuid", "text", "reportUuid", "createdAt", "updatedAt" };
@@ -33,8 +34,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		this.dbHandle = h;
 		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
 				+ " FROM \"" + tableName + "\""
-				+ " WHERE \"reportUuid\" IN ( %1$s )";
-		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
+				+ " WHERE \"reportUuid\" IN ( <foreignKeys> )";
+		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, "foreignKeys", new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
 	}
 
 	@Override
@@ -65,11 +66,11 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			return null;
 		}
 		DaoUtils.setInsertFields(rsi);
-		dbHandle.createStatement(
+		dbHandle.createUpdate(
 				"/* insertReportsSensitiveInformation */ INSERT INTO \"" + tableName + "\" "
 					+ " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
-				.bindFromProperties(rsi)
+				.bindBean(rsi)
 				.bind("reportUuid", report.getUuid())
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
@@ -86,10 +87,10 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		}
 		// Update relevant fields, but do not allow the reportUuid to be updated by the query!
 		rsi.setUpdatedAt(DateTime.now());
-		final int numRows = dbHandle.createStatement(
+		final int numRows = dbHandle.createUpdate(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
 					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-				.bindFromProperties(rsi)
+				.bindBean(rsi)
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
 		return numRows;
@@ -137,7 +138,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		}
 
 		// Check authorization in a single query
-		final Query<Map<String, Object>> query = dbHandle.createQuery(
+		final Query query = dbHandle.createQuery(
 				"/* checkReportAuthorization */ SELECT r.uuid"
 					+ " FROM reports r"
 					+ " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportUuid\" = r.uuid"
@@ -151,7 +152,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 					+ " )")
 			.bind("reportUuid", reportUuid)
 			.bind("userUuid", userUuid);
-		return (query.list().size() > 0);
+		return (query.map(new MapMapper(false)).list().size() > 0);
 	}
 
 }

@@ -1,16 +1,18 @@
 package mil.dds.anet.search.mssql;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
 
@@ -38,6 +40,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		final StringBuilder sql = new StringBuilder();
 		sql.append("/* MssqlReportSearch */ SELECT *, count(*) OVER() AS totalCount FROM (");
 		sql.append(" SELECT DISTINCT " + ReportDao.REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS);
@@ -180,18 +183,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("approverUuid", query.getPendingApprovalOf());
 		}
 
-		if (query.getState() != null && query.getState().size() > 0) {
-			if (query.getState().size() == 1) {
-				whereClauses.add("reports.state = :state");
-				args.put("state", DaoUtils.getEnumId(query.getState().get(0)));
-			} else {
-				List<String> argNames = new LinkedList<String>();
-				for (int i = 0;i < query.getState().size();i++) {
-					argNames.add(":state" + i);
-					args.put("state" + i, DaoUtils.getEnumId(query.getState().get(i)));
-				}
-				whereClauses.add("reports.state IN (" + Joiner.on(", ").join(argNames) + ")");
-			}
+		if (!Utils.isEmptyOrNull(query.getState())) {
+			whereClauses.add("reports.state IN ( <states> )");
+			listArgs.put("states", query.getState().stream().map(state -> DaoUtils.getEnumId(state)).collect(Collectors.toList()));
 		}
 
 		if (query.getCancelledReason() != null) {
@@ -214,19 +208,14 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getAuthorizationGroupUuid() != null) {
-			final List<String> argNames = new LinkedList<String>();
 			if (query.getAuthorizationGroupUuid().isEmpty()) {
-				argNames.add("-1");
+				listArgs.put("authorizationGroupUuids", Arrays.asList("-1"));
 			}
 			else {
-				for (int i = 0; i < query.getAuthorizationGroupUuid().size(); i++) {
-					argNames.add(":authorizationGroupUuid" + i);
-					args.put("authorizationGroupUuid" + i, query.getAuthorizationGroupUuid().get(i));
-				}
+				listArgs.put("authorizationGroupUuids", query.getAuthorizationGroupUuid());
 			}
-			final String authorizationGroupUuids = Joiner.on("', '").join(argNames);
 			whereClauses.add("reports.uuid IN ( SELECT ra.reportUuid FROM reportAuthorizationGroups ra "
-					+ "WHERE ra.authorizationGroupUuid IN ('" + authorizationGroupUuids + "'))");
+					+ "WHERE ra.authorizationGroupUuid IN ( <authorizationGroupUuids> ))");
 		}
 
 		if (query.getAttendeePositionUuid() != null) {
@@ -303,9 +292,8 @@ public class MssqlReportSearcher implements IReportSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Report> map = MssqlSearcher.addPagination(query, dbHandle, sql, args)
-				.map(new ReportMapper());
-		return AnetBeanList.getReportList(user, map, query.getPageNum(), query.getPageSize());
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args, listArgs);
+		return AnetBeanList.getReportList(user, sqlQuery, query.getPageNum(), query.getPageSize(), new ReportMapper());
 
 	}
 

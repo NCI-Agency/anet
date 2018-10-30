@@ -22,10 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
-import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,9 +104,7 @@ public class OrganizationResource {
 	private Organization createOrganizationCommon(Person user, Organization org) {
 		AuthUtils.assertAdministrator(user);
 		final Organization outer;
-		outer = engine.getDbHandle().inTransaction(new TransactionCallback<Organization>() {
-			@Override
-			public Organization inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		outer = engine.getDbHandle().inTransaction(h -> {
 				Organization created;
 				try {
 					created = dao.insert(org);
@@ -131,7 +127,6 @@ public class OrganizationResource {
 					}
 				}
 				return created;
-			}
 		});
 		AnetAuditLogger.log("Organization {} created by {}", outer, user);
 		return outer;
@@ -153,15 +148,16 @@ public class OrganizationResource {
 	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
-	public Response updateOrganization(@Auth Person user, Organization org) {
+	public Response updateOrganization(@Auth Person user, Organization org)
+			throws InterruptedException, ExecutionException, Exception {
 		updateOrganizationCommon(user, org);
 		return Response.ok().build();
 	}
 
-	private int updateOrganizationCommon(Person user, Organization org) {
+	private int updateOrganizationCommon(Person user, Organization org)
+			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
-			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				//Verify correct Organization
 				AuthUtils.assertSuperUserForOrg(user, org);
 				final int numRows;
@@ -216,7 +212,6 @@ public class OrganizationResource {
 
 				AnetAuditLogger.log("Organization {} updated by {}", org, user);
 				return numRows;
-			}
 		});
 	}
 
@@ -244,7 +239,8 @@ public class OrganizationResource {
 
 	@GraphQLMutation(name="updateOrganization")
 	@RolesAllowed("SUPER_USER")
-	public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org) {
+	public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org)
+			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something, so we return the number of updated rows
 		return updateOrganizationCommon(DaoUtils.getUserFromContext(context), org);
 	}
