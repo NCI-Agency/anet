@@ -462,7 +462,7 @@ class BaseReportShow extends Page {
 				<LinkTo person={person} />
 			</td>
 			<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
+			<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
