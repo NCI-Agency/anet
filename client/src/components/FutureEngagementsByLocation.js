@@ -186,45 +186,47 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
         uuid: "-1",
         name: 'No location allocated'
       }
-      let reportsList = values[0].reportList.list || []
-      reportsList = reportsList
-        .map(d => { if (!d.location) d.location = noLocation; return d })
-      // add days without data as we want to display them in the chart
-      let allCategories = this.engagementDateRangeArray.map(function(d) {
-        return {
-          key: d.valueOf(),
-          values: [{}]
-        }
-      })
-      let categoriesWithData = d3.nest()
-        .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
-        .key(function(d) { return d.location.uuid })
-        .rollup(function(leaves) { return leaves.length })
-        .entries(reportsList)
-      let groupedData = allCategories.map((d)=> {
-        let categData = categoriesWithData.find((x) => {return Number(x.key) === d.key })
-        return Object.assign({}, d, categData)
-      })
       let graphData = {}
-      graphData.data = groupedData
-      graphData.categoryLabels = allCategories.reduce(
-        function(prev, curr) {
-          prev[curr.key] = moment(curr.key).format('D MMM YYYY')
-          return prev
-        },
-        {}
-      )
-      graphData.leavesLabels = reportsList.reduce(
-        function(prev, curr) {
-          prev[curr.location.uuid] = curr.location.name
-          return prev
-        },
-        {}
-      )
+      let reportsList = values[0].reportList.list || []
+      if (!!reportsList.length) {
+        reportsList = reportsList
+          .map(d => { if (!d.location) d.location = noLocation; return d })
+        // add days without data as we want to display them in the chart
+        let allCategories = this.engagementDateRangeArray.map(function(d) {
+          return {
+            key: d.valueOf(),
+            values: [{}]
+          }
+        })
+        let categoriesWithData = d3.nest()
+          .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
+          .key(function(d) { return d.location.uuid })
+          .rollup(function(leaves) { return leaves.length })
+          .entries(reportsList)
+        let groupedData = allCategories.map((d)=> {
+          let categData = categoriesWithData.find((x) => {return Number(x.key) === d.key })
+          return Object.assign({}, d, categData)
+        })
+        graphData.data = groupedData
+        graphData.categoryLabels = allCategories.reduce(
+          function(prev, curr) {
+            prev[curr.key] = moment(curr.key).format('D MMM YYYY')
+            return prev
+          },
+          {}
+        )
+        graphData.leavesLabels = reportsList.reduce(
+          function(prev, curr) {
+            prev[curr.location.uuid] = curr.location.name
+            return prev
+          },
+          {}
+        )
+      }
       this.setState({
+        isLoading: false,
         updateChart: true,  // update chart after fetching the data
-        graphData: graphData,
-        isLoading: false
+        graphData: graphData
       })
     })
   }

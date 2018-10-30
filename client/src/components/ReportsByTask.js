@@ -171,22 +171,27 @@ class ReportsByTask extends ReportsVisualisation {
         shortName: noTaskMessage,
         longName: noTaskMessage
       }
-      let simplifiedValues = values[0].reportList.list ? values[0].reportList.list.map(d => {return {reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid)}}): []
-      let tasks = values[0].reportList.list ? values[0].reportList.list.map(d => d.tasks) : []
-      tasks = [].concat.apply([], tasks)
-        .filter((item, index, d) => d.findIndex(t => {return t.uuid === item.uuid }) === index)
-        .sort((a, b) => a.shortName.localeCompare(b.shortName))
-      // add No Task item, in order to relate to reports without Tasks
-      tasks.push(noTask)
+      let graphData = []
+      let reportsList = values[0].reportList.list || []
+      if (!!reportsList.length) {
+        let simplifiedValues = reportsList.map(d => {return {reportUuid: d.uuid, tasks: d.tasks.map(p => p.uuid)}})
+        let tasks = reportsList.map(d => d.tasks)
+        tasks = [].concat.apply([], tasks)
+          .filter((item, index, d) => d.findIndex(t => {return t.uuid === item.uuid }) === index)
+          .sort((a, b) => a.shortName.localeCompare(b.shortName))
+        // add No Task item, in order to relate to reports without Tasks
+        tasks.push(noTask)
+        graphData = tasks.map(d => {
+          let r = {}
+          r.task = d
+          r.reportsCount = (d.uuid ? simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1).length : simplifiedValues.filter(item => item.tasks.length === 0).length)
+          return r
+        })
+      }
       this.setState({
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
-        graphData: tasks
-          .map(d => {
-            let r = {}
-            r.task = d
-            r.reportsCount = (d.uuid ? simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1).length : simplifiedValues.filter(item => item.tasks.length === 0).length)
-            return r}),
+        graphData: graphData
       })
     })
   }

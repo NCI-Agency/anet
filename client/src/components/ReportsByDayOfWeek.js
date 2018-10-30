@@ -168,19 +168,22 @@ class ReportsByDayOfWeek extends ReportsVisualisation {
       let daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
       // Set the order in which to display the days of the week
       let displayOrderDaysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-      let simplifiedValues = values[0].reportList.list ?
-          values[0].reportList.list.map(d => {return {reportUuid: d.uuid, dayOfWeek: d.engagementDayOfWeek}}) :
-          []
+      let graphData = []
+      let reportsList = values[0].reportList.list || []
+      if (!!reportsList.length) {
+        let simplifiedValues = reportsList.map(d => {return {reportUuid: d.uuid, dayOfWeek: d.engagementDayOfWeek}})
+        graphData = displayOrderDaysOfWeek.map(d => {
+          let r = {}
+          r.dayOfWeekInt = daysOfWeekInt[daysOfWeek.indexOf(d)]
+          r.dayOfWeekString = d
+          r.reportsCount = simplifiedValues.filter(item => item.dayOfWeek === r.dayOfWeekInt).length
+          return r
+        })
+      }
       this.setState({
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
-        graphData: displayOrderDaysOfWeek
-          .map(d => {
-            let r = {}
-            r.dayOfWeekInt = daysOfWeekInt[daysOfWeek.indexOf(d)]
-            r.dayOfWeekString = d
-            r.reportsCount = simplifiedValues.filter(item => item.dayOfWeek === r.dayOfWeekInt).length
-            return r})
+        graphData: graphData
       })
     })
   }
