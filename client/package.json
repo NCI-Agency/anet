@@ -88,7 +88,7 @@
     "react-autosuggest-ie11-compatible": "https://github.com/VassilIordanov/react-autosuggest-ie11-compatible/releases/download/v9.4.2/react-autosuggest-ie11-compatible.tar.gz",
     "react-bootstrap": "^0.32.4",
     "react-confirm-bootstrap": "^5.3.0",
-    "react-dom": "^16.5.2",
+    "react-dom": "^16.6.0",
     "react-redux": "^5.0.7",
     "react-redux-loading-bar": "^4.1.0",
     "react-router": "^4.3.1",
