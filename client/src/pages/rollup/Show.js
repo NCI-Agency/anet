@@ -231,7 +231,7 @@ class BaseRollupShow extends Page {
 		Object.assign(reportsQueryParams, this.getSearchQuery(this.props))
 		Object.assign(reportsQueryParams, {
 			pageNum: forMap ? 0 : this.state.reportsPageNum,
-			pageSize: forMap ? 0 : 1
+			pageSize: forMap ? 0 : 10
 		})
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
