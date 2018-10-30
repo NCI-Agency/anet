@@ -163,7 +163,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getLocationId() != null) {
-			whereClauses.add("locationId = :locationId");
+			whereClauses.add("reports.locationId = :locationId");
 			args.put("locationId", query.getLocationId());
 		}
 
