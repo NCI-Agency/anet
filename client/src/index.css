@@ -240,8 +240,13 @@ span.asLink:focus {
 }
 
 #advanced-search.popover {
-	width: 750px;
-	max-width: none;
+	max-width: 100%;
+}
+
+@media (min-width: 768px) {
+	#advanced-search.popover {
+		width: 750px;
+	}
 }
 
 .graphiql-container {
@@ -674,6 +679,14 @@ header.searchPagination {
 }
 .advanced-search select[multiple] {
 	height: 64px;
+}
+
+.advanced-search .col-xs-1 .btn {
+	padding-left: 0;
+}
+
+.advanced-search .col-xs-1 .btn img {
+	vertical-align: baseline;
 }
 
 .only-show-for-print {
