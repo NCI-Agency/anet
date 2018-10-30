@@ -681,10 +681,10 @@ artillery-plugin-statsd@^2.2.1:
     lodash "^4.17.11"
     lynx "^0.2.0"
 
-artillery@^1.6.0-24:
-  version "1.6.0-24"
-  resolved "https://registry.yarnpkg.com/artillery/-/artillery-1.6.0-24.tgz#7aeca3bcb69d8c47881a22a5ed7227055ce5e0f2"
-  integrity sha512-zLTvkKs4/EfRijjTYq5HW5jHkUCpWTxR6bwYyg3EAOd7vTZdlicPIWjjH+UPSut0SNlIH36BghFY8Ojqq1RHeA==
+artillery@^1.6.0-25:
+  version "1.6.0-25"
+  resolved "https://registry.yarnpkg.com/artillery/-/artillery-1.6.0-25.tgz#d42f3c58d807035a2d13609a57d23b5d792894ec"
+  integrity sha512-PAA70Gbsa8A5Oem6uTfKrKgEDJ+M4xSySZ2ujvOlT6zT2vZvSrPiROlw71mOFYB50Nze7r3vxN8BehQzhCuzkg==
   dependencies:
     arrivals "^2.1.2"
     artillery-plugin-statsd "^2.2.1"

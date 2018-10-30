@@ -5,7 +5,7 @@
   "proxy": "http://localhost:8080",
   "homepage": "/assets/client",
   "devDependencies": {
-    "artillery": "^1.6.0-24",
+    "artillery": "^1.6.0-25",
     "autobind-decorator": "^2.1.0",
     "autoprefixer": "^9.3.0",
     "ava": "^0.25.0",
