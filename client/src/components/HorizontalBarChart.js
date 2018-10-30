@@ -204,7 +204,7 @@ class HorizontalBarChart extends Component {
       .attr('class', 'category-label')
       .attr('transform', function(d) {
         let x = -2
-        let y = yCategoryScale((d.values.length * yScale.bandwidth() + BAR_PADDING) / 2)
+        let y = yCategoryScale((d.values.length * yScale.bandwidth()) / 2 + BAR_PADDING)
         return `translate(${x}, ${y})`
       })
       .text(d => categoryLabels[d.key])
@@ -244,7 +244,7 @@ class HorizontalBarChart extends Component {
       .attr('class', 'bar-label')
       .attr('transform', function(d) {
         let x = 3
-        let y = yCategoryScale((yScale.bandwidth() + BAR_PADDING) / 2)
+        let y = yCategoryScale(yScale.bandwidth() / 2 + BAR_PADDING)
         return `translate(${x}, ${y})`
       })
       .text(d => leavesLabels[d.key])
