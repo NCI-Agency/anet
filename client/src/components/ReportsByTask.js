@@ -184,7 +184,9 @@ class ReportsByTask extends ReportsVisualisation {
         graphData = tasks.map(d => {
           let r = {}
           r.task = d
-          r.reportsCount = (d.uuid ? simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1).length : simplifiedValues.filter(item => item.tasks.length === 0).length)
+          r.reportsCount = (d.uuid === noTask.uuid)
+            ? simplifiedValues.filter(item => item.tasks.length === 0).length
+            : simplifiedValues.filter(item => item.tasks.indexOf(d.uuid) > -1).length
           return r
         })
       }
