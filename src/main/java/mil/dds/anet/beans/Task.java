@@ -17,6 +17,8 @@ import mil.dds.anet.views.IdFetcher;
 
 public class Task extends AbstractAnetBean {
 
+	public static final String DUMMY_TASK_UUID = "-1"; // pseudo uuid to represent 'no task'
+
 	public enum TaskStatus { ACTIVE, INACTIVE }
 	
 	DateTime plannedCompletion;
