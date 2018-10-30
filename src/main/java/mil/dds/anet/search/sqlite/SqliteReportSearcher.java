@@ -192,7 +192,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getLocationUuid() != null) {
-			whereClauses.add("\"locationUuid\" = :locationUuid");
+			whereClauses.add("reports.\"locationUuid\" = :locationUuid");
 			args.put("locationUuid", query.getLocationUuid());
 		}
 		
