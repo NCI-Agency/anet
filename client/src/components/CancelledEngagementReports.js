@@ -245,8 +245,11 @@ class CancelledEngagementReports extends ReportsVisualisation {
         shortName: `No ${this.advisorOrgLabel}`
       }
       let reportsList = values[0].reportList.list || []
-      reportsList = reportsList
-        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
+      reportsList = reportsList.map(d => {
+        if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg
+        if (!d.cancelledReason) d.cancelledReason = "NO_REASON_GIVEN"
+        return d
+      })
       this.setState({
         isLoading: false,
         updateChart: true,  // update chart after fetching the data

@@ -20,6 +20,7 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -194,8 +195,12 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getCancelledReason() != null) {
-			whereClauses.add("reports.cancelledReason = :cancelledReason");
-			args.put("cancelledReason", DaoUtils.getEnumId(query.getCancelledReason()));
+			if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
+				whereClauses.add("reports.cancelledReason IS NULL");
+			} else {
+				whereClauses.add("reports.cancelledReason = :cancelledReason");
+				args.put("cancelledReason", DaoUtils.getEnumId(query.getCancelledReason()));
+			}
 		}
 
 		if (query.getTagUuid() != null) {
