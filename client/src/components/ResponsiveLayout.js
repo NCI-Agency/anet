@@ -34,7 +34,7 @@ const sidebarContainer = {
 	overflowY: 'auto',
 	overflowX: 'hidden',
 	msOverflowStyle: '-ms-autohiding-scrollbar',
-	paddingRight: 18,
+	paddingRight: 0,
 	paddingLeft: 15,
 	paddingBottom: 5,
 }

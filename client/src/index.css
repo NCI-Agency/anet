@@ -43,7 +43,7 @@ input[type=checkbox][readonly] {
 fieldset {
 	background: #fff;
 	border: 1px solid #e0e0e0;
-	padding: 1.25em;
+	padding: .75em;
 	margin: 0;
 	margin-bottom: 3rem;
 	width: 100%;
