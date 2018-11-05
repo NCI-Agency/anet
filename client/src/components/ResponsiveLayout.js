@@ -110,7 +110,7 @@ class ResponsiveLayout extends Component {
 					toggleMenuAction={() => {
 						this.showFloatingMenu(!floatingMenu)
 					}} />
-				<div style={contentContainer}>
+				<div style={contentContainer} className="content-container">
 					<LoadingBar showFastActions style={loadingBar} />
 					<div
 						style={floatingMenu === false ? null : glassPane}
