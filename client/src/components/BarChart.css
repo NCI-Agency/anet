@@ -26,7 +26,12 @@
   fill: #EC971F;
 }
 
-.category-label, .bar-label {
+.category-label {
+  fill: #000;
+  font-size: 12px;
+}
+
+.bar-label {
   fill: #000;
 }
 

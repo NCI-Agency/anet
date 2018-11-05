@@ -34,7 +34,7 @@ const sidebarContainer = {
 	overflowY: 'auto',
 	overflowX: 'hidden',
 	msOverflowStyle: '-ms-autohiding-scrollbar',
-	paddingRight: 18,
+	paddingRight: 0,
 	paddingLeft: 15,
 	paddingBottom: 5,
 }
@@ -99,7 +99,7 @@ class ResponsiveLayout extends Component {
 	render() {
 		const { floatingMenu, topbarHeight } = this.state
 		const { pageProps, location, sidebarData, children } = this.props
-		const sidebarClass = floatingMenu === false ? "hidden-xs" : "nav-overlay"
+		const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
 
 		return (
 			<div style={anetContainer} className="anet" >
@@ -113,18 +113,18 @@ class ResponsiveLayout extends Component {
 				<div style={contentContainer} className="content-container">
 					<LoadingBar showFastActions style={loadingBar} />
 					<div
-						style={floatingMenu === false ? null : glassPane}
+						style={floatingMenu ? glassPane : null}
 						onClick={() => {
 							this.showFloatingMenu(false)
 						}}
 					/>
-					{(pageProps.useNavigation === true || floatingMenu === true) &&
+					{(pageProps.useNavigation || floatingMenu) &&
 						<div
 							style={sidebarContainer}
 							className={`main-sidebar ${sidebarClass}`}
 						>
-								<div style={sidebar}>
-									{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
+							<div style={sidebar}>
+								{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
 							</div>
 						</div>
 					}

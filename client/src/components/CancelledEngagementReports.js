@@ -1,101 +1,231 @@
+import React from 'react'
 import PropTypes from 'prop-types'
-import React, {Component} from 'react'
-import API from 'api'
-import Settings from 'Settings'
 import autobind from 'autobind-decorator'
-import {Button} from 'react-bootstrap'
 
+import {Popover, Overlay} from 'react-bootstrap'
 import BarChart from 'components/BarChart'
-import Fieldset from 'components/Fieldset'
-import ReportCollection from 'components/ReportCollection'
+import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE} from 'components/ReportCollection'
 
-import {Report} from 'models'
-
-import _isEqual from 'lodash/isEqual'
+import _cloneDeep from 'lodash/cloneDeep'
 
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
-import { showLoading, hideLoading } from 'react-redux-loading-bar'
+
+import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
+import ContainerDimensions from 'react-container-dimensions'
+import { IconNames } from '@blueprintjs/icons'
+import Settings from 'Settings'
 
 const d3 = require('d3')
-const chartByOrgUuid = 'cancelled_reports_by_org'
-const chartByReasonId = 'cancelled_reports_by_reason'
-const GQL_CHART_FIELDS =  /* GraphQL */`
-  uuid
-  advisorOrg { uuid, shortName }
-  cancelledReason
-`
+
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(BarChart))
+const Context = React.createContext()
 
 /*
  * Component displaying a chart with reports cancelled since
  * the given date.
  */
-class CancelledEngagementReports extends Component {
-  static propTypes = {
-    queryParams: PropTypes.object,
-    showLoading: PropTypes.func.isRequired,
-    hideLoading: PropTypes.func.isRequired,
-  }
+class CancelledEngagementReports extends ReportsVisualisation {
+  static propTypes = {...rvPropTypes}
 
   constructor(props) {
     super(props)
+
+    this.advisorOrgLabel = Settings.fields.advisor.org.name
+    this.CHART_ID_BY_ORG = 'cancelled_reports_by_org'
+    this.CHART_ID_BY_REASON = 'cancelled_reports_by_reason'
+    this.GQL_CHART_FIELDS =  /* GraphQL */`
+      uuid
+      advisorOrg { uuid, shortName }
+      cancelledReason
+    `
+    this.VISUALIZATIONS = [
+      {
+        id: 'cer-chart-by-org',
+        icons: [IconNames.GROUPED_BAR_CHART, IconNames.DIAGRAM_TREE],
+        title: `Chart by ${this.advisorOrgLabel}`,
+        renderer: this.getBarChartByOrg,
+      },
+      {
+        id: 'cer-chart-by-reason',
+        icons: [IconNames.GROUPED_BAR_CHART, IconNames.COMMENT],
+        title: `Chart by reason for cancellation`,
+        renderer: this.getBarChartByReason,
+      },
+      {
+        id: 'cer-collection',
+        icons: [IconNames.PANEL_TABLE],
+        title: `Reports`,
+        renderer: this.getReportCollection,
+      },
+      {
+        id: 'cer-map',
+        icons: [IconNames.MAP],
+        title: `Map`,
+        renderer: this.getReportMap,
+      },
+    ]
+    this.INITIAL_LAYOUT = {
+      direction: 'column',
+      first: {
+        direction: 'row',
+        first: this.VISUALIZATIONS[0].id,
+        second: this.VISUALIZATIONS[1].id,
+      },
+      second: {
+        direction: 'row',
+        first: this.VISUALIZATIONS[2].id,
+        second: this.VISUALIZATIONS[3].id,
+      },
+    }
+    this.DESCRIPTION = `The reports are grouped by ${this.advisorOrgLabel} or reason for cancellation.
+      In order to see the list of cancelled engagement reports for an organization or a reaons,
+      click on the bar corresponding to the organization or the reason.`
 
     this.state = {
       graphDataByOrg: [],
       graphDataByReason: [],
       reportsPageNum: 0,
-      focusedOrg: '',
-      focusedReason: '',
+      focusedSelection: '',
+      focusedIsOrg: true,
+      graphPopover: null,
+      hoveredBar: null,
+      graphPopoverByReason: null,
+      hoveredBarByReason: null,
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
     }
   }
 
-  render() {
-    const focusDetails = this.getFocusDetails()
-    return (
-      <div>
-        <p className="help-text">{`Grouped by ${Settings.fields.advisor.org.name}`}</p>
-        <p className="chart-description">
-          {`The reports are grouped by ${Settings.fields.advisor.org.name}. In order to see the
-            list of cancelled engagement reports for an organization, click on
-            the bar corresponding to the organization.`}
-        </p>
-        <BarChartWithLoader
-          chartId={chartByOrgUuid}
-          data={this.state.graphDataByOrg}
-          xProp='advisorOrg.uuid'
-          yProp='cancelledByOrg'
-          xLabel='advisorOrg.shortName'
-          onBarClick={this.goToOrg}
-          updateChart={this.state.updateChart}
-          isLoading={this.state.isLoading} />
-        <p className="help-text">{`Grouped by reason for cancellation`}</p>
-        <p className="chart-description">
-          {`The reports are grouped by reason for cancellation. In order to see
-            the list of cancelled engagement reports for a reason for
-            cancellation, click on the bar corresponding to the reason for
-            cancellation.`}
-        </p>
-        <BarChartWithLoader
-          chartId={chartByReasonId}
-          data={this.state.graphDataByReason}
-          xProp='cancelledReason'
-          yProp='cancelledByReason'
-          xLabel='reason'
-          onBarClick={this.goToReason}
-          updateChart={this.state.updateChart}
-          isLoading={this.state.isLoading} />
-        <Fieldset
-          title={`Cancelled Engagement Reports ${focusDetails.titleSuffix}`}
-          id='cancelled-reports-details'
-          action={!focusDetails.resetFnc
-            ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
-          } >
-          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
-        </Fieldset>
+  get additionalReportParams() {
+    return this.state.focusedIsOrg
+      ? {advisorOrgUuid: this.state.focusedSelection.advisorOrg.uuid}
+      : {cancelledReason: this.state.focusedSelection.cancelledReason}
+  }
+
+  @autobind
+  getBarChartByOrg(id) {
+    return <Context.Consumer>{context => (
+      <div className="non-scrollable">
+        <ContainerDimensions>{({width, height}) => (
+          <BarChartWithLoader
+            width={width}
+            height={height}
+            chartId={this.CHART_ID_BY_ORG}
+            data={context.graphDataByOrg}
+            xProp='advisorOrg.uuid'
+            yProp='cancelledByOrg'
+            xLabel='advisorOrg.shortName'
+            onBarClick={this.goToOrg}
+            showPopover={this.showPopover}
+            hidePopover={this.hidePopover}
+            updateChart={context.updateChart}
+            selectedBarClass={this.selectedBarClass}
+            selectedBar={(context.focusedSelection && context.focusedIsOrg) ? 'bar_' + context.focusedSelection.advisorOrg.uuid : ''}
+            isLoading={context.isLoading}
+          />
+        )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopover}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopover}
+        >
+          <Popover id="graph-popover" title={context.hoveredBar && context.hoveredBar.advisorOrg.shortName}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBar && context.hoveredBar.cancelledByOrg}</p>
+          </Popover>
+        </Overlay>
       </div>
+    )}</Context.Consumer>
+  }
+
+  @autobind
+  getBarChartByReason(id) {
+    return <Context.Consumer>{context => (
+      <div className="non-scrollable">
+        <ContainerDimensions>{({width, height}) => (
+          <BarChartWithLoader
+            width={width}
+            height={height}
+            chartId={this.CHART_ID_BY_REASON}
+            data={context.graphDataByReason}
+            xProp='cancelledReason'
+            yProp='cancelledByReason'
+            xLabel='reason'
+            onBarClick={this.goToReason}
+            showPopover={this.showPopoverByReason}
+            hidePopover={this.hidePopoverByReason}
+            updateChart={context.updateChart}
+            selectedBarClass={this.selectedBarClass}
+            selectedBar={(context.focusedSelection && !context.focusedIsOrg) ? 'bar_' + context.focusedSelection.cancelledReason : ''}
+            isLoading={context.isLoading}
+          />
+        )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopoverByReason}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopoverByReason}
+        >
+          <Popover id="graph-popover-by-reason" title={context.hoveredBarByReason && context.hoveredBarByReason.reason}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBarByReason && context.hoveredBarByReason.cancelledByReason}</p>
+          </Popover>
+        </Overlay>
+      </div>
+    )}</Context.Consumer>
+  }
+
+  @autobind
+  showPopoverByReason(graphPopoverByReason, hoveredBarByReason) {
+    this.setState({graphPopoverByReason, hoveredBarByReason})
+  }
+
+  @autobind
+  hidePopoverByReason() {
+    this.setState({graphPopoverByReason: null, hoveredBarByReason: null})
+  }
+
+  @autobind
+  getReportCollection(id)
+  {
+    return <Context.Consumer>{context => (
+      <div className="scrollable">
+        <ReportCollection
+          paginatedReports={context.reports}
+          goToPage={this.goToReportsPage}
+          viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY]}
+        />
+      </div>
+    )}</Context.Consumer>
+  }
+
+  @autobind
+  getReportMap(id)
+  {
+    return <Context.Consumer>{context => (
+      <div className="non-scrollable">
+        <ContainerDimensions>{({width, height}) => (
+          <ReportCollection
+            width={width}
+            height={height}
+            marginBottom={0}
+            reports={context.allReports}
+            viewFormats={[FORMAT_MAP]}
+          />
+        )}</ContainerDimensions>
+      </div>
+    )}</Context.Consumer>
+  }
+
+  render() {
+    return (
+      <Context.Provider value={this.state}>
+        {super.render()}
+      </Context.Provider>
     )
   }
 
@@ -106,57 +236,24 @@ class CancelledEngagementReports extends Component {
       .replace(/(\b\w)/gi, function(m) {return m.toUpperCase()}) : ''
   }
 
-  getFocusDetails() {
-    let titleSuffix = ''
-    let resetFnc = ''
-    let resetButtonLabel = ''
-    if (this.state.focusedOrg) {
-      titleSuffix = `for ${this.state.focusedOrg.shortName}`
-      resetFnc = 'goToOrg'
-      resetButtonLabel = 'All organizations'
-    }
-    else if (this.state.focusedReason) {
-      titleSuffix = `by ${this.getReasonDisplayName(this.state.focusedReason)}`
-      resetFnc = 'goToReason'
-      resetButtonLabel = 'All reasons'
-    }
-    return {
-      titleSuffix: titleSuffix,
-      resetFnc: resetFnc,
-      resetButtonLabel: resetButtonLabel
-    }
-  }
-
-  fetchData() {
-    this.setState( {isLoading: true} )
-    this.props.showLoading()
-    const pinned_ORGs = Settings.pinned_ORGs
-    const chartQueryParams = {}
-    Object.assign(chartQueryParams, this.props.queryParams)
-    Object.assign(chartQueryParams, {
-      pageNum: 0,
-      pageSize: 0,  // retrieve all the filtered reports
-    })
-    // Query used by the chart
-    const chartQuery = API.query(/* GraphQL */`
-        reportList(query:$chartQueryParams) {
-          totalCount, list {
-            ${GQL_CHART_FIELDS}
-          }
-        }
-      `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
-    const noAdvisorOrg = {
-      uuid: "-1",
-      shortName: `No ${Settings.fields.advisor.org.name}`
-    }
-    Promise.all([chartQuery]).then(values => {
+  @autobind
+  fetchChartData(chartQuery) {
+    return Promise.all([chartQuery]).then(values => {
+      const pinned_ORGs = Settings.pinned_ORGs
+      const noAdvisorOrg = {
+        uuid: "-1",
+        shortName: `No ${this.advisorOrgLabel}`
+      }
       let reportsList = values[0].reportList.list || []
-      reportsList = reportsList
-        .map(d => { if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg; return d })
+      reportsList = reportsList.map(d => {
+        if (!d.advisorOrg) d.advisorOrg = noAdvisorOrg
+        if (!d.cancelledReason) d.cancelledReason = "NO_REASON_GIVEN"
+        return d
+      })
       this.setState({
         isLoading: false,
         updateChart: true,  // update chart after fetching the data
-        graphDataByOrg: reportsList
+        graphDataByOrg: _cloneDeep(reportsList) // clone so we don't update the same reportsList twice!
           .filter((item, index, d) => d.findIndex(t => {return t.advisorOrg.uuid === item.advisorOrg.uuid }) === index)
           .map(d => {d.cancelledByOrg = reportsList.filter(item => item.advisorOrg.uuid === d.advisorOrg.uuid).length; return d})
           .sort((a, b) => {
@@ -175,107 +272,30 @@ class CancelledEngagementReports extends Component {
             return a.reason.localeCompare(b.reason)
         })
       })
-      this.props.hideLoading()
     })
-    this.fetchOrgData()
-  }
-
-  fetchOrgData() {
-    const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.props.queryParams)
-    Object.assign(reportsQueryParams, {
-      pageNum: this.state.reportsPageNum,
-      pageSize: 10
-    })
-    if (this.state.focusedOrg) {
-      Object.assign(reportsQueryParams, {advisorOrgUuid: this.state.focusedOrg.uuid})
-    }
-    // Query used by the reports collection
-    const reportsQuery = API.query(/* GraphQL */`
-        reportList(query:$reportsQueryParams) {
-          pageNum, pageSize, totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
-          }
-        }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
-    Promise.all([reportsQuery]).then(values => {
-      this.setState({
-        updateChart: false,  // only update the report list
-        reports: values[0].reportList
-      })
-    })
-  }
-
-  fetchReasonData() {
-    const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.props.queryParams)
-    Object.assign(reportsQueryParams, {
-      pageNum: this.state.reportsPageNum,
-      pageSize: 10
-    })
-    if (this.state.focusedReason) {
-      Object.assign(reportsQueryParams, {cancelledReason: this.state.focusedReason})
-    }
-    // Query used by the reports collection
-    const reportsQuery = API.query(/* GraphQL */`
-        reportList(query:$reportsQueryParams) {
-          pageNum, pageSize, totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
-          }
-        }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
-    Promise.all([reportsQuery]).then(values => {
-      this.setState({
-        reports: values[0].reportList
-      })
-    })
-  }
-
-  @autobind
-  goToReportsPage(newPage) {
-    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.state.focusedOrg ? this.fetchOrgData() : this.fetchReasonData())
-  }
-
-  resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('class', '')
   }
 
   @autobind
   goToOrg(item) {
-    // Note: we set updateChart to false as we do not want to re-render the chart
-    // when changing the focus organization.
-    this.setState({updateChart: false, reportsPageNum: 0, focusedReason: '', focusedOrg: (item ? item.advisorOrg : '')}, () => this.fetchOrgData())
-    // remove highlighting of the bars
-    this.resetChartSelection(chartByReasonId)
-    this.resetChartSelection(chartByOrgUuid)
-    if (item) {
-      // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartByOrgUuid + ' #bar_' + item.advisorOrg.uuid).attr('class', 'selected-bar')
-    }
+    this.updateHighlight(null, true, this.CHART_ID_BY_REASON)
+    this.setState({focusedIsOrg: true}, () => {
+      super.goToSelection(item, this.CHART_ID_BY_ORG)
+    })
   }
 
   @autobind
   goToReason(item) {
-    // Note: we set updateChart to false as we do not want to re-render the chart
-    // when changing the focus reason.
-    this.setState({updateChart: false, reportsPageNum: 0, focusedReason: (item ? item.cancelledReason : ''), focusedOrg: ''}, () => this.fetchReasonData())
-    // remove highlighting of the bars
-    this.resetChartSelection(chartByReasonId)
-    this.resetChartSelection(chartByOrgUuid)
-    if (item) {
-      // highlight the bar corresponding to the selected organization
-      d3.select('#' + chartByReasonId + ' #bar_' + item.cancelledReason).attr('class', 'selected-bar')
-    }
+    this.updateHighlight(null, true, this.CHART_ID_BY_ORG)
+    this.setState({focusedIsOrg: false}, () => {
+      super.goToSelection(item, this.CHART_ID_BY_REASON)
+    })
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
-      this.setState({
-        reportsPageNum: 0,
-        focusedReason: '',  // reset focus when changing the queryParams
-        focusedOrg: ''
-      }, () => this.fetchData())
-    }
+  @autobind
+  updateHighlight(focusedSelection, clear, chartId) {
+    super.updateHighlight(focusedSelection
+      ? (this.state.focusedIsOrg ? focusedSelection.advisorOrg.uuid : focusedSelection.cancelledReason)
+      : '', clear, chartId)
   }
 }
 

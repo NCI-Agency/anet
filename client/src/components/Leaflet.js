@@ -8,7 +8,9 @@ import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
 import {Map, Control, CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
+import { GestureHandling } from 'leaflet-gesture-handling'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
 import Settings from 'Settings'
 
 import MARKER_ICON from 'resources/leaflet/marker-icon.png'
@@ -16,16 +18,23 @@ import MARKER_ICON_2X from 'resources/leaflet/marker-icon-2x.png'
 import MARKER_SHADOW from 'resources/leaflet/marker-shadow.png'
 
 const css = {
-	height: '500px',
-	marginBottom: '18px',
 	zIndex: 1,
 }
 
 class BaseLeaflet extends Component {
 	static propTypes = {
+		width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+		height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+		marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 		markers: PropTypes.array,
 		appSettings: PropTypes.object,
 		mapId: PropTypes.string, // pass this when you have more than one map on a page
+	}
+
+	static defaultProps = {
+		width: '100%',
+		height: '500px',
+		marginBottom: '18px',
 	}
 
 	constructor(props) {
@@ -55,7 +64,8 @@ class BaseLeaflet extends Component {
 	}
 
 	componentDidMount() {		
-		const mapOptions = Object.assign({zoomControl:true},
+		Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
+		const mapOptions = Object.assign({zoomControl:true, gestureHandling:true},
 										 Settings.imagery.mapOptions.leafletOptions,
 										 Settings.imagery.mapOptions.crs && { crs: CRS[Settings.imagery.mapOptions.crs] })
 		const map = new Map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,
@@ -68,7 +78,7 @@ class BaseLeaflet extends Component {
 		map.on('moveend', this.moveEnd)
 
 		const markerLayer = new FeatureGroup([]).addTo(map)
-		this.setState({...this.state, map, markerLayer})
+		this.setState({map, markerLayer})
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -86,7 +96,9 @@ class BaseLeaflet extends Component {
 
 		if (prevState.map !== this.state.map) {
 			this.updateMarkerLayer(this.props.markers)
-			this.state.map && this.state.map.invalidateSize() // TODO: Still not 100% convinced if this is the right place for this call
+		}
+		if (prevProps.width !== this.props.width || prevProps.height !== this.props.height) {
+			this.state.map.invalidateSize()
 		}
 	}
 
@@ -142,17 +154,17 @@ class BaseLeaflet extends Component {
 	}
 
 	render() {
+		const style = Object.assign({}, css, {width: this.props.width, height: this.props.height, marginBottom: this.props.marginBottom})
 		return (
-			<div id={this.mapId} style={css} />
+			<div id={this.mapId} style={style} />
 		)
 	}
 
 	@autobind
 	moveEnd(event) {
-		let map = this.state.map
-		let center = map.getCenter()
+		const center = this.state.map.getCenter()
 
-		this.setState({map, center: [center.lat, center.lng].join(',')})
+		this.setState({center: [center.lat, center.lng].join(',')})
 	}
 
 }

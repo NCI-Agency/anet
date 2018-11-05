@@ -43,7 +43,7 @@ input[type=checkbox][readonly] {
 fieldset {
 	background: #fff;
 	border: 1px solid #e0e0e0;
-	padding: 1.25em;
+	padding: .75em;
 	margin: 0;
 	margin-bottom: 3rem;
 	width: 100%;
@@ -123,6 +123,15 @@ fieldset.warning {
 
 fieldset.danger {
 	border: 2px solid red;
+}
+
+#daily-rollup fieldset,
+#cancelled-reports fieldset,
+#future-engagements-by-location fieldset,
+#not-approved-reports fieldset,
+#reports-by-task fieldset,
+#reports-by-day-of-week fieldset {
+  margin-bottom: 0;
 }
 
 .input-group {
@@ -231,8 +240,13 @@ span.asLink:focus {
 }
 
 #advanced-search.popover {
-	width: 750px;
-	max-width: none;
+	max-width: 100%;
+}
+
+@media (min-width: 768px) {
+	#advanced-search.popover {
+		width: 750px;
+	}
 }
 
 .graphiql-container {
@@ -665,6 +679,14 @@ header.searchPagination {
 }
 .advanced-search select[multiple] {
 	height: 64px;
+}
+
+.advanced-search .col-xs-1 .btn {
+	padding-left: 0;
+}
+
+.advanced-search .col-xs-1 .btn img {
+	vertical-align: baseline;
 }
 
 .only-show-for-print {
