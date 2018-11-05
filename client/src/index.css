@@ -714,7 +714,7 @@ header.searchPagination {
 		display: inherit;
 	}
 
-	.breadcrumb, .header, .banner, .add-new-comment, button, .btn, .hide-for-print {
+	.breadcrumb, .header, .banner, .add-new-comment, button, .btn, .hide-for-print, .main-sidebar {
 		display: none !important;
 	}
 
@@ -754,7 +754,7 @@ header.searchPagination {
 
 	/*	Fixes the print style for the main viewport. Now the entire page is printed instead of the 100vh
 		This resets the display to block and height to 100%. And overrides the viewport height and flexbox display. */
-	#main-viewport, .anet {
+	#main-viewport, .anet, .content-container {
 		display: block !important;
 		height: 100% !important;
 	}
