@@ -751,8 +751,11 @@ header.searchPagination {
 	.primary-content {
 		width: 100%
 	}
-}
 
-.primary-content {
-	width: 100%;
+	/*	Fixes the print style for the main viewport. Now the entire page is printed instead of the 100vh
+		This resets the display to block and height to 100%. And overrides the viewport height and flexbox display. */
+	#main-viewport, .anet {
+		display: block !important;
+		height: 100% !important;
+	}
 }
