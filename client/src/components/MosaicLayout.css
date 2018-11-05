@@ -35,6 +35,7 @@
 }
 
 @media print {
+  .bp3-navbar,
   .mosaic-preview {
     display: none;
   }
