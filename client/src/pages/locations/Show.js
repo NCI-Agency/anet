@@ -10,6 +10,7 @@ import Messages, {setMessages} from 'components/Messages'
 import Leaflet from 'components/Leaflet'
 import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import GQL from 'graphqlapi'
 import {Location, Person} from 'models'
@@ -51,6 +52,7 @@ class BaseLocationShow extends Page {
 		let locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
 				uuid, name, lat, lng, status
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`)
 
@@ -72,10 +74,10 @@ class BaseLocationShow extends Page {
 			markers.push({name: location.name, lat: location.lat, lng: location.lng})
 		}
 
-		return (
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={location.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				<Breadcrumbs items={[[location.name || 'Location', Location.pathFor(location)]]} />
-
 				<Messages success={this.state.success} error={this.state.error} />
 
 				<Form static formFor={location} horizontal >
@@ -92,7 +94,7 @@ class BaseLocationShow extends Page {
 					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} mapId="reports" />
 				</Fieldset>
 			</div>
-		)
+		</div>)
 	}
 
 	@autobind

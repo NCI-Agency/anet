@@ -14,6 +14,7 @@ import Messages from 'components/Messages'
 import LinkTo from 'components/LinkTo'
 import ReportApprovals from 'components/ReportApprovals'
 import Tag from 'components/Tag'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
 import Settings from 'Settings'
@@ -107,6 +108,7 @@ class BaseReportShow extends Page {
 				tags { uuid, name, description }
 				reportSensitiveInformation { uuid, text }
 				authorizationGroups { uuid, name, description }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -162,10 +164,12 @@ class BaseReportShow extends Page {
 
 		const formattedReportReleasedAt = moment(report.getReportReleasedAt()).format('D MMM YYYY, [at] h:mm a')
 
-		return (
-			<div className="report-show">
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={report.notes} />
+			<div style={{order: -1, flexGrow: 4}} className="report-show">
 				<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
+
 
 				{report.isReleased() &&
 					<Fieldset style={{textAlign: 'center' }}>
@@ -409,7 +413,7 @@ class BaseReportShow extends Page {
 					</div></div>
 				}
 			</div>
-		)
+		</div>)
 	}
 
 	@autobind

@@ -41,6 +41,7 @@ export default class Report extends Model {
 		tags: [],
 		reportSensitiveInformation: null,
 		authorizationGroups: [],
+		...Model.schema,
 	}
 
 	isDraft() {

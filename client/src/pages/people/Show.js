@@ -12,6 +12,7 @@ import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import AssignPositionModal from 'components/AssignPositionModal'
 import EditAssociatedPositionsModal from 'components/EditAssociatedPositionsModal'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import GuidedTour from 'components/GuidedTour'
 import {personTour} from 'pages/HopscotchTour'
@@ -103,6 +104,7 @@ class BasePersonShow extends Page {
 					}
 				}
 				previousPositions { startTime, endTime, position { uuid, name }}
+				${GRAPHQL_NOTES_FIELDS}
 		}`)
 		let authoredReportsPart = this.getAuthoredReportsPart(props.match.params.uuid)
 		let attendedReportsPart = this.getAttendedReportsPart(props.match.params.uuid)
@@ -139,8 +141,9 @@ class BasePersonShow extends Page {
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
 			(person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 
-		return (
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={person.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				<div className="pull-right">
 					<GuidedTour
 						title="Take a guided tour of this person's page."
@@ -265,7 +268,7 @@ class BasePersonShow extends Page {
 					</Fieldset>
 				</Form>
 			</div>
-		)
+		</div>)
 	}
 
 	renderPosition(position) {

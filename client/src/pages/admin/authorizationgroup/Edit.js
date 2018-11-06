@@ -3,6 +3,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 
 import Messages from 'components/Messages'
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import AuthorizationGroupForm from 'pages/admin/authorizationgroup/Form'
 import {AuthorizationGroup} from 'models'
@@ -31,6 +32,7 @@ class AuthorizationGroupEdit extends Page {
 				uuid, name, description
 				positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
 				status
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			this.setState({
@@ -42,14 +44,15 @@ class AuthorizationGroupEdit extends Page {
 
 	render() {
 		let authorizationGroup = this.state.authorizationGroup
-		return (
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={authorizationGroup.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)], ["Edit", AuthorizationGroup.pathForEdit(authorizationGroup)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<AuthorizationGroupForm original={this.state.originalAuthorizationGroup} authorizationGroup={authorizationGroup} edit />
 			</div>
-		)
+		</div>)
 	}
 }
 

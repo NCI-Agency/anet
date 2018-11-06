@@ -9,6 +9,7 @@ import Messages, {setMessages} from 'components/Messages'
 import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import {AuthorizationGroup, Person} from 'models'
 import GQL from 'graphqlapi'
@@ -73,6 +74,7 @@ class BaseAuthorizationGroupShow extends Page {
 			uuid, name, description
 			positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
 			status
+			${GRAPHQL_NOTES_FIELDS}
 		}` )
 		let positionsPart = this.getPositionQueryPart(props.match.params.uuid)
 		let reportsPart = this.getReportQueryPart(props.match.params.uuid)
@@ -92,9 +94,9 @@ class BaseAuthorizationGroupShow extends Page {
 	render() {
 		let authorizationGroup = this.state.authorizationGroup
 		const { currentUser } = this.props
-		return (
-
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={authorizationGroup.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -117,7 +119,7 @@ class BaseAuthorizationGroupShow extends Page {
 					</Fieldset>
 				</Form>
 			</div>
-		)
+		</div>)
 	}
 
 	@autobind

@@ -13,6 +13,7 @@ import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import AssignPersonModal from 'components/AssignPersonModal'
 import EditAssociatedPositionsModal from 'components/EditAssociatedPositionsModal'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import GuidedTour from 'components/GuidedTour'
 import {positionTour} from 'pages/HopscotchTour'
@@ -68,6 +69,7 @@ class BasePositionShow extends Page {
 				},
 				previousPeople { startTime, endTime, person { uuid, name, rank }}
 				location { uuid, name }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => this.setState({position: new Position(data.position)}))
 	}
@@ -88,8 +90,9 @@ class BasePositionShow extends Page {
 			position.status === Position.STATUS.INACTIVE &&
 			(position.uuid && ((!position.person) || (!position.person.uuid)))
 
-		return (
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={position.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				<div className="pull-right">
 					<GuidedTour
 						title="Take a guided tour of this position's page."
@@ -101,6 +104,7 @@ class BasePositionShow extends Page {
 
 				<Breadcrumbs items={[[position.name || 'Position', Position.pathFor(position)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
+
 
 				<Form static formFor={position} horizontal>
 					<Fieldset title={position.name} action={
@@ -212,7 +216,7 @@ class BasePositionShow extends Page {
 						className="pull-right" />
 				</div></div>}
 			</div>
-		)
+		</div>)
 	}
 
 	renderAssociatedPositionRow(pos, idx) {

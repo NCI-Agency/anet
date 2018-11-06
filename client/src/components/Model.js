@@ -2,8 +2,13 @@ import encodeQuery from 'querystring/encode'
 import utils from 'utils'
 
 export default class Model {
-	static schema = {}
+	static schema = {
+		notes: [],
+	}
 
+	static GRAPHQL_NOTES_FIELDS = /* GraphQL */`
+		notes { uuid createdAt text author { uuid name rank } }
+	`
 
 	static resourceName = null
 	static displayName(appSettings)  { return null }

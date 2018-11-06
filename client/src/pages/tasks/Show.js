@@ -9,6 +9,7 @@ import Form from 'components/Form'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 import DictionaryField from '../../HOC/DictionaryField'
 
 import Settings from 'Settings'
@@ -71,6 +72,7 @@ class BaseTaskShow extends Page {
 				plannedCompletion, projectedCompletion,
 				responsibleOrg { uuid, shortName, longName, identificationCode },
 				customFieldRef1 { uuid, shortName, longName }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`)
 
@@ -91,8 +93,9 @@ class BaseTaskShow extends Page {
 
 		let canEdit = currentUser.isAdmin()
 
-		return (
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={task.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				<Breadcrumbs items={[[`${taskShortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -125,7 +128,7 @@ class BaseTaskShow extends Page {
 					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
 				</Fieldset>
 			</div>
-		)
+		</div>)
 	}
 
     @autobind

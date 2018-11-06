@@ -11,6 +11,7 @@ import Form from 'components/Form'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 import DictionaryField from '../../HOC/DictionaryField'
 import SubNav from 'components/SubNav'
 
@@ -122,6 +123,7 @@ class BaseOrganizationShow extends Page {
 				approvalSteps {
 					uuid, name, approvers { uuid, name, person { uuid, name, rank}}
 				}
+				${GRAPHQL_NOTES_FIELDS}
 			}`)
 		let reportsPart = this.getReportQueryPart(props.match.params.uuid)
 		let tasksPart = this.getTaskQueryPart(props.match.params.uuid)
@@ -184,8 +186,9 @@ class BaseOrganizationShow extends Page {
 				</Scrollspy>
 			</Nav>
 		)
-		return (
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={org.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				<SubNav subnavElemId="myorg-nav">
 					{isMyOrg && orgSubNav}
 				</SubNav>
@@ -204,7 +207,6 @@ class BaseOrganizationShow extends Page {
 				</div>}
 
 				<Breadcrumbs items={[[org.shortName || 'Organization', Organization.pathFor(org)]]} />
-
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Form formFor={org} static horizontal>
@@ -277,7 +279,7 @@ class BaseOrganizationShow extends Page {
 					</Fieldset>
 				</Form>
 			</div>
-		)
+		</div>)
 	}
 
 	@autobind

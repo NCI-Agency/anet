@@ -5,6 +5,7 @@ import moment from 'moment'
 
 import PersonForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
 import {Person} from 'models'
@@ -40,6 +41,7 @@ class BasePersonEdit extends Page {
 				position {
 					uuid, name
 				}
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			if (data.person.endOfTourDate) {
@@ -58,8 +60,9 @@ class BasePersonEdit extends Page {
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
 		const saveText = person.isNewUser() ? 'Create profile' : null
 
-		return (
-			<div>
+		return (<div style={{display: 'flex'}}>
+			<RelatedObjectNotes notes={person.notes} />
+			<div style={{order: -1, flexGrow: 4}}>
 				{!person.isNewUser() &&
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
@@ -72,7 +75,7 @@ class BasePersonEdit extends Page {
 					legendText={legendText}
 					saveText={saveText} />
 			</div>
-		)
+		</div>)
 	}
 }
 
