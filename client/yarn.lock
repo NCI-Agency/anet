@@ -842,10 +842,10 @@ auto-bind@^1.1.0:
   resolved "https://registry.yarnpkg.com/auto-bind/-/auto-bind-1.2.0.tgz#8b7e318aad53d43ba8a8ecaf0066d85d5f798cd6"
   integrity sha512-Zw7pZp7tztvKnWWtoII4AmqH5a2PV3ZN5F0BPRTGcc1kpRm4b6QXQnPU7Znbl6BfPfqOVOV29g4JeMqZQaqqOA==
 
-autobind-decorator@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-2.1.0.tgz#4451240dbfeff46361c506575a63ed40f0e5bc68"
-  integrity sha512-bgyxeRi1R2Q8kWpHsb1c+lXCulbIAHsyZRddaS+agAUX3hFUVZMociwvRgeZi1zWvfqEEjybSv4zxWvFV8ydQQ==
+autobind-decorator@^2.1.0, autobind-decorator@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-2.2.1.tgz#acabfddec272b9c98323dab5dc94f63c61b35855"
+  integrity sha512-XXC/B4Cm5X/Rv8etlFcpxUHdIhcs4U3tf8bsg50gUV8J6kq1Uij25xeBoSeuUwdKs2NMhwy+p9T4VNS8/ujp9w==
 
 autoprefixer@^9.3.1:
   version "9.3.1"
