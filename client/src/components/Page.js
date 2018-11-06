@@ -9,6 +9,7 @@ import {setMessages} from 'components/Messages'
 import API from 'api'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
+import {searchFormToQuery} from 'searchUtils'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { animateScroll, Link } from 'react-scroll'
@@ -161,23 +162,8 @@ export default class Page extends Component {
 	@autobind
 	getSearchQuery(props) {
 		let {searchQuery} = props || this.props
-		let query = {text: searchQuery.text}
-		if (searchQuery.filters) {
-			searchQuery.filters.forEach(filter => {
-				if (filter.value) {
-					if (filter.value.toQuery) {
-						const toQuery = typeof filter.value.toQuery === 'function'
-							? filter.value.toQuery()
-							: filter.value.toQuery
-						Object.assign(query, toQuery)
-					} else {
-						query[filter.key] = filter.value
-					}
-				}
-			})
-		}
+		const query = searchFormToQuery(searchQuery)
 		console.log('SEARCH advanced query', query)
-
 		return query
 	}
 

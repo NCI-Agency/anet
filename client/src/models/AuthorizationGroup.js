@@ -8,6 +8,7 @@ export default class AuthorizationGroup extends Model {
 	static resourceName = 'AuthorizationGroup'
 	static listName = 'authorizationGroupList'
 	static getInstanceName = 'authorizationGroup'
+
 	static displayName() {
 		// TODO: Get the display name from the dictionary
 		return 'Authorization Group'

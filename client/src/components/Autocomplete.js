@@ -1,11 +1,14 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {FormControl} from 'react-bootstrap'
+import {Button, FormControl} from 'react-bootstrap'
 import Autosuggest from 'react-autosuggest-ie11-compatible'
 import autobind from 'autobind-decorator'
+import _clone from 'lodash/clone'
 import _debounce from 'lodash/debounce'
 import _isEqual from 'lodash/isEqual'
 import _isEmpty from 'lodash/isEmpty'
+
+import SearchObjectModal from 'components/SearchObjectModal'
 
 import API from 'api'
 
@@ -62,6 +65,7 @@ export default class Autocomplete extends Component {
 			selectedUuids: selectedUuids,
 			stringValue: stringValue,
 			originalStringValue: stringValue,
+			showSearchModal: false,
 		}
 	}
 
@@ -105,38 +109,55 @@ export default class Autocomplete extends Component {
 		inputProps.onChange = this.onInputChange
 		inputProps.onBlur = this.onInputBlur
 		const { valueKey } = this.props
-		const renderSuggestion = this.props.template ? this.renderSuggestionTemplate : this.renderSuggestion
 
+		// Add search more link to the list of suggestions
+		let suggestions = _clone(this.state.suggestions)
+		suggestions.push('search_more')
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
 			<img src={SEARCH_ICON} className="form-control-icon" alt="" onClick={this.focus} />
 
 			<Autosuggest
-				suggestions={this.state.suggestions}
+				suggestions={suggestions}
 				onSuggestionsFetchRequested={this.fetchSuggestionsDebounced}
 				onSuggestionsClearRequested={this.clearSuggestions}
 				onSuggestionSelected={this.onSuggestionSelected}
 				getSuggestionValue={this.getStringValue.bind(this, valueKey)}
 				inputProps={inputProps}
 				renderInputComponent={this.renderInputComponent}
-				renderSuggestion={renderSuggestion}
+				renderSuggestion={this.renderSuggestion}
 				focusInputOnSuggestionClick={false}
+			/>
+			<SearchObjectModal
+				objectType={this.props.objectType.searchObjectType}
+				showModal={this.state.showSearchModal}
+				onCancel={this.hideSearchModal}
+				onSuccess={this.hideSearchModal}
 			/>
 		</div>
 	}
 
 	@autobind
 	renderSuggestion(suggestion) {
-		return _isEmpty(suggestion)
+		if (suggestion === 'search_more') {
+			return <span><Button bsStyle="link" onClick={this.showSearchModal}>Search more</Button></span>
+		}
+		else {
+			return _isEmpty(suggestion)
 				? this.noSuggestions
-				: <span>{this.getStringValue(suggestion, this.props.valueKey)}</span>
+				: (this.props.template ? this.props.template(suggestion) : <span>{this.getStringValue(suggestion, this.props.valueKey)}</span>)
+		}
 	}
 
 	@autobind
-	renderSuggestionTemplate(suggestion) {
-		return _isEmpty(suggestion)
-				? this.noSuggestions
-				: this.props.template(suggestion)
+	showSearchModal() {
+		this.setState({showSearchModal: true})
 	}
+
+	@autobind
+	hideSearchModal() {
+		this.setState({showSearchModal: false})
+	}
+
 
 	@autobind
 	renderInputComponent(inputProps) {
