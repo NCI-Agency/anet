@@ -572,11 +572,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 		if (!this.state.isCancelled) {
 			delete report.cancelledReason
 		}
-		let graphql = 'createReport(report: $report) { id }'
+		let graphql = 'createReport(report: $report) { id reportSensitiveInformation { id text } }'
 		let variableDef = '($report: ReportInput!)'
 		let variables = {report: report}
 		if (this.isEditMode()) {
-			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { id }'
+			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { id reportSensitiveInformation { id text } }'
 			variableDef = '($report: ReportInput!, $sendEditEmail: Boolean!)'
 			variables.sendEditEmail = disableSubmits
 		}
