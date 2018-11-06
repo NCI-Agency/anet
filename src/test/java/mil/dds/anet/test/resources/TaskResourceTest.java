@@ -4,9 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.GenericType;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -21,6 +24,9 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 public class TaskResourceTest extends AbstractResourceTest {
 
 	private static final String FIELDS = "id shortName longName category customFieldRef1 { id } responsibleOrg { id } status";
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void taskTest() { 
@@ -162,5 +168,17 @@ public class TaskResourceTest extends AbstractResourceTest {
 				FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Task>>>() {});
 		assertThat(taskList).isNotNull();
 		assertThat(taskList.getList()).isNotEmpty();
+	}
+
+	@Test
+	public void duplicateTaskTest() {
+		final Integer aId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+				TestData.createTask("DupTest", "Test dups", "Test-EF"), new GenericType<GraphQLResponse<Task>>() {});
+		assertThat(aId).isNotNull();
+
+		// Trying to create another task with the same shortName should fail
+		thrown.expect(ClientErrorException.class);
+		graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+				TestData.createTask("DupTest", "Test dups", "Test-EF"), new GenericType<GraphQLResponse<Task>>() {});
 	}
 }

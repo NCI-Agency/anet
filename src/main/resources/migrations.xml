@@ -1239,4 +1239,8 @@
 		</delete>
 	</changeSet>
 
+	<changeSet id="add_unique_tasks_shortName_constraint" author="gjvoosten" dbms="mssql,postgresql">
+		<addUniqueConstraint tableName="tasks" columnNames="shortName" constraintName="UQ_TaskShortName" />
+	</changeSet>
+
 </databaseChangeLog>
