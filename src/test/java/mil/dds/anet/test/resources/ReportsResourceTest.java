@@ -269,6 +269,11 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		Report returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getId(), new GenericType<GraphQLResponse<Report>>() {});
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
+
+		// Verify that author can no longer edit the report
+		thrown.expect(ForbiddenException.class);
+		graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput", returned, new GenericType<GraphQLResponse<Report>>() {});
+
 		logger.debug("Expecting report {} in step {} because of org {} on author {}",
 				new Object[] { returned.getId(), approval.getId(), advisorOrg.getId(), author.getId() });
 		assertThat(returned.getApprovalStep().getId()).isEqualTo(approval.getId());
