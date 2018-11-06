@@ -353,7 +353,7 @@ class BaseSearch extends Page {
 						<th>Name</th>
 						<th>Position</th>
 						<th>Location</th>
-						<th>Org</th>
+						<th>Organization</th>
 					</tr>
 				</thead>
 				<tbody>

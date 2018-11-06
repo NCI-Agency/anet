@@ -83,7 +83,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 								<th></th>
 								<th>Name</th>
 								<th>Position</th>
-								<th>Org</th>
+								<th>Organization</th>
 								<th></th>
 							</tr>
 						</thead>

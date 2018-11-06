@@ -269,7 +269,7 @@ class BaseReportShow extends Page {
 									<th>Name</th>
 									<th>Position</th>
 									<th>Location</th>
-									<th>Org</th>
+									<th>Organization</th>
 								</tr>
 							</thead>
 

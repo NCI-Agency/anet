@@ -62,7 +62,7 @@ export default class PositionTable extends Component {
 						<tr>
 							<th>Name</th>
 							<th>Location</th>
-							<th>Org</th>
+							<th>Organization</th>
 							<th>Current Occupant</th>
 							<th>Status</th>
 							<th />
