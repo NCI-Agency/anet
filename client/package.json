@@ -22,7 +22,7 @@
     "chalk": "^2.4.1",
     "chromedriver": "^2.43.1",
     "config": "^2.0.1",
-    "copy-webpack-plugin": "^4.5.4",
+    "copy-webpack-plugin": "^4.6.0",
     "cross-spawn": "^6.0.5",
     "css-loader": "^1.0.1",
     "dotenv": "^6.1.0",
