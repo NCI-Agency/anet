@@ -174,7 +174,7 @@ class ReportMinimal extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
-									<th>Org</th>
+									<th>Organization</th>
 								</tr>
 							</thead>
 

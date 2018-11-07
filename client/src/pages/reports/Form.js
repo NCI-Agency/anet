@@ -324,7 +324,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									<th>Name</th>
 									<th>Position</th>
 									<th>Location</th>
-									<th>Org</th>
+									<th>Organization</th>
 									<th></th>
 								</tr>
 							</thead>
