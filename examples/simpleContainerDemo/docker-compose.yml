@@ -3,8 +3,6 @@ services:
   anet-mssql:
     image: ncia/anet-mssql-linux
     container_name: anet-mssql
-    volumes:
-      -  ${PWD}/insertBaseData.sql:/hostdata/insertBaseData.sql
     ports:
       - 1433:1433
     environment:
@@ -16,15 +14,28 @@ services:
   anet-app:
     image: ncia/anet-app-server
     container_name: anet-app
-    command: server /home/anet/anet.yml
+# We have customized the entrypoint of the ANET container to perform the following:
+#  - wait for 10 seconds until the database initializes
+#  - drop the database
+#  - build the latest schema
+#  - load the bootstraping insertBaseData.sql script
+#  - start ANET
+    entrypoint: ["/bin/sh", "-c",
+          "sleep 10 && \
+          /anet/bin/anet db drop-all --confirm-delete-everything /home/anet/anet.yml && \
+          /anet/bin/anet db migrate /home/anet/anet.yml && \\
+          /anet/bin/anet dbScript -S /home/anet/insertBaseData.sql /home/anet/anet.yml && \\
+          /anet/bin/anet server /home/anet/anet.yml"]
     ports:
-      - "80:80"
+      - "80:8080"
       - "443:443"
     depends_on:
-      - anet-migrate
+      - anet-mssql
     environment:
+      ANET_DB_DRIVER: com.microsoft.sqlserver.jdbc.SQLServerDriver
       ANET_DB_USERNAME: AnetUser
       ANET_DB_PASSWORD: P@ssw0rd
       ANET_DB_URL: jdbc:sqlserver://anet-mssql:1433;databaseName=ANET
     volumes:
       -  ${PWD}/anet.yml:/home/anet/anet.yml
+      -  ${PWD}/insertBaseData.sql:/home/anet/insertBaseData.sql
