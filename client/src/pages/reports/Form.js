@@ -7,6 +7,7 @@ import { WithContext as ReactTags } from 'react-tag-input'
 import 'components/reactTags.css'
 
 import Fieldset from 'components/Fieldset'
+import Messages from 'components/Messages'
 import Form from 'components/Form'
 import RichTextEditor from 'components/RichTextEditor'
 import AuthorizationGroupsSelector from 'components/AuthorizationGroupsSelector'
@@ -199,6 +200,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 			<ToastContainer />
 
+			<Messages error={this.state.error} />
+
 			{showAssignedPositionWarning &&
 				<div className="alert alert-warning" style={alertStyle}>
 					You cannot submit a report: you are not assigned to a {advisorPositionSingular} position.<br/>
@@ -324,7 +327,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									<th>Name</th>
 									<th>Position</th>
 									<th>Location</th>
-									<th>Org</th>
+									<th>Organization</th>
 									<th></th>
 								</tr>
 							</thead>
@@ -569,11 +572,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 		if (!this.state.isCancelled) {
 			delete report.cancelledReason
 		}
-		let graphql = 'createReport(report: $report) { uuid }'
+		let graphql = 'createReport(report: $report) { uuid reportSensitiveInformation { uuid text } }'
 		let variableDef = '($report: ReportInput!)'
 		let variables = {report: report}
 		if (this.isEditMode()) {
-			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { uuid }'
+			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { uuid reportSensitiveInformation { uuid text } }'
 			variableDef = '($report: ReportInput!, $sendEditEmail: Boolean!)'
 			variables.sendEditEmail = disableSubmits
 		}
@@ -637,14 +640,14 @@ class BaseReportForm extends ValidatableFormWrapper {
 					toast.success('Your report has been automatically saved')
 					// And re-schedule the auto-save timer
 					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
-					this.setState({timeoutId})
+					this.setState({timeoutId, error: null})
 				}).catch(error => {
 					// Show an error message
 					this.autoSaveTimeout.add(this.autoSaveTimeout) // exponential back-off
 					toast.error("There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout.humanize())
 					// And re-schedule the auto-save timer
 					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
-					this.setState({timeoutId})
+					this.setState({timeoutId, error})
 				})
 		}
 	}

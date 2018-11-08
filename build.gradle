@@ -52,7 +52,7 @@ dependencies {
 	compile 'ch.qos.logback:logback-access:1.2.3'
 	compile 'com.github.waffle:waffle-jna:1.9.1'
 	compile 'com.graphql-java:graphql-java:10.0'
-	compile 'com.graphql-java:java-dataloader:2.2.0'
+	compile 'com.graphql-java:java-dataloader:2.2.1'
 	compile 'io.leangen.graphql:spqr:0.9.8'
 	compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
 
@@ -306,7 +306,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.0.3'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.0.4'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }

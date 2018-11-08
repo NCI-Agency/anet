@@ -19,6 +19,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
+
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.auth.Auth;
@@ -31,6 +33,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.TaskDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -43,9 +46,13 @@ import mil.dds.anet.utils.ResponseUtils;
 public class TaskResource {
 
 	TaskDao dao;
+	private final String duplicateTaskShortName;
 	
-	public TaskResource(AnetObjectEngine engine) {
+	public TaskResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.dao = engine.getTaskDao();
+		@SuppressWarnings("unchecked")
+		final String taskShortLabel = (String) ((Map<String, Object>) ((Map<String, Object>) config.getDictionary().get("fields")).get("task")).get("shortLabel");
+		duplicateTaskShortName = String.format("Duplicate %s number", taskShortLabel);
 	}
 	
 	@GET
@@ -82,9 +89,13 @@ public class TaskResource {
 			//Admin Users can only create tasks within their organization.
 			AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrg());
 		}
-		p = dao.insert(p);
-		AnetAuditLogger.log("Task {} created by {}", p, user);
-		return p;
+		try {
+			p = dao.insert(p);
+			AnetAuditLogger.log("Task {} created by {}", p, user);
+			return p;
+		} catch (UnableToExecuteStatementException e) {
+			throw ResponseUtils.handleSqlException(e, duplicateTaskShortName);
+		}
 	}
 
 	@GraphQLMutation(name="createTask")
@@ -118,12 +129,16 @@ public class TaskResource {
 			}
 		}
 		
-		final int numRows = dao.update(p);
-		if (numRows == 0) { 
-			throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
+		try {
+			final int numRows = dao.update(p);
+			if (numRows == 0) {
+				throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
+			}
+			AnetAuditLogger.log("Task {} updatedby {}", p, user);
+			return numRows;
+		} catch (UnableToExecuteStatementException e) {
+			throw ResponseUtils.handleSqlException(e, duplicateTaskShortName);
 		}
-		AnetAuditLogger.log("Task {} updatedby {}", p, user);
-		return numRows;
 	}
 
 	@GraphQLMutation(name="updateTask")
