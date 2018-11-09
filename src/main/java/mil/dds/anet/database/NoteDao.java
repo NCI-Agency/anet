@@ -31,7 +31,7 @@ public class NoteDao implements IAnetDao<Note> {
 		final String notesBatcherSql = "/* batch.getNotesForRelatedObject */ SELECT * FROM \"notesRelatedObjects\" "
 				+ "INNER JOIN notes ON \"notesRelatedObjects\".\"noteUuid\" = notes.uuid "
 				+ "WHERE \"notesRelatedObjects\".\"relatedObjectUuid\" IN ( <foreignKeys> ) "
-				+ "ORDER BY notes.\"createdAt\" DESC";
+				+ "ORDER BY notes.\"updatedAt\" DESC";
 		this.notesBatcher = new ForeignKeyBatcher<Note>(h, notesBatcherSql, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
 	}
 
@@ -39,11 +39,11 @@ public class NoteDao implements IAnetDao<Note> {
 		final String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* getAllNotes */ SELECT notes.*, COUNT(*) OVER() AS totalCount "
-					+ "FROM notes ORDER BY \"createdAt\" DESC "
+					+ "FROM notes ORDER BY \"updatedAt\" DESC "
 					+ "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else {
 			sql = "/* getAllNotes */ SELECT * from notes "
-					+ "ORDER BY \"createdAt\" DESC LIMIT :limit OFFSET :offset";
+					+ "ORDER BY \"updatedAt\" DESC LIMIT :limit OFFSET :offset";
 		}
 
 		final Query query = dbHandle.createQuery(sql)
