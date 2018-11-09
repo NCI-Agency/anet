@@ -213,7 +213,7 @@ export default class SearchObjectModal extends Component {
 					{Person.map(this.state.results.people.list, person =>
 						<tr key={person.uuid}>
 							<td>
-								<Button key={person.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, person)}><img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" /><LinkTo person={person} isLink={false} /></Button>
+								<Button key={person.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, person)}><img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" /><LinkTo person={person} isLink={false} /></Button>
 							</td>
 							<td>{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} isLink={false} /></td>
@@ -240,7 +240,7 @@ export default class SearchObjectModal extends Component {
 				<tbody>
 					{Organization.map(this.state.results.organizations.list, org =>
 						<tr key={org.uuid}>
-							<td><Button key={org.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, org)}><LinkTo organization={org} isLink={false} /></Button></td>
+							<td><Button key={org.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, org)}><LinkTo organization={org} isLink={false} /></Button></td>
 							<td>{org.longName}</td>
 							<td>{org.identificationCode}</td>
 							<td>{org.humanNameOfType()}</td>
@@ -270,7 +270,7 @@ export default class SearchObjectModal extends Component {
 				<tbody>
 					{this.state.results.locations.list.map(loc =>
 						<tr key={loc.uuid}>
-							<td><Button key={loc.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, loc)}><LinkTo anetLocation={loc} isLink={false} /></Button></td>
+							<td><Button key={loc.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, loc)}><LinkTo anetLocation={loc} isLink={false} /></Button></td>
 						</tr>
 					)}
 				</tbody>
@@ -290,7 +290,7 @@ export default class SearchObjectModal extends Component {
 				<tbody>
 					{Task.map(this.state.results.tasks.list, task =>
 						<tr key={task.uuid}>
-							<td><Button key={task.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, task)}>{task.shortName} {task.longName}</Button></td>
+							<td><Button key={task.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, task)}>{task.shortName} {task.longName}</Button></td>
 						</tr>
 					)}
 				</tbody>

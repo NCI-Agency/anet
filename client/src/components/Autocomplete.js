@@ -144,7 +144,7 @@ export default class Autocomplete extends Component {
 	@autobind
 	renderSuggestion(suggestion) {
 		if (suggestion === 'search_more') {
-			return <span><Button bsStyle="link" onClick={this.showSearchModal}>Search more</Button></span>
+			return <span><Button className="list-item" bsStyle="link" onClick={this.showSearchModal}>Search more</Button></span>
 		}
 		else {
 			return _isEmpty(suggestion)
