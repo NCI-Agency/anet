@@ -7,7 +7,7 @@ export default class Model {
 	}
 
 	static GRAPHQL_NOTES_FIELDS = /* GraphQL */`
-		notes { uuid createdAt text author { uuid name rank } }
+		notes { uuid createdAt updatedAt text author { uuid name rank } }
 	`
 
 	static resourceName = null
