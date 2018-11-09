@@ -198,7 +198,7 @@ class BaseRollupShow extends Page {
 				<Fieldset title={
 					<span>
 						Daily Rollup - {this.dateLongStr}
-						<CalendarButton onChange={this.changeRollupDate} value={this.state.date.toISOString()} style={calendarButtonCss} />
+						<CalendarButton onChange={this.changeRollupDate} value={this.state.date.format('YYYY-MM-DD')} style={calendarButtonCss} />
 					</span>
 				} action={
 					<div>
