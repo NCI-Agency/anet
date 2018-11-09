@@ -66,7 +66,7 @@ export default class SearchObjectModal extends Component {
 		return (
 			<Modal show={this.props.showModal} onHide={this.close}>
 				<Modal.Header closeButton>
-					<Modal.Title>Add from {this.props.objectType}</Modal.Title>
+					<Modal.Title>Add {this.props.objectType}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<Grid fluid>
