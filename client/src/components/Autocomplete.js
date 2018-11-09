@@ -110,9 +110,11 @@ export default class Autocomplete extends Component {
 		inputProps.onBlur = this.onInputBlur
 		const { valueKey } = this.props
 
-		// Add search more link to the list of suggestions
+		// Add search more link to the list of suggestions (when there is an advanced search option for the object type)
 		let suggestions = _clone(this.state.suggestions)
-		suggestions.push('search_more')
+		if (this.props.objectType.searchObjectType) {
+			suggestions.push('search_more')
+		}
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
 			<img src={SEARCH_ICON} className="form-control-icon" alt="" onClick={this.focus} />
 
@@ -127,12 +129,15 @@ export default class Autocomplete extends Component {
 				renderSuggestion={this.renderSuggestion}
 				focusInputOnSuggestionClick={false}
 			/>
-			<SearchObjectModal
-				objectType={this.props.objectType.searchObjectType}
-				showModal={this.state.showSearchModal}
-				onCancel={this.hideSearchModal}
-				onSuccess={this.hideSearchModal}
-			/>
+			{this.props.objectType.searchObjectType &&
+				<SearchObjectModal
+					objectType={this.props.objectType.searchObjectType}
+					showModal={this.state.showSearchModal}
+					onCancel={this.hideSearchModal}
+					onSuccess={this.hideSearchModal}
+					onAddObject={this.props.onChange}
+				/>
+			}
 		</div>
 	}
 

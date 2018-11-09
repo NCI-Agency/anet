@@ -31,8 +31,7 @@ function updateOrganizationFilterState(organizationFilter, positionType) {
 
 export default class AdvancedSearchForm extends Component {
 	static propTypes = {
-		onSubmitCallback: PropTypes.func.isRequired,
-		onSearch: PropTypes.func,
+		onSearchCallback: PropTypes.func.isRequired,
 		onCancel: PropTypes.func,
 		query: PropTypes.shape({
 			text: PropTypes.string,
@@ -41,6 +40,11 @@ export default class AdvancedSearchForm extends Component {
 		}),
 		searchObjectTypes: PropTypes.array,
 		text: PropTypes.string,
+		externalTextField: PropTypes.bool,
+	}
+
+	static defaultProps = {
+		externalTextField: true
 	}
 
 	constructor(props) {
@@ -111,7 +115,10 @@ export default class AdvancedSearchForm extends Component {
 					</Col>
 				</FormGroup>
 
-				<FormControl defaultValue={this.props.text} className="hidden" />
+				{this.props.externalTextField ?
+					<FormControl defaultValue={this.props.text} className="hidden" /> :
+					<FormControl placeholder="Search terms" onChange={this.onChangeText} />
+				}
 
 				{filters.map(filter =>
 					filterDefs[filter.key] && <SearchFilter key={filter.key} filter={filter} onRemove={this.removeFilter} element={filterDefs[filter.key]} organizationFilter={this.state.organizationFilter} />
@@ -141,14 +148,16 @@ export default class AdvancedSearchForm extends Component {
 	}
 
 	@autobind
+	onChangeText(event) {
+		this.setState({text: event.target.value})
+	}
+
+	@autobind
 	onSubmit(event) {
-		if (typeof this.props.onSearch === 'function') {
-			this.props.onSearch()
-		}
 		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
 		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
-		// We only update the Redux state on submit
-		this.props.onSubmitCallback(queryState)
+		// Use the search queryState
+		this.props.onSearchCallback(queryState)
 		event.preventDefault()
 		event.stopPropagation()
 	}

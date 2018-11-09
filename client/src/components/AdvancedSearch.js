@@ -27,11 +27,14 @@ class AdvancedSearch extends Component {
 
 	render() {
 		const advancedSearchProps = Object.without(this.props, 'onSearchGoToSearchPage', 'setSearchQuery')
-		return <AdvancedSearchForm {...advancedSearchProps} onSubmitCallback={this.onSubmitCallback} />
+		return <AdvancedSearchForm {...advancedSearchProps} onSearchCallback={this.onSearchCallback} />
 	}
 
 	@autobind
-	onSubmitCallback(queryState) {
+	onSearchCallback(queryState) {
+		if (typeof this.props.onSearch === 'function') {
+			this.props.onSearch()
+		}
 		// We only update the Redux state on submit
 		this.props.setSearchQuery(queryState)
 		if (this.props.onSearchGoToSearchPage) {

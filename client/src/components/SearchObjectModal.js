@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
-import {Modal, Grid, Row, Col, Table} from 'react-bootstrap'
+import {Modal, Grid, Row, Col, Table, FormControl, Button} from 'react-bootstrap'
 
 import _isEmpty from 'lodash/isEmpty'
 
@@ -66,19 +66,21 @@ export default class SearchObjectModal extends Component {
 		return (
 			<Modal show={this.props.showModal} onHide={this.close}>
 				<Modal.Header closeButton>
-					<Modal.Title>Search</Modal.Title>
+					<Modal.Title>Add from {this.props.objectType}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<Grid fluid>
 						<Row>
 							<Col md={2}>
-								<b>Select a person</b>
+								<b>Search for</b>
 							</Col>
 							<Col md={10}>
 								<AdvancedSearchForm
 									query={{objectType: this.props.objectType}}
 									searchObjectTypes={[this.props.objectType]}
-									onSubmitCallback={this.onSubmitCallback} />
+									onSearchCallback={this.onSearchCallback}
+									externalTextField={false}
+									onCancel={this.close} />
 							</Col>
 						</Row>
 						{numOrganizations > 0 &&
@@ -93,7 +95,8 @@ export default class SearchObjectModal extends Component {
 						{numTasks > 0 &&
 							this.renderTasks()
 						}
-						{numLocations > 0 && this.renderLocations()
+						{numLocations > 0 &&
+							this.renderLocations()
 						}
 						{numReports > 0 &&
 							<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} />
@@ -106,7 +109,7 @@ export default class SearchObjectModal extends Component {
 	}
 
 	@autobind
-	onSubmitCallback(queryState) {
+	onSearchCallback(queryState) {
 		this.fetchData({searchQuery: queryState})
 	}
 
@@ -161,8 +164,7 @@ export default class SearchObjectModal extends Component {
 	}
 
 	@autobind
-	close() {
-		// Reset state before closing (cancel)
+	resetResultsState() {
 		this.setState({
 			results: {
 				reports: null,
@@ -173,7 +175,21 @@ export default class SearchObjectModal extends Component {
 				tasks: null,
 			},
 		})
+	}
+
+	@autobind
+	close() {
+		// Reset state before closing (cancel)
+		this.resetResultsState()
 		this.props.onCancel()
+	}
+
+	@autobind
+	onAddObject(obj) {
+		this.props.onAddObject(obj)
+		// Reset state after adding a result
+		this.resetResultsState()
+		this.props.onSuccess()
 	}
 
 	@autobind
@@ -197,12 +213,11 @@ export default class SearchObjectModal extends Component {
 					{Person.map(this.state.results.people.list, person =>
 						<tr key={person.uuid}>
 							<td>
-								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-								<LinkTo person={person}/>
+								<Button key={person.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, person)}><img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" /><LinkTo person={person} isLink={false} /></Button>
 							</td>
-							<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
-							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
+							<td>{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
+							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} isLink={false} /></td>
+							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} isLink={false} />}</td>
 						</tr>
 					)}
 				</tbody>
@@ -225,7 +240,7 @@ export default class SearchObjectModal extends Component {
 				<tbody>
 					{Organization.map(this.state.results.organizations.list, org =>
 						<tr key={org.uuid}>
-							<td><LinkTo organization={org} /></td>
+							<td><Button key={org.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, org)}><LinkTo organization={org} isLink={false} /></Button></td>
 							<td>{org.longName}</td>
 							<td>{org.identificationCode}</td>
 							<td>{org.humanNameOfType()}</td>
@@ -255,7 +270,7 @@ export default class SearchObjectModal extends Component {
 				<tbody>
 					{this.state.results.locations.list.map(loc =>
 						<tr key={loc.uuid}>
-							<td><LinkTo anetLocation={loc} /></td>
+							<td><Button key={loc.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, loc)}><LinkTo anetLocation={loc} isLink={false} /></Button></td>
 						</tr>
 					)}
 				</tbody>
@@ -275,7 +290,7 @@ export default class SearchObjectModal extends Component {
 				<tbody>
 					{Task.map(this.state.results.tasks.list, task =>
 						<tr key={task.uuid}>
-							<td><LinkTo task={task} >{task.shortName} {task.longName}</LinkTo></td>
+							<td><Button key={task.uuid} bsStyle="link" onClick={this.onAddObject.bind(this, task)}>{task.shortName} {task.longName}</Button></td>
 						</tr>
 					)}
 				</tbody>
