@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
-import {Modal, Grid, Row, Col, Table, FormControl, Button} from 'react-bootstrap'
+import {Alert, Modal, Grid, Row, Col, Table, FormControl, Button} from 'react-bootstrap'
 
 import _isEmpty from 'lodash/isEmpty'
 
@@ -62,6 +62,8 @@ export default class SearchObjectModal extends Component {
 		const numTasks = results.tasks ? results.tasks.totalCount : 0
 		const numLocations = results.locations ? results.locations.totalCount : 0
 		const numOrganizations = results.organizations ? results.organizations.totalCount : 0
+		const numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
+		const noResults = numResults === 0
 		const taskShortLabel = Settings.fields.task.shortLabel
 		return (
 			<Modal show={this.props.showModal} onHide={this.close}>
@@ -83,6 +85,11 @@ export default class SearchObjectModal extends Component {
 									onCancel={this.close} />
 							</Col>
 						</Row>
+						{this.state.didSearch && noResults &&
+							<Alert bsStyle="warning">
+								<b>No search results found!</b>
+							</Alert>
+						}
 						{numOrganizations > 0 &&
 							this.renderOrgs()
 						}
