@@ -253,6 +253,7 @@ class BaseRollupShow extends Page {
 	}
 
 	renderGraph() {
+		if (this.state.isLoading) { return true }
 		let graphData = this.state.graphData
 		if (!graphData || !d3) {
 			return
