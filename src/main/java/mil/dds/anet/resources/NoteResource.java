@@ -39,7 +39,7 @@ public class NoteResource {
 	}
 
 	@GraphQLMutation(name="updateNote")
-	public Integer updateNote(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="note") Note n) {
+	public Note updateNote(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="note") Note n) {
 		final Person user = DaoUtils.getUserFromContext(context);
 		checkPermission(n, user);
 		checkText(n);
@@ -49,8 +49,8 @@ public class NoteResource {
 			throw new WebApplicationException("Couldn't process note update", Status.NOT_FOUND);
 		}
 		AnetAuditLogger.log("Note {} updated by {}", n, user);
-		// GraphQL mutations *have* to return something, so we return the number of updated rows
-		return numRows;
+		// Return the updated note since we want to use the updatedAt field
+		return n;
 	}
 
 	@GraphQLMutation(name="deleteNote")

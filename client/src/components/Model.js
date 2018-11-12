@@ -3,14 +3,17 @@ import PropTypes from 'prop-types'
 import encodeQuery from 'querystring/encode'
 import utils from 'utils'
 
+export const GRAPHQL_NOTE_FIELDS = /* GraphQL */`
+	uuid createdAt updatedAt text author { uuid name rank } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
+`
+export const GRAPHQL_NOTES_FIELDS = /* GraphQL */`
+	notes { ${GRAPHQL_NOTE_FIELDS} }
+`
+
 export default class Model {
 	static schema = {
 		notes: [],
 	}
-
-	static GRAPHQL_NOTES_FIELDS = /* GraphQL */`
-		notes { uuid createdAt updatedAt text author { uuid name rank } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
-	`
 
 	static notePropTypes = PropTypes.shape({
 		uuid: PropTypes.string,

@@ -4,7 +4,7 @@ import {Modal, Button} from 'react-bootstrap'
 
 import AppContext from 'components/AppContext'
 import Messages from'components/Messages'
-import Model from 'components/Model'
+import Model, { GRAPHQL_NOTE_FIELDS } from 'components/Model'
 import RichTextEditor from 'components/RichTextEditor'
 
 import {Person} from 'models'
@@ -54,16 +54,12 @@ class BaseRelatedObjectNoteModal extends Component {
 		const { note } = this.props
 		const edit = !!note.uuid
 		const operation = edit ? 'updateNote' : 'createNote'
-		let graphql = operation + '(note: $note)'
-		graphql += edit ? '' : ' { uuid }'
+		const graphql = operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
 		const variables = {note: note}
 		const variableDef = '($note: NoteInput!)'
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
-				if (data[operation].uuid) {
-					note.uuid = data[operation].uuid
-				}
-				this.props.onSuccess(note)
+				this.props.onSuccess(data[operation])
 			}).catch(error => {
 				this.setState({
 					error: error

@@ -22,7 +22,7 @@ import moment from 'moment'
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 
-export const GRAPHQL_NOTES_FIELDS = Model.GRAPHQL_NOTES_FIELDS
+export { GRAPHQL_NOTES_FIELDS } from 'components/Model'
 
 class BaseRelatedObjectNotes extends Component {
 	static propTypes = {
@@ -54,6 +54,8 @@ class BaseRelatedObjectNotes extends Component {
 	componentDidUpdate(prevProps, prevState) {
 		if (!_isEqual(prevProps.notes, this.props.notes)) {
 			this.setState({
+				success: null,
+				error: null,
 				notes: this.props.notes,
 			})
 		}
@@ -80,7 +82,7 @@ class BaseRelatedObjectNotes extends Component {
 	}
 
 	hideNewRelatedObjectNoteModal = (note) => {
-		this.state.notes.unshift(note) // add new note
+		this.state.notes.unshift(note) // add new note at the front
 		this.setState({
 			success: 'note added',
 			error: null,
@@ -90,11 +92,13 @@ class BaseRelatedObjectNotes extends Component {
 	}
 
 	hideEditRelatedObjectNoteModal = (note) => {
+		const notes = this.state.notes.filter(item => item.uuid !== note.uuid) // remove old note
+		notes.unshift(note) // add updated note at the front
 		this.setState({
 			success: 'note updated',
 			error: null,
 			showRelatedObjectNoteModal: null,
-			notes: this.state.notes, // note is updated in-place
+			notes: notes,
 		})
 	}
 
