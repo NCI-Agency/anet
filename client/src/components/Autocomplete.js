@@ -165,7 +165,6 @@ export default class Autocomplete extends Component {
 		this.setState({showSearchModal: false})
 	}
 
-
 	@autobind
 	renderInputComponent(inputProps) {
 		return <FormControl {...inputProps} />
@@ -176,7 +175,7 @@ export default class Autocomplete extends Component {
 		if (typeof suggestion === 'object') {
 			return suggestion[valueKey] || ''
 		}
-		return suggestion !== SEARCH_MORE_SUGGESTION ? suggestion : ''
+		return (suggestion !== SEARCH_MORE_SUGGESTION) ? suggestion : ''
 	}
 
 	@autobind
@@ -216,16 +215,13 @@ export default class Autocomplete extends Component {
 	onSuggestionSelected(event, {suggestion, suggestionValue}) {
 		event.stopPropagation()
 		event.preventDefault()
-
+		let stringValue = (this.props.clearOnSelect || (suggestion === SEARCH_MORE_SUGGESTION)) ? '' : suggestionValue
+		this.currentSelected = suggestion
+		this.setState({stringValue: stringValue})
 		if (suggestion !== SEARCH_MORE_SUGGESTION) {
-			let stringValue = this.props.clearOnSelect ? '' : suggestionValue
-			this.currentSelected = suggestion
-			this.setState({stringValue: stringValue})
-
 			if (this.props.onChange) {
 				this.props.onChange(suggestion)
 			}
-
 			if (this.props.onErrorChange) {
 				//Clear any error state.
 				this.props.onErrorChange(false)
