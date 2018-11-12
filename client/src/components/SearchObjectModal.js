@@ -22,7 +22,7 @@ import Settings from 'Settings'
 
 export default class SearchObjectModal extends Component {
 	static propTypes = {
-		//Optional: ANET Search Object Type (People, Reports, etc) to search for.
+		//Optional: ANET Search Object Type (People, Locations, etc) to search for.
 		objectType: PropTypes.string,
 		showModal: PropTypes.bool,
 		onCancel: PropTypes.func.isRequired,
@@ -36,7 +36,6 @@ export default class SearchObjectModal extends Component {
 			error: null,
 			didSearch: false,
 			pageNum: {
-				reports: 0,
 				people: 0,
 				organizations: 0,
 				positions: 0,
@@ -44,7 +43,6 @@ export default class SearchObjectModal extends Component {
 				tasks: 0,
 			},
 			results: {
-				reports: null,
 				people: null,
 				organizations: null,
 				positions: null,
@@ -57,13 +55,12 @@ export default class SearchObjectModal extends Component {
 
 	render() {
 		const { results, success, error } = this.state
-		const numReports = results.reports ? results.reports.totalCount : 0
 		const numPeople = results.people ? results.people.totalCount : 0
 		const numPositions = results.positions ? results.positions.totalCount : 0
 		const numTasks = results.tasks ? results.tasks.totalCount : 0
 		const numLocations = results.locations ? results.locations.totalCount : 0
 		const numOrganizations = results.organizations ? results.organizations.totalCount : 0
-		const numResults = numReports + numPeople + numPositions + numLocations + numOrganizations + numTasks
+		const numResults = numPeople + numPositions + numLocations + numOrganizations + numTasks
 		const noResults = numResults === 0
 		const taskShortLabel = Settings.fields.task.shortLabel
 		return (
@@ -106,9 +103,6 @@ export default class SearchObjectModal extends Component {
 						{numLocations > 0 &&
 							this.renderLocations()
 						}
-						{numReports > 0 &&
-							<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} />
-						}
 						<Messages error={this.state.error} />
 					</Grid>
 				</Modal.Body>
@@ -116,6 +110,7 @@ export default class SearchObjectModal extends Component {
 		)
 	}
 
+	//FIXME: a lot of the fetch data code here is the same as the one on the search page
 	@autobind
 	onSearchCallback(queryState) {
 		this.fetchData({searchQuery: queryState})
@@ -144,17 +139,10 @@ export default class SearchObjectModal extends Component {
 
 	@autobind
 	_dataFetcher(props, callback, pageSize) {
-
 		let {searchQuery} = props
 		let query = searchFormToQuery(searchQuery)
 		let parts = []
-		if (searchQuery.objectType) {
-			parts.push(this.getSearchPart(searchQuery.objectType, query, pageSize))
-		} else {
-			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, query, pageSize))
-			})
-		}
+		parts.push(this.getSearchPart(this.props.objectType, query, pageSize))
 		return callback(parts)
 	}
 
@@ -196,6 +184,8 @@ export default class SearchObjectModal extends Component {
 		return null
 	}
 
+	//FIXME: a lot of the render objecttype functions are almost the same as the
+	//render functions on the Search page
 	renderPeople() {
 		return <div>
 			{this.paginationFor('people')}
