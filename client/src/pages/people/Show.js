@@ -141,9 +141,8 @@ class BasePersonShow extends Page {
 			(hasPosition && currentUser.isSuperUserForOrg(position.organization)) ||
 			(person.role === Person.ROLE.PRINCIPAL && currentUser.isSuperUser())
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={person.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
 				<div className="pull-right">
 					<GuidedTour
 						title="Take a guided tour of this person's page."
@@ -153,6 +152,7 @@ class BasePersonShow extends Page {
 					/>
 				</div>
 
+				<RelatedObjectNotes notes={person.notes} />
 				<Breadcrumbs items={[[person.name, Person.pathFor(person)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
@@ -268,7 +268,7 @@ class BasePersonShow extends Page {
 					</Fieldset>
 				</Form>
 			</div>
-		</div>)
+		)
 	}
 
 	renderPosition(position) {

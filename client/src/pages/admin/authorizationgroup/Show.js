@@ -94,9 +94,9 @@ class BaseAuthorizationGroupShow extends Page {
 	render() {
 		let authorizationGroup = this.state.authorizationGroup
 		const { currentUser } = this.props
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={authorizationGroup.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={authorizationGroup.notes} />
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -119,7 +119,7 @@ class BaseAuthorizationGroupShow extends Page {
 					</Fieldset>
 				</Form>
 			</div>
-		</div>)
+		)
 	}
 
 	@autobind

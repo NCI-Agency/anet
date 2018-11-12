@@ -56,15 +56,15 @@ class TaskEdit extends Page {
 	render() {
 		let task = this.state.task
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={task.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={task.notes} />
 				<Breadcrumbs items={[[`${Settings.fields.task.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<TaskForm original={this.state.originalTask} task={task} edit />
 			</div>
-		</div>)
+		)
 	}
 }
 

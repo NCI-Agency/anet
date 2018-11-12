@@ -74,9 +74,9 @@ class BaseLocationShow extends Page {
 			markers.push({name: location.name, lat: location.lat, lng: location.lng})
 		}
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={location.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={location.notes} />
 				<Breadcrumbs items={[[location.name || 'Location', Location.pathFor(location)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -94,7 +94,7 @@ class BaseLocationShow extends Page {
 					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} mapId="reports" />
 				</Fieldset>
 			</div>
-		</div>)
+		)
 	}
 
 	@autobind

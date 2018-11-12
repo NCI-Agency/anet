@@ -93,9 +93,9 @@ class BaseTaskShow extends Page {
 
 		let canEdit = currentUser.isAdmin()
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={task.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={task.notes} />
 				<Breadcrumbs items={[[`${taskShortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -128,7 +128,7 @@ class BaseTaskShow extends Page {
 					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
 				</Fieldset>
 			</div>
-		</div>)
+		)
 	}
 
     @autobind

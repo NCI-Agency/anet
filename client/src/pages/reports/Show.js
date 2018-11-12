@@ -164,9 +164,9 @@ class BaseReportShow extends Page {
 
 		const formattedReportReleasedAt = moment(report.getReportReleasedAt()).format('D MMM YYYY, [at] h:mm a')
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={report.notes} />
-			<div style={{order: -1, flexGrow: 4}} className="report-show">
+		return (
+			<div className="report-show">
+				<RelatedObjectNotes notes={report.notes} />
 				<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
@@ -413,7 +413,7 @@ class BaseReportShow extends Page {
 					</div></div>
 				}
 			</div>
-		</div>)
+		)
 	}
 
 	@autobind

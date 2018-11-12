@@ -60,9 +60,9 @@ class BasePersonEdit extends Page {
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
 		const saveText = person.isNewUser() ? 'Create profile' : null
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={person.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={person.notes} />
 				{!person.isNewUser() &&
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
@@ -75,7 +75,7 @@ class BasePersonEdit extends Page {
 					legendText={legendText}
 					saveText={saveText} />
 			</div>
-		</div>)
+		)
 	}
 }
 

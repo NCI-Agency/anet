@@ -60,14 +60,14 @@ class PositionEdit extends Page {
 	render() {
 		let position = this.state.position
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={position.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={position.notes} />
 				<Breadcrumbs items={[[`Edit ${position.name}`, Position.pathForEdit(position)]]} />
 
 				<PositionForm original={this.state.originalPosition} position={position} edit success={this.state.success} error={this.state.error} />
 			</div>
-		</div>)
+		)
 	}
 }
 

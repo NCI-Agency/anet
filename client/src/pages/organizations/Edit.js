@@ -51,15 +51,15 @@ class OrganizationEdit extends Page {
 	render() {
 		let organization = this.state.organization
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={organization.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={organization.notes} />
 				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<OrganizationForm original={this.state.originalOrganization} organization={organization} edit />
 			</div>
-		</div>)
+		)
 	}
 }
 

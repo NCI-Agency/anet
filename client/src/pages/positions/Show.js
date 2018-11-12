@@ -90,9 +90,8 @@ class BasePositionShow extends Page {
 			position.status === Position.STATUS.INACTIVE &&
 			(position.uuid && ((!position.person) || (!position.person.uuid)))
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={position.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
 				<div className="pull-right">
 					<GuidedTour
 						title="Take a guided tour of this position's page."
@@ -102,6 +101,7 @@ class BasePositionShow extends Page {
 					/>
 				</div>
 
+				<RelatedObjectNotes notes={position.notes} />
 				<Breadcrumbs items={[[position.name || 'Position', Position.pathFor(position)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -216,7 +216,7 @@ class BasePositionShow extends Page {
 						className="pull-right" />
 				</div></div>}
 			</div>
-		</div>)
+		)
 	}
 
 	renderAssociatedPositionRow(pos, idx) {

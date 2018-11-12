@@ -186,9 +186,8 @@ class BaseOrganizationShow extends Page {
 				</Scrollspy>
 			</Nav>
 		)
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={org.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
 				<SubNav subnavElemId="myorg-nav">
 					{isMyOrg && orgSubNav}
 				</SubNav>
@@ -206,6 +205,7 @@ class BaseOrganizationShow extends Page {
 					/>
 				</div>}
 
+				<RelatedObjectNotes notes={org.notes} />
 				<Breadcrumbs items={[[org.shortName || 'Organization', Organization.pathFor(org)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
@@ -279,7 +279,7 @@ class BaseOrganizationShow extends Page {
 					</Fieldset>
 				</Form>
 			</div>
-		</div>)
+		)
 	}
 
 	@autobind

@@ -79,14 +79,14 @@ class BaseReportEdit extends Page {
 				buttonLabel: "Delete this report"
 		}
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={report.notes} />
-			<div style={{order: -1, flexGrow: 4}} className="report-edit">
+		return (
+			<div className="report-edit">
+				<RelatedObjectNotes notes={report.notes} />
 				<Breadcrumbs items={[['Report #' + report.uuid, '/reports/' + report.uuid], ['Edit', '/reports/' + report.uuid + '/edit']]} />
 
 				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.uuid}`} onDelete={canDelete && onConfirmDeleteProps} />
 			</div>
-		</div>)
+		)
 	}
 
 	@autobind

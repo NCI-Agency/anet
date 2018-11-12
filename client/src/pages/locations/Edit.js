@@ -41,14 +41,14 @@ class LocationEdit extends Page {
 	render() {
 		let location = this.state.location
 
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={location.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={location.notes} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />
 			</div>
-		</div>)
+		)
 	}
 }
 

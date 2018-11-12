@@ -44,15 +44,15 @@ class AuthorizationGroupEdit extends Page {
 
 	render() {
 		let authorizationGroup = this.state.authorizationGroup
-		return (<div style={{display: 'flex'}}>
-			<RelatedObjectNotes notes={authorizationGroup.notes} />
-			<div style={{order: -1, flexGrow: 4}}>
+		return (
+			<div>
+				<RelatedObjectNotes notes={authorizationGroup.notes} />
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)], ["Edit", AuthorizationGroup.pathForEdit(authorizationGroup)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<AuthorizationGroupForm original={this.state.originalAuthorizationGroup} authorizationGroup={authorizationGroup} edit />
 			</div>
-		</div>)
+		)
 	}
 }
 

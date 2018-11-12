@@ -23,11 +23,18 @@ const contentContainer = {
 }
 const mainViewportContainer = {
 	flex:'1 1 auto',
+	width: '100%',
 	overflowY: 'auto',
 	overflowX: 'hidden',
 	paddingTop: 5,
 	paddingLeft: 18,
 	paddingRight: 18,
+}
+const notesViewportContainer = {
+	minWidth: 45,
+	maxWidth: '20%',
+	overflow: 'auto',
+	padding: 5,
 }
 const sidebarContainer = {
 	flex:'0 0 auto',
@@ -135,6 +142,11 @@ class ResponsiveLayout extends Component {
 					>
 						{children}
 					</Element>
+					<Element
+						style={notesViewportContainer}
+						name="notesView"
+						id="notes-view"
+					/>
 				</div>
 			</div>
 		)
