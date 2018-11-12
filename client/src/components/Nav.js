@@ -85,13 +85,13 @@ class BaseNav extends Component {
 
 		return (
 			<BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
-				<Link to="/">
+				<Link to="/" onClick={this.props.clearSearchQuery}>
 					<NavItem>Home</NavItem>
 				</Link>
 
 				<BSNav id="search-nav"></BSNav>
 
-				{currentUser.uuid && <Link to={{pathname: '/reports/mine'}}>
+				{currentUser.uuid && <Link to={{pathname: '/reports/mine'}} onClick={this.props.clearSearchQuery}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
@@ -120,26 +120,26 @@ class BaseNav extends Component {
 
 				<BSNav id="org-nav"></BSNav>
 
-				<Link to="/rollup">
+				<Link to="/rollup" onClick={this.props.clearSearchQuery}>
 					<NavItem>Daily rollup</NavItem>
 				</Link>
 
 				{process.env.NODE_ENV === 'development' &&
-					<Link to="/graphiql">
+					<Link to="/graphiql" onClick={this.props.clearSearchQuery}>
 						<NavItem>GraphQL</NavItem>
 					</Link>
 				}
 
 				{currentUser.isAdmin() &&
-					<LinkContainer to="/admin">
+					<LinkContainer to="/admin" onClick={this.props.clearSearchQuery}>
 						<NavItem>Admin</NavItem>
 					</LinkContainer>
 				}
 
 				{inAdmin &&
 					<BSNav>
-						<LinkContainer to={"/admin/mergePeople"}><NavItem>Merge people</NavItem></LinkContainer>
-						<LinkContainer to={"/admin/authorizationGroups"}><NavItem>Authorization groups</NavItem></LinkContainer>
+						<LinkContainer to={"/admin/mergePeople"} onClick={this.props.clearSearchQuery}><NavItem>Merge people</NavItem></LinkContainer>
+						<LinkContainer to={"/admin/authorizationGroups"} onClick={this.props.clearSearchQuery}><NavItem>Authorization groups</NavItem></LinkContainer>
 					</BSNav>
 				}
 
@@ -147,14 +147,14 @@ class BaseNav extends Component {
 					<NavItem href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</NavItem>
 				}
 
-				<Link to="/help">
+				<Link to="/help" onClick={this.props.clearSearchQuery}>
 					<NavItem>Help</NavItem>
 				</Link>
 
 				{(currentUser.isAdmin() || currentUser.isSuperUser()) &&
 					<NavDropdown title="Insights" id="insights" active={inInsights}>
 						{INSIGHTS.map(insight =>
-							<Link to={"/insights/" + insight} key={insight}>
+							<Link to={"/insights/" + insight} key={insight} onClick={this.props.clearSearchQuery}>
 								<MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
 							</Link>)
 						}
@@ -172,7 +172,7 @@ const mapStateToProps = (state, ownProps) => ({
 const Nav = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} showFloatingMenu={context.showFloatingMenu} {...props} />
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )

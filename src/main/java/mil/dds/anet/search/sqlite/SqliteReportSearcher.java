@@ -16,9 +16,13 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
+
+import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import mil.dds.anet.beans.Task;
+import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -137,8 +141,12 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getTaskUuid() != null) {
-			whereClauses.add("reports.uuid IN (SELECT \"reportUuid\" from \"reportTasks\" where \"taskUuid\" = :taskUuid)");
-			args.put("taskUuid", query.getTaskUuid());
+			if (Task.DUMMY_TASK_UUID.equals(query.getTaskUuid())) {
+				whereClauses.add("NOT EXISTS (SELECT \"taskUuid\" from \"reportTasks\" where \"reportUuid\" = reports.uuid)");
+			} else {
+				whereClauses.add("reports.uuid IN (SELECT \"reportUuid\" from \"reportTasks\" where \"taskUuid\" = :taskUuid)");
+				args.put("taskUuid", query.getTaskUuid());
+			}
 		}
 		
 		if (query.getOrgUuid() != null) {
@@ -192,8 +200,12 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getLocationUuid() != null) {
-			whereClauses.add("reports.\"locationUuid\" = :locationUuid");
-			args.put("locationUuid", query.getLocationUuid());
+			if (Location.DUMMY_LOCATION_UUID.equals(query.getLocationUuid())) {
+				whereClauses.add("reports.\"locationUuid\" IS NULL");
+			} else {
+				whereClauses.add("reports.\"locationUuid\" = :locationUuid");
+				args.put("locationUuid", query.getLocationUuid());
+			}
 		}
 		
 		if (query.getPendingApprovalOf() != null) { 
@@ -209,8 +221,12 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getCancelledReason() != null) { 
-			whereClauses.add("reports.\"cancelledReason\" = :cancelledReason");
-			args.put("cancelledReason", DaoUtils.getEnumId(query.getCancelledReason()));
+			if (ReportCancelledReason.NO_REASON_GIVEN.equals(query.getCancelledReason())) {
+				whereClauses.add("reports.cancelledReason IS NULL");
+			} else {
+				whereClauses.add("reports.\"cancelledReason\" = :cancelledReason");
+				args.put("cancelledReason", DaoUtils.getEnumId(query.getCancelledReason()));
+			}
 		}
 		
 		if (whereClauses.size() == 0) {

@@ -43,7 +43,7 @@ input[type=checkbox][readonly] {
 fieldset {
 	background: #fff;
 	border: 1px solid #e0e0e0;
-	padding: 1.25em;
+	padding: .75em;
 	margin: 0;
 	margin-bottom: 3rem;
 	width: 100%;
@@ -123,6 +123,15 @@ fieldset.warning {
 
 fieldset.danger {
 	border: 2px solid red;
+}
+
+#daily-rollup fieldset,
+#cancelled-reports fieldset,
+#future-engagements-by-location fieldset,
+#not-approved-reports fieldset,
+#reports-by-task fieldset,
+#reports-by-day-of-week fieldset {
+  margin-bottom: 0;
 }
 
 .input-group {
@@ -231,8 +240,13 @@ span.asLink:focus {
 }
 
 #advanced-search.popover {
-	width: 750px;
-	max-width: none;
+	max-width: 100%;
+}
+
+@media (min-width: 768px) {
+	#advanced-search.popover {
+		width: 750px;
+	}
 }
 
 .graphiql-container {
@@ -667,6 +681,14 @@ header.searchPagination {
 	height: 64px;
 }
 
+.advanced-search .col-xs-1 .btn {
+	padding-left: 0;
+}
+
+.advanced-search .col-xs-1 .btn img {
+	vertical-align: baseline;
+}
+
 .only-show-for-print {
 	display: none;
 }
@@ -714,7 +736,7 @@ header.searchPagination {
 		display: inherit;
 	}
 
-	.breadcrumb, .header, .banner, .add-new-comment, button, .btn, .hide-for-print {
+	.breadcrumb, .header, .banner, .add-new-comment, button, .btn, .hide-for-print, .main-sidebar {
 		display: none !important;
 	}
 
@@ -751,8 +773,11 @@ header.searchPagination {
 	.primary-content {
 		width: 100%
 	}
-}
 
-.primary-content {
-	width: 100%;
+	/*	Fixes the print style for the main viewport. Now the entire page is printed instead of the 100vh
+		This resets the display to block and height to 100%. And overrides the viewport height and flexbox display. */
+	#main-viewport, .anet, .content-container {
+		display: block !important;
+		height: 100% !important;
+	}
 }

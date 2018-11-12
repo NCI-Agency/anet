@@ -55,45 +55,49 @@ class MergePeople extends Page {
 				</Alert>
 				<Grid fluid>
 					<Row>
-						<Col md={6}><h2>Loser</h2></Col>
-						<Col md={6}><h2>Winner</h2></Col>
-					</Row>
-					<Row>
 						<Col md={6}>
-							<Autocomplete valueKey="name"
-								value={loser}
-								placeholder="Select the duplicate person"
-								objectType={Person}
-								fields={personFields}
-								template={person =>
-									<LinkTo person={person} isLink={false} />
+							<Row>
+								<h2>Loser</h2>
+							</Row>
+							<Row>
+								<Autocomplete valueKey="name"
+									value={loser}
+									placeholder="Select the duplicate person"
+									objectType={Person}
+									fields={personFields}
+									template={person =>
+										<LinkTo person={person} isLink={false} />
+									}
+									onChange={this.selectLoser}
+								/>
+							</Row>
+							<Row>
+								{loser.uuid &&
+									<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
 								}
-								onChange={this.selectLoser}
-							/>
+							</Row>
 						</Col>
 						<Col md={6}>
-							<Autocomplete valueKey="name"
-								value={winner}
-								placeholder="Select the OTHER duplicate person"
-								objectType={Person}
-								fields={personFields}
-								template={person =>
-									<LinkTo person={person} isLink={false} />
+							<Row>
+								<h2>Winner</h2>
+							</Row>
+							<Row>
+								<Autocomplete valueKey="name"
+									value={winner}
+									placeholder="Select the OTHER duplicate person"
+									objectType={Person}
+									fields={personFields}
+									template={person =>
+										<LinkTo person={person} isLink={false} />
+									}
+									onChange={this.selectWinner}
+								/>
+							</Row>
+							<Row>
+								{winner.uuid &&
+									<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
 								}
-								onChange={this.selectWinner}
-							/>
-						</Col>
-					</Row>
-					<Row>
-						<Col md={6}>
-							{loser.uuid &&
-								<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
-							}
-						</Col>
-						<Col md={6}>
-							{winner.uuid &&
-								<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
-							}
+							</Row>
 						</Col>
 					</Row>
 					<Row>

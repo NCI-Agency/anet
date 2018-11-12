@@ -11,7 +11,6 @@ import Messages from 'components/Messages'
 import API from 'api'
 
 import AppContext from 'components/AppContext'
-import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { connect } from 'react-redux'
 
 class BaseAdminIndex extends Page {
@@ -22,7 +21,7 @@ class BaseAdminIndex extends Page {
 	}
 
 	constructor(props) {
-		super(props, DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS)
+		super(props)
 
 		this.state = {
 			success: null,

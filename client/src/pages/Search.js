@@ -32,7 +32,6 @@ import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
 import SubNav from 'components/SubNav'
 
-import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
@@ -353,7 +352,7 @@ class BaseSearch extends Page {
 						<th>Name</th>
 						<th>Position</th>
 						<th>Location</th>
-						<th>Org</th>
+						<th>Organization</th>
 					</tr>
 				</thead>
 				<tbody>
