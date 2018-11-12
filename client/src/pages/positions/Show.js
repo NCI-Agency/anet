@@ -101,7 +101,7 @@ class BasePositionShow extends Page {
 					/>
 				</div>
 
-				<RelatedObjectNotes notes={position.notes} />
+				<RelatedObjectNotes notes={position.notes} relatedObject={{relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
 				<Breadcrumbs items={[[position.name || 'Position', Position.pathFor(position)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 

@@ -53,7 +53,7 @@ class OrganizationEdit extends Page {
 
 		return (
 			<div>
-				<RelatedObjectNotes notes={organization.notes} />
+				<RelatedObjectNotes notes={organization.notes} relatedObject={{relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
 				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 

@@ -2215,7 +2215,7 @@
 			referencedTableName="people" referencedColumnNames="uuid"
 			onDelete="NO ACTION" onUpdate="NO ACTION" />
 
-		<createTable tableName="notesRelatedObjects">
+		<createTable tableName="noteRelatedObjects">
 			<column name="noteUuid" type="${uuid_type}">
 				<constraints nullable="false" />
 			</column>
@@ -2229,7 +2229,7 @@
 		</createTable>
 
 		<addForeignKeyConstraint
-			baseTableName="notesRelatedObjects" constraintName="FK_notesRelatedObjects_note" baseColumnNames="noteUuid"
+			baseTableName="noteRelatedObjects" constraintName="FK_noteRelatedObjects_note" baseColumnNames="noteUuid"
 			referencedTableName="notes" referencedColumnNames="uuid"
 			onDelete="NO ACTION" onUpdate="NO ACTION" />
 	</changeSet>

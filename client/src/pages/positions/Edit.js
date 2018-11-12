@@ -62,7 +62,7 @@ class PositionEdit extends Page {
 
 		return (
 			<div>
-				<RelatedObjectNotes notes={position.notes} />
+				<RelatedObjectNotes notes={position.notes} relatedObject={{relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
 				<Breadcrumbs items={[[`Edit ${position.name}`, Position.pathForEdit(position)]]} />
 
 				<PositionForm original={this.state.originalPosition} position={position} edit success={this.state.success} error={this.state.error} />

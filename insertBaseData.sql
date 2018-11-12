@@ -23,7 +23,7 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE authorizationGroups;
 --DROP TABLE reportAuthorizationGroups;
 --DROP TABLE notes;
---DROP TABLE notesRelatedObjects;
+--DROP TABLE noteRelatedObjects;
 --DROP TABLE DATABASECHANGELOG;
 --DROP TABLE DATABASECHANGELOGLOCK;
 
@@ -39,7 +39,7 @@ TRUNCATE TABLE savedSearches;
 TRUNCATE TABLE reportsSensitiveInformation;
 TRUNCATE TABLE authorizationGroupPositions;
 TRUNCATE TABLE reportAuthorizationGroups;
-TRUNCATE TABLE notesRelatedObjects;
+TRUNCATE TABLE noteRelatedObjects;
 DELETE FROM positions;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NOT NULL;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NULL;
@@ -850,7 +850,7 @@ SET @authorUuid = (SELECT uuid FROM people WHERE name = 'BECCABON, Rebecca');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
 	VALUES (@noteUuid, @authorUuid, 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO notesRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'people', p.uuid
 	FROM people p
 	WHERE p.rank = 'CIV';
@@ -859,7 +859,7 @@ SET @authorUuid = (SELECT uuid FROM people WHERE name = 'DMIN, Arthur');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
 	VALUES (@noteUuid, @authorUuid, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO notesRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'positions', p.uuid
 	FROM positions p
 	WHERE p.type = 3;
@@ -868,7 +868,7 @@ SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ERINSON, Erin');
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
 	VALUES (@noteUuid, @authorUuid, 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO notesRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'reports', r.uuid
 	FROM reports r
 	WHERE r.atmosphere = 0;
@@ -876,7 +876,7 @@ INSERT INTO notesRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 SET @noteUuid = lower(newid());
 INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
 	VALUES (@noteUuid, @authorUuid, 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO notesRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'reports', r.uuid
 	FROM reports r
 	WHERE r.text LIKE 'Today%';

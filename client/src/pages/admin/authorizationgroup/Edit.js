@@ -46,7 +46,7 @@ class AuthorizationGroupEdit extends Page {
 		let authorizationGroup = this.state.authorizationGroup
 		return (
 			<div>
-				<RelatedObjectNotes notes={authorizationGroup.notes} />
+				<RelatedObjectNotes notes={authorizationGroup.notes} relatedObject={{relatedObjectType: 'authorizationGroups', relatedObjectUuid: authorizationGroup.uuid}} />
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)], ["Edit", AuthorizationGroup.pathForEdit(authorizationGroup)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 

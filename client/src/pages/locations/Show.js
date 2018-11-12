@@ -76,7 +76,7 @@ class BaseLocationShow extends Page {
 
 		return (
 			<div>
-				<RelatedObjectNotes notes={location.notes} />
+				<RelatedObjectNotes notes={location.notes} relatedObject={{relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
 				<Breadcrumbs items={[[location.name || 'Location', Location.pathFor(location)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 

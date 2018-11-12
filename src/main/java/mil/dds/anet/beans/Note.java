@@ -4,12 +4,14 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
@@ -19,6 +21,7 @@ public class Note extends AbstractAnetBean {
 
 	private String text;
 	private Person author;
+	private List<NoteRelatedObject> noteRelatedObjects;
 
 	@GraphQLQuery(name="text")
 	public String getText() {
@@ -43,6 +46,22 @@ public class Note extends AbstractAnetBean {
 	@GraphQLIgnore
 	public Person getAuthor() {
 		return author;
+	}
+
+	@GraphQLQuery(name="noteRelatedObjects")
+	public CompletableFuture<List<NoteRelatedObject>> loadNoteRelatedObjects(@GraphQLRootContext Map<String, Object> context) {
+		return AnetObjectEngine.getInstance().getNoteDao().getRelatedObjects(context, this)
+				.thenApply(o -> { noteRelatedObjects = o; return o; });
+	}
+
+	@JsonSetter("noteRelatedObjects")
+	public void setNoteRelatedObjects(List<NoteRelatedObject> relatedObjects) {
+		this.noteRelatedObjects = relatedObjects;
+	}
+
+	@GraphQLIgnore
+	public List<NoteRelatedObject> getNoteRelatedObjects() {
+		return noteRelatedObjects;
 	}
 
 	@Override

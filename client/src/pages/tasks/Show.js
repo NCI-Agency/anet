@@ -95,7 +95,7 @@ class BaseTaskShow extends Page {
 
 		return (
 			<div>
-				<RelatedObjectNotes notes={task.notes} />
+				<RelatedObjectNotes notes={task.notes} relatedObject={{relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
 				<Breadcrumbs items={[[`${taskShortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 

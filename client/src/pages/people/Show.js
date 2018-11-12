@@ -152,7 +152,7 @@ class BasePersonShow extends Page {
 					/>
 				</div>
 
-				<RelatedObjectNotes notes={person.notes} />
+				<RelatedObjectNotes notes={person.notes} relatedObject={{relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
 				<Breadcrumbs items={[[person.name, Person.pathFor(person)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 

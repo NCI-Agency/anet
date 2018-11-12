@@ -81,7 +81,7 @@ class BaseReportEdit extends Page {
 
 		return (
 			<div className="report-edit">
-				<RelatedObjectNotes notes={report.notes} />
+				<RelatedObjectNotes notes={report.notes} relatedObject={{relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 				<Breadcrumbs items={[['Report #' + report.uuid, '/reports/' + report.uuid], ['Edit', '/reports/' + report.uuid + '/edit']]} />
 
 				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.uuid}`} onDelete={canDelete && onConfirmDeleteProps} />

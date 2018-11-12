@@ -65,6 +65,7 @@ import mil.dds.anet.resources.GraphQLResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.resources.LocationResource;
 import mil.dds.anet.resources.LoggingResource;
+import mil.dds.anet.resources.NoteResource;
 import mil.dds.anet.resources.OrganizationResource;
 import mil.dds.anet.resources.PersonResource;
 import mil.dds.anet.resources.TaskResource;
@@ -228,6 +229,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
 		final TagResource tagResource = new TagResource(engine);
 		final AuthorizationGroupResource authorizationGroupResource = new AuthorizationGroupResource(engine);
+		final NoteResource noteResource = new NoteResource(engine);
 
 		//Register all of the HTTP Resources
 		environment.jersey().register(loggingResource);
@@ -247,7 +249,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 				ImmutableList.of(reportResource, personResource,
 						positionResource, locationResource,
 						orgResource, taskResource,
-						adminResource, savedSearchResource, tagResource, authorizationGroupResource),
+						adminResource, savedSearchResource, tagResource,
+						authorizationGroupResource, noteResource),
 						metricRegistry, configuration.isDevelopmentMode()));
 	}
 

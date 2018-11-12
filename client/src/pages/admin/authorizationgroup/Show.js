@@ -96,7 +96,7 @@ class BaseAuthorizationGroupShow extends Page {
 		const { currentUser } = this.props
 		return (
 			<div>
-				<RelatedObjectNotes notes={authorizationGroup.notes} />
+				<RelatedObjectNotes notes={authorizationGroup.notes} relatedObject={{relatedObjectType: 'authorizationGroups', relatedObjectUuid: authorizationGroup.uuid}} />
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 

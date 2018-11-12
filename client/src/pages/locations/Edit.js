@@ -43,7 +43,7 @@ class LocationEdit extends Page {
 
 		return (
 			<div>
-				<RelatedObjectNotes notes={location.notes} />
+				<RelatedObjectNotes notes={location.notes} relatedObject={{relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />

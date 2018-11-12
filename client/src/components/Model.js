@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types'
+
 import encodeQuery from 'querystring/encode'
 import utils from 'utils'
 
@@ -7,8 +9,24 @@ export default class Model {
 	}
 
 	static GRAPHQL_NOTES_FIELDS = /* GraphQL */`
-		notes { uuid createdAt updatedAt text author { uuid name rank } }
+		notes { uuid createdAt updatedAt text author { uuid name rank } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid } }
 	`
+
+	static notePropTypes = PropTypes.shape({
+		uuid: PropTypes.string,
+		createdAt: PropTypes.number,
+		text: PropTypes.string,
+		author: PropTypes.shape({
+			uuid: PropTypes.string,
+			name: PropTypes.string,
+			rank: PropTypes.string,
+		}),
+		noteRelatedObjects: PropTypes.arrayOf(PropTypes.shape({
+			noteUuid: PropTypes.string,
+			relatedObjectType: PropTypes.string,
+			relatedObjectUuid: PropTypes.string,
+		})),
+	})
 
 	static resourceName = null
 	static displayName(appSettings)  { return null }
