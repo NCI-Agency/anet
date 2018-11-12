@@ -117,7 +117,13 @@ export default class AdvancedSearchForm extends Component {
 
 				{this.props.externalTextField ?
 					<FormControl defaultValue={this.props.text} className="hidden" /> :
-					<FormControl placeholder="Search terms" onChange={this.onChangeText} />
+					<FormGroup>
+						<Col xs={3}></Col>
+						<Col xs={8}>
+							<FormControl placeholder="Search terms" onChange={this.onChangeText} />
+						</Col>
+						<Col xs={1}></Col>
+					</FormGroup>
 				}
 
 				{filters.map(filter =>
