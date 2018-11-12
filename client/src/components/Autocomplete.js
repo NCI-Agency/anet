@@ -16,6 +16,8 @@ import './Autocomplete.css'
 
 import SEARCH_ICON from 'resources/search.png'
 
+const SEARCH_MORE_SUGGESTION = 'search_more'
+
 export default class Autocomplete extends Component {
 	static propTypes = {
 		value: PropTypes.oneOfType([
@@ -113,7 +115,7 @@ export default class Autocomplete extends Component {
 		// Add search more link to the list of suggestions (when there is an advanced search option for the object type)
 		let suggestions = _clone(this.state.suggestions)
 		if (this.props.objectType.searchObjectType) {
-			suggestions.push('search_more')
+			suggestions.push(SEARCH_MORE_SUGGESTION)
 		}
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
 			<img src={SEARCH_ICON} className="form-control-icon" alt="" onClick={this.focus} />
@@ -143,7 +145,7 @@ export default class Autocomplete extends Component {
 
 	@autobind
 	renderSuggestion(suggestion) {
-		if (suggestion === 'search_more') {
+		if (suggestion === SEARCH_MORE_SUGGESTION) {
 			return <span><Button className="list-item" bsStyle="link" onClick={this.showSearchModal}>Search more</Button></span>
 		}
 		else {
@@ -174,7 +176,7 @@ export default class Autocomplete extends Component {
 		if (typeof suggestion === 'object') {
 			return suggestion[valueKey] || ''
 		}
-		return suggestion
+		return suggestion !== SEARCH_MORE_SUGGESTION ? suggestion : ''
 	}
 
 	@autobind
@@ -215,17 +217,19 @@ export default class Autocomplete extends Component {
 		event.stopPropagation()
 		event.preventDefault()
 
-		let stringValue = this.props.clearOnSelect ? '' : suggestionValue
-		this.currentSelected = suggestion
-		this.setState({stringValue: stringValue})
+		if (suggestion !== SEARCH_MORE_SUGGESTION) {
+			let stringValue = this.props.clearOnSelect ? '' : suggestionValue
+			this.currentSelected = suggestion
+			this.setState({stringValue: stringValue})
 
-		if (this.props.onChange) {
-			this.props.onChange(suggestion)
-		}
+			if (this.props.onChange) {
+				this.props.onChange(suggestion)
+			}
 
-		if (this.props.onErrorChange) {
-			//Clear any error state.
-			this.props.onErrorChange(false)
+			if (this.props.onErrorChange) {
+				//Clear any error state.
+				this.props.onErrorChange(false)
+			}
 		}
 	}
 
