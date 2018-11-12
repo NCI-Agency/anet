@@ -64,10 +64,6 @@ export default class Page extends Component {
 		if (typeof props.setSearchProps === 'function') {
 			props.setSearchProps(Object.assign({}, sp))
 		}
-		if (typeof props.clearSearchQuery === 'function' && sp.clearSearchQuery) {
-			props.clearSearchQuery()
-		}
-
 		this.state = {
 			notFound: false,
 			invalidRequest: false,
