@@ -145,8 +145,13 @@ test('Approve report chain', async t => {
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
     await t.context.get('/rollup')
 
-    let $readReportButtons = await $$('.read-report-button')
-    t.is($readReportButtons.length, 4, 'Daily rollup report list includes the recently approved report')
+    let $approvedIntent = await t.context.driver.findElement(By.linkText('meeting goal'))
+    await assertElementText(
+        t,
+        $approvedIntent,
+        'meeting goal',
+        'Daily rollup report list includes the recently approved report'
+    )
 })
 
 test('Verify that validation and other reports/new interactions work', async t => {
