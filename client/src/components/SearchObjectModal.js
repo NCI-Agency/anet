@@ -31,7 +31,7 @@ export default class SearchObjectModal extends Component {
 
 	constructor(props) {
 		super(props)
-		this.state = {
+		this.defaultState = {
 			success: null,
 			error: null,
 			didSearch: false,
@@ -52,6 +52,7 @@ export default class SearchObjectModal extends Component {
 				tasks: null,
 			},
 		}
+		this.state = this.defaultState
 	}
 
 	render() {
@@ -171,23 +172,14 @@ export default class SearchObjectModal extends Component {
 	}
 
 	@autobind
-	resetResultsState() {
-		this.setState({
-			results: {
-				reports: null,
-				people: null,
-				organizations: null,
-				positions: null,
-				locations: null,
-				tasks: null,
-			},
-		})
+	resetState() {
+		this.setState(this.defaultState)
 	}
 
 	@autobind
 	close() {
 		// Reset state before closing (cancel)
-		this.resetResultsState()
+		this.resetState()
 		this.props.onCancel()
 	}
 
@@ -195,7 +187,7 @@ export default class SearchObjectModal extends Component {
 	onAddObject(obj) {
 		this.props.onAddObject(obj)
 		// Reset state after adding a result
-		this.resetResultsState()
+		this.resetState()
 		this.props.onSuccess()
 	}
 
