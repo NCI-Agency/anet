@@ -3,7 +3,7 @@ let test = require('../util/test'),
     _includes = require('lodash/includes')
 
 test('Draft and submit a report', async t => {
-    t.plan(16)
+    t.plan(12)
 
     let {pageHelpers, $, $$, assertElementText, By, until, shortWaitMs} = t.context
 
@@ -66,9 +66,11 @@ test('Draft and submit a report', async t => {
     let $addDetailsButton = await $('#toggleReportDetails')
     await $addDetailsButton.click()
 
-    await pageHelpers.writeInForm('.reportTextField .text-editor', 'report details')
+    await t.context.driver.wait(until.elementIsVisible($reportTextField))
+    await pageHelpers.writeInForm('.reportTextField .public-DraftEditor-content', 'report details')
 
     let $formButtonSubmit = await $('#formBottomSubmit')
+    await t.context.driver.wait(until.elementIsEnabled($formButtonSubmit))
     await $formButtonSubmit.click()
     await pageHelpers.assertReportShowStatusText(t, "This is a DRAFT report and hasn't been submitted.")
 
@@ -80,44 +82,71 @@ test('Draft and submit a report', async t => {
     // This assertion bombs out with a StaleElementReferenceError and I'm not sure why.
     // await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
 
-    let $approveButton = await $('.approve-button')
-    await $approveButton.click()
-
-    const $notificationApproved = await t.context.driver.findElement(By.css('div[role=alert]'))
+    let $allertSuccess = await t.context.driver.findElement(By.css('.alert-success'))
+    await t.context.driver.wait(until.elementIsVisible($allertSuccess))
     await assertElementText(
         t, 
-        $notificationApproved,
-        'Successfully approved report.', 
-        'Clicking the approve button displays a message telling the user that the action was successful.'
+        $allertSuccess,
+        'Report submitted',
+        'Clicking the submit report button displays a message telling the user that the action was successful.'
     )
+})
+
+test('Approve report chain', async t => {
+    t.plan(5)
+
+    let {pageHelpers, $, $$, assertElementText, By, until, shortWaitMs} = t.context
+    // First Erin needs to approve the report, then rebecca can approve the report
+    await t.context.get('/', 'erin')
+    let [$draftReportsErin, $reportsPendingErin, $orgReportsErin, $upcomingEngagementsErin] = await $$('.home-tile')
+    await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
+    await $reportsPendingErin.click()
+
+    await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
+    let $firstReadReportButtonErin = await $('.read-report-button')
+    let reportHref = await $firstReadReportButtonErin.getAttribute('href')
+    await t.context.driver.wait(until.elementIsEnabled($firstReadReportButtonErin))
+    await $firstReadReportButtonErin.click()
+
+    await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
+    let $errinApproveButton = await $('.approve-button')
+    await t.context.driver.wait(until.elementIsEnabled($errinApproveButton))
+    await $errinApproveButton.click()
 
     await t.context.get('/', 'rebecca')
     let [$draftReports, $reportsPending, $orgReports, $upcomingEngagements] = await $$('.home-tile')
     await t.context.driver.wait(until.elementIsVisible($reportsPending))
     await $reportsPending.click()
 
+    await t.context.driver.wait(until.stalenessOf($reportsPending))
     let $firstReadReportButton = await $('.read-report-button')
-    let reportHref = await $firstReadReportButton.getAttribute('href')
+    await t.context.driver.wait(until.elementIsEnabled($firstReadReportButton))
     await $firstReadReportButton.click()
 
     await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
     let $rebeccaApproveButton = await $('.approve-button')
     await $rebeccaApproveButton.click()
 
-    const $notificationDailyRollup = await t.context.driver.findElement(By.css('div[role=alert]'))
-    await assertElementText(
-        t, 
-        $notificationDailyRollup,
-        'Successfully approved report. It has been added to the daily rollup', 
-        'When a report is approved, the user sees a message indicating that it has been added to the daily rollup'
-    )
+    // check if page is redirected to search results
 
+    // let $notificationDailyRollup = await t.context.driver.findElement(By.css('.Toastify__toast-body'))
+    // await assertElementText(
+    //     t,
+    //     $notificationDailyRollup,
+    //     'Successfully approved report. It has been added to the daily rollup',
+    //     'When a report is approved, the user sees a message indicating that it has been added to the daily rollup'
+    // )
+
+    await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
     let $dailyRollupLink = await t.context.driver.findElement(By.linkText('Daily rollup'))
     await $dailyRollupLink.click()
 
-    currentPathname = await t.context.getCurrentPathname()
+    let currentPathname = await t.context.getCurrentPathname()
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
+    await t.context.get('/rollup')
 
+    let $readReportButtons = await $$('.read-report-button')
+    t.is($readReportButtons.length, 4, 'Daily rollup report list includes the recently approved report')
     async function getReportHrefsForPage() {
         let $readReportButtons = await $$('.read-report-button')
 
