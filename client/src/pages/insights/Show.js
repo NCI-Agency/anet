@@ -16,7 +16,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 
 import {Report} from 'models'
-import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -38,7 +38,7 @@ export const INSIGHTS = [
 
 const _SEARCH_PROPS = Object.assign(
 	{},
-	CLEAR_SEARCH_PROPS,
+	DEFAULT_SEARCH_PROPS,
 	{onSearchGoToSearchPage: false, searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]}
 )
 
@@ -84,7 +84,7 @@ export const INSIGHT_DETAILS = {
     onlyShowBetween: true,
   },
   [ADVISOR_REPORTS]: {
-    searchProps: CLEAR_SEARCH_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
     component: FilterableAdvisorReportsTable,
     navTitle: `${Settings.fields.advisor.person.name} Reports`,
     title: `${Settings.fields.advisor.person.name} Reports`,
@@ -179,10 +179,7 @@ class BaseInsightsShow extends Page {
   updateSearchQuery() {
     const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     this.props.setSearchProps(Object.assign({}, insightConfig.searchProps))
-    if (insightConfig.searchProps.onSearchGoToSearchPage) {
-      this.props.clearSearchQuery()
-    }
-    else {
+    if (!insightConfig.searchProps.onSearchGoToSearchPage) {
       deserializeQueryParams(
         SEARCH_OBJECT_TYPES.REPORTS,
         this.insightQueryParams[this.props.match.params.insight],
