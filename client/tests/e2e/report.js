@@ -93,7 +93,7 @@ test('Draft and submit a report', async t => {
 })
 
 test('Approve report chain', async t => {
-    t.plan(5)
+    t.plan(4)
 
     let {pageHelpers, $, $$, assertElementText, By, until, shortWaitMs} = t.context
     // First Erin needs to approve the report, then rebecca can approve the report
@@ -147,51 +147,6 @@ test('Approve report chain', async t => {
 
     let $readReportButtons = await $$('.read-report-button')
     t.is($readReportButtons.length, 4, 'Daily rollup report list includes the recently approved report')
-    async function getReportHrefsForPage() {
-        let $readReportButtons = await $$('.read-report-button')
-
-        // Normally, we would do a Promise.all here to read all button href values in parallel.
-        // However, hilariously, that causes webdriver to fail with EPIPE errors. So we will 
-        // issue the commands synchronously to avoid overloading it.
-        let hrefs = []
-        for (let $button of $readReportButtons) {
-            hrefs.push(await $button.getAttribute('href'))
-        }
-        return hrefs
-    }
-
-    async function getAllReportHrefs() {
-        let reportsHrefs = await getReportHrefsForPage()
-        let pageCount
-        try {
-            pageCount = (await $$('.pagination li:not(:first-child):not(:last-child) a', shortWaitMs)).length
-        } catch (e) {
-            if (e.name === 'TimeoutError') {
-                // If there are no pagination controls, then we do not need to look at multiple pages
-                return reportsHrefs
-            }
-            throw e
-        }
-
-        for (let pageIndex = 1; pageIndex < pageCount; pageIndex++) {
-            // +1 because nth-child is 1-indexed, 
-            // and +1 because the first pagination button will be the "previous" button.
-            let $pageButton = await $(`.pagination li:nth-child(${pageIndex + 2}) a`)
-            await t.context.driver.wait(until.elementIsVisible($pageButton))
-
-            await $pageButton.click()
-            // After we click the button, we need to give React time to load the new results
-            await t.context.driver.wait(until.elementLocated(By.css(`.pagination li:nth-child(${pageIndex + 2}).active a`)))
-            
-            let reportHrefsForPage = await getReportHrefsForPage()
-            reportsHrefs.push(...reportHrefsForPage)
-        }
-
-        return reportsHrefs
-    }
-
-    let allReportRefs = await getAllReportHrefs()
-    t.true(_includes(allReportRefs, reportHref), 'Daily rollup report list includes the recently approved report')
 })
 
 test('Verify that validation and other reports/new interactions work', async t => {
