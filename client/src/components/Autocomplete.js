@@ -130,6 +130,7 @@ export default class Autocomplete extends Component {
 				renderInputComponent={this.renderInputComponent}
 				renderSuggestion={this.renderSuggestion}
 				focusInputOnSuggestionClick={false}
+				shouldRenderSuggestions={this.shouldRenderSuggestions}
 			/>
 			{this.props.objectType.searchObjectType &&
 				<SearchObjectModal
@@ -141,6 +142,12 @@ export default class Autocomplete extends Component {
 				/>
 			}
 		</div>
+	}
+
+	shouldRenderSuggestions(value) {
+		//Make sure the suggestions are also displayed just on field focus even when no value is filled.
+		//This in order to be able to show the search more link option on field focus before filling in a value.
+		return true
 	}
 
 	@autobind
@@ -197,13 +204,16 @@ export default class Autocomplete extends Component {
 				+ 'list { ' + this.props.fields + '}'
 				+ '}'
 		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-		let queryVars = {text: value.value + "*", pageNum: 0, pageSize: 25}
-		if (this.props.queryParams) {
-			Object.assign(queryVars, this.props.queryParams)
+		if (value.value) {
+			//Only perform search when a value is filled in
+			let queryVars = {text: value.value + "*", pageNum: 0, pageSize: 25}
+			if (this.props.queryParams) {
+				Object.assign(queryVars, this.props.queryParams)
+			}
+			API.query(graphQlQuery, {query: queryVars}, variableDef, {disableSubmits: false}).then(data => {
+				this._setFilteredSuggestions(data[listName].list)
+			})
 		}
-		API.query(graphQlQuery, {query: queryVars}, variableDef, {disableSubmits: false}).then(data => {
-			this._setFilteredSuggestions(data[listName].list)
-		})
 	}
 
 	@autobind
@@ -232,9 +242,11 @@ export default class Autocomplete extends Component {
 	@autobind
 	onInputChange(event) {
 		if (!event.target.value) {
+			//If the component had a value, and the user just cleared the input
+			// - clear the list of suggestions
+			this.clearSuggestions()
 			if (!this.props.clearOnSelect) {
-				//If the component had a value, and the user just cleared the input
-				// then set the selection to an empty object. We need to do this because we need to
+				// - then set the selection to an empty object. We need to do this because we need to
 				// tell the server that value was cleared, rather than that there was no change.
 				//This is so the server sees that the value is not-null, but that uuid is NULL.
 				//Which tells the server specifically that the uuid should be set to NULL on the foreignKey
@@ -244,7 +256,6 @@ export default class Autocomplete extends Component {
 				this.props.onErrorChange(false) //clear any errors.
 			}
 		}
-
 		//The user is typing!
 		this.currentSelected = null
 		this.setState({stringValue: event.target.value})
