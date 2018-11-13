@@ -12,6 +12,7 @@ import RelatedObjectNoteModal from 'components/RelatedObjectNoteModal'
 import {Person} from 'models'
 import API from 'api'
 
+import NotificationBadge from 'react-notification-badge'
 import { Classes } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
@@ -135,8 +136,17 @@ class BaseRelatedObjectNotes extends Component {
 		const DATE_FORMAT = 'DD MMM YYYY HH:mm:ss'
 		const { currentUser } = this.props
 		const { notes } = this.state
+		const noNotes = _isEmpty(notes)
+		const nrNotes = noNotes ? 0 : notes.length
+		const badgeLabel = nrNotes > 10 ? '10+' : null
 		return this.state.hide
 			? <div>
+				<NotificationBadge
+					count={nrNotes}
+					label={badgeLabel}
+					style={{fontSize: '8px', padding: 4}}
+					effect={['none', 'none']}
+				/>
 				<button
 					className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.COMMENT))}
 					onClick={this.toggleHide}
@@ -166,13 +176,13 @@ class BaseRelatedObjectNotes extends Component {
 				<div style={{clear: 'both'}}>
 					<Messages error={this.state.error} success={this.state.success} />
 				</div>
-				{_isEmpty(notes) &&
+				{noNotes &&
 					<div style={{clear: 'both', paddingTop: '18px', backgroundColor: '#e8e8e8'}}>
 						<i>No notes</i>
 					</div>
 				}
 				{notes.map(note => {
-					const updatedAt = moment(note.updatedAt).format(DATE_FORMAT)
+					const updatedAt = moment(note.updatedAt).fromNow()
 					const byMe = Person.isEqual(currentUser, note.author)
 					const author = byMe ? 'me' : <LinkTo person={note.author} />
 					const canEdit = byMe || currentUser.isAdmin()
