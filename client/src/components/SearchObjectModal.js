@@ -36,32 +36,15 @@ export default class SearchObjectModal extends Component {
 			success: null,
 			error: null,
 			didSearch: false,
-			pageNum: {
-				people: 0,
-				organizations: 0,
-				positions: 0,
-				locations: 0,
-				tasks: 0,
-			},
-			results: {
-				people: null,
-				organizations: null,
-				positions: null,
-				locations: null,
-				tasks: null,
-			},
+			pageNum: 0,
+			results: null,
 		}
 		this.state = this.defaultState
 	}
 
 	render() {
 		const { results, success, error } = this.state
-		const numPeople = results.people ? results.people.totalCount : 0
-		const numPositions = results.positions ? results.positions.totalCount : 0
-		const numTasks = results.tasks ? results.tasks.totalCount : 0
-		const numLocations = results.locations ? results.locations.totalCount : 0
-		const numOrganizations = results.organizations ? results.organizations.totalCount : 0
-		const numResults = numPeople + numPositions + numLocations + numOrganizations + numTasks
+		const numResults = results ? results.totalCount : 0
 		const noResults = numResults === 0
 		const taskShortLabel = Settings.fields.task.shortLabel
 		return (
@@ -89,21 +72,10 @@ export default class SearchObjectModal extends Component {
 								<b>No search results found!</b>
 							</Alert>
 						}
-						{numOrganizations > 0 &&
-							this.renderOrgs()
-						}
-						{numPeople > 0 &&
-							this.renderPeople()
-						}
-						{numPositions > 0 &&
-							this.renderPositions()
-						}
-						{numTasks > 0 &&
-							this.renderTasks()
-						}
-						{numLocations > 0 &&
-							this.renderLocations()
-						}
+						{numResults > 0 && <div>
+							{this.pagination()}
+							{this.renderResults()}
+						</div>}
 						<Messages error={this.state.error} />
 					</Grid>
 				</Modal.Body>
@@ -121,7 +93,7 @@ export default class SearchObjectModal extends Component {
 		type = type.toLowerCase()
 		let subQuery = Object.assign({}, query)
 		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
-		subQuery.pageNum = this.state.pageNum[type]
+		subQuery.pageNum = this.state.pageNum
 
 		let config = SEARCH_CONFIG[type]
 		if (config.sortBy) {
@@ -139,25 +111,26 @@ export default class SearchObjectModal extends Component {
 	}
 
 	@autobind
-	_dataFetcher(props, callback, pageSize) {
+	_dataFetcher(callback, pageSize) {
+		let type = this.props.objectType.toLowerCase()
+		let config = SEARCH_CONFIG[type]
 		let {searchQuery} = this.state
 		let query = searchFormToQuery(searchQuery)
-		let parts = []
-		parts.push(this.getSearchPart(this.props.objectType, query, pageSize))
-		return callback(parts)
+		return callback([this.getSearchPart(this.props.objectType, query, pageSize)], config.dataKey)
 	}
 
 	@autobind
-	_fetchDataCallback(parts) {
+	_fetchDataCallback(parts, resultsListName) {
+		console.log(resultsListName)
 		return GQL.run(parts).then(data => {
-			this.setState({success: null, error: null, results: data, didSearch: true})
+			this.setState({success: null, error: null, results: data[resultsListName], didSearch: true})
 		}).catch(error =>
 			this.setState({success: null, error: error, didSearch: true})
 		)
 	}
 
-	fetchData(props) {
-		return this._dataFetcher(props, this._fetchDataCallback)
+	fetchData() {
+		return this._dataFetcher(this._fetchDataCallback)
 	}
 
 	@autobind
@@ -181,8 +154,8 @@ export default class SearchObjectModal extends Component {
 	}
 
 	@autobind
-	paginationFor(type) {
-		const {pageSize, pageNum, totalCount} = this.state.results[type]
+	pagination() {
+		const {pageSize, pageNum, totalCount} = this.state.results
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
 		return <header className="searchPagination">
@@ -195,118 +168,112 @@ export default class SearchObjectModal extends Component {
 				hideEllipsis={false}
 				hidePreviousAndNextPageLinks={false}
 				hideFirstAndLastPageLinks={true}
-				onChange={(value) => this.goToPage(type, value - 1)}
+				onChange={(value) => this.goToPage(value - 1)}
 			/>
 		</header>
 	}
 
 	@autobind
-	goToPage(type, pageNum) {
-		const pageNums = this.state.pageNum
-		pageNums[type] = pageNum
-		this.setState({pageNums}, () => this.fetchData())
+	goToPage(pageNum) {
+		this.setState({pageNum}, () => this.fetchData())
+	}
+
+	renderResults() {
+		return (
+			this.props.objectType === 'Organizations' ? this.renderOrgs() :
+			this.props.objectType === 'People' ? this.renderPeople() :
+			this.props.objectType === 'Positions'? this.renderPositions() :
+			this.props.objectType === 'Tasks' ? this.renderTasks() :
+			this.props.objectType === 'Locations' ? this.renderLocations() :
+				null
+		)
 	}
 
 	//FIXME: a lot of the render objecttype functions are almost the same as the
 	//render functions on the Search page
 	renderPeople() {
-		return <div>
-			{this.paginationFor('people')}
-			<Table responsive hover striped className="people-search-results">
-				<thead>
-				<tr>
-						<th>Name</th>
-						<th>Position</th>
-						<th>Location</th>
-						<th>Org</th>
+		return <Table responsive hover striped className="people-search-results">
+			<thead>
+			<tr>
+					<th>Name</th>
+					<th>Position</th>
+					<th>Location</th>
+					<th>Org</th>
+				</tr>
+			</thead>
+			<tbody>
+				{Person.map(this.state.results.list, person =>
+					<tr key={person.uuid}>
+						<td>
+							<Button key={person.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, person)}><img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" /><LinkTo person={person} isLink={false} /></Button>
+						</td>
+						<td>{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
+						<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} isLink={false} /></td>
+						<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} isLink={false} />}</td>
 					</tr>
-				</thead>
-				<tbody>
-					{Person.map(this.state.results.people.list, person =>
-						<tr key={person.uuid}>
-							<td>
-								<Button key={person.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, person)}><img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" /><LinkTo person={person} isLink={false} /></Button>
-							</td>
-							<td>{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} isLink={false} /></td>
-							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} isLink={false} />}</td>
-						</tr>
-					)}
-				</tbody>
-			</Table>
-		</div>
+				)}
+			</tbody>
+		</Table>
 	}
 
 	renderOrgs() {
-		return <div>
-			{this.paginationFor('organizations')}
-			<Table responsive hover striped id="organizations-search-results">
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Description</th>
-						<th>Code</th>
-						<th>Type</th>
+		return <Table responsive hover striped id="organizations-search-results">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Code</th>
+					<th>Type</th>
+				</tr>
+			</thead>
+			<tbody>
+				{Organization.map(this.state.results.list, org =>
+					<tr key={org.uuid}>
+						<td><Button key={org.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, org)}><LinkTo organization={org} isLink={false} /></Button></td>
+						<td>{org.longName}</td>
+						<td>{org.identificationCode}</td>
+						<td>{org.humanNameOfType()}</td>
 					</tr>
-				</thead>
-				<tbody>
-					{Organization.map(this.state.results.organizations.list, org =>
-						<tr key={org.uuid}>
-							<td><Button key={org.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, org)}><LinkTo organization={org} isLink={false} /></Button></td>
-							<td>{org.longName}</td>
-							<td>{org.identificationCode}</td>
-							<td>{org.humanNameOfType()}</td>
-						</tr>
-					)}
-				</tbody>
-			</Table>
-		</div>
+				)}
+			</tbody>
+		</Table>
 	}
 
 	renderPositions() {
-		return <div>
-			{this.paginationFor('positions')}
-			<PositionTable positions={this.state.results.positions.list} />
-		</div>
+		return <PositionTable positions={this.state.results.list} />
 	}
 
 	renderLocations() {
-		return <div>
-			{this.paginationFor('locations')}
-			<Table responsive hover striped>
-				<thead>
-					<tr>
-						<th>Name</th>
+		return <Table responsive hover striped>
+			<thead>
+				<tr>
+					<th>Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				{this.state.results.list.map(loc =>
+					<tr key={loc.uuid}>
+						<td><Button key={loc.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, loc)}><LinkTo anetLocation={loc} isLink={false} /></Button></td>
 					</tr>
-				</thead>
-				<tbody>
-					{this.state.results.locations.list.map(loc =>
-						<tr key={loc.uuid}>
-							<td><Button key={loc.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, loc)}><LinkTo anetLocation={loc} isLink={false} /></Button></td>
-						</tr>
-					)}
-				</tbody>
-			</Table>
-		</div>
+				)}
+			</tbody>
+		</Table>
 	}
 
 	renderTasks() {
-		return <div>
-			{this.paginationFor('tasks')}
-			<Table responsive hover striped>
-				<thead>
-					<tr>
-						<th>Name</th>
+		return <Table responsive hover striped>
+			<thead>
+				<tr>
+					<th>Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				{Task.map(this.state.results.list, task =>
+					<tr key={task.uuid}>
+						<td><Button key={task.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, task)}>{task.shortName} {task.longName}</Button></td>
 					</tr>
-				</thead>
-				<tbody>
-					{Task.map(this.state.results.tasks.list, task =>
-						<tr key={task.uuid}>
-							<td><Button key={task.uuid} className="list-item" bsStyle="link" onClick={this.onAddObject.bind(this, task)}>{task.shortName} {task.longName}</Button></td>
-						</tr>
-					)}
-				</tbody>
-			</Table>
-		</div>
+				)}
+			</tbody>
+		</Table>
 	}
 }

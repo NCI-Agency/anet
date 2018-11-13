@@ -6,6 +6,7 @@ import searchFilters from 'components/SearchFilters'
 export const SEARCH_CONFIG = {
 	reports : {
 		listName : 'reports: reportList',
+		dataKey: 'reports',
 		sortBy: 'ENGAGEMENT_DATE',
 		sortOrder: 'DESC',
 		variableType: 'ReportSearchQueryInput',
@@ -13,6 +14,7 @@ export const SEARCH_CONFIG = {
 	},
 	people : {
 		listName : 'people: personList',
+		dataKey: 'people',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PersonSearchQueryInput',
@@ -20,6 +22,7 @@ export const SEARCH_CONFIG = {
 	},
 	positions : {
 		listName: 'positions: positionList',
+		dataKey: 'positions',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQueryInput',
@@ -27,6 +30,7 @@ export const SEARCH_CONFIG = {
 	},
 	tasks : {
 		listName: 'tasks: taskList',
+		dataKey: 'tasks',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'TaskSearchQueryInput',
@@ -34,6 +38,7 @@ export const SEARCH_CONFIG = {
 	},
 	locations : {
 		listName: 'locations: locationList',
+		dataKey: 'locations',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'LocationSearchQueryInput',
@@ -41,6 +46,7 @@ export const SEARCH_CONFIG = {
 	},
 	organizations : {
 		listName: 'organizations: organizationList',
+		dataKey: 'organizations',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'OrganizationSearchQueryInput',
