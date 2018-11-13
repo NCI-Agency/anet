@@ -139,8 +139,13 @@ class BaseRelatedObjectNotes extends Component {
 		const noNotes = _isEmpty(notes)
 		const nrNotes = noNotes ? 0 : notes.length
 		const badgeLabel = nrNotes > 10 ? '10+' : null
+		const noteDivStyle = {
+			clear: 'both',
+			paddingTop: '18px',
+			backgroundColor: '#e8e8e8'
+		}
 		return this.state.hide
-			? <div>
+			? <div style={{minWidth: 50, padding: 5, marginRight: 10}}>
 				<NotificationBadge
 					count={nrNotes}
 					label={badgeLabel}
@@ -153,7 +158,7 @@ class BaseRelatedObjectNotes extends Component {
 					title="Show notes"
 				/>
 			  </div>
-			: <div>
+			: <div style={{padding: 5}}>
 				<h4 style={{float: 'left', verticalAlign: 'text-bottom'}}>Notes</h4>
 				<span style={{float: 'right'}}>
 					<button
@@ -177,7 +182,7 @@ class BaseRelatedObjectNotes extends Component {
 					<Messages error={this.state.error} success={this.state.success} />
 				</div>
 				{noNotes &&
-					<div style={{clear: 'both', paddingTop: '18px', backgroundColor: '#e8e8e8'}}>
+					<div style={noteDivStyle}>
 						<i>No notes</i>
 					</div>
 				}
@@ -187,10 +192,10 @@ class BaseRelatedObjectNotes extends Component {
 					const author = byMe ? 'me' : <LinkTo person={note.author} />
 					const canEdit = byMe || currentUser.isAdmin()
 					return (
-						<div key={note.uuid} style={{clear: 'both', paddingTop: '18px', backgroundColor: '#e8e8e8'}}>
+						<div key={note.uuid} style={noteDivStyle}>
 							<span style={{float: 'left'}}>
 								<b>{updatedAt}</b>
-								<br /><i>by {author}</i>:
+								<br /><i>by {author}:</i>
 							</span>
 							{canEdit && (
 								<span style={{float: 'right'}}>
@@ -214,7 +219,10 @@ class BaseRelatedObjectNotes extends Component {
 										className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.DELETE))} />
 								</span>
 							)}
-							<div style={{clear: 'both', backgroundColor: 'white'}} dangerouslySetInnerHTML={{__html: note.text}} />
+							<div
+								style={{clear: 'both', backgroundColor: 'white', overflowWrap: 'break-word', /*IE:*/ wordWrap: 'break-word'}}
+								dangerouslySetInnerHTML={{__html: note.text}}
+							/>
 						</div>
 					)
 				})}
