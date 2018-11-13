@@ -13,6 +13,7 @@ import LinkTo from 'components/LinkTo'
 import Messages from 'components/Messages'
 import PositionTable from 'components/PositionTable'
 import ReportCollection from 'components/ReportCollection'
+import UltimatePagination from 'components/UltimatePagination'
 
 import API from 'api'
 import GQL from 'graphqlapi'
@@ -113,7 +114,7 @@ export default class SearchObjectModal extends Component {
 	//FIXME: a lot of the fetch data code here is the same as the one on the search page
 	@autobind
 	onSearchCallback(queryState) {
-		this.fetchData({searchQuery: queryState})
+		this.setState({searchQuery: queryState}, () => this.fetchData())
 	}
 
 	getSearchPart(type, query, pageSize) {
@@ -139,7 +140,7 @@ export default class SearchObjectModal extends Component {
 
 	@autobind
 	_dataFetcher(props, callback, pageSize) {
-		let {searchQuery} = props
+		let {searchQuery} = this.state
 		let query = searchFormToQuery(searchQuery)
 		let parts = []
 		parts.push(this.getSearchPart(this.props.objectType, query, pageSize))
@@ -181,7 +182,29 @@ export default class SearchObjectModal extends Component {
 
 	@autobind
 	paginationFor(type) {
-		return null
+		const {pageSize, pageNum, totalCount} = this.state.results[type]
+		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
+		if (numPages === 1) { return }
+		return <header className="searchPagination">
+			<UltimatePagination
+				className="pull-right"
+				currentPage={pageNum + 1}
+				totalPages={numPages}
+				boundaryPagesRange={1}
+				siblingPagesRange={2}
+				hideEllipsis={false}
+				hidePreviousAndNextPageLinks={false}
+				hideFirstAndLastPageLinks={true}
+				onChange={(value) => this.goToPage(type, value - 1)}
+			/>
+		</header>
+	}
+
+	@autobind
+	goToPage(type, pageNum) {
+		const pageNums = this.state.pageNum
+		pageNums[type] = pageNum
+		this.setState({pageNums}, () => this.fetchData())
 	}
 
 	//FIXME: a lot of the render objecttype functions are almost the same as the
@@ -242,8 +265,8 @@ export default class SearchObjectModal extends Component {
 
 	renderPositions() {
 		return <div>
-		{this.paginationFor('positions')}
-		<PositionTable positions={this.state.results.positions.list} />
+			{this.paginationFor('positions')}
+			<PositionTable positions={this.state.results.positions.list} />
 		</div>
 	}
 
