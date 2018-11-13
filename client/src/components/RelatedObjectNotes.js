@@ -22,6 +22,7 @@ import moment from 'moment'
 
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
+import './BlueprintOverrides.css'
 
 export { GRAPHQL_NOTES_FIELDS } from 'components/Model'
 
