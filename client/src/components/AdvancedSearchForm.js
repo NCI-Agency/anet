@@ -40,11 +40,13 @@ export default class AdvancedSearchForm extends Component {
 		}),
 		searchObjectTypes: PropTypes.array,
 		text: PropTypes.string,
-		externalTextField: PropTypes.bool,
+		hideObjectType: PropTypes.bool,
+		hideTextField: PropTypes.bool,
 	}
 
 	static defaultProps = {
-		externalTextField: true
+		hideObjectType: false,
+		hideTextField: true,
 	}
 
 	constructor(props) {
@@ -100,6 +102,8 @@ export default class AdvancedSearchForm extends Component {
 		const moreFiltersAvailable = existingKeys.length < Object.keys(filterDefs).length
 		return <div className="advanced-search form-horizontal">
 			<Form onSubmit={this.onSubmit}>
+			{this.props.hideObjectType ?
+				<FormControl defaultValue={this.state.objectType} className="hidden" /> :
 				<FormGroup>
 					<Col xs={11} style={{textAlign: "center"}}>
 						<ButtonToggleGroup value={objectType} onChange={this.changeObjectType}>
@@ -114,8 +118,9 @@ export default class AdvancedSearchForm extends Component {
 						</Button>
 					</Col>
 				</FormGroup>
+			}
 
-				{this.props.externalTextField ?
+				{this.props.hideTextField ?
 					<FormControl defaultValue={this.props.text} className="hidden" /> :
 					<FormGroup>
 						<Col xs={3}></Col>

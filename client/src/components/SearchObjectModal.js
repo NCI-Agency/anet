@@ -53,31 +53,23 @@ export default class SearchObjectModal extends Component {
 					<Modal.Title>Add {this.props.objectType}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<Grid fluid>
-						<Row>
-							<Col md={2}>
-								<b>Search for</b>
-							</Col>
-							<Col md={10}>
-								<AdvancedSearchForm
-									query={{objectType: this.props.objectType}}
-									searchObjectTypes={[this.props.objectType]}
-									onSearchCallback={this.onSearchCallback}
-									externalTextField={false}
-									onCancel={this.close} />
-							</Col>
-						</Row>
-						{this.state.didSearch && noResults &&
-							<Alert bsStyle="warning">
-								<b>No search results found!</b>
-							</Alert>
-						}
-						{numResults > 0 && <div>
-							{this.pagination()}
-							{this.renderResults()}
-						</div>}
-						<Messages error={this.state.error} />
-					</Grid>
+					<AdvancedSearchForm
+						query={{objectType: this.props.objectType}}
+						searchObjectTypes={[this.props.objectType]}
+						onSearchCallback={this.onSearchCallback}
+						hideObjectType={true}
+						hideTextField={false}
+						onCancel={this.close} />
+					{this.state.didSearch && noResults &&
+						<Alert bsStyle="warning" style={{clear: 'both', marginTop: 10}}>
+							<b>No search results found!</b>
+						</Alert>
+					}
+					{numResults > 0 && <Fieldset id="searchObjectResults" title=" ">
+						{this.pagination()}
+						{this.renderResults()}
+						</Fieldset>}
+					<Messages error={this.state.error} />
 				</Modal.Body>
 			</Modal>
 		)
@@ -121,7 +113,6 @@ export default class SearchObjectModal extends Component {
 
 	@autobind
 	_fetchDataCallback(parts, resultsListName) {
-		console.log(resultsListName)
 		return GQL.run(parts).then(data => {
 			this.setState({success: null, error: null, results: data[resultsListName], didSearch: true})
 		}).catch(error =>
