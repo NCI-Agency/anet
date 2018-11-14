@@ -32,11 +32,11 @@ import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
 import SubNav from 'components/SubNav'
 
-import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
+import {SEARCH_CONFIG, searchFormToQuery} from 'searchUtils'
 import ReactDOM from 'react-dom'
 import { jumpToTop } from 'components/Page'
 
@@ -45,51 +45,6 @@ import Scrollspy from 'react-scrollspy'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
-
-const SEARCH_CONFIG = {
-	reports : {
-		listName : 'reports: reportList',
-		sortBy: 'ENGAGEMENT_DATE',
-		sortOrder: 'DESC',
-		variableType: 'ReportSearchQueryInput',
-		fields : ReportCollection.GQL_REPORT_FIELDS
-	},
-	people : {
-		listName : 'people: personList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
-		variableType: 'PersonSearchQueryInput',
-		fields: 'uuid, name, rank, emailAddress, role , position { uuid, name, code, location { uuid, name }, organization { uuid, shortName} }'
-	},
-	positions : {
-		listName: 'positions: positionList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
-		variableType: 'PositionSearchQueryInput',
-		fields: 'uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank }'
-	},
-	tasks : {
-		listName: 'tasks: taskList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
-		variableType: 'TaskSearchQueryInput',
-		fields: 'uuid, shortName, longName'
-	},
-	locations : {
-		listName: 'locations: locationList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
-		variableType: 'LocationSearchQueryInput',
-		fields: 'uuid, name, lat, lng'
-	},
-	organizations : {
-		listName: 'organizations: organizationList',
-		sortBy: 'NAME',
-		sortOrder: 'ASC',
-		variableType: 'OrganizationSearchQueryInput',
-		fields: 'uuid, shortName, longName, identificationCode, type'
-	}
-}
 
 class BaseSearch extends Page {
 
@@ -353,7 +308,7 @@ class BaseSearch extends Page {
 						<th>Name</th>
 						<th>Position</th>
 						<th>Location</th>
-						<th>Org</th>
+						<th>Organization</th>
 					</tr>
 				</thead>
 				<tbody>

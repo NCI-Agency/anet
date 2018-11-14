@@ -7,6 +7,8 @@ export default class Task extends Model {
 	static resourceName = 'Task'
 	static listName = 'taskList'
 	static getInstanceName = 'task'
+	static searchObjectType= 'Tasks'
+
 	static displayName() {
 		return Settings.fields.task.shortLabel
 	}

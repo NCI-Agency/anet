@@ -1251,6 +1251,10 @@
 		</delete>
 	</changeSet>
 
+	<changeSet id="add_unique_tasks_shortName_constraint" author="gjvoosten" dbms="mssql,postgresql">
+		<addUniqueConstraint tableName="tasks" columnNames="shortName" constraintName="UQ_TaskShortName" />
+	</changeSet>
+
 	<changeSet id="add-uuid-primaryKey-columns" author="gjvoosten">
 		<addColumn tableName="approvalSteps">
 			<column name="uuid" type="${uuid_type}" />

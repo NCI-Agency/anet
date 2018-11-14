@@ -139,20 +139,21 @@ class BaseReportShow extends Page {
 		const {report} = this.state
 		const { currentUser } = this.props
 
+		//User can approve if report is pending approval and user is one of the approvers in the current approval step
 		const canApprove = report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
 
-		//Authors can edit in draft mode, rejected mode, or Pending Mode
-		let canEdit = (report.isDraft() || report.isPending() || report.isRejected() || report.isFuture()) && Person.isEqual(currentUser, report.author)
+		//Authors can edit in draft mode (also future engagements) or rejected mode
+		let canEdit = (report.isDraft() || report.isFuture() || report.isRejected()) && Person.isEqual(currentUser, report.author)
 		//Approvers can edit.
 		canEdit = canEdit || canApprove
 
-		//Only the author can submit when report is in Draft or rejected AND author has a position
+		//Only the author can submit when report is in draft or rejected AND author has a position
 		const hasAssignedPosition = currentUser.hasAssignedPosition()
 		const hasActivePosition = currentUser.hasActivePosition()
 		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
 
-		//Anbody can email a report as long as it's not in draft.
+		//Anybody can email a report as long as it's not in draft.
 		let canEmail = !report.isDraft()
 
 		let errors = (report.isDraft() || report.isFuture()) && report.validateForSubmit()
@@ -269,7 +270,7 @@ class BaseReportShow extends Page {
 									<th>Name</th>
 									<th>Position</th>
 									<th>Location</th>
-									<th>Org</th>
+									<th>Organization</th>
 								</tr>
 							</thead>
 

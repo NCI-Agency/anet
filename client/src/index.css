@@ -164,7 +164,7 @@ fieldset.danger {
 	margin: 3px 0 4px 0;
 }
 
-.shortcut-list .btn-link {
+.shortcut-list .btn-link, .list-item.btn-link {
 	text-align: left;
 	white-space: initial;
 	padding: 0;

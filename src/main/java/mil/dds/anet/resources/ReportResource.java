@@ -414,16 +414,10 @@ public class ReportResource {
 			}
 			break;
 		case PENDING_APPROVAL:
-			//Either the author, or the approver
-			if (report.getAuthor().getUuid().equals(editor.getUuid())) {
-				//This is okay, but move it back to draft
-				report.setState(ReportState.DRAFT);
-				report.setApprovalStep(null);
-			} else {
-				boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(), report.getApprovalStep().getUuid());
-				if (!canApprove) {
-					throw new WebApplicationException(permError + "Must be the author or the current approver", Status.FORBIDDEN);
-				}
+			//Only the approver
+			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(), report.getApprovalStep().getUuid());
+			if (!canApprove) {
+				throw new WebApplicationException(permError + "Must be the current approver.", Status.FORBIDDEN);
 			}
 			break;
 		case RELEASED:

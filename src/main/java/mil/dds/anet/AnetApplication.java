@@ -221,7 +221,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		//Create all of the HTTP Resources.  
 		LoggingResource loggingResource = new LoggingResource();
 		PersonResource personResource = new PersonResource(engine, configuration);
-		TaskResource taskResource =  new TaskResource(engine);
+		TaskResource taskResource =  new TaskResource(engine, configuration);
 		LocationResource locationResource = new LocationResource(engine);
 		OrganizationResource orgResource = new OrganizationResource(engine);
 		PositionResource positionResource = new PositionResource(engine);

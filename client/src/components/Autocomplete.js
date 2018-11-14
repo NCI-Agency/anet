@@ -1,17 +1,22 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {FormControl} from 'react-bootstrap'
+import {Button, FormControl} from 'react-bootstrap'
 import Autosuggest from 'react-autosuggest-ie11-compatible'
 import autobind from 'autobind-decorator'
+import _clone from 'lodash/clone'
 import _debounce from 'lodash/debounce'
 import _isEqual from 'lodash/isEqual'
 import _isEmpty from 'lodash/isEmpty'
+
+import SearchObjectModal from 'components/SearchObjectModal'
 
 import API from 'api'
 
 import './Autocomplete.css'
 
 import SEARCH_ICON from 'resources/search.png'
+
+const SEARCH_MORE_SUGGESTION = 'search_more'
 
 export default class Autocomplete extends Component {
 	static propTypes = {
@@ -62,6 +67,7 @@ export default class Autocomplete extends Component {
 			selectedUuids: selectedUuids,
 			stringValue: stringValue,
 			originalStringValue: stringValue,
+			showSearchModal: false,
 		}
 	}
 
@@ -105,37 +111,65 @@ export default class Autocomplete extends Component {
 		inputProps.onChange = this.onInputChange
 		inputProps.onBlur = this.onInputBlur
 		const { valueKey } = this.props
-		const renderSuggestion = this.props.template ? this.renderSuggestionTemplate : this.renderSuggestion
 
+		// Add search more link to the list of suggestions (when there is an advanced search option for the object type)
+		let suggestions = _clone(this.state.suggestions)
+		if (this.props.objectType.searchObjectType) {
+			suggestions.push(SEARCH_MORE_SUGGESTION)
+		}
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
 			<img src={SEARCH_ICON} className="form-control-icon" alt="" onClick={this.focus} />
 
 			<Autosuggest
-				suggestions={this.state.suggestions}
+				suggestions={suggestions}
 				onSuggestionsFetchRequested={this.fetchSuggestionsDebounced}
 				onSuggestionsClearRequested={this.clearSuggestions}
 				onSuggestionSelected={this.onSuggestionSelected}
 				getSuggestionValue={this.getStringValue.bind(this, valueKey)}
 				inputProps={inputProps}
 				renderInputComponent={this.renderInputComponent}
-				renderSuggestion={renderSuggestion}
+				renderSuggestion={this.renderSuggestion}
 				focusInputOnSuggestionClick={false}
+				shouldRenderSuggestions={this.shouldRenderSuggestions}
 			/>
+			{this.props.objectType.searchObjectType &&
+				<SearchObjectModal
+					objectType={this.props.objectType.searchObjectType}
+					showModal={this.state.showSearchModal}
+					onCancel={this.hideSearchModal}
+					onSuccess={this.hideSearchModal}
+					onAddObject={this.props.onChange}
+				/>
+			}
 		</div>
+	}
+
+	shouldRenderSuggestions(value) {
+		//Make sure the suggestions are also displayed just on field focus even when no value is filled.
+		//This in order to be able to show the search more link option on field focus before filling in a value.
+		return true
 	}
 
 	@autobind
 	renderSuggestion(suggestion) {
-		return _isEmpty(suggestion)
+		if (suggestion === SEARCH_MORE_SUGGESTION) {
+			return <span><Button className="list-item" bsStyle="link" onClick={this.showSearchModal}>Search more</Button></span>
+		}
+		else {
+			return _isEmpty(suggestion)
 				? this.noSuggestions
-				: <span>{this.getStringValue(suggestion, this.props.valueKey)}</span>
+				: (this.props.template ? this.props.template(suggestion) : <span>{this.getStringValue(suggestion, this.props.valueKey)}</span>)
+		}
 	}
 
 	@autobind
-	renderSuggestionTemplate(suggestion) {
-		return _isEmpty(suggestion)
-				? this.noSuggestions
-				: this.props.template(suggestion)
+	showSearchModal() {
+		this.setState({showSearchModal: true})
+	}
+
+	@autobind
+	hideSearchModal() {
+		this.setState({showSearchModal: false})
 	}
 
 	@autobind
@@ -148,7 +182,7 @@ export default class Autocomplete extends Component {
 		if (typeof suggestion === 'object') {
 			return suggestion[valueKey] || ''
 		}
-		return suggestion
+		return (suggestion !== SEARCH_MORE_SUGGESTION) ? suggestion : ''
 	}
 
 	@autobind
@@ -170,13 +204,16 @@ export default class Autocomplete extends Component {
 				+ 'list { ' + this.props.fields + '}'
 				+ '}'
 		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-		let queryVars = {text: value.value + "*", pageNum: 0, pageSize: 25}
-		if (this.props.queryParams) {
-			Object.assign(queryVars, this.props.queryParams)
+		if (value.value) {
+			//Only perform search when a value is filled in
+			let queryVars = {text: value.value + "*", pageNum: 0, pageSize: 25}
+			if (this.props.queryParams) {
+				Object.assign(queryVars, this.props.queryParams)
+			}
+			API.query(graphQlQuery, {query: queryVars}, variableDef, {disableSubmits: false}).then(data => {
+				this._setFilteredSuggestions(data[listName].list)
+			})
 		}
-		API.query(graphQlQuery, {query: queryVars}, variableDef, {disableSubmits: false}).then(data => {
-			this._setFilteredSuggestions(data[listName].list)
-		})
 	}
 
 	@autobind
@@ -188,27 +225,28 @@ export default class Autocomplete extends Component {
 	onSuggestionSelected(event, {suggestion, suggestionValue}) {
 		event.stopPropagation()
 		event.preventDefault()
-
-		let stringValue = this.props.clearOnSelect ? '' : suggestionValue
+		let stringValue = (this.props.clearOnSelect || (suggestion === SEARCH_MORE_SUGGESTION)) ? '' : suggestionValue
 		this.currentSelected = suggestion
 		this.setState({stringValue: stringValue})
-
-		if (this.props.onChange) {
-			this.props.onChange(suggestion)
-		}
-
-		if (this.props.onErrorChange) {
-			//Clear any error state.
-			this.props.onErrorChange(false)
+		if (suggestion !== SEARCH_MORE_SUGGESTION) {
+			if (this.props.onChange) {
+				this.props.onChange(suggestion)
+			}
+			if (this.props.onErrorChange) {
+				//Clear any error state.
+				this.props.onErrorChange(false)
+			}
 		}
 	}
 
 	@autobind
 	onInputChange(event) {
 		if (!event.target.value) {
+			//If the component had a value, and the user just cleared the input
+			// - clear the list of suggestions
+			this.clearSuggestions()
 			if (!this.props.clearOnSelect) {
-				//If the component had a value, and the user just cleared the input
-				// then set the selection to an empty object. We need to do this because we need to
+				// - then set the selection to an empty object. We need to do this because we need to
 				// tell the server that value was cleared, rather than that there was no change.
 				//This is so the server sees that the value is not-null, but that uuid is NULL.
 				//Which tells the server specifically that the uuid should be set to NULL on the foreignKey
@@ -218,7 +256,6 @@ export default class Autocomplete extends Component {
 				this.props.onErrorChange(false) //clear any errors.
 			}
 		}
-
 		//The user is typing!
 		this.currentSelected = null
 		this.setState({stringValue: event.target.value})
