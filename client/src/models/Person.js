@@ -42,6 +42,7 @@ export default class Person extends Model {
 		biography: '',
 		get role() { return Person.ROLE.PRINCIPAL },
 		position: {},
+		...Model.schema,
 	}
 
 	static autocompleteQuery = "uuid, name, role, rank, position { uuid, name, code, organization { uuid, shortName }, location {uuid, name} }"

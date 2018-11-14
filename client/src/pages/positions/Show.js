@@ -13,6 +13,7 @@ import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import AssignPersonModal from 'components/AssignPersonModal'
 import EditAssociatedPositionsModal from 'components/EditAssociatedPositionsModal'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import GuidedTour from 'components/GuidedTour'
 import {positionTour} from 'pages/HopscotchTour'
@@ -68,6 +69,7 @@ class BasePositionShow extends Page {
 				},
 				previousPeople { startTime, endTime, person { uuid, name, rank }}
 				location { uuid, name }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => this.setState({position: new Position(data.position)}))
 	}
@@ -99,8 +101,10 @@ class BasePositionShow extends Page {
 					/>
 				</div>
 
+				<RelatedObjectNotes notes={position.notes} relatedObject={{relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
 				<Breadcrumbs items={[[position.name || 'Position', Position.pathFor(position)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
+
 
 				<Form static formFor={position} horizontal>
 					<Fieldset title={position.name} action={

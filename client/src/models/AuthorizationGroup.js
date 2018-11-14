@@ -23,7 +23,8 @@ export default class AuthorizationGroup extends Model {
 		name: '',
 		description: '',
 		positions: [],
-		get status() { return AuthorizationGroup.STATUS.ACTIVE }
+		get status() { return AuthorizationGroup.STATUS.ACTIVE },
+		...Model.schema,
 	}
 
 	static autocompleteQuery = "uuid, name, description"

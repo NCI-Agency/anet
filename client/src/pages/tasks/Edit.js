@@ -4,6 +4,7 @@ import moment from 'moment'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import TaskForm from './Form'
 
@@ -39,6 +40,7 @@ class TaskEdit extends Page {
 				plannedCompletion, projectedCompletion,
 				responsibleOrg { uuid, shortName, longName, identificationCode },
 				customFieldRef1 { uuid, shortName, longName }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			if (data.task.plannedCompletion) {
@@ -56,8 +58,8 @@ class TaskEdit extends Page {
 
 		return (
 			<div>
+				<RelatedObjectNotes notes={task.notes} relatedObject={{relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
 				<Breadcrumbs items={[[`${Settings.fields.task.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
-
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<TaskForm original={this.state.originalTask} task={task} edit />

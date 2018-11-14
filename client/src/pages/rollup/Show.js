@@ -364,7 +364,7 @@ class BaseRollupShow extends Page {
 				<Fieldset title={
 					<span>
 						Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`} - {this.dateLongStr}
-						<CalendarButton onChange={this.changeRollupDate} value={this.state.date.toISOString()} style={calendarButtonCss} />
+						<CalendarButton onChange={this.changeRollupDate} value={this.state.date.format('YYYY-MM-DD')} style={calendarButtonCss} />
 						{this.state.focusedOrg
 							? <Button onClick={() => this.goToOrg()}>All organizations</Button>
 							: <ButtonToggleGroup value={this.state.orgType} onChange={this.changeOrgType}>

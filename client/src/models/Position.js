@@ -33,6 +33,7 @@ export default class Position extends Model {
 		organization: {},
 		person: {},
 		location: {},
+		...Model.schema,
 	}
 
 	static autocompleteQuery = "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name }"
