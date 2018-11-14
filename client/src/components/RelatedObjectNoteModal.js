@@ -24,6 +24,11 @@ class BaseRelatedObjectNoteModal extends Component {
 		this.state = {
 			error: null,
 		}
+		this.text = this.props.note.text
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		this.text = this.props.note.text
 	}
 
 	render() {
@@ -36,7 +41,7 @@ class BaseRelatedObjectNoteModal extends Component {
 				</Modal.Header>
 				<Modal.Body>
 					<Messages error={this.state.error} />
-					<RichTextEditor value={note.text} onChange={this.onChangeNoteText} />
+					<RichTextEditor value={this.text} onChange={this.onChangeNoteText} />
 				</Modal.Body>
 				<Modal.Footer>
 					<Button className="pull-left" onClick={this.close}>Cancel</Button>
@@ -47,11 +52,12 @@ class BaseRelatedObjectNoteModal extends Component {
 	}
 
 	onChangeNoteText = (value) => {
-		this.props.note.text = value
+		this.text = value
 	}
 
 	save = () => {
 		const { note } = this.props
+		note.text = this.text
 		const edit = !!note.uuid
 		const operation = edit ? 'updateNote' : 'createNote'
 		const graphql = operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
