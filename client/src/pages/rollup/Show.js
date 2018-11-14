@@ -401,12 +401,12 @@ class BaseRollupShow extends Page {
 
 	@autobind
 	goToOrg(org) {
-		this.setState({reportsPageNum: 0, focusedOrg: org, isLoading: true}, () => this.loadData())
+		this.setState({reportsPageNum: 0, focusedOrg: org, graphPopover: null, hoveredBar: null, isLoading: true}, () => this.loadData())
 	}
 
 	@autobind
 	changeOrgType(orgType) {
-		this.setState({orgType, isLoading: true}, () => this.loadData())
+		this.setState({orgType, graphPopover: null, hoveredBar: null, isLoading: true}, () => this.loadData())
 	}
 
 	@autobind
