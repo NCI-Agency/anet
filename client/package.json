@@ -97,7 +97,7 @@
     "react-scroll": "^1.7.10",
     "react-scrollspy": "^3.3.5",
     "react-tag-input": "^5.2.3",
-    "react-toastify": "^4.4.0",
+    "react-toastify": "^4.4.3",
     "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.1",
     "whatwg-fetch": "^2.0.3"
