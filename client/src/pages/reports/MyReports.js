@@ -41,6 +41,35 @@ class BaseMyReports extends Page {
 		}
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+		if(prevProps.location.search !== this.props.location.search) {
+			this.assignPageNums(this.props.location.search)
+		}
+		super.componentDidUpdate(prevProps, prevState)
+	}
+
+	componentDidMount() {
+		this.assignPageNums(this.props.location.search)
+		super.componentDidMount()
+	}
+
+	assignPageNums(params) {
+		const searchParams = new URLSearchParams(params)
+		const updatePageNums = {}
+		for (const param of searchParams) {
+			const key = param[0]
+			const pageObj = { [key]: parseInt(param[1]) }
+			Object.assign(updatePageNums, pageObj)
+		}
+		Object.assign(this.pageNums, updatePageNums)
+	}
+
+	pushPageNumHistory(paramName, pageNum) {
+		this.props.history.push({
+			search: `?${paramName}=${pageNum}`,
+		})
+	}
+
 	@autobind
 	getPart(partName, state, authorUuid) {
 		const queryConstPart = {
@@ -109,7 +138,7 @@ class BaseMyReports extends Page {
 			let stateChange = {}
 			stateChange[section] = data[section]
 			console.log(stateChange)
-			this.setState(stateChange)
+			this.setState(stateChange, this.pushPageNumHistory(section, pageNum))
 		})
 	}
 }
