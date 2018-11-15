@@ -1,5 +1,7 @@
+import Settings from 'Settings'
 import Model from 'components/Model'
 import moment from 'moment'
+import _isEmpty from 'lodash/isEmpty'
 import {Organization, Person, Position} from 'models'
 
 export default class Report extends Model {
@@ -59,6 +61,10 @@ export default class Report extends Model {
 		return this.state === Report.STATE.REJECTED
 	}
 
+	isCancelled() {
+		return this.state === Report.STATE.CANCELLED
+	}
+
 	isFuture() {
 		return this.state === Report.STATE.FUTURE
 	}
@@ -72,7 +78,8 @@ export default class Report extends Model {
 	}
 
 	validateForSubmit() {
-		let errors = []
+		const errors = []
+		const warnings = []
 
 		let isCancelled = this.cancelledReason ? true : false
 		if (!isCancelled) {
@@ -104,7 +111,12 @@ export default class Report extends Model {
 		if (!isCancelled && !this.keyOutcomes) {
 			errors.push('You must provide a brief summary of the Key Outcomes')
 		}
-		return errors
+
+		if (_isEmpty(this.tasks)) {
+			warnings.push(`You should provide ${Settings.fields.task.longLabel}`)
+		}
+
+		return {errors, warnings}
 	}
 
 	checkPrimaryAttendee(primaryAttendee, primaryOrg, role, orgType, errors) {
