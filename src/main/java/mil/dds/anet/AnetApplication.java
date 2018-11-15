@@ -127,6 +127,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		//Add the init command
 		bootstrap.addCommand(new InitializationCommand());
 
+		//Add the datbase script command
+		bootstrap.addCommand(new DatabaseScriptCommand());
+
 		//Serve assets on /assets
 		bootstrap.addBundle(new AssetsBundle("/assets", "/assets", "index.html"));
 		bootstrap.addBundle(new AssetsBundle("/imagery", "/imagery", null, "imagery"));
