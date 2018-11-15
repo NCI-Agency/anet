@@ -154,7 +154,6 @@ async function validateUserCanEditUserForCurrentPage(t) {
     let originalBioText = await $bioTextArea.getText()
 
     let fakeBioText = `fake bio ${uuidv4()} `
-    await $bioTextArea.clear()
     await $bioTextArea.sendKeys(fakeBioText)
 
     await t.context.pageHelpers.clickFormBottomSubmit()
