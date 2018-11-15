@@ -116,6 +116,10 @@ export default class Report extends Model {
 			warnings.push(`You should provide ${Settings.fields.task.longLabel}`)
 		}
 
+		if (!_isEmpty(this.reportSensitiveInformation) && !_isEmpty(this.reportSensitiveInformation.text) && _isEmpty(this.authorizationGroups)) {
+			warnings.push(`You should provide authorization groups who can access the sensitive information`)
+		}
+
 		return {errors, warnings}
 	}
 
