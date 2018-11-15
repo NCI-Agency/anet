@@ -23,6 +23,7 @@ import {Organization, Person, Position} from 'models'
 import autobind from 'autobind-decorator'
 
 import ConfirmDelete from 'components/ConfirmDelete'
+import DictionaryField from 'HOC/DictionaryField'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -52,6 +53,7 @@ class BasePositionShow extends Page {
 			}),
 		}
 
+		this.CodeFieldWithLabel = DictionaryField(Form.Field)
 		setMessages(props, this.state)
 	}
 
@@ -74,12 +76,14 @@ class BasePositionShow extends Page {
 
 	render() {
 		const position = this.state.position
-		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
+		const isPrincipal = position.type === Position.TYPE.PRINCIPAL
+		const assignedRole = isPrincipal ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
+		const positionSettings = isPrincipal ? Settings.fields.principal.position : Settings.fields.advisor.position
 
 		const { currentUser } = this.props
 		const canEdit =
 			//Super Users can edit any Principal
-			(currentUser.isSuperUser() && position.type === Position.TYPE.PRINCIPAL) ||
+			(currentUser.isSuperUser() && isPrincipal) ||
 			//Admins can edit anybody
 			(currentUser.isAdmin()) ||
 			//Super users can edit positions within their own organization
@@ -106,7 +110,7 @@ class BasePositionShow extends Page {
 					<Fieldset title={position.name} action={
 						canEdit && <LinkTo position={position} edit button="primary" className="edit-position">Edit</LinkTo>
 					}>
-						<Form.Field id="code" />
+						<this.CodeFieldWithLabel dictProps={positionSettings.code} id="code" />
 
 						<Form.Field id="type">
 							{position.humanNameOfType()}

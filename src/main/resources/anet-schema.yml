@@ -161,6 +161,8 @@ properties:
                 description: Used in the UI for the type/permissions of an advisor position.
                 examples:
                 - ANET User
+              code:
+                "$ref": "#/definitions/inputField"
             required:
             - name
             - type
@@ -235,6 +237,8 @@ properties:
                 description: Used in the UI for the type/permissions of a principal position.
                 examples:
                 - Afghan Partner
+              code:
+                "$ref": "#/definitions/inputField"
             required:
             - name
             - type
