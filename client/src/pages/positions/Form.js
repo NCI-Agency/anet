@@ -19,6 +19,7 @@ import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import LinkTo from 'components/LinkTo'
 import { jumpToTop } from 'components/Page'
+import DictionaryField from 'HOC/DictionaryField'
 import utils from 'utils'
 
 import WARNING_ICON from 'resources/warning.png'
@@ -42,6 +43,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 			isBlocking: false,
 			errors: {},
 		}
+		this.CodeFieldWithLabel = DictionaryField(Form.Field)
 	}
 
 	render() {
@@ -49,6 +51,8 @@ class BasePositionForm extends ValidatableFormWrapper {
 		error = this.props.error || (this.state && this.state.error)
 		const { errors } = this.state
 		const hasErrors = Object.keys(errors).length > 0
+		const isPrincipal = position.type === Position.TYPE.PRINCIPAL
+		const positionSettings = isPrincipal ? Settings.fields.principal.position : Settings.fields.advisor.position
 
 		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
@@ -123,13 +127,11 @@ class BasePositionForm extends ValidatableFormWrapper {
 						</HelpBlock>}
 					</RequiredField>
 
-					<Form.Field id="code"
-						label={position.type === Position.TYPE.PRINCIPAL ? Settings.PRINCIPAL_POSITION_CODE_NAME : Settings.ADVISOR_POSITION_CODE_NAME}
-						placeholder="Postion ID or Number" />
+					<this.CodeFieldWithLabel dictProps={positionSettings.code} id="code" />
 
 					<RequiredField id="name" label="Position Name" placeholder="Name/Description of Position"/>
 
-					{position.type !== Position.TYPE.PRINCIPAL &&
+					{!isPrincipal &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
 								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.type}</Button>

@@ -263,6 +263,9 @@ dictionary:
       position:
         name: NATO Billet
         type: ANET User
+        code:
+          label: CE Post Number
+          placeholder: the CE post number for this position
       org:
         name: Advisor Organization
         allOrgName: All EFs / AOs
@@ -280,6 +283,9 @@ dictionary:
       position:
         name: Afghan Tashkil
         type: Afghan Partner
+        code:
+          label: Tashkil
+          placeholder: the Afghan taskhil ID for this position
       org:
         name: Afghan Government Organization
         longName:
