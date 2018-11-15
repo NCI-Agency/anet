@@ -712,7 +712,7 @@ INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid)
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps where name = 'Default Approvers'), (SELECT uuid from positions where name = 'ANET Administrator'));
 
--- Set approvalStepUuid's from organizations with default
+-- Set approvalStepUuids from organizations with default
 UPDATE reports SET
 approvalStepUuid = (SELECT uuid FROM approvalSteps WHERE name = 'Default Approvers')
 WHERE reports.uuid IN
