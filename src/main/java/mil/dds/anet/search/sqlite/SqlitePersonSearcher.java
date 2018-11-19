@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -58,6 +60,7 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		StringBuilder sql = new StringBuilder("/* SqlitePersonSearch */ SELECT " + PersonDao.PERSON_FIELDS 
 				+ " FROM people WHERE people.uuid IN (SELECT people.uuid FROM people ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		
 		if (query.getOrgUuid() != null || query.getLocationUuid() != null || query.getMatchPositionName()) {
 			sql.append(" LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" ");
@@ -89,18 +92,9 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 			sqlArgs.put("role", DaoUtils.getEnumId(query.getRole()));
 		}
 		
-		if (query.getStatus() != null && query.getStatus().size() > 0) {
-			if (query.getStatus().size() == 1) { 
-				whereClauses.add("people.status = :status");
-				sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus().get(0)));
-			} else {
-				List<String> argNames = new LinkedList<String>();
-				for (int i = 0;i < query.getStatus().size();i++) { 
-					argNames.add(":status" + i);
-					sqlArgs.put("status" + i, DaoUtils.getEnumId(query.getStatus().get(i)));
-				}
-				whereClauses.add("people.status IN (" + Joiner.on(", ").join(argNames) + ")");
-			}
+		if (!Utils.isEmptyOrNull(query.getStatus())) {
+			whereClauses.add("people.status IN ( <statuses> )");
+			listArgs.put("statuses", query.getStatus().stream().map(status -> DaoUtils.getEnumId(status)).collect(Collectors.toList()));
 		}
 		
 		if (query.getRank() != null && query.getRank().trim().length() > 0) {
@@ -148,10 +142,14 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		// append outside the subselect to enforce ordering there
 		sql.append(orderBy);
 
-		List<Person> list = dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
+		final Query q = dbHandle.createQuery(sql.toString())
+			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
-			.bind("limit", query.getPageSize())
+			.bind("limit", query.getPageSize());
+		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
+			q.bindList(listArg.getKey(), listArg.getValue());
+		}
+		final List<Person> list = q
 			.map(new PersonMapper())
 			.list();
 		result.setList(list);

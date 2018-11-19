@@ -16,7 +16,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 
 import {Report} from 'models'
-import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
 import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -38,7 +38,7 @@ export const INSIGHTS = [
 
 const _SEARCH_PROPS = Object.assign(
 	{},
-	CLEAR_SEARCH_PROPS,
+	DEFAULT_SEARCH_PROPS,
 	{onSearchGoToSearchPage: false, searchObjectTypes: [SEARCH_OBJECT_TYPES.REPORTS]}
 )
 
@@ -47,7 +47,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: PendingApprovalReports,
     navTitle: 'Pending Approval Reports',
-    title: 'Number of Pending Approval Reports',
+    title: '',
     dateRange: false,
     showCalendar: true
   },
@@ -55,7 +55,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: CancelledEngagementReports,
     navTitle: 'Cancelled Engagement Reports',
-    title: 'Number of Cancelled Engagement Reports',
+    title: '',
     dateRange: false,
     showCalendar: true
   },
@@ -63,7 +63,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: ReportsByTask,
     navTitle: 'Reports by Task',
-    title: 'Number of Reports by Task',
+    title: '',
     dateRange: false,
     showCalendar: true
   },
@@ -71,7 +71,7 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: ReportsByDayOfWeek,
     navTitle: 'Reports by Day of the Week',
-    title: 'Number of Reports by Day of the Week',
+    title: '',
     dateRange: true,
     showCalendar: false
   },
@@ -79,12 +79,12 @@ export const INSIGHT_DETAILS = {
     searchProps: _SEARCH_PROPS,
     component: FutureEngagementsByLocation,
     navTitle: 'Future Engagements by Location',
-    title: 'Number of Future Engagements by Location',
+    title: '',
     dateRange: true,
     onlyShowBetween: true,
   },
   [ADVISOR_REPORTS]: {
-    searchProps: CLEAR_SEARCH_PROPS,
+    searchProps: DEFAULT_SEARCH_PROPS,
     component: FilterableAdvisorReportsTable,
     navTitle: `${Settings.fields.advisor.person.name} Reports`,
     title: `${Settings.fields.advisor.person.name} Reports`,
@@ -179,10 +179,7 @@ class BaseInsightsShow extends Page {
   updateSearchQuery() {
     const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     this.props.setSearchProps(Object.assign({}, insightConfig.searchProps))
-    if (insightConfig.searchProps.onSearchGoToSearchPage) {
-      this.props.clearSearchQuery()
-    }
-    else {
+    if (!insightConfig.searchProps.onSearchGoToSearchPage) {
       deserializeQueryParams(
         SEARCH_OBJECT_TYPES.REPORTS,
         this.insightQueryParams[this.props.match.params.insight],
@@ -278,19 +275,17 @@ class BaseInsightsShow extends Page {
     const InsightComponent = insightConfig.component
     const insightPath = '/insights/' + this.props.match.params.insight
     const queryParams = this.getSearchQuery()
+    const flexStyle = {display: 'flex', flexDirection: 'column', height: '100%', flex: 1}
 
     return (
-      <div>
-        <Breadcrumbs items={[['Insights ' + insightConfig.title, insightPath]]} />
+      <div style={flexStyle}>
+        <Breadcrumbs items={[['Insights ' + insightConfig.navTitle, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
 
         {this.state.referenceDate &&
-          <Fieldset id={this.props.match.params.insight} title={
-            <span>
-              {insightConfig.title}
-            </span>
-            }>
+          <Fieldset id={this.props.match.params.insight} title={insightConfig.title} style={flexStyle}>
             <InsightComponent
+              style={flexStyle}
               queryParams={queryParams}
               date={this.state.referenceDate.clone()}
             />

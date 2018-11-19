@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -27,6 +28,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Handle dbHandle) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		final StringBuilder sql = new StringBuilder("/* MssqlPositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS);
 
 		final String text = query.getText();
@@ -65,13 +67,9 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			sqlArgs.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
 
-		if (query.getType() != null) {
-			List<String> argNames = new LinkedList<String>();
-			for (int i = 0;i < query.getType().size();i++) {
-				argNames.add(":state" + i);
-				sqlArgs.put("state" + i, DaoUtils.getEnumId(query.getType().get(i)));
-			}
-			whereClauses.add("positions.type IN (" + Joiner.on(", ").join(argNames) + ")");
+		if (!Utils.isEmptyOrNull(query.getType())) {
+			whereClauses.add("positions.type IN ( <types> )");
+			listArgs.put("types", query.getType().stream().map(type -> DaoUtils.getEnumId(type)).collect(Collectors.toList()));
 		}
 
 		String commonTableExpression = null;
@@ -151,9 +149,8 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Position> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
-			.map(new PositionMapper());
-		return new AnetBeanList<Position>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs, listArgs);
+		return new AnetBeanList<Position>(sqlQuery, query.getPageNum(), query.getPageSize(), new PositionMapper(), null);
 	}
 
 }

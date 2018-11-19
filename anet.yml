@@ -117,7 +117,7 @@ logging:
           archivedLogFilenamePattern: ./logs/clientLog-%d.log.zip
           archivedFileCount: 2
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-    "org.skife.jdbi.v2.DBI" :
+    "mil.dds.anet.utils.AnetDbLogger" :
       level: TRACE
       appenders:
         - type: file
@@ -263,6 +263,9 @@ dictionary:
       position:
         name: NATO Billet
         type: ANET User
+        code:
+          label: CE Post Number
+          placeholder: the CE post number for this position
       org:
         name: Advisor Organization
         allOrgName: All EFs / AOs
@@ -280,6 +283,9 @@ dictionary:
       position:
         name: Afghan Tashkil
         type: Afghan Partner
+        code:
+          label: Tashkil
+          placeholder: the Afghan taskhil ID for this position
       org:
         name: Afghan Government Organization
         longName:

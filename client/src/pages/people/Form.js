@@ -8,7 +8,7 @@ import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import Form from 'components/Form'
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
-import TextEditor from 'components/TextEditor'
+import RichTextEditor from 'components/RichTextEditor'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import OptionListModal from 'components/OptionListModal'
 
@@ -306,7 +306,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 					<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
 				</RequiredField>
 
-				<Form.Field id="biography" componentClass={TextEditor} className="biography" />
+				<Form.Field id="biography" componentClass={RichTextEditor} className="biography" />
 			</Fieldset>
 		</ValidatableForm>
 		</div>

@@ -19,7 +19,10 @@ import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import LinkTo from 'components/LinkTo'
 import { jumpToTop } from 'components/Page'
+import DictionaryField from 'HOC/DictionaryField'
 import utils from 'utils'
+
+import WARNING_ICON from 'resources/warning.png'
 
 class BasePositionForm extends ValidatableFormWrapper {
 	static propTypes = {
@@ -40,11 +43,16 @@ class BasePositionForm extends ValidatableFormWrapper {
 			isBlocking: false,
 			errors: {},
 		}
+		this.CodeFieldWithLabel = DictionaryField(Form.Field)
 	}
 
 	render() {
 		let {position, error, success, edit} = this.props
 		error = this.props.error || (this.state && this.state.error)
+		const { errors } = this.state
+		const hasErrors = Object.keys(errors).length > 0
+		const isPrincipal = position.type === Position.TYPE.PRINCIPAL
+		const positionSettings = isPrincipal ? Settings.fields.principal.position : Settings.fields.advisor.position
 
 		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
@@ -77,6 +85,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 				formFor={position}
 				onChange={this.onChange}
 				onSubmit={this.onSubmit}
+				submitDisabled={hasErrors}
 				submitText="Save position"
 				horizontal
 			>
@@ -102,7 +111,7 @@ class BasePositionForm extends ValidatableFormWrapper {
 						</HelpBlock> }
 					</Form.Field>
 
-					<Form.Field id="organization">
+					<RequiredField id="organization" validationState={errors.organization}>
 						<Autocomplete
 							placeholder="Select the organization for this position"
 							objectType={Organization}
@@ -111,15 +120,18 @@ class BasePositionForm extends ValidatableFormWrapper {
 							queryParams={orgSearchQuery}
 							valueKey="shortName"
 						/>
-					</Form.Field>
 
-					<Form.Field id="code"
-						label={position.type === Position.TYPE.PRINCIPAL ? Settings.PRINCIPAL_POSITION_CODE_NAME : Settings.ADVISOR_POSITION_CODE_NAME}
-						placeholder="Postion ID or Number" />
+						{errors.organization && <HelpBlock>
+							<img src={WARNING_ICON} alt="" height="20px" />
+							Organization not found in ANET Database.
+						</HelpBlock>}
+					</RequiredField>
+
+					<this.CodeFieldWithLabel dictProps={positionSettings.code} id="code" />
 
 					<RequiredField id="name" label="Position Name" placeholder="Name/Description of Position"/>
 
-					{position.type !== Position.TYPE.PRINCIPAL &&
+					{!isPrincipal &&
 						<Form.Field id="permissions">
 							<ButtonToggleGroup>
 								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.type}</Button>
@@ -151,12 +163,25 @@ class BasePositionForm extends ValidatableFormWrapper {
 		)
 	}
 
-
 	@autobind
 	onChange() {
 		this.setState({
+			errors : this.validatePosition(),
 			isBlocking: this.formHasUnsavedChanges(this.props.position, this.props.original),
 		})
+	}
+
+	@autobind
+	validatePosition() {
+		let position = this.props.position
+		let errors = this.state.errors
+		if (position.organization && (typeof position.organization !== 'object')) {
+			errors.organization = 'error'
+		} else {
+			delete errors.organization
+		}
+
+		return errors
 	}
 
 	@autobind

@@ -1,8 +1,7 @@
 package mil.dds.anet.database;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.DaoUtils.DbType;
@@ -23,16 +22,15 @@ public abstract class AnetBaseDao<T> implements IAnetDao<T> {
 		return DaoUtils.getDbType(dbHandle);
 	}
 
-	protected Query<T> getPagedQuery(int pageNum, int pageSize, ResultSetMapper<T> mapper) {
+	protected Query getPagedQuery(int pageNum, int pageSize) {
 		return dbHandle.createQuery(this.getAllSql)
 				.bind("limit", pageSize)
-				.bind("offset", pageSize * pageNum)
-				.map(mapper);
+				.bind("offset", pageSize * pageNum);
 	}
 
 	protected Long getSqliteRowCount() {
 		if (getDbType() == DbType.SQLITE) {
-			return dbHandle.createQuery(this.countAllSql).mapTo(Long.class).first();
+			return dbHandle.createQuery(this.countAllSql).mapTo(Long.class).findFirst().orElse(null);
 		}
 		return null;
 	}

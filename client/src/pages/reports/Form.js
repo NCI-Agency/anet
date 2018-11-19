@@ -7,8 +7,9 @@ import { WithContext as ReactTags } from 'react-tag-input'
 import 'components/reactTags.css'
 
 import Fieldset from 'components/Fieldset'
+import Messages from 'components/Messages'
 import Form from 'components/Form'
-import TextEditor from 'components/TextEditor'
+import RichTextEditor from 'components/RichTextEditor'
 import AuthorizationGroupsSelector from 'components/AuthorizationGroupsSelector'
 import Autocomplete from 'components/Autocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
@@ -60,7 +61,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				tasks: [],
 				authorizationGroups: [],
 			},
-			reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name})),
+			reportTags: (report.tags || []).map(tag => ({id: tag.uuid, text: tag.name})),
 			suggestionList: [],
 
 			showReportText: !!report.reportText || !!report.reportSensitiveInformation,
@@ -105,7 +106,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 					tasks: data.taskRecents.list,
 					authorizationGroups: data.authorizationGroupRecents.list,
 				},
-				suggestionList: data.tags.list.map(tag => ({id: tag.uuid.toString(), text: tag.name})),
+				suggestionList: data.tags.list.map(tag => ({id: tag.uuid, text: tag.name})),
 			}
 			this.setState(newState)
 		})
@@ -124,7 +125,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 		const prevReport = prevProps.report
 		const prevCurrentUser = prevProps.currentUser
 		if (report.uuid !== prevReport.uuid) {
-			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name}))})
+			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.uuid, text: tag.name}))})
 		}
 		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
 		const prevShowReportText = !!prevReport.reportText || !!prevReport.reportSensitiveInformation
@@ -199,6 +200,8 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 			<ToastContainer />
 
+			<Messages error={this.state.error} />
+
 			{showAssignedPositionWarning &&
 				<div className="alert alert-warning" style={alertStyle}>
 					You cannot submit a report: you are not assigned to a {advisorPositionSingular} position.<br/>
@@ -258,7 +261,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 					</Form.Field>
 
 					{!isCancelled &&
-						<Form.Field id="atmosphere" className="atmosphere-form-group" label="Atmospherics"> 
+						<Form.Field id="atmosphere" className="atmosphere-form-group" label="Atmospherics">
 							<ButtonToggleGroup>
 								<Button value="POSITIVE" id="positiveAtmos">Positive</Button>
 								<Button value="NEUTRAL" id="neutralAtmos">Neutral</Button>
@@ -324,7 +327,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 									<th>Name</th>
 									<th>Position</th>
 									<th>Location</th>
-									<th>Org</th>
+									<th>Organization</th>
 									<th></th>
 								</tr>
 							</thead>
@@ -382,11 +385,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 					<Collapse in={this.state.showReportText}>
 						<div>
-							<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
+							<Form.Field id="reportText" className="reportTextField" componentClass={RichTextEditor} />
 
 							{(report.reportSensitiveInformation || !this.props.edit) &&
 								<div>
-									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
+									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={RichTextEditor}
 										value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
 										onChange={this.updateReportSensitiveInformation} />
 									<AuthorizationGroupsSelector
@@ -460,7 +463,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 				<LinkTo person={person}/>
 			</td>
 			<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
+			<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 			<td onClick={this.removeAttendee.bind(this, person)} id={'attendeeDelete_' + person.role + "_" + idx} >
 				<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
@@ -557,7 +560,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 	@autobind
 	saveReport(disableSubmits) {
 		let report = new Report(Object.without(this.props.report, 'reportSensitiveInformationText', 'tags'))
-		report.tags = this.state.reportTags.map(tag => ({uuid: tag.uuid}))
+		report.tags = this.state.reportTags.map(tag => ({uuid: tag.id}))
 		if(report.primaryAdvisor) { report.attendees.find(a => a.uuid === report.primaryAdvisor.uuid).isPrimary = true }
 		if(report.primaryPrincipal) { report.attendees.find(a => a.uuid === report.primaryPrincipal.uuid).isPrimary = true }
 		delete report.primaryPrincipal
@@ -569,11 +572,11 @@ class BaseReportForm extends ValidatableFormWrapper {
 		if (!this.state.isCancelled) {
 			delete report.cancelledReason
 		}
-		let graphql = 'createReport(report: $report) { uuid }'
+		let graphql = 'createReport(report: $report) { uuid reportSensitiveInformation { uuid text } }'
 		let variableDef = '($report: ReportInput!)'
 		let variables = {report: report}
 		if (this.isEditMode()) {
-			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { uuid }'
+			graphql = 'updateReport(report: $report, sendEditEmail: $sendEditEmail) { uuid reportSensitiveInformation { uuid text } }'
 			variableDef = '($report: ReportInput!, $sendEditEmail: Boolean!)'
 			variables.sendEditEmail = disableSubmits
 		}
@@ -637,14 +640,14 @@ class BaseReportForm extends ValidatableFormWrapper {
 					toast.success('Your report has been automatically saved')
 					// And re-schedule the auto-save timer
 					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
-					this.setState({timeoutId})
+					this.setState({timeoutId, error: null})
 				}).catch(error => {
 					// Show an error message
 					this.autoSaveTimeout.add(this.autoSaveTimeout) // exponential back-off
 					toast.error("There was an error autosaving your report; we'll try again in " + this.autoSaveTimeout.humanize())
 					// And re-schedule the auto-save timer
 					let timeoutId = window.setTimeout(this.autoSave, this.autoSaveTimeout.asMilliseconds())
-					this.setState({timeoutId})
+					this.setState({timeoutId, error})
 				})
 		}
 	}

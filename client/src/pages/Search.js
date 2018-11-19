@@ -32,7 +32,6 @@ import ORGANIZATIONS_ICON from 'resources/organizations.png'
 
 import SubNav from 'components/SubNav'
 
-import { DEFAULT_PAGE_PROPS, CLEAR_SEARCH_PROPS } from 'actions'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
@@ -59,14 +58,14 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PersonSearchQueryInput',
-		fields: 'uuid, name, rank, emailAddress, role , position { uuid, name, organization { uuid, shortName} }'
+		fields: 'uuid, name, rank, emailAddress, role , position { uuid, name, code, location { uuid, name }, organization { uuid, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQueryInput',
-		fields: 'uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank }'
+		fields: 'uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
@@ -352,7 +351,8 @@ class BaseSearch extends Page {
 				<tr>
 						<th>Name</th>
 						<th>Position</th>
-						<th>Org</th>
+						<th>Location</th>
+						<th>Organization</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -362,7 +362,8 @@ class BaseSearch extends Page {
 								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 								<LinkTo person={person}/>
 							</td>
-							<td>{person.position && <LinkTo position={person.position} />}</td>
+							<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
+							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
 						</tr>
 					)}

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Button, Col, HelpBlock, Modal, Checkbox} from 'react-bootstrap'
+import Confirm from 'react-confirm-bootstrap'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 import utils from 'utils'
@@ -18,6 +19,7 @@ import Tag from 'components/Tag'
 import API from 'api'
 import Settings from 'Settings'
 import {Report, Person, Task, Comment, Position} from 'models'
+import _isEmpty from 'lodash/isEmpty'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 
@@ -139,23 +141,24 @@ class BaseReportShow extends Page {
 		const {report} = this.state
 		const { currentUser } = this.props
 
+		//User can approve if report is pending approval and user is one of the approvers in the current approval step
 		const canApprove = report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
 
-		//Authors can edit in draft mode, rejected mode, or Pending Mode
-		let canEdit = (report.isDraft() || report.isPending() || report.isRejected() || report.isFuture()) && Person.isEqual(currentUser, report.author)
+		//Authors can edit in draft mode (also future engagements) or rejected mode
+		let canEdit = (report.isDraft() || report.isFuture() || report.isRejected()) && Person.isEqual(currentUser, report.author)
 		//Approvers can edit.
 		canEdit = canEdit || canApprove
 
-		//Only the author can submit when report is in Draft or rejected AND author has a position
+		//Only the author can submit when report is in draft or rejected AND author has a position
 		const hasAssignedPosition = currentUser.hasAssignedPosition()
 		const hasActivePosition = currentUser.hasActivePosition()
 		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
 
-		//Anbody can email a report as long as it's not in draft.
+		//Anybody can email a report as long as it's not in draft.
 		let canEmail = !report.isDraft()
 
-		let errors = (report.isDraft() || report.isFuture()) && report.validateForSubmit()
+		const {errors, warnings} = (!report.isReleased() && !report.isCancelled()) && report.validateForSubmit()
 
 		let isCancelled = report.cancelledReason ? true : false
 
@@ -177,6 +180,9 @@ class BaseReportShow extends Page {
 					<Fieldset style={{textAlign: 'center' }}>
 						<h4 className="text-danger">This report was REJECTED. </h4>
 						<p>You can review the comments below, fix the report and re-submit</p>
+						<div style={{textAlign: 'left'}}>
+							{this.renderValidationMessages(errors, warnings)}
+						</div>
 					</Fieldset>
 				}
 
@@ -188,9 +194,7 @@ class BaseReportShow extends Page {
 							this.renderNoPositionAssignedText()
 						}
 						<div style={{textAlign: 'left'}}>
-							{errors && errors.length > 0 &&
-								this.renderValidationErrors(errors)
-							}
+							{this.renderValidationMessages(errors, warnings)}
 						</div>
 					</Fieldset>
 				}
@@ -207,9 +211,7 @@ class BaseReportShow extends Page {
 						<h4 className="text-success">This report is for an UPCOMING engagement.</h4>
 						<p>After your engagement has taken place, edit and submit this document as an engagement report.</p>
 						<div style={{textAlign: 'left'}}>
-							{errors && errors.length > 0 &&
-								this.renderValidationErrors(errors)
-							}
+							{this.renderValidationMessages(errors, warnings)}
 						</div>
 					</Fieldset>
 				}
@@ -220,7 +222,7 @@ class BaseReportShow extends Page {
 					<Fieldset title={`Report #${report.uuid}`} className="show-report-overview" action={<div>
 						{canEmail && <Button onClick={this.toggleEmailModal}>Email report</Button>}
 						{canEdit && <LinkTo report={report} edit button="primary">Edit</LinkTo>}
-						{canSubmit && errors.length === 0 && <Button bsStyle="primary" onClick={this.submitDraft}>Submit report</Button>}
+						{canSubmit && _isEmpty(errors) && this.renderSubmitButton(errors, warnings)}
 					</div>
 					}>
 
@@ -269,7 +271,7 @@ class BaseReportShow extends Page {
 									<th>Name</th>
 									<th>Position</th>
 									<th>Location</th>
-									<th>Org</th>
+									<th>Organization</th>
 								</tr>
 							</thead>
 
@@ -349,24 +351,18 @@ class BaseReportShow extends Page {
 					{canSubmit &&
 						<Fieldset>
 							<Col md={9}>
-								{(errors && errors.length > 0) ?
-									this.renderValidationErrors(errors)
-									:
-										<p>
-											By pressing submit, this report will be sent to
-											<strong> {Object.get(report, 'author.position.organization.name') || 'your organization approver'} </strong>
-											to go through the approval workflow.
-										</p>
+								{_isEmpty(errors) &&
+									<p>
+										By pressing submit, this report will be sent to
+										<strong> {Object.get(report, 'author.position.organization.name') || 'your organization approver'} </strong>
+										to go through the approval workflow.
+									</p>
 								}
+								{this.renderValidationMessages(errors, warnings)}
 							</Col>
 
 							<Col md={3}>
-								<Button type="submit" bsStyle="primary" bsSize="large"
-									onClick={this.submitDraft}
-									disabled={errors && errors.length > 0}
-									id="submitReportButton">
-									Submit report
-								</Button>
+								{this.renderSubmitButton(errors, warnings, "large", "submitReportButton")}
 							</Col>
 						</Fieldset>
 					}
@@ -394,7 +390,7 @@ class BaseReportShow extends Page {
 						</Form>
 					</Fieldset>
 
-					{canApprove && this.renderApprovalForm()}
+					{canApprove && this.renderApprovalForm(errors, warnings)}
 				</Form>
 				{currentUser.isAdmin() &&
 					<div className="submit-buttons"><div>
@@ -430,7 +426,7 @@ class BaseReportShow extends Page {
 	}
 
 	@autobind
-	renderApprovalForm() {
+	renderApprovalForm(errors, warnings) {
 		return <Fieldset className="report-sub-form" title="Report approval">
 			<h5>You can approve, reject, or edit this report</h5>
 
@@ -446,7 +442,7 @@ class BaseReportShow extends Page {
 			<Button bsStyle="warning" onClick={this.handleRejectReport}>Reject with comment</Button>
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
-				<Button bsStyle="primary" onClick={this.handleApproveReport} className="approve-button"><strong>Approve</strong></Button>
+				{this.renderApproveButton(errors, warnings)}
 			</div>
 		</Fieldset>
 	}
@@ -462,7 +458,7 @@ class BaseReportShow extends Page {
 				<LinkTo person={person} />
 			</td>
 			<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-			<td><LinkTo whenUnspecified="" position={person.position && person.position.location} /></td>
+			<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
 		</tr>
 	}
@@ -687,18 +683,75 @@ class BaseReportShow extends Page {
 		jumpToTop()
 	}
 
+	renderSubmitButton(errors, warnings, size, id) {
+		return this.renderValidationButton("Submit report?", "Submit report", "Submit anyway", "Cancel submit", this.submitDraft, errors, warnings, size, id)
+	}
+
+	renderApproveButton(errors, warnings, size, id) {
+		return this.renderValidationButton("Approve report?", "Approve", "Approve anyway", "Cancel approve", this.handleApproveReport, errors, warnings, size, id, "approve-button")
+	}
+
+	renderValidationButton(title, label, confirmText, cancelText, handler, errors, warnings, size, id, className) {
+		return _isEmpty(warnings)
+			?
+			<Button type="submit" bsStyle="primary" bsSize={size} className={className}
+				onClick={handler}
+				disabled={!_isEmpty(errors)}
+				id={id}>
+				{label}
+			</Button>
+			:
+			<Confirm
+				onConfirm={handler}
+				title={title}
+				body={this.renderValidationWarnings(warnings)}
+				confirmText={confirmText}
+				cancelText={cancelText}
+				dialogClassName="react-confirm-bootstrap-modal"
+				confirmBSStyle="primary">
+				<Button type="submit" bsStyle="primary" bsSize={size} className={className}
+					disabled={!_isEmpty(errors)}
+					id={id}>
+					{label}
+				</Button>
+			</Confirm>
+	}
+
+	renderValidationMessages(errors, warnings) {
+		return <React.Fragment>
+			{this.renderValidationErrors(errors)}
+			{this.renderValidationWarnings(warnings)}
+		</React.Fragment>
+	}
 
 	renderValidationErrors(errors) {
+		if (_isEmpty(errors)) {
+			return null
+		}
 		let warning = this.state.report.isFuture() ?
 			'You\'ll need to fill out these required fields before you can submit your final report:'
 			:
-			'The following errors must be fixed before submitting this report'
+			'The following errors must be fixed before submitting this report:'
 		let style = this.state.report.isFuture() ? "info" : "danger"
 		return <Alert bsStyle={style}>
 			{warning}
 			<ul>
 			{ errors.map((error,idx) =>
 				<li key={idx}>{error}</li>
+			)}
+			</ul>
+		</Alert>
+	}
+
+	renderValidationWarnings(warnings) {
+		if (_isEmpty(warnings)) {
+			return null
+		}
+		return <Alert bsStyle="warning">
+			The following warnings should be addressed before submitting this report:
+			<ul>
+			{warnings.map((warning ,idx) =>
+				<li key={idx}>{warning}</li>
 			)}
 			</ul>
 		</Alert>

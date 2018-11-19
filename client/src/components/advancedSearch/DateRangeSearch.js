@@ -11,6 +11,8 @@ import utils from 'utils'
 
 import {BETWEEN, BEFORE, AFTER, LAST_DAY, LAST_WEEK, LAST_MONTH, RANGE_TYPE_LABELS, dateToQuery, dateRangeStartKey, dateRangeEndKey} from 'dateUtils'
 
+const DATE_FORMAT = 'YYYY-MM-DD'
+
 const dateRangeValue = PropTypes.shape({
 	relative: PropTypes.string,
 	start: PropTypes.string,
@@ -170,8 +172,8 @@ export default class DateRangeSearch extends Component {
 		const filterValue = {}
 		if (query[startKey] && query[endKey]) {
 			filterValue.relative = BETWEEN
-			filterValue.start = moment(query[startKey]).toISOString()
-			filterValue.end = moment(query[endKey]).toISOString()
+			filterValue.start = moment(query[startKey]).format(DATE_FORMAT)
+			filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
 			toQueryValue[startKey] = query[startKey]
 			toQueryValue[endKey] = query[endKey]
 		}
@@ -183,12 +185,12 @@ export default class DateRangeSearch extends Component {
 			}
 			else {
 				filterValue.relative = AFTER
-				filterValue.start = moment(query[startKey]).toISOString()
+				filterValue.start = moment(query[startKey]).format(DATE_FORMAT)
 			}
 		}
 		else if (query[endKey]) {
 			filterValue.relative = BEFORE
-			filterValue.end = moment(query[endKey]).toISOString()
+			filterValue.end = moment(query[endKey]).format(DATE_FORMAT)
 			toQueryValue[endKey] = query[endKey]
 		}
 		if (Object.keys(filterValue).length) {

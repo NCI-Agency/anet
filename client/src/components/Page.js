@@ -64,13 +64,10 @@ export default class Page extends Component {
 		if (typeof props.setSearchProps === 'function') {
 			props.setSearchProps(Object.assign({}, sp))
 		}
-		if (typeof props.clearSearchQuery === 'function' && sp.clearSearchQuery) {
-			props.clearSearchQuery()
-		}
-
 		this.state = {
 			notFound: false,
 			invalidRequest: false,
+			isLoading: false,
 		}
 
 		this.renderPage = this.render
@@ -79,7 +76,7 @@ export default class Page extends Component {
 
 	@autobind
 	loadData() {
-		this.setState({notFound: false, invalidRequest: false})
+		this.setState({ notFound: false, invalidRequest: false, isLoading: true })
 
 		if (this.fetchData) {
 			document.body.classList.add('loading')
@@ -110,25 +107,28 @@ export default class Page extends Component {
 
 		if (response) {
 			if (response.status === 404 || (response.status === 500 && _get(response, ['errors', 0]) === 'Invalid Syntax')) {
-				this.setState({notFound: true})
+				this.setState({ notFound: true, isLoading: false })
 			} else if (response.status === 500) {
-				this.setState({invalidRequest: true})
+				this.setState({ invalidRequest: true, isLoading: false })
 			}
+		} else {
+			this.setState({ isLoading: false })
 		}
 
 		return response
 	}
 
 	render() {
+		if (this.state.isLoading) { return null }
 		if (this.state.notFound) {
 			let modelName = this.constructor.modelName
 			let text = modelName ? `${modelName} #${this.props.match.params.uuid}` : `Page`
 			return <NotFound text={`${text} not found.`} />
 		} else if (this.state.invalidRequest) {
 			return <NotFound text="There was an error processing this request. Please contact an administrator." />
+		} else if (!this.state.isLoading) {
+			return this.renderPage()
 		}
-
-		return this.renderPage()
 	}
 
 	componentDidUpdate(prevProps, prevState) {

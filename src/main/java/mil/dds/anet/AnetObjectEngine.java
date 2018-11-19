@@ -12,10 +12,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.dataloader.DataLoaderRegistry;
-import org.skife.jdbi.v2.DBI;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +73,7 @@ public class AnetObjectEngine {
 	
 	private final Handle dbHandle;
 	
-	public AnetObjectEngine(DBI jdbi) { 
+	public AnetObjectEngine(Jdbi jdbi) {
 		dbHandle = jdbi.open();
 		
 		personDao = new PersonDao(dbHandle);
@@ -184,22 +182,12 @@ public class AnetObjectEngine {
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
 		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(new TransactionCallback<R>() {
-			@Override
-			public R inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				return processor.apply(input);
-			}
-		});
+		return getDbHandle().inTransaction(h -> processor.apply(input));
 	}
 
 	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
 		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(new TransactionCallback<R>() {
-			@Override
-			public R inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				return processor.apply(arg1, arg2);
-			}
-		});
+		return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
 	}
 
 	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, String aoUuid) {

@@ -30,7 +30,7 @@ cache:
 install: true
 
 script:
-  - ./gradlew --parallel dockerCreateDB dockerStartDB jar dockerWaitForDB dbMigrate dockerLoadDB check test jacocoTestReport
+  - ./gradlew --parallel dockerCreateDB dockerStartDB jar dockerWaitForDB dbMigrate dbLoad check test jacocoTestReport
 
 after_script:
   - docker logs anet-mssql-server

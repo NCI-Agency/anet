@@ -36,7 +36,8 @@ public class Report extends AbstractAnetBean {
 										CANCELLED_DUE_TO_TRANSPORTATION,
 										CANCELLED_DUE_TO_FORCE_PROTECTION,
 										CANCELLED_DUE_TO_ROUTES,
-										CANCELLED_DUE_TO_THREAT }
+										CANCELLED_DUE_TO_THREAT,
+										NO_REASON_GIVEN }
 
 	ApprovalStep approvalStep;
 	ReportState state;

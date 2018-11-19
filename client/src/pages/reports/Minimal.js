@@ -14,6 +14,7 @@ import LinkTo from 'components/LinkTo'
 import Settings from 'Settings'
 import API from 'api'
 import {Report, Person, Task} from 'models'
+import _isEmpty from 'lodash/isEmpty'
 
 import { PAGE_PROPS_MIN_HEAD } from 'actions'
 import { connect } from 'react-redux'
@@ -96,7 +97,7 @@ class ReportMinimal extends Page {
 	render() {
 		let {report} = this.state
 
-		let errors = report.isDraft() && report.validateForSubmit()
+		const {errors, warnings} = (!report.isReleased() && !report.isCancelled()) && report.validateForSubmit()
 		let isCancelled = (report.cancelledReason) ? true : false
 
 		return (
@@ -114,9 +115,7 @@ class ReportMinimal extends Page {
 						<h4 className="text-danger">This report is in DRAFT state and hasn't been submitted.</h4>
 						<p>You can review the draft below to make sure all the details are correct.</p>
 						<div style={{textAlign: 'left'}}>
-							{errors && errors.length > 0 &&
-								this.renderValidationErrors(errors)
-							}
+							{this.renderValidationMessages(errors, warnings)}
 						</div>
 					</Fieldset>
 				}
@@ -174,7 +173,7 @@ class ReportMinimal extends Page {
 									<th style={{textAlign: 'center'}}>Primary</th>
 									<th>Name</th>
 									<th>Position</th>
-									<th>Org</th>
+									<th>Organization</th>
 								</tr>
 							</thead>
 
@@ -327,12 +326,36 @@ class ReportMinimal extends Page {
 		</div>
 	}
 
+	renderValidationMessages(errors, warnings) {
+		return <React.Fragment>
+			{this.renderValidationErrors(errors)}
+			{this.renderValidationWarnings(warnings)}
+		</React.Fragment>
+	}
+
 	renderValidationErrors(errors) {
+		if (_isEmpty(errors)) {
+			return null
+		}
 		return <Alert bsStyle="danger">
-			The following errors must be fixed before submitting this report
+			The following errors must be fixed before submitting this report:
 			<ul>
 			{ errors.map((error,idx) =>
 				<li key={idx}>{error}</li>
+			)}
+			</ul>
+		</Alert>
+	}
+
+	renderValidationWarnings(warnings) {
+		if (_isEmpty(warnings)) {
+			return null
+		}
+		return <Alert bsStyle="warning">
+			The following warnings should be addressed before submitting this report:
+			<ul>
+			{warnings.map((warning ,idx) =>
+				<li key={idx}>{warning}</li>
 			)}
 			</ul>
 		</Alert>

@@ -61,7 +61,8 @@ export default class PositionTable extends Component {
 					<thead>
 						<tr>
 							<th>Name</th>
-							<th>Org</th>
+							<th>Location</th>
+							<th>Organization</th>
 							<th>Current Occupant</th>
 							<th>Status</th>
 							<th />
@@ -77,6 +78,7 @@ export default class PositionTable extends Component {
 										<img src={pos.iconUrl()} alt={pos.type} height={20} className="person-icon" />
 										<LinkTo position={pos} >{nameComponents.join(' - ')}</LinkTo>
 									</td>
+									<td><LinkTo anetLocation={pos.location} /></td>
 									<td>{pos.organization && <LinkTo organization={pos.organization} />}</td>
 									<td>{pos.person && <LinkTo person={pos.person} />}</td>
 									<td>{utils.sentenceCase(pos.status)}</td>

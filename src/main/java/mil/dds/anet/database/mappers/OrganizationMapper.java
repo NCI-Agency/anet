@@ -3,18 +3,18 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.utils.DaoUtils;
 
-public class OrganizationMapper implements ResultSetMapper<Organization> {
+public class OrganizationMapper implements RowMapper<Organization> {
 
 	@Override
-	public Organization map(int index, ResultSet r, StatementContext ctx) throws SQLException {
+	public Organization map(ResultSet r, StatementContext ctx) throws SQLException {
 		Organization org = new Organization();
 		DaoUtils.setCommonBeanFields(org, r, "organizations");
 		org.setShortName(r.getString("organizations_shortName"));
@@ -29,7 +29,7 @@ public class OrganizationMapper implements ResultSetMapper<Organization> {
 		}
 		
 		if (MapperUtils.containsColumnNamed(r, "totalCount")) { 
-			ctx.setAttribute("totalCount", r.getInt("totalCount"));
+			ctx.define("totalCount", r.getInt("totalCount"));
 		}
 		
 		return org;
