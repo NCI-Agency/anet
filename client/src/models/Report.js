@@ -113,11 +113,11 @@ export default class Report extends Model {
 		}
 
 		if (_isEmpty(this.tasks)) {
-			warnings.push(`You should provide ${Settings.fields.task.longLabel}`)
+			warnings.push(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement. Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
 		}
 
 		if (!_isEmpty(this.reportSensitiveInformation) && !_isEmpty(this.reportSensitiveInformation.text) && _isEmpty(this.authorizationGroups)) {
-			warnings.push(`You should provide authorization groups who can access the sensitive information`)
+			warnings.push(`You should provide authorization groups who can access the sensitive information. If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
 		}
 
 		return {errors, warnings}
