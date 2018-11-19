@@ -68,17 +68,7 @@ module.exports = {
                         }
                     }
                 ]
-            }, {
-                test: /alloy-editor-no-react\.js$/,
-                use: {
-                    loader: 'imports-loader',
-                    options: {
-                        'React': 'react',
-                        'React.PropTypes': 'prop-types',
-                        'React.createClass': 'create-react-class'
-                    }
-                }
-            }
+            },
         ]
     },
     plugins: [
