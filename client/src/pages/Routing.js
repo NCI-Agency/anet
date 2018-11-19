@@ -1,16 +1,14 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import { Route, Switch, Redirect } from 'react-router'
+import {Route, Switch, Redirect} from 'react-router'
 
-import { Person } from 'models'
 import AppContext from 'components/AppContext'
-import asyncComponent from '../components/AsyncComponent'
-
+import asyncComponent from 'components/AsyncComponent'
+import {Person} from 'models'
 
 const Home = asyncComponent(() => import('pages/Home'))
 const Search = asyncComponent(() => import('pages/Search'))
-
 const RollupShow = asyncComponent(() => import('pages/rollup/Show'))
 const GraphiQL = asyncComponent(() => import('pages/GraphiQL'))
 const Help = asyncComponent(() => import('pages/Help'))

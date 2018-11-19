@@ -5,6 +5,7 @@ const paths = require('./paths')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const webpack = require('webpack')
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
+const AsyncChunkNames = require('webpack-async-chunk-names-plugin')
 const path = require('path')
 
 module.exports = merge(common, {
@@ -25,11 +26,33 @@ module.exports = merge(common, {
     ],
     splitChunks: {
       cacheGroups: {
-        commons: { test: /[\\/]node_modules[\\/]/, name: "vendors", chunks: "all" }
+        default: false,
+        vendors: false,
+
+        // vendor chunk
+        vendor: {
+          name: 'vendor',
+          chunks: 'all',
+          // import node_modules, split react and react-dom in separate chunks
+          test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+          // priority
+          priority: -10,
+        },
+
+        // common chunk
+        common: {
+          name: 'common',
+          minChunks: 2,
+          chunks: 'all',
+          priority: -20,
+          reuseExistingChunk: true,
+          enforce: true
+        }
       }
     }
   },
   plugins: [
+    new AsyncChunkNames(),
     new WebpackCleanupPlugin(),
     new webpack.HashedModuleIdsPlugin(),
     new webpack.DefinePlugin({
