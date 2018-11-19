@@ -60,8 +60,16 @@ class BaseOrganizationShow extends Page {
 		setMessages(props,this.state)
 	}
 
+	componentDidMount() {
+		this.reportsPageNum = this.getPageNum('reportsPage', this.props.location.search)
+		super.componentDidMount()
+	}
+
 	componentDidUpdate(prevProps, prevState) {
 		// Re-load data if uuid has changed
+		if(prevProps.location.search !== this.props.location.search) {
+			this.reportsPageNum = this.getPageNum('reportsPage', this.props.location.search)
+		}
 		if (this.props.match.params.uuid !== prevProps.match.params.uuid) {
 			this.loadData()
 		}
@@ -155,6 +163,18 @@ class BaseOrganizationShow extends Page {
 			toggleToFilter = Report.STATE.PENDING_APPROVAL
 		}
 		this.setState({ reportsFilter: toggleToFilter })
+	}
+
+	getPageNum(name, params) {
+		const searchParams = new URLSearchParams(params)
+		const pageNum = searchParams.get(name)
+		return pageNum ? pageNum : 0
+	}
+
+	pushSearchHistory(paramName, paramValue) {
+		this.props.history.push({
+			search: `?${paramName}=${paramValue}`,
+		})
 	}
 
 	render() {
@@ -285,7 +305,7 @@ class BaseOrganizationShow extends Page {
 		this.reportsPageNum = pageNum
 		let reportQueryPart = this.getReportQueryPart(this.state.organization.uuid)
 		GQL.run([reportQueryPart]).then(data =>
-			this.setState({reports: data.reports})
+			this.setState({reports: data.reports}, this.pushSearchHistory('reportsPage', pageNum))
 		)
 	}
 
