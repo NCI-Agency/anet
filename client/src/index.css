@@ -545,6 +545,7 @@ table hr.attendee-divider {
 	margin-left: 0;
 }
 
+.approve-button,
 .submit-buttons .btn-primary {
 	font-weight: bold;
 	height: 38px;

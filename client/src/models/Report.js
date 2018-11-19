@@ -1,5 +1,7 @@
+import Settings from 'Settings'
 import Model from 'components/Model'
 import moment from 'moment'
+import _isEmpty from 'lodash/isEmpty'
 import {Organization, Person, Position} from 'models'
 
 export default class Report extends Model {
@@ -59,6 +61,10 @@ export default class Report extends Model {
 		return this.state === Report.STATE.REJECTED
 	}
 
+	isCancelled() {
+		return this.state === Report.STATE.CANCELLED
+	}
+
 	isFuture() {
 		return this.state === Report.STATE.FUTURE
 	}
@@ -72,7 +78,8 @@ export default class Report extends Model {
 	}
 
 	validateForSubmit() {
-		let errors = []
+		const errors = []
+		const warnings = []
 
 		let isCancelled = this.cancelledReason ? true : false
 		if (!isCancelled) {
@@ -104,7 +111,16 @@ export default class Report extends Model {
 		if (!isCancelled && !this.keyOutcomes) {
 			errors.push('You must provide a brief summary of the Key Outcomes')
 		}
-		return errors
+
+		if (_isEmpty(this.tasks)) {
+			warnings.push(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement. Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
+		}
+
+		if (!_isEmpty(this.reportSensitiveInformation) && !_isEmpty(this.reportSensitiveInformation.text) && _isEmpty(this.authorizationGroups)) {
+			warnings.push(`You should provide authorization groups who can access the sensitive information. If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
+		}
+
+		return {errors, warnings}
 	}
 
 	checkPrimaryAttendee(primaryAttendee, primaryOrg, role, orgType, errors) {
