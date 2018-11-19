@@ -4,6 +4,7 @@ import parseAddressList from 'email-addresses'
 import pluralize from 'pluralize'
 import decodeQuery from 'querystring/decode'
 import encodeQuery from 'querystring/encode'
+import WebURLSearchParams from 'url-search-params'
 
 import Settings from 'Settings'
 
@@ -121,7 +122,7 @@ export default {
 	},
 
 	assignPageNums: function (target, params) {
-		const searchParams = new URLSearchParams(params)
+		const searchParams = pollyfillURLSearchParams(params)
 		const updatePageNums = {}
 		for (const param of searchParams) {
 			const key = param[0]
@@ -132,7 +133,7 @@ export default {
 	},
 
 	getPageNum: function(name, params) {
-		const searchParams = new URLSearchParams(params)
+		const searchParams = pollyfillURLSearchParams(params)
 		const pageNum = searchParams.get(name)
 		return pageNum ? pageNum : 0
 	},
@@ -142,6 +143,14 @@ export default {
 			search: `?${paramName}=${value}`,
 		})
 	},
+}
+
+function pollyfillURLSearchParams(params) {
+	if ('URLSearchParams' in window) {
+		return new URLSearchParams(params)
+	} else {
+		return new WebURLSearchParams(params)
+	}
 }
 
 Object.forEach = function(source, func) {
