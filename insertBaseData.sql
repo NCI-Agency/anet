@@ -286,10 +286,12 @@ INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps WHERE name='EF 1.1 Approvers'), (SELECT uuid from positions where name = 'EF 1.1 SuperUser'));
 
 -- Create the EF 2.2 approval process
+DECLARE @approvalStepUuid varchar(36);
+SET @approvalStepUuid = lower(newid());
 INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid)
-	VALUES (lower(newid()), 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where shortName='EF 2.2'));
+	VALUES (@approvalStepUuid, 'EF 2.2 Secondary Reviewers', (SELECT uuid from organizations where shortName='EF 2.2'));
 INSERT INTO approvalSteps (uuid, name, advisorOrganizationUuid, nextStepUuid)
-	VALUES (lower(newid()), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where shortName='EF 2.2'), (SELECT MAX(uuid) from approvalSteps));
+	VALUES (lower(newid()), 'EF 2.2 Initial Approvers', (SELECT uuid from organizations where shortName='EF 2.2'), @approvalStepUuid);
 
 INSERT INTO approvers (approvalStepUuid, positionUuid)
 	VALUES ((SELECT uuid from approvalSteps WHERE name='EF 2.2 Initial Approvers'), (SELECT uuid from positions where name = 'EF 2.2 Super User'));

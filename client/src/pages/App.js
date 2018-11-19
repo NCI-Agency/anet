@@ -80,6 +80,7 @@ class App extends Page {
 	render() {
 		const { currentUser, settings, organizations } = this.state
 		const { pageProps, history, location } = this.props
+		if (currentUser._loaded !== true) { return null }
 
 		return (
 			<AppContext.Provider

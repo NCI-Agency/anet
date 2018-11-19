@@ -1,5 +1,5 @@
 const merge = require('webpack-merge')
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 const common = require('./webpack.common.js')
 const paths = require('./paths')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -18,14 +18,9 @@ module.exports = merge(common, {
   optimization: {
     minimize: true,
     minimizer: [
-      new UglifyJSPlugin({
-        uglifyOptions: {
-          compress: {
-            // hack to make codemirror work with uglifyjs: https://github.com/webpack/webpack/issues/6760
-            inline: 1,
-          },
-          parallel: true,
-        }
+      new TerserPlugin({
+        cache: true,
+        parallel: true
       })
     ],
     splitChunks: {

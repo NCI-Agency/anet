@@ -186,6 +186,9 @@ class BaseOrganizationShow extends Page {
 				</Scrollspy>
 			</Nav>
 		)
+		if (currentUser._loaded !== true) {
+			return <div className='loader'></div>
+		}
 		return (
 			<div>
 				<SubNav subnavElemId="myorg-nav">
