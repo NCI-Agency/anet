@@ -1,54 +1,58 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import {Route, Switch, Redirect} from 'react-router'
-import Home from 'pages/Home'
-import Search from 'pages/Search'
-import RollupShow from 'pages/rollup/Show'
-import GraphiQL from 'pages/GraphiQL'
-import Help from 'pages/Help'
-import PageMissing from 'pages/PageMissing'
+import { Route, Switch, Redirect } from 'react-router'
 
-import ReportNew from 'pages/reports/New'
-import ReportShow from 'pages/reports/Show'
-import ReportEdit from 'pages/reports/Edit'
-import ReportMinimal from 'pages/reports/Minimal'
-import MyReports from 'pages/reports/MyReports'
-
-import PersonShow from 'pages/people/Show'
-import PersonNew from 'pages/people/New'
-import PersonEdit from 'pages/people/Edit'
-
-import OrganizationShow from 'pages/organizations/Show'
-import OrganizationNew from 'pages/organizations/New'
-import OrganizationEdit from 'pages/organizations/Edit'
-
-import LocationShow from 'pages/locations/Show'
-import LocationEdit from 'pages/locations/Edit'
-import LocationNew from 'pages/locations/New'
-
-import PositionShow from 'pages/positions/Show'
-import PositionEdit from 'pages/positions/Edit'
-import PositionNew from 'pages/positions/New'
-
-import TaskShow from 'pages/tasks/Show'
-import TaskNew from 'pages/tasks/New'
-import TaskEdit from 'pages/tasks/Edit'
-
-import AdminIndex from 'pages/admin/Index'
-import MergePeople from 'pages/admin/MergePeople'
-import AuthorizationGroups from 'pages/admin/AuthorizationGroups'
-import AuthorizationGroupShow from 'pages/admin/authorizationgroup/Show'
-import AuthorizationGroupEdit from 'pages/admin/authorizationgroup/Edit'
-import AuthorizationGroupNew from 'pages/admin/authorizationgroup/New'
-
-import InsightsShow from  'pages/insights/Show'
-
-import OnboardingShow from 'pages/onboarding/Show'
-import OnboardingEdit from 'pages/onboarding/Edit'
-
+import { Person } from 'models'
 import AppContext from 'components/AppContext'
-import {Person} from 'models'
+import asyncComponent from '../components/AsyncComponent'
+
+
+const Home = asyncComponent(() => import('pages/Home'))
+const Search = asyncComponent(() => import('pages/Search'))
+
+const RollupShow = asyncComponent(() => import('pages/rollup/Show'))
+const GraphiQL = asyncComponent(() => import('pages/GraphiQL'))
+const Help = asyncComponent(() => import('pages/Help'))
+const PageMissing = asyncComponent(() => import('pages/PageMissing'))
+
+const ReportNew = asyncComponent(() => import('pages/reports/New'))
+const ReportShow = asyncComponent(() => import('pages/reports/Show'))
+const ReportEdit = asyncComponent(() => import('pages/reports/Edit'))
+const ReportMinimal = asyncComponent(() => import('pages/reports/Minimal'))
+const MyReports = asyncComponent(() => import('pages/reports/MyReports'))
+
+const PersonShow = asyncComponent(() => import('pages/people/Show'))
+const PersonNew = asyncComponent(() => import('pages/people/New'))
+const PersonEdit = asyncComponent(() => import('pages/people/Edit'))
+
+const OrganizationShow = asyncComponent(() => import('pages/organizations/Show'))
+const OrganizationNew = asyncComponent(() => import('pages/organizations/New'))
+const OrganizationEdit = asyncComponent(() => import('pages/organizations/Edit'))
+
+const LocationShow = asyncComponent(() => import('pages/locations/Show'))
+const LocationEdit = asyncComponent(() => import('pages/locations/Edit'))
+const LocationNew = asyncComponent(() => import('pages/locations/New'))
+
+const PositionShow = asyncComponent(() => import('pages/positions/Show'))
+const PositionEdit = asyncComponent(() => import('pages/positions/Edit'))
+const PositionNew = asyncComponent(() => import('pages/positions/New'))
+
+const TaskShow = asyncComponent(() => import('pages/tasks/Show'))
+const TaskNew = asyncComponent(() => import('pages/tasks/New'))
+const TaskEdit = asyncComponent(() => import('pages/tasks/Edit'))
+
+const AdminIndex = asyncComponent(() => import('pages/admin/Index'))
+const MergePeople = asyncComponent(() => import('pages/admin/MergePeople'))
+const AuthorizationGroups = asyncComponent(() => import('pages/admin/AuthorizationGroups'))
+const AuthorizationGroupShow = asyncComponent(() => import('pages/admin/authorizationgroup/Show'))
+const AuthorizationGroupEdit = asyncComponent(() => import('pages/admin/authorizationgroup/Edit'))
+const AuthorizationGroupNew = asyncComponent(() => import('pages/admin/authorizationgroup/New'))
+
+const InsightsShow = asyncComponent(() => import( 'pages/insights/Show'))
+
+const OnboardingShow = asyncComponent(() => import('pages/onboarding/Show'))
+const OnboardingEdit = asyncComponent(() => import('pages/onboarding/Edit'))
 
 class BaseRouting extends Component {
   static propTypes = {
