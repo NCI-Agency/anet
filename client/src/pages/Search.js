@@ -185,9 +185,18 @@ class BaseSearch extends Page {
 	}
 
 	componentDidMount() {
+		const { success, pageNum } = this.state
+		const { location } = this.props
+
+		this.setPageNumState(pageNum, location.search)
 		super.componentDidMount()
-		const { success } = this.state
 		this.notify(success)
+	}
+
+	setPageNumState(pageNumObj, searchParams) {
+		this.setState(
+			utils.assignPageNums(pageNumObj, searchParams)
+		)
 	}
 
 	render() {
@@ -337,7 +346,9 @@ class BaseSearch extends Page {
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
-			this.setState({results})
+			this.setState(
+				{results},
+				utils.pushToSearchHistory(this.props.history, type, pageNum))
 		}).catch(error =>
 			this.setState({success: null, error: error})
 		)
