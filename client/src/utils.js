@@ -119,6 +119,29 @@ export default {
 	getReference: function(obj) {
 		return (obj && obj.uuid) ? {uuid: obj.uuid} : {}
 	},
+
+	assignPageNums: function (target, params) {
+		const searchParams = new URLSearchParams(params)
+		const updatePageNums = {}
+		for (const param of searchParams) {
+			const key = param[0]
+			const pageObj = { [key]: parseInt(param[1]) }
+			Object.assign(updatePageNums, pageObj)
+		}
+		return Object.assign(target, updatePageNums)
+	},
+
+	getPageNum: function(name, params) {
+		const searchParams = new URLSearchParams(params)
+		const pageNum = searchParams.get(name)
+		return pageNum ? pageNum : 0
+	},
+
+	pushToSearchHistory: function(history, paramName, value) {
+		history.push({
+			search: `?${paramName}=${value}`,
+		})
+	},
 }
 
 Object.forEach = function(source, func) {

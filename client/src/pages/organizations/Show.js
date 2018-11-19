@@ -4,6 +4,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import {ListGroup, ListGroupItem, Nav, NavItem} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
+import utils from 'utils'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Fieldset from 'components/Fieldset'
@@ -30,6 +31,7 @@ import { connect } from 'react-redux'
 import Scrollspy from 'react-scrollspy'
 
 const NO_REPORT_FILTER = 'NO_FILTER'
+const REPORT_PAGE_PARAM = 'reportsPage'
 
 class BaseOrganizationShow extends Page {
 
@@ -61,14 +63,14 @@ class BaseOrganizationShow extends Page {
 	}
 
 	componentDidMount() {
-		this.reportsPageNum = this.getPageNum('reportsPage', this.props.location.search)
+		this.reportsPageNum = utils.getPageNum(REPORT_PAGE_PARAM, this.props.location.search)
 		super.componentDidMount()
 	}
 
 	componentDidUpdate(prevProps, prevState) {
 		// Re-load data if uuid has changed
 		if(prevProps.location.search !== this.props.location.search) {
-			this.reportsPageNum = this.getPageNum('reportsPage', this.props.location.search)
+			this.reportsPageNum = utils.getPageNum(REPORT_PAGE_PARAM, this.props.location.search)
 		}
 		if (this.props.match.params.uuid !== prevProps.match.params.uuid) {
 			this.loadData()
@@ -163,18 +165,6 @@ class BaseOrganizationShow extends Page {
 			toggleToFilter = Report.STATE.PENDING_APPROVAL
 		}
 		this.setState({ reportsFilter: toggleToFilter })
-	}
-
-	getPageNum(name, params) {
-		const searchParams = new URLSearchParams(params)
-		const pageNum = searchParams.get(name)
-		return pageNum ? pageNum : 0
-	}
-
-	pushSearchHistory(paramName, paramValue) {
-		this.props.history.push({
-			search: `?${paramName}=${paramValue}`,
-		})
 	}
 
 	render() {
@@ -305,7 +295,10 @@ class BaseOrganizationShow extends Page {
 		this.reportsPageNum = pageNum
 		let reportQueryPart = this.getReportQueryPart(this.state.organization.uuid)
 		GQL.run([reportQueryPart]).then(data =>
-			this.setState({reports: data.reports}, this.pushSearchHistory('reportsPage', pageNum))
+			this.setState(
+				{reports: data.reports},
+				utils.pushToSearchHistory(this.props.history, REPORT_PAGE_PARAM, pageNum)
+			)
 		)
 	}
 

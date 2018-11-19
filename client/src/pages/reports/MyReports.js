@@ -11,6 +11,8 @@ import {Person, Report} from 'models'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 
+import utils from 'utils'
+
 class BaseMyReports extends Page {
 
 	static propTypes = {
@@ -43,31 +45,14 @@ class BaseMyReports extends Page {
 
 	componentDidUpdate(prevProps, prevState) {
 		if(prevProps.location.search !== this.props.location.search) {
-			this.assignPageNums(this.props.location.search)
+			utils.assignPageNums(this.props.location.search)
 		}
 		super.componentDidUpdate(prevProps, prevState)
 	}
 
 	componentDidMount() {
-		this.assignPageNums(this.props.location.search)
+		utils.assignPageNums(this.pageNums, this.props.location.search)
 		super.componentDidMount()
-	}
-
-	assignPageNums(params) {
-		const searchParams = new URLSearchParams(params)
-		const updatePageNums = {}
-		for (const param of searchParams) {
-			const key = param[0]
-			const pageObj = { [key]: parseInt(param[1]) }
-			Object.assign(updatePageNums, pageObj)
-		}
-		Object.assign(this.pageNums, updatePageNums)
-	}
-
-	pushPageNumHistory(paramName, pageNum) {
-		this.props.history.push({
-			search: `?${paramName}=${pageNum}`,
-		})
 	}
 
 	@autobind
@@ -138,7 +123,10 @@ class BaseMyReports extends Page {
 			let stateChange = {}
 			stateChange[section] = data[section]
 			console.log(stateChange)
-			this.setState(stateChange, this.pushPageNumHistory(section, pageNum))
+			this.setState(
+				stateChange,
+				utils.pushToSearchHistory(this.props.history, section, pageNum)
+			)
 		})
 	}
 }
