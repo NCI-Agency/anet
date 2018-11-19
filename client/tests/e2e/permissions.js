@@ -142,7 +142,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
     await t.context.driver.wait(t.context.until.elementIsVisible($editPersonButton))
     await $editPersonButton.click()
 
-    let $bioTextArea = await $('.biography .text-editor')
+    let $bioTextArea = await $('.biography .public-DraftEditor-content')
     await t.context.driver.wait(
         async () => {
             let originalBioText = await $bioTextArea.getText()
@@ -188,6 +188,7 @@ async function getUserPersonAndPositionFromSearchResults(t, searchQuery, personN
     let {$, $$} = t.context
 
     let $searchBar = await $('#searchBarInput')
+    await $searchBar.clear()
     await $searchBar.sendKeys(searchQuery)
 
     let $searchBarSubmit = await $('#searchBarSubmit')
@@ -215,6 +216,7 @@ async function getPrincipalOrgFromSearchResults(t, principalOrgName) {
   let {$, $$} = t.context
 
   let $searchBar = await $('#searchBarInput')
+  await $searchBar.clear()
   await $searchBar.sendKeys(principalOrgName)
 
   let $searchBarSubmit = await $('#searchBarSubmit')

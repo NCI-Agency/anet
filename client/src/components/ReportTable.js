@@ -34,7 +34,7 @@ export default class ReportTable extends Component {
 					<tr key={report.uuid}>
 						{showAuthors && <td><LinkTo person={report.author} /></td>}
 						<td>{<LinkTo organization={report.advisorOrg} />}</td>
-						<td>{<LinkTo report={report} />}</td>
+						<td>{<LinkTo report={report} className="read-report-button" />}</td>
 						{showStatus && <td>{report.state}</td>}
 						<td>{moment(report.engagementDate).format('DD MMM YYYY')}</td>
 					</tr>
