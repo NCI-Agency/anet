@@ -1,24 +1,43 @@
 import { Report } from 'models'
-import { runGQL, fuzzy } from '../simutils'
+import { runGQL, populate } from '../simutils'
 import faker from 'faker'
 
 const populateReport = function (report) {
-    fuzzy.always() && (report.intent = faker.lorem.paragraph())
-    fuzzy.always() && (report.engagementDate = faker.date.recent().toISOString())
-    fuzzy.often() && (report.cancelledReason = faker.random.arrayElement(["CANCELLED_BY_ADVISOR","CANCELLED_BY_PRINCIPAL","CANCELLED_DUE_TO_TRANSPORTATION","CANCELLED_DUE_TO_FORCE_PROTECTION","CANCELLED_DUE_TO_ROUTES","CANCELLED_DUE_TO_THREAT"]))
-    fuzzy.always() && (report.atmosphere = faker.random.arrayElement(["POSITIVE","NEUTRAL","NEGATIVE"]))
-    fuzzy.often() && (report.atmosphereDetails = faker.lorem.sentence())
-    fuzzy.often() && (report.location = {})
-    fuzzy.often() && (report.attendees = [])
-    fuzzy.sometimes() && (report.tasks = [])
-    // fuzzy.often() && (report.comments = Array.apply(null, { length: faker.random.number(10)})).map(Function.call, faker.lorem.sentence())
-    fuzzy.often() && (report.reportText = faker.lorem.paragraphs())
-    fuzzy.often() && (report.nextSteps = faker.lorem.sentence())
-    fuzzy.often() && (report.keyOutcomes = faker.lorem.sentence())
-    fuzzy.seldomly() && (report.tags = [])
-    fuzzy.seldomly() && (report.reportSensitiveInformation = null) &&
-        (report.authorizationGroups = [])
-}
+
+    const emptyArray = () => { return [] }
+    const emptyObject = () => { return {} }
+    const template = {
+        intent: faker.lorem.paragraph,
+        engagementDate: () => faker.date.recent().toISOString(),
+        cancelledReason: () => faker.random.arrayElement(["CANCELLED_BY_ADVISOR","CANCELLED_BY_PRINCIPAL","CANCELLED_DUE_TO_TRANSPORTATION","CANCELLED_DUE_TO_FORCE_PROTECTION","CANCELLED_DUE_TO_ROUTES","CANCELLED_DUE_TO_THREAT"]),
+        atmosphere: () => faker.random.arrayElement(["POSITIVE","NEUTRAL","NEGATIVE"]),
+        atmosphereDetails: faker.lorem.sentence,
+        location: emptyObject,
+        attendees: emptyArray,
+        tasks: emptyArray,
+        reportText: faker.lorem.paragraphs,
+        nextSteps: faker.lorem.sentence,
+        keyOutcomes: faker.lorem.sentence,
+        tags: emptyArray,
+        reportSensitiveInformation: () => null,
+        authorizationGroups: emptyArray
+    }
+
+    populate(report, template)
+        .intent.always()
+        .engagementDate.always()
+        .cancelledReason.often()
+        .atmosphere.always()
+        .atmosphereDetails.often()
+        .location.often()
+        .attendees.often()
+        .tasks.sometimes()
+        .reportText.often()
+        .nextSteps.often()
+        .keyOutcomes.often()
+        .tags.seldom()
+        .reportSensitiveInformation.and().authorizationGroups.seldom()
+    }
 
 const createReport = async function (user) {
     const report = new Report()
@@ -32,10 +51,10 @@ const createReport = async function (user) {
 
 const updateDraftReport = async function (user) {
 
-    const report = await runGQL(user,
+    const reports = await runGQL(user,
         {
             query: `query {
-                reportList(query: {pageNum: 0, pageSize: 0, authorUuid: "${user.person.uuid}"}) {
+                reportList(query: {pageNum: 0, pageSize: 0, state:DRAFT, authorUuid: "${user.person.uuid}"}) {
                   list {
                     uuid
                   }
@@ -44,6 +63,7 @@ const updateDraftReport = async function (user) {
             }`,
             variables: {}
         })
+    const report = faker.random.arrayElement(reports.data.reportList.list)
 
     populateReport(report)
     const json = await runGQL(user,

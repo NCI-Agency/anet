@@ -1,6 +1,7 @@
 import { createReport } from './stories/ReportStories'
 import faker from 'faker'
 import {runGQL} from './simutils'
+import { createPerson } from './stories/PersonStories';
 
 const simpleScenario =
 {
@@ -35,21 +36,27 @@ const simpleScenario =
                     const person = faker.random.arrayElement(json.data.personList.list)
                     return { name: person.domainUsername, password: person.domainUsername, person: person }
                 }
-            },
+            }
         ],
     stories:
         [
+            // {
+            //     name: "Create Report",
+            //     frequency: 2,
+            //     runnable: createReport,
+            //     userTypes: ["existingAdvisor"]
+            // },
+            // {
+            //     name: "Create profile",
+            //     frequency: 1,
+            //     runnable: createReport,
+            //     userTypes: ["newUser"]
+            // },
             {
-                name: "Create Report",
-                frequency: 2,
-                runnable: createReport,
-                userTypes: ["existingAdvisor"]
-            },
-            {
-                name: "Create profile",
+                name: "Create person",
                 frequency: 1,
-                runnable: createReport,
-                userTypes: ["newUser"]
+                runnable: createPerson,
+                userTypes: ["existingAdvisor"]
             }
         ]
 }
