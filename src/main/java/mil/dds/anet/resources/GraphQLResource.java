@@ -78,7 +78,7 @@ public class GraphQLResource {
 	private final AnetObjectEngine engine;
 	private List<Object> resources;
 	private boolean developmentMode;
-	private final MetricRegistry metricRegistry; // FIXME: use a statistics collector for DataLoader?
+	private final MetricRegistry metricRegistry;
 	private GraphQLSchema graphqlSchema;
 
 	public GraphQLResource(AnetObjectEngine engine, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {
@@ -210,6 +210,9 @@ public class GraphQLResource {
 			return request.get();
 		} catch (InterruptedException | ExecutionException e) {
 			throw new WebApplicationException("failed to complete graphql request", e);
+		}
+		finally {
+			BatchingUtils.updateStats(metricRegistry, dataLoaderRegistry);
 		}
 	}
 
