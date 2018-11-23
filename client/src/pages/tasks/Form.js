@@ -12,9 +12,9 @@ import NewAutocomplete from 'components/NewAutocomplete'
 import Messages from'components/Messages'
 import DictionaryField from '../../HOC/DictionaryField'
 
-import Settings from 'Settings'
 import API from 'api'
 import {Organization, Person, Task} from 'models'
+import * as TaskDefs from 'models/Task'
 import _isEmpty from 'lodash/isEmpty'
 
 import CALENDAR_ICON from 'resources/calendar.png'
@@ -66,13 +66,6 @@ class BaseTaskForm extends Component {
 	render() {
 		const { currentUser, edit, title, ...myFormProps } = this.props
 
-		const taskShortLabel = Settings.fields.task.shortLabel
-		const customFieldRef1 = Settings.fields.task.customFieldRef1
-		const customFieldEnum1 = Settings.fields.task.customFieldEnum1
-		const customFieldEnum2 = Settings.fields.task.customFieldEnum2
-		const plannedCompletion = Settings.fields.task.plannedCompletion
-		const projectedCompletion = Settings.fields.task.projectedCompletion
-
 		const orgSearchQuery = {
 			status: Organization.STATUS.ACTIVE,
 			type: Organization.TYPE.ADVISOR_ORG,
@@ -103,7 +96,7 @@ class BaseTaskForm extends Component {
 				submitForm
 			}) => {
 				const action = <div>
-					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {taskShortLabel}</Button>
+					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {TaskDefs.shortLabel}</Button>
 				</div>
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
@@ -113,13 +106,13 @@ class BaseTaskForm extends Component {
 						<Fieldset>
 							<Field
 								name="shortName"
-								label={`${taskShortLabel} number`}
+								label={TaskDefs.fieldLabels.shortName}
 								component={FieldHelper.renderInputField}
 							/>
 
 							<Field
 								name="longName"
-								label={`${taskShortLabel} description`}
+								label={TaskDefs.fieldLabels.longName}
 								component={FieldHelper.renderInputField}
 							/>
 
@@ -131,7 +124,7 @@ class BaseTaskForm extends Component {
 
 							<Field
 								name="responsibleOrg"
-								label="Responsible organization"
+								label={TaskDefs.fieldLabels.responsibleOrg}
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('responsibleOrg', value)}
 								addon={ORGANIZATION_ICON}
@@ -140,14 +133,14 @@ class BaseTaskForm extends Component {
 									objectType={Organization}
 									valueKey="shortName"
 									fields={Organization.autocompleteQuery}
-									placeholder={`Select a responsible organization for this ${taskShortLabel}`}
+									placeholder={`Select a responsible organization for this ${TaskDefs.shortLabel}`}
 									queryParams={orgSearchQuery}
 								/>
 							</Field>
 
-							{customFieldRef1 &&
+							{TaskDefs.customFieldRef1 &&
 								<this.TaskCustomFieldRef1
-									dictProps={customFieldRef1}
+									dictProps={TaskDefs.customFieldRef1}
 									name="customFieldRef1"
 									component={FieldHelper.renderSpecialField}
 									onChange={value => setFieldValue('customFieldRef1', value)}
@@ -158,57 +151,57 @@ class BaseTaskForm extends Component {
 										valueKey="shortName"
 										fields={Task.autocompleteQuery}
 										template={Task.autocompleteTemplate}
-										placeholder={customFieldRef1.placeholder}
+										placeholder={TaskDefs.customFieldRef1.placeholder}
 										queryParams={{}}
 									/>
 								</this.TaskCustomFieldRef1>
 							}
 
 							<this.TaskCustomField
-								dictProps={Settings.fields.task.customField}
+								dictProps={TaskDefs.customField}
 								name="customField"
 								component={FieldHelper.renderInputField}
 							/>
 
-							{plannedCompletion &&
+							{TaskDefs.plannedCompletion &&
 								<this.PlannedCompletionField
-									dictProps={plannedCompletion}
+									dictProps={TaskDefs.plannedCompletion}
 									name="plannedCompletion"
 									component={FieldHelper.renderSpecialField}
 									onChange={(value, formattedValue) => setFieldValue('plannedCompletion', value)}
 									addon={CALENDAR_ICON}
 								>
-									<DatePicker showTodayButton placeholder={plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
+									<DatePicker showTodayButton placeholder={TaskDefs.plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
 								</this.PlannedCompletionField>
 							}
 
-							{projectedCompletion &&
+							{TaskDefs.projectedCompletion &&
 								<this.ProjectedCompletionField
-									dictProps={projectedCompletion}
+									dictProps={TaskDefs.projectedCompletion}
 									name="projectedCompletion"
 									component={FieldHelper.renderSpecialField}
 									onChange={(value, formattedValue) => setFieldValue('projectedCompletion', value)}
 									addon={CALENDAR_ICON}
 								>
-									<DatePicker showTodayButton placeholder={projectedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
+									<DatePicker showTodayButton placeholder={TaskDefs.projectedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
 								</this.ProjectedCompletionField>
 							}
 
-							{customFieldEnum1 &&
+							{TaskDefs.customFieldEnum1 &&
 								<this.TaskCustomFieldEnum1
-									dictProps={Object.without(customFieldEnum1, 'enum')}
+									dictProps={Object.without(TaskDefs.customFieldEnum1, 'enum')}
 									name="customFieldEnum1"
 									component={FieldHelper.renderButtonToggleGroup}
-									buttons={this.customEnumButtons(customFieldEnum1.enum)}
+									buttons={this.customEnumButtons(TaskDefs.customFieldEnum1.enum)}
 								/>
 							}
 
-							{customFieldEnum2 &&
+							{TaskDefs.customFieldEnum2 &&
 								<this.TaskCustomFieldEnum2
-									dictProps={Object.without(customFieldEnum2, 'enum')}
+									dictProps={Object.without(TaskDefs.customFieldEnum2, 'enum')}
 									name="customFieldEnum2"
 									component={FieldHelper.renderButtonToggleGroup}
-									buttons={this.customEnumButtons(customFieldEnum2.enum)}
+									buttons={this.customEnumButtons(TaskDefs.customFieldEnum2.enum)}
 								/>
 							}
 						</Fieldset>
@@ -218,7 +211,7 @@ class BaseTaskForm extends Component {
 								<Button onClick={this.onCancel}>Cancel</Button>
 							</div>
 							<div>
-								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {taskShortLabel}</Button>
+								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {TaskDefs.shortLabel}</Button>
 							</div>
 						</div>
 					</Form>

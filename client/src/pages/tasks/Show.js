@@ -12,9 +12,9 @@ import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
 import DictionaryField from '../../HOC/DictionaryField'
 
-import Settings from 'Settings'
 import GQL from 'graphqlapi'
 import {Person, Task} from 'models'
+import * as TaskDefs from 'models/Task'
 
 import moment from 'moment'
 
@@ -80,13 +80,6 @@ class BaseTaskShow extends Page {
 		const { task, reports } = this.state
 		const { currentUser, ...myFormProps } = this.props
 
-		const taskShortLabel = Settings.fields.task.shortLabel
-		const customFieldRef1 = Settings.fields.task.customFieldRef1
-		const customFieldEnum1 = Settings.fields.task.customFieldEnum1
-		const customFieldEnum2 = Settings.fields.task.customFieldEnum2
-		const plannedCompletion = Settings.fields.task.plannedCompletion
-		const projectedCompletion = Settings.fields.task.projectedCompletion
-
 		// Admins can edit tasks, or super users if this task is assigned to their org.
 		const canEdit = currentUser.isAdmin()
 
@@ -101,20 +94,20 @@ class BaseTaskShow extends Page {
 			}) => {
 				const action = canEdit && <LinkTo task={task} edit button="primary">Edit</LinkTo>
 				return <div>
-					<Breadcrumbs items={[[`${taskShortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
+					<Breadcrumbs items={[[`${TaskDefs.shortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={`${taskShortLabel} ${task.shortName}`} action={action} />
+						<Fieldset title={`${TaskDefs.shortLabel} ${task.shortName}`} action={action} />
 						<Fieldset>
 							<Field
 								name="shortName"
-								label={`${taskShortLabel} number`}
+								label={TaskDefs.fieldLabels.shortName}
 								component={FieldHelper.renderReadonlyField}
 							/>
 
 							<Field
 								name="longName"
-								label={`${taskShortLabel} description`}
+								label={TaskDefs.fieldLabels.longName}
 								component={FieldHelper.renderReadonlyField}
 							/>
 
@@ -125,7 +118,7 @@ class BaseTaskShow extends Page {
 
 							<Field
 								name="responsibleOrg"
-								label="Responsible organization"
+								label={TaskDefs.fieldLabels.responsibleOrg}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={values.responsibleOrg &&
 									<LinkTo organization={values.responsibleOrg}>
@@ -134,9 +127,9 @@ class BaseTaskShow extends Page {
 								}
 							/>
 
-							{customFieldRef1 &&
+							{TaskDefs.customFieldRef1 &&
 								<this.TaskCustomFieldRef1
-									dictProps={customFieldRef1}
+									dictProps={TaskDefs.customFieldRef1}
 									name="customFieldRef1"
 									component={FieldHelper.renderReadonlyField}
 									humanValue={values.customFieldRef1 &&
@@ -148,40 +141,40 @@ class BaseTaskShow extends Page {
 							}
 
 							<this.TaskCustomField
-								dictProps={Settings.fields.task.customField}
+								dictProps={TaskDefs.customField}
 								name="customField"
 								component={FieldHelper.renderReadonlyField}
 							/>
 
-							{plannedCompletion &&
+							{TaskDefs.plannedCompletion &&
 								<this.PlannedCompletionField
-									dictProps={plannedCompletion}
+									dictProps={TaskDefs.plannedCompletion}
 									name="plannedCompletion"
 									component={FieldHelper.renderReadonlyField}
 									humanValue={values.plannedCompletion && moment(values.plannedCompletion).format('D MMM YYYY')}
 								/>
 							}
 
-							{projectedCompletion &&
+							{TaskDefs.projectedCompletion &&
 								<this.ProjectedCompletionField
-									dictProps={projectedCompletion}
+									dictProps={TaskDefs.projectedCompletion}
 									name="projectedCompletion"
 									component={FieldHelper.renderReadonlyField}
 									humanValue={values.projectedCompletion && moment(values.projectedCompletion).format('D MMM YYYY')}
 								/>
 							}
 
-							{customFieldEnum1 &&
+							{TaskDefs.customFieldEnum1 &&
 								<this.TaskCustomFieldEnum1
-									dictProps={Object.without(customFieldEnum1, 'enum')}
+									dictProps={Object.without(TaskDefs.customFieldEnum1, 'enum')}
 									name="customFieldEnum1"
 									component={FieldHelper.renderReadonlyField}
 								/>
 							}
 
-							{customFieldEnum2 &&
+							{TaskDefs.customFieldEnum2 &&
 								<this.TaskCustomFieldEnum2
-									dictProps={Object.without(customFieldEnum2, 'enum')}
+									dictProps={Object.without(TaskDefs.customFieldEnum2, 'enum')}
 									name="customFieldEnum2"
 									component={FieldHelper.renderReadonlyField}
 								/>
@@ -189,7 +182,7 @@ class BaseTaskShow extends Page {
 						</Fieldset>
 					</Form>
 
-					<Fieldset title={`Reports for this ${taskShortLabel}`}>
+					<Fieldset title={`Reports for this ${TaskDefs.shortLabel}`}>
 						<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} />
 					</Fieldset>
 				</div>

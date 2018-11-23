@@ -3,12 +3,28 @@ import React from 'react'
 import Model from 'components/Model'
 import Settings from 'Settings'
 
+export const {
+	shortLabel,
+	customFieldRef1,
+	customField,
+	customFieldEnum1,
+	customFieldEnum2,
+	plannedCompletion,
+	projectedCompletion,
+} = Settings.fields.task
+
+export const fieldLabels = {
+	shortName: `${shortLabel} number`,
+	longName: `${shortLabel} description`,
+	responsibleOrg: 'Responsible organization',
+}
+
 export default class Task extends Model {
 	static resourceName = 'Task'
 	static listName = 'taskList'
 	static getInstanceName = 'task'
 	static displayName() {
-		return Settings.fields.task.shortLabel
+		return shortLabel
 	}
 
 	static STATUS = {
