@@ -9,7 +9,7 @@ import TaskForm from './Form'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Person, Task} from 'models'
+import {Task} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
@@ -20,15 +20,12 @@ class TaskEdit extends Page {
 		...pagePropTypes,
 	}
 
-	static modelName = 'Task'
+	state = {
+		task: new Task(),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			task: new Task(),
-			originalTask: new Task()
-		}
 	}
 
 	fetchData(props) {
@@ -41,26 +38,23 @@ class TaskEdit extends Page {
 				customFieldRef1 { uuid, shortName, longName }
 			}
 		`).then(data => {
+			const task = new Task(data.task)
 			if (data.task.plannedCompletion) {
-				data.task.plannedCompletion = moment(data.task.plannedCompletion).format()
+				task.plannedCompletion = moment(data.task.plannedCompletion).format()
 			}
 			if (data.task.projectedCompletion) {
-				data.task.projectedCompletion = moment(data.task.projectedCompletion).format()
+				task.projectedCompletion = moment(data.task.projectedCompletion).format()
 			}
-			this.setState({task: new Task(data.task), originalTask: new Task(data.task)})
+			this.setState({task})
 		})
 	}
 
 	render() {
-		let task = this.state.task
-
+		const { task } = this.state
 		return (
 			<div>
 				<Breadcrumbs items={[[`${Settings.fields.task.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
-
-				<Messages error={this.state.error} success={this.state.success} />
-
-				<TaskForm original={this.state.originalTask} task={task} edit />
+				<TaskForm edit initialValues={task} title={`${Settings.fields.task.shortLabel} ${task.shortName}`} />
 			</div>
 		)
 	}
