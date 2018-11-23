@@ -15,7 +15,6 @@ import DictionaryField from '../../HOC/DictionaryField'
 import API from 'api'
 import {Organization, Person, Task} from 'models'
 import * as TaskDefs from 'models/Task'
-import _isEmpty from 'lodash/isEmpty'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 import ORGANIZATION_ICON from 'resources/organizations.png'
@@ -81,8 +80,8 @@ class BaseTaskForm extends Component {
 			<Formik
 				enableReinitialize={true}
 				onSubmit={this.onSubmit}
-				validate={this.validate}
-				isInitialValid={() => this.isValid(this.props.initialValues)}
+				validationSchema={Task.yupSchema}
+				isInitialValid={() => Task.yupSchema.isValidSync(this.props.initialValues)}
 				{...myFormProps}
 			>
 			{({
@@ -219,30 +218,6 @@ class BaseTaskForm extends Component {
 			}}
 			</Formik>
 		)
-	}
-
-	isValid = (values) => {
-		return _isEmpty(this.validate(values))
-	}
-
-	validate = (values) => {
-		let errors = {}
-		if (!values.shortName) {
-			errors.shortName = 'Required'
-		}
-		if (!values.longName) {
-			errors.longName = 'Required'
-		}
-		if (!values.status) {
-			errors.status = 'Required'
-		}
-		if (values.responsibleOrg && (typeof values.responsibleOrg !== 'object')) {
-			errors.responsibleOrg =  'Organization not found in database'
-		}
-		if (values.customFieldRef1 && (typeof values.customFieldRef1 !== 'object')) {
-			errors.customFieldRef1 =  'Task not found in database'
-		}
-		return errors
 	}
 
 	customEnumButtons = (list) => {
