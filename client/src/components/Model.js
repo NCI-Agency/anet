@@ -1,9 +1,19 @@
 import encodeQuery from 'querystring/encode'
+import _forEach from 'lodash/forEach'
 import utils from 'utils'
 
 export default class Model {
 	static schema = {}
 
+	static fillObject(props, yupSchema) {
+		const obj = yupSchema.cast(props)
+		_forEach(yupSchema.fields, (value, key) => {
+			if (!obj.hasOwnProperty(key) || obj[key] === null || obj[key] === undefined) {
+				obj[key] = value.default()
+			}
+		})
+		return obj
+	}
 
 	static resourceName = null
 	static displayName(appSettings)  { return null }

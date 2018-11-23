@@ -3,6 +3,8 @@ import React from 'react'
 import Model from 'components/Model'
 import Settings from 'Settings'
 
+import * as yup from 'yup'
+
 export const {
 	shortLabel,
 	customFieldRef1,
@@ -32,24 +34,37 @@ export default class Task extends Model {
 		INACTIVE: 'INACTIVE'
 	}
 
-	static schema = {
-		shortName: '',
-		longName: '',
-		category: '',
-		responsibleOrg: {},
-		customFieldRef1: {},
-		customFieldEnum1: '',
-		customFieldEnum2: '',
-		customField: '',
-		projectedCompletion: null,
-		plannedCompletion: null,
-		get status() { return Task.STATUS.ACTIVE },
-	}
+	static yupSchema = yup.object().shape({
+		shortName: yup.string().required().default('')
+			.label(fieldLabels.shortName),
+		longName: yup.string().required().default('')
+			.label(fieldLabels.longName),
+		category: yup.string().nullable().default(''),
+		responsibleOrg: yup.object().nullable().default({})
+			.label(fieldLabels.responsibleOrg),
+		customFieldRef1: yup.object().nullable().default({})
+			.label(customFieldRef1.label),
+		customFieldEnum1: yup.string().nullable().default('')
+			.label(customFieldEnum1.label),
+		customFieldEnum2: yup.string().nullable().default('')
+			.label(customFieldEnum2.label),
+		customField: yup.string().nullable().default('')
+			.label(customField.label),
+		projectedCompletion: yup.number().nullable().default(null)
+			.label(projectedCompletion.label),
+		plannedCompletion: yup.number().nullable().default(null)
+			.label(plannedCompletion.label),
+		status: yup.string().required().default(() => Task.STATUS.ACTIVE),
+	})
 
 	static autocompleteQuery = "uuid, shortName, longName"
 
 	static autocompleteTemplate(task) {
 		return <span>{[task.shortName, task.longName].join(' - ')}</span>
+	}
+
+	constructor(props) {
+		super(Model.fillObject(props, Task.yupSchema))
 	}
 
 	toString() {
