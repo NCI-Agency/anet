@@ -127,7 +127,7 @@ export default class NewAutocomplete extends Component {
 		if (typeof suggestion === 'object') {
 			return suggestion[valueKey] || ''
 		}
-		return suggestion
+		return suggestion || ''
 	}
 
 	@autobind
@@ -222,7 +222,7 @@ export default class NewAutocomplete extends Component {
 			}
 		}
 		if (this.props.onBlur) {
-			this.props.onBlur()  // make sure the field is being marked as touched
+			this.props.onBlur(event)  // make sure the field is being marked as touched
 		}
 	}
 
