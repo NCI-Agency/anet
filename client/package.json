@@ -108,7 +108,8 @@
     "react-toastify": "^4.4.3",
     "react-ultimate-pagination": "^1.2.0",
     "redux": "^4.0.1",
-    "whatwg-fetch": "^2.0.3"
+    "whatwg-fetch": "^2.0.3",
+    "yup": "^0.26.6"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production --config config/webpack.prod.js",
