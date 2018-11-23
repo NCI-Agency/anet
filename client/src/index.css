@@ -540,14 +540,14 @@ table hr.attendee-divider {
 	padding-left: 1rem;
 }
 
-.report-form fieldset:last-child {
+.form-horizontal fieldset:last-child {
 	margin-bottom: 10px;
 }
 
 .submit-buttons {
 	display: flex;
 	align-items: flex-end;
-	margin: 5rem 0 5rem 0;
+	margin-bottom: 10px;
 }
 
 .submit-buttons > div {
