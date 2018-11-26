@@ -55,8 +55,7 @@ export default class Task extends Model {
 		plannedCompletion: yup.number().nullable().default(null)
 			.label(plannedCompletion.label),
 		status: yup.string().required().default(() => Task.STATUS.ACTIVE),
-	})
-	// FIXME: merge with Model.yupSchema (notes!)
+	}).concat(Model.yupSchema)
 
 	static autocompleteQuery = "uuid, shortName, longName"
 

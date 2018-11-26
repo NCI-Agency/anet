@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import encodeQuery from 'querystring/encode'
 import _forEach from 'lodash/forEach'
 import utils from 'utils'
+import * as yup from 'yup'
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */`
 	uuid createdAt updatedAt text author { uuid name rank } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
@@ -15,6 +16,10 @@ export default class Model {
 	static schema = {
 		notes: [],
 	}
+
+	static yupSchema = yup.object().shape({
+		notes: yup.array().nullable().default([]),
+	})
 
 	static fillObject(props, yupSchema) {
 		const obj = yupSchema.cast(props)

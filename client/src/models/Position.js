@@ -46,8 +46,7 @@ export default class Position extends Model {
 			.test('required-object', '${path} is required', value => value && value.uuid),
 		person: yup.object().nullable().default({}),
 		location: yup.object().nullable().default({}),
-	})
-	// FIXME: merge with Model.yupSchema (notes!)
+	}).concat(Model.yupSchema)
 
 	static autocompleteQuery = "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name }"
 
