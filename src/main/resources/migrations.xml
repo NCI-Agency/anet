@@ -14,6 +14,10 @@
 	<!-- Not really a UUID but who cares? -->
 	<property name="uuid_function" value="lower(hex(randomblob(16)))" dbms="sqlite" />
 
+	<!-- Type for storing long text transparantly -->
+	<property name="long_text_type" value="nvarchar(max)" dbms="mssql" />
+	<property name="long_text_type" value="text" dbms="postgresql,sqlite" />
+
 	<!-- Use a NONCLUSTERED index only for MSSQL -->
 	<property name="non_clustered" value="NONCLUSTERED" dbms="mssql" />
 	<property name="non_clustered" value="" dbms="postgresql,sqlite" />
@@ -2191,6 +2195,43 @@
 		<dropColumn tableName="tags" columnName="id" />
 		<dropColumn tableName="tasks" columnName="id" />
 		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add_notes" author="gjvoosten">
+		<createTable tableName="notes">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="authorUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="text" type="${long_text_type}" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="notes" constraintName="FK_notes_author" baseColumnNames="authorUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<createTable tableName="noteRelatedObjects">
+			<column name="noteUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="noteRelatedObjects" constraintName="FK_noteRelatedObjects_note" baseColumnNames="noteUuid"
+			referencedTableName="notes" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
 	</changeSet>
 
 </databaseChangeLog>

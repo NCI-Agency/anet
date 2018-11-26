@@ -47,6 +47,7 @@ export default class Position extends Model {
 		person: yup.object().nullable().default({}),
 		location: yup.object().nullable().default({}),
 	})
+	// FIXME: merge with Model.yupSchema (notes!)
 
 	static autocompleteQuery = "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name }"
 

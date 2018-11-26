@@ -2,6 +2,7 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import LocationForm from './Form'
 
@@ -29,6 +30,7 @@ class LocationEdit extends Page {
 		return API.query(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
 				uuid, name, status, lat, lng
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			this.setState({location: new Location(data.location)})
@@ -39,6 +41,7 @@ class LocationEdit extends Page {
 		const { location } = this.state
 		return (
 			<div>
+				<RelatedObjectNotes notes={location.notes} relatedObject={{relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
 				<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)], ["Edit", Location.pathForEdit(location)]]} />
 				<LocationForm edit initialValues={location} title={`Location ${location.name}`} />
 			</div>

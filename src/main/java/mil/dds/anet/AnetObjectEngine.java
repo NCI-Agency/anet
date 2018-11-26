@@ -31,6 +31,7 @@ import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.TaskDao;
@@ -64,6 +65,7 @@ public class AnetObjectEngine {
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
+	private final NoteDao noteDao;
 	private final Map<String, Object> context;
 
 	ISearcher searcher;
@@ -91,6 +93,7 @@ public class AnetObjectEngine {
 		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
 		emailDao = new EmailDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
+		noteDao = new NoteDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
 		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
 		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
@@ -158,6 +161,10 @@ public class AnetObjectEngine {
 
 	public AuthorizationGroupDao getAuthorizationGroupDao() {
 		return authorizationGroupDao;
+	}
+
+	public NoteDao getNoteDao() {
+		return noteDao;
 	}
 
 	public EmailDao getEmailDao() {

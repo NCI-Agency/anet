@@ -3,6 +3,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import moment from 'moment'
 
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import TaskForm from './Form'
 
@@ -35,6 +36,7 @@ class TaskEdit extends Page {
 				plannedCompletion, projectedCompletion,
 				responsibleOrg { uuid, shortName, longName, identificationCode },
 				customFieldRef1 { uuid, shortName, longName }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			const task = new Task(data.task)
@@ -52,6 +54,7 @@ class TaskEdit extends Page {
 		const { task } = this.state
 		return (
 			<div>
+				<RelatedObjectNotes notes={task.notes} relatedObject={{relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
 				<Breadcrumbs items={[[`${Settings.fields.task.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
 				<TaskForm edit initialValues={task} title={`${Settings.fields.task.shortLabel} ${task.shortName}`} />
 			</div>

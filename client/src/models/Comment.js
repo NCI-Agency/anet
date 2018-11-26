@@ -6,7 +6,8 @@ export default class Comment extends Model {
 	static schema = {
 		reportUuid: null,
 		author: {},
-		text: ''
+		text: '',
+		...Model.schema,
 	}
 
 	toString() {

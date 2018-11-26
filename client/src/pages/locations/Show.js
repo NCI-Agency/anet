@@ -11,6 +11,7 @@ import Messages, {setMessages} from 'components/Messages'
 import Leaflet from 'components/Leaflet'
 import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import GQL from 'graphqlapi'
 import {Location, Person} from 'models'
@@ -53,6 +54,7 @@ class BaseLocationShow extends Page {
 		const locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
 				uuid, name, lat, lng, status
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`)
 
@@ -96,6 +98,7 @@ class BaseLocationShow extends Page {
 				}
 				const action = canEdit && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>
 				return <div>
+					<RelatedObjectNotes notes={location.notes} relatedObject={{relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
 					<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">

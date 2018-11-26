@@ -28,7 +28,8 @@ export default class Organization extends Model {
 		childrenOrgs: [],
 		approvalSteps: [],
 		positions: [],
-		tasks: []
+		tasks: [],
+		...Model.schema,
 	}
 
 	static autocompleteQuery = "uuid, shortName, longName, identificationCode"

@@ -1,9 +1,20 @@
+import PropTypes from 'prop-types'
+
 import encodeQuery from 'querystring/encode'
 import _forEach from 'lodash/forEach'
 import utils from 'utils'
 
+export const GRAPHQL_NOTE_FIELDS = /* GraphQL */`
+	uuid createdAt updatedAt text author { uuid name rank } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
+`
+export const GRAPHQL_NOTES_FIELDS = /* GraphQL */`
+	notes { ${GRAPHQL_NOTE_FIELDS} }
+`
+
 export default class Model {
-	static schema = {}
+	static schema = {
+		notes: [],
+	}
 
 	static fillObject(props, yupSchema) {
 		const obj = yupSchema.cast(props)
@@ -14,6 +25,22 @@ export default class Model {
 		})
 		return obj
 	}
+
+	static notePropTypes = PropTypes.shape({
+		uuid: PropTypes.string,
+		createdAt: PropTypes.number,
+		text: PropTypes.string,
+		author: PropTypes.shape({
+			uuid: PropTypes.string,
+			name: PropTypes.string,
+			rank: PropTypes.string,
+		}),
+		noteRelatedObjects: PropTypes.arrayOf(PropTypes.shape({
+			noteUuid: PropTypes.string,
+			relatedObjectType: PropTypes.string,
+			relatedObjectUuid: PropTypes.string,
+		})),
+	})
 
 	static resourceName = null
 	static displayName(appSettings)  { return null }

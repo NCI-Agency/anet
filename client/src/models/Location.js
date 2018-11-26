@@ -18,6 +18,7 @@ export default class Location extends Model {
 		lat: yup.number().nullable().default(null),
 		lng: yup.number().nullable().default(null),
 	})
+	// FIXME: merge with Model.yupSchema (notes!)
 
 	static autocompleteQuery = "uuid, name"
 

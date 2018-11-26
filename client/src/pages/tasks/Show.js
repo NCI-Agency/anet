@@ -10,6 +10,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 import DictionaryField from '../../HOC/DictionaryField'
 
 import GQL from 'graphqlapi'
@@ -65,6 +66,7 @@ class BaseTaskShow extends Page {
 				plannedCompletion, projectedCompletion,
 				responsibleOrg { uuid, shortName, longName, identificationCode },
 				customFieldRef1 { uuid, shortName, longName }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`)
 
@@ -94,6 +96,7 @@ class BaseTaskShow extends Page {
 			}) => {
 				const action = canEdit && <LinkTo task={task} edit button="primary">Edit</LinkTo>
 				return <div>
+					<RelatedObjectNotes notes={task.notes} relatedObject={{relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
 					<Breadcrumbs items={[[`${TaskDefs.shortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
