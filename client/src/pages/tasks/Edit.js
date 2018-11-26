@@ -3,7 +3,6 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import moment from 'moment'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import Messages from 'components/Messages'
 
 import TaskForm from './Form'
 
