@@ -46,7 +46,7 @@ class BaseTaskShow extends Page {
 	}
 
 	fetchData(props) {
-		let reportsQuery = new GQL.Part(/* GraphQL */`
+		const reportsQuery = new GQL.Part(/* GraphQL */`
 			reports: reportList(query: $reportsQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
@@ -58,7 +58,7 @@ class BaseTaskShow extends Page {
 			taskUuid: props.match.params.uuid,
 		})
 
-		let taskQuery = new GQL.Part(/* GraphQL */`
+		const taskQuery = new GQL.Part(/* GraphQL */`
 			task(uuid:"${props.match.params.uuid}") {
 				uuid, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
@@ -120,9 +120,9 @@ class BaseTaskShow extends Page {
 								name="responsibleOrg"
 								label={TaskDefs.fieldLabels.responsibleOrg}
 								component={FieldHelper.renderReadonlyField}
-								humanValue={values.responsibleOrg &&
-									<LinkTo organization={values.responsibleOrg}>
-										{values.responsibleOrg.shortName} {values.responsibleOrg.longName} {values.responsibleOrg.identificationCode}
+								humanValue={task.responsibleOrg &&
+									<LinkTo organization={task.responsibleOrg}>
+										{task.responsibleOrg.shortName} {task.responsibleOrg.longName} {task.responsibleOrg.identificationCode}
 									</LinkTo>
 								}
 							/>
@@ -132,9 +132,9 @@ class BaseTaskShow extends Page {
 									dictProps={TaskDefs.customFieldRef1}
 									name="customFieldRef1"
 									component={FieldHelper.renderReadonlyField}
-									humanValue={values.customFieldRef1 &&
-										<LinkTo task={values.customFieldRef1}>
-											{values.customFieldRef1.shortName} {values.customFieldRef1.longName}
+									humanValue={task.customFieldRef1 &&
+										<LinkTo task={task.customFieldRef1}>
+											{task.customFieldRef1.shortName} {task.customFieldRef1.longName}
 										</LinkTo>
 									}
 								/>
@@ -151,7 +151,7 @@ class BaseTaskShow extends Page {
 									dictProps={TaskDefs.plannedCompletion}
 									name="plannedCompletion"
 									component={FieldHelper.renderReadonlyField}
-									humanValue={values.plannedCompletion && moment(values.plannedCompletion).format('D MMM YYYY')}
+									humanValue={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')}
 								/>
 							}
 
@@ -160,7 +160,7 @@ class BaseTaskShow extends Page {
 									dictProps={TaskDefs.projectedCompletion}
 									name="projectedCompletion"
 									component={FieldHelper.renderReadonlyField}
-									humanValue={values.projectedCompletion && moment(values.projectedCompletion).format('D MMM YYYY')}
+									humanValue={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')}
 								/>
 							}
 

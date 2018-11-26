@@ -38,7 +38,7 @@ class BaseLocationShow extends Page {
 	}
 
 	fetchData(props) {
-		let reportsQuery = new GQL.Part(/* GraphQL */`
+		const reportsQuery = new GQL.Part(/* GraphQL */`
 			reports: reportList(query: $reportsQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
@@ -50,7 +50,7 @@ class BaseLocationShow extends Page {
 			locationUuid: props.match.params.uuid,
 		})
 
-		let locationQuery = new GQL.Part(/* GraphQL */`
+		const locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
 				uuid, name, lat, lng, status
 			}
@@ -85,13 +85,13 @@ class BaseLocationShow extends Page {
 				values,
 			}) => {
 				const marker = {
-					id: values.uuid || 0,
-					name: values.name || '',
+					id: location.uuid || 0,
+					name: location.name || '',
 				}
-				if (Location.hasCoordinates(values)) {
+				if (Location.hasCoordinates(location)) {
 					Object.assign(marker, {
-						lat: values.lat,
-						lng: values.lng,
+						lat: location.lat,
+						lng: location.lng,
 					})
 				}
 				const action = canEdit && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>
@@ -116,7 +116,7 @@ class BaseLocationShow extends Page {
 								component={FieldHelper.renderReadonlyField}
 								humanValue={
 									<React.Fragment>
-										<Coordinate coord={values.lat} />, <Coordinate coord={values.lng} />
+										<Coordinate coord={location.lat} />, <Coordinate coord={location.lng} />
 									</React.Fragment>
 								}
 							/>
