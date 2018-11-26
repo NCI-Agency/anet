@@ -80,12 +80,14 @@ public class DaoUtils {
 
 	public static void setInsertFields(AbstractAnetBean bean) {
 		bean.setUuid(getNewUuid());
-		bean.setCreatedAt(DateTime.now());
-		bean.setUpdatedAt(DateTime.now());
+		final DateTime now = DateTime.now();
+		bean.setCreatedAt(now);
+		bean.setUpdatedAt(now);
 	}
 
 	public static void setUpdateFields(AbstractAnetBean bean) {
-		bean.setUpdatedAt(DateTime.now());
+		final DateTime now = DateTime.now();
+		bean.setUpdatedAt(now);
 	}
 
 	public static void setCommonBeanFields(AbstractAnetBean bean, ResultSet rs, String tableName)

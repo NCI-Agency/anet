@@ -11,6 +11,7 @@ import Form from 'components/Form'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 import DictionaryField from '../../HOC/DictionaryField'
 import SubNav from 'components/SubNav'
 
@@ -122,6 +123,7 @@ class BaseOrganizationShow extends Page {
 				approvalSteps {
 					uuid, name, approvers { uuid, name, person { uuid, name, rank}}
 				}
+				${GRAPHQL_NOTES_FIELDS}
 			}`)
 		let reportsPart = this.getReportQueryPart(props.match.params.uuid)
 		let tasksPart = this.getTaskQueryPart(props.match.params.uuid)
@@ -206,8 +208,8 @@ class BaseOrganizationShow extends Page {
 					/>
 				</div>}
 
+				<RelatedObjectNotes notes={org.notes} relatedObject={{relatedObjectType: 'organizations', relatedObjectUuid: org.uuid}} />
 				<Breadcrumbs items={[[org.shortName || 'Organization', Organization.pathFor(org)]]} />
-
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Form formFor={org} static horizontal>

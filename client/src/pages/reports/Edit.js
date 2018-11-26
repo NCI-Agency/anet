@@ -6,6 +6,7 @@ import moment from 'moment'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import ReportForm from './Form'
 
@@ -52,6 +53,7 @@ class BaseReportEdit extends Page {
 				tags { uuid, name, description }
 				reportSensitiveInformation { uuid, text }
 				authorizationGroups { uuid, name, description }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			function getReportFromData() {
@@ -79,6 +81,7 @@ class BaseReportEdit extends Page {
 
 		return (
 			<div className="report-edit">
+				<RelatedObjectNotes notes={report.notes} relatedObject={{relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 				<Breadcrumbs items={[['Report #' + report.uuid, '/reports/' + report.uuid], ['Edit', '/reports/' + report.uuid + '/edit']]} />
 
 				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.uuid}`} onDelete={canDelete && onConfirmDeleteProps} />

@@ -93,7 +93,7 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@blueprintjs/core@^3.7.0":
+"@blueprintjs/core@^3.9.0":
   version "3.9.0"
   resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.9.0.tgz#60f10908227de8260be920a529bc67efbe9eb686"
   integrity sha512-Dmt4qcmDooIqlmyJCMICAU2htIESnt1YjUqb/j+A3JkVAq0dxjaxjECm8+bClrZTgpEFEqrUkk0pKaXoVYlM8w==
@@ -9729,6 +9729,11 @@ react-mosaic-component@^2.0.0:
     react-dnd "^5.0.0"
     react-dnd-html5-backend "^5.0.1"
     uuid "^3.3.2"
+
+react-notification-badge@^1.3.4:
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/react-notification-badge/-/react-notification-badge-1.3.4.tgz#730ed28dbd4f436f3c96540938a3fdf5663ab11c"
+  integrity sha1-cw7Sjb1PQ288llQJOKP99WY6sRw=
 
 react-overlays@^0.7.4:
   version "0.7.4"

@@ -12,6 +12,8 @@ import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Note;
+import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
@@ -73,6 +75,18 @@ public final class BatchingUtils {
 			@Override
 			public CompletionStage<List<Location>> load(List<String> keys) {
 				return CompletableFuture.supplyAsync(() -> engine.getLocationDao().getByIds(keys));
+			}
+		}, dataLoaderOptions));
+		dataLoaderRegistry.register("note.noteRelatedObjects", new DataLoader<>(new BatchLoader<String, List<NoteRelatedObject>>() {
+			@Override
+			public CompletionStage<List<List<NoteRelatedObject>>> load(List<String> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getNoteDao().getNoteRelatedObjects(foreignKeys));
+			}
+		}, dataLoaderOptions));
+		dataLoaderRegistry.register("noteRelatedObject.notes", new DataLoader<>(new BatchLoader<String, List<Note>>() {
+			@Override
+			public CompletionStage<List<List<Note>>> load(List<String> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getNoteDao().getNotes(foreignKeys));
 			}
 		}, dataLoaderOptions));
 		dataLoaderRegistry.register("organizations", new DataLoader<>(new BatchLoader<String, Organization>() {

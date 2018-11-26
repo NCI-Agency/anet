@@ -28,6 +28,7 @@ export default class Task extends Model {
 		projectedCompletion: null,
 		plannedCompletion: null,
 		get status() { return Task.STATUS.ACTIVE },
+		...Model.schema,
 	}
 
 	static autocompleteQuery = "uuid, shortName, longName"
