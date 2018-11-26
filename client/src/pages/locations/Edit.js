@@ -1,12 +1,12 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Messages from 'components/Messages'
+import Breadcrumbs from 'components/Breadcrumbs'
 
 import LocationForm from './Form'
-import {Location} from 'models'
 
 import API from 'api'
+import {Location} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
@@ -17,13 +17,12 @@ class LocationEdit extends Page {
 		...pagePropTypes,
 	}
 
+	state = {
+		location: new Location(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			location: new Location(),
-			originalLocation : new Location()
-		}
 	}
 
 	fetchData(props) {
@@ -32,18 +31,16 @@ class LocationEdit extends Page {
 				uuid, name, status, lat, lng
 			}
 		`).then(data => {
-			this.setState({location: new Location(data.location), originalLocation : new Location(data.location) })
+			this.setState({location: new Location(data.location)})
 		})
 	}
 
 	render() {
-		let location = this.state.location
-
+		const { location } = this.state
 		return (
 			<div>
-				<Messages error={this.state.error} success={this.state.success} />
-
-				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />
+				<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)], ["Edit", Location.pathForEdit(location)]]} />
+				<LocationForm edit initialValues={location} title={`Location ${location.name}`} />
 			</div>
 		)
 	}

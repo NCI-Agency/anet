@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import autobind from 'autobind-decorator'
 
-import Form from 'components/Form'
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
@@ -24,14 +25,15 @@ class BaseLocationShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static modelName = 'Location'
+	state = {
+		location: new Location(),
+		reportsPageNum: 0,
+		success: null,
+		error: null,
+	}
 
 	constructor(props) {
 		super(props)
-		this.state = {
-			location: new Location(),
-			reportsPageNum: 0
-		}
 		setMessages(props,this.state)
 	}
 
@@ -63,41 +65,77 @@ class BaseLocationShow extends Page {
 	}
 
 	render() {
-		let {location, reports} = this.state
-		const { currentUser } = this.props
-		let markers=[]
-		let latlng = 'None'
-		if (Location.hasCoordinates(location)) {
-			latlng = location.lat + ', ' + location.lng
-			markers.push({name: location.name, lat: location.lat, lng: location.lng})
+		const { location, reports } = this.state
+		const { currentUser, ...myFormProps } = this.props
+
+		const canEdit = currentUser.isSuperUser()
+
+		function Coordinate(props) {
+			const coord = typeof props.coord === 'number' ? Math.round(props.coord * 1000) / 1000 : '?'
+			return <span>{coord}</span>
 		}
 
 		return (
-			<div>
-				<Breadcrumbs items={[[location.name || 'Location', Location.pathFor(location)]]} />
+			<Formik
+				enableReinitialize={true}
+				initialValues={location}
+				{...myFormProps}
+			>
+			{({
+				values,
+			}) => {
+				const marker = {
+					id: values.uuid || 0,
+					name: values.name || '',
+				}
+				if (Location.hasCoordinates(values)) {
+					Object.assign(marker, {
+						lat: values.lat,
+						lng: values.lng,
+					})
+				}
+				const action = canEdit && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>
+				return <div>
+					<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)]]} />
+					<Messages success={this.state.success} error={this.state.error} />
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={`Location ${location.name}`} action={action} />
+						<Fieldset>
+							<Field
+								name="name"
+								component={FieldHelper.renderReadonlyField}
+							/>
 
-				<Messages success={this.state.success} error={this.state.error} />
+							<Field
+								name="status"
+								component={FieldHelper.renderReadonlyField}
+							/>
 
-				<Form static formFor={location} horizontal >
-					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>} >
-						<Form.Field id="status" />
+							<Field
+								name="location"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={
+									<React.Fragment>
+										<Coordinate coord={values.lat} />, <Coordinate coord={values.lng} />
+									</React.Fragment>
+								}
+							/>
+						</Fieldset>
 
-						<Form.Field id="latlng" value={latlng} label="Lat/Lon" />
+						<Leaflet markers={[marker]} />
+					</Form>
+
+					<Fieldset title={`Reports at this Location`}>
+						<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} mapId="reports" />
 					</Fieldset>
-
-					<Leaflet markers={markers} />
-				</Form>
-
-				<Fieldset title="Reports at this location">
-					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} mapId="reports" />
-				</Fieldset>
-			</div>
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	goToReportsPage(pageNum) {
-		this.setState({reportsPageNum: pageNum}, () => this.loadData())
+	goToReportsPage = (pageNum) => {
+		this.setState({reportsPageNum: pageNum}, this.loadData)
 	}
 }
 

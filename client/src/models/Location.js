@@ -1,5 +1,7 @@
 import Model from 'components/Model'
 
+import * as yup from 'yup'
+
 export default class Location extends Model {
 	static resourceName = 'Location'
 	static listName = 'locationList'
@@ -10,17 +12,21 @@ export default class Location extends Model {
 		INACTIVE: 'INACTIVE'
 	}
 
-	static schema = {
-		name: '',
-		get status() { return Location.STATUS.ACTIVE },
-		lat: null,
-		lng: null
-	}
+	static yupSchema = yup.object().shape({
+		name: yup.string().required().default(''),
+		status: yup.string().required().default(() => Location.STATUS.ACTIVE),
+		lat: yup.number().nullable().default(null),
+		lng: yup.number().nullable().default(null),
+	})
 
 	static autocompleteQuery = "uuid, name"
 
 	static hasCoordinates(location) {
 		return location && typeof location.lat === 'number' && typeof location.lng === 'number'
+	}
+
+	constructor(props) {
+		super(Model.fillObject(props, Location.yupSchema))
 	}
 
 	toString() {
