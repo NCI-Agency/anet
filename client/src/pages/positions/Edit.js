@@ -6,7 +6,7 @@ import Breadcrumbs from 'components/Breadcrumbs'
 import PositionForm from './Form'
 
 import API from 'api'
-import {Person, Position} from 'models'
+import {Position} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
@@ -17,15 +17,12 @@ class PositionEdit extends Page {
 		...pagePropTypes,
 	}
 
-	static modelName = 'Position'
+	state = {
+		position: new Position(),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			position: new Position(),
-			originalPosition: new Position(),
-		}
 	}
 
 	fetchData(props) {
@@ -39,30 +36,24 @@ class PositionEdit extends Page {
 			}
 		`).then(data => {
 			function getPositionFromData() {
-				let position = new Position(data.position)
-				if (position.type === Position.TYPE.ADVISOR || position.type === Position.TYPE.SUPER_USER || position.type === Position.TYPE.ADMINISTRATOR) {
-					// For advisor types of positions, set the type to ADVISOR and add
-					// permissions property. The permissions property allows selecting a
-					// specific advisor type and is removed in the onSubmit method in the
-					// Form.js.
-					position.permissions = position.type
+				const position = new Position(data.position)
+				if ([Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR].includes(position.type)) {
+					// For advisor types of positions, set the type to ADVISOR.
 					position.type = Position.TYPE.ADVISOR
 				}
 				return position
 			}
 
-			this.setState({position: getPositionFromData(), originalPosition: getPositionFromData()})
+			this.setState({position: getPositionFromData()})
 		})
 	}
 
 	render() {
-		let position = this.state.position
-
+		const { position } = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[[`Edit ${position.name}`, Position.pathForEdit(position)]]} />
-
-				<PositionForm original={this.state.originalPosition} position={position} edit success={this.state.success} error={this.state.error} />
+				<Breadcrumbs items={[[`Position ${position.name}`, Position.pathFor(position)], ["Edit", Position.pathForEdit(position)]]} />
+				<PositionForm edit initialValues={position} title={`Position ${position.name}`} />
 			</div>
 		)
 	}

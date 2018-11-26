@@ -3,8 +3,19 @@ import React from 'react'
 import Model from 'components/Model'
 import Settings from 'Settings'
 
+import * as yup from 'yup'
+
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
+
+export const advisorPosition = Settings.fields.advisor.position
+export const principalPosition = Settings.fields.principal.position
+export const administratorPosition = Settings.fields.administrator.position
+export const superUserPosition = Settings.fields.superUser.position
+
+export const fieldLabels = {
+	name: 'Position Name',
+}
 
 export default class Position extends Model {
 	static resourceName = 'Position'
@@ -23,16 +34,19 @@ export default class Position extends Model {
 		ADMINISTRATOR: 'ADMINISTRATOR'
 	}
 
-	static schema = {
-		name: '',
-		type: '',
-		code: '',
-		get status() { return Position.STATUS.ACTIVE },
-		associatedPositions: [],
-		organization: {},
-		person: {},
-		location: {},
-	}
+	static yupSchema = yup.object().shape({
+		name: yup.string().required().default('')
+			.label(fieldLabels.name),
+		type: yup.string().required().default(() => Position.TYPE.ADVISOR),
+		code: yup.string().nullable().default(''),
+		status: yup.string().required().default(() => Position.STATUS.ACTIVE),
+		associatedPositions: yup.array().nullable().default([]),
+		previousPeople: yup.array().nullable().default([]),
+		organization: yup.object().nullable().default({})
+			.test('required-object', '${path} is required', value => value && value.uuid),
+		person: yup.object().nullable().default({}),
+		location: yup.object().nullable().default({}),
+	})
 
 	static autocompleteQuery = "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name }"
 
@@ -45,14 +59,18 @@ export default class Position extends Model {
 
 	static humanNameOfType(type) {
 		if (type === Position.TYPE.PRINCIPAL) {
-			return Settings.fields.principal.position.type
+			return principalPosition.type
 		} else if (type === Position.TYPE.ADVISOR) {
-			return Settings.fields.advisor.position.type
+			return advisorPosition.type
 		} else if (type === Position.TYPE.SUPER_USER) {
-			return Settings.fields.superUser.position.type
+			return superUserPosition.type
 		} else if (type === Position.TYPE.ADMINISTRATOR) {
-			return Settings.fields.administrator.position.type
+			return administratorPosition.type
 		}
+	}
+
+	constructor(props) {
+		super(Model.fillObject(props, Position.yupSchema))
 	}
 
 	humanNameOfType() {
