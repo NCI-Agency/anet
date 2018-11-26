@@ -48,7 +48,7 @@ export default class AssignPersonModal extends Component {
 					<Modal.Title>Set Person for <LinkTo position={position} isLink={false}/></Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					{position.person.id &&
+					{position.person.uuid &&
 						<div style={{textAlign:'center'}}>
 							<Button bsStyle="danger" onClick={this.remove}>
 								Remove <LinkTo person={position.person} isLink={false}/> from <LinkTo position={position} isLink={false}/>
@@ -66,7 +66,7 @@ export default class AssignPersonModal extends Component {
 									placeholder="Select a person for this position"
 									objectType={Person}
 									className="select-person-autocomplete"
-									fields={'id, name, rank, role, position  { id, name}'}
+									fields={'uuid, name, rank, role, position { uuid, name}'}
 									template={person =>
 										<LinkTo person={person} isLink={false} />
 									}
@@ -76,7 +76,7 @@ export default class AssignPersonModal extends Component {
 								/>
 							</Col>
 						</Row>
-						{newPerson && newPerson.id &&
+						{newPerson && newPerson.uuid &&
 							<Table>
 								<thead>
 									<tr>
@@ -97,7 +97,7 @@ export default class AssignPersonModal extends Component {
 											{newPerson.position ?
 												newPerson.position.name
 												:
-												(newPerson.id === position.person.id ?
+												(newPerson.uuid === position.person.uuid ?
 													position.name
 													:
 													<i>None</i>
@@ -121,11 +121,11 @@ export default class AssignPersonModal extends Component {
 
 	@autobind
 	remove() {
-		let graphql = 'deletePersonFromPosition(id: $id)'
+		let graphql = 'deletePersonFromPosition(uuid: $uuid)'
 		const variables = {
-			id: this.props.position.id,
+			uuid: this.props.position.uuid,
 		}
-		const variableDef = '($id: Int!)'
+		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(
 				data => this.props.onSuccess()
@@ -137,12 +137,12 @@ export default class AssignPersonModal extends Component {
 	@autobind
 	save() {
 		const operation = 'putPersonInPosition'
-		let graphql = operation + '(id: $id, person: $person)'
+		let graphql = operation + '(uuid: $uuid, person: $person)'
 		const variables = {
-			id: this.props.position.id,
-			person: {id: this.state.person.id}
+			uuid: this.props.position.uuid,
+			person: {uuid: this.state.person.uuid}
 		}
-		const variableDef = '($id: Int!, $person: PersonInput!)'
+		const variableDef = '($uuid: String!, $person: PersonInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(
 				data => this.props.onSuccess()
@@ -166,7 +166,7 @@ export default class AssignPersonModal extends Component {
 	@autobind
 	updateAlert() {
 		let error = null
-		if (!_isEmpty(this.state.person) && !_isEmpty(this.state.person.position) && this.state.person.position.id !== this.props.position.id) {
+		if (!_isEmpty(this.state.person) && !_isEmpty(this.state.person.position) && this.state.person.position.uuid !== this.props.position.uuid) {
 			const errorMessage = <React.Fragment>This person is currently in another position. By selecting this person, <b>{this.state.person.position.name}</b> will be left unfilled.</React.Fragment>
 			error = {message: errorMessage}
 		}

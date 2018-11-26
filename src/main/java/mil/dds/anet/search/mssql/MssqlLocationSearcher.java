@@ -6,10 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -41,7 +41,7 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (locations, (name), :containsQuery) c_locations"
-					+ " ON locations.id = c_locations.[Key]");
+					+ " ON locations.uuid = c_locations.[Key]");
 			whereClauses.add("c_locations.rank IS NOT NULL");
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 		}
@@ -77,13 +77,12 @@ public class MssqlLocationSearcher implements ILocationSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "locations", "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "locations", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "locations", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
-		final Query<Location> map = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
-			.map(new LocationMapper());
-		return new AnetBeanList<Location>(map, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		return new AnetBeanList<Location>(sqlQuery, query.getPageNum(), query.getPageSize(), new LocationMapper(), null);
 	}
 
 }

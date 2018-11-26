@@ -58,35 +58,35 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PersonSearchQueryInput',
-		fields: 'id, name, rank, emailAddress, role , position { id, name, code, location { id, name }, organization { id, shortName} }'
+		fields: 'uuid, name, rank, emailAddress, role , position { uuid, name, code, location { uuid, name }, organization { uuid, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQueryInput',
-		fields: 'id , name, code, type, status, location { id, name }, organization { id, shortName}, person { id, name, rank }'
+		fields: 'uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'TaskSearchQueryInput',
-		fields: 'id, shortName, longName'
+		fields: 'uuid, shortName, longName'
 	},
 	locations : {
 		listName: 'locations: locationList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'LocationSearchQueryInput',
-		fields : 'id, name, lat, lng'
+		fields: 'uuid, name, lat, lng'
 	},
 	organizations : {
 		listName: 'organizations: organizationList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'OrganizationSearchQueryInput',
-		fields: 'id, shortName, longName, identificationCode, type'
+		fields: 'uuid, shortName, longName, identificationCode, type'
 	}
 }
 
@@ -357,7 +357,7 @@ class BaseSearch extends Page {
 				</thead>
 				<tbody>
 					{Person.map(this.state.results.people.list, person =>
-						<tr key={person.id}>
+						<tr key={person.uuid}>
 							<td>
 								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 								<LinkTo person={person}/>
@@ -386,7 +386,7 @@ class BaseSearch extends Page {
 				</thead>
 				<tbody>
 					{Organization.map(this.state.results.organizations.list, org =>
-						<tr key={org.id}>
+						<tr key={org.uuid}>
 							<td><LinkTo organization={org} /></td>
 							<td>{org.longName}</td>
 							<td>{org.identificationCode}</td>
@@ -416,7 +416,7 @@ class BaseSearch extends Page {
 				</thead>
 				<tbody>
 					{this.state.results.locations.list.map(loc =>
-						<tr key={loc.id}>
+						<tr key={loc.uuid}>
 							<td><LinkTo anetLocation={loc} /></td>
 						</tr>
 					)}
@@ -436,7 +436,7 @@ class BaseSearch extends Page {
 				</thead>
 				<tbody>
 					{Task.map(this.state.results.tasks.list, task =>
-						<tr key={task.id}>
+						<tr key={task.uuid}>
 							<td><LinkTo task={task} >{task.shortName} {task.longName}</LinkTo></td>
 						</tr>
 					)}
@@ -479,12 +479,12 @@ class BaseSearch extends Page {
 			savedSearch.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
 		const operation = 'createSavedSearch'
-		let graphql = operation + '(savedSearch: $savedSearch) { id }'
+		let graphql = operation + '(savedSearch: $savedSearch) { uuid }'
 		const variables = { savedSearch: savedSearch }
 		const variableDef = '($savedSearch: SavedSearchInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
-				if (data[operation].id) {
+				if (data[operation].uuid) {
 					this.setState({
 						success: 'Search saved',
 						error: null,

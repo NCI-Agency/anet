@@ -50,8 +50,8 @@ public class LoggingResource {
 	@PermitAll
 	public void logMessage(final @Context HttpServletRequest requestContext, final @Auth Person user, final List<LogEntry> logEntries) {
 		for (final LogEntry logEntry : logEntries) {
-			logger.log(Level.toLevel(logEntry.severity), String.format("%1$d %2$s %3$s %4$s %5$s",
-					user.getId(), requestContext.getRemoteAddr(), logEntry.url,
+			logger.log(Level.toLevel(logEntry.severity), String.format("%1$s %2$s %3$s %4$s %5$s",
+					user.getUuid(), requestContext.getRemoteAddr(), logEntry.url,
 					logEntry.lineNr, logEntry.message));
 		}
 	}

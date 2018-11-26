@@ -2,6 +2,7 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import Messages from 'components/Messages'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import LocationForm from './Form'
 import {Location} from 'models'
@@ -28,8 +29,9 @@ class LocationEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			location(id:${props.match.params.id}) {
-				id, name, status, lat, lng
+			location(uuid:"${props.match.params.uuid}") {
+				uuid, name, status, lat, lng
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			this.setState({location: new Location(data.location), originalLocation : new Location(data.location) })
@@ -41,6 +43,7 @@ class LocationEdit extends Page {
 
 		return (
 			<div>
+				<RelatedObjectNotes notes={location.notes} relatedObject={{relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />

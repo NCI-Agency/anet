@@ -33,8 +33,8 @@ public class AuthUtils {
 	}
 	
 	public static boolean isSuperUserForOrg(final Person user, final Organization org) {
-		if (org == null || org.getId() == null) {
-			logger.error("Organization {} is null or has a null ID in SuperUser check for {}",
+		if (org == null || org.getUuid() == null) {
+			logger.error("Organization {} is null or has a null UUID in SuperUser check for {}",
 					org, user); // DANGER: possible log injection vector here?
 			return false;
 		}
@@ -51,11 +51,11 @@ public class AuthUtils {
 		if (position.getType() != PositionType.SUPER_USER) { return false; } 
 
 		// Given that we know it's a super-user position, does it actually match this organization?
-		Organization loadedOrg = AnetObjectEngine.getInstance().getOrganizationDao().getById(org.getId());
+		Organization loadedOrg = AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(org.getUuid());
 		if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG) { return true; }
 		
 		if (position.getOrganization() == null) { return false; }
-		if (org.getId().equals(position.getOrganization().getId())) { return true; }
+		if (org.getUuid().equals(position.getOrganization().getUuid())) { return true; }
 		
 		//As a last check, load the descendant orgs. 
 		try {
@@ -63,7 +63,7 @@ public class AuthUtils {
 			Optional<Organization> orgMatch =  posOrg
 					.loadAllDescendants()
 					.stream()
-					.filter(o -> o.getId().equals(org.getId()))
+					.filter(o -> o.getUuid().equals(org.getUuid()))
 					.findFirst();
 			return orgMatch.isPresent();
 		} catch (InterruptedException | ExecutionException e) {

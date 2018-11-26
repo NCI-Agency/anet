@@ -34,8 +34,8 @@ public class PersonPositionHistory extends AbstractAnetBean {
 	@Override
 	@JsonIgnore
 	@GraphQLIgnore
-	public Integer getId() {
-		throw new WebApplicationException("no ID field on PersonPositionHistory");
+	public String getUuid() {
+		throw new WebApplicationException("no UUID field on PersonPositionHistory");
 	}
 
 	@GraphQLIgnore

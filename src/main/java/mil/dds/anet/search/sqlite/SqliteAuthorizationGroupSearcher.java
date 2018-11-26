@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -40,11 +40,11 @@ public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSear
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
 		}
 
-		if (query.getPositionId() != null) {
+		if (query.getPositionUuid() != null) {
 			// Search for authorization groups related to a given position
-			whereClauses.add("id IN ( SELECT \"authorizationGroupId\" FROM \"authorizationGroupPositions\" "
-							+ "WHERE \"positionId\" = :positionId) ");
-			sqlArgs.put("positionId", query.getPositionId());
+			whereClauses.add("uuid IN ( SELECT \"authorizationGroupUuid\" FROM \"authorizationGroupPositions\" "
+							+ "WHERE \"positionUuid\" = :positionUuid) ");
+			sqlArgs.put("positionUuid", query.getPositionUuid());
 		}
 
 		final AnetBeanList<AuthorizationGroup> result = new AnetBeanList<AuthorizationGroup>(query.getPageNum(), query.getPageSize(), new ArrayList<AuthorizationGroup>());
@@ -69,14 +69,14 @@ public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSear
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, null, "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
 		sql.append(" LIMIT :limit OFFSET :offset");
 
 		final List<AuthorizationGroup> list = dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
+			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())
 			.map(new AuthorizationGroupMapper())

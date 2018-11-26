@@ -47,7 +47,7 @@ class BaseAssignPositionModal extends Component {
 				//Only super users can put people in super user billets
 				//And they are limited to their organization.
 				positionSearchQuery.type.push(Position.TYPE.SUPER_USER)
-				positionSearchQuery.organizationId = currentUser.position.organization.id
+				positionSearchQuery.organizationUuid = currentUser.position.organization.uuid
 				positionSearchQuery.includeChildrenOrgs = true
 			}
 		} else if (person.role === Person.ROLE.PRINCIPAL) {
@@ -60,7 +60,7 @@ class BaseAssignPositionModal extends Component {
 					<Modal.Title>Set Position for <LinkTo person={person} isLink={false}/></Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					{person.position.id &&
+					{person.position.uuid &&
 						<div style={{textAlign:'center'}}>
 							<Button bsStyle="danger" onClick={this.remove} className="remove-person-from-position">
 								Remove <LinkTo person={person} isLink={false}/> from <LinkTo position={person.position} isLink={false}/>
@@ -77,7 +77,7 @@ class BaseAssignPositionModal extends Component {
 								<Autocomplete valueKey="name"
 									placeholder="Select a position for this person"
 									objectType={Position}
-									fields={'id, name, code, type, organization { id, shortName, longName, identificationCode}, person { id, name }'}
+									fields={'uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name }'}
 									template={pos =>
 										<span>{[pos.name, pos.code].join(' - ')}</span>
 									}
@@ -87,7 +87,7 @@ class BaseAssignPositionModal extends Component {
 								/>
 							</Col>
 						</Row>
-						{newPosition && newPosition.id &&
+						{newPosition && newPosition.uuid &&
 							<Table>
 								<thead>
 									<tr>
@@ -108,7 +108,7 @@ class BaseAssignPositionModal extends Component {
 											{newPosition.person ?
 												newPosition.person.name
 												:
-												(newPosition.id === person.position.id ?
+												(newPosition.uuid === person.position.uuid ?
 													person.name
 													:
 													<i>Unfilled</i>
@@ -132,11 +132,11 @@ class BaseAssignPositionModal extends Component {
 
 	@autobind
 	remove() {
-		let graphql = 'deletePersonFromPosition(id: $id)'
+		let graphql = 'deletePersonFromPosition(uuid: $uuid)'
 		const variables = {
-			id: this.props.person.position.id,
+			uuid: this.props.person.position.uuid,
 		}
-		const variableDef = '($id: Int!)'
+		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(
 				data => this.props.onSuccess()
@@ -148,12 +148,12 @@ class BaseAssignPositionModal extends Component {
 	@autobind
 	save() {
 		const operation = 'putPersonInPosition'
-		let graphql = operation + '(id: $id, person: $person)'
+		let graphql = operation + '(uuid: $uuid, person: $person)'
 		const variables = {
-			id: this.state.position.id,
-			person: {id: this.props.person.id}
+			uuid: this.state.position.uuid,
+			person: {uuid: this.props.person.uuid}
 		}
-		const variableDef = '($id: Int!, $person: PersonInput!)'
+		const variableDef = '($uuid: String!, $person: PersonInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(
 				data => this.props.onSuccess()
@@ -171,7 +171,7 @@ class BaseAssignPositionModal extends Component {
 
 	@autobind
 	onPositionSelect(position) {
-		if (position.id) {
+		if (position.uuid) {
 			this.setState({position}, () => this.updateAlert())
 		}
 	}
@@ -179,7 +179,7 @@ class BaseAssignPositionModal extends Component {
 	@autobind
 	updateAlert() {
 		let error = null
-		if (!_isEmpty(this.state.position) && !_isEmpty(this.state.position.person) && this.state.position.person.id !== this.props.person.id){
+		if (!_isEmpty(this.state.position) && !_isEmpty(this.state.position.person) && this.state.position.person.uuid !== this.props.person.uuid){
 			const errorMessage = <React.Fragment>This position is currently held by <LinkTo person={this.state.position.person}/>.  By selecting this position, they will be removed.</React.Fragment>
 			error = {message: errorMessage}
 		}

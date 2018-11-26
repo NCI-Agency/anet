@@ -1,13 +1,10 @@
 package mil.dds.anet.database;
 
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
@@ -19,7 +16,7 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-@RegisterMapper(TaskMapper.class)
+@RegisterRowMapper(TaskMapper.class)
 public class TaskDao implements IAnetDao<Task> {
 
 	private final Handle dbHandle;
@@ -27,8 +24,8 @@ public class TaskDao implements IAnetDao<Task> {
 
 	public TaskDao(Handle h) { 
 		this.dbHandle = h; 
-		final String idBatcherSql = "/* batch.getTasksByIds */ SELECT * from tasks where id IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, new TaskMapper());
+		final String idBatcherSql = "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, "uuids", new TaskMapper());
 	}
 	
 	public AnetBeanList<Task> getAll(int pageNum, int pageSize) {
@@ -39,74 +36,67 @@ public class TaskDao implements IAnetDao<Task> {
 		} else { 
 			sql = "/* getAllTasks */ SELECT * from tasks ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
-		Query<Task> query = dbHandle.createQuery(sql)
+		final Query query = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
-				.bind("offset", pageSize * pageNum)
-				.map(new TaskMapper());
-		return new AnetBeanList<Task>(query, pageNum, pageSize, null);
+				.bind("offset", pageSize * pageNum);
+		return new AnetBeanList<Task>(query, pageNum, pageSize, new TaskMapper(), null);
 	}
-	
-	@Override
-	public Task getById(int id) { 
-		Query<Task> query = dbHandle.createQuery("/* getTaskById */ SELECT * from tasks where id = :id")
-			.bind("id",id)
-			.map(new TaskMapper());
-		List<Task> results = query.list();
-		if (results.size() == 0) { return null; } 
-		return results.get(0);
+
+	public Task getByUuid(String uuid) {
+		return dbHandle.createQuery("/* getTaskByUuid */ SELECT * from tasks where uuid = :uuid")
+				.bind("uuid", uuid)
+				.map(new TaskMapper())
+				.findFirst().orElse(null);
 	}
 
 	@Override
-	public List<Task> getByIds(List<Integer> ids) {
-		return idBatcher.getByIds(ids);
+	public List<Task> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
 	}
 
 	@Override
 	public Task insert(Task p) {
-		p.setCreatedAt(DateTime.now());
-		p.setUpdatedAt(DateTime.now());
-		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* inserTask */ INSERT INTO tasks "
-				+ "(\"longName\", \"shortName\", category, \"customFieldRef1Id\", \"organizationId\", \"createdAt\", \"updatedAt\", status, "
+		DaoUtils.setInsertFields(p);
+		dbHandle.createUpdate("/* insertTask */ INSERT INTO tasks "
+				+ "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"organizationUuid\", \"createdAt\", \"updatedAt\", status, "
 				+ "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\") "
-				+ "VALUES (:longName, :shortName, :category, :customFieldRef1Id, :organizationId, :createdAt, :updatedAt, :status, "
+				+ "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :organizationUuid, :createdAt, :updatedAt, :status, "
 				+ ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion)")
-			.bindFromProperties(p)
-			.bind("customFieldRef1Id", DaoUtils.getId(p.getCustomFieldRef1()))
-			.bind("organizationId", DaoUtils.getId(p.getResponsibleOrg()))
+			.bindBean(p)
+			.bind("customFieldRef1Uuid", DaoUtils.getUuid(p.getCustomFieldRef1()))
+			.bind("organizationUuid", DaoUtils.getUuid(p.getResponsibleOrg()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
-			.executeAndReturnGeneratedKeys();
-		p.setId(DaoUtils.getGeneratedId(keys));
+			.execute();
 		return p;
 	}
 	
-	@Override
 	public int update(Task p) { 
-		p.setUpdatedAt(DateTime.now());
-		return dbHandle.createStatement("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
-				+ "category = :category, \"customFieldRef1Id\" = :customFieldRef1Id, \"updatedAt\" = :updatedAt, "
-				+ "\"organizationId\" = :organizationId, status = :status, "
+		DaoUtils.setUpdateFields(p);
+		return dbHandle.createUpdate("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
+				+ "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, \"updatedAt\" = :updatedAt, "
+				+ "\"organizationUuid\" = :organizationUuid, status = :status, "
 				+ "\"customField\" = :customField, \"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
 				+ "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion "
-				+ "WHERE id = :id")
-			.bindFromProperties(p)
-			.bind("customFieldRef1Id", DaoUtils.getId(p.getCustomFieldRef1()))
-			.bind("organizationId", DaoUtils.getId(p.getResponsibleOrg()))
+				+ "WHERE uuid = :uuid")
+			.bindBean(p)
+			.bind("customFieldRef1Uuid", DaoUtils.getUuid(p.getCustomFieldRef1()))
+			.bind("organizationUuid", DaoUtils.getUuid(p.getResponsibleOrg()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.execute();
 	}
 	
 	public int setResponsibleOrgForTask(Task p, Organization org) { 
-		p.setUpdatedAt(DateTime.now());
-		return dbHandle.createStatement("/* setReponsibleOrgForTask */ UPDATE tasks "
-				+ "SET \"organizationId\" = :orgId, \"updatedAt\" = :updatedAt WHERE id = :id")
-			.bind("orgId", DaoUtils.getId(org))
-			.bind("id", p.getId())
+		DaoUtils.setUpdateFields(p);
+		return dbHandle.createUpdate("/* setReponsibleOrgForTask */ UPDATE tasks "
+				+ "SET \"organizationUuid\" = :orgUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+			.bind("orgUuid", DaoUtils.getUuid(org))
+			.bind("uuid", p.getUuid())
 			.bind("updatedAt", p.getUpdatedAt())
 			.execute();
 	}
 	
 	public List<Task> getTopLevelTasks() {
-		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Id\" IS NULL")
+		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
 			.map(new TaskMapper())
 			.list();
 	}
@@ -119,34 +109,34 @@ public class TaskDao implements IAnetDao<Task> {
 	public List<Task> getRecentTasks(Person author, int maxResults) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.id IN ("
-					+ "SELECT TOP(:maxResults) \"reportTasks\".\"taskId\" "
-					+ "FROM reports JOIN \"reportTasks\" ON reports.id = \"reportTasks\".\"reportId\" "
-					+ "WHERE \"authorId\" = :authorId "
-					+ "GROUP BY \"taskId\" "
+			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
+					+ "SELECT TOP(:maxResults) \"reportTasks\".\"taskUuid\" "
+					+ "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
+					+ "WHERE \"authorUuid\" = :authorUuid "
+					+ "GROUP BY \"taskUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
-			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.id IN ("
-					+ "SELECT \"reportTasks\".\"taskId\" "
-					+ "FROM reports JOIN \"reportTasks\" ON reports.id = \"reportTasks\".\"reportId\" "
-					+ "WHERE \"authorId\" = :authorId "
-					+ "GROUP BY \"taskId\" "
+			sql =  "/* getRecentTask */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
+					+ "SELECT \"reportTasks\".\"taskUuid\" "
+					+ "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
+					+ "WHERE \"authorUuid\" = :authorUuid "
+					+ "GROUP BY \"taskUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
 		return dbHandle.createQuery(sql)
-				.bind("authorId", author.getId())
+				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
 				.map(new TaskMapper())
 				.list();
 	}
 
-	public List<Task> getTasksByOrganizationId(Integer orgId) {
-		return dbHandle.createQuery("/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationId\" = :orgId")
-			.bind("orgId", orgId)
+	public List<Task> getTasksByOrganizationUuid(String orgUuid) {
+		return dbHandle.createQuery("/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationUuid\" = :orgUuid")
+			.bind("orgUuid", orgUuid)
 			.map(new TaskMapper())
 			.list();
 	}

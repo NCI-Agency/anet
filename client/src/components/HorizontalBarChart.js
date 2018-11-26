@@ -12,37 +12,75 @@ class HorizontalBarChart extends Component {
   /*
    * Example for the data property structure when displaying number of
    * engagements per location, grouped by day:
-   * [{
-      key: '25 Oct 2017',
-        values: [{
-          key: 'Location 1',
-          value: 11
-        }, {
-          key: 'Location 2',
-          value: 8
-        }]
-      }, {
-        key: '27 Oct 2017',
-          values: [{
-          key: '',
-          value: 0
-        }]
-      }, {
-        key: '28 Oct 2017',
-        values: [{
-          key: 'Location 4',
-          value: 3
-        }]
-      }]
-  */
+   *
+   *  this.props.data = {
+   *    categoryLabels: {
+   *      1540677600000: "28 Oct 2018",
+   *      1540767600000: "29 Oct 2018",
+   *      1540854000000: "30 Oct 2018",
+   *    },
+   *    leavesLabels: {
+   *      -1: "No location allocated",
+   *      a873c6dc-e0aa-47cd-b2b5-9e017f1293ac: "General Hospital",
+   *      1ee8cf79-7b20-4045-b349-2d354e10d41f: "Fort Amherst",
+   *      4d115293-0e8b-45ba-a632-a36136d5ed89: "MoD Headquarters Kabul"
+   *    },
+   *    data: [
+   *      {
+   *        key: 1540677600000,
+   *        values: [{}]
+   *      },
+   *      {
+   *        key: 1540767600000,
+   *        values: [
+   *          {
+   *            key: "a873c6dc-e0aa-47cd-b2b5-9e017f1293ac",
+   *            value: 2
+   *          }
+   *        ]
+   *      },
+   *      {
+   *        key: 1540854000000,
+   *        values: [
+   *          {
+   *            key: "-1",
+   *            value: 1
+   *          },
+   *          {
+   *            key: "a873c6dc-e0aa-47cd-b2b5-9e017f1293ac",
+   *            value: 1
+   *          },
+   *          {
+   *            key: "1ee8cf79-7b20-4045-b349-2d354e10d41f"
+   *            value: 1
+   *          },
+   *          {
+   *            key: "4d115293-0e8b-45ba-a632-a36136d5ed89",
+   *            value: 1
+   *          }
+   *        ]
+   *      }
+   *    ]
+   *  }
+   */
+
   static propTypes = {
+    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     chartId: PropTypes.string,
     data: PropTypes.object,
     onBarClick: PropTypes.func,
+    showPopover: PropTypes.func,
+    hidePopover: PropTypes.func,
+    selectedBarClass: PropTypes.string,
+    selectedBar: PropTypes.string,
     updateChart: PropTypes.bool
   }
 
   static defaultProps = {
+    width: '100%',
+    selectedBarClass: 'selected-bar',
+    selectedBar: '',
     updateChart: true
   }
 
@@ -59,12 +97,19 @@ class HorizontalBarChart extends Component {
     this.createBarChart()
   }
 
+  isNumeric(value) {
+    return typeof value === 'number'
+  }
+
   createBarChart() {
     const BAR_HEIGHT = 24
     const BAR_PADDING = 8
-    const MARGIN = {top: 20, right: 20}  // left and bottom MARGINs are dynamic
-    let box = this.node.getBoundingClientRect()
-    let chartWidth = box.right - box.left
+    const MARGIN = {
+      top: 30, right: 20,
+      left: 0, bottom: 20,  // left and bottom MARGINs are dynamic, these are extra margins
+    }
+    let chartBox = this.node.getBoundingClientRect()
+    let chartWidth = this.isNumeric(this.props.width) ? this.props.width : (chartBox.right - chartBox.left)
     let chartData = this.props.data.data
     let categoryLabels = this.props.data.categoryLabels
     let leavesLabels = this.props.data.leavesLabels
@@ -72,10 +117,7 @@ class HorizontalBarChart extends Component {
     let chart = d3.select(this.node)
     let xLabels = [].concat.apply(
       [],
-      chartData.map(
-        function(d, i) {
-          return d.values.map(d => d.value)
-        })
+      chartData.map(d => d.values.map(d => d.value))
     )
     let yLabels = Object.values(categoryLabels)
 
@@ -92,32 +134,31 @@ class HorizontalBarChart extends Component {
     tmpSVG.selectAll('.get_max_width_x_label')
       .data(xLabels)
       .enter().append('text')
+      .attr('class', 'x axis')
       .text(d => d)
       .each(xLabelWidth)
       .remove()
     tmpSVG.selectAll('.get_max_width_y_label')
       .data(yLabels)
       .enter().append('text')
-      .attr('class', 'y-axis')
+      .attr('class', 'category-label')
       .text(d => d)
       .each(yLabelWidth)
       .remove()
     tmpSVG.remove()
 
     // The left margin depends on the width of the y-axis labels.
-    // We add extra margin to make sure that if the label is different because
-    // of the automatic formatting the labels are still displayed on the chart.
-    let marginLeft = maxYLabelWidth + 50
+    let marginLeft = maxYLabelWidth + MARGIN.left
     // The bottom margin depends on the width of the x-axis labels.
-    let marginBottom = maxXLabelWidth + 20
+    let marginBottom = maxXLabelWidth + MARGIN.bottom
     let xWidth = chartWidth - marginLeft - MARGIN.right
 
     let categoryDomain = []
-    let cummulative = 0
+    let cumulative = 0
     chartData.forEach(function(val, i) {
       // per category, how many elements, including the elements of the previous categories
-      val.cummulative = cummulative
-      cummulative += val.values.length
+      val.cumulative = cumulative
+      cumulative += val.values.length
       val.values.forEach(function(values) {
         values.parentKey = val.key
         categoryDomain.push(i)
@@ -126,7 +167,7 @@ class HorizontalBarChart extends Component {
 
     // We use a dynamic yHeight, depending on how much data we have to display,
     // in order to make sure the chart is readable for lots of data 
-    let yHeight = (BAR_HEIGHT + BAR_PADDING) * categoryDomain.length + BAR_HEIGHT
+    let yHeight = (BAR_HEIGHT + BAR_PADDING) * categoryDomain.length
     let chartHeight = yHeight + MARGIN.top + marginBottom
 
     let yCategoryScale = d3.scaleLinear()
@@ -138,12 +179,18 @@ class HorizontalBarChart extends Component {
     let yCategoryDomain = yScale.bandwidth() * categoryDomain.length
     yCategoryScale.domain([yCategoryDomain, 0])
 
+    let xMax = d3.max(xLabels)
     let xScale = d3.scaleLinear()
       .range([0, xWidth])
-      .domain([0, d3.max(xLabels)])
+      .domain([0, xMax])
 
+    let xTicks = Math.min(xMax, 10)
+    let xAxisTop = d3.axisTop()
+      .scale(xScale)
+      .ticks(xTicks, 'd')
     let xAxis = d3.axisBottom()
       .scale(xScale)
+      .ticks(xTicks, 'd')
 
     let yAxis = d3.axisLeft()
       .scale(yCategoryScale)
@@ -153,11 +200,15 @@ class HorizontalBarChart extends Component {
       .attr('width', chartWidth)
       .attr('height', chartHeight)
       .append('g')
-      .attr('transform', 'translate(' + marginLeft + ',' + MARGIN.top + ')')
+      .attr('transform', `translate(${marginLeft}, ${MARGIN.top})`)
 
     chart.append('g')
       .attr('class', 'x axis')
-      .attr('transform', 'translate(0,' + yHeight + ')')
+      .call(xAxisTop)
+
+    chart.append('g')
+      .attr('class', 'x axis')
+      .attr('transform', `translate(0, ${yHeight})`)
       .call(xAxis)
 
     chart.append('g')
@@ -169,10 +220,10 @@ class HorizontalBarChart extends Component {
       .enter()
       .append('g')
       .attr('class', function(d, i) {
-        return 'category-' + (i % 2)
+        return `category-${i % 2}`
       })
       .attr('transform', function(d) {
-        return 'translate(1,' + yCategoryScale((d.cummulative * yScale.bandwidth())) + ')'
+        return `translate(1, ${yCategoryScale(d.cumulative * yScale.bandwidth())})`
       })
 
     categoryGroup.selectAll('.category-label')
@@ -182,9 +233,8 @@ class HorizontalBarChart extends Component {
       .attr('class', 'category-label')
       .attr('transform', function(d) {
         let x = -2
-        let y = yCategoryScale((d.values.length * yScale.bandwidth() +
-          BAR_PADDING) / 2)
-        return 'translate(' + x + ',' + y + ')'
+        let y = yCategoryScale((d.values.length * yScale.bandwidth()) / 2 + BAR_PADDING)
+        return `translate(${x}, ${y})`
       })
       .text(d => categoryLabels[d.key])
       .attr('text-anchor', 'end')
@@ -195,9 +245,10 @@ class HorizontalBarChart extends Component {
       .append('g')
       .attr('class', 'category-bars-group')
       .attr('transform', function(d, i) {
-        return 'translate(0,' + yCategoryScale((i * yScale.bandwidth())) + ')'
+        return `translate(0, ${yCategoryScale(i * yScale.bandwidth())})`
       })
 
+    const selectedBar = this.props.selectedBar
     barsGroup.selectAll('.bar')
       .data(function(d) {
         return [d]
@@ -206,11 +257,14 @@ class HorizontalBarChart extends Component {
       .filter(d => d.value !== undefined)
       .append('rect')
       .attr('class', 'bar')
-      .attr('id', function(d, i) { return 'bar_' + d.key + d.parentKey })
+      .attr('id', function(d, i) { return `bar_${d.key}${d.parentKey}` })
+      .classed(this.props.selectedBarClass, function(d, i) { return this.id === selectedBar })
       .attr('x', 0)
       .attr('y', yCategoryScale(BAR_PADDING))
       .attr('width', d => xScale(d.value))
-      .attr('height', yCategoryScale(yScale.bandwidth() - BAR_PADDING))
+      .attr('height', BAR_HEIGHT)
+      .on('mouseenter', d => this.props.showPopover && this.props.showPopover(d3.event.target, d))
+      .on('mouseleave', d => this.props.hidePopover && this.props.hidePopover())
 
     barsGroup.selectAll('.bar-label')
       .data(function(d) { return [d] })
@@ -219,8 +273,8 @@ class HorizontalBarChart extends Component {
       .attr('class', 'bar-label')
       .attr('transform', function(d) {
         let x = 3
-        let y = yCategoryScale((yScale.bandwidth() + BAR_PADDING) / 2)
-        return 'translate(' + x + ',' + y + ')'
+        let y = yCategoryScale(yScale.bandwidth() / 2 + BAR_PADDING)
+        return `translate(${x}, ${y})`
       })
       .text(d => leavesLabels[d.key])
       .attr('text-anchor', 'start')
@@ -237,14 +291,16 @@ class HorizontalBarChart extends Component {
   }
 
   render() {
-    return <svg id={this.props.chartId} ref={node => this.node = node} width='100%'></svg>
+    return <svg id={this.props.chartId} ref={node => this.node = node} width={this.props.width} height={this.props.height}></svg>
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     // Make sure the chart is only re-rendered if the state or properties have
     // changed. This because we do not want to re-render the chart only in order
     // to highlight a bar in the chart.
-    if (nextProps && !nextProps.updateChart) {
+    if (nextProps && !nextProps.updateChart
+        && nextProps.width === this.props.width
+        && nextProps.height === this.props.height) {
       return false
     }
     return true

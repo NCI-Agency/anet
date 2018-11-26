@@ -9,7 +9,7 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 
 	public enum PersonSearchSortBy { CREATED_AT, NAME, RANK }
 
-	Integer orgId;
+	String orgUuid;
 	Role role;
 	List<PersonStatus> status;
 	Boolean includeChildOrgs;
@@ -17,7 +17,7 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 	String country;
 	
 	//Filter to people in positions at a certain location
-	Integer locationId;
+	String locationUuid;
 	
 	//Also match on positions whose name or code matches text. 
 	Boolean matchPositionName;
@@ -34,12 +34,12 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 		this.sortBy = PersonSearchSortBy.NAME;
 	}
 
-	public Integer getOrgId() {
-		return orgId;
+	public String getOrgUuid() {
+		return orgUuid;
 	}
 
-	public void setOrgId(Integer orgId) {
-		this.orgId = orgId;
+	public void setOrgUuid(String orgUuid) {
+		this.orgUuid = orgUuid;
 	}
 
 	public Role getRole() {
@@ -82,12 +82,12 @@ public class PersonSearchQuery extends AbstractSearchQuery {
 		this.country = country;
 	}
 
-	public Integer getLocationId() {
-		return locationId;
+	public String getLocationUuid() {
+		return locationUuid;
 	}
 
-	public void setLocationId(Integer locationId) {
-		this.locationId = locationId;
+	public void setLocationUuid(String locationUuid) {
+		this.locationUuid = locationUuid;
 	}
 
 	public Boolean getMatchPositionName() {

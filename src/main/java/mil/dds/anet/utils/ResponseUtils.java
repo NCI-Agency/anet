@@ -20,7 +20,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -99,6 +99,9 @@ public class ResponseUtils {
 		if (cause != null) {
 			final String message = cause.getMessage();
 			if (message != null && (message.contains(" duplicate ") || message.contains(" UNIQUE constraint "))) {
+				logger.error("Duplicate found", e);
+				logger.error("Caused by", cause);
+				logger.error("With message: {}", message);
 				return new WebApplicationException(userMessage, Status.CONFLICT);
 			}
 		}

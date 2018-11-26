@@ -35,7 +35,7 @@ class BaseHelp extends Page {
 
 	fetchData(props) {
 		const { currentUser } = props
-		if (!currentUser.id || !currentUser.position || !currentUser.position.organization) {
+		if (!currentUser.uuid || !currentUser.position || !currentUser.position.organization) {
 			// No super users to be found
 			return
 		}
@@ -45,7 +45,7 @@ class BaseHelp extends Page {
 			pageSize: 0,  // retrieve all these positions
 			type: [Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR],
 			status: Position.STATUS.ACTIVE,
-			organizationId: currentUser.position.organization.id
+			organizationUuid: currentUser.position.organization.uuid
 		}
 		const positionsPart = new GQL.Part(/* GraphQL */`
 			positionList(query: $positionQuery) {

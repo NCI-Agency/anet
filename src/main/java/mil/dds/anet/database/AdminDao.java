@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.database.mappers.AdminSettingMapper;
@@ -63,7 +63,7 @@ public class AdminDao {
 			sql = "/* insertAdminSetting */ INSERT INTO \"adminSettings\" (\"key\", value) VALUES (:key, :value)";
 		}
 		cachedSettings.put(setting.getKey(), setting.getValue());
-		return dbHandle.createStatement(sql)
+		return dbHandle.createUpdate(sql)
 			.bind("key", setting.getKey())
 			.bind("value", setting.getValue())
 			.execute();

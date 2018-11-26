@@ -1,0 +1,48 @@
+.mosaic.mosaic-blueprint-theme {
+  background: #fff;
+}
+
+.mosaic-root {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.mosaic-container {
+  flex: 1;
+  min-height: 200px;
+}
+
+.mosaic-container .scrollable {
+  height: 100%;
+  overflow: auto;
+}
+
+.mosaic-container .scrollable-y {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.mosaic-container .non-scrollable {
+  height: 100%;
+  overflow: hidden;
+}
+
+.bp3-button {
+  margin-left: 5px;
+}
+
+#graph-popover {
+	z-index: 100;
+}
+
+@media print {
+  .bp3-navbar,
+  .mosaic-preview {
+    display: none;
+  }
+}
+
+@import './BlueprintOverrides.css'

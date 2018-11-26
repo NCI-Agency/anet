@@ -16,7 +16,7 @@ public final class GraphQLHelper {
 	private static final String getWithParamFmt = "query ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { %4$s } }";
 	private static final String getFmt = "query { payload: %1$s { %2$s } }";
 	private static final String getAllFmt = "query { payload: %1$s { pageNum pageSize totalCount list { %2$s } } }";
-	private static final String createFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { id } }";
+	private static final String createFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { uuid } }";
 	private static final String updateFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) }";
 	private static final String updateObjectFmt = "mutation ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { %4$s } }";
 	private static final String searchFmt = "query ($%1$s: %2$s!) { payload: %3$s (%1$s: $%1$s) { pageNum pageSize totalCount list { %4$s } } }";
@@ -28,14 +28,14 @@ public final class GraphQLHelper {
 	}
 
 	/**
-	 * @return the object matching the id
+	 * @return the object matching the uuid
 	 */
-	public <T extends AbstractAnetBean> T getObjectById(Person user, String getQuery, String fields, Integer id, GenericType<GraphQLResponse<T>> responseType) {
-		return getObject(user, getQuery, "id", fields, "Int", id, responseType);
+	public <T extends AbstractAnetBean> T getObjectById(Person user, String getQuery, String fields, String uuid, GenericType<GraphQLResponse<T>> responseType) {
+		return getObject(user, getQuery, "uuid", fields, "String", uuid, responseType);
 	}
 
 	/**
-	 * @return the object matching the param (usually the id)
+	 * @return the object matching the param (usually the uuid)
 	 */
 	public <T extends AbstractAnetBean> T getObject(Person user, String getQuery, String paramName, String fields, String paramType, Object param, GenericType<GraphQLResponse<T>> responseType) {
 		final String q = String.format(getWithParamFmt, paramName, paramType, getQuery, fields);
@@ -74,12 +74,12 @@ public final class GraphQLHelper {
 	}
 
 	/**
-	 * @return id of the newly created object
+	 * @return uuid of the newly created object
 	 */
-	public <T extends AbstractAnetBean> Integer createObject(Person user, String createQuery, String paramName, String paramType, T param, GenericType<GraphQLResponse<T>> responseType) {
+	public <T extends AbstractAnetBean> String createObject(Person user, String createQuery, String paramName, String paramType, T param, GenericType<GraphQLResponse<T>> responseType) {
 		final String q = String.format(createFmt, paramName, paramType, createQuery);
 		final T obj = graphQLClient.doGraphQLQuery(user, q, paramName, param, responseType);
-		return (obj == null) ? null : obj.getId();
+		return (obj == null) ? null : obj.getUuid();
 	}
 
 	/**
@@ -115,9 +115,9 @@ public final class GraphQLHelper {
 	/**
 	 * @return the number of objects deleted
 	 */
-	public <T extends AbstractAnetBean> Integer deleteObject(Person user, String deleteQuery, Integer id) {
-		final String q = String.format(updateFmt, "id", "Int", deleteQuery);
-		return graphQLClient.doGraphQLQuery(user, q, "id", id, new GenericType<GraphQLResponse<Integer>>() {});
+	public <T extends AbstractAnetBean> Integer deleteObject(Person user, String deleteQuery, String uuid) {
+		final String q = String.format(updateFmt, "uuid", "String", deleteQuery);
+		return graphQLClient.doGraphQLQuery(user, q, "uuid", uuid, new GenericType<GraphQLResponse<Integer>>() {});
 	}
 
 	/**

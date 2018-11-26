@@ -7,10 +7,11 @@ export default class Tag extends Model {
 
 	static schema = {
 		name: '',
-		description: null
+		description: null,
+		...Model.schema,
 	}
 
-	static autocompleteQuery = "id, name"
+	static autocompleteQuery = "uuid, name"
 
 	toString() {
 		return this.name

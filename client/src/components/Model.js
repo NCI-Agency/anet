@@ -1,9 +1,35 @@
+import PropTypes from 'prop-types'
+
 import encodeQuery from 'querystring/encode'
 import utils from 'utils'
 
-export default class Model {
-	static schema = {}
+export const GRAPHQL_NOTE_FIELDS = /* GraphQL */`
+	uuid createdAt updatedAt text author { uuid name rank } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
+`
+export const GRAPHQL_NOTES_FIELDS = /* GraphQL */`
+	notes { ${GRAPHQL_NOTE_FIELDS} }
+`
 
+export default class Model {
+	static schema = {
+		notes: [],
+	}
+
+	static notePropTypes = PropTypes.shape({
+		uuid: PropTypes.string,
+		createdAt: PropTypes.number,
+		text: PropTypes.string,
+		author: PropTypes.shape({
+			uuid: PropTypes.string,
+			name: PropTypes.string,
+			rank: PropTypes.string,
+		}),
+		noteRelatedObjects: PropTypes.arrayOf(PropTypes.shape({
+			noteUuid: PropTypes.string,
+			relatedObjectType: PropTypes.string,
+			relatedObjectUuid: PropTypes.string,
+		})),
+	})
 
 	static resourceName = null
 	static displayName(appSettings)  { return null }
@@ -41,8 +67,8 @@ export default class Model {
 		}
 
 		let resourceName = utils.resourceize(this.resourceName)
-		let id = instance.id
-		let url = ['', resourceName, id].join('/')
+		let uuid = instance.uuid
+		let url = ['', resourceName, uuid].join('/')
 
 		if (query) {
 			url += '?' + encodeQuery(query)
@@ -73,7 +99,7 @@ export default class Model {
 	}
 
 	static isEqual(a, b) {
-		return a && b && a.id === b.id
+		return a && b && a.uuid === b.uuid
 	}
 
 	constructor(props) {
@@ -102,10 +128,10 @@ export default class Model {
 	}
 
 	toPath(query) {
-		return this.id ? this.constructor.pathFor(this, query) : this.constructor.pathForNew(query)
+		return this.uuid ? this.constructor.pathFor(this, query) : this.constructor.pathForNew(query)
 	}
 
 	toString() {
-		return this.name || this.id
+		return this.name || this.uuid
 	}
 }

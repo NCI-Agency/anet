@@ -7,7 +7,7 @@ public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 	public enum AuthorizationGroupSearchSortBy { CREATED_AT, NAME }
 
 	private AuthorizationGroupStatus status;
-	private Integer positionId;
+	private String positionUuid;
 	private AuthorizationGroupSearchSortBy sortBy;
 	private SortOrder sortOrder;
 
@@ -19,12 +19,12 @@ public class AuthorizationGroupSearchQuery extends AbstractSearchQuery {
 		this.status = status;
 	}
 
-	public Integer getPositionId() {
-		return positionId;
+	public String getPositionUuid() {
+		return positionUuid;
 	}
 
-	public void setPositionId(Integer positionId) {
-		this.positionId = positionId;
+	public void setPositionUuid(String positionUuid) {
+		this.positionUuid = positionUuid;
 	}
 
 	public AuthorizationGroupSearchSortBy getSortBy() {

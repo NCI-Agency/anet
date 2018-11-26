@@ -70,7 +70,7 @@ class OrganizationAdvisorsTable extends Component {
             let checked = (organization.selected === undefined) ? false : organization.selected
             let modalLink = <AdvisorReportsModal 
                                 name={ organization.name }
-                                id={ organization.id }
+                                uuid={ organization.uuid }
                                 columnGroups={ this.props.columnGroups } />
 
             return <AdvisorReportsRow

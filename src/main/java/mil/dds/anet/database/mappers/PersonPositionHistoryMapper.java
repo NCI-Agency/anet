@@ -4,28 +4,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.PersonPositionHistory;
 import mil.dds.anet.beans.Position;
 
-public class PersonPositionHistoryMapper implements ResultSetMapper<PersonPositionHistory> {
+public class PersonPositionHistoryMapper implements RowMapper<PersonPositionHistory> {
 
 	@Override
-	public PersonPositionHistory map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public PersonPositionHistory map(ResultSet rs, StatementContext ctx) throws SQLException {
 		final PersonPositionHistory pph = new PersonPositionHistory();
 		final DateTime createdAt = new DateTime(rs.getTimestamp("pph_createdAt"));
 		pph.setCreatedAt(createdAt);
-		final Integer positionId = MapperUtils.getInteger(rs, "positionId");
-		if (positionId != null) {
-			pph.setPosition(Position.createWithId(positionId));
+		final String positionUuid = rs.getString("positionUuid");
+		if (positionUuid != null) {
+			pph.setPosition(Position.createWithUuid(positionUuid));
 		}
-		final Integer personId = MapperUtils.getInteger(rs, "personId");
-		if (personId != null) {
-			pph.setPerson(Person.createWithId(personId));
-			if (MapperUtils.containsColumnNamed(rs, "people_id")) { 
+		final String personUuid = rs.getString( "personUuid");
+		if (personUuid != null) {
+			pph.setPerson(Person.createWithUuid(personUuid));
+			if (MapperUtils.containsColumnNamed(rs, "people_uuid")) { 
 				PersonMapper.fillInFields(pph.getPerson(), rs);
 			}
 		}

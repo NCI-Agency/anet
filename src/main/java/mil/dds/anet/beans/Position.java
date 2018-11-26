@@ -32,9 +32,9 @@ public class Position extends AbstractAnetBean {
 	List<PersonPositionHistory> previousPeople;
 	Boolean isApprover;
 
-	public static Position createWithId(Integer id) {
-		Position b = new Position();
-		b.setId(id);
+	public static Position createWithUuid(String uuid) {
+		final Position b = new Position();
+		b.setUuid(uuid);
 		return b;
 	}
 	
@@ -161,25 +161,25 @@ public class Position extends AbstractAnetBean {
 	}
 	
 	@Override
-	public boolean equals(Object o) { 
+	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
-			return false; 
+			return false;
 		}
 		Position other = (Position) o;
-		return Objects.equals(id, other.getId()) 
-			&& Objects.equals(name, other.getName()) 
-			&& Objects.equals(code,  other.getCode()) 
-			&& Objects.equals(type, other.getType()) 
-			&& idEqual(organization, other.getOrganization());
+		return Objects.equals(uuid, other.getUuid())
+			&& Objects.equals(name, other.getName())
+			&& Objects.equals(code,  other.getCode())
+			&& Objects.equals(type, other.getType())
+			&& uuidEqual(organization, other.getOrganization());
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, name, code, type, organization);
+	public int hashCode() {
+		return Objects.hash(uuid, name, code, type, organization);
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("[id:%s name:%s orgId:%d]", id, name, DaoUtils.getId(organization));
+	public String toString() {
+		return String.format("[uuid:%s name:%s orgUuid:%s]", uuid, name, DaoUtils.getUuid(organization));
 	}
 }

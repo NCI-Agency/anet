@@ -47,7 +47,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 			positionSearchQuery.type = [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]
 			if (currentUser.isAdmin() === false) {
 				//Super Users can only assign a position in their organization!
-				positionSearchQuery.organizationId = currentUser.position.organization.id
+				positionSearchQuery.organizationUuid = currentUser.position.organization.uuid
 				positionSearchQuery.includeChildrenOrgs = true
 			}
 		} else {
@@ -64,7 +64,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 					<Autocomplete
 						placeholder={'Start typing to search for a ' + assignedRole + ' position...'}
 						objectType={Position}
-						fields={'id, name, code, type, person { id, name, rank }, organization { id, shortName, longName, identificationCode}'}
+						fields={'uuid, name, code, type, person { uuid, name, rank }, organization { uuid, shortName, longName, identificationCode }'}
 						template={pos => {
 							let components = []
 							pos.person && components.push(pos.person.name)
@@ -91,7 +91,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 							{Position.map(associatedPositions, relPos => {
 								let person = new Person(relPos.person)
 								return (
-									<tr key={relPos.id}>
+									<tr key={relPos.uuid}>
 										<td>
 											{person && <img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />}
 										</td>
@@ -119,10 +119,10 @@ class BaseEditAssociatedPositionsModal extends Component {
 
 	@autobind
 	addPositionRelationship(newRelatedPos)  {
-		if (newRelatedPos.id) {
+		if (newRelatedPos.uuid) {
 			let rels = this.state.associatedPositions
 
-			if (!rels.find(relPos => relPos.id === newRelatedPos.id)) {
+			if (!rels.find(relPos => relPos.uuid === newRelatedPos.uuid)) {
 				let newRels = rels.slice()
 				newRels.push(new Position(newRelatedPos))
 
@@ -134,7 +134,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 	@autobind
 	removePositionRelationship(relToDelete) {
 		let rels = this.state.associatedPositions
-		let index = rels.findIndex(rel => rel.id === relToDelete.id)
+		let index = rels.findIndex(rel => rel.uuid === relToDelete.uuid)
 
 		if (index !== -1) {
 			let newRels = rels.slice()

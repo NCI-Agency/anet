@@ -6,6 +6,7 @@ import moment from 'moment'
 import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import ReportForm from './Form'
 
@@ -39,19 +40,20 @@ class BaseReportEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			report(id:${props.match.params.id}) {
-				id, intent, engagementDate, atmosphere, atmosphereDetails, state
+			report(uuid:"${props.match.params.uuid}") {
+				uuid, intent, engagementDate, atmosphere, atmosphereDetails, state
 				keyOutcomes, reportText, nextSteps, cancelledReason,
-				author { id, name },
-				location { id, name },
+				author { uuid, name },
+				location { uuid, name },
 				attendees {
-					id, name, role, primary
-					position { id, name, code, organization { id, shortName}, location {id, name} }
+					uuid, name, role, primary
+					position { uuid, name, code, organization { uuid, shortName}, location {uuid, name} }
 				}
-				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
-				tags { id, name, description }
-				reportSensitiveInformation { id, text }
-				authorizationGroups { id, name, description }
+				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
+				tags { uuid, name, description }
+				reportSensitiveInformation { uuid, text }
+				authorizationGroups { uuid, name, description }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			function getReportFromData() {
@@ -72,16 +74,17 @@ class BaseReportEdit extends Page {
 		const onConfirmDeleteProps = {
 				onConfirmDelete: this.onConfirmDelete,
 				objectType: "report",
-				objectDisplay: `#${this.state.report.id}`,
+				objectDisplay: `#${this.state.report.uuid}`,
 				bsStyle: "warning",
 				buttonLabel: "Delete this report"
 		}
 
 		return (
 			<div className="report-edit">
-				<Breadcrumbs items={[['Report #' + report.id, '/reports/' + report.id], ['Edit', '/reports/' + report.id + '/edit']]} />
+				<RelatedObjectNotes notes={report.notes} relatedObject={{relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
+				<Breadcrumbs items={[['Report #' + report.uuid, '/reports/' + report.uuid], ['Edit', '/reports/' + report.uuid + '/edit']]} />
 
-				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.id}`} onDelete={canDelete && onConfirmDeleteProps} />
+				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.uuid}`} onDelete={canDelete && onConfirmDeleteProps} />
 			</div>
 		)
 	}
@@ -89,9 +92,9 @@ class BaseReportEdit extends Page {
 	@autobind
 	onConfirmDelete() {
 		const operation = 'deleteReport'
-		let graphql = operation + '(id: $id)'
-		const variables = { id: this.state.report.id }
-		const variableDef = '($id: Int!)'
+		let graphql = operation + '(uuid: $uuid)'
+		const variables = { uuid: this.state.report.uuid }
+		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.props.history.push({

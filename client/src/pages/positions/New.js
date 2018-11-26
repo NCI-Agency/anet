@@ -30,12 +30,12 @@ class PositionNew extends Page {
 
 	fetchData(props) {
 		const qs = utils.parseQueryString(props.location.search)
-		if (qs.organizationId) {
-			//If an organizationId was given in query parameters,
+		if (qs.organizationUuid) {
+			//If an organizationUuid was given in query parameters,
 			// then look that org up and pre-populate the field.
 			return API.query(/* GraphQL */`
-				organization(id:${qs.organizationId}) {
-					id, shortName, longName, identificationCode, type
+				organization(uuid:"${qs.organizationUuid}") {
+					uuid, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
 				function getPositionFromData() {

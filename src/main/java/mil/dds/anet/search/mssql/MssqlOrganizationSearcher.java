@@ -6,10 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -43,7 +43,7 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (organizations, (longName), :containsQuery) c_organizations"
-					+ " ON organizations.id = c_organizations.[Key]");
+					+ " ON organizations.uuid = c_organizations.[Key]");
 			whereClauses.add("(c_organizations.rank IS NOT NULL"
 					+ " OR organizations.identificationCode LIKE :likeQuery"
 					+ " OR organizations.shortName LIKE :likeQuery)");
@@ -62,19 +62,19 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 		}
 
 		String commonTableExpression = null;
-		if (query.getParentOrgId() != null) {
+		if (query.getParentOrgUuid() != null) {
 			if (query.getParentOrgRecursively() != null && query.getParentOrgRecursively()) {
-				commonTableExpression = "WITH parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :parentOrgId "
+				commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id AND o.id != :parentOrgId"
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid AND o.uuid != :parentOrgUuid"
 					+ ") ";
-				whereClauses.add("( organizations.parentOrgId IN (SELECT id from parent_orgs) "
-					+ "OR organizations.id = :parentOrgId)");
+				whereClauses.add("( organizations.parentOrgUuid IN (SELECT uuid from parent_orgs) "
+					+ "OR organizations.uuid = :parentOrgUuid)");
 			} else {
-				whereClauses.add("organizations.parentOrgId = :parentOrgId");
+				whereClauses.add("organizations.parentOrgUuid = :parentOrgUuid");
 			}
-			sqlArgs.put("parentOrgId", query.getParentOrgId());
+			sqlArgs.put("parentOrgUuid", query.getParentOrgUuid());
 		}
 
 		if (whereClauses.isEmpty()) {
@@ -106,7 +106,7 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "organizations", "shortName", "longName", "identificationCode"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "organizations", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "organizations", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
@@ -114,9 +114,8 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Organization> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
-			.map(new OrganizationMapper());
-		return new AnetBeanList<Organization>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		return new AnetBeanList<Organization>(sqlQuery, query.getPageNum(), query.getPageSize(), new OrganizationMapper(), null);
 	}
 
 }

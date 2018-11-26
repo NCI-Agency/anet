@@ -47,7 +47,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 
 	@GraphQLQuery(name="positions")
 	public CompletableFuture<List<Position>> loadPositions(@GraphQLRootContext Map<String, Object> context) {
-		return AnetObjectEngine.getInstance().getAuthorizationGroupDao().getPositionsForAuthorizationGroup(context, id)
+		return AnetObjectEngine.getInstance().getAuthorizationGroupDao().getPositionsForAuthorizationGroup(context, uuid)
 				.thenApply(o -> { positions = o; return o; });
 	}
 
@@ -75,7 +75,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
-		query.setAuthorizationGroupId(Arrays.asList(id));
+		query.setAuthorizationGroupUuid(Arrays.asList(uuid));
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
 	}
 
@@ -85,7 +85,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		PositionSearchQuery query = new PositionSearchQuery();
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
-		query.setAuthorizationGroupId(id);
+		query.setAuthorizationGroupUuid(uuid);
 		return AnetObjectEngine.getInstance().getPositionDao().search(query);
 	}
 
@@ -95,7 +95,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 			return false;
 		}
 		AuthorizationGroup a = (AuthorizationGroup) o;
-		return Objects.equals(a.getId(), id)
+		return Objects.equals(a.getUuid(), uuid)
 				&& Objects.equals(a.getName(), name)
 				&& Objects.equals(a.getDescription(), description)
 				&& Objects.equals(a.getPositions(), positions)
@@ -104,12 +104,12 @@ public class AuthorizationGroup extends AbstractAnetBean {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, description, positions, status);
+		return Objects.hash(uuid, name, description, positions, status);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("(%d) - %s", id, name);
+		return String.format("(%s) - %s", uuid, name);
 	}
 
 }

@@ -20,6 +20,17 @@ config:
       - "henry"
     admin:
       - "arthur"
+    advisorAttendee:
+      - "ANDERSON, Andrew"
+      - "BECCABON, Rebecca"
+      - "ELIZAWELL, Elizabeth"
+      - "ERINSON, Erin"
+      - "JACKSON, Jack"
+      - "REINTON, Reina"
+    principalAttendee:
+      - "ROGWELL, Roger"
+      - "STEVESON, Steve"
+      - "TOPFERNESS, Christopf"
 scenarios:
   - name: Check home
     weight: 5
@@ -33,6 +44,30 @@ scenarios:
     weight: 3
     flow:
     - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          query: "query  { people: personList (f:search, query:{text:\"{{ advisorAttendee }}\" }) {list { uuid, name }}}"
+        capture:
+        - json: "$.data.people.list[0].uuid"
+          as: "advisorAttendeeUuid"
+        - json: "$.data.people.list[0].name"
+          as: "advisorAttendeeName"
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          query: "query  { people: personList (f:search, query:{text:\"{{ principalAttendee }}\" }) {list { uuid, name }}}"
+        capture:
+        - json: "$.data.people.list[0].uuid"
+          as: "principalAttendeeUuid"
+        - json: "$.data.people.list[0].name"
+          as: "principalAttendeeName"
+    - post:
         url: "/api/reports/new"
         beforeRequest: "generateRandomData"
         auth:
@@ -44,15 +79,14 @@ scenarios:
           atmosphere: "{{ atmosphere }}"
           atmosphereDetails: "{{ atmosphereDetails }}"
           attendees:
-          - name: REINTON, Reina
+          - name: "{{ advisorAttendeeName }}"
             status: ACTIVE
             role: ADVISOR
-            id: 4
+            uuid: "{{ advisorAttendeeUuid }}"
             primary: true
-          - name: TOPFERNESS, Christopf
-            status: ACTIVE
+          - name: "{{ principalAttendeeName }}"
             role: PRINCIPAL
-            id: 8
+            uuid: "{{ principalAttendeeUuid }}"
             primary: true
           tasks: []
           comments: []
@@ -61,16 +95,12 @@ scenarios:
           keyOutcomes: "{{ keyOutcomes }}"
           tags: []
           reportSensitiveInformation:
-            id: 
-            createdAt: 
-            updatedAt: 
-            text: 
-            reportId: 1020
+            text: "{{ reportSensitiveInformationText }}"
           authorizationGroups: []
         capture:
-          json: "$.id"
-          as: "reportId"
-    - log: "{{ advisor }} creating report {{ reportId }}"
+          json: "$.uuid"
+          as: "reportUuid"
+    - log: "{{ advisor }} creating report {{ reportUuid }}"
   - name: Approve report
     weight: 5
     flow:
@@ -80,10 +110,10 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json: 
-          query: "query { person(f:me) { id }}"
+          query: "query { person(f:me) { uuid }}"
         capture:
-          json: "$.data.person.id"
-          as: "personId"
+          json: "$.data.person.uuid"
+          as: "personUuid"
     - post:
         url: "/graphql"
         afterResponse: "continueIfResult"
@@ -91,9 +121,9 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json: 
-          query: "query  { reports: reportList (f:search, query:{pendingApprovalOf:{{ personId }} }) {list { id}}}"
+          query: "query  { reports: reportList (f:search, query:{pendingApprovalOf:\"{{ personUuid }}\" }) {list { uuid}}}"
         capture:
-          json: "$.data.reports.list[0].id"
+          json: "$.data.reports.list[0].uuid"
           as: "result"
     - log: "{{ advisor }} approving report {{ result }}"
     - post:
@@ -110,10 +140,34 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json: 
-          query: "query { person(f:me) { id }}"
+          query: "query { person(f:me) { uuid }}"
         capture:
-          json: "$.data.person.id"
-          as: "personId"
+          json: "$.data.person.uuid"
+          as: "personUuid"
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          query: "query  { people: personList (f:search, query:{text:\"{{ advisorAttendee }}\" }) {list { uuid }}}"
+        capture:
+        - json: "$.data.people.list[0].uuid"
+          as: "advisorAttendeeUuid"
+        - json: "$.data.people.list[0].name"
+          as: "advisorAttendeeName"
+    - post:
+        url: "/graphql"
+        auth:
+          user: "{{advisor}}"
+          pass: "{{advisor}}"
+        json:
+          query: "query  { people: personList (f:search, query:{text:\"{{ principalAttendee }}\" }) {list { uuid }}}"
+        capture:
+        - json: "$.data.people.list[0].uuid"
+          as: "principalAttendeeUuid"
+        - json: "$.data.people.list[0].name"
+          as: "principalAttendeeName"
     - post:
         url: "/graphql"
         afterResponse: "continueIfResult"
@@ -121,32 +175,35 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json: 
-          query: "query  { reports: reportList (f:search, query:{authorId:{{ personId }},state:[DRAFT,REJECTED]}) {list { id}}}"
+          query: "query  { reports: reportList (f:search, query:{authorUuid:\"{{ personUuid }}\",state:[DRAFT,REJECTED]}) {list { uuid, reportSensitiveInformation { uuid } }}}"
         capture:
-          json: "$.data.reports.list[0].id"
+        - json: "$.data.reports.list[0].uuid"
           as: "result"
+        - json: "$.data.reports.list[0].reportSensitiveInformation.uuid"
+          as: "rsiUuid"
     - log: "{{ advisor }} updating report {{ result }}"
     - post:
-        url: "/api/reports/{{ result }}/update"
+        url: "/api/reports/update"
         beforeRequest: "generateRandomData"
         auth:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json:
+          uuid: "{{ result }}"
           intent: "{{ intent }}"
           engagementDate: "{{ engagementDate }}"
           atmosphere: "{{ atmosphere }}"
           atmosphereDetails: "{{ atmosphereDetails }}"
           attendees:
-          - name: REINTON, Reina
+          - name: "{{ advisorAttendeeName }}"
             status: ACTIVE
             role: ADVISOR
-            id: 4
+            uuid: "{{ advisorAttendeeUuid }}"
             primary: true
-          - name: TOPFERNESS, Christopf
+          - name: "{{ principalAttendeeName }}"
             status: ACTIVE
             role: PRINCIPAL
-            id: 8
+            uuid: "{{ principalAttendeeUuid }}"
             primary: true
           tasks: []
           comments: []
@@ -155,11 +212,9 @@ scenarios:
           keyOutcomes: "{{ keyOutcomes }}"
           tags: []
           reportSensitiveInformation:
-            id: 
-            createdAt: 
-            updatedAt: 
-            text: 
-            reportId: 1020
+            uuid: "{{ rsiUuid }}"
+            text: "{{ reportSensitiveInformationText }}"
+            reportUuid: "{{ result }}"
           authorizationGroups: []
   - name: Submit report
     weight: 1
@@ -170,10 +225,10 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json: 
-          query: "query { person(f:me) { id }}"
+          query: "query { person(f:me) { uuid }}"
         capture:
-          json: "$.data.person.id"
-          as: "personId"
+          json: "$.data.person.uuid"
+          as: "personUuid"
     - post:
         url: "/graphql"
         afterResponse: "continueIfResult"
@@ -181,9 +236,9 @@ scenarios:
           user: "{{advisor}}"
           pass: "{{advisor}}"
         json: 
-          query: "query  { reports: reportList (f:search, query:{authorId:{{ personId }},state:[DRAFT,REJECTED]}) {list { id}}}"
+          query: "query  { reports: reportList (f:search, query:{authorUuid:\"{{ personUuid }}\",state:[DRAFT,REJECTED]}) {list { uuid}}}"
         capture:
-          json: "$.data.reports.list[0].id"
+          json: "$.data.reports.list[0].uuid"
           as: "result"
     - log: "{{ advisor }} submitting report {{ result }}"
     - post:

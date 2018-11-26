@@ -28,9 +28,10 @@ export default class Task extends Model {
 		projectedCompletion: null,
 		plannedCompletion: null,
 		get status() { return Task.STATUS.ACTIVE },
+		...Model.schema,
 	}
 
-	static autocompleteQuery = "id, shortName, longName"
+	static autocompleteQuery = "uuid, shortName, longName"
 
 	static autocompleteTemplate(task) {
 		return <span>{[task.shortName, task.longName].join(' - ')}</span>

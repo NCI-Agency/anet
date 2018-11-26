@@ -47,12 +47,12 @@ public class SavedSearch extends AbstractAnetBean {
 	}
 	
 	@Override
-	public boolean equals(Object o) { 
-		if (o == null || o instanceof SavedSearch == false) { 
-			return false; 
+	public boolean equals(Object o) {
+		if (o == null || o instanceof SavedSearch == false) {
+			return false;
 		}
 		SavedSearch other = (SavedSearch) o;
-		return Objects.equal(getId(), other.getId())
+		return Objects.equal(getUuid(), other.getUuid())
 				&& Objects.equal(name, other.getName())
 				&& Objects.equal(owner, other.getOwner())
 				&& Objects.equal(objectType, other.getObjectType())
@@ -60,13 +60,13 @@ public class SavedSearch extends AbstractAnetBean {
 	}
 	
 	@Override
-	public String toString() { 
-		return String.format("SavedSearch[id:%d, name:%s, query:%s, owner:%d]", 
-				getId(), name, query, owner.getId());
+	public String toString() {
+		return String.format("SavedSearch[uuid:%s, name:%s, query:%s, owner:%s]",
+				getUuid(), name, query, owner.getUuid());
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hashCode(id, name, owner, objectType, query);
+	public int hashCode() {
+		return Objects.hashCode(uuid, name, owner, objectType, query);
 	}
 }

@@ -28,8 +28,8 @@ public class TaskTest extends BeanTester<Task> {
 
 	@Test
 	public void staticCreatorTest() { 
-		Task p = Task.createWithId(4);
-		assertThat(p.getId()).isEqualTo(4);
+		Task p = Task.createWithUuid("4");
+		assertThat(p.getUuid()).isEqualTo("4");
 		assertThat(p.getLongName()).isNull();
 	}
 }

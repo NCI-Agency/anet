@@ -1,49 +1,96 @@
-import React, {Component} from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-import API from 'api'
 import autobind from 'autobind-decorator'
-import {Button} from 'react-bootstrap'
 
+import {Popover, Overlay} from 'react-bootstrap'
 import HorizontalBarChart from 'components/HorizontalBarChart'
-import Fieldset from 'components/Fieldset'
-import ReportCollection from 'components/ReportCollection'
-import moment from 'moment'
+import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE} from 'components/ReportCollection'
 
-import _isEqual from 'lodash/isEqual'
+import moment from 'moment'
 
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 
+import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
+import ContainerDimensions from 'react-container-dimensions'
+import { IconNames } from '@blueprintjs/icons'
+
 const d3 = require('d3')
-const chartId = 'future_engagements_by_location'
-const GQL_CHART_FIELDS =  /* GraphQL */`
-  id
-  engagementDate
-  location { id, name }
-`
+
 const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoading')('data')(HorizontalBarChart))
+const Context = React.createContext()
 
 /*
  * Component displaying a chart with number of future engagements per date and
  * location. Locations are grouped per date.
  */
-class FutureEngagementsByLocation extends Component {
-  static propTypes = {
-    queryParams: PropTypes.object,
-    showLoading: PropTypes.func.isRequired,
-    hideLoading: PropTypes.func.isRequired,
-  }
+class FutureEngagementsByLocation extends ReportsVisualisation {
+  static propTypes = {...rvPropTypes}
 
   constructor(props) {
     super(props)
 
+    this.CHART_ID = 'future_engagements_by_location'
+    this.GQL_CHART_FIELDS =  /* GraphQL */`
+      uuid
+      engagementDate
+      location { uuid, name }
+    `
+    this.VISUALIZATIONS = [
+      {
+        id: 'febl-chart',
+        icons: [IconNames.HORIZONTAL_BAR_CHART],
+        title: `Chart by date and location`,
+        renderer: this.getBarChart,
+      },
+      {
+        id: 'febl-collection',
+        icons: [IconNames.PANEL_TABLE],
+        title: `Reports by date and location`,
+        renderer: this.getReportCollection,
+      },
+      {
+        id: 'febl-map',
+        icons: [IconNames.MAP],
+        title: `Map by date and location`,
+        renderer: this.getReportMap,
+      },
+    ]
+    this.INITIAL_LAYOUT = {
+      direction: 'column',
+      first: {
+        direction: 'row',
+        first: this.VISUALIZATIONS[0].id,
+        second: this.VISUALIZATIONS[1].id,
+      },
+      second: this.VISUALIZATIONS[2].id,
+    }
+    this.DESCRIPTION = `The engagements are grouped first by date and within the date per location.
+      In order to see the list of engagements for a date and location,
+      click on the bar corresponding to the date and location.`
+
     this.state = {
       graphData: {},
+      reports: {},
+      allReports: [],
       reportsPageNum: 0,
-      focusedDate: '',
-      focusedLocation: '',
+      focusedSelection: '',
+      graphPopover: null,
+      hoveredBar: null,
       updateChart: true,  // whether the chart needs to be updated
       isLoading: false
+    }
+  }
+
+  get additionalReportParams() {
+    const focusedDate = this.state.focusedSelection ? parseInt(this.state.focusedSelection.parentKey, 10) : ''
+    const focusedLocation = this.state.focusedSelection ? this.state.focusedSelection.key : ''
+    return {
+      // Use here the start and end of a date in order to make sure the
+      // fetch is independent of the engagementDate time value
+      engagementDateStart: moment(focusedDate).startOf('day').valueOf(),
+      engagementDateEnd: moment(focusedDate).endOf('day').valueOf(),
+      locationUuid: focusedLocation
     }
   }
 
@@ -58,205 +105,136 @@ class FutureEngagementsByLocation extends Component {
     return dateArray
   }
 
-  render() {
-    const focusDetails = this.getFocusDetails()
-    return (
-      <div>
-        <p className="help-text">{`Grouped by date and location`}</p>
-        <p className="chart-description">
-          {`The engagements are grouped first by date and within the date per
-            location. In order to see the list of engagements for a date and
-            location, click on the bar corresponding to the date and location.`}
-        </p>
-        <BarChartWithLoader
-          chartId={chartId}
-          data={this.state.graphData}
-          onBarClick={this.goToSelection}
-          updateChart={this.state.updateChart}
-          isLoading={this.state.isLoading}
-        />
-        <Fieldset
-            title={`Future Engagements ${focusDetails.titleSuffix}`}
-            id='cancelled-reports-details'
-            action={!focusDetails.resetFnc
-              ? '' : <Button onClick={() => this[focusDetails.resetFnc]()}>{focusDetails.resetButtonLabel}</Button>
-            }
-          >
-          <ReportCollection paginatedReports={this.state.reports} goToPage={this.goToReportsPage} />
-        </Fieldset>
+  @autobind
+  getBarChart(id) {
+    return <Context.Consumer>{context => (
+      <div className="scrollable-y">
+        <ContainerDimensions>{({width}) => (
+          <BarChartWithLoader
+            width={width}
+            chartId={this.chartId}
+            data={context.graphData}
+            onBarClick={this.goToSelection}
+            showPopover={this.showPopover}
+            hidePopover={this.hidePopover}
+            updateChart={context.updateChart}
+            selectedBarClass={this.selectedBarClass}
+            selectedBar={context.focusedSelection ? 'bar_' + context.focusedSelection.key + context.focusedSelection.parentKey : ''}
+            isLoading={context.isLoading}
+          />
+        )}</ContainerDimensions>
+
+        <Overlay
+          show={!!context.graphPopover}
+          placement="top"
+          container={document.body}
+          animation={false}
+          target={() => context.graphPopover}
+        >
+          <Popover id="graph-popover" title={context.hoveredBar && context.graphData.categoryLabels[context.hoveredBar.parentKey]}>
+            <p style={{textAlign: 'center'}}>{context.hoveredBar && `${context.graphData.leavesLabels[context.hoveredBar.key]}: ${context.hoveredBar.value}`}</p>
+          </Popover>
+        </Overlay>
       </div>
+    )}</Context.Consumer>
+  }
+
+  @autobind
+  getReportCollection(id)
+  {
+    return <Context.Consumer>{context => (
+      <div className="scrollable">
+        <ReportCollection
+          paginatedReports={context.reports}
+          goToPage={this.goToReportsPage}
+          viewFormats={[FORMAT_TABLE, FORMAT_SUMMARY]}
+        />
+      </div>
+    )}</Context.Consumer>
+  }
+
+  @autobind
+  getReportMap(id)
+  {
+    return <Context.Consumer>{context => (
+      <div className="non-scrollable">
+        <ContainerDimensions>{({width, height}) => (
+          <ReportCollection
+            width={width}
+            height={height}
+            marginBottom={0}
+            reports={context.allReports}
+            viewFormats={[FORMAT_MAP]}
+          />
+        )}</ContainerDimensions>
+      </div>
+    )}</Context.Consumer>
+  }
+
+  render() {
+    return (
+      <Context.Provider value={this.state}>
+        {super.render()}
+      </Context.Provider>
     )
   }
 
-  getFocusDetails() {
-    let titleSuffix = ''
-    let resetFnc = ''
-    let resetButtonLabel = ''
-    const focusDate = moment(this.state.focusedDate).format('D MMM YYYY')
-    if (this.state.focusedLocation && this.state.focusedDate) {
-      titleSuffix = `for ${this.state.focusedLocation.label} on ${focusDate}`
-      resetFnc = 'goToSelection'
-      resetButtonLabel = 'All locations'
-    }
-    return {
-      titleSuffix: titleSuffix,
-      resetFnc: resetFnc,
-      resetButtonLabel: resetButtonLabel
-    }
-  }
-
-  fetchData() {
-    this.setState( {isLoading: true} )
-    this.props.showLoading()
-    // Query used by the chart
-    const chartQuery = this.runChartQuery(this.chartQueryParams())
-    const noLocation = {
-      id: -1,
-      name: 'No location allocated'
-    }
-    Promise.all([chartQuery]).then(values => {
-      let reportsList = values[0].reportList.list || []
-      reportsList = reportsList
-        .map(d => { if (!d.location) d.location = noLocation; return d })
-      // add days without data as we want to display them in the chart
-      let allCategories = this.engagementDateRangeArray.map(function(d) {
-        return {
-          key: d.valueOf(),
-          values: [{}]
-        }
-      })
-      let categoriesWithData = d3.nest()
-        .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
-        .key(function(d) { return d.location.id })
-        .rollup(function(leaves) { return leaves.length })
-        .entries(reportsList)
-      let groupedData = allCategories.map((d)=> {
-        let categData = categoriesWithData.find((x) => {return Number(x.key) === d.key })
-        return Object.assign({}, d, categData)
-      })
-      let graphData = {}
-      graphData.data = groupedData
-      graphData.categoryLabels = allCategories.reduce(
-        function(prev, curr) {
-          prev[curr.key] = moment(curr.key).format('D MMM YYYY')
-          return prev
-        },
-        {}
-      )
-      graphData.leavesLabels = reportsList.reduce(
-        function(prev, curr) {
-          prev[curr.location.id] = curr.location.name
-          return prev
-        },
-        {}
-      )
-      this.setState({
-        updateChart: true,  // update chart after fetching the data
-        graphData: graphData,
-        isLoading: false
-      })
-      this.props.hideLoading()
-    })
-    this.fetchFocusData()
-  }
-
-  fetchFocusData() {
-    const reportsQueryParams = {}
-    Object.assign(reportsQueryParams, this.props.queryParams)
-    Object.assign(reportsQueryParams, {
-      pageNum: this.state.reportsPageNum,
-      pageSize: 10
-    })
-    if (this.state.focusedDate) {
-      Object.assign(reportsQueryParams, {
-        // Use here the start and end of a date in order to make sure the
-        // fetch is independent of the engagementDate time value
-        engagementDateStart: moment(this.state.focusedDate).startOf('day').valueOf(),
-        engagementDateEnd: moment(this.state.focusedDate).endOf('day').valueOf(),
-        locationId: this.state.focusedLocation.key
-      })
-    }
-    // Query used by the reports collection
-    let reportsQuery = API.query(/* GraphQL */`
-        reportList(query:$reportsQueryParams) {
-          pageNum, pageSize, totalCount, list {
-            ${ReportCollection.GQL_REPORT_FIELDS}
-          }
-        }
-      `, {reportsQueryParams}, '($reportsQueryParams: ReportSearchQueryInput)')
-    Promise.all([reportsQuery]).then(values => {
-      this.setState({
-        updateChart: false,  // only update the report list
-        reports: values[0].reportList
-      })
-    })
-  }
-
-  chartQueryParams = () => {
-    const chartQueryParams = {}
-    const queryParams = this.props.queryParams
-    Object.assign(chartQueryParams, queryParams)
-    Object.assign(chartQueryParams, {
-      pageNum: 0,
-      pageSize: 0,  // retrieve all the filtered reports
-    })
-    return chartQueryParams
-  }
-
-  runChartQuery = (chartQueryParams) => {
-    return API.query(/* GraphQL */`
-    reportList(query:$chartQueryParams) {
-      totalCount, list {
-        ${GQL_CHART_FIELDS}
+  @autobind
+  fetchChartData(chartQuery) {
+    return Promise.all([chartQuery]).then(values => {
+      const noLocation = {
+        uuid: "-1",
+        name: 'No location allocated'
       }
-    }
-  `, {chartQueryParams}, '($chartQueryParams: ReportSearchQueryInput)')
-  }
-
-  @autobind
-  goToReportsPage(newPage) {
-    this.setState({updateChart: false, reportsPageNum: newPage}, () => this.fetchFocusData())
-  }
-
-  resetChartSelection(chartId) {
-    d3.selectAll('#' + chartId + ' rect').attr('class', '')
-  }
-
-  @autobind
-  goToSelection(item) {
-    // Note: we set updateChart to false as we do not want to re-render the chart
-    // when changing the focus bar
-    this.setState(
-      {
-        updateChart: false,
-        reportsPageNum: 0,
-        focusedDate: (item ? parseInt(item.parentKey, 10) : ''),
-        focusedLocation: (item ? {key: item.key, label: this.state.graphData.leavesLabels[item.key]} : '')
-      },
-      () => this.fetchFocusData()
-    )
-    // remove highlighting of the bars
-    this.resetChartSelection(chartId)
-    if (item) {
-      // highlight the selected bar
-      d3.select('#' + chartId + ' #bar_' + item.key + item.parentKey).attr('class', 'selected-bar')
-    }
-  }
-
-  componentDidMount() {
-    this.fetchData()
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
+      let graphData = {}
+      let reportsList = values[0].reportList.list || []
+      if (!!reportsList.length) {
+        reportsList = reportsList
+          .map(d => { if (!d.location) d.location = noLocation; return d })
+        // add days without data as we want to display them in the chart
+        let allCategories = this.engagementDateRangeArray.map(function(d) {
+          return {
+            key: d.valueOf(),
+            values: [{}]
+          }
+        })
+        let categoriesWithData = d3.nest()
+          .key(function(d) { return moment(d.engagementDate).startOf('day').valueOf() })
+          .key(function(d) { return d.location.uuid })
+          .rollup(function(leaves) { return leaves.length })
+          .entries(reportsList)
+        let groupedData = allCategories.map((d)=> {
+          let categData = categoriesWithData.find((x) => {return Number(x.key) === d.key })
+          return Object.assign({}, d, categData)
+        })
+        graphData.data = groupedData
+        graphData.categoryLabels = allCategories.reduce(
+          function(prev, curr) {
+            prev[curr.key] = moment(curr.key).format('D MMM YYYY')
+            return prev
+          },
+          {}
+        )
+        graphData.leavesLabels = reportsList.reduce(
+          function(prev, curr) {
+            prev[curr.location.uuid] = curr.location.name
+            return prev
+          },
+          {}
+        )
+      }
       this.setState({
-        reportsPageNum: 0,
-        focusedDate: '',  // reset focus when changing the queryParams
-        focusedLocation: ''
-      }, () => this.fetchData())
-    }
+        isLoading: false,
+        updateChart: true,  // update chart after fetching the data
+        graphData: graphData
+      })
+    })
   }
 
+  @autobind
+  updateHighlight(focusedSelection, clear) {
+    super.updateHighlight(focusedSelection ? (focusedSelection.key + focusedSelection.parentKey) : '', clear)
+  }
 }
 
 export default connect(null, mapDispatchToProps)(FutureEngagementsByLocation)

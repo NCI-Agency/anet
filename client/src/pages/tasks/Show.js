@@ -9,6 +9,7 @@ import Form from 'components/Form'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 import DictionaryField from '../../HOC/DictionaryField'
 
 import Settings from 'Settings'
@@ -34,7 +35,7 @@ class BaseTaskShow extends Page {
 
 		this.state = {
 			task: new Task({
-				id: props.match.params.id,
+				uuid: props.match.params.uuid,
 				shortName: props.match.params.shortName,
 				longName: props.match.params.longName,
 				responsibleOrg: props.match.params.responsibleOrg
@@ -61,16 +62,17 @@ class BaseTaskShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			taskId: props.match.params.id,
+			taskUuid: props.match.params.uuid,
 		})
 
 		let taskQuery = new GQL.Part(/* GraphQL */`
-			task(id:${props.match.params.id}) {
-				id, shortName, longName, status,
+			task(uuid:"${props.match.params.uuid}") {
+				uuid, shortName, longName, status,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
-				responsibleOrg {id, shortName, longName, identificationCode},
-				customFieldRef1 { id, shortName, longName }
+				responsibleOrg { uuid, shortName, longName, identificationCode },
+				customFieldRef1 { uuid, shortName, longName }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`)
 
@@ -93,6 +95,7 @@ class BaseTaskShow extends Page {
 
 		return (
 			<div>
+				<RelatedObjectNotes notes={task.notes} relatedObject={{relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
 				<Breadcrumbs items={[[`${taskShortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -102,11 +105,11 @@ class BaseTaskShow extends Page {
 						<Form.Field id="longName" label={`${taskShortLabel} description`} />
 						<Form.Field id="status" />
 
-						{task.responsibleOrg && task.responsibleOrg.id &&
+						{task.responsibleOrg && task.responsibleOrg.uuid &&
 							this.renderOrg()
 						}
 
-						{task.customFieldRef1 && task.customFieldRef1.id &&
+						{task.customFieldRef1 && task.customFieldRef1.uuid &&
 							<this.TaskCustomFieldRef1 dictProps={Settings.fields.task.customFieldRef1} id="customFieldRef1">
 								<LinkTo task={task.customFieldRef1}>{task.customFieldRef1.shortName} {task.customFieldRef1.longName}</LinkTo>
 							</this.TaskCustomFieldRef1>

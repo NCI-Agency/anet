@@ -3,7 +3,7 @@ package mil.dds.anet.database;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +33,13 @@ public class EmailDao {
 	public void deletePendingEmails(List<Integer> processedEmails) {
 		if (!processedEmails.isEmpty()) {
 			final String emailIds = Joiner.on(", ").join(processedEmails);
-			dbHandle.createStatement("/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN (" + emailIds + ")").execute();
+			dbHandle.createUpdate("/* PendingEmailDelete*/ DELETE FROM \"pendingEmails\" WHERE id IN (" + emailIds + ")").execute();
 		}
 	}
 
 	public void createPendingEmail(String jobSpec) {
 		logger.debug("Running execute on {}", dbHandle);
-		dbHandle.createStatement("/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")
+		dbHandle.createUpdate("/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")
 			.bind("jobSpec", jobSpec)
 			.bind("createdAt", new DateTime())
 			.execute();

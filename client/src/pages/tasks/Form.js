@@ -72,7 +72,7 @@ class BaseTaskForm extends ValidatableFormWrapper {
 
 		orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
 		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
-			orgSearchQuery.parentOrgId = currentUser.position.organization.id
+			orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
 			orgSearchQuery.parentOrgRecursively = true
 		}
 		const {ValidatableForm, RequiredField} = this
@@ -177,14 +177,14 @@ class BaseTaskForm extends ValidatableFormWrapper {
 		task.customFieldRef1 = utils.getReference(task.customFieldRef1)
 		const operation = edit ? 'updateTask' : 'createTask'
 		let graphql = operation + '(task: $task)'
-		graphql += edit ? '' : ' { id }'
+		graphql += edit ? '' : ' { uuid }'
 		const variables = { task: task }
 		const variableDef = '($task: TaskInput!)'
 		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
-				if (data[operation].id) {
-					task.id = data[operation].id
+				if (data[operation].uuid) {
+					task.uuid = data[operation].uuid
 				}
 				this.props.history.replace(Task.pathForEdit(task))
 				this.props.history.push({

@@ -19,7 +19,7 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class TagResourceTest extends AbstractResourceTest {
 
-	private static final String FIELDS = "id name description createdAt";
+	private static final String FIELDS = "uuid name description createdAt";
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -31,9 +31,9 @@ public class TagResourceTest extends AbstractResourceTest {
 		t.setDescription("desc");
 
 		// Create
-		final Integer tId = graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", t, new GenericType<GraphQLResponse<Tag>>() {});
-		assertThat(tId).isNotNull();
-		final Tag created = graphQLHelper.getObjectById(admin, "tag", FIELDS, tId, new GenericType<GraphQLResponse<Tag>>() {});
+		final String tUuid = graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", t, new GenericType<GraphQLResponse<Tag>>() {});
+		assertThat(tUuid).isNotNull();
+		final Tag created = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid, new GenericType<GraphQLResponse<Tag>>() {});
 		assertThat(created.getName()).isEqualTo(t.getName());
 		assertThat(created.getDescription()).isEqualTo(t.getDescription());
 		assertThat(created.getCreatedAt()).isNotNull();
@@ -45,15 +45,15 @@ public class TagResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 
 		// Get
-		final Tag updated = graphQLHelper.getObjectById(admin, "tag", FIELDS, tId, new GenericType<GraphQLResponse<Tag>>() {});
+		final Tag updated = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid, new GenericType<GraphQLResponse<Tag>>() {});
 		assertThat(updated).isEqualTo(created);
 	}
 
 	@Test
 	public void tagExceptionTest() throws UnsupportedEncodingException {
-		// Get with unknown id
+		// Get with unknown uuid
 		thrown.expect(NotFoundException.class);
-		graphQLHelper.getObjectById(admin, "tag", FIELDS, -1, new GenericType<GraphQLResponse<Tag>>() {});
+		graphQLHelper.getObjectById(admin, "tag", FIELDS, "-1", new GenericType<GraphQLResponse<Tag>>() {});
 
 		// Create with empty name
 		thrown.expect(BadRequestException.class);

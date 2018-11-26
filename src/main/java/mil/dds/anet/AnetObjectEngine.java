@@ -12,10 +12,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.dataloader.DataLoaderRegistry;
-import org.skife.jdbi.v2.DBI;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +31,7 @@ import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.TaskDao;
@@ -66,6 +65,7 @@ public class AnetObjectEngine {
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
+	private final NoteDao noteDao;
 	private final Map<String, Object> context;
 
 	ISearcher searcher;
@@ -75,7 +75,7 @@ public class AnetObjectEngine {
 	
 	private final Handle dbHandle;
 	
-	public AnetObjectEngine(DBI jdbi) { 
+	public AnetObjectEngine(Jdbi jdbi) {
 		dbHandle = jdbi.open();
 		
 		personDao = new PersonDao(dbHandle);
@@ -93,6 +93,7 @@ public class AnetObjectEngine {
 		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
 		emailDao = new EmailDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
+		noteDao = new NoteDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
 		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
 		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
@@ -162,6 +163,10 @@ public class AnetObjectEngine {
 		return authorizationGroupDao;
 	}
 
+	public NoteDao getNoteDao() {
+		return noteDao;
+	}
+
 	public EmailDao getEmailDao() {
 		return emailDao;
 	}
@@ -170,57 +175,42 @@ public class AnetObjectEngine {
 		return searcher;
 	}
 
-	public Integer getDefaultOrgId() {
-		try {
-			final String defaultOrgSetting = getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
-			return Integer.parseInt(defaultOrgSetting);
-		} catch (NumberFormatException e) {
-			return null;
-		}
+	public String getDefaultOrgUuid() {
+		return getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
 	}
 
 	public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context, Person person) {
 		if (person == null) {
 			return CompletableFuture.supplyAsync(() -> null);
 		}
-		return orgDao.getOrganizationsForPerson(context, person.getId())
+		return orgDao.getOrganizationsForPerson(context, person.getUuid())
 				.thenApply(l -> l.isEmpty() ? null : l.get(0));
 	}
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
 		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(new TransactionCallback<R>() {
-			@Override
-			public R inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				return processor.apply(input);
-			}
-		});
+		return getDbHandle().inTransaction(h -> processor.apply(input));
 	}
 
 	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
 		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(new TransactionCallback<R>() {
-			@Override
-			public R inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				return processor.apply(arg1, arg2);
-			}
-		});
+		return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
 	}
 
-	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, Integer aoId) {
-		return asDao.getByAdvisorOrganizationId(context, aoId)
+	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, String aoUuid) {
+		return asDao.getByAdvisorOrganizationUuid(context, aoUuid)
 				.thenApply(unordered -> orderSteps(unordered));
 	}
 
 	private List<ApprovalStep> orderSteps(List<ApprovalStep> unordered) {
 		int numSteps = unordered.size();
 		LinkedList<ApprovalStep> ordered = new LinkedList<ApprovalStep>();
-		Integer nextStep = null;
+		String nextStep = null;
 		for (int i = 0;i < numSteps;i++) {
 			for (ApprovalStep as : unordered) {
-				if (Objects.equals(as.getNextStepId(), nextStep)) {
+				if (Objects.equals(as.getNextStepUuid(), nextStep)) {
 					ordered.addFirst(as);
-					nextStep = as.getId();
+					nextStep = as.getUuid();
 					break;
 				}
 			}
@@ -228,8 +218,8 @@ public class AnetObjectEngine {
 		return ordered;
 	}
 	
-	public boolean canUserApproveStep(Map<String, Object> context, Integer userId, int approvalStepId) {
-		ApprovalStep as = asDao.getById(approvalStepId);
+	public boolean canUserApproveStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
+		ApprovalStep as = asDao.getByUuid(approvalStepUuid);
 		final List<Position> approvers;
 		try {
 			approvers = as.loadApprovers(context).get();
@@ -237,17 +227,17 @@ public class AnetObjectEngine {
 			return false;
 		}
 		for (Position approverPosition: approvers) {
-			//approverPosition.getPerson() has the currentPersonId already loaded, so this is safe. 
-			if (Objects.equals(userId, DaoUtils.getId(approverPosition.getPerson()))) { return true; } 
+			//approverPosition.getPerson() has the currentPersonUuid already loaded, so this is safe.
+			if (Objects.equals(userUuid, DaoUtils.getUuid(approverPosition.getPerson()))) { return true; }
 		}
 		return false;
 	}
 
 	/*
-	 * Helper function to build a map of organization IDs to their top level parent organization object.
-	 * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to get all orgs.  
+	 * Helper function to build a map of organization UUIDs to their top level parent organization object.
+	 * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to get all orgs.
 	 */
-	public Map<Integer,Organization> buildTopLevelOrgHash(OrganizationType orgType) {
+	public Map<String,Organization> buildTopLevelOrgHash(OrganizationType orgType) {
 		OrganizationSearchQuery orgQuery = new OrganizationSearchQuery();
 		orgQuery.setPageSize(Integer.MAX_VALUE);
 		orgQuery.setType(orgType);
@@ -256,18 +246,18 @@ public class AnetObjectEngine {
 		return Utils.buildParentOrgMapping(orgs, null);
 	}
 	
-	/* Helper function to build a map or organization IDS to their top parent
-	 * capped at a certain point in the hierarchy. 
-	 * parentOrg will map to parentOrg, and all children will map to the highest 
-	 * parent that is NOT the parentOrgId. 
+	/* Helper function to build a map or organization UUIDs to their top parent
+	 * capped at a certain point in the hierarchy.
+	 * parentOrg will map to parentOrg, and all children will map to the highest
+	 * parent that is NOT the parentOrgUuid.
 	 */
-	public Map<Integer,Organization> buildTopLevelOrgHash(Integer parentOrgId) { 
+	public Map<String,Organization> buildTopLevelOrgHash(String parentOrgUuid) {
 		OrganizationSearchQuery query = new OrganizationSearchQuery();
-		query.setParentOrgId(parentOrgId);
+		query.setParentOrgUuid(parentOrgUuid);
 		query.setParentOrgRecursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
 		List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
-		return Utils.buildParentOrgMapping(orgList, parentOrgId);
+		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
 	}
 	
 	public static AnetObjectEngine getInstance() { 

@@ -121,7 +121,7 @@ export default class ReportSummary extends Component {
 			</Row>
       <Row>
         <Col md={12}>
-        {report.tags && <Row><Col md={12}>{report.tags.map((tag,i) => <Tag key={tag.id} tag={tag} />)}</Col></Row>}
+        {report.tags && <Row><Col md={12}>{report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}</Col></Row>}
         </Col>
       </Row>
 			<Row className="hide-for-print">

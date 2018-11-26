@@ -4,6 +4,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
 import {Organization, Person} from 'models'
@@ -30,13 +31,14 @@ class OrganizationEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			organization(id:${props.match.params.id}) {
-				id, shortName, longName, status, identificationCode, type,
-				parentOrg { id, shortName, longName, identificationCode }
-				approvalSteps { id, name
-					approvers { id, name, person { id, name, rank}}
+			organization(uuid:"${props.match.params.uuid}") {
+				uuid, shortName, longName, status, identificationCode, type,
+				parentOrg { uuid, shortName, longName, identificationCode }
+				approvalSteps { uuid, name
+					approvers { uuid, name, person { uuid, name, rank}}
 				},
-				tasks { id, shortName, longName}
+				tasks { uuid, shortName, longName}
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			this.setState({
@@ -51,6 +53,7 @@ class OrganizationEdit extends Page {
 
 		return (
 			<div>
+				<RelatedObjectNotes notes={organization.notes} relatedObject={{relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
 				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 

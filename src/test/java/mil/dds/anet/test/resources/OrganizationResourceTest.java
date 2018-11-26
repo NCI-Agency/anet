@@ -31,8 +31,8 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class OrganizationResourceTest extends AbstractResourceTest {
 
-	private static final String FIELDS = "id shortName longName status identificationCode type";
-	private static final String POSITION_FIELDS = "id name code type status organization { id } location { id }";
+	private static final String FIELDS = "uuid shortName longName status identificationCode type";
+	private static final String POSITION_FIELDS = "uuid name code type status organization { uuid } location { uuid }";
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -43,10 +43,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		final Person jack = getJackJackson();
 
 		//Create a new AO
-		final Integer aoId = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(aoId).isNotNull();
-		final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoId, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(aoUuid).isNotNull();
+		final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoUuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao.getShortName()).isEqualTo(created.getShortName());
 		assertThat(ao.getLongName()).isEqualTo(created.getLongName());
 		assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
@@ -57,43 +57,43 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 
 		//Verify the AO name is updated.
-		Organization updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, created.getId(), new GenericType<GraphQLResponse<Organization>>() {});
+		Organization updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(updated.getLongName()).isEqualTo(created.getLongName());
 
 		//Create a position and put it in this AO
 		Position b1 = PositionTest.getTestAdvisor();
 		b1.setOrganization(updated);
 		b1.setCode(b1.getCode() + "_" + DateTime.now().getMillis());
-		final Integer b1Id = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+		final String b1Uuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
 				b1, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(b1Id).isNotNull();
-		b1 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1Id, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(b1.getId()).isNotNull();
-		assertThat(b1.getOrganization().getId()).isEqualTo(updated.getId());
+		assertThat(b1Uuid).isNotNull();
+		b1 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1Uuid, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(b1.getUuid()).isNotNull();
+		assertThat(b1.getOrganization().getUuid()).isEqualTo(updated.getUuid());
 
 		b1.setOrganization(updated);
 		nrUpdated = graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", b1);
 		assertThat(nrUpdated).isEqualTo(1);
 
-		Position ret = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		Position ret = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(ret.getOrganization()).isNotNull();
-		assertThat(ret.getOrganization().getId()).isEqualTo(updated.getId());
+		assertThat(ret.getOrganization().getUuid()).isEqualTo(updated.getUuid());
 
 		//Create a child organizations
 		Organization child = new Organization();
-		child.setParentOrg(Organization.createWithId(created.getId()));
+		child.setParentOrg(Organization.createWithUuid(created.getUuid()));
 		child.setShortName("AO McChild");
 		child.setLongName("Child McAo");
 		child.setStatus(OrganizationStatus.ACTIVE);
 		child.setType(OrganizationType.ADVISOR_ORG);
-		final Integer childId = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String childUuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				child, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(childId).isNotNull();
-		child = graphQLHelper.getObjectById(admin, "organization", FIELDS, childId, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(child.getId()).isNotNull();
+		assertThat(childUuid).isNotNull();
+		child = graphQLHelper.getObjectById(admin, "organization", FIELDS, childUuid, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(child.getUuid()).isNotNull();
 
 		OrganizationSearchQuery query = new OrganizationSearchQuery();
-		query.setParentOrgId(created.getId());
+		query.setParentOrgUuid(created.getUuid());
 		final AnetBeanList<Organization> children = graphQLHelper.searchObjects(admin, "organizationList", "query", "OrganizationSearchQueryInput",
 				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		assertThat(children.getList()).hasSize(1).contains(child);
@@ -107,7 +107,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Verify approval step was saved. 
-		updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getId(), new GenericType<GraphQLResponse<Organization>>() {});
+		updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(), new GenericType<GraphQLResponse<Organization>>() {});
 		List<ApprovalStep> returnedSteps = updated.loadApprovalSteps(context).get();
 		assertThat(returnedSteps.size()).isEqualTo(1);
 		assertThat(returnedSteps.get(0).loadApprovers(context).get()).contains(b1);
@@ -117,11 +117,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		task.setShortName("TST POM1");
 		task.setLongName("Verify that you can update Tasks on a Organization");
 		task.setStatus(TaskStatus.ACTIVE);
-		final Integer taskId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+		final String taskUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
 				task, new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(taskId).isNotNull();
-		task = graphQLHelper.getObjectById(admin, "task", "id shortName longName status", taskId, new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(task.getId()).isNotNull();
+		assertThat(taskUuid).isNotNull();
+		task = graphQLHelper.getObjectById(admin, "task", "uuid shortName longName status", taskUuid, new GenericType<GraphQLResponse<Task>>() {});
+		assertThat(task.getUuid()).isNotNull();
 		
 		child.setTasks(ImmutableList.of(task));
 		child.setApprovalSteps(null);
@@ -129,10 +129,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Verify task was saved. 
-		updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getId(), new GenericType<GraphQLResponse<Organization>>() {});
+		updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(), new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(updated.loadTasks()).isNotNull();
 		assertThat(updated.loadTasks().size()).isEqualTo(1);
-		assertThat(updated.loadTasks().get(0).getId()).isEqualTo(task.getId());
+		assertThat(updated.loadTasks().get(0).getUuid()).isEqualTo(task.getUuid());
 		
 		//Change the approval steps. 
 		step1.setApprovers(ImmutableList.of(admin.loadPosition()));
@@ -145,7 +145,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Verify approval steps updated correct. 
-		updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getId(), new GenericType<GraphQLResponse<Organization>>() {});
+		updated = graphQLHelper.getObjectById(jack, "organization", FIELDS, child.getUuid(), new GenericType<GraphQLResponse<Organization>>() {});
 		returnedSteps = updated.loadApprovalSteps(context).get();
 		assertThat(returnedSteps.size()).isEqualTo(2);
 		assertThat(returnedSteps.get(0).getName()).isEqualTo(step1.getName());
@@ -158,10 +158,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 	public void createDuplicateAO() {
 		// Create a new AO
 		final Organization ao = OrganizationTest.getTestAO(true);
-		final Integer aoId = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(aoId).isNotNull();
-		final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoId, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(aoUuid).isNotNull();
+		final Organization created = graphQLHelper.getObjectById(admin, "organization", FIELDS, aoUuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao.getShortName()).isEqualTo(created.getShortName());
 		assertThat(ao.getLongName()).isEqualTo(created.getLongName());
 		assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
@@ -176,20 +176,20 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 	public void updateDuplicateAO() {
 		// Create a new AO
 		final Organization ao1 = OrganizationTest.getTestAO(true);
-		final Integer ao1Id = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String ao1Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao1, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(ao1Id).isNotNull();
-		final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao1Id, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(ao1Uuid).isNotNull();
+		final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao1Uuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
 		assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
 		assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
 
 		// Create another new AO
 		final Organization ao2 = OrganizationTest.getTestAO(true);
-		final Integer ao2Id = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String ao2Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao2, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(ao2Id).isNotNull();
-		final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao2Id, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(ao2Uuid).isNotNull();
+		final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao2Uuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao2.getShortName()).isEqualTo(created2.getShortName());
 		assertThat(ao2.getLongName()).isEqualTo(created2.getLongName());
 		assertThat(ao2.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
@@ -204,48 +204,48 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 	public void createEmptyDuplicateAO() {
 		// Create a new AO with NULL identificationCode
 		final Organization ao1 = OrganizationTest.getTestAO(false);
-		final Integer ao1Id = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String ao1Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao1, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(ao1Id).isNotNull();
-		final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao1Id, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(ao1Uuid).isNotNull();
+		final Organization created1 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao1Uuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao1.getShortName()).isEqualTo(created1.getShortName());
 		assertThat(ao1.getLongName()).isEqualTo(created1.getLongName());
 		assertThat(ao1.getIdentificationCode()).isEqualTo(created1.getIdentificationCode());
 
 		// Creating another AO with NULL identificationCode should succeed
-		final Integer ao2Id = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String ao2Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao1, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(ao2Id).isNotNull();
-		final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao2Id, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(ao2Uuid).isNotNull();
+		final Organization created2 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao2Uuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao1.getShortName()).isEqualTo(created2.getShortName());
 		assertThat(ao1.getLongName()).isEqualTo(created2.getLongName());
 		assertThat(ao1.getIdentificationCode()).isEqualTo(created2.getIdentificationCode());
 
 		// Creating an AO with empty identificationCode should succeed
 		ao1.setIdentificationCode("");
-		final Integer ao3Id = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String ao3Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao1, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(ao3Id).isNotNull();
-		final Organization created3 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao3Id, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(ao3Uuid).isNotNull();
+		final Organization created3 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao3Uuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao1.getShortName()).isEqualTo(created3.getShortName());
 		assertThat(ao1.getLongName()).isEqualTo(created3.getLongName());
 		assertThat(ao1.getIdentificationCode()).isEqualTo(created3.getIdentificationCode());
 
 		// Creating another AO with empty identificationCode should succeed
-		final Integer ao4Id = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String ao4Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao1, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(ao4Id).isNotNull();
-		final Organization created4 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao4Id, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(ao4Uuid).isNotNull();
+		final Organization created4 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao4Uuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao1.getShortName()).isEqualTo(created4.getShortName());
 		assertThat(ao1.getLongName()).isEqualTo(created4.getLongName());
 		assertThat(ao1.getIdentificationCode()).isEqualTo(created4.getIdentificationCode());
 
 		// Create a new AO with non-NULL identificationCode
 		final Organization ao2 = OrganizationTest.getTestAO(true);
-		final Integer ao5Id = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String ao5Uuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				ao2, new GenericType<GraphQLResponse<Organization>>() {});
-		assertThat(ao5Id).isNotNull();
-		final Organization created5 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao5Id, new GenericType<GraphQLResponse<Organization>>() {});
+		assertThat(ao5Uuid).isNotNull();
+		final Organization created5 = graphQLHelper.getObjectById(admin, "organization", FIELDS, ao5Uuid, new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(ao2.getShortName()).isEqualTo(created5.getShortName());
 		assertThat(ao2.getLongName()).isEqualTo(created5.getLongName());
 		assertThat(ao2.getIdentificationCode()).isEqualTo(created5.getIdentificationCode());

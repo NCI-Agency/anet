@@ -98,14 +98,14 @@ class AuthorizationGroupForm extends ValidatableFormWrapper {
 		let edit = this.props.edit
 		const operation = edit ? 'updateAuthorizationGroup' : 'createAuthorizationGroup'
 		let graphql = operation + '(authorizationGroup: $authorizationGroup)'
-		graphql += edit ? '' : ' { id }'
+		graphql += edit ? '' : ' { uuid }'
 		const variables = { authorizationGroup: authGroup }
 		const variableDef = '($authorizationGroup: AuthorizationGroupInput!)'
 		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
-				if (data[operation].id) {
-					authGroup.id = data[operation].id
+				if (data[operation].uuid) {
+					authGroup.uuid = data[operation].uuid
 				}
 				this.props.history.replace(AuthorizationGroup.pathForEdit(authGroup))
 				this.props.history.push({

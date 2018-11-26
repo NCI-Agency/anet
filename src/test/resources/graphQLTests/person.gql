@@ -1,31 +1,31 @@
-person(id:${personId}) {
-    id,
+person(uuid:"${personUuid}") {
+    uuid,
     name, rank, role, emailAddress, phoneNumber, biography, country, gender, endOfTourDate
     position {
-        id,
+        uuid,
         name,
         organization {
-            id,
+            uuid,
             shortName, longName
         }
     },
     authoredReports(pageNum:0,pageSize:10) { list { 
-        id,
+        uuid,
         engagementDate,
-        advisorOrg { id, shortName, longName }
+        advisorOrg { uuid, shortName, longName }
         intent,
         author {
-            id,
+            uuid,
             name
         }
     }},
     attendedReports(pageNum:0, pageSize:10) { list { 
-        id,
+        uuid,
         engagementDate,
-        advisorOrg { id, shortName, longName}
+        advisorOrg { uuid, shortName, longName }
         intent,
         author {
-            id,
+            uuid,
             name
         }
     }}

@@ -2,7 +2,7 @@ package mil.dds.anet.search.sqlite;
 
 import java.util.ArrayList;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;

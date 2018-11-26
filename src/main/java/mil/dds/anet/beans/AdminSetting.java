@@ -17,8 +17,8 @@ public class AdminSetting extends AbstractAnetBean {
 	@Override
 	@JsonIgnore
 	@GraphQLIgnore
-	public Integer getId() {
-		throw new WebApplicationException("no ID field on AdminSetting");
+	public String getUuid() {
+		throw new WebApplicationException("no UUID field on AdminSetting");
 	}
 	
 	@GraphQLQuery(name="key")

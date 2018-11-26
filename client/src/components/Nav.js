@@ -44,10 +44,10 @@ class BaseNav extends Component {
 		const inInsights = path.indexOf('/insights') === 0
 
 		const myOrg = currentUser.position ? currentUser.position.organization : null
-		let orgId, myOrgId
+		let orgUuid, myOrgUuid
 		if (inOrg) {
-			orgId = +path.split('/')[2]
-			myOrgId = myOrg && +myOrg.id
+			orgUuid = path.split('/')[2]
+			myOrgUuid = myOrg && myOrg.uuid
 		}
 
 		const showFloatingMenu = this.props.showFloatingMenu
@@ -91,7 +91,7 @@ class BaseNav extends Component {
 
 				<BSNav id="search-nav"></BSNav>
 
-				{currentUser.id && <Link to={{pathname: '/reports/mine'}} onClick={this.props.clearSearchQuery}>
+				{currentUser.uuid && <Link to={{pathname: '/reports/mine'}} onClick={this.props.clearSearchQuery}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
@@ -110,9 +110,9 @@ class BaseNav extends Component {
 
 				<BSNav id="myorg-nav"></BSNav>
 
-				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="advisor-organizations" active={inOrg && orgId !== myOrgId}>
+				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="advisor-organizations" active={inOrg && orgUuid !== myOrgUuid}>
 					{Organization.map(organizations, org =>
-						<LinkTo organization={org} componentClass={Link} key={org.id} onClick={this.props.clearSearchQuery}>
+						<LinkTo organization={org} componentClass={Link} key={org.uuid} onClick={this.props.clearSearchQuery}>
 							<MenuItem>{org.shortName}</MenuItem>
 						</LinkTo>
 					)}
@@ -172,7 +172,7 @@ const mapStateToProps = (state, ownProps) => ({
 const Nav = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} showFloatingMenu={context.showFloatingMenu} {...props} />
+			<BaseNav appSettings={context.appSettings} currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )

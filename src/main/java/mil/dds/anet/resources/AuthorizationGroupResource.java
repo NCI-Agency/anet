@@ -64,9 +64,9 @@ public class AuthorizationGroupResource {
 	@GET
 	@Timed
 	@GraphQLQuery(name="authorizationGroup")
-	@Path("/{id}")
-	public AuthorizationGroup getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		final AuthorizationGroup t = dao.getById(id);
+	@Path("/{uuid}")
+	public AuthorizationGroup getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+		final AuthorizationGroup t = dao.getByUuid(uuid);
 		if (t == null) {
 			throw new WebApplicationException(Status.NOT_FOUND);
 		}
@@ -128,9 +128,9 @@ public class AuthorizationGroupResource {
 		// Update positions:
 		if (t.getPositions() != null) {
 			try {
-				final List<Position> existingPositions = dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getId()).get();
+				final List<Position> existingPositions = dao.getPositionsForAuthorizationGroup(engine.getContext(), t.getUuid()).get();
 				for (final Position p : t.getPositions()) {
-					Optional<Position> existingPosition = existingPositions.stream().filter(el -> el.getId().equals(p.getId())).findFirst();
+					Optional<Position> existingPosition = existingPositions.stream().filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
 					if (existingPosition.isPresent()) {
 						existingPositions.remove(existingPosition.get());
 					} else {

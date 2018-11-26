@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -22,21 +23,37 @@ import mil.dds.anet.views.AbstractAnetBean;
 
 public class Utils {
 
-	public static boolean idEqual(AbstractAnetBean a, AbstractAnetBean b) { 
-		if (a == null && b == null) { return true; } 
-		if (a == null || b == null) { return false; } 
-		return Objects.equals(a.getId(), b.getId());
-	}
-	
-	public static boolean containsById(List<AbstractAnetBean> list, int id) { 
-		for (AbstractAnetBean el : list) { 
-			if (el.getId().equals(id)) { return true; } 
+	/**
+	 * Crude method to check whether a uuid is purely integer,
+	 * in which case it is probably a legacy id;
+	 * used for backwards-compatibility only.
+	 * @param uuid the uuid to check
+	 * @return the integer value of the uuid, or null if it isn't
+	 */
+	public static Integer getInteger(String uuid) {
+		try {
+			return Integer.parseInt(uuid);
 		}
-		return false; 
+		catch (NumberFormatException ignored) {
+			return null;
+		}
+	}
+
+	public static boolean uuidEqual(AbstractAnetBean a, AbstractAnetBean b) {
+		if (a == null && b == null) { return true; }
+		if (a == null || b == null) { return false; }
+		return Objects.equals(a.getUuid(), b.getUuid());
+	}
+
+	public static boolean containsByUuid(List<AbstractAnetBean> list, String uuid) {
+		for (AbstractAnetBean el : list) {
+			if (el.getUuid().equals(uuid)) { return true; }
+		}
+		return false;
 	}
 	
-	public static <T extends AbstractAnetBean> T getById(List<T> list, Integer id) { 
-		return list.stream().filter(el -> Objects.equals(id, el.getId())).findFirst().orElse(null);
+	public static <T extends AbstractAnetBean> T getByUuid(List<T> list, String uuid) {
+		return list.stream().filter(el -> Objects.equals(uuid, el.getUuid())).findFirst().orElse(null);
 	}
 	
 	/*
@@ -44,19 +61,19 @@ public class Utils {
 	 * For each element that is in newElements but is not in oldElements it will call addFunc
 	 * For each element that is in oldElements but is not in newElements, it will call removeFunc
 	 */
-	public static <T extends AbstractAnetBean> void addRemoveElementsById(List<T> oldElements, List<T> newElements,
-			Consumer<T> addFunc, Consumer<Integer> removeFunc) { 
-		List<Integer> existingIds = oldElements.stream().map(p -> p.getId()).collect(Collectors.toList());			
+	public static <T extends AbstractAnetBean> void addRemoveElementsByUuid(List<T> oldElements, List<T> newElements,
+			Consumer<T> addFunc, Consumer<String> removeFunc) {
+		List<String> existingUuids = oldElements.stream().map(p -> p.getUuid()).collect(Collectors.toList());			
 		for (T newEl : newElements) { 
-			if (existingIds.remove(newEl.getId()) == false) { 
+			if (existingUuids.remove(newEl.getUuid()) == false) {
 				//Add this element
 				addFunc.accept(newEl);
 			}
 		}
 		
-		//Now remove all items in existingIds. 
-		for (Integer id : existingIds) {
-			removeFunc.accept(id);
+		//Now remove all items in existingUuids.
+		for (String uuid : existingUuids) {
+			removeFunc.accept(uuid);
 		}
 	}
 	
@@ -114,26 +131,26 @@ public class Utils {
 	}
 
 	/**
-	 * Given a list of organizations and a topParentId, this function maps all of the organizations to their highest parent
+	 * Given a list of organizations and a topParentUuid, this function maps all of the organizations to their highest parent
 	 * within this list excluding the topParent.  This is used to generate graphs/tables that bubble things up to their highest parent
 	 * This is used in the daily rollup graphs. 
 	 */
-	public static Map<Integer, Organization> buildParentOrgMapping(List<Organization> orgs, @Nullable Integer topParentId) {
-		Map<Integer,Organization> result = new HashMap<Integer,Organization>();
-		Map<Integer,Organization> orgMap = new HashMap<Integer,Organization>();
+	public static Map<String, Organization> buildParentOrgMapping(List<Organization> orgs, @Nullable String topParentUuid) {
+		final Map<String, Organization> result = new HashMap<>();
+		final Map<String, Organization> orgMap = new HashMap<>();
 
 		for (Organization o : orgs) {
-			orgMap.put(o.getId(), o);
+			orgMap.put(o.getUuid(), o);
 		}
 
 		for (Organization o : orgs) {
-			int curr = o.getId();
-			Integer parentId = DaoUtils.getId(o.getParentOrg());
-			while (Objects.equals(parentId,topParentId) == false && orgMap.containsKey(parentId)) {
-				curr = parentId;
-				parentId = DaoUtils.getId(orgMap.get(parentId).getParentOrg());
+			String curr = o.getUuid();
+			String parentUuid = DaoUtils.getUuid(o.getParentOrg());
+			while (Objects.equals(parentUuid,topParentUuid) == false && orgMap.containsKey(parentUuid)) {
+				curr = parentUuid;
+				parentUuid = DaoUtils.getUuid(orgMap.get(parentUuid).getParentOrg());
 			}
-			result.put(o.getId(), orgMap.get(curr));
+			result.put(o.getUuid(), orgMap.get(curr));
 		}
 
 		return result;
@@ -141,10 +158,15 @@ public class Utils {
 	
 	public static final PolicyFactory POLICY_DEFINITION = new HtmlPolicyBuilder()
 			.allowStandardUrlProtocols()
+			// Allow in-line image data
+			.allowUrlProtocols("data")
+			.allowAttributes("src").matching(Pattern.compile("^data:image/.*$")).onElements("img")
+			// Allow some image attributes
+			.allowAttributes("align", "alt", "border", "name", "height", "width", "hspace", "vspace").onElements("img")
 			// Allow title="..." on any element.
 			.allowAttributes("title").globally()
-			// Allow href="..." on <a> elements.
-			.allowAttributes("href").onElements("a")
+			// Allow href="..." on <a> elements (but not the 'data:' protocol!).
+			.allowAttributes("href").matching(Pattern.compile("^(?!data:).*$")).onElements("a")
 			// Defeat link spammers.
 			.requireRelNofollowOnLinks()
 			// The align attribute on <p> elements can have any value below.
@@ -155,7 +177,7 @@ public class Utils {
 			// These elements are allowed.
 			.allowElements("a", "p", "div", "i", "b", "u", "em", "blockquote", "tt", "strong", "br", 
 					"ul", "ol", "li","table","tr","td","thead","tbody","th","span","h1","h2","h3",
-					"h4","h5","h6","hr")
+					"h4","h5","h6","hr", "img")
 			.toFactory();
 	
 	public static String sanitizeHtml(String input) {
@@ -205,28 +227,28 @@ public class Utils {
 	 * Transform a result list from a database query by grouping. For example,
 	 * given a result list:
 	 * <code>
-	 * [{"id": 3, "name": "alice", "someprop": "x", "week": 39, "nrdone": 2, "nrtodo": 0},
-	 *  {"id": 3, "name": "alice", "someprop": "x", "week": 40, "nrdone": 1, "nrtodo": 3},
-	 *  {"id": 3, "name": "alice", "someprop": "x", "week": 41, "nrdone": 0, "nrtodo": 5},
-	 *  {"id": 5, "name": "bob",   "someprop": "y", "week": 39, "nrdone": 8, "nrtodo": 2},
-	 *  {"id": 5, "name": "bob",   "someprop": "y", "week": 41, "nrdone": 3, "nrtodo": 0},
-	 *  {"id": 6, "name": "eve",   "someprop": "z", "week": 39, "nrdone": 6, "nrtodo": 1}]
+	 * [{"uuid": 3, "name": "alice", "someprop": "x", "week": 39, "nrdone": 2, "nrtodo": 0},
+	 *  {"uuid": 3, "name": "alice", "someprop": "x", "week": 40, "nrdone": 1, "nrtodo": 3},
+	 *  {"uuid": 3, "name": "alice", "someprop": "x", "week": 41, "nrdone": 0, "nrtodo": 5},
+	 *  {"uuid": 5, "name": "bob",   "someprop": "y", "week": 39, "nrdone": 8, "nrtodo": 2},
+	 *  {"uuid": 5, "name": "bob",   "someprop": "y", "week": 41, "nrdone": 3, "nrtodo": 0},
+	 *  {"uuid": 6, "name": "eve",   "someprop": "z", "week": 39, "nrdone": 6, "nrtodo": 1}]
 	 * </code>
 	 * then transforming it like so:
 	 * <code>
 	 * final Set&lt;String&gt; tlf = Stream.of("name", "someprop").collect(Collectors.toSet());
-	 * return resultGrouper(list, "stats", "id", tlf);
+	 * return resultGrouper(list, "stats", "uuid", tlf);
 	 * </code>
 	 * will return the list:
 	 * <code>
-	 * [{"id": 3, "name": "alice", "someprop": "x",
+	 * [{"uuid": 3, "name": "alice", "someprop": "x",
 	 *    "stats": [{"week": 39, "nrdone": 2, "nrtodo": 0},
 	 *                    {"week": 40, "nrdone": 1, "nrtodo": 3},
 	 *                    {"week": 41, "nrdone": 0, "nrtodo": 5}]},
-	 *  {"id": 5, "name": "bob",   "someprop": "y",
+	 *  {"uuid": 5, "name": "bob",   "someprop": "y",
 	 *    "stats": [{"week": 39, "nrdone": 8, "nrtodo": 2},
 	 *                    {"week": 41, "nrdone": 3, "nrtodo": 0}]},
-	 *  {"id": 6, "name": "eve",   "someprop": "z",
+	 *  {"uuid": 6, "name": "eve",   "someprop": "z",
 	 *     "stats": [{"week": 39, "nrdone": 6, "nrtodo": 1}]}]
 	 * </code>
 	 *

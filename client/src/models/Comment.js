@@ -4,9 +4,10 @@ export default class Comment extends Model {
 	static resourceName = 'Comment'
 
 	static schema = {
-		reportId: null,
+		reportUuid: null,
 		author: {},
-		text: ''
+		text: '',
+		...Model.schema,
 	}
 
 	toString() {

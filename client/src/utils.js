@@ -117,7 +117,7 @@ export default {
 	},
 
 	getReference: function(obj) {
-		return (obj && obj.id) ? {id: obj.id} : {}
+		return (obj && obj.uuid) ? {uuid: obj.uuid} : {}
 	},
 }
 

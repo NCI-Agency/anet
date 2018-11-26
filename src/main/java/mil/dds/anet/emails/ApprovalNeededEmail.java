@@ -26,7 +26,7 @@ public class ApprovalNeededEmail extends AnetEmailAction {
 	
 	@Override
 	public Map<String, Object> execute() {
-		Report r = AnetObjectEngine.getInstance().getReportDao().getById(report.getId());
+		Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
 		ApprovalStep step;
 		try {
 			step = r.loadApprovalStep(AnetObjectEngine.getInstance().getContext()).get();
@@ -47,7 +47,7 @@ public class ApprovalNeededEmail extends AnetEmailAction {
 	}
 
 	public void setReport(Report report) {
-		this.report = Report.createWithId(report.getId());
+		this.report = Report.createWithUuid(report.getUuid());
 	}
 
 }

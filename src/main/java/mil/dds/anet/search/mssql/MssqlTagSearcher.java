@@ -6,10 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -42,9 +42,9 @@ public class MssqlTagSearcher implements ITagSearcher {
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (tags, (name, description), :containsQuery) c_tags"
-					+ " ON tags.id = c_tags.[Key]"
+					+ " ON tags.uuid = c_tags.[Key]"
 					+ " LEFT JOIN FREETEXTTABLE(tags, (name, description), :freetextQuery) f_tags"
-					+ " ON tags.id = f_tags.[Key]");
+					+ " ON tags.uuid = f_tags.[Key]");
 			whereClauses.add("c_tags.rank IS NOT NULL");
 			sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
 			sqlArgs.put("freetextQuery", text);
@@ -76,13 +76,12 @@ public class MssqlTagSearcher implements ITagSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tags", "name"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tags", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tags", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
-		final Query<Tag> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs)
-			.map(new TagMapper());
-		return new AnetBeanList<Tag>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		return new AnetBeanList<Tag>(sqlQuery, query.getPageNum(), query.getPageSize(), new TagMapper(), null);
 	}
 
 }

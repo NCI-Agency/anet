@@ -6,10 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -41,7 +41,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 
 		if (doFullTextSearch) {
 			sql.append(" LEFT JOIN CONTAINSTABLE (tasks, (longName), :containsQuery) c_tasks"
-					+ " ON tasks.id = c_tasks.[Key]");
+					+ " ON tasks.uuid = c_tasks.[Key]");
 			whereClauses.add("(c_tasks.rank IS NOT NULL"
 					+ " OR tasks.shortName LIKE :likeQuery)");
 			args.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
@@ -49,18 +49,18 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		}
 
 		String commonTableExpression = null;
-		if (query.getResponsibleOrgId() != null) {
+		if (query.getResponsibleOrgUuid() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-				commonTableExpression = "WITH parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.parentOrgId = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
 					+ ") ";
-				whereClauses.add(" organizationId IN (SELECT id from parent_orgs)");
+				whereClauses.add(" organizationUuid IN (SELECT uuid from parent_orgs)");
 			} else {
-				whereClauses.add("organizationId = :orgId");
+				whereClauses.add("organizationUuid = :orgUuid");
 			}
-			args.put("orgId", query.getResponsibleOrgId());
+			args.put("orgUuid", query.getResponsibleOrgUuid());
 		}
 
 		if (query.getCategory() != null) {
@@ -131,7 +131,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), "tasks", "shortName", "longName"));
 				break;
 		}
-		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tasks", "id"));
+		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tasks", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
@@ -139,9 +139,8 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query<Task> sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args)
-			.map(new TaskMapper());
-		return new AnetBeanList<Task>(sqlQuery, query.getPageNum(), query.getPageSize(), null);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args);
+		return new AnetBeanList<Task>(sqlQuery, query.getPageNum(), query.getPageSize(), new TaskMapper(), null);
 	}
 
 }

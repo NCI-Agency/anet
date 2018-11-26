@@ -1,8 +1,8 @@
 {
-	"id" : null,
+	"uuid" : null,
 	"name" : "Group Alpha",
 	"members" : [
-		{"id" : 1 },
-		{"id" : 2}
+		{"uuid" : "1"},
+		{"uuid" : "2"}
 	]
 }

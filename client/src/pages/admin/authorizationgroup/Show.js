@@ -9,6 +9,7 @@ import Messages, {setMessages} from 'components/Messages'
 import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import {AuthorizationGroup, Person} from 'models'
 import GQL from 'graphqlapi'
@@ -37,25 +38,25 @@ class BaseAuthorizationGroupShow extends Page {
 		setMessages(props,this.state)
 	}
 
-	getPositionQueryPart(authGroupId) {
+	getPositionQueryPart(authGroupUuid) {
 		let positionQuery = {
 			pageNum: this.positionsPageNum,
 			pageSize: 10,
-			authorizationGroupId: authGroupId
+			authorizationGroupUuid: authGroupUuid
 		}
 		let positionsPart = new GQL.Part(/* GraphQL */`
 			paginatedPositions: positionList(query:$positionQuery) {
-				pageNum, pageSize, totalCount, list { id , name, code, type, status, organization { id, shortName}, person { id, name } }
+				pageNum, pageSize, totalCount, list { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
 			}`)
 			.addVariable("positionQuery", "PositionSearchQueryInput", positionQuery)
 		return positionsPart
 	}
 
-	getReportQueryPart(authGroupId) {
+	getReportQueryPart(authGroupUuid) {
 		let reportQuery = {
 			pageNum: this.reportsPageNum,
 			pageSize: 10,
-			authorizationGroupId: authGroupId
+			authorizationGroupUuid: authGroupUuid
 		}
 		let reportsPart = new GQL.Part(/* GraphQL */`
 			reports: reportList(query:$reportQuery) {
@@ -69,13 +70,14 @@ class BaseAuthorizationGroupShow extends Page {
 
 	fetchData(props) {
 		let authGroupPart = new GQL.Part(/* GraphQL */`
-			authorizationGroup(id:${props.match.params.id}) {
-			id, name, description
-			positions { id , name, code, type, status, organization { id, shortName}, person { id, name } }
+			authorizationGroup(uuid:"${props.match.params.uuid}") {
+			uuid, name, description
+			positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
 			status
+			${GRAPHQL_NOTES_FIELDS}
 		}` )
-		let positionsPart = this.getPositionQueryPart(props.match.params.id)
-		let reportsPart = this.getReportQueryPart(props.match.params.id)
+		let positionsPart = this.getPositionQueryPart(props.match.params.uuid)
+		let reportsPart = this.getReportQueryPart(props.match.params.uuid)
 		return this.runGQL([authGroupPart, positionsPart, reportsPart])
 	}
 
@@ -93,8 +95,8 @@ class BaseAuthorizationGroupShow extends Page {
 		let authorizationGroup = this.state.authorizationGroup
 		const { currentUser } = this.props
 		return (
-
 			<div>
+				<RelatedObjectNotes notes={authorizationGroup.notes} relatedObject={{relatedObjectType: 'authorizationGroups', relatedObjectUuid: authorizationGroup.uuid}} />
 				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
 
@@ -123,7 +125,7 @@ class BaseAuthorizationGroupShow extends Page {
 	@autobind
 	goToPositionsPage(pageNum) {
 		this.positionsPageNum = pageNum
-		let positionQueryPart = this.getPositionQueryPart(this.state.authorizationGroup.id)
+		let positionQueryPart = this.getPositionQueryPart(this.state.authorizationGroup.uuid)
 		GQL.run([positionQueryPart]).then(data =>
 			this.setState({positions: data.paginatedPositions})
 		)
@@ -132,7 +134,7 @@ class BaseAuthorizationGroupShow extends Page {
 	@autobind
 	goToReportsPage(pageNum) {
 		this.reportsPageNum = pageNum
-		let reportQueryPart = this.getReportQueryPart(this.state.authorizationGroup.id)
+		let reportQueryPart = this.getReportQueryPart(this.state.authorizationGroup.uuid)
 		GQL.run([reportQueryPart]).then(data =>
 			this.setState({reports: data.reports})
 		)

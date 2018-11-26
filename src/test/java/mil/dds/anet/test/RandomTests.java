@@ -13,9 +13,9 @@ public class RandomTests {
 	@Test
 	public void randomTests() { 
 		Person p = new Person();
-		assertThat(DaoUtils.getId(p)).isNull();
-		p.setId(4);
-		assertThat(DaoUtils.getId(p)).isEqualTo(4);
+		assertThat(DaoUtils.getUuid(p)).isNull();
+		p.setUuid("4");
+		assertThat(DaoUtils.getUuid(p)).isEqualTo("4");
 		
 	}
 	

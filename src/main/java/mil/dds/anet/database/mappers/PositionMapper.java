@@ -3,9 +3,8 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
@@ -13,48 +12,48 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
+import mil.dds.anet.utils.DaoUtils;
 
-public class PositionMapper implements ResultSetMapper<Position> {
+public class PositionMapper implements RowMapper<Position> {
 
 	@Override
-	public Position map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public Position map(ResultSet rs, StatementContext ctx) throws SQLException {
 		//This hits when we do a join but there's no Billet record. 
-		if (rs.getObject("positions_id") == null) { return null; }
+		if (rs.getObject("positions_uuid") == null) { return null; }
 		
 		Position p = fillInFields(new Position(), rs);
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
-			ctx.setAttribute("totalCount", rs.getInt("totalCount"));
+			ctx.define("totalCount", rs.getInt("totalCount"));
 		}
 		
-		if (MapperUtils.containsColumnNamed(rs, "people_id")) { 
+		if (MapperUtils.containsColumnNamed(rs, "people_uuid")) {
 			PersonMapper.fillInFields(p.getPerson(), rs);
 		}
 		return p;
 	}
 	
 	public static Position fillInFields(Position p, ResultSet rs)  throws SQLException { 
-		p.setId(rs.getInt("positions_id"));
+		DaoUtils.setCommonBeanFields(p, rs, "positions");
 		p.setName(rs.getString("positions_name"));
 		p.setCode(rs.getString("positions_code"));
 		p.setType(MapperUtils.getEnumIdx(rs, "positions_type", PositionType.class));
 		p.setStatus(MapperUtils.getEnumIdx(rs, "positions_status", PositionStatus.class));
 
-		Integer orgId = MapperUtils.getInteger(rs, "positions_organizationId");
-		if (orgId != null) { 
-			p.setOrganization(Organization.createWithId(orgId));
+		String orgUuid = rs.getString("positions_organizationUuid");
+		if (orgUuid != null) {
+			p.setOrganization(Organization.createWithUuid(orgUuid));
 		}
-		Integer personId = MapperUtils.getInteger(rs, "positions_currentPersonId");
-		if (personId != null) {
-			p.setPerson(Person.createWithId(personId));
-		}
-		
-		Integer locationId = MapperUtils.getInteger(rs, "positions_locationId");
-		if (locationId != null) { 
-			p.setLocation(Location.createWithId(locationId));
+		String personUuid = rs.getString("positions_currentPersonUuid");
+		if (personUuid != null) {
+			p.setPerson(Person.createWithUuid(personUuid));
 		}
 		
-		p.setCreatedAt(new DateTime(rs.getTimestamp("positions_createdAt")));
+		String locationUuid = rs.getString("positions_locationUuid");
+		if (locationUuid != null) {
+			p.setLocation(Location.createWithUuid(locationUuid));
+		}
+		
 		return p;
 	}
 

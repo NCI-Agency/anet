@@ -117,7 +117,7 @@ logging:
           archivedLogFilenamePattern: ./logs/clientLog-%d.log.zip
           archivedFileCount: 2
           logFormat: '[%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %p %c: %m%n'
-    "org.skife.jdbi.v2.DBI" :
+    "mil.dds.anet.utils.AnetDbLogger" :
       level: TRACE
       appenders:
         - type: file

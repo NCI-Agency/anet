@@ -72,21 +72,21 @@ class BaseHome extends Page {
 	myDraft(currentUser) {
 		return {
 			title: "My draft reports",
-			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorId: currentUser.id },
+			query: { state: [Report.STATE.DRAFT, Report.STATE.REJECTED], authorUuid: currentUser.uuid },
 		}
 	}
 
 	myPending(currentUser) {
 		return {
 			title: "My reports pending approval",
-			query: { authorId: currentUser.id, state: [Report.STATE.PENDING_APPROVAL]},
+			query: { authorUuid: currentUser.uuid, state: [Report.STATE.PENDING_APPROVAL]},
 		}
 	}
 
 	pendingMe(currentUser) {
 		return {
 			title: "Reports pending my approval",
-			query: { pendingApprovalOf: currentUser.id },
+			query: { pendingApprovalOf: currentUser.uuid },
 		}
 	}
 
@@ -102,7 +102,7 @@ class BaseHome extends Page {
 		return {
 			title: currentUser.position.organization.shortName + "'s reports in the last 7 days",
 			query: {
-				orgId: currentUser.position.organization.id,
+				orgUuid: currentUser.position.organization.uuid,
 				includeOrgChildren: false,
 				createdAtStart: LAST_WEEK,
 				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
@@ -115,7 +115,7 @@ class BaseHome extends Page {
 		return {
 			title: currentUser.position.organization.shortName + "'s upcoming engagements",
 			query: {
-				orgId: currentUser.position.organization.id,
+				orgUuid: currentUser.position.organization.uuid,
 				includeOrgChildren: false,
 				state: [Report.STATE.FUTURE],
 				sortOrder: 'ASC'
@@ -161,7 +161,7 @@ class BaseHome extends Page {
 			tileThree: reportList(query: $queryThree) { totalCount },
 			tileFour: reportList(query: $queryFour) { totalCount },
 			tileFive: reportList(query: $queryFive) { totalCount },
-			savedSearches: mySearches {id, name, objectType, query}`
+			savedSearches: mySearches {uuid, name, objectType, query}`
 		queries.forEach(q => {
 			q.query.pageNum = 0
 			q.query.pageSize = 1  // we're only interested in the totalCount, so just get at most one report
@@ -239,7 +239,7 @@ class BaseHome extends Page {
 						<ControlLabel>Select a saved search</ControlLabel>
 						<FormControl componentClass="select" onChange={this.onSaveSearchSelect}>
 							{this.state.savedSearches && this.state.savedSearches.map( savedSearch =>
-								<option value={savedSearch.id} key={savedSearch.id}>{savedSearch.name}</option>
+								<option value={savedSearch.uuid} key={savedSearch.uuid}>{savedSearch.name}</option>
 							)}
 						</FormControl>
 					</FormGroup>
@@ -274,8 +274,8 @@ class BaseHome extends Page {
 
 	@autobind
 	onSaveSearchSelect(event) {
-		let id = event && event.target ? event.target.value : event
-		let search = this.state.savedSearches.find(el => Number(el.id) === Number(id))
+		let uuid = event && event.target ? event.target.value : event
+		let search = this.state.savedSearches.find(el => el.uuid === uuid)
 		this.setState({selectedSearch: search})
 	}
 
@@ -305,11 +305,11 @@ class BaseHome extends Page {
 	@autobind
 	onConfirmDelete() {
 		const search = this.state.selectedSearch
-		const index = this.state.savedSearches.findIndex(s => s.id === search.id)
+		const index = this.state.savedSearches.findIndex(s => s.uuid === search.uuid)
 		const operation = 'deleteSavedSearch'
-		let graphql = operation + '(id: $id)'
-		const variables = { id: search.id }
-		const variableDef = '($id: Int!)'
+		let graphql = operation + '(uuid: $uuid)'
+		const variables = { uuid: search.uuid }
+		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				let savedSearches = this.state.savedSearches

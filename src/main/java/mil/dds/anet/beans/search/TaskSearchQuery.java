@@ -8,7 +8,7 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 
 	public enum TaskSearchSortBy { CREATED_AT, NAME, CATEGORY }
 
-	Integer responsibleOrgId;
+	String responsibleOrgUuid;
 	Boolean includeChildrenOrgs;
 	String category;
 	TaskStatus status;
@@ -22,12 +22,12 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 	private TaskSearchSortBy sortBy;
 	private SortOrder sortOrder;
 
-	public Integer getResponsibleOrgId() {
-		return responsibleOrgId;
+	public String getResponsibleOrgUuid() {
+		return responsibleOrgUuid;
 	}
 
-	public void setResponsibleOrgId(Integer responsibleOrgId) {
-		this.responsibleOrgId = responsibleOrgId;
+	public void setResponsibleOrgUuid(String responsibleOrgUuid) {
+		this.responsibleOrgUuid = responsibleOrgUuid;
 	}
 
 	public Boolean getIncludeChildrenOrgs() {

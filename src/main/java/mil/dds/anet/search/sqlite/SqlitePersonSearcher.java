@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -56,11 +58,12 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 	@Override
 	public AnetBeanList<Person> runSearch(PersonSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqlitePersonSearch */ SELECT " + PersonDao.PERSON_FIELDS 
-				+ " FROM people WHERE people.id IN (SELECT people.id FROM people ");
+				+ " FROM people WHERE people.uuid IN (SELECT people.uuid FROM people ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		
-		if (query.getOrgId() != null || query.getLocationId() != null || query.getMatchPositionName()) { 
-			sql.append(" LEFT JOIN positions ON people.id = positions.\"currentPersonId\" ");
+		if (query.getOrgUuid() != null || query.getLocationUuid() != null || query.getMatchPositionName()) {
+			sql.append(" LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" ");
 		}
 		
 		sql.append(" WHERE ");
@@ -89,18 +92,9 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 			sqlArgs.put("role", DaoUtils.getEnumId(query.getRole()));
 		}
 		
-		if (query.getStatus() != null && query.getStatus().size() > 0) {
-			if (query.getStatus().size() == 1) { 
-				whereClauses.add("people.status = :status");
-				sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus().get(0)));
-			} else {
-				List<String> argNames = new LinkedList<String>();
-				for (int i = 0;i < query.getStatus().size();i++) { 
-					argNames.add(":status" + i);
-					sqlArgs.put("status" + i, DaoUtils.getEnumId(query.getStatus().get(i)));
-				}
-				whereClauses.add("people.status IN (" + Joiner.on(", ").join(argNames) + ")");
-			}
+		if (!Utils.isEmptyOrNull(query.getStatus())) {
+			whereClauses.add("people.status IN ( <statuses> )");
+			listArgs.put("statuses", query.getStatus().stream().map(status -> DaoUtils.getEnumId(status)).collect(Collectors.toList()));
 		}
 		
 		if (query.getRank() != null && query.getRank().trim().length() > 0) {
@@ -118,23 +112,23 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 			sqlArgs.put("pendingVerification", query.getPendingVerification());
 		}
 		
-		if (query.getOrgId() != null) { 
+		if (query.getOrgUuid() != null) {
 			if (query.getIncludeChildOrgs() != null && query.getIncludeChildOrgs()) { 
-				whereClauses.add(" positions.\"organizationId\" IN ( "
-					+ "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				whereClauses.add(" positions.\"organizationUuid\" IN ( "
+					+ "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
-					+ ") SELECT id from parent_orgs)");
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
+					+ ") SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add(" positions.\"organizationId\" = :orgId ");
+				whereClauses.add(" positions.\"organizationUuid\" = :orgUuid ");
 			}
-			sqlArgs.put("orgId", query.getOrgId());
+			sqlArgs.put("orgUuid", query.getOrgUuid());
 		}
 		
-		if (query.getLocationId() != null) { 
-			whereClauses.add(" positions.\"locationId\" = :locationId ");
-			sqlArgs.put("locationId", query.getLocationId());
+		if (query.getLocationUuid() != null) {
+			whereClauses.add(" positions.\"locationUuid\" = :locationUuid ");
+			sqlArgs.put("locationUuid", query.getLocationUuid());
 		}
 		
 		if (whereClauses.size() == 0) { return result; }
@@ -148,10 +142,14 @@ public class SqlitePersonSearcher implements IPersonSearcher {
 		// append outside the subselect to enforce ordering there
 		sql.append(orderBy);
 
-		List<Person> list = dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
+		final Query q = dbHandle.createQuery(sql.toString())
+			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
-			.bind("limit", query.getPageSize())
+			.bind("limit", query.getPageSize());
+		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
+			q.bindList(listArg.getKey(), listArg.getValue());
+		}
+		final List<Person> list = q
 			.map(new PersonMapper())
 			.list();
 		result.setList(list);

@@ -1,11 +1,8 @@
 package mil.dds.anet.database;
 
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -20,63 +17,60 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 
 	public SavedSearchDao(Handle h) { 
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getSavedSearchesByIds */ SELECT * from \"savedSearches\" where id IN ( %1$s )";
-		this.idBatcher = new IdBatcher<SavedSearch>(h, idBatcherSql, new SavedSearchMapper());
+		final String idBatcherSql = "/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<SavedSearch>(h, idBatcherSql, "uuids", new SavedSearchMapper());
 	}
 	
 	@Override
 	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
 		throw new UnsupportedOperationException();
 	}
-	
-	@Override
-	public SavedSearch getById(int id) { 
-		return dbHandle.createQuery("/* getSavedSearchById */ SELECT * from \"savedSearches\" where id = :id")
-				.bind("id", id)
+
+	public SavedSearch getByUuid(String uuid) {
+		return dbHandle.createQuery("/* getSavedSearchByUuid */ SELECT * from \"savedSearches\" where uuid = :uuid")
+				.bind("uuid", uuid)
 				.map(new SavedSearchMapper())
-				.first();
+				.findFirst().orElse(null);
 	}
 
 	@Override
-	public List<SavedSearch> getByIds(List<Integer> ids) {
-		return idBatcher.getByIds(ids);
+	public List<SavedSearch> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
 	}
 
 	public List<SavedSearch> getSearchesByOwner(Person owner) { 
-		return dbHandle.createQuery("/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerId\" = :ownerId")
-			.bind("ownerId", owner.getId())
+		return dbHandle.createQuery("/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
+			.bind("ownerUuid", owner.getUuid())
 			.map(new SavedSearchMapper())
 			.list();
 	}
 	
-	@Override
 	public SavedSearch insert(SavedSearch obj) {
-		obj.setCreatedAt(DateTime.now());
-		GeneratedKeys<Map<String, Object>> keys = dbHandle.createStatement("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
-				+ "(\"ownerId\", name, \"objectType\", query) "
-				+ "VALUES (:ownerId, :name, :objectType, :query)")
-			.bindFromProperties(obj)
-			.bind("ownerId", obj.getOwner().getId())
+		DaoUtils.setInsertFields(obj);
+		dbHandle.createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
+				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
+				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
+			.bindBean(obj)
+			.bind("ownerUuid", obj.getOwner().getUuid())
 			.bind("objectType", DaoUtils.getEnumId(obj.getObjectType()))
-			.executeAndReturnGeneratedKeys();
-		obj.setId(DaoUtils.getGeneratedId(keys));
+			.execute();
 		return obj;
 	}
 
-	@Override
 	public int update(SavedSearch obj) {
-		return dbHandle.createStatement("/* updateSavedSearch */ UPDATE \"savedSearches\" "
+		DaoUtils.setUpdateFields(obj);
+		return dbHandle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
 				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
-				+ "WHERE id = :id")
-			.bindFromProperties(obj)
+				+ "WHERE uuid = :uuid")
+			.bindBean(obj)
 			.execute();
 	}
 
-	public int deleteSavedSearch(Integer id, Person owner) {
-		return dbHandle.createStatement("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
-				+ "WHERE id = :id AND \"ownerId\" = :ownerId")
-			.bind("id", id)
-			.bind("ownerId", owner.getId())
+	public int deleteSavedSearch(String uuid, Person owner) {
+		return dbHandle.createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
+				+ "WHERE uuid = :uuid AND \"ownerUuid\" = :ownerUuid")
+			.bind("uuid", uuid)
+			.bind("ownerUuid", owner.getUuid())
 			.execute();
 	}
 	

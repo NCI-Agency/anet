@@ -22,7 +22,7 @@ const taskFilters = props => {
 		Organization: {
 			component: OrganizationFilter,
 			props: {
-				queryKey: "responsibleOrgId",
+				queryKey: "responsibleOrgUuid",
 				queryIncludeChildOrgsKey: "includeChildrenOrgs",
 			}
 		},
@@ -85,7 +85,7 @@ export default {
 				Author: {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "authorId",
+						queryKey: "authorUuid",
 						objectType: Person,
 						valueKey: "name",
 						fields: Person.autocompleteQuery,
@@ -97,7 +97,7 @@ export default {
 				Attendee: {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "attendeeId",
+						queryKey: "attendeeUuid",
 						objectType: Person,
 						valueKey: "name",
 						fields: Person.autocompleteQuery,
@@ -120,7 +120,7 @@ export default {
 				"Author Position": {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "authorPositionId",
+						queryKey: "authorPositionUuid",
 						objectType: Position,
 						valueKey: "name",
 						fields: Position.autocompleteQuery,
@@ -132,7 +132,7 @@ export default {
 				"Attendee Position": {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "attendeePositionId",
+						queryKey: "attendeePositionUuid",
 						objectType: Position,
 						valueKey: "name",
 						fields: Position.autocompleteQuery,
@@ -143,7 +143,7 @@ export default {
 				Organization: {
 					component: OrganizationFilter,
 					props: {
-						queryKey: "orgId",
+						queryKey: "orgUuid",
 						queryIncludeChildOrgsKey: "includeOrgChildren",
 					}
 				},
@@ -174,7 +174,7 @@ export default {
 				Location: {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "locationId",
+						queryKey: "locationUuid",
 						objectType: Location,
 						valueKey: "name",
 						fields: Location.autocompleteQuery,
@@ -194,7 +194,7 @@ export default {
 				Tag: {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "tagId",
+						queryKey: "tagUuid",
 						objectType: Tag,
 						valueKey: "name",
 						fields: Tag.autocompleteQuery,
@@ -214,7 +214,7 @@ export default {
 		filters.Reports.filters[taskShortLabel] = {
 			component: AutocompleteFilter,
 			props: {
-				queryKey: "taskId",
+				queryKey: "taskUuid",
 				objectType: Task,
 				valueKey: "shortName",
 				fields: Task.autocompleteQuery,
@@ -230,7 +230,7 @@ export default {
 				Organization: {
 					component: OrganizationFilter,
 					props: {
-						queryKey: "orgId",
+						queryKey: "orgUuid",
 						queryIncludeChildOrgsKey: "includeChildOrgs",
 					}
 				},
@@ -252,7 +252,7 @@ export default {
 				Location: {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "locationId",
+						queryKey: "locationUuid",
 						objectType: Location,
 						valueKey: "name",
 						fields: Location.autocompleteQuery,
@@ -312,7 +312,7 @@ export default {
 				[POSTITION_ORGANIZATION_FILTER_KEY]: {
 					component: OrganizationFilter,
 					props: {
-						queryKey: "organizationId",
+						queryKey: "organizationUuid",
 						queryIncludeChildOrgsKey: "includeChildrenOrgs",
 						ref: organizationFilterRef,
 					}
@@ -327,7 +327,7 @@ export default {
 				Location: {
 					component: AutocompleteFilter,
 					props: {
-						queryKey: "locationId",
+						queryKey: "locationUuid",
 						objectType: Location,
 						valueKey: "name",
 						fields: Location.autocompleteQuery,

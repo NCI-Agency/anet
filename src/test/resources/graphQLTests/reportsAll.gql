@@ -1,8 +1,8 @@
 reports(pageSize:100, pageNum:0) {
 	totalCount, list { 
-	    id, intent, state
+	    uuid, intent, state
 	    author {
-	        id
+	        uuid
 	        name
 	    }
 	}

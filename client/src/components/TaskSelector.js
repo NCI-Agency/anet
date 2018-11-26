@@ -55,7 +55,7 @@ export default class TasksSelector extends Component {
 					</thead>
 					<tbody>
 						{tasks.map((task, idx) =>
-							<tr key={task.id}>
+							<tr key={task.uuid}>
 								<td>{task.shortName} - {task.longName}</td>
 								<td onClick={this.removeTask.bind(this, task)} id={'taskDelete_' + idx}>
 									<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
@@ -82,20 +82,20 @@ export default class TasksSelector extends Component {
 		return <Form.Field.ExtraCol className="shortcut-list">
 			<h5>Recent {taskShortLabel}</h5>
 			{shortcuts.map(task =>
-				<Button key={task.id} bsStyle="link" onClick={this.addTask.bind(this, task)}>Add "{task.shortName} {task.longName.substr(0,80)}{task.longName.length > 80 ? '...' : ''}"</Button>
+				<Button key={task.uuid} bsStyle="link" onClick={this.addTask.bind(this, task)}>Add "{task.shortName} {task.longName.substr(0,80)}{task.longName.length > 80 ? '...' : ''}"</Button>
 			)}
 		</Form.Field.ExtraCol>
 	}
 
 	@autobind
 	addTask(newTask) {
-		if (!newTask || !newTask.id) {
+		if (!newTask || !newTask.uuid) {
 			return
 		}
 
 		let tasks = this.props.tasks
 
-		if (!tasks.find(task => task.id === newTask.id)) {
+		if (!tasks.find(task => task.uuid === newTask.uuid)) {
 			tasks.push(newTask)
 		}
 
@@ -105,7 +105,7 @@ export default class TasksSelector extends Component {
 	@autobind
 	removeTask(oldTask) {
 		let tasks = this.props.tasks
-		let index = tasks.findIndex(task => task.id === oldTask.id)
+		let index = tasks.findIndex(task => task.uuid === oldTask.uuid)
 
 		if (index !== -1) {
 			tasks.splice(index, 1)

@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
 import com.codahale.metrics.annotation.Timed;
 
@@ -51,7 +51,7 @@ public class SavedSearchResource {
 	}
 
 	private SavedSearch createSavedSearchCommon(Person user, SavedSearch savedSearch) {
-		savedSearch.setOwner(Person.createWithId(user.getId()));
+		savedSearch.setOwner(Person.createWithUuid(user.getUuid()));
 		try {
 			final SavedSearch created = dao.insert(savedSearch);
 			AnetAuditLogger.log("SavedSearch {} created by {}", created, user);
@@ -75,24 +75,24 @@ public class SavedSearchResource {
 		return dao.getSearchesByOwner(user);
 	}
 
-    @DELETE
-    @Timed
-    @Path("/{id}")
-    public Response deleteSavedSearch(@Auth Person user, @PathParam("id") Integer id) {
-        deleteSavedSearchCommon(user, id);
-        return Response.ok().build();
-    }
+	@DELETE
+	@Timed
+	@Path("/{uuid}")
+	public Response deleteSavedSearch(@Auth Person user, @PathParam("uuid") String uuid) {
+	    deleteSavedSearchCommon(user, uuid);
+	    return Response.ok().build();
+	}
 
-    private int deleteSavedSearchCommon(Person user, int savedSearchId) {
-        int numDeleted = dao.deleteSavedSearch(savedSearchId, user);
-        if (numDeleted == 0) {
-            throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
-        }
-        return numDeleted;
-    }
+	private int deleteSavedSearchCommon(Person user, String savedSearchUuid) {
+	    int numDeleted = dao.deleteSavedSearch(savedSearchUuid, user);
+	    if (numDeleted == 0) {
+		throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
+	    }
+	    return numDeleted;
+	}
 
-    @GraphQLMutation(name="deleteSavedSearch")
-    public Integer deleteSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int savedSearchId) {
-        return deleteSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearchId);
-    }
+	@GraphQLMutation(name="deleteSavedSearch")
+	public Integer deleteSavedSearch(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String savedSearchUuid) {
+	    return deleteSavedSearchCommon(DaoUtils.getUserFromContext(context), savedSearchUuid);
+	}
 }

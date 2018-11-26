@@ -8,7 +8,7 @@ import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 import Form from 'components/Form'
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
-import TextEditor from 'components/TextEditor'
+import RichTextEditor from 'components/RichTextEditor'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import OptionListModal from 'components/OptionListModal'
 
@@ -59,7 +59,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 	componentDidUpdate(prevProps, prevState) {
 		const { person } = this.props
 		const prevPerson = prevProps.person
-		if (person.id !== prevPerson.id) {
+		if (person.uuid !== prevPerson.uuid) {
 			const splitName = Person.parseFullName(person.name)
 			this.setState({
 				fullName: Person.fullName(splitName),
@@ -96,7 +96,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 
 		const {ValidatableForm, RequiredField} = this
 
-		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.id
+		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
 		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
 		const ranks = Settings.fields.person.ranks || []
 
@@ -307,7 +307,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 					<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
 				</RequiredField>
 
-				<Form.Field id="biography" componentClass={TextEditor} className="biography" />
+				<Form.Field id="biography" componentClass={RichTextEditor} className="biography" />
 			</Fieldset>
 		</ValidatableForm>
 		</div>
@@ -376,7 +376,7 @@ class BasePersonForm extends ValidatableFormWrapper {
 		person.name = Person.fullName(this.state.splitName, true)
 		const operation = edit ? 'updatePerson' : 'createPerson'
 		let graphql = operation + '(person: $person)'
-		graphql += edit ? '' : ' { id }'
+		graphql += edit ? '' : ' { uuid }'
 		const variables = { person: person }
 		const variableDef = '($person: PersonInput!)'
 		this.setState({isBlocking: false})
@@ -390,8 +390,8 @@ class BasePersonForm extends ValidatableFormWrapper {
 						pathname: '/',
 					})
 				} else {
-					if (data[operation].id) {
-						person.id = data[operation].id
+					if (data[operation].uuid) {
+						person.uuid = data[operation].uuid
 					}
 					this.props.history.replace(Person.pathForEdit(person))
 					this.props.history.push({

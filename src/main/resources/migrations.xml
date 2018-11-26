@@ -6,6 +6,22 @@
 		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
 		 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
+	<!-- Type for storing UUIDv4 transparantly -->
+	<property name="uuid_type" value="varchar(36)" />
+	<!-- Convenience functions to generate UUIDv4 on various databases -->
+	<property name="uuid_function" value="lower(newid())" dbms="mssql" />
+	<property name="uuid_function" value="uuid_generate_v4()" dbms="postgresql" />
+	<!-- Not really a UUID but who cares? -->
+	<property name="uuid_function" value="lower(hex(randomblob(16)))" dbms="sqlite" />
+
+	<!-- Type for storing long text transparantly -->
+	<property name="long_text_type" value="nvarchar(max)" dbms="mssql" />
+	<property name="long_text_type" value="text" dbms="postgresql,sqlite" />
+
+	<!-- Use a NONCLUSTERED index only for MSSQL -->
+	<property name="non_clustered" value="NONCLUSTERED" dbms="mssql" />
+	<property name="non_clustered" value="" dbms="postgresql,sqlite" />
+
 	<changeSet id="1" author="hpitelka">
 		<createTable tableName="people">
 			<column name="id" type="int" autoIncrement="true">
@@ -1165,7 +1181,7 @@
 	<changeSet id="rename-custom-field-enum-in-tasks-sqlite" author="maradragan" dbms="sqlite">
 		<!-- sqlite doesn't support rename column, so drop and add a new column -->
 		<addColumn tableName="tasks">
-			<column name="customFieldEnum1" type="nvarchar(max)" />
+			<column name="customFieldEnum1" type="text" />
 		</addColumn>
 		<dropColumn tableName="tasks" columnName="customFieldEnum" />
 	</changeSet>
@@ -1241,6 +1257,981 @@
 
 	<changeSet id="add_unique_tasks_shortName_constraint" author="gjvoosten" dbms="mssql,postgresql">
 		<addUniqueConstraint tableName="tasks" columnNames="shortName" constraintName="UQ_TaskShortName" />
+	</changeSet>
+
+	<changeSet id="add-uuid-primaryKey-columns" author="gjvoosten">
+		<addColumn tableName="approvalSteps">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="authorizationGroups">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="comments">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="locations">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="organizations">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="people">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="positions">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reports">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportsSensitiveInformation">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="savedSearches">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="tags">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="uuid" type="${uuid_type}" />
+		</addColumn>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-uuid-foreignKey-columns" author="gjvoosten">
+		<addColumn tableName="approvalActions">
+			<column name="approvalStepUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="approvalActions">
+			<column name="personUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="approvalActions">
+			<column name="reportUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="approvalSteps">
+			<column name="advisorOrganizationUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="approvalSteps">
+			<column name="nextStepUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="approvers">
+			<column name="approvalStepUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="approvers">
+			<column name="positionUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="authorizationGroupPositions">
+			<column name="authorizationGroupUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="authorizationGroupPositions">
+			<column name="positionUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="comments">
+			<column name="authorUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="comments">
+			<column name="reportUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="organizations">
+			<column name="parentOrgUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="peoplePositions">
+			<column name="personUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="peoplePositions">
+			<column name="positionUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="positionRelationships">
+			<column name="positionUuid_a" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="positionRelationships">
+			<column name="positionUuid_b" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="positions">
+			<column name="currentPersonUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="positions">
+			<column name="locationUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="positions">
+			<column name="organizationUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportAuthorizationGroups">
+			<column name="authorizationGroupUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportAuthorizationGroups">
+			<column name="reportUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportPeople">
+			<column name="personUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportPeople">
+			<column name="reportUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reports">
+			<column name="advisorOrganizationUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reports">
+			<column name="approvalStepUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reports">
+			<column name="authorUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reports">
+			<column name="locationUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reports">
+			<column name="principalOrganizationUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportsSensitiveInformation">
+			<column name="reportUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportTags">
+			<column name="reportUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportTags">
+			<column name="tagUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportTasks">
+			<column name="reportUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="reportTasks">
+			<column name="taskUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="savedSearches">
+			<column name="ownerUuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="customFieldRef1Uuid" type="${uuid_type}" />
+		</addColumn>
+		<addColumn tableName="tasks">
+			<column name="organizationUuid" type="${uuid_type}" />
+		</addColumn>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="fill-uuid-primaryKey-columns" author="gjvoosten">
+		<!--
+			If on postgresql, make sure to enable uuid generation before running this changeset:
+				CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+		-->
+		<!-- Generate new uuid's for all tables -->
+		<sql>
+			UPDATE "approvalSteps" SET uuid = ${uuid_function};
+			UPDATE "authorizationGroups" SET uuid = ${uuid_function};
+			UPDATE comments SET uuid = ${uuid_function};
+			UPDATE locations SET uuid = ${uuid_function};
+			UPDATE organizations SET uuid = ${uuid_function};
+			UPDATE people SET uuid = ${uuid_function};
+			UPDATE positions SET uuid = ${uuid_function};
+			UPDATE reports SET uuid = ${uuid_function};
+			UPDATE "reportsSensitiveInformation" SET uuid = ${uuid_function};
+			UPDATE "savedSearches" SET uuid = ${uuid_function};
+			UPDATE tags SET uuid = ${uuid_function};
+			UPDATE tasks SET uuid = ${uuid_function};
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="fill-uuid-foreignKey-columns" author="gjvoosten">
+		<!-- Fill uuid references for all tables -->
+		<sql>
+			UPDATE "adminSettings" SET value = (
+				SELECT uuid FROM organizations
+				WHERE organizations.id = CAST(value AS int)
+			)
+			WHERE "key" = 'DEFAULT_APPROVAL_ORGANIZATION';
+		</sql>
+		<sql>
+			UPDATE "approvalActions" SET "approvalStepUuid" = (
+				SELECT uuid FROM "approvalSteps"
+				WHERE "approvalSteps".id = "approvalActions"."approvalStepId"
+			);
+			UPDATE "approvalActions" SET "personUuid" = (
+				SELECT uuid FROM people
+				WHERE people.id = "approvalActions"."personId"
+			);
+			UPDATE "approvalActions" SET "reportUuid" = (
+				SELECT uuid FROM reports
+				WHERE reports.id = "approvalActions"."reportId"
+			);
+			UPDATE "approvalSteps" SET "advisorOrganizationUuid" = (
+				SELECT uuid FROM organizations
+				WHERE organizations.id = "approvalSteps"."advisorOrganizationId"
+			);
+			UPDATE "approvalSteps" SET "nextStepUuid" = (
+				SELECT a2.uuid FROM "approvalSteps" a2
+				WHERE a2.id = "approvalSteps"."nextStepId"
+			);
+			UPDATE approvers SET "approvalStepUuid" = (
+				SELECT uuid FROM "approvalSteps"
+				WHERE "approvalSteps".id = approvers."approvalStepId"
+			);
+			UPDATE approvers SET "positionUuid" = (
+				SELECT uuid FROM positions
+				WHERE positions.id = approvers."positionId"
+			);
+			UPDATE "authorizationGroupPositions" SET "authorizationGroupUuid" = (
+				SELECT uuid FROM "authorizationGroups"
+				WHERE "authorizationGroups".id = "authorizationGroupPositions"."authorizationGroupId"
+			);
+			UPDATE "authorizationGroupPositions" SET "positionUuid" = (
+				SELECT uuid FROM positions
+				WHERE positions.id = "authorizationGroupPositions"."positionId"
+			);
+			UPDATE comments SET "authorUuid" = (
+				SELECT uuid FROM people
+				WHERE people.id = comments."authorId"
+			);
+			UPDATE comments SET "reportUuid" = (
+				SELECT uuid FROM reports
+				WHERE reports.id = comments."reportId"
+			);
+			UPDATE organizations SET "parentOrgUuid" = (
+				SELECT o2.uuid FROM organizations o2
+				WHERE o2.id = organizations."parentOrgId"
+			);
+			UPDATE "peoplePositions" SET "personUuid" = (
+				SELECT uuid FROM people
+				WHERE people.id = "peoplePositions"."personId"
+			);
+			UPDATE "peoplePositions" SET "positionUuid" = (
+				SELECT uuid FROM positions
+				WHERE positions.id = "peoplePositions"."positionId"
+			);
+			UPDATE "positionRelationships" SET "positionUuid_a" = (
+				SELECT uuid FROM positions
+				WHERE positions.id = "positionRelationships"."positionId_a"
+			);
+			UPDATE "positionRelationships" SET "positionUuid_b" = (
+				SELECT uuid FROM positions
+				WHERE positions.id = "positionRelationships"."positionId_b"
+			);
+			UPDATE positions SET "currentPersonUuid" = (
+				SELECT uuid FROM people
+				WHERE people.id = positions."currentPersonId"
+			);
+			UPDATE positions SET "locationUuid" = (
+				SELECT uuid FROM locations
+				WHERE locations.id = positions."locationId"
+			);
+			UPDATE positions SET "organizationUuid" = (
+				SELECT uuid FROM organizations
+				WHERE organizations.id = positions."organizationId"
+			);
+			UPDATE "reportAuthorizationGroups" SET "authorizationGroupUuid" = (
+				SELECT uuid FROM "authorizationGroups"
+				WHERE "authorizationGroups".id = "reportAuthorizationGroups"."authorizationGroupId"
+			);
+			UPDATE "reportAuthorizationGroups" SET "reportUuid" = (
+				SELECT uuid FROM reports
+				WHERE reports.id = "reportAuthorizationGroups"."reportId"
+			);
+			UPDATE "reportPeople" SET "personUuid" = (
+				SELECT uuid FROM people
+				WHERE people.id = "reportPeople"."personId"
+			);
+			UPDATE "reportPeople" SET "reportUuid" = (
+				SELECT uuid FROM reports
+				WHERE reports.id = "reportPeople"."reportId"
+			);
+			UPDATE reports SET "advisorOrganizationUuid" = (
+				SELECT uuid FROM organizations
+				WHERE organizations.id = reports."advisorOrganizationId"
+			);
+			UPDATE reports SET "approvalStepUuid" = (
+				SELECT uuid FROM "approvalSteps"
+				WHERE "approvalSteps".id = reports."approvalStepId"
+			);
+			UPDATE reports SET "authorUuid" = (
+				SELECT uuid FROM people
+				WHERE people.id = reports."authorId"
+			);
+			UPDATE reports SET "locationUuid" = (
+				SELECT uuid FROM locations
+				WHERE locations.id = reports."locationId"
+			);
+			UPDATE reports SET "principalOrganizationUuid" = (
+				SELECT uuid FROM organizations
+				WHERE organizations.id = reports."principalOrganizationId"
+			);
+			UPDATE "reportsSensitiveInformation" SET "reportUuid" = (
+				SELECT uuid FROM reports
+				WHERE reports.id = "reportsSensitiveInformation"."reportId"
+			);
+			UPDATE "reportTags" SET "reportUuid" = (
+				SELECT uuid FROM reports
+				WHERE reports.id = "reportTags"."reportId"
+			);
+			UPDATE "reportTags" SET "tagUuid" = (
+				SELECT uuid FROM tags
+				WHERE tags.id = "reportTags"."tagId"
+			);
+			UPDATE "reportTasks" SET "reportUuid" = (
+				SELECT uuid FROM reports
+				WHERE reports.id = "reportTasks"."reportId"
+			);
+			UPDATE "reportTasks" SET "taskUuid" = (
+				SELECT uuid FROM tasks
+				WHERE tasks.id = "reportTasks"."taskId"
+			);
+			UPDATE "savedSearches" SET "ownerUuid" = (
+				SELECT uuid FROM people
+				WHERE people.id = "savedSearches"."ownerId"
+			);
+			UPDATE tasks SET "customFieldRef1Uuid" = (
+				SELECT t2.uuid FROM tasks t2
+				WHERE t2.id = tasks."customFieldRef1Id"
+			);
+			UPDATE tasks SET "organizationUuid" = (
+				SELECT uuid FROM organizations
+				WHERE organizations.id = tasks."organizationId"
+			);
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-fullText-indexes" author="gjvoosten" dbms="mssql" runInTransaction="false">
+		<sql>
+			DROP FULLTEXT INDEX ON authorizationGroups;
+			DROP FULLTEXT INDEX ON locations;
+			DROP FULLTEXT INDEX ON people;
+			DROP FULLTEXT INDEX ON positions;
+			DROP FULLTEXT INDEX ON reports;
+			DROP FULLTEXT INDEX ON tags;
+			DROP FULLTEXT INDEX ON tasks;
+			DROP FULLTEXT INDEX on organizations;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-unique-indexes" author="gjvoosten">
+		<dropIndex tableName="organizations" indexName="uniqueOrganizationIdentificationCode" />
+		<dropIndex tableName="positions" indexName="UniqueCurrentPersonInPosition" />
+		<dropIndex tableName="positions" indexName="UniquePositionCodes" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-foreignKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<dropForeignKeyConstraint
+			baseTableName="approvalActions" constraintName="fk_approvalActions_step" />
+		<dropForeignKeyConstraint
+			baseTableName="approvalActions" constraintName="fk_approvalActions_person" />
+
+		<dropForeignKeyConstraint
+			baseTableName="approvalSteps" constraintName="fk_approvalSteps_orgId" />
+
+		<dropForeignKeyConstraint
+			baseTableName="approvers" constraintName="fk_approvers_step" />
+		<dropForeignKeyConstraint
+			baseTableName="approvers" constraintName="fk_approvers_position" />
+
+		<dropForeignKeyConstraint
+			baseTableName="authorizationGroupPositions" constraintName="fk_authorizationGroupPositions_authorizationGroup" />
+		<dropForeignKeyConstraint
+			baseTableName="authorizationGroupPositions" constraintName="fk_authorizationGroupPositions_position" />
+
+		<dropForeignKeyConstraint
+			baseTableName="comments" constraintName="fk_comments_author" />
+		<dropForeignKeyConstraint
+			baseTableName="comments" constraintName="fk_comments_report" />
+
+		<dropForeignKeyConstraint
+			baseTableName="organizations" constraintName="fk_organizations_parentOrg" />
+
+		<dropForeignKeyConstraint
+			baseTableName="peoplePositions" constraintName="fk_peoplePositions_person" />
+		<dropForeignKeyConstraint
+			baseTableName="peoplePositions" constraintName="fk_peoplePositions_position" />
+
+		<dropForeignKeyConstraint
+			baseTableName="positionRelationships" constraintName="fk_positionsRelationships_idA" />
+		<dropForeignKeyConstraint
+			baseTableName="positionRelationships" constraintName="fk_positionsRelationships_idB" />
+
+		<dropForeignKeyConstraint
+			baseTableName="positions" constraintName="fk_positions_currPerson" />
+		<dropForeignKeyConstraint
+			baseTableName="positions" constraintName="fk_positions_location" />
+		<dropForeignKeyConstraint
+			baseTableName="positions" constraintName="fk_positions_org" />
+
+		<dropForeignKeyConstraint
+			baseTableName="reportAuthorizationGroups" constraintName="fk_reportAuthorizationGroups_authorizationGroup" />
+		<dropForeignKeyConstraint
+			baseTableName="reportAuthorizationGroups" constraintName="fk_reportAuthorizationGroups_report" />
+
+		<dropForeignKeyConstraint
+			baseTableName="reportPeople" constraintName="fk_reportPeople_person" />
+		<dropForeignKeyConstraint
+			baseTableName="reportPeople" constraintName="fk_reportPeople_report" />
+
+		<dropForeignKeyConstraint
+			baseTableName="reports" constraintName="fk_reports_advisorOrg" />
+		<dropForeignKeyConstraint
+			baseTableName="reports" constraintName="fk_reports_approvalStep" />
+		<dropForeignKeyConstraint
+			baseTableName="reports" constraintName="fk_reports_author" />
+		<dropForeignKeyConstraint
+			baseTableName="reports" constraintName="fk_reports_location" />
+		<dropForeignKeyConstraint
+			baseTableName="reports" constraintName="fk_reports_principalOrg" />
+
+		<dropForeignKeyConstraint
+			baseTableName="reportsSensitiveInformation" constraintName="fk_reportsSensitiveInformation_report" />
+
+		<dropForeignKeyConstraint
+			baseTableName="reportTags" constraintName="fk_reportTags_report" />
+		<dropForeignKeyConstraint
+			baseTableName="reportTags" constraintName="fk_reportTags_tag" />
+
+		<dropForeignKeyConstraint
+			baseTableName="reportTasks" constraintName="fk_reportTasks_poam" />
+		<dropForeignKeyConstraint
+			baseTableName="reportTasks" constraintName="fk_reportTasks_report" />
+
+		<dropForeignKeyConstraint
+			baseTableName="savedSearches" constraintName="fk_savedSearch_owner" />
+
+		<dropForeignKeyConstraint
+			baseTableName="tasks" constraintName="fk_tasks_org"/>
+		<dropForeignKeyConstraint
+			baseTableName="tasks" constraintName="fk_tasks_customFieldRef1Id"/>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-unique-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<dropUniqueConstraint
+			tableName="authorizationGroupPositions" constraintName="uniqueAuthorizationGroupPositions" />
+		<dropUniqueConstraint
+			tableName="reportAuthorizationGroups" constraintName="uniqueReportAuthorizationGroup" />
+		<dropUniqueConstraint
+			tableName="reportPeople" constraintName="uniqueReportPerson" />
+		<dropUniqueConstraint
+			tableName="reportTags" constraintName="uniqueReportTag" />
+		<dropUniqueConstraint
+			tableName="reportTasks" constraintName="uniqueReportTask" />
+		<dropUniqueConstraint
+			tableName="reportsSensitiveInformation" constraintName="uniqueReport" />
+		<dropUniqueConstraint
+			tableName="savedSearches" constraintName="uniqueOwnerIdName" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-primaryKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<dropPrimaryKey
+			tableName="approvalSteps" />
+		<dropPrimaryKey
+			tableName="authorizationGroups" />
+		<dropPrimaryKey
+			tableName="comments" />
+		<dropPrimaryKey
+			tableName="locations" />
+		<dropPrimaryKey
+			tableName="organizations" />
+		<dropPrimaryKey
+			tableName="people" />
+		<dropPrimaryKey
+			tableName="positions" />
+		<dropPrimaryKey
+			tableName="reports" />
+		<dropPrimaryKey
+			tableName="reportsSensitiveInformation" />
+		<dropPrimaryKey
+			tableName="savedSearches" />
+		<dropPrimaryKey
+			tableName="tags" />
+		<dropPrimaryKey
+			tableName="tasks" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-notNull-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<!-- only for foreign keys; primary keys have IDENTITY so cannot be null -->
+		<dropNotNullConstraint
+			tableName="approvalSteps" columnName="advisorOrganizationId" columnDataType="int"  />
+		<dropNotNullConstraint
+			tableName="authorizationGroupPositions" columnName="authorizationGroupId" columnDataType="int" />
+		<dropNotNullConstraint
+			tableName="authorizationGroupPositions" columnName="positionId" columnDataType="int" />
+		<dropNotNullConstraint
+			tableName="reportAuthorizationGroups" columnName="reportId" columnDataType="int" />
+		<dropNotNullConstraint
+			tableName="reportAuthorizationGroups" columnName="authorizationGroupId" columnDataType="int" />
+		<dropNotNullConstraint
+			tableName="reportTags" columnName="reportId" columnDataType="int" />
+		<dropNotNullConstraint
+			tableName="reportTags" columnName="tagId" columnDataType="int" />
+		<dropNotNullConstraint
+			tableName="reports" columnName="authorId" columnDataType="int" />
+		<dropNotNullConstraint
+			tableName="reportsSensitiveInformation" columnName="reportId" columnDataType="int" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-uuid-notNull-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<!-- primary keys -->
+		<addNotNullConstraint
+			tableName="approvalSteps" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="authorizationGroups" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="comments" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="locations" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="organizations" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="people" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="positions" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reports" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reportsSensitiveInformation" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="savedSearches" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="tags" columnName="uuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="tasks" columnName="uuid" columnDataType="${uuid_type}" />
+		<!-- foreign keys -->
+		<addNotNullConstraint
+			tableName="approvalSteps" columnName="advisorOrganizationUuid" columnDataType="${uuid_type}"  />
+		<addNotNullConstraint
+			tableName="authorizationGroupPositions" columnName="authorizationGroupUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="authorizationGroupPositions" columnName="positionUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reportAuthorizationGroups" columnName="reportUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reportAuthorizationGroups" columnName="authorizationGroupUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reportTags" columnName="reportUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reportTags" columnName="tagUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reports" columnName="authorUuid" columnDataType="${uuid_type}" />
+		<addNotNullConstraint
+			tableName="reportsSensitiveInformation" columnName="reportUuid" columnDataType="${uuid_type}" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-uuid-primaryKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<addPrimaryKey
+			tableName="approvalSteps" constraintName="PK_approvalSteps" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="authorizationGroups" constraintName="PK_authorizationGroups" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="comments" constraintName="PK_comments" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="locations" constraintName="PK_locations" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="organizations" constraintName="PK_organizations" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="people" constraintName="PK_people" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="positions" constraintName="PK_positions" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="reports" constraintName="PK_reports" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="reportsSensitiveInformation" constraintName="PK_reportsSensitiveInformation" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="savedSearches" constraintName="PK_savedSearches" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="tags" constraintName="PK_tags" columnNames="uuid" />
+		<addPrimaryKey
+			tableName="tasks" constraintName="PK_tasks" columnNames="uuid" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-uuid-unique-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<addUniqueConstraint
+			tableName="authorizationGroupPositions" constraintName="UQ_AuthorizationGroupPositions" columnNames="authorizationGroupUuid, positionUuid" />
+		<addUniqueConstraint
+			tableName="reportAuthorizationGroups" constraintName="UQ_ReportAuthorizationGroup" columnNames="reportUuid, authorizationGroupUuid" />
+		<addUniqueConstraint
+			tableName="reportPeople" constraintName="UQ_ReportPerson" columnNames="personUuid, reportUuid" />
+		<addUniqueConstraint
+			tableName="reportTags" constraintName="UQ_ReportTag" columnNames="reportUuid, tagUuid" />
+		<addUniqueConstraint
+			tableName="reportTasks" constraintName="UQ_ReportTask" columnNames="taskUuid, reportUuid" />
+		<addUniqueConstraint
+			tableName="reportsSensitiveInformation" constraintName="UQ_Report" columnNames="reportUuid" />
+		<addUniqueConstraint
+			tableName="savedSearches" constraintName="UQ_OwnerUuidName" columnNames="ownerUuid, name" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-uuid-foreignKey-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<addForeignKeyConstraint
+			baseTableName="approvalActions" constraintName="FK_approvalActions_step" baseColumnNames="approvalStepUuid"
+			referencedTableName="approvalSteps" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="approvalActions" constraintName="FK_approvalActions_person" baseColumnNames="personUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<!-- FK constraint was missing before -->
+		<addForeignKeyConstraint
+			baseTableName="approvalActions" constraintName="FK_approvalActions_report" baseColumnNames="reportUuid"
+			referencedTableName="reports" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="approvalSteps" constraintName="FK_approvalSteps_organization" baseColumnNames="advisorOrganizationUuid"
+			referencedTableName="organizations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<!-- FK constraint was missing before -->
+		<addForeignKeyConstraint
+			baseTableName="approvalSteps" constraintName="FK_approvalSteps_nextStep" baseColumnNames="nextStepUuid"
+			referencedTableName="approvalSteps" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="approvers" constraintName="FK_approvers_step" baseColumnNames="approvalStepUuid"
+			referencedTableName="approvalSteps" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="approvers" constraintName="FK_approvers_position" baseColumnNames="positionUuid"
+			referencedTableName="positions" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="authorizationGroupPositions" constraintName="FK_authorizationGroupPositions_authorizationGroup" baseColumnNames="authorizationGroupUuid"
+			referencedTableName="authorizationGroups" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="authorizationGroupPositions" constraintName="FK_authorizationGroupPositions_position" baseColumnNames="positionUuid"
+			referencedTableName="positions" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="comments" constraintName="FK_comments_author" baseColumnNames="authorUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="comments" constraintName="FK_comments_report" baseColumnNames="reportUuid"
+			referencedTableName="reports" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="organizations" constraintName="FK_organizations_parentOrg" baseColumnNames="parentOrgUuid"
+			referencedTableName="organizations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="peoplePositions" constraintName="FK_peoplePositions_person" baseColumnNames="personUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="peoplePositions" constraintName="FK_peoplePositions_position" baseColumnNames="positionUuid"
+			referencedTableName="positions" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="positionRelationships" constraintName="FK_positionsRelationships_positionA" baseColumnNames="positionUuid_a"
+			referencedTableName="positions" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="positionRelationships" constraintName="FK_positionsRelationships_positionB" baseColumnNames="positionUuid_b"
+			referencedTableName="positions" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="positions" constraintName="FK_positions_currPerson" baseColumnNames="currentPersonUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="positions" constraintName="FK_positions_location" baseColumnNames="locationUuid"
+			referencedTableName="locations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="positions" constraintName="FK_positions_org" baseColumnNames="organizationUuid"
+			referencedTableName="organizations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="reportAuthorizationGroups" constraintName="FK_reportAuthorizationGroups_authorizationGroup" baseColumnNames="authorizationGroupUuid"
+			referencedTableName="authorizationGroups" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reportAuthorizationGroups" constraintName="FK_reportAuthorizationGroups_report" baseColumnNames="reportUuid"
+			referencedTableName="reports" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="reportPeople" constraintName="FK_reportPeople_person" baseColumnNames="personUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reportPeople" constraintName="FK_reportPeople_report" baseColumnNames="reportUuid"
+			referencedTableName="reports" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="reports" constraintName="FK_reports_advisorOrg" baseColumnNames="advisorOrganizationUuid"
+			referencedTableName="organizations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reports" constraintName="FK_reports_approvalStep" baseColumnNames="approvalStepUuid"
+			referencedTableName="approvalSteps" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reports" constraintName="FK_reports_author" baseColumnNames="authorUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reports" constraintName="FK_reports_location" baseColumnNames="locationUuid"
+			referencedTableName="locations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reports" constraintName="FK_reports_principalOrg" baseColumnNames="principalOrganizationUuid"
+			referencedTableName="organizations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="reportsSensitiveInformation" constraintName="FK_reportsSensitiveInformation_report" baseColumnNames="reportUuid"
+			referencedTableName="reports" referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="CASCADE" />
+
+		<addForeignKeyConstraint
+			baseTableName="reportTags" constraintName="FK_reportTags_report" baseColumnNames="reportUuid"
+			referencedTableName="reports" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reportTags" constraintName="FK_reportTags_tag" baseColumnNames="tagUuid"
+			referencedTableName="tags" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="reportTasks" constraintName="FK_reportTasks_task" baseColumnNames="taskUuid"
+			referencedTableName="tasks" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="reportTasks" constraintName="FK_reportTasks_report" baseColumnNames="reportUuid"
+			referencedTableName="reports" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="savedSearches" constraintName="FK_savedSearch_owner" baseColumnNames="ownerUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<addForeignKeyConstraint
+			baseTableName="tasks" constraintName="FK_tasks_organization" baseColumnNames="organizationUuid"
+			referencedTableName="organizations" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<addForeignKeyConstraint
+			baseTableName="tasks" constraintName="FK_tasks_customFieldRef1" baseColumnNames="customFieldRef1Uuid"
+			referencedTableName="tasks" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-uuid-unique-indexes" author="gjvoosten">
+		<sql>
+			CREATE UNIQUE ${non_clustered} INDEX "UQ_OrganizationIdentificationCode"
+			ON organizations ( "identificationCode" )
+			WHERE "identificationCode" IS NOT NULL
+			AND "identificationCode" != '';
+
+			CREATE UNIQUE ${non_clustered} INDEX "UQ_CurrentPersonInPosition"
+			ON positions ("currentPersonUuid")
+			WHERE "currentPersonUuid" IS NOT NULL;
+
+			CREATE UNIQUE ${non_clustered} INDEX "UQ_PositionCodes"
+			ON positions (code)
+			WHERE code IS NOT NULL;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-uuid-fullText-indexes" author="gjvoosten" dbms="mssql" runInTransaction="false">
+		<sql>
+			CREATE FULLTEXT INDEX ON authorizationGroups(name, description) KEY INDEX PK_authorizationGroups;
+			CREATE FULLTEXT INDEX ON locations(name) KEY INDEX PK_locations;
+			CREATE FULLTEXT INDEX ON organizations(longName, shortName, identificationCode) KEY INDEX PK_organizations;
+			CREATE FULLTEXT INDEX ON people(name, emailAddress, biography) KEY INDEX PK_people;
+			CREATE FULLTEXT INDEX ON positions(name, code) KEY INDEX PK_positions;
+			CREATE FULLTEXT INDEX ON reports(text, nextSteps, intent, atmosphereDetails, keyOutcomes) KEY INDEX PK_reports;
+			CREATE FULLTEXT INDEX ON tags(name, description) KEY INDEX PK_tags;
+			CREATE FULLTEXT INDEX ON tasks(longName, shortName, customField) KEY INDEX PK_tasks;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-foreignKey-columns" author="gjvoosten">
+		<dropColumn tableName="approvalActions" columnName="approvalStepId" />
+		<dropColumn tableName="approvalActions" columnName="personId" />
+		<dropColumn tableName="approvalActions" columnName="reportId" />
+		<dropColumn tableName="approvalSteps" columnName="advisorOrganizationId" />
+		<dropColumn tableName="approvalSteps" columnName="nextStepId" />
+		<dropColumn tableName="approvers" columnName="approvalStepId" />
+		<dropColumn tableName="approvers" columnName="positionId" />
+		<dropColumn tableName="authorizationGroupPositions" columnName="authorizationGroupId" />
+		<dropColumn tableName="authorizationGroupPositions" columnName="positionId" />
+		<dropColumn tableName="comments" columnName="authorId" />
+		<dropColumn tableName="comments" columnName="reportId" />
+		<dropColumn tableName="organizations" columnName="parentOrgId" />
+		<dropColumn tableName="peoplePositions" columnName="personId" />
+		<dropColumn tableName="peoplePositions" columnName="positionId" />
+		<dropColumn tableName="positionRelationships" columnName="positionId_a" />
+		<dropColumn tableName="positionRelationships" columnName="positionId_b" />
+		<dropColumn tableName="positions" columnName="currentPersonId" />
+		<dropColumn tableName="positions" columnName="locationId" />
+		<dropColumn tableName="positions" columnName="organizationId" />
+		<dropColumn tableName="reportAuthorizationGroups" columnName="authorizationGroupId" />
+		<dropColumn tableName="reportAuthorizationGroups" columnName="reportId" />
+		<dropColumn tableName="reportPeople" columnName="personId" />
+		<dropColumn tableName="reportPeople" columnName="reportId" />
+		<dropColumn tableName="reports" columnName="advisorOrganizationId" />
+		<dropColumn tableName="reports" columnName="approvalStepId" />
+		<dropColumn tableName="reports" columnName="authorId" />
+		<dropColumn tableName="reports" columnName="locationId" />
+		<dropColumn tableName="reports" columnName="principalOrganizationId" />
+		<dropColumn tableName="reportsSensitiveInformation" columnName="reportId" />
+		<dropColumn tableName="reportTags" columnName="reportId" />
+		<dropColumn tableName="reportTags" columnName="tagId" />
+		<dropColumn tableName="reportTasks" columnName="reportId" />
+		<dropColumn tableName="reportTasks" columnName="taskId" />
+		<dropColumn tableName="savedSearches" columnName="ownerId" />
+		<dropColumn tableName="tasks" columnName="customFieldRef1Id" />
+		<dropColumn tableName="tasks" columnName="organizationId" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="update-uuid-savedSearches" author="gjvoosten">
+		<!-- Requires at least SQL Server 2016: -->
+		<sql dbms="mssql">
+			-- Add JSON fields for the new uuid's
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeeUuid', (SELECT uuid FROM people WHERE id=JSON_VALUE(query, '$.attendeeId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeePositionUuid', (SELECT uuid FROM positions WHERE id=JSON_VALUE(query, '$.attendeePositionId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorUuid', (SELECT uuid FROM people WHERE id=JSON_VALUE(query, '$.authorId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorPositionUuid', (SELECT uuid FROM positions WHERE id=JSON_VALUE(query, '$.authorPositionId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.locationUuid', (SELECT uuid FROM locations WHERE id=JSON_VALUE(query, '$.locationId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.orgUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.orgId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.organizationUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.organizationId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.responsibleOrgUuid', (SELECT uuid FROM organizations WHERE id=JSON_VALUE(query, '$.responsibleOrgId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.tagUuid', (SELECT uuid FROM tags WHERE id=JSON_VALUE(query, '$.tagId')));
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskUuid', (SELECT uuid FROM tasks WHERE id=JSON_VALUE(query, '$.taskId')));
+			-- Remove JSON fields for the old id's
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeeId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.attendeePositionId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.authorPositionId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.locationId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.orgId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.organizationId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.responsibleOrgId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.tagId', NULL);
+			UPDATE savedSearches SET query=JSON_MODIFY(query, '$.taskId', NULL);
+		</sql>
+		<!-- Requires at least PostgreSQL 9.5: -->
+		<sql dbms="postgresql">
+			-- Add JSON fields for the new uuid's
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{attendeeUuid}', TO_JSONB(p.uuid), true)
+				FROM people p WHERE p.id=(s.query::json->>'attendeeId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{attendeePositionUuid}', TO_JSONB(p.uuid), true)
+				FROM positions p WHERE p.id=(s.query::json->>'attendeePositionId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{authorUuid}', TO_JSONB(p.uuid), true)
+				FROM people p WHERE p.id=(s.query::json->>'authorId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{authorPositionUuid}', TO_JSONB(p.uuid), true)
+				FROM positions p WHERE p.id=(s.query::json->>'authorPositionId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{locationUuid}', TO_JSONB(l.uuid), true)
+				FROM locations l WHERE l.id=(s.query::json->>'locationId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{orgUuid}', TO_JSONB(o.uuid), true)
+				FROM organizations o WHERE o.id=(s.query::json->>'orgId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{orgUuid}', TO_JSONB(o.uuid), true)
+				FROM organizations o WHERE o.id=(s.query::json->>'organizationId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{responsibleOrgUuid}', TO_JSONB(o.uuid), true)
+				FROM organizations o WHERE o.id=(s.query::json->>'responsibleOrgId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{tagUuid}', TO_JSONB(t.uuid), true)
+				FROM tags t WHERE t.id=(s.query::json->>'tagId')::int;
+			UPDATE "savedSearches" s SET query=JSONB_SET(query::jsonb, '{taskUuid}', TO_JSONB(t.uuid), true)
+				FROM tasks t WHERE t.id=(s.query::json->>'taskId')::int;
+			-- Remove JSON fields for the old id's
+			UPDATE "savedSearches" SET query=query::jsonb #- '{attendeeId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{attendeePositionId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{authorId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{authorPositionId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{locationId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{orgId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{organizationId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{responsibleOrgId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{tagId}';
+			UPDATE "savedSearches" SET query=query::jsonb #- '{taskId}';
+		</sql>
+		<!-- No JSON manipulation in SQLite: -->
+		<sql dbms="sqlite">
+			DELETE FROM "savedSearches";
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add-reports-legacyId-column" author="gjvoosten">
+		<!-- Create a new legacy id column for reports and fill it with the old id -->
+		<addColumn tableName="reports">
+			<column name="legacyId" type="int" />
+		</addColumn>
+		<sql>
+		    UPDATE reports SET legacyId=id;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="drop-id-primaryKey-columns" author="gjvoosten">
+		<dropColumn tableName="approvalSteps" columnName="id" />
+		<dropColumn tableName="authorizationGroups" columnName="id" />
+		<dropColumn tableName="comments" columnName="id" />
+		<dropColumn tableName="locations" columnName="id" />
+		<dropColumn tableName="organizations" columnName="id" />
+		<dropColumn tableName="people" columnName="id" />
+		<dropColumn tableName="positions" columnName="id" />
+		<dropColumn tableName="reports" columnName="id" />
+		<dropColumn tableName="reportsSensitiveInformation" columnName="id" />
+		<dropColumn tableName="savedSearches" columnName="id" />
+		<dropColumn tableName="tags" columnName="id" />
+		<dropColumn tableName="tasks" columnName="id" />
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
+	<changeSet id="add_notes" author="gjvoosten">
+		<createTable tableName="notes">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="authorUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="text" type="${long_text_type}" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="notes" constraintName="FK_notes_author" baseColumnNames="authorUuid"
+			referencedTableName="people" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+
+		<createTable tableName="noteRelatedObjects">
+			<column name="noteUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="relatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="relatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="noteRelatedObjects" constraintName="FK_noteRelatedObjects_note" baseColumnNames="noteUuid"
+			referencedTableName="notes" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
 	</changeSet>
 
 </databaseChangeLog>

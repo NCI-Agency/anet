@@ -6,17 +6,17 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-
-import org.skife.jdbi.v2.GeneratedKeys;
-import org.skife.jdbi.v2.Handle;
+import org.joda.time.DateTime;
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.database.mappers.MapperUtils;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class DaoUtils {
@@ -41,10 +41,10 @@ public class DaoUtils {
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-	
-	public static Integer getId(AbstractAnetBean obj) { 
+
+	public static String getUuid(AbstractAnetBean obj) {
 		if (obj == null) { return null; }
-		return obj.getId();
+		return obj.getUuid();
 	}
 	
 	public static Integer getEnumId(Enum<?> o) { 
@@ -73,36 +73,57 @@ public class DaoUtils {
 	public static boolean isMsSql(Handle dbHandle) {
 		return getDbType(dbHandle) == DbType.MSSQL;
 	}
-	
-	public static Integer getGeneratedId(GeneratedKeys<Map<String,Object>> keys) { 
-		Map<String,Object> r = keys.first();
-		if (r == null) {
-			return null;
+
+	public static String getNewUuid() {
+		return UUID.randomUUID().toString();
+	}
+
+	public static void setInsertFields(AbstractAnetBean bean) {
+		bean.setUuid(getNewUuid());
+		final DateTime now = DateTime.now();
+		bean.setCreatedAt(now);
+		bean.setUpdatedAt(now);
+	}
+
+	public static void setUpdateFields(AbstractAnetBean bean) {
+		final DateTime now = DateTime.now();
+		bean.setUpdatedAt(now);
+	}
+
+	public static void setCommonBeanFields(AbstractAnetBean bean, ResultSet rs, String tableName)
+			throws SQLException {
+		// Should always be there
+		bean.setUuid(rs.getString(getQualifiedFieldName(tableName, "uuid")));
+
+		// Not all beans have createdAt and/or updatedAt
+		final String createdAtCol = getQualifiedFieldName(tableName, "createdAt");
+		if (MapperUtils.containsColumnNamed(rs, createdAtCol)) {
+			bean.setCreatedAt(new DateTime(rs.getTimestamp(createdAtCol)));
 		}
-		Object id = null;
-		// NOTE: this could probably be a switch on DB_TYPE instead, with modest care
-		if (r.containsKey("last_insert_rowid()")) { 
-			id = r.get("last_insert_rowid()");
-		} else if (r.containsKey("generated_keys")) { 
-			id = r.get("generated_keys");
-		} else if (r.containsKey("id")) {
-			id = r.get("id");
-		}
-		if (id == null) { return null; } 
-		if (id instanceof Integer) { 
-			return (Integer) id;
-		} else if (id instanceof Number) {
-			return ((Number) id).intValue();
-		} else {
-			logger.error("Database returned an ID of type {} (not a Number or Integer)", id.getClass());
-			throw new WebApplicationException("Unexpected id type returned from database");
+		final String updatedAtCol = getQualifiedFieldName(tableName, "updatedAt");
+		if (MapperUtils.containsColumnNamed(rs, updatedAtCol)) {
+			bean.setUpdatedAt(new DateTime(rs.getTimestamp(updatedAtCol)));
 		}
 	}
+
+	private static String getQualifiedFieldName(String tableName, String fieldName) {
+		final StringBuilder result = new StringBuilder();
+		if (!Utils.isEmptyOrNull(tableName)) {
+			result.append(tableName);
+			result.append("_");
+		}
+		result.append(fieldName);
+		return result.toString();
+	}
 	
-	public static String buildFieldAliases(String tableName, String[] fields) { 
-		List<String> fieldAliases = new LinkedList<String>();
-		for (String field : fields) { 
-			fieldAliases.add(String.format("\"%s\".\"%s\" AS %s_%s", tableName, field, tableName, field));
+	public static String buildFieldAliases(String tableName, String[] fields, boolean addAs) {
+		final List<String> fieldAliases = new LinkedList<String>();
+		for (String field : fields) {
+			final StringBuilder sb = new StringBuilder(String.format("\"%s\".\"%s\"", tableName, field));
+			if (addAs) {
+				sb.append(String.format(" AS %s_%s", tableName, field));
+			}
+			fieldAliases.add(sb.toString());
 		}
 		return " " + Joiner.on(", ").join(fieldAliases) + " ";
 	}

@@ -37,7 +37,7 @@ class LocationForm extends ValidatableFormWrapper {
 	render() {
 		const location = this.props.anetLocation
 		const marker = {
-			id: location.id || 0,
+			id: location.uuid || 0,
 			name: location.name || '',
 			draggable: true,
 			onMove: this.onMarkerMove
@@ -111,14 +111,14 @@ class LocationForm extends ValidatableFormWrapper {
 		let edit = this.props.edit
 		const operation = edit ? 'updateLocation' : 'createLocation'
 		let graphql = operation + '(location: $location)'
-		graphql += edit ? '' : ' { id }'
+		graphql += edit ? '' : ' { uuid }'
 		const variables = { location: loc }
 		const variableDef = '($location: LocationInput!)'
 		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
-				if (data[operation].id) {
-					loc.id = data[operation].id
+				if (data[operation].uuid) {
+					loc.id = data[operation].uuid
 				}
 				this.props.history.replace(Location.pathForEdit(loc))
 				this.props.history.push({

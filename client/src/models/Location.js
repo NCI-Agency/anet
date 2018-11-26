@@ -14,10 +14,11 @@ export default class Location extends Model {
 		name: '',
 		get status() { return Location.STATUS.ACTIVE },
 		lat: null,
-		lng: null
+		lng: null,
+		...Model.schema,
 	}
 
-	static autocompleteQuery = "id, name"
+	static autocompleteQuery = "uuid, name"
 
 	static hasCoordinates(location) {
 		return location && typeof location.lat === 'number' && typeof location.lng === 'number'

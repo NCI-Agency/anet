@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -36,18 +36,18 @@ public class SqliteTaskSearcher implements ITaskSearcher {
 			args.put("text", Utils.getSqliteFullTextQuery(text));
 		}
 		
-		if (query.getResponsibleOrgId() != null) { 
+		if (query.getResponsibleOrgUuid() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
 					+ ") ";
-				whereClauses.add(" \"organizationId\" IN (SELECT id from parent_orgs)");
+				whereClauses.add(" \"organizationUuid\" IN (SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add("\"organizationId\" = :orgId");
+				whereClauses.add("\"organizationUuid\" = :orgUuid");
 			}
-			args.put("orgId", query.getResponsibleOrgId());
+			args.put("orgUuid", query.getResponsibleOrgUuid());
 		}
 		
 		if (query.getCategory() != null) { 
@@ -70,7 +70,7 @@ public class SqliteTaskSearcher implements ITaskSearcher {
 		}
 		
 		result.setList(dbHandle.createQuery(sql.toString())
-			.bindFromMap(args)
+			.bindMap(args)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())
 			.map(new TaskMapper())

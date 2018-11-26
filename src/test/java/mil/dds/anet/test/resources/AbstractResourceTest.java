@@ -64,10 +64,10 @@ public abstract class AbstractResourceTest {
 	 * If missing, creates them. 
 	 */
 	public Person findOrPutPersonInDb(Person stub) {
-		final String fields = "id name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
+		final String fields = "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
 				+ " position {"
-				+ "   id name type status "
-				+ "   organization { id shortName }"
+				+ "   uuid name type status "
+				+ "   organization { uuid shortName }"
 				+ " }";
 		if (stub.getDomainUsername() != null) { 
 			try { 
@@ -88,8 +88,8 @@ public abstract class AbstractResourceTest {
 		}
 
 		//Create insert into DB
-		final Integer newPersonId = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput", stub, new GenericType<GraphQLResponse<Person>>() {});
-		return graphQLHelper.getObjectById(admin, "person", fields, newPersonId, new GenericType<GraphQLResponse<Person>>() {});
+		final String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput", stub, new GenericType<GraphQLResponse<Person>>() {});
+		return graphQLHelper.getObjectById(admin, "person", fields, newPersonUuid, new GenericType<GraphQLResponse<Person>>() {});
 	}
 	
 	public Person getJackJackson() { 

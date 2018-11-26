@@ -1,5 +1,8 @@
 package mil.dds.anet.beans.search;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties({"user", "pass"})
 public abstract class AbstractSearchQuery implements ISearchQuery {
 
 	private String text;

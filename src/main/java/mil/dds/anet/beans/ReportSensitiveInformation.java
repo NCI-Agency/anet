@@ -25,18 +25,18 @@ public class ReportSensitiveInformation extends AbstractAnetBean {
 			return false;
 		}
 		final ReportSensitiveInformation rsi = (ReportSensitiveInformation) o;
-		return Objects.equals(rsi.getId(), id)
+		return Objects.equals(rsi.getUuid(), uuid)
 				&& Objects.equals(rsi.getText(), text);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, text);
+		return Objects.hash(uuid, text);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("[id:%d]", id);
+		return String.format("[uuid:%s]", uuid);
 	}
 
 }

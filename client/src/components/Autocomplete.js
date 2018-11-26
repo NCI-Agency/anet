@@ -53,13 +53,13 @@ export default class Autocomplete extends Component {
 		this.fetchSuggestionsDebounced = _debounce(this.fetchSuggestions, 200)
 		this.noSuggestions = <span><i>No suggestions found</i></span>
 
-		const selectedIds = this._getSelectedIds(props)
+		const selectedUuids = this._getSelectedUuids(props)
 		const value = this._getValue(props)
 		const stringValue = this.getStringValue(value, props.valueKey)
 
 		this.state = {
 			suggestions: [],
-			selectedIds: selectedIds,
+			selectedUuids: selectedUuids,
 			stringValue: stringValue,
 			originalStringValue: stringValue,
 		}
@@ -76,10 +76,10 @@ export default class Autocomplete extends Component {
 	}
 
 	@autobind
-	_getSelectedIds(props) {
+	_getSelectedUuids(props) {
 		const {value} = props
 		if (Array.isArray(value)) {
-			return value.map(object => object.id)
+			return value.map(object => object.uuid)
 		}
 
 		return []
@@ -88,11 +88,11 @@ export default class Autocomplete extends Component {
 	componentDidUpdate(prevProps, prevState) {
 		//Ensure that we update the stringValue if we get an updated value
 		if (!_isEqual(prevProps.value, this.props.value)) {
-			const selectedIds = this._getSelectedIds(this.props)
+			const selectedUuids = this._getSelectedUuids(this.props)
 			const value = this._getValue(this.props)
 			const stringValue = this.getStringValue(value, this.props.valueKey)
 			this.setState({
-				selectedIds: selectedIds,
+				selectedUuids: selectedUuids,
 				stringValue: stringValue,
 				originalStringValue: stringValue
 			})
@@ -153,8 +153,8 @@ export default class Autocomplete extends Component {
 
 	@autobind
 	_setFilteredSuggestions(list) {
-		if (this.state.selectedIds) {
-			list = list.filter(suggestion => suggestion && suggestion.id && this.state.selectedIds.indexOf(suggestion.id) === -1)
+		if (this.state.selectedUuids) {
+			list = list.filter(suggestion => suggestion && suggestion.uuid && this.state.selectedUuids.indexOf(suggestion.uuid) === -1)
 		}
 		if (!list.length) {
 			list = [{}] // use an empty object so we render the 'noSuggestions' text
@@ -210,8 +210,8 @@ export default class Autocomplete extends Component {
 				//If the component had a value, and the user just cleared the input
 				// then set the selection to an empty object. We need to do this because we need to
 				// tell the server that value was cleared, rather than that there was no change.
-				//This is so the server sees that the value is not-null, but that id is NULL.
-				//Which tells the server specifically that the id should be set to NULL on the foreignKey
+				//This is so the server sees that the value is not-null, but that uuid is NULL.
+				//Which tells the server specifically that the uuid should be set to NULL on the foreignKey
 				this.onSuggestionSelected(event, {suggestion: {}, suggestionValue: ''})
 			}
 			if (this.props.onErrorChange) {

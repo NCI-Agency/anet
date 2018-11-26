@@ -28,10 +28,11 @@ export default class Organization extends Model {
 		childrenOrgs: [],
 		approvalSteps: [],
 		positions: [],
-		tasks: []
+		tasks: [],
+		...Model.schema,
 	}
 
-	static autocompleteQuery = "id, shortName, longName, identificationCode"
+	static autocompleteQuery = "uuid, shortName, longName, identificationCode"
 
 	isAdvisorOrg() {
 		return this.type === Organization.TYPE.ADVISOR_ORG

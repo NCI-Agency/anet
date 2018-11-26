@@ -22,10 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
-import org.skife.jdbi.v2.exceptions.UnableToExecuteStatementException;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,9 +86,9 @@ public class OrganizationResource {
 	@GET
 	@Timed
 	@GraphQLQuery(name="organization")
-	@Path("/{id}")
-	public Organization getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		Organization org = dao.getById(id);
+	@Path("/{uuid}")
+	public Organization getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+		Organization org = dao.getByUuid(uuid);
 		if (org == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return org;
 	}
@@ -106,9 +104,7 @@ public class OrganizationResource {
 	private Organization createOrganizationCommon(Person user, Organization org) {
 		AuthUtils.assertAdministrator(user);
 		final Organization outer;
-		outer = engine.getDbHandle().inTransaction(new TransactionCallback<Organization>() {
-			@Override
-			public Organization inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		outer = engine.getDbHandle().inTransaction(h -> {
 				Organization created;
 				try {
 					created = dao.insert(org);
@@ -126,12 +122,11 @@ public class OrganizationResource {
 					//Create the approval steps
 					for (ApprovalStep step : org.getApprovalSteps()) {
 						validateApprovalStep(step);
-						step.setAdvisorOrganizationId(created.getId());
+						step.setAdvisorOrganizationUuid(created.getUuid());
 						engine.getApprovalStepDao().insertAtEnd(step);
 					}
 				}
 				return created;
-			}
 		});
 		AnetAuditLogger.log("Organization {} created by {}", outer, user);
 		return outer;
@@ -153,15 +148,16 @@ public class OrganizationResource {
 	@Timed
 	@Path("/update")
 	@RolesAllowed("SUPER_USER")
-	public Response updateOrganization(@Auth Person user, Organization org) {
+	public Response updateOrganization(@Auth Person user, Organization org)
+			throws InterruptedException, ExecutionException, Exception {
 		updateOrganizationCommon(user, org);
 		return Response.ok().build();
 	}
 
-	private int updateOrganizationCommon(Person user, Organization org) {
+	private int updateOrganizationCommon(Person user, Organization org)
+			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Integer>() {
-			public Integer inTransaction(Handle conn, TransactionStatus status) throws Exception {
+		return dbHandle.inTransaction(h -> {
 				//Verify correct Organization
 				AuthUtils.assertSuperUserForOrg(user, org);
 				final int numRows;
@@ -177,37 +173,37 @@ public class OrganizationResource {
 
 				if (org.getTasks() != null || org.getApprovalSteps() != null) {
 					//Load the existing org, so we can check for differences.
-					Organization existing = dao.getById(org.getId());
+					Organization existing = dao.getByUuid(org.getUuid());
 
 					if (org.getTasks() != null) {
 						logger.debug("Editing tasks for {}", org);
-						Utils.addRemoveElementsById(existing.loadTasks(), org.getTasks(),
+						Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
 								newTask -> engine.getTaskDao().setResponsibleOrgForTask(newTask, existing),
-								oldTaskId -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithId(oldTaskId), null));
+								oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithUuid(oldTaskUuid), null));
 					}
 
 					if (org.getApprovalSteps() != null) {
 						logger.debug("Editing approval steps for {}", org);
 						for (ApprovalStep step : org.getApprovalSteps()) {
 							validateApprovalStep(step);
-							step.setAdvisorOrganizationId(org.getId());
+							step.setAdvisorOrganizationUuid(org.getUuid());
 						}
 						List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).get();
 
-						Utils.addRemoveElementsById(existingSteps, org.getApprovalSteps(),
+						Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
 								newStep -> engine.getApprovalStepDao().insert(newStep),
-								oldStepId -> engine.getApprovalStepDao().deleteStep(oldStepId));
+								oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
 
 						for (int i = 0;i < org.getApprovalSteps().size();i++) {
 							ApprovalStep curr = org.getApprovalSteps().get(i);
 							ApprovalStep next = (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
-							curr.setNextStepId(DaoUtils.getId(next));
-							ApprovalStep existingStep = Utils.getById(existingSteps, curr.getId());
-							//If this step didn't exist before, we still need to set the nextStepId on it, but don't need to do a deep update.
+							curr.setNextStepUuid(DaoUtils.getUuid(next));
+							ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
+							//If this step didn't exist before, we still need to set the nextStepUuid on it, but don't need to do a deep update.
 							if (existingStep == null) {
 								engine.getApprovalStepDao().update(curr);
 							} else {
-								//Check for updates to name, nextStepId and approvers.
+								//Check for updates to name, nextStepUuid and approvers.
 								updateStep(curr, existingStep);
 							}
 						}
@@ -216,7 +212,6 @@ public class OrganizationResource {
 
 				AnetAuditLogger.log("Organization {} updated by {}", org, user);
 				return numRows;
-			}
 		});
 	}
 
@@ -224,18 +219,18 @@ public class OrganizationResource {
 	private void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
 		final AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
-		newStep.setId(oldStep.getId()); //Always want to make changes to the existing group
+		newStep.setUuid(oldStep.getUuid()); //Always want to make changes to the existing group
 		if (!newStep.getName().equals(oldStep.getName())) {
 			approvalStepDao.update(newStep);
-		} else if (!Objects.equals(newStep.getNextStepId(), oldStep.getNextStepId())) {
+		} else if (!Objects.equals(newStep.getNextStepUuid(), oldStep.getNextStepUuid())) {
 			approvalStepDao.update(newStep);
 		}
 
 		if (newStep.getApprovers() != null) {
 			try {
-				Utils.addRemoveElementsById(oldStep.loadApprovers(engine.getContext()).get(), newStep.getApprovers(),
+				Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).get(), newStep.getApprovers(),
 					newPosition -> approvalStepDao.addApprover(newStep, newPosition),
-					oldPositionId -> approvalStepDao.removeApprover(newStep, Position.createWithId(oldPositionId)));
+					oldPositionUuid -> approvalStepDao.removeApprover(newStep, Position.createWithUuid(oldPositionUuid)));
 			} catch (InterruptedException | ExecutionException e) {
 				throw new WebApplicationException("failed to load Approvers", e);
 			}
@@ -244,7 +239,8 @@ public class OrganizationResource {
 
 	@GraphQLMutation(name="updateOrganization")
 	@RolesAllowed("SUPER_USER")
-	public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org) {
+	public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org)
+			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something, so we return the number of updated rows
 		return updateOrganizationCommon(DaoUtils.getUserFromContext(context), org);
 	}

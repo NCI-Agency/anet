@@ -49,7 +49,7 @@ export default class AuthorizationGroupsSelector extends Component {
 				</thead>
 				<tbody>
 					{groups.map((ag, idx) =>
-						<tr key={ag.id}>
+						<tr key={ag.uuid}>
 							<td>{ag.name}</td>
 							<td>{ag.description}</td>
 							<td onClick={this.removeAuthorizationGroup.bind(this, ag)} id={'authorizationGroupDelete_' + idx} >
@@ -69,20 +69,20 @@ export default class AuthorizationGroupsSelector extends Component {
 		return <Form.Field.ExtraCol className="shortcut-list">
 			<h5>Recent groups</h5>
 			{shortcuts.map(group =>
-				<Button key={group.id} bsStyle="link" onClick={this.addAuthorizationGroup.bind(this, group)}>Add {group.name}</Button>
+				<Button key={group.uuid} bsStyle="link" onClick={this.addAuthorizationGroup.bind(this, group)}>Add {group.name}</Button>
 			)}
 		</Form.Field.ExtraCol>
 	}
 
 	@autobind
 	addAuthorizationGroup(newGroup) {
-		if (!newGroup || !newGroup.id) {
+		if (!newGroup || !newGroup.uuid) {
 			return
 		}
 
 		let groups = this.props.groups
 
-		if (!groups.find(group => group.id === newGroup.id)) {
+		if (!groups.find(group => group.uuid === newGroup.uuid)) {
 			groups.push(newGroup)
 		}
 
@@ -92,7 +92,7 @@ export default class AuthorizationGroupsSelector extends Component {
 	@autobind
 	removeAuthorizationGroup(oldGroup) {
 		let groups = this.props.groups
-		let index = groups.findIndex(group => group.id === oldGroup.id)
+		let index = groups.findIndex(group => group.uuid === oldGroup.uuid)
 
 		if (index !== -1) {
 			groups.splice(index, 1)

@@ -23,7 +23,7 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class TaskResourceTest extends AbstractResourceTest {
 
-	private static final String FIELDS = "id shortName longName category customFieldRef1 { id } responsibleOrg { id } status";
+	private static final String FIELDS = "uuid shortName longName category customFieldRef1 { uuid } responsibleOrg { uuid } status";
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -32,51 +32,51 @@ public class TaskResourceTest extends AbstractResourceTest {
 	public void taskTest() { 
 		final Person jack = getJackJackson();
 
-		final Integer aId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+		final String aUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
 				TestData.createTask("TestF1", "Do a thing with a person", "Test-EF"), new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(aId).isNotNull();
-		final Task a = graphQLHelper.getObjectById(admin, "task", FIELDS, aId, new GenericType<GraphQLResponse<Task>>() {});
+		assertThat(aUuid).isNotNull();
+		final Task a = graphQLHelper.getObjectById(admin, "task", FIELDS, aUuid, new GenericType<GraphQLResponse<Task>>() {});
 
-		final Integer bId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+		final String bUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
 				TestData.createTask("TestM1", "Teach a person how to fish", "Test-Milestone", a, null, TaskStatus.ACTIVE), new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(bId).isNotNull();
+		assertThat(bUuid).isNotNull();
 		
-		final Integer cId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+		final String cUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
 				TestData.createTask("TestM2", "Watch the person fishing", "Test-Milestone", a, null, TaskStatus.ACTIVE), new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(cId).isNotNull();
+		assertThat(cUuid).isNotNull();
 		
-		final Integer dId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+		final String dUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
 				TestData.createTask("TestM3", "Have the person go fishing without you", "Test-Milestone", a, null, TaskStatus.ACTIVE), new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(dId).isNotNull();
+		assertThat(dUuid).isNotNull();
 		
-		final Integer eId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+		final String eUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
 				TestData.createTask("TestF2", "Be a thing in a test case", "Test-EF", null, null, TaskStatus.ACTIVE), new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(eId).isNotNull();
+		assertThat(eUuid).isNotNull();
 		
 		//modify a task. 
 		a.setLongName("Do a thing with a person modified");
 		final Integer nrUpdated = graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
 		assertThat(nrUpdated).isEqualTo(1);
-		final Task returned = graphQLHelper.getObjectById(jack, "task", FIELDS, aId, new GenericType<GraphQLResponse<Task>>() {});
+		final Task returned = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid, new GenericType<GraphQLResponse<Task>>() {});
 		assertThat(returned.getLongName()).isEqualTo(a.getLongName());
 
 		//Assign the Task to the AO
 		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
 		queryOrgs.setText("EF8");
 		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query", "OrganizationSearchQueryInput",
-				"id shortName", queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
+				"uuid shortName", queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		Organization ef8 = orgs.getList().stream().filter(o -> o.getShortName().equals("EF8")).findFirst().get();
 		assertThat(ef8).isNotNull();
 		
 		a.setResponsibleOrg(ef8);
 		final Integer nrUpdated2 = graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
 		assertThat(nrUpdated2).isEqualTo(1);
-		final Task returned2 = graphQLHelper.getObjectById(jack, "task", FIELDS, aId, new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(returned2.getResponsibleOrg().getId()).isEqualTo(ef8.getId());
+		final Task returned2 = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid, new GenericType<GraphQLResponse<Task>>() {});
+		assertThat(returned2.getResponsibleOrg().getUuid()).isEqualTo(ef8.getUuid());
 		
 		//Fetch the tasks off the organization
 		final TaskSearchQuery queryTasks = new TaskSearchQuery();
-		queryTasks.setResponsibleOrgId(ef8.getId());
+		queryTasks.setResponsibleOrgUuid(ef8.getUuid());
 		final AnetBeanList<Task> tasks = graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput",
 				FIELDS, queryTasks, new GenericType<GraphQLResponse<AnetBeanList<Task>>>() {});
 		assertThat(tasks.getList()).contains(a);
@@ -87,7 +87,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		a.setStatus(TaskStatus.INACTIVE);
 		final Integer nrUpdated3= graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
 		assertThat(nrUpdated3).isEqualTo(1);
-		final Task returned3 = graphQLHelper.getObjectById(jack, "task", FIELDS, aId, new GenericType<GraphQLResponse<Task>>() {});
+		final Task returned3 = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid, new GenericType<GraphQLResponse<Task>>() {});
 		assertThat(returned3.getStatus()).isEqualTo(TaskStatus.INACTIVE);
 	}
 	
@@ -112,12 +112,12 @@ public class TaskResourceTest extends AbstractResourceTest {
 		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
 		queryOrgs.setText("EF 2");
 		final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList", "query", "OrganizationSearchQueryInput",
-				"id shortName", queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
+				"uuid shortName", queryOrgs, new GenericType<GraphQLResponse<AnetBeanList<Organization>>>() {});
 		Organization ef2 = orgs.getList().stream().filter(o -> o.getShortName().equals("EF 2")).findFirst().get();
 		assertThat(ef2).isNotNull();
 		
 		query.setText(null);
-		query.setResponsibleOrgId(ef2.getId());
+		query.setResponsibleOrgUuid(ef2.getUuid());
 		final AnetBeanList<Task> searchObjects2 = graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput",
 				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Task>>>() {});
 		assertThat(searchObjects2).isNotNull();
@@ -125,12 +125,12 @@ public class TaskResourceTest extends AbstractResourceTest {
 		final List<Task> searchResults2 = searchObjects2.getList();
 		assertThat(searchResults2).isNotEmpty();
 		assertThat(searchResults2.stream()
-				.filter(p -> p.getResponsibleOrg().getId().equals(ef2.getId()))
+				.filter(p -> p.getResponsibleOrg().getUuid().equals(ef2.getUuid()))
 				.count())
 			.isEqualTo(searchResults2.size());
 		
 		//Search by category
-		query.setResponsibleOrgId(null);
+		query.setResponsibleOrgUuid(null);
 		query.setText("expenses");
 		query.setCategory("Milestone");
 		final AnetBeanList<Task> searchObjects3 = graphQLHelper.searchObjects(jack, "taskList", "query", "TaskSearchQueryInput",
@@ -172,9 +172,9 @@ public class TaskResourceTest extends AbstractResourceTest {
 
 	@Test
 	public void duplicateTaskTest() {
-		final Integer aId = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+		final String aUuid = graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
 				TestData.createTask("DupTest", "Test dups", "Test-EF"), new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(aId).isNotNull();
+		assertThat(aUuid).isNotNull();
 
 		// Trying to create another task with the same shortName should fail
 		thrown.expect(ClientErrorException.class);

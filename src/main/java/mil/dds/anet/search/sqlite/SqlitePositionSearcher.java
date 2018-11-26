@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import org.skife.jdbi.v2.Handle;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
 
-import jersey.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -25,12 +27,13 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 	@Override
 	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Handle dbHandle) {
 		StringBuilder sql = new StringBuilder("/* SqlitePositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS 
-				+ " FROM positions WHERE positions.id IN (SELECT positions.id FROM positions ");
+				+ " FROM positions WHERE positions.uuid IN (SELECT positions.uuid FROM positions ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
+		final Map<String,List<?>> listArgs = new HashMap<>();
 		String commonTableExpression = null;
 		
 		if (query.getMatchPersonName() != null && query.getMatchPersonName()) { 
-			sql.append(" LEFT JOIN people ON positions.\"currentPersonId\" = people.id ");
+			sql.append(" LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid ");
 		}
 		
 		sql.append(" WHERE ");
@@ -51,40 +54,36 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 			sqlArgs.put("text", Utils.getSqliteFullTextQuery(text));
 		}
 		
-		if (query.getType() != null) { 
-			List<String> argNames = new LinkedList<String>();
-			for (int i = 0;i < query.getType().size();i++) { 
-				argNames.add(":state" + i);
-				sqlArgs.put("state" + i, DaoUtils.getEnumId(query.getType().get(i)));
-			}
-			whereClauses.add("positions.type IN (" + Joiner.on(", ").join(argNames) + ")");
+		if (!Utils.isEmptyOrNull(query.getType())) {
+			whereClauses.add("positions.type IN ( <types> )");
+			listArgs.put("types", query.getType().stream().map(type -> DaoUtils.getEnumId(type)).collect(Collectors.toList()));
 		}
 		
-		if (query.getOrganizationId() != null) { 
+		if (query.getOrganizationUuid() != null) {
 			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) { 
-				commonTableExpression = "WITH RECURSIVE parent_orgs(id) AS ( "
-						+ "SELECT id FROM organizations WHERE id = :orgId "
+				commonTableExpression = "WITH RECURSIVE parent_orgs(uuid) AS ( "
+						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
-						+ "SELECT o.id from parent_orgs po, organizations o WHERE o.\"parentOrgId\" = po.id "
+						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.\"parentOrgUuid\" = po.uuid "
 					+ ") ";
-				whereClauses.add(" positions.\"organizationId\" IN (SELECT id from parent_orgs)");
+				whereClauses.add(" positions.\"organizationUuid\" IN (SELECT uuid from parent_orgs)");
 			} else { 
-				whereClauses.add("positions.\"organizationId\" = :orgId");
+				whereClauses.add("positions.\"organizationUuid\" = :orgUuid");
 			}
-			sqlArgs.put("orgId", query.getOrganizationId());
+			sqlArgs.put("orgUuid", query.getOrganizationUuid());
 		}
 		
 		if (query.getIsFilled() != null) {
 			if (query.getIsFilled()) { 
-				whereClauses.add("positions.\"currentPersonId\" IS NOT NULL");
+				whereClauses.add("positions.\"currentPersonUuid\" IS NOT NULL");
 			} else { 
-				whereClauses.add("positions.\"currentPersonId\" IS NULL");
+				whereClauses.add("positions.\"currentPersonUuid\" IS NULL");
 			}
 		}
 		
-		if (query.getLocationId() != null) { 
-			whereClauses.add("positions.\"locationId\" = :locationId");
-			sqlArgs.put("locationId", query.getLocationId());
+		if (query.getLocationUuid() != null) {
+			whereClauses.add("positions.\"locationUuid\" = :locationUuid");
+			sqlArgs.put("locationUuid", query.getLocationUuid());
 		}
 		
 		if (query.getStatus() != null) { 
@@ -129,12 +128,17 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 		
-		result.setList(dbHandle.createQuery(sql.toString())
-			.bindFromMap(sqlArgs)
+		final Query q = dbHandle.createQuery(sql.toString())
+			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
-			.bind("limit", query.getPageSize())
+			.bind("limit", query.getPageSize());
+		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
+			q.bindList(listArg.getKey(), listArg.getValue());
+		}
+		final List<Position> list = q
 			.map(new PositionMapper())
-			.list());
+			.list();
+		result.setList(list);
 		result.setTotalCount(result.getList().size()); // Sqlite cannot do true total counts, so this is a crutch.
 		return result;
 	}

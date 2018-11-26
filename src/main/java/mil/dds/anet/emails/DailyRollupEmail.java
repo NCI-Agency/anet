@@ -34,8 +34,8 @@ public class DailyRollupEmail extends AnetEmailAction {
 	DateTime startDate;
 	DateTime endDate;
 	OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG; // show the table based off this organization type. 
-	Integer advisorOrganizationId;
-	Integer principalOrganizationId;
+	String advisorOrganizationUuid;
+	String principalOrganizationUuid;
 	String comment;
 
 	public DailyRollupEmail() {
@@ -60,9 +60,9 @@ public class DailyRollupEmail extends AnetEmailAction {
 		query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
 		query.setSortOrder(SortOrder.DESC);
 		
-		query.setPrincipalOrgId(principalOrganizationId);
+		query.setPrincipalOrgUuid(principalOrganizationUuid);
 		query.setIncludePrincipalOrgChildren(true);
-		query.setAdvisorOrgId(advisorOrganizationId);
+		query.setAdvisorOrgUuid(advisorOrganizationUuid);
 		query.setIncludeAdvisorOrgChildren(true);
 
 		List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
@@ -78,11 +78,11 @@ public class DailyRollupEmail extends AnetEmailAction {
 		context.put("comment", comment);
 		
 		List<ReportGrouping> outerGrouping = null;
-		if (principalOrganizationId != null) { 
-			outerGrouping = allReports.getGroupingForParent(principalOrganizationId);
-		} else if (advisorOrganizationId != null) { 
-			outerGrouping = allReports.getGroupingForParent(advisorOrganizationId);
-		} else { 
+		if (principalOrganizationUuid != null) {
+			outerGrouping = allReports.getGroupingForParent(principalOrganizationUuid);
+		} else if (advisorOrganizationUuid != null) {
+			outerGrouping = allReports.getGroupingForParent(advisorOrganizationUuid);
+		} else {
 			outerGrouping = allReports.getByGrouping(chartOrgType);
 		}
 		
@@ -131,19 +131,18 @@ public class DailyRollupEmail extends AnetEmailAction {
 		}
 
 		public List<ReportGrouping> getByGrouping(OrganizationType orgType) {
-			
-			Map<Integer, Organization> orgIdToTopOrg = AnetObjectEngine.getInstance().buildTopLevelOrgHash(orgType);
-			return groupReports(orgIdToTopOrg, orgType);
+			final Map<String, Organization> orgUuidToTopOrg = AnetObjectEngine.getInstance().buildTopLevelOrgHash(orgType);
+			return groupReports(orgUuidToTopOrg, orgType);
 		}
 		
-		public List<ReportGrouping> getGroupingForParent(Integer parentOrgId) { 
-			Map<Integer, Organization> orgIdToTopOrg = AnetObjectEngine.getInstance().buildTopLevelOrgHash(parentOrgId);
-			OrganizationType orgType = orgIdToTopOrg.get(parentOrgId).getType();
-			return groupReports(orgIdToTopOrg, orgType);
+		public List<ReportGrouping> getGroupingForParent(String parentOrgUuid) {
+			final Map<String, Organization> orgUuidToTopOrg = AnetObjectEngine.getInstance().buildTopLevelOrgHash(parentOrgUuid);
+			final OrganizationType orgType = orgUuidToTopOrg.get(parentOrgUuid).getType();
+			return groupReports(orgUuidToTopOrg, orgType);
 		}
 		
-		private List<ReportGrouping> groupReports(Map<Integer,Organization> orgIdToTopOrg, OrganizationType orgType) { 
-			Map<Integer, ReportGrouping> orgIdToReports = new HashMap<Integer,ReportGrouping>();
+		private List<ReportGrouping> groupReports(Map<String,Organization> orgUuidToTopOrg, OrganizationType orgType) {
+			final Map<String, ReportGrouping> orgUuidToReports = new HashMap<>();
 			for (Report r : reports) {
 				final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
 				Organization reportOrg;
@@ -155,30 +154,30 @@ public class DailyRollupEmail extends AnetEmailAction {
 					logger.error("failed to load AdvisorOrg/PrincipalOrg", e);
 					return null;
 				}
-				int topOrgId;
+				String topOrgUuid;
 				String topOrgName;
 				if (reportOrg == null) {
-					topOrgId = -1;
+					topOrgUuid = Organization.DUMMY_ORG_UUID;
 					topOrgName = "Other";
 				} else {
-					Organization topOrg = orgIdToTopOrg.get(reportOrg.getId());
+					Organization topOrg = orgUuidToTopOrg.get(reportOrg.getUuid());
 					if (topOrg == null) {  //this should never happen unless the data in the database is bad. 
-						topOrgId = -1;
+						topOrgUuid = Organization.DUMMY_ORG_UUID;
 						topOrgName = "Other";
 					} else { 
-						topOrgId = topOrg.getId();
+						topOrgUuid = topOrg.getUuid();
 						topOrgName = topOrg.getShortName();
 					}
 				}
-				ReportGrouping group = orgIdToReports.get(topOrgId);
+				ReportGrouping group = orgUuidToReports.get(topOrgUuid);
 				if (group == null) {
 					group = new ReportGrouping();
 					group.setName(topOrgName);
-					orgIdToReports.put(topOrgId, group);
+					orgUuidToReports.put(topOrgUuid, group);
 				}
 				group.addReport(r);
 			}
-			return orgIdToReports.values().stream()
+			return orgUuidToReports.values().stream()
 					.sorted((a, b) -> a.getName().compareTo(b.getName()))
 					.collect(Collectors.toList());
 
@@ -218,20 +217,20 @@ public class DailyRollupEmail extends AnetEmailAction {
 		this.chartOrgType = chartOrgType;
 	}
 
-	public Integer getAdvisorOrganizationId() {
-		return advisorOrganizationId;
+	public String getAdvisorOrganizationUuid() {
+		return advisorOrganizationUuid;
 	}
 
-	public void setAdvisorOrganizationId(Integer advisorOrganizationId) {
-		this.advisorOrganizationId = advisorOrganizationId;
+	public void setAdvisorOrganizationUuid(String advisorOrganizationUuid) {
+		this.advisorOrganizationUuid = advisorOrganizationUuid;
 	}
 
-	public Integer getPrincipalOrganizationId() {
-		return principalOrganizationId;
+	public String getPrincipalOrganizationUuid() {
+		return principalOrganizationUuid;
 	}
 
-	public void setPrincipalOrganizationId(Integer principalOrganizationId) {
-		this.principalOrganizationId = principalOrganizationId;
+	public void setPrincipalOrganizationUuid(String principalOrganizationUuid) {
+		this.principalOrganizationUuid = principalOrganizationUuid;
 	}
 
 	public String getComment() {

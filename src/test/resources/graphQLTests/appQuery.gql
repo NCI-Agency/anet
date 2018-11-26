@@ -1,8 +1,8 @@
 me {
-    id, name, role
+    uuid, name, role
     position {
-        id, name, type,
-		organization { id, shortName, longName, allDescendantOrgs { id }}
+        uuid, name, type,
+		organization { uuid, shortName, longName, allDescendantOrgs { uuid }}
     }
 }
 
@@ -10,9 +10,9 @@ adminSettings {
     key, value
 }
 organizationTopLevelOrgs(type: ADVISOR_ORG) {
-	list { 
-	    id, shortName, longName
-	    parentOrg { id } 
+	list {
+	    uuid, shortName, longName
+	    parentOrg { uuid }
 
 	}
 }

@@ -40,9 +40,9 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class PositionResourceTest extends AbstractResourceTest {
 
-	private static final String ORGANIZATION_FIELDS = "id shortName";
-	private static final String PERSON_FIELDS = "id name role";
-	private static final String POSITION_FIELDS = "id name code type status";
+	private static final String ORGANIZATION_FIELDS = "uuid shortName";
+	private static final String PERSON_FIELDS = "uuid name role";
+	private static final String POSITION_FIELDS = "uuid name code type status";
 	private static final String FIELDS = POSITION_FIELDS + " person { " + PERSON_FIELDS + " } organization { " + ORGANIZATION_FIELDS + " }";
 
 	@Rule
@@ -52,7 +52,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 	public void positionTest()
 		throws ExecutionException, InterruptedException {
 		final Person jack = getJackJackson();
-		assertThat(jack.getId()).isNotNull();
+		assertThat(jack.getUuid()).isNotNull();
 		assertThat(jack.getPosition()).isNotNull();
 		final Position jacksOldPosition = jack.getPosition();
 		
@@ -63,27 +63,27 @@ public class PositionResourceTest extends AbstractResourceTest {
 		test.setStatus(PositionStatus.ACTIVE);
 		
 		//Assign to an AO
-		final Integer aoId = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+		final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				OrganizationTest.getTestAO(true), new GenericType<GraphQLResponse<Organization>>() {});
-		test.setOrganization(Organization.createWithId(aoId));
+		test.setOrganization(Organization.createWithUuid(aoUuid));
 
-		Integer createdId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+		String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
 				test, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(createdId).isNotNull();
-		Position created = graphQLHelper.getObjectById(jack, "position", FIELDS, createdId, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(createdUuid).isNotNull();
+		Position created = graphQLHelper.getObjectById(jack, "position", FIELDS, createdUuid, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(created.getName()).isEqualTo(test.getName());
-		assertThat(created.getOrganization().getId()).isEqualTo(aoId);
+		assertThat(created.getOrganization().getUuid()).isEqualTo(aoUuid);
 		
 		//Assign a person into the position
 		Map<String, Object> variables = new HashMap<>();
-		variables.put("id", created.getId());
+		variables.put("uuid", created.getUuid());
 		variables.put("person", jack);
-		Integer nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		Integer nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 		
-		Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(currPos.getPerson()).isNotNull();
-		assertThat(currPos.getPerson().getId()).isEqualTo(jack.getId());
+		assertThat(currPos.getPerson().getUuid()).isEqualTo(jack.getUuid());
 		
 		final DateTime jacksTime = DateTime.now();
 		try {
@@ -97,40 +97,40 @@ public class PositionResourceTest extends AbstractResourceTest {
 		final Position stevesCurrentPosition = steve.loadPosition();
 		assertThat(stevesCurrentPosition).isNotNull();
 		variables = new HashMap<>();
-		variables.put("id", created.getId());
+		variables.put("uuid", created.getUuid());
 		variables.put("person", steve);
-		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Verify that the new person is in the position
-		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(currPos.getPerson()).isNotNull();
-		assertThat(currPos.getPerson().getId()).isEqualTo(steve.getId());
+		assertThat(currPos.getPerson().getUuid()).isEqualTo(steve.getUuid());
 		
 		//Verify that the previous person is now no longer in a position
-		Person returnedPerson = graphQLHelper.getObjectById(jack, "person", PERSON_FIELDS + " position { " + POSITION_FIELDS + " }", jack.getId(), new GenericType<GraphQLResponse<Person>>() {});
+		Person returnedPerson = graphQLHelper.getObjectById(jack, "person", PERSON_FIELDS + " position { " + POSITION_FIELDS + " }", jack.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(returnedPerson.getPosition()).isNull();
 		
 		//delete the person from this position
-		Integer nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", created.getId());
+		Integer nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", created.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 		
-		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(currPos.getPerson()).isNull();
 		
 		//Put steve back in his old position
 		variables = new HashMap<>();
-		variables.put("id", stevesCurrentPosition.getId());
+		variables.put("uuid", stevesCurrentPosition.getUuid());
 		variables.put("person", steve);
-		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 		
-		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, stevesCurrentPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, stevesCurrentPosition.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(currPos.getPerson()).isNotNull();
-		assertThat(currPos.getPerson().getId()).isEqualTo(steve.getId());
+		assertThat(currPos.getPerson().getUuid()).isEqualTo(steve.getUuid());
 		
 		//pull for the person at a previous time. 
-		Position retPos = graphQLHelper.getObjectById(jack, "position", POSITION_FIELDS + " previousPeople { createdAt startTime endTime person { id name } }", created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		Position retPos = graphQLHelper.getObjectById(jack, "position", POSITION_FIELDS + " previousPeople { createdAt startTime endTime person { uuid name } }", created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		final List<PersonPositionHistory> previousPeople = retPos.getPreviousPeople();
 		assertThat(previousPeople).isNotEmpty();
 		PersonPositionHistory last = null;
@@ -142,12 +142,12 @@ public class PositionResourceTest extends AbstractResourceTest {
 		}
 		assertThat(last).isNotNull();
 		assertThat(last.getPerson()).isNotNull();
-		assertThat(last.getPerson().getId()).isEqualTo(jack.getId());
+		assertThat(last.getPerson().getUuid()).isEqualTo(jack.getUuid());
 		
-		created = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		created = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		List<PersonPositionHistory> history = created.loadPreviousPeople(context).get();
 		assertThat(history.size()).isEqualTo(2);
-		assertThat(history.get(0).getPosition().getId()).isEqualTo(created.getId());
+		assertThat(history.get(0).getPosition().getUuid()).isEqualTo(created.getUuid());
 		assertThat(history.get(0).getPerson()).isEqualTo(jack);
 		assertThat(history.get(0).getStartTime()).isNotNull();
 		assertThat(history.get(0).getEndTime()).isNotNull();
@@ -173,18 +173,18 @@ public class PositionResourceTest extends AbstractResourceTest {
 		prinPos.setStatus(PositionStatus.ACTIVE);
 		
 		Person principal = getRogerRogwell();
-		assertThat(principal.getId()).isNotNull();
-		Integer tashkilId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+		assertThat(principal.getUuid()).isNotNull();
+		String tashkilUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
 				prinPos, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(tashkilId).isNotNull();
-		Position tashkil = graphQLHelper.getObjectById(admin, "position", FIELDS, tashkilId, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(tashkil.getId()).isNotNull();
+		assertThat(tashkilUuid).isNotNull();
+		Position tashkil = graphQLHelper.getObjectById(admin, "position", FIELDS, tashkilUuid, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(tashkil.getUuid()).isNotNull();
 		
 		//put the principal in a tashkil
 		variables = new HashMap<>();
-		variables.put("id", tashkil.getId());
+		variables.put("uuid", tashkil.getUuid());
 		variables.put("person", principal);
-		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//assign the tashkil to the position
@@ -195,7 +195,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//verify that we can pull the tashkil from the position
-		retPos = graphQLHelper.getObjectById(jack, "position", FIELDS + " associatedPositions { " + FIELDS + " }", created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		retPos = graphQLHelper.getObjectById(jack, "position", FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(retPos.getAssociatedPositions().size()).isEqualTo(1);
 		assertThat(retPos.getAssociatedPositions()).contains(tashkil);
 		
@@ -205,37 +205,37 @@ public class PositionResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//verify that it's now gone. 
-		retPos = graphQLHelper.getObjectById(jack, "position", FIELDS + " associatedPositions { " + FIELDS + " }", created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		retPos = graphQLHelper.getObjectById(jack, "position", FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(retPos.getAssociatedPositions().size()).isEqualTo(0);
 		
 		//remove the principal from the tashkil
-		nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", tashkil.getId());
+		nrDeleted = graphQLHelper.deleteObject(admin, "deletePersonFromPosition", tashkil.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 		
 		//Try to delete this position, it should fail because the tashkil is active
 		thrown.expect(BadRequestException.class);
-		graphQLHelper.deleteObject(admin, "deletePosition", tashkil.getId());
+		graphQLHelper.deleteObject(admin, "deletePosition", tashkil.getUuid());
 		
 		tashkil.setStatus(PositionStatus.INACTIVE);
 		nrUpdated = graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", tashkil);
 		assertThat(nrUpdated).isEqualTo(1);
 		
-		nrDeleted = graphQLHelper.deleteObject(admin, "deletePosition", tashkil.getId());
+		nrDeleted = graphQLHelper.deleteObject(admin, "deletePosition", tashkil.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 
 		thrown.expect(NotFoundException.class);
-		graphQLHelper.getObjectById(jack, "position", FIELDS, tashkil.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		graphQLHelper.getObjectById(jack, "position", FIELDS, tashkil.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 
 		//Put jack back in his old position
 		variables = new HashMap<>();
-		variables.put("id", jacksOldPosition.getId());
+		variables.put("uuid", jacksOldPosition.getUuid());
 		variables.put("person", jack);
-		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 
-		currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, jacksOldPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, jacksOldPosition.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(currPos.getPerson()).isNotNull();
-		assertThat(currPos.getPerson().getId()).isEqualTo(jack.getId());
+		assertThat(currPos.getPerson().getUuid()).isEqualTo(jack.getUuid());
 	}
 		
 	
@@ -255,19 +255,19 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		test.setOrganization(orgs.getList().get(0));
 		
-		Integer createdId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+		String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
 				test, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(createdId).isNotNull();
-		Position created = graphQLHelper.getObjectById(admin, "position", FIELDS, createdId, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(createdUuid).isNotNull();
+		Position created = graphQLHelper.getObjectById(admin, "position", FIELDS, createdUuid, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(created.getName()).isEqualTo(test.getName());
 		assertThat(created.getCode()).isEqualTo(test.getCode());
-		assertThat(created.getId()).isNotNull();
+		assertThat(created.getUuid()).isNotNull();
 		
 		//Change Name/Code
 		created.setName("Deputy Chief of Donuts");
 		Integer nrUpdated = graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", created);
 		assertThat(nrUpdated).isEqualTo(1);
-		Position returned = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		Position returned = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(returned.getName()).isEqualTo(created.getName());
 		assertThat(returned.getCode()).isEqualTo(created.getCode());
 		
@@ -277,24 +277,24 @@ public class PositionResourceTest extends AbstractResourceTest {
 		assertThat(stevesCurrPos).isNotNull();
 		
 		Map<String, Object> variables = new HashMap<>();
-		variables.put("id", created.getId());
+		variables.put("uuid", created.getUuid());
 		variables.put("person", steve);
-		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 		
-		Position principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		Position principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(principalPos.getPerson()).isNotNull();
-		assertThat(principalPos.getPerson().getId()).isEqualTo(steve.getId());
+		assertThat(principalPos.getPerson().getUuid()).isEqualTo(steve.getUuid());
 		
 		//Put steve back in his originial position
 		variables = new HashMap<>();
-		variables.put("id", stevesCurrPos.getId());
+		variables.put("uuid", stevesCurrPos.getUuid());
 		variables.put("person", steve);
-		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($id: Int!, $person: PersonInput!) { payload: putPersonInPosition (id: $id, person: $person) }", variables);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($uuid: String!, $person: PersonInput!) { payload: putPersonInPosition (uuid: $uuid, person: $person) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Ensure the old position is now empty
-		principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(principalPos.getPerson()).isNull();
 	}
 	
@@ -354,11 +354,11 @@ public class PositionResourceTest extends AbstractResourceTest {
 		
 		query.setText("Advisor");
 		query.setType(null);
-		query.setOrganizationId(ef1.getId());
+		query.setOrganizationUuid(ef1.getUuid());
 		searchResults = graphQLHelper.searchObjects(jack, "positionList", "query", "PositionSearchQueryInput",
 				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Position>>>() {}).getList();
 		assertThat(searchResults.stream()
-				.filter(p -> p.getOrganization().getId() == ef1.getId())
+				.filter(p -> p.getOrganization().getUuid() == ef1.getUuid())
 				.collect(Collectors.toList()))
 			.hasSameElementsAs(searchResults);
 		
@@ -430,11 +430,11 @@ public class PositionResourceTest extends AbstractResourceTest {
 		newb.setRole(Role.PRINCIPAL);
 		newb.setStatus(PersonStatus.ACTIVE);
 		
-		Integer newbId = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+		String newbUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
 				newb, new GenericType<GraphQLResponse<Person>>() {});
-		assertThat(newbId).isNotNull();
-		newb = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, newbId, new GenericType<GraphQLResponse<Person>>() {});
-		assertThat(newb.getId()).isNotNull();
+		assertThat(newbUuid).isNotNull();
+		newb = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, newbUuid, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(newb.getUuid()).isNotNull();
 		
 		final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
 		queryOrgs.setText("Ministry");
@@ -450,48 +450,48 @@ public class PositionResourceTest extends AbstractResourceTest {
 		newbPosition.setStatus(PositionStatus.ACTIVE);
 		newbPosition.setPerson(newb);
 		
-		Integer newbPositionId = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+		String newbPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
 				newbPosition, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(newbPositionId).isNotNull();
-		newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPositionId, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(newbPosition.getId()).isNotNull();
+		assertThat(newbPositionUuid).isNotNull();
+		newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPositionUuid, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(newbPosition.getUuid()).isNotNull();
 		
 		//Ensure that the position contains the person
-		Position returned = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(returned.getId()).isNotNull();
+		Position returned = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(returned.getUuid()).isNotNull();
 		final Person returnedPerson = returned.getPerson();
 		assertThat(returnedPerson).isNotNull();
-		assertThat(returnedPerson.getId()).isEqualTo(newb.getId());
+		assertThat(returnedPerson.getUuid()).isEqualTo(newb.getUuid());
 		
 		//Ensure that the person is assigned to this position. 
 		assertThat(newb.loadPosition()).isNotNull();
-		assertThat(newb.loadPosition().getId()).isEqualTo(returned.getId());
+		assertThat(newb.loadPosition().getUuid()).isEqualTo(returned.getUuid());
 		
 		//Assign somebody else to this position. 
 		Person prin2 = new Person();
 		prin2.setName("2nd Principal in PrincipalTest");
 		prin2.setRole(Role.PRINCIPAL);
-		Integer prin2Id = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
+		String prin2Uuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
 				prin2, new GenericType<GraphQLResponse<Person>>() {});
-		assertThat(prin2Id).isNotNull();
-		prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2Id, new GenericType<GraphQLResponse<Person>>() {});
-		assertThat(prin2.getId()).isNotNull();
+		assertThat(prin2Uuid).isNotNull();
+		prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2Uuid, new GenericType<GraphQLResponse<Person>>() {});
+		assertThat(prin2.getUuid()).isNotNull();
 		assertThat(prin2.loadPosition()).isNull();
 		
-		prin2.setPosition(Position.createWithId(newbPosition.getId()));
+		prin2.setPosition(Position.createWithUuid(newbPosition.getUuid()));
 		Integer nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", prin2);
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Reload this person to check their position was set. 
-		prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2.getId(), new GenericType<GraphQLResponse<Person>>() {});
+		prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(prin2).isNotNull();
 		assertThat(prin2.loadPosition()).isNotNull();
-		assertThat(prin2.loadPosition().getId()).isEqualTo(newbPosition.getId());
+		assertThat(prin2.loadPosition().getUuid()).isEqualTo(newbPosition.getUuid());
 		
 		//Check with a different API endpoint. 
-		Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(currPos.getPerson()).isNotNull();
-		assertThat(currPos.getPerson().getId()).isEqualTo(prin2.getId());
+		assertThat(currPos.getPerson().getUuid()).isEqualTo(prin2.getUuid());
 		
 		//Slow the test down a bit
 		try {
@@ -504,31 +504,31 @@ public class PositionResourceTest extends AbstractResourceTest {
 		pos2.setType(PositionType.PRINCIPAL);
 		pos2.setOrganization(orgs.getList().get(0));
 		pos2.setStatus(PositionStatus.ACTIVE);
-		pos2.setPerson(Person.createWithId(prin2.getId()));
+		pos2.setPerson(Person.createWithUuid(prin2.getUuid()));
 		
-		Integer pos2Id = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
+		String pos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
 				pos2, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(pos2Id).isNotNull();
-		pos2 = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2Id, new GenericType<GraphQLResponse<Position>>() {});
-		assertThat(pos2.getId()).isNotNull();
+		assertThat(pos2Uuid).isNotNull();
+		pos2 = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2Uuid, new GenericType<GraphQLResponse<Position>>() {});
+		assertThat(pos2.getUuid()).isNotNull();
 		
-		returned = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		returned = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(returned).isNotNull();
 		assertThat(returned.getName()).isEqualTo(pos2.getName());
 		final Person returnedPerson2 = returned.getPerson();
 		assertThat(returnedPerson2).isNotNull();
-		assertThat(returnedPerson2.getId()).isEqualTo(prin2.getId());
+		assertThat(returnedPerson2.getUuid()).isEqualTo(prin2.getUuid());
 		
 		//Make sure prin2 got moved out of newbPosition
-		currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(currPos.getPerson()).isNull();
 		
 		//Pull the history of newbPosition
-		newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getId(), new GenericType<GraphQLResponse<Position>>() {});
+		newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		List<PersonPositionHistory> history = newbPosition.loadPreviousPeople(context).get();
 		assertThat(history.size()).isEqualTo(2);
-		assertThat(history.get(0).getPerson().getId()).isEqualTo(newb.getId());
-		assertThat(history.get(1).getPerson().getId()).isEqualTo(prin2.getId());
+		assertThat(history.get(0).getPerson().getUuid()).isEqualTo(newb.getUuid());
+		assertThat(history.get(1).getPerson().getUuid()).isEqualTo(prin2.getUuid());
 	}
 	
 }

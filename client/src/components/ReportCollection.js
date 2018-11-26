@@ -11,33 +11,36 @@ import {Location} from 'models'
 import Leaflet from 'components/Leaflet'
 import _get from 'lodash/get'
 
-const FORMAT_SUMMARY = 'summary'
-const FORMAT_TABLE = 'table'
-const FORMAT_MAP = 'map'
+export const FORMAT_SUMMARY = 'summary'
+export const FORMAT_TABLE = 'table'
+export const FORMAT_MAP = 'map'
 
-const GQL_REPORT_FIELDS =  /* GraphQL */`
-	id, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
+export const GQL_REPORT_FIELDS =  /* GraphQL */`
+	uuid, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
-	author { id, name, rank }
-	primaryAdvisor { id, name, rank },
-	primaryPrincipal { id, name, rank },
-	advisorOrg { id, shortName },
-	principalOrg { id, shortName },
-	location { id, name, lat, lng },
-	tasks { id, shortName },
-	tags { id, name, description }
+	author { uuid, name, rank }
+	primaryAdvisor { uuid, name, rank },
+	primaryPrincipal { uuid, name, rank },
+	advisorOrg { uuid, shortName },
+	principalOrg { uuid, shortName },
+	location { uuid, name, lat, lng },
+	tasks { uuid, shortName },
+	tags { uuid, name, description }
 	approvalStatus {
 		type, createdAt
-		step { id , name
-			approvers { id, name, person { id, name, rank } }
+		step { uuid, name
+			approvers { uuid, name, person { uuid, name, rank } }
 		},
-		person { id, name, rank }
+		person { uuid, name, rank }
 	}
 `
 
 
 export default class ReportCollection extends Component {
 	static propTypes = {
+		width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+		height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+		marginBottom: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 		reports: PropTypes.array,
 		paginatedReports: PropTypes.shape({
 			totalCount: PropTypes.number,
@@ -47,13 +50,19 @@ export default class ReportCollection extends Component {
 		}),
 		goToPage: PropTypes.func,
 		mapId: PropTypes.string,
+		viewFormats: PropTypes.arrayOf(PropTypes.string),
+		hideButtons: PropTypes.bool,
+	}
+
+	static defaultProps = {
+		viewFormats: [FORMAT_SUMMARY, FORMAT_TABLE, FORMAT_MAP],
 	}
 
 	constructor(props) {
 		super(props)
 
 		this.state = {
-			viewFormat: 'summary',
+			viewFormat: this.props.viewFormats[0],
 		}
 	}
 
@@ -70,16 +79,20 @@ export default class ReportCollection extends Component {
 		}
 
 		let reportsExist = _get(reports, 'length', 0) > 0
+		const showHeader = (this.props.viewFormats.length > 1) || (numPages > 1)
 
 		return <div className="report-collection">
 			{reportsExist ?
 				<div>
+					{showHeader &&
 					<header>
+						{this.props.viewFormats.length > 1 &&
 						<ButtonToggleGroup value={this.state.viewFormat} onChange={this.changeViewFormat} className="hide-for-print">
-							<Button value={FORMAT_SUMMARY}>Summary</Button>
-							<Button value={FORMAT_TABLE}>Table</Button>
-							<Button value={FORMAT_MAP}>Map</Button>
+							{this.props.viewFormats.includes(FORMAT_SUMMARY) && <Button value={FORMAT_SUMMARY}>Summary</Button>}
+							{this.props.viewFormats.includes(FORMAT_TABLE) && <Button value={FORMAT_TABLE}>Table</Button>}
+							{this.props.viewFormats.includes(FORMAT_MAP) && <Button value={FORMAT_MAP}>Map</Button>}
 						</ButtonToggleGroup>
+						}
 
 						{numPages > 1 &&
 							<UltimatePagination
@@ -101,6 +114,7 @@ export default class ReportCollection extends Component {
 							</div>
 						}
 					</header>
+					}
 
 					<div>
 						{this.state.viewFormat === FORMAT_TABLE && this.renderTable(reports)}
@@ -108,8 +122,8 @@ export default class ReportCollection extends Component {
 						{this.state.viewFormat === FORMAT_MAP && this.renderMap(reports)}
 					</div>
 
-					<footer>
-						{numPages > 1 &&
+					{numPages > 1 &&
+						<footer>
 							<UltimatePagination
 								className="pull-right"
 								currentPage={pageNum}
@@ -121,8 +135,8 @@ export default class ReportCollection extends Component {
 								hideFirstAndLastPageLinks={true}
 								onChange={(value) => this.props.goToPage(value - 1)}
 							/>
-						}
-					</footer>
+						</footer>
+					}
 				</div>
 				:
 				<em>No reports found</em>
@@ -145,7 +159,7 @@ export default class ReportCollection extends Component {
 	renderSummary(reports) {
 		return <div>
 			{reports.map(report =>
-				<ReportSummary report={report} key={report.id} />
+				<ReportSummary report={report} key={report.uuid} />
 			)}
 		</div>
 	}
@@ -154,10 +168,10 @@ export default class ReportCollection extends Component {
 		let markers = []
 		reports.forEach(report => {
 			if (Location.hasCoordinates(report.location)) {
-				markers.push({id: report.id, lat: report.location.lat, lng: report.location.lng, name: report.intent})
+				markers.push({id: report.uuid, lat: report.location.lat, lng: report.location.lng, name: report.intent})
 			}
 		})
-		return <Leaflet markers={markers} mapId={this.props.mapId} />
+		return <Leaflet markers={markers} mapId={this.props.mapId} width={this.props.width} height={this.props.height} marginBottom={this.props.marginBottom} />
 	}
 
 	@autobind

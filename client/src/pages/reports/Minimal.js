@@ -30,29 +30,29 @@ class ReportMinimal extends Page {
 		super(props, PAGE_PROPS_MIN_HEAD)
 
 		this.state = {
-			report: new Report({id: props.match.params.id}),
+			report: new Report({uuid: props.match.params.uuid}),
 		}
 	}
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			report(id:${props.match.params.id}) {
-				id, intent, engagementDate, atmosphere, atmosphereDetails
+			report(uuid:"${props.match.params.uuid}") {
+				uuid, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
 				state
 
-				location { id, name }
+				location { uuid, name }
 				author {
-					id, name
+					uuid, name
 					position {
 						organization {
 							shortName, longName, identificationCode
 							approvalSteps {
-								id, name,
+								uuid, name,
 								approvers {
-									id, name,
-									person { id, name rank }
+									uuid, name,
+									person { uuid, name rank }
 								}
 							}
 						}
@@ -60,34 +60,34 @@ class ReportMinimal extends Page {
 				}
 
 				attendees {
-					id, name, rank, role, primary
-					position { id, name, organization { id, shortName}}
+					uuid, name, role, primary
+					position { uuid, name, organization { uuid, shortName} }
 				}
-				primaryAdvisor { id }
-				primaryPrincipal { id }
+				primaryAdvisor { uuid }
+				primaryPrincipal { uuid }
 
-				tasks { id, shortName, longName, responsibleOrg { id, shortName} }
+				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
 
 				comments {
-					id, text, createdAt, updatedAt
-					author { id, name, rank }
+					uuid, text, createdAt, updatedAt
+					author { uuid, name, rank }
 				}
 
-				principalOrg { id, shortName, longName, identificationCode }
-				advisorOrg { id, shortName, longName, identificationCode }
+				principalOrg { uuid, shortName, longName, identificationCode }
+				advisorOrg { uuid, shortName, longName, identificationCode }
 
 				approvalStatus {
 					type, createdAt
-					step { id , name
-						approvers { id, name, person { id, name, rank } }
+					step { uuid , name
+						approvers { uuid, name, person { uuid, name, rank } }
 					},
-					person { id, name, rank}
+					person { uuid, name, rank}
 				}
 
-				approvalStep { name, approvers { id } }
+				approvalStep { name, approvers { uuid } }
 
-				tags { id, name, description }
-				reportSensitiveInformation { id, text }
+				tags { uuid, name, description }
+				reportSensitiveInformation { uuid, text }
 			}
 		`).then(data => {
 			this.setState({report: new Report(data.report)})
@@ -128,7 +128,7 @@ class ReportMinimal extends Page {
 				}
 
 				<Form static formFor={report} horizontal>
-					<Fieldset title={`Report #${report.id}`} className="show-report-overview">
+					<Fieldset title={`Report #${report.uuid}`} className="show-report-overview">
 						<Form.Field id="intent" label="Summary" >
 							<p><strong>Meeting goal:</strong> {report.intent}</p>
 							{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
@@ -153,7 +153,7 @@ class ReportMinimal extends Page {
 							</Form.Field>
 						}
 						<Form.Field id="tags" label="Tags">
-							{report.tags && report.tags.map((tag,i) => <Tag key={tag.id} tag={tag} />)}
+							{report.tags && report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}
 						</Form.Field>
 						<Form.Field id="author" label="Report author">
 							<span>{report.author && report.author.name}</span>
@@ -200,7 +200,7 @@ class ReportMinimal extends Page {
 
 							<tbody>
 								{Task.map(report.tasks, (task, idx) =>
-									<tr key={task.id} id={"task_" + idx}>
+									<tr key={task.uuid} id={"task_" + idx}>
 										<td className="taskName" >{task.shortName} - {task.longName}</td>
 										<td className="taskOrg" >{task.responsibleOrg && task.responsibleOrg.shortName }</td>
 									</tr>
@@ -225,7 +225,7 @@ class ReportMinimal extends Page {
 						{report.comments.map(comment => {
 							let createdAt = moment(comment.createAt)
 							return (
-								<p key={comment.id}>
+								<p key={comment.uuid}>
 									{comment.author.name}
 									<span title={createdAt.format('L LT')}> {createdAt.fromNow()}: </span>
 									"{comment.text}"
@@ -255,7 +255,7 @@ class ReportMinimal extends Page {
 
 	@autobind
 	renderAttendeeRow(person) {
-		return <tr key={person.id}>
+		return <tr key={person.uuid}>
 			<td className="primary-attendee">
 				{person.primary && <Checkbox readOnly checked />}
 			</td>
@@ -302,7 +302,7 @@ class ReportMinimal extends Page {
 	@autobind
 	renderApprovalAction(action) {
 		let step = action.step
-		return <div key={step.id}>
+		return <div key={step.uuid}>
 			<Button onClick={this.showApproversModal.bind(this, step)}>
 				{step.name}
 			</Button>
@@ -313,7 +313,7 @@ class ReportMinimal extends Page {
 				<Modal.Body>
 					<ul>
 					{step.approvers.map(position =>
-						<li key={position.id}>{position.name} - {position.person && <LinkTo person={position.person} isLink={false}/> }</li>
+						<li key={position.uuid}>{position.name} - {position.person && <LinkTo person={position.person} isLink={false}/> }</li>
 					)}
 					</ul>
 				</Modal.Body>

@@ -1,9 +1,9 @@
 {
-	"id": null,
+	"uuid": null,
 	"name": "sensitive info positions group",
 	"description": "desc",
 	"positions": [{
-		"id": null,
+		"uuid": null,
 		"name": "Head of donut operations",
 		"code": "DNT-001",
 		"organization": null,

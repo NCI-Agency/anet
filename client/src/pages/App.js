@@ -39,11 +39,11 @@ class App extends Page {
 	fetchData(props) {
 		return API.query(/* GraphQL */`
 			me {
-				id, name, role, emailAddress, rank, status
+				uuid, name, role, emailAddress, rank, status
 				position {
-					id, name, code, type, status, isApprover
-					organization { id, shortName , allDescendantOrgs { id }}
-					location {id, name}
+					uuid, name, code, type, status, isApprover
+					organization { uuid, shortName , allDescendantOrgs { uuid }}
+					location {uuid, name}
 				}
 			}
 
@@ -52,7 +52,7 @@ class App extends Page {
 			}
 
 			organizationTopLevelOrgs(type: ADVISOR_ORG) {
-				list { id, shortName }
+				list { uuid, shortName }
 			}
 		`).then(data => {
 			data.me._loaded = true
@@ -80,6 +80,7 @@ class App extends Page {
 	render() {
 		const { currentUser, settings, organizations } = this.state
 		const { pageProps, history, location } = this.props
+		if (currentUser._loaded !== true) { return null }
 
 		return (
 			<AppContext.Provider

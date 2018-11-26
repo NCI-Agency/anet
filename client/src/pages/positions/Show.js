@@ -13,6 +13,7 @@ import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import AssignPersonModal from 'components/AssignPersonModal'
 import EditAssociatedPositionsModal from 'components/EditAssociatedPositionsModal'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import GuidedTour from 'components/GuidedTour'
 import {positionTour} from 'pages/HopscotchTour'
@@ -45,7 +46,7 @@ class BasePositionShow extends Page {
 			success: null,
 			error: null,
 			position: new Position( {
-				id: props.match.params.id,
+				uuid: props.match.params.uuid,
 				previousPeople: [],
 				associatedPositions: [],
 				showAssignPersonModal: false,
@@ -59,17 +60,18 @@ class BasePositionShow extends Page {
 
 	fetchData(props) {
 		return API.query(/* GraphQL */`
-			position(id:${props.match.params.id}) {
-				id, name, type, status, code,
-				organization { id, shortName, longName, identificationCode },
-				person { id, name, rank },
+			position(uuid:"${props.match.params.uuid}") {
+				uuid, name, type, status, code,
+				organization { uuid, shortName, longName, identificationCode },
+				person { uuid, name, rank },
 				associatedPositions {
-					id, name,
-					person { id, name, rank }
-					organization { id, shortName }
+					uuid, name,
+					person { uuid, name, rank }
+					organization { uuid, shortName }
 				},
-				previousPeople { startTime, endTime, person { id, name, rank }}
-				location { id, name }
+				previousPeople { startTime, endTime, person { uuid, name, rank }}
+				location { uuid, name }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => this.setState({position: new Position(data.position)}))
 	}
@@ -87,10 +89,10 @@ class BasePositionShow extends Page {
 			//Admins can edit anybody
 			(currentUser.isAdmin()) ||
 			//Super users can edit positions within their own organization
-			(position.organization && position.organization.id && currentUser.isSuperUserForOrg(position.organization))
+			(position.organization && position.organization.uuid && currentUser.isSuperUserForOrg(position.organization))
 		const canDelete = (currentUser.isAdmin()) &&
 			position.status === Position.STATUS.INACTIVE &&
-			(position.id && ((!position.person) || (!position.person.id)))
+			(position.uuid && ((!position.person) || (!position.person.uuid)))
 
 		return (
 			<div>
@@ -103,8 +105,10 @@ class BasePositionShow extends Page {
 					/>
 				</div>
 
+				<RelatedObjectNotes notes={position.notes} relatedObject={{relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
 				<Breadcrumbs items={[[position.name || 'Position', Position.pathFor(position)]]} />
 				<Messages success={this.state.success} error={this.state.error} />
+
 
 				<Form static formFor={position} horizontal>
 					<Fieldset title={position.name} action={
@@ -131,10 +135,10 @@ class BasePositionShow extends Page {
 
 					<Fieldset title="Current assigned person"
 						id="assigned-advisor"
-						className={(!position.person || !position.person.id) ? 'warning' : undefined}
+						className={(!position.person || !position.person.uuid) ? 'warning' : undefined}
 						style={{textAlign: 'center'}}
-						action={position.person && position.person.id && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
-						{position.person && position.person.id
+						action={position.person && position.person.uuid && canEdit && <Button onClick={this.showAssignPersonModal}>Change assigned person</Button>} >
+						{position.person && position.person.uuid
 							? <div>
 								<h4 className="assigned-person-name"><LinkTo person={position.person}/></h4>
 								<p></p>
@@ -210,7 +214,7 @@ class BasePositionShow extends Page {
 					<ConfirmDelete
 						onConfirmDelete={this.onConfirmDelete}
 						objectType="position"
-						objectDisplay={'#' + this.state.position.id}
+						objectDisplay={'#' + this.state.position.uuid}
 						bsStyle="warning"
 						buttonLabel="Delete position"
 						className="pull-right" />
@@ -224,7 +228,7 @@ class BasePositionShow extends Page {
 		if (pos.person) {
 			personName = <LinkTo person={pos.person} />
 		}
-		return <tr key={pos.id} id={`associatedPosition_${idx}`}>
+		return <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
 			<td>{personName}</td>
 			<td><Link to={Position.pathFor(pos)}>{pos.name}</Link></td>
 		</tr>
@@ -259,9 +263,9 @@ class BasePositionShow extends Page {
 	@autobind
 	onConfirmDelete() {
 		const operation = 'deletePosition'
-		let graphql = operation + '(id: $id)'
-		const variables = { id: this.state.position.id }
-		const variableDef = '($id: Int!)'
+		let graphql = operation + '(uuid: $uuid)'
+		const variables = { uuid: this.state.position.uuid }
+		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.props.history.push({

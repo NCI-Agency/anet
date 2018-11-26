@@ -124,7 +124,8 @@ public class PersonTest extends BeanTester<Person> {
 	public static ReportPerson personToReportPerson(Person p) {
 		ReportPerson rp = new ReportPerson();
 		rp.setName(p.getName());
-		rp.setId(p.getId());
+		rp.setUuid(p.getUuid());
+		rp.setUuid(p.getUuid());
 		rp.setPhoneNumber(p.getPhoneNumber());
 		rp.setEmailAddress(p.getEmailAddress());
 		rp.setBiography(p.getBiography());
@@ -156,8 +157,8 @@ public class PersonTest extends BeanTester<Person> {
 
 	/* Helper method to determine why a and b are not the .equals */
 	public static void whyIsnt(Person a, Person b) {
-		if (Objects.equals(a.getId(), b.getId()) == false) {
-			System.out.println(String.format("Unequal because ids %d != %d", a.getId(), b.getId()));
+		if (Objects.equals(a.getUuid(), b.getUuid()) == false) {
+			System.out.println(String.format("Unequal because ids %s != %s", a.getUuid(), b.getUuid()));
 		} else if (!Objects.equals(a.getName(), b.getName())) { 
 			System.out.println(String.format("Unequal because names %s != %s", a.getName(), b.getName()));
 		} else if (!Objects.equals(a.getStatus(), b.getStatus())) {

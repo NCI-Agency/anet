@@ -36,7 +36,8 @@ public class Report extends AbstractAnetBean {
 										CANCELLED_DUE_TO_TRANSPORTATION,
 										CANCELLED_DUE_TO_FORCE_PROTECTION,
 										CANCELLED_DUE_TO_ROUTES,
-										CANCELLED_DUE_TO_THREAT }
+										CANCELLED_DUE_TO_THREAT,
+										NO_REASON_GIVEN }
 
 	ApprovalStep approvalStep;
 	ReportState state;
@@ -192,7 +193,7 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="attendees")
 	public CompletableFuture<List<ReportPerson>> loadAttendees(@GraphQLRootContext Map<String, Object> context) {
-		return AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(context, id)
+		return AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(context, uuid)
 				.thenApply(o -> { attendees = o; return o; });
 	}
 	
@@ -241,7 +242,7 @@ public class Report extends AbstractAnetBean {
 	
 	@GraphQLQuery(name="tasks")
 	public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
-		return AnetObjectEngine.getInstance().getReportDao().getTasksForReport(context, id)
+		return AnetObjectEngine.getInstance().getReportDao().getTasksForReport(context, uuid)
 				.thenApply(o -> { tasks = o; return o; });
 	}
 
@@ -353,7 +354,7 @@ public class Report extends AbstractAnetBean {
 	public CompletableFuture<List<ApprovalAction>> loadApprovalStatus(@GraphQLRootContext Map<String, Object> context) {
 		final CompletableFuture<List<ApprovalAction>> result;
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		final CompletableFuture<List<ApprovalAction>> actionsForReport = engine.getApprovalActionDao().getActionsForReport(context, id);
+		final CompletableFuture<List<ApprovalAction>> actionsForReport = engine.getApprovalActionDao().getActionsForReport(context, this.getUuid());
 		if (state == ReportState.RELEASED) {
 			result = actionsForReport
 					.thenApply(actions -> compactActions(actions));
@@ -363,9 +364,9 @@ public class Report extends AbstractAnetBean {
 					.thenApply(futures -> {
 				final List<ApprovalAction> actions = actionsForReport.join();
 				final Organization ao = organizationForAuthor.join();
-				final CompletableFuture<List<ApprovalStep>> orgSteps = getWorkflowForOrg(context, engine, DaoUtils.getId(ao));
-				final Integer defaultOrgId = engine.getDefaultOrgId();
-				final CompletableFuture<List<ApprovalStep>> defaultSteps = getDefaultWorkflow(context, engine, defaultOrgId);
+				final CompletableFuture<List<ApprovalStep>> orgSteps = getWorkflowForOrg(context, engine, DaoUtils.getUuid(ao));
+				final String defaultOrgUuid = engine.getDefaultOrgUuid();
+				final CompletableFuture<List<ApprovalStep>> defaultSteps = getDefaultWorkflow(context, engine, defaultOrgUuid);
 				return CompletableFuture.allOf(orgSteps, defaultSteps)
 						.thenApply(futuresSteps -> {
 					List<ApprovalStep> steps = orgSteps.join();
@@ -397,7 +398,7 @@ public class Report extends AbstractAnetBean {
 		ApprovalAction last = actions.get(0);
 		final List<ApprovalAction> compacted = new LinkedList<ApprovalAction>();
 		for (final ApprovalAction action : actions) {
-			if (action.getStep() != null && last.getStep() != null && action.getStep().getId().equals(last.getStep().getId()) == false) {
+			if (action.getStep() != null && last.getStep() != null && action.getStep().getUuid().equals(last.getStep().getUuid()) == false) {
 				compacted.add(last);
 			}
 			last = action;
@@ -411,7 +412,7 @@ public class Report extends AbstractAnetBean {
 		for (final ApprovalStep step : steps) {
 			//If there is an Action for this step, grab the last one (date wise)
 			final Optional<ApprovalAction> existing = actions.stream().filter(a ->
-					Objects.equals(DaoUtils.getId(step), DaoUtils.getId(a.getStep()))
+					Objects.equals(DaoUtils.getUuid(step), DaoUtils.getUuid(a.getStep()))
 				).max(new Comparator<ApprovalAction>() {
 					public int compare(ApprovalAction a, ApprovalAction b) {
 						return a.getCreatedAt().compareTo(b.getCreatedAt());
@@ -430,24 +431,24 @@ public class Report extends AbstractAnetBean {
 		return workflow;
 	}
 
-	private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context, AnetObjectEngine engine, Integer aoId) {
-		if (aoId == null) {
+	private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context, AnetObjectEngine engine, String aoUuid) {
+		if (aoUuid == null) {
 			return CompletableFuture.supplyAsync(() -> null);
 		}
 
-		return engine.getApprovalStepsForOrg(context, aoId);
+		return engine.getApprovalStepsForOrg(context, aoUuid);
 	}
 
-	private CompletableFuture<List<ApprovalStep>> getDefaultWorkflow(Map<String, Object> context, AnetObjectEngine engine, Integer defaultOrgId) {
-		if (defaultOrgId == null) {
+	private CompletableFuture<List<ApprovalStep>> getDefaultWorkflow(Map<String, Object> context, AnetObjectEngine engine, String defaultOrgUuid) {
+		if (defaultOrgUuid == null) {
 			throw new WebApplicationException("Missing the DEFAULT_APPROVAL_ORGANIZATION admin setting");
 		}
-		return getWorkflowForOrg(context, engine, defaultOrgId);
+		return getWorkflowForOrg(context, engine, defaultOrgUuid);
 	}
 
 	@GraphQLQuery(name="tags")
 	public CompletableFuture<List<Tag>> loadTags(@GraphQLRootContext Map<String, Object> context) {
-		return AnetObjectEngine.getInstance().getReportDao().getTagsForReport(context, id)
+		return AnetObjectEngine.getInstance().getReportDao().getTagsForReport(context, uuid)
 				.thenApply(o -> { tags = o; return o; });
 	}
 
@@ -489,8 +490,8 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="authorizationGroups") // TODO: batch load? (used in reports/{Edit,Show}.js)
 	public List<AuthorizationGroup> loadAuthorizationGroups() {
-		if (authorizationGroups == null && id != null) {
-			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(id);
+		if (authorizationGroups == null && uuid != null) {
+			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(uuid);
 		}
 		return authorizationGroups;
 	}
@@ -510,13 +511,13 @@ public class Report extends AbstractAnetBean {
 			return false;
 		}
 		Report r = (Report) other;
-		return Objects.equals(r.getId(), id)
+		return Objects.equals(r.getUuid(), uuid)
 				&& Objects.equals(r.getState(), state)
-				&& idEqual(r.getApprovalStep(), approvalStep)
+				&& uuidEqual(r.getApprovalStep(), approvalStep)
 				&& Objects.equals(r.getCreatedAt(), createdAt)
 				&& Objects.equals(r.getUpdatedAt(), updatedAt)
 				&& Objects.equals(r.getEngagementDate(), engagementDate)
-				&& idEqual(r.getLocation(), location)
+				&& uuidEqual(r.getLocation(), location)
 				&& Objects.equals(r.getIntent(), intent)
 				&& Objects.equals(r.getExsum(), exsum)
 				&& Objects.equals(r.getAtmosphere(), atmosphere)
@@ -525,7 +526,7 @@ public class Report extends AbstractAnetBean {
 				&& Objects.equals(r.getTasks(), tasks)
 				&& Objects.equals(r.getReportText(), reportText)
 				&& Objects.equals(r.getNextSteps(), nextSteps)
-				&& idEqual(r.getAuthor(), author)
+				&& uuidEqual(r.getAuthor(), author)
 				&& Objects.equals(r.getComments(), comments)
 				&& Objects.equals(r.getTags(), tags)
 				&& Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)
@@ -533,21 +534,21 @@ public class Report extends AbstractAnetBean {
 	}
 	
 	@Override
-	public int hashCode() { 
-		return Objects.hash(id, state, approvalStep, createdAt, updatedAt, 
-			location, intent, exsum, attendees, tasks, reportText, 
+	public int hashCode() {
+		return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt,
+			location, intent, exsum, attendees, tasks, reportText,
 			nextSteps, author, comments, atmosphere, atmosphereDetails, engagementDate,
 			tags, reportSensitiveInformation, authorizationGroups);
 	}
 
-	public static Report createWithId(Integer id) {
-		Report r = new Report();
-		r.setId(id);
+	public static Report createWithUuid(String uuid) {
+		final Report r = new Report();
+		r.setUuid(uuid);
 		return r;
 	}
-	
+
 	@Override
-	public String toString() { 
-		return String.format("[id:%d, intent:%s]", id, intent);
+	public String toString() {
+		return String.format("[uuid:%s, intent:%s]", uuid, intent);
 	}
 }

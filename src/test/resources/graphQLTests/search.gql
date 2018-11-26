@@ -1,27 +1,27 @@
 reportList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
-	list { id, intent, engagementDate, keyOutcomes, nextSteps
-        primaryAdvisor { id, name, position { organization { id, shortName, longName}}},
-        primaryPrincipal { id, name, position { organization { id, shortName, longName}}},
-        advisorOrg { id, shortName, longName},
-        principalOrg { id, shortName, longName},
-        location { id, name},
-        tasks {id, shortName, longName}
+	list { uuid, intent, engagementDate, keyOutcomes, nextSteps
+        primaryAdvisor { uuid, name, position { organization { uuid, shortName, longName}}},
+        primaryPrincipal { uuid, name, position { organization { uuid, shortName, longName}}},
+        advisorOrg { uuid, shortName, longName},
+        principalOrg { uuid, shortName, longName},
+        location { uuid, name},
+        tasks {uuid, shortName, longName}
 	}
 }
 
 personList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
-	totalCount, list { id, name, rank, emailAddress }
+	totalCount, list { uuid, name, rank, emailAddress }
 }
 positionList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
-	totalCount, list { id, name, type, organization{ id, shortName} , person { id, name}}
+	totalCount, list { uuid, name, type, organization{ uuid, shortName} , person { uuid, name}}
 }
 taskList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
-	totalCount, list { id, shortName, longName}
+	totalCount, list { uuid, shortName, longName}
 }
 locationList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
-	totalCount, list { id, name, lat, lng}
+	totalCount, list { uuid, name, lat, lng}
 }
 organizationList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
-	totalCount, list { id, shortName, longName }
+	totalCount, list { uuid, shortName, longName }
 }
 

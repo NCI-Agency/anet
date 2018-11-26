@@ -36,19 +36,19 @@ public class Tag extends AbstractAnetBean {
 			return false;
 		}
 		Tag t = (Tag) o;
-		return Objects.equals(t.getId(), id)
+		return Objects.equals(t.getUuid(), uuid)
 				&& Objects.equals(t.getName(), name)
 				&& Objects.equals(t.getDescription(), description);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, description);
+		return Objects.hash(uuid, name, description);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("(%d) - %s", id, name);
+		return String.format("(%s) - %s", uuid, name);
 	}
 
 }

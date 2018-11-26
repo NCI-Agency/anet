@@ -12,10 +12,10 @@ public class ApprovalStepTest extends BeanTester<ApprovalStep> {
 	// It has all the foreign keys filled it and is dangerous!  
 	private static ApprovalStep getTestApprovalStep() {
 		ApprovalStep as = new ApprovalStep();
-		as.setId(42);
-		as.setAdvisorOrganizationId(22);
+		as.setUuid("42");
+		as.setAdvisorOrganizationUuid("22");
 		as.setApprovers(ImmutableList.of());
-		as.setNextStepId(9292);
+		as.setNextStepUuid("9292");
 		return as;
 	}
 	

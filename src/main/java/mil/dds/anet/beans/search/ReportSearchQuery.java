@@ -12,7 +12,7 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 
 	public enum ReportSearchSortBy { CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT } 
 
-	Integer authorId;
+	String authorUuid;
 	DateTime engagementDateStart;
 	DateTime engagementDateEnd;
 	private Integer engagementDayOfWeek;
@@ -23,28 +23,28 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 	DateTime updatedAtEnd;
 	DateTime releasedAtStart;
 	DateTime releasedAtEnd;
-	Integer attendeeId;
+	String attendeeUuid;
 	Atmosphere atmosphere;
 	
-	//Can use either orgId or one or both of advisorOrgId and principalOrgId
-	//only use orgId if you don't know the type of the organization. 
-	Integer advisorOrgId;
+	//Can use either orgUuid or one or both of advisorOrgUuid and principalOrgUuid
+	//only use orgUuid if you don't know the type of the organization.
+	String advisorOrgUuid;
 	Boolean includeAdvisorOrgChildren;
-	//Set principalOrgId or advisorOrgId = -1 to tell ANET to search for reports specifically with a NULL organizationId. 
-	Integer principalOrgId;
+	//Set principalOrgUuid or advisorOrgUuid = Organization.DUMMY_ORG_UUID to tell ANET to search for reports specifically with a NULL organizationUuid.
+	String principalOrgUuid;
 	Boolean includePrincipalOrgChildren;
-	Integer orgId;
+	String orgUuid;
 	Boolean includeOrgChildren;
 	
-	Integer locationId;
-	Integer taskId;
-	Integer pendingApprovalOf;
+	String locationUuid;
+	String taskUuid;
+	String pendingApprovalOf;
 	List<ReportState> state;
 	ReportCancelledReason cancelledReason;
-	private Integer tagId;
-	private Integer authorPositionId;
-	private Integer attendeePositionId;
-	private List<Integer> authorizationGroupId;
+	private String tagUuid;
+	private String authorPositionUuid;
+	private String attendeePositionUuid;
+	private List<String> authorizationGroupUuid;
 	private Boolean sensitiveInfo;
 
 	private ReportSearchSortBy sortBy;
@@ -56,12 +56,12 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.sortOrder = SortOrder.DESC;
 	}
 
-	public Integer getAuthorId() {
-		return authorId;
+	public String getAuthorUuid() {
+		return authorUuid;
 	}
 
-	public void setAuthorId(Integer authorId) {
-		this.authorId = authorId;
+	public void setAuthorUuid(String authorUuid) {
+		this.authorUuid = authorUuid;
 	}
 
 	public DateTime getEngagementDateStart() {
@@ -144,12 +144,12 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.releasedAtEnd = releasedAtEnd;
 	}
 
-	public Integer getAttendeeId() {
-		return attendeeId;
+	public String getAttendeeUuid() {
+		return attendeeUuid;
 	}
 
-	public void setAttendeeId(Integer attendeeId) {
-		this.attendeeId = attendeeId;
+	public void setAttendeeUuid(String attendeeUuid) {
+		this.attendeeUuid = attendeeUuid;
 	}
 
 	public Atmosphere getAtmosphere() {
@@ -160,12 +160,12 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.atmosphere = atmosphere;
 	}
 
-	public Integer getAdvisorOrgId() {
-		return advisorOrgId;
+	public String getAdvisorOrgUuid() {
+		return advisorOrgUuid;
 	}
 
-	public void setAdvisorOrgId(Integer advisorOrgId) {
-		this.advisorOrgId = advisorOrgId;
+	public void setAdvisorOrgUuid(String advisorOrgUuid) {
+		this.advisorOrgUuid = advisorOrgUuid;
 	}
 
 	public boolean getIncludeAdvisorOrgChildren() {
@@ -176,12 +176,12 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.includeAdvisorOrgChildren = includeAdvisorOrgChildren;
 	}
 
-	public Integer getPrincipalOrgId() {
-		return principalOrgId;
+	public String getPrincipalOrgUuid() {
+		return principalOrgUuid;
 	}
 
-	public void setPrincipalOrgId(Integer principalOrgId) {
-		this.principalOrgId = principalOrgId;
+	public void setPrincipalOrgUuid(String principalOrgUuid) {
+		this.principalOrgUuid = principalOrgUuid;
 	}
 
 	public boolean getIncludePrincipalOrgChildren() {
@@ -192,12 +192,12 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.includePrincipalOrgChildren = includePrincipalOrgChildren;
 	}
 
-	public Integer getOrgId() {
-		return orgId;
+	public String getOrgUuid() {
+		return orgUuid;
 	}
 
-	public void setOrgId(Integer orgId) {
-		this.orgId = orgId;
+	public void setOrgUuid(String orgUuid) {
+		this.orgUuid = orgUuid;
 	}
 
 	public boolean getIncludeOrgChildren() {
@@ -208,27 +208,27 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.includeOrgChildren = includeOrgChildren;
 	}
 
-	public Integer getLocationId() {
-		return locationId;
+	public String getLocationUuid() {
+		return locationUuid;
 	}
 
-	public void setLocationId(Integer locationId) {
-		this.locationId = locationId;
+	public void setLocationUuid(String locationUuid) {
+		this.locationUuid = locationUuid;
 	}
 
-	public Integer getTaskId() {
-		return taskId;
+	public String getTaskUuid() {
+		return taskUuid;
 	}
 
-	public void setTaskId(Integer taskId) {
-		this.taskId = taskId;
+	public void setTaskUuid(String taskUuid) {
+		this.taskUuid = taskUuid;
 	}
 
-	public Integer getPendingApprovalOf() {
+	public String getPendingApprovalOf() {
 		return pendingApprovalOf;
 	}
 
-	public void setPendingApprovalOf(Integer pendingApprovalOf) {
+	public void setPendingApprovalOf(String pendingApprovalOf) {
 		this.pendingApprovalOf = pendingApprovalOf;
 	}
 
@@ -248,36 +248,36 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.cancelledReason = cancelledReason;
 	}
 
-	public Integer getTagId() {
-		return tagId;
+	public String getTagUuid() {
+		return tagUuid;
 	}
 
-	public void setTagId(Integer tagId) {
-		this.tagId = tagId;
+	public void setTagUuid(String tagUuid) {
+		this.tagUuid = tagUuid;
 	}
 
-	public Integer getAuthorPositionId() {
-		return authorPositionId;
+	public String getAuthorPositionUuid() {
+		return authorPositionUuid;
 	}
 
-	public void setAuthorPositionId(Integer authorPositionId) {
-		this.authorPositionId = authorPositionId;
+	public void setAuthorPositionUuid(String authorPositionUuid) {
+		this.authorPositionUuid = authorPositionUuid;
 	}
 
-	public Integer getAttendeePositionId() {
-		return attendeePositionId;
+	public String getAttendeePositionUuid() {
+		return attendeePositionUuid;
 	}
 
-	public void setAttendeePositionId(Integer attendeePositionId) {
-		this.attendeePositionId = attendeePositionId;
+	public void setAttendeePositionUuid(String attendeePositionUuid) {
+		this.attendeePositionUuid = attendeePositionUuid;
 	}
 
-	public List<Integer> getAuthorizationGroupId() {
-		return authorizationGroupId;
+	public List<String> getAuthorizationGroupUuid() {
+		return authorizationGroupUuid;
 	}
 
-	public void setAuthorizationGroupId(List<Integer> authorizationGroupId) {
-		this.authorizationGroupId = authorizationGroupId;
+	public void setAuthorizationGroupUuid(List<String> authorizationGroupUuid) {
+		this.authorizationGroupUuid = authorizationGroupUuid;
 	}
 
 	public boolean getSensitiveInfo() {

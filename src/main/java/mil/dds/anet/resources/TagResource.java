@@ -58,9 +58,9 @@ public class TagResource {
 	@GET
 	@Timed
 	@GraphQLQuery(name="tag")
-	@Path("/{id}")
-	public Tag getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		final Tag t = dao.getById(id);
+	@Path("/{uuid}")
+	public Tag getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+		final Tag t = dao.getByUuid(uuid);
 		if (t == null) {
 			throw new WebApplicationException(Status.NOT_FOUND);
 		}

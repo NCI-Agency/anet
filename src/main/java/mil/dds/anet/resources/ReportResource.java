@@ -3,7 +3,6 @@ package mil.dds.anet.resources;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -36,9 +35,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.TransactionCallback;
-import org.skife.jdbi.v2.TransactionStatus;
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,12 +126,12 @@ public class ReportResource {
 
 	@GET
 	@Timed
-	@Path("/{id}")
+	@Path("/{uuid}")
 	@GraphQLQuery(name="report")
-	public Report getById(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
-			@PathParam("id") @GraphQLArgument(name="id") Integer id) {
+	public Report getByUuid(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
+			@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
 		user = DaoUtils.getUser(context, user);
-		final Report r = dao.getById(id, user);
+		final Report r = dao.getByUuid(uuid, user);
 		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		return r;
 	}
@@ -207,7 +204,7 @@ public class ReportResource {
 		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
 
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
-			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getId(), existing.getApprovalStep().getId());
+			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(), existing.getApprovalStep().getUuid());
 			if (canApprove) {
 				AnetEmail email = new AnetEmail();
 				ReportEditedEmail action = new ReportEditedEmail();
@@ -257,7 +254,7 @@ public class ReportResource {
 	private Report executeReportUpdates(Person editor, Report r) {
 		//Verify this person has access to edit this report
 		//Either they are the author, or an approver for the current step.
-		final Report existing = dao.getById(r.getId(), editor);
+		final Report existing = dao.getByUuid(r.getUuid(), editor);
 		if (existing == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		r.setState(existing.getState());
 		r.setApprovalStep(existing.getApprovalStep());
@@ -280,7 +277,7 @@ public class ReportResource {
 		ReportPerson exstingPrimaryAdvisor;
 		try {
 			exstingPrimaryAdvisor = existing.loadPrimaryAdvisor(engine.getContext()).get();
-			if (Utils.idEqual(primaryAdvisor, exstingPrimaryAdvisor) == false || existing.getAdvisorOrg() == null) {
+			if (Utils.uuidEqual(primaryAdvisor, exstingPrimaryAdvisor) == false || existing.getAdvisorOrg() == null) {
 				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), primaryAdvisor).get());
 			} else {
 				r.setAdvisorOrg(existing.getAdvisorOrg());
@@ -293,7 +290,7 @@ public class ReportResource {
 		ReportPerson existingPrimaryPrincipal;
 		try {
 			existingPrimaryPrincipal = existing.loadPrimaryPrincipal(engine.getContext()).get();
-			if (Utils.idEqual(primaryPrincipal, existingPrimaryPrincipal) ==  false || existing.getPrincipalOrg() == null) {
+			if (Utils.uuidEqual(primaryPrincipal, existingPrimaryPrincipal) ==  false || existing.getPrincipalOrg() == null) {
 				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), primaryPrincipal).get());
 			} else {
 				r.setPrincipalOrg(existing.getPrincipalOrg());
@@ -314,10 +311,10 @@ public class ReportResource {
 		if (r.getAttendees() != null) {
 			try {
 				//Fetch the people associated with this report
-				List<ReportPerson> existingPeople = dao.getAttendeesForReport(engine.getContext(), r.getId()).get();
+				List<ReportPerson> existingPeople = dao.getAttendeesForReport(engine.getContext(), r.getUuid()).get();
 				//Find any differences and fix them.
 				for (ReportPerson rp : r.getAttendees()) {
-					Optional<ReportPerson> existingPerson = existingPeople.stream().filter(el -> el.getId().equals(rp.getId())).findFirst();
+					Optional<ReportPerson> existingPerson = existingPeople.stream().filter(el -> el.getUuid().equals(rp.getUuid())).findFirst();
 					if (existingPerson.isPresent()) {
 						if (existingPerson.get().isPrimary() != rp.isPrimary()) {
 							dao.updateAttendeeOnReport(rp, r);
@@ -339,18 +336,18 @@ public class ReportResource {
 		//Update Tasks:
 		if (r.getTasks() != null) {
 			try {
-				List<Task> existingTasks = dao.getTasksForReport(engine.getContext(), r.getId()).get();
-				List<Integer> existingTaskIds = existingTasks.stream().map(p -> p.getId()).collect(Collectors.toList());
+				List<Task> existingTasks = dao.getTasksForReport(engine.getContext(), r.getUuid()).get();
+				List<String> existingTaskUuids = existingTasks.stream().map(p -> p.getUuid()).collect(Collectors.toList());
 				for (Task p : r.getTasks()) {
-					int idx = existingTaskIds.indexOf(p.getId());
+					int idx = existingTaskUuids.indexOf(p.getUuid());
 					if (idx == -1) {
 						dao.addTaskToReport(p, r);
 					} else {
-						existingTaskIds.remove(idx);
+						existingTaskUuids.remove(idx);
 					}
 				}
-				for (Integer id : existingTaskIds) {
-					dao.removeTaskFromReport(Task.createWithId(id), r);
+				for (String uuid : existingTaskUuids) {
+					dao.removeTaskFromReport(Task.createWithUuid(uuid), r);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				throw new WebApplicationException("failed to load Tasks", e);
@@ -360,9 +357,9 @@ public class ReportResource {
 		// Update Tags:
 		if (r.getTags() != null) {
 			try {
-				List<Tag> existingTags = dao.getTagsForReport(engine.getContext(), r.getId()).get();
+				List<Tag> existingTags = dao.getTagsForReport(engine.getContext(), r.getUuid()).get();
 				for (final Tag t : r.getTags()) {
-					Optional<Tag> existingTag = existingTags.stream().filter(el -> el.getId().equals(t.getId())).findFirst();
+					Optional<Tag> existingTag = existingTags.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
 					if (existingTag.isPresent()) {
 						existingTags.remove(existingTag.get());
 					} else {
@@ -379,9 +376,9 @@ public class ReportResource {
 
 		// Update AuthorizationGroups:
 		if (r.getAuthorizationGroups() != null) {
-			final List<AuthorizationGroup> existingAuthorizationGroups = dao.getAuthorizationGroupsForReport(r.getId());
+			final List<AuthorizationGroup> existingAuthorizationGroups = dao.getAuthorizationGroupsForReport(r.getUuid());
 			for (final AuthorizationGroup t : r.getAuthorizationGroups()) {
-				Optional<AuthorizationGroup> existingAuthorizationGroup = existingAuthorizationGroups.stream().filter(el -> el.getId().equals(t.getId())).findFirst();
+				Optional<AuthorizationGroup> existingAuthorizationGroup = existingAuthorizationGroups.stream().filter(el -> el.getUuid().equals(t.getUuid())).findFirst();
 				if (existingAuthorizationGroup.isPresent()) {
 					existingAuthorizationGroups.remove(existingAuthorizationGroup.get());
 				} else {
@@ -412,37 +409,37 @@ public class ReportResource {
 		case REJECTED:
 		case FUTURE:
 			//Must be the author
-			if (!report.getAuthor().getId().equals(editor.getId())) {
+			if (!report.getAuthor().getUuid().equals(editor.getUuid())) {
 				throw new WebApplicationException(permError + "Must be the author of this report.", Status.FORBIDDEN);
 			}
 			break;
 		case PENDING_APPROVAL:
 			//Only the approver
-			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getId(), report.getApprovalStep().getId());
+			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(), report.getApprovalStep().getUuid());
 			if (!canApprove) {
 				throw new WebApplicationException(permError + "Must be the current approver.", Status.FORBIDDEN);
 			}
 			break;
 		case RELEASED:
 		case CANCELLED:
-			AnetAuditLogger.log("attempt to edit released report {} by editor {} (id: {}) was forbidden",
-					report.getId(), editor.getName(), editor.getId());
+			AnetAuditLogger.log("attempt to edit released report {} by editor {} (uuid: {}) was forbidden",
+					report.getUuid(), editor.getName(), editor.getUuid());
 			throw new WebApplicationException("Cannot edit a released report", Status.FORBIDDEN);
 		}
 	}
 
 	/* Submit a report for approval
-	 * Kicks a report from DRAFT to PENDING_APPROVAL and sets the approval step Id
+	 * Kicks a report from DRAFT to PENDING_APPROVAL and sets the approval step uuid
 	 */
 	@POST
 	@Timed
-	@Path("/{id}/submit")
-	public Report submitReport(@Auth Person user, @PathParam("id") int id) {
-		return submitReportCommon(user, id);
+	@Path("/{uuid}/submit")
+	public Report submitReport(@Auth Person user, @PathParam("uuid") String uuid) {
+		return submitReportCommon(user, uuid);
 	}
 
-	private Report submitReportCommon(Person user, int id) {
-		final Report r = dao.getById(id, user);
+	private Report submitReportCommon(Person user, String uuid) {
+		final Report r = dao.getByUuid(uuid, user);
 		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
@@ -478,21 +475,21 @@ public class ReportResource {
 			throw new WebApplicationException("You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
 		}
 
-		final Integer orgId;
+		final String orgUuid;
 		try {
 			final Organization org = engine.getOrganizationForPerson(engine.getContext(), r.getAuthor()).get();
 			if (org == null) {
 				// Author missing Org, use the Default Approval Workflow
-				orgId = engine.getDefaultOrgId();
+				orgUuid = engine.getDefaultOrgUuid();
 			} else {
-				orgId = org.getId();
+				orgUuid = org.getUuid();
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			throw new WebApplicationException("failed to load Organization for Author", e);
 		}
 		List<ApprovalStep> steps = null;
 		try {
-			steps = engine.getApprovalStepsForOrg(engine.getContext(), orgId).get();
+			steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
 			throwExceptionNoApprovalSteps(steps);
 		} catch (InterruptedException | ExecutionException e) {
 			throw new WebApplicationException("failed to load Organization for Author", e);
@@ -504,20 +501,20 @@ public class ReportResource {
 		final int numRows = engine.executeInTransaction(dao::update, r, user);
 		sendApprovalNeededEmail(r);
 		logger.info("Putting report {} into step {} because of org {} on author {}",
-				r.getId(), steps.get(0).getId(), orgId, r.getAuthor().getId());
+				r.getUuid(), steps.get(0).getUuid(), orgUuid, r.getAuthor().getUuid());
 
 		if (numRows != 1) {
 			throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
 		}
 
-		AnetAuditLogger.log("report {} submitted by author {} (id: {})", r.getId(), r.getAuthor().getName(), r.getAuthor().getId());
+		AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(), r.getAuthor().getName(), r.getAuthor().getUuid());
 		return r;
 	}
 
 	@GraphQLMutation(name="submitReport")
-	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int id) {
+	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String uuid) {
 		// GraphQL mutations *have* to return something, we return the report
-		return submitReportCommon(DaoUtils.getUserFromContext(context), id);
+		return submitReportCommon(DaoUtils.getUserFromContext(context), uuid);
 	}
 
 	/***
@@ -567,41 +564,42 @@ public class ReportResource {
 	 */
 	@POST
 	@Timed
-	@Path("/{id}/approve")
-	public Report approveReport(@Auth Person approver, @PathParam("id") int id, Comment comment) {
-		return approveReportCommon(approver, id, comment);
+	@Path("/{uuid}/approve")
+	public Report approveReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment comment)
+			throws InterruptedException, ExecutionException, Exception {
+		return approveReportCommon(approver, uuid, comment);
 	}
 
-	private Report approveReportCommon(Person approver, int id, Comment comment) {
+	private Report approveReportCommon(Person approver, String uuid, Comment comment)
+			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Report>() {
-			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				final Report r = dao.getById(id, approver);
+		return dbHandle.inTransaction(h -> {
+				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				if (step == null) {
-					logger.info("Report ID {} does not currently need an approval", r.getId());
+					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
 					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
 				}
 
 				//Verify that this user can approve for this step.
-				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getId(), step.getId());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
-					logger.info("User ID {} cannot approve report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
 				}
 
 				//Write the approval
 				ApprovalAction approval = new ApprovalAction();
 				approval.setReport(r);
-				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setStep(ApprovalStep.createWithUuid(step.getUuid()));
 				approval.setPerson(approver);
 				approval.setType(ApprovalType.APPROVE);
 				engine.getApprovalActionDao().insert(approval);
 
 				//Update the report
-				r.setApprovalStep(ApprovalStep.createWithId(step.getNextStepId()));
-				if (step.getNextStepId() == null) {
+				r.setApprovalStep(ApprovalStep.createWithUuid(step.getNextStepUuid()));
+				if (step.getNextStepUuid() == null) {
 					//Done with approvals, move to released (or cancelled) state!
 					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
 					r.setReleasedAt(DateTime.now());
@@ -616,23 +614,23 @@ public class ReportResource {
 
 				//Add the comment
 				if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
-					comment.setReportId(r.getId());
+					comment.setReportUuid(r.getUuid());
 					comment.setAuthor(approver);
 					engine.getCommentDao().insert(comment);
 				}
 
-				AnetAuditLogger.log("Report {} approved by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				AnetAuditLogger.log("Report {} approved by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
 				return r;
-			}
 		});
 	}
 
 	@GraphQLMutation(name="approveReport")
 	public Report approveReport(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="id") int id,
-			@GraphQLArgument(name="comment") Comment comment) {
+			@GraphQLArgument(name="uuid") String uuid,
+			@GraphQLArgument(name="comment") Comment comment)
+			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something
-		return approveReportCommon(DaoUtils.getUserFromContext(context), id, comment);
+		return approveReportCommon(DaoUtils.getUserFromContext(context), uuid, comment);
 	}
 
 	private void sendReportReleasedEmail(Report r) {
@@ -650,40 +648,41 @@ public class ReportResource {
 
 	/**
 	 * Rejects a report and moves it back to the author with state REJECTED.
-	 * @param id the Report ID to reject
+	 * @param uuid the Report UUID to reject
 	 * @param reason : A @link Comment object which will be posted to the report with the reason why the report was rejected.
 	 * @return 200 on a successful reject, 401 if you don't have privileges to reject this report.
 	 */
 	@POST
 	@Timed
-	@Path("/{id}/reject")
-	public Report rejectReport(@Auth Person approver, @PathParam("id") int id, Comment reason) {
-		return rejectReportCommon(approver, id, reason);
+	@Path("/{uuid}/reject")
+	public Report rejectReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment reason)
+			throws InterruptedException, ExecutionException, Exception {
+		return rejectReportCommon(approver, uuid, reason);
 	}
 
-	private Report rejectReportCommon(Person approver, int id, Comment reason) {
+	private Report rejectReportCommon(Person approver, String uuid, Comment reason)
+			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-		return dbHandle.inTransaction(new TransactionCallback<Report>() {
-			public Report inTransaction(Handle conn, TransactionStatus status) throws Exception {
-				final Report r = dao.getById(id, approver);
+		return dbHandle.inTransaction(h -> {
+				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				if (step == null) {
-					logger.info("Report ID {} does not currently need an approval", r.getId());
+					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
 					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
 				}
 
 				//Verify that this user can reject for this step.
-				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getId(), step.getId());
+				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
-					logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					logger.info("User UUID {} cannot reject report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
 				}
 
 				//Write the rejection
 				ApprovalAction approval = new ApprovalAction();
 				approval.setReport(r);
-				approval.setStep(ApprovalStep.createWithId(step.getId()));
+				approval.setStep(ApprovalStep.createWithUuid(step.getUuid()));
 				approval.setPerson(approver);
 				approval.setType(ApprovalType.REJECT);
 				engine.getApprovalActionDao().insert(approval);
@@ -697,23 +696,23 @@ public class ReportResource {
 				}
 
 				//Add the comment
-				reason.setReportId(r.getId());
+				reason.setReportUuid(r.getUuid());
 				reason.setAuthor(approver);
 				engine.getCommentDao().insert(reason);
 
 				sendReportRejectEmail(r, approver, reason);
-				AnetAuditLogger.log("report {} rejected by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				AnetAuditLogger.log("report {} rejected by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
 				return r;
-			}
 		});
 	}
 
 	@GraphQLMutation(name="rejectReport")
 	public Report rejectReport(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="id") int id,
-			@GraphQLArgument(name="comment") Comment reason) {
+			@GraphQLArgument(name="uuid") String uuid,
+			@GraphQLArgument(name="comment") Comment reason)
+			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something
-		return rejectReportCommon(DaoUtils.getUserFromContext(context), id, reason);
+		return rejectReportCommon(DaoUtils.getUserFromContext(context), uuid, reason);
 	}
 
 	private void sendReportRejectEmail(Report r, Person rejector, Comment rejectionComment) {
@@ -733,19 +732,19 @@ public class ReportResource {
 
 	@POST
 	@Timed
-	@Path("/{id}/comments")
-	public Comment addComment(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
-		return addCommentCommon(author, reportId, comment);
+	@Path("/{uuid}/comments")
+	public Comment addComment(@Auth Person author, @PathParam("uuid") String reportUuid, Comment comment) {
+		return addCommentCommon(author, reportUuid, comment);
 	}
 
-	private Comment addCommentCommon(@Auth Person author, @PathParam("id") int reportId, Comment comment) {
-		comment.setReportId(reportId);
+	private Comment addCommentCommon(@Auth Person author, @PathParam("uuid") String reportUuid, Comment comment) {
+		comment.setReportUuid(reportUuid);
 		comment.setAuthor(author);
 		comment = engine.getCommentDao().insert(comment);
 		if (comment == null) {
 			throw new WebApplicationException("Couldn't process adding new comment");
 		}
-		final Report r = dao.getById(reportId, author);
+		final Report r = dao.getByUuid(reportUuid, author);
 		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 		sendNewCommentEmail(r, comment);
 		return comment;
@@ -753,10 +752,10 @@ public class ReportResource {
 
 	@GraphQLMutation(name="addComment")
 	public Comment addComment(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="id") int reportId,
+			@GraphQLArgument(name="uuid") String reportUuid,
 			@GraphQLArgument(name="comment") Comment comment) {
 		// GraphQL mutations *have* to return something
-		return addCommentCommon(DaoUtils.getUserFromContext(context), reportId, comment);
+		return addCommentCommon(DaoUtils.getUserFromContext(context), reportUuid, comment);
 	}
 
 	private void sendNewCommentEmail(Report r, Comment comment) {
@@ -775,20 +774,20 @@ public class ReportResource {
 
 	@GET
 	@Timed
-	@Path("/{id}/comments")
-	public List<Comment> getCommentsForReport(@PathParam("id") int reportId) {
+	@Path("/{uuid}/comments")
+	public List<Comment> getCommentsForReport(@PathParam("uuid") String reportUuid) {
 		//TODO: it doesn't seem to be used
-		return engine.getCommentDao().getCommentsForReport(Report.createWithId(reportId));
+		return engine.getCommentDao().getCommentsForReport(Report.createWithUuid(reportUuid));
 	}
 
 	@DELETE
 	@Timed
-	@Path("/{id}/comments/{commentId}")
-	public Response deleteComment(@Auth Person user, @PathParam("commentId") int commentId) {
+	@Path("/{uuid}/comments/{commentUuid}")
+	public Response deleteComment(@Auth Person user, @PathParam("commentUuid") String commentUuid) {
 		// For now, only admins are allowed to delete a comment
 		// (even though there's no action for it in the front-end).
 		AuthUtils.assertAdministrator(user);
-		int numRows = engine.getCommentDao().delete(commentId);
+		int numRows = engine.getCommentDao().delete(commentUuid);
 		if (numRows != 1) {
 			throw new WebApplicationException("Unable to delete comment", Status.NOT_FOUND);
 		}
@@ -797,18 +796,18 @@ public class ReportResource {
 
 	@POST
 	@Timed
-	@Path("/{id}/email")
-	public Response emailReport(@Auth Person user, @PathParam("id") int reportId, AnetEmail email) {
-		emailReportCommon(user, reportId, email);
+	@Path("/{uuid}/email")
+	public Response emailReport(@Auth Person user, @PathParam("uuid") String reportUuid, AnetEmail email) {
+		emailReportCommon(user, reportUuid, email);
 		return Response.ok().build();
 	}
 
-	private int emailReportCommon(Person user, int reportId, AnetEmail email) {
-		final Report r = dao.getById(reportId, user);
+	private int emailReportCommon(Person user, String reportUuid, AnetEmail email) {
+		final Report r = dao.getByUuid(reportUuid, user);
 		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 
 		ReportEmail action = new ReportEmail();
-		action.setReport(Report.createWithId(reportId));
+		action.setReport(Report.createWithUuid(reportUuid));
 		action.setSender(user);
 		action.setComment(email.getComment());
 		email.setAction(action);
@@ -818,10 +817,10 @@ public class ReportResource {
 
 	@GraphQLMutation(name="emailReport")
 	public Integer emailReport(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="id") int reportId,
+			@GraphQLArgument(name="uuid") String reportUuid,
 			@GraphQLArgument(name="email") AnetEmail email) {
 		// GraphQL mutations *have* to return something, we return an integer
-		return emailReportCommon(DaoUtils.getUserFromContext(context), reportId, email);
+		return emailReportCommon(DaoUtils.getUserFromContext(context), reportUuid, email);
 	}
 
 	/*
@@ -829,14 +828,14 @@ public class ReportResource {
 	 */
 	@DELETE
 	@Timed
-	@Path("/{id}/delete")
-	public Response deleteReport(@Auth Person user, @PathParam("id") int reportId) {
-		deleteReportCommon(user, reportId);
+	@Path("/{uuid}/delete")
+	public Response deleteReport(@Auth Person user, @PathParam("uuid") String reportUuid) {
+		deleteReportCommon(user, reportUuid);
 		return Response.ok().build();
 	}
 
-	private int deleteReportCommon(Person user, int reportId) {
-		final Report report = dao.getById(reportId, user);
+	private int deleteReportCommon(Person user, String reportUuid) {
+		final Report report = dao.getByUuid(reportUuid, user);
 		if (report == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 
 		assertCanDeleteReport(report, user);
@@ -845,8 +844,8 @@ public class ReportResource {
 	}
 
 	@GraphQLMutation(name="deleteReport")
-	public Integer deleteReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int reportId) {
-		return deleteReportCommon(DaoUtils.getUserFromContext(context), reportId);
+	public Integer deleteReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String reportUuid) {
+		return deleteReportCommon(DaoUtils.getUserFromContext(context), reportUuid);
 	}
 
 	private void assertCanDeleteReport(Report report, Person user) {
@@ -854,7 +853,7 @@ public class ReportResource {
 
 		if (report.getState() == ReportState.DRAFT || report.getState() == ReportState.REJECTED) {
 			//only the author may delete these reports
-			if (Objects.equals(report.getAuthor().getId(), user.getId())) {
+			if (Objects.equals(report.getAuthor().getUuid(), user.getUuid())) {
 				return;
 			}
 		}
@@ -895,8 +894,8 @@ public class ReportResource {
 	 * @param start Start timestamp for the rollup period
 	 * @param end end timestamp for the rollup period
 	 * @param engagementDateStart minimum date on reports to include
-	 * @param orgType  If orgId is NULL then the type of organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
-	 * @param orgId if orgType is NULL then the parent org to create the graph off of. All reports will be by/about this org or a child org.
+	 * @param orgType  If orgUuid is NULL then the type of organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
+	 * @param orgUuid if orgType is NULL then the parent org to create the graph off of. All reports will be by/about this org or a child org.
 	 */
 	@GET
 	@Timed
@@ -906,8 +905,8 @@ public class ReportResource {
 			@QueryParam("startDate") @GraphQLArgument(name="startDate") Long start,
 			@QueryParam("endDate") @GraphQLArgument(name="endDate") Long end,
 			@QueryParam("orgType") @GraphQLArgument(name="orgType") OrganizationType orgType,
-			@QueryParam("advisorOrganizationId") @GraphQLArgument(name="advisorOrganizationId") Integer advisorOrgId,
-			@QueryParam("principalOrganizationId") @GraphQLArgument(name="principalOrganizationId") Integer principalOrgId) {
+			@QueryParam("advisorOrganizationUuid") @GraphQLArgument(name="advisorOrganizationUuid") String advisorOrgUuid,
+			@QueryParam("principalOrganizationUuid") @GraphQLArgument(name="principalOrganizationUuid") String principalOrgUuid) {
 		DateTime startDate = new DateTime(start);
 		DateTime endDate = new DateTime(end);
 
@@ -915,12 +914,12 @@ public class ReportResource {
 
 		@SuppressWarnings("unchecked")
 		final List<String> nonReportingOrgsShortNames = (List<String>) config.getDictionary().get("non_reporting_ORGs");
-		final Map<Integer, Organization> nonReportingOrgs = getOrgsByShortNames(nonReportingOrgsShortNames);
+		final Map<String, Organization> nonReportingOrgs = getOrgsByShortNames(nonReportingOrgsShortNames);
 
-		if (principalOrgId != null) {
-			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, principalOrgId, OrganizationType.PRINCIPAL_ORG, nonReportingOrgs);
-		} else if (advisorOrgId != null) {
-			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, advisorOrgId, OrganizationType.ADVISOR_ORG, nonReportingOrgs);
+		if (principalOrgUuid != null) {
+			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, principalOrgUuid, OrganizationType.PRINCIPAL_ORG, nonReportingOrgs);
+		} else if (advisorOrgUuid != null) {
+			dailyRollupGraph = dao.getDailyRollupGraph(startDate, endDate, advisorOrgUuid, OrganizationType.ADVISOR_ORG, nonReportingOrgs);
 		} else {
 			if (orgType == null) {
 				orgType = OrganizationType.ADVISOR_ORG;
@@ -940,23 +939,23 @@ public class ReportResource {
 			@QueryParam("startDate") Long start,
 			@QueryParam("endDate") Long end,
 			@QueryParam("orgType") OrganizationType orgType,
-			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
-			@QueryParam("principalOrganizationId") Integer principalOrgId,
+			@QueryParam("advisorOrganizationUuid") String advisorOrgUuid,
+			@QueryParam("principalOrganizationUuid") String principalOrgUuid,
 			AnetEmail email) {
 		emailRollupCommon(user, start, end, orgType,
-			advisorOrgId, principalOrgId, email);
+			advisorOrgUuid, principalOrgUuid, email);
 		return Response.ok().build();
 	}
 
 	public int emailRollupCommon(Person user,
 			Long start, Long end, OrganizationType orgType,
-			Integer advisorOrgId, Integer principalOrgId, AnetEmail email) {
+			String advisorOrgUuid, String principalOrgUuid, AnetEmail email) {
 		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
 		action.setComment(email.getComment());
-		action.setAdvisorOrganizationId(advisorOrgId);
-		action.setPrincipalOrganizationId(principalOrgId);
+		action.setAdvisorOrganizationUuid(advisorOrgUuid);
+		action.setPrincipalOrganizationUuid(principalOrgUuid);
 		action.setChartOrgType(orgType);
 
 		email.setAction(action);
@@ -969,12 +968,12 @@ public class ReportResource {
 			@GraphQLArgument(name="startDate") Long start,
 			@GraphQLArgument(name="endDate") Long end,
 			@GraphQLArgument(name="orgType") OrganizationType orgType,
-			@GraphQLArgument(name="advisorOrganizationId") Integer advisorOrgId,
-			@GraphQLArgument(name="principalOrganizationId") Integer principalOrgId,
+			@GraphQLArgument(name="advisorOrganizationUuid") String advisorOrgUuid,
+			@GraphQLArgument(name="principalOrganizationUuid") String principalOrgUuid,
 			@GraphQLArgument(name="email") AnetEmail email) {
 		// GraphQL mutations *have* to return something, we return an integer
 		return emailRollupCommon(DaoUtils.getUserFromContext(context), start,
-			end, orgType, advisorOrgId, principalOrgId, email);
+			end, orgType, advisorOrgUuid, principalOrgUuid, email);
 	}
 
 	/**
@@ -987,33 +986,33 @@ public class ReportResource {
 	public Response showRollupEmail(@QueryParam("startDate") Long start,
 			@QueryParam("endDate") Long end,
 			@QueryParam("orgType") OrganizationType orgType,
-			@QueryParam("advisorOrganizationId") Integer advisorOrgId,
-			@QueryParam("principalOrganizationId") Integer principalOrgId,
+			@QueryParam("advisorOrganizationUuid") String advisorOrgUuid,
+			@QueryParam("principalOrganizationUuid") String principalOrgUuid,
 			@QueryParam("showText") @DefaultValue("false") Boolean showReportText) {
-		return Response.ok(showRollupEmailCommon(start, end, orgType, advisorOrgId,
-				principalOrgId, showReportText), MediaType.TEXT_HTML_TYPE).build();
+		return Response.ok(showRollupEmailCommon(start, end, orgType, advisorOrgUuid,
+				principalOrgUuid, showReportText), MediaType.TEXT_HTML_TYPE).build();
 	}
 
 	@GraphQLQuery(name="showRollupEmail")
 	public String showRollupEmailGraphQL(@GraphQLArgument(name="startDate") Long start,
 			@GraphQLArgument(name="endDate") Long end,
 			@GraphQLArgument(name="orgType") OrganizationType orgType,
-			@GraphQLArgument(name="advisorOrganizationId") Integer advisorOrgId,
-			@GraphQLArgument(name="principalOrganizationId") Integer principalOrgId,
+			@GraphQLArgument(name="advisorOrganizationUuid") String advisorOrgUuid,
+			@GraphQLArgument(name="principalOrganizationUuid") String principalOrgUuid,
 			@GraphQLArgument(name="showText", defaultValue="false") Boolean showReportText) {
-		return showRollupEmailCommon(start, end, orgType, advisorOrgId,
-				principalOrgId, showReportText);
+		return showRollupEmailCommon(start, end, orgType, advisorOrgUuid,
+				principalOrgUuid, showReportText);
 	}
 
 	private String showRollupEmailCommon(Long start, Long end,
-			OrganizationType orgType, Integer advisorOrgId,
-			Integer principalOrgId, Boolean showReportText) {
+			OrganizationType orgType, String advisorOrgUuid,
+			String principalOrgUuid, Boolean showReportText) {
 		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
 		action.setChartOrgType(orgType);
-		action.setAdvisorOrganizationId(advisorOrgId);
-		action.setPrincipalOrganizationId(principalOrgId);
+		action.setAdvisorOrganizationUuid(advisorOrgUuid);
+		action.setPrincipalOrganizationUuid(principalOrgUuid);
 
 		Map<String,Object> context = action.execute();
 
@@ -1058,45 +1057,51 @@ public class ReportResource {
 	@RolesAllowed("SUPER_USER")
 	public List<AdvisorReportsEntry> getAdvisorReportInsights(
 		@DefaultValue("3") 	@QueryParam("weeksAgo") @GraphQLArgument(name="weeksAgo", defaultValue="3") int weeksAgo,
-		@DefaultValue("-1") @QueryParam("orgId") @GraphQLArgument(name="orgId", defaultValue="-1") int orgId) {
+		@DefaultValue(Organization.DUMMY_ORG_UUID) @QueryParam("orgUuid") @GraphQLArgument(name="orgUuid", defaultValue=Organization.DUMMY_ORG_UUID) String orgUuid) {
 
 		DateTime now = DateTime.now();
 		DateTime weekStart = now.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay();
 		DateTime startDate = weekStart.minusWeeks(weeksAgo);
-		final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgId);
-		// Organization is given, group by person
-		String topLevelField = "name";
-		String groupCol = "personid";
-		if (orgId < 0) {
-			// No organization is given, group by organization, we are in the top level
-			topLevelField = "organizationshortname";
-			groupCol = "organizationid";
+		final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgUuid);
+
+		final String groupName = "stats";
+		final String topLevelField;
+		final String groupCol;
+		if (Organization.DUMMY_ORG_UUID.equals(orgUuid)) {
+			topLevelField = "organizationShortName";
+			groupCol = "organizationUuid";
+		} else {
+			topLevelField = "name";
+			groupCol = "personUuid";
 		}
 		final Set<String> tlf = Stream.of(topLevelField).collect(Collectors.toSet());
-		final List<Map<String, Object>> groupedResults = Utils.resultGrouper(list, "stats", groupCol, tlf);
-		List<AdvisorReportsEntry> result = new LinkedList<AdvisorReportsEntry>();
-		for (Map<String, Object> group : groupedResults) {
-			AdvisorReportsEntry entry = new AdvisorReportsEntry();
-			entry.setId((int) group.get(groupCol));
+		final List<Map<String, Object>> groupedResults = Utils.resultGrouper(list, groupName, groupCol, tlf);
+		final List<AdvisorReportsEntry> result = new LinkedList<AdvisorReportsEntry>();
+		for (final Map<String, Object> group : groupedResults) {
+			final AdvisorReportsEntry entry = new AdvisorReportsEntry();
+			entry.setUuid((String) group.get(groupCol));
 			entry.setName((String) group.get(topLevelField));
-			List<AdvisorReportsStats> stats = new LinkedList<AdvisorReportsStats>();
-			for (Map<String, Object> groupSt : (ArrayList<Map<String, Object>>) group.get("stats")) {
+			final List<AdvisorReportsStats> stats = new LinkedList<AdvisorReportsStats>();
+			@SuppressWarnings("unchecked")
+			final List<Map<String, Object>> groupStats = (List<Map<String, Object>>) group.get(groupName);
+			for (final Map<String, Object> groupSt : groupStats) {
 				AdvisorReportsStats st = new AdvisorReportsStats();
 				st.setWeek((int) groupSt.get("week"));
-				st.setNrReportsSubmitted((int) groupSt.get("nrreportssubmitted"));
-				st.setNrEngagementsAttended((int) groupSt.get("nrengagementsattended"));
+				st.setNrReportsSubmitted((int) groupSt.get("nrReportsSubmitted"));
+				st.setNrEngagementsAttended((int) groupSt.get("nrEngagementsAttended"));
 				stats.add(st);
 			}
 			entry.setStats(stats);
 			result.add(entry);
 		}
 		return result;
+
 	}
 
-	private Map<Integer, Organization> getOrgsByShortNames(List<String> orgShortNames) {
-		final Map<Integer, Organization> result = new HashMap<>();
+	private Map<String, Organization> getOrgsByShortNames(List<String> orgShortNames) {
+		final Map<String, Organization> result = new HashMap<>();
 		for (final Organization organization : engine.getOrganizationDao().getOrgsByShortNames(orgShortNames)) {
-			result.put(organization.getId(), organization);
+			result.put(organization.getUuid(), organization);
 		}
 		return result;
 	}
@@ -1156,7 +1161,7 @@ public class ReportResource {
 				if (c != 0) {
 					result = c;
 				} else {
-					result = o1.getOrg().getId() - o2.getOrg().getId();
+					result = o1.getOrg().getUuid().compareTo(o2.getOrg().getUuid());
 				}
 			}
 

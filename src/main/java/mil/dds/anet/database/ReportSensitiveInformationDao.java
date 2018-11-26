@@ -5,11 +5,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.mapper.MapMapper;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -21,22 +20,22 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-@RegisterMapper(ReportSensitiveInformationMapper.class)
+@RegisterRowMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
 
-	private static final String[] fields = { "id", "text", "reportId", "createdAt", "updatedAt" };
+	private static final String[] fields = { "uuid", "text", "reportUuid", "createdAt", "updatedAt" };
 	private static final String tableName = "reportsSensitiveInformation";
-	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields);
+	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
 	private Handle dbHandle;
 	private final ForeignKeyBatcher<ReportSensitiveInformation> reportIdBatcher;
 
 	public ReportSensitiveInformationDao(Handle h) {
 		this.dbHandle = h;
-		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportIds */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
+		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
 				+ " FROM \"" + tableName + "\""
-				+ " WHERE \"reportId\" IN ( %1$s )";
-		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportId");
+				+ " WHERE \"reportUuid\" IN ( <foreignKeys> )";
+		this.reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(h, reportIdBatcherSql, "foreignKeys", new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
 	}
 
 	@Override
@@ -44,17 +43,16 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public ReportSensitiveInformation getById(@Bind("id") int id) {
+	public ReportSensitiveInformation getByUuid(String uuid) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public List<ReportSensitiveInformation> getByIds(List<Integer> reportIds) {
+	public List<ReportSensitiveInformation> getByIds(List<String> reportUuids) {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<List<ReportSensitiveInformation>> getReportSensitiveInformation(List<Integer> foreignKeys) {
+	public List<List<ReportSensitiveInformation>> getReportSensitiveInformation(List<String> foreignKeys) {
 		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 
@@ -67,23 +65,18 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return null;
 		}
-		rsi.setCreatedAt(DateTime.now());
-		rsi.setUpdatedAt(DateTime.now());
-		final GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
+		DaoUtils.setInsertFields(rsi);
+		dbHandle.createUpdate(
 				"/* insertReportsSensitiveInformation */ INSERT INTO \"" + tableName + "\" "
-					+ " (text, \"reportId\", \"createdAt\", \"updatedAt\") "
-					+ "VALUES (:text, :reportId, :createdAt, :updatedAt)")
-				.bind("text", rsi.getText())
-				.bind("reportId", report.getId())
-				.bind("createdAt", rsi.getCreatedAt())
-				.bind("updatedAt", rsi.getUpdatedAt())
-				.executeAndReturnGeneratedKeys();
-		rsi.setId(DaoUtils.getGeneratedId(keys));
+					+ " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
+				.bindBean(rsi)
+				.bind("reportUuid", report.getUuid())
+				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
 		return rsi;
 	}
 
-	@Override
 	public int update(ReportSensitiveInformation rsi) {
 		throw new UnsupportedOperationException();
 	}
@@ -92,21 +85,19 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return 0;
 		}
-		// Update relevant fields, but do not allow the reportId to be updated by the query!
+		// Update relevant fields, but do not allow the reportUuid to be updated by the query!
 		rsi.setUpdatedAt(DateTime.now());
-		final int numRows = dbHandle.createStatement(
+		final int numRows = dbHandle.createUpdate(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
-					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE id = :id")
-				.bind("id", rsi.getId())
-				.bind("text", rsi.getText())
-				.bind("updatedAt", rsi.getUpdatedAt())
+					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+				.bindBean(rsi)
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
 		return numRows;
 	}
 
 	public Object insertOrUpdate(ReportSensitiveInformation rsi, Person user, Report report) {
-		return (DaoUtils.getId(rsi) == null)
+		return (DaoUtils.getUuid(rsi) == null)
 				? insert(rsi, user, report)
 				: update(rsi, user, report);
 	}
@@ -116,7 +107,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			return CompletableFuture.supplyAsync(() -> null);
 		}
 		return new ForeignKeyFetcher<ReportSensitiveInformation>()
-				.load(context, "report.reportSensitiveInformation", report.getId())
+				.load(context, "report.reportSensitiveInformation", report.getUuid())
 				.thenApply(l ->
 		{
 			ReportSensitiveInformation rsi = Utils.isEmptyOrNull(l) ? null : l.get(0);
@@ -139,29 +130,29 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	 * @return true if the user is allowed to access the report's sensitive information
 	 */
 	private boolean isAuthorized(Person user, Report report) {
-		final Integer userId = DaoUtils.getId(user);
-		final Integer reportId = DaoUtils.getId(report);
-		if (userId == null || reportId == null) {
+		final String userUuid = DaoUtils.getUuid(user);
+		final String reportUuid = DaoUtils.getUuid(report);
+		if (userUuid == null || reportUuid == null) {
 			// No user or no report
 			return false;
 		}
 
 		// Check authorization in a single query
-		final Query<Map<String, Object>> query = dbHandle.createQuery(
-				"/* checkReportAuthorization */ SELECT r.id"
+		final Query query = dbHandle.createQuery(
+				"/* checkReportAuthorization */ SELECT r.uuid"
 					+ " FROM reports r"
-					+ " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportId\" = r.id"
-					+ " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupId\" = rag.\"authorizationGroupId\" "
-					+ " LEFT JOIN positions p ON p.id = agp.\"positionId\" "
-					+ " WHERE r.id = :reportId"
+					+ " LEFT JOIN \"reportAuthorizationGroups\" rag ON rag.\"reportUuid\" = r.uuid"
+					+ " LEFT JOIN \"authorizationGroupPositions\" agp ON agp.\"authorizationGroupUuid\" = rag.\"authorizationGroupUuid\" "
+					+ " LEFT JOIN positions p ON p.uuid = agp.\"positionUuid\" "
+					+ " WHERE r.uuid = :reportUuid"
 					+ " AND ("
-					+ "   (r.\"authorId\" = :userId)"
+					+ "   (r.\"authorUuid\" = :userUuid)"
 					+ "   OR"
-					+ "   (p.\"currentPersonId\" = :userId)"
+					+ "   (p.\"currentPersonUuid\" = :userUuid)"
 					+ " )")
-			.bind("reportId", reportId)
-			.bind("userId", userId);
-		return (query.list().size() > 0);
+			.bind("reportUuid", reportUuid)
+			.bind("userUuid", userUuid);
+		return (query.map(new MapMapper(false)).list().size() > 0);
 	}
 
 }

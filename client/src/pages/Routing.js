@@ -68,10 +68,10 @@ class BaseRouting extends Component {
 			render={({ match: { url } }) => (
 			<Switch>
 				<Route path={`${url}/new`} component={ReportNew} />
-				<Route path={`${url}/:id/edit`} component={ReportEdit} />
-				<Route path={`${url}/:id/min`} component={ReportMinimal} />
+				<Route path={`${url}/:uuid/edit`} component={ReportEdit} />
+				<Route path={`${url}/:uuid/min`} component={ReportMinimal} />
 				<Route path={`${url}/mine`} component={MyReports} />
-				<Route path={`${url}/:id`} component={ReportShow} />
+				<Route path={`${url}/:uuid`} component={ReportShow} />
 			</Switch>
 		)}
 		/>
@@ -80,8 +80,8 @@ class BaseRouting extends Component {
 			render={({ match: { url } }) => (
 			<Switch>
 				<Route path={`${url}/new`} component={PersonNew} />
-				<Route path={`${url}/:id/edit`} component={PersonEdit} />
-				<Route path={`${url}/:id`} component={PersonShow} />
+				<Route path={`${url}/:uuid/edit`} component={PersonEdit} />
+				<Route path={`${url}/:uuid`} component={PersonShow} />
 			</Switch>
 		)}
 		/>
@@ -90,8 +90,8 @@ class BaseRouting extends Component {
 			render={({ match: { url } }) => (
 			<Switch>
 				<Route path={`${url}/new`} component={OrganizationNew} />
-				<Route path={`${url}/:id/edit`} component={OrganizationEdit} />
-				<Route path={`${url}/:id/:action?`} component={OrganizationShow} />
+				<Route path={`${url}/:uuid/edit`} component={OrganizationEdit} />
+				<Route path={`${url}/:uuid/:action?`} component={OrganizationShow} />
 			</Switch>
 		)}
 		/>
@@ -100,8 +100,8 @@ class BaseRouting extends Component {
 			render={({ match: { url } }) => (
 			<Switch>
 				<Route path={`${url}/new`} component={LocationNew} />
-				<Route path={`${url}/:id/edit`} component={LocationEdit} />
-				<Route path={`${url}/:id`} component={LocationShow} />
+				<Route path={`${url}/:uuid/edit`} component={LocationEdit} />
+				<Route path={`${url}/:uuid`} component={LocationShow} />
 			</Switch>
 		)}
 		/>
@@ -110,8 +110,8 @@ class BaseRouting extends Component {
 			render={({ match: { url } }) => (
 			<Switch>
 				<Route path={`${url}/new`} component={PositionNew} />
-				<Route path={`${url}/:id/edit`} component={PositionEdit} />
-				<Route path={`${url}/:id`} component={PositionShow} />
+				<Route path={`${url}/:uuid/edit`} component={PositionEdit} />
+				<Route path={`${url}/:uuid`} component={PositionShow} />
 			</Switch>
 		)}
 		/>
@@ -120,8 +120,8 @@ class BaseRouting extends Component {
 			render={({ match: { url } }) => (
 			<Switch>
 				<Route path={`${url}/new`} component={TaskNew} />
-				<Route path={`${url}/:id/edit`} component={TaskEdit} />
-				<Route path={`${url}/:id`} component={TaskShow} />
+				<Route path={`${url}/:uuid/edit`} component={TaskEdit} />
+				<Route path={`${url}/:uuid`} component={TaskShow} />
 			</Switch>
 		)}
 		/>
@@ -133,8 +133,8 @@ class BaseRouting extends Component {
 				<Route path={`${url}/mergePeople`} component={MergePeople} />
 				<Route exact path={`${url}/authorizationGroups`} component={AuthorizationGroups} />
 				<Route path={`${url}/authorizationGroups/new`} component={AuthorizationGroupNew} />
-				<Route path={`${url}/authorizationGroups/:id/edit`} component={AuthorizationGroupEdit} />
-				<Route path={`${url}/authorizationGroups/:id`} component={AuthorizationGroupShow} />
+				<Route path={`${url}/authorizationGroups/:uuid/edit`} component={AuthorizationGroupEdit} />
+				<Route path={`${url}/authorizationGroups/:uuid`} component={AuthorizationGroupShow} />
 			</Switch>
 		)}
 		/>

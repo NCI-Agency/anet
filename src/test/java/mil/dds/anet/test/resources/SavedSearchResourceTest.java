@@ -24,7 +24,7 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 
 public class SavedSearchResourceTest extends AbstractResourceTest {
 
-	private static final String FIELDS = "id name objectType query owner { id }";
+	private static final String FIELDS = "uuid name objectType query owner { uuid }";
 
 	@Test
 	public void testSavedSearches() throws IOException { 
@@ -36,13 +36,13 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ss.setObjectType(SearchObjectType.REPORTS);
 		ss.setQuery("{\"text\" : \"spreadsheets\"}");
 		
-		final Integer ssId = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch", "SavedSearchInput",
+		final String ssUuid = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch", "SavedSearchInput",
 				ss, new GenericType<GraphQLResponse<SavedSearch>>() {});
-		assertThat(ssId).isNotNull();
+		assertThat(ssUuid).isNotNull();
 		
 		//Fetch a list of all of my saved searches
 		List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});
-		final Optional<SavedSearch> optional = mine.stream().filter(e -> e.getId().equals(ssId)).findFirst();
+		final Optional<SavedSearch> optional = mine.stream().filter(e -> e.getUuid().equals(ssUuid)).findFirst();
 		assertThat(optional).get().isNotNull();
 		SavedSearch created = optional.get();
 		
@@ -51,11 +51,11 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 
 		ReportSearchQuery query = mapper.readValue(created.getQuery(), ReportSearchQuery.class);
 		final AnetBeanList<Report> results = graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput",
-				"id intent state", query, new GenericType<GraphQLResponse<AnetBeanList<Report>>>() {});
+				"uuid intent state", query, new GenericType<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(results.getList()).isNotEmpty();
 		
 		//Delete it
-		final Integer nrDeleted = graphQLHelper.deleteObject(jack, "deleteSavedSearch", created.getId());
+		final Integer nrDeleted = graphQLHelper.deleteObject(jack, "deleteSavedSearch", created.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 		
 		mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});
@@ -73,13 +73,13 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ss.setObjectType(SearchObjectType.LOCATIONS);
 		ss.setQuery("{\"text\" : \"kabul\"}");
 
-		final Integer ssId = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch", "SavedSearchInput",
+		final String ssUuid = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch", "SavedSearchInput",
 				ss, new GenericType<GraphQLResponse<SavedSearch>>() {});
-		assertThat(ssId).isNotNull();
+		assertThat(ssUuid).isNotNull();
 
 		//Fetch a list of all of my saved searches
 		List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});
-		final Optional<SavedSearch> optional = mine.stream().filter(e -> e.getId().equals(ssId)).findFirst();
+		final Optional<SavedSearch> optional = mine.stream().filter(e -> e.getUuid().equals(ssUuid)).findFirst();
 		assertThat(optional).get().isNotNull();
 		SavedSearch created = optional.get();
 
@@ -88,11 +88,11 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 
 		LocationSearchQuery query = mapper.readValue(created.getQuery(), LocationSearchQuery.class);
 		final AnetBeanList<Location> results = graphQLHelper.searchObjects(jack, "locationList", "query", "LocationSearchQueryInput",
-				"id name status lat lng", query, new GenericType<GraphQLResponse<AnetBeanList<Location>>>() {});
+				"uuid name status lat lng", query, new GenericType<GraphQLResponse<AnetBeanList<Location>>>() {});
 		assertThat(results.getList()).isNotEmpty();
 
 		//Delete it
-		final Integer nrDeleted = graphQLHelper.deleteObject(jack, "deleteSavedSearch", created.getId());
+		final Integer nrDeleted = graphQLHelper.deleteObject(jack, "deleteSavedSearch", created.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 
 		mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});

@@ -1,14 +1,10 @@
 package mil.dds.anet.database;
 
 import java.util.List;
-import java.util.Map;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.GeneratedKeys;
-import org.skife.jdbi.v2.Handle;
-import org.skife.jdbi.v2.Query;
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
+import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
@@ -18,7 +14,7 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-@RegisterMapper(LocationMapper.class)
+@RegisterRowMapper(LocationMapper.class)
 public class LocationDao implements IAnetDao<Location> {
 
 	private final Handle dbHandle;
@@ -26,8 +22,8 @@ public class LocationDao implements IAnetDao<Location> {
 
 	public LocationDao(Handle h) { 
 		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getLocationsByIds */ SELECT * from locations where id IN ( %1$s )";
-		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, new LocationMapper());
+		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
+		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, "uuids", new LocationMapper());
 	}
 	
 	public AnetBeanList<Location> getAll(int pageNum, int pageSize) {
@@ -41,81 +37,67 @@ public class LocationDao implements IAnetDao<Location> {
 					+ "ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		
-		Query<Location> query = dbHandle.createQuery(sql)
+		final Query sqlQuery = dbHandle.createQuery(sql)
 				.bind("limit", pageSize)
-				.bind("offset", pageSize * pageNum)
-				.map(new LocationMapper());
-		return new AnetBeanList<Location>(query, pageNum, pageSize, null);
+				.bind("offset", pageSize * pageNum);
+		return new AnetBeanList<Location>(sqlQuery, pageNum, pageSize, new LocationMapper(), null);
 	}
-	
-	@Override
-	public Location getById(@Bind("id") int id) { 
-		Query<Location> query = dbHandle.createQuery("/* getLocationById */ SELECT * from locations where id = :id")
-				.bind("id", id)
-				.map(new LocationMapper());
-			List<Location> results = query.list();
-			if (results.size() == 0) { return null; } 
-			return results.get(0);
+
+	public Location getByUuid(String uuid) {
+		return dbHandle.createQuery("/* getLocationByUuid */ SELECT * from locations where uuid = :uuid")
+				.bind("uuid", uuid)
+				.map(new LocationMapper())
+				.findFirst().orElse(null);
 	}
 
 	@Override
-	public List<Location> getByIds(List<Integer> ids) {
-		return idBatcher.getByIds(ids);
+	public List<Location> getByIds(List<String> uuids) {
+		return idBatcher.getByIds(uuids);
 	}
 
 	@Override
 	public Location insert(Location l) {
-		l.setCreatedAt(DateTime.now());
-		l.setUpdatedAt(DateTime.now());
-		GeneratedKeys<Map<String,Object>> keys = dbHandle.createStatement(
-				"/* locationInsert */ INSERT INTO locations (name, status, lat, lng, \"createdAt\", \"updatedAt\") "
-					+ "VALUES (:name, :status, :lat, :lng, :createdAt, :updatedAt)")
-			.bind("name", l.getName())
+		DaoUtils.setInsertFields(l);
+		dbHandle.createUpdate(
+				"/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, :updatedAt)")
+			.bindBean(l)
 			.bind("status", DaoUtils.getEnumId(l.getStatus()))
-			.bind("lat", l.getLat())
-			.bind("lng", l.getLng())
-			.bind("createdAt", l.getCreatedAt())
-			.bind("updatedAt", l.getUpdatedAt())
-			.executeAndReturnGeneratedKeys();
-		l.setId(DaoUtils.getGeneratedId(keys));
+			.execute();
 		return l;
 	}
 	
-	@Override
 	public int update(Location l) {
-		return dbHandle.createStatement("/* updateLocation */ UPDATE locations "
-					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE id = :id")
-				.bind("id", l.getId())
-				.bind("name", l.getName())
+		DaoUtils.setUpdateFields(l);
+		return dbHandle.createUpdate("/* updateLocation */ UPDATE locations "
+					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+				.bindBean(l)
 				.bind("status", DaoUtils.getEnumId(l.getStatus()))
-				.bind("lat", l.getLat())
-				.bind("lng", l.getLng())
-				.bind("updatedAt", DateTime.now())
 				.execute();
 	}
 	
 	public List<Location> getRecentLocations(Person author, int maxResults) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
-			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE id IN ( "
-					+ "SELECT TOP(:maxResults) reports.\"locationId\" "
+			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE uuid IN ( "
+					+ "SELECT TOP(:maxResults) reports.\"locationUuid\" "
 					+ "FROM reports "
-					+ "WHERE authorid = :authorId "
-					+ "GROUP BY \"locationId\" "
+					+ "WHERE authorUuid = :authorUuid "
+					+ "GROUP BY \"locationUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC"
 				+ ")";
 		} else {
-			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE id IN ( "
-					+ "SELECT reports.\"locationId\" "
+			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE uuid IN ( "
+					+ "SELECT reports.\"locationUuid\" "
 					+ "FROM reports "
-					+ "WHERE \"authorId\" = :authorId "
-					+ "GROUP BY \"locationId\" "
+					+ "WHERE \"authorUuid\" = :authorUuid "
+					+ "GROUP BY \"locationUuid\" "
 					+ "ORDER BY MAX(reports.\"createdAt\") DESC "
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
 		return dbHandle.createQuery(sql)
-				.bind("authorId", author.getId())
+				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.map(new LocationMapper())
 				.list();

@@ -3,25 +3,24 @@ package mil.dds.anet.database.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.joda.time.DateTime;
-import org.skife.jdbi.v2.StatementContext;
-import org.skife.jdbi.v2.tweak.ResultSetMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.mapper.RowMapper;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.beans.search.SavedSearch.SearchObjectType;
+import mil.dds.anet.utils.DaoUtils;
 
-public class SavedSearchMapper implements ResultSetMapper<SavedSearch> {
+public class SavedSearchMapper implements RowMapper<SavedSearch> {
 
 	@Override
-	public SavedSearch map(int index, ResultSet rs, StatementContext ctx) throws SQLException {
+	public SavedSearch map(ResultSet rs, StatementContext ctx) throws SQLException {
 		SavedSearch ss = new SavedSearch();
-		ss.setId(rs.getInt("id"));
-		ss.setOwner(Person.createWithId(rs.getInt("ownerId")));
+		DaoUtils.setCommonBeanFields(ss, rs, null);
+		ss.setOwner(Person.createWithUuid(rs.getString("ownerUuid")));
 		ss.setName(rs.getString("name"));
 		ss.setObjectType(MapperUtils.getEnumIdx(rs, "objectType", SearchObjectType.class));
 		ss.setQuery(rs.getString("query"));
-		ss.setCreatedAt(new DateTime(rs.getTimestamp("createdAt")));
 		return ss;
 	}
 

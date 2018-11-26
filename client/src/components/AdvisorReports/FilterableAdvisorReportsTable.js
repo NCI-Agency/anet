@@ -37,7 +37,7 @@ class FilterableAdvisorReportsTable extends Component {
     componentDidMount() {
       this.setState( {isLoading: true} )
       this.props.showLoading()
-      API.query(/* GraphQL */`advisorReportInsights { id name stats { week nrReportsSubmitted nrEngagementsAttended }}`)
+      API.query(/* GraphQL */`advisorReportInsights { uuid name stats { week nrReportsSubmitted nrEngagementsAttended }}`)
         .then(data => {
           this.setState({
               isLoading: false,

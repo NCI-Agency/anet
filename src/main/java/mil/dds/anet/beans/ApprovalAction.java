@@ -28,8 +28,8 @@ public class ApprovalAction extends AbstractAnetBean {
 	@Override
 	@JsonIgnore
 	@GraphQLIgnore
-	public Integer getId() {
-		throw new WebApplicationException("no ID field on ApprovalAction");
+	public String getUuid() {
+		throw new WebApplicationException("no UUID field on ApprovalAction");
 	}
 
 	@GraphQLQuery(name="step")
@@ -87,7 +87,7 @@ public class ApprovalAction extends AbstractAnetBean {
 		}
 		ApprovalAction other = (ApprovalAction) o;
 		return Objects.equals(step, other.getStep()) 
-				&& AbstractAnetBean.idEqual(person, other.getPerson()) 
+				&& AbstractAnetBean.uuidEqual(person, other.getPerson())
 				&& Objects.equals(report, other.getReport()) 
 				&& Objects.equals(createdAt, other.getCreatedAt()) 
 				&& Objects.equals(type, other.getType());
@@ -100,6 +100,6 @@ public class ApprovalAction extends AbstractAnetBean {
 	
 	@Override
 	public String toString() { 
-		return String.format("[ApprovalAction: step:%d, type:%s, person:%d, report:%d]", DaoUtils.getId(step), type, DaoUtils.getId(person), DaoUtils.getId(report));
+		return String.format("[ApprovalAction: step:%s, type:%s, person:%s, report:%s]", DaoUtils.getUuid(step), type, DaoUtils.getUuid(person), DaoUtils.getUuid(report));
 	}
 }

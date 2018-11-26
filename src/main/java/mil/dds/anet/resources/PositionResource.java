@@ -69,10 +69,10 @@ public class PositionResource {
 
 	@GET
 	@Timed
-	@Path("/{id}")
+	@Path("/{uuid}")
 	@GraphQLQuery(name="position")
-	public Position getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		Position p = dao.getById(id);
+	public Position getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+		Position p = dao.getByUuid(uuid);
 		if (p == null) { throw new WebApplicationException(Status.NOT_FOUND); }
 		return p;
 	}
@@ -84,7 +84,7 @@ public class PositionResource {
 		if (pos.getType() == null) {
 			throw new WebApplicationException("Position type must be defined", Status.BAD_REQUEST);
 		}
-		if (pos.getOrganization() == null || pos.getOrganization().getId() == null) {
+		if (DaoUtils.getUuid(pos.getOrganization()) == null) {
 			throw new WebApplicationException("A Position must belong to an organization", Status.BAD_REQUEST);
 		}
 	}
@@ -105,11 +105,11 @@ public class PositionResource {
 	}
 
 	/**
-	 * Creates a new position in the database. Must have Name, Type and Organization with ID specified.
+	 * Creates a new position in the database. Must have Name, Type and Organization with UUID specified.
 	 * Optionally can provide:
-	 * - position.person : If a person ID is provided in the Person object, that person will be put in this position.
+	 * - position.person : If a person UUID is provided in the Person object, that person will be put in this position.
 	 * @param position the position to create
-	 * @return the same Position object with the ID field filled in.
+	 * @return the same Position object with the UUID field filled in.
 	 */
 	private Position createPositionCommon(Person user, Position pos) {
 		assertCanUpdatePosition(user, pos);
@@ -143,17 +143,17 @@ public class PositionResource {
 	private int updateAssociatedPositionCommon(Person user, Position pos) {
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
-		final Position current = dao.getById(pos.getId());
+		final Position current = dao.getByUuid(pos.getUuid());
 		if (current == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 
 		// Run the diff and see if anything changed and update.
 		if (pos.getAssociatedPositions() != null) {
-			Utils.addRemoveElementsById(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
+			Utils.addRemoveElementsByUuid(current.loadAssociatedPositions(), pos.getAssociatedPositions(),
 					newPosition -> {
 						dao.associatePosition(newPosition, pos);
 					},
-					oldPositionId -> {
-						dao.deletePositionAssociation(pos, Position.createWithId(oldPositionId));
+					oldPositionUuid -> {
+						dao.deletePositionAssociation(pos, Position.createWithUuid(oldPositionUuid));
 					});
 			AnetAuditLogger.log("Person {} associations changed to {} by {}", current, pos.getAssociatedPositions(), user);
 			return 1;
@@ -187,15 +187,15 @@ public class PositionResource {
 		}
 
 		if (pos.getPerson() != null || PositionStatus.INACTIVE.equals(pos.getStatus())) {
-			final Position current = dao.getById(pos.getId());
+			final Position current = dao.getByUuid(pos.getUuid());
 			if (current != null) {
 				//Run the diff and see if anything changed and update.
 				if (pos.getPerson() != null) {
-					if (pos.getPerson().getId() == null) {
+					if (pos.getPerson().getUuid() == null) {
 						//Intentionally remove the person
 						dao.removePersonFromPosition(current);
 						AnetAuditLogger.log("Person {} removed from position {} by {}", pos.getPerson(), current, user);
-					} else if (Utils.idEqual(pos.getPerson(), current.getPerson()) == false) {
+					} else if (Utils.uuidEqual(pos.getPerson(), current.getPerson()) == false) {
 						dao.setPersonInPosition(pos.getPerson(), pos);
 						AnetAuditLogger.log("Person {} put in position {} by {}", pos.getPerson(), current, user);
 					}
@@ -226,10 +226,10 @@ public class PositionResource {
 
 	@GET
 	@Timed
-	@Path("/{id}/person")
-	public Person getAdvisorInPosition(@PathParam("id") int positionId, @QueryParam("atTime") Long atTimeMillis) {
+	@Path("/{uuid}/person")
+	public Person getAdvisorInPosition(@PathParam("uuid") String positionUuid, @QueryParam("atTime") Long atTimeMillis) {
 		//TODO: it doesn't seem to be used
-		Position p = Position.createWithId(positionId);
+		Position p = Position.createWithUuid(positionUuid);
 
 		DateTime dtg = (atTimeMillis == null) ? DateTime.now() : new DateTime(atTimeMillis);
 		return dao.getPersonInPosition(p, dtg);
@@ -237,15 +237,15 @@ public class PositionResource {
 
 	@POST
 	@Timed
-	@Path("/{id}/person")
+	@Path("/{uuid}/person")
 	@RolesAllowed("SUPER_USER")
-	public Response putPersonInPosition(@Auth Person user, @PathParam("id") int positionId, Person person) {
-		putPersonInPositionCommon(user, positionId, person);
+	public Response putPersonInPosition(@Auth Person user, @PathParam("uuid") String positionUuid, Person person) {
+		putPersonInPositionCommon(user, positionUuid, person);
 		return Response.ok().build();
 	}
 
-	private int putPersonInPositionCommon(Person user, int positionId, Person person) {
-		final Position pos = dao.getById(positionId);
+	private int putPersonInPositionCommon(Person user, String positionUuid, Person person) {
+		final Position pos = dao.getByUuid(positionUuid);
 		if (pos == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
@@ -257,21 +257,21 @@ public class PositionResource {
 	@GraphQLMutation(name="putPersonInPosition")
 	@RolesAllowed("SUPER_USER")
 	public Integer putPersonInPosition(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="id") int positionId, @GraphQLArgument(name="person") Person person) {
-		return putPersonInPositionCommon(DaoUtils.getUserFromContext(context), positionId, person);
+			@GraphQLArgument(name="uuid") String positionUuid, @GraphQLArgument(name="person") Person person) {
+		return putPersonInPositionCommon(DaoUtils.getUserFromContext(context), positionUuid, person);
 	}
 
 	@DELETE
 	@Timed
-	@Path("/{id}/person")
+	@Path("/{uuid}/person")
 	@RolesAllowed("SUPER_USER")
-	public Response deletePersonFromPosition(@Auth Person user, @PathParam("id") int positionId) {
-		deletePersonFromPositionCommon(user, positionId);
+	public Response deletePersonFromPosition(@Auth Person user, @PathParam("uuid") String positionUuid) {
+		deletePersonFromPositionCommon(user, positionUuid);
 		return Response.ok().build();
 	}
 
-	private int deletePersonFromPositionCommon(Person user, int positionId) {
-		Position pos = dao.getById(positionId);
+	private int deletePersonFromPositionCommon(Person user, String positionUuid) {
+		Position pos = dao.getByUuid(positionUuid);
 		if (pos == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		AuthUtils.assertSuperUserForOrg(user, pos.getOrganization());
 
@@ -279,31 +279,31 @@ public class PositionResource {
 		if (numRows == 0) {
 			throw new WebApplicationException("Couldn't process delete person from position", Status.NOT_FOUND);
 		}
-		AnetAuditLogger.log("Person removed from Position id#{} by {}", positionId, user);
+		AnetAuditLogger.log("Person removed from Position uuid#{} by {}", positionUuid, user);
 		return numRows;
 	}
 
 	@GraphQLMutation(name="deletePersonFromPosition")
-	public Integer deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int positionId) {
-		return deletePersonFromPositionCommon(DaoUtils.getUserFromContext(context), positionId);
+	public Integer deletePersonFromPosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String positionUuid) {
+		return deletePersonFromPositionCommon(DaoUtils.getUserFromContext(context), positionUuid);
 	}
 
 	@GET
 	@Timed
-	@Path("/{id}/associated")
-	public AnetBeanList<Position> getAssociatedPositions(@PathParam("id") int positionId) {
-		Position b = Position.createWithId(positionId);
+	@Path("/{uuid}/associated")
+	public AnetBeanList<Position> getAssociatedPositions(@PathParam("uuid") String positionUuid) {
+		Position b = Position.createWithUuid(positionUuid);
 
 		return new AnetBeanList<Position>(dao.getAssociatedPositions(b));
 	}
 
 	@POST
 	@Timed
-	@Path("/{id}/associated")
+	@Path("/{uuid}/associated")
 	@RolesAllowed("SUPER_USER")
-	public Response associatePositions(@PathParam("id") int positionId, Position b, @Auth Person user) {
-		Position a = dao.getById(positionId);
-		b = dao.getById(b.getId());
+	public Response associatePositions(@PathParam("uuid") String positionUuid, Position b, @Auth Person user) {
+		Position a = dao.getByUuid(positionUuid);
+		b = dao.getByUuid(b.getUuid());
 		
 		Position principalPos = (a.getType() == PositionType.PRINCIPAL) ? a : b;
 		Position advisorPos = (a.getType() == PositionType.PRINCIPAL) ? b : a;
@@ -326,11 +326,11 @@ public class PositionResource {
 
 	@DELETE
 	@Timed
-	@Path("/{id}/associated/{positionId}")
+	@Path("/{uuid}/associated/{positionUuid}")
 	@RolesAllowed("SUPER_USER")
-	public Response deletePositionAssociation(@PathParam("id") int positionId, @PathParam("positionId") int associatedPositionId, @Auth Person user) {
-		Position a = dao.getById(positionId);
-		Position b = dao.getById(associatedPositionId);
+	public Response deletePositionAssociation(@PathParam("uuid") String positionUuid, @PathParam("positionUuid") String associatedPositionUuid, @Auth Person user) {
+		Position a = dao.getByUuid(positionUuid);
+		Position b = dao.getByUuid(associatedPositionUuid);
 
 		Position advisorPos = (a.getType() == PositionType.PRINCIPAL) ? b : a;
 		AuthUtils.assertSuperUserForOrg(user, advisorPos.getOrganization());
@@ -342,9 +342,9 @@ public class PositionResource {
 
 	@GET
 	@Timed
-	@Path("/{id}/history")
-	public List<PersonPositionHistory> getPositionHistory(@PathParam("id") int positionId) {
-		Position position = dao.getById(positionId);
+	@Path("/{uuid}/history")
+	public List<PersonPositionHistory> getPositionHistory(@PathParam("uuid") String positionUuid) {
+		Position position = dao.getByUuid(positionUuid);
 		if (position == null) { throw new WebApplicationException(Status.NOT_FOUND); } 
 		try {
 			return dao.getPositionHistory(engine.getContext(), position).get();
@@ -374,14 +374,14 @@ public class PositionResource {
 
 	@DELETE
 	@Timed
-	@Path("/{id}")
-	public Response deletePosition(@PathParam("id") int positionId) {
-		deletePositionCommon(positionId);
+	@Path("/{uuid}")
+	public Response deletePosition(@PathParam("uuid") String positionUuid) {
+		deletePositionCommon(positionUuid);
 		return Response.ok().build();
 	}
 
-	private int deletePositionCommon(int positionId) {
-		final Position position = dao.getById(positionId);
+	private int deletePositionCommon(String positionUuid) {
+		final Position position = dao.getByUuid(positionUuid);
 		if (position == null) { throw new WebApplicationException("Position not found", Status.NOT_FOUND); }
 		
 		//if there is a person in this position, reject
@@ -402,8 +402,8 @@ public class PositionResource {
 	}
 
 	@GraphQLMutation(name="deletePosition")
-	public Integer deletePosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="id") int positionId) {
-		return deletePositionCommon(positionId);
+	public Integer deletePosition(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String positionUuid) {
+		return deletePositionCommon(positionUuid);
 	}
 
 }

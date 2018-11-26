@@ -38,7 +38,7 @@ class BaseOrganizationLaydown extends Component {
 
 		return <Element name="laydown">
 			<Fieldset id="supportedPositions" title="Supported positions" action={<div>
-				{isSuperUser && <LinkTo position={Position.pathForNew({organizationId: org.id})} button>
+				{isSuperUser && <LinkTo position={Position.pathForNew({organizationUuid: org.uuid})} button>
 					Create position
 				</LinkTo>}
 			</div>}>
@@ -96,14 +96,14 @@ class BaseOrganizationLaydown extends Component {
 	}
 
 	renderPositionRow(position, other, otherIndex) {
-		let key = position.id
+		let key = position.uuid
 		let otherPersonCol, otherNameCol, positionPersonCol, positionNameCol
 		if (position.status === Position.STATUS.INACTIVE && this.state.showInactivePositions === false) {
 			return
 		}
 
 		if (other) {
-			key += '.' + other.id
+			key += '.' + other.uuid
 			otherNameCol = <td><LinkTo position={other} >{this.positionWithStatus(other)}</LinkTo></td>
 
 			otherPersonCol = other.person
@@ -113,7 +113,7 @@ class BaseOrganizationLaydown extends Component {
 
 		if (otherIndex === 0) {
 			positionNameCol = <td><LinkTo position={position} >{this.positionWithStatus(position)}</LinkTo></td>
-			positionPersonCol = (position.person && position.person.id)
+			positionPersonCol = (position.person && position.person.uuid)
 					? <td><LinkTo person={position.person} >{this.personWithStatus(position.person)}</LinkTo></td>
 					: <td className="text-danger">Unfilled</td>
 		}

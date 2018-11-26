@@ -72,14 +72,14 @@ public class PersonResource {
 	}
 	
 	/**
-	 * Returns a single person entry based on ID. 
+	 * Returns a single person entry based on UUID.
 	 */
 	@GET
 	@Timed
-	@Path("/{id}")
+	@Path("/{uuid}")
 	@GraphQLQuery(name="person")
-	public Person getById(@PathParam("id") @GraphQLArgument(name="id") int id) {
-		Person p = dao.getById(id);
+	public Person getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+		Person p = dao.getByUuid(uuid);
 		if (p == null) { throw new WebApplicationException("No such person", Status.NOT_FOUND); }
 		return p;
 	}
@@ -88,9 +88,9 @@ public class PersonResource {
 	/**
 	 * Creates a new {@link Person} object as supplied in http entity. 
 	 * Optional: 
-	 * - position: If you provide a Position ID number in the Position object, 
+	 * - position: If you provide a Position UUID number in the Position object,
 	 *     this person will be associated with that position (Potentially removing anybody currently in the position)
-	 * @return the same Person object with the ID field filled in. 
+	 * @return the same Person object with the UUID field filled in.
 	 */
 	@POST
 	@Timed
@@ -105,8 +105,8 @@ public class PersonResource {
 			validateEmail(p.getEmailAddress());
 		}
 
-		if (p.getPosition() != null && p.getPosition().getId() != null) { 
-			Position position = AnetObjectEngine.getInstance().getPositionDao().getById(p.getPosition().getId());
+		if (p.getPosition() != null && p.getPosition().getUuid() != null) {
+			Position position = AnetObjectEngine.getInstance().getPositionDao().getByUuid(p.getPosition().getUuid());
 			if (position == null) { 
 				throw new WebApplicationException("Position " + p.getPosition() + " does not exist", Status.BAD_REQUEST);
 			}
@@ -131,7 +131,7 @@ public class PersonResource {
 	}
 
 	private boolean canUpdatePerson(Person editor, Person subject) {
-		if (editor.getId().equals(subject.getId())) {
+		if (editor.getUuid().equals(subject.getUuid())) {
 			return true;
 		}
 		Position editorPos = editor.getPosition();
@@ -172,7 +172,7 @@ public class PersonResource {
 	}
 
 	private int updatePersonCommon(Person user, Person p) {
-		Person existing = dao.getById(p.getId());
+		Person existing = dao.getByUuid(p.getUuid());
 		if (canUpdatePerson(user, existing) == false) {
 			throw new WebApplicationException("You do not have permissions to edit this person", Status.FORBIDDEN);
 		}
@@ -185,17 +185,17 @@ public class PersonResource {
 		if (p.getPosition() != null) {
 			//Maybe update position? 
 			Position existingPos = existing.loadPosition();
-			if (existingPos == null && p.getPosition().getId() != null) {
+			if (existingPos == null && p.getPosition().getUuid() != null) {
 				//Update the position for this person.
 				AuthUtils.assertSuperUser(user);
 				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(p, p.getPosition());
 				AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
-			} else if (existingPos != null && existingPos.getId().equals(p.getPosition().getId()) == false) {
+			} else if (existingPos != null && existingPos.getUuid().equals(p.getPosition().getUuid()) == false) {
 				//Update the position for this person.
 				AuthUtils.assertSuperUser(user);
 				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(p, p.getPosition());
 				AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
-			} else if (existingPos != null && p.getPosition().getId() == null) {
+			} else if (existingPos != null && p.getPosition().getUuid() == null) {
 				//Remove this person from their position.
 				AuthUtils.assertSuperUser(user);
 				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos);
@@ -214,7 +214,7 @@ public class PersonResource {
 			Position existingPos = existing.loadPosition();
 			if (existingPos != null) { 
 				// A user can reset 'themselves' if the account was incorrect ("This is not me")
-				if (!user.getId().equals(p.getId())) {
+				if (!user.getUuid().equals(p.getUuid())) {
 					// Otherwise needs to be at least super user
 					AuthUtils.assertSuperUser(user);
 				}
@@ -264,14 +264,14 @@ public class PersonResource {
 	
 	/**
 	 * Fetches the current position that a given person  is in. 
-	 * @param personId the ID number of the person whose position you want to lookup
+	 * @param uuid the UUID of the person whose position you want to lookup
 	 */
 	@GET
 	@Timed
-	@Path("/{id}/position")
-	public Position getPositionForPerson(@PathParam("personId") int personId) {
+	@Path("/{uuid}/position")
+	public Position getPositionForPerson(@PathParam("uuid") String uuid) {
 		//TODO: it doesn't seem to be used
-		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(Person.createWithId(personId));
+		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(Person.createWithUuid(uuid));
 	}
 	
 	/** 
@@ -305,22 +305,22 @@ public class PersonResource {
 	@Path("/merge")
 	@RolesAllowed("ADMINISTRATOR")
 	public Response mergePeople(@Auth Person user,
-			@QueryParam("winner") int winnerId,
-			@QueryParam("loser") int loserId,
+			@QueryParam("winner") String winnerUuid,
+			@QueryParam("loser") String loserUuid,
 			@QueryParam("copyPosition") @DefaultValue("false") Boolean copyPosition) {
-		mergePeopleCommon(user, winnerId, loserId, copyPosition);
+		mergePeopleCommon(user, winnerUuid, loserUuid, copyPosition);
 		return Response.ok().build();
 	}
 
-	private int mergePeopleCommon(Person user, int winnerId, int loserId, Boolean copyPosition) {
-		if (loserId == winnerId) {
+	private int mergePeopleCommon(Person user, String winnerUuid, String loserUuid, Boolean copyPosition) {
+		if (loserUuid.equals(winnerUuid)) {
 			throw new WebApplicationException("You selected the same person twice", Status.NOT_ACCEPTABLE);
 		}
-		Person winner = dao.getById(winnerId);
+		Person winner = dao.getByUuid(winnerUuid);
 		if (winner == null) {
 			throw new WebApplicationException("Winner not found", Status.NOT_FOUND);
 		}
-		Person loser = dao.getById(loserId);
+		Person loser = dao.getByUuid(loserUuid);
 		if (loser == null) {
 			throw new WebApplicationException("Loser not found", Status.NOT_FOUND);
 		}
@@ -362,11 +362,11 @@ public class PersonResource {
 	@GraphQLMutation(name="mergePeople")
 	@RolesAllowed("ADMINISTRATOR")
 	public Integer mergePeople(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="winnerId") int winnerId,
-			@GraphQLArgument(name="loserId") int loserId,
+			@GraphQLArgument(name="winnerUuid") String winnerUuid,
+			@GraphQLArgument(name="loserUuid") String loserUuid,
 			@GraphQLArgument(name="copyPosition", defaultValue="false") boolean copyPosition) {
 		// GraphQL mutations *have* to return something, so we return the number of updated rows
-		return mergePeopleCommon(DaoUtils.getUserFromContext(context), winnerId, loserId, copyPosition);
+		return mergePeopleCommon(DaoUtils.getUserFromContext(context), winnerUuid, loserUuid, copyPosition);
 	}
 
 	private void validateEmail(String emailInput) {

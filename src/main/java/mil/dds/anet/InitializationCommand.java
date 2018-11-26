@@ -3,12 +3,12 @@ package mil.dds.anet;
 import java.util.List;
 import java.util.Scanner;
 
-import org.skife.jdbi.v2.DBI;
+import org.jdbi.v3.core.Jdbi;
 
 import com.google.common.collect.ImmutableList;
 
 import io.dropwizard.cli.ConfiguredCommand;
-import io.dropwizard.jdbi.DBIFactory;
+import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import mil.dds.anet.beans.AdminSetting;
@@ -38,14 +38,14 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 
 	@Override
 	protected void run(Bootstrap<AnetConfiguration> bootstrap, Namespace namespace, AnetConfiguration configuration) throws Exception {
-		final DBIFactory factory = new DBIFactory();
+		final JdbiFactory factory = new JdbiFactory();
 		final Environment environment = new Environment(bootstrap.getApplication().getName(),
 				bootstrap.getObjectMapper(),
 				bootstrap.getValidatorFactory().getValidator(),
 				bootstrap.getMetricRegistry(),
 				bootstrap.getClassLoader(),
 				bootstrap.getHealthCheckRegistry());
-		final DBI jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
+		final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
 		final AnetObjectEngine engine = new AnetObjectEngine(jdbi);
 		
 		System.out.println("-------- WELCOME TO ANET! --------");
@@ -87,7 +87,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		adminOrg.setShortName(scanner.nextLine());
 		adminOrg.setStatus(Organization.OrganizationStatus.ACTIVE);
 		adminOrg = engine.getOrganizationDao().insert(adminOrg);
-		System.out.println("... Organization " + adminOrg.getId() + " Saved!");
+		System.out.println("... Organization " + adminOrg.getUuid() + " Saved!");
 		
 		//Create First Position
 		System.out.print("Name of Administrator Position >>");
@@ -97,7 +97,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		adminPos.setName(scanner.nextLine());
 		adminPos.setStatus(Position.PositionStatus.ACTIVE);
 		adminPos = engine.getPositionDao().insert(adminPos);
-		System.out.println("... Position " + adminPos.getId() + " Saved!");
+		System.out.println("... Position " + adminPos.getUuid() + " Saved!");
 		
 		//Create First User
 		System.out.print("Your Name [LAST NAME, First name(s)] >>");
@@ -109,18 +109,18 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		admin.setStatus(PersonStatus.ACTIVE);
 		admin = engine.getPersonDao().insert(admin);
 		engine.getPositionDao().setPersonInPosition(admin, adminPos);
-		System.out.println("... Person " + admin.getId() + " Saved!");
+		System.out.println("... Person " + admin.getUuid() + " Saved!");
 		
 		//Set Default Approval Chain.
 		System.out.println("Setting you as the default approver...");
 		AdminSetting defaultOrg = new AdminSetting();
 		defaultOrg.setKey(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION.name());
-		defaultOrg.setValue(adminOrg.getId().toString());
+		defaultOrg.setValue(adminOrg.getUuid());
 		engine.getAdminDao().saveSetting(defaultOrg);
 		
 		ApprovalStep defaultStep = new ApprovalStep();
 		defaultStep.setName("Default Approver");
-		defaultStep.setAdvisorOrganizationId(adminOrg.getId());
+		defaultStep.setAdvisorOrganizationUuid(adminOrg.getUuid());
 		defaultStep.setApprovers(ImmutableList.of(adminPos));
 		engine.getApprovalStepDao().insert(defaultStep);
 		System.out.println("DONE!");

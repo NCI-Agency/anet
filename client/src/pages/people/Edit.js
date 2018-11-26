@@ -5,6 +5,7 @@ import moment from 'moment'
 
 import PersonForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
 import {Person} from 'models'
@@ -33,13 +34,14 @@ class BasePersonEdit extends Page {
 
 	fetchData(props) {
 		return API.query(/*GraphQL*/ `
-			person(id:${props.match.params.id}) {
-				id,
+			person(uuid:"${props.match.params.uuid}") {
+				uuid,
 				name, rank, role, emailAddress, phoneNumber, status, domainUsername,
 				biography, country, gender, endOfTourDate,
 				position {
-					id, name
+					uuid, name
 				}
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			if (data.person.endOfTourDate) {
@@ -60,6 +62,7 @@ class BasePersonEdit extends Page {
 
 		return (
 			<div>
+				<RelatedObjectNotes notes={person.notes} relatedObject={{relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
 				{!person.isNewUser() &&
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}

@@ -27,7 +27,7 @@ export default class SavedSearchTable extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (this.props.search && (prevProps.search.id !== this.props.search.id)) {
+		if (this.props.search && (prevProps.search.uuid !== this.props.search.uuid)) {
 			this.runSearch(this.props.search)
 		}
 	}
