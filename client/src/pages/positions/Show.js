@@ -241,7 +241,7 @@ class BasePositionShow extends Page {
 						</Fieldset>
 					</Form>
 
-					{canDelete &
+					{canDelete &&
 						<div className="submit-buttons">
 							<div>
 								<ConfirmDelete

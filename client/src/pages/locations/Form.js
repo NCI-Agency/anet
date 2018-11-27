@@ -48,7 +48,6 @@ class LocationForm extends Component {
 
 	render() {
 		const { edit, title, ...myFormProps } = this.props
-		const { initialValues } = myFormProps
 
 		function Coordinate(props) {
 			const coord = typeof props.coord === 'number' ? Math.round(props.coord * 1000) / 1000 : '?'
@@ -130,7 +129,7 @@ class LocationForm extends Component {
 					</Form>
 				</div>
 			}}
-		</Formik>
+			</Formik>
 		)
 	}
 
