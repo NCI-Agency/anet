@@ -8,7 +8,8 @@ import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
-import PositionsSelector from 'components/PositionsSelector'
+import MultiSelector from 'components/MultiSelector'
+import PositionTable from 'components/PositionTable'
 import { jumpToTop } from 'components/Page'
 
 import API from 'api'
@@ -16,6 +17,8 @@ import {AuthorizationGroup, Position} from 'models'
 
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
+
+import POSITIONS_ICON from 'resources/positions.png'
 
 class AuthorizationGroupForm extends Component {
 	static propTypes = {
@@ -96,9 +99,17 @@ class AuthorizationGroupForm extends Component {
 								buttons={this.statusButtons}
 							/>
 
-							<PositionsSelector
-								positions={values.positions}
+							<MultiSelector
+								items={values.positions}
+								objectType={Position}
 								queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]}}
+								addFieldName='positions'
+								addFieldLabel='Positions'
+								addon={POSITIONS_ICON}
+								placeholder='Start typing to search for a position...'
+								fields={Position.autocompleteQuery}
+								template={Position.autocompleteTemplate}
+								renderSelected={<PositionTable positions={values.positions} showDelete={true} />}
 								onChange={value => setFieldValue('positions', value)}
 							/>
 						</Fieldset>
