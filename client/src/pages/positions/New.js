@@ -56,7 +56,7 @@ class PositionNew extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['New Position', Position.pathForNew()]]} />
-				<PositionForm initialValues={position} title='Create a new position' />
+				<PositionForm initialValues={position} title='Create a new Position' />
 			</div>
 		)
 	}

@@ -28,7 +28,7 @@ class LocationNew extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['New Location', Location.pathForNew()]]} />
-				<LocationForm initialValues={location} title='Create a new location' />
+				<LocationForm initialValues={location} title='Create a new Location' />
 			</div>
 		)
 	}
