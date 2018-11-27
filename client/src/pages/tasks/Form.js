@@ -127,15 +127,16 @@ class BaseTaskForm extends Component {
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('responsibleOrg', value)}
 								addon={ORGANIZATION_ICON}
-							>
-								<NewAutocomplete
-									objectType={Organization}
-									valueKey="shortName"
-									fields={Organization.autocompleteQuery}
-									placeholder={`Select a responsible organization for this ${TaskDefs.shortLabel}`}
-									queryParams={orgSearchQuery}
-								/>
-							</Field>
+								widget={
+									<NewAutocomplete
+										objectType={Organization}
+										valueKey="shortName"
+										fields={Organization.autocompleteQuery}
+										placeholder={`Select a responsible organization for this ${TaskDefs.shortLabel}`}
+										queryParams={orgSearchQuery}
+									/>
+								}
+							/>
 
 							{TaskDefs.customFieldRef1 &&
 								<this.TaskCustomFieldRef1
@@ -144,16 +145,17 @@ class BaseTaskForm extends Component {
 									component={FieldHelper.renderSpecialField}
 									onChange={value => setFieldValue('customFieldRef1', value)}
 									addon={TASK_ICON}
-								>
-									<NewAutocomplete
-										objectType={Task}
-										valueKey="shortName"
-										fields={Task.autocompleteQuery}
-										template={Task.autocompleteTemplate}
-										placeholder={TaskDefs.customFieldRef1.placeholder}
-										queryParams={{}}
-									/>
-								</this.TaskCustomFieldRef1>
+									widget={
+										<NewAutocomplete
+											objectType={Task}
+											valueKey="shortName"
+											fields={Task.autocompleteQuery}
+											template={Task.autocompleteTemplate}
+											placeholder={TaskDefs.customFieldRef1.placeholder}
+											queryParams={{}}
+										/>
+									}
+								/>
 							}
 
 							<this.TaskCustomField
@@ -169,9 +171,10 @@ class BaseTaskForm extends Component {
 									component={FieldHelper.renderSpecialField}
 									onChange={(value, formattedValue) => setFieldValue('plannedCompletion', value)}
 									addon={CALENDAR_ICON}
-								>
-									<DatePicker showTodayButton placeholder={TaskDefs.plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
-								</this.PlannedCompletionField>
+									widget={
+										<DatePicker showTodayButton placeholder={TaskDefs.plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
+									}
+								/>
 							}
 
 							{TaskDefs.projectedCompletion &&
@@ -181,9 +184,10 @@ class BaseTaskForm extends Component {
 									component={FieldHelper.renderSpecialField}
 									onChange={(value, formattedValue) => setFieldValue('projectedCompletion', value)}
 									addon={CALENDAR_ICON}
-								>
-									<DatePicker showTodayButton placeholder={TaskDefs.projectedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
-								</this.ProjectedCompletionField>
+									widget={
+										<DatePicker showTodayButton placeholder={TaskDefs.projectedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
+									}
+								/>
 							}
 
 							{TaskDefs.customFieldEnum1 &&

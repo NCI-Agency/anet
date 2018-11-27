@@ -134,9 +134,9 @@ export const renderSpecialField = ({
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => {
-	const {label, children, addon, extraColElem, ...otherProps} = props
-	const widgetElem = React.cloneElement(children, {...field, ...otherProps})
-	return renderField(field, label, form, widgetElem, undefined, extraColElem, addon)
+	const {label, widget, children, addon, extraColElem, ...otherProps} = props
+	const widgetElem = React.cloneElement(widget, {...field, ...otherProps})
+	return renderField(field, label, form, widgetElem, children, extraColElem, addon)
 }
 
 export const renderButtonToggleGroup = ({

@@ -174,16 +174,17 @@ class BasePositionForm extends Component {
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('organization', value)}
 								addon={ORGANIZATION_ICON}
-							>
-								<NewAutocomplete
-									objectType={Organization}
-									valueKey="shortName"
-									fields={Organization.autocompleteQuery}
-									placeholder="Select the organization for this position"
-									queryParams={orgSearchQuery}
-									template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
-								/>
-							</Field>
+								widget={
+									<NewAutocomplete
+										objectType={Organization}
+										valueKey="shortName"
+										fields={Organization.autocompleteQuery}
+										placeholder="Select the organization for this position"
+										queryParams={orgSearchQuery}
+										template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
+									/>
+								}
+							/>
 
 							<this.CodeFieldWithLabel
 								dictProps={positionSettings.code}
@@ -211,15 +212,16 @@ class BasePositionForm extends Component {
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('location', value)}
 								addon={LOCATION_ICON}
-							>
-								<NewAutocomplete
-									objectType={Location}
-									valueKey="name"
-									fields={Location.autocompleteQuery}
-									placeholder="Start typing to find a location where this Position will operate from..."
-									queryParams={{status: Location.STATUS.ACTIVE}}
-								/>
-							</Field>
+								widget={
+									<NewAutocomplete
+										objectType={Location}
+										valueKey="name"
+										fields={Location.autocompleteQuery}
+										placeholder="Start typing to find a location where this Position will operate from..."
+										queryParams={{status: Location.STATUS.ACTIVE}}
+									/>
+								}
+							/>
 						</Fieldset>
 
 						<div className="submit-buttons">
