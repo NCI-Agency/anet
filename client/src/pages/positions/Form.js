@@ -233,7 +233,7 @@ class BasePositionForm extends Component {
 					</Form>
 				</div>
 			}}
-		</Formik>
+			</Formik>
 		)
 	}
 
