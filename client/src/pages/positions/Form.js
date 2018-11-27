@@ -152,9 +152,9 @@ class BasePositionForm extends Component {
 						<Fieldset>
 							<Field
 								name="type"
-								component={FieldHelper.renderButtonToggleGroup}
+								component={this.props.edit ? FieldHelper.renderReadonlyField : FieldHelper.renderButtonToggleGroup}
+								humanValue={Position.humanNameOfType}
 								buttons={this.typeButtons}
-								disabled={this.props.edit}
 							/>
 
 							<Field

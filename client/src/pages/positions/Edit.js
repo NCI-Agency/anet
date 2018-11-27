@@ -37,16 +37,7 @@ class PositionEdit extends Page {
 				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
-			function getPositionFromData() {
-				const position = new Position(data.position)
-				if ([Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR].includes(position.type)) {
-					// For advisor types of positions, set the type to ADVISOR.
-					position.type = Position.TYPE.ADVISOR
-				}
-				return position
-			}
-
-			this.setState({position: getPositionFromData()})
+			this.setState({position: new Position(data.position)})
 		})
 	}
 
