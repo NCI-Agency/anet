@@ -74,11 +74,13 @@ const renderField = (field, label, form, widgetElem, children, extraColElem, add
 	const id = getFieldId(field)
 	const validationState = getFormGroupValidationState(field, form)
 
+	// setting label or extraColElem explicitly to null will completely remove these columns!
+	const widgetWidth = 12 - (label === null ? 0 : 2) - (extraColElem === null ? 0 : 3)
 	// controlId prop of the FormGroup sets the id of the control element
 	return (
 		<FormGroup controlId={id} validationState={validationState}>
-			<Col sm={2} componentClass={ControlLabel}>{label}</Col>
-			<Col sm={7}>
+			{label !== null && <Col sm={2} componentClass={ControlLabel}>{label}</Col>}
+			<Col sm={widgetWidth}>
 				<div>
 					{widget}
 					{getHelpBlock(field, form)}

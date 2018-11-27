@@ -18,7 +18,8 @@ export default class MultiSelectAutocomplete extends Component {
 		onRemoveItem: PropTypes.func,
 		shortcuts: PropTypes.array,
 		shortcutsTitle: PropTypes.string,
-		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
+		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 
 		//Needed for the autocomplete widget
 		//Required: ANET Object Type (Person, Report, etc) to search for.
@@ -37,10 +38,11 @@ export default class MultiSelectAutocomplete extends Component {
 		addFieldLabel: 'Add item',
 		shortcuts: [],
 		shortcutsTitle: 'Recents',
+		renderExtraCol: true,
 	}
 
 	render() {
-		const {addFieldName, addFieldLabel, renderSelected, items, onAddItem, onRemoveItem, shortcuts, shortcutsTitle, addon, ...autocompleteProps} = this.props
+		const {addFieldName, addFieldLabel, renderSelected, items, onAddItem, onRemoveItem, shortcuts, shortcutsTitle, renderExtraCol, addon, ...autocompleteProps} = this.props
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		return (
 			<Field
@@ -50,7 +52,7 @@ export default class MultiSelectAutocomplete extends Component {
 				excludeValues={items}
 				onChange={this.addItem}
 				addon={addon}
-				extraColElem={this.renderShortcuts()}
+				extraColElem={renderExtraCol ? this.renderShortcuts() : null}
 				widget={
 					<NewAutocomplete
 						clearOnSelect={true}
@@ -89,9 +91,9 @@ export default class MultiSelectAutocomplete extends Component {
 		}
 	}
 
-	removeItem = (item, index) => {
-		if (this.props.items[index] !== 'undefined') {
-			this.props.onRemoveItem(item, index)
+	removeItem = (oldItem) => {
+		if (this.props.items.find(obj => obj.uuid === oldItem.uuid)) {
+			this.props.onRemoveItem(oldItem)
 		}
 	}
 }

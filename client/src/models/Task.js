@@ -8,6 +8,7 @@ import * as yup from 'yup'
 
 export const {
 	shortLabel,
+	longLabel,
 	customFieldRef1,
 	customField,
 	customFieldEnum1,
