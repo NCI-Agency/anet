@@ -1,9 +1,8 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
+import AuthorizationGroupForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import Messages from 'components/Messages'
-import AuthorizationGroupForm from 'pages/admin/authorizationgroup/Form'
 
 import {AuthorizationGroup} from 'models'
 
@@ -12,26 +11,24 @@ import { connect } from 'react-redux'
 
 class AuthorizationGroupNew extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
+
+	state = {
+		authorizationGroup: new AuthorizationGroup(),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			authorizationGroup: new AuthorizationGroup(),
-			originalAuthorizationGroup : new AuthorizationGroup()
-		}
 	}
 
 	render() {
-		let authorizationGroup = this.state.authorizationGroup
-
+		const { authorizationGroup } = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new authorization group', AuthorizationGroup.pathForNew()]]} />
-				<Messages success={this.state.success} error={this.state.error} />
-
-				<AuthorizationGroupForm original={this.state.originalAuthorizationGroup} authorizationGroup={authorizationGroup} />
+				<Breadcrumbs items={[['New Authorization Group', AuthorizationGroup.pathForNew()]]} />
+				<AuthorizationGroupForm initialValues={authorizationGroup} title='Create a new Authorization Group' />
 			</div>
 		)
 	}

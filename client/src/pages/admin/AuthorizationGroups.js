@@ -35,7 +35,7 @@ class AuthorizationGroups extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['Authorization Groups', '/admin/authorizationGroups']]} />
-				<Fieldset title='Authorization groups' id='12'>
+				<Fieldset title='Authorization Groups'>
 					<AuthorizationGroupTable authorizationGroups={this.state.authorizationGroups} />
 				</Fieldset>
 			</div>
