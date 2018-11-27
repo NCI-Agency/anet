@@ -5,7 +5,7 @@ import autobind from 'autobind-decorator'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Form from 'components/Form'
 import {Grid, Col, Row, Alert, Button, Checkbox} from 'react-bootstrap'
-import Autocomplete from 'components/Autocomplete'
+import NewAutocomplete from 'components/NewAutocomplete'
 import LinkTo from 'components/LinkTo'
 import moment from 'moment'
 import Messages from 'components/Messages'
@@ -60,7 +60,7 @@ class MergePeople extends Page {
 								<h2>Loser</h2>
 							</Row>
 							<Row>
-								<Autocomplete valueKey="name"
+								<NewAutocomplete valueKey="name"
 									value={loser}
 									placeholder="Select the duplicate person"
 									objectType={Person}
@@ -82,7 +82,7 @@ class MergePeople extends Page {
 								<h2>Winner</h2>
 							</Row>
 							<Row>
-								<Autocomplete valueKey="name"
+								<NewAutocomplete valueKey="name"
 									value={winner}
 									placeholder="Select the OTHER duplicate person"
 									objectType={Person}

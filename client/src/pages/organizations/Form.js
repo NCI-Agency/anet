@@ -8,6 +8,7 @@ import Fieldset from 'components/Fieldset'
 import Form from 'components/Form'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Autocomplete from 'components/Autocomplete'
+import NewAutocomplete from 'components/NewAutocomplete'
 import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
 import Messages from 'components/Messages'
@@ -76,7 +77,7 @@ class BaseOrganizationForm extends ValidatableFormWrapper {
 				</Form.Field>
 
 				<Form.Field id="parentOrg" label="Parent organization">
-					<Autocomplete
+					<NewAutocomplete
 						objectType={Organization}
 						valueKey="shortName"
 						fields={Organization.autocompleteQuery}

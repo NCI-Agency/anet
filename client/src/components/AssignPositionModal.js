@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
-import Autocomplete from 'components/Autocomplete'
+import NewAutocomplete from 'components/NewAutocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Position, Person} from 'models'
 import LinkTo from 'components/LinkTo'
@@ -74,7 +74,7 @@ class BaseAssignPositionModal extends Component {
 								<b>Select a position</b>
 							</Col>
 							<Col md={10}>
-								<Autocomplete valueKey="name"
+								<NewAutocomplete valueKey="name"
 									placeholder="Select a position for this person"
 									objectType={Position}
 									fields={'uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name }'}

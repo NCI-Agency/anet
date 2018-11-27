@@ -12,6 +12,7 @@ import Form from 'components/Form'
 import RichTextEditor from 'components/RichTextEditor'
 import AuthorizationGroupsSelector from 'components/AuthorizationGroupsSelector'
 import Autocomplete from 'components/Autocomplete'
+import NewAutocomplete from 'components/NewAutocomplete'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import TaskSelector from 'components/TaskSelector'
 import LinkTo from 'components/LinkTo'
@@ -239,7 +240,7 @@ class BaseReportForm extends ValidatableFormWrapper {
 
 					<Form.Field id="location" addon={LOCATION_ICON} validationState={errors.location} className="location-form-group"
 						postInputGroupChildren={errors.location && invalidInputWarningMessage}>
-						<Autocomplete
+						<NewAutocomplete
 							objectType={Location}
 							valueKey="name"
 							fields={Location.autocompleteQuery}
