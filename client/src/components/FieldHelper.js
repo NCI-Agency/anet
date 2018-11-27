@@ -42,7 +42,7 @@ const renderFieldNoLabel = (field, form, widgetElem, children) => {
 	return (
 		<FormGroup controlId={id} validationState={validationState}>
 			{widgetElem}
-			{getHelpBlock(field)}
+			{getHelpBlock(field, form)}
 			{children}
 		</FormGroup>
 	)
