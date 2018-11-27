@@ -18,6 +18,7 @@ export default class NewAutocomplete extends Component {
 		value: PropTypes.oneOfType([
 			PropTypes.object,
 			PropTypes.string,
+			PropTypes.array, // MultiSelectAutocomplete
 		]),
 
 		//The property of the selected object to display.
