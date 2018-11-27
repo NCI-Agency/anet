@@ -62,7 +62,7 @@ class BasePersonEdit extends Page {
 
 		return (
 			<div>
-				<RelatedObjectNotes notes={person.notes} relatedObject={{relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
+				<RelatedObjectNotes notes={person.notes} relatedObject={person.uuid && {relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
 				{!person.isNewUser() &&
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}

@@ -111,7 +111,7 @@ class BasePositionShow extends Page {
 						/>
 					</div>
 
-					<RelatedObjectNotes notes={position.notes} relatedObject={{relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
+					<RelatedObjectNotes notes={position.notes} relatedObject={position.uuid && {relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
 					<Breadcrumbs items={[[`Position ${position.name}`, Position.pathFor(position)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">

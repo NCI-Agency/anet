@@ -54,7 +54,7 @@ class PositionEdit extends Page {
 		const { position } = this.state
 		return (
 			<div>
-				<RelatedObjectNotes notes={position.notes} relatedObject={{relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
+				<RelatedObjectNotes notes={position.notes} relatedObject={position.uuid && {relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
 				<Breadcrumbs items={[[`Position ${position.name}`, Position.pathFor(position)], ["Edit", Position.pathForEdit(position)]]} />
 				<PositionForm edit initialValues={position} title={`Position ${position.name}`} />
 			</div>

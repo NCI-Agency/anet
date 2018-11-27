@@ -208,7 +208,7 @@ class BaseOrganizationShow extends Page {
 					/>
 				</div>}
 
-				<RelatedObjectNotes notes={org.notes} relatedObject={{relatedObjectType: 'organizations', relatedObjectUuid: org.uuid}} />
+				<RelatedObjectNotes notes={org.notes} relatedObject={org.uuid && {relatedObjectType: 'organizations', relatedObjectUuid: org.uuid}} />
 				<Breadcrumbs items={[[org.shortName || 'Organization', Organization.pathFor(org)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 

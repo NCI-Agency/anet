@@ -168,7 +168,7 @@ class BaseReportShow extends Page {
 
 		return (
 			<div className="report-show">
-				<RelatedObjectNotes notes={report.notes} relatedObject={{relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
+				<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 				<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
