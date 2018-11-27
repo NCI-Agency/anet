@@ -1,4 +1,5 @@
 import Model from 'components/Model'
+import utils from 'utils'
 
 import * as yup from 'yup'
 
@@ -23,6 +24,10 @@ export default class Location extends Model {
 
 	static hasCoordinates(location) {
 		return location && typeof location.lat === 'number' && typeof location.lng === 'number'
+	}
+
+	static humanNameOfStatus(status) {
+		return utils.sentenceCase(status)
 	}
 
 	constructor(props) {

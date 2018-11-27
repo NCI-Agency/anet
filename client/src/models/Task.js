@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Model from 'components/Model'
+import utils from 'utils'
 import Settings from 'Settings'
 
 import * as yup from 'yup'
@@ -61,6 +62,10 @@ export default class Task extends Model {
 
 	static autocompleteTemplate(task) {
 		return <span>{[task.shortName, task.longName].join(' - ')}</span>
+	}
+
+	static humanNameOfStatus(status) {
+		return utils.sentenceCase(status)
 	}
 
 	constructor(props) {

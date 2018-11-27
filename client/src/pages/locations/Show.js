@@ -112,6 +112,7 @@ class BaseLocationShow extends Page {
 							<Field
 								name="status"
 								component={FieldHelper.renderReadonlyField}
+								humanValue={Location.humanNameOfStatus}
 							/>
 
 							<Field

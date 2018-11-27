@@ -1,6 +1,7 @@
 import React from 'react'
 
 import Model from 'components/Model'
+import utils from 'utils'
 import Settings from 'Settings'
 
 import * as yup from 'yup'
@@ -55,6 +56,10 @@ export default class Position extends Model {
 			<img src={(new Position(position)).iconUrl()} alt={position.type} height={20} className="position-icon" />
 			{position.name}
 		</span>
+	}
+
+	static humanNameOfStatus(status) {
+		return utils.sentenceCase(status)
 	}
 
 	static humanNameOfType(type) {

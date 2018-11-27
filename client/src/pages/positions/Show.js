@@ -132,11 +132,13 @@ class BasePositionShow extends Page {
 							<Field
 								name="type"
 								component={FieldHelper.renderReadonlyField}
+								humanValue={Position.humanNameOfType}
 							/>
 
 							<Field
 								name="status"
 								component={FieldHelper.renderReadonlyField}
+								humanValue={Position.humanNameOfStatus}
 							/>
 
 							{position.organization &&

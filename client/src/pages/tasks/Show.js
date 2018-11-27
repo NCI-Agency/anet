@@ -117,6 +117,7 @@ class BaseTaskShow extends Page {
 							<Field
 								name="status"
 								component={FieldHelper.renderReadonlyField}
+								humanValue={Task.humanNameOfStatus}
 							/>
 
 							<Field
