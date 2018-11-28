@@ -93,8 +93,7 @@ class BaseTopBar extends Component {
                 <div>
                     <GeneralBanner options={this.bannerOptions()} />
                     <SecurityBanner location={this.props.location} />
-                    {/* Todo remove check for currentUser.id below once initial state is handled better */}
-                    {currentUser && currentUser.id && !currentUser.hasActivePosition() && !currentUser.isNewUser() && <NoPositionBanner />}
+                    {currentUser && !currentUser.hasActivePosition() && !currentUser.isNewUser() && <NoPositionBanner />}
                     <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
                 </div>
             </div>
