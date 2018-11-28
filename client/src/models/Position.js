@@ -44,6 +44,7 @@ export default class Position extends Model {
 		associatedPositions: yup.array().nullable().default([]),
 		previousPeople: yup.array().nullable().default([]),
 		organization: yup.object().nullable().default({})
+			// eslint-disable-next-line no-template-curly-in-string
 			.test('required-object', '${path} is required', value => value && value.uuid),
 		person: yup.object().nullable().default({}),
 		location: yup.object().nullable().default({}),
