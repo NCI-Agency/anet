@@ -32,7 +32,7 @@ export default class Organization extends Model {
 		...Model.schema,
 	}
 
-	static autocompleteQuery = "uuid, shortName, longName, identificationCode"
+	static autocompleteQuery = "uuid, shortName, longName, identificationCode, type"
 
 	isAdvisorOrg() {
 		return this.type === Organization.TYPE.ADVISOR_ORG

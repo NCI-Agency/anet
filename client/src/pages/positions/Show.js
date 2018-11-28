@@ -42,7 +42,6 @@ class BasePositionShow extends Page {
 	CodeFieldWithLabel = DictionaryField(Field)
 	state = {
 		position: new Position(),
-				//associatedPositions: [],
 		success: null,
 		error: null,
 		showAssignPersonModal: false,

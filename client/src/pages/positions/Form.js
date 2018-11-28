@@ -92,34 +92,11 @@ class BasePositionForm extends Component {
 	render() {
 		const { currentUser, edit, title, ...myFormProps } = this.props
 		const { initialValues } = myFormProps
-
 		// For advisor types of positions, add permissions property.
 		// The permissions property allows selecting a
 		// specific advisor type and is removed in the onSubmit method.
 		if ([Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR].includes(initialValues.type)) {
 			initialValues.permissions = initialValues.type
-		}
-
-		const isPrincipal = initialValues.type === Position.TYPE.PRINCIPAL
-		const positionSettings = isPrincipal ? PositionDefs.principalPosition : PositionDefs.advisorPosition
-
-		const isAdmin = currentUser && currentUser.isAdmin()
-		const permissionsButtons = isAdmin ? this.adminPermissionsButtons : this.nonAdminPermissionsButtons
-
-		const orgSearchQuery = {status: Organization.STATUS.ACTIVE}
-		if (initialValues.isPrincipal()) {
-			orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
-		} else {
-			orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
-			if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
-				orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
-				orgSearchQuery.parentOrgRecursively = true
-			}
-		}
-
-		// Reset the organization property when changing the organization type
-		if (initialValues.organization && initialValues.organization.type && (initialValues.organization.type !== orgSearchQuery.type)) {
-			initialValues.organization = {}
 		}
 
 		return (
@@ -140,6 +117,26 @@ class BasePositionForm extends Component {
 				values,
 				submitForm
 			}) => {
+				const isPrincipal = values.type === Position.TYPE.PRINCIPAL
+				const positionSettings = isPrincipal ? PositionDefs.principalPosition : PositionDefs.advisorPosition
+
+				const isAdmin = currentUser && currentUser.isAdmin()
+				const permissionsButtons = isAdmin ? this.adminPermissionsButtons : this.nonAdminPermissionsButtons
+
+				const orgSearchQuery = {status: Organization.STATUS.ACTIVE}
+				if (isPrincipal) {
+					orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
+				} else {
+					orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
+					if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
+						orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
+						orgSearchQuery.parentOrgRecursively = true
+					}
+				}
+				// Reset the organization property when changing the organization type
+				if (values.organization && values.organization.type && (values.organization.type !== orgSearchQuery.type)) {
+					values.organization = {}
+				}
 				const willAutoKickPerson = values.status === Position.STATUS.INACTIVE && values.person && values.person.uuid
 				const action = <div>
 					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Position</Button>
@@ -205,11 +202,13 @@ class BasePositionForm extends Component {
 								placeholder="Name/Description of Position"
 							/>
 
-							<Field
-								name="permissions"
-								component={FieldHelper.renderButtonToggleGroup}
-								buttons={permissionsButtons}
-							/>
+							{!isPrincipal &&
+								<Field
+									name="permissions"
+									component={FieldHelper.renderButtonToggleGroup}
+									buttons={permissionsButtons}
+								/>
+							}
 						</Fieldset>
 
 						<Fieldset title="Additional information">
