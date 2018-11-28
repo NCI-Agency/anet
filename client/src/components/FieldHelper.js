@@ -29,9 +29,9 @@ const getHelpBlock = (field, form) => {
 	const fieldTouched = touched[field.name]
 	const fieldError = errors[field.name]
 	const fieldWarning = null
-	return (
+	return (fieldTouched && (fieldError || fieldWarning) &&
 		<HelpBlock>
-			{fieldTouched && (fieldError ? fieldError: fieldWarning ? fieldWarning : '')}
+			{fieldTouched && (fieldError ? fieldError: fieldWarning)}
 		</HelpBlock>
 	)
 }
