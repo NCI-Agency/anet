@@ -6,21 +6,22 @@ This document covers the steps required to deploy ANET to a server environment.
 ## Environment
 
 - **Hardware**: ANET does not have specific required hardware. Hardware recommendations are:
-	- 1x Windows Application Server (300GB HDD, 64 GB RAM, 8x CPU Cores)
-	- 1x Microsoft SQL Server (2012 or greater) Database Server. 
+	- 1x Windows Application Server (50GB HDD, 16 GB RAM, 4x CPU Cores)
+	- 1x Microsoft SQL Server (2016 or greater) Database Server. 
 - **Software**: Software requirements: 
 	- Java JRE 1.8 installed on the Application Server
 	- Administration Privileges to run processes on restricted ports (80/443)
 	- Optional: A valid SSL certificate for the domain name of the application server.
-	- Microsoft SQL Server 2012 or greater. The MS SQL database should be configured to:
+	- Microsoft SQL Server 2016 or greater. The MS SQL database should be configured to:
 		- allow connections on a static TCP/IP port `1433`
 		- fulltext module should be installed. This can be done by:
 			1. Open the Programs and Features control panel.
-			2. Select `Microsoft SQL Server 2012` and click `Change`.
+			2. Select `Microsoft SQL Server 2016` and click `Change`.
 			3. When prompted to `Add/Repair/Remove`, select `Add` and provide intallation media.
 			4. Advance through the wizard until the Feature Selection screen. Then select `Full-Text
 and Semantic Extractions for Search`.
-	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, or IE version 11 or greater)
+	- Users are required to have a modern web browser (Mozilla Firefox, Google Chrome, Microsoft Edge or other with good HTML5 support). IE11 is currently supported alhtough performance is degraded and support will be discontinued beyond Q3 2019
+	- A service manager, such as https://nssm.cc/ , can be used to install ANET as a service on Windows
 - **Network Accessibility**
 	- Users will acccess the Application Server over HTTP/HTTPS (`80`/`443`)
 	- The Application Server will access the SQL Server over port `1433` (or whatever port you have SQL configured to)
@@ -33,7 +34,7 @@ and Semantic Extractions for Search`.
 
 ## Installation Prerequisites
 
-There is no software to install on client computers, only a modern web browser (Mozilla Firefox, Google Chrome, or Microsoft IE Version 11 or greater) is required.
+There is no software to install on client computers, only a modern web browser (Mozilla Firefox, Google Chrome, or Microsoft Edge) is required.
 
 You should have the following information on hand for the installation:
 
@@ -70,7 +71,7 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 7. If imagery/maps are needed, install them according to the "How to configure imagery" section 
 8. To verify that ANET is functioning, manually launch the ANET Server: ```"bin/anet.bat" server anet.yml```
 9. Visit `http://servername` or `https://servername` (depending on SSL configuration) and verify you can see a welcome screen. In case of a problem, please refer to [TROUBLESHOOT.md](TROUBLESHOOT.md)
-10. Add a strart-up task for ANET:
+10. You can either add a strart-up task for ANET, or skip to step 11 if you wish to install it as a service:
 	* Open Task Scheduler
 	* Create task
 	* Name it "ANET"
@@ -81,17 +82,27 @@ Create a folder for the application, for example: `c:\anet`. In that location:
 		* Start a program/script: `c:\anet\bin\anet.bat`
 		* Add arguments: `server anet.yml`
 		* Start in: `c:\anet`
+11. If you have opted to install ANET as a service:
+	* Install `nssm` or other service manager
+	* Create a serive named `anet`, with:
+    *  `c:\anet` as start-up directory 
+    *  `c:\anet\bin\anet.bat` as application path
+    *  and `server anet.yml` as arguments
+    *  add the sql service as a dependency
 
 # ANET Upgrade Documentation
 On the ANET server: 
-- Stop the `"bin/anet" server anet.yml` process. This is typically done by killing the java process from the task manager
+- Stop the `"bin/anet" server anet.yml` process. This is typically done by killing the java process from the task manager, or if a service is installed by running `net stop anet`
 - Take a complete backup of your SQL Database
 - Move the `bin`, `lib` and `doc` directory to a backup directory. Make sure that `anet.yml` remain intact
 - Unzip the provided ANET distribution zip. Copy the `bin`, `lib` and `doc` from the distribution into the anet application folder, typically `c:\anet`
 - Make any required changes or upgrades to your `anet.yml` file
+- Run `bin/anet.bat check anet.yml` to verify that `anet.yml` is in the correct format
 - Run `bin/anet.bat db migrate anet.yml` to migrate your database
-- Start the server
+- Start the server, if it has been installed as a service, run `net stop anet`
 - Run through verification testing to ensure there are no issues
+
+Alternatively, an experimental service update script is available in the `doc` folder. 
 
 # ANET Configuration
 ANET is configured primarily through the `anet.yml` file. This file follows the Dropwizard configuration format ( https://www.dropwizard.io/1.3.5/docs/manual/core.html#configuration ). Here is a description of the configuration options custom to ANET:
@@ -166,16 +177,24 @@ dictionary:
         label: Projected Completion
         placeholder: 'Fill in the projected completion date'
       plannedCompletion:
-        label: 'Planned completion'
+        label: 'Planned Completion'
         placeholder: 'Fill in the planned completion date'
+      customFieldRef1:
+        label: 'Parent task'
+        placeholder: 'Start typing to search for a higher level task'
       customField:
         label: 'Custom field'
         placeholder: 'Fill in the custom field'
-      customFieldEnum:
+      customFieldEnum1:
         label: 'Project status'
         enum:
           OPEN: Open
           CLOSED: Closed
+      customFieldEnum2:
+        label: 'Custom field enum 2'
+        enum:
+          CUSTOMVALUE1: Custom value 1
+          CUSTOMVALUE2: Custom value 2
     person:
       ranks:
         - CIV
@@ -249,6 +268,10 @@ dictionary:
           - United States of America
       position:
         name: NATO Billet
+        type: ANET User
+        code:
+          label: CE Post Number
+          placeholder: the CE post number for this position
       org:
         name: Advisor Organization
         allOrgName: All EFs / AOs
@@ -265,6 +288,10 @@ dictionary:
           - Afghanistan
       position:
         name: Afghan Tashkil
+        type: Afghan Partner
+        code:
+          label: Tashkil
+          placeholder: the Afghan taskhil ID for this position
       org:
         name: Afghan Government Organization
         longName:
@@ -275,14 +302,16 @@ dictionary:
           placeholder: the six character code
     superUser:
       position:
-        name: ANET Super User
+        type: ANET Super User
     administrator:
       position:
-        name: ANET Administrator
+        type: ANET Administrator
   pinned_ORGs:
     - Key Leader Engagement
   non_reporting_ORGs:
     - ANET Administrators
+  tasking_ORGs:
+    - EF 2.2
   domainNames:
     - cmil.mil
     - mission.ita
@@ -295,11 +324,13 @@ dictionary:
       homeView:
         location: [34.52, 69.16]
         zoomLevel: 10
+      leafletOptions:
+        attributionControl: false
     baseLayers:
       - name: OSM
         default: true
         type: tile
-        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url: "https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png"
       - name: World Imagery Tiles
         default: false
         type: tile
