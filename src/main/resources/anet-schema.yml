@@ -166,6 +166,7 @@ properties:
             required:
             - name
             - type
+            - code
           org:
             type: object
             additionalProperties: false
@@ -242,6 +243,7 @@ properties:
             required:
             - name
             - type
+            - code
           org:
             type: object
             additionalProperties: false
