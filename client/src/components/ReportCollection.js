@@ -82,11 +82,10 @@ export default class ReportCollection extends Component {
 		const showHeader = (this.props.viewFormats.length > 1) || (numPages > 1)
 
 		return <div className="report-collection">
-			{reportsExist ?
 				<div>
 					{showHeader &&
 					<header>
-						{this.props.viewFormats.length > 1 &&
+						{reportsExist && this.props.viewFormats.length > 1 &&
 						<ButtonToggleGroup value={this.state.viewFormat} onChange={this.changeViewFormat} className="hide-for-print">
 							{this.props.viewFormats.includes(FORMAT_SUMMARY) && <Button value={FORMAT_SUMMARY}>Summary</Button>}
 							{this.props.viewFormats.includes(FORMAT_TABLE) && <Button value={FORMAT_TABLE}>Table</Button>}
@@ -116,11 +115,11 @@ export default class ReportCollection extends Component {
 					</header>
 					}
 
-					<div>
+					{reportsExist && <div>
 						{this.state.viewFormat === FORMAT_TABLE && this.renderTable(reports)}
 						{this.state.viewFormat === FORMAT_SUMMARY && this.renderSummary(reports)}
 						{this.state.viewFormat === FORMAT_MAP && this.renderMap(reports)}
-					</div>
+					</div>}
 
 					{numPages > 1 &&
 						<footer>
@@ -138,9 +137,7 @@ export default class ReportCollection extends Component {
 						</footer>
 					}
 				</div>
-				:
-				<em>No reports found</em>
-			}
+				{!reportsExist && <em>No reports found</em>}
 		</div>
 	}
 
