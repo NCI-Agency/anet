@@ -150,12 +150,18 @@ class BasePositionForm extends Component {
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={this.props.title} action={action} />
 						<Fieldset>
-							<Field
-								name="type"
-								component={this.props.edit ? FieldHelper.renderReadonlyField : FieldHelper.renderButtonToggleGroup}
-								humanValue={Position.humanNameOfType}
-								buttons={this.typeButtons}
-							/>
+							{this.props.edit
+								? <Field
+									name="type"
+									component={FieldHelper.renderReadonlyField}
+									humanValue={Position.humanNameOfType}
+								/>
+								: <Field
+									name="type"
+									component={FieldHelper.renderButtonToggleGroup}
+									buttons={this.typeButtons}
+								/>
+							}
 
 							<Field
 								name="status"
