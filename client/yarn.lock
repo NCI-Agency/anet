@@ -869,10 +869,10 @@ auto-bind@^1.1.0:
   resolved "https://registry.yarnpkg.com/auto-bind/-/auto-bind-1.2.1.tgz#807f7910b0210db9eefe133f3492c28e89698b96"
   integrity sha512-/W9yj1yKmBLwpexwAujeD9YHwYmRuWFGV8HWE7smQab797VeHa4/cnE2NFeDhA+E+5e/OGBI8763EhLjfZ/MXA==
 
-autobind-decorator@^2.1.0:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-2.3.1.tgz#d7ef8b752d6874ffe713f45431018a6565f9e8da"
-  integrity sha512-YQIx7zLi++ctT0sZNLKxMyNQ+fUsBJD3rnZC9PYFl8a6Nvtek45BJF/jJ1v+n1BgHYVvRKsdsW6b77S4a/1Ybw==
+autobind-decorator@2.1.0, autobind-decorator@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-2.1.0.tgz#4451240dbfeff46361c506575a63ed40f0e5bc68"
+  integrity sha512-bgyxeRi1R2Q8kWpHsb1c+lXCulbIAHsyZRddaS+agAUX3hFUVZMociwvRgeZi1zWvfqEEjybSv4zxWvFV8ydQQ==
 
 autoprefixer@^9.3.1:
   version "9.3.1"
@@ -2536,10 +2536,10 @@ chrome-trace-event@^1.0.0:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^2.43.1:
-  version "2.43.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.43.3.tgz#bf14f4134a988ce25cdea66e7dd787fec968c23a"
-  integrity sha512-QvAYKKeOMmbIv6eM3d5SZeRD+8g71trT6cbAyUBNSmIjqK1Yf6QODpz4szSWoRbtw2tBDdKEYkKvznU+cGUV4w==
+chromedriver@^2.44.0:
+  version "2.44.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.44.0.tgz#aed1d136d0ae2d43be80c69ade756ca55ebf8fc3"
+  integrity sha512-/lDFxpSc3mJG/+RF657qDVa3XbfwG8+X2x0Y3kVkvZe6u6aZg+zTMHeGoQziUQGPaDQ9sj8sFYv4duv/AS6y7A==
   dependencies:
     del "^3.0.0"
     extract-zip "^1.6.7"

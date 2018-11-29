@@ -20,7 +20,7 @@
     "babel-runtime": "^6.26.0",
     "chai": "^4.2.0",
     "chalk": "^2.4.1",
-    "chromedriver": "^2.43.1",
+    "chromedriver": "^2.44.0",
     "config": "^3.0.0",
     "copy-webpack-plugin": "^4.6.0",
     "cross-spawn": "^6.0.5",
@@ -111,6 +111,9 @@
     "redux": "^4.0.1",
     "whatwg-fetch": "^2.0.3",
     "yup": "^0.26.6"
+  },
+  "resolutions": {
+    "autobind-decorator": "2.1.0"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production --config config/webpack.prod.js",
