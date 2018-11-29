@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Model from 'components/Model'
+import Model, { yupDate } from 'components/Model'
 import utils from 'utils'
 import Settings from 'Settings'
 
@@ -52,9 +52,9 @@ export default class Task extends Model {
 			.label(customFieldEnum2.label),
 		customField: yup.string().nullable().default('')
 			.label(customField.label),
-		projectedCompletion: yup.number().nullable().default(null)
+		projectedCompletion: yupDate.nullable().default(null)
 			.label(projectedCompletion.label),
-		plannedCompletion: yup.number().nullable().default(null)
+		plannedCompletion: yupDate.nullable().default(null)
 			.label(plannedCompletion.label),
 		status: yup.string().required().default(() => Task.STATUS.ACTIVE),
 	}).concat(Model.yupSchema)

@@ -24,6 +24,7 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
+import moment from 'moment'
 import utils from 'utils'
 
 class BaseTaskForm extends Component {
@@ -169,10 +170,16 @@ class BaseTaskForm extends Component {
 									dictProps={TaskDefs.plannedCompletion}
 									name="plannedCompletion"
 									component={FieldHelper.renderSpecialField}
+									value={values.plannedCompletion && moment(values.plannedCompletion).format()}
 									onChange={(value, formattedValue) => setFieldValue('plannedCompletion', value)}
 									addon={CALENDAR_ICON}
 									widget={
-										<DatePicker showTodayButton placeholder={TaskDefs.plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
+										<DatePicker
+											showTodayButton
+											placeholder={TaskDefs.plannedCompletion.placeholder}
+											dateFormat="DD/MM/YYYY"
+											showClearButton={false}
+										/>
 									}
 								/>
 							}
@@ -182,10 +189,16 @@ class BaseTaskForm extends Component {
 									dictProps={TaskDefs.projectedCompletion}
 									name="projectedCompletion"
 									component={FieldHelper.renderSpecialField}
+									value={values.projectedCompletion && moment(values.projectedCompletion).format()}
 									onChange={(value, formattedValue) => setFieldValue('projectedCompletion', value)}
 									addon={CALENDAR_ICON}
 									widget={
-										<DatePicker showTodayButton placeholder={TaskDefs.projectedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
+										<DatePicker
+											showTodayButton
+											placeholder={TaskDefs.projectedCompletion.placeholder}
+											dateFormat="DD/MM/YYYY"
+											showClearButton={false}
+										/>
 									}
 								/>
 							}

@@ -71,8 +71,8 @@ class BaseTaskShow extends Page {
 		`)
 
 		return GQL.run([reportsQuery, taskQuery]).then(data => {
-            this.setState({
-                task: new Task(data.task),
+			this.setState({
+				task: new Task(data.task),
 				reports: data.reports,
             })
         })

@@ -1,6 +1,5 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import moment from 'moment'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
@@ -39,14 +38,7 @@ class TaskEdit extends Page {
 				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
-			const task = new Task(data.task)
-			if (data.task.plannedCompletion) {
-				task.plannedCompletion = moment(data.task.plannedCompletion).format()
-			}
-			if (data.task.projectedCompletion) {
-				task.projectedCompletion = moment(data.task.projectedCompletion).format()
-			}
-			this.setState({task})
+			this.setState({task: new Task(data.task)})
 		})
 	}
 
