@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import encodeQuery from 'querystring/encode'
 import _forEach from 'lodash/forEach'
 import utils from 'utils'
+import moment from 'moment'
 import * as yup from 'yup'
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */`
@@ -11,6 +12,13 @@ export const GRAPHQL_NOTE_FIELDS = /* GraphQL */`
 export const GRAPHQL_NOTES_FIELDS = /* GraphQL */`
 	notes { ${GRAPHQL_NOTE_FIELDS} }
 `
+export const yupDate = yup.date().transform(function(value, originalValue) {
+	if (this.isType(value)) {
+		return value
+	}
+	const newValue = moment(originalValue)
+	return newValue.isValid() ? newValue.toDate() : value
+})
 
 export default class Model {
 	static schema = {
@@ -22,13 +30,18 @@ export default class Model {
 	})
 
 	static fillObject(props, yupSchema) {
-		const obj = yupSchema.cast(props)
-		_forEach(yupSchema.fields, (value, key) => {
-			if (!obj.hasOwnProperty(key) || obj[key] === null || obj[key] === undefined) {
-				obj[key] = value.default()
-			}
-		})
-		return obj
+		try {
+			const obj = yupSchema.cast(props)
+			_forEach(yupSchema.fields, (value, key) => {
+				if (!obj.hasOwnProperty(key) || obj[key] === null || obj[key] === undefined) {
+					obj[key] = value.default()
+				}
+			})
+			return obj
+		} catch (e) {
+			console.log('Coercion exception:', e)
+			throw e
+		}
 	}
 
 	static notePropTypes = PropTypes.shape({
