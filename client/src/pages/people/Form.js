@@ -68,8 +68,8 @@ const roleButtons = ({ isAdmin, title }) => [
 ]
 class BasePersonForm extends Component {
 	static propTypes = {
-		person: PropTypes.object.isRequired,
-		original: PropTypes.object.isRequired,
+		initialValues: PropTypes.object.isRequired,
+		title: PropTypes.string,
 		edit: PropTypes.bool,
 		legendText: PropTypes.string,
 		saveText: PropTypes.string,
@@ -77,32 +77,40 @@ class BasePersonForm extends Component {
 		loadAppData: PropTypes.func,
 	}
 
+	static defaultProps = {
+		initialValues: new Person(),
+		title: '',
+		edit: false,
+	}
+
 	constructor(props) {
 		super(props)
-		const { person } = props
-		const splitName = Person.parseFullName(person.name)
 		this.state = {
 			success: null,
-			error: null,
-			isBlocking: false,
-			fullName: Person.fullName(splitName),
-			splitName: splitName,
-			originalStatus: person.status,
+			fullName: '',
+			splitName: '',
+			originalStatus: '',
 			showWrongPersonModal: false,
 			wrongPersonOptionValue: null,
 		}
+		Object.assign(this.state, this.getParsedName(props.initialValues))
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		const { person } = this.props
-		const prevPerson = prevProps.person
+		const person = this.props.initialValues
+		const prevPerson = prevProps.initialValues
 		if (person.uuid !== prevPerson.uuid) {
-			const splitName = Person.parseFullName(person.name)
-			this.setState({
-				fullName: Person.fullName(splitName),
-				splitName: splitName,
-				originalStatus: person.status,
-			})
+			const updateState = { originalStatus: person.status }
+			Object.assign(updateState, this.getParsedName(person))
+			this.setState(updateState)
+		}
+	}
+
+	getParsedName(person) {
+		const splitName = Person.parseFullName(person.name)
+		return {
+			fullName: Person.fullName(splitName),
+			splitName,
 		}
 	}
 
@@ -119,52 +127,19 @@ class BasePersonForm extends Component {
 
 	renderCountrySelectOptions = (countries) => {
 		return countries.map(country =>
-			<option key={country} value={country}>{country}</option>
+			<Field component="option" key={country} value={country} >{country}</Field>
 		)
 	}
 
 	render() {
 		const { fullName } = this.state
-		const { currentUser, person, edit, title, ...myFormProps } = this.props
-
-		if (!person) return null
-		const isAdvisor = person.isAdvisor()
-		const legendText = this.props.legendText || (edit ? `Edit Person ${fullName}` : 'Create a new Person')
-
-		const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
-		const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
-		const ranks = Settings.fields.person.ranks || []
-
-		const countries = this.countries(person)
-		if (!edit && countries.length === 1) {
-			// For new objects, assign default country if there's only one
-			person.country = countries[0]
-		}
-
-		const isAdmin = currentUser && currentUser.isAdmin()
-		const isSelf = Person.isEqual(currentUser, person)
-		// anyone with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
-		const disableStatusChange = (this.state.originalStatus === Person.STATUS.INACTIVE && !isAdmin) || isSelf
-		// admins can edit all persons, new users can be edited by super users or themselves
-		const canEditName = isAdmin || (
-				(person.isNewUser() || !edit) && currentUser && (
-						currentUser.isSuperUser() ||
-						isSelf
-				)
-			)
-		const nameMessage = "This is not " + (isSelf ? "me" : fullName)
-		const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
-
-		const confirmLabel = this.state.wrongPersonOptionValue === 'needNewAccount'
-				? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
-				: 'Yes, I would like to inactivate this account'
-		const advisorSingular = Settings.fields.advisor.person.name
-		const advisorPlural = pluralize(advisorSingular)
-		const superUserAdvisorTitle = isAdmin ? null : `Super users cannot create ${advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${advisorPlural} have the correct domain name associated with their profile, it is required that each new ${advisorSingular} individually logs into ANET and creates their own ANET profile.`
+		const { currentUser, edit, title, ...myFormProps } = this.props
 
 		return <Formik
-			enableReinitialize={true}
+			enableReinitialize
 			onSubmit={this.onSubmit}
+			validationSchema={Person.yupSchema}
+			isInitialValid={() => Person.yupSchema.isValidSync(this.props.initialValues)}
 			{...myFormProps}
 		>
 		{({
@@ -177,9 +152,44 @@ class BasePersonForm extends Component {
 			values,
 			submitForm
 		}) => {
-			const action = <div>
-				<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save person</Button>
-			</div>
+			const person = new Person(values)
+			const isSelf = Person.isEqual(currentUser, person)
+			const isAdmin = currentUser && currentUser.isAdmin()
+			const isAdvisor = person.isAdvisor()
+			const legendText = this.props.legendText || (edit ? `Edit Person ${fullName}` : 'Create a new Person')
+
+			const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
+			const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
+			const ranks = Settings.fields.person.ranks || []
+
+			const countries = this.countries(person)
+			if (!edit && countries.length === 1) {
+				// For new objects, assign default country if there's only one
+				person.country = countries[0]
+			}
+			// anyone with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
+			const disableStatusChange = (this.state.originalStatus === Person.STATUS.INACTIVE && !isAdmin) || isSelf
+			// admins can edit all persons, new users can be edited by super users or themselves
+			const canEditName = isAdmin || (
+					(person.isNewUser() || !edit) && currentUser && (
+							currentUser.isSuperUser() ||
+							isSelf
+					)
+				)
+
+			const advisorSingular = Settings.fields.advisor.person.name
+			const advisorPlural = pluralize(advisorSingular)
+			const superUserAdvisorTitle = isAdmin ? null : `Super users cannot create ${advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${advisorPlural} have the correct domain name associated with their profile, it is required that each new ${advisorSingular} individually logs into ANET and creates their own ANET profile.`
+			const nameMessage = "This is not " + (isSelf ? "me" : fullName)
+			const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
+			const confirmLabel = this.state.wrongPersonOptionValue === 'needNewAccount'
+					? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
+					: 'Yes, I would like to inactivate this account'
+
+			const action = <React.Fragment>
+				<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Person</Button>
+			</React.Fragment>
+
 			return <React.Fragment>
 				<NavigationWarning isBlocking={dirty} />
 				<Form className="form-horizontal" method="post">
@@ -285,7 +295,7 @@ class BasePersonForm extends Component {
 							<Field
 								name="role"
 								component={FieldHelper.renderReadonlyField}
-								value={person.humanNameOfRole}
+								value={person.humanNameOfRole()}
 							/>
 								:
 							<Field
@@ -335,6 +345,7 @@ class BasePersonForm extends Component {
 							name="emailAddress"
 							label="Email"
 							type="email"
+							validate={(email) => this.handleEmailValidation(email, person)}
 							component={FieldHelper.renderInputField}
 						/>
 						<Field
@@ -345,51 +356,57 @@ class BasePersonForm extends Component {
 						<Field
 							name="rank"
 							component={FieldHelper.renderSpecialField}
-						>
-							<Field component="select">
-								<option />
-								{ranks.map(rank =>
-									<option key={rank} value={rank}>{rank}</option>
-								)}
-							</Field>
-						</Field>
+							widget={
+								<Field component="select" className="form-control" >
+									<Field component="option" />
+									{ranks.map(rank =>
+											<Field component="option" key={rank} value={rank} >{rank}</Field>
+										)
+									}
+								</Field>
+							}
+						/>
 						<Field
 							name="gender"
 							component={FieldHelper.renderSpecialField}
-						>
-							<Field component="select">
-								<option />
-								<option value="MALE" >Male</option>
-								<option value="FEMALE" >Female</option>
-							</Field>
-						</Field>
+							widget={
+								<Field component="select" className="form-control" >
+									<Field component="option" value="MALE" >Male</Field>
+									<Field component="option" value="FEMALE" >Female</Field>
+								</Field>
+							}
+						/>
 						<Field
 							name="country"
 							label="Nationality"
 							component={FieldHelper.renderSpecialField}
-						>
-							<Field component="select">
-								<option />
-								{this.renderCountrySelectOptions(countries)}
-							</Field>
-						</Field>
+							value={person.country}
+							widget={
+								<Field component="select" className="form-control" >
+									<Field component="option" />
+									{this.renderCountrySelectOptions(countries)}
+								</Field>
+							}
+						/>
 						<Field
 							name="endOfTourDate"
 							label="End of tour"
 							component={FieldHelper.renderSpecialField}
 							onChange={(value, formattedValue) => setFieldValue('endOfTourDate', value)}
 							addon={CALENDAR_ICON}
-						>
-							<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
-						</Field>
+							widget={
+								<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
+							}
+						/>
 						<Field
 							name="biography"
+							className="biography"
 							component={FieldHelper.renderSpecialField}
 							onChange={(value) => setFieldValue('biography', value)}
-							className="biography"
-						>
-							<RichTextEditor />
-						</Field>
+							widget={
+								<RichTextEditor />
+							}
+						/>
 					</Fieldset>
 					<div className="submit-buttons">
 						<div>
@@ -437,32 +454,22 @@ class BasePersonForm extends Component {
 		})
 	}
 
-	@autobind
-	onChange() {
-		const person = Object.without(this.props.person, 'firstName', 'lastName')
-		this.setState({
-			isBlocking: this.formHasUnsavedChanges(person, this.props.original),
-		})
+	handleEmailValidation = (value, person) => {
+		return utils.handleEmailValidation(value, {validate: person.isAdvisor()})
 	}
 
-	@autobind
-	handleEmailValidation(value) {
-		return utils.handleEmailValidation(value, this.props.person.isAdvisor())
-	}
-
-	@autobind
-	onSubmit(event) {
-		const { edit, person } = this.props
+	onSubmit = (values, form) => {
+		const person = new Person(values)
 		let isFirstTimeUser = false
 		if (person.isNewUser()) {
 			isFirstTimeUser = true
 			person.status = Person.STATUS.ACTIVE
 		}
-		this.updatePerson(person, edit, isFirstTimeUser)
+		this.updatePerson(person, form, isFirstTimeUser)
 	}
 
-	@autobind
-	updatePerson(person, edit, isNew) {
+	updatePerson = (person, form, isNew) => {
+		const { edit } = this.props
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
 		person.name = Person.fullName(this.state.splitName, true)
@@ -471,9 +478,9 @@ class BasePersonForm extends Component {
 		graphql += edit ? '' : ' { uuid }'
 		const variables = { person: person }
 		const variableDef = '($person: PersonInput!)'
-		this.setState({isBlocking: false})
 		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
 			.then(data => {
+				form.resetForm()
 				if (isNew) {
 					localStorage.clear()
 					localStorage.newUser = 'true'
@@ -494,7 +501,7 @@ class BasePersonForm extends Component {
 					})
 				}
 			}).catch(error => {
-				this.setState({success: null, error: error})
+				this.setState({error})
 				jumpToTop()
 			})
 	}

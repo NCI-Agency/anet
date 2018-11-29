@@ -16,16 +16,15 @@ export default {
 		return pluralize(changeCase.camel(string))
 	},
 
-	handleEmailValidation: function(value, shouldValidate) {
+	handleEmailValidation: function(value, props) {
+		if(!props.validate) return
 		const domainNames = Settings.domainNames.map(d => d.toLowerCase())
-		if (!shouldValidate || domainNames.length === 0) {
-			return { isValid: null, message: 'No custom validator is set' }
-		}
 
 		let wildcardDomains = this.getWildcardDomains(domainNames, WILDCARD)
 		try {
-			let isValid = this.validateEmail(value, domainNames, wildcardDomains)
-			return { isValid: isValid, message: this.emailErrorMessage(domainNames) }
+			const error = !this.validateEmail(value, domainNames, wildcardDomains)
+			if(error)
+				return this.emailErrorMessage(domainNames)
 		}
 		catch (e) {
 			return { isValid: false, message: (<div>{e.message}</div>) }

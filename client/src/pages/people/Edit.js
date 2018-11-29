@@ -25,9 +25,7 @@ class BasePersonEdit extends Page {
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
 		this.state = {
-			originalPerson: new Person(),
 			person: new Person(),
 		}
 	}
@@ -47,29 +45,25 @@ class BasePersonEdit extends Page {
 			if (data.person.endOfTourDate) {
 				data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
 			}
-			this.setState({person: new Person(data.person), originalPerson: new Person(data.person)})
+			this.setState({	person: new Person(data.person) })
 		})
 	}
 
 	render() {
-		let {person, originalPerson} = this.state
-
+		const { person } = this.state
 		const { currentUser } = this.props
 		let canEditPosition = currentUser && currentUser.isSuperUser()
 
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
 		const saveText = person.isNewUser() ? 'Create profile' : null
-
 		return (
 			<div>
 				<RelatedObjectNotes notes={person.notes} relatedObject={person.uuid && {relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
 				{!person.isNewUser() &&
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
-
 				<PersonForm
-					original={originalPerson}
-					person={person}
+					initialValues={person}
 					edit
 					showPositionAssignment={canEditPosition}
 					legendText={legendText}
