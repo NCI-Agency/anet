@@ -11,6 +11,7 @@ import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
 import _isEmpty from 'lodash/isEmpty'
+import * as yup from 'yup'
 
 export default class Person extends Model {
 	static resourceName = 'Person'
@@ -30,19 +31,22 @@ export default class Person extends Model {
 
 	static nameDelimiter = ','
 
-	static schema = {
-		name: '',
-		get status() { return Person.STATUS.ACTIVE },
-		country: '',
-		rank: '',
-		gender: 'MALE',
-		phoneNumber: '',
-		endOfTourDate: null,
-		biography: '',
-		get role() { return Person.ROLE.PRINCIPAL },
-		position: {},
-		...Model.schema,
-	}
+	static yupSchema = yup.object().shape({
+		name: yup.string().nullable().default(''),
+		firstName: yup.string().nullable().default(''),
+		lastName: yup.string().nullable().default(''),
+		domainUsername: yup.string().nullable().default(''),
+		emailAddress: yup.string().email().nullable().default(''),
+		country: yup.string().nullable().default(''),
+		rank: yup.string().nullable().default(''),
+		gender: yup.mixed().nullable().default(''),
+		phoneNumber: yup.string().nullable().default(''),
+		endOfTourDate: yup.string().nullable().default(''),
+		biography: yup.string().nullable().default(''),
+		position: yup.object().nullable().default({}),
+		role: yup.string().nullable().default(() => Person.ROLE.PRINCIPAL),
+		status: yup.string().nullable().default(() => Person.STATUS.ACTIVE),
+	}).concat(Model.yupSchema)
 
 	static autocompleteQuery = "uuid, name, role, rank, position { uuid, name, code, organization { uuid, shortName }, location {uuid, name} }"
 
@@ -61,6 +65,10 @@ export default class Person extends Model {
 			return Settings.fields.principal.person.name
 		}
 		throw new Error(`Unrecognized role: ${role}`)
+	}
+
+	constructor(props) {
+		super(Model.fillObject(props, Person.yupSchema))
 	}
 
 	humanNameOfRole() {
