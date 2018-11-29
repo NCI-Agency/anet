@@ -102,7 +102,7 @@ class BaseTaskForm extends Component {
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={this.props.title} action={action} />
+						<Fieldset title={title} action={action} />
 						<Fieldset>
 							<Field
 								name="shortName"
