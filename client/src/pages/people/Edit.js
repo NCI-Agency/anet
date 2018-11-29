@@ -66,7 +66,7 @@ class BasePersonEdit extends Page {
 					initialValues={person}
 					edit
 					showPositionAssignment={canEditPosition}
-					legendText={legendText}
+					title={legendText}
 					saveText={saveText} />
 			</div>
 		)

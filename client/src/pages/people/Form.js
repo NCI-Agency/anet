@@ -71,7 +71,6 @@ class BasePersonForm extends Component {
 		initialValues: PropTypes.object.isRequired,
 		title: PropTypes.string,
 		edit: PropTypes.bool,
-		legendText: PropTypes.string,
 		saveText: PropTypes.string,
 		currentUser: PropTypes.instanceOf(Person),
 		loadAppData: PropTypes.func,
@@ -156,7 +155,7 @@ class BasePersonForm extends Component {
 			const isSelf = Person.isEqual(currentUser, person)
 			const isAdmin = currentUser && currentUser.isAdmin()
 			const isAdvisor = person.isAdvisor()
-			const legendText = this.props.legendText || (edit ? `Edit Person ${fullName}` : 'Create a new Person')
+			const legendText = title || (edit ? `Edit Person ${fullName}` : 'Create a new Person')
 
 			const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
 			const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
