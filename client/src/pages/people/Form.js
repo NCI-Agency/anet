@@ -269,7 +269,7 @@ class BasePersonForm extends Component {
 							<Field
 								name="role"
 								component={FieldHelper.renderReadonlyField}
-								value={person.humanNameOfRole()}
+								humanValue={person.humanNameOfRole()}
 							/>
 								:
 							<Field
