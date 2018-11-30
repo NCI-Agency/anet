@@ -197,7 +197,6 @@ class BasePersonForm extends Component {
 										disabled={!canEditName}
 									/>
 								</Col>
-								<Field disabled={!canEditName} className="hidden" name="name" value={fullName} />
 							</Col>
 
 							{edit && !canEditName &&
