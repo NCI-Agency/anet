@@ -45,6 +45,9 @@ class BasePersonEdit extends Page {
 			if (data.person.endOfTourDate) {
 				data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
 			}
+			const parsedFullName = Person.parseFullName(data.person.name)
+			data.person.firstName = parsedFullName.firstName
+			data.person.lastName = parsedFullName.lastName
 			this.setState({	person: new Person(data.person) })
 		})
 	}

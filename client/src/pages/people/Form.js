@@ -29,6 +29,7 @@ import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
 import _isEmpty from 'lodash/isEmpty'
+import _clone from 'lodash/clone'
 
 // Handle events
 const handleLastNameOnKeyDown = (event) => {
@@ -66,6 +67,7 @@ const roleButtons = ({ isAdmin, title }) => [
 		label: Settings.fields.principal.person.name
 	},
 ]
+
 class BasePersonForm extends Component {
 	static propTypes = {
 		initialValues: PropTypes.object.isRequired,
@@ -86,30 +88,9 @@ class BasePersonForm extends Component {
 		super(props)
 		this.state = {
 			success: null,
-			fullName: '',
-			splitName: '',
 			originalStatus: '',
 			showWrongPersonModal: false,
 			wrongPersonOptionValue: null,
-		}
-		Object.assign(this.state, this.getParsedName(props.initialValues))
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		const person = this.props.initialValues
-		const prevPerson = prevProps.initialValues
-		if (person.uuid !== prevPerson.uuid) {
-			const updateState = { originalStatus: person.status }
-			Object.assign(updateState, this.getParsedName(person))
-			this.setState(updateState)
-		}
-	}
-
-	getParsedName(person) {
-		const splitName = Person.parseFullName(person.name)
-		return {
-			fullName: Person.fullName(splitName),
-			splitName,
 		}
 	}
 
@@ -131,9 +112,7 @@ class BasePersonForm extends Component {
 	}
 
 	render() {
-		const { fullName } = this.state
 		const { currentUser, edit, title, ...myFormProps } = this.props
-
 		return <Formik
 			enableReinitialize
 			onSubmit={this.onSubmit}
@@ -152,10 +131,10 @@ class BasePersonForm extends Component {
 			submitForm
 		}) => {
 			const person = new Person(values)
+			const fullName = Person.fullName(Person.parseFullName(person.name))
 			const isSelf = Person.isEqual(currentUser, person)
 			const isAdmin = currentUser && currentUser.isAdmin()
 			const isAdvisor = person.isAdvisor()
-			const legendText = title || (edit ? `Edit Person ${fullName}` : 'Create a new Person')
 
 			const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
 			const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
@@ -167,7 +146,7 @@ class BasePersonForm extends Component {
 				person.country = countries[0]
 			}
 			// anyone with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
-			const disableStatusChange = (this.state.originalStatus === Person.STATUS.INACTIVE && !isAdmin) || isSelf
+			const disableStatusChange = (this.props.initialValues.status === Person.STATUS.INACTIVE && !isAdmin) || isSelf
 			// admins can edit all persons, new users can be edited by super users or themselves
 			const canEditName = isAdmin || (
 					(person.isNewUser() || !edit) && currentUser && (
@@ -193,7 +172,7 @@ class BasePersonForm extends Component {
 				<NavigationWarning isBlocking={dirty} />
 				<Form className="form-horizontal" method="post">
 					<Messages error={this.state.error} />
-					<Fieldset title={legendText} action={action} />
+					<Fieldset title={this.props.title} action={action} />
 					<Fieldset>
 						<FormGroup>
 							<Col sm={2} componentClass={ControlLabel}>Name</Col>
@@ -205,8 +184,6 @@ class BasePersonForm extends Component {
 										display="inline"
 										placeholder="LAST NAME"
 										disabled={!canEditName}
-										value={this.state.splitName.lastName}
-										onChange={this.handleOnChangeLastName}
 										onKeyDown={handleLastNameOnKeyDown}
 									/>
 								</Col>
@@ -218,8 +195,6 @@ class BasePersonForm extends Component {
 										display="inline"
 										placeholder="First name(s) - Lower-case except for the first letter of each name"
 										disabled={!canEditName}
-										value={this.state.splitName.firstName}
-										onChange={this.handleOnChangeFirstName}
 									/>
 								</Col>
 								<Field disabled={!canEditName} className="hidden" name="name" value={fullName} />
@@ -428,31 +403,6 @@ class BasePersonForm extends Component {
 		return Person.fullName(splitName)
 	}
 
-	handleOnKeyDown = (event) => {
-		if (event.key === ',') {
-			event.preventDefault()
-			document.getElementById('firstName').focus()
-		}
-	}
-
-	handleOnChangeLastName = (event) => {
-		const value = event.target.value
-		const { splitName } = this.state
-		this.setState({
-			fullName: this.getFullName(splitName, { lastName: value }),
-			splitName: splitName
-		})
-	}
-
-	handleOnChangeFirstName = (event) => {
-		const value = event.target.value
-		const { splitName } = this.state
-		this.setState({
-			fullName: this.getFullName(splitName, { firstName: value }),
-			splitName: splitName
-		})
-	}
-
 	handleEmailValidation = (value, person) => {
 		return utils.handleEmailValidation(value, {validate: person.isAdvisor()})
 	}
@@ -469,9 +419,9 @@ class BasePersonForm extends Component {
 
 	updatePerson = (person, form, isNew) => {
 		const { edit } = this.props
+		person.name = Person.fullName({firstName: person.firstName, lastName: person.lastName}, true)
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
-		person.name = Person.fullName(this.state.splitName, true)
 		const operation = edit ? 'updatePerson' : 'createPerson'
 		let graphql = operation + '(person: $person)'
 		graphql += edit ? '' : ' { uuid }'
