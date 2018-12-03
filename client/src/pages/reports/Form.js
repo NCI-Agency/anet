@@ -192,6 +192,7 @@ class BaseReportForm extends Component {
 			authorizationGroups: [],
 		},
 		tagSuggestions: [],
+		showReportText: this.props.showReportText,
 	}
 
 	componentDidMount() {
