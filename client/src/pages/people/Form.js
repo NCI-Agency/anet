@@ -322,9 +322,9 @@ class BasePersonForm extends Component {
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
-									<Field component="option" />
+									<option key="NORANK" />
 									{ranks.map(rank =>
-											<Field component="option" key={rank} value={rank}>{rank}</Field>
+											<option key={rank} value={rank}>{rank}</option>
 										)
 									}
 								</Field>
@@ -336,8 +336,9 @@ class BasePersonForm extends Component {
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
-									<Field component="option" value="MALE" >Male</Field>
-									<Field component="option" value="FEMALE" >Female</Field>
+									<option key="NOGENDER"/>
+									<option key="MALE" value="MALE">Male</option>
+									<option key="FEMALE" value="FEMALE">Female</option>
 								</Field>
 							}
 						/>
@@ -347,9 +348,9 @@ class BasePersonForm extends Component {
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
-									<Field component="option" />
+									<option key="NOCOUNTRY"/>
 									{countries.map(country =>
-											<Field component="option" key={country} value={country}>{country}</Field>
+											<option key={country} value={country}>{country}</option>
 										)
 									}
 								</Field>
