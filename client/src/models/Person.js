@@ -17,6 +17,7 @@ export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
 	static getInstanceName = 'person'
+	static getModelNameLinkTo = 'person'
 
 	static STATUS = {
 		NEW_USER: 'NEW_USER',
