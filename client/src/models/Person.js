@@ -80,12 +80,20 @@ export default class Person extends Model {
 		return utils.sentenceCase(this.status)
 	}
 
-	isNewUser() {
+	static isNewUser() {
 		return this.status === Person.STATUS.NEW_USER
 	}
 
+	isNewUser() {
+		return Person.isNewUser(this)
+	}
+
+	static isAdvisor(person) {
+		return person.role === Person.ROLE.ADVISOR
+	}
+
 	isAdvisor() {
-		return this.role === Person.ROLE.ADVISOR
+		return Person.isAdvisor(this)
 	}
 
 	isPrincipal() {

@@ -126,17 +126,17 @@ class BasePersonForm extends Component {
 			values,
 			submitForm
 		}) => {
-			const person = new Person(values)
-			const fullName = Person.fullName(Person.parseFullName(person.name))
-			const isSelf = Person.isEqual(currentUser, person)
+			const fullName = Person.fullName(Person.parseFullName(values.name))
+			const isSelf = Person.isEqual(currentUser, values)
 			const isAdmin = currentUser && currentUser.isAdmin()
-			const isAdvisor = person.isAdvisor()
+			const isAdvisor = Person.isAdvisor(values)
+			const isNewUser = Person.isNewUser(values)
 
-			const willAutoKickPosition = person.status === Person.STATUS.INACTIVE && person.position && !!person.position.uuid
-			const warnDomainUsername = person.status === Person.STATUS.INACTIVE && !_isEmpty(person.domainUsername)
+			const willAutoKickPosition = values.status === Person.STATUS.INACTIVE && values.position && !!values.position.uuid
+			const warnDomainUsername = values.status === Person.STATUS.INACTIVE && !_isEmpty(values.domainUsername)
 			const ranks = Settings.fields.person.ranks || []
 			const roleButtons = isAdmin ? this.adminRoleButtons : this.roleButtons
-			const countries = this.countries(person)
+			const countries = this.countries(values)
 			if (countries.length === 1) {
 				// Assign default country if there's only one
 				values.country = countries[0]
@@ -145,7 +145,7 @@ class BasePersonForm extends Component {
 			const disableStatusChange = (this.props.initialValues.status === Person.STATUS.INACTIVE && !isAdmin) || isSelf
 			// admins can edit all persons, new users can be edited by super users or themselves
 			const canEditName = isAdmin || (
-					(person.isNewUser() || !edit) && currentUser && (
+					(isNewUser || !edit) && currentUser && (
 							currentUser.isSuperUser() ||
 							isSelf
 					)
@@ -261,7 +261,7 @@ class BasePersonForm extends Component {
 							<Field
 								name="role"
 								component={FieldHelper.renderReadonlyField}
-								humanValue={person.humanNameOfRole()}
+								humanValue={Person.humanNameOfRole(values.role)}
 							/>
 								:
 							<Field
@@ -278,7 +278,7 @@ class BasePersonForm extends Component {
 								type="text"
 							/>
 								:
-							person.isNewUser() ?
+							isNewUser ?
 								<Field
 									name="status"
 									component={FieldHelper.renderReadonlyField}
@@ -290,11 +290,11 @@ class BasePersonForm extends Component {
 									buttons={this.statusButtons}
 								>
 								{willAutoKickPosition && <HelpBlock>
-									<span className="text-danger">Settings this person to inactive will automatically remove them from the <strong>{person.position.name}</strong> position.</span>
+									<span className="text-danger">Settings this person to inactive will automatically remove them from the <strong>{values.position.name}</strong> position.</span>
 									</HelpBlock> }
 
 									{warnDomainUsername && <HelpBlock>
-										<span className="text-danger">Settings this person to inactive means the next person to logon with the user name <strong>{person.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
+										<span className="text-danger">Settings this person to inactive means the next person to logon with the user name <strong>{values.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
 									</HelpBlock> }
 								</Field>
 						}
@@ -311,7 +311,7 @@ class BasePersonForm extends Component {
 							name="emailAddress"
 							label="Email"
 							type="email"
-							validate={(email) => this.handleEmailValidation(email, person)}
+							validate={(email) => this.handleEmailValidation(email, values)}
 							component={FieldHelper.renderInputField}
 						/>
 						<Field
@@ -416,7 +416,7 @@ class BasePersonForm extends Component {
 	onSubmit = (values, form) => {
 		const person = new Person(values)
 		let isFirstTimeUser = false
-		if (person.isNewUser()) {
+		if (Person.isNewUser(values)) {
 			isFirstTimeUser = true
 			person.status = Person.STATUS.ACTIVE
 		}
