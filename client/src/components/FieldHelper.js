@@ -152,14 +152,18 @@ export const renderButtonToggleGroup = ({
 			{buttons.map((button, index) => {
 				if (!button) { return null }
 				const {label, ...props} = button
-				return <Button
-					{...props}
-					name={field.name}
-					key={button.value}
-					active={field.value === button.value}
-					onClick={field.onChange}>
-						{label}
-				</Button>
+				return (
+					<Button
+						{...props}
+						name={field.name}
+						key={button.value}
+						active={field.value === button.value}
+						onBlur={field.onBlur}
+						onClick={field.onChange}
+					>
+							{label}
+					</Button>
+				)
 			})}
 		</ButtonGroup>
 	)
