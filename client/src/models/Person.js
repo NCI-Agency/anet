@@ -20,6 +20,8 @@ export const fieldLabels = {
 	emailAddress: 'Email',
 	phoneNumber: 'Phone',
 	country: 'Nationality',
+	rank: 'Rank',
+	gender: 'Gender',
 	endOfTourDate: 'End of tour',
 }
 
@@ -45,16 +47,34 @@ export default class Person extends Model {
 	static yupSchema = yup.object().shape({
 		name: yup.string().nullable().default(''),
 		// not actually in the database, but used for validation
-		firstName: yup.string().nullable().default('').label(fieldLabels.firstName),
+		firstName: yup.string()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.firstName}`) : schema.nullable()
+			)).default('').label(fieldLabels.firstName),
 		// not actually in the database, but used for validation
-		lastName: yup.string().uppercase().required().default('').label(fieldLabels.lastName),
+		lastName: yup.string().uppercase().required(`You must provide the ${fieldLabels.lastName}`).default('').label(fieldLabels.lastName),
 		domainUsername: yup.string().nullable().default('').label(fieldLabels.domainUsername),
-		emailAddress: yup.string().email().required().default('').label(fieldLabels.emailAddress),
-		country: yup.string().nullable().default('').label(fieldLabels.country),
-		rank: yup.string().required().default(''),
-		gender: yup.mixed().nullable().default(''),
+		emailAddress: yup.string().email()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.emailAddress}`) : schema.nullable()
+			)).default('').label(fieldLabels.emailAddress),
+		country: yup.string()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.country}`) : schema.nullable()
+		)).default('').label(fieldLabels.country),
+		rank: yup.string()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.rank}`) : schema.nullable()
+			)).default('').label(fieldLabels.rank),
+		gender: yup.mixed()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.gender}`) : schema.nullable()
+			)).default('').label(fieldLabels.gender),
 		phoneNumber: yup.string().nullable().default('').label(fieldLabels.phoneNumber),
-		endOfTourDate: yupDate.nullable().required().default(null).label(fieldLabels.endOfTourDate),
+		endOfTourDate: yupDate.nullable()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${fieldLabels.endOfTourDate}`) : schema.nullable()
+			)).default(null).label(fieldLabels.endOfTourDate),
 		biography: yup.string().nullable().default(''),
 		position: yup.object().nullable().default({}),
 		role: yup.string().nullable().default(() => Person.ROLE.PRINCIPAL),

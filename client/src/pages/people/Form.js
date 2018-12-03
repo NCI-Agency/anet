@@ -318,6 +318,7 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="rank"
+							label={PersonDefs.fieldLabels.rank}
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
@@ -331,6 +332,7 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="gender"
+							label={PersonDefs.fieldLabels.gender}
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
