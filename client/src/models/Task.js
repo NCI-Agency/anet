@@ -76,6 +76,6 @@ export default class Task extends Model {
 	}
 
 	toString() {
-		return this.longName || this.shortName || 'Unnamed'
+		return `${this.shortName} ${this.longName.substr(0, 80)}${this.longName.length > 80 ? '...' : ''}`
 	}
 }
