@@ -100,12 +100,6 @@ class BasePersonForm extends Component {
 				return []
 		}
 	}
-
-	renderCountrySelectOptions = (countries) => {
-		return countries.map(country =>
-			<Field component="option" key={country} value={country} >{country}</Field>
-		)
-	}
 	state = {
 		success: null,
 		originalStatus: '',
@@ -143,9 +137,9 @@ class BasePersonForm extends Component {
 			const ranks = Settings.fields.person.ranks || []
 			const roleButtons = isAdmin ? this.adminRoleButtons : this.roleButtons
 			const countries = this.countries(person)
-			if (!edit && countries.length === 1) {
-				// For new objects, assign default country if there's only one
-				person.country = countries[0]
+			if (countries.length === 1) {
+				// Assign default country if there's only one
+				values.country = countries[0]
 			}
 			// anyone with edit permissions can change status to INACTIVE, only admins can change back to ACTIVE (but nobody can change status of self!)
 			const disableStatusChange = (this.props.initialValues.status === Person.STATUS.INACTIVE && !isAdmin) || isSelf
@@ -352,7 +346,6 @@ class BasePersonForm extends Component {
 							name="country"
 							label="Nationality"
 							component={FieldHelper.renderSpecialField}
-							value={person.country}
 							widget={
 								<Field component="select" className="form-control" >
 									<Field component="option" />
@@ -412,6 +405,12 @@ class BasePersonForm extends Component {
 			event.preventDefault()
 			document.getElementById('firstName').focus()
 		}
+	}
+
+	renderCountrySelectOptions = (countries) => {
+		return countries.map(country =>
+			<Field component="option" key={country} value={country}>{country}</Field>
+		)
 	}
 
 	onSubmit = (values, form) => {
