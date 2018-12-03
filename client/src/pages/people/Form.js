@@ -126,12 +126,10 @@ class BasePersonForm extends Component {
 			values,
 			submitForm
 		}) => {
-			const fullName = Person.fullName(Person.parseFullName(values.name))
 			const isSelf = Person.isEqual(currentUser, values)
 			const isAdmin = currentUser && currentUser.isAdmin()
 			const isAdvisor = Person.isAdvisor(values)
 			const isNewUser = Person.isNewUser(values)
-
 			const willAutoKickPosition = values.status === Person.STATUS.INACTIVE && values.position && !!values.position.uuid
 			const warnDomainUsername = values.status === Person.STATUS.INACTIVE && !_isEmpty(values.domainUsername)
 			const ranks = Settings.fields.person.ranks || []
@@ -150,13 +148,12 @@ class BasePersonForm extends Component {
 							isSelf
 					)
 				)
-
+			const fullName = Person.fullName(Person.parseFullName(values.name))
 			const nameMessage = "This is not " + (isSelf ? "me" : fullName)
 			const modalTitle = `It is possible that the information of ${fullName} is out of date. Please help us identify if any of the following is the case:`
 			const confirmLabel = this.state.wrongPersonOptionValue === 'needNewAccount'
 					? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
 					: 'Yes, I would like to inactivate this account'
-
 			const action = <React.Fragment>
 				<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Person</Button>
 			</React.Fragment>
@@ -289,10 +286,9 @@ class BasePersonForm extends Component {
 									component={FieldHelper.renderButtonToggleGroup}
 									buttons={this.statusButtons}
 								>
-								{willAutoKickPosition && <HelpBlock>
+									{willAutoKickPosition && <HelpBlock>
 									<span className="text-danger">Settings this person to inactive will automatically remove them from the <strong>{values.position.name}</strong> position.</span>
 									</HelpBlock> }
-
 									{warnDomainUsername && <HelpBlock>
 										<span className="text-danger">Settings this person to inactive means the next person to logon with the user name <strong>{values.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
 									</HelpBlock> }
@@ -326,7 +322,7 @@ class BasePersonForm extends Component {
 								<Field component="select" className="form-control" >
 									<Field component="option" />
 									{ranks.map(rank =>
-											<Field component="option" key={rank} value={rank} >{rank}</Field>
+											<Field component="option" key={rank} value={rank}>{rank}</Field>
 										)
 									}
 								</Field>
@@ -349,7 +345,10 @@ class BasePersonForm extends Component {
 							widget={
 								<Field component="select" className="form-control" >
 									<Field component="option" />
-									{this.renderCountrySelectOptions(countries)}
+									{countries.map(country =>
+											<Field component="option" key={country} value={country}>{country}</Field>
+										)
+									}
 								</Field>
 							}
 						/>
@@ -405,12 +404,6 @@ class BasePersonForm extends Component {
 			event.preventDefault()
 			document.getElementById('firstName').focus()
 		}
-	}
-
-	renderCountrySelectOptions = (countries) => {
-		return countries.map(country =>
-			<Field component="option" key={country} value={country}>{country}</Field>
-		)
 	}
 
 	onSubmit = (values, form) => {
