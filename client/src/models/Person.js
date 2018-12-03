@@ -13,6 +13,16 @@ import AFG_ICON from 'resources/afg_small.png'
 import _isEmpty from 'lodash/isEmpty'
 import * as yup from 'yup'
 
+export const fieldLabels = {
+	firstName: 'First name',
+	lastName: 'Last name',
+	domainUsername: 'Domain username',
+	emailAddress: 'Email',
+	phoneNumber: 'Phone',
+	country: 'Nationality',
+	endOfTourDate: 'End of tour',
+}
+
 export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
@@ -34,15 +44,17 @@ export default class Person extends Model {
 
 	static yupSchema = yup.object().shape({
 		name: yup.string().nullable().default(''),
-		firstName: yup.string().nullable().default(''),
-		lastName: yup.string().uppercase().required().default(''),
-		domainUsername: yup.string().nullable().default(''),
-		emailAddress: yup.string().email().required().default(''),
-		country: yup.string().nullable().default(''),
+		// not actually in the database, but used for validation
+		firstName: yup.string().nullable().default('').label(fieldLabels.firstName),
+		// not actually in the database, but used for validation
+		lastName: yup.string().uppercase().required().default('').label(fieldLabels.lastName),
+		domainUsername: yup.string().nullable().default('').label(fieldLabels.domainUsername),
+		emailAddress: yup.string().email().required().default('').label(fieldLabels.emailAddress),
+		country: yup.string().nullable().default('').label(fieldLabels.country),
 		rank: yup.string().required().default(''),
 		gender: yup.mixed().nullable().default(''),
-		phoneNumber: yup.string().nullable().default(''),
-		endOfTourDate: yupDate.nullable().required().default(null),
+		phoneNumber: yup.string().nullable().default('').label(fieldLabels.phoneNumber),
+		endOfTourDate: yupDate.nullable().required().default(null).label(fieldLabels.endOfTourDate),
 		biography: yup.string().nullable().default(''),
 		position: yup.object().nullable().default({}),
 		role: yup.string().nullable().default(() => Person.ROLE.PRINCIPAL),

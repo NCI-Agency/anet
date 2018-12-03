@@ -16,6 +16,7 @@ import OptionListModal from 'components/OptionListModal'
 import API from 'api'
 import Settings from 'Settings'
 import {Person} from 'models'
+import * as PersonDefs from 'models/Person'
 import utils from 'utils'
 import pluralize from 'pluralize'
 
@@ -305,14 +306,14 @@ class BasePersonForm extends Component {
 					<Fieldset title="Additional information">
 						<Field
 							name="emailAddress"
-							label="Email"
+							label={PersonDefs.fieldLabels.emailAddress}
 							type="email"
 							validate={(email) => this.handleEmailValidation(email, values)}
 							component={FieldHelper.renderInputField}
 						/>
 						<Field
 							name="phoneNumber"
-							label="Phone"
+							label={PersonDefs.fieldLabels.phoneNumber}
 							component={FieldHelper.renderInputField}
 						/>
 						<Field
@@ -340,7 +341,7 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="country"
-							label="Nationality"
+							label={PersonDefs.fieldLabels.country}
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
@@ -354,7 +355,7 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="endOfTourDate"
-							label="End of tour"
+							label={PersonDefs.fieldLabels.endOfTourDate}
 							component={FieldHelper.renderSpecialField}
 							value={values.endOfTourDate && moment(values.endOfTourDate).format()}
 							onChange={(value, formattedValue) => setFieldValue('endOfTourDate', value)}
