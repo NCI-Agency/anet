@@ -49,7 +49,7 @@ export default class Person extends Model {
 		status: yup.string().nullable().default(() => Person.STATUS.ACTIVE),
 	}).concat(Model.yupSchema)
 
-	static autocompleteQuery = "uuid, name, role, rank, position { uuid, name, code, organization { uuid, shortName }, location {uuid, name} }"
+	static autocompleteQuery = "uuid, name, role, rank, status, endOfTourDate, position { uuid, name, code, status, organization { uuid, shortName }, location {uuid, name} }"
 
 	static autocompleteTemplate(person) {
 		return <span>
