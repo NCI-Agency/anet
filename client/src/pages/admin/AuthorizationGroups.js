@@ -3,7 +3,7 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Fieldset from 'components/Fieldset'
-import AuthorizationGroupTable from 'components/AuthorizationGroupTable'
+import AuthorizationGroupTable from './AuthorizationGroupTable'
 
 import API from 'api'
 
