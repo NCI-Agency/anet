@@ -8,7 +8,9 @@ import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
 import {Map, Control, CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
+import { GeoSearchControl, OpenStreetMapProvider, EsriProvider } from 'leaflet-geosearch'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-geosearch/assets/css/leaflet.css'
 import Settings from 'Settings'
 
 import MARKER_ICON from 'resources/leaflet/marker-icon.png'
@@ -20,6 +22,30 @@ const css = {
 	marginBottom: '18px',
 	zIndex: 1,
 }
+
+class CustomUrlEsriProvider extends EsriProvider {
+	constructor(options = {}) {
+		super(options)
+	}
+
+	endpoint({ query, protocol } = {}) {
+	  const { params } = this.options
+	  const paramString = this.getParamString({
+		...params,
+		f: 'json',
+		text: query,
+	  })
+	  return `${protocol}//${this.options.url}?${paramString}`
+	}
+  }
+
+const geoSearcherProviders = {
+	ESRI : () => { return new CustomUrlEsriProvider({url: Settings.imagery.geoSearcher.url,
+                                                     params: {maxLocations : 10}})},
+	OSM :  () => { return new OpenStreetMapProvider()}
+}
+
+const searchProvider = Settings.imagery.geoSearcher && geoSearcherProviders[Settings.imagery.geoSearcher.provider]()
 
 class BaseLeaflet extends Component {
 	static propTypes = {
@@ -60,6 +86,10 @@ class BaseLeaflet extends Component {
 										 Settings.imagery.mapOptions.crs && { crs: CRS[Settings.imagery.mapOptions.crs] })
 		const map = new Map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,
 															 Settings.imagery.mapOptions.homeView.zoomLevel)
+        if (searchProvider) {
+            new GeoSearchControl({ provider: searchProvider }).addTo(map)
+		}
+
 		const layerControl = new Control.Layers({}, {}, {collapsed:false})
 
 		layerControl.addTo(map)

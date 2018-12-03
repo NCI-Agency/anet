@@ -370,6 +370,17 @@ properties:
         additionalProperties: false
         required:
           - homeView
+      geoSearcher:
+        properties:
+          provider:
+            type: string
+            enum:
+              - ESRI
+              - OSM
+          url:
+            type: string
+        required:
+          - provider
       baseLayers:
         type: array
         uniqueItems: true
