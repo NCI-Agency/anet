@@ -565,6 +565,14 @@ table hr.attendee-divider {
 	height: 38px;
 }
 
+.submit-buttons :not(.btn-group) .btn + .btn {
+	margin-left: 1rem;
+}
+
+.submit-buttons .btn:last-child {
+	margin-right: 0.5rem;
+}
+
 .report-form .report-details {
 	width: 90%;
 	margin-left: auto;
