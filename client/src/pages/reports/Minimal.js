@@ -98,7 +98,7 @@ class ReportMinimal extends Page {
 		let {report} = this.state
 
 		const {errors, warnings} = (!report.isReleased() && !report.isCancelled()) && report.validateForSubmit()
-		let isCancelled = (report.cancelledReason) ? true : false
+		const cancelled = !!report.cancelledReason
 
 		return (
 			<div>
@@ -141,13 +141,13 @@ class ReportMinimal extends Page {
 							<span>{report.location.name}</span>
 						</Form.Field>
 
-						{!isCancelled &&
+						{!cancelled &&
 							<Form.Field id="atmosphere" label="Atmospherics">
 								{utils.upperCaseFirst(report.atmosphere)}
 								{report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
 							</Form.Field>
 						}
-						{isCancelled &&
+						{cancelled &&
 							<Form.Field id="cancelledReason" label="Cancelled Reason">
 								{utils.sentenceCase(report.cancelledReason)}
 							</Form.Field>

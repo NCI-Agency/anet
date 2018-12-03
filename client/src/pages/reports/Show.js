@@ -162,7 +162,7 @@ class BaseReportShow extends Page {
 
 		const {errors, warnings} = (!report.isReleased() && !report.isCancelled()) && report.validateForSubmit()
 
-		let isCancelled = report.cancelledReason ? true : false
+		const cancelled = !!report.cancelledReason
 
 		const formattedReportReleasedAt = moment(report.getReportReleasedAt()).format('D MMM YYYY, [at] h:mm a')
 
@@ -242,13 +242,13 @@ class BaseReportShow extends Page {
 							{report.location && <LinkTo anetLocation={report.location} />}
 						</Form.Field>
 
-						{!isCancelled &&
+						{!cancelled &&
 							<Form.Field id="atmosphere" label="Atmospherics">
 								{utils.sentenceCase(report.atmosphere)}
 								{report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
 							</Form.Field>
 						}
-						{isCancelled &&
+						{cancelled &&
 							<Form.Field id="cancelledReason" label="Cancelled Reason">
 								{utils.sentenceCase(report.cancelledReason)}
 							</Form.Field>
