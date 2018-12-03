@@ -156,9 +156,7 @@ class BasePositionShow extends Page {
 								name="location"
 								component={FieldHelper.renderReadonlyField}
 								humanValue={position.location &&
-									<LinkTo anetLocation={position.location}>
-										{position.location.name}
-									</LinkTo>
+									<LinkTo anetLocation={position.location} />
 								}
 							/>
 						</Fieldset>
