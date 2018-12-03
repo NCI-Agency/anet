@@ -47,16 +47,6 @@ class BasePersonForm extends Component {
 		edit: false,
 	}
 
-	constructor(props) {
-		super(props)
-		this.state = {
-			success: null,
-			originalStatus: '',
-			showWrongPersonModal: false,
-			wrongPersonOptionValue: null,
-		}
-	}
-
 	statusButtons = [
 		{
 			id: 'statusActiveButton',
@@ -114,6 +104,12 @@ class BasePersonForm extends Component {
 		return countries.map(country =>
 			<Field component="option" key={country} value={country} >{country}</Field>
 		)
+	}
+	state = {
+		success: null,
+		originalStatus: '',
+		showWrongPersonModal: false,
+		wrongPersonOptionValue: null,
 	}
 
 	render() {
