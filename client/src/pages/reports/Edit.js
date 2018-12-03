@@ -2,8 +2,6 @@ import PropTypes from 'prop-types'
 
 import React from 'react'
 import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
-import moment from 'moment'
-import autobind from 'autobind-decorator'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
@@ -25,17 +23,13 @@ class BaseReportEdit extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	static modelName = 'Report'
+
+	state = {
+		report: new Report(),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			success: null,
-			error: null,
-			report: new Report(),
-			originalReport: new Report(),
-		}
 	}
 
 	fetchData(props) {
@@ -46,8 +40,8 @@ class BaseReportEdit extends Page {
 				author { uuid, name },
 				location { uuid, name },
 				attendees {
-					uuid, name, role, primary
-					position { uuid, name, code, organization { uuid, shortName}, location {uuid, name} }
+					uuid, name, role, primary, status, endOfTourDate
+					position { uuid, name, code, status, organization { uuid, shortName}, location {uuid, name} }
 				}
 				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
 				tags { uuid, name, description }
@@ -57,20 +51,22 @@ class BaseReportEdit extends Page {
 			}
 		`).then(data => {
 			function getReportFromData() {
-				const report = new Report(data.report)
-				report.engagementDate = report.engagementDate && moment(report.engagementDate).format()
-				return report
+				Object.assign(data.report, {
+					cancelled: data.report.cancelledReason ? true : false,
+					reportTags: (data.report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name})),
+				})
+				return new Report(data.report)
 			}
-			this.setState({report: getReportFromData(), originalReport: getReportFromData()})
+			this.setState({report: getReportFromData()})
 		})
 	}
 
 	render() {
-		let {report} = this.state
+		const { report } = this.state
 		const { currentUser } = this.props
 
 		//Only the author can delete a report, and only in DRAFT.
-		let canDelete = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author)
+		const canDelete = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author)
 		const onConfirmDeleteProps = {
 				onConfirmDelete: this.onConfirmDelete,
 				objectType: "report",
@@ -78,19 +74,18 @@ class BaseReportEdit extends Page {
 				bsStyle: "warning",
 				buttonLabel: "Delete this report"
 		}
+		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
 
 		return (
 			<div className="report-edit">
 				<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
-				<Breadcrumbs items={[['Report #' + report.uuid, '/reports/' + report.uuid], ['Edit', '/reports/' + report.uuid + '/edit']]} />
-
-				<ReportForm edit original={this.state.originalReport} report={report} title={`Edit Report #${report.uuid}`} onDelete={canDelete && onConfirmDeleteProps} />
+				<Breadcrumbs items={[[`Report #${report.uuid}`, Report.pathForEdit(report)]]} />
+				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} onDelete={canDelete && onConfirmDeleteProps} showReportText={showReportText} />
 			</div>
 		)
 	}
 
-	@autobind
-	onConfirmDelete() {
+	onConfirmDelete = () => {
 		const operation = 'deleteReport'
 		let graphql = operation + '(uuid: $uuid)'
 		const variables = { uuid: this.state.report.uuid }

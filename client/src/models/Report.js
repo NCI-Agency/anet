@@ -1,8 +1,18 @@
 import Settings from 'Settings'
-import Model from 'components/Model'
+import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
 import {Organization, Person, Position} from 'models'
+
+import * as yup from 'yup'
+
+export const fieldLabels = {
+	intent: 'Meeting goal (purpose)',
+	atmosphere: 'Atmospherics',
+	atmosphereDetails: 'Atmospherics details',
+	cancelled: '',
+	reportTags: 'Tags',
+}
 
 export default class Report extends Model {
 	static resourceName = 'Report'
@@ -28,23 +38,81 @@ export default class Report extends Model {
 		CANCELLED_DUE_TO_THREAT: 'CANCELLED_DUE_TO_THREAT',
 	}
 
-	static schema = {
-		intent: '',
-		engagementDate: null,
-		cancelledReason: null,
-		atmosphere: null,
-		atmosphereDetails: '',
-		location: {},
-		attendees: [],
-		tasks: [],
-		comments: [],
-		reportText: '',
-		nextSteps: '',
-		keyOutcomes: '',
-		tags: [],
-		reportSensitiveInformation: null,
-		authorizationGroups: [],
-		...Model.schema,
+	static ATMOSPHERE = {
+		POSITIVE: 'POSITIVE',
+		NEGATIVE: 'NEGATIVE',
+		NEUTRAL: 'NEUTRAL',
+	}
+
+	static yupSchema = yup.object().shape({
+		intent: yup.string().required(`You must provide the ${fieldLabels.intent}`).default('')
+			.label(fieldLabels.intent),
+		engagementDate: yupDate.nullable().required('You must provide the Date of Engagement')
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema : schema.test('future-engagement', 'You cannot submit reports for future dates, except for cancelled engagements',
+					engagementDate => !moment(engagementDate).isAfter(moment().endOf('day'))
+			)))
+			.default(null),
+		// not actually in the database, but used for validation:
+		cancelled: yup.boolean().default(false)
+			.label(fieldLabels.cancelled),
+		cancelledReason: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.required('You must provide a reason for cancellation') : schema.nullable()
+			))
+			.default(null),
+		atmosphere: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.required('You must provide the overall atmospherics of the engagement')
+			))
+			.default(null)
+			.label(fieldLabels.atmosphere),
+		atmosphereDetails: yup.string().nullable()
+			.when(['cancelled', 'atmosphere'], (cancelled, atmosphere, schema) => (
+				cancelled ? schema.nullable() : (atmosphere === Report.ATMOSPHERE.POSITIVE) ? schema.nullable() : schema.required('You must provide atmospherics details if the engagement was not Positive')
+			))
+			.default('')
+			.label(fieldLabels.atmosphereDetails),
+		location: yup.object().nullable().default({}),
+		attendees: yup.array().nullable()
+			.test('primary-principal', 'primary principal error',
+				// can't use arrow function here because of binding to 'this'
+				function(value) {
+					const err = Report.checkPrimaryAttendee(Report.getPrimaryPrincipal(value), Person.ROLE.PRINCIPAL, Organization.TYPE.PRINCIPAL_ORG)
+					return err ? this.createError({message: err}) : true
+				}
+			)
+			.test('primary-advisor', 'primary advisor error',
+				// can't use arrow function here because of binding to 'this'
+				function(value) {
+					const err = Report.checkPrimaryAttendee(Report.getPrimaryAdvisor(value), Person.ROLE.ADVISOR, Organization.TYPE.ADVISOR_ORG)
+					return err ? this.createError({message: err}) : true
+				}
+			)
+			.default([]),
+		principalOrg: yup.object().nullable().default({}),
+		advisorOrg: yup.object().nullable().default({}),
+		tasks: yup.array().nullable().default([]),
+		comments: yup.array().nullable().default([]),
+		reportText: yup.string().nullable().default(''),
+		nextSteps: yup.string().required('You must provide a brief summary of the Next Steps')
+			.default('')
+			.label('Next steps description'),
+		keyOutcomes: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.required('You must provide a brief summary of the Key Outcomes')
+			))
+			.default('')
+			.label('Key outcome description'),
+		tags: yup.array().nullable().default([]),
+		reportTags: yup.array().nullable().default([])
+			.label(fieldLabels.reportTags),
+		reportSensitiveInformation: yup.object().nullable().default({}), // null?
+		authorizationGroups: yup.array().nullable().default([]),
+	}).concat(Model.yupSchema)
+
+	constructor(props) {
+		super(Model.fillObject(props, Report.yupSchema))
 	}
 
 	isDraft() {
@@ -83,24 +151,26 @@ export default class Report extends Model {
 		const errors = []
 		const warnings = []
 
-		let isCancelled = this.cancelledReason ? true : false
-		if (!isCancelled) {
+		let cancelled = this.cancelledReason ? true : false
+		if (!cancelled) {
 			if (!this.atmosphere) {
 				errors.push('You must provide the overall atmospherics of the engagement')
 			} else {
-				if (this.atmosphere !== 'POSITIVE' && !this.atmosphereDetails) {
+				if (this.atmosphere !== Report.ATMOSPHERE.POSITIVE && !this.atmosphereDetails) {
 					errors.push('You must provide atmospherics details if the engagement was not Positive')
 				}
 			}
 		}
 		if (!this.engagementDate) {
 			errors.push('You must provide the Date of Engagement')
-		} else if (!isCancelled && moment(this.engagementDate).isAfter(moment().endOf('day'))) {
+		} else if (!cancelled && moment(this.engagementDate).isAfter(moment().endOf('day'))) {
 			errors.push('You cannot submit reports for future dates, except for cancelled engagements')
 		}
 
-		this.checkPrimaryAttendee(this.getPrimaryPrincipal(), this.principalOrg, Person.ROLE.PRINCIPAL, Organization.TYPE.PRINCIPAL_ORG, errors)
-		this.checkPrimaryAttendee(this.getPrimaryAdvisor(), this.advisorOrg, Person.ROLE.ADVISOR, Organization.TYPE.ADVISOR_ORG, errors)
+		const ppErr = Report.checkPrimaryAttendee(Report.getPrimaryPrincipal(this.attendees), Person.ROLE.PRINCIPAL, Organization.TYPE.PRINCIPAL_ORG)
+		if (ppErr) errors.push(ppErr)
+		const paErr = Report.checkPrimaryAttendee(Report.getPrimaryAdvisor(this.attendees), Person.ROLE.ADVISOR, Organization.TYPE.ADVISOR_ORG)
+		if (paErr) errors.push(paErr)
 
 		if (!this.intent) {
 			errors.push("You must provide the Meeting Goal (purpose)")
@@ -110,7 +180,7 @@ export default class Report extends Model {
 			errors.push('You must provide a brief summary of the Next Steps')
 		}
 
-		if (!isCancelled && !this.keyOutcomes) {
+		if (!cancelled && !this.keyOutcomes) {
 			errors.push('You must provide a brief summary of the Key Outcomes')
 		}
 
@@ -125,31 +195,29 @@ export default class Report extends Model {
 		return {errors, warnings}
 	}
 
-	checkPrimaryAttendee(primaryAttendee, primaryOrg, role, orgType, errors) {
+	static checkPrimaryAttendee(primaryAttendee, role, orgType) {
 		const roleName = Person.humanNameOfRole(role)
 		if (!primaryAttendee) {
-			errors.push(`You must provide the primary ${roleName} for the Engagement`)
+			return `You must provide the primary ${roleName} for the Engagement`
 		} else if (primaryAttendee.status !== Person.STATUS.ACTIVE) {
-			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`)
+			return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
 		} else if (primaryAttendee.endOfTourDate && moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf('day'))) {
-			errors.push(`The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`)
+			return `The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`
 		} else if (!primaryAttendee.position) {
-			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`)
+			return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
 		} else if (primaryAttendee.position.status !== Position.STATUS.ACTIVE) {
-			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`)
-		} else if (primaryOrg && (primaryOrg.type !== orgType)) {
-			errors.push(`The primary ${roleName}'s - ${primaryAttendee.name} - organization should be ${Organization.humanNameOfType(orgType)}`)
+			return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
 		}
 	}
 
-	getPrimaryPrincipal() {
-		return this.attendees.find( el =>
+	static getPrimaryPrincipal(attendees) {
+		return attendees.find( el =>
 			el.role === Person.ROLE.PRINCIPAL && el.primary
 		)
 	}
 
-	getPrimaryAdvisor() {
-		return this.attendees.find( el =>
+	static getPrimaryAdvisor(attendees) {
+		return attendees.find( el =>
 			el.role === Person.ROLE.ADVISOR && el.primary
 		)
 	}
