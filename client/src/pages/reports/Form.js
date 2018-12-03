@@ -22,7 +22,8 @@ import TaskTable from 'components/TaskTable'
 import RichTextEditor from 'components/RichTextEditor'
 import Messages from 'components/Messages'
 import NavigationWarning from 'components/NavigationWarning'
-import LinkTo from 'components/LinkTo'
+import AttendeesTable from './AttendeesTable'
+import AuthorizationGroupTable from './AuthorizationGroupTable'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 import LOCATION_ICON from 'resources/locations.png'
@@ -39,91 +40,6 @@ import { jumpToTop } from 'components/Page'
 import utils from 'utils'
 
 import { withRouter } from 'react-router-dom'
-
-class AttendeesTable extends Component {
-	render() {
-		return (
-			<Table striped condensed hover responsive id="attendeesTable">
-				<thead>
-					<tr>
-						<th style={{textAlign: 'center'}}>Primary</th>
-						<th>Name</th>
-						<th>Position</th>
-						<th>Location</th>
-						<th>Organization</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{Person.map(this.props.attendees.filter(p => p.role === Person.ROLE.ADVISOR),
-						person => this.renderAttendeeRow(person)
-					)}
-
-					<tr className="attendee-divider-row"><td colSpan={6}><hr /></td></tr>
-
-					{Person.map(this.props.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL),
-						person => this.renderAttendeeRow(person)
-					)}
-				</tbody>
-			</Table>
-		)
-	}
-
-	renderAttendeeRow = (person) => {
-		return (
-			<tr key={person.uuid}>
-				<td className="primary-attendee">
-					<Checkbox checked={person.primary} onChange={() => this.setPrimaryAttendee(person)} />
-				</td>
-
-				<td>
-					<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-					<LinkTo person={person}/>
-				</td>
-				<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-				<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
-				<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
-				<td onClick={() => this.props.onDelete(person)}>
-					<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
-				</td>
-			</tr>
-		)
-	}
-
-	setPrimaryAttendee = (person) => {
-		this.props.attendees.forEach(attendee => {
-			if (Person.isEqual(attendee, person)) {
-				attendee.primary = true
-			} else if (attendee.role === person.role) {
-				attendee.primary = false
-			}
-		})
-		this.props.onChange(this.props.attendees)
-	}
-}
-
-const AuthorizationGroupTable = (props) => (
-	<Table striped condensed hover responsive>
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Description</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			{props.authorizationGroups.map((ag, agIndex) =>
-				<tr key={ag.uuid}>
-					<td>{ag.name}</td>
-					<td>{ag.description}</td>
-					<td onClick={() => props.onDelete(ag)}>
-						<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove group" /></span>
-					</td>
-				</tr>
-			)}
-		</tbody>
-	</Table>
-)
 
 class BaseReportForm extends Component {
 	static propTypes = {
@@ -476,7 +392,7 @@ class BaseReportForm extends Component {
 												template={AuthorizationGroup.autocompleteTemplate}
 												addFieldName='authorizationGroups'
 												addFieldLabel='Authorization Groups'
-												renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} />}
+												renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
 												onChange={value => setFieldValue('authorizationGroups', value)}
 												shortcutsTitle={`Recent Authorization Groups`}
 												shortcuts={recents.authorizationGroups}
