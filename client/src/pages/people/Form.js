@@ -394,8 +394,8 @@ class BasePersonForm extends Component {
 		return Person.fullName(splitName)
 	}
 
-	handleEmailValidation = (value, person) => {
-		return utils.handleEmailValidation(value, {validate: person.isAdvisor()})
+	handleEmailValidation = (value, values) => {
+		return utils.handleEmailValidation(value, {validate: Person.isAdvisor(values)})
 	}
 
 	handleLastNameOnKeyDown = (event) => {
@@ -406,18 +406,54 @@ class BasePersonForm extends Component {
 		}
 	}
 
+	onCancel = () => {
+		this.props.history.goBack()
+	}
+
 	onSubmit = (values, form) => {
-		const person = new Person(values)
+		this.save(values, form)
+			.then(response => this.onSubmitSuccess(response, values, form))
+			.catch(error => {
+				this.setState({error})
+				jumpToTop()
+			})
+	}
+
+	onSubmitSuccess = (response, values, form) => {
 		let isFirstTimeUser = false
 		if (Person.isNewUser(values)) {
 			isFirstTimeUser = true
-			person.status = Person.STATUS.ACTIVE
 		}
-		this.updatePerson(person, form, isFirstTimeUser)
+		// After successful submit, reset the form in order to make sure the dirty
+		// prop is also reset (otherwise we would get a blocking navigation warning)
+		form.resetForm()
+		if (isFirstTimeUser) {
+			localStorage.clear()
+			localStorage.newUser = 'true'
+			this.props.loadAppData()
+			this.props.history.push({
+				pathname: '/',
+			})
+		} else {
+			const { edit } = this.props
+			const operation = edit ? 'updatePerson' : 'createPerson'
+			const person = new Person({uuid: (response[operation].uuid ? response[operation].uuid : this.props.initialValues.uuid)})
+			this.props.history.replace(Person.pathForEdit(person))
+			this.props.history.push({
+				pathname: Person.pathFor(person),
+				state: {
+					success: 'Person saved',
+				}
+			})
+		}
 	}
 
-	updatePerson = (person, form, isNew) => {
+	save = (values, form) => {
 		const { edit } = this.props
+		let person = new Person(values)
+		if (Person.isNewUser(values)) {
+			person.status = Person.STATUS.ACTIVE
+		}
 		person.name = Person.fullName({firstName: person.firstName, lastName: person.lastName}, true)
 		// Clean up person object for JSON response
 		person = Object.without(person, 'firstName', 'lastName')
@@ -426,32 +462,7 @@ class BasePersonForm extends Component {
 		graphql += edit ? '' : ' { uuid }'
 		const variables = { person: person }
 		const variableDef = '($person: PersonInput!)'
-		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
-			.then(data => {
-				form.resetForm()
-				if (isNew) {
-					localStorage.clear()
-					localStorage.newUser = 'true'
-					this.props.loadAppData()
-					this.props.history.push({
-						pathname: '/',
-					})
-				} else {
-					if (data[operation].uuid) {
-						person.uuid = data[operation].uuid
-					}
-					this.props.history.replace(Person.pathForEdit(person))
-					this.props.history.push({
-						pathname: Person.pathFor(person),
-						state: {
-							success: 'Person saved',
-						}
-					})
-				}
-			}).catch(error => {
-				this.setState({error})
-				jumpToTop()
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
 
 	@autobind
