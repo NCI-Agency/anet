@@ -32,7 +32,7 @@ import { jumpToTop } from 'components/Page'
 import utils from 'utils'
 
 const ApproverTable = (props) => (
-	<Table striped>
+	<Table striped condensed hover responsive>
 		<thead>
 			<tr>
 				<th>Name</th>

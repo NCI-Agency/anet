@@ -17,7 +17,7 @@ import POSITIONS_ICON from 'resources/positions.png'
 import REMOVE_ICON from 'resources/delete.png'
 
 const PositionTable = (props) => (
-	<Table hover striped>
+	<Table striped condensed hover responsive>
 		<thead>
 			<tr>
 				<th></th>

@@ -12,7 +12,7 @@ export default class AuthorizationGroupTable extends Component {
 
 	render() {
 		let authorizationGroups = AuthorizationGroup.fromArray(this.props.authorizationGroups)
-		return <Table striped>
+		return <Table striped condensed hover responsive>
 			<thead>
 				<tr>
 					<th>Name</th>

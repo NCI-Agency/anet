@@ -88,7 +88,7 @@ class BaseAssignPositionModal extends Component {
 							</Col>
 						</Row>
 						{newPosition && newPosition.uuid &&
-							<Table>
+							<Table striped condensed hover responsive>
 								<thead>
 									<tr>
 										<th>Organization</th>

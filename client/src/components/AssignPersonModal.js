@@ -77,7 +77,7 @@ export default class AssignPersonModal extends Component {
 							</Col>
 						</Row>
 						{newPerson && newPerson.uuid &&
-							<Table>
+							<Table striped condensed hover responsive>
 								<thead>
 									<tr>
 										<th>Rank</th>

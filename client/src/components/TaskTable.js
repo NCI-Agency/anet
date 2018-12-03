@@ -58,7 +58,7 @@ export default class TaskTable extends Component {
 						</header>
 					}
 
-					<Table responsive hover striped className="tasks_table">
+					<Table striped condensed hover responsive className="tasks_table">
 						<thead>
 							<tr>
 								<th>Name</th>
