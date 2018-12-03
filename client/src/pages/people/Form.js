@@ -30,6 +30,7 @@ import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
 import _isEmpty from 'lodash/isEmpty'
 import _clone from 'lodash/clone'
+import moment from 'moment'
 
 class BasePersonForm extends Component {
 	static propTypes = {
@@ -363,6 +364,7 @@ class BasePersonForm extends Component {
 							name="endOfTourDate"
 							label="End of tour"
 							component={FieldHelper.renderSpecialField}
+							value={values.endOfTourDate && moment(values.endOfTourDate).format()}
 							onChange={(value, formattedValue) => setFieldValue('endOfTourDate', value)}
 							addon={CALENDAR_ICON}
 							widget={

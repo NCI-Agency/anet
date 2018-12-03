@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Model from 'components/Model'
+import Model, { yupDate } from 'components/Model'
 import LinkTo from 'components/LinkTo'
 import utils from 'utils'
 import Settings from 'Settings'
@@ -41,7 +41,7 @@ export default class Person extends Model {
 		rank: yup.string().required().default(''),
 		gender: yup.mixed().nullable().default(''),
 		phoneNumber: yup.string().nullable().default(''),
-		endOfTourDate: yup.string().required().default(''),
+		endOfTourDate: yupDate.nullable().required().default(null),
 		biography: yup.string().nullable().default(''),
 		position: yup.object().nullable().default({}),
 		role: yup.string().nullable().default(() => Person.ROLE.PRINCIPAL),
