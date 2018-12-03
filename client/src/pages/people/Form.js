@@ -31,43 +31,6 @@ import { jumpToTop } from 'components/Page'
 import _isEmpty from 'lodash/isEmpty'
 import _clone from 'lodash/clone'
 
-// Handle events
-const handleLastNameOnKeyDown = (event) => {
-	// adding a "," to the last name results in jumping to the end of the first name
-	if (event.key === ',') {
-		event.preventDefault()
-		document.getElementById('firstName').focus()
-	}
-}
-
-const statusButtons = [
-	{
-		id: 'statusActiveButton',
-		value: Person.STATUS.ACTIVE,
-		label: 'ACTIVE',
-	},
-	{
-		id: 'statusInactiveButton',
-		value: Person.STATUS.INACTIVE,
-		label: 'INACTIVE'
-	},
-]
-
-const roleButtons = ({ isAdmin, title }) => [
-	{
-		id: 'roleAdvisorButton',
-		title: title,
-		value: Person.ROLE.ADVISOR,
-		label: Settings.fields.advisor.person.name,
-		disabled: !isAdmin
-	},
-	{
-		id: 'rolePrincipalButton',
-		value: Person.ROLE.PRINCIPAL,
-		label: Settings.fields.principal.person.name
-	},
-]
-
 class BasePersonForm extends Component {
 	static propTypes = {
 		initialValues: PropTypes.object.isRequired,
@@ -93,6 +56,34 @@ class BasePersonForm extends Component {
 			wrongPersonOptionValue: null,
 		}
 	}
+
+	statusButtons = [
+		{
+			id: 'statusActiveButton',
+			value: Person.STATUS.ACTIVE,
+			label: 'ACTIVE',
+		},
+		{
+			id: 'statusInactiveButton',
+			value: Person.STATUS.INACTIVE,
+			label: 'INACTIVE'
+		},
+	]
+
+	roleButtons = ({ isAdmin, title }) => [
+		{
+			id: 'roleAdvisorButton',
+			title: title,
+			value: Person.ROLE.ADVISOR,
+			label: Settings.fields.advisor.person.name,
+			disabled: !isAdmin
+		},
+		{
+			id: 'rolePrincipalButton',
+			value: Person.ROLE.PRINCIPAL,
+			label: Settings.fields.principal.person.name
+		},
+	]
 
 	countries = person => {
 		switch(person.role) {
@@ -184,7 +175,7 @@ class BasePersonForm extends Component {
 										display="inline"
 										placeholder="LAST NAME"
 										disabled={!canEditName}
-										onKeyDown={handleLastNameOnKeyDown}
+										onKeyDown={this.handleLastNameOnKeyDown}
 									/>
 								</Col>
 								<Col sm={1} className="name-input">,</Col>
@@ -274,7 +265,7 @@ class BasePersonForm extends Component {
 							<Field
 								name="role"
 								component={FieldHelper.renderButtonToggleGroup}
-								buttons={roleButtons({ isAdmin, title: superUserAdvisorTitle})}
+								buttons={this.roleButtons({ isAdmin, title: superUserAdvisorTitle})}
 							/>
 						}
 
@@ -294,7 +285,7 @@ class BasePersonForm extends Component {
 								<Field
 									name="status"
 									component={FieldHelper.renderButtonToggleGroup}
-									buttons={statusButtons}
+									buttons={this.statusButtons}
 								>
 								{willAutoKickPosition && <HelpBlock>
 									<span className="text-danger">Settings this person to inactive will automatically remove them from the <strong>{person.position.name}</strong> position.</span>
@@ -404,6 +395,14 @@ class BasePersonForm extends Component {
 
 	handleEmailValidation = (value, person) => {
 		return utils.handleEmailValidation(value, {validate: person.isAdvisor()})
+	}
+
+	handleLastNameOnKeyDown = (event) => {
+		// adding a "," to the last name results in jumping to the end of the first name
+		if (event.key === ',') {
+			event.preventDefault()
+			document.getElementById('firstName').focus()
+		}
 	}
 
 	onSubmit = (values, form) => {
