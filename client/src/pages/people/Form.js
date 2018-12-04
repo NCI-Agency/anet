@@ -291,12 +291,14 @@ class BasePersonForm extends Component {
 							<Field
 								name="status"
 								component={FieldHelper.renderReadonlyField}
+								humanValue={Person.humanNameOfStatus(values.status)}
 							/>
 								:
 							isNewUser ?
 								<Field
 									name="status"
 									component={FieldHelper.renderReadonlyField}
+									humanValue={Person.humanNameOfStatus(values.status)}
 								/>
 								:
 								<Field

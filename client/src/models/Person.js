@@ -97,6 +97,10 @@ export default class Person extends Model {
 		throw new Error(`Unrecognized role: ${role}`)
 	}
 
+	static humanNameOfStatus(status) {
+		return utils.sentenceCase(status)
+	}
+
 	constructor(props) {
 		super(Model.fillObject(props, Person.yupSchema))
 	}
@@ -106,7 +110,7 @@ export default class Person extends Model {
 	}
 
 	humanNameOfStatus() {
-		return utils.sentenceCase(this.status)
+		return Person.humanNameOfStatus(this.status)
 	}
 
 	static isNewUser(person) {
