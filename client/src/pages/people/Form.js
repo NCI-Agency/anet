@@ -401,7 +401,7 @@ class BasePersonForm extends Component {
 							<Button onClick={this.onCancel}>Cancel</Button>
 						</div>
 						<div>
-							<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Person</Button>
+							<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>{this.props.saveText}</Button>
 						</div>
 					</div>
 				</Form>
