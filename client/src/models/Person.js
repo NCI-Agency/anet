@@ -47,23 +47,23 @@ export default class Person extends Model {
 	static yupSchema = yup.object().shape({
 		name: yup.string().nullable().default(''),
 		// not actually in the database, but used for validation
-		firstName: yup.string()
+		firstName: yup.string().nullable()
 			.when('role', (role, schema) => (
 				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.firstName}`) : schema.nullable()
 			)).default('').label(fieldLabels.firstName),
 		// not actually in the database, but used for validation
-		lastName: yup.string().uppercase().required(`You must provide the ${fieldLabels.lastName}`).default('').label(fieldLabels.lastName),
+		lastName: yup.string().nullable().uppercase().required(`You must provide the ${fieldLabels.lastName}`).default('').label(fieldLabels.lastName),
 		domainUsername: yup.string().nullable().default('').label(fieldLabels.domainUsername),
-		emailAddress: yup.string().email()
+		emailAddress: yup.string().nullable().email()
 			.when('role', (role, schema) => (
 				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.emailAddress}`) : schema.nullable()
 			)).default('').label(fieldLabels.emailAddress),
-		country: yup.string().required(`You must provide the ${fieldLabels.country}`).default('').label(fieldLabels.country),
-		rank: yup.string()
+		country: yup.string().nullable().required(`You must provide the ${fieldLabels.country}`).default('').label(fieldLabels.country),
+		rank: yup.string().nullable()
 			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.rank}`) : schema.nullable()
+				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${fieldLabels.rank}`) : schema.nullable()
 			)).default('').label(fieldLabels.rank),
-		gender: yup.string()
+		gender: yup.string().nullable()
 			.when('role', (role, schema) => (
 				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.gender}`) : schema.nullable()
 			)).default('').label(fieldLabels.gender),
