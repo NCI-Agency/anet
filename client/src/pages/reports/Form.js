@@ -16,6 +16,7 @@ import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import NewAutocomplete from 'components/NewAutocomplete'
 import Fieldset from 'components/Fieldset'
+import ConfirmDelete from 'components/ConfirmDelete'
 import ReportTags from 'components/ReportTags'
 import MultiSelector from 'components/MultiSelector'
 import TaskTable from 'components/TaskTable'
@@ -32,7 +33,6 @@ import TASK_ICON from 'resources/tasks.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
 import * as ReportDefs from 'models/Report'
-import * as OrganizationDefs from 'models/Organization'
 import * as PositionDefs from 'models/Position'
 import * as TaskDefs from 'models/Task'
 
@@ -197,6 +197,8 @@ class BaseReportForm extends Component {
 					const autosaveHandler = () => this.autoSave({setFieldValue, resetForm})
 					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
 				}
+				//Only the author can delete a report, and only in DRAFT.
+				const canDelete = !!values.uuid && (Report.isDraft(values.state) || Report.isRejected(values.state)) && Person.isEqual(currentUser, values.author)
 				// Skip validation on save!
 				const action = <div>
 					<Button bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm})} disabled={isSubmitting}>{submitText}</Button>
@@ -464,6 +466,15 @@ class BaseReportForm extends Component {
 							</div>
 							<div>
 								{this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format('hh:mm:ss')}</div>}
+								{canDelete &&
+									<ConfirmDelete
+										onConfirmDelete={() => this.onConfirmDelete(values.uuid, resetForm)}
+										objectType="report"
+										objectDisplay={values.uuid}
+										bsStyle="warning"
+										buttonLabel="Delete this report"
+									/>
+								}
 								{/* Skip validation on save! */}
 								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm: resetForm})} disabled={isSubmitting}>{submitText}</Button>
 							</div>
@@ -514,12 +525,7 @@ class BaseReportForm extends Component {
 			this.save(this.autoSaveSettings.values, false)
 				.then(response => {
 					const newValues = _cloneDeep(this.autoSaveSettings.values)
-					if (response[operation].uuid) {
-						newValues.uuid = response[operation].uuid
-					}
-					if (response[operation].reportSensitiveInformation) {
-						newValues.reportSensitiveInformation = response[operation].reportSensitiveInformation
-					}
+					Object.assign(newValues, response[operation])
 					// After successful autosave, reset the form with the new values in order to make sure the dirty
 					// prop is also reset (otherwise we would get a blocking navigation warning)
 					form.resetForm(newValues)
@@ -536,6 +542,26 @@ class BaseReportForm extends Component {
 					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
 				})
 		}
+	}
+
+	onConfirmDelete = (uuid, resetForm) => {
+		const operation = 'deleteReport'
+		let graphql = operation + '(uuid: $uuid)'
+		const variables = { uuid: uuid }
+		const variableDef = '($uuid: String!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				// After successful delete, reset the form in order to make sure the dirty
+				// prop is also reset (otherwise we would get a blocking navigation warning)
+				resetForm()
+				this.props.history.push({
+					pathname: '/',
+					state: {success: 'Report deleted'}
+				})
+			}).catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
+			})
 	}
 
 	onCancel = () => {
@@ -590,7 +616,7 @@ class BaseReportForm extends Component {
 		const edit = this.isEditMode(values)
 		const operation = edit ? 'updateReport' : 'createReport'
 		let graphql = operation + '(report: $report' + (edit ? ', sendEditEmail: $sendEditEmail' : '') +')'
-		graphql += '{ uuid reportSensitiveInformation { uuid text } }'
+		graphql += '{ uuid state author { uuid } reportSensitiveInformation { uuid text } }'
 		const variables = { report: report }
 		if (edit) {
 			variables.sendEditEmail = sendEmail

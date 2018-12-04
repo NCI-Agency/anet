@@ -115,8 +115,12 @@ export default class Report extends Model {
 		super(Model.fillObject(props, Report.yupSchema))
 	}
 
+	static isDraft(state) {
+		return state === Report.STATE.DRAFT
+	}
+
 	isDraft() {
-		return this.state === Report.STATE.DRAFT
+		return Report.isDraft(this.state)
 	}
 
 	isPending() {
@@ -127,8 +131,12 @@ export default class Report extends Model {
 		return this.state === Report.STATE.RELEASED
 	}
 
+	static isRejected(state) {
+		return state === Report.STATE.REJECTED
+	}
+
 	isRejected() {
-		return this.state === Report.STATE.REJECTED
+		return Report.isRejected(this.state)
 	}
 
 	isCancelled() {
