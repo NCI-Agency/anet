@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import {Table} from 'react-bootstrap'
 
 import UltimatePagination from 'components/UltimatePagination'
+import LinkTo from 'components/LinkTo'
 import {Task} from 'models'
 import * as TaskDefs from 'models/Task'
 
@@ -62,13 +63,15 @@ export default class TaskTable extends Component {
 						<thead>
 							<tr>
 								<th>Name</th>
+								{this.props.showOrganization && <th>Organization</th>}
 								<th />
 							</tr>
 						</thead>
 						<tbody>
 							{Task.map(tasks, task =>
 								<tr key={task.uuid}>
-									<td>{task.shortName} - {task.longName}</td>
+									<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
+									{this.props.showOrganization && <td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>}
 									{this.props.showDelete && <td onClick={this.props.onDelete.bind(this, task)} id={'taskDelete_' + task.uuid} >
 										<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt={`Remove ${TaskDefs.shortLabel}`} /></span>
 									</td>}
