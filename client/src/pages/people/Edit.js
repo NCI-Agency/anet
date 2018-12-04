@@ -48,7 +48,6 @@ class BasePersonEdit extends Page {
 			const parsedFullName = Person.parseFullName(data.person.name)
 			data.person.firstName = parsedFullName.firstName
 			data.person.lastName = parsedFullName.lastName
-			data.person.isFirstTimeUser = Person.isNewUser(data.person)
 			this.setState({ person: new Person(data.person) })
 		})
 	}

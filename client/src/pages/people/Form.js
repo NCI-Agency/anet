@@ -105,6 +105,7 @@ class BasePersonForm extends Component {
 		originalStatus: '',
 		showWrongPersonModal: false,
 		wrongPersonOptionValue: null,
+		onSaveRedirectToHome: Person.isNewUser(this.props.initialValues),  // redirect first time users to the homepage in order to be able to use onboarding
 	}
 
 	render() {
@@ -163,10 +164,6 @@ class BasePersonForm extends Component {
 				<Form className="form-horizontal" method="post">
 					<Messages error={this.state.error} />
 					<Fieldset title={this.props.title} action={action} />
-					<Field
-						name="isFirstTimeUser"
-						component={FieldHelper.renderInputFieldNoLabel}
-					/>
 					<Fieldset>
 						<FormGroup>
 							<Col sm={2} componentClass={ControlLabel}>Name</Col>
@@ -198,8 +195,7 @@ class BasePersonForm extends Component {
 									<TriggerableConfirm
 										onConfirm={() => {
 											setFieldValue('status', Person.STATUS.INACTIVE)
-											setFieldValue('isFirstTimeUser', this.state.wrongPersonOptionValue === 'needNewAccount')
-											submitForm()
+											this.setState({onSaveRedirectToHome: this.state.wrongPersonOptionValue === 'needNewAccount'}, submitForm)
 										}}
 										title="Confirm to reset account"
 										body="Are you sure you want to reset this account?"
@@ -438,7 +434,7 @@ class BasePersonForm extends Component {
 	}
 
 	onSubmitSuccess = (response, values, form) => {
-		if (values.isFirstTimeUser) {
+		if (this.state.onSaveRedirectToHome) {
 			// After successful submit, reset the form in order to make sure the dirty
 			// prop is also reset (otherwise we would get a blocking navigation warning)
 			form.resetForm()
@@ -468,12 +464,12 @@ class BasePersonForm extends Component {
 	save = (values, form) => {
 		const { edit } = this.props
 		let person = new Person(values)
-		if (values.status == Person.STATUS.NEW_USER) {
+		if (values.status === Person.STATUS.NEW_USER) {
 			person.status = Person.STATUS.ACTIVE
 		}
 		person.name = Person.fullName({firstName: person.firstName, lastName: person.lastName}, true)
 		// Clean up person object for JSON response
-		person = Object.without(person, 'firstName', 'lastName', 'isFirstTimeUser')
+		person = Object.without(person, 'firstName', 'lastName')
 		const operation = edit ? 'updatePerson' : 'createPerson'
 		let graphql = operation + '(person: $person)'
 		graphql += edit ? '' : ' { uuid }'
