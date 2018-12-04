@@ -91,8 +91,8 @@ class BasePersonForm extends Component {
 			label: Settings.fields.principal.person.name
 		},
 	]
-	countries = person => {
-		switch(person.role) {
+	countries = role => {
+		switch(role) {
 			case Person.ROLE.ADVISOR:
 				return Settings.fields.advisor.person.countries
 			case Person.ROLE.PRINCIPAL:
@@ -135,8 +135,8 @@ class BasePersonForm extends Component {
 			const warnDomainUsername = values.status === Person.STATUS.INACTIVE && !_isEmpty(values.domainUsername)
 			const ranks = Settings.fields.person.ranks || []
 			const roleButtons = isAdmin ? this.adminRoleButtons : this.roleButtons
-			const countries = this.countries(values)
-			if (countries.length === 1) {
+			const countries = this.countries(values.role)
+			if (countries.length === 1 && !values.country) {
 				// Assign default country if there's only one
 				values.country = countries[0]
 			}
@@ -266,6 +266,21 @@ class BasePersonForm extends Component {
 								name="role"
 								component={FieldHelper.renderButtonToggleGroup}
 								buttons={roleButtons}
+								onClick={
+										event => {
+											const role = event.target.value
+											const roleCountries = this.countries(role)
+											// Reset country value on role change
+											if (roleCountries.length === 1) {
+												// Assign default country if there's only one
+												setFieldValue('country', roleCountries[0])
+											}
+											else {
+												setFieldValue('country', '')
+											}
+											setFieldValue('role', role)
+										}
+								}
 							/>
 						}
 
@@ -348,7 +363,7 @@ class BasePersonForm extends Component {
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
-									<option key="NOCOUNTRY"/>
+									<option />
 									{countries.map(country =>
 											<option key={country} value={country}>{country}</option>
 										)
