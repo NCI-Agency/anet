@@ -1,15 +1,15 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import {Checkbox, Button, Collapse, Table} from 'react-bootstrap'
+import {Checkbox, Button, Collapse, HelpBlock} from 'react-bootstrap'
 import DatePicker from 'react-16-bootstrap-date-picker'
 
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import moment from 'moment'
-import pluralize from 'pluralize'
 import _isEmpty from 'lodash/isEmpty'
+import _cloneDeep from 'lodash/cloneDeep'
 
 import Settings from 'Settings'
 
@@ -29,13 +29,17 @@ import CALENDAR_ICON from 'resources/calendar.png'
 import LOCATION_ICON from 'resources/locations.png'
 import PEOPLE_ICON from 'resources/people.png'
 import TASK_ICON from 'resources/tasks.png'
-import REMOVE_ICON from 'resources/delete.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
 import * as ReportDefs from 'models/Report'
+import * as OrganizationDefs from 'models/Organization'
+import * as PositionDefs from 'models/Position'
 import * as TaskDefs from 'models/Task'
 
 import API from 'api'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import 'components/reactToastify.css'
 import { jumpToTop } from 'components/Page'
 import utils from 'utils'
 
@@ -100,6 +104,14 @@ class BaseReportForm extends Component {
 			label: 'Cancelled due to Threat',
 		},
 	]
+	// some autosave settings
+	defaultTimeout = moment.duration(30, 'seconds')
+	autoSaveSettings = {
+		autoSaveTimeout: this.defaultTimeout.clone(),
+		timeoutId: null,
+		dirty: false,
+		values: {},
+	}
 	state = {
 		recents: {
 			persons: [],
@@ -143,17 +155,28 @@ class BaseReportForm extends Component {
 		})
 	}
 
+	componentWillUnmount() {
+		window.clearTimeout(this.autoSaveSettings.timeoutId)
+	}
+
 	render() {
 		const { currentUser, edit, title, ...myFormProps } = this.props
 		const { recents, tagSuggestions } = this.state
+		const submitText = currentUser.hasActivePosition() ? 'Preview and submit' : 'Save draft'
+		const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
+		const showActivePositionWarning = currentUser.hasAssignedPosition() && !currentUser.hasActivePosition()
+		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
+		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
+		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
+		const advisorPositionSingular = PositionDefs.advisorPosition.name
 
 		return (
 			<Formik
-					enableReinitialize={true}
-					onSubmit={this.onSubmit}
-					validationSchema={Report.yupSchema}
-					isInitialValid={() => Report.yupSchema.isValidSync(this.props.initialValues)}
-					{...myFormProps}
+				enableReinitialize={true}
+				onSubmit={this.onSubmit}
+				validationSchema={Report.yupSchema}
+				isInitialValid={() => Report.yupSchema.isValidSync(this.props.initialValues)}
+				{...myFormProps}
 			>
 			{({
 				handleSubmit,
@@ -166,14 +189,39 @@ class BaseReportForm extends Component {
 				submitForm,
 				resetForm
 			}) => {
-				// Skip validation on save-as-draft!
+				// need up-to-date copies of these in the autosave handler
+				this.autoSaveSettings.dirty = dirty
+				this.autoSaveSettings.values = values
+				if (!this.autoSaveSettings.timeoutId) {
+					// Schedule the auto-save timer
+					const autosaveHandler = () => this.autoSave({setFieldValue, resetForm})
+					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
+				}
+				// Skip validation on save!
 				const action = <div>
-					<Button key="saveAsDraft" bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm})} disabled={isSubmitting}>Save as draft</Button>
-					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Submit</Button>
+					<Button bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm})} disabled={isSubmitting}>{submitText}</Button>
 				</div>
-				return <div>
+				return <div className="report-form">
 					<NavigationWarning isBlocking={dirty} />
+					<ToastContainer />
 					<Messages error={this.state.error} />
+
+					{showAssignedPositionWarning &&
+						<div className="alert alert-warning" style={alertStyle}>
+							You cannot submit a report: you are not assigned to a {advisorPositionSingular} position.<br/>
+							Please contact your organization's super user(s) and request to be assigned to a {advisorPositionSingular} position.<br/>
+							If you are unsure, you can also contact the support team {supportEmailMessage}.
+						</div>
+					}
+
+					{showActivePositionWarning &&
+						<div className="alert alert-warning" style={alertStyle}>
+							You cannot submit a report: your assigned {advisorPositionSingular} position has an inactive status.<br/>
+							Please contact your organization's super users and request them to assign you to an active {advisorPositionSingular} position.<br/>
+							If you are unsure, you can also contact the support team {supportEmailMessage}.
+						</div>
+					}
+
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={title} action={action} />
 						<Fieldset>
@@ -203,7 +251,13 @@ class BaseReportForm extends Component {
 										showClearButton={false}
 									/>
 								}
-							/>
+							>
+								{values.engagementDate && moment().endOf("day").isBefore(values.engagementDate) &&
+									<HelpBlock>
+										<span className="text-success">This will create an upcoming engagement</span>
+									</HelpBlock>
+								}
+							</Field>
 
 							<Field
 								name="location"
@@ -325,7 +379,7 @@ class BaseReportForm extends Component {
 									addFieldName='tasks'
 									addFieldLabel={TaskDefs.shortLabel}
 									addon={TASK_ICON}
-									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} />}
+									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
 									onChange={value => setFieldValue('tasks', value)}
 									shortcutsTitle={`Recent ${TaskDefs.shortLabel}`}
 									shortcuts={recents.tasks}
@@ -409,9 +463,9 @@ class BaseReportForm extends Component {
 								<Button onClick={this.onCancel}>Cancel</Button>
 							</div>
 							<div>
-								{/* Skip validation on save-as-draft! */}
-								<Button id="formBottomSaveAsDraft" key="saveAsDraft" bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm: resetForm})} disabled={isSubmitting}>Save as draft</Button>
-								<Button id="formBottomSubmit" key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Submit</Button>
+								{this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format('hh:mm:ss')}</div>}
+								{/* Skip validation on save! */}
+								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm: resetForm})} disabled={isSubmitting}>{submitText}</Button>
 							</div>
 						</div>
 					</Form>
@@ -441,11 +495,47 @@ class BaseReportForm extends Component {
 
 	isEditMode = (values) => {
 		// We're in edit mode when the form was started as an edit form, or when the report got an id after autosave
-		return values.uuid
+		return !!values.uuid
 	}
 
 	toggleReportText = () => {
 		this.setState({showReportText: !this.state.showReportText})
+	}
+
+	autoSave = (form) => {
+		const autosaveHandler = () => this.autoSave(form)
+		// Only auto-save if the report has changed
+		if (!this.autoSaveSettings.dirty) {
+			// Just re-schedule the auto-save timer
+			this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
+		} else {
+			const edit = this.isEditMode(this.autoSaveSettings.values)
+			const operation = edit ? 'updateReport' : 'createReport'
+			this.save(this.autoSaveSettings.values, false)
+				.then(response => {
+					const newValues = _cloneDeep(this.autoSaveSettings.values)
+					if (response[operation].uuid) {
+						newValues.uuid = response[operation].uuid
+					}
+					if (response[operation].reportSensitiveInformation) {
+						newValues.reportSensitiveInformation = response[operation].reportSensitiveInformation
+					}
+					// After successful autosave, reset the form with the new values in order to make sure the dirty
+					// prop is also reset (otherwise we would get a blocking navigation warning)
+					form.resetForm(newValues)
+					this.autoSaveSettings.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
+					this.setState({autoSavedAt: moment()})
+					toast.success('Your report has been automatically saved')
+					// And re-schedule the auto-save timer
+					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
+				}).catch(error => {
+					// Show an error message
+					this.autoSaveSettings.autoSaveTimeout.add(this.autoSaveSettings.autoSaveTimeout) // exponential back-off
+					toast.error("There was an error autosaving your report; we'll try again in " + this.autoSaveSettings.autoSaveTimeout.humanize())
+					// And re-schedule the auto-save timer
+					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
+				})
+		}
 	}
 
 	onCancel = () => {

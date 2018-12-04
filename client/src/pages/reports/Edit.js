@@ -52,7 +52,7 @@ class BaseReportEdit extends Page {
 		`).then(data => {
 			function getReportFromData() {
 				Object.assign(data.report, {
-					cancelled: data.report.cancelledReason ? true : false,
+					cancelled: !!data.report.cancelledReason,
 					reportTags: (data.report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name})),
 				})
 				return new Report(data.report)
