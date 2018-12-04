@@ -1,64 +1,62 @@
-{
-  reportList(query: {releasedAtStart: -259200000, pageSize: 3, pageNum: 0, sortBy: RELEASED_AT, sortOrder: DESC}) {
-    pageNum
-    totalCount
-    list {
+reportList(query: {releasedAtStart: -259200000, pageSize: 3, pageNum: 0, sortBy: RELEASED_AT, sortOrder: DESC}) {
+  pageNum
+  totalCount
+  list {
+    uuid
+    releasedAt
+    intent
+    engagementDate
+    location {
       uuid
-      releasedAt
-      intent
-      engagementDate
-      location {
+      name
+      lat
+      lng
+    }
+    atmosphere
+    atmosphereDetails
+    reportText
+    advisorOrg {
+      uuid
+      shortName
+      longName
+    }
+    attendees {
+      uuid
+      name
+      role
+      primary
+      rank
+      position {
         uuid
         name
-        lat
-        lng
-      }
-      atmosphere
-      atmosphereDetails
-      reportText
-      advisorOrg {
-        uuid
-        shortName
-        longName
-      }
-      attendees {
-        uuid
-        name
-        role
-        primary
-        rank
-        position {
-          uuid
-          name
-          status
-          organization {
-            uuid
-            shortName
-          }
-        }
-      }
-      tasks {
-        uuid
-        shortName
-        longName
-        responsibleOrg {
+        status
+        organization {
           uuid
           shortName
         }
       }
-      keyOutcomes
-      nextSteps
-      author {
+    }
+    tasks {
+      uuid
+      shortName
+      longName
+      responsibleOrg {
         uuid
+        shortName
+      }
+    }
+    keyOutcomes
+    nextSteps
+    author {
+      uuid
+      name
+      rank
+      emailAddress
+      phoneNumber
+      position {
         name
-        rank
-        emailAddress
-        phoneNumber
-        position {
-          name
-          organization {
-            shortName
-          }
+        organization {
+          shortName
         }
       }
     }
