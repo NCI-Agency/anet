@@ -109,8 +109,8 @@ export default class Person extends Model {
 		return utils.sentenceCase(this.status)
 	}
 
-	static isNewUser() {
-		return this.status === Person.STATUS.NEW_USER
+	static isNewUser(person) {
+		return person.status === Person.STATUS.NEW_USER
 	}
 
 	isNewUser() {
