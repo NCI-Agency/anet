@@ -30,11 +30,9 @@ class PersonNew extends Page {
 		return (
 			<div>
 				<Breadcrumbs items={[['Create new Person', Person.pathForNew()]]} />
-
 				<PersonForm
 					original={this.state.originalPerson}
-					person={person}
-					showPositionAssignment={true} />
+					person={person} />
 			</div>
 		)
 	}

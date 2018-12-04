@@ -14,20 +14,20 @@ import AppContext from 'components/AppContext'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
-class BasePersonEdit extends Page {
+class PersonEdit extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		currentUser: PropTypes.instanceOf(Person),
+	}
+
+	state = {
+		person: new Person(),
 	}
 
 	static modelName = 'User'
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-		this.state = {
-			person: new Person(),
-		}
 	}
 
 	fetchData(props) {
@@ -54,9 +54,6 @@ class BasePersonEdit extends Page {
 
 	render() {
 		const { person } = this.state
-		const { currentUser } = this.props
-		let canEditPosition = currentUser && currentUser.isSuperUser()
-
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
 		const saveText = person.isNewUser() ? 'Create profile' : 'Save Person'
 		return (
@@ -68,20 +65,11 @@ class BasePersonEdit extends Page {
 				<PersonForm
 					initialValues={person}
 					edit
-					showPositionAssignment={canEditPosition}
 					title={legendText}
 					saveText={saveText} />
 			</div>
 		)
 	}
 }
-
-const PersonEdit = (props) => (
-	<AppContext.Consumer>
-		{context =>
-			<BasePersonEdit currentUser={context.currentUser} {...props} />
-		}
-	</AppContext.Consumer>
-)
 
 export default connect(null, mapDispatchToProps)(PersonEdit)
