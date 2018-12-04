@@ -46,6 +46,8 @@ export default class Person extends Model {
 
 	static yupSchema = yup.object().shape({
 		name: yup.string().nullable().default(''),
+		// not actually in the database, but used for form initialization
+		isFirstTimeUser: yup.boolean().default(false),
 		// not actually in the database, but used for validation
 		firstName: yup.string().nullable()
 			.when('role', (role, schema) => (

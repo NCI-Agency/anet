@@ -163,6 +163,10 @@ class BasePersonForm extends Component {
 				<Form className="form-horizontal" method="post">
 					<Messages error={this.state.error} />
 					<Fieldset title={this.props.title} action={action} />
+					<Field
+						name="isFirstTimeUser"
+						component={FieldHelper.renderInputFieldNoLabel}
+					/>
 					<Fieldset>
 						<FormGroup>
 							<Col sm={2} componentClass={ControlLabel}>Name</Col>
@@ -192,7 +196,11 @@ class BasePersonForm extends Component {
 							{edit && !canEditName &&
 								<React.Fragment>
 									<TriggerableConfirm
-										onConfirm={this.confirmReset.bind(this)}
+										onConfirm={() => {
+											setFieldValue('status', Person.STATUS.INACTIVE)
+											setFieldValue('isFirstTimeUser', this.state.wrongPersonOptionValue === 'needNewAccount')
+											submitForm()
+										}}
 										title="Confirm to reset account"
 										body="Are you sure you want to reset this account?"
 										confirmText={confirmLabel}
@@ -287,7 +295,6 @@ class BasePersonForm extends Component {
 							<Field
 								name="status"
 								component={FieldHelper.renderReadonlyField}
-								type="text"
 							/>
 								:
 							isNewUser ?
@@ -431,14 +438,10 @@ class BasePersonForm extends Component {
 	}
 
 	onSubmitSuccess = (response, values, form) => {
-		let isFirstTimeUser = false
-		if (Person.isNewUser(values)) {
-			isFirstTimeUser = true
-		}
-		// After successful submit, reset the form in order to make sure the dirty
-		// prop is also reset (otherwise we would get a blocking navigation warning)
-		form.resetForm()
-		if (isFirstTimeUser) {
+		if (values.isFirstTimeUser) {
+			// After successful submit, reset the form in order to make sure the dirty
+			// prop is also reset (otherwise we would get a blocking navigation warning)
+			form.resetForm()
 			localStorage.clear()
 			localStorage.newUser = 'true'
 			this.props.loadAppData()
@@ -446,6 +449,9 @@ class BasePersonForm extends Component {
 				pathname: '/',
 			})
 		} else {
+			// After successful submit, reset the form in order to make sure the dirty
+			// prop is also reset (otherwise we would get a blocking navigation warning)
+			form.resetForm()
 			const { edit } = this.props
 			const operation = edit ? 'updatePerson' : 'createPerson'
 			const person = new Person({uuid: (response[operation].uuid ? response[operation].uuid : this.props.initialValues.uuid)})
@@ -462,12 +468,12 @@ class BasePersonForm extends Component {
 	save = (values, form) => {
 		const { edit } = this.props
 		let person = new Person(values)
-		if (Person.isNewUser(values)) {
+		if (values.status == Person.STATUS.NEW_USER) {
 			person.status = Person.STATUS.ACTIVE
 		}
 		person.name = Person.fullName({firstName: person.firstName, lastName: person.lastName}, true)
 		// Clean up person object for JSON response
-		person = Object.without(person, 'firstName', 'lastName')
+		person = Object.without(person, 'firstName', 'lastName', 'isFirstTimeUser')
 		const operation = edit ? 'updatePerson' : 'createPerson'
 		let graphql = operation + '(person: $person)'
 		graphql += edit ? '' : ' { uuid }'
@@ -482,10 +488,14 @@ class BasePersonForm extends Component {
 	}
 
 	@autobind
-	confirmReset() {
-		const { person } = this.props
-		person.status = Person.STATUS.INACTIVE
-		this.updatePerson(person, true, this.state.wrongPersonOptionValue === 'needNewAccount')
+	confirmReset(values, form) {
+		values.status = Person.STATUS.INACTIVE
+		this.save(values, form)
+			.then(response => this.onSubmitSuccess(response, values, form, this.state.wrongPersonOptionValue === 'needNewAccount'))
+			.catch(error => {
+				this.setState({error})
+				jumpToTop()
+			})
 	}
 
 	@autobind
