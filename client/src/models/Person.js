@@ -63,7 +63,7 @@ export default class Person extends Model {
 			.when('role', (role, schema) => (
 				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.rank}`) : schema.nullable()
 			)).default('').label(fieldLabels.rank),
-		gender: yup.mixed()
+		gender: yup.string()
 			.when('role', (role, schema) => (
 				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.gender}`) : schema.nullable()
 			)).default('').label(fieldLabels.gender),
