@@ -10,7 +10,6 @@ import * as FieldHelper from 'components/FieldHelper'
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import RichTextEditor from 'components/RichTextEditor'
-import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import OptionListModal from 'components/OptionListModal'
 
 import API from 'api'
@@ -30,7 +29,6 @@ import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
 import _isEmpty from 'lodash/isEmpty'
-import _clone from 'lodash/clone'
 import moment from 'moment'
 
 class BasePersonForm extends Component {
@@ -38,7 +36,6 @@ class BasePersonForm extends Component {
 		initialValues: PropTypes.object.isRequired,
 		title: PropTypes.string,
 		edit: PropTypes.bool,
-		saveText: PropTypes.string,
 		currentUser: PropTypes.instanceOf(Person),
 		loadAppData: PropTypes.func,
 	}
@@ -404,13 +401,6 @@ class BasePersonForm extends Component {
 			</React.Fragment>
 		}}
 		</Formik>
-	}
-
-	getFullName(splitName, editName) {
-		if (editName.lastName !== undefined) { splitName.lastName = editName.lastName }
-		if (editName.firstName !== undefined) { splitName.firstName = editName.firstName }
-
-		return Person.fullName(splitName)
 	}
 
 	handleEmailValidation = (value, values) => {
