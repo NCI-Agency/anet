@@ -36,6 +36,7 @@ class BasePersonForm extends Component {
 		initialValues: PropTypes.object.isRequired,
 		title: PropTypes.string,
 		edit: PropTypes.bool,
+		saveText: PropTypes.string,
 		currentUser: PropTypes.instanceOf(Person),
 		loadAppData: PropTypes.func,
 	}
@@ -44,6 +45,7 @@ class BasePersonForm extends Component {
 		initialValues: new Person(),
 		title: '',
 		edit: false,
+		saveText: 'Save Person',
 	}
 
 	statusButtons = [
@@ -153,7 +155,7 @@ class BasePersonForm extends Component {
 					? 'Yes, I would like to inactivate my predecessor\'s account and set up a new one for myself'
 					: 'Yes, I would like to inactivate this account'
 			const action = <React.Fragment>
-				<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Person</Button>
+				<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>{this.props.saveText}</Button>
 			</React.Fragment>
 
 			return <React.Fragment>

@@ -51,9 +51,10 @@ class BaseOnboardingEdit extends Page {
 	render() {
 		return <div>
 			<PersonForm
-				person={this.state.person} edit
-				legendText={"Create your account"}
-				saveText={"Create profile"}
+				initialValues={this.state.person}
+				edit
+				title="Create your account"
+				saveText="Create profile"
 			/>
 		</div>
 	}

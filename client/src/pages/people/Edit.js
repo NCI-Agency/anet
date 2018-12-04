@@ -58,7 +58,7 @@ class BasePersonEdit extends Page {
 		let canEditPosition = currentUser && currentUser.isSuperUser()
 
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
-		const saveText = person.isNewUser() ? 'Create profile' : null
+		const saveText = person.isNewUser() ? 'Create profile' : 'Save Person'
 		return (
 			<div>
 				<RelatedObjectNotes notes={person.notes} relatedObject={person.uuid && {relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
