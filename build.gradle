@@ -308,7 +308,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.0.5'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.1.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }
