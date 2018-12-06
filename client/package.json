@@ -6,7 +6,7 @@
   "homepage": "/assets/client",
   "devDependencies": {
     "artillery": "^1.6.0-24",
-    "autobind-decorator": "^2.1.0",
+    "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.3.1",
     "ava": "^0.25.0",
     "babel-core": "^6.26.3",
@@ -111,7 +111,7 @@
     "whatwg-fetch": "^2.0.3"
   },
   "resolutions": {
-    "autobind-decorator": "2.1.0"
+    "autobind-decorator": "2.4.0"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production --config config/webpack.prod.js",
