@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import {Button, HelpBlock} from 'react-bootstrap'
-import autobind from 'autobind-decorator'
 
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
