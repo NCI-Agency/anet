@@ -225,7 +225,7 @@ class BasePersonShow extends Page {
 								name="biography"
 								className="biography"
 								component={FieldHelper.renderReadonlyField}
-								value={<div dangerouslySetInnerHTML={{__html: person.biography}} />}
+								humanValue={<div dangerouslySetInnerHTML={{__html: person.biography}} />}
 							/>
 						</Fieldset>
 
