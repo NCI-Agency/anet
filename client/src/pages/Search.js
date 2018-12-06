@@ -462,11 +462,13 @@ class BaseSearch extends Page {
 					values,
 					submitForm
 				}) => {
-					return <Form className="form-horizontal" method="post">
+					return <Form>
 						<Field
 							name="name"
 							component={FieldHelper.renderInputField}
-							placeholder="Give this saved search a name" />
+							placeholder="Give this saved search a name"
+							horizontal={false}
+						/>
 						<div className="submit-buttons">
 							<div>
 								<Button id="saveSearchModalSubmitButton" bsStyle="primary" type="button" onClick={submitForm}>Save</Button>
