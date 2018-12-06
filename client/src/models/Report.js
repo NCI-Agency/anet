@@ -2,7 +2,7 @@ import Settings from 'Settings'
 import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
-import {Organization, Person, Position} from 'models'
+import {Person, Position} from 'models'
 
 import * as yup from 'yup'
 
@@ -77,15 +77,15 @@ export default class Report extends Model {
 		attendees: yup.array().nullable()
 			.test('primary-principal', 'primary principal error',
 				// can't use arrow function here because of binding to 'this'
-				function(value) {
-					const err = Report.checkPrimaryAttendee(Report.getPrimaryPrincipal(value), Person.ROLE.PRINCIPAL, Organization.TYPE.PRINCIPAL_ORG)
+				function(attendees) {
+					const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.PRINCIPAL)
 					return err ? this.createError({message: err}) : true
 				}
 			)
 			.test('primary-advisor', 'primary advisor error',
 				// can't use arrow function here because of binding to 'this'
-				function(value) {
-					const err = Report.checkPrimaryAttendee(Report.getPrimaryAdvisor(value), Person.ROLE.ADVISOR, Organization.TYPE.ADVISOR_ORG)
+				function(attendees) {
+					const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
 					return err ? this.createError({message: err}) : true
 				}
 			)
@@ -111,6 +111,25 @@ export default class Report extends Model {
 		authorizationGroups: yup.array().nullable().default([]),
 	}).concat(Model.yupSchema)
 
+	static yupWarningSchema = yup.object().shape({
+		state: yup.string().nullable().default(''),
+		tasks: yup.array().nullable()
+			.when('state', (state, schema) => (
+				(Report.isReleased(state) || Report.isCancelled(state))
+					? schema.nullable()
+					: schema.required(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement.
+						Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
+			)),
+		reportSensitiveInformation: yup.object().nullable().default({}),
+		authorizationGroups: yup.array().nullable()
+			.when(['reportSensitiveInformation', 'reportSensitiveInformation.text'], (reportSensitiveInformation, reportSensitiveInformationText, schema) => (
+				(_isEmpty(reportSensitiveInformation) || _isEmpty(reportSensitiveInformationText))
+					? schema.nullable()
+					: schema.required(`You should provide authorization groups who can access the sensitive information.
+						If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
+			)),
+	})
+
 	constructor(props) {
 		super(Model.fillObject(props, Report.yupSchema))
 	}
@@ -123,12 +142,20 @@ export default class Report extends Model {
 		return Report.isDraft(this.state)
 	}
 
+	static isPending(state) {
+		return state === Report.STATE.PENDING_APPROVAL
+	}
+
 	isPending() {
-		return this.state === Report.STATE.PENDING_APPROVAL
+		return Report.isPending(this.state)
+	}
+
+	static isReleased() {
+		return this.state === Report.STATE.RELEASED
 	}
 
 	isReleased() {
-		return this.state === Report.STATE.RELEASED
+		return Report.isReleased(this.state)
 	}
 
 	static isRejected(state) {
@@ -139,12 +166,20 @@ export default class Report extends Model {
 		return Report.isRejected(this.state)
 	}
 
-	isCancelled() {
+	static isCancelled() {
 		return this.state === Report.STATE.CANCELLED
 	}
 
+	isCancelled() {
+		return Report.isCancelled(this.state)
+	}
+
+	static isFuture(state) {
+		return state === Report.STATE.FUTURE
+	}
+
 	isFuture() {
-		return this.state === Report.STATE.FUTURE
+		return Report.isFuture(this.state)
 	}
 
 	showApprovals() {
@@ -159,7 +194,7 @@ export default class Report extends Model {
 		const errors = []
 		const warnings = []
 
-		let cancelled = this.cancelledReason ? true : false
+		let cancelled = !!this.cancelledReason
 		if (!cancelled) {
 			if (!this.atmosphere) {
 				errors.push('You must provide the overall atmospherics of the engagement')
@@ -175,9 +210,9 @@ export default class Report extends Model {
 			errors.push('You cannot submit reports for future dates, except for cancelled engagements')
 		}
 
-		const ppErr = Report.checkPrimaryAttendee(Report.getPrimaryPrincipal(this.attendees), Person.ROLE.PRINCIPAL, Organization.TYPE.PRINCIPAL_ORG)
+		const ppErr = Report.checkPrimaryAttendee(this.attendees, Person.ROLE.PRINCIPAL)
 		if (ppErr) errors.push(ppErr)
-		const paErr = Report.checkPrimaryAttendee(Report.getPrimaryAdvisor(this.attendees), Person.ROLE.ADVISOR, Organization.TYPE.ADVISOR_ORG)
+		const paErr = Report.checkPrimaryAttendee(this.attendees, Person.ROLE.ADVISOR)
 		if (paErr) errors.push(paErr)
 
 		if (!this.intent) {
@@ -203,7 +238,8 @@ export default class Report extends Model {
 		return {errors, warnings}
 	}
 
-	static checkPrimaryAttendee(primaryAttendee, role, orgType) {
+	static checkPrimaryAttendee(attendees, role) {
+		const primaryAttendee = Report.getPrimaryAttendee(attendees, role)
 		const roleName = Person.humanNameOfRole(role)
 		if (!primaryAttendee) {
 			return `You must provide the primary ${roleName} for the Engagement`
@@ -218,15 +254,9 @@ export default class Report extends Model {
 		}
 	}
 
-	static getPrimaryPrincipal(attendees) {
+	static getPrimaryAttendee(attendees, role) {
 		return attendees.find( el =>
-			el.role === Person.ROLE.PRINCIPAL && el.primary
-		)
-	}
-
-	static getPrimaryAdvisor(attendees) {
-		return attendees.find( el =>
-			el.role === Person.ROLE.ADVISOR && el.primary
+			el.role === role && el.primary
 		)
 	}
 
