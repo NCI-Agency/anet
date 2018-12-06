@@ -15,24 +15,20 @@ class PersonNew extends Page {
 		...pagePropTypes,
 	}
 
+	state = {
+		person: new Person(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			originalPerson: new Person(),
-			person: new Person(),
-		}
 	}
 
 	render() {
-		let person = this.state.person
-
+		const {person} = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new Person', Person.pathForNew()]]} />
-				<PersonForm
-					original={this.state.originalPerson}
-					person={person} />
+				<Breadcrumbs items={[['New Person', Person.pathForNew()]]} />
+				<PersonForm initialValues={person} title='Create a new Person' />
 			</div>
 		)
 	}
