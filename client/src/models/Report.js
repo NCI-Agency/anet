@@ -190,54 +190,6 @@ export default class Report extends Model {
 		return this.intent || 'None'
 	}
 
-	validateForSubmit() {
-		const errors = []
-		const warnings = []
-
-		let cancelled = !!this.cancelledReason
-		if (!cancelled) {
-			if (!this.atmosphere) {
-				errors.push('You must provide the overall atmospherics of the engagement')
-			} else {
-				if (this.atmosphere !== Report.ATMOSPHERE.POSITIVE && !this.atmosphereDetails) {
-					errors.push('You must provide atmospherics details if the engagement was not Positive')
-				}
-			}
-		}
-		if (!this.engagementDate) {
-			errors.push('You must provide the Date of Engagement')
-		} else if (!cancelled && moment(this.engagementDate).isAfter(moment().endOf('day'))) {
-			errors.push('You cannot submit reports for future dates, except for cancelled engagements')
-		}
-
-		const ppErr = Report.checkPrimaryAttendee(this.attendees, Person.ROLE.PRINCIPAL)
-		if (ppErr) errors.push(ppErr)
-		const paErr = Report.checkPrimaryAttendee(this.attendees, Person.ROLE.ADVISOR)
-		if (paErr) errors.push(paErr)
-
-		if (!this.intent) {
-			errors.push("You must provide the Meeting Goal (purpose)")
-		}
-
-		if (!this.nextSteps) {
-			errors.push('You must provide a brief summary of the Next Steps')
-		}
-
-		if (!cancelled && !this.keyOutcomes) {
-			errors.push('You must provide a brief summary of the Key Outcomes')
-		}
-
-		if (_isEmpty(this.tasks)) {
-			warnings.push(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement. Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
-		}
-
-		if (!_isEmpty(this.reportSensitiveInformation) && !_isEmpty(this.reportSensitiveInformation.text) && _isEmpty(this.authorizationGroups)) {
-			warnings.push(`You should provide authorization groups who can access the sensitive information. If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
-		}
-
-		return {errors, warnings}
-	}
-
 	static checkPrimaryAttendee(attendees, role) {
 		const primaryAttendee = Report.getPrimaryAttendee(attendees, role)
 		const roleName = Person.humanNameOfRole(role)
