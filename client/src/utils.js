@@ -8,6 +8,8 @@ import encodeQuery from 'querystring/encode'
 import Settings from 'Settings'
 
 const WILDCARD = '*'
+const domainNames = Settings.domainNames.map(d => d.toLowerCase())
+const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
 
 export default {
 	...changeCase,
@@ -16,17 +18,15 @@ export default {
 		return pluralize(changeCase.camel(string))
 	},
 
-	handleEmailValidation: function(value, props) {
-		if(!props.validate) return
-		const domainNames = Settings.domainNames.map(d => d.toLowerCase())
-
-		let wildcardDomains = this.getWildcardDomains(domainNames, WILDCARD)
-		try {
-			const error = !this.validateEmail(value, domainNames, wildcardDomains)
-			if(error)
-				return this.emailErrorMessage(domainNames)
+	handleEmailValidation: function(value, shouldValidate) {
+		if (!shouldValidate) {
+			return { isValid: true, message: null }
 		}
-		catch (e) {
+		try {
+			const isValid = this.validateEmail(value, domainNames, wildcardDomains)
+			const message = isValid ? null :this.emailErrorMessage(domainNames)
+			return { isValid, message }
+		} catch (e) {
 			return { isValid: false, message: (<div>{e.message}</div>) }
 		}
 	},
@@ -56,13 +56,6 @@ export default {
 			})
 		}
 		return isValid
-	},
-
-	getWildcardDomains: function(domainList, token) {
-		let wildcardDomains = domainList.filter(domain => {
-			return domain[0] === token
-		})
-		return wildcardDomains
 	},
 
 	emailErrorMessage: function(validDomainNames) {
