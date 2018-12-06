@@ -101,7 +101,7 @@ class BasePositionShow extends Page {
 			{({
 				values,
 			}) => {
-				const action = canEdit && <LinkTo position={position} edit button="primary">Edit</LinkTo>
+				const action = canEdit && <LinkTo position={position} edit button="primary" className="edit-position">Edit</LinkTo>
 				return <div>
 					<div className="pull-right">
 						<GuidedTour

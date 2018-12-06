@@ -98,23 +98,23 @@ test('Approve report chain', async t => {
     let {pageHelpers, $, $$, assertElementText, By, until, shortWaitMs} = t.context
     // First Erin needs to approve the report, then rebecca can approve the report
     await t.context.get('/', 'erin')
-    let [$draftReportsErin, $reportsPendingErin, $orgReportsErin, $upcomingEngagementsErin] = await $$('.home-tile')
+    let $homeTileErin = await $$('.home-tile')
+    let [$draftReportsErin, $reportsPendingErin, $orgReportsErin, $upcomingEngagementsErin] = $homeTileErin
     await t.context.driver.wait(until.elementIsVisible($reportsPendingErin))
     await $reportsPendingErin.click()
 
     await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
     let $firstReadReportButtonErin = await $('.read-report-button')
-    let reportHref = await $firstReadReportButtonErin.getAttribute('href')
     await t.context.driver.wait(until.elementIsEnabled($firstReadReportButtonErin))
     await $firstReadReportButtonErin.click()
 
     await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
-    let $errinApproveButton = await $('.approve-button')
-    await t.context.driver.wait(until.elementIsEnabled($errinApproveButton))
-    await $errinApproveButton.click()
-
+    let $erinApproveButton = await $('.approve-button')
+    await t.context.driver.wait(until.elementIsEnabled($erinApproveButton))
+    await $erinApproveButton.click()
     await t.context.get('/', 'rebecca')
-    let [$draftReports, $reportsPending, $orgReports, $upcomingEngagements] = await $$('.home-tile')
+    let $homeTile = await $$('.home-tile')
+    let [$draftReports, $reportsPending, $orgReports, $upcomingEngagements] = $homeTile
     await t.context.driver.wait(until.elementIsVisible($reportsPending))
     await $reportsPending.click()
 
@@ -145,7 +145,8 @@ test('Approve report chain', async t => {
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
     await t.context.get('/rollup')
 
-    let $approvedIntent = await t.context.driver.findElement(By.linkText('meeting goal'))
+    let $reportCollection = await $('.report-collection')
+    let $approvedIntent = await $reportCollection.findElement(By.linkText('meeting goal'))
     await assertElementText(
         t,
         $approvedIntent,
@@ -182,16 +183,17 @@ test('Verify that validation and other reports/new interactions work', async t =
         )
     }
 
-    let $meetingGoal = await $('.meeting-goal')
     let $meetingGoalInput = await $('#intent')
-
+    let $meetingGoalDiv = await t.context.driver.findElement(By.xpath('//textarea[@id="intent"]/ancestor::div[contains(concat(" ", normalize-space(@class), " "), " form-group ")]'))
+    // check that parent div.form-group does not have class 'has-error'
     t.false(
-        _includes(await $meetingGoal.getAttribute('class'), 'has-warning'), 
+        _includes(await $meetingGoalDiv.getAttribute('class'), 'has-error'),
         `Meeting goal does not start in an invalid state`
     )   
     t.is(await $meetingGoalInput.getAttribute('value'), '', `Meeting goal field starts blank`)
 
-    await verifyFieldIsRequired($meetingGoal, $meetingGoalInput, 'has-warning', 'Meeting goal')
+    // check that parent div.form-group now has a class 'has-error'
+    await verifyFieldIsRequired($meetingGoalDiv, $meetingGoalInput, 'has-error', 'Meeting goal')
 
     let $engagementDate = await $('#engagementDate')
     t.is(await $engagementDate.getAttribute('value'), '', 'Engagement date field starts blank')
@@ -208,7 +210,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     let $locationInput = await $('#location')
     t.is(await $locationInput.getAttribute('value'), '', 'Location field starts blank')
 
-    let $locationShortcutButton = await $('.location-form-group .shortcut-list button')
+    let $locationShortcutButton = await $('.location-form-group.shortcut-list button')
     await $locationShortcutButton.click()
     t.is(await $locationInput.getAttribute('value'), 'General Hospital', 'Clicking the shortcut adds a location')
 
@@ -234,9 +236,10 @@ test('Verify that validation and other reports/new interactions work', async t =
     await $negativeAtmosphereButton.click()
     t.is((await $atmosphereDetails.getAttribute('placeholder')).trim(), 'Why was this engagement negative?')
 
-    let $atmosphereDetailsGroup = await $('.atmosphere-details')
+    let $atmosphereDetailsGroup = await t.context.driver.findElement(By.xpath('//input[@id="atmosphereDetails"]/ancestor::div[contains(concat(" ", normalize-space(@class), " "), " form-group ")]'))
 
     await $neutralAtmosphereButton.click()
+    // check that parent div.form-group now has a class 'has-error'
     await verifyFieldIsRequired($atmosphereDetailsGroup, $atmosphereDetails, 'has-error', 'Neutral atmospherics details')
 
     let $attendanceFieldsetTitle = await $('#attendance-fieldset .title-text')

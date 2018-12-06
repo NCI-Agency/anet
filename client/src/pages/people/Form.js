@@ -388,11 +388,10 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="biography"
-							className="biography"
 							component={FieldHelper.renderSpecialField}
 							onChange={(value) => setFieldValue('biography', value)}
 							widget={
-								<RichTextEditor />
+								<RichTextEditor className="biography" />
 							}
 						/>
 					</Fieldset>

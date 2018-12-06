@@ -120,7 +120,7 @@
     "start": "NODE_ENV=development webpack-dev-server --mode development --open --config config/webpack.dev.js --port 3000",
     "lint": "eslint src tests/e2e/**/*.js tests/util/**/*.js",
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
-    "test": "npm run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
+    "test": "yarn run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "wdio": "wdio -b http://localhost:8080 ./config/wdio.config.js",
     "wdio:watch": "wdio ./config/wdio.config.js --watch",
     "load-test": "artillery run tests/load/load.yml",

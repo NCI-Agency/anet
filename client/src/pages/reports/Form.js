@@ -267,14 +267,13 @@ class BaseReportForm extends Component {
 								onChange={value => setFieldValue('location', value)}
 								addon={LOCATION_ICON}
 								extraColElem={recents.locations && recents.locations.length > 0 &&
-									<div className="shortcut-list">
+									<div className="location-form-group shortcut-list">
 										<h5>Recent Locations</h5>
 										{recents.locations.map(location => (
 											<Button key={location.uuid} bsStyle="link" onClick={() => setFieldValue('location', location)}>Add {location.name}</Button>
 										))}
 									</div>
 								}
-								className="location-form-group"
 								widget={
 									<Autocomplete
 										objectType={Location}
@@ -290,10 +289,10 @@ class BaseReportForm extends Component {
 								name="cancelled"
 								component={FieldHelper.renderSpecialField}
 								label={ReportDefs.fieldLabels.cancelled}
-								className="cancelled-checkbox"
 								widget={
 									<Checkbox
 										inline
+										className="cancelled-checkbox"
 										checked={values.cancelled}
 										onClick={event => (event.target.checked && !values.cancelledReason &&
 											// set a default reason when cancelled has been checked and no reason has been selected
@@ -309,9 +308,8 @@ class BaseReportForm extends Component {
 									name="cancelledReason"
 									label="due to"
 									component={FieldHelper.renderSpecialField}
-									className="cancelled-reason-form-group"
 									widget={
-										<Field component="select" className="form-control" >
+										<Field component="select" className="cancelled-reason-form-group form-control" >
 											{this.cancelledReasonOptions.map(reason =>
 												<option key={reason.value} value={reason.value}>{reason.label}</option>
 											)}
@@ -422,22 +420,20 @@ class BaseReportForm extends Component {
 										component={FieldHelper.renderSpecialField}
 										onChange={value => setFieldValue('reportText', value)}
 										widget={
-											<RichTextEditor />
+											<RichTextEditor className="reportTextField" />
 										}
-										className="reportTextField"
 									/>
 
 									{(values.reportSensitiveInformation || !this.props.edit) &&
 										<div>
 											<Field
-											name="reportSensitiveInformation.text"
+												name="reportSensitiveInformation.text"
 												component={FieldHelper.renderSpecialField}
 												label="Report sensitive information text"
 												onChange={value => setFieldValue('reportSensitiveInformation.text', value)}
 												widget={
-													<RichTextEditor />
+													<RichTextEditor className="reportSensitiveInformationField" />
 												}
-												className="reportSensitiveInformationField"
 											/>
 											<MultiSelector
 												items={values.authorizationGroups}
