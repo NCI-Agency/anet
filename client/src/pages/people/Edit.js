@@ -23,8 +23,6 @@ class PersonEdit extends Page {
 		person: new Person(),
 	}
 
-	static modelName = 'User'
-
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
 	}
