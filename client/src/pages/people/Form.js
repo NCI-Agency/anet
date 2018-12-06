@@ -411,7 +411,8 @@ class BasePersonForm extends Component {
 	}
 
 	handleEmailValidation = (value, values) => {
-		return utils.handleEmailValidation(value, Person.isAdvisor(values))
+		const r = utils.handleEmailValidation(value, Person.isAdvisor(values))
+		return r.isValid ? null : r.message
 	}
 
 	handleLastNameOnKeyDown = (event) => {
