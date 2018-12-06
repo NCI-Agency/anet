@@ -12032,10 +12032,10 @@ wdio@^3.0.0:
     tcp-port-used "^0.1.2"
     webdriverio "^4.12.0"
 
-webdriverio@^4.12.0, webdriverio@^4.14.0:
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-4.14.0.tgz#f8a48d03abc70c87d7d17b59bd3f45a322927e0c"
-  integrity sha512-642Iqp9en2hvuVINkTfQvWoQCaLb6zJyLHgQFUFLx7s+8l8GnrHzMjkv5DbecZHwnBkhybpphbTW7k0B2ARH5A==
+webdriverio@^4.12.0, webdriverio@^4.14.1:
+  version "4.14.1"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-4.14.1.tgz#50fdb010d37233c77c48e5f0497a63ab875cdfc1"
+  integrity sha512-Gjb5ft6JtO7WdoZifedeM6U941UZi03IlG0t3Xq9M9SxSm6FuyqMEmNZ4HI3UcBRkSbWxdOWGAvpFShYxVr7iA==
   dependencies:
     archiver "~2.1.0"
     babel-runtime "^6.26.0"
