@@ -45,7 +45,7 @@ const API = {
 
 	_send(url, data, params) {
 		params = params || {}
-		params.disableSubmits = typeof params.disableSubmits === 'undefined' ? true : params.disableSubmits
+		params.disableSubmits = params.disableSubmits === undefined ? true : params.disableSubmits
 		params.method = params.method || 'POST'
 		params.body = JSON.stringify(data)
 

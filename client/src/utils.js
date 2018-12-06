@@ -131,7 +131,7 @@ Object.get = function(source, keypath) {
 	while (keys[0]) {
 		let key = keys.shift()
 		source = source[key]
-		if (typeof source === 'undefined' || source === null)
+		if (source === undefined || source === null)
 			return source
 	}
 	return source

@@ -9,7 +9,7 @@ const getFieldId = field => (
 const getHumanValue = (field, humanValue) => {
 	if (typeof humanValue === 'function') {
 		return humanValue(field.value)
-	} else if (typeof humanValue !== 'undefined') {
+	} else if (humanValue !== undefined) {
 		return humanValue
 	} else {
 		return field.value
@@ -49,10 +49,10 @@ const renderFieldNoLabel = (field, form, widgetElem, children) => {
 }
 
 const renderField = (field, label, form, widgetElem, children, extraColElem, addon, horizontal) => {
-	if (typeof label === 'undefined') {
+	if (label === undefined) {
 		label = utils.sentenceCase(field.name) // name is a required prop of field
 	}
-	if (typeof horizontal === 'undefined') {
+	if (horizontal === undefined) {
 		horizontal = true  // default direction of label and input
 	}
 	let widget
