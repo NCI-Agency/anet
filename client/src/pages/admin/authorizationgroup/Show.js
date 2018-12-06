@@ -26,6 +26,8 @@ class BaseAuthorizationGroupShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	static modelName = 'AuthorizationGroup'
+
 	state = {
 		authorizationGroup: new AuthorizationGroup(),
 		positions: null,

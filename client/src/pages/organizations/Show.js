@@ -44,6 +44,8 @@ class BaseOrganizationShow extends Page {
 		scrollspyOffset: PropTypes.number,
 	}
 
+	static modelName = 'Organization'
+
 	IdentificationCodeFieldWithLabel = DictionaryField(Field)
 	LongNameWithLabel = DictionaryField(Field)
 	state = {

@@ -39,6 +39,8 @@ class BasePositionShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	static modelName = 'Position'
+
 	CodeFieldWithLabel = DictionaryField(Field)
 	state = {
 		position: new Position(),

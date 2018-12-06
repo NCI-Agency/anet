@@ -18,6 +18,8 @@ class AuthorizationGroupEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'AuthorizationGroup'
+
 	state = {
 		authorizationGroup: new AuthorizationGroup(),
 	}

@@ -19,6 +19,8 @@ class TaskEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'Task'
+
 	state = {
 		task: new Task(),
 	}

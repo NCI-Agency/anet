@@ -18,6 +18,8 @@ class LocationEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'Location'
+
 	state = {
 		location: new Location(),
 	}

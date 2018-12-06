@@ -18,6 +18,8 @@ class PositionEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'Position'
+
 	state = {
 		position: new Position(),
 	}

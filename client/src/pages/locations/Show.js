@@ -26,6 +26,8 @@ class BaseLocationShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	static modelName = 'Location'
+
 	state = {
 		location: new Location(),
 		reportsPageNum: 0,

@@ -28,6 +28,8 @@ class BaseTaskShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	static modelName = 'Task'
+
 	TaskCustomFieldRef1 = DictionaryField(Field)
 	TaskCustomField = DictionaryField(Field)
 	PlannedCompletionField = DictionaryField(Field)

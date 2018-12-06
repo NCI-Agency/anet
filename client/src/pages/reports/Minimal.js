@@ -33,6 +33,8 @@ class ReportMinimal extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'Report'
+
 	state = {
 		report: new Report(),
 		validationErrors: null,

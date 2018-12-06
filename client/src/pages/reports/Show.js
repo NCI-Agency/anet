@@ -46,6 +46,8 @@ class BaseReportShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	static modelName = 'Report'
+
 	state = {
 		report: new Report(),
 		validationErrors: null,

@@ -19,6 +19,8 @@ class PersonEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'User'
+
 	state = {
 		person: new Person(),
 	}

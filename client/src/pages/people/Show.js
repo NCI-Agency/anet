@@ -35,6 +35,8 @@ class BasePersonShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	static modelName = 'User'
+
 	state = {
 		person: new Person({
 			uuid: this.props.match.params.uuid,

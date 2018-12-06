@@ -17,6 +17,8 @@ class OrganizationEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'Organization'
+
 	state = {
 		organization: new Organization(),
 	}

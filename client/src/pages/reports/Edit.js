@@ -19,6 +19,8 @@ class ReportEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'Report'
+
 	state = {
 		report: new Report(),
 	}
