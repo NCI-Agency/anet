@@ -14,7 +14,7 @@ import _cloneDeep from 'lodash/cloneDeep'
 import Settings from 'Settings'
 
 import AppContext from 'components/AppContext'
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 import Fieldset from 'components/Fieldset'
 import ConfirmDelete from 'components/ConfirmDelete'
 import ReportTags from 'components/ReportTags'
@@ -276,7 +276,7 @@ class BaseReportForm extends Component {
 								}
 								className="location-form-group"
 								widget={
-									<NewAutocomplete
+									<Autocomplete
 										objectType={Location}
 										valueKey="name"
 										fields={Location.autocompleteQuery}

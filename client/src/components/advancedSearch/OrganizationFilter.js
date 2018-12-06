@@ -6,7 +6,7 @@ import API from 'api'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 
 import {Organization} from 'models'
 
@@ -70,7 +70,7 @@ export default class OrganizationFilter extends Component {
 				<React.Fragment>{msg}</React.Fragment>
 			:
 				<div>
-					<NewAutocomplete
+					<Autocomplete
 						objectType={Organization}
 						valueKey="shortName"
 						fields={Organization.autocompleteQuery}

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Person, Position} from 'models'
 import LinkTo from 'components/LinkTo'
@@ -62,7 +62,7 @@ export default class AssignPersonModal extends Component {
 								<b>Select a person</b>
 							</Col>
 							<Col md={10}>
-								<NewAutocomplete valueKey="name"
+								<Autocomplete valueKey="name"
 									placeholder="Select a person for this position"
 									objectType={Person}
 									className="select-person-autocomplete"

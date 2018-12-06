@@ -8,7 +8,7 @@ import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 import Messages from'components/Messages'
 import DictionaryField from '../../HOC/DictionaryField'
 
@@ -129,7 +129,7 @@ class BaseTaskForm extends Component {
 								onChange={value => setFieldValue('responsibleOrg', value)}
 								addon={ORGANIZATION_ICON}
 								widget={
-									<NewAutocomplete
+									<Autocomplete
 										objectType={Organization}
 										valueKey="shortName"
 										fields={Organization.autocompleteQuery}
@@ -147,7 +147,7 @@ class BaseTaskForm extends Component {
 									onChange={value => setFieldValue('customFieldRef1', value)}
 									addon={TASK_ICON}
 									widget={
-										<NewAutocomplete
+										<Autocomplete
 											objectType={Task}
 											valueKey="shortName"
 											fields={Task.autocompleteQuery}

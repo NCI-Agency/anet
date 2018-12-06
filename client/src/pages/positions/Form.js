@@ -8,7 +8,7 @@ import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 import Messages from 'components/Messages'
 
 import API from 'api'
@@ -178,7 +178,7 @@ class BasePositionForm extends Component {
 								onChange={value => setFieldValue('organization', value)}
 								addon={ORGANIZATION_ICON}
 								widget={
-									<NewAutocomplete
+									<Autocomplete
 										objectType={Organization}
 										valueKey="shortName"
 										fields={Organization.autocompleteQuery}
@@ -218,7 +218,7 @@ class BasePositionForm extends Component {
 								onChange={value => setFieldValue('location', value)}
 								addon={LOCATION_ICON}
 								widget={
-									<NewAutocomplete
+									<Autocomplete
 										objectType={Location}
 										valueKey="name"
 										fields={Location.autocompleteQuery}

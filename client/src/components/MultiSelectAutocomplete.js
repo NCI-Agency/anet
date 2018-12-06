@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Button } from 'react-bootstrap'
 
 import LinkTo from 'components/LinkTo'
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 import { Field } from 'formik'
 import { renderSpecialField } from 'components/FieldHelper'
 
@@ -54,7 +54,7 @@ export default class MultiSelectAutocomplete extends Component {
 				addon={addon}
 				extraColElem={renderExtraCol ? this.renderShortcuts() : null}
 				widget={
-					<NewAutocomplete
+					<Autocomplete
 						clearOnSelect={true}
 						{...autocompleteProps}
 					/>

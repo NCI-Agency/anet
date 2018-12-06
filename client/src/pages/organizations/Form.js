@@ -7,7 +7,7 @@ import { Formik, Form, Field, FieldArray } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 import MultiSelector from 'components/MultiSelector'
 import TaskTable from 'components/TaskTable'
 import LinkTo from 'components/LinkTo'
@@ -187,7 +187,7 @@ class BaseOrganizationForm extends Component {
 										onChange={value => setFieldValue('parentOrg', value)}
 										addon={ORGANIZATION_ICON}
 										widget={
-											<NewAutocomplete
+											<Autocomplete
 												objectType={Organization}
 												valueKey="shortName"
 												fields={Organization.autocompleteQuery}

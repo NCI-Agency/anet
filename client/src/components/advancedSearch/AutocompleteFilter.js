@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
-import NewAutocomplete from 'components/NewAutocomplete'
+import Autocomplete from 'components/Autocomplete'
 import API from 'api'
 
 export default class AutocompleteFilter extends Component {
@@ -53,7 +53,7 @@ export default class AutocompleteFilter extends Component {
 			!this.props.asFormField ?
 				<React.Fragment>{this.props.value[this.props.valueKey]}</React.Fragment>
 			:
-				<NewAutocomplete
+				<Autocomplete
 					{...autocompleteProps}
 					onChange={this.onChange}
 					value={this.state.value}

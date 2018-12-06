@@ -13,7 +13,7 @@ import './Autocomplete.css'
 
 import SEARCH_ICON from 'resources/search.png'
 
-export default class NewAutocomplete extends Component {
+export default class Autocomplete extends Component {
 	static propTypes = {
 		value: PropTypes.oneOfType([
 			PropTypes.object,
