@@ -45,14 +45,9 @@ class ReportEdit extends Page {
 				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
-			function getReportFromData() {
-				Object.assign(data.report, {
-					cancelled: !!data.report.cancelledReason,
-					reportTags: (data.report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name})),
-				})
-				return new Report(data.report)
-			}
-			this.setState({report: getReportFromData()})
+			data.report.cancelled = !!data.report.cancelledReason
+			data.report.reportTags = (data.report.tags || []).map(tag => ({id: tag.uuid.toString(), text: tag.name}))
+			this.setState({report: new Report(data.report)})
 		})
 	}
 

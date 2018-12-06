@@ -36,17 +36,12 @@ class PositionNew extends Page {
 					uuid, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
-				function getPositionFromData() {
-					const organization = new Organization(data.organization)
-					return new Position({
-						type: organization.isAdvisorOrg() ? Position.TYPE.ADVISOR : Position.TYPE.PRINCIPAL,
-						organization,
-					})
-				}
-
-				this.setState({
-					position: getPositionFromData(),
+				const organization = new Organization(data.organization)
+				const position = new Position({
+					type: organization.isAdvisorOrg() ? Position.TYPE.ADVISOR : Position.TYPE.PRINCIPAL,
+					organization,
 				})
+				this.setState({position})
 			})
 		}
 	}
