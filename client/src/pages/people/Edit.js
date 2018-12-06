@@ -10,7 +10,6 @@ import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObject
 import API from 'api'
 import {Person} from 'models'
 
-import AppContext from 'components/AppContext'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
