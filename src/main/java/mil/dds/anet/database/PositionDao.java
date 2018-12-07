@@ -290,7 +290,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 				+ "LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid "
 				+ "WHERE positions.uuid IN "
 				+ "(SELECT \"positionUuid_a\" FROM \"positionRelationships\" WHERE \"positionUuid_b\" = :positionUuid AND deleted = :deleted) "
-				+ "OR positions.uuid IN (SELECT \"positionUuid_b\" FROM \"positionRelationships\" WHERE \"positionUuid_a\" = :positionUuid AND deleted = :deleted)")
+				+ "OR positions.uuid IN "
+				+ "(SELECT \"positionUuid_b\" FROM \"positionRelationships\" WHERE \"positionUuid_a\" = :positionUuid AND deleted = :deleted)")
 			.bind("positionUuid", p.getUuid())
 			.bind("deleted", false)
 			.map(new PositionMapper())
@@ -317,7 +318,11 @@ public class PositionDao extends AnetBaseDao<Position> {
 		Collections.sort(uuids);
 		return dbHandle.createUpdate("/* deletePositionAssociation */ UPDATE \"positionRelationships\" "
 				+ "SET deleted = :deleted, \"updatedAt\" = :updatedAt "
-				+ "WHERE \"positionUuid_a\" = :positionUuid_a AND \"positionUuid_b\" = :positionUuid_b")
+				+ "WHERE ("
+				+ "  (\"positionUuid_a\" = :positionUuid_a AND \"positionUuid_b\" = :positionUuid_b)"
+				+ "OR "
+				+ "  (\"positionUuid_a\" = :positionUuid_b AND \"positionUuid_b\" = :positionUuid_a)"
+				+ ")")
 			.bind("deleted", true)
 			.bind("positionUuid_a", uuids.get(0))
 			.bind("positionUuid_b", uuids.get(1))
