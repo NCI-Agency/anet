@@ -5,7 +5,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
-import {Alert, Button, Col, HelpBlock, Modal, ControlLabel} from 'react-bootstrap'
+import {Alert, Button, Col, HelpBlock, Modal} from 'react-bootstrap'
 import Confirm from 'react-confirm-bootstrap'
 import moment from 'moment'
 import utils from 'utils'
@@ -478,11 +478,11 @@ class BaseReportShow extends Page {
 				</Modal.Header>
 
 				<Modal.Body>
-					<ControlLabel htmlFor="to">To</ControlLabel>
 					<Field
 						name="to"
-						component={FieldHelper.renderInputFieldNoLabel}
+						component={FieldHelper.renderInputField}
 						validate={(email) => this.handleEmailValidation(email, values)}
+						horizontal={false}
 					>
 						<HelpBlock>
 							One or more email addresses, comma separated, e.g.:<br />
@@ -490,11 +490,11 @@ class BaseReportShow extends Page {
 						</HelpBlock>
 					</Field>
 
-					<ControlLabel htmlFor="comment">Comment</ControlLabel>
 					<Field
 						name="comment"
-						component={FieldHelper.renderInputFieldNoLabel}
+						component={FieldHelper.renderInputField}
 						componentClass="textarea"
+						horizontal={false}
 					/>
 				</Modal.Body>
 
