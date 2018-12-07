@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Button, Alert, HelpBlock, Radio, Col, ControlLabel, FormGroup} from 'react-bootstrap'
 import DatePicker from 'react-16-bootstrap-date-picker'
-import autobind from 'autobind-decorator'
 
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
@@ -480,13 +479,11 @@ class BasePersonForm extends Component {
 		return API.mutation(graphql, variables, variableDef)
 	}
 
-	@autobind
-	showWrongPersonModal() {
+	showWrongPersonModal = () => {
 		this.setState({showWrongPersonModal: true})
 	}
 
-	@autobind
-	confirmReset(values, form) {
+	confirmReset = (values, form) => {
 		values.status = Person.STATUS.INACTIVE
 		this.save(values, form)
 			.then(response => this.onSubmitSuccess(response, values, form, this.state.wrongPersonOptionValue === 'needNewAccount'))
@@ -496,8 +493,7 @@ class BasePersonForm extends Component {
 			})
 	}
 
-	@autobind
-	hideWrongPersonModal(optionValue) {
+	hideWrongPersonModal = (optionValue) => {
 		this.setState({showWrongPersonModal: false, wrongPersonOptionValue: optionValue})
 		if (optionValue) {
 			// do something useful with optionValue

@@ -21,7 +21,6 @@ import {personTour} from 'pages/HopscotchTour'
 
 import {Person, Position} from 'models'
 import * as PersonDefs from 'models/Person'
-import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
 import Settings from 'Settings'
 
@@ -364,34 +363,29 @@ class BasePersonShow extends Page {
 		}
 	}
 
-	@autobind
-	showAssignPositionModal() {
+	showAssignPositionModal = () => {
 		this.setState({showAssignPositionModal: true})
 	}
 
-	@autobind
-	hideAssignPositionModal(success) {
+	hideAssignPositionModal = (success) => {
 		this.setState({showAssignPositionModal: false})
 		if (success) {
 			this.fetchData(this.props)
 		}
 	}
 
-	@autobind
-	showAssociatedPositionsModal() {
+	showAssociatedPositionsModal = () => {
 		this.setState({showAssociatedPositionsModal: true})
 	}
 
-	@autobind
-	hideAssociatedPositionsModal(success) {
+	hideAssociatedPositionsModal = (success) => {
 		this.setState({showAssociatedPositionsModal: false})
 		if (success) {
 			this.fetchData(this.props)
 		}
 	}
 
-	@autobind
-	goToAuthoredPage(pageNum) {
+	goToAuthoredPage = (pageNum) => {
 		this.setState({authoredReportsPageNum: pageNum}, () => {
 			const part = this.getAuthoredReportsPart(this.state.person.uuid)
 			GQL.run([part]).then(data =>
@@ -400,8 +394,7 @@ class BasePersonShow extends Page {
 		})
 	}
 
-	@autobind
-	goToAttendedPage(pageNum) {
+	goToAttendedPage = (pageNum) => {
 		this.setState({attendedReportsPageNum: pageNum}, () => {
 			const part = this.getAttendedReportsPart(this.state.person.uuid)
 			GQL.run([part]).then(data =>
