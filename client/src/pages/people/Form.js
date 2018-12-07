@@ -166,7 +166,7 @@ class BasePersonForm extends Component {
 					<Fieldset title={this.props.title} action={action} />
 					<Fieldset>
 						<FormGroup>
-							<Col sm={2} componentClass={ControlLabel}>Name</Col>
+							<Col sm={2} componentClass={ControlLabel} htmlFor="lastName">Name</Col>
 							<Col sm={7}>
 								<Col sm={5}>
 									<Field
@@ -284,7 +284,13 @@ class BasePersonForm extends Component {
 											setFieldValue('role', role)
 										}
 								}
-							/>
+							>
+								{!edit && isAdvisor &&
+									<Alert bsStyle="warning">
+										Creating a {Settings.fields.advisor.person.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
+									</Alert>
+								}
+							</Field>
 						}
 
 						{disableStatusChange ?
@@ -313,12 +319,6 @@ class BasePersonForm extends Component {
 										<span className="text-danger">Settings this person to inactive means the next person to logon with the user name <strong>{values.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
 									</HelpBlock> }
 								</Field>
-						}
-
-						{!edit && isAdvisor &&
-							<Alert bsStyle="warning">
-								Creating a {Settings.fields.advisor.person.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
-							</Alert>
 						}
 					</Fieldset>
 
