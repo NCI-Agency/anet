@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
@@ -24,7 +24,6 @@ import {Person, Organization, Task} from 'models'
 import FileSaver from 'file-saver'
 
 import DOWNLOAD_ICON from 'resources/download.png'
-import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
 import LOCATIONS_ICON from 'resources/locations.png'
@@ -38,7 +37,6 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
-import ReactDOM from 'react-dom'
 import { jumpToTop } from 'components/Page'
 
 import AppContext from 'components/AppContext'
@@ -129,10 +127,6 @@ class BaseSearch extends Page {
 			tasks: null,
 		},
 		showSaveSearch: false,
-	}
-
-	constructor(props) {
-		super(props)
 	}
 
 	getSearchPart(type, query, pageSize) {
