@@ -20,18 +20,16 @@ const getFormGroupValidationState = (field, form) => {
 	const {touched, errors} = form
 	const fieldTouched = touched[field.name]
 	const fieldError = errors[field.name]
-	const fieldWarning = null
-	return (fieldTouched && (fieldError ? 'error' : fieldWarning ? 'warning': null)) || null
+	return (fieldTouched && (fieldError ? 'error' : null)) || null
 }
 
 const getHelpBlock = (field, form) => {
 	const {touched, errors} = form
 	const fieldTouched = touched[field.name]
 	const fieldError = errors[field.name]
-	const fieldWarning = null
-	return (fieldTouched && (fieldError || fieldWarning) &&
+	return (fieldTouched && fieldError &&
 		<HelpBlock>
-			{fieldTouched && (fieldError ? fieldError: fieldWarning)}
+			{fieldError}
 		</HelpBlock>
 	)
 }
