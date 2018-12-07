@@ -481,7 +481,7 @@ class BaseReportShow extends Page {
 					<Field
 						name="to"
 						component={FieldHelper.renderInputField}
-						validate={(email) => this.handleEmailValidation(email, values)}
+						validate={(email) => this.handleEmailValidation(email)}
 						vertical={true}
 					>
 						<HelpBlock>
@@ -509,8 +509,8 @@ class BaseReportShow extends Page {
 		this.setState({showEmailModal : !this.state.showEmailModal})
 	}
 
-	handleEmailValidation = (value, values) => {
-		const r = utils.handleEmailValidation(value, true)
+	handleEmailValidation = (value) => {
+		const r = utils.parseEmailAddresses(value)
 		return r.isValid ? null : r.message
 	}
 
