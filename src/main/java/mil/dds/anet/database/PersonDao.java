@@ -177,36 +177,57 @@ public class PersonDao extends AnetBaseDao<Person> {
 					.bind("loserUuid", loser.getUuid())
 					.bind("isPrimary", true)
 					.execute();
+
 				//update report attendance, should now be unique
 				h.createUpdate("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-				
+
 				// update approvals this person might have done
 				h.createUpdate("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-				
+
 				// report author update
 				h.createUpdate("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-			
+
 				// comment author update
 				h.createUpdate("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-				
+
 				// update position history
 				h.createUpdate("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-		
+
+				// update note authors
+				h.createUpdate("UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
+					.execute();
+
+				// update note related objects where we don't already have the same note for the winnerUuid
+				h.createUpdate("UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
+						+ " AND \"noteUuid\" NOT IN ("
+							+ "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
+						+ ")")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
+					.execute();
+
+				// now delete obsolete note related objects
+				h.createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
+					.bind("loserUuid", loser.getUuid())
+					.execute();
+
 				//delete the person!
 				return h.createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
 					.bind("loserUuid", loser.getUuid())
