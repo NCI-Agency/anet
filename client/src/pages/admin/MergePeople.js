@@ -1,6 +1,5 @@
 import React from 'react'
 import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
-import autobind from 'autobind-decorator'
 
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
@@ -137,23 +136,19 @@ class MergePeople extends Page {
 		)
 	}
 
-	@autobind
-	selectLoser(loser) {
+	selectLoser = (loser) => {
 		this.setState({loser: loser})
 	}
 
-	@autobind
-	selectWinner(winner) {
+	selectWinner = (winner) => {
 		this.setState({winner: winner})
 	}
 
-	@autobind
-	toggleCopyPosition() {
+	toggleCopyPosition = () => {
 		this.setState({copyPosition: !this.state.copyPosition})
 	}
 
-	@autobind
-	validate() {
+	validate = () => {
 		let {winner, loser} = this.state
 		let errors = []
 
@@ -171,9 +166,7 @@ class MergePeople extends Page {
 		return errors
 	}
 
-
-	@autobind
-	showPersonDetails(person) {
+	showPersonDetails = (person) => {
 		return <Formik initialValues={person}>
 			{({values,}) => (
 				<Form>
@@ -251,8 +244,7 @@ class MergePeople extends Page {
 		</Formik>
 	}
 
-	@autobind
-	submit(event) {
+	submit = (event) => {
 		event.stopPropagation()
 		event.preventDefault()
 		let {winner, loser, copyPosition} = this.state
