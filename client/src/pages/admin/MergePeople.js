@@ -2,8 +2,10 @@ import React from 'react'
 import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import autobind from 'autobind-decorator'
 
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
 import Breadcrumbs from 'components/Breadcrumbs'
-import Form from 'components/Form'
 import {Grid, Col, Row, Alert, Button, Checkbox} from 'react-bootstrap'
 import Autocomplete from 'components/Autocomplete'
 import LinkTo from 'components/LinkTo'
@@ -131,7 +133,6 @@ class MergePeople extends Page {
 						</Col>
 					</Row>
 				</Grid>
-
 			</div>
 		)
 	}
@@ -173,30 +174,81 @@ class MergePeople extends Page {
 
 	@autobind
 	showPersonDetails(person) {
-		return <Form static formFor={person} >
-			<Form.Field id="uuid" />
-			<Form.Field id="name" />
-			<Form.Field id="status">{person.humanNameOfStatus()}</Form.Field>
-			<Form.Field id="role">{person.humanNameOfRole()}</Form.Field>
-			<Form.Field id="rank" />
-			<Form.Field id="emailAddress" />
-			<Form.Field id="domainUsername" />
-			<Form.Field id="createdAt" >
-				{person.createdAt && moment(person.createdAt).format("DD MMM YYYY HH:mm:ss")}
-			</Form.Field>
-			<Form.Field id="position" >
-				{person.position && <LinkTo position={person.position} />}
-			</Form.Field>
-			<Form.Field id="organization" >
-				{person.position && <LinkTo organization={person.position.organization} /> }
-			</Form.Field>
-			<Form.Field id="numReports" label="Number of Reports Written" >
-				{person.authoredReports && person.authoredReports.totalCount }
-			</Form.Field>
-			<Form.Field id="numReportsIn" label="Number of Reports Attended" >
-				{person.attendedReports && person.attendedReports.totalCount }
-			</Form.Field>
-		</Form>
+		return <Formik initialValues={person}>
+			{({values,}) => (
+				<Form>
+					<Field
+						name="uuid"
+						component={FieldHelper.renderReadonlyField}
+						vertical={true}
+					/>
+					<Field
+						name="name"
+						component={FieldHelper.renderReadonlyField}
+						vertical={true}
+					/>
+					<Field
+						name="status"
+						component={FieldHelper.renderReadonlyField}
+						humanValue={person.humanNameOfStatus()}
+						vertical={true}
+					/>
+					<Field
+						name="role"
+						component={FieldHelper.renderReadonlyField}
+						humanValue={person.humanNameOfRole()}
+						vertical={true}
+					/>
+					<Field
+						name="rank"
+						component={FieldHelper.renderReadonlyField}
+						vertical={true}
+					/>
+					<Field
+						name="emailAddress"
+						component={FieldHelper.renderReadonlyField}
+						vertical={true}
+					/>
+					<Field
+						name="domainUsername"
+						component={FieldHelper.renderReadonlyField}
+						vertical={true}
+					/>
+					<Field
+						name="createdAt"
+						component={FieldHelper.renderReadonlyField}
+						humanValue={person.createdAt && moment(person.createdAt).format("DD MMM YYYY HH:mm:ss")}
+						vertical={true}
+					/>
+					<Field
+						name="position"
+						component={FieldHelper.renderReadonlyField}
+						humanValue={person.position && <LinkTo position={person.position} />}
+						vertical={true}
+					/>
+					<Field
+						name="organization"
+						component={FieldHelper.renderReadonlyField}
+						humanValue={person.position && <LinkTo organization={person.position.organization} />}
+						vertical={true}
+					/>
+					<Field
+						name="numReports"
+						label="Number of Reports Written"
+						component={FieldHelper.renderReadonlyField}
+						humanValue={person.authoredReports && person.authoredReports.totalCount}
+						vertical={true}
+					/>
+					<Field
+						name="numReportsIn"
+						label="Number of Reports Attended"
+						component={FieldHelper.renderReadonlyField}
+						humanValue={person.attendedReports && person.attendedReports.totalCount}
+						vertical={true}
+					/>
+				</Form>
+			)}
+		</Formik>
 	}
 
 	@autobind
