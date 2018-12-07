@@ -6,8 +6,8 @@
   "homepage": "/assets/client",
   "devDependencies": {
     "artillery": "^1.6.0-24",
-    "autobind-decorator": "^2.1.0",
-    "autoprefixer": "^9.3.1",
+    "autobind-decorator": "^2.4.0",
+    "autoprefixer": "^9.4.2",
     "ava": "^0.25.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^7.2.3",
@@ -20,7 +20,7 @@
     "babel-runtime": "^6.26.0",
     "chai": "^4.2.0",
     "chalk": "^2.4.1",
-    "chromedriver": "^2.44.0",
+    "chromedriver": "^2.44.1",
     "config": "^3.0.0",
     "copy-webpack-plugin": "^4.6.0",
     "cross-spawn": "^6.0.5",
@@ -52,12 +52,12 @@
     "style-loader": "^0.23.1",
     "uuid": "^3.3.2",
     "wdio": "^3.0.0",
-    "wdio-chromedriver-service": "^0.1.1",
+    "wdio-chromedriver-service": "^0.1.5",
     "wdio-dot-reporter": "^0.0.10",
     "wdio-mocha-framework": "^0.6.4",
     "wdio-spec-reporter": "^0.1.5",
-    "webdriverio": "^4.14.0",
-    "webpack": "^4.26.1",
+    "webdriverio": "^4.14.1",
+    "webpack": "^4.27.1",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
@@ -113,7 +113,7 @@
     "yup": "^0.26.6"
   },
   "resolutions": {
-    "autobind-decorator": "2.1.0"
+    "autobind-decorator": "2.4.0"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production --config config/webpack.prod.js",
