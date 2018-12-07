@@ -46,13 +46,11 @@ const renderFieldNoLabel = (field, form, widgetElem, children) => {
 	)
 }
 
-const renderField = (field, label, form, widgetElem, children, extraColElem, addon, horizontal) => {
+const renderField = (field, label, form, widgetElem, children, extraColElem, addon, vertical) => {
 	if (label === undefined) {
 		label = utils.sentenceCase(field.name) // name is a required prop of field
 	}
-	if (horizontal === undefined) {
-		horizontal = true  // default direction of label and input
-	}
+	vertical = vertical || false// default direction of label and input = vertical
 	let widget
 	if (!addon) {
 		widget = widgetElem
@@ -80,7 +78,14 @@ const renderField = (field, label, form, widgetElem, children, extraColElem, add
 	// controlId prop of the FormGroup sets the id of the control element
 	return (
 		<FormGroup controlId={id} validationState={validationState}>
-			{horizontal ?
+			{vertical ?
+				<React.Fragment>
+					{label !== null && <ControlLabel>{label}</ControlLabel>}
+					{widget}
+					{getHelpBlock(field, form)}
+					{children}
+				</React.Fragment>
+			:
 				<React.Fragment>
 					{label !== null && <Col sm={2} componentClass={ControlLabel}>{label}</Col>}
 					<Col sm={widgetWidth}>
@@ -90,13 +95,6 @@ const renderField = (field, label, form, widgetElem, children, extraColElem, add
 							{children}
 						</div>
 					</Col>
-				</React.Fragment>
-			:
-				<React.Fragment>
-					{label !== null && <ControlLabel>{label}</ControlLabel>}
-					{widget}
-					{getHelpBlock(field, form)}
-					{children}
 				</React.Fragment>
 			}
 			{extraColElem && <Col sm={3} {...extraColElem.props} />}
@@ -109,9 +107,9 @@ export const renderInputField = ({
   form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => {
-	const {label, children, extraColElem, addon, horizontal, ...otherProps} = props
+	const {label, children, extraColElem, addon, vertical, ...otherProps} = props
 	const widgetElem = <FormControl {...field} {...otherProps} />
-	return renderField(field, label, form, widgetElem, children, extraColElem, addon, horizontal)
+	return renderField(field, label, form, widgetElem, children, extraColElem, addon, vertical)
 }
 
 export const renderInputFieldNoLabel = ({
@@ -129,9 +127,9 @@ export const renderReadonlyField = ({
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => {
-	const {label, children, extraColElem, addon, horizontal, humanValue, ...otherProps} = props
+	const {label, children, extraColElem, addon, vertical, humanValue, ...otherProps} = props
 	const widgetElem = <FormControl.Static componentClass={'div'} {...field} {...otherProps}>{getHumanValue(field, humanValue)}</FormControl.Static>
-	return renderField(field, label, form, widgetElem, children, extraColElem, addon, horizontal)
+	return renderField(field, label, form, widgetElem, children, extraColElem, addon, vertical)
 }
 
 export const renderValue = ({
@@ -148,9 +146,9 @@ export const renderSpecialField = ({
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => {
-	const {label, children, extraColElem, addon, horizontal, widget, ...otherProps} = props
+	const {label, children, extraColElem, addon, vertical, widget, ...otherProps} = props
 	const widgetElem = React.cloneElement(widget, {...field, ...otherProps})
-	return renderField(field, label, form, widgetElem, children, extraColElem, addon, horizontal)
+	return renderField(field, label, form, widgetElem, children, extraColElem, addon, vertical)
 }
 
 export const renderButtonToggleGroup = ({
@@ -158,7 +156,7 @@ export const renderButtonToggleGroup = ({
   form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => {
-	const {label, children, extraColElem, addon, horizontal, buttons, ...otherProps} = props
+	const {label, children, extraColElem, addon, vertical, buttons, ...otherProps} = props
 	const widgetElem = (
 		<ButtonGroup {...otherProps}>
 			{buttons.map((button, index) => {
@@ -179,7 +177,7 @@ export const renderButtonToggleGroup = ({
 			})}
 		</ButtonGroup>
 	)
-	return renderField(field, label, form, widgetElem, children, extraColElem, addon, horizontal)
+	return renderField(field, label, form, widgetElem, children, extraColElem, addon, vertical)
 }
 
 export const renderToggleButton = ({

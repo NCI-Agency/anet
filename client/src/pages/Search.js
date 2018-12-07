@@ -461,7 +461,7 @@ class BaseSearch extends Page {
 							name="name"
 							component={FieldHelper.renderInputField}
 							placeholder="Give this saved search a name"
-							horizontal={false}
+							vertical={true}
 						/>
 						<div className="submit-buttons">
 							<div>

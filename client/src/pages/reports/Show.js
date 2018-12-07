@@ -482,7 +482,7 @@ class BaseReportShow extends Page {
 						name="to"
 						component={FieldHelper.renderInputField}
 						validate={(email) => this.handleEmailValidation(email, values)}
-						horizontal={false}
+						vertical={true}
 					>
 						<HelpBlock>
 							One or more email addresses, comma separated, e.g.:<br />
@@ -494,7 +494,7 @@ class BaseReportShow extends Page {
 						name="comment"
 						component={FieldHelper.renderInputField}
 						componentClass="textarea"
-						horizontal={false}
+						vertical={true}
 					/>
 				</Modal.Body>
 
