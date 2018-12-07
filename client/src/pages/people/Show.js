@@ -231,14 +231,14 @@ class BasePersonShow extends Page {
 						<Fieldset title="Position" >
 							<Fieldset title="Current Position" id="current-position"
 								className={(!position || !position.uuid) ? 'warning' : undefined}
-								action={position && position.uuid && canChangePosition &&
+								action={hasPosition && canChangePosition &&
 									<div>
 										<LinkTo position={position} edit button="default" >Edit position details</LinkTo>
 										<Button onClick={this.showAssignPositionModal} className="change-assigned-position">
 											Change assigned position
 										</Button>
 									</div>}>
-								{position && position.uuid
+								{hasPosition
 									? this.renderPosition(position)
 									: this.renderPositionBlankSlate(person)
 								}
@@ -252,7 +252,7 @@ class BasePersonShow extends Page {
 								}
 							</Fieldset>
 
-							{position && position.uuid &&
+							{hasPosition &&
 								<Fieldset title={`Assigned ${assignedRole}`} action={canChangePosition && <Button onClick={this.showAssociatedPositionsModal}>Change assigned {assignedRole}</Button>}>
 									{this.renderCounterparts(position)}
 									{canChangePosition &&
