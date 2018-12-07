@@ -607,7 +607,7 @@ class BaseReportShow extends Page {
 	pendingMyApproval = (currentUser) => {
 		return {
 			title: "Reports pending my approval",
-			query: { pendingApprovalOf: currentUser.id },
+			query: { pendingApprovalOf: currentUser.uuid },
 		}
 	}
 
