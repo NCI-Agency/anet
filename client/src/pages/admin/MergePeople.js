@@ -23,16 +23,12 @@ class MergePeople extends Page {
 
 	static propTypes = {...pagePropTypes}
 
-	constructor(props) {
-		super(props)
-
-		this.state = {
-			success: null,
-			error: null,
-			winner: {},
-			loser: {},
-			copyPosition: false
-		}
+	state = {
+		success: null,
+		error: null,
+		winner: {},
+		loser: {},
+		copyPosition: false
 	}
 
 	render() {
