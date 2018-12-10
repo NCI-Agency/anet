@@ -181,7 +181,7 @@ public class AnetObjectEngine {
 
 	public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context, Person person) {
 		if (person == null) {
-			return CompletableFuture.supplyAsync(() -> null);
+			return CompletableFuture.completedFuture(null);
 		}
 		return orgDao.getOrganizationsForPerson(context, person.getUuid())
 				.thenApply(l -> l.isEmpty() ? null : l.get(0));

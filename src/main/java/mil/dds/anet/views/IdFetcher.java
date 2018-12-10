@@ -13,7 +13,7 @@ public class IdFetcher<T extends AbstractAnetBean> {
 		final DataLoaderRegistry dlr = (DataLoaderRegistry) context.get("dataLoaderRegistry");
 		final DataLoader<String, T> dl = dlr.getDataLoader(dataLoader);
 		return (DaoUtils.getUuid(bean) == null)
-				? CompletableFuture.supplyAsync(() -> null)
+				? CompletableFuture.completedFuture(null)
 				: dl.load(bean.getUuid());
 	}
 }

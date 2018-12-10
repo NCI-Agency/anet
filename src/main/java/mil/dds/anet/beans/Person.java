@@ -157,7 +157,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 
 	@GraphQLQuery(name="position")
-	public Position loadPosition() {
+	public synchronized Position loadPosition() {
 		if (position == null) {
 			position = Optional.ofNullable(AnetObjectEngine.getInstance()
 					.getPositionDao().getCurrentPositionForPerson(this));

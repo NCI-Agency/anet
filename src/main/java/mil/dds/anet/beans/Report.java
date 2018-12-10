@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -329,7 +330,7 @@ public class Report extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="comments") // TODO: batch load? (used in reports/{Minimal,Show}.js
-	public List<Comment> loadComments() {
+	public synchronized List<Comment> loadComments() {
 		if (comments == null) {
 			comments = AnetObjectEngine.getInstance().getCommentDao().getCommentsForReport(this);
 		}
@@ -357,7 +358,7 @@ public class Report extends AbstractAnetBean {
 		final CompletableFuture<List<ApprovalAction>> actionsForReport = engine.getApprovalActionDao().getActionsForReport(context, this.getUuid());
 		if (state == ReportState.RELEASED) {
 			result = actionsForReport
-					.thenApply(actions -> compactActions(actions));
+					.thenApply(actions -> { approvalStatus = compactActions(actions); return approvalStatus; });
 		} else {
 			final CompletableFuture<Organization> organizationForAuthor = engine.getOrganizationForPerson(context, author);
 			result = CompletableFuture.allOf(actionsForReport, organizationForAuthor)
@@ -367,7 +368,7 @@ public class Report extends AbstractAnetBean {
 				final CompletableFuture<List<ApprovalStep>> orgSteps = getWorkflowForOrg(context, engine, DaoUtils.getUuid(ao));
 				final String defaultOrgUuid = engine.getDefaultOrgUuid();
 				final CompletableFuture<List<ApprovalStep>> defaultSteps = getDefaultWorkflow(context, engine, defaultOrgUuid);
-				return CompletableFuture.allOf(orgSteps, defaultSteps)
+				approvalStatus = CompletableFuture.allOf(orgSteps, defaultSteps)
 						.thenApply(futuresSteps -> {
 					List<ApprovalStep> steps = orgSteps.join();
 					if (steps == null || steps.size() == 0) {
@@ -375,6 +376,8 @@ public class Report extends AbstractAnetBean {
 					}
 					return createWorkflow(actions, steps);
 				}).join();
+
+				return approvalStatus;
 			});
 		}
 		return result;
@@ -433,7 +436,7 @@ public class Report extends AbstractAnetBean {
 
 	private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context, AnetObjectEngine engine, String aoUuid) {
 		if (aoUuid == null) {
-			return CompletableFuture.supplyAsync(() -> null);
+			return CompletableFuture.completedFuture(new ArrayList<ApprovalStep>());
 		}
 
 		return engine.getApprovalStepsForOrg(context, aoUuid);
@@ -489,7 +492,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="authorizationGroups") // TODO: batch load? (used in reports/{Edit,Show}.js)
-	public List<AuthorizationGroup> loadAuthorizationGroups() {
+	public synchronized List<AuthorizationGroup> loadAuthorizationGroups() {
 		if (authorizationGroups == null && uuid != null) {
 			authorizationGroups = AnetObjectEngine.getInstance().getReportDao().getAuthorizationGroupsForReport(uuid);
 		}

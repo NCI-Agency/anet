@@ -100,7 +100,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="positions") // TODO: batch load? (used in organizations/Show.js)
-	public List<Position> loadPositions() {
+	public synchronized List<Position> loadPositions() {
 		if (positions == null) {
 			positions = AnetObjectEngine.getInstance()
 					.getPositionDao().getByOrganization(this);
@@ -124,7 +124,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="childrenOrgs") // TODO: batch load? (used in organizations/Show.js)
-	public List<Organization> loadChildrenOrgs() { 
+	public synchronized List<Organization> loadChildrenOrgs() {
 		if (childrenOrgs == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
 			query.setPageSize(Integer.MAX_VALUE);
@@ -136,7 +136,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="allDescendantOrgs") // TODO: batch load? (used in App.js for me → position → organization)
-	public List<Organization> loadAllDescendants() { 
+	public synchronized List<Organization> loadAllDescendants() {
 		if (descendants == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
 			query.setPageSize(Integer.MAX_VALUE);
@@ -148,7 +148,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="tasks") // TODO: batch load? (used in organizations/Edit.js)
-	public List<Task> loadTasks() { 
+	public synchronized List<Task> loadTasks() {
 		if (tasks == null) { 
 			tasks = AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationUuid(this.getUuid());
 		}

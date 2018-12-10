@@ -104,7 +104,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 
 	public CompletableFuture<ReportSensitiveInformation> getForReport(Map<String, Object> context, Report report, Person user) {
 		if (!isAuthorized(user, report)) {
-			return CompletableFuture.supplyAsync(() -> null);
+			return CompletableFuture.completedFuture(null);
 		}
 		return new ForeignKeyFetcher<ReportSensitiveInformation>()
 				.load(context, "report.reportSensitiveInformation", report.getUuid())

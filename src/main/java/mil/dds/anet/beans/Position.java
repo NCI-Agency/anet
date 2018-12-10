@@ -105,7 +105,7 @@ public class Position extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="associatedPositions") // TODO: batch load? (used in positions/{Edit,Show}.js, {organizations,people}/Show.js)
-	public List<Position> loadAssociatedPositions() { 
+	public synchronized List<Position> loadAssociatedPositions() {
 		if (associatedPositions == null) { 
 			associatedPositions = AnetObjectEngine.getInstance()
 				.getPositionDao().getAssociatedPositions(this);
@@ -153,7 +153,7 @@ public class Position extends AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="isApprover")
-	public Boolean loadIsApprover() { 
+	public synchronized Boolean loadIsApprover() {
 		if (this.isApprover == null) { 
 			this.isApprover = AnetObjectEngine.getInstance().getPositionDao().getIsApprover(this);
 		}
