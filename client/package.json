@@ -71,7 +71,6 @@
     "core-js": "^2.5.7",
     "create-react-class": "^15.6.3",
     "d3": "^5.7.0",
-    "deep-equal": "^1.0.1",
     "draft-convert": "^2.1.4",
     "draft-js": "^0.10.5",
     "email-addresses": "^3.0.2",
