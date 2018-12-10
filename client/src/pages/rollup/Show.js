@@ -388,8 +388,13 @@ class BaseRollupShow extends Page {
 						/>
 					</Context.Provider>
 				</Fieldset>
-
-				{this.renderEmailModal()}
+				<Formik
+					enableReinitialize
+					onSubmit={this.onSubmitEmailRollup}
+					initialValues={{to: '', comment:''}}
+				>
+				{(formikProps) => this.renderEmailModal(formikProps)}
+				</Formik>
 			</div>
 		)
 	}
@@ -429,55 +434,43 @@ class BaseRollupShow extends Page {
 	}
 
 	@autobind
-	renderEmailModal() {
+	renderEmailModal(formikProps) {
+		const {values, isSubmitting, isValid, submitForm} = formikProps
 		return <Modal show={this.state.showEmailModal} onHide={this.toggleEmailModal}>
-			<Formik
-				enableReinitialize
-				onSubmit={this.onSubmitEmailRollup}
-				initialValues={{to: '', comment:''}}
-			>
-			{({
-				values,
-				submitForm,
-				isSubmitting,
-				isValid
-			}) => {
-				return <Form>
-					<Modal.Header closeButton>
-						<Modal.Title>Email rollup - {this.dateStr}</Modal.Title>
-					</Modal.Header>
-					<Modal.Body>
-						<h5>
-							{this.state.focusedOrg ?
-								`Reports for ${this.state.focusedOrg.shortName}` :
-								`All reports by ${this.state.orgType.replace('_', ' ').toLowerCase()}`
-							}
-						</h5>
-						<Field
-							name="to"
-							component={FieldHelper.renderInputField}
-							validate={(email) => this.handleEmailValidation(email)}
-							vertical={true}
-						>
-							<HelpBlock>
-								One or more email addresses, comma separated, e.g.:<br />
-								<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
-							</HelpBlock>
-						</Field>
-						<Field
-							name="comment"
-							component={FieldHelper.renderInputField}
-							componentClass="textarea"
-							vertical={true}
-						/>
-					</Modal.Body>
-					<Modal.Footer>
-						<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.showPreview}>Preview</Button>
-						<Button bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Send email</Button>
-					</Modal.Footer>
-				</Form>
-			}}
-			</Formik>
+			<Form>
+				<Modal.Header closeButton>
+					<Modal.Title>Email rollup - {this.dateStr}</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<h5>
+						{this.state.focusedOrg ?
+							`Reports for ${this.state.focusedOrg.shortName}` :
+							`All reports by ${this.state.orgType.replace('_', ' ').toLowerCase()}`
+						}
+					</h5>
+					<Field
+						name="to"
+						component={FieldHelper.renderInputField}
+						validate={(email) => this.handleEmailValidation(email)}
+						vertical={true}
+					>
+						<HelpBlock>
+							One or more email addresses, comma separated, e.g.:<br />
+							<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
+						</HelpBlock>
+					</Field>
+					<Field
+						name="comment"
+						component={FieldHelper.renderInputField}
+						componentClass="textarea"
+						vertical={true}
+					/>
+				</Modal.Body>
+				<Modal.Footer>
+					<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.showPreview}>Preview</Button>
+					<Button bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Send email</Button>
+				</Modal.Footer>
+			</Form>
 		</Modal>
 	}
 
@@ -545,6 +538,7 @@ class BaseRollupShow extends Page {
 			error: null,
 			showEmailModal: false,
 		})
+		form.resetForm()  // Reset the email modal field values
 	}
 
 	emailRollup = (values, form) => {
