@@ -1,6 +1,10 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Modal, Button} from 'react-bootstrap'
+import * as yup from 'yup'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
 
 import AppContext from 'components/AppContext'
 import Messages from'components/Messages'
@@ -18,59 +22,77 @@ class BaseRelatedObjectNoteModal extends Component {
 		onCancel: PropTypes.func.isRequired,
 		onSuccess: PropTypes.func.isRequired,
 	}
-
-	constructor(props) {
-		super(props)
-		this.state = {
-			error: null,
-		}
-		this.text = this.props.note.text
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		this.text = this.props.note.text
+	yupSchema = yup.object().shape({
+		text: yup.string().required().default('')
+	})
+	state = {
+		error: null,
 	}
 
 	render() {
 		const { showModal, note, currentUser } = this.props
-
 		return (
 			<Modal show={showModal} onHide={this.close}>
-				<Modal.Header closeButton>
-					<Modal.Title>{note.uuid ? 'Edit note' : 'Post a new note'}</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<Messages error={this.state.error} />
-					<RichTextEditor value={this.text} onChange={this.onChangeNoteText} />
-				</Modal.Body>
-				<Modal.Footer>
-					<Button className="pull-left" onClick={this.close}>Cancel</Button>
-					<Button onClick={this.save} bsStyle={"primary"} >Save</Button>
-				</Modal.Footer>
+				<Formik
+					enableReinitialize={true}
+					onSubmit={this.onSubmit}
+					validationSchema={this.yupSchema}
+					isInitialValid={() => this.yupSchema.isValidSync(note)}
+					initialValues={note}
+				>
+				{({
+					isSubmitting,
+					isValid,
+					setFieldValue,
+					values,
+					submitForm
+				}) => {
+					return <Form>
+								<Modal.Header closeButton>
+									<Modal.Title>{note.uuid ? 'Edit note' : 'Post a new note'}</Modal.Title>
+								</Modal.Header>
+								<Modal.Body>
+									<Messages error={this.state.error} />
+									<Field
+										name="text"
+										component={FieldHelper.renderSpecialField}
+										onChange={(value) => setFieldValue('text', value)}
+										widget={<RichTextEditor className="textField" />}
+										vertical={true}
+									/>
+								</Modal.Body>
+								<Modal.Footer>
+									<Button className="pull-left" onClick={this.close}>Cancel</Button>
+									<Button onClick={submitForm} bsStyle="primary" disabled={isSubmitting || !isValid}>Save</Button>
+								</Modal.Footer>
+							</Form>
+				}}
+				</Formik>
 			</Modal>
 		)
 	}
 
-	onChangeNoteText = (value) => {
-		this.text = value
+	onSubmit = (values, form) => {
+		return this.save(values, form)
+			.then(response => this.onSubmitSuccess(response, values, form))
+			.catch(error => {
+				this.setState({error})
+			})
 	}
 
-	save = () => {
-		const { note } = this.props
-		note.text = this.text
-		const edit = !!note.uuid
+	onSubmitSuccess = (response, values, form) => {
+		const edit = !!this.props.note.uuid
+		const operation = edit ? 'updateNote' : 'createNote'
+		this.props.onSuccess(response[operation])
+	}
+
+	save = (values, form) => {
+		const edit = !!this.props.note.uuid
 		const operation = edit ? 'updateNote' : 'createNote'
 		const graphql = operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
-		const variables = {note: note}
+		const variables = {note: values}
 		const variableDef = '($note: NoteInput!)'
-		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
-			.then(data => {
-				this.props.onSuccess(data[operation])
-			}).catch(error => {
-				this.setState({
-					error: error
-				})
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
 
 	close = () => {
