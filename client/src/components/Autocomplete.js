@@ -164,7 +164,7 @@ export default class Autocomplete extends Component {
 		if (this.props.queryParams) {
 			Object.assign(queryVars, this.props.queryParams)
 		}
-		API.query(graphQlQuery, {query: queryVars}, variableDef, {disableSubmits: false}).then(data => {
+		API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
 			this._setSuggestions(data[listName].list)
 		})
 	}
