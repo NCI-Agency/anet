@@ -195,14 +195,23 @@ public class GraphQLResource {
 		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
 		final Runnable dispatcher = () -> {
 			while (!request.isDone()) {
+				// Wait a while, giving other threads the chance to do some work
+				try {
+					Thread.yield();
+					Thread.sleep(25);
+				} catch (InterruptedException ignored) {}
+
 				// Dispatch all our data loaders until the request is done;
 				// we have data loaders at various depths (one dependent on another),
 				// e.g. in {@link Report#loadApprovalStatus}
-				CompletableFuture.allOf(
-						dataLoaderRegistry.getDataLoaders()
-						.stream()
-						.map(dl -> (CompletableFuture<?>)dl.dispatch())
-						.toArray(CompletableFuture<?>[]::new));
+				final CompletableFuture<?>[] dispatchersWithWork = dataLoaderRegistry.getDataLoaders()
+					.stream()
+					.filter(dl -> dl.dispatchDepth() > 0)
+					.map(dl -> (CompletableFuture<?>)dl.dispatch())
+					.toArray(CompletableFuture<?>[]::new);
+				if (dispatchersWithWork.length > 0) {
+					CompletableFuture.allOf(dispatchersWithWork).join();
+				}
 			}
 		};
 		dispatcher.run();
