@@ -31,10 +31,10 @@ class MergePeople extends Page {
 	yupSchema = yup.object().shape({
 		loser: yup.object().nullable().default({})
 			// eslint-disable-next-line no-template-curly-in-string
-			.test('required-objects', 'You must select a ${path}', value => value && value.uuid),
+			.test('required-object', 'You must select a ${path}', value => value && value.uuid),
 		winner: yup.object().nullable().default({})
 			// eslint-disable-next-line no-template-curly-in-string
-			.test('required-objectd', 'You must select a ${path}', value => value && value.uuid)
+			.test('required-object', 'You must select a ${path}', value => value && value.uuid)
 			.test(
 				'not-equals-loser',
 				'You selected the same person twice!',
