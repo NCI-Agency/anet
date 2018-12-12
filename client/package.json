@@ -63,7 +63,7 @@
     "webpack-merge": "^4.1.5"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.9.0",
+    "@blueprintjs/core": "^3.10.0",
     "bootstrap": "^3.3.7",
     "change-case": "^3.0.1",
     "classnames": "^2.2.6",
