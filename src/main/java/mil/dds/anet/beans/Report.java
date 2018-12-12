@@ -478,6 +478,9 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="reportSensitiveInformation")
 	public CompletableFuture<ReportSensitiveInformation> loadReportSensitiveInformation(@GraphQLRootContext Map<String, Object> context) {
+		if (reportSensitiveInformation != null) {
+			return CompletableFuture.completedFuture(reportSensitiveInformation);
+		}
 		return AnetObjectEngine.getInstance().getReportSensitiveInformationDao().getForReport(context, this, user)
 				.thenApply(o -> { reportSensitiveInformation = o; return o; });
 	}
