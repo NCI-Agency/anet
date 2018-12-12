@@ -51,7 +51,7 @@ public class SavedSearchResource {
 	}
 
 	private SavedSearch createSavedSearchCommon(Person user, SavedSearch savedSearch) {
-		savedSearch.setOwner(Person.createWithUuid(user.getUuid()));
+		savedSearch.setOwnerUuid(user.getUuid());
 		try {
 			final SavedSearch created = dao.insert(savedSearch);
 			AnetAuditLogger.log("SavedSearch {} created by {}", created, user);

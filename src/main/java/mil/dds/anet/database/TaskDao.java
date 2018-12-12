@@ -6,9 +6,9 @@ import java.util.List;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.joda.time.DateTime;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Task.TaskStatus;
@@ -58,11 +58,9 @@ public class TaskDao implements IAnetDao<Task> {
 		dbHandle.createUpdate("/* insertTask */ INSERT INTO tasks "
 				+ "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"organizationUuid\", \"createdAt\", \"updatedAt\", status, "
 				+ "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\") "
-				+ "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :organizationUuid, :createdAt, :updatedAt, :status, "
+				+ "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :responsibleOrgUuid, :createdAt, :updatedAt, :status, "
 				+ ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion)")
 			.bindBean(p)
-			.bind("customFieldRef1Uuid", DaoUtils.getUuid(p.getCustomFieldRef1()))
-			.bind("organizationUuid", DaoUtils.getUuid(p.getResponsibleOrg()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.execute();
 		return p;
@@ -72,24 +70,21 @@ public class TaskDao implements IAnetDao<Task> {
 		DaoUtils.setUpdateFields(p);
 		return dbHandle.createUpdate("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
 				+ "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, \"updatedAt\" = :updatedAt, "
-				+ "\"organizationUuid\" = :organizationUuid, status = :status, "
+				+ "\"organizationUuid\" = :responsibleOrgUuid, status = :status, "
 				+ "\"customField\" = :customField, \"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
 				+ "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion "
 				+ "WHERE uuid = :uuid")
 			.bindBean(p)
-			.bind("customFieldRef1Uuid", DaoUtils.getUuid(p.getCustomFieldRef1()))
-			.bind("organizationUuid", DaoUtils.getUuid(p.getResponsibleOrg()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.execute();
 	}
 	
-	public int setResponsibleOrgForTask(Task p, Organization org) { 
-		DaoUtils.setUpdateFields(p);
+	public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {
 		return dbHandle.createUpdate("/* setReponsibleOrgForTask */ UPDATE tasks "
 				+ "SET \"organizationUuid\" = :orgUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-			.bind("orgUuid", DaoUtils.getUuid(org))
-			.bind("uuid", p.getUuid())
-			.bind("updatedAt", p.getUpdatedAt())
+			.bind("orgUuid", organizationUuid)
+			.bind("uuid", taskUuid)
+			.bind("updatedAt", DateTime.now())
 			.execute();
 	}
 	

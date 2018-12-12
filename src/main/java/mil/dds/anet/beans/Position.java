@@ -9,11 +9,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.IdFetcher;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Position extends AbstractAnetBean {
 
@@ -25,18 +26,12 @@ public class Position extends AbstractAnetBean {
 	PositionType type;
 	PositionStatus status;
 	//Lazy Loaded
-	Organization organization;
-	Person person; //The Current person.
+	private ForeignObjectHolder<Organization> organization = new ForeignObjectHolder<>();
+	private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>(); //The Current person.
 	List<Position> associatedPositions;
-	Location location;
+	private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
 	List<PersonPositionHistory> previousPeople;
 	Boolean isApprover;
-
-	public static Position createWithUuid(String uuid) {
-		final Position b = new Position();
-		b.setUuid(uuid);
-		return b;
-	}
 	
 	@GraphQLQuery(name="name")
 	public String getName() {
@@ -76,39 +71,69 @@ public class Position extends AbstractAnetBean {
 
 	@GraphQLQuery(name="organization")
 	public CompletableFuture<Organization> loadOrganization(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Organization>().load(context, "organizations", organization)
-				.thenApply(o -> { organization = o; return o; });
+		if (organization.hasForeignObject()) {
+			return CompletableFuture.completedFuture(organization.getForeignObject());
+		}
+		return new UuidFetcher<Organization>().load(context, "organizations", organization.getForeignUuid())
+				.thenApply(o -> { organization.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setOrganizationUuid(String organizationUuid) {
+		this.organization = new ForeignObjectHolder<>(organizationUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getOrganizationUuid() {
+		return organization.getForeignUuid();
+	}
+
 	public void setOrganization(Organization ao) {
-		this.organization = ao;
+		this.organization = new ForeignObjectHolder<>(ao);
 	}
-	
+
 	@GraphQLIgnore
 	public Organization getOrganization() { 
-		return organization;
+		return organization.getForeignObject();
 	}
-	
+
 	@GraphQLQuery(name="person")
 	public CompletableFuture<Person> loadPerson(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Person>().load(context, "people", person)
-				.thenApply(o -> { person = o; return o; });
+		if (person.hasForeignObject()) {
+			return CompletableFuture.completedFuture(person.getForeignObject());
+		}
+		return new UuidFetcher<Person>().load(context, "people", person.getForeignUuid())
+				.thenApply(o -> { person.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
 	@GraphQLIgnore
-	public Person getPerson() { 
-		return person;
+	public void setPersonUuid(String personUuid) {
+		this.person = new ForeignObjectHolder<>(personUuid);
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getPersonUuid() {
+		return person.getForeignUuid();
+	}
+
 	public void setPerson(Person p) {
-		this.person = p;
+		this.person = new ForeignObjectHolder<>(p);
 	}
-	
+
+	@GraphQLIgnore
+	public Person getPerson() {
+		return person.getForeignObject();
+	}
+
 	@GraphQLQuery(name="associatedPositions") // TODO: batch load? (used in positions/{Edit,Show}.js, {organizations,people}/Show.js)
 	public synchronized List<Position> loadAssociatedPositions() {
 		if (associatedPositions == null) { 
 			associatedPositions = AnetObjectEngine.getInstance()
-				.getPositionDao().getAssociatedPositions(this);
+				.getPositionDao().getAssociatedPositions(uuid);
 		}
 		return associatedPositions;
 	}
@@ -121,28 +146,43 @@ public class Position extends AbstractAnetBean {
 	public void setAssociatedPositions(List<Position> associatedPositions) { 
 		this.associatedPositions = associatedPositions;
 	}
-	
+
 	@GraphQLQuery(name="location")
 	public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Location>().load(context, "locations", location)
-				.thenApply(o -> { location = o; return o; });
+		if (location.hasForeignObject()) {
+			return CompletableFuture.completedFuture(location.getForeignObject());
+		}
+		return new UuidFetcher<Location>().load(context, "locations", location.getForeignUuid())
+				.thenApply(o -> { location.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
 	@GraphQLIgnore
-	public Location getLocation() { 
-		return location;
+	public void setLocationUuid(String locationUuid) {
+		this.location = new ForeignObjectHolder<>(locationUuid);
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getLocationUuid() {
+		return location.getForeignUuid();
+	}
+
 	public void setLocation(Location location) { 
-		this.location = location;
+		this.location = new ForeignObjectHolder<>(location);
 	}
-	
+
+	@GraphQLIgnore
+	public Location getLocation() {
+		return location.getForeignObject();
+	}
+
 	@GraphQLQuery(name="previousPeople")
 	public CompletableFuture<List<PersonPositionHistory>> loadPreviousPeople(@GraphQLRootContext Map<String, Object> context) {
 		if (previousPeople != null) {
 			return CompletableFuture.completedFuture(previousPeople);
 		}
-		return AnetObjectEngine.getInstance().getPositionDao().getPositionHistory(context, this)
+		return AnetObjectEngine.getInstance().getPositionDao().getPositionHistory(context, uuid)
 				.thenApply(o -> { previousPeople = o; return o; });
 	}
 
@@ -158,7 +198,7 @@ public class Position extends AbstractAnetBean {
 	@GraphQLQuery(name="isApprover")
 	public synchronized Boolean loadIsApprover() {
 		if (this.isApprover == null) { 
-			this.isApprover = AnetObjectEngine.getInstance().getPositionDao().getIsApprover(this);
+			this.isApprover = AnetObjectEngine.getInstance().getPositionDao().getIsApprover(uuid);
 		}
 		return isApprover;
 	}
@@ -173,7 +213,7 @@ public class Position extends AbstractAnetBean {
 			&& Objects.equals(name, other.getName())
 			&& Objects.equals(code,  other.getCode())
 			&& Objects.equals(type, other.getType())
-			&& uuidEqual(organization, other.getOrganization());
+			&& Objects.equals(getOrganizationUuid(), other.getOrganizationUuid());
 	}
 	
 	@Override
@@ -183,6 +223,6 @@ public class Position extends AbstractAnetBean {
 	
 	@Override
 	public String toString() {
-		return String.format("[uuid:%s name:%s orgUuid:%s]", uuid, name, DaoUtils.getUuid(organization));
+		return String.format("[uuid:%s name:%s orgUuid:%s]", uuid, name, getOrganizationUuid());
 	}
 }

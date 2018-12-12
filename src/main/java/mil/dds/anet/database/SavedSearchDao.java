@@ -49,7 +49,6 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
 				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
 			.bindBean(obj)
-			.bind("ownerUuid", obj.getOwner().getUuid())
 			.bind("objectType", DaoUtils.getEnumId(obj.getObjectType()))
 			.execute();
 		return obj;

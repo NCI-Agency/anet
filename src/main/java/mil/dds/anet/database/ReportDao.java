@@ -69,10 +69,9 @@ public class ReportDao implements IAnetDao<Report> {
 	public ReportDao(Handle db) {
 		this.dbHandle = db;
 		this.weekFormat = getWeekFormat(DaoUtils.getDbType(db));
-		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM reports, people "
-				+ "WHERE reports.uuid IN ( <uuids> ) "
-				+ "AND reports.\"authorUuid\" = people.uuid";
+		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
+				+ "FROM reports "
+				+ "WHERE reports.uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Report>(db, idBatcherSql, "uuids", new ReportMapper());
 
 		final String attendeesBatcherSql = "/* batch.getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS
@@ -114,7 +113,7 @@ public class ReportDao implements IAnetDao<Report> {
 
 	public AnetBeanList<Report> getAll(int pageNum, int pageSize, Person user) {
 		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle),
-				"Reports", "reports join people on reports.\"authorUuid\" = people.uuid", REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS,
+				"Reports", "reports", REPORT_FIELDS,
 				"reports.\"createdAt\"");
 		final Query query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
@@ -153,10 +152,6 @@ public class ReportDao implements IAnetDao<Report> {
 					.bind("state", DaoUtils.getEnumId(r.getState()))
 					.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
 					.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
-					.bind("locationUuid", DaoUtils.getUuid(r.getLocation()))
-					.bind("authorUuid", DaoUtils.getUuid(r.getAuthor()))
-					.bind("advisorOrgUuid", DaoUtils.getUuid(r.getAdvisorOrg()))
-					.bind("principalOrgUuid", DaoUtils.getUuid(r.getPrincipalOrg()))
 					.execute();
 
 				// Write sensitive information (if allowed)
@@ -227,13 +222,12 @@ public class ReportDao implements IAnetDao<Report> {
 			keyField = "uuid";
 			key = uuid;
 		}
-		final Report result = dbHandle.createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM reports, people "
-				+ "WHERE reports.\"" + keyField + "\" = :key "
-				+ "AND reports.\"authorUuid\" = people.uuid")
-				.bind("key", key)
-				.map(new ReportMapper())
-				.findFirst().orElse(null);
+		final Report result = dbHandle.createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS
+				+ "FROM reports "
+				+ "WHERE reports.\"" + keyField + "\" = :key")
+			.bind("key", key)
+			.map(new ReportMapper())
+			.findFirst().orElse(null);
 		if (result == null) { return null; }
 		result.setUser(user);
 		return result;
@@ -279,13 +273,8 @@ public class ReportDao implements IAnetDao<Report> {
 		return dbHandle.createUpdate(sql.toString())
 			.bindBean(r)
 			.bind("state", DaoUtils.getEnumId(r.getState()))
-			.bind("locationUuid", DaoUtils.getUuid(r.getLocation()))
-			.bind("authorUuid", DaoUtils.getUuid(r.getAuthor()))
-			.bind("approvalStepUuid", DaoUtils.getUuid(r.getApprovalStep()))
 			.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
 			.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
-			.bind("advisorOrgUuid", DaoUtils.getUuid(r.getAdvisorOrg()))
-			.bind("principalOrgUuid", DaoUtils.getUuid(r.getPrincipalOrg()))
 			.execute();
 	}
 
@@ -345,11 +334,11 @@ public class ReportDao implements IAnetDao<Report> {
 			.execute();
 	}
 
-	public int removeTaskFromReport(Task p, Report r) {
+	public int removeTaskFromReport(String taskUuid, Report r) {
 		return dbHandle.createUpdate("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"taskUuid\" = :taskUuid")
 				.bind("reportUuid", r.getUuid())
-				.bind("taskUuid", p.getUuid())
+				.bind("taskUuid", taskUuid)
 				.execute();
 	}
 

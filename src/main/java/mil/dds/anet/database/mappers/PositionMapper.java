@@ -6,9 +6,6 @@ import java.sql.SQLException;
 import org.jdbi.v3.core.statement.StatementContext;
 import org.jdbi.v3.core.mapper.RowMapper;
 
-import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
@@ -26,10 +23,6 @@ public class PositionMapper implements RowMapper<Position> {
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
 			ctx.define("totalCount", rs.getInt("totalCount"));
 		}
-		
-		if (MapperUtils.containsColumnNamed(rs, "people_uuid")) {
-			PersonMapper.fillInFields(p.getPerson(), rs);
-		}
 		return p;
 	}
 	
@@ -40,19 +33,9 @@ public class PositionMapper implements RowMapper<Position> {
 		p.setType(MapperUtils.getEnumIdx(rs, "positions_type", PositionType.class));
 		p.setStatus(MapperUtils.getEnumIdx(rs, "positions_status", PositionStatus.class));
 
-		String orgUuid = rs.getString("positions_organizationUuid");
-		if (orgUuid != null) {
-			p.setOrganization(Organization.createWithUuid(orgUuid));
-		}
-		String personUuid = rs.getString("positions_currentPersonUuid");
-		if (personUuid != null) {
-			p.setPerson(Person.createWithUuid(personUuid));
-		}
-		
-		String locationUuid = rs.getString("positions_locationUuid");
-		if (locationUuid != null) {
-			p.setLocation(Location.createWithUuid(locationUuid));
-		}
+		p.setOrganizationUuid(rs.getString("positions_organizationUuid"));
+		p.setPersonUuid(rs.getString("positions_currentPersonUuid"));
+		p.setLocationUuid(rs.getString("positions_locationUuid"));
 		
 		return p;
 	}

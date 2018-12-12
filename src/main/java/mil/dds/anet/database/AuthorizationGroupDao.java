@@ -172,10 +172,9 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
-		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS  + ", " + PersonDao.PERSON_FIELDS
-				+ " FROM reports, people, \"reportAuthorizationGroups\" "
-				+ "WHERE reports.\"authorUuid\" = people.uuid "
-				+ "AND \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = :authorizationGroupUuid "
+		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS
+				+ "FROM reports, \"reportAuthorizationGroups\" "
+				+ "WHERE \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = :authorizationGroupUuid "
 				+ "AND \"reportAuthorizationGroups\".\"reportUuid\" = reports.uuid")
 				.bind("authorizationGroupUuid", a.getUuid())
 				.map(new ReportMapper())

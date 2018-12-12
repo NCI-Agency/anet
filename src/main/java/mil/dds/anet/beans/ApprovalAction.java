@@ -12,17 +12,16 @@ import javax.ws.rs.WebApplicationException;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.IdFetcher;
+import mil.dds.anet.views.UuidFetcher;
 
 public class ApprovalAction extends AbstractAnetBean {
 
 	public enum ApprovalType { APPROVE, REJECT }
 	
-	ApprovalStep step;
-	Person person;
-	Report report;
+	private ForeignObjectHolder<ApprovalStep> step = new ForeignObjectHolder<>();
+	private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
+	private ForeignObjectHolder<Report> report = new ForeignObjectHolder<>();
 	ApprovalType type;
 	
 	@Override
@@ -34,43 +33,88 @@ public class ApprovalAction extends AbstractAnetBean {
 
 	@GraphQLQuery(name="step")
 	public CompletableFuture<ApprovalStep> loadStep(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<ApprovalStep>().load(context, "approvalSteps", step)
-				.thenApply(o -> { step = o; return o; });
+		if (step.hasForeignObject()) {
+			return CompletableFuture.completedFuture(step.getForeignObject());
+		}
+		return new UuidFetcher<ApprovalStep>().load(context, "approvalSteps", step.getForeignUuid())
+				.thenApply(o -> { step.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setStepUuid(String stepUuid) {
+		this.step = new ForeignObjectHolder<>(stepUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getStepUuid() {
+		return step.getForeignUuid();
+	}
+
 	public void setStep(ApprovalStep step) {
-		this.step = step;
+		this.step = new ForeignObjectHolder<>(step);
 	}
-	
+
 	@GraphQLIgnore
 	public ApprovalStep getStep() { 
-		return step;
+		return step.getForeignObject();
 	}
-	
-	@GraphQLIgnore
-	public Person getPerson() {
-		return person;
-	}
-	
-	public void setPerson(Person person) {
-		this.person = person;
-	}
-	
+
 	@GraphQLQuery(name="person")
 	public CompletableFuture<Person> loadPerson(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Person>().load(context, "people", person)
-				.thenApply(o -> { person = o; return o; });
+		if (person.hasForeignObject()) {
+			return CompletableFuture.completedFuture(person.getForeignObject());
+		}
+		return new UuidFetcher<Person>().load(context, "people", person.getForeignUuid())
+				.thenApply(o -> { person.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setPersonUuid(String personUuid) {
+		this.person = new ForeignObjectHolder<>(personUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getPersonUuid() {
+		return person.getForeignUuid();
+	}
+
+	public void setPerson(Person person) {
+		this.person = new ForeignObjectHolder<>(person);
+	}
+
+	@GraphQLIgnore
+	public Person getPerson() {
+		return person.getForeignObject();
+	}
+
+	// Note: there's *no* loader for report, it should not be necessary
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setReportUuid(String reportUuid) {
+		this.report = new ForeignObjectHolder<>(reportUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getReportUuid() {
+		return report.getForeignUuid();
+	}
+
+	// So this one will probably be unused
 	@GraphQLQuery(name="report")
 	public Report getReport() {
-		return report;
+		return report.getForeignObject();
 	}
-	
+
 	public void setReport(Report report) {
-		this.report = report;
+		this.report = new ForeignObjectHolder<>(report);
 	}
-	
+
 	@GraphQLQuery(name="type")
 	public ApprovalType getType() {
 		return type;
@@ -86,9 +130,9 @@ public class ApprovalAction extends AbstractAnetBean {
 			return false;
 		}
 		ApprovalAction other = (ApprovalAction) o;
-		return Objects.equals(step, other.getStep()) 
-				&& AbstractAnetBean.uuidEqual(person, other.getPerson())
-				&& Objects.equals(report, other.getReport()) 
+		return Objects.equals(getStepUuid(), other.getStepUuid())
+				&& Objects.equals(getPersonUuid(), other.getPersonUuid())
+				&& Objects.equals(getReportUuid(), other.getReportUuid())
 				&& Objects.equals(createdAt, other.getCreatedAt()) 
 				&& Objects.equals(type, other.getType());
 	}
@@ -100,6 +144,6 @@ public class ApprovalAction extends AbstractAnetBean {
 	
 	@Override
 	public String toString() { 
-		return String.format("[ApprovalAction: step:%s, type:%s, person:%s, report:%s]", DaoUtils.getUuid(step), type, DaoUtils.getUuid(person), DaoUtils.getUuid(report));
+		return String.format("[ApprovalAction: step:%s, type:%s, person:%s, report:%s]", getStepUuid(), type, getPersonUuid(), getReportUuid());
 	}
 }

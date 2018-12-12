@@ -17,6 +17,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.util.Duration;
 import mil.dds.anet.AnetApplication;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -114,6 +115,12 @@ public abstract class AbstractResourceTest {
 	
 	public Person getBobBobtown() { 
 		return findOrPutPersonInDb(PersonTest.getBobBobtown());
+	}
+
+	public Organization createOrganizationWithUuid(String uuid) {
+		final Organization ao = new Organization();
+		ao.setUuid(uuid);
+		return ao;
 	}
 
 }

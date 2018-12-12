@@ -173,17 +173,17 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 				.load(context, "approvalStep.approvers", approvalStepUuid);
 	}
 
-	public int addApprover(ApprovalStep step, Position position) {
+	public int addApprover(ApprovalStep step, String positionUuid) {
 		return dbHandle.createUpdate("/* addApprover */ INSERT INTO approvers (\"approvalStepUuid\", \"positionUuid\") VALUES (:stepUuid, :positionUuid)")
 				.bind("stepUuid", step.getUuid())
-				.bind("positionUuid", position.getUuid())
+				.bind("positionUuid", positionUuid)
 				.execute();
 	}
 	
-	public int removeApprover(ApprovalStep step, Position position) {
+	public int removeApprover(ApprovalStep step, String positionUuid) {
 		return dbHandle.createUpdate("/* removeApprover */ DELETE FROM approvers WHERE \"approvalStepUuid\" = :stepUuid AND \"positionUuid\" = :positionUuid")
 				.bind("stepUuid", step.getUuid())
-				.bind("positionUuid", position.getUuid())
+				.bind("positionUuid", positionUuid)
 				.execute();
 	}
 }

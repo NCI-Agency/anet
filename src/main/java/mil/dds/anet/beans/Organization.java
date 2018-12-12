@@ -10,13 +10,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.IdFetcher;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Organization extends AbstractAnetBean {
 
@@ -29,7 +31,7 @@ public class Organization extends AbstractAnetBean {
 	String longName;
 	private OrganizationStatus status;
 	private String identificationCode;
-	Organization parentOrg;
+	private ForeignObjectHolder<Organization> parentOrg = new ForeignObjectHolder<>();
 	OrganizationType type;
 	
 	/* The following are all Lazy Loaded */
@@ -77,19 +79,34 @@ public class Organization extends AbstractAnetBean {
 
 	@GraphQLQuery(name="parentOrg")
 	public CompletableFuture<Organization> loadParentOrg(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Organization>().load(context, "organizations", parentOrg)
-				.thenApply(o -> { parentOrg = o; return o; });
+		if (parentOrg.hasForeignObject()) {
+			return CompletableFuture.completedFuture(parentOrg.getForeignObject());
+		}
+		return new UuidFetcher<Organization>().load(context, "organizations", parentOrg.getForeignUuid())
+				.thenApply(o -> { parentOrg.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setParentOrgUuid(String parentOrgUuid) {
+		this.parentOrg = new ForeignObjectHolder<>(parentOrgUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getParentOrgUuid() {
+		return parentOrg.getForeignUuid();
+	}
+
 	@GraphQLIgnore
 	public Organization getParentOrg() {
-		return parentOrg;
+		return parentOrg.getForeignObject();
 	}
-	
+
 	public void setParentOrg(Organization parentOrg) {
-		this.parentOrg = parentOrg;
+		this.parentOrg = new ForeignObjectHolder<>(parentOrg);
 	}
-	
+
 	@GraphQLQuery(name="type")
 	public OrganizationType getType() {
 		return type;
@@ -103,7 +120,7 @@ public class Organization extends AbstractAnetBean {
 	public synchronized List<Position> loadPositions() {
 		if (positions == null) {
 			positions = AnetObjectEngine.getInstance()
-					.getPositionDao().getByOrganization(this);
+					.getPositionDao().getByOrganization(uuid);
 		}
 		return positions;
 	}
@@ -179,12 +196,6 @@ public class Organization extends AbstractAnetBean {
 			query.setPrincipalOrgUuid(uuid);
 		}
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
-	}
-
-	public static Organization createWithUuid(String uuid) {
-		final Organization ao = new Organization();
-		ao.setUuid(uuid);
-		return ao;
 	}
 	
 	@Override

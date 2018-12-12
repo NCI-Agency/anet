@@ -43,7 +43,8 @@ public class NewReportCommentEmail extends AnetEmailAction {
 	}
 
 	public void setComment(Comment comment) {
-		this.comment = Comment.createWithUuid(comment.getUuid());
+		this.comment = new Comment();
+		this.comment.setUuid(comment.getUuid());
 	}
 
 }

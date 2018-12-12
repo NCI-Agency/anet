@@ -9,18 +9,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.IdFetcher;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Note extends AbstractAnetBean {
 
 	private String text;
-	private Person author;
+	private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
 	private List<NoteRelatedObject> noteRelatedObjects;
 
 	@GraphQLQuery(name="text")
@@ -34,18 +33,32 @@ public class Note extends AbstractAnetBean {
 
 	@GraphQLQuery(name="author")
 	public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Person>().load(context, "people", author)
-				.thenApply(o -> { author = o; return o; });
+		if (author.hasForeignObject()) {
+			return CompletableFuture.completedFuture(author.getForeignObject());
+		}
+		return new UuidFetcher<Person>().load(context, "people", author.getForeignUuid())
+				.thenApply(o -> { author.setForeignObject(o); return o; });
 	}
 
-	@JsonSetter("author")
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setAuthorUuid(String authorUuid) {
+		this.author = new ForeignObjectHolder<>(authorUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getAuthorUuid() {
+		return author.getForeignUuid();
+	}
+
 	public void setAuthor(Person author) {
-		this.author = author;
+		this.author = new ForeignObjectHolder<>(author);
 	}
 
 	@GraphQLIgnore
 	public Person getAuthor() {
-		return author;
+		return author.getForeignObject();
 	}
 
 	@GraphQLQuery(name="noteRelatedObjects")
@@ -57,7 +70,6 @@ public class Note extends AbstractAnetBean {
 				.thenApply(o -> { noteRelatedObjects = o; return o; });
 	}
 
-	@JsonSetter("noteRelatedObjects")
 	public void setNoteRelatedObjects(List<NoteRelatedObject> relatedObjects) {
 		this.noteRelatedObjects = relatedObjects;
 	}
@@ -74,7 +86,7 @@ public class Note extends AbstractAnetBean {
 		}
 		final Note n = (Note) o;
 		return Objects.equals(n.getUuid(), uuid)
-				&& uuidEqual(n.getAuthor(), author)
+				&& Objects.equals(n.getAuthorUuid(), getAuthorUuid())
 				&& Objects.equals(n.getText(), text);
 	}
 
@@ -85,7 +97,7 @@ public class Note extends AbstractAnetBean {
 
 	@Override
 	public String toString() {
-		return String.format("[uuid:%s, author:%s]", uuid, DaoUtils.getUuid(author));
+		return String.format("[uuid:%s, author:%s]", uuid, getAuthorUuid());
 	}
 
 }

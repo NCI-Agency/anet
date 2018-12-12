@@ -18,7 +18,6 @@ import javax.ws.rs.WebApplicationException;
 import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person.Role;
@@ -26,7 +25,7 @@ import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.IdFetcher;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Report extends AbstractAnetBean {
 
@@ -40,13 +39,13 @@ public class Report extends AbstractAnetBean {
 										CANCELLED_DUE_TO_THREAT,
 										NO_REASON_GIVEN }
 
-	ApprovalStep approvalStep;
+	private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
 	ReportState state;
 	DateTime releasedAt;
 	
 	DateTime engagementDate;
 	private Integer engagementDayOfWeek;
-	Location location;
+	private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
 	String intent;
 	String exsum; //can be null to autogenerate
 	Atmosphere atmosphere;
@@ -59,13 +58,12 @@ public class Report extends AbstractAnetBean {
 	String keyOutcomes;
 	String nextSteps;
 	String reportText;
-	
-	Person author;	
-	
-	Organization advisorOrg;
-	Organization principalOrg;
-	ReportPerson primaryAdvisor;
-	ReportPerson primaryPrincipal;
+
+	private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
+	private ForeignObjectHolder<Organization> advisorOrg = new ForeignObjectHolder<>();
+	private ForeignObjectHolder<Organization> principalOrg = new ForeignObjectHolder<>();
+	private ForeignObjectHolder<ReportPerson> primaryAdvisor = new ForeignObjectHolder<>();
+	private ForeignObjectHolder<ReportPerson> primaryPrincipal = new ForeignObjectHolder<>();
 
 	List<Comment> comments;
 	private List<Tag> tags;
@@ -75,21 +73,36 @@ public class Report extends AbstractAnetBean {
 	private List<AuthorizationGroup> authorizationGroups;
 	private List<ApprovalAction> approvalStatus;
 
+	@GraphQLQuery(name="approvalStep")
+	public CompletableFuture<ApprovalStep> loadApprovalStep(@GraphQLRootContext Map<String, Object> context) {
+		if (approvalStep.hasForeignObject()) {
+			return CompletableFuture.completedFuture(approvalStep.getForeignObject());
+		}
+		return new UuidFetcher<ApprovalStep>().load(context, "approvalSteps", approvalStep.getForeignUuid())
+				.thenApply(o -> { approvalStep.setForeignObject(o); return o; });
+	}
+
+	@JsonIgnore
 	@GraphQLIgnore
-	public ApprovalStep getApprovalStep() {
-		return approvalStep;
+	public void setApprovalStepUuid(String approvalStepUuid) {
+		this.approvalStep = new ForeignObjectHolder<>(approvalStepUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getApprovalStepUuid() {
+		return approvalStep.getForeignUuid();
 	}
 
 	public void setApprovalStep(ApprovalStep approvalStep) {
-		this.approvalStep = approvalStep;
+		this.approvalStep = new ForeignObjectHolder<>(approvalStep);
 	}
 
-	@GraphQLQuery(name="approvalStep")
-	public CompletableFuture<ApprovalStep> loadApprovalStep(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<ApprovalStep>().load(context, "approvalSteps", approvalStep)
-				.thenApply(o -> { approvalStep = o; return o; });
+	@GraphQLIgnore
+	public ApprovalStep getApprovalStep() {
+		return approvalStep.getForeignObject();
 	}
-	
+
 	@GraphQLQuery(name="state")
 	public ReportState getState() {
 		return state;
@@ -134,17 +147,32 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="location")
 	public CompletableFuture<Location> loadLocation(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Location>().load(context, "locations", location)
-				.thenApply(o -> { location = o; return o; });
+		if (location.hasForeignObject()) {
+			return CompletableFuture.completedFuture(location.getForeignObject());
+		}
+		return new UuidFetcher<Location>().load(context, "locations", location.getForeignUuid())
+				.thenApply(o -> { location.setForeignObject(o); return o; });
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setLocationUuid(String locationUuid) {
+		this.location = new ForeignObjectHolder<>(locationUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getLocationUuid() {
+		return location.getForeignUuid();
 	}
 
 	public void setLocation(Location location) {
-		this.location = location;
+		this.location = new ForeignObjectHolder<>(location);
 	}
 	
 	@GraphQLIgnore
 	public Location getLocation() { 
-		return location;
+		return location.getForeignObject();
 	}
 
 	@GraphQLQuery(name="intent")
@@ -212,38 +240,46 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="primaryAdvisor")
 	public CompletableFuture<ReportPerson> loadPrimaryAdvisor(@GraphQLRootContext Map<String, Object> context) {
+		if (primaryAdvisor.hasForeignObject()) {
+			return CompletableFuture.completedFuture(primaryAdvisor.getForeignObject());
+		}
 		return loadAttendees(context) //Force the load of attendees
 				.thenApply(l ->
 		{
-			primaryAdvisor = l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.ADVISOR))
+			final ReportPerson o = l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.ADVISOR))
 					.findFirst().orElse(null);
-			return primaryAdvisor;
-		});
-	}
-
-	@GraphQLQuery(name="primaryPrincipal")
-	public CompletableFuture<ReportPerson> loadPrimaryPrincipal(@GraphQLRootContext Map<String, Object> context) {
-		return loadAttendees(context) //Force the load of attendees
-				.thenApply(l ->
-		{
-			primaryPrincipal = l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.PRINCIPAL))
-					.findFirst().orElse(null);
-			return primaryPrincipal;
+			primaryAdvisor.setForeignObject(o);
+			return o;
 		});
 	}
 
 	@JsonIgnore
 	@GraphQLIgnore
 	public ReportPerson getPrimaryAdvisor() {
-		return primaryAdvisor;
+		return primaryAdvisor.getForeignObject();
+	}
+
+	@GraphQLQuery(name="primaryPrincipal")
+	public CompletableFuture<ReportPerson> loadPrimaryPrincipal(@GraphQLRootContext Map<String, Object> context) {
+		if (primaryPrincipal.hasForeignObject()) {
+			return CompletableFuture.completedFuture(primaryPrincipal.getForeignObject());
+		}
+		return loadAttendees(context) //Force the load of attendees
+				.thenApply(l ->
+		{
+			final ReportPerson o = l.stream().filter(p -> p.isPrimary() && p.getRole().equals(Role.PRINCIPAL))
+					.findFirst().orElse(null);
+			primaryPrincipal.setForeignObject(o);
+			return o;
+		});
 	}
 
 	@JsonIgnore
 	@GraphQLIgnore
 	public ReportPerson getPrimaryPrincipal() {
-		return primaryPrincipal;
+		return primaryPrincipal.getForeignObject();
 	}
-	
+
 	@GraphQLQuery(name="tasks")
 	public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
 		if (tasks != null) {
@@ -291,59 +327,102 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="author")
 	public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Person>().load(context, "people", author)
-				.thenApply(o -> { author = o; return o; });
+		if (author.hasForeignObject()) {
+			return CompletableFuture.completedFuture(author.getForeignObject());
+		}
+		return new UuidFetcher<Person>().load(context, "people", author.getForeignUuid())
+				.thenApply(o -> { author.setForeignObject(o); return o; });
 	}
 
-	@JsonSetter("author")
-	public void setAuthor(Person author) {
-		this.author = author;
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setAuthorUuid(String authorUuid) {
+		this.author = new ForeignObjectHolder<>(authorUuid);
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getAuthorUuid() {
+		return author.getForeignUuid();
+	}
+
+	public void setAuthor(Person author) {
+		this.author = new ForeignObjectHolder<>(author);
+	}
+
 	@GraphQLIgnore
 	public Person getAuthor() { 
-		return author;
-	}
-	
-	@GraphQLIgnore
-	public Organization getAdvisorOrg() {
-		return advisorOrg;
-	}
-
-	public void setAdvisorOrg(Organization advisorOrg) {
-		this.advisorOrg = advisorOrg;
+		return author.getForeignObject();
 	}
 
 	@GraphQLQuery(name="advisorOrg")
 	public CompletableFuture<Organization> loadAdvisorOrg(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Organization>().load(context, "organizations", advisorOrg)
-				.thenApply(o -> { advisorOrg = o; return o; });
-	}
-	
-	@GraphQLIgnore
-	public Organization getPrincipalOrg() {
-		return principalOrg;
+		if (advisorOrg.hasForeignObject()) {
+			return CompletableFuture.completedFuture(advisorOrg.getForeignObject());
+		}
+		return new UuidFetcher<Organization>().load(context, "organizations", advisorOrg.getForeignUuid())
+				.thenApply(o -> { advisorOrg.setForeignObject(o); return o; });
 	}
 
-	public void setPrincipalOrg(Organization principalOrg) {
-		this.principalOrg = principalOrg;
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setAdvisorOrgUuid(String advisorOrgUuid) {
+		this.advisorOrg = new ForeignObjectHolder<>(advisorOrgUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getAdvisorOrgUuid() {
+		return advisorOrg.getForeignUuid();
+	}
+
+	public void setAdvisorOrg(Organization advisorOrg) {
+		this.advisorOrg = new ForeignObjectHolder<>(advisorOrg);
+	}
+
+	@GraphQLIgnore
+	public Organization getAdvisorOrg() {
+		return advisorOrg.getForeignObject();
 	}
 
 	@GraphQLQuery(name="principalOrg")
 	public CompletableFuture<Organization> loadPrincipalOrg(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Organization>().load(context, "organizations", principalOrg)
-				.thenApply(o -> { principalOrg = o; return o; });
+		if (principalOrg.hasForeignObject()) {
+			return CompletableFuture.completedFuture(principalOrg.getForeignObject());
+		}
+		return new UuidFetcher<Organization>().load(context, "organizations", principalOrg.getForeignUuid())
+				.thenApply(o -> { principalOrg.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setPrincipalOrgUuid(String principalOrgUuid) {
+		this.principalOrg = new ForeignObjectHolder<>(principalOrgUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getPrincipalOrgUuid() {
+		return principalOrg.getForeignUuid();
+	}
+
+	@GraphQLIgnore
+	public Organization getPrincipalOrg() {
+		return principalOrg.getForeignObject();
+	}
+
+	public void setPrincipalOrg(Organization principalOrg) {
+		this.principalOrg = new ForeignObjectHolder<>(principalOrg);
+	}
+
 	@GraphQLQuery(name="comments") // TODO: batch load? (used in reports/{Minimal,Show}.js
 	public synchronized List<Comment> loadComments() {
 		if (comments == null) {
-			comments = AnetObjectEngine.getInstance().getCommentDao().getCommentsForReport(this);
+			comments = AnetObjectEngine.getInstance().getCommentDao().getCommentsForReport(uuid);
 		}
 		return comments;
 	}
 
-	@JsonSetter("comments")
 	public void setComments(List<Comment> comments) {
 		this.comments = comments;
 	}
@@ -369,7 +448,7 @@ public class Report extends AbstractAnetBean {
 			result = actionsForReport
 					.thenApply(actions -> { approvalStatus = compactActions(actions); return approvalStatus; });
 		} else {
-			final CompletableFuture<Organization> organizationForAuthor = engine.getOrganizationForPerson(context, author);
+			final CompletableFuture<Organization> organizationForAuthor = engine.getOrganizationForPerson(context, author.getForeignUuid());
 			result = CompletableFuture.allOf(actionsForReport, organizationForAuthor)
 					.thenApply(futures -> {
 				final List<ApprovalAction> actions = actionsForReport.join();
@@ -531,11 +610,11 @@ public class Report extends AbstractAnetBean {
 		Report r = (Report) other;
 		return Objects.equals(r.getUuid(), uuid)
 				&& Objects.equals(r.getState(), state)
-				&& uuidEqual(r.getApprovalStep(), approvalStep)
+				&& Objects.equals(r.getApprovalStepUuid(), getApprovalStepUuid())
 				&& Objects.equals(r.getCreatedAt(), createdAt)
 				&& Objects.equals(r.getUpdatedAt(), updatedAt)
 				&& Objects.equals(r.getEngagementDate(), engagementDate)
-				&& uuidEqual(r.getLocation(), location)
+				&& Objects.equals(r.getLocationUuid(), getLocationUuid())
 				&& Objects.equals(r.getIntent(), intent)
 				&& Objects.equals(r.getExsum(), exsum)
 				&& Objects.equals(r.getAtmosphere(), atmosphere)
@@ -544,7 +623,7 @@ public class Report extends AbstractAnetBean {
 				&& Objects.equals(r.getTasks(), tasks)
 				&& Objects.equals(r.getReportText(), reportText)
 				&& Objects.equals(r.getNextSteps(), nextSteps)
-				&& uuidEqual(r.getAuthor(), author)
+				&& Objects.equals(r.getAuthorUuid(), getAuthorUuid())
 				&& Objects.equals(r.getComments(), comments)
 				&& Objects.equals(r.getTags(), tags)
 				&& Objects.equals(r.getReportSensitiveInformation(), reportSensitiveInformation)

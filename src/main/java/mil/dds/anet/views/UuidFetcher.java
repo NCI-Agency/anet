@@ -6,14 +6,12 @@ import java.util.concurrent.CompletableFuture;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
 
-import mil.dds.anet.utils.DaoUtils;
-
-public class IdFetcher<T extends AbstractAnetBean> {
-	public CompletableFuture<T> load(Map<String, Object> context, String dataLoader, T bean) {
+public class UuidFetcher<T extends AbstractAnetBean> {
+	public CompletableFuture<T> load(Map<String, Object> context, String dataLoader, String uuid) {
 		final DataLoaderRegistry dlr = (DataLoaderRegistry) context.get("dataLoaderRegistry");
 		final DataLoader<String, T> dl = dlr.getDataLoader(dataLoader);
-		return (DaoUtils.getUuid(bean) == null)
+		return (uuid == null)
 				? CompletableFuture.completedFuture(null)
-				: dl.load(bean.getUuid());
+				: dl.load(uuid);
 	}
 }

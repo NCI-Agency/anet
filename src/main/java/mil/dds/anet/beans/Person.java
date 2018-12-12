@@ -9,7 +9,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
@@ -40,7 +39,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	private String biography;
 	private String domainUsername;
 		
-	private Optional<Position> position;
+	private ForeignObjectHolder<Position> position = new ForeignObjectHolder<>();
 
 	private List<PersonPositionHistory> previousPositions;
 	
@@ -158,22 +157,21 @@ public class Person extends AbstractAnetBean implements Principal {
 
 	@GraphQLQuery(name="position")
 	public synchronized Position loadPosition() {
-		if (position == null) {
-			position = Optional.ofNullable(AnetObjectEngine.getInstance()
-					.getPositionDao().getCurrentPositionForPerson(this));
+		if (position.hasForeignObject()) {
+			return position.getForeignObject();
 		}
-		return position.orElse(null);
+		final Position o = AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
+		position.setForeignObject(o);
+		return o;
 	}
-	
+
+	public void setPosition(Position position) {
+		this.position = new ForeignObjectHolder<>(position);
+	}
+
 	@GraphQLIgnore
 	public Position getPosition() {
-		return (position == null) ? null : position.orElse(null);
-	}
-	
-	public void setPosition(Position position) { 
-		if (position != null) { 
-			this.position = Optional.of(position);
-		}
+		return position.getForeignObject();
 	}
 
 	@GraphQLQuery(name="previousPositions")
@@ -181,7 +179,7 @@ public class Person extends AbstractAnetBean implements Principal {
 		if (previousPositions != null) {
 			return CompletableFuture.completedFuture(previousPositions);
 		}
-		return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, this)
+		return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, uuid)
 				.thenApply(o -> { previousPositions = o; return o; });
 	}
 

@@ -496,7 +496,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Organization ef1 = null;
 		for (Organization org : results.getList()) {
 			if (org.getShortName().trim().equalsIgnoreCase("ef 1.1")) {
-				billet.setOrganization(Organization.createWithUuid(org.getUuid()));
+				billet.setOrganization(createOrganizationWithUuid(org.getUuid()));
 				ef1 = org;
 				break;
 			}

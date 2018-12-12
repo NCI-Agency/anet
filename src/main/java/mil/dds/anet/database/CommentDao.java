@@ -6,7 +6,6 @@ import java.util.List;
 import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.Comment;
-import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.CommentMapper;
 import mil.dds.anet.utils.DaoUtils;
@@ -22,8 +21,8 @@ public class CommentDao implements IAnetDao<Comment> {
 
 	public CommentDao(Handle dbHandle) { 
 		this.dbHandle = dbHandle;
-		final String idBatcherSql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
+		final String idBatcherSql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS
+				+ "FROM comments "
 				+ "WHERE comments.uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Comment>(dbHandle, idBatcherSql, "uuids", new CommentMapper());
 	}
@@ -49,7 +48,6 @@ public class CommentDao implements IAnetDao<Comment> {
 				+ "INSERT INTO comments (uuid, \"reportUuid\", \"authorUuid\", \"createdAt\", \"updatedAt\", text)"
 				+ "VALUES (:uuid, :reportUuid, :authorUuid, :createdAt, :updatedAt, :text)")
 			.bindBean(c)
-			.bind("authorUuid", DaoUtils.getUuid(c.getAuthor()))
 			.execute();
 		return c;
 	}
@@ -61,11 +59,11 @@ public class CommentDao implements IAnetDao<Comment> {
 			.execute();
 	}
 
-	public List<Comment> getCommentsForReport(Report report) {
-		return dbHandle.createQuery("/* getCommentForReport */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
+	public List<Comment> getCommentsForReport(String reportUuid) {
+		return dbHandle.createQuery("/* getCommentForReport */ SELECT " + COMMENT_FIELDS
+				+ "FROM comments "
 				+ "WHERE comments.\"reportUuid\" = :reportUuid ORDER BY comments.\"createdAt\" ASC")
-			.bind("reportUuid", report.getUuid())
+			.bind("reportUuid", reportUuid)
 			.map(new CommentMapper())
 			.list();
 	}

@@ -86,12 +86,5 @@ public class ApprovalStep extends AbstractAnetBean {
 	public String toString() {
 		return String.format("%s - %s, aoid: %d, nsid: %d", uuid, name, advisorOrganizationUuid, nextStepUuid);
 	}
-
-	public static ApprovalStep createWithUuid(String uuid) {
-		final ApprovalStep step = new ApprovalStep();
-		step.setUuid(uuid);
-		return step;
-	}
-	
 	
 }

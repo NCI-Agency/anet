@@ -22,11 +22,7 @@ public class OrganizationMapper implements RowMapper<Organization> {
 		org.setStatus(MapperUtils.getEnumIdx(r, "organizations_status", OrganizationStatus.class));
 		org.setIdentificationCode(r.getString("organizations_identificationCode"));
 		org.setType(MapperUtils.getEnumIdx(r, "organizations_type", OrganizationType.class));
-		
-		String parentOrgUuid = r.getString("organizations_parentOrgUuid");
-		if (parentOrgUuid != null) {
-			org.setParentOrg(Organization.createWithUuid(parentOrgUuid));
-		}
+		org.setParentOrgUuid(r.getString("organizations_parentOrgUuid"));
 		
 		if (MapperUtils.containsColumnNamed(r, "totalCount")) { 
 			ctx.define("totalCount", r.getInt("totalCount"));
