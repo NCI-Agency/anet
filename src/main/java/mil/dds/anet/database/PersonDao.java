@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -52,10 +53,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 	}
 
 	public Person getByUuid(String uuid) {
-		return dbHandle.createQuery("/* personGetByUuid */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid = :uuid")
-				.bind("uuid",  uuid)
-				.map(new PersonMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override

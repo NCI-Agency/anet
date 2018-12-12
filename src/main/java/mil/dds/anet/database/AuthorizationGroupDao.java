@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -62,10 +63,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public AuthorizationGroup getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getAuthorizationGroupByUuid */ SELECT * from \"authorizationGroups\" where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new AuthorizationGroupMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override

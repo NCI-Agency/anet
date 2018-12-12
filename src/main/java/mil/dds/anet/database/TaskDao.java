@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.Handle;
@@ -43,10 +44,7 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 
 	public Task getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getTaskByUuid */ SELECT * from tasks where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new TaskMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override

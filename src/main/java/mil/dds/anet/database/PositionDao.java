@@ -101,12 +101,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 	}
 
 	public Position getByUuid(String uuid) {
-		return dbHandle.createQuery("/* positionGetByUuid */ SELECT " + POSITIONS_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM positions LEFT JOIN people ON positions.\"currentPersonUuid\" = people.uuid "
-				+ "WHERE positions.uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new PositionMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override

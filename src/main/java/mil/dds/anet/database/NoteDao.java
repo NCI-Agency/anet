@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -60,10 +61,7 @@ public class NoteDao implements IAnetDao<Note> {
 	}
 
 	public Note getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getNoteByUuid */ SELECT * FROM notes WHERE uuid = :uuid")
-			.bind("uuid", uuid)
-			.map(new NoteMapper())
-			.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override

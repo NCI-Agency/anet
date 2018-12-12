@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.Handle;
@@ -33,12 +34,7 @@ public class CommentDao implements IAnetDao<Comment> {
 	}
 
 	public Comment getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getCommentByUuid */ SELECT " + COMMENT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM comments LEFT JOIN people ON comments.\"authorUuid\" = people.uuid "
-				+ "WHERE comments.uuid = :uuid")
-			.bind("uuid", uuid)
-			.map(new CommentMapper())
-			.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
