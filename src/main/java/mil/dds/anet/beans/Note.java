@@ -50,6 +50,9 @@ public class Note extends AbstractAnetBean {
 
 	@GraphQLQuery(name="noteRelatedObjects")
 	public CompletableFuture<List<NoteRelatedObject>> loadNoteRelatedObjects(@GraphQLRootContext Map<String, Object> context) {
+		if (noteRelatedObjects != null) {
+			return CompletableFuture.completedFuture(noteRelatedObjects);
+		}
 		return AnetObjectEngine.getInstance().getNoteDao().getRelatedObjects(context, this)
 				.thenApply(o -> { noteRelatedObjects = o; return o; });
 	}

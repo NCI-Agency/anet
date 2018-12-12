@@ -110,6 +110,9 @@ public class Organization extends AbstractAnetBean {
 	
 	@GraphQLQuery(name="approvalSteps")
 	public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(@GraphQLRootContext Map<String, Object> context) {
+		if (approvalSteps != null) {
+			return CompletableFuture.completedFuture(approvalSteps);
+		}
 		return AnetObjectEngine.getInstance()
 				.getApprovalStepsForOrg(context, uuid).thenApply(o -> { approvalSteps = o; return o; });
 	}

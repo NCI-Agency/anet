@@ -194,6 +194,9 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="attendees")
 	public CompletableFuture<List<ReportPerson>> loadAttendees(@GraphQLRootContext Map<String, Object> context) {
+		if (attendees != null) {
+			return CompletableFuture.completedFuture(attendees);
+		}
 		return AnetObjectEngine.getInstance().getReportDao().getAttendeesForReport(context, uuid)
 				.thenApply(o -> { attendees = o; return o; });
 	}
@@ -243,6 +246,9 @@ public class Report extends AbstractAnetBean {
 	
 	@GraphQLQuery(name="tasks")
 	public CompletableFuture<List<Task>> loadTasks(@GraphQLRootContext Map<String, Object> context) {
+		if (tasks != null) {
+			return CompletableFuture.completedFuture(tasks);
+		}
 		return AnetObjectEngine.getInstance().getReportDao().getTasksForReport(context, uuid)
 				.thenApply(o -> { tasks = o; return o; });
 	}
@@ -353,6 +359,9 @@ public class Report extends AbstractAnetBean {
 	 */
 	@GraphQLQuery(name="approvalStatus")
 	public CompletableFuture<List<ApprovalAction>> loadApprovalStatus(@GraphQLRootContext Map<String, Object> context) {
+		if (approvalStatus != null) {
+			return CompletableFuture.completedFuture(approvalStatus);
+		}
 		final CompletableFuture<List<ApprovalAction>> result;
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		final CompletableFuture<List<ApprovalAction>> actionsForReport = engine.getApprovalActionDao().getActionsForReport(context, this.getUuid());
@@ -451,6 +460,9 @@ public class Report extends AbstractAnetBean {
 
 	@GraphQLQuery(name="tags")
 	public CompletableFuture<List<Tag>> loadTags(@GraphQLRootContext Map<String, Object> context) {
+		if (tags != null) {
+			return CompletableFuture.completedFuture(tags);
+		}
 		return AnetObjectEngine.getInstance().getReportDao().getTagsForReport(context, uuid)
 				.thenApply(o -> { tags = o; return o; });
 	}

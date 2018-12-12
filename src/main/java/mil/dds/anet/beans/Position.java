@@ -139,6 +139,9 @@ public class Position extends AbstractAnetBean {
 	
 	@GraphQLQuery(name="previousPeople")
 	public CompletableFuture<List<PersonPositionHistory>> loadPreviousPeople(@GraphQLRootContext Map<String, Object> context) {
+		if (previousPeople != null) {
+			return CompletableFuture.completedFuture(previousPeople);
+		}
 		return AnetObjectEngine.getInstance().getPositionDao().getPositionHistory(context, this)
 				.thenApply(o -> { previousPeople = o; return o; });
 	}

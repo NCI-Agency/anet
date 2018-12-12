@@ -22,6 +22,9 @@ public class ApprovalStep extends AbstractAnetBean {
 
 	@GraphQLQuery(name="approvers")
 	public CompletableFuture<List<Position>> loadApprovers(@GraphQLRootContext Map<String, Object> context) {
+		if (approvers != null) {
+			return CompletableFuture.completedFuture(approvers);
+		}
 		return AnetObjectEngine.getInstance().getApprovalStepDao().getApproversForStep(context, uuid)
 				.thenApply(o -> { approvers = o; return o; });
 	}
