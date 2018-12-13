@@ -8,8 +8,10 @@ import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
 import {Map, Control, CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
+import { GeoSearchControl, OpenStreetMapProvider, EsriProvider } from 'leaflet-geosearch'
 import { GestureHandling } from 'leaflet-gesture-handling'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-geosearch/assets/css/leaflet.css'
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
 import Settings from 'Settings'
 
@@ -20,6 +22,29 @@ import MARKER_SHADOW from 'resources/leaflet/marker-shadow.png'
 const css = {
 	zIndex: 1,
 }
+
+class CustomUrlEsriProvider extends EsriProvider {
+	constructor(options = {}) {
+		super(options)
+	}
+
+	endpoint({ query, protocol } = {}) {
+		const { params } = this.options
+		const paramString = this.getParamString({
+			...params,
+			f: 'json',
+			text: query,
+		})
+		return `${protocol}//${this.options.url}?${paramString}`
+	}
+  }
+
+const geoSearcherProviders = {
+	ESRI: () => { return new CustomUrlEsriProvider({url: Settings.imagery.geoSearcher.url, params: {maxLocations: 10}}) },
+	OSM: () => { return new OpenStreetMapProvider() },
+}
+
+const searchProvider = Settings.imagery.geoSearcher && geoSearcherProviders[Settings.imagery.geoSearcher.provider]()
 
 class BaseLeaflet extends Component {
 	static propTypes = {
@@ -47,11 +72,11 @@ class BaseLeaflet extends Component {
 		}
 
 		this.icon = new Icon({
-			iconUrl:       MARKER_ICON,
+			iconUrl: MARKER_ICON,
 			iconRetinaUrl: MARKER_ICON_2X,
-			shadowUrl:     MARKER_SHADOW,
-			iconSize:    [25, 41],
-			iconAnchor:  [12, 41],
+			shadowUrl: MARKER_SHADOW,
+			iconSize: [25, 41],
+			iconAnchor: [12, 41],
 			popupAnchor: [1, -34],
 			tooltipAnchor: [16, -28],
 			shadowSize: [41, 41]
@@ -68,8 +93,12 @@ class BaseLeaflet extends Component {
 		const mapOptions = Object.assign({zoomControl:true, gestureHandling:true},
 										 Settings.imagery.mapOptions.leafletOptions,
 										 Settings.imagery.mapOptions.crs && { crs: CRS[Settings.imagery.mapOptions.crs] })
-		const map = new Map(this.mapId, mapOptions).setView( Settings.imagery.mapOptions.homeView.location,
-															 Settings.imagery.mapOptions.homeView.zoomLevel)
+		const map = new Map(this.mapId, mapOptions).setView(Settings.imagery.mapOptions.homeView.location,
+															Settings.imagery.mapOptions.homeView.zoomLevel)
+		if (searchProvider) {
+			new GeoSearchControl({ provider: searchProvider }).addTo(map)
+		}
+
 		const layerControl = new Control.Layers({}, {}, {collapsed:false})
 
 		layerControl.addTo(map)
