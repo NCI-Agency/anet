@@ -110,14 +110,6 @@ class BaseSearch extends Page {
 		error: null,
 		didSearch: false,
 		query: this.props.searchQuery.text || null,
-		pageNum: {
-			reports: 0,
-			people: 0,
-			organizations: 0,
-			positions: 0,
-			locations: 0,
-			tasks: 0,
-		},
 		results: {
 			reports: null,
 			people: null,
@@ -129,11 +121,11 @@ class BaseSearch extends Page {
 		showSaveSearch: false,
 	}
 
-	getSearchPart(type, query, pageSize) {
+	getSearchPart(type, query, pageNum, pageSize) {
 		type = type.toLowerCase()
 		let subQuery = Object.assign({}, query)
+		subQuery.pageNum = (pageNum === undefined) ? 0 : pageNum
 		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
-		subQuery.pageNum = this.state.pageNum[type]
 
 		let config = SEARCH_CONFIG[type]
 		if (config.sortBy) {
@@ -151,16 +143,15 @@ class BaseSearch extends Page {
 	}
 
 	@autobind
-	_dataFetcher(props, callback, pageSize) {
-
+	_dataFetcher(props, callback, pageNum, pageSize) {
 		let {searchQuery} = props
 		let query = this.getSearchQuery(props)
 		let parts = []
 		if (searchQuery.objectType) {
-			parts.push(this.getSearchPart(searchQuery.objectType, query, pageSize))
+			parts.push(this.getSearchPart(searchQuery.objectType, query, pageNum, pageSize))
 		} else {
 			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, query, pageSize))
+				parts.push(this.getSearchPart(key, query, pageNum, pageSize))
 			})
 		}
 		return callback(parts)
@@ -324,11 +315,8 @@ class BaseSearch extends Page {
 
 	@autobind
 	goToPage(type, pageNum) {
-		const pageNums = this.state.pageNum
-		pageNums[type] = pageNum
-
 		const query = this.getSearchQuery()
-		const part = this.getSearchPart(type, query)
+		const part = this.getSearchPart(type, query, pageNum)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
