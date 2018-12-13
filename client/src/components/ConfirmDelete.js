@@ -15,7 +15,7 @@ export default class ConfirmDelete extends Component {
 	}
 
 	render() {
-		const {onConfirmDelete, objectType, objectDisplay, bsStyle, buttonLabel, ...otherProps} = this.props
+		const {onConfirmDelete, objectType, objectDisplay, bsStyle, buttonLabel, children, ...otherProps} = this.props
 		const confirmDeleteText = `Yes, I am sure that I want to delete ${objectType} ${objectDisplay}`
 		const title = `Confirm to delete ${objectType}`
 		const body = `Are you sure you want to delete this ${objectType}? This cannot be undone.`
@@ -31,6 +31,7 @@ export default class ConfirmDelete extends Component {
 				confirmBSStyle="primary">
 				<Button bsStyle={bsStyle} {...otherProps}>
 					{buttonLabel}
+					{children}
 				</Button>
 			</Confirm>
 		)
