@@ -45,7 +45,7 @@ export default class Report extends Model {
 	}
 
 	static yupSchema = yup.object().shape({
-		intent: yup.string().required(`You must provide the ${fieldLabels.intent}`).default('')
+		intent: yup.string().nullable().required(`You must provide the ${fieldLabels.intent}`).default('')
 			.label(fieldLabels.intent),
 		engagementDate: yupDate.nullable().required('You must provide the Date of Engagement')
 			.when('cancelled', (cancelled, schema) => (
@@ -95,7 +95,7 @@ export default class Report extends Model {
 		tasks: yup.array().nullable().default([]),
 		comments: yup.array().nullable().default([]),
 		reportText: yup.string().nullable().default(''),
-		nextSteps: yup.string().required('You must provide a brief summary of the Next Steps')
+		nextSteps: yup.string().nullable().required('You must provide a brief summary of the Next Steps')
 			.default('')
 			.label('Next steps description'),
 		keyOutcomes: yup.string().nullable()
