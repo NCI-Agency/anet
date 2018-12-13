@@ -179,12 +179,10 @@ class BaseInsightsShow extends Page {
   updateSearchQuery() {
     const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     this.props.setSearchProps(Object.assign({}, insightConfig.searchProps))
-    if (!insightConfig.searchProps.onSearchGoToSearchPage) {
-      deserializeQueryParams(
-        SEARCH_OBJECT_TYPES.REPORTS,
-        this.insightQueryParams[this.props.match.params.insight],
-        this.deserializeCallback)
-    }
+    deserializeQueryParams(
+      SEARCH_OBJECT_TYPES.REPORTS,
+      this.insightQueryParams[this.props.match.params.insight],
+      this.deserializeCallback)
   }
 
   componentDidUpdate(prevProps, prevState) {
