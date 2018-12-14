@@ -162,7 +162,7 @@ class BaseInsightsShow extends Page {
   }
 
   @autobind
-  updateSearchQuery() {
+  setInsightDefaultSearchQuery() {
     const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     this.props.setSearchProps(Object.assign({}, insightConfig.searchProps))
     deserializeQueryParams(
@@ -173,15 +173,26 @@ class BaseInsightsShow extends Page {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.insight !== this.props.match.params.insight) {
-      // when insight changes we need to update the search query to use the new insight default query params
-      this.updateSearchQuery()
+      // when insight changes we need to update the search query to use the new
+      // insight default query params
+      // NOTE: this also happens now when using the back browser button from one
+      // insight to the previous one. Do we want that?
+      this.setInsightDefaultSearchQuery()
+    }
+    else if ((prevProps.searchQuery !== this.props.searchQuery) &&
+        (this.props.searchQuery === DEFAULT_SEARCH_QUERY)) {
+      // when the search query has been cleared, use the default insight search query
+      // (for instance on consecutive clicks on the same insight in the left navigation)
+      this.setInsightDefaultSearchQuery()
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
     if (this.props.searchQuery === DEFAULT_SEARCH_QUERY) {
-      this.updateSearchQuery()
+      // when going from a different page to the insight page,  use the default
+      // insight search query
+      this.setInsightDefaultSearchQuery()
     }
   }
 
