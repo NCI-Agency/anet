@@ -15,7 +15,7 @@ import moment from 'moment'
 import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableAdvisorReportsTable'
 
 import {Report} from 'models'
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'actions'
+import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES, DEFAULT_SEARCH_QUERY } from 'actions'
 import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -180,7 +180,9 @@ class BaseInsightsShow extends Page {
 
   componentDidMount() {
     super.componentDidMount()
-    this.updateSearchQuery()
+    if (this.props.searchQuery === DEFAULT_SEARCH_QUERY) {
+      this.updateSearchQuery()
+    }
   }
 
   render() {
