@@ -111,55 +111,55 @@ class BaseInsightsShow extends Page {
     appSettings: PropTypes.object,
   }
 
-  get currentDateTime() {
-    return moment().clone()
-  }
-
   get cutoffDate() {
     const { appSettings } = this.props || {}
     let maxReportAge = 1 + (parseInt(appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS, 10) || 14)
     return moment().subtract(maxReportAge, 'days').clone()
   }
+  get currentDateTime() {
+    return moment().clone()
+  }
+
+  defaultPastDates = {
+    referenceDate: this.cutoffDate,
+    startDate: this.cutoffDate,
+    endDate: this.currentDateTime
+  }
+  defaultFutureDates = {
+    referenceDate: this.currentDateTime,
+    startDate: this.currentDateTime,
+    endDate: this.currentDateTime.add(14, 'days')
+  }
 
   constructor(props) {
     const insightConfig = INSIGHT_DETAILS[props.match.params.insight]
     super(props, DEFAULT_PAGE_PROPS, insightConfig.searchProps)
-    this.state = {...this.insightDefaultDates}
-  }
-
-  get insightDefaultDates() {
-    const prefix = this.props.match.params.insight.split('-', 1).pop()
-    if (prefix !== undefined && prefix === PREFIX_FUTURE) {
-      return this.getDefaultFutureDates()
-    } else {
-      return this.getDefaultPastDates()
-    }
   }
 
   get insightQueryParams() {
     return {
       [NOT_APPROVED_REPORTS]: {
         state: [Report.STATE.PENDING_APPROVAL],
-        updatedAtEnd: this.state.referenceDate.endOf('day').valueOf()
+        updatedAtEnd: this.defaultPastDates.referenceDate.endOf('day').valueOf()
       },
       [CANCELLED_REPORTS]: {
         state: [Report.STATE.CANCELLED],
         cancelledReason: '',
-        releasedAtStart: this.state.referenceDate.startOf('day').valueOf()
+        releasedAtStart: this.defaultPastDates.referenceDate.startOf('day').valueOf()
       },
       [REPORTS_BY_TASK]: {
         state: [Report.STATE.RELEASED],
-        releasedAtStart: this.state.referenceDate.startOf('day').valueOf()
+        releasedAtStart: this.defaultPastDates.referenceDate.startOf('day').valueOf()
       },
       [REPORTS_BY_DAY_OF_WEEK]: {
         state: [Report.STATE.RELEASED],
-        releasedAtStart: this.state.startDate.startOf('day').valueOf(),
-        releasedAtEnd: this.state.endDate.endOf('day').valueOf(),
+        releasedAtStart: this.defaultPastDates.startDate.startOf('day').valueOf(),
+        releasedAtEnd: this.defaultPastDates.endDate.endOf('day').valueOf(),
         includeEngagementDayOfWeek: 1
       },
       [FUTURE_ENGAGEMENTS_BY_LOCATION]: {
-        engagementDateStart: this.state.startDate.startOf('day').valueOf(),
-        engagementDateEnd: this.state.endDate.endOf('day').valueOf()
+        engagementDateStart: this.defaultFutureDates.startDate.startOf('day').valueOf(),
+        engagementDateEnd: this.defaultFutureDates.endDate.endOf('day').valueOf()
       },
       [ADVISOR_REPORTS]: {},
     }
@@ -187,85 +187,14 @@ class BaseInsightsShow extends Page {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.match.params.insight !== this.props.match.params.insight) {
-      const oldQueryParams = this.insightQueryParams[prevProps.match.params.insight]
-      const newQueryParams = this.insightQueryParams[this.props.match.params.insight]
-      // when changing insight, set dates to insight specific defaults
-      const defaultDates = this.insightDefaultDates
-      if (!this.state.referenceDate.isSame(defaultDates.referenceDate, 'day') ||
-          !this.state.startDate.isSame(defaultDates.startDate, 'day') ||
-          !this.state.endDate.isSame(defaultDates.endDate, 'day')) {
-        this.setState(
-          defaultDates,
-          () => this.updateSearchQuery()
-        )
-      }
-      else if (!_isEqualWith(oldQueryParams, newQueryParams, utils.treatFunctionsAsEqual)) {
-        this.updateSearchQuery()
-      }
+      // when insight changes we need to update the search query to use the new insight default query params
+      this.updateSearchQuery()
     }
   }
 
   componentDidMount() {
     super.componentDidMount()
     this.updateSearchQuery()
-  }
-
-  getDefaultPastDates = () => {
-    return {
-      referenceDate: this.cutoffDate,
-      startDate: this.cutoffDate,
-      endDate: this.currentDateTime
-    }
-  }
-
-  getDefaultFutureDates = () => {
-    return {
-      referenceDate: this.currentDateTime,
-      startDate: this.currentDateTime,
-      endDate: this.currentDateTime.add(14, 'days')
-    }
-  }
-
-  handleChangeDateRange = (value) => {
-    if (value.relative < 0) {
-      this.updateRelativeDateTime(value)
-    } else {
-      this.updateDateRange(value)
-    }
-  }
-
-  updateRelativeDateTime = (value) => {
-    const startDate = moment(parseInt(value.relative, 10) + this.currentDateTime.valueOf())
-    this.setState({
-      startDate: startDate,
-      endDate: this.currentDateTime
-    })
-  }
-
-  updateDateRange = (value) => {
-    if (value.start !== null) {
-      this.updateDate("startDate", moment(value.start))
-    }
-
-    if (value.end !== null) {
-      this.updateDate("endDate", moment(value.end))
-    }
-  }
-
-  updateDate = (key, newDate) => {
-    const oldDate = this.state[key]
-    const dateChaged = newDate.valueOf() !== oldDate.valueOf()
-    if (dateChaged) {
-      this.setState( { [key]: newDate } )
-    }
-  }
-
-  @autobind
-  changeReferenceDate(newDate) {
-    let date = moment(newDate)
-    if (date.valueOf() !== this.state.referenceDate.valueOf()) {
-      this.setState({referenceDate: date})
-    }
   }
 
   render() {
@@ -279,16 +208,12 @@ class BaseInsightsShow extends Page {
       <div style={flexStyle}>
         <Breadcrumbs items={[['Insights ' + insightConfig.navTitle, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
-
-        {this.state.referenceDate &&
-          <Fieldset id={this.props.match.params.insight} title={insightConfig.title} style={flexStyle}>
-            <InsightComponent
-              style={flexStyle}
-              queryParams={queryParams}
-              date={this.state.referenceDate.clone()}
-            />
-          </Fieldset>
-        }
+        <Fieldset id={this.props.match.params.insight} title={insightConfig.title} style={flexStyle}>
+          <InsightComponent
+            style={flexStyle}
+            queryParams={queryParams}
+          />
+        </Fieldset>
       </div>
     )
   }
