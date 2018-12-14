@@ -9,7 +9,6 @@ import FutureEngagementsByLocation from 'components/FutureEngagementsByLocation'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import Fieldset from 'components/Fieldset'
-import CalendarButton from 'components/CalendarButton'
 import autobind from 'autobind-decorator'
 import moment from 'moment'
 
@@ -20,8 +19,6 @@ import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from 'a
 import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
-import _isEqualWith from 'lodash/isEqualWith'
-import utils from 'utils'
 import {deserializeQueryParams} from 'searchUtils'
 
 export const NOT_APPROVED_REPORTS = 'not-approved-reports'
@@ -91,17 +88,6 @@ export const INSIGHT_DETAILS = {
     dateRange: false,
     showCalendar: false
   },
-}
-
-const PREFIX_FUTURE = 'future'
-
-const calendarButtonCss = {
-  marginLeft: '20px',
-  marginTop: '-8px',
-}
-
-const dateRangeFilterCss = {
-  marginTop: '20px'
 }
 
 class BaseInsightsShow extends Page {
