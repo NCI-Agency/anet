@@ -170,6 +170,13 @@ export default class ReportsVisualisation extends Component {
     }
   }
 
+  componentDidMount() {
+    this.setState({
+      reportsPageNum: 0,
+      focusedSelection: ''  // reset focus when changing the queryParams
+    }, () => this.fetchData())
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (!_isEqual(prevProps.queryParams, this.props.queryParams)) {
       this.setState({
