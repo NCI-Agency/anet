@@ -15,7 +15,6 @@ const OrganizationAdvisorsTableWithLoader = connect(null, mapDispatchToProps)(Lo
 
 class FilterableAdvisorReportsTable extends Component {
     static propTypes = {
-        date: PropTypes.object,
         showLoading: PropTypes.func.isRequired,
         hideLoading: PropTypes.func.isRequired,
     }
