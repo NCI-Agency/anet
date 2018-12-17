@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import decodeQuery from 'querystring/decode'
 import utils from 'utils'
+import _isEmpty from 'lodash/isEmpty'
 
 import * as Models from 'models'
 
@@ -54,7 +55,7 @@ export default class LinkTo extends Component {
 		}
 
 		let modelInstance = this.props[modelName]
-		if (!modelInstance)
+		if (_isEmpty(modelInstance))
 			return <span>{whenUnspecified}</span>
 
 		let modelClass = Models[modelName]

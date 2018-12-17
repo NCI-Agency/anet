@@ -3,7 +3,6 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 
 import OrganizationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import Messages from 'components/Messages'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
@@ -20,13 +19,14 @@ class OrganizationEdit extends Page {
 
 	static modelName = 'Organization'
 
+	state = {
+		organization: new Organization(),
+	}
+
+	static modelName = 'Organization'
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			originalOrganization: new Organization(),
-			organization: new Organization(),
-		}
 	}
 
 	fetchData(props) {
@@ -43,21 +43,18 @@ class OrganizationEdit extends Page {
 		`).then(data => {
 			this.setState({
 				organization: new Organization(data.organization),
-				originalOrganization: new Organization(data.organization)
 			})
 		})
 	}
 
 	render() {
-		let organization = this.state.organization
+		const { organization } = this.state
 
 		return (
 			<div>
-				<RelatedObjectNotes notes={organization.notes} relatedObject={{relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
-				<Breadcrumbs items={[[`Edit ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
-				<Messages error={this.state.error} success={this.state.success} />
-
-				<OrganizationForm original={this.state.originalOrganization} organization={organization} edit />
+				<RelatedObjectNotes notes={organization.notes} relatedObject={organization.uuid && {relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
+				<Breadcrumbs items={[[`Organization ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
+				<OrganizationForm edit initialValues={organization} title={`Organization ${organization.shortName}`} />
 			</div>
 		)
 	}

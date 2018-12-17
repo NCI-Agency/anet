@@ -8,6 +8,8 @@ import encodeQuery from 'querystring/encode'
 import Settings from 'Settings'
 
 const WILDCARD = '*'
+const domainNames = Settings.domainNames.map(d => d.toLowerCase())
+const wildcardDomains = domainNames.filter(domain => domain[0] === WILDCARD)
 
 export default {
 	...changeCase,
@@ -17,17 +19,14 @@ export default {
 	},
 
 	handleEmailValidation: function(value, shouldValidate) {
-		const domainNames = Settings.domainNames.map(d => d.toLowerCase())
-		if (!shouldValidate || domainNames.length === 0) {
-			return { isValid: null, message: 'No custom validator is set' }
+		if (!shouldValidate) {
+			return { isValid: true, message: null }
 		}
-
-		let wildcardDomains = this.getWildcardDomains(domainNames, WILDCARD)
 		try {
-			let isValid = this.validateEmail(value, domainNames, wildcardDomains)
-			return { isValid: isValid, message: this.emailErrorMessage(domainNames) }
-		}
-		catch (e) {
+			const isValid = this.validateEmail(value, domainNames, wildcardDomains)
+			const message = isValid ? null :this.emailErrorMessage(domainNames)
+			return { isValid, message }
+		} catch (e) {
 			return { isValid: false, message: (<div>{e.message}</div>) }
 		}
 	},
@@ -57,13 +56,6 @@ export default {
 			})
 		}
 		return isValid
-	},
-
-	getWildcardDomains: function(domainList, token) {
-		let wildcardDomains = domainList.filter(domain => {
-			return domain[0] === token
-		})
-		return wildcardDomains
 	},
 
 	emailErrorMessage: function(validDomainNames) {
@@ -139,7 +131,7 @@ Object.get = function(source, keypath) {
 	while (keys[0]) {
 		let key = keys.shift()
 		source = source[key]
-		if (typeof source === 'undefined' || source === null)
+		if (source === undefined || source === null)
 			return source
 	}
 	return source

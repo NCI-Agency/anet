@@ -1,11 +1,10 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Messages from 'components/Messages'
 import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
-import AuthorizationGroupForm from 'pages/admin/authorizationgroup/Form'
+import AuthorizationGroupForm from './Form'
 import {AuthorizationGroup} from 'models'
 
 import API from 'api'
@@ -15,15 +14,18 @@ import { connect } from 'react-redux'
 
 class AuthorizationGroupEdit extends Page {
 
-	static propTypes = {...pagePropTypes}
+	static propTypes = {
+		...pagePropTypes,
+	}
+
+	static modelName = 'AuthorizationGroup'
+
+	state = {
+		authorizationGroup: new AuthorizationGroup(),
+	}
 
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			authorizationGroup: new AuthorizationGroup(),
-			originalAuthorizationGroup : new AuthorizationGroup()
-		}
 	}
 
 	fetchData(props) {
@@ -37,20 +39,17 @@ class AuthorizationGroupEdit extends Page {
 		`).then(data => {
 			this.setState({
 				authorizationGroup: new AuthorizationGroup(data.authorizationGroup),
-				originalAuthorizationGroup : new AuthorizationGroup(data.authorizationGroup)
 			})
 		})
 	}
 
 	render() {
-		let authorizationGroup = this.state.authorizationGroup
+		const { authorizationGroup } = this.state
 		return (
 			<div>
-				<RelatedObjectNotes notes={authorizationGroup.notes} relatedObject={{relatedObjectType: 'authorizationGroups', relatedObjectUuid: authorizationGroup.uuid}} />
-				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)], ["Edit", AuthorizationGroup.pathForEdit(authorizationGroup)]]} />
-				<Messages error={this.state.error} success={this.state.success} />
-
-				<AuthorizationGroupForm original={this.state.originalAuthorizationGroup} authorizationGroup={authorizationGroup} edit />
+				<RelatedObjectNotes notes={authorizationGroup.notes} relatedObject={authorizationGroup.uuid && {relatedObjectType: 'authorizationGroups', relatedObjectUuid: authorizationGroup.uuid}} />
+				<Breadcrumbs items={[[`Authorization Group ${authorizationGroup.name}`, AuthorizationGroup.pathFor(authorizationGroup)], ["Edit", AuthorizationGroup.pathForEdit(authorizationGroup)]]} />
+				<AuthorizationGroupForm edit initialValues={authorizationGroup} title={`Authorization Group ${authorizationGroup.name}`} />
 			</div>
 		)
 	}

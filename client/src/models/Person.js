@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Model from 'components/Model'
+import Model, { yupDate } from 'components/Model'
 import LinkTo from 'components/LinkTo'
 import utils from 'utils'
 import Settings from 'Settings'
@@ -11,11 +11,16 @@ import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
 import _isEmpty from 'lodash/isEmpty'
+import * as yup from 'yup'
+
+export const advisorPerson = Settings.fields.advisor.person
+export const principalPerson = Settings.fields.principal.person
 
 export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
 	static getInstanceName = 'person'
+	static getModelNameLinkTo = 'person'
 
 	static STATUS = {
 		NEW_USER: 'NEW_USER',
@@ -30,21 +35,41 @@ export default class Person extends Model {
 
 	static nameDelimiter = ','
 
-	static schema = {
-		name: '',
-		get status() { return Person.STATUS.ACTIVE },
-		country: '',
-		rank: '',
-		gender: 'MALE',
-		phoneNumber: '',
-		endOfTourDate: null,
-		biography: '',
-		get role() { return Person.ROLE.PRINCIPAL },
-		position: {},
-		...Model.schema,
-	}
+	static yupSchema = yup.object().shape({
+		name: yup.string().nullable().default(''),
+		// not actually in the database, but used for validation
+		firstName: yup.string().nullable()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.firstName}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.firstName),
+		// not actually in the database, but used for validation
+		lastName: yup.string().nullable().uppercase().required(`You must provide the ${Settings.fields.person.lastName}`).default('').label(Settings.fields.person.lastName),
+		domainUsername: yup.string().nullable().default('').label(Settings.fields.person.domainUsername),
+		emailAddress: yup.string().nullable().email()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.emailAddress}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.emailAddress),
+		country: yup.string().nullable().required(`You must provide the ${Settings.fields.person.country}`).default('').label(Settings.fields.person.country),
+		rank: yup.string().nullable()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${Settings.fields.person.rank}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.rank),
+		gender: yup.string().nullable()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.gender}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.gender),
+		phoneNumber: yup.string().nullable().default('').label(Settings.fields.person.phoneNumber),
+		endOfTourDate: yupDate.nullable()
+			.when('role', (role, schema) => (
+				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${Settings.fields.person.endOfTourDate}`) : schema.nullable()
+			)).default(null).label(Settings.fields.person.endOfTourDate),
+		biography: yup.string().nullable().default(''),
+		position: yup.object().nullable().default({}),
+		role: yup.string().nullable().default(() => Person.ROLE.PRINCIPAL),
+		status: yup.string().nullable().default(() => Person.STATUS.ACTIVE),
+	}).concat(Model.yupSchema)
 
-	static autocompleteQuery = "uuid, name, role, rank, position { uuid, name, code, organization { uuid, shortName }, location {uuid, name} }"
+	static autocompleteQuery = "uuid, name, role, rank, status, endOfTourDate, position { uuid, name, code, status, organization { uuid, shortName }, location {uuid, name} }"
 
 	static autocompleteTemplate(person) {
 		return <span>
@@ -58,9 +83,17 @@ export default class Person extends Model {
 			return Settings.fields.advisor.person.name
 		}
 		if (role === Person.ROLE.PRINCIPAL) {
-			return Settings.fields.principal.person.name
+			return principalPerson.name
 		}
 		throw new Error(`Unrecognized role: ${role}`)
+	}
+
+	static humanNameOfStatus(status) {
+		return utils.sentenceCase(status)
+	}
+
+	constructor(props) {
+		super(Model.fillObject(props, Person.yupSchema))
 	}
 
 	humanNameOfRole() {
@@ -68,15 +101,23 @@ export default class Person extends Model {
 	}
 
 	humanNameOfStatus() {
-		return utils.sentenceCase(this.status)
+		return Person.humanNameOfStatus(this.status)
+	}
+
+	static isNewUser(person) {
+		return person.status === Person.STATUS.NEW_USER
 	}
 
 	isNewUser() {
-		return this.status === Person.STATUS.NEW_USER
+		return Person.isNewUser(this)
+	}
+
+	static isAdvisor(person) {
+		return person.role === Person.ROLE.ADVISOR
 	}
 
 	isAdvisor() {
-		return this.role === Person.ROLE.ADVISOR
+		return Person.isAdvisor(this)
 	}
 
 	isPrincipal() {
@@ -96,7 +137,7 @@ export default class Person extends Model {
 
 	hasAssignedPosition() {
 		// has a non-empty position with a non-zero uuid
-		return !_isEmpty(this.position) && !!this.position.uuid
+		return !_isEmpty(this.position) && !!this.position.uuid
 	}
 
 	hasActivePosition() {

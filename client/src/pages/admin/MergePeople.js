@@ -1,17 +1,19 @@
 import React from 'react'
 import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
-import autobind from 'autobind-decorator'
+import * as yup from 'yup'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
 
 import Breadcrumbs from 'components/Breadcrumbs'
-import Form from 'components/Form'
 import {Grid, Col, Row, Alert, Button, Checkbox} from 'react-bootstrap'
 import Autocomplete from 'components/Autocomplete'
 import LinkTo from 'components/LinkTo'
 import moment from 'moment'
 import Messages from 'components/Messages'
 
-import Settings from 'Settings'
 import {Person} from 'models'
+import Settings from 'Settings'
 
 import API from 'api'
 
@@ -22,23 +24,37 @@ class MergePeople extends Page {
 
 	static propTypes = {...pagePropTypes}
 
-	constructor(props) {
-		super(props)
-
-		this.state = {
-			success: null,
-			error: null,
-			winner: {},
-			loser: {},
-			copyPosition: false
-		}
+	state = {
+		success: null,
+		error: null,
 	}
+	yupSchema = yup.object().shape({
+		loser: yup.object().nullable().default({})
+			// eslint-disable-next-line no-template-curly-in-string
+			.test('required-object', 'You must select a ${path}', value => value && value.uuid),
+		winner: yup.object().nullable().default({})
+			// eslint-disable-next-line no-template-curly-in-string
+			.test('required-object', 'You must select a ${path}', value => value && value.uuid)
+			.test(
+				'not-equals-loser',
+				'You selected the same person twice!',
+				function(value) {
+					const l = this.resolve(yup.ref('loser'))
+					return value && value.uuid && l && l.uuid ? (value.uuid !== l.uuid) : true
+				}
+			)
+			.test(
+				'equal-roles',
+				`You can only merge people of the same Role (i.e. ${Settings.fields.advisor.person.name}/${Settings.fields.principal.person.name})`,
+				function(value) {
+					const l = this.resolve(yup.ref('loser'))
+					return value && value.role && l && l.role ? (value.role === l.role) : true
+				}
+			)
+	})
 
 	render() {
-		let {winner, loser, copyPosition} = this.state
-		let errors = this.validate()
-
-		let personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
+		const personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
 			position { uuid, name, organization { uuid, shortName, longName, identificationCode }},
 			authoredReports(pageNum:0,pageSize:1) { totalCount }
 			attendedReports(pageNum:0,pageSize:1) { totalCount }`
@@ -53,178 +69,234 @@ class MergePeople extends Page {
 					<p><b>Important</b>: Select the two duplicative people below. The loser account will
 					be deleted and all reports will be transferred over to the winner.  </p>
 				</Alert>
-				<Grid fluid>
-					<Row>
-						<Col md={6}>
+				<Formik
+					enableReinitialize={true}
+					onSubmit={this.onSubmit}
+					validationSchema={this.yupSchema}
+					isInitialValid={() => this.yupSchema.isValidSync({})}
+					initialValues={{loser: {}, winner: {}, copyPosition: false}}
+				>
+				{({
+					isSubmitting,
+					isValid,
+					setFieldValue,
+					setFieldTouched,
+					values,
+					submitForm
+				}) => {
+					const { loser, winner } = values
+					return <Form>
+						<Grid fluid>
 							<Row>
-								<h2>Loser</h2>
+								<Col md={6}>
+									<Row>
+										<Field
+											name="loser"
+											component={FieldHelper.renderSpecialField}
+											vertical={true}
+											onChange={value => {
+												setFieldValue('loser', value)
+												setFieldTouched('loser')  //onBlur doesn't work when selecting an option
+												}
+											}
+											widget={
+												<Autocomplete
+													valueKey="name"
+													placeholder="Select the duplicate person"
+													objectType={Person}
+													fields={personFields}
+													template={person =>
+														<LinkTo person={person} isLink={false} />
+													}
+												/>
+											}
+										/>
+									</Row>
+									<Row>
+										{loser.uuid &&
+											<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
+										}
+									</Row>
+								</Col>
+								<Col md={6}>
+									<Row>
+										<Field
+											name="winner"
+											component={FieldHelper.renderSpecialField}
+											vertical={true}
+											onChange={value => {
+												setFieldValue('winner', value)
+												setFieldTouched('winner')  //onBlur doesn't work when selecting an option
+												}
+											}
+											widget={
+												<Autocomplete
+													valueKey="name"
+													placeholder="Select the OTHER duplicate person"
+													objectType={Person}
+													fields={personFields}
+													template={person =>
+														<LinkTo person={person} isLink={false} />
+													}
+												/>
+											}
+										/>
+									</Row>
+									<Row>
+										{winner.uuid &&
+											<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
+										}
+									</Row>
+								</Col>
 							</Row>
 							<Row>
-								<Autocomplete valueKey="name"
-									value={loser}
-									placeholder="Select the duplicate person"
-									objectType={Person}
-									fields={personFields}
-									template={person =>
-										<LinkTo person={person} isLink={false} />
+								<Col md={12} >
+									{loser.position && !winner.position &&
+										<Field
+											name="copyPosition"
+											component={FieldHelper.renderSpecialField}
+											label={null}
+											widget={
+												<Checkbox
+													inline
+													checked={values.copyPosition}
+												>
+												Set position on winner to {loser.position.name}
+												</Checkbox>
+											}
+										/>
 									}
-									onChange={this.selectLoser}
-								/>
-							</Row>
-							<Row>
-								{loser.uuid &&
-									<fieldset>{this.showPersonDetails(new Person(loser))}</fieldset>
-								}
-							</Row>
-						</Col>
-						<Col md={6}>
-							<Row>
-								<h2>Winner</h2>
-							</Row>
-							<Row>
-								<Autocomplete valueKey="name"
-									value={winner}
-									placeholder="Select the OTHER duplicate person"
-									objectType={Person}
-									fields={personFields}
-									template={person =>
-										<LinkTo person={person} isLink={false} />
+									{loser.position && winner.position &&
+										<Alert bsStyle="danger">
+											<b>Danger:</b> Position on Loser ({loser.position.name}) will be left unfilled
+										</Alert>
 									}
-									onChange={this.selectWinner}
-								/>
+								</Col>
 							</Row>
 							<Row>
-								{winner.uuid &&
-									<fieldset>{this.showPersonDetails(new Person(winner))}</fieldset>
-								}
+								<Col md={12}>
+									<Button bsStyle="primary" bsSize="large" block onClick={submitForm} disabled={isSubmitting || !isValid}>
+										Merge People
+									</Button>
+								</Col>
 							</Row>
-						</Col>
-					</Row>
-					<Row>
-						<Col md={12} >
-							{errors.length === 0 && loser.position && !winner.position &&
-								<Checkbox value={copyPosition} onChange={this.toggleCopyPosition} >
-									Set position on winner to {loser.position.name}
-								</Checkbox>
-							}
-							{loser.position && winner.position &&
-								<Alert bsStyle="danger">
-									<b>Danger:</b> Position on Loser ({loser.position.name}) will be left unfilled
-								</Alert>
-							}
-						</Col>
-					</Row>
-					<Row>
-						<Col md={12}>
-						{errors.length > 0 &&
-								<Alert bsStyle="danger">
-									<ul>
-									{errors.map((error, index) =>
-										<li key={index} >{error}</li>
-									)}
-									</ul>
-								</Alert>
-							}
-							<Button bsStyle="primary" bsSize="large" block onClick={this.submit} disabled={errors.length > 0} >
-								Merge People
-							</Button>
-						</Col>
-					</Row>
-				</Grid>
-
+						</Grid>
+					</Form>
+				}}
+				</Formik>
 			</div>
 		)
 	}
 
-	@autobind
-	selectLoser(loser) {
-		this.setState({loser: loser})
+	showPersonDetails = (person) => {
+		return <React.Fragment>
+			<Field
+				name="uuid"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.uuid}
+				vertical={true}
+			/>
+			<Field
+				name="name"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.name}
+				vertical={true}
+			/>
+			<Field
+				name="status"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.humanNameOfStatus()}
+				vertical={true}
+			/>
+			<Field
+				name="role"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.humanNameOfRole()}
+				vertical={true}
+			/>
+			<Field
+				name="rank"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.rank}
+				vertical={true}
+			/>
+			<Field
+				name="emailAddress"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.emailAddress}
+				vertical={true}
+			/>
+			<Field
+				name="domainUsername"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.domainUsername}
+				vertical={true}
+			/>
+			<Field
+				name="createdAt"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.createdAt && moment(person.createdAt).format("DD MMM YYYY HH:mm:ss")}
+				vertical={true}
+			/>
+			<Field
+				name="position"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.position && <LinkTo position={person.position} />}
+				vertical={true}
+			/>
+			<Field
+				name="organization"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.position && <LinkTo organization={person.position.organization} />}
+				vertical={true}
+			/>
+			<Field
+				name="numReports"
+				label="Number of Reports Written"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.authoredReports && person.authoredReports.totalCount}
+				vertical={true}
+			/>
+			<Field
+				name="numReportsIn"
+				label="Number of Reports Attended"
+				component={FieldHelper.renderReadonlyField}
+				humanValue={person.attendedReports && person.attendedReports.totalCount}
+				vertical={true}
+			/>
+		</React.Fragment>
 	}
 
-	@autobind
-	selectWinner(winner) {
-		this.setState({winner: winner})
+	onSubmit = (values, form) => {
+		return this.save(values, form)
+			.then(response => this.onSubmitSuccess(response, values, form))
+			.catch(error => {
+				this.setState({success: null, error: error})
+				jumpToTop()
+				console.error(error)
+			})
 	}
 
-	@autobind
-	toggleCopyPosition() {
-		this.setState({copyPosition: !this.state.copyPosition})
-	}
-
-	@autobind
-	validate() {
-		let {winner, loser} = this.state
-		let errors = []
-
-		if (!winner.uuid || !loser.uuid) {
-			errors.push("You must select two people")
-			return errors
+	onSubmitSuccess = (response, values, form) => {
+		if (response.mergePeople) {
+			this.props.history.push({
+				pathname: Person.pathFor(values.winner),
+				state: {success: 'People merged'}
+			})
 		}
-		if (winner.uuid === loser.uuid) {
-			errors.push("You selected the same person twice!")
-		}
-		if (winner.role !== loser.role) {
-			errors.push(`You can only merge people of the same Role (i.e. ${Settings.fields.advisor.person.name}/${Settings.fields.principal.person.name})`)
-		}
-
-		return errors
 	}
 
-
-	@autobind
-	showPersonDetails(person) {
-		return <Form static formFor={person} >
-			<Form.Field id="uuid" />
-			<Form.Field id="name" />
-			<Form.Field id="status">{person.humanNameOfStatus()}</Form.Field>
-			<Form.Field id="role">{person.humanNameOfRole()}</Form.Field>
-			<Form.Field id="rank" />
-			<Form.Field id="emailAddress" />
-			<Form.Field id="domainUsername" />
-			<Form.Field id="createdAt" >
-				{person.createdAt && moment(person.createdAt).format("DD MMM YYYY HH:mm:ss")}
-			</Form.Field>
-			<Form.Field id="position" >
-				{person.position && <LinkTo position={person.position} />}
-			</Form.Field>
-			<Form.Field id="organization" >
-				{person.position && <LinkTo organization={person.position.organization} /> }
-			</Form.Field>
-			<Form.Field id="numReports" label="Number of Reports Written" >
-				{person.authoredReports && person.authoredReports.totalCount }
-			</Form.Field>
-			<Form.Field id="numReportsIn" label="Number of Reports Attended" >
-				{person.attendedReports && person.attendedReports.totalCount }
-			</Form.Field>
-		</Form>
-	}
-
-	@autobind
-	submit(event) {
-		event.stopPropagation()
-		event.preventDefault()
-		let {winner, loser, copyPosition} = this.state
-		let operation = 'mergePeople'
-		let graphql = operation + '(winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition)'
+	save = (values, form) => {
+		const { winner, loser, copyPosition } = values
+		const operation = 'mergePeople'
+		const graphql = operation + '(winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition)'
 		const variables = {
 				winnerUuid: winner.uuid,
 				loserUuid: loser.uuid,
 				copyPosition: copyPosition
 		}
 		const variableDef = '($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!)'
-		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
-			.then(data => {
-				if (data[operation]) {
-					this.props.history.push({
-						pathname: Person.pathFor(this.state.winner),
-						state: {success: 'People merged'}
-					})
-				}
-			}).catch(error => {
-				this.setState({success: null, error: error})
-				jumpToTop()
-				console.error(error)
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
 
 }

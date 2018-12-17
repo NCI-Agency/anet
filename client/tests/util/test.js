@@ -283,6 +283,7 @@ test.beforeEach(t => {
                     await t.context.driver.wait(until.elementIsVisible($advisorCell))
                     let $advisorLink = await $advisorCell.findElement(By.css('a'))
                     await $advisorLink.click()
+                    await t.context.driver.wait(until.stalenessOf($advisorLink))
                     return
                 }
             }

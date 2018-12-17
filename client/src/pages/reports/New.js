@@ -2,10 +2,8 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Breadcrumbs from 'components/Breadcrumbs'
-import Messages from 'components/Messages'
-
 import ReportForm from './Form'
+import Breadcrumbs from 'components/Breadcrumbs'
 
 import GuidedTour from 'components/GuidedTour'
 import {reportTour} from 'pages/HopscotchTour'
@@ -23,13 +21,12 @@ class BaseReportNew extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	state = {
+		report: new Report(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			report: new Report(),
-			originalReport: new Report(),
-		}
 	}
 
 	componentDidUpdate() {
@@ -40,19 +37,15 @@ class BaseReportNew extends Page {
 		this.addCurrentUserAsAttendee()
 	}
 
-	addCurrentUserAsAttendee() {
+	addCurrentUserAsAttendee = () => {
 		const { currentUser } = this.props
-		let newAttendee = currentUser
-
-		const addedAttendeeToReport = this.state.report.addAttendee(newAttendee)
-		const addedAttendeeToOriginalReport = this.state.originalReport.addAttendee(newAttendee)
-
-		if (addedAttendeeToReport || addedAttendeeToOriginalReport) {
+		if (this.state.report.addAttendee(currentUser)) {
 			this.forceUpdate()
 		}
 	}
 
 	render() {
+		const { report } = this.state
 		return (
 			<div className="report-new">
 				<div className="pull-right">
@@ -64,10 +57,8 @@ class BaseReportNew extends Page {
 					/>
 				</div>
 
-				<Breadcrumbs items={[['Submit a report', Report.pathForNew()]]} />
-				<Messages error={this.state.error} />
-
-				<ReportForm original={this.state.originalReport} report={this.state.report} title="Create a new Report" />
+				<Breadcrumbs items={[['New Report', Report.pathForNew()]]} />
+				<ReportForm initialValues={report} title='Create a new Report' />
 			</div>
 		)
 	}

@@ -1,16 +1,18 @@
 import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 import {Alert, Table, Modal, Button, Nav, NavItem, Badge} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
 
 import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
-import Form from 'components/Form'
 import Messages from 'components/Messages'
 import PositionTable from 'components/PositionTable'
 
@@ -22,7 +24,6 @@ import {Person, Organization, Task} from 'models'
 import FileSaver from 'file-saver'
 
 import DOWNLOAD_ICON from 'resources/download.png'
-import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
 import LOCATIONS_ICON from 'resources/locations.png'
@@ -36,7 +37,6 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
-import ReactDOM from 'react-dom'
 import { jumpToTop } from 'components/Page'
 
 import AppContext from 'components/AppContext'
@@ -105,25 +105,20 @@ class BaseSearch extends Page {
 			toastId: this.successToastId
 		})
 	}
-
-	constructor(props) {
-		super(props)
-
-		Object.assign(this.state, {
-			success: null,
-			error: null,
-			didSearch: false,
-			query: props.searchQuery.text || null,
-			saveSearch: {show: false},
-			results: {
-				reports: null,
-				people: null,
-				organizations: null,
-				positions: null,
-				locations: null,
-				tasks: null,
-			},
-		})
+	state = {
+		success: null,
+		error: null,
+		didSearch: false,
+		query: this.props.searchQuery.text || null,
+		results: {
+			reports: null,
+			people: null,
+			organizations: null,
+			positions: null,
+			locations: null,
+			tasks: null,
+		},
+		showSaveSearch: false,
 	}
 
 	getSearchPart(type, query, pageNum, pageSize) {
@@ -198,7 +193,7 @@ class BaseSearch extends Page {
 		const taskShortLabel = Settings.fields.task.shortLabel
 		return (
 			<div>
-				<ToastContainer/>
+				<ToastContainer />
 				<SubNav subnavElemId="search-nav">
 					<div><Button onClick={this.props.history.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
 					<Nav stacked bsStyle="pills">
@@ -243,7 +238,7 @@ class BaseSearch extends Page {
 							<img src={DOWNLOAD_ICON} height={16} alt="Export search results" />
 						</Button>
 					}
-					<Button onClick={this.showSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
+					<Button onClick={this.openSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
 				</div>
 
 				<Breadcrumbs items={[['Search results', '']]} />
@@ -434,35 +429,70 @@ class BaseSearch extends Page {
 	}
 
 	renderSaveModal() {
-		return <Modal show={this.state.saveSearch.show} onHide={this.closeSaveModal}>
+		return <Modal show={this.state.showSaveSearch} onHide={this.closeSaveModal}>
 			<Modal.Header closeButton>
 				<Modal.Title>Save search</Modal.Title>
 			</Modal.Header>
 
 			<Modal.Body>
-				<Form formFor={this.state.saveSearch} onChange={this.onChangeSaveSearch}
-					onSubmit={this.onSubmitSaveSearch} submitText={false}>
-					<Form.Field id="name" placeholder="Give this saved search a name" />
-					<Button type="submit" bsStyle="primary" id="saveSearchModalSubmitButton" >Save</Button>
-				</Form>
+				<Formik
+					enableReinitialize
+					onSubmit={this.onSubmitSaveSearch}
+					initialValues={{name: ''}}
+				>
+				{({
+					values,
+					submitForm
+				}) => {
+					return <Form>
+						<Field
+							name="name"
+							component={FieldHelper.renderInputField}
+							placeholder="Give this saved search a name"
+							vertical={true}
+						/>
+						<div className="submit-buttons">
+							<div>
+								<Button id="saveSearchModalSubmitButton" bsStyle="primary" type="button" onClick={submitForm}>Save</Button>
+							</div>
+						</div>
+					</Form>
+					}
+				}
+				</Formik>
 			</Modal.Body>
 		</Modal>
 	}
 
-
-	@autobind
-	onChangeSaveSearch() {
-		let savedSearch = this.state.saveSearch
-		this.setState({saveSearch: savedSearch})
+	onSubmitSaveSearch = (values, form) => {
+		this.saveSearch(values, form)
+			.then(response => this.onSubmitSaveSearchSuccess(response, values, form))
+			.catch(error => {
+				this.setState({
+					success: null,
+					error: error,
+					showSaveSearch: false,
+				})
+				jumpToTop()
+			})
 	}
 
-	@autobind
-	onSubmitSaveSearch(event) {
-		event.stopPropagation()
-		event.preventDefault()
+	onSubmitSaveSearchSuccess = (response, values, form) => {
+		if (response.createSavedSearch.uuid) {
+			this.setState({
+				success: 'Search saved',
+				error: null,
+				showSaveSearch: false,
+			})
+			jumpToTop()
+		}
+	}
 
-		const savedSearch = Object.without(this.state.saveSearch, 'show')
-		savedSearch.query = JSON.stringify(this.getSearchQuery())
+	saveSearch = (values, form) => {
+		const savedSearch = {
+			name: values.name,
+			query: JSON.stringify(this.getSearchQuery())
+		}
 		if (this.props.searchQuery.objectType) {
 			savedSearch.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
@@ -470,29 +500,17 @@ class BaseSearch extends Page {
 		let graphql = operation + '(savedSearch: $savedSearch) { uuid }'
 		const variables = { savedSearch: savedSearch }
 		const variableDef = '($savedSearch: SavedSearchInput!)'
-		API.mutation(graphql, variables, variableDef)
-			.then(data => {
-				if (data[operation].uuid) {
-					this.setState({
-						success: 'Search saved',
-						error: null,
-						saveSearch: {show: false}
-					})
-					jumpToTop()
-				}
-			}).catch(error => {
-				this.setState({
-					success: null,
-					error: error,
-					saveSearch: {show: false}
-				})
-				jumpToTop()
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
 
 	@autobind
-	showSaveModal() {
-		this.setState({saveSearch: {show: true, name: ''}})
+	openSaveModal() {
+		this.setState({showSaveSearch: true})
+	}
+
+	@autobind
+	closeSaveModal() {
+		this.setState({showSaveSearch: false})
 	}
 
 	@autobind
@@ -507,11 +525,6 @@ class BaseSearch extends Page {
 	@autobind
 	exportSearchResults() {
 		this._dataFetcher(this.props, this._exportSearchResultsCallback, 0)
-	}
-
-	@autobind
-	closeSaveModal() {
-		this.setState({saveSearch: {show: false}})
 	}
 }
 

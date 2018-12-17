@@ -18,13 +18,12 @@ class OrganizationNew extends Page {
 		...pagePropTypes,
 	}
 
+	state = {
+		organization: new Organization(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			originalOrganization: new Organization({type: Organization.TYPE.ADVISOR_ORG}),
-			organization: new Organization({type: Organization.TYPE.ADVISOR_ORG}),
-		}
 	}
 
 	fetchData(props) {
@@ -35,27 +34,20 @@ class OrganizationNew extends Page {
 					uuid, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
-				let {organization, originalOrganization} = this.state
+				const {organization} = this.state
 				organization.parentOrg = new Organization(data.organization)
 				organization.type = organization.parentOrg.type
-
-				originalOrganization.parentOrg = new Organization(data.organization)
-				originalOrganization.type = originalOrganization.parentOrg.type
-
-				this.setState({organization, originalOrganization})
+				this.setState({organization})
 			})
 		}
 	}
 
-
 	render() {
-		let organization = this.state.organization
-
+		const { organization } = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new Organization', Organization.pathForNew()]]} />
-
-				<OrganizationForm original={this.state.originalOrganization} organization={organization} />
+				<Breadcrumbs items={[['New Organization', Organization.pathForNew()]]} />
+				<OrganizationForm initialValues={organization} title='Create a new Organization' />
 			</div>
 		)
 	}

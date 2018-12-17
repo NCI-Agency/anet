@@ -1,13 +1,16 @@
 import React from 'react'
 import encodeQuery from 'querystring/encode'
+import Model from 'components/Model'
 import utils from 'utils'
 
-import Model from 'components/Model'
+import * as yup from 'yup'
 
 export default class AuthorizationGroup extends Model {
 	static resourceName = 'AuthorizationGroup'
 	static listName = 'authorizationGroupList'
 	static getInstanceName = 'authorizationGroup'
+	static getModelNameLinkTo = 'authorizationGroup'
+
 	static displayName() {
 		// TODO: Get the display name from the dictionary
 		return 'Authorization Group'
@@ -18,21 +21,16 @@ export default class AuthorizationGroup extends Model {
 		INACTIVE: 'INACTIVE'
 	}
 
-	static schema = {
-		name: '',
-		description: '',
-		positions: [],
-		get status() { return AuthorizationGroup.STATUS.ACTIVE },
-		...Model.schema,
-	}
+	static yupSchema = yup.object().shape({
+		name: yup.string().required().default(''),
+		description: yup.string().required().default(''),
+		status: yup.string().required().default(() => AuthorizationGroup.STATUS.ACTIVE),
+		positions: yup.array().nullable().default([]),
+	}).concat(Model.yupSchema)
 
 	static autocompleteQuery = "uuid, name, description"
 	static autocompleteTemplate(group) {
 		return <span>{[group.name, group.description].join(' - ')}</span>
-	}
-
-	toString() {
-		return this.name || this.description || 'Unnamed'
 	}
 
 	static pathFor(instance, query) {
@@ -66,7 +64,19 @@ export default class AuthorizationGroup extends Model {
 		return url
 	}
 
+	static humanNameOfStatus(status) {
+		return utils.sentenceCase(status)
+	}
+
+	constructor(props) {
+		super(Model.fillObject(props, AuthorizationGroup.yupSchema))
+	}
+
 	humanNameOfStatus() {
-		return utils.sentenceCase(this.status)
+		return AuthorizationGroup.humanNameOfStatus(this.status)
+	}
+
+	toString() {
+		return this.name || this.description || 'Unnamed'
 	}
 }

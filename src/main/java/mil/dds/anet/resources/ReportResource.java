@@ -182,6 +182,9 @@ public class ReportResource {
 		}
 
 		r.setReportText(Utils.sanitizeHtml(r.getReportText()));
+
+		// Needed for sensitive information, e.g. when autoSaving a new report
+		r.setUser(author);
 		r = dao.insert(r, author);
 		AnetAuditLogger.log("Report {} created by author {} ", r, author);
 		return r;

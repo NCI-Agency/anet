@@ -1,13 +1,13 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Messages from 'components/Messages'
+import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import LocationForm from './Form'
-import {Location} from 'models'
 
 import API from 'api'
+import {Location} from 'models'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
@@ -18,13 +18,14 @@ class LocationEdit extends Page {
 		...pagePropTypes,
 	}
 
+	static modelName = 'Location'
+
+	state = {
+		location: new Location(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			location: new Location(),
-			originalLocation : new Location()
-		}
 	}
 
 	fetchData(props) {
@@ -34,19 +35,17 @@ class LocationEdit extends Page {
 				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
-			this.setState({location: new Location(data.location), originalLocation : new Location(data.location) })
+			this.setState({location: new Location(data.location)})
 		})
 	}
 
 	render() {
-		let location = this.state.location
-
+		const { location } = this.state
 		return (
 			<div>
-				<RelatedObjectNotes notes={location.notes} relatedObject={{relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
-				<Messages error={this.state.error} success={this.state.success} />
-
-				<LocationForm original={this.state.originalLocation} anetLocation={location} edit />
+				<RelatedObjectNotes notes={location.notes} relatedObject={location.uuid && {relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
+				<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)], ["Edit", Location.pathForEdit(location)]]} />
+				<LocationForm edit initialValues={location} title={`Location ${location.name}`} />
 			</div>
 		)
 	}

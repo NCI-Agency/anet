@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
 import {ListGroup, ListGroupItem, Nav, NavItem} from 'react-bootstrap'
-import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
 import Breadcrumbs from 'components/Breadcrumbs'
 import Fieldset from 'components/Fieldset'
-import Form from 'components/Form'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
@@ -22,9 +24,9 @@ import OrganizationTasks from './OrganizationTasks'
 import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
-import Settings from 'Settings'
-import {Organization, Person, Position, Report, Task} from 'models'
 import GQL from 'graphqlapi'
+import {Organization, Person, Position, Report, Task} from 'models'
+import Settings from 'Settings'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -42,22 +44,21 @@ class BaseOrganizationShow extends Page {
 
 	static modelName = 'Organization'
 
+	IdentificationCodeFieldWithLabel = DictionaryField(Field)
+	LongNameWithLabel = DictionaryField(Field)
+	state = {
+		organization: new Organization(),
+		reportsFilter: NO_REPORT_FILTER,
+		reports: null,
+		tasks: null,
+		reportsPageNum: 0,
+		tasksPageNum: 0,
+		success: null,
+		error: null,
+	}
+
 	constructor(props) {
 		super(props)
-
-		this.state = {
-			organization: new Organization({uuid: props.match.params.uuid}),
-			reports: null,
-			tasks: null,
-			reportsFilter: NO_REPORT_FILTER,
-		}
-
-		this.reportsPageNum = 0
-		this.tasksPageNum = 0
-		this.togglePendingApprovalFilter = this.togglePendingApprovalFilter.bind(this)
-		this.IdentificationCodeFieldWithLabel = DictionaryField(Form.Field)
-		this.LongNameWithLabel = DictionaryField(Form.Field)
-
 		setMessages(props,this.state)
 	}
 
@@ -72,9 +73,9 @@ class BaseOrganizationShow extends Page {
 		}
 	}
 
-	getReportQueryPart(orgUuid) {
+	getReportQueryPart = (orgUuid) => {
 		let reportQuery = {
-			pageNum: this.reportsPageNum,
+			pageNum: this.state.reportsPageNum,
 			pageSize: 10,
 			orgUuid: orgUuid,
 			state: (this.reportsFilterIsSet()) ? this.state.reportsFilter : null
@@ -89,9 +90,9 @@ class BaseOrganizationShow extends Page {
 		return reportsPart
 	}
 
-	getTaskQueryPart(orgUuid) {
+	getTaskQueryPart = (orgUuid) => {
 		let taskQuery = {
-			pageNum: this.tasksPageNum,
+			pageNum: this.state.tasksPageNum,
 			status: Task.STATUS.ACTIVE,
 			pageSize: 10,
 			responsibleOrgUuid: orgUuid
@@ -131,7 +132,7 @@ class BaseOrganizationShow extends Page {
 		return this.runGQL([orgPart, reportsPart, tasksPart])
 	}
 
-	runGQL(queries) {
+	runGQL = (queries) => {
 		return GQL.run(queries).then(data =>
 			this.setState({
 				organization: new Organization(data.organization),
@@ -141,15 +142,15 @@ class BaseOrganizationShow extends Page {
 		)
 	}
 
-	runGQLReports(reports){
+	runGQLReports = (reports) => {
 		GQL.run(reports).then( data => this.setState({ reports: data.reports }) )
 	}
 
-	reportsFilterIsSet() {
+	reportsFilterIsSet = () => {
 		return (this.state.reportsFilter !== NO_REPORT_FILTER)
 	}
 
-	togglePendingApprovalFilter() {
+	togglePendingApprovalFilter = () => {
 		let toggleToFilter = this.state.reportsFilter
 		if(toggleToFilter === Report.STATE.PENDING_APPROVAL){
 			toggleToFilter = NO_REPORT_FILTER
@@ -160,19 +161,18 @@ class BaseOrganizationShow extends Page {
 	}
 
 	render() {
-		const org = this.state.organization
-		const reports = this.state.reports
-		const tasks = this.state.tasks
+		const { organization, reports, tasks } = this.state
+		const { currentUser, ...myFormProps } = this.props
 
-		const { currentUser } = this.props
-		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(org)
+		const isSuperUser = currentUser && currentUser.isSuperUserForOrg(organization)
 		const isAdmin = currentUser && currentUser.isAdmin()
-		const isPrincipalOrg = org.type === Organization.TYPE.PRINCIPAL_ORG
-
-		const superUsers = org.positions.filter(pos => pos.status !== Position.STATUS.INACTIVE && (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
+		const isAdvisorOrg = (organization.type === Organization.TYPE.ADVISOR_ORG)
+		const isPrincipalOrg = (organization.type === Organization.TYPE.PRINCIPAL_ORG)
 		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
+
+		const superUsers = organization.positions.filter(pos => pos.status !== Position.STATUS.INACTIVE && (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
 		const myOrg = currentUser && currentUser.position ? currentUser.position.organization : null
-		const isMyOrg = myOrg && (org.uuid === myOrg.uuid)
+		const isMyOrg = myOrg && (organization.uuid === myOrg.uuid)
 		const orgSubNav = (
 			<Nav>
 				<Scrollspy className="nav" currentClassName="active" offset={this.props.scrollspyOffset}
@@ -181,7 +181,7 @@ class BaseOrganizationShow extends Page {
 					<NavItem href="#supportedPositions">Supported positions</NavItem>
 					<NavItem href="#vacantPositions">Vacant positions</NavItem>
 					{!isPrincipalOrg && <NavItem href="#approvals">Approvals</NavItem>}
-					{org.isTaskEnabled() && <NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem> }
+					{organization.isTaskEnabled() && <NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem> }
 					<NavItem href="#reports">Reports</NavItem>
 				</Scrollspy>
 			</Nav>
@@ -190,119 +190,162 @@ class BaseOrganizationShow extends Page {
 			return <div className='loader'></div>
 		}
 		return (
-			<div>
-				<SubNav subnavElemId="myorg-nav">
-					{isMyOrg && orgSubNav}
-				</SubNav>
+			<Formik
+				enableReinitialize={true}
+				initialValues={organization}
+				{...myFormProps}
+			>
+			{({
+				values,
+			}) => {
+				const action = <div>
+					{isAdmin && <LinkTo organization={Organization.pathForNew({parentOrgUuid: organization.uuid})} button>
+						Create sub-organization
+					</LinkTo>}
 
-				<SubNav subnavElemId="org-nav">
-					{!isMyOrg && orgSubNav}
-				</SubNav>
+					{isSuperUser && <LinkTo organization={organization} edit button="primary" id="editButton">
+						Edit
+					</LinkTo>}
+				</div>
+				return <div>
+					<SubNav subnavElemId="myorg-nav">
+						{isMyOrg && orgSubNav}
+					</SubNav>
 
-				{currentUser.isSuperUser() && <div className="pull-right">
-					<GuidedTour
-						title="Take a guided tour of this organization's page."
-						tour={orgTour}
-						autostart={localStorage.newUser === 'true' && localStorage.hasSeenOrgTour !== 'true'}
-						onEnd={() => localStorage.hasSeenOrgTour = 'true'}
-					/>
-				</div>}
+					<SubNav subnavElemId="org-nav">
+						{!isMyOrg && orgSubNav}
+					</SubNav>
 
-				<RelatedObjectNotes notes={org.notes} relatedObject={{relatedObjectType: 'organizations', relatedObjectUuid: org.uuid}} />
-				<Breadcrumbs items={[[org.shortName || 'Organization', Organization.pathFor(org)]]} />
-				<Messages error={this.state.error} success={this.state.success} />
-
-				<Form formFor={org} static horizontal>
-					<Fieldset id="info" title={org.shortName} action={<div>
-						{isAdmin && <LinkTo organization={Organization.pathForNew({parentOrgUuid: org.uuid})} button>
-							Create sub-organization
-						</LinkTo>}
-
-						{isSuperUser && <LinkTo organization={org} edit button="primary" id="editButton">
-							Edit
-						</LinkTo>}
-					</div>}>
-
-						<Form.Field id="status" />
-
-						<Form.Field id="type">
-							{org.humanNameOfType()}
-						</Form.Field>
-
-						<this.LongNameWithLabel dictProps={orgSettings.longName} id="longName"/>
-
-						<this.IdentificationCodeFieldWithLabel dictProps={orgSettings.identificationCode} id="identificationCode"/>
-		
-						{org.parentOrg && org.parentOrg.uuid &&
-							<Form.Field id="parentOrg" label="Parent organization">
-								<LinkTo organization={org.parentOrg} >{org.parentOrg.shortName} {org.parentOrg.longName} {org.parentOrg.identificationCode}</LinkTo>
-							</Form.Field>
-						}
-
-						{org.isAdvisorOrg() &&
-							<Form.Field id="superUsers" label="Super users">
-								{superUsers.map(position =>
-									<p key={position.uuid}>
-										{position.person ?
-											<LinkTo person={position.person} />
-											:
-											<i><LinkTo position={position} />- (Unfilled)</i>
-										}
-									</p>
-								)}
-								{superUsers.length === 0 && <p><i>No super users</i></p>}
-							</Form.Field>
-						}
-
-						{org.childrenOrgs && org.childrenOrgs.length > 0 && <Form.Field id="childrenOrgs" label="Sub organizations">
-							<ListGroup>
-								{org.childrenOrgs.map(org =>
-									<ListGroupItem key={org.uuid} >
-										<LinkTo organization={org} >{org.shortName} {org.longName} {org.identificationCode}</LinkTo>
-									</ListGroupItem>
-								)}
-							</ListGroup>
-						</Form.Field>}
-					</Fieldset>
-
-					<OrganizationLaydown organization={org} />
-					{!isPrincipalOrg && <OrganizationApprovals organization={org} />}
-					{ org.isTaskEnabled() &&
-						<OrganizationTasks organization={org} tasks={tasks} goToPage={this.goToTasksPage}/>
-					}
-
-					<Fieldset id="reports" title={`Reports from ${org.shortName}`}>
-						<ReportCollection
-							paginatedReports={reports}
-							goToPage={this.goToReportsPage}
-							setReportsFilter={this.togglePendingApprovalFilter}
-							filterIsSet={this.reportsFilterIsSet()}
-							isSuperUser={isSuperUser}
+					{currentUser.isSuperUser() && <div className="pull-right">
+						<GuidedTour
+							title="Take a guided tour of this organization's page."
+							tour={orgTour}
+							autostart={localStorage.newUser === 'true' && localStorage.hasSeenOrgTour !== 'true'}
+							onEnd={() => localStorage.hasSeenOrgTour = 'true'}
 						/>
-					</Fieldset>
-				</Form>
-			</div>
+					</div>}
+
+					<RelatedObjectNotes notes={organization.notes} relatedObject={organization.uuid && {relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
+					<Breadcrumbs items={[[`Organization ${organization.shortName}`, Organization.pathFor(organization)]]} />
+					<Messages success={this.state.success} error={this.state.error} />
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={`Organization ${organization.shortName}`} action={action} />
+						<Fieldset>
+							<Field
+								name="status"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={Organization.humanNameOfStatus}
+							/>
+
+							<Field
+								name="type"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={Organization.humanNameOfType}
+							/>
+
+							<this.LongNameWithLabel
+								dictProps={orgSettings.longName}
+								name="longName"
+								component={FieldHelper.renderReadonlyField}
+							/>
+
+							<this.IdentificationCodeFieldWithLabel
+								dictProps={orgSettings.identificationCode}
+								name="identificationCode"
+								component={FieldHelper.renderReadonlyField}
+							/>
+
+							{organization.parentOrg && organization.parentOrg.uuid &&
+								<Field
+									name="parentOrg"
+									component={FieldHelper.renderReadonlyField}
+									label={Settings.fields.organization.parentOrg}
+									humanValue={organization.parentOrg &&
+										<LinkTo organization={organization.parentOrg}>
+											{organization.parentOrg.shortName} {organization.parentOrg.longName} {organization.parentOrg.identificationCode}
+										</LinkTo>
+									}
+								/>
+							}
+
+							{organization.isAdvisorOrg() &&
+								<Field
+									name="superUsers"
+									component={FieldHelper.renderReadonlyField}
+									label="Super users"
+									humanValue={
+										<React.Fragment>
+											{superUsers.map(position =>
+												<p key={position.uuid}>
+													{position.person
+														? <LinkTo person={position.person} />
+														: <i><LinkTo position={position} />- (Unfilled)</i>
+													}
+												</p>
+											)}
+											{superUsers.length === 0 && <p><i>No super users</i></p>}
+										</React.Fragment>
+									}
+								/>
+							}
+
+							{organization.childrenOrgs && organization.childrenOrgs.length > 0 &&
+								<Field
+									name="childrenOrgs"
+									component={FieldHelper.renderReadonlyField}
+									label="Sub organizations"
+									humanValue={
+										<ListGroup>
+											{organization.childrenOrgs.map(organization =>
+												<ListGroupItem key={organization.uuid} >
+													<LinkTo organization={organization} >{organization.shortName} {organization.longName} {organization.identificationCode}</LinkTo>
+												</ListGroupItem>
+											)}
+										</ListGroup>
+									}
+								/>
+							}
+						</Fieldset>
+
+						<OrganizationLaydown organization={organization} />
+						{!isPrincipalOrg && <OrganizationApprovals organization={organization} />}
+						{ organization.isTaskEnabled() &&
+							<OrganizationTasks organization={organization} tasks={tasks} goToPage={this.goToTasksPage}/>
+						}
+
+						<Fieldset id="reports" title={`Reports from ${organization.shortName}`}>
+							<ReportCollection
+								paginatedReports={reports}
+								goToPage={this.goToReportsPage}
+								setReportsFilter={this.togglePendingApprovalFilter}
+								filterIsSet={this.reportsFilterIsSet()}
+								isSuperUser={isSuperUser}
+							/>
+						</Fieldset>
+					</Form>
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	goToReportsPage(pageNum) {
-		this.reportsPageNum = pageNum
-		let reportQueryPart = this.getReportQueryPart(this.state.organization.uuid)
-		GQL.run([reportQueryPart]).then(data =>
-			this.setState({reports: data.reports})
-		)
+	goToReportsPage = (pageNum) => {
+		this.setState({reportsPageNum: pageNum}, () => {
+			const reportQueryPart = this.getReportQueryPart(this.state.organization.uuid)
+			GQL.run([reportQueryPart]).then(data =>
+				this.setState({reports: data.reports})
+			)
+		})
 	}
 
-	@autobind
-	goToTasksPage(pageNum) {
-		this.tasksPageNum = pageNum
-		let taskQueryPart = this.getTaskQueryPart(this.state.organization.uuid)
-		GQL.run([taskQueryPart]).then(data =>
-			this.setState({tasks: data.tasks})
-		)
+	goToTasksPage = (pageNum) => {
+		this.setState({tasksPageNum: pageNum}, () => {
+			const taskQueryPart = this.getTaskQueryPart(this.state.organization.uuid)
+			GQL.run([taskQueryPart]).then(data =>
+				this.setState({tasks: data.tasks})
+			)
+		})
 	}
-
 }
 
 

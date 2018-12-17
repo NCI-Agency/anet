@@ -1,202 +1,296 @@
 import PropTypes from 'prop-types'
-import React from 'react'
-import autobind from 'autobind-decorator'
+import React, { Component } from 'react'
 
 import {Button} from 'react-bootstrap'
 import DatePicker from 'react-16-bootstrap-date-picker'
 
-import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
-import Form from 'components/Form'
 import Messages from'components/Messages'
-import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import DictionaryField from '../../HOC/DictionaryField'
 
-import Settings from 'Settings'
 import API from 'api'
-import {Organization, Person, Position, Task} from 'models'
+import {Organization, Person, Task} from 'models'
+import Settings from 'Settings'
 
 import CALENDAR_ICON from 'resources/calendar.png'
+import ORGANIZATION_ICON from 'resources/organizations.png'
+import TASK_ICON from 'resources/tasks.png'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
+import moment from 'moment'
 import utils from 'utils'
 
-const customEnumButtons = (list) => {
-	let buttons = []
-	for (const key in list) {
-		if (list.hasOwnProperty(key)) {
-			let value = list[key]
-			buttons.push(<Button id="statusActiveButton" key={key} value={key}>{value}</Button>)
-		}
-	  }
-    return buttons
-}
-
-class BaseTaskForm extends ValidatableFormWrapper {
+class BaseTaskForm extends Component {
 	static propTypes = {
-		task: PropTypes.object.isRequired,
-		original: PropTypes.object.isRequired,
+		initialValues: PropTypes.object.isRequired,
+		title: PropTypes.string,
 		edit: PropTypes.bool,
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	constructor(props) {
-		super(props)
-		this.TaskCustomFieldRef1 = DictionaryField(Form.Field)
-		this.TaskCustomField = DictionaryField(Form.Field)
-		this.PlannedCompletionField = DictionaryField(Form.Field)
-		this.ProjectedCompletionField = DictionaryField(Form.Field)
-		this.TaskCustomFieldEnum1 = DictionaryField(Form.Field)
-		this.TaskCustomFieldEnum2 = DictionaryField(Form.Field)
+	static defaultProps = {
+		initialValues: new Task(),
+		title: '',
+		edit: false,
+	}
 
-		this.state = {
-			success: null,
-			error: null,
-			isBlocking: false,
-		}
+	statusButtons = [
+		{
+			id: 'statusActiveButton',
+			value: Task.STATUS.ACTIVE,
+			label: 'Active',
+		},
+		{
+			id: 'statusInactiveButton',
+			value: Task.STATUS.INACTIVE,
+			label: 'Inactive'
+		},
+	]
+	TaskCustomFieldRef1 = DictionaryField(Field)
+	TaskCustomField = DictionaryField(Field)
+	PlannedCompletionField = DictionaryField(Field)
+	ProjectedCompletionField = DictionaryField(Field)
+	TaskCustomFieldEnum1 = DictionaryField(Field)
+	TaskCustomFieldEnum2 = DictionaryField(Field)
+	state = {
+		error: null,
 	}
 
 	render() {
-		const { task, edit, currentUser } = this.props
-		const taskShortLabel = Settings.fields.task.shortLabel
-		const customFieldRef1 = Settings.fields.task.customFieldRef1
-		const customFieldEnum1 = Settings.fields.task.customFieldEnum1
-		const customFieldEnum2 = Settings.fields.task.customFieldEnum2
-		const plannedCompletion = Settings.fields.task.plannedCompletion
-		const projectedCompletion = Settings.fields.task.projectedCompletion
-		const orgSearchQuery = {status: Organization.STATUS.ACTIVE}
+		const { currentUser, edit, title, ...myFormProps } = this.props
 
-		orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
-		if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
-			orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
-			orgSearchQuery.parentOrgRecursively = true
+		const orgSearchQuery = {
+			status: Organization.STATUS.ACTIVE,
+			type: Organization.TYPE.ADVISOR_ORG,
 		}
-		const {ValidatableForm, RequiredField} = this
+
+		if (currentUser && currentUser.isSuperUser() && !currentUser.isAdmin()) {
+			Object.assign(orgSearchQuery, {
+				parentOrgUuid: currentUser.position.organization.uuid,
+				parentOrgRecursively: true,
+			})
+		}
 		return (
-			<div>
-				<NavigationWarning isBlocking={this.state.isBlocking} />
-
-				<Messages error={this.state.error} success={this.state.success} />
-
-				<ValidatableForm
-					formFor={task}
-					onChange={this.onChange}
-					onSubmit={this.onSubmit}
-					submitText={`Save ${taskShortLabel}`}
-					horizontal>
-
-					<Fieldset title={edit ?
-						`Edit ${taskShortLabel} ${task.shortName}`
-						:
-						`Create a new ${taskShortLabel}`
-					}>
-						<RequiredField id="shortName" label={`${taskShortLabel} number`} />
-						<RequiredField id="longName" label={`${taskShortLabel} description`} />
-
-						<RequiredField id="status" >
-							<ButtonToggleGroup>
-								<Button id="statusActiveButton" value={ Task.STATUS.ACTIVE }>Active</Button>
-								<Button id="statusInactiveButton" value={ Task.STATUS.INACTIVE }>Inactive</Button>
-							</ButtonToggleGroup>
-						</RequiredField>
-
-						<Form.Field id="responsibleOrg" label="Responsible organization">
-							<Autocomplete
-								objectType={Organization}
-								valueKey="shortName"
-								fields={Organization.autocompleteQuery}
-								placeholder={`Select a responsible organization for this ${taskShortLabel}`}
-								queryParams={orgSearchQuery}
+			<Formik
+				enableReinitialize={true}
+				onSubmit={this.onSubmit}
+				validationSchema={Task.yupSchema}
+				isInitialValid={() => Task.yupSchema.isValidSync(this.props.initialValues)}
+				{...myFormProps}
+			>
+			{({
+				handleSubmit,
+				isSubmitting,
+				isValid,
+				dirty,
+				errors,
+				setFieldValue,
+				values,
+				submitForm
+			}) => {
+				const action = <div>
+					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {Settings.fields.task.shortLabel}</Button>
+				</div>
+				return <div>
+					<NavigationWarning isBlocking={dirty} />
+					<Messages error={this.state.error} />
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={title} action={action} />
+						<Fieldset>
+							<Field
+								name="shortName"
+								label={Settings.fields.task.shortName}
+								component={FieldHelper.renderInputField}
 							/>
-						</Form.Field>
 
-						{customFieldRef1 &&
-							<this.TaskCustomFieldRef1 dictProps={customFieldRef1} id="customFieldRef1">
-								<Autocomplete
-									objectType={Task}
-									valueKey="shortName"
-									fields={Task.autocompleteQuery}
-									template={Task.autocompleteTemplate}
-									placeholder={customFieldRef1.placeholder}
-									queryParams={{}}
+							<Field
+								name="longName"
+								label={Settings.fields.task.longName}
+								component={FieldHelper.renderInputField}
+							/>
+
+							<Field
+								name="status"
+								component={FieldHelper.renderButtonToggleGroup}
+								buttons={this.statusButtons}
+							/>
+
+							<Field
+								name="responsibleOrg"
+								label={Settings.fields.task.responsibleOrg}
+								component={FieldHelper.renderSpecialField}
+								onChange={value => setFieldValue('responsibleOrg', value)}
+								addon={ORGANIZATION_ICON}
+								widget={
+									<Autocomplete
+										objectType={Organization}
+										valueKey="shortName"
+										fields={Organization.autocompleteQuery}
+										placeholder={`Select a responsible organization for this ${Settings.fields.taskSettings.fields.task.shortLabel}`}
+										queryParams={orgSearchQuery}
+									/>
+								}
+							/>
+
+							{Settings.fields.task.customFieldRef1 &&
+								<this.TaskCustomFieldRef1
+									dictProps={Settings.fields.task.customFieldRef1}
+									name="customFieldRef1"
+									component={FieldHelper.renderSpecialField}
+									onChange={value => setFieldValue('customFieldRef1', value)}
+									addon={TASK_ICON}
+									widget={
+										<Autocomplete
+											objectType={Task}
+											valueKey="shortName"
+											fields={Task.autocompleteQuery}
+											template={Task.autocompleteTemplate}
+											placeholder={Settings.fields.task.customFieldRef1.placeholder}
+											queryParams={{}}
+										/>
+									}
 								/>
-							</this.TaskCustomFieldRef1>
-						}
+							}
 
-						<this.TaskCustomField dictProps={Settings.fields.task.customField} id="customField"/>
+							<this.TaskCustomField
+								dictProps={Settings.fields.task.customField}
+								name="customField"
+								component={FieldHelper.renderInputField}
+							/>
 
-						{plannedCompletion &&
-							<this.PlannedCompletionField dictProps={plannedCompletion} id="plannedCompletion" addon={CALENDAR_ICON}>
-								<DatePicker showTodayButton placeholder={plannedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
-							</this.PlannedCompletionField>
-						}
+							{Settings.fields.task.plannedCompletion &&
+								<this.PlannedCompletionField
+									dictProps={Settings.fields.task.plannedCompletion}
+									name="plannedCompletion"
+									component={FieldHelper.renderSpecialField}
+									value={values.plannedCompletion && moment(values.plannedCompletion).format()}
+									onChange={(value, formattedValue) => setFieldValue('plannedCompletion', value)}
+									addon={CALENDAR_ICON}
+									widget={
+										<DatePicker
+											showTodayButton
+											placeholder={Settings.fields.task.plannedCompletion.placeholder}
+											dateFormat="DD/MM/YYYY"
+											showClearButton={false}
+										/>
+									}
+								/>
+							}
 
-						{projectedCompletion &&
-							<this.ProjectedCompletionField dictProps={projectedCompletion} id="projectedCompletion" addon={CALENDAR_ICON}>
-								<DatePicker showTodayButton placeholder={projectedCompletion.placeholder} dateFormat="DD/MM/YYYY" showClearButton={false} />
-							</this.ProjectedCompletionField>
-						}
+							{Settings.fields.task.projectedCompletion &&
+								<this.ProjectedCompletionField
+									dictProps={Settings.fields.task.projectedCompletion}
+									name="projectedCompletion"
+									component={FieldHelper.renderSpecialField}
+									value={values.projectedCompletion && moment(values.projectedCompletion).format()}
+									onChange={(value, formattedValue) => setFieldValue('projectedCompletion', value)}
+									addon={CALENDAR_ICON}
+									widget={
+										<DatePicker
+											showTodayButton
+											placeholder={Settings.fields.task.projectedCompletion.placeholder}
+											dateFormat="DD/MM/YYYY"
+											showClearButton={false}
+										/>
+									}
+								/>
+							}
 
-						{customFieldEnum1 &&
-							<this.TaskCustomFieldEnum1  dictProps={Object.without(customFieldEnum1, 'enum')} id="customFieldEnum1">
-								<ButtonToggleGroup>
-									{customEnumButtons(customFieldEnum1.enum)}
-								</ButtonToggleGroup>
-							</this.TaskCustomFieldEnum1>
-						}
+							{Settings.fields.task.customFieldEnum1 &&
+								<this.TaskCustomFieldEnum1
+									dictProps={Object.without(Settings.fields.task.customFieldEnum1, 'enum')}
+									name="customFieldEnum1"
+									component={FieldHelper.renderButtonToggleGroup}
+									buttons={this.customEnumButtons(Settings.fields.task.customFieldEnum1.enum)}
+								/>
+							}
 
-						{customFieldEnum2 &&
-							<this.TaskCustomFieldEnum2  dictProps={Object.without(customFieldEnum2, 'enum')} id="customFieldEnum2">
-								<ButtonToggleGroup>
-									{customEnumButtons(customFieldEnum2.enum)}
-								</ButtonToggleGroup>
-							</this.TaskCustomFieldEnum2>
-						}
-
+							{Settings.fields.task.customFieldEnum2 &&
+								<this.TaskCustomFieldEnum2
+									dictProps={Object.without(Settings.fields.task.customFieldEnum2, 'enum')}
+									name="customFieldEnum2"
+									component={FieldHelper.renderButtonToggleGroup}
+									buttons={this.customEnumButtons(Settings.fields.task.customFieldEnum2.enum)}
+								/>
+							}
 						</Fieldset>
-				</ValidatableForm>
-			</div>
+
+						<div className="submit-buttons">
+							<div>
+								<Button onClick={this.onCancel}>Cancel</Button>
+							</div>
+							<div>
+								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {Settings.fields.task.shortLabel}</Button>
+							</div>
+						</div>
+					</Form>
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	onChange() {
-		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.props.task, this.props.original),
+	customEnumButtons = (list) => {
+		const buttons = []
+		for (const key in list) {
+			if (list.hasOwnProperty(key)) {
+				buttons.push({
+					id: key,
+					value: key,
+					label: list[key],
+				})
+			}
+		}
+	    return buttons
+	}
+
+	onCancel = () => {
+		this.props.history.goBack()
+	}
+
+	onSubmit = (values, form) => {
+		return this.save(values, form)
+			.then(response => this.onSubmitSuccess(response, values, form))
+			.catch(error => {
+				this.setState({error})
+				jumpToTop()
+			})
+	}
+
+	onSubmitSuccess = (response, values, form) => {
+		const { edit } = this.props
+		const operation = edit ? 'updateTask' : 'createTask'
+		const task = new Task({uuid: (response[operation].uuid ? response[operation].uuid : this.props.initialValues.uuid)})
+		// After successful submit, reset the form in order to make sure the dirty
+		// prop is also reset (otherwise we would get a blocking navigation warning)
+		form.resetForm()
+		this.props.history.replace(Task.pathForEdit(task))
+		this.props.history.push({
+			pathname: Task.pathFor(task),
+			state: {
+				success: 'Task saved',
+			}
 		})
 	}
 
-	@autobind
-	onSubmit(event) {
-		let {task, edit} = this.props
+	save = (values, form) => {
+		const task = new Task(values)
 		task.responsibleOrg = utils.getReference(task.responsibleOrg)
 		task.customFieldRef1 = utils.getReference(task.customFieldRef1)
+		const { edit } = this.props
 		const operation = edit ? 'updateTask' : 'createTask'
 		let graphql = operation + '(task: $task)'
 		graphql += edit ? '' : ' { uuid }'
 		const variables = { task: task }
 		const variableDef = '($task: TaskInput!)'
-		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
-			.then(data => {
-				if (data[operation].uuid) {
-					task.uuid = data[operation].uuid
-				}
-				this.props.history.replace(Task.pathForEdit(task))
-				this.props.history.push({
-					pathname: Task.pathFor(task),
-					state: {
-						success: 'Task saved',
-					}
-				})
-			}).catch(error => {
-				this.setState({success: null, error: error})
-				jumpToTop()
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
 }
 

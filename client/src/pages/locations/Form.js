@@ -1,14 +1,14 @@
 import PropTypes from 'prop-types'
-import React from 'react'
+import React, { Component } from 'react'
+
 import {Button} from 'react-bootstrap'
-import autobind from 'autobind-decorator'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import Form from 'components/Form'
-import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Messages from 'components/Messages'
 import Leaflet from 'components/Leaflet'
-import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
 
 import API from 'api'
 import {Location} from 'models'
@@ -17,40 +17,37 @@ import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
 
-class LocationForm extends ValidatableFormWrapper {
+class LocationForm extends Component {
 	static propTypes = {
-		anetLocation: PropTypes.object.isRequired,
-		original: PropTypes.object.isRequired,
+		initialValues: PropTypes.object.isRequired,
+		title: PropTypes.string,
 		edit: PropTypes.bool,
 	}
 
-	constructor(props) {
-		super(props)
+	static defaultProps = {
+		initialValues: new Location(),
+		title: '',
+		edit: false,
+	}
 
-		this.state = {
-			success: null,
-			error: null,
-			isBlocking: false,
-		}
+	statusButtons = [
+		{
+			id: 'statusActiveButton',
+			value: Location.STATUS.ACTIVE,
+			label: 'Active',
+		},
+		{
+			id: 'statusInactiveButton',
+			value: Location.STATUS.INACTIVE,
+			label: 'Inactive'
+		},
+	]
+	state = {
+		error: null,
 	}
 
 	render() {
-		const location = this.props.anetLocation
-		const marker = {
-			id: location.uuid || 0,
-			name: location.name || '',
-			draggable: true,
-			onMove: this.onMarkerMove
-		}
-		if (Location.hasCoordinates(location)) {
-			Object.assign(marker, {
-				lat: location.lat,
-				lng: location.lng,
-			})
-		}
-		let edit = this.props.edit
-
-		const {ValidatableForm, RequiredField} = this
+		const { edit, title, ...myFormProps } = this.props
 
 		function Coordinate(props) {
 			const coord = typeof props.coord === 'number' ? Math.round(props.coord * 1000) / 1000 : '?'
@@ -58,81 +55,129 @@ class LocationForm extends ValidatableFormWrapper {
 		}
 
 		return (
-			<div>
-				<NavigationWarning isBlocking={this.state.isBlocking} />
+			<Formik
+				enableReinitialize={true}
+				onSubmit={this.onSubmit}
+				validationSchema={Location.yupSchema}
+				isInitialValid={() => Location.yupSchema.isValidSync(this.props.initialValues)}
+				{...myFormProps}
+			>
+			{({
+				handleSubmit,
+				isSubmitting,
+				isValid,
+				dirty,
+				errors,
+				setFieldValue,
+				values,
+				submitForm
+			}) => {
+				const marker = {
+					id: values.uuid || 0,
+					name: values.name || '',
+					draggable: true,
+					onMove: (event) => this.onMarkerMove(event, setFieldValue)
+				}
+				if (Location.hasCoordinates(values)) {
+					Object.assign(marker, {
+						lat: values.lat,
+						lng: values.lng,
+					})
+				}
+				const action = <div>
+					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Location</Button>
+				</div>
+				return <div>
+					<NavigationWarning isBlocking={dirty} />
+					<Messages error={this.state.error} />
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={title} action={action} />
+						<Fieldset>
+							<Field
+								name="name"
+								component={FieldHelper.renderInputField}
+							/>
 
-				<Messages success={this.state.success} error={this.state.error} />
+							<Field
+								name="status"
+								component={FieldHelper.renderButtonToggleGroup}
+								buttons={this.statusButtons}
+							/>
 
-				<ValidatableForm formFor={location} onChange={this.onChange} onSubmit={this.onSubmit} horizontal submitText="Save location">
-					{this.state.error && <fieldset><p>There was a problem saving this location</p><p>{this.state.error}</p></fieldset>}
+							<Field
+								name="location"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={
+									<React.Fragment>
+										<Coordinate coord={values.lat} />, <Coordinate coord={values.lng} />
+									</React.Fragment>
+								}
+							/>
+						</Fieldset>
 
-					<Fieldset title={edit ? `Edit Location ${location.name}` : "Create new Location"}>
-						<RequiredField id="name" />
+						<h3>Drag the marker below to set the location</h3>
+						<Leaflet markers={[marker]} />
 
-						<Form.Field id="status" >
-							<ButtonToggleGroup>
-								<Button id="statusActiveButton" value={ Location.STATUS.ACTIVE }>Active</Button>
-								<Button id="statusInactiveButton" value={ Location.STATUS.INACTIVE }>Inactive</Button>
-							</ButtonToggleGroup>
-						</Form.Field>
-
-						<Form.Field type="static" id="location">
-							<Coordinate coord={location.lat} />, <Coordinate coord={location.lng} />
-						</Form.Field>
-					</Fieldset>
-
-					<h3>Drag the marker below to set the location</h3>
-					<Leaflet markers={[marker]} />
-
-				</ValidatableForm>
-			</div>
+						<div className="submit-buttons">
+							<div>
+								<Button onClick={this.onCancel}>Cancel</Button>
+							</div>
+							<div>
+								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Location</Button>
+							</div>
+						</div>
+					</Form>
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	onMarkerMove(event) {
-		let latLng = event.latlng
-		let loc = this.props.anetLocation
-		loc.lat = latLng.lat
-		loc.lng = latLng.lng
-		this.onChange()
+	onMarkerMove = (event, setFieldValue) => {
+		const latLng = event.latlng
+		setFieldValue('lat', latLng.lat)
+		setFieldValue('lng', latLng.lng)
 	}
 
-	@autobind
-	onChange() {
-		this.setState({
-			isBlocking: this.formHasUnsavedChanges(this.props.anetLocation, this.props.original),
-		})
+	onCancel = () => {
+		this.props.history.goBack()
 	}
 
-	@autobind
-	onSubmit(event) {
-		let loc = this.props.anetLocation
-		let edit = this.props.edit
-		const operation = edit ? 'updateLocation' : 'createLocation'
-		let graphql = operation + '(location: $location)'
-		graphql += edit ? '' : ' { uuid }'
-		const variables = { location: loc }
-		const variableDef = '($location: LocationInput!)'
-		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
-			.then(data => {
-				if (data[operation].uuid) {
-					loc.id = data[operation].uuid
-				}
-				this.props.history.replace(Location.pathForEdit(loc))
-				this.props.history.push({
-					pathname: Location.pathFor(loc),
-					state: {
-						success: 'Location saved',
-					}
-				})
-			}).catch(error => {
-				this.setState({success: null, error: error})
+	onSubmit = (values, form) => {
+		return this.save(values, form)
+			.then(response => this.onSubmitSuccess(response, values, form))
+			.catch(error => {
+				this.setState({error})
 				jumpToTop()
 			})
 	}
 
+	onSubmitSuccess = (response, values, form) => {
+		const { edit } = this.props
+		const operation = edit ? 'updateLocation' : 'createLocation'
+		const location = new Location({uuid: (response[operation].uuid ? response[operation].uuid : this.props.initialValues.uuid)})
+		// After successful submit, reset the form in order to make sure the dirty
+		// prop is also reset (otherwise we would get a blocking navigation warning)
+		form.resetForm()
+		this.props.history.replace(Location.pathForEdit(location))
+		this.props.history.push({
+			pathname: Location.pathFor(location),
+			state: {
+				success: 'Location saved',
+			}
+		})
+	}
+
+	save = (values, form) => {
+		const location = new Location(values)
+		const { edit } = this.props
+		const operation = edit ? 'updateLocation' : 'createLocation'
+		let graphql = operation + '(location: $location)'
+		graphql += edit ? '' : ' { uuid }'
+		const variables = { location: location }
+		const variableDef = '($location: LocationInput!)'
+		return API.mutation(graphql, variables, variableDef)
+	}
 }
 
 export default withRouter(LocationForm)

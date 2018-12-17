@@ -10,13 +10,12 @@ definitions:
   labeledField:
     type: object
     additionalProperties: true
+    required: [label]
     properties:
       label:
         type: string
         title: The label for this field
         description: Used in the UI where a label for the field is shown.
-    required:
-    - label
 
 # definition for fields that allow free-form entry
   inputField:
@@ -42,41 +41,47 @@ definitions:
           examples: 
             - black: Black
               white: White
-      required:
-      - enum
+      required: [enum]
 
 #########################################################
 ### schema root
 #########################################################
 type: object
 additionalProperties: false
+required: [SUPPORT_EMAIL_ADDR, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
     title: The support email address
     description: The email address where support requests can be sent.
-    examples:
-    - support@example.com
+    examples: [support@example.com]
   fields:
     type: object
     additionalProperties: false
+    required: [task, report, person, position, organization, advisor, principal, superUser, administrator]
     properties:
+
       task:
         type: object
         additionalProperties: false
+        required: [shortLabel, shortName, longLabel, longName, responsibleOrg]
         properties:
           shortLabel:
             type: string
             title: The short label for this field
             description: Used in the UI where a short label for tasks is shown.
-            examples:
-            - Task
+            examples: [Task]
+          shortName:
+            type: string
+            examples: [Task number]
           longLabel:
             type: string
             title: The long label for this field
             description: Used in the UI where a long label for tasks is shown.
-            examples:
-            - Tasks and Milestones
+            examples: [Tasks and Milestones]
+          longName:
+            type: string
+            examples: [Tasks description]
           projectedCompletion: 
             "$ref": "#/definitions/inputField"
           plannedCompletion:
@@ -89,13 +94,71 @@ properties:
             "$ref": "#/definitions/choiceField"
           customFieldEnum2:
             "$ref": "#/definitions/choiceField"
-        required:
-        - shortLabel
-        - longLabel
+          responsibleOrg:
+            type: string
+            title: The label for a task's responsible organization
+            description: Used in the UI where a label for a task's responsible organization is shown.
+            examples: [Responsible organization]
+
+      report:
+        type: object
+        additionalProperties: false
+        required: [intent,atmosphere,atmosphereDetails,cancelled,reportTags]
+        properties:
+          intent:
+            type: string
+            title: The label for a report's intent
+            description: Used in the UI where a report's intent is shown.
+          atmosphere:
+            type: string
+            title: The label for a report's athmosphere
+            description: Used in the UI where a report's athmosphere is shown.
+          atmosphereDetails:
+            type: string
+            title: The label for report's athmosphere details
+            description: Used in the UI where a report's athmosphere details are shown.
+          cancelled:
+            type: string
+            title: The label for a report's cancelled
+            description: Used in the UI where a report's cancelled is shown.
+          reportTags:
+            type: string
+            title: The label for report's tags
+            description: Used in the UI where report's tags are shown.
+
       person:
         type: object
         additionalProperties: false
+        required: [firstName, lastName, domainUsername, emailAddress, phoneNumber, country, rank, ranks, gender, endOfTourDate]
         properties:
+          firstName:
+            type: string
+            title: The label for a person's first name
+            description: Used in the UI where a person's first name is shown.
+          lastName:
+            type: string
+            title: The label for a person's last name
+            description: Used in the UI where a person's last name is shown.
+          domainUsername:
+            type: string
+            title: The label for a person's domain username
+            description: Used in the UI where a person's domain username is shown.
+          emailAddress:
+            type: string
+            title: The label for a person's email address
+            description: Used in the UI where a person's email address is shown.
+          phoneNumber:
+            type: string
+            title: The label for a person's phone number
+            description: Used in the UI where a person's phone number is shown.
+          country:
+            type: string
+            title: The label for a person's country
+            description: Used in the UI where a person's country is shown.
+          rank:
+            type: string
+            title: The label for a person's rank
+            description: Used in the UI where a person's rank is shown.
           ranks:
             type: array
             uniqueItems: true
@@ -104,28 +167,56 @@ properties:
               type: string
               title: The list of possible ranks
               description: Used in the UI where a rank can be selected for a person.
-              examples:
-              - CIV
-              - CTR
-              - OF-1
-              - OF-2
-              - OF-3
-        required:
-        - ranks
+              examples: [CIV, CTR, OF-1, OF-2, OF-3]
+          gender:
+            type: string
+            title: The label for a person's gender
+            description: Used in the UI where a person's gender is shown.
+          endOfTourDate:
+            type: string
+            title: The label for a person's end of tour date
+            description: Used in the UI where a person's end of tour date is shown.
+
+      position:
+        type: object
+        additionalProperties: false
+        required: [name]
+        properties:
+          name:
+            type: string
+            title: The label for a position's name
+            description: Used in the UI where a position's name is shown.
+
+      organization:
+        type: object
+        additionalProperties: false
+        required: [shortName, parentOrg]
+        properties:
+          shortName:
+            type: string
+            title: The label for an organization's short name
+            description: Used in the UI where an organization's short name is shown.
+          parentOrg:
+            type: string
+            title: The label for an organization's parent organization
+            description: Used in the UI where an organization's parent organization is shown.
+
       advisor:
         type: object
         additionalProperties: false
+        required: [person, position, org]        
         properties:
+
           person:
             type: object
             additionalProperties: false
+            required: [name, countries]
             properties:
               name:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a person inside an advisor organization is shown.
-                examples:
-                - NATO Member
+                examples: [NATO Member]
               countries:
                 type: array
                 uniqueItems: true
@@ -135,73 +226,56 @@ properties:
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for
                     a person inside an advisor organization.
-                  examples:
-                  - Australia
-                  - Finland
-                  - Georgia
-                  - Greece
-                  - Sweden
-                  - Turkey
-            required:
-            - name
-            - countries
+                  examples: [Australia, Finland, Georgia, Greece, Sweden, Turkey]
+
           position:
             type: object
             additionalProperties: false
+            required: [name, type, code]
             properties:
               name:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a position inside an advisor organization is shown.
-                examples:
-                - NATO Billet
+                examples: [NATO Billet]
               type:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of an advisor position.
-                examples:
-                - ANET User
+                examples: [ANET User]
               code:
                 "$ref": "#/definitions/inputField"
-            required:
-            - name
-            - type
-            - code
+
           org:
             type: object
             additionalProperties: false
+            required: [name, allOrgName, longName]
             properties:
               name:
                 type: string
                 title: The name of this field
                 description: Used in the UI where an advisor organization is shown.
-                examples:
-                - Advisor Organization
+                examples: [Advisor Organization]
               allOrgName:
                 type: string
                 title: The name used to represent 'all organizations'
                 description: Used in the UI to refer to all organizations collectively.
-                examples:
-                - All EFs / AOs
+                examples: [All EFs / AOs]
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:
                 "$ref": "#/definitions/inputField"
-            required:
-            - name
-            - allOrgName
-            - longName
-        required:
-        - person
-        - position
-        - org
+
       principal:
         type: object
         additionalProperties: false
+        required: [person, position, org]
         properties:
+
           person:
             type: object
             additionalProperties: false
+            required: [name, countries]
             properties:
               name:
                 type: string
@@ -217,79 +291,68 @@ properties:
                   type: string
                   title: The list of possible countries
                   description: Used in the UI where a country can be selected for a person inside a principal organization.
-                  examples:
-                  - Netherlands
-            required:
-            - name
-            - countries
+                  examples: [Netherlands]
+
           position:
             type: object
             additionalProperties: false
+            required: [name, type, code]
             properties:
               name:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a position inside a principal organization is shown.
-                examples:
-                - Afghan Tashkil
+                examples: [Afghan Tashkil]
               type:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a principal position.
-                examples:
-                - Afghan Partner
+                examples: [Afghan Partner]
               code:
                 "$ref": "#/definitions/inputField"
-            required:
-            - name
-            - type
-            - code
+
           org:
             type: object
             additionalProperties: false
+            required: [name, longName]
             properties:
               name:
                 type: string
                 title: The name of this field
                 description: Used in the UI where a principal organization is shown.
-                examples:
-                - Afghan Government Organization
+                examples: [Afghan Government Organization]
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:
                 "$ref": "#/definitions/inputField"
-            required:
-            - name
-            - longName
-        required:
-        - person
-        - position
-        - org
+
       superUser:
         type: object
         additionalProperties: false
+        required: [position]
         properties:
+
           position:
             type: object
             additionalProperties: false
+            required: [type]
             properties:
               type:
                 type: string
                 title: The permissions type of this field
                 description: Used in the UI for the type/permissions of a super user position.
-                examples:
-                - ANET Super User
-            required:
-            - type
-        required:
-        - position
+                examples: [ANET Super User]
+
       administrator:
         type: object
         additionalProperties: false
+        required: [position]
         properties:
+
           position:
             type: object
             additionalProperties: false
+            required: [type]
             properties:
               type:
                 type: string
@@ -297,17 +360,7 @@ properties:
                 description: Used in the UI for the type/permissions of an administrator position.
                 examples:
                 - ANET Administrator
-            required:
-            - type
-        required:
-        - position
-    required:
-    - task
-    - person
-    - advisor
-    - principal
-    - superUser
-    - administrator
+
   pinned_ORGs:
     type: array
     uniqueItems: true
@@ -315,8 +368,8 @@ properties:
       type: string
       title: The list of pinned organizations
       description: A list of organization that are pinned at the top of insights (e.g. rollups).
-      examples:
-      - Key Leader Engagement
+      examples: [Key Leader Engagement]
+
   non_reporting_ORGs:
     type: array
     uniqueItems: true
@@ -324,8 +377,8 @@ properties:
       type: string
       title: The list of non-reporting organizations
       description: A list of organizations that are considered non-reporting and as such will not be shown in insights.
-      examples:
-      - ANET Administrators
+      examples: [ANET Administrators]
+
   tasking_ORGs:
     type: array
     uniqueItems: true
@@ -333,8 +386,8 @@ properties:
       type: string
       title: The list of tasking organizations
       description: When defined, indicates which organizations maintain tasks. When not set, all organizations may contain tasks
-      examples:
-      - EF 2.2
+      examples: [EF 2.2]
+
   domainNames:
     type: array
     uniqueItems: true
@@ -343,36 +396,35 @@ properties:
       type: string
       title: The list of possible (email) domain names
       description: Valid email domain names for this ANET instance; may contain wildcards.
-      examples:
-      - "*.nato.int"
-      - dds.mil
+      examples: ["*.nato.int", dds.mil]
+
   imagery:
     type: object
     additionalProperties: false
     properties:
+
       mapOptions:
         type: object
+        required: [homeView]
         properties:
           crs:
             type: string
           homeView:
             type: object
+            required: [location, zoomLevel]
             properties:
               location:
                 type: array
               zoomLevel:
                 type: number
             additionalProperties: false
-            required:
-              - location
-              - zoomLevel
           leafletOptions:
             type: object
             additionalProperties: true
         additionalProperties: false
-        required:
-          - homeView
+
       geoSearcher:
+        required: [provider]
         properties:
           provider:
             type: string
@@ -381,8 +433,7 @@ properties:
               - OSM
           url:
             type: string
-        required:
-          - provider
+
       baseLayers:
         type: array
         uniqueItems: true
@@ -390,6 +441,7 @@ properties:
         items:
           type: object
           additionalProperties: false
+          required: [name, type]
           properties:
             name: 
               type: string
@@ -402,13 +454,3 @@ properties:
             options:
               type: object
               additionalProperties: true
-          required:
-            - name
-            - type
-required:
-- SUPPORT_EMAIL_ADDR
-- fields
-- pinned_ORGs
-- non_reporting_ORGs
-- domainNames
-- imagery

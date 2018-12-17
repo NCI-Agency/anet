@@ -21,6 +21,7 @@ test('Move someone in and out of a position', async t => {
 
     let $removePersonButton = await $('.remove-person-from-position')
     await $removePersonButton.click()
+    await t.context.driver.wait(until.stalenessOf($removePersonButton))
 
     await assertElementText(t, await $('p.not-assigned-to-position-message'), 'ERINSON, Erin is not assigned to a position.')
     
@@ -49,7 +50,7 @@ test('Move someone in and out of a position', async t => {
     let currentPathname = await t.context.getCurrentPathname()
     t.regex(currentPathname, /positions\/[0-9a-f-]+/, 'URL is updated to positions/show page')
 
-    await assertElementText(t, await $('.legend .title-text'), positionName)
+    await assertElementText(t, await $('.legend .title-text'), `Position ${positionName}`)
     await assertElementText(t, await $('.position-empty-message'), `${positionName} is currently empty.`)
 
     let $changeAssignedPersonButton = await $('button.change-assigned-person')

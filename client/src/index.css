@@ -540,14 +540,14 @@ table hr.attendee-divider {
 	padding-left: 1rem;
 }
 
-.report-form fieldset:last-child {
+.form-horizontal fieldset:last-child {
 	margin-bottom: 10px;
 }
 
 .submit-buttons {
 	display: flex;
 	align-items: flex-end;
-	margin: 5rem 0 5rem 0;
+	margin-bottom: 10px;
 }
 
 .submit-buttons > div {
@@ -563,6 +563,14 @@ table hr.attendee-divider {
 .submit-buttons .btn-primary {
 	font-weight: bold;
 	height: 38px;
+}
+
+.submit-buttons :not(.btn-group) .btn + .btn {
+	margin-left: 1rem;
+}
+
+.submit-buttons .btn:last-child {
+	margin-right: 0.5rem;
 }
 
 .report-form .report-details {

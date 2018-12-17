@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import autobind from 'autobind-decorator'
 
-import Form from 'components/Form'
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
@@ -27,17 +28,20 @@ class BaseLocationShow extends Page {
 
 	static modelName = 'Location'
 
+	state = {
+		location: new Location(),
+		reportsPageNum: 0,
+		success: null,
+		error: null,
+	}
+
 	constructor(props) {
 		super(props)
-		this.state = {
-			location: new Location(),
-			reportsPageNum: 0
-		}
 		setMessages(props,this.state)
 	}
 
 	fetchData(props) {
-		let reportsQuery = new GQL.Part(/* GraphQL */`
+		const reportsQuery = new GQL.Part(/* GraphQL */`
 			reports: reportList(query: $reportsQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
@@ -49,7 +53,7 @@ class BaseLocationShow extends Page {
 			locationUuid: props.match.params.uuid,
 		})
 
-		let locationQuery = new GQL.Part(/* GraphQL */`
+		const locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
 				uuid, name, lat, lng, status
 				${GRAPHQL_NOTES_FIELDS}
@@ -65,41 +69,79 @@ class BaseLocationShow extends Page {
 	}
 
 	render() {
-		let {location, reports} = this.state
-		const { currentUser } = this.props
-		let markers=[]
-		let latlng = 'None'
-		if (Location.hasCoordinates(location)) {
-			latlng = location.lat + ', ' + location.lng
-			markers.push({name: location.name, lat: location.lat, lng: location.lng})
+		const { location, reports } = this.state
+		const { currentUser, ...myFormProps } = this.props
+
+		const canEdit = currentUser.isSuperUser()
+
+		function Coordinate(props) {
+			const coord = typeof props.coord === 'number' ? Math.round(props.coord * 1000) / 1000 : '?'
+			return <span>{coord}</span>
 		}
 
 		return (
-			<div>
-				<RelatedObjectNotes notes={location.notes} relatedObject={{relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
-				<Breadcrumbs items={[[location.name || 'Location', Location.pathFor(location)]]} />
-				<Messages success={this.state.success} error={this.state.error} />
+			<Formik
+				enableReinitialize={true}
+				initialValues={location}
+				{...myFormProps}
+			>
+			{({
+				values,
+			}) => {
+				const marker = {
+					id: location.uuid || 0,
+					name: location.name || '',
+				}
+				if (Location.hasCoordinates(location)) {
+					Object.assign(marker, {
+						lat: location.lat,
+						lng: location.lng,
+					})
+				}
+				const action = canEdit && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>
+				return <div>
+					<RelatedObjectNotes notes={location.notes} relatedObject={location.uuid && {relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
+					<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)]]} />
+					<Messages success={this.state.success} error={this.state.error} />
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={`Location ${location.name}`} action={action} />
+						<Fieldset>
+							<Field
+								name="name"
+								component={FieldHelper.renderReadonlyField}
+							/>
 
-				<Form static formFor={location} horizontal >
-					<Fieldset title={location.name} action={currentUser.isSuperUser() && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>} >
-						<Form.Field id="status" />
+							<Field
+								name="status"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={Location.humanNameOfStatus}
+							/>
 
-						<Form.Field id="latlng" value={latlng} label="Lat/Lon" />
+							<Field
+								name="location"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={
+									<React.Fragment>
+										<Coordinate coord={location.lat} />, <Coordinate coord={location.lng} />
+									</React.Fragment>
+								}
+							/>
+						</Fieldset>
+
+						<Leaflet markers={[marker]} />
+					</Form>
+
+					<Fieldset title={`Reports at this Location`}>
+						<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} mapId="reports" />
 					</Fieldset>
-
-					<Leaflet markers={markers} />
-				</Form>
-
-				<Fieldset title="Reports at this location">
-					<ReportCollection paginatedReports={reports} goToPage={this.goToReportsPage} mapId="reports" />
-				</Fieldset>
-			</div>
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	goToReportsPage(pageNum) {
-		this.setState({reportsPageNum: pageNum}, () => this.loadData())
+	goToReportsPage = (pageNum) => {
+		this.setState({reportsPageNum: pageNum}, this.loadData)
 	}
 }
 

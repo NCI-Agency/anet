@@ -6,7 +6,7 @@ import autobind from 'autobind-decorator'
 import NotFound from 'components/NotFound'
 import {setMessages} from 'components/Messages'
 
-import API from 'api'
+import _isEmpty from 'lodash/isEmpty'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 
@@ -56,8 +56,8 @@ export default class Page extends Component {
 
 	constructor(props, pageProps, searchProps) {
 		super(props)
-		const pp = pageProps || DEFAULT_PAGE_PROPS
-		const sp = searchProps || DEFAULT_SEARCH_PROPS
+		const pp = _isEmpty(pageProps) ? DEFAULT_PAGE_PROPS : pageProps
+		const sp = _isEmpty(searchProps) ? DEFAULT_SEARCH_PROPS : searchProps
 		if (typeof props.setPageProps === 'function') {
 			props.setPageProps(Object.assign({}, pp))
 		}
