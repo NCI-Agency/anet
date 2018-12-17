@@ -32,10 +32,6 @@ import PEOPLE_ICON from 'resources/people.png'
 import TASK_ICON from 'resources/tasks.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
-import * as ReportDefs from 'models/Report'
-import * as PersonDefs from 'models/Person'
-import * as PositionDefs from 'models/Position'
-import * as TaskDefs from 'models/Task'
 
 import API from 'api'
 import { ToastContainer, toast } from 'react-toastify'
@@ -82,11 +78,11 @@ class BaseReportForm extends Component {
 	cancelledReasonOptions = [
 		{
 			value: 'CANCELLED_BY_ADVISOR',
-			label: `Cancelled by ${PersonDefs.advisorPerson.name}`,
+			label: `Cancelled by ${Settings.fields.advisor.person.name}`,
 		},
 		{
 			value: 'CANCELLED_BY_PRINCIPAL',
-			label: `Cancelled by ${PersonDefs.principalPerson.name}`,
+			label: `Cancelled by ${Settings.fields.principal.person.name}`,
 		},
 		{
 			value: 'CANCELLED_DUE_TO_TRANSPORTATION',
@@ -169,7 +165,7 @@ class BaseReportForm extends Component {
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
-		const advisorPositionSingular = PositionDefs.advisorPosition.name
+		const advisorPositionSingular = Settings.fields.advisor.position.name
 
 		return (
 			<Formik
@@ -230,7 +226,7 @@ class BaseReportForm extends Component {
 						<Fieldset>
 							<Field
 								name="intent"
-								label={ReportDefs.fieldLabels.intent}
+								label={Settings.fields.report.intent}
 								component={FieldHelper.renderInputField}
 								componentClass="textarea"
 								placeholder="What is the engagement supposed to achieve?"
@@ -289,7 +285,7 @@ class BaseReportForm extends Component {
 							<Field
 								name="cancelled"
 								component={FieldHelper.renderSpecialField}
-								label={ReportDefs.fieldLabels.cancelled}
+								label={Settings.fields.report.cancelled}
 								widget={
 									<Checkbox
 										inline
@@ -322,7 +318,7 @@ class BaseReportForm extends Component {
 							{!values.cancelled &&
 								<Field
 									name="atmosphere"
-									label={ReportDefs.fieldLabels.atmosphere}
+									label={Settings.fields.report.atmosphere}
 									component={FieldHelper.renderButtonToggleGroup}
 									buttons={this.atmosphereButtons}
 									className="atmosphere-form-group"
@@ -331,7 +327,7 @@ class BaseReportForm extends Component {
 							{!values.cancelled && values.atmosphere &&
 								<Field
 									name="atmosphereDetails"
-									label={ReportDefs.fieldLabels.atmosphereDetails}
+									label={Settings.fields.report.atmosphereDetails}
 									component={FieldHelper.renderInputField}
 									placeholder={`Why was this engagement ${values.atmosphere.toLowerCase()}? ${values.atmosphere === 'POSITIVE' ? "(optional)" : ""}`}
 									className="atmosphere-details"
@@ -340,7 +336,7 @@ class BaseReportForm extends Component {
 
 							<Field
 								name="reportTags"
-								label={ReportDefs.fieldLabels.reportTags}
+								label={Settings.fields.report.reportTags}
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('reportTags', value)}
 								widget={
@@ -369,20 +365,20 @@ class BaseReportForm extends Component {
 						</Fieldset>
 
 						{!values.cancelled &&
-							<Fieldset title={TaskDefs.longLabel} className="tasks-selector">
+							<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
 								<MultiSelector
 									items={values.tasks}
 									objectType={Task}
 									queryParams={{status: Task.STATUS.ACTIVE}}
-									placeholder={`Start typing to search for ${TaskDefs.shortLabel}...`}
+									placeholder={`Start typing to search for ${Settings.fields.task.shortLabel}...`}
 									fields={Task.autocompleteQuery}
 									template={Task.autocompleteTemplate}
 									addFieldName='tasks'
-									addFieldLabel={TaskDefs.shortLabel}
+									addFieldLabel={Settings.fields.task.shortLabel}
 									addon={TASK_ICON}
 									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
 									onChange={value => setFieldValue('tasks', value)}
-									shortcutsTitle={`Recent ${TaskDefs.shortLabel}`}
+									shortcutsTitle={`Recent ${Settings.fields.task.shortLabel}`}
 									shortcuts={recents.tasks}
 									renderExtraCol={true}
 								/>

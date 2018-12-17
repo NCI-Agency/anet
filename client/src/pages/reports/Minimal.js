@@ -18,9 +18,7 @@ import Tag from 'components/Tag'
 
 import API from 'api'
 import {Report} from 'models'
-import * as ReportDefs from 'models/Report'
-import * as OrganizationDefs from 'models/Organization'
-import * as TaskDefs from 'models/Task'
+import Settings from 'Settings'
 import _isEmpty from 'lodash/isEmpty'
 
 import { PAGE_PROPS_MIN_HEAD } from 'actions'
@@ -163,7 +161,7 @@ class ReportMinimal extends Page {
 								component={FieldHelper.renderSpecialField}
 								widget={
 									<div id="intent" className="form-control-static">
-										<p><strong>{ReportDefs.fieldLabels.intent}:</strong> {report.intent}</p>
+										<p><strong>{Settings.fields.report.intent}:</strong> {report.intent}</p>
 										{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
 										<p><strong>Next steps:</strong> {report.nextSteps}</p>
 									</div>
@@ -196,7 +194,7 @@ class ReportMinimal extends Page {
 							{!report.cancelled &&
 								<Field
 									name="atmosphere"
-									label={ReportDefs.fieldLabels.atmosphere}
+									label={Settings.fields.report.atmosphere}
 									component={FieldHelper.renderReadonlyField}
 									humanValue={
 										<React.Fragment>
@@ -209,7 +207,7 @@ class ReportMinimal extends Page {
 
 							<Field
 								name="reportTags"
-								label={ReportDefs.fieldLabels.reportTags}
+								label={Settings.fields.report.reportTags}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={report.tags && report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}
 							/>
@@ -222,14 +220,14 @@ class ReportMinimal extends Page {
 
 							<Field
 								name="advisorOrg"
-								label={OrganizationDefs.advisorOrganization.name}
+								label={Settings.fields.organization.name}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={<LinkTo organization={report.advisorOrg} />}
 							/>
 
 							<Field
 								name="principalOrg"
-								label={OrganizationDefs.principalOrganization.name}
+								label={Settings.fields.organization.name}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={<LinkTo organization={report.principalOrg} />}
 							/>
@@ -239,7 +237,7 @@ class ReportMinimal extends Page {
 							<AttendeesTable attendees={report.attendees} disabled={true} />
 						</Fieldset>
 
-						<Fieldset title={TaskDefs.longLabel}>
+						<Fieldset title={Settings.fields.task.longLabel}>
 							<TaskTable tasks={report.tasks} showOrganization={true} />
 						</Fieldset>
 

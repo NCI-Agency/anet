@@ -14,7 +14,6 @@ import OptionListModal from 'components/OptionListModal'
 import API from 'api'
 import Settings from 'Settings'
 import {Person} from 'models'
-import * as PersonDefs from 'models/Person'
 import utils from 'utils'
 import pluralize from 'pluralize'
 
@@ -59,20 +58,20 @@ class BasePersonForm extends Component {
 			label: 'INACTIVE'
 		},
 	]
-	advisorSingular = PersonDefs.advisorPerson.name
+	advisorSingular = Settings.fields.advisor.person.name
 	advisorPlural = pluralize(this.advisorSingular)
 	roleButtons = [
 		{
 			id: 'roleAdvisorButton',
 			title: `Super users cannot create ${this.advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${this.advisorPlural} have the correct domain name associated with their profile, it is required that each new ${this.advisorSingular} individually logs into ANET and creates their own ANET profile.`,			
 			value: Person.ROLE.ADVISOR,
-			label: PersonDefs.advisorPerson.name,
+			label: Settings.fields.advisor.person.name,
 			disabled: true
 		},
 		{
 			id: 'rolePrincipalButton',
 			value: Person.ROLE.PRINCIPAL,
-			label: PersonDefs.principalPerson.name
+			label: Settings.fields.principal.person.name
 		},
 	]
 	adminRoleButtons = [
@@ -80,21 +79,21 @@ class BasePersonForm extends Component {
 			id: 'roleAdvisorButton',
 			title: null,
 			value: Person.ROLE.ADVISOR,
-			label: PersonDefs.advisorPerson.name,
+			label: Settings.fields.advisor.person.name,
 			disabled: false
 		},
 		{
 			id: 'rolePrincipalButton',
 			value: Person.ROLE.PRINCIPAL,
-			label: PersonDefs.principalPerson.name
+			label: Settings.fields.principal.person
 		},
 	]
 	countries = role => {
 		switch(role) {
 			case Person.ROLE.ADVISOR:
-				return PersonDefs.advisorPerson.countries
+				return Settings.fields.advisor.person.countries
 			case Person.ROLE.PRINCIPAL:
-				return PersonDefs.principalPerson.countries
+				return Settings.fields.principal.person.countries
 			default:
 				return []
 		}
@@ -286,7 +285,7 @@ class BasePersonForm extends Component {
 							>
 								{!edit && isAdvisor &&
 									<Alert bsStyle="warning">
-										Creating a {PersonDefs.advisorPerson.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
+										Creating a {Settings.fields.advisor.person.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
 									</Alert>
 								}
 							</Field>
@@ -324,19 +323,19 @@ class BasePersonForm extends Component {
 					<Fieldset title="Additional information">
 						<Field
 							name="emailAddress"
-							label={PersonDefs.fieldLabels.emailAddress}
+							label={Settings.fields.person.emailAddress}
 							type="email"
 							validate={(email) => this.handleEmailValidation(email, values)}
 							component={FieldHelper.renderInputField}
 						/>
 						<Field
 							name="phoneNumber"
-							label={PersonDefs.fieldLabels.phoneNumber}
+							label={Settings.fields.person.phoneNumber}
 							component={FieldHelper.renderInputField}
 						/>
 						<Field
 							name="rank"
-							label={PersonDefs.fieldLabels.rank}
+							label={Settings.fields.person.rank}
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
@@ -350,7 +349,7 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="gender"
-							label={PersonDefs.fieldLabels.gender}
+							label={Settings.fields.person.gender}
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
@@ -362,7 +361,7 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="country"
-							label={PersonDefs.fieldLabels.country}
+							label={Settings.fields.person.country}
 							component={FieldHelper.renderSpecialField}
 							widget={
 								<Field component="select" className="form-control" >
@@ -376,7 +375,7 @@ class BasePersonForm extends Component {
 						/>
 						<Field
 							name="endOfTourDate"
-							label={PersonDefs.fieldLabels.endOfTourDate}
+							label={Settings.fields.person.endOfTourDate}
 							component={FieldHelper.renderSpecialField}
 							value={values.endOfTourDate && moment(values.endOfTourDate).format()}
 							onChange={(value, formattedValue) => setFieldValue('endOfTourDate', value)}

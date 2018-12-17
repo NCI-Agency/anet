@@ -14,7 +14,7 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import API from 'api'
 import {Organization, Person, Task} from 'models'
-import * as TaskDefs from 'models/Task'
+import Settings from 'Settings'
 
 import CALENDAR_ICON from 'resources/calendar.png'
 import ORGANIZATION_ICON from 'resources/organizations.png'
@@ -96,7 +96,7 @@ class BaseTaskForm extends Component {
 				submitForm
 			}) => {
 				const action = <div>
-					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {TaskDefs.shortLabel}</Button>
+					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {Settings.fields.task.shortLabel}</Button>
 				</div>
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
@@ -106,13 +106,13 @@ class BaseTaskForm extends Component {
 						<Fieldset>
 							<Field
 								name="shortName"
-								label={TaskDefs.fieldLabels.shortName}
+								label={Settings.fields.task.shortName}
 								component={FieldHelper.renderInputField}
 							/>
 
 							<Field
 								name="longName"
-								label={TaskDefs.fieldLabels.longName}
+								label={Settings.fields.task.longName}
 								component={FieldHelper.renderInputField}
 							/>
 
@@ -124,7 +124,7 @@ class BaseTaskForm extends Component {
 
 							<Field
 								name="responsibleOrg"
-								label={TaskDefs.fieldLabels.responsibleOrg}
+								label={Settings.fields.task.responsibleOrg}
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('responsibleOrg', value)}
 								addon={ORGANIZATION_ICON}
@@ -133,15 +133,15 @@ class BaseTaskForm extends Component {
 										objectType={Organization}
 										valueKey="shortName"
 										fields={Organization.autocompleteQuery}
-										placeholder={`Select a responsible organization for this ${TaskDefs.shortLabel}`}
+										placeholder={`Select a responsible organization for this ${Settings.fields.taskSettings.fields.task.shortLabel}`}
 										queryParams={orgSearchQuery}
 									/>
 								}
 							/>
 
-							{TaskDefs.customFieldRef1 &&
+							{Settings.fields.task.customFieldRef1 &&
 								<this.TaskCustomFieldRef1
-									dictProps={TaskDefs.customFieldRef1}
+									dictProps={Settings.fields.task.customFieldRef1}
 									name="customFieldRef1"
 									component={FieldHelper.renderSpecialField}
 									onChange={value => setFieldValue('customFieldRef1', value)}
@@ -152,7 +152,7 @@ class BaseTaskForm extends Component {
 											valueKey="shortName"
 											fields={Task.autocompleteQuery}
 											template={Task.autocompleteTemplate}
-											placeholder={TaskDefs.customFieldRef1.placeholder}
+											placeholder={Settings.fields.task.customFieldRef1.placeholder}
 											queryParams={{}}
 										/>
 									}
@@ -160,14 +160,14 @@ class BaseTaskForm extends Component {
 							}
 
 							<this.TaskCustomField
-								dictProps={TaskDefs.customField}
+								dictProps={Settings.fields.task.customField}
 								name="customField"
 								component={FieldHelper.renderInputField}
 							/>
 
-							{TaskDefs.plannedCompletion &&
+							{Settings.fields.task.plannedCompletion &&
 								<this.PlannedCompletionField
-									dictProps={TaskDefs.plannedCompletion}
+									dictProps={Settings.fields.task.plannedCompletion}
 									name="plannedCompletion"
 									component={FieldHelper.renderSpecialField}
 									value={values.plannedCompletion && moment(values.plannedCompletion).format()}
@@ -176,7 +176,7 @@ class BaseTaskForm extends Component {
 									widget={
 										<DatePicker
 											showTodayButton
-											placeholder={TaskDefs.plannedCompletion.placeholder}
+											placeholder={Settings.fields.task.plannedCompletion.placeholder}
 											dateFormat="DD/MM/YYYY"
 											showClearButton={false}
 										/>
@@ -184,9 +184,9 @@ class BaseTaskForm extends Component {
 								/>
 							}
 
-							{TaskDefs.projectedCompletion &&
+							{Settings.fields.task.projectedCompletion &&
 								<this.ProjectedCompletionField
-									dictProps={TaskDefs.projectedCompletion}
+									dictProps={Settings.fields.task.projectedCompletion}
 									name="projectedCompletion"
 									component={FieldHelper.renderSpecialField}
 									value={values.projectedCompletion && moment(values.projectedCompletion).format()}
@@ -195,7 +195,7 @@ class BaseTaskForm extends Component {
 									widget={
 										<DatePicker
 											showTodayButton
-											placeholder={TaskDefs.projectedCompletion.placeholder}
+											placeholder={Settings.fields.task.projectedCompletion.placeholder}
 											dateFormat="DD/MM/YYYY"
 											showClearButton={false}
 										/>
@@ -203,21 +203,21 @@ class BaseTaskForm extends Component {
 								/>
 							}
 
-							{TaskDefs.customFieldEnum1 &&
+							{Settings.fields.task.customFieldEnum1 &&
 								<this.TaskCustomFieldEnum1
-									dictProps={Object.without(TaskDefs.customFieldEnum1, 'enum')}
+									dictProps={Object.without(Settings.fields.task.customFieldEnum1, 'enum')}
 									name="customFieldEnum1"
 									component={FieldHelper.renderButtonToggleGroup}
-									buttons={this.customEnumButtons(TaskDefs.customFieldEnum1.enum)}
+									buttons={this.customEnumButtons(Settings.fields.task.customFieldEnum1.enum)}
 								/>
 							}
 
-							{TaskDefs.customFieldEnum2 &&
+							{Settings.fields.task.customFieldEnum2 &&
 								<this.TaskCustomFieldEnum2
-									dictProps={Object.without(TaskDefs.customFieldEnum2, 'enum')}
+									dictProps={Object.without(Settings.fields.task.customFieldEnum2, 'enum')}
 									name="customFieldEnum2"
 									component={FieldHelper.renderButtonToggleGroup}
-									buttons={this.customEnumButtons(TaskDefs.customFieldEnum2.enum)}
+									buttons={this.customEnumButtons(Settings.fields.task.customFieldEnum2.enum)}
 								/>
 							}
 						</Fieldset>
@@ -227,7 +227,7 @@ class BaseTaskForm extends Component {
 								<Button onClick={this.onCancel}>Cancel</Button>
 							</div>
 							<div>
-								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {TaskDefs.shortLabel}</Button>
+								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save {Settings.fields.task.shortLabel}</Button>
 							</div>
 						</div>
 					</Form>

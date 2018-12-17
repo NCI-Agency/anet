@@ -12,7 +12,7 @@ import Messages from 'components/Messages'
 
 import API from 'api'
 import {Location, Organization, Person, Position} from 'models'
-import * as PositionDefs from 'models/Position'
+import Settings from 'Settings'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -56,31 +56,31 @@ class BasePositionForm extends Component {
 		{
 			id: 'typeAdvisorButton',
 			value: Position.TYPE.ADVISOR,
-			label: PositionDefs.advisorPosition.name,
+			label: Settings.fields.advisor.position.name,
 		},
 		{
 			id: 'typePrincipalButton',
 			value: Position.TYPE.PRINCIPAL,
-			label: PositionDefs.principalPosition.name
+			label: Settings.fields.principal.position.name
 		},
 	]
 	nonAdminPermissionsButtons = [
 		{
 			id: 'permsAdvisorButton',
 			value: Position.TYPE.ADVISOR,
-			label: PositionDefs.advisorPosition.type,
+			label: Settings.fields.advisor.position.type,
 		},
 	]
 	adminPermissionsButtons = this.nonAdminPermissionsButtons.concat([
 		{
 			id: 'permsSuperUserButton',
 			value: Position.TYPE.SUPER_USER,
-			label: PositionDefs.superUserPosition.type,
+			label: Settings.fields.superUser.position.type,
 		},
 		{
 			id: 'permsAdminButton',
 			value: Position.TYPE.ADMINISTRATOR,
-			label: PositionDefs.administratorPosition.type,
+			label: Settings.fields.administrator.position.type,
 		},
 	])
 	CodeFieldWithLabel = DictionaryField(Field)
@@ -117,7 +117,7 @@ class BasePositionForm extends Component {
 				submitForm
 			}) => {
 				const isPrincipal = values.type === Position.TYPE.PRINCIPAL
-				const positionSettings = isPrincipal ? PositionDefs.principalPosition : PositionDefs.advisorPosition
+				const positionSettings = isPrincipal ? Settings.fields.principal.position : Settings.fields.advisor.position
 
 				const isAdmin = currentUser && currentUser.isAdmin()
 				const permissionsButtons = isAdmin ? this.adminPermissionsButtons : this.nonAdminPermissionsButtons
@@ -197,7 +197,7 @@ class BasePositionForm extends Component {
 							<Field
 								name="name"
 								component={FieldHelper.renderInputField}
-								label={PositionDefs.fieldLabels.name}
+								label={Settings.fields.position.name}
 								placeholder="Name/Description of Position"
 							/>
 

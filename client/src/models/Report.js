@@ -6,14 +6,6 @@ import {Person, Position} from 'models'
 
 import * as yup from 'yup'
 
-export const fieldLabels = {
-	intent: 'Meeting goal (purpose)',
-	atmosphere: 'Atmospherics',
-	atmosphereDetails: 'Atmospherics details',
-	cancelled: '',
-	reportTags: 'Tags',
-}
-
 export default class Report extends Model {
 	static resourceName = 'Report'
 	static listName = 'reportList'
@@ -45,8 +37,8 @@ export default class Report extends Model {
 	}
 
 	static yupSchema = yup.object().shape({
-		intent: yup.string().nullable().required(`You must provide the ${fieldLabels.intent}`).default('')
-			.label(fieldLabels.intent),
+		intent: yup.string().nullable().required(`You must provide the ${Settings.fields.report.intent}`).default('')
+			.label(Settings.fields.report.intent),
 		engagementDate: yupDate.nullable().required('You must provide the Date of Engagement')
 			.when('cancelled', (cancelled, schema) => (
 				cancelled ? schema : schema.test('future-engagement', 'You cannot submit reports for future dates, except for cancelled engagements',
@@ -55,7 +47,7 @@ export default class Report extends Model {
 			.default(null),
 		// not actually in the database, but used for validation:
 		cancelled: yup.boolean().default(false)
-			.label(fieldLabels.cancelled),
+			.label(Settings.fields.report.cancelled),
 		cancelledReason: yup.string().nullable()
 			.when('cancelled', (cancelled, schema) => (
 				cancelled ? schema.required('You must provide a reason for cancellation') : schema.nullable()
@@ -66,13 +58,13 @@ export default class Report extends Model {
 				cancelled ? schema.nullable() : schema.required('You must provide the overall atmospherics of the engagement')
 			))
 			.default(null)
-			.label(fieldLabels.atmosphere),
+			.label(Settings.fields.report.atmosphere),
 		atmosphereDetails: yup.string().nullable()
 			.when(['cancelled', 'atmosphere'], (cancelled, atmosphere, schema) => (
 				cancelled ? schema.nullable() : (atmosphere === Report.ATMOSPHERE.POSITIVE) ? schema.nullable() : schema.required('You must provide atmospherics details if the engagement was not Positive')
 			))
 			.default('')
-			.label(fieldLabels.atmosphereDetails),
+			.label(Settings.fields.report.atmosphereDetails),
 		location: yup.object().nullable().default({}),
 		attendees: yup.array().nullable()
 			.test('primary-principal', 'primary principal error',
@@ -106,7 +98,7 @@ export default class Report extends Model {
 			.label('Key outcome description'),
 		tags: yup.array().nullable().default([]),
 		reportTags: yup.array().nullable().default([])
-			.label(fieldLabels.reportTags),
+			.label(Settings.fields.report.reportTags),
 		reportSensitiveInformation: yup.object().nullable().default({}), // null?
 		authorizationGroups: yup.array().nullable().default([]),
 	}).concat(Model.yupSchema)

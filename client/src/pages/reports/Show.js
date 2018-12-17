@@ -25,10 +25,6 @@ import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObject
 import API from 'api'
 import Settings from 'Settings'
 import {Report, Person, Comment, Position} from 'models'
-import * as ReportDefs from 'models/Report'
-import * as OrganizationDefs from 'models/Organization'
-import * as PositionDefs from 'models/Position'
-import * as TaskDefs from 'models/Task'
 import _isEmpty from 'lodash/isEmpty'
 
 import AppContext from 'components/AppContext'
@@ -136,7 +132,7 @@ class BaseReportShow extends Page {
 		const alertStyle = {top:132, marginBottom: '1rem', textAlign: 'center'}
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
-		const advisorPositionSingular = PositionDefs.advisorPosition.name
+		const advisorPositionSingular = Settings.fields.advisor.position.name
 		if (!currentUser.hasAssignedPosition()) {
 			return <div className="alert alert-warning" style={alertStyle}>
 					You cannot submit a report: you are not assigned to a {advisorPositionSingular} position.<br/>
@@ -259,7 +255,7 @@ class BaseReportShow extends Page {
 								component={FieldHelper.renderSpecialField}
 								widget={
 									<div id="intent" className="form-control-static">
-										<p><strong>{ReportDefs.fieldLabels.intent}:</strong> {report.intent}</p>
+										<p><strong>{Settings.fields.report.intent}:</strong> {report.intent}</p>
 										{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
 										<p><strong>Next steps:</strong> {report.nextSteps}</p>
 									</div>
@@ -292,7 +288,7 @@ class BaseReportShow extends Page {
 							{!report.cancelled &&
 								<Field
 									name="atmosphere"
-									label={ReportDefs.fieldLabels.atmosphere}
+									label={Settings.fields.report.atmosphere}
 									component={FieldHelper.renderReadonlyField}
 									humanValue={
 										<React.Fragment>
@@ -305,7 +301,7 @@ class BaseReportShow extends Page {
 
 							<Field
 								name="reportTags"
-								label={ReportDefs.fieldLabels.reportTags}
+								label={Settings.fields.report.reportTags}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={report.tags && report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}
 							/>
@@ -318,14 +314,14 @@ class BaseReportShow extends Page {
 
 							<Field
 								name="advisorOrg"
-								label={OrganizationDefs.advisorOrganization.name}
+								label={Settings.fields.advisor.org.name}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={<LinkTo organization={report.advisorOrg} />}
 							/>
 
 							<Field
 								name="principalOrg"
-								label={OrganizationDefs.principalOrganization.name}
+								label={Settings.fields.principal.org.name}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={<LinkTo organization={report.principalOrg} />}
 							/>
@@ -335,7 +331,7 @@ class BaseReportShow extends Page {
 							<AttendeesTable attendees={report.attendees} disabled={true} />
 						</Fieldset>
 
-						<Fieldset title={TaskDefs.longLabel}>
+						<Fieldset title={Settings.fields.task.longLabel}>
 							<TaskTable tasks={report.tasks} showOrganization={true} />
 						</Fieldset>
 

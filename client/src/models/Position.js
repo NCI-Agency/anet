@@ -14,10 +14,6 @@ export const principalPosition = Settings.fields.principal.position
 export const administratorPosition = Settings.fields.administrator.position
 export const superUserPosition = Settings.fields.superUser.position
 
-export const fieldLabels = {
-	name: 'Position Name',
-}
-
 export default class Position extends Model {
 	static resourceName = 'Position'
 	static listName = 'positionList'
@@ -38,7 +34,7 @@ export default class Position extends Model {
 
 	static yupSchema = yup.object().shape({
 		name: yup.string().required().default('')
-			.label(fieldLabels.name),
+			.label(Settings.fields.position.name),
 		type: yup.string().required().default(() => Position.TYPE.ADVISOR),
 		code: yup.string().nullable().default(''),
 		status: yup.string().required().default(() => Position.STATUS.ACTIVE),

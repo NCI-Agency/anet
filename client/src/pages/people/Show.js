@@ -20,7 +20,7 @@ import GuidedTour from 'components/GuidedTour'
 import {personTour} from 'pages/HopscotchTour'
 
 import {Person, Position} from 'models'
-import * as PersonDefs from 'models/Person'
+import Settings from 'Settings'
 import GQL from 'graphqlapi'
 
 import AppContext from 'components/AppContext'
@@ -124,7 +124,7 @@ class BasePersonShow extends Page {
 		const { currentUser, ...myFormProps } = this.props
 		// The position for this person's counterparts
 		const position = person.position
-		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? PersonDefs.advisorPerson.name : PersonDefs.principalPerson.name
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
 
 				//User can always edit themselves
 		//Admins can always edit anybody
@@ -173,7 +173,7 @@ class BasePersonShow extends Page {
 						<Fieldset>
 							<Field
 								name="rank"
-								label={PersonDefs.fieldLabels.rank}
+								label={Settings.fields.person.rank}
 								component={FieldHelper.renderReadonlyField}
 							/>
 							<Field
@@ -194,28 +194,28 @@ class BasePersonShow extends Page {
 							/>
 							<Field
 								name="phoneNumber"
-								label={PersonDefs.fieldLabels.phoneNumber}
+								label={Settings.fields.person.phoneNumber}
 								component={FieldHelper.renderReadonlyField}
 							/>
 							<Field
 								name="emailAddress"
-								label={PersonDefs.fieldLabels.emailAddress}
+								label={Settings.fields.person.emailAddress}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={emailHumanValue}
 							/>
 							<Field
 								name="country"
-								label={PersonDefs.fieldLabels.country}
+								label={Settings.fields.person.country}
 								component={FieldHelper.renderReadonlyField}
 							/>
 							<Field
 								name="gender"
-								label={PersonDefs.fieldLabels.gender}
+								label={Settings.fields.person.gender}
 								component={FieldHelper.renderReadonlyField}
 							/>
 							<Field
 								name="endOfTourDate"
-								label={PersonDefs.fieldLabels.endOfTourDate}
+								label={Settings.fields.person.endOfTourDate}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={person.endOfTourDate && moment(person.endOfTourDate).format('D MMM YYYY')}
 							/>

@@ -16,18 +16,6 @@ import * as yup from 'yup'
 export const advisorPerson = Settings.fields.advisor.person
 export const principalPerson = Settings.fields.principal.person
 
-export const fieldLabels = {
-	firstName: 'First name',
-	lastName: 'Last name',
-	domainUsername: 'Domain username',
-	emailAddress: 'Email',
-	phoneNumber: 'Phone',
-	country: 'Nationality',
-	rank: 'Rank',
-	gender: 'Gender',
-	endOfTourDate: 'End of tour',
-}
-
 export default class Person extends Model {
 	static resourceName = 'Person'
 	static listName = 'personList'
@@ -52,29 +40,29 @@ export default class Person extends Model {
 		// not actually in the database, but used for validation
 		firstName: yup.string().nullable()
 			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.firstName}`) : schema.nullable()
-			)).default('').label(fieldLabels.firstName),
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.firstName}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.firstName),
 		// not actually in the database, but used for validation
-		lastName: yup.string().nullable().uppercase().required(`You must provide the ${fieldLabels.lastName}`).default('').label(fieldLabels.lastName),
-		domainUsername: yup.string().nullable().default('').label(fieldLabels.domainUsername),
+		lastName: yup.string().nullable().uppercase().required(`You must provide the ${Settings.fields.person.lastName}`).default('').label(Settings.fields.person.lastName),
+		domainUsername: yup.string().nullable().default('').label(Settings.fields.person.domainUsername),
 		emailAddress: yup.string().nullable().email()
 			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.emailAddress}`) : schema.nullable()
-			)).default('').label(fieldLabels.emailAddress),
-		country: yup.string().nullable().required(`You must provide the ${fieldLabels.country}`).default('').label(fieldLabels.country),
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.emailAddress}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.emailAddress),
+		country: yup.string().nullable().required(`You must provide the ${Settings.fields.person.country}`).default('').label(Settings.fields.person.country),
 		rank: yup.string().nullable()
 			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${fieldLabels.rank}`) : schema.nullable()
-			)).default('').label(fieldLabels.rank),
+				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${Settings.fields.person.rank}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.rank),
 		gender: yup.string().nullable()
 			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.required(`You must provide the ${fieldLabels.gender}`) : schema.nullable()
-			)).default('').label(fieldLabels.gender),
-		phoneNumber: yup.string().nullable().default('').label(fieldLabels.phoneNumber),
+				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.gender}`) : schema.nullable()
+			)).default('').label(Settings.fields.person.gender),
+		phoneNumber: yup.string().nullable().default('').label(Settings.fields.person.phoneNumber),
 		endOfTourDate: yupDate.nullable()
 			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${fieldLabels.endOfTourDate}`) : schema.nullable()
-			)).default(null).label(fieldLabels.endOfTourDate),
+				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${Settings.fields.person.endOfTourDate}`) : schema.nullable()
+			)).default(null).label(Settings.fields.person.endOfTourDate),
 		biography: yup.string().nullable().default(''),
 		position: yup.object().nullable().default({}),
 		role: yup.string().nullable().default(() => Person.ROLE.PRINCIPAL),
@@ -92,7 +80,7 @@ export default class Person extends Model {
 
 	static humanNameOfRole(role) {
 		if (role === Person.ROLE.ADVISOR) {
-			return advisorPerson.name
+			return Settings.fields.advisor.person.name
 		}
 		if (role === Person.ROLE.PRINCIPAL) {
 			return principalPerson.name

@@ -18,7 +18,6 @@ import Messages from 'components/Messages'
 import Settings from 'Settings'
 
 import {Organization, Report} from 'models'
-import * as OrganizationDefs from 'models/Organization'
 import utils from 'utils'
 
 import API from 'api'
@@ -369,8 +368,8 @@ class BaseRollupShow extends Page {
 						{this.state.focusedOrg
 							? <Button onClick={() => this.goToOrg()}>All organizations</Button>
 							: <ButtonToggleGroup value={this.state.orgType} onChange={this.changeOrgType}>
-								<Button value={Organization.TYPE.ADVISOR_ORG}>{pluralize(OrganizationDefs.advisorOrganization.name)}</Button>
-								<Button value={Organization.TYPE.PRINCIPAL_ORG}>{pluralize(OrganizationDefs.principalOrganization.name)}</Button>
+								<Button value={Organization.TYPE.ADVISOR_ORG}>{pluralize(Settings.fields.advisor.org.name)}</Button>
+								<Button value={Organization.TYPE.PRINCIPAL_ORG}>{pluralize(Settings.fields.principal.org.name)}</Button>
 							  </ButtonToggleGroup>
 						}
 					</span>

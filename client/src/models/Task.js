@@ -17,12 +17,6 @@ export const {
 	projectedCompletion,
 } = Settings.fields.task
 
-export const fieldLabels = {
-	shortName: `${shortLabel} number`,
-	longName: `${shortLabel} description`,
-	responsibleOrg: 'Responsible organization',
-}
-
 export default class Task extends Model {
 	static resourceName = 'Task'
 	static listName = 'taskList'
@@ -40,12 +34,12 @@ export default class Task extends Model {
 
 	static yupSchema = yup.object().shape({
 		shortName: yup.string().required().default('')
-			.label(fieldLabels.shortName),
+			.label(Settings.fields.task.shortName),
 		longName: yup.string().required().default('')
-			.label(fieldLabels.longName),
+			.label(Settings.fields.task.longName),
 		category: yup.string().nullable().default(''),
 		responsibleOrg: yup.object().nullable().default({})
-			.label(fieldLabels.responsibleOrg),
+			.label(Settings.fields.task.responsibleOrg),
 		customFieldRef1: yup.object().nullable().default({})
 			.label(customFieldRef1.label),
 		customFieldEnum1: yup.string().nullable().default('')

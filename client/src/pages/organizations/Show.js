@@ -26,8 +26,7 @@ import OrganizationApprovals from './Approvals'
 
 import GQL from 'graphqlapi'
 import {Organization, Person, Position, Report, Task} from 'models'
-import * as OrganizationDefs from 'models/Organization'
-import * as TaskDefs from 'models/Task'
+import Settings from 'Settings'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -169,7 +168,7 @@ class BaseOrganizationShow extends Page {
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isAdvisorOrg = (organization.type === Organization.TYPE.ADVISOR_ORG)
 		const isPrincipalOrg = (organization.type === Organization.TYPE.PRINCIPAL_ORG)
-		const orgSettings = isPrincipalOrg ? OrganizationDefs.principalOrganization : OrganizationDefs.advisorOrganization
+		const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
 
 		const superUsers = organization.positions.filter(pos => pos.status !== Position.STATUS.INACTIVE && (!pos.person || pos.person.status !== Position.STATUS.INACTIVE) && (pos.type === Position.TYPE.SUPER_USER || pos.type === Position.TYPE.ADMINISTRATOR))
 		const myOrg = currentUser && currentUser.position ? currentUser.position.organization : null
@@ -182,7 +181,7 @@ class BaseOrganizationShow extends Page {
 					<NavItem href="#supportedPositions">Supported positions</NavItem>
 					<NavItem href="#vacantPositions">Vacant positions</NavItem>
 					{!isPrincipalOrg && <NavItem href="#approvals">Approvals</NavItem>}
-					{organization.isTaskEnabled() && <NavItem href="#tasks">{pluralize(TaskDefs.shortLabel)}</NavItem> }
+					{organization.isTaskEnabled() && <NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem> }
 					<NavItem href="#reports">Reports</NavItem>
 				</Scrollspy>
 			</Nav>
@@ -260,7 +259,7 @@ class BaseOrganizationShow extends Page {
 								<Field
 									name="parentOrg"
 									component={FieldHelper.renderReadonlyField}
-									label={OrganizationDefs.fieldLabels.parentOrg}
+									label={Settings.fields.organization.parentOrg}
 									humanValue={organization.parentOrg &&
 										<LinkTo organization={organization.parentOrg}>
 											{organization.parentOrg.shortName} {organization.parentOrg.longName} {organization.parentOrg.identificationCode}

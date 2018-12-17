@@ -15,8 +15,7 @@ import Messages from 'components/Messages'
 
 import API from 'api'
 import {Organization, Person, Position, Task} from 'models'
-import * as OrganizationDefs from 'models/Organization'
-import * as TaskDefs from 'models/Task'
+import Settings from 'Settings'
 
 import DictionaryField from '../../HOC/DictionaryField'
 
@@ -84,12 +83,12 @@ class BaseOrganizationForm extends Component {
 		{
 			id: 'typeAdvisorButton',
 			value: Organization.TYPE.ADVISOR_ORG,
-			label: OrganizationDefs.advisorOrganization.name,
+			label: Settings.fields.advisor.org.name,
 		},
 		{
 			id: 'typePrincipalButton',
 			value: Organization.TYPE.PRINCIPAL_ORG,
-			label: OrganizationDefs.principalOrganization.name,
+			label: Settings.fields.principal.org.name,
 		},
 	]
 	IdentificationCodeFieldWithLabel = DictionaryField(Field)
@@ -123,7 +122,7 @@ class BaseOrganizationForm extends Component {
 				const isAdmin = currentUser && currentUser.isAdmin()
 				const isAdvisorOrg = (values.type === Organization.TYPE.ADVISOR_ORG)
 				const isPrincipalOrg = (values.type === Organization.TYPE.PRINCIPAL_ORG)
-				const orgSettings = isPrincipalOrg ? OrganizationDefs.principalOrganization : OrganizationDefs.advisorOrganization
+				const orgSettings = isPrincipalOrg ? Settings.fields.principal.org : Settings.fields.advisor.org
 				const orgSearchQuery = {status: Organization.STATUS.ACTIVE, type: values.type}
 				// Reset the parentOrg property when changing the organization type
 				if (values.parentOrg && values.parentOrg.type && (values.parentOrg.type !== values.type)) {
@@ -156,7 +155,7 @@ class BaseOrganizationForm extends Component {
 									<Field
 										name="parentOrg"
 										component={FieldHelper.renderReadonlyField}
-										label={OrganizationDefs.fieldLabels.parentOrg}
+										label={Settings.fields.organization.parentOrg}
 										humanValue={values.parentOrg &&
 											<LinkTo organization={values.parentOrg}>
 												{values.parentOrg.shortName} {values.parentOrg.longName} {values.parentOrg.identificationCode}
@@ -166,7 +165,7 @@ class BaseOrganizationForm extends Component {
 									<Field
 										name="shortName"
 										component={FieldHelper.renderReadonlyField}
-										label={OrganizationDefs.fieldLabels.shortName}
+										label={Settings.fields.organization.shortName}
 									/>
 									<this.LongNameWithLabel
 										dictProps={orgSettings.longName}
@@ -183,7 +182,7 @@ class BaseOrganizationForm extends Component {
 									<Field
 										name="parentOrg"
 										component={FieldHelper.renderSpecialField}
-										label={OrganizationDefs.fieldLabels.parentOrg}
+										label={Settings.fields.organization.parentOrg}
 										onChange={value => setFieldValue('parentOrg', value)}
 										addon={ORGANIZATION_ICON}
 										widget={
@@ -200,7 +199,7 @@ class BaseOrganizationForm extends Component {
 									<Field
 										name="shortName"
 										component={FieldHelper.renderInputField}
-										label={OrganizationDefs.fieldLabels.shortName}
+										label={Settings.fields.organization.shortName}
 										placeholder="e.g. EF1.1"
 									/>
 									<this.LongNameWithLabel
@@ -261,16 +260,16 @@ class BaseOrganizationForm extends Component {
 								</Fieldset>
 
 								{Organization.isTaskEnabled(values.shortName) &&
-									<Fieldset title={TaskDefs.longLabel} className="tasks-selector">
+									<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
 										<MultiSelector
 											items={values.tasks}
 											objectType={Task}
 											queryParams={{status: Task.STATUS.ACTIVE}}
-											placeholder={`Start typing to search for ${TaskDefs.shortLabel}...`}
+											placeholder={`Start typing to search for ${Settings.fields.task.shortLabel}...`}
 											fields={Task.autocompleteQuery}
 											template={Task.autocompleteTemplate}
 											addFieldName='tasks'
-											addFieldLabel={TaskDefs.shortLabel}
+											addFieldLabel={Settings.fields.task.shortLabel}
 											addon={TASK_ICON}
 											renderSelected={<TaskTable tasks={values.tasks} showDelete={true} />}
 											onChange={value => setFieldValue('tasks', value)}

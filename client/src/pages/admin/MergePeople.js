@@ -13,7 +13,7 @@ import moment from 'moment'
 import Messages from 'components/Messages'
 
 import {Person} from 'models'
-import * as PersonDefs from 'models/Person'
+import Settings from 'Settings'
 
 import API from 'api'
 
@@ -45,7 +45,7 @@ class MergePeople extends Page {
 			)
 			.test(
 				'equal-roles',
-				`You can only merge people of the same Role (i.e. ${PersonDefs.advisorPerson.name}/${PersonDefs.principalPerson.name})`,
+				`You can only merge people of the same Role (i.e. ${Settings.fields.advisor.person.name}/${Settings.fields.principal.person.name})`,
 				function(value) {
 					const l = this.resolve(yup.ref('loser'))
 					return value && value.role && l && l.role ? (value.role === l.role) : true
