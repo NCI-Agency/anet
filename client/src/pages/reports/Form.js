@@ -33,6 +33,7 @@ import TASK_ICON from 'resources/tasks.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
 import * as ReportDefs from 'models/Report'
+import * as PersonDefs from 'models/Person'
 import * as PositionDefs from 'models/Position'
 import * as TaskDefs from 'models/Task'
 
@@ -81,11 +82,11 @@ class BaseReportForm extends Component {
 	cancelledReasonOptions = [
 		{
 			value: 'CANCELLED_BY_ADVISOR',
-			label: `Cancelled by ${Settings.fields.advisor.person.name}`,
+			label: `Cancelled by ${PersonDefs.advisorPerson.name}`,
 		},
 		{
 			value: 'CANCELLED_BY_PRINCIPAL',
-			label: `Cancelled by ${Settings.fields.principal.person.name}`,
+			label: `Cancelled by ${PersonDefs.principalPerson.name}`,
 		},
 		{
 			value: 'CANCELLED_DUE_TO_TRANSPORTATION',

@@ -21,8 +21,8 @@ import GuidedTour from 'components/GuidedTour'
 import {positionTour} from 'pages/HopscotchTour'
 
 import API from 'api'
-import Settings from 'Settings'
 import {Person, Position} from 'models'
+import * as PersonDefs from 'models/Person'
 import * as PositionDefs from 'models/Position'
 
 import ConfirmDelete from 'components/ConfirmDelete'
@@ -78,7 +78,7 @@ class BasePositionShow extends Page {
 		const { currentUser, ...myFormProps } = this.props
 
 		const isPrincipal = position.type === Position.TYPE.PRINCIPAL
-		const assignedRole = isPrincipal ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
+		const assignedRole = isPrincipal ? PersonDefs.advisorPerson.name : PersonDefs.principalPerson.name
 		const positionSettings = isPrincipal ? PositionDefs.principalPosition : PositionDefs.advisorPosition
 
 		const canEdit =

@@ -13,6 +13,9 @@ import AFG_ICON from 'resources/afg_small.png'
 import _isEmpty from 'lodash/isEmpty'
 import * as yup from 'yup'
 
+export const advisorPerson = Settings.fields.advisor.person
+export const principalPerson = Settings.fields.principal.person
+
 export const fieldLabels = {
 	firstName: 'First name',
 	lastName: 'Last name',
@@ -89,10 +92,10 @@ export default class Person extends Model {
 
 	static humanNameOfRole(role) {
 		if (role === Person.ROLE.ADVISOR) {
-			return Settings.fields.advisor.person.name
+			return advisorPerson.name
 		}
 		if (role === Person.ROLE.PRINCIPAL) {
-			return Settings.fields.principal.person.name
+			return principalPerson.name
 		}
 		throw new Error(`Unrecognized role: ${role}`)
 	}

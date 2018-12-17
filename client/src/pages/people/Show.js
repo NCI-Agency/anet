@@ -22,7 +22,6 @@ import {personTour} from 'pages/HopscotchTour'
 import {Person, Position} from 'models'
 import * as PersonDefs from 'models/Person'
 import GQL from 'graphqlapi'
-import Settings from 'Settings'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -125,7 +124,7 @@ class BasePersonShow extends Page {
 		const { currentUser, ...myFormProps } = this.props
 		// The position for this person's counterparts
 		const position = person.position
-		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? Settings.fields.advisor.person.name : Settings.fields.principal.person.name
+		const assignedRole = position.type === Position.TYPE.PRINCIPAL ? PersonDefs.advisorPerson.name : PersonDefs.principalPerson.name
 
 				//User can always edit themselves
 		//Admins can always edit anybody

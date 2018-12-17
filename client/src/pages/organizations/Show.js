@@ -24,7 +24,6 @@ import OrganizationTasks from './OrganizationTasks'
 import OrganizationLaydown from './Laydown'
 import OrganizationApprovals from './Approvals'
 
-import Settings from 'Settings'
 import GQL from 'graphqlapi'
 import {Organization, Person, Position, Report, Task} from 'models'
 import * as OrganizationDefs from 'models/Organization'
@@ -183,7 +182,7 @@ class BaseOrganizationShow extends Page {
 					<NavItem href="#supportedPositions">Supported positions</NavItem>
 					<NavItem href="#vacantPositions">Vacant positions</NavItem>
 					{!isPrincipalOrg && <NavItem href="#approvals">Approvals</NavItem>}
-					{organization.isTaskEnabled() && <NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem> }
+					{organization.isTaskEnabled() && <NavItem href="#tasks">{pluralize(TaskDefs.shortLabel)}</NavItem> }
 					<NavItem href="#reports">Reports</NavItem>
 				</Scrollspy>
 			</Nav>

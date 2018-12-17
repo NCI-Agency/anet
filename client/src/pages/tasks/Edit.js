@@ -7,8 +7,8 @@ import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObject
 import TaskForm from './Form'
 
 import API from 'api'
-import Settings from 'Settings'
 import {Task} from 'models'
+import * as TaskDefs from 'models/Task'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
@@ -49,8 +49,8 @@ class TaskEdit extends Page {
 		return (
 			<div>
 				<RelatedObjectNotes notes={task.notes} relatedObject={task.uuid && {relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
-				<Breadcrumbs items={[[`${Settings.fields.task.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
-				<TaskForm edit initialValues={task} title={`${Settings.fields.task.shortLabel} ${task.shortName}`} />
+				<Breadcrumbs items={[[`${TaskDefs.shortLabel} ${task.shortName}`, Task.pathFor(task)], ["Edit", Task.pathForEdit(task)]]} />
+				<TaskForm edit initialValues={task} title={`${TaskDefs.shortLabel} ${task.shortName}`} />
 			</div>
 		)
 	}

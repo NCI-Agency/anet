@@ -59,20 +59,20 @@ class BasePersonForm extends Component {
 			label: 'INACTIVE'
 		},
 	]
-	advisorSingular = Settings.fields.advisor.person.name
+	advisorSingular = PersonDefs.advisorPerson.name
 	advisorPlural = pluralize(this.advisorSingular)
 	roleButtons = [
 		{
 			id: 'roleAdvisorButton',
 			title: `Super users cannot create ${this.advisorSingular} profiles. ANET uses the domain user name to authenticate and uniquely identify each ANET user. To ensure that ${this.advisorPlural} have the correct domain name associated with their profile, it is required that each new ${this.advisorSingular} individually logs into ANET and creates their own ANET profile.`,			
 			value: Person.ROLE.ADVISOR,
-			label: Settings.fields.advisor.person.name,
+			label: PersonDefs.advisorPerson.name,
 			disabled: true
 		},
 		{
 			id: 'rolePrincipalButton',
 			value: Person.ROLE.PRINCIPAL,
-			label: Settings.fields.principal.person.name
+			label: PersonDefs.principalPerson.name
 		},
 	]
 	adminRoleButtons = [
@@ -80,21 +80,21 @@ class BasePersonForm extends Component {
 			id: 'roleAdvisorButton',
 			title: null,
 			value: Person.ROLE.ADVISOR,
-			label: Settings.fields.advisor.person.name,
+			label: PersonDefs.advisorPerson.name,
 			disabled: false
 		},
 		{
 			id: 'rolePrincipalButton',
 			value: Person.ROLE.PRINCIPAL,
-			label: Settings.fields.principal.person.name
+			label: PersonDefs.principalPerson.name
 		},
 	]
 	countries = role => {
 		switch(role) {
 			case Person.ROLE.ADVISOR:
-				return Settings.fields.advisor.person.countries
+				return PersonDefs.advisorPerson.countries
 			case Person.ROLE.PRINCIPAL:
-				return Settings.fields.principal.person.countries
+				return PersonDefs.principalPerson.countries
 			default:
 				return []
 		}
@@ -286,7 +286,7 @@ class BasePersonForm extends Component {
 							>
 								{!edit && isAdvisor &&
 									<Alert bsStyle="warning">
-										Creating a {Settings.fields.advisor.person.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
+										Creating a {PersonDefs.advisorPerson.name} in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.
 									</Alert>
 								}
 							</Field>
@@ -312,10 +312,10 @@ class BasePersonForm extends Component {
 									buttons={this.statusButtons}
 								>
 									{willAutoKickPosition && <HelpBlock>
-									<span className="text-danger">Settings this person to inactive will automatically remove them from the <strong>{values.position.name}</strong> position.</span>
+									<span className="text-danger">Setting this person to inactive will automatically remove them from the <strong>{values.position.name}</strong> position.</span>
 									</HelpBlock> }
 									{warnDomainUsername && <HelpBlock>
-										<span className="text-danger">Settings this person to inactive means the next person to logon with the user name <strong>{values.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
+										<span className="text-danger">Setting this person to inactive means the next person to logon with the user name <strong>{values.domainUsername}</strong> will have to create a new profile. Do you want the next person to login with this user name to create a new profile?</span>
 									</HelpBlock> }
 								</Field>
 						}

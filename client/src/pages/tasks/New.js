@@ -5,8 +5,8 @@ import TaskForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
-import Settings from 'Settings'
-import {Organization, Person, Task} from 'models'
+import {Organization, Task} from 'models'
+import * as TaskDefs from 'models/Task'
 
 import utils from 'utils'
 
@@ -46,8 +46,8 @@ class TaskNew extends Page {
 		const { task } = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[[`New ${Settings.fields.task.shortLabel}`, Task.pathForNew()]]} />
-				<TaskForm initialValues={task} title={`Create a new ${Settings.fields.task.shortLabel}`} />
+				<Breadcrumbs items={[[`New ${TaskDefs.shortLabel}`, Task.pathForNew()]]} />
+				<TaskForm initialValues={task} title={`Create a new ${TaskDefs.shortLabel}`} />
 			</div>
 		)
 	}
