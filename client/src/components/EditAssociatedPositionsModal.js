@@ -112,7 +112,7 @@ class BaseEditAssociatedPositionsModal extends Component {
 									placeholder={`Start typing to search for a ${assignedRole} position...`}
 									fields='uuid, name, code, type, person { uuid, name, rank, role }, organization { uuid, shortName, longName, identificationCode }'
 									template={pos => {
-										let components = []
+										const components = []
 										pos.person && components.push(pos.person.name)
 										pos.name && components.push(pos.name)
 										pos.code && components.push(pos.code)
@@ -138,7 +138,6 @@ class BaseEditAssociatedPositionsModal extends Component {
 		// Reset state before closing (cancel)
 		this.setState({
 			error: null,
-			// associatedPositions: this.props.position.associatedPositions.slice()
 		})
 		this.props.onCancel()
 	}

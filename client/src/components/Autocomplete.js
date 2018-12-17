@@ -142,7 +142,7 @@ export default class Autocomplete extends Component {
 
 	@autobind
 	_setSuggestions(list) {
-		let excludedUuids =  this._getExcludedUuids()
+		const excludedUuids =  this._getExcludedUuids()
 		if (excludedUuids) {
 			list = list.filter(suggestion => suggestion && suggestion.uuid && excludedUuids.indexOf(suggestion.uuid) === -1)
 		}
