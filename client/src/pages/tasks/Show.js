@@ -106,13 +106,13 @@ class BaseTaskShow extends Page {
 						<Fieldset>
 							<Field
 								name="shortName"
-								label={Settings.fields.task.fieldLabels.shortName}
+								label={Settings.fields.task.shortName}
 								component={FieldHelper.renderReadonlyField}
 							/>
 
 							<Field
 								name="longName"
-								label={Settings.fields.task.fieldLabels.longName}
+								label={Settings.fields.task.longName}
 								component={FieldHelper.renderReadonlyField}
 							/>
 
@@ -124,7 +124,7 @@ class BaseTaskShow extends Page {
 
 							<Field
 								name="responsibleOrg"
-								label={Settings.fields.task.fieldLabels.responsibleOrg}
+								label={Settings.fields.task.responsibleOrg}
 								component={FieldHelper.renderReadonlyField}
 								humanValue={task.responsibleOrg &&
 									<LinkTo organization={task.responsibleOrg}>
