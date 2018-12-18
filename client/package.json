@@ -21,7 +21,7 @@
     "chai": "^4.2.0",
     "chalk": "^2.4.1",
     "chromedriver": "^2.44.1",
-    "config": "^3.0.0",
+    "config": "^3.0.1",
     "copy-webpack-plugin": "^4.6.0",
     "cross-spawn": "^6.0.5",
     "css-loader": "^2.0.0",
