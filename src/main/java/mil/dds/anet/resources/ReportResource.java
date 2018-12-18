@@ -740,7 +740,7 @@ public class ReportResource {
 		return addCommentCommon(author, reportUuid, comment);
 	}
 
-	private Comment addCommentCommon(@Auth Person author, @PathParam("uuid") String reportUuid, Comment comment) {
+	private Comment addCommentCommon(Person author, String reportUuid, Comment comment) {
 		comment.setReportUuid(reportUuid);
 		comment.setAuthorUuid(author.getUuid());
 		comment = engine.getCommentDao().insert(comment);

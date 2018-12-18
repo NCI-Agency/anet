@@ -489,7 +489,7 @@ public class Report extends AbstractAnetBean {
 		ApprovalAction last = actions.get(0);
 		final List<ApprovalAction> compacted = new LinkedList<ApprovalAction>();
 		for (final ApprovalAction action : actions) {
-			if (action.getStep() != null && last.getStep() != null && action.getStep().getUuid().equals(last.getStep().getUuid()) == false) {
+			if (action.getStepUuid() != null && last.getStepUuid() != null && !action.getStepUuid().equals(last.getStepUuid())) {
 				compacted.add(last);
 			}
 			last = action;

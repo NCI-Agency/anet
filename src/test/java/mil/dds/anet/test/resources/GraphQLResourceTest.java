@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +19,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 		Map<String,Object> variables = new HashMap<String,Object>();
 		variables.put("personUuid", jack.getUuid());
 		variables.put("positionUuid", steve.loadPosition().getUuid());
-		variables.put("orgUuid", steve.loadPosition().loadOrganization(context).get().getUuid());
+		variables.put("orgUuid", steve.getPosition().getOrganizationUuid());
 		variables.put("searchQuery", "hospital");
 		variables.put("reportUuid", jack.loadAttendedReports(0, 1).getList().get(0).getUuid());
 		variables.put("pageNum", 0);
@@ -115,7 +115,7 @@ public class GraphQLResourceTest extends AbstractResourceTest {
 
 					input.close();
 				} catch (IOException e) { 
-					Assertions.fail("Unable to read file ", e);
+					fail("Unable to read file ", e);
 				}
 			}
 		}

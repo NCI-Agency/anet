@@ -145,10 +145,10 @@ public class Utils {
 
 		for (Organization o : orgs) {
 			String curr = o.getUuid();
-			String parentUuid = DaoUtils.getUuid(o.getParentOrg());
+			String parentUuid = o.getParentOrgUuid();
 			while (Objects.equals(parentUuid,topParentUuid) == false && orgMap.containsKey(parentUuid)) {
 				curr = parentUuid;
-				parentUuid = DaoUtils.getUuid(orgMap.get(parentUuid).getParentOrg());
+				parentUuid = orgMap.get(parentUuid).getParentOrgUuid();
 			}
 			result.put(o.getUuid(), orgMap.get(curr));
 		}

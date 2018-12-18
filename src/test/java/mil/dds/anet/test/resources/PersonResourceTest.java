@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,9 +11,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.GenericType;
 
 import org.joda.time.DateTime;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
@@ -39,9 +38,6 @@ public class PersonResourceTest extends AbstractResourceTest {
 	private static final String PERSON_FIELDS = "uuid name status role emailAddress phoneNumber rank biography country"
 			+ " gender endOfTourDate domainUsername pendingVerification createdAt updatedAt";
 	private static final String FIELDS = PERSON_FIELDS + " position { " + POSITION_FIELDS + " }";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testCreatePerson() {
@@ -112,7 +108,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		assertThat(newPerson2Uuid).isNotNull();
 		newPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2Uuid, new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(newPerson2.getUuid()).isNotNull();
-		assertThat(newPerson2.getPosition()).isNotNull();
+		assertThat(newPerson2.loadPosition()).isNotNull();
 		assertThat(newPerson2.getPosition().getUuid()).isEqualTo(newPos.getUuid());
 		
 		//Change this person w/ a new position, and ensure it gets changed. 
@@ -131,8 +127,10 @@ public class PersonResourceTest extends AbstractResourceTest {
 		newPerson2.setName("Changey McChangeface");
 		newPerson2.setPosition(newPos2);
 		//A person cannot change their own position
-		thrown.expect(ForbiddenException.class);
-		graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson2);
+		try {
+			graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson2);
+			fail("Expected ForbiddenException");
+		} catch (ForbiddenException expectedException) {}
 		
 		nrUpdated = graphQLHelper.updateObject(admin, "updatePerson", "person", "PersonInput", newPerson2);
 		assertThat(nrUpdated).isEqualTo(1);
@@ -140,13 +138,15 @@ public class PersonResourceTest extends AbstractResourceTest {
 		retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
 		assertThat(retPerson).isNotNull();
 		assertThat(retPerson.getName()).isEqualTo(newPerson2.getName());
-		assertThat(retPerson.getPosition()).isNotNull();
+		assertThat(retPerson.loadPosition()).isNotNull();
 		assertThat(retPerson.getPosition().getUuid()).isEqualTo(newPos2.getUuid());
 		
 		//Now newPerson2 who is a super user, should NOT be able to edit newPerson
 		//Because they are not in newPerson2's organization. 
-		thrown.expect(ForbiddenException.class);
-		graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson);
+		try {
+			graphQLHelper.updateObject(newPerson2, "updatePerson", "person", "PersonInput", newPerson);
+			fail("Expected ForbiddenException");
+		} catch (ForbiddenException expectedException) {}
 		
 		//Add some scary HTML to newPerson2's profile and ensure it gets stripped out. 
 		newPerson2.setBiography("<b>Hello world</b>.  I like script tags! <script>window.alert('hello world')</script>");
@@ -336,8 +336,10 @@ public class PersonResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Assert that loser is gone. 
-		thrown.expect(NotFoundException.class);
-		graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
+		try {
+			graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
+			fail("Expected NotFoundException");
+		} catch (NotFoundException expectedException) {}
 		
 		//Assert that the position is empty. 
 		Position winnerPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
@@ -362,12 +364,14 @@ public class PersonResourceTest extends AbstractResourceTest {
 		variables.put("winnerUuid", winnerUuid);
 		variables.put("loserUuid", loserUuid);
 		variables.put("copyPosition", true);
-		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($winnerUuid: String!, $loserUuid: String!, $copyPosition: Bool!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition) }", variables);
+		nrUpdated = graphQLHelper.updateObject(admin, "mutation ($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!) { payload: mergePeople (winnerUuid: $winnerUuid, loserUuid: $loserUuid, copyPosition: $copyPosition) }", variables);
 		assertThat(nrUpdated).isEqualTo(1);
 		
 		//Assert that loser is gone. 
-		thrown.expect(NotFoundException.class);
-		graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
+		try {
+			graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(), new GenericType<GraphQLResponse<Person>>() {});
+			fail("Expected NotFoundException");
+		} catch (NotFoundException expectedException) {}
 		
 		//Assert that the winner is in the position. 
 		winnerPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(), new GenericType<GraphQLResponse<Position>>() {});

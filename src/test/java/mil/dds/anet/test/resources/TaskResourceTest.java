@@ -1,15 +1,14 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.GenericType;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -24,9 +23,6 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 public class TaskResourceTest extends AbstractResourceTest {
 
 	private static final String FIELDS = "uuid shortName longName category customFieldRef1 { uuid } responsibleOrg { uuid } status";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void taskTest() { 
@@ -72,7 +68,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		final Integer nrUpdated2 = graphQLHelper.updateObject(admin, "updateTask", "task", "TaskInput", a);
 		assertThat(nrUpdated2).isEqualTo(1);
 		final Task returned2 = graphQLHelper.getObjectById(jack, "task", FIELDS, aUuid, new GenericType<GraphQLResponse<Task>>() {});
-		assertThat(returned2.getResponsibleOrg().getUuid()).isEqualTo(ef8.getUuid());
+		assertThat(returned2.getResponsibleOrgUuid()).isEqualTo(ef8.getUuid());
 		
 		//Fetch the tasks off the organization
 		final TaskSearchQuery queryTasks = new TaskSearchQuery();
@@ -125,7 +121,7 @@ public class TaskResourceTest extends AbstractResourceTest {
 		final List<Task> searchResults2 = searchObjects2.getList();
 		assertThat(searchResults2).isNotEmpty();
 		assertThat(searchResults2.stream()
-				.filter(p -> p.getResponsibleOrg().getUuid().equals(ef2.getUuid()))
+				.filter(p -> p.getResponsibleOrgUuid().equals(ef2.getUuid()))
 				.count())
 			.isEqualTo(searchResults2.size());
 		
@@ -177,8 +173,10 @@ public class TaskResourceTest extends AbstractResourceTest {
 		assertThat(aUuid).isNotNull();
 
 		// Trying to create another task with the same shortName should fail
-		thrown.expect(ClientErrorException.class);
-		graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
-				TestData.createTask("DupTest", "Test dups", "Test-EF"), new GenericType<GraphQLResponse<Task>>() {});
+		try {
+			graphQLHelper.createObject(admin, "createTask", "task", "TaskInput",
+					TestData.createTask("DupTest", "Test dups", "Test-EF"), new GenericType<GraphQLResponse<Task>>() {});
+			fail("Expected ClientErrorException");
+		} catch (ClientErrorException expectedException) {}
 	}
 }
