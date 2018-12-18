@@ -13,7 +13,7 @@ import {Person} from 'models'
 import API from 'api'
 
 import NotificationBadge from 'react-notification-badge'
-import { Classes } from '@blueprintjs/core'
+import { Classes, Icon } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
 import _isEmpty from 'lodash/isEmpty'
@@ -21,7 +21,6 @@ import _isEqual from 'lodash/isEqual'
 import moment from 'moment'
 
 import '@blueprintjs/core/lib/css/blueprint.css'
-import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 import './BlueprintOverrides.css'
 
 export { GRAPHQL_NOTES_FIELDS } from 'components/Model'
@@ -154,19 +153,23 @@ class BaseRelatedObjectNotes extends Component {
 					effect={['none', 'none']}
 				/>
 				<button
-					className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.COMMENT))}
+					className={classNames(Classes.BUTTON)}
 					onClick={this.toggleHide}
 					title="Show notes"
-				/>
+				>
+					<Icon icon={IconNames.COMMENT} />
+				</button>
 			  </div>
 			: <div style={{padding: 5}}>
 				<h4 style={{float: 'left', verticalAlign: 'text-bottom'}}>Notes</h4>
 				<span style={{float: 'right'}}>
 					<button
-						className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.ADD))}
+						className={classNames(Classes.BUTTON)}
 						title="Post a new note"
 						onClick={() => this.showRelatedObjectNoteModal('new')}
-					/>
+					>
+						<Icon icon={IconNames.ADD} />
+					</button>
 					<RelatedObjectNoteModal
 						note={{noteRelatedObjects: [{...this.props.relatedObject}]}}
 						showModal={this.state.showRelatedObjectNoteModal === 'new'}
@@ -174,10 +177,12 @@ class BaseRelatedObjectNotes extends Component {
 						onSuccess={this.hideNewRelatedObjectNoteModal}
 					/>
 					<button
-						className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.CROSS))}
+						className={classNames(Classes.BUTTON)}
 						onClick={this.toggleHide}
 						title="Hide notes"
-					/>
+					>
+						<Icon icon={IconNames.CROSS} />
+					</button>
 				</span>
 				<div style={{clear: 'both'}}>
 					<Messages error={this.state.error} success={this.state.success} />
@@ -201,10 +206,12 @@ class BaseRelatedObjectNotes extends Component {
 							{canEdit && (
 								<span style={{float: 'right'}}>
 									<button
-										className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.EDIT))}
+										className={classNames(Classes.BUTTON)}
 										title="Edit note"
 										onClick={() => this.showRelatedObjectNoteModal(note.uuid)}
-									/>
+									>
+										<Icon icon={IconNames.EDIT} />
+									</button>
 									<RelatedObjectNoteModal
 										note={note}
 										showModal={this.state.showRelatedObjectNoteModal === note.uuid}
@@ -217,7 +224,10 @@ class BaseRelatedObjectNotes extends Component {
 										objectDisplay={'#' + note.uuid}
 										bsStyle="warning"
 										title="Delete note"
-										className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.DELETE))} />
+										className={classNames(Classes.BUTTON)}
+									>
+										<Icon icon={IconNames.DELETE} />
+									</ConfirmDelete>
 								</span>
 							)}
 							<div
