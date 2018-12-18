@@ -68,7 +68,7 @@
     "bootstrap": "^3.3.7",
     "change-case": "^3.0.1",
     "classnames": "^2.2.6",
-    "core-js": "^2.6.0",
+    "core-js": "^2.6.1",
     "create-react-class": "^15.6.3",
     "d3": "^5.7.0",
     "draft-convert": "^2.1.4",
