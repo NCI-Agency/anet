@@ -122,7 +122,7 @@ public class TaskResource {
 			
 			//If changing the Responsible Organization, Super Users must also have super user privileges over the next org.
 			if (!Objects.equals(existing.getResponsibleOrgUuid(), p.getResponsibleOrgUuid())) {
-				if (DaoUtils.getUuid(p.getResponsibleOrg()) == null) {
+				if (p.getResponsibleOrgUuid() == null) {
 					throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 				}
 				AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrgUuid());
