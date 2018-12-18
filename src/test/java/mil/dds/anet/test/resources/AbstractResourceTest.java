@@ -68,7 +68,7 @@ public abstract class AbstractResourceTest {
 		final String fields = "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
 				+ " position {"
 				+ "   uuid name type status "
-				+ "   organization { uuid shortName }"
+				+ "   organization { uuid shortName parentOrg { uuid shortName } }"
 				+ " }";
 		if (stub.getDomainUsername() != null) { 
 			try { 

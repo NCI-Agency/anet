@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.UnsupportedEncodingException;
 
@@ -8,9 +9,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.GenericType;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -20,9 +19,6 @@ import mil.dds.anet.test.resources.utils.GraphQLResponse;
 public class TagResourceTest extends AbstractResourceTest {
 
 	private static final String FIELDS = "uuid name description createdAt";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void tagCreateTest() throws UnsupportedEncodingException {
@@ -52,12 +48,16 @@ public class TagResourceTest extends AbstractResourceTest {
 	@Test
 	public void tagExceptionTest() throws UnsupportedEncodingException {
 		// Get with unknown uuid
-		thrown.expect(NotFoundException.class);
-		graphQLHelper.getObjectById(admin, "tag", FIELDS, "-1", new GenericType<GraphQLResponse<Tag>>() {});
+		try {
+			graphQLHelper.getObjectById(admin, "tag", FIELDS, "-1", new GenericType<GraphQLResponse<Tag>>() {});
+			fail("Expected NotFoundException");
+		} catch (NotFoundException expectedException) {}
 
 		// Create with empty name
-		thrown.expect(BadRequestException.class);
-		graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", new Tag(), new GenericType<GraphQLResponse<Tag>>() {});
+		try {
+			graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", new Tag(), new GenericType<GraphQLResponse<Tag>>() {});
+			fail("Expected BadRequestException");
+		} catch (BadRequestException expectedException) {}
 	}
 
 	@Test

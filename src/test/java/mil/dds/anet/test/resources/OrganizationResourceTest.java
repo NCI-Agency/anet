@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -9,9 +10,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.GenericType;
 
 import org.joda.time.DateTime;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
@@ -33,9 +32,6 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 	private static final String FIELDS = "uuid shortName longName status identificationCode type";
 	private static final String POSITION_FIELDS = "uuid name code type status organization { uuid } location { uuid }";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void createAO() throws InterruptedException, ExecutionException {
@@ -69,7 +65,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(b1Uuid).isNotNull();
 		b1 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1Uuid, new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(b1.getUuid()).isNotNull();
-		assertThat(b1.getOrganization().getUuid()).isEqualTo(updated.getUuid());
+		assertThat(b1.getOrganizationUuid()).isEqualTo(updated.getUuid());
 
 		b1.setOrganization(updated);
 		nrUpdated = graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", b1);
@@ -77,7 +73,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 		Position ret = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, b1.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(ret.getOrganization()).isNotNull();
-		assertThat(ret.getOrganization().getUuid()).isEqualTo(updated.getUuid());
+		assertThat(ret.getOrganizationUuid()).isEqualTo(updated.getUuid());
 
 		//Create a child organizations
 		Organization child = new Organization();
@@ -167,9 +163,11 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 		assertThat(ao.getIdentificationCode()).isEqualTo(created.getIdentificationCode());
 
 		// Trying to create another AO with the same identificationCode should fail
-		thrown.expect(ClientErrorException.class);
-		graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
-				ao, new GenericType<GraphQLResponse<Organization>>() {});
+		try {
+			graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
+					ao, new GenericType<GraphQLResponse<Organization>>() {});
+			fail("Expected ClientErrorException");
+		} catch (ClientErrorException expectedException) {}
 	}
 
 	@Test
@@ -196,8 +194,10 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 		// Trying to update AO2 with the same identificationCode as AO1 should fail
 		created2.setIdentificationCode(ao1.getIdentificationCode());
-		thrown.expect(ClientErrorException.class);
-		graphQLHelper.updateObject(admin, "updateOrganization", "organization", "OrganizationInput", created2);
+		try {
+			graphQLHelper.updateObject(admin, "updateOrganization", "organization", "OrganizationInput", created2);
+			fail("Expected ClientErrorException");
+		} catch (ClientErrorException expectedException) {}
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -20,11 +21,8 @@ import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.GenericType;
 
-import org.assertj.core.api.Assertions;
 import org.joda.time.DateTime;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +70,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private static final String COMMENT_FIELDS = "uuid text author { uuid }";
 	private static final String LOCATION_FIELDS = "uuid name status lat lng";
 	private static final String ORGANIZATION_FIELDS = "uuid shortName longName status identificationCode type";
 	private static final String PERSON_FIELDS = "uuid name status role emailAddress phoneNumber rank biography country"
@@ -90,13 +89,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
 			+ " approvalStep { uuid }"
 			+ " location { %5$s }"
 			+ " tags { uuid name description }"
-			+ " comments { uuid text }"
+			+ " comments { %6$s }"
 			+ " authorizationGroups { uuid name }"
 			+ " approvalStatus { step { uuid } person { uuid } type createdAt }",
-			REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS);
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+			REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS, COMMENT_FIELDS);
 
 	@Test
 	public void createReport()
@@ -191,7 +187,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 		Position checkit = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS + " person { uuid }", authorBillet.getUuid(), new GenericType<GraphQLResponse<Position>>() {});
 		assertThat(checkit.getPerson()).isNotNull();
-		assertThat(checkit.getPerson().getUuid()).isEqualTo(author.getUuid());
+		assertThat(checkit.getPersonUuid()).isEqualTo(author.getUuid());
 
 		//Create Approval workflow for Advising Organization
 		final List<ApprovalStep> approvalSteps = new ArrayList<>();
@@ -262,8 +258,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report created = graphQLHelper.getObjectById(author, "report", FIELDS, createdUuid, new GenericType<GraphQLResponse<Report>>() {});
 		assertThat(created.getUuid()).isNotNull();
 		assertThat(created.getState()).isEqualTo(ReportState.DRAFT);
-		assertThat(created.getAdvisorOrg().getUuid()).isEqualTo(advisorOrg.getUuid());
-		assertThat(created.getPrincipalOrg().getUuid()).isEqualTo(principalOrg.getUuid());
+		assertThat(created.getAdvisorOrgUuid()).isEqualTo(advisorOrg.getUuid());
+		assertThat(created.getPrincipalOrgUuid()).isEqualTo(principalOrg.getUuid());
 		// check that HTML of report text is sanitized after create
 		assertThat(created.getReportText()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
 
@@ -275,15 +271,17 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
 
 		// Verify that author can no longer edit the report
-		thrown.expect(ForbiddenException.class);
-		graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput", returned, new GenericType<GraphQLResponse<Report>>() {});
+		try {
+			graphQLHelper.updateObject(author, "updateReport", "report", FIELDS, "ReportInput", returned, new GenericType<GraphQLResponse<Report>>() {});
+			fail("Expected ForbiddenException");
+		} catch (ForbiddenException expectedException) {}
 
 		logger.debug("Expecting report {} in step {} because of org {} on author {}",
 				new Object[] { returned.getUuid(), approval.getUuid(), advisorOrg.getUuid(), author.getUuid() });
-		assertThat(returned.getApprovalStep().getUuid()).isEqualTo(approval.getUuid());
+		assertThat(returned.getApprovalStepUuid()).isEqualTo(approval.getUuid());
 
 		//verify the location on this report
-		assertThat(returned.getLocation().getUuid()).isEqualTo(loc.getUuid());
+		assertThat(returned.getLocationUuid()).isEqualTo(loc.getUuid());
 
 		//verify the principals on this report
 		assertThat(returned.getAttendees()).contains(principal);
@@ -314,9 +312,9 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		ApprovalAction approvalAction = approvalStatus.get(0);
 		assertThat(approvalAction.getPerson()).isNull(); //Because this hasn't been approved yet.
 		assertThat(approvalAction.getCreatedAt()).isNull();
-		assertThat(approvalAction.getStep().getUuid()).isEqualTo(steps.get(0).getUuid());
+		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
 		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.getStep().getUuid()).isEqualTo(steps.get(1).getUuid());
+		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Reject the report
 		variables = new HashMap<>();
@@ -330,7 +328,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Check on report status to verify it was rejected
 		returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
 		assertThat(returned.getState()).isEqualTo(ReportState.REJECTED);
-		assertThat(returned.getApprovalStep()).isNull();
+		assertThat(returned.getApprovalStepUuid()).isNull();
 
 		//Author needs to re-submit
 		submitted = graphQLHelper.updateObject(author, "submitReport", "uuid", FIELDS, "String", created.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
@@ -345,11 +343,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Check on Report status to verify it got moved forward
 		returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
 		assertThat(returned.getState()).isEqualTo(ReportState.PENDING_APPROVAL);
-		assertThat(returned.getApprovalStep().getUuid()).isEqualTo(releaseApproval.getUuid());
+		assertThat(returned.getApprovalStepUuid()).isEqualTo(releaseApproval.getUuid());
 
 		//Verify that the wrong person cannot approve this report.
-		thrown.expect(ForbiddenException.class);
-		graphQLHelper.updateObject(approver1, "approveReport", "uuid", FIELDS, "String", created.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+		try {
+			graphQLHelper.updateObject(approver1, "approveReport", "uuid", FIELDS, "String", created.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+			fail("Expected ForbiddenException");
+		} catch (ForbiddenException expectedException) {}
 
 		//Approve the report
 		approved = graphQLHelper.updateObject(approver2, "approveReport", "uuid", FIELDS, "String", created.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
@@ -358,34 +358,33 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Check on Report status to verify it got moved forward
 		returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
 		assertThat(returned.getState()).isEqualTo(ReportState.RELEASED);
-		assertThat(returned.getApprovalStep()).isNull();
+		assertThat(returned.getApprovalStepUuid()).isNull();
 
 		//check on report status to see that it got approved.
 		approvalStatus = returned.getApprovalStatus();
 		assertThat(approvalStatus.size()).isEqualTo(2);
 		approvalAction = approvalStatus.get(0);
-		assertThat(approvalAction.getPerson().getUuid()).isEqualTo(approver1.getUuid());
+		assertThat(approvalAction.getPersonUuid()).isEqualTo(approver1.getUuid());
 		assertThat(approvalAction.getCreatedAt()).isNotNull();
-		assertThat(approvalAction.getStep().getUuid()).isEqualTo(steps.get(0).getUuid());
+		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
 		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.getStep().getUuid()).isEqualTo(steps.get(1).getUuid());
+		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Post a comment on the report because it's awesome
 		variables = new HashMap<>();
 		variables.put("uuid", created.getUuid());
 		variables.put("comment", TestData.createComment("This is a test comment one"));
 		Comment commentOne = graphQLHelper.updateObject(author,
-				"mutation ($uuid: String!, $comment: CommentInput!) { payload: addComment (uuid: $uuid, comment: $comment) { uuid text } }",
+				"mutation ($uuid: String!, $comment: CommentInput!) { payload: addComment (uuid: $uuid, comment: $comment) { " + COMMENT_FIELDS + " } }",
 				variables, new GenericType<GraphQLResponse<Comment>>() {});
 		assertThat(commentOne.getUuid()).isNotNull();
-		assertThat(commentOne.getReportUuid()).isEqualTo(created.getUuid());
-		assertThat(commentOne.getAuthor().getUuid()).isEqualTo(author.getUuid());
+		assertThat(commentOne.getAuthorUuid()).isEqualTo(author.getUuid());
 
 		variables = new HashMap<>();
 		variables.put("uuid", created.getUuid());
 		variables.put("comment", TestData.createComment("This is a test comment two"));
 		Comment commentTwo = graphQLHelper.updateObject(approver1,
-				"mutation ($uuid: String!, $comment: CommentInput!) { payload: addComment (uuid: $uuid, comment: $comment) { uuid text } }",
+				"mutation ($uuid: String!, $comment: CommentInput!) { payload: addComment (uuid: $uuid, comment: $comment) { " + COMMENT_FIELDS + " } }",
 				variables, new GenericType<GraphQLResponse<Comment>>() {});
 		assertThat(commentTwo.getUuid()).isNotNull();
 
@@ -403,21 +402,21 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(rollup.getList()).contains(returned);
 
 		//Pull recent People, Tasks, and Locations and verify that the records from the last report are there.
-		List<Person> recentPeople = graphQLHelper.getObjectList(author, "personRecents", PERSON_FIELDS, new GenericType<GraphQLResponse<List<Person>>>() {});
-		assertThat(recentPeople).contains(principalPerson);
+		AnetBeanList<Person> recentPeople = graphQLHelper.getAllObjects(author, "personRecents", PERSON_FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
+		assertThat(recentPeople.getList()).contains(principalPerson);
 
-		List<Task> recentTasks = graphQLHelper.getObjectList(author, "taskRecents", PERSON_FIELDS, new GenericType<GraphQLResponse<List<Task>>>() {});
-		assertThat(recentTasks).contains(action);
+		AnetBeanList<Task> recentTasks = graphQLHelper.getAllObjects(author, "taskRecents", TASK_FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Task>>>() {});
+		assertThat(recentTasks.getList()).contains(action);
 
-		List<Location> recentLocations = graphQLHelper.getObjectList(author, "locationRecents", PERSON_FIELDS, new GenericType<GraphQLResponse<List<Location>>>() {});
-		assertThat(recentLocations).contains(loc);
+		AnetBeanList<Location> recentLocations = graphQLHelper.getAllObjects(author, "locationRecents", LOCATION_FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Location>>>() {});
+		assertThat(recentLocations.getList()).contains(loc);
 
 		//Go and delete the entire approval chain!
 		advisorOrg.setApprovalSteps(ImmutableList.of());
 		nrUpdated = graphQLHelper.updateObject(admin, "updateOrganization", "organization", "OrganizationInput", advisorOrg);
 		assertThat(nrUpdated).isEqualTo(1);
 
-		Organization updatedOrg = graphQLHelper.getObjectById(admin, "organization", FIELDS, advisorOrg.getUuid(), new GenericType<GraphQLResponse<Organization>>() {});
+		Organization updatedOrg = graphQLHelper.getObjectById(admin, "organization", ORGANIZATION_FIELDS, advisorOrg.getUuid(), new GenericType<GraphQLResponse<Organization>>() {});
 		assertThat(updatedOrg).isNotNull();
 		assertThat(updatedOrg.loadApprovalSteps(context).get()).isEmpty();
 	}
@@ -474,7 +473,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		final List<ApprovalStep> steps = orgWithSteps.loadApprovalSteps(context).get();
 		assertThat(steps).isNotNull();
 		assertThat(steps).hasSize(1);
-		assertThat(returned.getApprovalStep().getUuid()).isEqualTo(steps.get(0).getUuid());
+		assertThat(returned.getApprovalStepUuid()).isEqualTo(steps.get(0).getUuid());
 
 		//Get the Person who is able to approve that report (nick@example.com)
 		Person nick = new Person();
@@ -527,7 +526,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report returned2 = graphQLHelper.getObjectById(jack, "report", FIELDS, r.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
 		assertThat(returned2.getUuid()).isEqualTo(r.getUuid());
 		assertThat(returned2.getState()).isEqualTo(Report.ReportState.PENDING_APPROVAL);
-		assertThat(returned2.getApprovalStep().getUuid()).isNotEqualTo(returned.getApprovalStep().getUuid());
+		assertThat(returned2.getApprovalStepUuid()).isNotEqualTo(returned.getApprovalStepUuid());
 	}
 
 	@Test
@@ -585,7 +584,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Verify the report changed
 		Report returned2 = graphQLHelper.getObjectById(elizabeth, "report", FIELDS, returned.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
 		assertThat(returned2.getIntent()).isEqualTo(r.getIntent());
-		assertThat(returned2.getLocation().getUuid()).isEqualTo(loc.getUuid());
+		assertThat(returned2.getLocationUuid()).isEqualTo(loc.getUuid());
 		assertThat(returned2.getTasks()).isEmpty();
 		final List<ReportPerson> returned2Attendees = returned2.getAttendees();
 		assertThat(returned2Attendees).hasSize(3);
@@ -650,7 +649,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream()
-				.filter(r -> (r.getAuthor().getUuid().equals(jack.getUuid()))).count())
+				.filter(r -> (r.getAuthorUuid().equals(jack.getUuid()))).count())
 			.isEqualTo(searchResults.getList().size());
 		final int numResults = searchResults.getList().size();
 
@@ -677,7 +676,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 					.anyMatch(rp -> (rp.getUuid().equals(steve.getUuid())));
 			}
 			catch (Exception e) {
-				Assertions.fail("error", e);
+				fail("error", e);
 				return false;
 			}
 		})).hasSameSizeAs(searchResults.getList());
@@ -703,7 +702,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 						.anyMatch(p -> p.getUuid().equals(task.getUuid()));
 			}
 			catch (Exception e) {
-				Assertions.fail("error", e);
+				fail("error", e);
 				return false;
 			}
 		})).hasSameSizeAs(searchResults.getList());
@@ -731,7 +730,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 					.equals(ef11.getUuid());
 			}
 			catch (Exception e) {
-				Assertions.fail("error", e);
+				fail("error", e);
 				return false;
 			}
 		})).hasSameSizeAs(searchResults.getList());
@@ -766,7 +765,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 					.equals(ef11.getUuid());
 			}
 			catch (Exception e) {
-				Assertions.fail("error", e);
+				fail("error", e);
 				return false;
 			}
 		})).hasSameSizeAs(searchResults.getList());
@@ -787,7 +786,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
 		assertThat(searchResults.getList().stream().filter(r ->
-				r.getLocation().getUuid().equals(cabot.getUuid())
+				r.getLocationUuid().equals(cabot.getUuid())
 			)).hasSameSizeAs(searchResults.getList());
 
 		//Search by Status.
@@ -826,7 +825,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 					.equals(mod.getUuid());
 			}
 			catch (Exception e) {
-				Assertions.fail("error", e);
+				fail("error", e);
 				return false;
 			}
 		})).hasSameSizeAs(searchResults.getList());
@@ -876,7 +875,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		searchResults = graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput",
 				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(searchResults.getList().stream().filter(r ->
-			r.getAdvisorOrg().getUuid().equals(ef22.getUuid()) && r.getPrincipalOrg().getUuid().equals(mod.getUuid())
+			r.getAdvisorOrgUuid().equals(ef22.getUuid()) && r.getPrincipalOrgUuid().equals(mod.getUuid())
 			).count()).isEqualTo(searchResults.getList().size());
 
 		//this might fail if there are any children of ef22 or mod, but there aren't in the base data set.
@@ -885,7 +884,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		searchResults = graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput",
 				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(searchResults.getList().stream().filter(r ->
-			r.getAdvisorOrg().getUuid().equals(ef22.getUuid()) && r.getPrincipalOrg().getUuid().equals(mod.getUuid())
+			r.getAdvisorOrgUuid().equals(ef22.getUuid()) && r.getPrincipalOrgUuid().equals(mod.getUuid())
 			).count()).isEqualTo(searchResults.getList().size());
 
 		//Search by Atmosphere
@@ -1027,16 +1026,20 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(r.getUuid()).isNotNull();
 
 		//Try to delete  by jack, this should fail.
-		thrown.expect(ForbiddenException.class);
-		graphQLHelper.deleteObject(jack, "deleteReport", r.getUuid());
+		try {
+			graphQLHelper.deleteObject(jack, "deleteReport", r.getUuid());
+			fail("Expected ForbiddenException");
+		} catch (ForbiddenException expectedException) {}
 
 		//Now have the author delete this report.
 		final Integer nrDeleted = graphQLHelper.deleteObject(liz, "deleteReport", r.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 
 		//Assert the report is gone.
-		thrown.expect(NotFoundException.class);
-		graphQLHelper.getObjectById(liz, "report", FIELDS, r.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+		try {
+			graphQLHelper.getObjectById(liz, "report", FIELDS, r.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+			fail("Expected NotFoundException");
+		} catch (NotFoundException expectedException) {}
 	}
 
 	@Test
@@ -1108,8 +1111,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				variables, new GenericType<GraphQLResponse<List<RollupGraph>>>() {});
 
 		//Submit the report
-		thrown.expect(BadRequestException.class);
-		graphQLHelper.updateObject(admin, "submitReport", "uuid", FIELDS, "String", r.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+		try {
+			graphQLHelper.updateObject(admin, "submitReport", "uuid", FIELDS, "String", r.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+			fail("Expected BadRequestException");
+		} catch (BadRequestException expectedException) {}
 
 		//Oops set the engagementDate.
 		r.setEngagementDate(DateTime.now());
@@ -1133,8 +1138,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
 				variables, new GenericType<GraphQLResponse<List<RollupGraph>>>() {});
 
-		final Position pos = admin.getPosition();
-		final Organization org = pos.getOrganization();
+		final Position pos = admin.loadPosition();
+		final Organization org = pos.loadOrganization(context).get();
 		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
@@ -1177,8 +1182,10 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				variables, new GenericType<GraphQLResponse<List<RollupGraph>>>() {});
 
 		//Submit the report
-		thrown.expect(BadRequestException.class);
-		graphQLHelper.updateObject(elizabeth, "submitReport", "uuid", FIELDS, "String", r.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+		try {
+			graphQLHelper.updateObject(elizabeth, "submitReport", "uuid", FIELDS, "String", r.getUuid(), new GenericType<GraphQLResponse<Report>>() {});
+			fail("Expected BadRequestException");
+		} catch (BadRequestException expectedException) {}
 
 		//Oops set the engagementDate.
 		r.setEngagementDate(DateTime.now());
@@ -1202,18 +1209,22 @@ public class ReportsResourceTest extends AbstractResourceTest {
 				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
 				variables, new GenericType<GraphQLResponse<List<RollupGraph>>>() {});
 
-		final Position pos = elizabeth.getPosition();
-		final Organization org = pos.getOrganization();
+		final Position pos = elizabeth.loadPosition();
+		final Organization org = pos.loadOrganization(context).get();
 		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
 		//Elizabeth's organization should have one more report RELEASED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
-		final String orgUuid = org.loadParentOrg(context).get().getUuid();
+		final Organization po = org.loadParentOrg(context).get();
+		final String orgUuid = po.getUuid();
 		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
 		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
 		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
 		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
+		logger.error("GJ: org={}, parent={}, nro={} [shortname={}], diff={}, startCt={}, endCt={}", org, po, nro, org.getShortName(), diff, startCt, endCt);
+		logger.error("GJ: startGraph={}, orgReportsStart={}", startGraph, orgReportsStart);
+		logger.error("GJ: endGraph={}, orgReportsEnd={}", endGraph, orgReportsEnd);
 		assertThat(startCt).isEqualTo(endCt - diff);
 	}
 
