@@ -9933,10 +9933,10 @@ react-themeable@^1.1.0:
   dependencies:
     object-assign "^3.0.0"
 
-react-toastify@^4.4.3:
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-4.4.3.tgz#bf4a514b4a160e20ad227a95bd84c9853d1f86ca"
-  integrity sha512-MHv9eAkb02xLKemOtS1mnv+jq+2iThYG8pWJxRCj5s/wgr5lU69uVLh/bTy7lU/HJq0uJEcdwfuIeHr4KGuoUQ==
+react-toastify@^4.5.1:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/react-toastify/-/react-toastify-4.5.1.tgz#6379d779898107799bf5d08434a4c308721254dd"
+  integrity sha512-6qWSL7WCwGQ965TgBXYgrxucA85J3CUJRllJ6CHd5+DnA+LJZJAMVUYAOT2rcTMUpcB7pjn3EwknorG2gL7fhA==
   dependencies:
     classnames "^2.2.6"
     prop-types "^15.6.0"
