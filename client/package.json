@@ -84,7 +84,7 @@
     "leaflet-gesture-handling": "^1.1.8",
     "locale-compare-polyfill": "^0.0.2",
     "lodash": "^4.17.11",
-    "moment": "^2.22.2",
+    "moment": "^2.23.0",
     "object-assign": "^4.1.1",
     "pluralize": "^7.0.0",
     "promise": "^8.0.2",
