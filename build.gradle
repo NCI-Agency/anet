@@ -59,7 +59,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.9.2'
+	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.10.0'
 
 	compile "com.microsoft.sqlserver:mssql-jdbc:6.2.2.jre8"
 
