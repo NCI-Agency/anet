@@ -47,6 +47,9 @@ public class AuthorizationGroup extends AbstractAnetBean {
 
 	@GraphQLQuery(name="positions")
 	public CompletableFuture<List<Position>> loadPositions(@GraphQLRootContext Map<String, Object> context) {
+		if (positions != null) {
+			return CompletableFuture.completedFuture(positions);
+		}
 		return AnetObjectEngine.getInstance().getAuthorizationGroupDao().getPositionsForAuthorizationGroup(context, uuid)
 				.thenApply(o -> { positions = o; return o; });
 	}

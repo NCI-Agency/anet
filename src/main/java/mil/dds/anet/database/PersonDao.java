@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -36,12 +37,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 		super(h, "Person", tableName, PERSON_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, "uuids", new PersonMapper());
-		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT \"peoplePositions\".\"positionUuid\" AS \"positionUuid\", "
-				+ "\"peoplePositions\".\"personUuid\" AS \"personUuid\", "
-				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
-				+ PositionDao.POSITIONS_FIELDS + " FROM \"peoplePositions\" "
-				+ "LEFT JOIN positions ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
-				+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+
+		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT * FROM \"peoplePositions\" "
+				+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
 	}
 	
@@ -52,10 +50,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 	}
 
 	public Person getByUuid(String uuid) {
-		return dbHandle.createQuery("/* personGetByUuid */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid = :uuid")
-				.bind("uuid",  uuid)
-				.map(new PersonMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -236,9 +231,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 
 	}
 
-	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Person person) {
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, String personUuid) {
 		return new ForeignKeyFetcher<PersonPositionHistory>()
-				.load(context, "person.personPositionHistory", person.getUuid())
+				.load(context, "person.personPositionHistory", personUuid)
 				.thenApply(l ->
 		{
 			return PersonPositionHistory.getDerivedHistory(l);

@@ -28,7 +28,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
-import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
@@ -61,16 +60,14 @@ public class SqliteReportSearcher implements IReportSearcher {
 
 	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
 		StringBuffer sql = new StringBuffer();
-		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS + "," + PersonDao.PERSON_FIELDS);
+		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
 		if (query.getIncludeEngagementDayOfWeek()) {
 			sql.append(", ");
 			sql.append(String.format(this.isoDowFormat, "engagementDate"));
 			sql.append(" as \"engagementDayOfWeek\" ");
 		}
 		sql.append(" FROM reports ");
-		sql.append(", people ");
-		sql.append("WHERE reports.\"authorUuid\" = people.uuid ");
-		sql.append("AND reports.uuid IN ( SELECT reports.uuid FROM reports ");
+		sql.append("WHERE reports.uuid IN ( SELECT reports.uuid FROM reports ");
 		sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid ");
 		sql.append("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid ");
 		

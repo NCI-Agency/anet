@@ -305,7 +305,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 		//Assign to an AO
 		final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization", "OrganizationInput",
 				OrganizationTest.getTestAO(true), new GenericType<GraphQLResponse<Organization>>() {});
-		test.setOrganization(Organization.createWithUuid(aoUuid));
+		test.setOrganization(createOrganizationWithUuid(aoUuid));
 
 		String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position", "PositionInput",
 				test, new GenericType<GraphQLResponse<Position>>() {});

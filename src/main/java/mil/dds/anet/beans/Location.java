@@ -78,10 +78,4 @@ public class Location extends AbstractAnetBean {
 		return String.format("(%s) - %s [%f, %f]", uuid, name, lat, lng);
 	}
 
-	public static Location createWithUuid(String uuid) {
-		final Location l = new Location();
-		l.setUuid(uuid);
-		return l;
-	}
-
 }

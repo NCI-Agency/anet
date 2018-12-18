@@ -10,10 +10,11 @@ import java.util.concurrent.CompletableFuture;
 
 import org.joda.time.DateTime;
 
-import mil.dds.anet.utils.DaoUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.IdFetcher;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Task extends AbstractAnetBean {
 
@@ -31,11 +32,11 @@ public class Task extends AbstractAnetBean {
 	String customFieldEnum1;
 	String customFieldEnum2;
 
-	Task customFieldRef1;
+	private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
 
 	TaskStatus status;
 
-	Organization responsibleOrg;
+	private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
 
 	public void setPlannedCompletion(DateTime plannedCompletion) {
 		this.plannedCompletion = plannedCompletion;
@@ -111,17 +112,32 @@ public class Task extends AbstractAnetBean {
 
 	@GraphQLQuery(name="customFieldRef1")
 	public CompletableFuture<Task> loadCustomFieldRef1(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Task>().load(context, "tasks", customFieldRef1)
-				.thenApply(o -> { customFieldRef1 = o; return o; });
+		if (customFieldRef1.hasForeignObject()) {
+			return CompletableFuture.completedFuture(customFieldRef1.getForeignObject());
+		}
+		return new UuidFetcher<Task>().load(context, "tasks", customFieldRef1.getForeignUuid())
+				.thenApply(o -> { customFieldRef1.setForeignObject(o); return o; });
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
+		this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1Uuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getCustomFieldRef1Uuid() {
+		return customFieldRef1.getForeignUuid();
 	}
 
 	public void setCustomFieldRef1(Task customFieldRef1) {
-		this.customFieldRef1 = customFieldRef1;
+		this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1);
 	}
 
 	@GraphQLIgnore
 	public Task getCustomFieldRef1() {
-		return customFieldRef1;
+		return customFieldRef1.getForeignObject();
 	}
 
 	@GraphQLQuery(name="status")
@@ -133,25 +149,34 @@ public class Task extends AbstractAnetBean {
 		this.status = status;
 	}
 
-	public void setResponsibleOrg(Organization org) { 
-		this.responsibleOrg = org;
-	}
-
 	@GraphQLQuery(name="responsibleOrg")
 	public CompletableFuture<Organization> loadResponsibleOrg(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Organization>().load(context, "organizations", responsibleOrg)
-				.thenApply(o -> { responsibleOrg = o; return o; });
+		if (responsibleOrg.hasForeignObject()) {
+			return CompletableFuture.completedFuture(responsibleOrg.getForeignObject());
+		}
+		return new UuidFetcher<Organization>().load(context, "organizations", responsibleOrg.getForeignUuid())
+				.thenApply(o -> { responsibleOrg.setForeignObject(o); return o; });
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setResponsibleOrgUuid(String responsibleOrgUuid) {
+		this.responsibleOrg = new ForeignObjectHolder<>(responsibleOrgUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getResponsibleOrgUuid() {
+		return responsibleOrg.getForeignUuid();
+	}
+
+	public void setResponsibleOrg(Organization org) {
+		this.responsibleOrg = new ForeignObjectHolder<>(org);
 	}
 
 	@GraphQLIgnore
-	public Organization getResponsibleOrg() { 
-		return responsibleOrg;
-	}
-
-	public static Task createWithUuid(String uuid) {
-		final Task p = new Task();
-		p.setUuid(uuid);
-		return p;
+	public Organization getResponsibleOrg() {
+		return responsibleOrg.getForeignObject();
 	}
 
 	@Override
@@ -164,7 +189,7 @@ public class Task extends AbstractAnetBean {
 				&& Objects.equals(other.getShortName(), shortName)
 				&& Objects.equals(other.getLongName(), longName)
 				&& Objects.equals(other.getCategory(), category)
-				&& uuidEqual(other.getCustomFieldRef1(), customFieldRef1);
+				&& Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid());
 	}
 
 	@Override
@@ -174,7 +199,7 @@ public class Task extends AbstractAnetBean {
 
 	@Override
 	public String toString() {
-		return String.format("[uuid:%s shortName:%s category:%s customFieldRef1:%s]", uuid, shortName, category, DaoUtils.getUuid(customFieldRef1));
+		return String.format("[uuid:%s shortName:%s category:%s customFieldRef1:%s]", uuid, shortName, category, getCustomFieldRef1Uuid());
 	}
 
 }

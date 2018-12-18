@@ -36,10 +36,4 @@ public class ReportPerson extends Person {
 		return Objects.hash(super.hashCode(), primary);
 	}
 
-	public static ReportPerson createWithUuid(String uuid) {
-		final ReportPerson rp = new ReportPerson();
-		rp.setUuid(uuid);
-		return rp;
-	}
-
 }

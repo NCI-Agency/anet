@@ -1,17 +1,24 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Comment extends AbstractAnetBean {
 
 	private String reportUuid;
 	
-	private Person author;
+	private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
 	private String text;
 
 	@GraphQLQuery(name="reportUuid")
@@ -24,12 +31,33 @@ public class Comment extends AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="author")
+	public CompletableFuture<Person> loadAuthor(@GraphQLRootContext Map<String, Object> context) {
+		if (author.hasForeignObject()) {
+			return CompletableFuture.completedFuture(author.getForeignObject());
+		}
+		return new UuidFetcher<Person>().load(context, "people", author.getForeignUuid())
+				.thenApply(o -> { author.setForeignObject(o); return o; });
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setAuthorUuid(String authorUuid) {
+		this.author = new ForeignObjectHolder<>(authorUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getAuthorUuid() {
+		return author.getForeignUuid();
+	}
+
+	@GraphQLIgnore
 	public Person getAuthor() {
-		return author;
+		return author.getForeignObject();
 	}
 
 	public void setAuthor(Person author) {
-		this.author = author;
+		this.author = new ForeignObjectHolder<>(author);
 	}
 
 	@GraphQLQuery(name="text")
@@ -41,7 +69,6 @@ public class Comment extends AbstractAnetBean {
 		this.text = Utils.trimStringReturnNull(text);
 	}
 	
-	
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || o.getClass() != this.getClass()) {
@@ -49,7 +76,7 @@ public class Comment extends AbstractAnetBean {
 		}
 		Comment c = (Comment) o;
 		return Objects.equals(c.getUuid(), uuid)
-				&& uuidEqual(c.getAuthor(), author)
+				&& Objects.equals(c.getAuthorUuid(), getAuthorUuid())
 				&& Objects.equals(c.getText(), text)
 				&& Objects.equals(c.getReportUuid(), reportUuid)
 				&& Objects.equals(c.getUpdatedAt(), updatedAt)
@@ -63,13 +90,7 @@ public class Comment extends AbstractAnetBean {
 	
 	@Override
 	public String toString() {
-		return String.format("[%s] - [Author:%s,Report:%d] - (%s)", uuid, author.getUuid(), reportUuid, text);
-	}
-
-	public static Comment createWithUuid(String uuid) {
-		final Comment c = new Comment();
-		c.setUuid(uuid);
-		return c;
+		return String.format("[%s] - [Author:%s,Report:%d] - (%s)", uuid, getAuthorUuid(), reportUuid, text);
 	}
 
 }

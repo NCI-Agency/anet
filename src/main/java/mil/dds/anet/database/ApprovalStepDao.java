@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -51,10 +52,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 
 	@Override
 	public ApprovalStep getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getApprovalStepByUuid */ SELECT * from \"approvalSteps\" where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new ApprovalStepMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -175,17 +173,17 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 				.load(context, "approvalStep.approvers", approvalStepUuid);
 	}
 
-	public int addApprover(ApprovalStep step, Position position) {
+	public int addApprover(ApprovalStep step, String positionUuid) {
 		return dbHandle.createUpdate("/* addApprover */ INSERT INTO approvers (\"approvalStepUuid\", \"positionUuid\") VALUES (:stepUuid, :positionUuid)")
 				.bind("stepUuid", step.getUuid())
-				.bind("positionUuid", position.getUuid())
+				.bind("positionUuid", positionUuid)
 				.execute();
 	}
 	
-	public int removeApprover(ApprovalStep step, Position position) {
+	public int removeApprover(ApprovalStep step, String positionUuid) {
 		return dbHandle.createUpdate("/* removeApprover */ DELETE FROM approvers WHERE \"approvalStepUuid\" = :stepUuid AND \"positionUuid\" = :positionUuid")
 				.bind("stepUuid", step.getUuid())
-				.bind("positionUuid", position.getUuid())
+				.bind("positionUuid", positionUuid)
 				.execute();
 	}
 }

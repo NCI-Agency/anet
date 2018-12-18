@@ -32,7 +32,7 @@ public class NoteResource {
 		checkText(n);
 		checkNoteRelatedObjects(n);
 		final Person user = DaoUtils.getUserFromContext(context);
-		n.setAuthor(user);
+		n.setAuthorUuid(DaoUtils.getUuid(user));
 		n = dao.insert(n);
 		AnetAuditLogger.log("Note {} created by {}", n, user);
 		return n;

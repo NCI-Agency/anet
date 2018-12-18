@@ -93,7 +93,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		System.out.print("Name of Administrator Position >>");
 		Position adminPos = new Position();
 		adminPos.setType(PositionType.ADMINISTRATOR);
-		adminPos.setOrganization(adminOrg);
+		adminPos.setOrganizationUuid(adminOrg.getUuid());
 		adminPos.setName(scanner.nextLine());
 		adminPos.setStatus(Position.PositionStatus.ACTIVE);
 		adminPos = engine.getPositionDao().insert(adminPos);
@@ -108,7 +108,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		admin.setRole(Role.ADVISOR);
 		admin.setStatus(PersonStatus.ACTIVE);
 		admin = engine.getPersonDao().insert(admin);
-		engine.getPositionDao().setPersonInPosition(admin, adminPos);
+		engine.getPositionDao().setPersonInPosition(admin.getUuid(), adminPos.getUuid());
 		System.out.println("... Person " + admin.getUuid() + " Saved!");
 		
 		//Set Default Approval Chain.

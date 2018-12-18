@@ -81,7 +81,7 @@ public class OrganizationResourceTest extends AbstractResourceTest {
 
 		//Create a child organizations
 		Organization child = new Organization();
-		child.setParentOrg(Organization.createWithUuid(created.getUuid()));
+		child.setParentOrg(createOrganizationWithUuid(created.getUuid()));
 		child.setShortName("AO McChild");
 		child.setLongName("Child McAo");
 		child.setStatus(OrganizationStatus.ACTIVE);

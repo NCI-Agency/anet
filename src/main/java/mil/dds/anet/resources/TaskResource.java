@@ -83,11 +83,11 @@ public class TaskResource {
 
 	private Task createTaskCommon(Person user, Task p) {
 		if (AuthUtils.isAdmin(user) == false) { 
-			if (p.getResponsibleOrg() == null || p.getResponsibleOrg().getUuid() == null) {
+			if (p.getResponsibleOrgUuid() == null) {
 				throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 			}
 			//Admin Users can only create tasks within their organization.
-			AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrg());
+			AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrgUuid());
 		}
 		try {
 			p = dao.insert(p);
@@ -118,14 +118,14 @@ public class TaskResource {
 		//Admins can edit all Tasks, SuperUsers can edit tasks within their EF. 
 		if (AuthUtils.isAdmin(user) == false) { 
 			Task existing = dao.getByUuid(p.getUuid());
-			AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrg());
+			AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrgUuid());
 			
 			//If changing the Responsible Organization, Super Users must also have super user privileges over the next org.
-			if (!Objects.equals(DaoUtils.getUuid(existing.getResponsibleOrg()), DaoUtils.getUuid(p.getResponsibleOrg()))) {
+			if (!Objects.equals(existing.getResponsibleOrgUuid(), p.getResponsibleOrgUuid())) {
 				if (DaoUtils.getUuid(p.getResponsibleOrg()) == null) {
 					throw new WebApplicationException("You must select a responsible organization", Status.FORBIDDEN);
 				}
-				AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrg());
+				AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrgUuid());
 			}
 		}
 		

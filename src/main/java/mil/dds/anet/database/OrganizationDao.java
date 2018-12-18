@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,11 +50,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	}
 
 	public Organization getByUuid(String uuid) {
-		return dbHandle.createQuery(
-				"/* getOrgByUuid */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new OrganizationMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override

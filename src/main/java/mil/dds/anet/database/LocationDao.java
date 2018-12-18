@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.Handle;
@@ -44,10 +45,7 @@ public class LocationDao implements IAnetDao<Location> {
 	}
 
 	public Location getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getLocationByUuid */ SELECT * from locations where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new LocationMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override

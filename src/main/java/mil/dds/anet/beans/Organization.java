@@ -10,13 +10,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
-import mil.dds.anet.views.IdFetcher;
+import mil.dds.anet.views.UuidFetcher;
 
 public class Organization extends AbstractAnetBean {
 
@@ -29,7 +31,7 @@ public class Organization extends AbstractAnetBean {
 	String longName;
 	private OrganizationStatus status;
 	private String identificationCode;
-	Organization parentOrg;
+	private ForeignObjectHolder<Organization> parentOrg = new ForeignObjectHolder<>();
 	OrganizationType type;
 	
 	/* The following are all Lazy Loaded */
@@ -77,19 +79,34 @@ public class Organization extends AbstractAnetBean {
 
 	@GraphQLQuery(name="parentOrg")
 	public CompletableFuture<Organization> loadParentOrg(@GraphQLRootContext Map<String, Object> context) {
-		return new IdFetcher<Organization>().load(context, "organizations", parentOrg)
-				.thenApply(o -> { parentOrg = o; return o; });
+		if (parentOrg.hasForeignObject()) {
+			return CompletableFuture.completedFuture(parentOrg.getForeignObject());
+		}
+		return new UuidFetcher<Organization>().load(context, "organizations", parentOrg.getForeignUuid())
+				.thenApply(o -> { parentOrg.setForeignObject(o); return o; });
 	}
-	
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setParentOrgUuid(String parentOrgUuid) {
+		this.parentOrg = new ForeignObjectHolder<>(parentOrgUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getParentOrgUuid() {
+		return parentOrg.getForeignUuid();
+	}
+
 	@GraphQLIgnore
 	public Organization getParentOrg() {
-		return parentOrg;
+		return parentOrg.getForeignObject();
 	}
-	
+
 	public void setParentOrg(Organization parentOrg) {
-		this.parentOrg = parentOrg;
+		this.parentOrg = new ForeignObjectHolder<>(parentOrg);
 	}
-	
+
 	@GraphQLQuery(name="type")
 	public OrganizationType getType() {
 		return type;
@@ -100,16 +117,19 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="positions") // TODO: batch load? (used in organizations/Show.js)
-	public List<Position> loadPositions() {
+	public synchronized List<Position> loadPositions() {
 		if (positions == null) {
 			positions = AnetObjectEngine.getInstance()
-					.getPositionDao().getByOrganization(this);
+					.getPositionDao().getByOrganization(uuid);
 		}
 		return positions;
 	}
 	
 	@GraphQLQuery(name="approvalSteps")
 	public CompletableFuture<List<ApprovalStep>> loadApprovalSteps(@GraphQLRootContext Map<String, Object> context) {
+		if (approvalSteps != null) {
+			return CompletableFuture.completedFuture(approvalSteps);
+		}
 		return AnetObjectEngine.getInstance()
 				.getApprovalStepsForOrg(context, uuid).thenApply(o -> { approvalSteps = o; return o; });
 	}
@@ -124,7 +144,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="childrenOrgs") // TODO: batch load? (used in organizations/Show.js)
-	public List<Organization> loadChildrenOrgs() { 
+	public synchronized List<Organization> loadChildrenOrgs() {
 		if (childrenOrgs == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
 			query.setPageSize(Integer.MAX_VALUE);
@@ -136,7 +156,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="allDescendantOrgs") // TODO: batch load? (used in App.js for me → position → organization)
-	public List<Organization> loadAllDescendants() { 
+	public synchronized List<Organization> loadAllDescendants() {
 		if (descendants == null) { 
 			OrganizationSearchQuery query = new OrganizationSearchQuery();
 			query.setPageSize(Integer.MAX_VALUE);
@@ -148,7 +168,7 @@ public class Organization extends AbstractAnetBean {
 	}
 	
 	@GraphQLQuery(name="tasks") // TODO: batch load? (used in organizations/Edit.js)
-	public List<Task> loadTasks() { 
+	public synchronized List<Task> loadTasks() {
 		if (tasks == null) { 
 			tasks = AnetObjectEngine.getInstance().getTaskDao().getTasksByOrganizationUuid(this.getUuid());
 		}
@@ -176,12 +196,6 @@ public class Organization extends AbstractAnetBean {
 			query.setPrincipalOrgUuid(uuid);
 		}
 		return AnetObjectEngine.getInstance().getReportDao().search(query);
-	}
-
-	public static Organization createWithUuid(String uuid) {
-		final Organization ao = new Organization();
-		ao.setUuid(uuid);
-		return ao;
 	}
 	
 	@Override
