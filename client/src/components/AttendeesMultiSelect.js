@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import { Button, Col, FormGroup, Grid, Row, Table } from 'react-bootstrap'
+import { Button, Col, Collapse, FormGroup, Grid, Row, Table, Tabs, Tab } from 'react-bootstrap'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import {Person, Position} from 'models'
 import LinkTo from 'components/LinkTo'
@@ -13,6 +13,34 @@ import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
 import {SEARCH_CONFIG, searchFormToQuery} from 'searchUtils'
 
+const AttendeesTable = (props) => {
+	return (
+		<Table responsive hover striped className="people-search-results">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Position</th>
+					<th>Location</th>
+					<th>Organization</th>
+				</tr>
+			</thead>
+			<tbody>
+				{Person.map(props.attendees, person => (
+					<tr key={person.uuid}>
+						<td>
+							<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
+							<LinkTo person={person}/>
+						</td>
+						<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
+						<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
+						<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
+					</tr>
+				))}
+			</tbody>
+		</Table>
+	)
+}
+
 export default class AttendeesMultiSelect extends Component {
 	static propTypes = {
 		addFieldName: PropTypes.string.isRequired, // name of the autocomplete field
@@ -21,8 +49,7 @@ export default class AttendeesMultiSelect extends Component {
 		renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired, // how to render the selected items
 		onAddItem: PropTypes.func.isRequired,
 		onRemoveItem: PropTypes.func,
-		shortcuts: PropTypes.array,
-		shortcutsTitle: PropTypes.string,
+		shortcutDefs: PropTypes.object,
 		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
 		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 
@@ -42,20 +69,20 @@ export default class AttendeesMultiSelect extends Component {
 
 	static defaultProps = {
 		addFieldLabel: 'Add item',
-		shortcuts: [],
-		shortcutsTitle: 'Recents',
+		shortcutDefs: {},
 		renderExtraCol: true,
 	}
 
 	state = {
 		searchTerms: '',
+		shortcutKey: Object.keys(this.props.shortcutDefs)[0],
 		suggestions: [],
-		advanced: false,
 		pageNum: 0,
+		showShortcuts: false,
 	}
 
 	render() {
-		const {addFieldName, addFieldLabel, renderSelected, items, onAddItem, onRemoveItem, shortcuts, shortcutsTitle, renderExtraCol, addon, ...autocompleteProps} = this.props
+		const {addFieldName, addFieldLabel, renderSelected, items, onAddItem, onRemoveItem, shortcutDefs, renderExtraCol, addon, ...autocompleteProps} = this.props
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		return (
 			<React.Fragment>
@@ -65,221 +92,67 @@ export default class AttendeesMultiSelect extends Component {
 					component={renderInputField}
 					value={this.state.searchTerms}
 					onChange={this.changeSearchTerms}
+					onFocus={() => this.setState({showShortcuts: true}, () => this.fetchSuggestions())}
 				/>
-				<Grid fluid>
+				<Collapse in={this.state.showShortcuts}>
 					<Row>
-						<Col xs={3} style={{textAlign: "left"}}>
-							<Row>
-								<ButtonToggleGroup value={this.state.advanced ? 'advanced': 'common'} onChange={this.changeSearchType}> 
-									<Button value="common" onClick={() => this.setState({advanced: false})}>Common</Button>
-									<Button value="advanced" onClick={() => this.setState({advanced: true})}>Advanced</Button>
-								</ButtonToggleGroup>
-							</Row>
-							{this.state.advanced ?
-								<AdvancedSearchForm
-									query={{objectType: this.props.objectType.searchObjectType}}
-									searchObjectTypes={[this.props.objectType]}
-									onSearchCallback={this.onSearchCallback}
-									hideObjectType={true}
-									hideTextField={true} />
-							:
-								<Row className="shortcut-list">
-									<Button value="common" bsStyle="link" onClick={() => this.fetchMyColleagues()}>My colleagues</Button>
-									<Button value="common" bsStyle="link" onClick={() => this.fetchRecentContacts()}>Recent contacts</Button>
-									<Button value="common" bsStyle="link" onClick={() => this.fetchActivePrincipals()}>Active principals</Button>
-								</Row>
-							}
-						</Col>
-						<Col xs={9}>
-								<Table responsive hover striped className="people-search-results">
-									<thead>
-										<tr>
-											<th>Name</th>
-											<th>Position</th>
-											<th>Location</th>
-											<th>Organization</th>
-											<th>&nbsp;</th>
-										</tr>
-									</thead>
-									<tbody>
-										{Person.map(this.state.suggestions, person =>
-											<tr key={person.uuid}>
-												<td>
-													<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-													<LinkTo person={person}/>
-												</td>
-												<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-												<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
-												<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
-												<td>
-													<Table responsive hover striped className="people-search-results">
-														<tbody>
-															<tr>
-																<td>{person.position.type === Position.TYPE.PRINCIPAL ? 'Is advised by' : 'Advises'}</td>
-																<td>counterpart 1 name</td>
-																<td>counterpart 1 position</td>
-																<td>counterpart 1 location</td>
-																<td>counterpart 1 org</td>
-															</tr>
-															<tr>
-																<td>{person.position.type === Position.TYPE.PRINCIPAL ? 'Is advised by' : 'Advises'}</td>
-																<td>counterpart 2 name</td>
-																<td>counterpart 2 position</td>
-																<td>counterpart 2 location</td>
-																<td>counterpart 2 org</td>
-															</tr>
-														</tbody>
-													</Table>
-												</td>
-											</tr>
-										)}
-									</tbody>
-								</Table>
+						<Col sm={2} />
+						<Col sm={7}>
+							<ButtonToggleGroup value={this.state.shortcutKey} onChange={this.changeShortcut} className="hide-for-print">
+								{Object.keys(shortcutDefs).map(shortcutKey =>
+									<Button key={shortcutKey} value={shortcutKey}>{shortcutDefs[shortcutKey].label}</Button>
+								)}
+							</ButtonToggleGroup>
+							<AttendeesTable attendees={this.state.suggestions} />
 						</Col>
 					</Row>
-				</Grid>
+				</Collapse>
 			</React.Fragment>
 		)
 	}
 
 	changeSearchTerms = (event) => {
-		this.setState({searchTerms: event.target.value}, () => this.fetchSuggestions)
+		this.setState({searchTerms: event.target.value}, () => this.fetchSuggestions())
+	}
+
+	changeShortcut = (shortcutKey) => {
+		this.setState({shortcutKey}, () => this.fetchSuggestions())
 	}
 
 	fetchSuggestions = () => {
-		let resourceName = this.props.objectType.resourceName
-		let listName = this.props.objectType.listName
-		let graphQlQuery = listName + ' (query: $query) { '
-				+ 'list { ' + this.props.fields + '}'
-				+ '}'
-		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-		//Only perform search when a value is filled in
-		let queryVars = {text: this.state.searchTerms + "*", pageNum: 0, pageSize: 25}
-		if (this.props.queryParams) {
-			Object.assign(queryVars, this.props.queryParams)
-		}
-		API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-			this.setState({suggestions: data[listName].list})
-		})
-	}
-
-	fetchMyColleagues = () => {
-		let resourceName = this.props.objectType.resourceName
-		let listName = this.props.objectType.listName
-		let graphQlQuery = listName + ' (query: $query) { '
-				+ 'list { ' + this.props.fields + '}'
-				+ '}'
-		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-		let queryVars = {orgUuid: this.props.currentUser.position.organization.uuid, pageNum: 0, pageSize: 25}
-		API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-			this.setState({suggestions: data[listName].list})
-		})		
-	}
-
-	fetchMyCounterparts = () => {
-		let resourceName = this.props.objectType.resourceName
-		let listName = this.props.objectType.listName
-		let graphQlQuery = listName + ' (query: $query) { '
-				+ 'list { ' + this.props.fields + '}'
-				+ '}'
-		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-		let queryVars = {position: this.props.currentUser.position.associatedPositions, pageNum: 0, pageSize: 25}
-		API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-			this.setState({suggestions: data[listName].list})
-		})		
-
-	}
-
-	fetchRecentContacts = () => {
-		API.query(/* GraphQL */`
-				personRecents(maxResults:6) {
-					list { ` + this.props.fields + ` }
-				}`
-		).then(data => {
-			this.setState({suggestions: data.personRecents.list})
-		})
-	}
-
-	fetchActivePrincipals = () => {
-		let resourceName = this.props.objectType.resourceName
-		let listName = this.props.objectType.listName
-		let graphQlQuery = listName + ' (query: $query) { '
-				+ 'list { ' + this.props.fields + '}'
-				+ '}'
-		let variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-		let queryVars = {status: Person.STATUS.ACTIVE, role: Person.ROLE.ADVISOR, pageNum: 0, pageSize: 25}
-		API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-			this.setState({suggestions: data[listName].list})
-		})
-	}
-
-	getSearchPart(type, query, pageSize) {
-		type = type.toLowerCase()
-		let subQuery = Object.assign({}, query)
-		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
-		subQuery.pageNum = this.state.pageNum
-
-		let config = SEARCH_CONFIG[type]
-		if (config.sortBy) {
-			subQuery.sortBy = config.sortBy
-		}
-		if (config.sortOrder) {
-			subQuery.sortOrder = config.sortOrder
-		}
-		let part = new GQL.Part(/* GraphQL */`
-			${config.listName} (query:$${type}Query) {
-				pageNum, pageSize, totalCount, list { ${config.fields} }
+		const {shortcutKey} = this.state
+		const shortcutDefs = this.props.shortcutDefs[shortcutKey]
+		const resourceName = this.props.objectType.resourceName
+		const listName = shortcutDefs.listName || this.props.objectType.listName
+		if (shortcutDefs.queryVars) {
+			// GraphQL search type of query
+			let graphQlQuery = listName + ' (query: $query) { '
+			+ 'list { ' + this.props.fields + '}'
+			+ '}'
+			const variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
+			let queryVars = {pageNum: 0, pageSize: 25}
+			if (this.props.queryParams) {
+				Object.assign(queryVars, this.props.queryParams)
 			}
-			`).addVariable(type + "Query", config.variableType, subQuery)
-		return part
-	}
-
-	@autobind
-	_dataFetcher(callback, pageSize) {
-		let type = this.props.objectType.searchObjectType.toLowerCase()
-		let config = SEARCH_CONFIG[type]
-		let {searchQuery} = this.state
-		let query = searchFormToQuery(searchQuery)
-		return callback([this.getSearchPart(this.props.objectType.searchObjectType, query, pageSize)], config.dataKey)
-	}
-
-	@autobind
-	_fetchDataCallback(parts, resultsListName) {
-		return GQL.run(parts).then(data => {
-			this.setState({suggestions: data[resultsListName].list})
-		}).catch(error =>
-			this.setState({success: null, error: error, didSearch: true})
-		)
-	}
-
-	fetchSearchData() {
-		return this._dataFetcher(this._fetchDataCallback)
-	}	
-	@autobind
-	onSearchCallback(queryState) {
-		this.setState({searchQuery: queryState}, () => this.fetchSearchData())
-	}
-
-	@autobind
-	changeSearchType(searchType) {
-		this.setState({advanced: searchType === 'advanced' ? true : false})
-	}
-
-	renderShortcuts = () => {
-		const shortcuts = this.props.shortcuts
-		return (shortcuts && shortcuts.length > 0 &&
-			<div className="shortcut-list">
-				<h5>{this.props.shortcutsTitle}</h5>
-				{shortcuts.map(shortcut => {
-					const shortcutLinkProps = {
-						[this.props.objectType.getModelNameLinkTo]: shortcut,
-						isLink: false,
-						forShortcut: true
-					}
-					return <Button key={shortcut.uuid} bsStyle="link" onClick={() => this.addItem(shortcut)}>Add <LinkTo {...shortcutLinkProps} /></Button>
-				})}
-			</div>
-		)
+			if (shortcutDefs.queryVars) {
+				Object.assign(queryVars, shortcutDefs.queryVars)
+			}
+			if (this.state.searchTerms) {
+				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
+			}
+			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
+				this.setState({suggestions: data[listName].list})
+			})
+		}
+		else {
+			API.query(/* GraphQL */`
+					` + listName + `(` + shortcutDefs.listArgs + `) {
+						list { ` + this.props.fields + ` }
+					}`
+			).then(data => {
+				this.setState({suggestions: data[listName].list})
+			})
+		}
 	}
 
 	addItem = (newItem) => {

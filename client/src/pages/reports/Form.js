@@ -166,6 +166,31 @@ class BaseReportForm extends Component {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		const advisorPositionSingular = Settings.fields.advisor.position.name
+		const advisorsShortcuts = {
+			myColleagues: {
+				label: 'My colleagues',
+				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
+			},
+			recentContacts: {
+				label: 'Recent contacts',
+				listName: 'personRecents',
+				listArgs: 'maxResults:6',
+			},
+		}
+		const principalsShortcuts = {
+			relatedCounterparts: {
+				label: 'Related counterparts',
+				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
+			},
+			myCounterparts: {
+				label: 'My counterparts',
+				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
+			},
+			activePrincipals: {
+				label: 'Active principals',
+				queryVars: {status: Person.STATUS.ACTIVE, role: Person.ROLE.PRINCIPAL},
+			},
+		}
 
 		return (
 			<Formik
@@ -347,17 +372,35 @@ class BaseReportForm extends Component {
 								placeholder="Start typing to search for people who attended the meeting..."
 								fields={Person.autocompleteQuery}
 								template={Person.autocompleteTemplate}
-								addFieldName='attendees'
-								addFieldLabel="Attendees"
+								addFieldName='advisors'
+								addFieldLabel="Advisors"
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
 								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
 								shortcutsTitle={`Recent attendees`}
-								shortcuts={recents.persons}
+								shortcutDefs={advisorsShortcuts}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}
 							/>
-						</Fieldset>
+							<AttendeesMultiSelector
+								items={values.attendees}
+								objectType={Person}
+								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], matchPositionName: true}}
+								placeholder="Start typing to search for people who attended the meeting..."
+								fields={Person.autocompleteQuery}
+								template={Person.autocompleteTemplate}
+								addFieldName='principals'
+								addFieldLabel="Principals"
+								addon={PEOPLE_ICON}
+								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
+								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
+								shortcutsTitle={`Recent attendees`}
+								shortcutDefs={principalsShortcuts}
+								renderExtraCol={true}
+								currentUser={this.props.currentUser}
+							/>
+
+								</Fieldset>
 
 						{!values.cancelled &&
 							<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">

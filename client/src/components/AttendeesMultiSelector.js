@@ -8,7 +8,7 @@ export default class AttendeesMultiSelector extends Component {
 		items: PropTypes.array.isRequired,
 		objectType: PropTypes.func.isRequired,
 		onChange: PropTypes.func.isRequired,
-		shortcuts: PropTypes.array,
+		shortcutDefs: PropTypes.object,
 		queryParams: PropTypes.object,
 		addFieldName: PropTypes.string,
 		addFieldLabel: PropTypes.string,
@@ -29,7 +29,7 @@ export default class AttendeesMultiSelector extends Component {
 	}
 
 	render() {
-		const { items, objectType, shortcuts, queryParams, addFieldName, addFieldLabel, renderSelected, placeholder, addon, fields, template, renderExtraCol } = this.props
+		const { items, objectType, shortcutDefs, queryParams, addFieldName, addFieldLabel, renderSelected, placeholder, addon, fields, template, renderExtraCol } = this.props
 		return (
 			<AttendeesMultiSelect
 				addFieldName={addFieldName}
@@ -38,7 +38,7 @@ export default class AttendeesMultiSelector extends Component {
 				renderSelected={renderSelected}
 				onAddItem={this.addItem}
 				onRemoveItem={this.removeItem}
-				shortcuts={shortcuts}
+				shortcutDefs={shortcutDefs}
 				renderExtraCol={renderExtraCol}
 				addon={addon}
 				objectType={objectType}
