@@ -441,34 +441,25 @@ public class Report extends AbstractAnetBean {
 		if (approvalStatus != null) {
 			return CompletableFuture.completedFuture(approvalStatus);
 		}
-		final CompletableFuture<List<ApprovalAction>> result;
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		final CompletableFuture<List<ApprovalAction>> actionsForReport = engine.getApprovalActionDao().getActionsForReport(context, this.getUuid());
-		if (state == ReportState.RELEASED) {
-			result = actionsForReport
-					.thenApply(actions -> { approvalStatus = compactActions(actions); return approvalStatus; });
-		} else {
-			final CompletableFuture<Organization> organizationForAuthor = engine.getOrganizationForPerson(context, author.getForeignUuid());
-			result = CompletableFuture.allOf(actionsForReport, organizationForAuthor)
-					.thenApply(futures -> {
-				final List<ApprovalAction> actions = actionsForReport.join();
-				final Organization ao = organizationForAuthor.join();
-				final CompletableFuture<List<ApprovalStep>> orgSteps = getWorkflowForOrg(context, engine, DaoUtils.getUuid(ao));
-				final String defaultOrgUuid = engine.getDefaultOrgUuid();
-				final CompletableFuture<List<ApprovalStep>> defaultSteps = getDefaultWorkflow(context, engine, defaultOrgUuid);
-				approvalStatus = CompletableFuture.allOf(orgSteps, defaultSteps)
-						.thenApply(futuresSteps -> {
-					List<ApprovalStep> steps = orgSteps.join();
-					if (steps == null || steps.size() == 0) {
-						steps = defaultSteps.join();
+		return engine.getApprovalActionDao().getActionsForReport(context, uuid)
+				.thenApply(actions -> {
+			if (state == ReportState.RELEASED) {
+				approvalStatus = compactActions(actions);
+			} else {
+				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();
+				final String aoUuid = DaoUtils.getUuid(ao);
+				List<ApprovalStep> steps = getWorkflowForOrg(context, engine, aoUuid).join();
+				if (Utils.isEmptyOrNull(steps)) {
+					final String defaultOrgUuid = engine.getDefaultOrgUuid();
+					if (aoUuid == null || !Objects.equals(aoUuid, defaultOrgUuid)) {
+						steps = getDefaultWorkflow(context, engine, defaultOrgUuid).join();
 					}
-					return createWorkflow(actions, steps);
-				}).join();
-
-				return approvalStatus;
-			});
-		}
-		return result;
+				}
+				approvalStatus = createWorkflow(actions, steps);
+			}
+			return approvalStatus;
+		});
 	}
 
 	@GraphQLIgnore
