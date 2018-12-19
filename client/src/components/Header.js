@@ -12,8 +12,9 @@ import menuLogo from 'resources/anet-menu.png'
 const backgroundCss = {
 	background: '#fff',
 	paddingTop: '2em',
+	paddingBottom: '1em',
 	zIndex: 100,
-	boxShadow: '0 4px 3px 0 rgba(0,0,0,0.1)',
+	boxShadow: '0 4px 6px hsla(0, 0%, 0%, 0.2)',
 }
 
 export default class Header extends Component {

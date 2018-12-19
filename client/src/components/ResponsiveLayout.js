@@ -26,11 +26,12 @@ const mainViewportContainer = {
 	width: '100%',
 	overflowY: 'auto',
 	overflowX: 'hidden',
-	paddingTop: 5,
+	paddingTop: 15,
 	paddingLeft: 18,
 	paddingRight: 18,
 }
 const notesViewportContainer = {
+	paddingTop: 18,
 	maxWidth: '20%',
 	overflow: 'auto',
 }
@@ -39,6 +40,7 @@ const sidebarContainer = {
 	overflowY: 'auto',
 	overflowX: 'hidden',
 	msOverflowStyle: '-ms-autohiding-scrollbar',
+	fontSize: 15,
 	paddingRight: 0,
 	paddingLeft: 15,
 	paddingBottom: 5,
@@ -46,7 +48,7 @@ const sidebarContainer = {
 const sidebar = {
 	flexGrow: 1,
 	minWidth: 200,
-	paddingTop: 15,
+	paddingTop: 25,
 }
 const glassPane = {
 	position: 'absolute',

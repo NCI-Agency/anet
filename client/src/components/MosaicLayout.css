@@ -2,6 +2,14 @@
   background: #fff;
 }
 
+.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-body {
+  background-color: #f9f9f9;
+}
+
+.mosaic-tile {
+  margin: 8px;
+}
+
 .mosaic-root {
   top: 0;
   right: 0;
@@ -16,17 +24,20 @@
 
 .mosaic-container .scrollable {
   height: 100%;
+  padding: 15px;
   overflow: auto;
 }
 
 .mosaic-container .scrollable-y {
   height: 100%;
+  padding: 15px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 .mosaic-container .non-scrollable {
   height: 100%;
+  padding: 15px;
   overflow: hidden;
 }
 
@@ -36,6 +47,10 @@
 
 #graph-popover {
 	z-index: 100;
+}
+
+.bp3-navbar {
+  margin-bottom: 18px;
 }
 
 @media print {
