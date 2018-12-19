@@ -93,10 +93,10 @@ test('Draft and submit a report', async t => {
 })
 
 test('Approve report chain', async t => {
-    t.plan(4)
+    t.plan(6)
 
-    let {pageHelpers, $, $$, assertElementText, By, until, shortWaitMs} = t.context
-    // First Erin needs to approve the report, then rebecca can approve the report
+    let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, until, shortWaitMs} = t.context
+    // Try to have Erin approve her own report
     await t.context.get('/', 'erin')
     let $homeTileErin = await $$('.home-tile')
     let [$draftReportsErin, $reportsPendingErin, $orgReportsErin, $upcomingEngagementsErin] = $homeTileErin
@@ -109,10 +109,25 @@ test('Approve report chain', async t => {
     await $firstReadReportButtonErin.click()
 
     await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
-    let $erinApproveButton = await $('.approve-button')
-    await t.context.driver.wait(until.elementIsEnabled($erinApproveButton))
-    await $erinApproveButton.click()
-    await t.context.driver.wait(until.stalenessOf($erinApproveButton))
+    await assertElementNotPresent(t, '.approve-button', 'Erin should not be allowed to approve her own reports')
+
+    // First Jacob needs to approve the report, then rebecca can approve the report
+    await t.context.get('/', 'jacob')
+    let $homeTileJacob = await $$('.home-tile')
+    let [$draftReportsJacob, $reportsPendingJacob, $orgReportsJacob, $upcomingEngagementsJacob] = $homeTileJacob
+    await t.context.driver.wait(until.elementIsVisible($reportsPendingJacob))
+    await $reportsPendingJacob.click()
+
+    await t.context.driver.wait(until.stalenessOf($reportsPendingJacob))
+    let $firstReadReportButtonJacob = await $('.read-report-button')
+    await t.context.driver.wait(until.elementIsEnabled($firstReadReportButtonJacob))
+    await $firstReadReportButtonJacob.click()
+
+    await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
+    let $jacobApproveButton = await $('.approve-button')
+    await t.context.driver.wait(until.elementIsEnabled($jacobApproveButton))
+    await $jacobApproveButton.click()
+    await t.context.driver.wait(until.stalenessOf($jacobApproveButton))
 
     await t.context.get('/', 'rebecca')
     let $homeTile = await $$('.home-tile')
@@ -140,8 +155,7 @@ test('Approve report chain', async t => {
     // )
 
     await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
-    let $dailyRollupLink = await t.context.driver.findElement(By.linkText('Daily rollup'))
-    await $dailyRollupLink.click()
+    await t.context.get('/rollup')
     await $('#daily-rollup')
 
     let currentPathname = await t.context.getCurrentPathname()
