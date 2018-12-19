@@ -39,7 +39,7 @@
     "git-describe": "^4.0.3",
     "graphql-cli": "^2.17.0",
     "handlebars": "^4.0.12",
-    "handlebars-loader": "^1.7.0",
+    "handlebars-loader": "^1.7.1",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.0.7",
     "ignore-loader": "^0.1.2",
