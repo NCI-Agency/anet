@@ -85,7 +85,7 @@ class BasePersonForm extends Component {
 		{
 			id: 'rolePrincipalButton',
 			value: Person.ROLE.PRINCIPAL,
-			label: Settings.fields.principal.person
+			label: Settings.fields.principal.person.name
 		},
 	]
 	countries = role => {

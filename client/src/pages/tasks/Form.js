@@ -133,7 +133,7 @@ class BaseTaskForm extends Component {
 										objectType={Organization}
 										valueKey="shortName"
 										fields={Organization.autocompleteQuery}
-										placeholder={`Select a responsible organization for this ${Settings.fields.taskSettings.fields.task.shortLabel}`}
+										placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
 										queryParams={orgSearchQuery}
 									/>
 								}
