@@ -169,26 +169,39 @@ class BaseReportForm extends Component {
 		const advisorsShortcuts = {
 			myColleagues: {
 				label: 'My colleagues',
+				searchQuery: true,
 				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
 			},
 			recentContacts: {
 				label: 'Recent contacts',
+				searchQuery: false,
 				listName: 'personRecents',
 				listArgs: 'maxResults:6',
+			},
+			all: {
+				label: 'All',
+				searchQuery: true,
 			},
 		}
 		const principalsShortcuts = {
 			relatedCounterparts: {
 				label: 'Related counterparts',
+				searchQuery: true,
 				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
 			},
 			myCounterparts: {
 				label: 'My counterparts',
+				searchQuery: true,
 				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
 			},
 			activePrincipals: {
 				label: 'Active principals',
-				queryVars: {status: Person.STATUS.ACTIVE, role: Person.ROLE.PRINCIPAL},
+				searchQuery: true,
+				queryVars: {status: Person.STATUS.ACTIVE},
+			},
+			all: {
+				label: 'All',
+				searchQuery: true,
 			},
 		}
 
@@ -368,8 +381,8 @@ class BaseReportForm extends Component {
 							<AttendeesMultiSelector
 								items={values.attendees}
 								objectType={Person}
-								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], matchPositionName: true}}
-								placeholder="Start typing to search for people who attended the meeting..."
+								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.ADVISOR, matchPositionName: true}}
+								placeholder="Start typing to search for advisors who attended the meeting..."
 								fields={Person.autocompleteQuery}
 								template={Person.autocompleteTemplate}
 								addFieldName='advisors'
@@ -377,7 +390,6 @@ class BaseReportForm extends Component {
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
 								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
-								shortcutsTitle={`Recent attendees`}
 								shortcutDefs={advisorsShortcuts}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}
@@ -385,8 +397,8 @@ class BaseReportForm extends Component {
 							<AttendeesMultiSelector
 								items={values.attendees}
 								objectType={Person}
-								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], matchPositionName: true}}
-								placeholder="Start typing to search for people who attended the meeting..."
+								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.PRINCIPAL, matchPositionName: true}}
+								placeholder="Start typing to search for principals who attended the meeting..."
 								fields={Person.autocompleteQuery}
 								template={Person.autocompleteTemplate}
 								addFieldName='principals'
@@ -394,7 +406,6 @@ class BaseReportForm extends Component {
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
 								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
-								shortcutsTitle={`Recent attendees`}
 								shortcutDefs={principalsShortcuts}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}

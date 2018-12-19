@@ -12,6 +12,7 @@ import AdvancedSearchForm from 'components/AdvancedSearchForm'
 import autobind from 'autobind-decorator'
 import GQL from 'graphqlapi'
 import {SEARCH_CONFIG, searchFormToQuery} from 'searchUtils'
+import _debounce from 'lodash/debounce'
 
 const AttendeesTable = (props) => {
 	return (
@@ -112,7 +113,7 @@ export default class AttendeesMultiSelect extends Component {
 	}
 
 	changeSearchTerms = (event) => {
-		this.setState({searchTerms: event.target.value}, () => this.fetchSuggestions())
+		this.setState({searchTerms: event.target.value}, () => this.fetchSuggestionsDebounced())
 	}
 
 	changeShortcut = (shortcutKey) => {
@@ -124,7 +125,7 @@ export default class AttendeesMultiSelect extends Component {
 		const shortcutDefs = this.props.shortcutDefs[shortcutKey]
 		const resourceName = this.props.objectType.resourceName
 		const listName = shortcutDefs.listName || this.props.objectType.listName
-		if (shortcutDefs.queryVars) {
+		if (shortcutDefs.searchQuery) {
 			// GraphQL search type of query
 			let graphQlQuery = listName + ' (query: $query) { '
 			+ 'list { ' + this.props.fields + '}'
@@ -154,6 +155,8 @@ export default class AttendeesMultiSelect extends Component {
 			})
 		}
 	}
+
+	fetchSuggestionsDebounced = _debounce(this.fetchSuggestions, 200)
 
 	addItem = (newItem) => {
 		if (!newItem || !newItem.uuid) {
