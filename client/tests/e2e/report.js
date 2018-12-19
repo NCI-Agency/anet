@@ -112,6 +112,8 @@ test('Approve report chain', async t => {
     let $erinApproveButton = await $('.approve-button')
     await t.context.driver.wait(until.elementIsEnabled($erinApproveButton))
     await $erinApproveButton.click()
+    await t.context.driver.wait(until.stalenessOf($erinApproveButton))
+
     await t.context.get('/', 'rebecca')
     let $homeTile = await $$('.home-tile')
     let [$draftReports, $reportsPending, $orgReports, $upcomingEngagements] = $homeTile
@@ -140,10 +142,10 @@ test('Approve report chain', async t => {
     await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
     let $dailyRollupLink = await t.context.driver.findElement(By.linkText('Daily rollup'))
     await $dailyRollupLink.click()
+    await $('#daily-rollup')
 
     let currentPathname = await t.context.getCurrentPathname()
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
-    await t.context.get('/rollup')
 
     let $reportCollection = await $('.report-collection')
     let $approvedIntent = await $reportCollection.findElement(By.linkText('meeting goal'))
