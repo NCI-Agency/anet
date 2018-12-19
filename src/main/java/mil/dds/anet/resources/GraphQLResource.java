@@ -178,19 +178,18 @@ public class GraphQLResource {
 	private ExecutionResult dispatchRequest(Person user, String query, Map<String, Object> variables) {
 		final DataLoaderRegistry dataLoaderRegistry
 			= BatchingUtils.registerDataLoaders(engine, true, true);
-		final DataLoaderDispatcherInstrumentation dispatcherInstrumentation
-			= new DataLoaderDispatcherInstrumentation(dataLoaderRegistry);
-
 		final Map<String, Object> context = new HashMap<>();
 		context.put("user", user);
 		context.put("dataLoaderRegistry", dataLoaderRegistry);
 		final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
 				.query(query)
+				.dataLoaderRegistry(dataLoaderRegistry)
 				.context(context)
 				.variables(variables)
 				.build();
+
 		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
-				.instrumentation(dispatcherInstrumentation)
+				.instrumentation(new DataLoaderDispatcherInstrumentation())
 				.build();
 		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
 		final Runnable dispatcher = () -> {
