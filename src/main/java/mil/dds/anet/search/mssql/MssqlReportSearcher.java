@@ -168,6 +168,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getPendingApprovalOf() != null) {
+			whereClauses.add("reports.authorId != :approverId");
 			whereClauses.add("reports.approvalStepId IN "
 				+ "(SELECT approvalStepId from approvers where positionId IN "
 				+ "(SELECT id FROM positions where currentPersonId = :approverId))");

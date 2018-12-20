@@ -140,9 +140,11 @@ class BaseReportShow extends Page {
 	render() {
 		const {report} = this.state
 		const { currentUser } = this.props
+		const isAdmin = currentUser && currentUser.isAdmin()
+		const isAuthor = Person.isEqual(currentUser, report.author)
 
-		//User can approve if report is pending approval and user is one of the approvers in the current approval step
-		const canApprove = report.isPending() && currentUser.position &&
+		//When either admin or not the author, user can approve if report is pending approval and user is one of the approvers in the current approval step
+		const canApprove = (isAdmin || !isAuthor) && report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
 
 		//Authors can edit in draft mode (also future engagements) or rejected mode
