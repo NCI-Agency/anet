@@ -7,7 +7,7 @@ import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObject
 import ReportForm from './Form'
 
 import API from 'api'
-import {Report} from 'models'
+import { Person, Report } from 'models'
 
 import { withRouter } from 'react-router-dom'
 import { PAGE_PROPS_NO_NAV } from 'actions'

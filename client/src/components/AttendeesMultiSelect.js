@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 
 import { Button, Col, Collapse, FormGroup, Grid, Row, Table, Tabs, Tab } from 'react-bootstrap'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import Checkbox from 'components/Checkbox'
 import {Person, Position} from 'models'
 import LinkTo from 'components/LinkTo'
 import { Field } from 'formik'
@@ -19,6 +20,7 @@ const AttendeesTable = (props) => {
 		<Table responsive hover striped className="people-search-results">
 			<thead>
 				<tr>
+					<th />
 					<th>Name</th>
 					<th>Position</th>
 					<th>Location</th>
@@ -28,6 +30,7 @@ const AttendeesTable = (props) => {
 			<tbody>
 				{Person.map(props.attendees, person => (
 					<tr key={person.uuid}>
+						<td><Checkbox checked={ props.attendees.checked } onChange={ () => props.onSelectRow(person) } /></td>
 						<td>
 							<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 							<LinkTo person={person}/>
@@ -104,10 +107,11 @@ export default class AttendeesMultiSelect extends Component {
 									<Button key={shortcutKey} value={shortcutKey}>{shortcutDefs[shortcutKey].label}</Button>
 								)}
 							</ButtonToggleGroup>
-							<AttendeesTable attendees={this.state.suggestions} />
+							<AttendeesTable attendees={this.state.suggestions} onSelectRow={this.addItem} />
 						</Col>
 					</Row>
 				</Collapse>
+				{renderSelectedWithDelete}
 			</React.Fragment>
 		)
 	}
@@ -131,7 +135,7 @@ export default class AttendeesMultiSelect extends Component {
 			+ 'list { ' + this.props.fields + '}'
 			+ '}'
 			const variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-			let queryVars = {pageNum: 0, pageSize: 25}
+			let queryVars = {pageNum: 0, pageSize: 6}
 			if (this.props.queryParams) {
 				Object.assign(queryVars, this.props.queryParams)
 			}

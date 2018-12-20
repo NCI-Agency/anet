@@ -157,7 +157,7 @@ class BaseReportForm extends Component {
 	}
 
 	render() {
-		const { currentUser, edit, title, ...myFormProps } = this.props
+		const { currentUser, edit, title, initialValues, ...myFormProps } = this.props
 		const { recents, tagSuggestions } = this.state
 		const submitText = currentUser.hasActivePosition() ? 'Preview and submit' : 'Save draft'
 		const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
@@ -204,13 +204,19 @@ class BaseReportForm extends Component {
 				searchQuery: true,
 			},
 		}
+		let updatedInitialValues = _cloneDeep(initialValues)
+		if (initialValues.attendees.length && !initialValues.advisors.length && !initialValues.principals.length) {
+			updatedInitialValues.advisors = initialValues.attendees.filter(attendee => attendee.role === Person.ROLE.ADVISOR)
+			updatedInitialValues.principals = initialValues.attendees.filter(attendee => attendee.role === Person.ROLE.PRINCIPAL)
+		}
 
 		return (
 			<Formik
 				enableReinitialize={true}
 				onSubmit={this.onSubmit}
 				validationSchema={Report.yupSchema}
-				isInitialValid={() => Report.yupSchema.isValidSync(this.props.initialValues)}
+				isInitialValid={() => Report.yupSchema.isValidSync(updatedInitialValues)}
+				initialValues={updatedInitialValues}
 				{...myFormProps}
 			>
 			{({
@@ -379,7 +385,7 @@ class BaseReportForm extends Component {
 
 						<Fieldset title={!values.cancelled ? "Meeting attendance" : "Planned attendance"} id="attendance-fieldset">
 							<AttendeesMultiSelector
-								items={values.attendees}
+								items={values.advisors}
 								objectType={Person}
 								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.ADVISOR, matchPositionName: true}}
 								placeholder="Start typing to search for advisors who attended the meeting..."
@@ -388,14 +394,14 @@ class BaseReportForm extends Component {
 								addFieldName='advisors'
 								addFieldLabel="Advisors"
 								addon={PEOPLE_ICON}
-								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
-								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
+								renderSelected={<AttendeesTable attendees={values.advisors} onChange={value => setFieldValue('advisors', value)} showDelete={true} />}
+								onChange={value => this.updateAttendees(setFieldValue, 'advisors', value)}
 								shortcutDefs={advisorsShortcuts}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}
 							/>
 							<AttendeesMultiSelector
-								items={values.attendees}
+								items={values.principals}
 								objectType={Person}
 								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.PRINCIPAL, matchPositionName: true}}
 								placeholder="Start typing to search for principals who attended the meeting..."
@@ -404,14 +410,13 @@ class BaseReportForm extends Component {
 								addFieldName='principals'
 								addFieldLabel="Principals"
 								addon={PEOPLE_ICON}
-								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
-								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
+								renderSelected={<AttendeesTable attendees={values.principals} onChange={value => setFieldValue('principals', value)} showDelete={true} />}
+								onChange={value => this.updateAttendees(setFieldValue, 'principals', value)}
 								shortcutDefs={principalsShortcuts}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}
 							/>
-
-								</Fieldset>
+						</Fieldset>
 
 						{!values.cancelled &&
 							<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
@@ -636,7 +641,9 @@ class BaseReportForm extends Component {
 	}
 
 	save = (values, sendEmail) => {
-		const report = Object.without(new Report(values), 'cancelled', 'reportTags', 'showReportText')
+		let report = new Report(values)
+		report.attendees = report.advisors.concat(report.principals)
+		report = Object.without(report, 'cancelled', 'reportTags', 'showReportText', 'advisors', 'principals')
 		if (!values.cancelled) {
 			delete report.cancelledReason
 		}

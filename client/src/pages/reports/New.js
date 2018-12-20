@@ -21,46 +21,29 @@ class BaseReportNew extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	state = {
-		report: new Report(),
-	}
-
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-	}
-
-	componentDidUpdate() {
-		this.addCurrentUserAsAttendee()
-	}
-
-	componentDidMount() {
-		this.addCurrentUserAsAttendee()
-	}
-
-	addCurrentUserAsAttendee = () => {
-		const { currentUser } = this.props
-		if (this.state.report.addAttendee(currentUser)) {
-			this.forceUpdate()
+		this.report = new Report()
+		if (props.currentUser && props.currentUser.uuid) {
+			let person = new Person(props.currentUser)
+			person.primary = true
+			this.report.attendees.push(person)
 		}
 	}
 
 	render() {
-		const { report } = this.state
-		return (
-			<div className="report-new">
-				<div className="pull-right">
-					<GuidedTour
-						title="Take a guided tour of the report page."
-						tour={reportTour}
-						autostart={localStorage.newUser === 'true' && localStorage.hasSeenReportTour !== 'true'}
-						onEnd={() => localStorage.hasSeenReportTour = 'true'}
-					/>
-				</div>
-
-				<Breadcrumbs items={[['New Report', Report.pathForNew()]]} />
-				<ReportForm initialValues={report} title='Create a new Report' />
+		return <div className="report-new">
+			<div className="pull-right">
+				<GuidedTour
+					title="Take a guided tour of the report page."
+					tour={reportTour}
+					autostart={localStorage.newUser === 'true' && localStorage.hasSeenReportTour !== 'true'}
+					onEnd={() => localStorage.hasSeenReportTour = 'true'}
+				/>
 			</div>
-		)
+			<Breadcrumbs items={[['New Report', Report.pathForNew()]]} />
+			<ReportForm initialValues={this.report} title='Create a new Report' />
+		</div>
 	}
 }
 
