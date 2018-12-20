@@ -16,6 +16,8 @@ import {SEARCH_CONFIG, searchFormToQuery} from 'searchUtils'
 import _debounce from 'lodash/debounce'
 
 const AttendeesTable = (props) => {
+	const { attendees, selectedAttendees, addItem, removeItem } = props
+	const selectedAttendeesUuids = selectedAttendees.map(a => a.uuid)
 	return (
 		<Table responsive hover striped className="people-search-results">
 			<thead>
@@ -28,9 +30,10 @@ const AttendeesTable = (props) => {
 				</tr>
 			</thead>
 			<tbody>
-				{Person.map(props.attendees, person => (
-					<tr key={person.uuid}>
-						<td><Checkbox checked={ props.attendees.checked } onChange={ () => props.onSelectRow(person) } /></td>
+				{Person.map(props.attendees, person => {
+					const isSelected = selectedAttendeesUuids.includes(person.uuid)
+					return <tr key={person.uuid}>
+						<td><Checkbox checked={ isSelected ? true : false } onChange={ () => isSelected ? removeItem(person) : addItem(person) } /></td>
 						<td>
 							<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 							<LinkTo person={person}/>
@@ -39,7 +42,7 @@ const AttendeesTable = (props) => {
 						<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 						<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
 					</tr>
-				))}
+				})}
 			</tbody>
 		</Table>
 	)
@@ -107,7 +110,12 @@ export default class AttendeesMultiSelect extends Component {
 									<Button key={shortcutKey} value={shortcutKey}>{shortcutDefs[shortcutKey].label}</Button>
 								)}
 							</ButtonToggleGroup>
-							<AttendeesTable attendees={this.state.suggestions} onSelectRow={this.addItem} />
+							<AttendeesTable
+								attendees={this.state.suggestions}
+								selectedAttendees={items}
+								addItem={this.addItem}
+								removeItem={this.removeItem}
+							/>
 						</Col>
 					</Row>
 				</Collapse>

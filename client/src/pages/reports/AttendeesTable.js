@@ -23,15 +23,7 @@ export default class AttendeesTable extends Component {
 					</tr>
 				</thead>
 				<tbody>
-					{Person.map(this.props.attendees.filter(p => p.role === Person.ROLE.ADVISOR),
-						person => this.renderAttendeeRow(person)
-					)}
-
-					<tr className="attendee-divider-row"><td colSpan={6}><hr /></td></tr>
-
-					{Person.map(this.props.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL),
-						person => this.renderAttendeeRow(person)
-					)}
+					{Person.map(this.props.attendees, person => this.renderAttendeeRow(person))}
 				</tbody>
 			</Table>
 		)
