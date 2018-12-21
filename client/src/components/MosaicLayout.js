@@ -25,7 +25,7 @@ export default class MosaicLayout extends Component {
     ).isRequired,
     initialNode: PropTypes.object, // FIXME: actually MosaicNode
     description: PropTypes.string,
-    style: PropTypes.object,
+    style: PropTypes.object,
   }
 
   constructor(props) {
