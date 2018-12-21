@@ -49,9 +49,10 @@ fieldset.approval-fieldset :last-child button::after {
 
 fieldset.approval-fieldset.compact{
 	border: 0;
-	border-bottom: 1px solid #ccc;
+	border-bottom: 2px solid hsla(0, 0%, 0%, 0.06);
 	margin-bottom: 1rem;
-	padding: 0.25em 0.75em 0.75em 0em
+	padding: 0.25em 0.75em 0.75em 0em;
+	box-shadow: none;
 }
 
 .modal-content .modal-footer .label {

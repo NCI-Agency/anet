@@ -354,7 +354,8 @@ class BaseRollupShow extends Page {
 	}
 
 	render() {
-		const flexStyle = {display: 'flex', flexDirection: 'column', height: '100%', flex: 1}
+		const flexStyle = {display: 'flex', flexDirection: 'column', flex: '1 1 auto'}
+		const mosaicLayoutStyle = { display: 'flex', flex: '1 1 auto' }
 
 		return (
 			<div id="daily-rollup" style={flexStyle}>
@@ -362,9 +363,10 @@ class BaseRollupShow extends Page {
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset title={
-					<span>
-						Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`} - {this.dateLongStr}
+					<div>
+						<div style={{ paddingBottom: 8 }}>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`} - {this.dateLongStr}
 						<CalendarButton onChange={this.changeRollupDate} value={this.state.date.format('YYYY-MM-DD')} style={calendarButtonCss} />
+						</div>
 						{this.state.focusedOrg
 							? <Button onClick={() => this.goToOrg()}>All organizations</Button>
 							: <ButtonToggleGroup value={this.state.orgType} onChange={this.changeOrgType}>
@@ -372,7 +374,7 @@ class BaseRollupShow extends Page {
 								<Button value={Organization.TYPE.PRINCIPAL_ORG}>{pluralize(Settings.fields.principal.org.name)}</Button>
 							  </ButtonToggleGroup>
 						}
-					</span>
+					</div>
 				} action={
 					<span>
 						<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.printPreview}>Print</Button>
@@ -381,7 +383,7 @@ class BaseRollupShow extends Page {
 				} style={flexStyle}>
 					<Context.Provider value={this.state}>
 						<MosaicLayout
-							style={flexStyle}
+							style={mosaicLayoutStyle}
 							visualizations={this.VISUALIZATIONS}
 							initialNode={this.INITIAL_LAYOUT}
 							description={this.DESCRIPTION}

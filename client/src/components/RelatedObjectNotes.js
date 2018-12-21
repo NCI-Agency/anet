@@ -141,11 +141,12 @@ class BaseRelatedObjectNotes extends Component {
 		const badgeLabel = nrNotes > 10 ? '10+' : null
 		const noteDivStyle = {
 			clear: 'both',
+			width: '350px',
 			paddingTop: '18px',
 			backgroundColor: '#e8e8e8'
 		}
 		return this.state.hide
-			? <div style={{minWidth: 50, padding: 5, marginRight: 10}}>
+			? <div style={{minWidth: 50, padding: 5, marginRight: 15}}>
 				<NotificationBadge
 					count={nrNotes}
 					label={badgeLabel}
