@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import com.codahale.metrics.MetricRegistry;
+
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.ApprovalStep;
@@ -24,6 +26,8 @@ import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderOptions;
 import org.dataloader.DataLoaderRegistry;
+import org.dataloader.stats.Statistics;
+import org.dataloader.stats.ThreadLocalStatisticsCollector;
 
 public final class BatchingUtils {
 	
@@ -31,11 +35,10 @@ public final class BatchingUtils {
 
 	public static DataLoaderRegistry registerDataLoaders(AnetObjectEngine engine, boolean batchingEnabled, boolean cachingEnabled) {
 		final DataLoaderOptions dataLoaderOptions = DataLoaderOptions.newOptions()
-				.setBatchingEnabled(batchingEnabled)
-				.setCachingEnabled(cachingEnabled)
-				.setMaxBatchSize(1000);
+				.setStatisticsCollector(() -> new ThreadLocalStatisticsCollector()).setBatchingEnabled(batchingEnabled)
+				.setCachingEnabled(cachingEnabled).setMaxBatchSize(1000);
 		final DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
-	
+
 		dataLoaderRegistry.register("approvalSteps", new DataLoader<>(new BatchLoader<String, ApprovalStep>() {
 			@Override
 			public CompletionStage<List<ApprovalStep>> load(List<String> keys) {
@@ -164,6 +167,32 @@ public final class BatchingUtils {
 		}, dataLoaderOptions));
 	
 		return dataLoaderRegistry;
+	}
+
+	public static void updateStats(MetricRegistry metricRegistry, DataLoaderRegistry dataLoaderRegistry) {
+		// Combined stats for all data loaders
+		updateStats(metricRegistry, "DataLoaderRegistry", dataLoaderRegistry.getStatistics());
+		for (final String key : dataLoaderRegistry.getKeys()) {
+			// Individual stats per data loader
+			updateStats(metricRegistry, key, dataLoaderRegistry.getDataLoader(key).getStatistics());
+		}
+	}
+
+	private static void updateStats(MetricRegistry metricRegistry, String name, Statistics statistics) {
+		metricRegistry.counter(MetricRegistry.name(name, "BatchInvokeCount"))
+			.inc(statistics.getBatchInvokeCount());
+		metricRegistry.counter(MetricRegistry.name(name, "BatchLoadCount"))
+			.inc(statistics.getBatchLoadCount());
+		metricRegistry.counter(MetricRegistry.name(name, "BatchLoadExceptionCount"))
+			.inc(statistics.getBatchLoadExceptionCount());
+		metricRegistry.counter(MetricRegistry.name(name, "CacheHitCount"))
+			.inc(statistics.getCacheHitCount());
+		metricRegistry.counter(MetricRegistry.name(name, "CacheMissCount"))
+			.inc(statistics.getCacheMissCount());
+		metricRegistry.counter(MetricRegistry.name(name, "LoadCount"))
+			.inc(statistics.getLoadCount());
+		metricRegistry.counter(MetricRegistry.name(name, "LoadErrorCount"))
+			.inc(statistics.getLoadErrorCount());
 	}
 
 }

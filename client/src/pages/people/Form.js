@@ -117,7 +117,8 @@ class BasePersonForm extends ValidatableFormWrapper {
 		const { currentUser } = this.props
 		const isAdmin = currentUser && currentUser.isAdmin()
 		const isSelf = Person.isEqual(currentUser, person)
-		const disableStatusChange = this.state.originalStatus === Person.STATUS.INACTIVE || isSelf
+		// status can only be changed by admins (but not of self!)
+		const disableStatusChange = !isAdmin || isSelf
 		// admins can edit all persons, new users can be edited by super users or themselves
 		const canEditName = isAdmin || (
 				(person.isNewUser() || !edit) && currentUser && (
