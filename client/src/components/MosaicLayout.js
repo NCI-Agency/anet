@@ -37,23 +37,23 @@ export default class MosaicLayout extends Component {
 
   render() {
     return <div className="mosaic-box" style={this.props.style}>
-      {this.props.description &&
-        <p className="chart-description">{this.props.description}</p>
-      }
-      {this.renderNavBar()}
       <div className="mosaic-container">
-      <Mosaic
-        value={this.state.currentNode}
-        onChange={this.updateCurrentNode}
-        renderTile={(id, path) => {
-          const viz = this.props.visualizations.find(viz => viz.id === id)
-          return <MosaicWindow
-            title={viz.title}
-            path={path}>
-            {viz.renderer(id)}
-          </MosaicWindow>
-        }}
-      />
+        {this.props.description &&
+          <p className="chart-description">{this.props.description}</p>
+        }
+        {this.renderNavBar()}
+        <Mosaic
+          value={this.state.currentNode}
+          onChange={this.updateCurrentNode}
+          renderTile={(id, path) => {
+            const viz = this.props.visualizations.find(viz => viz.id === id)
+            return <MosaicWindow
+              title={viz.title}
+              path={path}>
+              {viz.renderer(id)}
+            </MosaicWindow>
+          }}
+        />
       </div>
     </div>
   }

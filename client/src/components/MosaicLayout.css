@@ -18,8 +18,10 @@
 }
 
 .mosaic-container {
-  flex: 1;
-  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 80vh;
 }
 
 .mosaic-container .scrollable {
@@ -50,7 +52,8 @@
 }
 
 .bp3-navbar {
-  margin-bottom: 18px;
+  margin: 8px;
+  width: inherit;
 }
 
 @media print {
