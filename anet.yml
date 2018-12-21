@@ -307,6 +307,7 @@ dictionary:
   tasking_ORGs:
     - EF 2.2
   domainNames:
+    - "*"
     - cmil.mil
     - mission.ita
     - nato.int

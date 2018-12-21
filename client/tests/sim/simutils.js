@@ -1,5 +1,3 @@
-'use strict'
-
 import fetch from 'node-fetch'
 
 async function runGQL(user, query) {
@@ -8,9 +6,17 @@ async function runGQL(user, query) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(query),
     })
-    return await result.json()
+    const json = await result.json()
+    if (json.errors) {
+        json.errors.forEach((error) => console.error(error.message))
+    }
+    return json
 }
 
+
+function identity(input) {
+    return input
+}
 
 const chance = (probability) => {
     return function (func) {
@@ -63,30 +69,32 @@ function populate(instance, scheme, context) {
     Object.keys(scheme).forEach((key) => {
         const applyWithProbability = function (probability) {
             if (fuzzy.withProbability(probability)) {
-                populator.__queue.push(key);
+                populator.__queue.push(key)
                 populator.__queue.forEach((key) => {
                     const val = scheme[key]
-                    instance[key] = (typeof val === 'function' ? val(instance, context) : val)
+                    instance[key] = (typeof val === 'function' ? val(instance[key], instance, context) : val)
                 })
             }
             populator.__queue.length = 0
-            return populator;
+            return populator
         }
 
         populator[key] = {
-            always: applyWithProbability.bind(null, 0.99),
+            always: applyWithProbability.bind(null, 1),
+            mostly: applyWithProbability.bind(null, 0.99),
             often: applyWithProbability.bind(null, 0.9),
-            sometimes: applyWithProbability.bind(null, 0.5),
-            seldom: applyWithProbability.bind(null, 0.1),
-            never: applyWithProbability.bind(null, 0.01),
+            average: applyWithProbability.bind(null, 0.5),
+            sometimes: applyWithProbability.bind(null, 0.1),
+            rarely: applyWithProbability.bind(null, 0.01),
+            never: applyWithProbability.bind(null, 0),
             withProbability: applyWithProbability,
             and: function () {
                 populator.__queue.push(key)
-                return populator;
+                return populator
             }
         }
-    });
-    return populator;
+    })
+    return populator
 }
 
-export { runGQL, fuzzy, populate }
+export { runGQL, fuzzy, populate, identity }

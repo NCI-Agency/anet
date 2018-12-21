@@ -1,71 +1,73 @@
 import { Person } from 'models'
-import { runGQL, populate, fuzzy } from '../simutils'
+import { runGQL, populate, fuzzy, identity } from '../simutils'
 import faker from 'faker'
 import firstNames from './afghanFirstNames'
 import lastNames from './afghanSurnames'
 
-const personTemplate = {
-    name: (instance, context) => {
-
-        return Person.fullName({
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName()
-        }, true)
+const genderFirstNames = firstNames.reduce(
+    (result, d) => {
+        result[d.gender === 'm' ? 'male' : 'female'] = d
+        return result
     },
-    status: () => Person.STATUS.NEW_USER, //faker.random.objectElement(Person.STATUS),
-    country: (instance) => instance.country,
-    rank: (instance) => instance.rank,
-    gender: (instance, context) => (fuzzy.withProbability(.9) ? 'MALE' : 'FEMALE'),
-    phoneNumber: () => faker.phone.phoneNumber(),
-    endOfTourDate: () => faker.date.future(),
-    biography: () => faker.lorem.paragraphs(),
-    role: () => faker.random.objectElement(Person.ROLE),
-    position: (instance) => instance.position,
-    emailAddress: (instance) => {
-        const p = Person.parseFullName(instance.name)
-        return faker.internet.email(p.firstName, p.lastName)
+    { male: [], female: []})
+
+
+function randomPrincipal() {
+    const gender = (fuzzy.withProbability(.9) ? 'MALE' : 'FEMALE')
+    const name = {
+        firstName: faker.random.arrayElement(
+            gender === 'MALE' ? genderFirstNames.male : genderFirstNames.female).name,
+        lastName: faker.random.arrayElement(lastNames).name
+    }
+    return {
+        name: () => Person.fullName(name, true),
+        status: () => Person.STATUS.ACTIVE,
+        country: identity,
+        rank: identity,
+        gender: () => gender,
+        phoneNumber: () => faker.phone.phoneNumber(),
+        endOfTourDate: () => faker.date.future(),
+        biography: () => faker.lorem.paragraphs(),
+        role: () => Person.ROLE.PRINCIPAL,
+        position: identity,
+        emailAddress: () => faker.internet.email(name.firstName, name.lastName)
     }
 }
 
-const principalTemplate = {
-    name: (instance, context) => {
-        const firstName = faker.random.arrayElement(firstNames)
-        context.gender = firstName.gender
-        return Person.fullName({
-            firstName: firstName.name,
-            lastName: faker.random.arrayElement(lastNames).name
-        }, true)
-    },
-    status: () => Person.STATUS.ACTIVE,
-    country: (instance) => instance.country,
-    rank: (instance) => instance.rank,
-    gender: (instance, context) => (context.gender === 'm' ? 'MALE' : 'FEMALE'),
-    phoneNumber: () => faker.phone.phoneNumber(),
-    endOfTourDate: () => faker.date.future(),
-    biography: () => faker.lorem.paragraphs(),
-    role: () => Person.ROLE.PRINCIPAL,
-    position: (instance) => instance.position,
-    emailAddress: (instance) => {
-        const p = Person.parseFullName(instance.name)
-        return faker.internet.email(p.firstName, p.lastName)
+function modifiedPerson() {
+    return {
+        name: identity,
+        status: identity,
+        country: identity,
+        rank: identity,
+        gender: identity,
+        phoneNumber: () => faker.phone.phoneNumber(),
+        endOfTourDate: () => faker.date.future(),
+        biography: () => faker.lorem.paragraphs(),
+        role: identity,
+        position: identity,
+        emailAddress: (value, instance) => {
+            const name = Person.parseFullName(instance.name)
+            return faker.internet.email(name.firstName, name.lastName)
+        }
     }
 }
 
 const createPerson = async function (user) {
     const person = new Person()
 
-    populate(person, principalTemplate)
-        .name.withProbability(1)
-        .role.withProbability(1)
-        .status.withProbability(1)
-        .rank.withProbability(1)
-        .country.withProbability(1)
-        .gender.withProbability(1)
-        .endOfTourDate.withProbability(1)
-        .biography.withProbability(1)
+    populate(person, randomPrincipal())
+        .name.always()
+        .role.always()
+        .status.always()
+        .rank.always()
+        .country.always()
+        .gender.always()
+        .endOfTourDate.always()
+        .biography.always()
 
-    console.log(person)
-    return await runGQL(user,
+    return await runGQL(
+        user,
         {
             query: `mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }`,
             variables: { person: person }
@@ -88,7 +90,7 @@ const updatePerson = async function (user) {
         })
     const person = faker.random.arrayElement(people.data.personList.list)
 
-    populate(person, personTemplate)
+    populate(person, modifiedPerson())
         .name.seldom()
         .phoneNumber.sometimes()
         .rank.sometimes()
