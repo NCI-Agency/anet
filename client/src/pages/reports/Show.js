@@ -26,6 +26,7 @@ import API from 'api'
 import Settings from 'Settings'
 import {Report, Person, Comment, Position} from 'models'
 import _isEmpty from 'lodash/isEmpty'
+import _concat from 'lodash/concat'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -158,16 +159,18 @@ class BaseReportShow extends Page {
 		//When either admin or not the author, user can approve if report is pending approval and user is one of the approvers in the current approval step
 		const canApprove = (isAdmin || !isAuthor) && report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
+		//Warn admins when they try to approve their own report
+		const warnApproveOwnReport = canApprove && isAuthor
 
 		//Authors can edit in draft mode (also future engagements) or rejected mode
-		let canEdit = (report.isDraft() || report.isFuture() || report.isRejected()) && Person.isEqual(currentUser, report.author)
+		let canEdit = isAuthor && (report.isDraft() || report.isFuture() || report.isRejected())
 		//Approvers can edit.
 		canEdit = canEdit || canApprove
 
 		//Only the author can submit when report is in draft or rejected AND author has a position
 		const hasAssignedPosition = currentUser.hasAssignedPosition()
 		const hasActivePosition = currentUser.hasActivePosition()
-		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
+		const canSubmit = isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
 
 		//Anybody can email a report as long as it's not in draft.
 		const canEmail = !report.isDraft()
@@ -407,7 +410,7 @@ class BaseReportShow extends Page {
 							</div>
 						</Fieldset>
 
-						{canApprove && this.renderApprovalForm(values, !_isEmpty(this.state.validationErrors), () => setSubmitting(false))}
+						{canApprove && this.renderApprovalForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
 					</Form>
 
 					{currentUser.isAdmin() &&
@@ -447,7 +450,7 @@ class BaseReportShow extends Page {
 			})
 	}
 
-	renderApprovalForm = (values, disabled, cancelHandler) => {
+	renderApprovalForm = (values, disabled, warnApproveOwnReport, cancelHandler) => {
 		return <Fieldset className="report-sub-form" title="Report approval">
 			<h5>You can approve, reject, or edit this report</h5>
 			{this.renderValidationMessages('approving')}
@@ -460,10 +463,10 @@ class BaseReportShow extends Page {
 				placeholder="Type a comment here; required for a rejection"
 			/>
 
-			<Button bsStyle="warning" onClick={() => this.rejectReport(values.approvalComment)}>Reject with comment</Button>
+			{this.renderRejectButton(warnApproveOwnReport, "Reject with comment", () => this.rejectReport(values.approvalComment), cancelHandler)}
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
-				{this.renderApproveButton(disabled, () => this.approveReport(values.approvalComment), cancelHandler)}
+				{this.renderApproveButton(warnApproveOwnReport, disabled, () => this.approveReport(values.approvalComment), cancelHandler)}
 			</div>
 		</Fieldset>
 	}
@@ -654,16 +657,39 @@ class BaseReportShow extends Page {
 		jumpToTop()
 	}
 
+	renderRejectButton = (warnApproveOwnReport, label, confirmHandler, cancelHandler) => {
+		const validationWarnings = warnApproveOwnReport ? ["You are rejecting your own report"] : []
+		return _isEmpty(validationWarnings)
+			?
+			<Button bsStyle="warning" onClick={confirmHandler}>{label}</Button>
+			:
+			<Confirm
+				onConfirm={confirmHandler}
+				onClose={cancelHandler}
+				title="Reject report?"
+				body={this.renderValidationWarnings(validationWarnings, "rejecting")}
+				confirmText="Reject anyway"
+				cancelText="Cancel reject"
+				dialogClassName="react-confirm-bootstrap-modal"
+				confirmBSStyle="primary">
+			<Button bsStyle="warning" onClick={confirmHandler}>{label}</Button>
+			</Confirm>
+	}
+
 	renderSubmitButton = (disabled, cancelHandler, size, id) => {
-		return this.renderValidationButton(disabled, "submitting", "Submit report?", "Submit report", "Submit anyway", this.submitDraft, "Cancel submit", cancelHandler, size, id)
+		return this.renderValidationButton(false, disabled, "submitting", "Submit report?", "Submit report", "Submit anyway", this.submitDraft, "Cancel submit", cancelHandler, size, id)
 	}
 
-	renderApproveButton = (disabled, confirmHandler, cancelHandler, size, id) => {
-		return this.renderValidationButton(disabled, "approving", "Approve report?", "Approve", "Approve anyway", confirmHandler, "Cancel approve", cancelHandler, size, id, "approve-button")
+	renderApproveButton = (warnApproveOwnReport, disabled, confirmHandler, cancelHandler, size, id) => {
+		return this.renderValidationButton(warnApproveOwnReport, disabled, "approving", "Approve report?", "Approve", "Approve anyway", confirmHandler, "Cancel approve", cancelHandler, size, id, "approve-button")
 	}
 
-	renderValidationButton = (disabled, submitType, title, label, confirmText, confirmHandler, cancelText, cancelHandler, size, id, className) => {
-		return _isEmpty(this.state.validationWarnings)
+	renderValidationButton = (warnApproveOwnReport, disabled, submitType, title, label, confirmText, confirmHandler, cancelText, cancelHandler, size, id, className) => {
+		let validationWarnings = warnApproveOwnReport ? ["You are approving your own report"] : []
+		if (!_isEmpty(this.state.validationWarnings)) {
+			validationWarnings = _concat(validationWarnings, this.state.validationWarnings)
+		}
+		return _isEmpty(validationWarnings)
 			?
 			<Button type="button" bsStyle="primary" bsSize={size} className={className}
 				onClick={confirmHandler}
@@ -676,7 +702,7 @@ class BaseReportShow extends Page {
 				onConfirm={confirmHandler}
 				onClose={cancelHandler}
 				title={title}
-				body={this.renderValidationWarnings(submitType)}
+				body={this.renderValidationWarnings(validationWarnings, submitType)}
 				confirmText={confirmText}
 				cancelText={cancelText}
 				dialogClassName="react-confirm-bootstrap-modal"
@@ -694,7 +720,7 @@ class BaseReportShow extends Page {
 		return (
 			<React.Fragment>
 				{this.renderValidationErrors(submitType)}
-				{this.renderValidationWarnings(submitType)}
+				{this.renderValidationWarnings(this.state.validationWarnings, submitType)}
 			</React.Fragment>
 		)
 	}
@@ -719,15 +745,15 @@ class BaseReportShow extends Page {
 		)
 	}
 
-	renderValidationWarnings = (submitType) => {
-		if (_isEmpty(this.state.validationWarnings)) {
+	renderValidationWarnings = (validationWarnings, submitType) => {
+		if (_isEmpty(validationWarnings)) {
 			return null
 		}
 		return (
 			<Alert bsStyle="warning">
 				The following warnings should be addressed before {submitType} this report:
 				<ul>
-					{this.state.validationWarnings.map((warning ,idx) =>
+					{validationWarnings.map((warning, idx) =>
 						<li key={idx}>{warning}</li>
 					)}
 				</ul>
