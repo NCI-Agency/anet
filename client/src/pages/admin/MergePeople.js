@@ -235,7 +235,7 @@ class MergePeople extends Page {
 			<Field
 				name="createdAt"
 				component={FieldHelper.renderReadonlyField}
-				humanValue={person.createdAt && moment(person.createdAt).format("DD MMM YYYY HH:mm:ss")}
+				humanValue={person.createdAt && moment(person.createdAt).format(Settings.dateFormats.forms.withTime)}
 				vertical={true}
 			/>
 			<Field

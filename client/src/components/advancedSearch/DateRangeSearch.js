@@ -2,8 +2,8 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
-import DatePicker from 'react-16-bootstrap-date-picker'
-import {Row, Col} from 'react-bootstrap'
+import Settings from 'Settings'
+import CustomDateInput from 'components/CustomDateInput'
 import moment from 'moment'
 import _uniqueId from 'lodash/uniqueId'
 import _isEqualWith from 'lodash/isEqualWith'
@@ -14,9 +14,9 @@ import {BETWEEN, BEFORE, AFTER, LAST_DAY, LAST_WEEK, LAST_MONTH, RANGE_TYPE_LABE
 const DATE_FORMAT = 'YYYY-MM-DD'
 
 const dateRangeValue = PropTypes.shape({
-	relative: PropTypes.string,
-	start: PropTypes.string,
-	end: PropTypes.string
+	relative: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+	start: PropTypes.oneOfType([PropTypes.string, PropTypes.number,  PropTypes.instanceOf(Date)]),
+	end: PropTypes.oneOfType([PropTypes.string, PropTypes.number,  PropTypes.instanceOf(Date)]),
 })
 
 export default class DateRangeSearch extends Component {
@@ -72,7 +72,11 @@ export default class DateRangeSearch extends Component {
 			<select
 				disabled={onlyBetween}
 				value={this.state.value.relative}
-				onChange={this.onChangeRelative}>{options}</select>
+				onChange={this.onChangeRelative}
+				style={{marginRight: 5}}
+			>
+				{options}
+			</select>
 		)
 	}
 
@@ -80,39 +84,35 @@ export default class DateRangeSearch extends Component {
 		let {value} = this.state
 		let dateRangeDisplay = RANGE_TYPE_LABELS[value.relative].concat(" ")
 		if ((value.relative === BETWEEN) || (value.relative === AFTER)) {
-			dateRangeDisplay = dateRangeDisplay.concat(moment(value.start).format('DD MMM YYYY'))
+			dateRangeDisplay = dateRangeDisplay.concat(moment(value.start).format(Settings.dateFormats.forms.short))
 		}
 		if (value.relative === BETWEEN) {
 			dateRangeDisplay = dateRangeDisplay.concat(" and ")
 		}
 		if ((value.relative === BETWEEN) || (value.relative === BEFORE)) {
-			dateRangeDisplay = dateRangeDisplay.concat(moment(value.end).format('DD MMM YYYY'))
+			dateRangeDisplay = dateRangeDisplay.concat(moment(value.end).format(Settings.dateFormats.forms.short))
 		}
+		const dateStart = value.start && moment(value.start).toDate()
+		const dateEnd = value.end && moment(value.end).toDate()
 		return (
 			!this.props.asFormField ?
 				dateRangeDisplay
 			:
-				<div style={this.props.style}>
-					<Row>
-					<Col md={3}>
-						{this.selectMenu(this.props.onlyBetween)}
-					</Col>
+				<div style={{
+					display: 'flex',
+					flexDirection: 'row',
+					alignItems: 'flex-start',
+				}}>
+					{this.selectMenu(this.props.onlyBetween)}
 					{((value.relative === BETWEEN) || (value.relative === AFTER)) &&
-						<Col md={4}>
-							<DatePicker value={value.start} onChange={this.onChangeStart} showTodayButton showClearButton={false} />
-						</Col>
+						<CustomDateInput showIcon={false} value={dateStart} onChange={this.onChangeStart} />
 					}
 					{value.relative === BETWEEN &&
-						<Col md={1} style={{paddingTop:'5px', paddingLeft:'9px'}}>
-							and
-						</Col>
+						<span style={{marginLeft: 5, marginRight: 5}}>and</span>
 					}
 					{((value.relative === BETWEEN) || (value.relative === BEFORE)) &&
-						<Col md={4}>
-							<DatePicker value={value.end} onChange={this.onChangeEnd} showTodayButton showClearButton={false} />
-						</Col>
+						<CustomDateInput showIcon={false} value={dateEnd} onChange={this.onChangeEnd} />
 					}
-					</Row>
 				</div>
 		)
 	}

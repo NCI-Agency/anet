@@ -116,6 +116,16 @@
     resize-observer-polyfill "^1.5.0"
     tslib "^1.9.0"
 
+"@blueprintjs/datetime@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/datetime/-/datetime-3.5.0.tgz#a16db852fc2041d53d7a46c70b724a426de0f6c9"
+  integrity sha512-9oSrab3fDjdajD5MVnpVe8bxWNMku0arM3ge4Y6er0jMRqZXwF8al0ENrjUiYas5LkN8LQK+7TSpB2nsHesdJA==
+  dependencies:
+    "@blueprintjs/core" "^3.10.0"
+    classnames "^2.2"
+    react-day-picker "^7.1.10"
+    tslib "^1.9.0"
+
 "@blueprintjs/icons@^3.4.0":
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-3.4.0.tgz#893250c32dbc09add6b988f1ed27b239d6aea6a5"
@@ -9678,11 +9688,6 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-16-bootstrap-date-picker@^5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/react-16-bootstrap-date-picker/-/react-16-bootstrap-date-picker-5.1.2.tgz#2f41b925e2a97f8925dd4fe3087f578b86223d3c"
-  integrity sha1-L0G5JeKpf4kl3U/jCH9Xi4YiPTw=
-
 "react-autosuggest-ie11-compatible@https://github.com/VassilIordanov/react-autosuggest-ie11-compatible/releases/download/v9.4.2/react-autosuggest-ie11-compatible.tar.gz":
   version "9.4.2"
   resolved "https://github.com/VassilIordanov/react-autosuggest-ie11-compatible/releases/download/v9.4.2/react-autosuggest-ie11-compatible.tar.gz#8c9eb010774460ecba6b59cedb8aa9c96159d3da"
@@ -9750,6 +9755,13 @@ react-container-dimensions@^1.4.1:
     element-resize-detector "^1.1.10"
     invariant "^2.2.2"
     prop-types "^15.5.8"
+
+react-day-picker@^7.1.10:
+  version "7.2.4"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-7.2.4.tgz#3c3bea7aa1910bef7bad17f25ff15cd26a7d1848"
+  integrity sha512-LaePKijvAdXTrQhTyU7XfxxD5NQIFb4FH4vr1T862xNtmncoS8jZLliyHieMHNhZZ8RJU1pruqoQzkZQ05646w==
+  dependencies:
+    prop-types "^15.6.2"
 
 react-dnd-html5-backend@3.0.2:
   version "3.0.2"

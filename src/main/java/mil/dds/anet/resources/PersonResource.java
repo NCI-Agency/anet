@@ -383,7 +383,7 @@ public class PersonResource {
 		final String domainName = splittedEmail[1].toLowerCase();
 
 		@SuppressWarnings("unchecked")
-		final List<String> whitelistDomainNames = ((List<String>)this.config.getDictionary().get("domainNames"))
+		final List<String> whitelistDomainNames = ((List<String>)this.config.getDictionaryEntry("domainNames"))
 			.stream().map(String::toLowerCase).collect(Collectors.toList());
 
 		final List<String> wildcardDomainNames = whitelistDomainNames.stream()
@@ -402,7 +402,7 @@ public class PersonResource {
 	}
 
 	private String validateEmailErrorMessage() {
-		final String supportEmailAddr = (String)this.config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+		final String supportEmailAddr = (String)this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
 		final String messageBody = "Only valid email domain names are allowed. If your email domain name is not in the list, please contact the support team";
 		final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody : String.format("%s at %s", messageBody, supportEmailAddr);
 		return errorMessage;

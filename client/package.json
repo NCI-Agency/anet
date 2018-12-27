@@ -65,6 +65,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.10.0",
+    "@blueprintjs/datetime": "^3.5.0",
     "bootstrap": "^3.3.7",
     "change-case": "^3.0.1",
     "classnames": "^2.2.6",
@@ -90,7 +91,6 @@
     "promise": "^8.0.2",
     "prop-types": "^15.6.2",
     "react": "^16.6.3",
-    "react-16-bootstrap-date-picker": "^5.1.2",
     "react-autosuggest-ie11-compatible": "https://github.com/VassilIordanov/react-autosuggest-ie11-compatible/releases/download/v9.4.2/react-autosuggest-ie11-compatible.tar.gz",
     "react-bootstrap": "^0.32.4",
     "react-confirm-bootstrap": "^5.3.0",

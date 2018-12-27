@@ -1,3 +1,8 @@
+.bp3-transition-container {
+	/* Make sure it is on top of the advanced search popup */
+	z-index: 1070 !important;
+}
+
 @media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: none) {
 	/* IE10+ specific styles go here */
 	button.bp3-button > span.bp3-icon {

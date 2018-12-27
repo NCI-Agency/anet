@@ -10,7 +10,7 @@ import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import DailyRollupChart from 'components/DailyRollupChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE, GQL_REPORT_FIELDS} from 'components/ReportCollection'
-import CalendarButton from 'components/CalendarButton'
+import CustomDateInput from 'components/CustomDateInput'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
@@ -57,8 +57,8 @@ class BaseRollupShow extends Page {
 		date: PropTypes.object,
 	}
 
-	get dateStr() { return this.state.date.format('DD MMM YYYY') }
-	get dateLongStr() { return this.state.date.format('DD MMMM YYYY') }
+	get dateStr() { return this.state.date.format(Settings.dateFormats.forms.short) }
+	get dateLongStr() { return this.state.date.format(Settings.dateFormats.forms.short) }
 	get rollupStart() { return moment(this.state.date).subtract(1, 'days').startOf('day').hour(19) } //7pm yesterday
 	get rollupEnd() { return moment(this.state.date).endOf('day').hour(18) } // 6:59:59pm today.
 
@@ -364,8 +364,9 @@ class BaseRollupShow extends Page {
 
 				<Fieldset title={
 					<div>
-						<div style={{ paddingBottom: 8 }}>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`} - {this.dateLongStr}
-						<CalendarButton onChange={this.changeRollupDate} value={this.state.date.format('YYYY-MM-DD')} style={calendarButtonCss} />
+						<div style={{ paddingBottom: 8, display: 'flex' }}>
+							<div>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`} - </div>
+							<CustomDateInput id="rollupDate" value={this.state.date.toDate()} onChange={this.changeRollupDate} showValueLeft={true} />
 						</div>
 						{this.state.focusedOrg
 							? <Button onClick={() => this.goToOrg()}>All organizations</Button>

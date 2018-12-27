@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +27,9 @@ public class DailyRollupEmail extends AnetEmailAction {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	public static DateTimeFormatter dtf = DateTimeFormat.forPattern("dd MMM YYYY");
 	public static String SHOW_REPORT_TEXT_FLAG = "showReportText";
 
+	private final DateTimeFormatter dtf;
 	DateTime startDate;
 	DateTime endDate;
 	OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG; // show the table based off this organization type. 
@@ -38,7 +37,8 @@ public class DailyRollupEmail extends AnetEmailAction {
 	String principalOrganizationUuid;
 	String comment;
 
-	public DailyRollupEmail() {
+	public DailyRollupEmail(DateTimeFormatter dtf) {
+		this.dtf = dtf;
 		templateName = "/emails/rollup.ftl";
 	}
 

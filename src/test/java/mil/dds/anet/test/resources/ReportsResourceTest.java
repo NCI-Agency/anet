@@ -1140,9 +1140,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		final Position pos = admin.loadPosition();
 		final Organization org = pos.loadOrganization(context).get();
-		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")
-		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
+		final List<String> nro = (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
 		//Admin's organization should have one more report RELEASED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
 		final String orgUuid = org.getUuid();
@@ -1211,9 +1210,8 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		final Position pos = elizabeth.loadPosition();
 		final Organization org = pos.loadOrganization(context).get();
-		final Map<String, Object> dictionary = RULE.getConfiguration().getDictionary();
 		@SuppressWarnings("unchecked")
-		final List<String> nro = (List<String>) dictionary.get("non_reporting_ORGs");
+		final List<String> nro = (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
 		//Elizabeth's organization should have one more report RELEASED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
 		final Organization po = org.loadParentOrg(context).get();

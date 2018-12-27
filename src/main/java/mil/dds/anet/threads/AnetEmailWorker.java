@@ -60,10 +60,12 @@ public class AnetEmailWorker implements Runnable {
 	private Configuration freemarkerConfig;
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
+	private final String dateFormat;
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
 	private boolean noEmailConfiguration;
 	
+	@SuppressWarnings("unchecked")
 	public AnetEmailWorker(EmailDao dao, AnetConfiguration config, ScheduledExecutorService scheduler) {
 		this.dao = dao;
 		this.scheduler = scheduler;
@@ -72,8 +74,9 @@ public class AnetEmailWorker implements Runnable {
 		//mapper.enableDefaultTyping();
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
-		this.supportEmailAddr = (String) config.getDictionary().get("SUPPORT_EMAIL_ADDR");
-		this.fields = (Map<String, Object>) config.getDictionary().get("fields");
+		this.supportEmailAddr = (String) config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
+		this.dateFormat = (String) config.getDictionaryEntry("dateFormats.email");
+		this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 		instance = this;
 
 		SmtpConfiguration smtpConfig = config.getSmtp();
@@ -176,6 +179,7 @@ public class AnetEmailWorker implements Runnable {
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
+			context.put("dateFormat", dateFormat);
 			context.put("fields", fields);
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
 

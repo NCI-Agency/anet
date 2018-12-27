@@ -115,7 +115,7 @@ Dear ${approvalStepName},
 </#if>
 
 <div>
-  <strong>Engagement date and location:</strong> ${(report.engagementDate.toString('dd MMM yyyy'))!} @ ${(report.loadLocation(context).get().name)!}
+  <strong>Engagement date and location:</strong> ${(report.engagementDate.toString(dateFormat))!} @ ${(report.loadLocation(context).get().name)!}
 </div>
 
 <#assign tasks = report.loadTasks(context).get()>

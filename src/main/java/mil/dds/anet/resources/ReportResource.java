@@ -35,6 +35,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,15 +102,15 @@ public class ReportResource {
 	AnetConfiguration config;
 
 	private final RollupGraphComparator rollupGraphComparator;
+	private final DateTimeFormatter dtf;
 
 	public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.engine = engine;
 		this.dao = engine.getReportDao();
 		this.config = config;
-
+		this.dtf = DateTimeFormat.forPattern((String) this.config.getDictionaryEntry("dateFormats.email"));
 		@SuppressWarnings("unchecked")
-		List<String> pinnedOrgNames = (List<String>)this.config.getDictionary().get("pinned_ORGs");
-
+		List<String> pinnedOrgNames = (List<String>)this.config.getDictionaryEntry("pinned_ORGs");
 		this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
 
 	}
@@ -525,7 +527,7 @@ public class ReportResource {
 	 */
 	private void throwExceptionNoApprovalSteps(List<ApprovalStep> steps) {
 		if (Utils.isEmptyOrNull(steps)) {
-			final String supportEmailAddr = (String)this.config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+			final String supportEmailAddr = (String)this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
 			final String messageBody = "Advisor organization is missing a report approval chain. In order to have an approval chain created for the primary advisor attendee's advisor organization, please contact the ANET support team";
 			final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody : String.format("%s at %s", messageBody, supportEmailAddr);
 			throw new WebApplicationException(errorMessage, Status.BAD_REQUEST);
@@ -926,7 +928,7 @@ public class ReportResource {
 		final List<RollupGraph> dailyRollupGraph;
 
 		@SuppressWarnings("unchecked")
-		final List<String> nonReportingOrgsShortNames = (List<String>) config.getDictionary().get("non_reporting_ORGs");
+		final List<String> nonReportingOrgsShortNames = (List<String>) config.getDictionaryEntry("non_reporting_ORGs");
 		final Map<String, Organization> nonReportingOrgs = getOrgsByShortNames(nonReportingOrgsShortNames);
 
 		if (principalOrgUuid != null) {
@@ -963,7 +965,7 @@ public class ReportResource {
 	public int emailRollupCommon(Person user,
 			Long start, Long end, OrganizationType orgType,
 			String advisorOrgUuid, String principalOrgUuid, AnetEmail email) {
-		DailyRollupEmail action = new DailyRollupEmail();
+		DailyRollupEmail action = new DailyRollupEmail(dtf);
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
 		action.setComment(email.getComment());
@@ -1020,7 +1022,7 @@ public class ReportResource {
 	private String showRollupEmailCommon(Long start, Long end,
 			OrganizationType orgType, String advisorOrgUuid,
 			String principalOrgUuid, Boolean showReportText) {
-		DailyRollupEmail action = new DailyRollupEmail();
+		DailyRollupEmail action = new DailyRollupEmail(dtf);
 		action.setStartDate(new DateTime(start));
 		action.setEndDate(new DateTime(end));
 		action.setChartOrgType(orgType);
@@ -1030,7 +1032,7 @@ public class ReportResource {
 		Map<String,Object> context = action.execute();
 
 		@SuppressWarnings("unchecked")
-		final Map<String,Object> fields = (Map<String, Object>) config.getDictionary().get("fields");
+		final Map<String,Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 
 		context.put("context", engine.getContext());
 		context.put("serverUrl", config.getServerUrl());

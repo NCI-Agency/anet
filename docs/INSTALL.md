@@ -169,6 +169,16 @@ Currently, the recognized entries in the dictionary (and suggested values for ea
 ```yaml
 dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
+
+  dateFormats:
+    email: d MMMM yyyy
+    excel: d MMMM yyyy
+    forms:
+      input: DD-MM-YYYY
+      short: D MMMM YYYY
+      long: dddd, D MMMM YYYY
+      withTime: D MMMM YYYY @ HH:mm
+
   fields:
 
     task:
@@ -178,10 +188,8 @@ dictionary:
       longName: Task description
       projectedCompletion:
         label: Projected Completion
-        placeholder: Fill in the projected completion date
       plannedCompletion:
         label: Planned Completion
-        placeholder: Fill in the planned completion date
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task
