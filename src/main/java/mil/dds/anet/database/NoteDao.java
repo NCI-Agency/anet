@@ -77,7 +77,7 @@ public class NoteDao implements IAnetDao<Note> {
 					"/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", text, \"createdAt\", \"updatedAt\") "
 						+ "VALUES (:uuid, :authorUuid, :text, :createdAt, :updatedAt)")
 				.bindBean(n)
-				.bind("authorUuid", DaoUtils.getUuid(n.getAuthor()))
+				.bind("authorUuid", n.getAuthorUuid())
 				.execute();
 			insertNoteRelatedObjects(h, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
 			return n;

@@ -141,7 +141,6 @@ class BaseRelatedObjectNotes extends Component {
 		const badgeLabel = nrNotes > 10 ? '10+' : null
 		const noteDivStyle = {
 			clear: 'both',
-			width: '350px',
 			paddingTop: '18px',
 			backgroundColor: '#e8e8e8'
 		}
