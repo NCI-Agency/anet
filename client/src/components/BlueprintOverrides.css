@@ -1,10 +1,10 @@
 @media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: none) {
 	/* IE10+ specific styles go here */
-	button.bp3-button:empty {
-		padding-top: 5px !important;
+	button.bp3-button > span.bp3-icon {
+		padding-top: 2px !important;
 	}
 
-	span.bp3-icon-standard {
-		padding-top: 2px;
+	.bp3-navbar {
+		height: auto !important;
 	}
 }
