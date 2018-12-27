@@ -93,7 +93,7 @@ test('Draft and submit a report', async t => {
 })
 
 test('Approve report chain', async t => {
-    t.plan(6)
+    t.plan(5)
 
     let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, until, shortWaitMs} = t.context
     // Try to have Erin approve her own report
@@ -104,12 +104,7 @@ test('Approve report chain', async t => {
     await $reportsPendingErin.click()
 
     await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
-    let $firstReadReportButtonErin = await $('.read-report-button')
-    await t.context.driver.wait(until.elementIsEnabled($firstReadReportButtonErin))
-    await $firstReadReportButtonErin.click()
-
-    await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
-    await assertElementNotPresent(t, '.approve-button', 'Erin should not be allowed to approve her own reports')
+    await assertElementNotPresent(t, '.read-report-button', 'Erin should not be allowed to approve her own reports')
 
     // First Jacob needs to approve the report, then rebecca can approve the report
     await t.context.get('/', 'jacob')
