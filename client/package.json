@@ -97,7 +97,7 @@
     "react-container-dimensions": "^1.4.1",
     "react-dom": "^16.7.0",
     "react-mosaic-component": "^2.0.0",
-    "react-notification-badge": "^1.3.4",
+    "react-notification-badge": "^1.4.0",
     "react-redux": "^5.1.1",
     "react-redux-loading-bar": "^4.1.0",
     "react-router": "^4.3.1",
