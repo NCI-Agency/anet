@@ -506,7 +506,7 @@ class BaseSearch extends Page {
 
 	@autobind
 	exportSearchResults() {
-		this._dataFetcher(this.props, this._exportSearchResultsCallback, 0)
+		this._dataFetcher(this.props, this._exportSearchResultsCallback, 0, 0)
 	}
 
 	@autobind
