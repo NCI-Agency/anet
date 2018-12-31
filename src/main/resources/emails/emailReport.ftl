@@ -319,7 +319,8 @@ ${sender.name} sent you a report from ANET:
         <label for="author" class="col-sm-2 control-label">Report author</label>
         <div class="col-sm-7">
           <div id="author" class="form-control-static">
-            <a href="/people/${report.author.uuid}">${(report.author.rank)!} ${(report.author.name)!}</a>
+            <#assign author = report.loadAuthor(context).get()>
+            <a href="/people/${author.uuid}">${(author.rank)!} ${(author.name)!}</a>
           </div>
         </div>
       </div>
