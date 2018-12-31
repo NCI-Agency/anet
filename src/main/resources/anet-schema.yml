@@ -77,10 +77,13 @@ properties:
         required: [input, short, long, withTime]
         properties:
           input:
-            type: string
-            title: The date format used in form input fields
-            description: Used in date inputs in the user interface; should be easy to type, e.g. "06-12-1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
-            examples: ["DD-MM-YYYY"]
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+              title: The supported date formats for form input fields
+              description: Used in date inputs in the user interface, the first one is used as placeholder; should be easy to type, e.g. "06-12-1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+              examples: ["DD-MM-YYYY", "DD/MM/YYYY", "D MMMM YYYY"]
           short:
             type: string
             title: The short date format for forms

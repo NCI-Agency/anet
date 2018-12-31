@@ -240,7 +240,7 @@ class BaseReportForm extends Component {
 								component={FieldHelper.renderSpecialField}
 								value={values.engagementDate}
 								onChange={(value, formattedValue) => setFieldValue('engagementDate', value)}
-								widget={<CustomDateInput id="engagementDate" dateFormat={Settings.dateFormats.forms.long} />}
+								widget={<CustomDateInput id="engagementDate" />}
 							>
 								{values.engagementDate && moment().endOf("day").isBefore(values.engagementDate) &&
 									<HelpBlock>

@@ -58,7 +58,6 @@ class BaseRollupShow extends Page {
 	}
 
 	get dateStr() { return this.state.date.format(Settings.dateFormats.forms.short) }
-	get dateLongStr() { return this.state.date.format(Settings.dateFormats.forms.short) }
 	get rollupStart() { return moment(this.state.date).subtract(1, 'days').startOf('day').hour(19) } //7pm yesterday
 	get rollupEnd() { return moment(this.state.date).endOf('day').hour(18) } // 6:59:59pm today.
 
@@ -364,9 +363,9 @@ class BaseRollupShow extends Page {
 
 				<Fieldset title={
 					<div>
-						<div style={{ paddingBottom: 8, display: 'flex' }}>
-							<div>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`} - </div>
-							<CustomDateInput id="rollupDate" value={this.state.date.toDate()} onChange={this.changeRollupDate} showValueLeft={true} />
+						<div style={{ paddingBottom: 8, display: 'flex', alignItems: 'center' }}>
+							<div style={{ marginRight: 5}}>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`}</div>
+							<CustomDateInput id="rollupDate" value={this.state.date.toDate()} onChange={this.changeRollupDate} />
 						</div>
 						{this.state.focusedOrg
 							? <Button onClick={() => this.goToOrg()}>All organizations</Button>

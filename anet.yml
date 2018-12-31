@@ -168,7 +168,7 @@ dictionary:
     email: d MMMM yyyy
     excel: d MMMM yyyy
     forms:
-      input: DD-MM-YYYY
+      input: [DD-MM-YYYY, DD/MM/YYYY, D MMMM YYYY]
       short: D MMMM YYYY
       long: dddd, D MMMM YYYY
       withTime: D MMMM YYYY @ HH:mm

@@ -29,44 +29,33 @@ const CalendarIcon = (id) => (
 export default class CustomDateInput extends Component {
 	static propTypes = {
 		id: PropTypes.string,
-		dateFormat: PropTypes.string,
 		showIcon: PropTypes.bool,
-		showValueLeft: PropTypes.bool,
 		value: PropTypes.object,
 		onChange: PropTypes.func,
 	}
 
 	static defaultProps = {
-		dateFormat: Settings.dateFormats.forms.short,
 		showIcon: true,
-		showValueLeft: false,
 	}
 
 	render() {
-		const { id, showIcon, showValueLeft, value } = this.props
+		const { id, showIcon, value } = this.props
 		const rightElement = showIcon && CalendarIcon(id)
-		const style = { width: showIcon ? '11em' : '8em' }
-		const flexDirection = showValueLeft ? 'row' : 'column-reverse'
-		const inputFormat = Settings.dateFormats.forms.input
+		const style = { width: showIcon ? '11em' : '8em', fontSize: '1.1em' }
+		const inputFormat = Settings.dateFormats.forms.input[0]
 		return (
-			<div style={{
-				display: 'flex',
-				flexDirection,
-			}}>
-				<span style={{marginLeft: 5, marginRight: 5}}>{value && moment(value).format(this.props.dateFormat)}</span>
-				<DateInput
-					inputProps={{ id, style }}
-					rightElement={rightElement}
-					value={value}
-					onChange={this.props.onChange}
-					formatDate={date => moment(date).format(inputFormat)}
-					parseDate={str => moment(str, inputFormat).toDate()}
-					placeholder={inputFormat}
-					maxDate={moment().add(20, 'years').endOf('year').toDate()}
-					canClearSelection={false}
-					showActionsBar={true}
-				/>
-			</div>
+			<DateInput
+				inputProps={{ id, style }}
+				rightElement={rightElement}
+				value={value}
+				onChange={this.props.onChange}
+				formatDate={date => moment(date).format(inputFormat)}
+				parseDate={str => moment(str, Settings.dateFormats.forms.input, true).toDate()}
+				placeholder={inputFormat}
+				maxDate={moment().add(20, 'years').endOf('year').toDate()}
+				canClearSelection={false}
+				showActionsBar={true}
+			/>
 		)
 	}
 }

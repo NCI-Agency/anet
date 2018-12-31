@@ -101,7 +101,7 @@ export default class DateRangeSearch extends Component {
 				<div style={{
 					display: 'flex',
 					flexDirection: 'row',
-					alignItems: 'flex-start',
+					alignItems: 'center',
 				}}>
 					{this.selectMenu(this.props.onlyBetween)}
 					{((value.relative === BETWEEN) || (value.relative === AFTER)) &&
