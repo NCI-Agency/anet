@@ -73,7 +73,7 @@ export default class DateRangeSearch extends Component {
 				disabled={onlyBetween}
 				value={this.state.value.relative}
 				onChange={this.onChangeRelative}
-				style={{marginRight: 5}}
+				style={{marginRight: 5, height: '38px'}}
 			>
 				{options}
 			</select>

@@ -15,7 +15,8 @@ const CalendarIcon = (id) => (
 		src={CALENDAR_ICON}
 		alt=""
 		title="Pick a date"
-		height={30}
+		height={24}
+		style={{verticalAlign: 'middle'}}
 		onClick={() => {
 			const element = document.getElementById(id)
 			if (element && element.focus) {
@@ -44,7 +45,7 @@ export default class CustomDateInput extends Component {
 	render() {
 		const { id, showIcon, showValueLeft, value } = this.props
 		const rightElement = showIcon && CalendarIcon(id)
-		const style = { width: showIcon ? '10em' : '8em' }
+		const style = { width: showIcon ? '11em' : '8em' }
 		const flexDirection = showValueLeft ? 'row' : 'column-reverse'
 		const inputFormat = Settings.dateFormats.forms.input
 		return (
