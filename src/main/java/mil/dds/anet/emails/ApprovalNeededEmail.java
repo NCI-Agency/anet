@@ -20,7 +20,7 @@ public class ApprovalNeededEmail extends AnetEmailAction {
 	Report report;
 	
 	public ApprovalNeededEmail() { 
-		templateName = "/emails/approvalNeeded.ftl";
+		templateName = "/emails/approvalNeeded.ftlh";
 		subject = "ANET Report needs your approval";
 	}
 	

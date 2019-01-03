@@ -16,7 +16,7 @@ public class ReportRejectionEmail extends AnetEmailAction {
 	Comment comment;
 	
 	public ReportRejectionEmail() { 
-		templateName = "/emails/reportRejection.ftl";
+		templateName = "/emails/reportRejection.ftlh";
 		subject = "ANET Report Returned to You for Editing";
 	}
 	

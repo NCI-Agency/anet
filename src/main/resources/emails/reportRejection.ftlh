@@ -19,7 +19,8 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-Hi ${report.author.name},
+<#assign reportAuthor = report.loadAuthor(context).get()>
+Hi ${reportAuthor.name},
 
 <p>Your report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, has been returned by ${rejector.name} &lt;${rejector.emailAddress}&gt;. The following comment was provided:</p>
 <p>"${comment.text}"</p>

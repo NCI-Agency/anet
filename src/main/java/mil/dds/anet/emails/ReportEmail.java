@@ -15,7 +15,7 @@ public class ReportEmail extends AnetEmailAction {
 	String comment;
 	
 	public ReportEmail() { 
-		templateName = "/emails/emailReport.ftl";
+		templateName = "/emails/emailReport.ftlh";
 		subject = "Sharing a report in ANET";
 	}
 	

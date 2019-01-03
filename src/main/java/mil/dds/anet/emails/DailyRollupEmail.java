@@ -39,7 +39,7 @@ public class DailyRollupEmail extends AnetEmailAction {
 
 	public DailyRollupEmail(DateTimeFormatter dtf) {
 		this.dtf = dtf;
-		templateName = "/emails/rollup.ftl";
+		templateName = "/emails/rollup.ftlh";
 	}
 
 	@Override
