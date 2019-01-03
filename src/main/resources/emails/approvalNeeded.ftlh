@@ -25,7 +25,7 @@ Dear ${approvalStepName},
   <#assign reportAuthor = report.loadAuthor(context).get()>
   ${reportAuthor.name}'s report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, is ready for your review.<br>
   Using <a href="${serverUrl}/reports/${report.uuid}" />this link</a>,
-  you can either <em>Approve</em>, <em>Reject</em> or <em>Edit</em> the report.
+  you can either <em>Approve</em>, <em>Request changes on</em> or <em>Edit</em> the report.
 </div>
 <br>
 <#if report.cancelledReason??>

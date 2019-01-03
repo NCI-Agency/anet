@@ -589,7 +589,7 @@ public class ReportResource {
 
 				//Report author cannot approve own report, unless admin
 				if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
-					logger.info("Author {} cannot approve own report ID {}", approver.getUuid(), r.getUuid());
+					logger.info("Author {} cannot approve own report UUID {}", approver.getUuid(), r.getUuid());
 					throw new WebApplicationException("You cannot approve your own report", Status.FORBIDDEN);
 				}
 				//Verify that this user can approve for this step.
@@ -684,14 +684,14 @@ public class ReportResource {
 
 				//Report author cannot reject own report, unless admin
 				if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
-					logger.info("Author {} cannot reject own report ID {}", approver.getUuid(), r.getUuid());
-					throw new WebApplicationException("You cannot reject your own report", Status.FORBIDDEN);
+					logger.info("Author {} cannot request changes on own report UUID {}", approver.getUuid(), r.getUuid());
+					throw new WebApplicationException("You cannot request changes on your own report", Status.FORBIDDEN);
 				}
 				//Verify that this user can reject for this step.
 				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
-					logger.info("User UUID {} cannot reject report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
-					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
+					logger.info("User UUID {} cannot request changes on report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
+					throw new WebApplicationException("User cannot request changes on report", Status.FORBIDDEN);
 				}
 
 				//Write the rejection
@@ -707,7 +707,7 @@ public class ReportResource {
 				r.setState(ReportState.REJECTED);
 				final int numRows = dao.update(r, approver);
 				if (numRows == 0) {
-					throw new WebApplicationException("Couldn't process report rejection", Status.NOT_FOUND);
+					throw new WebApplicationException("Couldn't process report change request", Status.NOT_FOUND);
 				}
 
 				//Add the comment
@@ -716,7 +716,7 @@ public class ReportResource {
 				engine.getCommentDao().insert(reason);
 
 				sendReportRejectEmail(r, approver, reason);
-				AnetAuditLogger.log("report {} rejected by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
+				AnetAuditLogger.log("report {} has requested changes by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
 				return r;
 		});
 	}

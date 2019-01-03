@@ -210,7 +210,7 @@ class BaseReportShow extends Page {
 
 					{report.isRejected() &&
 						<Fieldset style={{textAlign: 'center' }}>
-							<h4 className="text-danger">This report was REJECTED. </h4>
+							<h4 className="text-danger">This report has CHANGES REQUESTED.</h4>
 							<p>You can review the comments below, fix the report and re-submit</p>
 							<div style={{textAlign: 'left'}}>
 								{this.renderValidationMessages()}
@@ -452,7 +452,7 @@ class BaseReportShow extends Page {
 
 	renderApprovalForm = (values, disabled, warnApproveOwnReport, cancelHandler) => {
 		return <Fieldset className="report-sub-form" title="Report approval">
-			<h5>You can approve, reject, or edit this report</h5>
+			<h5>You can approve, request changes on, or edit this report</h5>
 			{this.renderValidationMessages('approving')}
 
 			<Field
@@ -460,10 +460,10 @@ class BaseReportShow extends Page {
 				label="Approval comment"
 				component={FieldHelper.renderInputField}
 				componentClass="textarea"
-				placeholder="Type a comment here; required for a rejection"
+				placeholder="Type a comment here; required when requesting changes"
 			/>
 
-			{this.renderRejectButton(warnApproveOwnReport, "Reject with comment", () => this.rejectReport(values.approvalComment), cancelHandler)}
+			{this.renderRejectButton(warnApproveOwnReport, "Request changes", () => this.rejectReport(values.approvalComment), cancelHandler)}
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
 				{this.renderApproveButton(warnApproveOwnReport, disabled, () => this.approveReport(values.approvalComment), cancelHandler)}
@@ -585,11 +585,11 @@ class BaseReportShow extends Page {
 
 	rejectReport = (rejectionComment) => {
 		if (_isEmpty(rejectionComment)) {
-			this.handleError({message: 'Please include a comment when rejecting a report.'})
+			this.handleError({message: 'Please include a comment when requesting changes.'})
 			return
 		}
 
-		const text = 'REJECTED: ' + rejectionComment
+		const text = 'REQUESTED CHANGES: ' + rejectionComment
 		let graphql = 'rejectReport(uuid: $uuid, comment: $comment) { uuid }'
 		const variables = {
 			uuid: this.state.report.uuid,
@@ -599,7 +599,7 @@ class BaseReportShow extends Page {
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				const queryDetails = this.pendingMyApproval(this.props.currentUser)
-				const message = 'Successfully rejected report.'
+				const message = 'Successfully requested changes.'
 				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback.bind(this, message))
 			}).catch(error => {
 				this.handleError(error)
@@ -658,7 +658,7 @@ class BaseReportShow extends Page {
 	}
 
 	renderRejectButton = (warnApproveOwnReport, label, confirmHandler, cancelHandler) => {
-		const validationWarnings = warnApproveOwnReport ? ["You are rejecting your own report"] : []
+		const validationWarnings = warnApproveOwnReport ? ["You are requesting changes on your own report"] : []
 		return _isEmpty(validationWarnings)
 			?
 			<Button bsStyle="warning" onClick={confirmHandler}>{label}</Button>
@@ -666,10 +666,10 @@ class BaseReportShow extends Page {
 			<Confirm
 				onConfirm={confirmHandler}
 				onClose={cancelHandler}
-				title="Reject report?"
+				title="Request changes?"
 				body={this.renderValidationWarnings(validationWarnings, "rejecting")}
-				confirmText="Reject anyway"
-				cancelText="Cancel reject"
+				confirmText="Request changes anyway"
+				cancelText="Cancel change request"
 				dialogClassName="react-confirm-bootstrap-modal"
 				confirmBSStyle="primary">
 			<Button bsStyle="warning" onClick={confirmHandler}>{label}</Button>
