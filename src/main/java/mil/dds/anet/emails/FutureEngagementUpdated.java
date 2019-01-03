@@ -13,7 +13,7 @@ public class FutureEngagementUpdated extends AnetEmailAction {
 	Report report;
 	
 	public FutureEngagementUpdated() { 
-		templateName = "/emails/futureEngagementUpdated.ftl";
+		templateName = "/emails/futureEngagementUpdated.ftlh";
 		subject = "ANET: Upcoming Engagement Report";
 	}
 	

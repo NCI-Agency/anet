@@ -14,7 +14,7 @@ public class NewReportCommentEmail extends AnetEmailAction {
 	Comment comment;
 	
 	public NewReportCommentEmail() { 
-		templateName = "/emails/newReportComment.ftl";
+		templateName = "/emails/newReportComment.ftlh";
 		subject = "New Comment on your ANET Report";
 	}
 	

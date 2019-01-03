@@ -39,7 +39,7 @@ public class DailyRollupEmail extends AnetEmailAction {
 	String comment;
 
 	public DailyRollupEmail() {
-		templateName = "/emails/rollup.ftl";
+		templateName = "/emails/rollup.ftlh";
 	}
 
 	@Override

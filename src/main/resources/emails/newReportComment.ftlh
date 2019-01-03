@@ -19,9 +19,11 @@ a {
 <body>
 <p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
 
-Hi ${report.author.name},
+<#assign reportAuthor = report.loadAuthor(context).get()>
+Hi ${reportAuthor.name},
 
-<p>The following comment was added to your report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, by ${comment.author.rank!} ${comment.author.name}:</p>
+<#assign commentAuthor = comment.loadAuthor(context).get()>
+<p>The following comment was added to your report, <a href="${serverUrl}/reports/${report.uuid}"><em><strong>"${reportIntent}"</strong></em></a>, by ${commentAuthor.rank!} ${commentAuthor.name}:</p>
 
 <p><i>"${comment.text}"</i></p>
 

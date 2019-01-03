@@ -12,7 +12,7 @@ public class ReportReleasedEmail extends AnetEmailAction {
 	Report report;
 	
 	public ReportReleasedEmail() { 
-		templateName = "/emails/reportReleased.ftl";
+		templateName = "/emails/reportReleased.ftlh";
 		subject = "ANET Report Approved";
 	}
 	

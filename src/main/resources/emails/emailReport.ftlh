@@ -249,13 +249,13 @@ ${sender.name} sent you a report from ANET:
         <div class="col-sm-7">
           <div id="intent" class="form-control-static">
             <p>
-              <strong>Meeting goal:</strong> ${report.intent}
+              <strong>Meeting goal:</strong> ${(report.intent)!}
             </p>
             <p>
-              <span><strong>Key outcomes:</strong> ${report.keyOutcomes}</span>
+              <span><strong>Key outcomes:</strong> ${(report.keyOutcomes)!}</span>
             </p>
             <p>
-              <strong>Next steps:</strong> ${report.nextSteps}
+              <strong>Next steps:</strong> ${(report.nextSteps)!}
             </p>
           </div>
         </div>
@@ -295,7 +295,7 @@ ${sender.name} sent you a report from ANET:
           <label for="atmosphere" class="col-sm-2 control-label">Atmospherics</label>
           <div class="col-sm-7">
             <div id="atmosphere" class="form-control-static">
-              ${report.atmosphere?capitalize} - ${report.atmosphereDetails}
+              ${(report.atmosphere)!?capitalize} - ${(report.atmosphereDetails)!}
             </div>
           </div>
         </#if>
@@ -319,8 +319,8 @@ ${sender.name} sent you a report from ANET:
         <label for="author" class="col-sm-2 control-label">Report author</label>
         <div class="col-sm-7">
           <div id="author" class="form-control-static">
-            <#assign author = report.loadAuthor(context).get()>
-            <a href="/people/${author.uuid}">${(author.rank)!} ${(author.name)!}</a>
+            <#assign reportAuthor = report.loadAuthor(context).get()>
+            <a href="/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
           </div>
         </div>
       </div>
@@ -463,7 +463,7 @@ ${sender.name} sent you a report from ANET:
       <fieldset>
         <div>
           <p>
-            ${report.reportText}
+            ${report.reportText?no_esc}
           </p>
         </div>
       </fieldset>
