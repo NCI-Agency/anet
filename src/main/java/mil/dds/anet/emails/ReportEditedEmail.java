@@ -14,7 +14,7 @@ public class ReportEditedEmail extends AnetEmailAction {
 	Person editor;
 	
 	public ReportEditedEmail() { 
-		templateName = "/emails/reportEdited.ftl";
+		templateName = "/emails/reportEdited.ftlh";
 		subject = "New Edit to your ANET Report";
 	}
 	

@@ -175,12 +175,12 @@ a {
                 <p><strong>Next steps:</strong> ${(report.nextSteps)!}</p>
             </#if>
             <#if showReportText >
-            	<p><strong>Report Details</strong> ${(report.reportText)!}</p>
+                <p><strong>Report Details</strong> ${(report.reportText)!?no_esc}</p>
             </#if>
         </div>
     </div>
 
     <a href="${serverUrl}/reports/${report.uuid}/min" >
-    	Read full report
+        Read full report
     </a>
 </#macro>

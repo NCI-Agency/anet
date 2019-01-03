@@ -463,7 +463,7 @@ ${sender.name} sent you a report from ANET:
       <fieldset>
         <div>
           <p>
-            ${report.reportText}
+            ${report.reportText?no_esc}
           </p>
         </div>
       </fieldset>
