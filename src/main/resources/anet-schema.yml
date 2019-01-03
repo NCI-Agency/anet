@@ -79,6 +79,7 @@ properties:
           input:
             type: array
             uniqueItems: true
+            minItems: 1
             items:
               type: string
               title: The supported date formats for form input fields
