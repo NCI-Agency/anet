@@ -10,8 +10,9 @@ import {Route} from 'react-router'
 import {BrowserRouter} from 'react-router-dom'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
-import rootReducer from './reducers'
+import { PersistGate } from 'redux-persist/lib/integration/react'
 import { jumpToTop } from 'components/Page'
+import { persistor, store } from './store'
 
 import App from 'pages/App'
 
@@ -22,12 +23,12 @@ window.onerror = function(message, url, lineNumber, columnNumber) {
 	return false
   }
 
-const store = createStore(rootReducer)
-
 ReactDOM.render((
 	<Provider store={store}>
-		<BrowserRouter onUpdate={jumpToTop}>
-			<Route path="/" component={App} />
-		</BrowserRouter>
+		<PersistGate persistor={persistor}>
+			<BrowserRouter onUpdate={jumpToTop}>
+				<Route path="/" component={App} />
+			</BrowserRouter>
+		</PersistGate>
 	</Provider>
 ), document.getElementById('root'))
