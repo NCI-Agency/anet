@@ -21,7 +21,7 @@ a {
 
 Hi ${report.author.name},
 
-<p>Your report, <a href="${serverUrl}/reports/${report.id?c}"><em><strong>"${reportIntent}"</strong></em></a>, has been returned by ${rejector.name} &lt;${rejector.emailAddress}&gt;. The following comment was provided:</p>
+<p>Your report, <a href="${serverUrl}/reports/${report.id?c}"><em><strong>"${reportIntent}"</strong></em></a>, changes have been requested by ${rejector.name} &lt;${rejector.emailAddress}&gt;. The following comment was provided:</p>
 <p>"${comment.text}"</p>
 
 <p><strong>Engagement date and location:</strong> ${(report.engagementDate.toString('dd MMM yyyy'))!} @ ${(report.loadLocation(context).get().name)!}</p>

@@ -38,7 +38,7 @@ export default class ReportSummary extends Component {
 
 			{report.isRejected() &&
 				<p className="report-rejected">
-					<strong>Rejected</strong>
+					<strong>Changes requested</strong>
 				</p>
 			}
 

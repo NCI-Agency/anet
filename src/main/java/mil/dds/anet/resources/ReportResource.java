@@ -676,7 +676,7 @@ public class ReportResource {
 				//Verify that this user can reject for this step.
 				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getId(), step.getId());
 				if (canApprove == false) {
-					logger.info("User ID {} cannot reject report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
+					logger.info("User ID {} cannot request changes to report ID {} for step ID {}",approver.getId(), r.getId(), step.getId());
 					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
 				}
 
@@ -693,7 +693,7 @@ public class ReportResource {
 				r.setState(ReportState.REJECTED);
 				final int numRows = dao.update(r, approver);
 				if (numRows == 0) {
-					throw new WebApplicationException("Couldn't process report rejection", Status.NOT_FOUND);
+					throw new WebApplicationException("Couldn't process report change request", Status.NOT_FOUND);
 				}
 
 				//Add the comment
@@ -702,7 +702,7 @@ public class ReportResource {
 				engine.getCommentDao().insert(reason);
 
 				sendReportRejectEmail(r, approver, reason);
-				AnetAuditLogger.log("report {} rejected by {} (id: {})", r.getId(), approver.getName(), approver.getId());
+				AnetAuditLogger.log("report {} has requested changes by {} (id: {})", r.getId(), approver.getName(), approver.getId());
 				return r;
 			}
 		});

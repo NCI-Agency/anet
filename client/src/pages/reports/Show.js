@@ -180,7 +180,7 @@ class BaseReportShow extends Page {
 
 				{report.isRejected() &&
 					<Fieldset style={{textAlign: 'center' }}>
-						<h4 className="text-danger">This report was REJECTED. </h4>
+						<h4 className="text-danger">This report has CHANGES REQUESTED. </h4>
 						<p>You can review the comments below, fix the report and re-submit</p>
 						<div style={{textAlign: 'left'}}>
 							{this.renderValidationMessages(errors, warnings)}
@@ -430,18 +430,18 @@ class BaseReportShow extends Page {
 	@autobind
 	renderApprovalForm(errors, warnings) {
 		return <Fieldset className="report-sub-form" title="Report approval">
-			<h5>You can approve, reject, or edit this report</h5>
+			<h5>You can approve, request changes to, or edit this report</h5>
 
 			<Form.Field
 				id="approvalComment"
 				componentClass="textarea"
 				label="Approval comment"
-				placeholder="Type a comment here; required for a rejection"
+				placeholder="Describe what the author should change; required when requesting changes"
 				getter={this.getApprovalComment}
 				onChange={this.onChangeComment}
 			/>
 
-			<Button bsStyle="warning" onClick={this.handleRejectReport}>Reject with comment</Button>
+			<Button bsStyle="warning" onClick={this.handleRejectReport}>Request changes</Button>
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
 				{this.renderApproveButton(errors, warnings)}
@@ -574,11 +574,11 @@ class BaseReportShow extends Page {
 	@autobind
 	rejectReport() {
 		if (this.state.approvalComment.text.length === 0){
-			this.handleError({message:'Please include a comment when rejecting a report.'})
+			this.handleError({message:'Please include a comment when requesting changes.'})
 			return
 		}
 
-		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
+		this.state.approvalComment.text = 'REQUESTED CHANGES: ' + this.state.approvalComment.text
 		let graphql = 'rejectReport(id: $id, comment: $comment) { id }'
 		const variables = {
 			id: this.state.report.id,
@@ -589,7 +589,7 @@ class BaseReportShow extends Page {
 			.then(data => {
 				const { currentUser } = this.props
 				const queryDetails = this.pendingMyApproval(currentUser)
-				const message = 'Successfully rejected report.'
+				const message = 'Successfully requested changes.'
 				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback.bind(this, message))
 			}).catch(error => {
 				this.handleError(error)
