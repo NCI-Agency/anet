@@ -63,6 +63,7 @@ const loadingBar = {
 	backgroundColor: '#29d'
 }
 
+export const ResponsiveLayoutContext = React.createContext()
 
 class ResponsiveLayout extends Component {
 	static propTypes = {
@@ -109,6 +110,12 @@ class ResponsiveLayout extends Component {
 		const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
 
 		return (
+		<ResponsiveLayoutContext.Provider
+			value={{
+				showFloatingMenu: this.showFloatingMenu,
+				topbarOffset: topbarHeight,
+			}}
+		>
 			<div style={anetContainer} className="anet" >
 				<TopBar
 					topbarHeight={this.handleTopbarHeight}
@@ -131,7 +138,7 @@ class ResponsiveLayout extends Component {
 							className={`main-sidebar ${sidebarClass}`}
 						>
 							<div style={sidebar}>
-								{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
+								<Nav organizations={sidebarData} />
 							</div>
 						</div>
 					}
@@ -149,6 +156,7 @@ class ResponsiveLayout extends Component {
 					/>
 				</div>
 			</div>
+		</ResponsiveLayoutContext.Provider>
 		)
 	}
 }
