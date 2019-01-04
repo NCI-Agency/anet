@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {Alert, Table, Modal, Button, Nav, NavItem, Badge} from 'react-bootstrap'
+import {Alert, Table, Modal, Button, Nav, Badge} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
 
@@ -39,8 +39,7 @@ import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
 import { jumpToTop } from 'components/Page'
 
-import AppContext from 'components/AppContext'
-import Scrollspy from 'react-scrollspy'
+import { AnchorNavItem } from 'components/Nav'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
@@ -90,11 +89,10 @@ const SEARCH_CONFIG = {
 	}
 }
 
-class BaseSearch extends Page {
+class Search extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		scrollspyOffset: PropTypes.number,
 	}
 
 	successToastId = 'success-message';
@@ -197,38 +195,35 @@ class BaseSearch extends Page {
 				<SubNav subnavElemId="search-nav">
 					<div><Button onClick={this.props.history.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
 					<Nav stacked bsStyle="pills">
-						<Scrollspy className="nav" currentClassName="active" offset={this.props.scrollspyOffset}
-							items={ ['organizations', 'people', 'positions', 'tasks', 'locations', 'reports'] }>
-							<NavItem href="#organizations" disabled={!numOrganizations}>
-								<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
-								{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="organizations" disabled={!numOrganizations}>
+							<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
+							{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#people" disabled={!numPeople}>
-								<img src={PEOPLE_ICON} alt="" /> People
-								{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="people" disabled={!numPeople}>
+							<img src={PEOPLE_ICON} alt="" /> People
+							{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#positions" disabled={!numPositions}>
-								<img src={POSITIONS_ICON} alt="" /> Positions
-								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="positions" disabled={!numPositions}>
+							<img src={POSITIONS_ICON} alt="" /> Positions
+							{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#tasks" disabled={!numTasks}>
-								<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
-								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="tasks" disabled={!numTasks}>
+							<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
+							{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#locations" disabled={!numLocations}>
-								<img src={LOCATIONS_ICON} alt="" /> Locations
-								{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="locations" disabled={!numLocations}>
+							<img src={LOCATIONS_ICON} alt="" /> Locations
+							{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#reports" disabled={!numReports}>
-								<img src={REPORTS_ICON} alt="" /> Reports
-								{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
-							</NavItem>
-						</Scrollspy>
+						<AnchorNavItem to="reports" disabled={!numReports}>
+							<img src={REPORTS_ICON} alt="" /> Reports
+							{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
+						</AnchorNavItem>
 					</Nav>
 				</SubNav>
 
@@ -531,13 +526,5 @@ class BaseSearch extends Page {
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery,
 })
-
-const Search = (props) => (
-	<AppContext.Consumer>
-		{context =>
-			<BaseSearch scrollspyOffset={context.scrollspyOffset} {...props} />
-		}
-	</AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Search))
