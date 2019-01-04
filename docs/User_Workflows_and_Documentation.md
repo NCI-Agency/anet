@@ -95,11 +95,11 @@ Please note that you cannot delete reports that have been submitted for approval
 
 **Commenting**
 
-Once a report is submitted for approvals, ANET users can comment on it. While users reviewing reports before releasing them to the daily will be prompted to add a comment when rejecting a report, all users can use commenting the commenting function. These comments will be visible to all users. 
+Once a report is submitted for approvals, ANET users can comment on it. Users reviewing reports before releasing them to the daily will be prompted to add a comment when requesting changes. In addition, any user is able to use the commenting function at any time. These comments will be visible to all users. 
 
-**Editing Rejected Reports**
+**Editing report change requests**
 
-If your reviewer rejects your report, you’ll receive an email letting you know. The email will include the comment the left explaining why the report was rejected. You’ll need to edit and resubmit the report. 
+If your reviewer returns your report with requested changes, you’ll receive an email letting you know. The email will include the comment explaining why the report needs changes. You’ll need to edit and resubmit the report.
 
 In order to edit the report, you’ll first need to navigate to the report in ANET. You can do this by clicking on the link provided in the email, or clicking on “My Reports” on the left-hand menu of the homepage. When you find and click into the report, you can review the comment the reviewer left. 
 
@@ -127,7 +127,7 @@ When you read a report that you think someone else may want to read, you can qui
 ## Workflows for Super Users
 *These workflows are the ones that will be most helpful for Super Users. Admins are also able to complete these workflows. Super Users and Admins have advanced capabilities within ANET. Super Users are able to manage information for their organization, and admins are able to manage information across the system.*
 
-**Approving and Rejecting Reports**
+**Reviewing Reports**
 
 Super Users (or advisors who are added to an organization’s approval chain), may need to review advisors’ reports before they are released to the daily rollup. One way to quickly see which reports you need to review:
 
@@ -135,8 +135,8 @@ Super Users (or advisors who are added to an organization’s approval chain), m
 2. Clicking there will take you to a page of the reports that are waiting on your approval. 
 3. Select the report you’d like to review by clicking on the “Read full report” button visible on the bottom right of the report summary. 
 4. There, you’ll be able to see the entire report, including the executive summary which will be displayed in the daily rollup. 
-5. Below the report summary, you can can reject with a comment by clicking on the “Reject with comment” button. Similarly, you can edit or approve the report by clicking on the “Edit report” or “Approve” buttons, respectively. 
-6. If you reject the report, you’ll be prompted to include a comment with the rejection if you have not already done so. Once rejected, the report is resent to the author to review. 
+5. Below the report summary, you can can request changes and comment by clicking on the “Request changes” button. Similarly, you can edit or approve the report by clicking on the “Edit report” or “Approve” buttons, respectively.
+6. If you request changes, you’ll be prompted to include a comment with the request, if you have not already done so. Once changes are requested, the report is resent to the author to review. 
 7. If you approve the report it will go to the next approver if there is one, or it will be released to the daily rollup if you were the final approver. 
 
 **Creating a new person**
@@ -238,7 +238,7 @@ As a Super User, you can create approval chains for your organization. These app
 
 The approval chain is a series of steps. In each step, you can add one or more person to review reports. If there is more than one person in a step, it means that either of them can review the report. One of the two (but not both) must review the report for it to move on to the last step. 
 
-After the report has been approved by someone in the final step, their report will go to the daily rollup. If, along the way, one of the reviewers rejects the report, the report will be returned to the author for corrections. The report will then need to be resubmitted. 
+After the report has been approved by someone in the final step, their report will go to the daily rollup. If, along the way, one of the reviewers request changes to the report, the report will be returned to the author for corrections. The report will then need to be resubmitted. 
 
 ## Workflows for Admins
 *These workflows are the ones that will be most helpful for Admins. Admins are able to complete all of the workflows available to Advisors and Super Users. They also have a few additional capabilities within the ANET front end outlined here.* 

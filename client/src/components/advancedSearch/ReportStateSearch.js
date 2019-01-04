@@ -12,7 +12,7 @@ const STATE_LABELS = {
 	[Report.STATE.RELEASED]: 'Released',
 	[Report.STATE.CANCELLED]: 'Cancelled',
 	[Report.STATE.FUTURE]: 'Upcoming Engagement',
-	[Report.STATE.REJECTED]: 'Rejected',
+	[Report.STATE.REJECTED]: 'Changes requested',
 }
 const CANCELLATION_REASON_LABELS = {
 	[Report.CANCELLATION_REASON.CANCELLED_BY_ADVISOR]: 'Advisor',

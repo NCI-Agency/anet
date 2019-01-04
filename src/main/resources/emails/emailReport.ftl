@@ -484,7 +484,7 @@ ${sender.name} sent you a report from ANET:
             <#assign type = "Approved">
             <#assign styleClass = "btn-success approved">
           <#elseif approvalAction.type == "REJECT">
-            <#assign type = "Rejected">
+            <#assign type = "Changes requested">
             <#assign styleClass = "btn-danger rejected">
           <#else>
             <#assign type = "Unknown">
