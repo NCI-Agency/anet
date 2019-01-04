@@ -452,7 +452,7 @@ class BaseReportShow extends Page {
 
 	renderApprovalForm = (values, disabled, warnApproveOwnReport, cancelHandler) => {
 		return <Fieldset className="report-sub-form" title="Report approval">
-			<h5>You can approve, request changes on, or edit this report</h5>
+			<h5>You can approve, request changes to, or edit this report</h5>
 			{this.renderValidationMessages('approving')}
 
 			<Field
@@ -658,7 +658,7 @@ class BaseReportShow extends Page {
 	}
 
 	renderRejectButton = (warnApproveOwnReport, label, confirmHandler, cancelHandler) => {
-		const validationWarnings = warnApproveOwnReport ? ["You are requesting changes on your own report"] : []
+		const validationWarnings = warnApproveOwnReport ? ["You are requesting changes to your own report"] : []
 		return _isEmpty(validationWarnings)
 			?
 			<Button bsStyle="warning" onClick={confirmHandler}>{label}</Button>

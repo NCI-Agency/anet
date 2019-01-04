@@ -684,14 +684,14 @@ public class ReportResource {
 
 				//Report author cannot reject own report, unless admin
 				if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
-					logger.info("Author {} cannot request changes on own report UUID {}", approver.getUuid(), r.getUuid());
-					throw new WebApplicationException("You cannot request changes on your own report", Status.FORBIDDEN);
+					logger.info("Author {} cannot request changes to own report UUID {}", approver.getUuid(), r.getUuid());
+					throw new WebApplicationException("You cannot request changes to your own report", Status.FORBIDDEN);
 				}
 				//Verify that this user can reject for this step.
 				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
 				if (canApprove == false) {
-					logger.info("User UUID {} cannot request changes on report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
-					throw new WebApplicationException("User cannot request changes on report", Status.FORBIDDEN);
+					logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
+					throw new WebApplicationException("User cannot request changes to report", Status.FORBIDDEN);
 				}
 
 				//Write the rejection
