@@ -8,6 +8,15 @@ import faker from 'faker'
 const simulate = async () => {
     console.log('Sim starting'.green)
 
+    simpleScenario.buildup.forEach(async buildup => {
+        const userTypeName = faker.random.arrayElement(buildup.userTypes)
+        const userType = simpleScenario.userTypes.find(d => d.name === userTypeName)
+        if (userType) {
+            const user = await userType.userFunction()
+            await buildup.runnable(user, buildup.number)
+        }
+    })
+
     while (true) {
         await Aigle.resolve(simpleScenario.userTypes).each(async userType => {
             await Aigle.delay(1000)

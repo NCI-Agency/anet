@@ -1,9 +1,9 @@
 import { createReport } from './stories/ReportStories'
 import faker from 'faker'
 import {runGQL} from './simutils'
-import { createPerson } from './stories/PersonStories'
-import { createHiearchy } from './stories/OrganizationStories'
-import { createPosition, putPersonInPosition, updateAssociatedPosition } from './stories/PositionStories'
+import { personsBuildup, createPerson } from './stories/PersonStories'
+import { organizationsBuildup, createHiearchy } from './stories/OrganizationStories'
+import { positionsBuildup, assignedPositionsBuildup, createPosition, updatePosition, deletePosition, putPersonInPosition, deletePersonFromPosition, updateAssociatedPosition, removeAssociatedPosition } from './stories/PositionStories'
 
 const simpleScenario =
 {
@@ -63,6 +63,39 @@ const simpleScenario =
                 }
             }
         ],
+    buildup: 
+        [
+            {
+                name: "Create person",
+                number: 100,
+                runnable: personsBuildup,
+                userTypes: ["existingAdmin"]
+            },
+            {
+                name: "Create organization",
+                number: 50,
+                runnable: organizationsBuildup,
+                userTypes: ["existingAdmin"]
+            },
+            {
+                name: "Create position",
+                number: 50,
+                runnable: positionsBuildup,
+                userTypes: ["existingAdmin"]
+            },
+            {
+                name: "Put person in position",
+                number: 50,
+                runnable: assignedPositionsBuildup,
+                userTypes: ["existingAdmin"]
+            }
+            // {
+            //     name: "Associated advisor position with principal position",
+            //     number: 750,
+            //     runnable: updateAssociatedPosition,
+            //     userTypes: ["existingAdmin"]
+            // }
+        ],
     stories:
         [
             // {
@@ -89,24 +122,48 @@ const simpleScenario =
             //     runnable: createHiearchy,
             //     userTypes: ["existingAdmin"]
             // },
-            // {
-            //     name: "Create position",
-            //     frequency: 1,
-            //     runnable: createPosition,
-            //     userTypes: ["existingAdmin"]
-            // }
+            {
+                name: "Create position",
+                frequency: 1,
+                runnable: createPosition,
+                userTypes: ["existingAdmin"]
+            }
             // {
             //     name: "Put person in position",
             //     frequency: 1,
             //     runnable: putPersonInPosition,
             //     userTypes: ["existingAdmin"]
             // }
-            {
-                name: "Associated advisor position with principal position",
-                frequency: 1,
-                runnable: updateAssociatedPosition,
-                userTypes: ["existingAdmin"]
-            }            
+            // {
+            //     name: "Associated advisor position with principal position",
+            //     frequency: 1,
+            //     runnable: updateAssociatedPosition,
+            //     userTypes: ["existingAdmin"]
+            // }
+            // {
+            //     name: "Remove advisor position from principal position",
+            //     frequency: 1,
+            //     runnable: removeAssociatedPosition,
+            //     userTypes: ["existingAdmin"]
+            // }            
+            // {
+            //     name: "Remove person from position",
+            //     frequency: 1,
+            //     runnable: deletePersonFromPosition,
+            //     userTypes: ["existingAdmin"]
+            // }            
+            // {
+            //     name: "Delete a position",
+            //     frequency: 1,
+            //     runnable: deletePosition,
+            //     userTypes: ["existingAdmin"]
+            // }    
+            // {
+            //     name: "Update a position",
+            //     frequency: 1,
+            //     runnable: updatePosition,
+            //     userTypes: ["existingAdmin"]
+            // }            
         ]
 }
 

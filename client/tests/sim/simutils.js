@@ -8,6 +8,9 @@ async function runGQL(user, query) {
     })
     const json = await result.json()
     if (json.errors) {
+        const x = query.query.split('\n').filter((s, i) => i && s.trim().length).map((s) => s.match(/^\s*/)[0].length).reduce((r, d) => Math.min(r, d), 40)
+        const q = query.query.split('\n').map((s, i) => (i && s.slice(x)) || s).join('\n')
+        console.debug(`${(user.name||'?').green} failed to execute query:\n${q.blue}\nwith variables:\n${JSON.stringify(query.variables, null, 4).blue}`)
         json.errors.forEach((error) => console.error(error.message))
     }
     return json
@@ -41,6 +44,34 @@ const fuzzy = {
     seldom: chance(0.1),
     never: chance(0.01),
     withProbability: (probability) => (Math.random() < probability)
+}
+
+/** 
+ * Standard Normal variate using Box-Muller transform (average is 0, standard deviation is 1).
+ * 
+ * See https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+ * and https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+ * 
+ * @returns A random variable with normal distribution
+ */
+function randn_bm() {
+    var u = 0, v = 0;
+    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while(v === 0) v = Math.random();
+    return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+}
+
+/**
+ * Gives the probability function for a normal distribution with certain mean and standard deviation.
+ * 
+ * @param {*} mean the mean
+ * @param {*} stddev the standard deviation
+ */
+function norm(mean, stddev) {
+    const variance = stddev * stddev
+    return function (x) {        
+        return (1 / Math.sqrt(2 * Math.PI * variance)) * Math.exp(- (x - mean) * (x - mean) / 2 * variance)
+    }
 }
 
 /**

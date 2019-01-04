@@ -59,6 +59,7 @@ async function createHiearchy(user) {
     const status = Organization.STATUS.ACTIVE           // faker.random.objectElement(Organization.STATUS)
     const usedServices = []
 
+    console.debug(`Creating ${type.toLowerCase.green} organization ${longName.green} (${shortName.green})`)
     return await createSubOrg(undefined, [])
 
     /**
@@ -83,7 +84,7 @@ async function createHiearchy(user) {
         for (i = 1, chance = total - distrib[0]; i < distrib.length && r < chance; i++, chance -= distrib[i]) {
             // nop
         }
-        return i - 1;
+        return i - 1
     }
 
     /**
@@ -214,4 +215,24 @@ const deleteOrganization = function (user) {
     // todo
 }
 
-export { createOrganization, createHiearchy }
+const organizationsBuildup = async function (user, number) {
+    var count
+    
+    async function count() {
+        return (await runGQL(user,
+            {
+                query: `query {
+                    organizationList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
+                        totalCount
+                    }
+                }`,
+                variables: {}
+            })).data.organizationList.totalCount
+    }
+
+    if ((await count()) < number) {
+        await createHiearchy(user)
+    }
+}
+
+export { organizationsBuildup, createOrganization, createHiearchy }
