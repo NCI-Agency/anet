@@ -58,6 +58,7 @@ import io.leangen.graphql.GraphQLSchemaGenerator;
 import io.leangen.graphql.generator.mapping.common.ScalarMapper;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.graphql.DateTimeMapper;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.ResponseUtils;
@@ -76,13 +77,15 @@ public class GraphQLResource {
 	private static final String RESULT_KEY_DATA = "data";
 
 	private final AnetObjectEngine engine;
+	private final AnetConfiguration config;
 	private List<Object> resources;
 	private boolean developmentMode;
 	private final MetricRegistry metricRegistry;
 	private GraphQLSchema graphqlSchema;
 
-	public GraphQLResource(AnetObjectEngine engine, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {
+	public GraphQLResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {
 		this.engine = engine;
+		this.config = config;
 		this.resources = resources;
 		this.metricRegistry = metricRegistry;
 		this.developmentMode = developmentMode;
@@ -302,8 +305,7 @@ public class GraphQLResource {
 
 		final CellStyle dateStyle = workbook.createCellStyle();
 		final CreationHelper createHelper = workbook.getCreationHelper();
-		// TODO: Get the date format from the dictionary
-		final short dateFormat = createHelper.createDataFormat().getFormat("dd MMM yyyy");
+		final short dateFormat = createHelper.createDataFormat().getFormat((String) config.getDictionaryEntry("dateFormats.excel"));
 		dateStyle.setDataFormat(dateFormat);
 		
 		XSSFRow header = sheet.createRow(0);

@@ -55,6 +55,52 @@ properties:
     title: The support email address
     description: The email address where support requests can be sent.
     examples: [support@example.com]
+
+  dateFormats:
+    type: object
+    additionalProperties: false
+    required: [email, excel, forms]
+    properties:
+      email:
+        type: string
+        title: The date format for email
+        description: Used in report emails, e.g. "6 December 1998"; see https://www.joda.org/joda-time/key_format.html#Pattern-based_formatting for format specifiers.
+        examples: ["d MMMM yyyy"]
+      excel:
+        type: string
+        title: The date format for Excel export
+        description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://www.joda.org/joda-time/key_format.html#Pattern-based_formatting for format specifiers.
+        examples: ["d MMMM yyyy"]
+      forms:
+        type: object
+        additionalProperties: false
+        required: [input, short, long, withTime]
+        properties:
+          input:
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              type: string
+              title: The supported date formats for form input fields
+              description: Used in date inputs in the user interface, the first one is used as placeholder; should be easy to type, e.g. "06-12-1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+              examples: ["DD-MM-YYYY", "DD/MM/YYYY", "D MMMM YYYY"]
+          short:
+            type: string
+            title: The short date format for forms
+            description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+            examples: ["D MMMM YYYY"]
+          long:
+            type: string
+            title: The long date format for forms
+            description: Used to show dates in forms in the user interface; should be easy to read, e.g. "Sunday, 6 December 1998"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+            examples: ["dddd, D MMMM YYYY"]
+          withTime:
+            type: string
+            title: The date format including the time for forms
+            description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998 @ 13:45"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
+            examples: ["D MMMM YYYY @ HH:mm"]
+
   fields:
     type: object
     additionalProperties: false

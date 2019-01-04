@@ -204,7 +204,7 @@ class BaseReportShow extends Page {
 					{report.isReleased() &&
 						<Fieldset style={{textAlign: 'center' }}>
 							<h4 className="text-danger">This report is RELEASED.</h4>
-							<p>This report has been approved and released to the ANET community on {moment(report.getReportReleasedAt()).format('D MMM YYYY, [at] h:mm a')}</p>
+							<p>This report has been approved and released to the ANET community on {moment(report.getReportReleasedAt()).format(Settings.dateFormats.forms.withTime)}</p>
 						</Fieldset>
 					}
 
@@ -270,7 +270,7 @@ class BaseReportShow extends Page {
 							<Field
 								name="engagementDate"
 								component={FieldHelper.renderReadonlyField}
-								humanValue={report.engagementDate && moment(report.engagementDate).format('D MMM YYYY')}
+								humanValue={report.engagementDate && moment(report.engagementDate).format(Settings.dateFormats.forms.long)}
 							/>
 
 							<Field
@@ -388,8 +388,8 @@ class BaseReportShow extends Page {
 								let createdAt = moment(comment.createdAt)
 								return (
 									<p key={comment.uuid}>
-										<LinkTo person={comment.author} />
-										<span title={createdAt.format('L LT')}> {createdAt.fromNow()}: </span>
+										<LinkTo person={comment.author} />,
+										<span title={createdAt.format(Settings.dateFormats.forms.withTime)}> {createdAt.fromNow()}: </span>
 										"{comment.text}"
 									</p>
 								)

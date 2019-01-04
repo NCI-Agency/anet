@@ -248,7 +248,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		environment.jersey().register(tagResource);
 		environment.jersey().register(authorizationGroupResource);
 		environment.jersey().register(new ViewResponseFilter(configuration));
-		environment.jersey().register(new GraphQLResource(engine,
+		environment.jersey().register(new GraphQLResource(engine, configuration,
 				ImmutableList.of(reportResource, personResource,
 						positionResource, locationResource,
 						orgResource, taskResource,

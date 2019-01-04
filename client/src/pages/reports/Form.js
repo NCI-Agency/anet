@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import {Checkbox, Button, Collapse, HelpBlock} from 'react-bootstrap'
-import DatePicker from 'react-16-bootstrap-date-picker'
 
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
@@ -16,6 +15,7 @@ import Settings from 'Settings'
 import AppContext from 'components/AppContext'
 import Autocomplete from 'components/Autocomplete'
 import Fieldset from 'components/Fieldset'
+import CustomDateInput from 'components/CustomDateInput'
 import ConfirmDelete from 'components/ConfirmDelete'
 import ReportTags from 'components/ReportTags'
 import MultiSelector from 'components/MultiSelector'
@@ -26,7 +26,6 @@ import NavigationWarning from 'components/NavigationWarning'
 import AttendeesTable from './AttendeesTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
 
-import CALENDAR_ICON from 'resources/calendar.png'
 import LOCATION_ICON from 'resources/locations.png'
 import PEOPLE_ICON from 'resources/people.png'
 import TASK_ICON from 'resources/tasks.png'
@@ -239,17 +238,9 @@ class BaseReportForm extends Component {
 							<Field
 								name="engagementDate"
 								component={FieldHelper.renderSpecialField}
-								value={values.engagementDate && moment(values.engagementDate).format()}
+								value={values.engagementDate}
 								onChange={(value, formattedValue) => setFieldValue('engagementDate', value)}
-								addon={CALENDAR_ICON}
-								widget={
-									<DatePicker
-										showTodayButton
-										placeholder="When did it happen?"
-										dateFormat="DD/MM/YYYY"
-										showClearButton={false}
-									/>
-								}
+								widget={<CustomDateInput id="engagementDate" />}
 							>
 								{values.engagementDate && moment().endOf("day").isBefore(values.engagementDate) &&
 									<HelpBlock>
@@ -458,7 +449,7 @@ class BaseReportForm extends Component {
 								<Button onClick={this.onCancel}>Cancel</Button>
 							</div>
 							<div>
-								{this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format('hh:mm:ss')}</div>}
+								{this.state.autoSavedAt && <div>Last autosaved at {this.state.autoSavedAt.format(Settings.dateFormats.forms.withTime)}</div>}
 								{canDelete &&
 									<ConfirmDelete
 										onConfirmDelete={() => this.onConfirmDelete(values.uuid, resetForm)}

@@ -1,3 +1,26 @@
+.bp3-transition-container {
+	/* Make sure it is on top of the advanced search popup */
+	z-index: 1070 !important;
+}
+
+/* Make bp3 input and right element behave mostly like bootstrap inputs */
+.bp3-input {
+	height: 38px;
+}
+.bp3-input-action {
+	height: 38px;
+	padding: 6px 12px;
+	background-color: #eeeeee;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+/* If no right element, take up no space */
+.bp3-input-action:empty {
+	display: none;
+}
+
 @media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: none) {
 	/* IE10+ specific styles go here */
 	button.bp3-button > span.bp3-icon {

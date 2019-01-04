@@ -50,8 +50,7 @@ public class TaskResource {
 	
 	public TaskResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.dao = engine.getTaskDao();
-		@SuppressWarnings("unchecked")
-		final String taskShortLabel = (String) ((Map<String, Object>) ((Map<String, Object>) config.getDictionary().get("fields")).get("task")).get("shortLabel");
+		final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortLabel");
 		duplicateTaskShortName = String.format("Duplicate %s number", taskShortLabel);
 	}
 	

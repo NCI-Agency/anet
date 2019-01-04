@@ -133,7 +133,6 @@ class BaseRelatedObjectNotes extends Component {
 	}
 
 	renderPortal = () => {
-		const DATE_FORMAT = 'DD MMM YYYY HH:mm:ss'
 		const { currentUser } = this.props
 		const { notes } = this.state
 		const noNotes = _isEmpty(notes)

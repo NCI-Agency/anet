@@ -24,15 +24,13 @@ export default class ReportSummary extends Component {
 		return <Grid fluid className="report-summary">
 			{report.state === Report.STATE.DRAFT &&
 				<p className="report-draft">
-					<strong>Draft{report.updatedAt && ':'}</strong>
+					<strong>Draft</strong>
 					{
 						/* If the parent does not fetch report.updatedAt, we will not display this
-							so we do not get a broken view. It would be better to go through and
-							find all the places where report is passed in and ensure that the graphql
-							query includes updatedAt, but I don't have time for that now.
+							so we do not get a broken view.
 						*/
 						report.updatedAt &&
-							<span> last saved at {moment(report.updatedAt).format('D MMMM, YYYY @ HHmm')}</span>
+							<span>: last saved at {moment(report.updatedAt).format(Settings.dateFormats.forms.withTime)}</span>
 					}
 				</p>
 			}
@@ -71,7 +69,7 @@ export default class ReportSummary extends Component {
 				<Col md={12}>
 					{report.engagementDate &&
 						<Label bsStyle="default" className="engagement-date">
-							{moment(report.engagementDate).format('D MMM YYYY')}
+							{moment(report.engagementDate).format(Settings.dateFormats.forms.short)}
 						</Label>
 					}
 				</Col>

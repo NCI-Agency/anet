@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Button, Alert, HelpBlock, Radio, Col, ControlLabel, FormGroup} from 'react-bootstrap'
-import DatePicker from 'react-16-bootstrap-date-picker'
 
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
+import CustomDateInput from 'components/CustomDateInput'
 import Messages from 'components/Messages'
 import RichTextEditor from 'components/RichTextEditor'
 import OptionListModal from 'components/OptionListModal'
@@ -17,7 +17,6 @@ import {Person} from 'models'
 import utils from 'utils'
 import pluralize from 'pluralize'
 
-import CALENDAR_ICON from 'resources/calendar.png'
 import 'components/NameInput.css'
 
 import TriggerableConfirm from 'components/TriggerableConfirm'
@@ -27,7 +26,6 @@ import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
 import _isEmpty from 'lodash/isEmpty'
-import moment from 'moment'
 
 class BasePersonForm extends Component {
 	static propTypes = {
@@ -377,12 +375,9 @@ class BasePersonForm extends Component {
 							name="endOfTourDate"
 							label={Settings.fields.person.endOfTourDate}
 							component={FieldHelper.renderSpecialField}
-							value={values.endOfTourDate && moment(values.endOfTourDate).format()}
+							value={values.endOfTourDate}
 							onChange={(value, formattedValue) => setFieldValue('endOfTourDate', value)}
-							addon={CALENDAR_ICON}
-							widget={
-								<DatePicker placeholder="End of Tour Date" dateFormat="DD/MM/YYYY" showClearButton={false} />
-							}
+							widget={<CustomDateInput id="endOfTourDate" />}
 						/>
 						<Field
 							name="biography"
