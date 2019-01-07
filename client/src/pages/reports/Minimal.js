@@ -125,7 +125,7 @@ class ReportMinimal extends Page {
 
 					{report.isRejected() &&
 						<Fieldset style={{textAlign: 'center' }}>
-							<h4 className="text-danger">This report was REJECTED. </h4>
+							<h4 className="text-danger">This report has CHANGES REQUESTED. </h4>
 							<p>You can review the comments below, fix the report and re-submit</p>
 							<div style={{textAlign: 'left'}}>
 								{this.renderValidationMessages()}
