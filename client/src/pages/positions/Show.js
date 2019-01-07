@@ -229,8 +229,8 @@ class BasePositionShow extends Page {
 										<tr key={idx} id={`previousPerson_${idx}`}>
 											<td><LinkTo person={pp.person} /></td>
 											<td>
-												{moment(pp.startTime).format('D MMM YYYY')} - &nbsp;
-												{pp.endTime && moment(pp.endTime).format('D MMM YYYY')}
+												{moment(pp.startTime).format(Settings.dateFormats.forms.short)} - &nbsp;
+												{pp.endTime && moment(pp.endTime).format(Settings.dateFormats.forms.short)}
 											</td>
 										</tr>
 									)}

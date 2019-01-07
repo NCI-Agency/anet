@@ -265,7 +265,7 @@ ${sender.name} sent you a report from ANET:
         <label for="engagementDate" class="col-sm-2 control-label">Engagement Date</label>
         <div class="col-sm-7">
           <div id="engagementDate" class="form-control-static">
-            ${(report.engagementDate.toString('dd MMM yyyy'))!}
+            ${(report.engagementDate.toString(dateFormat))!}
           </div>
         </div>
       </div>
@@ -485,7 +485,7 @@ ${sender.name} sent you a report from ANET:
             <#assign type = "Approved">
             <#assign styleClass = "btn-success approved">
           <#elseif approvalAction.type == "REJECT">
-            <#assign type = "Rejected">
+            <#assign type = "Changes requested">
             <#assign styleClass = "btn-danger rejected">
           <#else>
             <#assign type = "Unknown">
@@ -506,7 +506,7 @@ ${sender.name} sent you a report from ANET:
                 <#assign person = approvalAction.getPerson()>
                 <div class="approval-details">
                   <span>By ${(person.name)!}</span><br>
-                  <small>On ${(approvalAction.createdAt.toString('dd MMM yyyy'))!}
+                  <small>On ${(approvalAction.createdAt.toString(dateFormat))!}
                   <br>At ${(approvalAction.createdAt.toString('h:mm a'))!}</small>
                 </div>
               </#if>

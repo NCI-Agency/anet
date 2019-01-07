@@ -5,7 +5,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
-import {ListGroup, ListGroupItem, Nav, NavItem} from 'react-bootstrap'
+import {ListGroup, ListGroupItem, Nav} from 'react-bootstrap'
 import pluralize from 'pluralize'
 
 import Breadcrumbs from 'components/Breadcrumbs'
@@ -29,8 +29,8 @@ import {Organization, Person, Position, Report, Task} from 'models'
 import Settings from 'Settings'
 
 import AppContext from 'components/AppContext'
+import { AnchorNavItem } from 'components/Nav'
 import { connect } from 'react-redux'
-import Scrollspy from 'react-scrollspy'
 
 const NO_REPORT_FILTER = 'NO_FILTER'
 
@@ -39,7 +39,6 @@ class BaseOrganizationShow extends Page {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
-		scrollspyOffset: PropTypes.number,
 	}
 
 	static modelName = 'Organization'
@@ -175,15 +174,12 @@ class BaseOrganizationShow extends Page {
 		const isMyOrg = myOrg && (organization.uuid === myOrg.uuid)
 		const orgSubNav = (
 			<Nav>
-				<Scrollspy className="nav" currentClassName="active" offset={this.props.scrollspyOffset}
-				items={ ['info', 'supportedPositions', 'vacantPositions', 'approvals', 'tasks', 'reports'] }>
-					<NavItem href="#info">Info</NavItem>
-					<NavItem href="#supportedPositions">Supported positions</NavItem>
-					<NavItem href="#vacantPositions">Vacant positions</NavItem>
-					{!isPrincipalOrg && <NavItem href="#approvals">Approvals</NavItem>}
-					{organization.isTaskEnabled() && <NavItem href="#tasks">{pluralize(Settings.fields.task.shortLabel)}</NavItem> }
-					<NavItem href="#reports">Reports</NavItem>
-				</Scrollspy>
+				<AnchorNavItem to="info">Info</AnchorNavItem>
+				<AnchorNavItem to="supportedPositions">Supported positions</AnchorNavItem>
+				<AnchorNavItem to="vacantPositions">Vacant positions</AnchorNavItem>
+				{!isPrincipalOrg && <AnchorNavItem to="approvals">Approvals</AnchorNavItem>}
+				{organization.isTaskEnabled() && <AnchorNavItem to="tasks">{pluralize(Settings.fields.task.shortLabel)}</AnchorNavItem>}
+				<AnchorNavItem to="reports">Reports</AnchorNavItem>
 			</Nav>
 		)
 		if (currentUser._loaded !== true) {
@@ -230,7 +226,7 @@ class BaseOrganizationShow extends Page {
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`Organization ${organization.shortName}`} action={action} />
-						<Fieldset>
+						<Fieldset id="info">
 							<Field
 								name="status"
 								component={FieldHelper.renderReadonlyField}
@@ -348,12 +344,10 @@ class BaseOrganizationShow extends Page {
 	}
 }
 
-
-
 const OrganizationShow = (props) => (
 	<AppContext.Consumer>
 		{context =>
-			<BaseOrganizationShow currentUser={context.currentUser} scrollspyOffset={context.scrollspyOffset} {...props} />
+			<BaseOrganizationShow currentUser={context.currentUser} {...props} />
 		}
 	</AppContext.Consumer>
 )

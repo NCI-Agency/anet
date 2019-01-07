@@ -217,7 +217,7 @@ class BasePersonShow extends Page {
 								name="endOfTourDate"
 								label={Settings.fields.person.endOfTourDate}
 								component={FieldHelper.renderReadonlyField}
-								humanValue={person.endOfTourDate && moment(person.endOfTourDate).format('D MMM YYYY')}
+								humanValue={person.endOfTourDate && moment(person.endOfTourDate).format(Settings.dateFormats.forms.short)}
 							/>
 							<Field
 								name="biography"
@@ -297,8 +297,8 @@ class BasePersonShow extends Page {
 										<tr key={idx} id={`previousPosition_${idx}`}>
 											<td><LinkTo position={pp.position} /></td>
 											<td>
-												{moment(pp.startTime).format('D MMM YYYY')} - &nbsp;
-												{pp.endTime && moment(pp.endTime).format('D MMM YYYY')}
+												{moment(pp.startTime).format(Settings.dateFormats.forms.short)} - &nbsp;
+												{pp.endTime && moment(pp.endTime).format(Settings.dateFormats.forms.short)}
 											</td>
 										</tr>
 									)}

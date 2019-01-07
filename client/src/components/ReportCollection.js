@@ -33,6 +33,7 @@ export const GQL_REPORT_FIELDS =  /* GraphQL */`
 		},
 		person { uuid, name, rank }
 	}
+	updatedAt
 `
 
 

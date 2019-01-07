@@ -214,7 +214,7 @@ test('Verify that validation and other reports/new interactions work', async t =
 
     t.is(
         await $engagementDate.getAttribute('value'), 
-        moment().format('DD/MM/YYYY'), 
+        moment().format('DD-MM-YYYY'),
         'Clicking the "today" button puts the current date in the engagement field'
     )
 

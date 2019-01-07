@@ -11,19 +11,44 @@ import {Organization, Person} from 'models'
 import {INSIGHTS, INSIGHT_DETAILS} from 'pages/insights/Show'
 
 import AppContext from 'components/AppContext'
+import { ResponsiveLayoutContext } from 'components/ResponsiveLayout'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
 import {ScrollLink, scrollSpy} from 'react-scroll'
+
+export const AnchorNavItem = (props) => {
+	const {to, ...remainingProps} = props
+	const ScrollLinkNavItem = ScrollLink(NavItem)
+	return (
+		<ResponsiveLayoutContext.Consumer>
+			{context =>
+				<ScrollLinkNavItem
+					activeClass="active"
+					to={to}
+					spy={true}
+					hashSpy={true}
+					smooth={true}
+					duration={500}
+					containerId="main-viewport"
+					onClick={() => context.showFloatingMenu(false)}
+					//TODO: fix the need for offset
+					offset={-context.topbarOffset}
+					{...remainingProps}
+				>
+					{props.children}
+				</ScrollLinkNavItem>
+			}
+		</ResponsiveLayoutContext.Consumer>
+	)
+}
 
 class BaseNav extends Component {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
-		showFloatingMenu: PropTypes.func,
 		organizations: PropTypes.array,
-		topbarOffset: PropTypes.number.isRequired,
 	}
 
 	componentDidMount() {
@@ -31,7 +56,7 @@ class BaseNav extends Component {
 	}
 
 	render() {
-		const { currentUser, topbarOffset } = this.props
+		const { currentUser } = this.props
 		const { organizations } = this.props || []
 		const { appSettings } = this.props || {}
 		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
@@ -40,7 +65,6 @@ class BaseNav extends Component {
 		const path = this.props.location.pathname
 		const inAdmin = path.indexOf('/admin') === 0
 		const inOrg = path.indexOf('/organizations') === 0
-		const inMyReports = path.indexOf('/reports/mine') === 0
 		const inInsights = path.indexOf('/insights') === 0
 
 		const myOrg = currentUser.position ? currentUser.position.organization : null
@@ -50,65 +74,25 @@ class BaseNav extends Component {
 			myOrgUuid = myOrg && myOrg.uuid
 		}
 
-		const showFloatingMenu = this.props.showFloatingMenu
-		const ScrollLinkNavItem = ScrollLink(NavItem)
-		const AnchorNavItem = function(props) {
-			const {to, ...remainingProps} = props
-			return <ScrollLinkNavItem
-					activeClass="active"
-					to={to}
-					spy={true}
-					hashSpy={true}
-					smooth={true}
-					duration={500}
-					containerId="main-viewport"
-					offset={-topbarOffset}
-					onClick={() => {
-						showFloatingMenu(false)
-					}}
-					{...remainingProps}>
-						{props.children}
-				</ScrollLinkNavItem>
-			//TODO: fix the need for offset
-		}
-
-		const orgSubNav = (
-			<BSNav>
-				<AnchorNavItem to="info" >Info</AnchorNavItem>
-				<AnchorNavItem to="supportedPositions" >Supported positions</AnchorNavItem>
-				<AnchorNavItem to="vacantPositions" >Vacant positions</AnchorNavItem>
-				<AnchorNavItem to="approvals" >Approvals</AnchorNavItem>
-				<AnchorNavItem to="tasks" >{pluralize(Settings.fields.task.shortLabel)}</AnchorNavItem>
-				<AnchorNavItem to="reports" >Reports</AnchorNavItem>
-			</BSNav>
-		)
-
 		return (
 			<BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
 				<Link to="/" onClick={this.props.clearSearchQuery}>
 					<NavItem>Home</NavItem>
 				</Link>
 
-				<BSNav id="search-nav"></BSNav>
+				<BSNav id="search-nav" />
 
 				{currentUser.uuid && <Link to={{pathname: '/reports/mine'}} onClick={this.props.clearSearchQuery}>
 					<NavItem>My reports</NavItem>
 				</Link>}
 
-				{inMyReports &&
-					<BSNav>
-						<AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
-						<AnchorNavItem to="upcoming-engagements">Upcoming Engagements</AnchorNavItem>
-						<AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
-						<AnchorNavItem to="published-reports">Published reports</AnchorNavItem>
-					</BSNav>
-				}
+				<BSNav id="reports-nav" />
 
 				{myOrg && <Link to={Organization.pathFor(myOrg)} onClick={this.props.clearSearchQuery}>
 					<NavItem id="my-organization">My organization <br /><small>{myOrg.shortName}</small></NavItem>
 				</Link>}
 
-				<BSNav id="myorg-nav"></BSNav>
+				<BSNav id="myorg-nav" />
 
 				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="advisor-organizations" active={inOrg && orgUuid !== myOrgUuid}>
 					{Organization.map(organizations, org =>
@@ -118,7 +102,7 @@ class BaseNav extends Component {
 					)}
 				</NavDropdown>
 
-				<BSNav id="org-nav"></BSNav>
+				<BSNav id="org-nav" />
 
 				<Link to="/rollup" onClick={this.props.clearSearchQuery}>
 					<NavItem>Daily rollup</NavItem>

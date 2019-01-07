@@ -125,7 +125,7 @@ class ReportMinimal extends Page {
 
 					{report.isRejected() &&
 						<Fieldset style={{textAlign: 'center' }}>
-							<h4 className="text-danger">This report was REJECTED. </h4>
+							<h4 className="text-danger">This report has CHANGES REQUESTED. </h4>
 							<p>You can review the comments below, fix the report and re-submit</p>
 							<div style={{textAlign: 'left'}}>
 								{this.renderValidationMessages()}
@@ -171,7 +171,7 @@ class ReportMinimal extends Page {
 							<Field
 								name="engagementDate"
 								component={FieldHelper.renderReadonlyField}
-								humanValue={report.engagementDate && moment(report.engagementDate).format('D MMM YYYY')}
+								humanValue={report.engagementDate && moment(report.engagementDate).format(Settings.dateFormats.forms.short)}
 							/>
 
 							<Field
@@ -262,8 +262,8 @@ class ReportMinimal extends Page {
 								let createdAt = moment(comment.createdAt)
 								return (
 									<p key={comment.uuid}>
-										<LinkTo person={comment.author} />
-										<span title={createdAt.format('L LT')}> {createdAt.fromNow()}: </span>
+										<LinkTo person={comment.author} />,
+										<span title={createdAt.format(Settings.dateFormats.forms.withTime)}> {createdAt.fromNow()}: </span>
 										"{comment.text}"
 									</p>
 								)

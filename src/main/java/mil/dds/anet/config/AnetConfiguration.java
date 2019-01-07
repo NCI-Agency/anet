@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import mil.dds.anet.utils.Utils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 
@@ -122,6 +124,18 @@ public class AnetConfiguration extends Configuration {
 
 	public void setDictionary(Map<String, Object> dictionary) {
 		this.dictionary = dictionary;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Object getDictionaryEntry(String keyPath) {
+		if (Utils.isEmptyOrNull(keyPath)) {
+			return null;
+		}
+		Object elem = dictionary;
+		for (final String key : keyPath.split("\\.")) {
+			elem = ((Map<String, Object>) elem).get(key);
+		}
+		return elem;
 	}
 
 	public static class SmtpConfiguration {

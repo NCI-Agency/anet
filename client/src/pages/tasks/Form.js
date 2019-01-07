@@ -2,12 +2,12 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import {Button} from 'react-bootstrap'
-import DatePicker from 'react-16-bootstrap-date-picker'
 
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
+import CustomDateInput from 'components/CustomDateInput'
 import Autocomplete from 'components/Autocomplete'
 import Messages from'components/Messages'
 import DictionaryField from '../../HOC/DictionaryField'
@@ -16,7 +16,6 @@ import API from 'api'
 import {Organization, Person, Task} from 'models'
 import Settings from 'Settings'
 
-import CALENDAR_ICON from 'resources/calendar.png'
 import ORGANIZATION_ICON from 'resources/organizations.png'
 import TASK_ICON from 'resources/tasks.png'
 
@@ -24,7 +23,6 @@ import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
-import moment from 'moment'
 import utils from 'utils'
 
 class BaseTaskForm extends Component {
@@ -170,17 +168,9 @@ class BaseTaskForm extends Component {
 									dictProps={Settings.fields.task.plannedCompletion}
 									name="plannedCompletion"
 									component={FieldHelper.renderSpecialField}
-									value={values.plannedCompletion && moment(values.plannedCompletion).format()}
+									value={values.plannedCompletion}
 									onChange={(value, formattedValue) => setFieldValue('plannedCompletion', value)}
-									addon={CALENDAR_ICON}
-									widget={
-										<DatePicker
-											showTodayButton
-											placeholder={Settings.fields.task.plannedCompletion.placeholder}
-											dateFormat="DD/MM/YYYY"
-											showClearButton={false}
-										/>
-									}
+									widget={<CustomDateInput id="plannedCompletion" />}
 								/>
 							}
 
@@ -189,17 +179,9 @@ class BaseTaskForm extends Component {
 									dictProps={Settings.fields.task.projectedCompletion}
 									name="projectedCompletion"
 									component={FieldHelper.renderSpecialField}
-									value={values.projectedCompletion && moment(values.projectedCompletion).format()}
+									value={values.projectedCompletion}
 									onChange={(value, formattedValue) => setFieldValue('projectedCompletion', value)}
-									addon={CALENDAR_ICON}
-									widget={
-										<DatePicker
-											showTodayButton
-											placeholder={Settings.fields.task.projectedCompletion.placeholder}
-											dateFormat="DD/MM/YYYY"
-											showClearButton={false}
-										/>
-									}
+									widget={<CustomDateInput id="projectedCompletion" />}
 								/>
 							}
 

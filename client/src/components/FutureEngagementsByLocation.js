@@ -10,6 +10,7 @@ import moment from 'moment'
 
 import { connect } from 'react-redux'
 import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
+import Settings from 'Settings'
 
 import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
@@ -210,7 +211,7 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
         graphData.data = groupedData
         graphData.categoryLabels = allCategories.reduce(
           function(prev, curr) {
-            prev[curr.key] = moment(curr.key).format('D MMM YYYY')
+            prev[curr.key] = moment(curr.key).format(Settings.dateFormats.forms.short)
             return prev
           },
           {}

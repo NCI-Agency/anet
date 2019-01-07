@@ -157,7 +157,7 @@ class BaseTaskShow extends Page {
 									dictProps={Settings.fields.task.plannedCompletion}
 									name="plannedCompletion"
 									component={FieldHelper.renderReadonlyField}
-									humanValue={task.plannedCompletion && moment(task.plannedCompletion).format('D MMM YYYY')}
+									humanValue={task.plannedCompletion && moment(task.plannedCompletion).format(Settings.dateFormats.forms.short)}
 								/>
 							}
 
@@ -166,7 +166,7 @@ class BaseTaskShow extends Page {
 									dictProps={Settings.fields.task.projectedCompletion}
 									name="projectedCompletion"
 									component={FieldHelper.renderReadonlyField}
-									humanValue={task.projectedCompletion && moment(task.projectedCompletion).format('D MMM YYYY')}
+									humanValue={task.projectedCompletion && moment(task.projectedCompletion).format(Settings.dateFormats.forms.short)}
 								/>
 							}
 
