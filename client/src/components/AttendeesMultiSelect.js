@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import { Button, Col, Collapse, FormGroup, Grid, Row, Table, Tabs, Tab } from 'react-bootstrap'
+import { Button, Col, Row, Table, Overlay, Popover, InputGroup } from 'react-bootstrap'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Checkbox from 'components/Checkbox'
 import {Person, Position} from 'models'
@@ -9,10 +9,6 @@ import LinkTo from 'components/LinkTo'
 import { Field } from 'formik'
 import { renderInputField } from 'components/FieldHelper'
 import API from 'api'
-import AdvancedSearchForm from 'components/AdvancedSearchForm'
-import autobind from 'autobind-decorator'
-import GQL from 'graphqlapi'
-import {SEARCH_CONFIG, searchFormToQuery} from 'searchUtils'
 import _debounce from 'lodash/debounce'
 
 const AttendeesTable = (props) => {
@@ -85,42 +81,83 @@ export default class AttendeesMultiSelect extends Component {
 		shortcutKey: Object.keys(this.props.shortcutDefs)[0],
 		suggestions: [],
 		pageNum: 0,
-		showShortcuts: false,
+		showOverlay: false,
+		inputFocused: false,
+	}
+
+	handleInputFocus = () => {
+		if (this.state.inputFocused === true) {
+			return
+		}
+		this.setState({
+			inputFocused: true,
+			showOverlay: true,
+		})
+	}
+
+	handleInputBlur = () => {
+		this.setState({
+			inputFocused: false,
+		})
+	}
+
+
+	handleHideOverlay = () => {
+		if (this.state.inputFocused) {
+			return
+		}
+		this.setState({
+			showOverlay: false
+		})
 	}
 
 	render() {
 		const {addFieldName, addFieldLabel, renderSelected, items, onAddItem, onRemoveItem, shortcutDefs, renderExtraCol, addon, ...autocompleteProps} = this.props
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		return (
-			<React.Fragment>
+			<InputGroup>
 				<Field
 					name={addFieldName}
 					label={addFieldLabel}
 					component={renderInputField}
 					value={this.state.searchTerms}
 					onChange={this.changeSearchTerms}
-					onFocus={() => this.setState({showShortcuts: true}, () => this.fetchSuggestions())}
-				/>
-				<Collapse in={this.state.showShortcuts}>
-					<Row>
-						<Col sm={2} />
-						<Col sm={7}>
-							<ButtonToggleGroup value={this.state.shortcutKey} onChange={this.changeShortcut} className="hide-for-print">
-								{Object.keys(shortcutDefs).map(shortcutKey =>
-									<Button key={shortcutKey} value={shortcutKey}>{shortcutDefs[shortcutKey].label}</Button>
-								)}
-							</ButtonToggleGroup>
-							<AttendeesTable
-								attendees={this.state.suggestions}
-								selectedAttendees={items}
-								addItem={this.addItem}
-								removeItem={this.removeItem}
-							/>
-						</Col>
-					</Row>
-				</Collapse>
-				{renderSelectedWithDelete}
-			</React.Fragment>
+					onFocus={this.handleInputFocus}
+					onBlur={this.handleInputBlur}
+					innerRef={el => {this.overlayTarget = el}}
+				>
+				<Overlay
+					show={this.state.showOverlay}
+					container={this.overlayContainer}
+					target={this.overlayTarget}
+					rootClose={true}
+					onHide={this.handleHideOverlay}
+					placement="bottom"
+					animation={false}
+					delayHide={200}
+				>
+					<Popover id={addFieldName} title={null} placement="bottom" style={{left: 0, width: '100%', maxWidth: '100%'}}>
+						<Row>
+							<Col sm={12}>
+								<ButtonToggleGroup value={this.state.shortcutKey} onChange={this.changeShortcut} className="hide-for-print">
+									{Object.keys(shortcutDefs).map(shortcutKey =>
+										<Button key={shortcutKey} value={shortcutKey}>{shortcutDefs[shortcutKey].label}</Button>
+									)}
+								</ButtonToggleGroup>
+								<AttendeesTable
+									attendees={this.state.suggestions}
+									selectedAttendees={items}
+									addItem={this.addItem}
+									removeItem={this.removeItem}
+								/>
+							</Col>
+						</Row>
+					</Popover>
+				</Overlay>
+				<div ref={el => {this.overlayContainer = el}} style={{position: 'relative'}} />
+			</Field>
+			{renderSelectedWithDelete}
+		</InputGroup>
 		)
 	}
 

@@ -107,8 +107,8 @@ export const renderInputField = ({
   form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => {
-	const {label, children, extraColElem, addon, vertical, ...otherProps} = props
-	const widgetElem = <FormControl {...field} {...otherProps} />
+	const {label, children, extraColElem, addon, vertical, innerRef, ...otherProps} = props
+	const widgetElem = <FormControl {...field} ref={innerRef} {...otherProps} />
 	return renderField(field, label, form, widgetElem, children, extraColElem, addon, vertical)
 }
 
