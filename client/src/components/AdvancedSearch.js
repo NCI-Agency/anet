@@ -16,9 +16,7 @@ import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
 import _isEqualWith from 'lodash/isEqualWith'
-import _cloneDeepWith from 'lodash/cloneDeepWith'
 import _cloneDeep from 'lodash/cloneDeep'
-import _clone from 'lodash/clone'
 import utils from 'utils'
 
 import {Position, Organization} from 'models'
@@ -189,21 +187,16 @@ class AdvancedSearch extends Component {
 	}
 
 	@autobind
-	resolveToQuery(value) {
-		if (typeof value === 'function') {
-			return _clone(value())
-		}
-	}
-
-	@autobind
 	onSubmit(event) {
 		if (typeof this.props.onSearch === 'function') {
 			this.props.onSearch()
 		}
-		const resolvedFilters = _cloneDeepWith(this.state.filters, this.resolveToQuery)
-		const queryState = {objectType: this.state.objectType, filters: resolvedFilters, text: this.state.text}
 		// We only update the Redux state on submit
-		this.props.setSearchQuery(queryState)
+		this.props.setSearchQuery({
+			objectType: this.state.objectType,
+			filters: this.state.filters,
+			text: this.state.text,
+		})
 		if (this.props.onSearchGoToSearchPage) {
 			this.props.history.push({
 				pathname: '/search'
