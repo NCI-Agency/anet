@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import {Checkbox, Table, Button, Collapse, HelpBlock} from 'react-bootstrap'
+import {Checkbox, Table, Button, HelpBlock} from 'react-bootstrap'
 import DatePicker from 'react-16-bootstrap-date-picker'
 import autobind from 'autobind-decorator'
 import { WithContext as ReactTags } from 'react-tag-input'
@@ -64,7 +64,6 @@ class BaseReportForm extends ValidatableFormWrapper {
 			reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name})),
 			suggestionList: [],
 
-			showReportText: !!report.reportText || !!report.reportSensitiveInformation,
 			isCancelled: !!report.cancelledReason,
 			errors: {},
 
@@ -126,11 +125,6 @@ class BaseReportForm extends ValidatableFormWrapper {
 		const prevCurrentUser = prevProps.currentUser
 		if (report.id !== prevReport.id) {
 			this.setState({reportTags: (report.tags || []).map(tag => ({id: tag.id.toString(), text: tag.name}))})
-		}
-		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
-		const prevShowReportText = !!prevReport.reportText || !!prevReport.reportSensitiveInformation
-		if (showReportText !== prevShowReportText) {
-			this.setState({showReportText: showReportText})
 		}
 		const isCancelled = !!report.cancelledReason
 		const prevIsCancelled = !!prevReport.cancelledReason
@@ -379,29 +373,21 @@ class BaseReportForm extends ValidatableFormWrapper {
 						<Form.Field.ExtraCol>{250 - report.nextSteps.length} characters remaining</Form.Field.ExtraCol>
 					</RequiredField>
 
-					<Button className="center-block toggle-section-button" onClick={this.toggleReportText} id="toggleReportDetails" >
-						{this.state.showReportText ? 'Hide' : 'Add'} detailed report
-					</Button>
+					<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
 
-					<Collapse in={this.state.showReportText}>
+					{(report.reportSensitiveInformation || !this.props.edit) &&
 						<div>
-							<Form.Field id="reportText" className="reportTextField" componentClass={TextEditor} />
-
-							{(report.reportSensitiveInformation || !this.props.edit) &&
-								<div>
-									<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
-										value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
-										onChange={this.updateReportSensitiveInformation} />
-									<AuthorizationGroupsSelector
-										groups={report.authorizationGroups}
-										shortcuts={recents.authorizationGroups}
-										onChange={this.onChange}
-										onErrorChange={this.onAuthorizationGroupError}
-										validationState={errors.authorizationGroups} />
-								</div>
-							}
+							<Form.Field id="reportSensitiveInformationText" className="reportSensitiveInformationField" componentClass={TextEditor}
+								value={report.reportSensitiveInformation && report.reportSensitiveInformation.text}
+								onChange={this.updateReportSensitiveInformation} />
+							<AuthorizationGroupsSelector
+								groups={report.authorizationGroups}
+								shortcuts={recents.authorizationGroups}
+								onChange={this.onChange}
+								onErrorChange={this.onAuthorizationGroupError}
+								validationState={errors.authorizationGroups} />
 						</div>
-					</Collapse>
+					}
 				</Fieldset>
 			</ValidatableForm>
 		</div>
@@ -413,11 +399,6 @@ class BaseReportForm extends ValidatableFormWrapper {
 		}
 		this.props.report.reportSensitiveInformation.text = value
 		this.onChange()
-	}
-
-	@autobind
-	toggleReportText() {
-		this.setState({showReportText: !this.state.showReportText})
 	}
 
 	@autobind
