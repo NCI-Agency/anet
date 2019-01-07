@@ -6,12 +6,11 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
-import org.joda.time.DateTime;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -33,7 +32,7 @@ public class Person extends AbstractAnetBean implements Principal {
 	private String phoneNumber;
 	private String gender;
 	private String country;
-	private DateTime endOfTourDate;
+	private Instant endOfTourDate;
 	
 	private String rank;
 	private String biography;
@@ -120,11 +119,11 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 
 	@GraphQLQuery(name="endOfTourDate")
-	public DateTime getEndOfTourDate() {
+	public Instant getEndOfTourDate() {
 		return endOfTourDate;
 	}
 
-	public void setEndOfTourDate(DateTime endOfTourDate) {
+	public void setEndOfTourDate(Instant endOfTourDate) {
 		this.endOfTourDate = endOfTourDate;
 	}
 
@@ -227,8 +226,8 @@ public class Person extends AbstractAnetBean implements Principal {
 			&& Objects.equals(other.getRank(), rank)
 			&& Objects.equals(other.getBiography(), biography)
 			&& Objects.equals(other.getPendingVerification(), pendingVerification)
-			&& (createdAt != null) ? (createdAt.isEqual(other.getCreatedAt())) : (other.getCreatedAt() == null)
-			&& (updatedAt != null) ? (updatedAt.isEqual(other.getUpdatedAt())) : (other.getUpdatedAt() == null);
+			&& (createdAt != null) ? (createdAt.equals(other.getCreatedAt())) : (other.getCreatedAt() == null)
+			&& (updatedAt != null) ? (updatedAt.equals(other.getUpdatedAt())) : (other.getUpdatedAt() == null);
 		return b;
  	}
 	

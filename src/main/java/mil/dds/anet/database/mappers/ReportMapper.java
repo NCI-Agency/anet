@@ -2,9 +2,7 @@ package mil.dds.anet.database.mappers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.statement.StatementContext;
 import org.jdbi.v3.core.mapper.RowMapper;
 
@@ -22,17 +20,8 @@ public class ReportMapper implements RowMapper<Report> {
 		DaoUtils.setCommonBeanFields(r, rs, "reports");
 		
 		r.setState(MapperUtils.getEnumIdx(rs, "reports_state", ReportState.class));
-		
-		Timestamp engagementDate = rs.getTimestamp("reports_engagementDate");
-		if (engagementDate != null) { 
-			r.setEngagementDate(new DateTime(engagementDate));
-		}
-		
-		Timestamp releasedAt = rs.getTimestamp("reports_releasedAt");
-		if (releasedAt != null) { 
-			r.setReleasedAt(new DateTime(releasedAt));
-		}
-		
+		r.setEngagementDate(DaoUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));
+		r.setReleasedAt(DaoUtils.getInstantAsLocalDateTime(rs, "reports_releasedAt"));
 		r.setLocationUuid(rs.getString("reports_locationUuid"));
 		r.setApprovalStepUuid(rs.getString("reports_approvalStepUuid"));
 		

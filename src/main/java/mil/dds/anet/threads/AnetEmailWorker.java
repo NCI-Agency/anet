@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,13 +25,11 @@ import javax.mail.internet.MimeMessage;
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.google.common.base.Joiner;
 
 import freemarker.template.Configuration;
@@ -43,6 +42,8 @@ import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.database.mappers.MapperUtils;
+import mil.dds.anet.utils.DaoUtils;
 
 public class AnetEmailWorker implements Runnable {
 
@@ -69,9 +70,7 @@ public class AnetEmailWorker implements Runnable {
 	public AnetEmailWorker(EmailDao dao, AnetConfiguration config, ScheduledExecutorService scheduler) {
 		this.dao = dao;
 		this.scheduler = scheduler;
-		this.mapper = new ObjectMapper();
-		mapper.registerModule(new JodaModule());
-		//mapper.enableDefaultTyping();
+		this.mapper = MapperUtils.getDefaultMapper();
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
@@ -126,7 +125,7 @@ public class AnetEmailWorker implements Runnable {
 		//Send the emails!
 		final List<Integer> processedEmails = new LinkedList<Integer>();
 		for (final AnetEmail email : emails) {
-			if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(DateTime.now().minusHours(nbOfHoursForStaleEmails))) {
+			if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(nbOfHoursForStaleEmails).toInstant())) {
 				logger.info("Purging stale email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
 				processedEmails.add(email.getId());
 			}

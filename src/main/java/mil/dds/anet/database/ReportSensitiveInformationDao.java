@@ -1,10 +1,10 @@
 package mil.dds.anet.database;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
@@ -71,6 +71,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 					+ " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
 				.bindBean(rsi)
+				.bind("createdAt", DaoUtils.asLocalDateTime(rsi.getCreatedAt()))
+				.bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
 				.bind("reportUuid", report.getUuid())
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
@@ -86,11 +88,12 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			return 0;
 		}
 		// Update relevant fields, but do not allow the reportUuid to be updated by the query!
-		rsi.setUpdatedAt(DateTime.now());
+		rsi.setUpdatedAt(Instant.now());
 		final int numRows = dbHandle.createUpdate(
 				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
 					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(rsi)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
 		return numRows;
