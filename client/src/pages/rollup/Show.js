@@ -10,7 +10,6 @@ import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import DailyRollupChart from 'components/DailyRollupChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE, GQL_REPORT_FIELDS} from 'components/ReportCollection'
-import CustomDateInput from 'components/CustomDateInput'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
@@ -30,6 +29,11 @@ import LoaderHOC, {mapDispatchToProps as loaderMapDispatchToProps} from 'HOC/Loa
 import MosaicLayout from 'components/MosaicLayout'
 import ContainerDimensions from 'react-container-dimensions'
 import { IconNames } from '@blueprintjs/icons'
+
+import { DateRangeInput } from "@blueprintjs/datetime"
+import '@blueprintjs/core/lib/css/blueprint.css'
+import '@blueprintjs/datetime/lib/css/blueprint-datetime.css'
+import 'components/BlueprintOverrides.css'
 
 const BarChartWithLoader = connect(null, loaderMapDispatchToProps)(LoaderHOC('isLoading')('data')(DailyRollupChart))
 const Context = React.createContext()
@@ -54,12 +58,26 @@ class BaseRollupShow extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		date: PropTypes.object,
 	}
 
-	get dateStr() { return this.state.date.format(Settings.dateFormats.forms.short) }
-	get rollupStart() { return moment(this.state.date).subtract(1, 'days').startOf('day').hour(19) } //7pm yesterday
-	get rollupEnd() { return moment(this.state.date).endOf('day').hour(18) } // 6:59:59pm today.
+	get dateStr() {
+		if (this.state.startDate.isSame(this.state.endDate, 'day')) {
+			return this.state.startDate.format(Settings.dateFormats.forms.short)
+		} else {
+			return `${this.state.startDate.format(Settings.dateFormats.forms.short)} - ${this.state.endDate.format(Settings.dateFormats.forms.short)}`
+		}
+	}
+	get rollupStart() { return moment(this.state.startDate).startOf('day') }
+	get rollupEnd() { return moment(this.state.endDate).endOf('day') }
+	static dateOrDefault = (qsDate) => qsDate ? moment(+qsDate) : moment().subtract(1, 'day') // default to yesterday
+	static dateRangeFromQS = (search) => {
+		// Having a qs with ?date=… overrides startDate and endDate (for backwards compatibility)
+		const qs = utils.parseQueryString(search)
+		return {
+			startDate: BaseRollupShow.dateOrDefault(qs.date || qs.startDate),
+			endDate: BaseRollupShow.dateOrDefault(qs.date || qs.endDate),
+		}
+	}
 
 	constructor(props) {
 		super(props)
@@ -106,9 +124,10 @@ class BaseRollupShow extends Page {
 		}
 		this.DESCRIPTION = `Number of reports released today per organization.`
 
-		const qs = utils.parseQueryString(props.location.search)
+		const { startDate, endDate } = BaseRollupShow.dateRangeFromQS(props.location.search)
 		this.state = {
-			date: moment(+props.date || +qs.date || undefined),
+			startDate,
+			endDate,
 			reports: {list: []},
 			reportsPageNum: 0,
 			graphData: [],
@@ -124,10 +143,12 @@ class BaseRollupShow extends Page {
 
 	static getDerivedStateFromProps(props, state) {
 		const stateUpdate = {}
-		const qs = utils.parseQueryString(props.location.search)
-		const date = moment(+qs.date || undefined)
-		if (!state.date.isSame(date, 'day')) {
-			Object.assign(stateUpdate, {date: date})
+		const { startDate, endDate } = BaseRollupShow.dateRangeFromQS(props.location.search)
+		if (!state.startDate.isSame(startDate, 'day')) {
+			Object.assign(stateUpdate, {startDate})
+		}
+		if (!state.endDate.isSame(endDate, 'day')) {
+			Object.assign(stateUpdate, {endDate})
 		}
 		const { appSettings } = props || {}
 		const maxReportAge = appSettings.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS
@@ -138,7 +159,7 @@ class BaseRollupShow extends Page {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (!this.state.date.isSame(prevState.date, 'day') || prevState.maxReportAge !== this.state.maxReportAge) {
+		if (!this.state.startDate.isSame(prevState.startDate, 'day') || !this.state.endDate.isSame(prevState.endDate, 'day') || prevState.maxReportAge !== this.state.maxReportAge) {
 			this.loadData()
 		}
 	}
@@ -355,6 +376,8 @@ class BaseRollupShow extends Page {
 	render() {
 		const flexStyle = {display: 'flex', flexDirection: 'column', flex: '1 1 auto'}
 		const mosaicLayoutStyle = { display: 'flex', flex: '1 1 auto' }
+		const inputFormat = Settings.dateFormats.forms.input[0]
+		const style = { width: '8em', fontSize: '1.1em' }
 
 		return (
 			<div id="daily-rollup" style={flexStyle}>
@@ -362,10 +385,22 @@ class BaseRollupShow extends Page {
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset title={
-					<div>
+					<div style={{float: 'left'}}>
 						<div style={{ paddingBottom: 8, display: 'flex', alignItems: 'center' }}>
 							<div style={{ marginRight: 5}}>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`}</div>
-							<CustomDateInput id="rollupDate" value={this.state.date.toDate()} onChange={this.changeRollupDate} />
+							<DateRangeInput
+								startInputProps={{ style }}
+								endInputProps={{ style }}
+								value={[this.state.startDate.toDate(), this.state.endDate.toDate()]}
+								onChange={this.changeRollupDate}
+								formatDate={date => moment(date).format(inputFormat)}
+								parseDate={str => moment(str, Settings.dateFormats.forms.input, true).toDate()}
+								placeholder={inputFormat}
+								maxDate={moment().toDate()}
+								allowSingleDayRange={true}
+								contiguousCalendarMonths={false}
+								shortcuts={true}
+							/>
 						</div>
 						{this.state.focusedOrg
 							? <Button onClick={() => this.goToOrg()}>All organizations</Button>
@@ -417,11 +452,10 @@ class BaseRollupShow extends Page {
 	}
 
 	@autobind
-	changeRollupDate(newDate) {
-		let date = moment(newDate)
+	changeRollupDate(dateRange) {
 		this.props.history.replace({
 			pathname: 'rollup',
-			search: utils.formatQueryString({date: date.valueOf()})
+			search: utils.formatQueryString({startDate: dateRange[0].valueOf(), endDate: dateRange[1].valueOf()})
 		})
 	}
 
