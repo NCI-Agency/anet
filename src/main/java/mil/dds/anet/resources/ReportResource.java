@@ -102,13 +102,15 @@ public class ReportResource {
 	AnetConfiguration config;
 
 	private final RollupGraphComparator rollupGraphComparator;
+	private final String dateFormat;
 	private final DateTimeFormatter dtf;
 
 	public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.engine = engine;
 		this.dao = engine.getReportDao();
 		this.config = config;
-		this.dtf = DateTimeFormat.forPattern((String) this.config.getDictionaryEntry("dateFormats.email"));
+		this.dateFormat = (String) this.config.getDictionaryEntry("dateFormats.email");
+		this.dtf = DateTimeFormat.forPattern(this.dateFormat);
 		@SuppressWarnings("unchecked")
 		List<String> pinnedOrgNames = (List<String>)this.config.getDictionaryEntry("pinned_ORGs");
 		this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
@@ -1039,6 +1041,7 @@ public class ReportResource {
 		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 		context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
+		context.put("dateFormat", dateFormat);
 		context.put("fields", fields);
 
 		try {
