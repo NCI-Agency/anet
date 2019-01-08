@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import {Checkbox, Table} from 'react-bootstrap'
+import { Classes, Icon } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
+import classNames from 'classnames'
 
 import _isEmpty from 'lodash/isEmpty'
 
 import {Person} from 'models'
 import LinkTo from 'components/LinkTo'
-
-import REMOVE_ICON from 'resources/delete.png'
 
 export default class AttendeesTable extends Component {
 	render() {
@@ -43,8 +44,15 @@ export default class AttendeesTable extends Component {
 				<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 				<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 				<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
-				{this.props.showDelete && <td onClick={() => this.props.onDelete(person)}>
-					<span style={{cursor: 'pointer'}}><img src={REMOVE_ICON} height={14} alt="Remove attendee" /></span>
+				{this.props.showDelete && <td>
+					<button
+						type="button"
+						className={classNames(Classes.BUTTON)}
+						title="Remove attendee"
+						onClick={() => this.props.onDelete(person)}
+					>
+						<Icon icon={IconNames.DELETE} />
+					</button>
 				</td>}
 			</tr>
 		)

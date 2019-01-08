@@ -2,6 +2,10 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import { Button, Col, Row, Table, Overlay, Popover, InputGroup } from 'react-bootstrap'
+import { Classes, Icon } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
+import classNames from 'classnames'
+
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Checkbox from 'components/Checkbox'
 import {Person, Position} from 'models'
@@ -29,7 +33,16 @@ const AttendeesTable = (props) => {
 				{Person.map(props.attendees, person => {
 					const isSelected = selectedAttendeesUuids.includes(person.uuid)
 					return <tr key={person.uuid}>
-						<td><Checkbox checked={ isSelected ? true : false } onChange={ () => isSelected ? removeItem(person) : addItem(person) } /></td>
+						<td>
+							<button
+								type="button"
+								className={classNames(Classes.BUTTON)}
+								title="Add attendee"
+								onClick={() => addItem(person)}
+							>
+								<Icon icon={IconNames.ADD} />
+							</button>
+						</td>
 						<td>
 							<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 							<LinkTo person={person}/>
