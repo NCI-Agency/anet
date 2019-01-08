@@ -1,6 +1,6 @@
 import reducer from './pagination'
 import * as types from '../constants/ActionTypes'
-import { REPORT_DRAFT }from '../constants'
+import { REPORT_DRAFT } from '../constants'
 
 describe('pagination reducer', () => {
 	it('should return the initial state', () => {
