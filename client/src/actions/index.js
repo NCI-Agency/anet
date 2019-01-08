@@ -1,3 +1,5 @@
+import * as types from '../constants/ActionTypes'
+
 export const DEFAULT_PAGE_PROPS = {
 	useNavigation: true,
 	minimalHeader: false,
@@ -55,3 +57,13 @@ export const setSearchQuery = searchQuery => ({
 export const clearSearchQuery = () => ({
 	type: 'CLEAR_SEARCH_QUERY',
 })
+
+export function setPagination(pageKey, pageNum) {
+	return {
+		type: types.SET_PAGINATION,
+		payload: {
+			pageKey,
+			pageNum
+		}
+	}
+}
