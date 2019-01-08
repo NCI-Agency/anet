@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class AnetEmailWorker implements Runnable {
 	private Configuration freemarkerConfig;
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
-	private final String dateFormat;
+	private final DateTimeFormatter dtf;
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
 	private boolean noEmailConfiguration;
@@ -74,7 +75,7 @@ public class AnetEmailWorker implements Runnable {
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
-		this.dateFormat = (String) config.getDictionaryEntry("dateFormats.email");
+		this.dtf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email")).withZone(DaoUtils.getDefaultZoneId());
 		this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 		instance = this;
 
@@ -179,7 +180,7 @@ public class AnetEmailWorker implements Runnable {
 			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
-			context.put("dateFormat", dateFormat);
+			context.put("dateFormatter", dtf);
 			context.put("fields", fields);
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
 

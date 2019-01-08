@@ -107,7 +107,7 @@ public class ReportResource {
 		this.engine = engine;
 		this.dao = engine.getReportDao();
 		this.config = config;
-		this.dtf = DateTimeFormatter.ofPattern((String) this.config.getDictionaryEntry("dateFormats.email"));
+		this.dtf = DateTimeFormatter.ofPattern((String) this.config.getDictionaryEntry("dateFormats.email")).withZone(DaoUtils.getDefaultZoneId());
 		@SuppressWarnings("unchecked")
 		List<String> pinnedOrgNames = (List<String>)this.config.getDictionaryEntry("pinned_ORGs");
 		this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
