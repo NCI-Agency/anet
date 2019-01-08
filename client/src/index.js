@@ -24,7 +24,7 @@ const persistor = persistStore(store)
 window.onerror = function(message, url, lineNumber, columnNumber) {
 	API.logOnServer('ERROR', url, lineNumber+":"+columnNumber, message)
 	return false
-  }
+}
 
 ReactDOM.render((
 	<Provider store={store}>

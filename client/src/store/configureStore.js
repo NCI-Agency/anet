@@ -1,4 +1,4 @@
-import { createStore, compose } from 'redux'
+import { createStore } from 'redux'
 import persistReducer from '../reducers/persistReducer'
 
 /**
@@ -7,11 +7,14 @@ import persistReducer from '../reducers/persistReducer'
  * @param {Object} initialState
  */
 export default function configureStore(initialState) {
-	let finalCreateStore = compose(
-		window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-	)(createStore)
+	const enhancer = window.__REDUX_DEVTOOLS_EXTENSION__ &&
+		window.__REDUX_DEVTOOLS_EXTENSION__({ serialize: true, trace: true })
+	if (!enhancer) {
+		console.warn('Install Redux DevTools Extension to inspect the app state: ' +
+		'https://github.com/zalmoxisus/redux-devtools-extension#installation')
+	}
 
-	const store = finalCreateStore(persistReducer, initialState)
+	const store = createStore(persistReducer, initialState, enhancer)
 
 	if (module.hot) {
 	// Enable Webpack hot module replacement for reducers

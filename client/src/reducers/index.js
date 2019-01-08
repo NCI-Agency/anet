@@ -3,12 +3,12 @@ import { loadingBarReducer } from 'react-redux-loading-bar'
 import pageProps from './pageProps'
 import searchProps from './searchProps'
 import searchQuery from './searchQuery'
-import gotoPage from './gotoPage'
+import pagination from './pagination'
 
 export default combineReducers({
 	loadingBar: loadingBarReducer,
 	pageProps,
 	searchProps,
 	searchQuery,
-	gotoPage,
+	pagination,
 })
