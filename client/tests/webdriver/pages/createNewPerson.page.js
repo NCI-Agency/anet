@@ -11,13 +11,13 @@ class CreatePerson extends Page {
     get roleAdvisorButton()     { return browser.element('#roleAdvisorButton') }
     get emailAddress()          { return browser.element('#emailAddress') }
     get phoneNumber()           { return browser.element('#phoneNumber') }
-    get rank()                  { return browser.element('#rank') }
-    get gender()                { return browser.element('#gender') }
-    get country()               { return browser.element('#country') }
+    get rank()                  { return browser.element('select[name="rank"]') }
+    get gender()                { return browser.element('select[name="gender"]') }
+    get country()               { return browser.element('select[name="country"]') }
     get endOfTourDate()         { return browser.element('#endOfTourDate') }
     get biography()             { return browser.element('.biography .text-editor p') }
     get submitButton()          { return browser.element('#formBottomSubmit') }
-    get endOfTourDay()          { return browser.element('#date-picker-popover-0 div table tbody tr td[data-day="7"]') }
+    get endOfTourDay()          { return browser.element('.bp3-datepicker-footer button.bp3-button:first-child') }
 
     openAsSuperUser() {
         super.openAsSuperUser(Page_URL)

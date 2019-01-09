@@ -265,7 +265,7 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	description = "Waiting until the DB server has started"
 	targetContainerId { "anet-mssql-server" }
-	cmd = ["/opt/waitTillServiceStarted.sh"]
+	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
 }
 
 task dbLoad(dependsOn: 'compileJava', type: JavaExec) {
@@ -308,7 +308,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.1.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.2.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }
