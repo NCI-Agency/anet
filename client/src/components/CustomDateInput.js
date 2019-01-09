@@ -32,6 +32,7 @@ export default class CustomDateInput extends Component {
 		showIcon: PropTypes.bool,
 		value: PropTypes.object,
 		onChange: PropTypes.func,
+		onBlur: PropTypes.func,
 	}
 
 	static defaultProps = {
@@ -39,16 +40,16 @@ export default class CustomDateInput extends Component {
 	}
 
 	render() {
-		const { id, showIcon, value } = this.props
+		const { id, showIcon, value, onChange, onBlur } = this.props
 		const rightElement = showIcon && CalendarIcon(id)
 		const style = { width: showIcon ? '11em' : '8em', fontSize: '1.1em' }
 		const inputFormat = Settings.dateFormats.forms.input[0]
 		return (
 			<DateInput
-				inputProps={{ id, style }}
+				inputProps={{ id, style, onBlur }}
 				rightElement={rightElement}
 				value={value}
-				onChange={this.props.onChange}
+				onChange={onChange}
 				formatDate={date => moment(date).format(inputFormat)}
 				parseDate={str => moment(str, Settings.dateFormats.forms.input, true).toDate()}
 				placeholder={inputFormat}
