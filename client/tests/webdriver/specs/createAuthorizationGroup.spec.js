@@ -34,7 +34,7 @@ describe('Create authorization group form page', () => {
             CreateAuthorizationGroup.submitForm()
             CreateAuthorizationGroup.waitForAlertSuccessToLoad()
             const alertMessage = CreateAuthorizationGroup.alertSuccess.getText()
-            expect(alertMessage).to.equal('Authorization group saved')
+            expect(alertMessage).to.equal('Authorization Group saved')
         })
     })
 })

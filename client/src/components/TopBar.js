@@ -90,7 +90,7 @@ class BaseTopBar extends Component {
                 style={{ flex:'0 0 auto', zIndex: 100}}
                 ref={this.topbarDiv}
             >
-                <div>
+                <div id="topbar">
                     <GeneralBanner options={this.bannerOptions()} />
                     <SecurityBanner location={this.props.location} />
                     {currentUser && !currentUser.hasActivePosition() && !currentUser.isNewUser() && <NoPositionBanner />}
