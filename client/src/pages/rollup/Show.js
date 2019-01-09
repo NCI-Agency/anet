@@ -62,9 +62,9 @@ class BaseRollupShow extends Page {
 
 	get dateStr() {
 		if (this.state.startDate.isSame(this.state.endDate, 'day')) {
-			return this.state.startDate.format(Settings.dateFormats.forms.short)
+			return `for ${this.state.startDate.format(Settings.dateFormats.forms.short)}`
 		} else {
-			return `${this.state.startDate.format(Settings.dateFormats.forms.short)} - ${this.state.endDate.format(Settings.dateFormats.forms.short)}`
+			return `from ${this.state.startDate.format(Settings.dateFormats.forms.short)} to ${this.state.endDate.format(Settings.dateFormats.forms.short)}`
 		}
 	}
 	get rollupStart() { return moment(this.state.startDate).startOf('day') }
@@ -122,7 +122,7 @@ class BaseRollupShow extends Page {
 				second: this.VISUALIZATIONS[2].id,
 			}
 		}
-		this.DESCRIPTION = `Number of reports released today per organization.`
+		this.DESCRIPTION = `Number of reports released per organization.`
 
 		const { startDate, endDate } = BaseRollupShow.dateRangeFromQS(props.location.search)
 		this.state = {
@@ -377,18 +377,19 @@ class BaseRollupShow extends Page {
 		const flexStyle = {display: 'flex', flexDirection: 'column', flex: '1 1 auto'}
 		const mosaicLayoutStyle = { display: 'flex', flex: '1 1 auto' }
 		const inputFormat = Settings.dateFormats.forms.input[0]
-		const style = { width: '8em', fontSize: '1.1em' }
+		const style = { width: '7em', fontSize: '1em' }
 
 		return (
 			<div id="daily-rollup" style={flexStyle}>
-				<Breadcrumbs items={[[`Rollup for ${this.dateStr}`, '/rollup']]} />
+				<Breadcrumbs items={[[`Rollup ${this.dateStr}`, '/rollup']]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset title={
 					<div style={{float: 'left'}}>
 						<div style={{ paddingBottom: 8, display: 'flex', alignItems: 'center' }}>
-							<div style={{ marginRight: 5}}>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`}</div>
+							<div style={{ marginRight: 5}}>Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`}</div>
 							<DateRangeInput
+								className="rollupDateRange"
 								startInputProps={{ style }}
 								endInputProps={{ style }}
 								value={[this.state.startDate.toDate(), this.state.endDate.toDate()]}

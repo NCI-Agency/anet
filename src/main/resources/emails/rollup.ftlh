@@ -41,7 +41,7 @@ a {
 
 <#if comment??>
 	<div>
-		<h3 style="color: #981B1E;">Daily Rollup Notes:</h3>
+		<h3 style="color: #981B1E;">Rollup Notes:</h3>
 		<p>${comment}</p>
 	</div>
 </#if>

@@ -44,7 +44,11 @@ public class DailyRollupEmail extends AnetEmailAction {
 
 	@Override
 	public String getSubject() {
-		return "Daily Rollup for " + dtf.print(endDate);
+		if (startDate.withTimeAtStartOfDay().equals(endDate.withTimeAtStartOfDay())) {
+			return "Rollup for " + dtf.print(startDate);
+		} else {
+			return "Rollup from " + dtf.print(startDate) + " to " + dtf.print(endDate);
+		}
 	}
 
 	@Override
