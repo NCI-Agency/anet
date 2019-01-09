@@ -399,6 +399,7 @@ class BaseRollupShow extends Page {
 								placeholder={inputFormat}
 								maxDate={moment().toDate()}
 								allowSingleDayRange={true}
+								closeOnSelection={false}
 								contiguousCalendarMonths={false}
 								shortcuts={true}
 							/>
