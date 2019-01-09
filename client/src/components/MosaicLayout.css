@@ -26,20 +26,17 @@
 
 .mosaic-container .scrollable {
   height: 100%;
-  padding: 15px;
   overflow: auto;
 }
 
 .mosaic-container .scrollable-y {
   height: 100%;
-  padding: 15px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 .mosaic-container .non-scrollable {
   height: 100%;
-  padding: 15px;
   overflow: hidden;
 }
 

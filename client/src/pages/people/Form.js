@@ -120,6 +120,7 @@ class BasePersonForm extends Component {
 			dirty,
 			errors,
 			setFieldValue,
+			setFieldTouched,
 			values,
 			submitForm
 		}) => {
@@ -377,6 +378,7 @@ class BasePersonForm extends Component {
 							component={FieldHelper.renderSpecialField}
 							value={values.endOfTourDate}
 							onChange={(value, formattedValue) => setFieldValue('endOfTourDate', value)}
+							onBlur={() => setFieldTouched('endOfTourDate', true)}
 							widget={<CustomDateInput id="endOfTourDate" />}
 						/>
 						<Field

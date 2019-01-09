@@ -90,6 +90,7 @@ class BaseTaskForm extends Component {
 				dirty,
 				errors,
 				setFieldValue,
+				setFieldTouched,
 				values,
 				submitForm
 			}) => {
@@ -170,6 +171,7 @@ class BaseTaskForm extends Component {
 									component={FieldHelper.renderSpecialField}
 									value={values.plannedCompletion}
 									onChange={(value, formattedValue) => setFieldValue('plannedCompletion', value)}
+									onBlur={() => setFieldTouched('plannedCompletion', true)}
 									widget={<CustomDateInput id="plannedCompletion" />}
 								/>
 							}
@@ -181,6 +183,7 @@ class BaseTaskForm extends Component {
 									component={FieldHelper.renderSpecialField}
 									value={values.projectedCompletion}
 									onChange={(value, formattedValue) => setFieldValue('projectedCompletion', value)}
+									onBlur={() => setFieldTouched('projectedCompletion', true)}
 									widget={<CustomDateInput id="projectedCompletion" />}
 								/>
 							}

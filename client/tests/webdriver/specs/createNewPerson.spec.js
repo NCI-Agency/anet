@@ -31,14 +31,14 @@ describe('Create new Person form page', () => {
             CreatePerson.lastName.waitForVisible()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
             CreatePerson.emailAddress.setValue('notValidEmail@')
-            CreatePerson.submitForm()
+            CreatePerson.lastName.click()
             const errorMessage = browser.element('input#emailAddress + span.help-block')
             errorMessage.waitForExist()
             errorMessage.waitForVisible()
-            expect(errorMessage.getText()).to.equal('Valid email address is required')
+            expect(errorMessage.getText()).to.equal('Email must be a valid email')
 
             // perform submit form to prevent warning dialog
-            CreatePerson.emailAddress.clearElement()
+            CreatePerson.emailAddress.setValue('test@dds.mil')
             CreatePerson.lastName.click()
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
@@ -67,6 +67,7 @@ describe('Create new Person form page', () => {
             CreatePerson.roleAdvisorButton.waitForExist()
             CreatePerson.roleAdvisorButton.click()
             CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
+            CreatePerson.lastName.click()
             let errorMessage = browser.element('input#emailAddress + span.help-block')
             errorMessage.waitForVisible(1000, true) // element should *not* be visible!
             CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
@@ -74,11 +75,11 @@ describe('Create new Person form page', () => {
             CreatePerson.country.selectByValue(CreatePerson.getRandomOption(CreatePerson.country))
             // This makes sure the help-block is displayed after form submit
             CreatePerson.endOfTourDate.setValue('')
-            CreatePerson.submitForm()
-            errorMessage = browser.element('input#endOfTourDate').$('..') .$('..').$('..').$('span.help-block')
+            CreatePerson.lastName.click()
+            errorMessage = CreatePerson.endOfTourDate.$('..').$('..').$('..').$('..').$('span.help-block')
             errorMessage.waitForExist()
             errorMessage.waitForVisible()
-            expect(errorMessage.getText()).to.equal('End of tour is required')
+            expect(errorMessage.getText()).to.equal('You must provide the End of tour')
         })
 
         it('Should save with a valid email address in uppercase', () => {
@@ -88,6 +89,7 @@ describe('Create new Person form page', () => {
             CreatePerson.roleAdvisorButton.waitForExist()
             CreatePerson.roleAdvisorButton.click()
             CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
+            CreatePerson.lastName.click()
             const errorMessage = browser.element('input#emailAddress + span.help-block')
             errorMessage.waitForVisible(1000, true) // element should *not* be visible!
             CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
