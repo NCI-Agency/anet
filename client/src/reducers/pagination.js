@@ -1,8 +1,6 @@
 import { SET_PAGINATION } from '../constants/ActionTypes'
 
-const initialState = {
-	pageTypes: {}
-}
+const initialState = {}
 
 export default function pages(state = initialState, action) {
 	switch (action.type) {
@@ -10,12 +8,9 @@ export default function pages(state = initialState, action) {
 			const { pageKey, pageNum } = action.payload
 			return {
 				...state,
-				pageTypes: {
-					[pageKey]: {
-						pageNum
-					},
-					...state.pageTypes,
-				}
+				[pageKey]: {
+					pageNum
+				},
 			}
 		default:
 			return state

@@ -12,7 +12,15 @@ import utils from 'utils'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { animateScroll, Link } from 'react-scroll'
-import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
+import {
+	setPageProps,
+	setSearchProps,
+	setSearchQuery,
+	clearSearchQuery,
+	setPagination,
+	DEFAULT_PAGE_PROPS,
+	DEFAULT_SEARCH_PROPS
+} from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
@@ -21,6 +29,7 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
 	setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
 	setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
 	clearSearchQuery: () => dispatch(clearSearchQuery()),
+	setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum)),
 })
 
 export const propTypes = {

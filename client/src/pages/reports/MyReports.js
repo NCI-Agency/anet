@@ -30,12 +30,6 @@ class BaseMyReports extends Page {
 			pending: null,
 			released: null
 		}
-		this.pageNums = {
-			draft: 0,
-			future: 0,
-			pending: 0,
-			released: 0
-		}
 		this.partFuncs = {
 			draft: this.getPart.bind(this, 'draft', [Report.STATE.DRAFT, Report.STATE.REJECTED]),
 			future: this.getPart.bind(this, 'future', [Report.STATE.FUTURE]),
@@ -46,9 +40,12 @@ class BaseMyReports extends Page {
 
 	@autobind
 	getPart(partName, state, authorUuid) {
+		const { pagination } = this.props
+		const pagePart = pagination[partName]
+
 		const queryConstPart = {
 			pageSize: 10,
-			pageNum: this.pageNums[partName],
+			pageNum: pagePart ? pagePart.pageNum  : 0,
 			authorUuid: authorUuid,
 			state: state
 		}
@@ -114,20 +111,22 @@ class BaseMyReports extends Page {
 
 	@autobind
 	goToPage(section, pageNum) {
-		this.pageNums[section] = pageNum
-		const part = (this.partFuncs[section])(this.props.currentUser.uuid)
+		const { currentUser, setPagination } = this.props
+		const part = (this.partFuncs[section])(currentUser.uuid)
 		GQL.run([part]).then( data => {
 			let stateChange = {}
 			stateChange[section] = data[section]
 			console.log(stateChange)
-			this.setState(stateChange)
+			this.setState(stateChange, () => setPagination(section, pageNum))
 		})
 	}
 }
 
 const mapStateToProps = (state, ownProps) => ({
-	searchQuery: state.searchQuery
+	searchQuery: state.searchQuery,
+	pagination: state.pagination,
 })
+
 const MyReports = (props) => (
 	<AppContext.Consumer>
 		{context =>
