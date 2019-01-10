@@ -5,6 +5,7 @@
   "proxy": "http://localhost:8080",
   "homepage": "/assets/client",
   "devDependencies": {
+    "@storybook/react": "^4.1.6",
     "artillery": "^1.6.0-24",
     "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.4.5",
@@ -124,7 +125,8 @@
     "wdio": "wdio -b http://localhost:8080 ./config/wdio.config.js",
     "wdio:watch": "wdio ./config/wdio.config.js --watch",
     "load-test": "artillery run tests/load/load.yml",
-    "graphql": "graphql"
+    "graphql": "graphql",
+    "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "jest": {
     "moduleFileExtensions": [
