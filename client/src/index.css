@@ -366,12 +366,13 @@ li#search-nav .nav > li a {
 }
 
 .nav-overlay {
+	position: 'relative';
 	border: 1px solid #e0e0e0;
 	flex-grow: 1;
 	background: #f2f2f2;
 	padding: 5px 8px 5px;
 	left: 0;
-	z-index: 99;
+	z-index: 999;
 }
 
 .report-sub-form .form-group {
