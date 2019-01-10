@@ -3,6 +3,8 @@ import React, { Component } from 'react'
 import {Person, Organization, Task} from 'models'
 import AttendeesMultiSelect from 'components/AttendeesMultiSelect'
 
+import _cloneDeep from 'lodash/cloneDeep'
+
 export default class AttendeesMultiSelector extends Component {
 	static propTypes = {
 		items: PropTypes.array.isRequired,
@@ -52,13 +54,13 @@ export default class AttendeesMultiSelector extends Component {
 	}
 
 	addItem = (newItem) => {
-		const { items } = this.props
+		const items = _cloneDeep(this.props.items)
 		items.push(newItem)
 		this.props.onChange(items)
 	}
 
 	removeItem = (oldItem) => {
-		const { items } = this.props
+		const items = _cloneDeep(this.props.items)
 		const index = items.findIndex(item => item.uuid === oldItem.uuid)
 		items.splice(index, 1)
 		this.props.onChange(items)

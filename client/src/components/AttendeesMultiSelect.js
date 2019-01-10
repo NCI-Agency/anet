@@ -98,6 +98,13 @@ export default class AttendeesMultiSelect extends Component {
 		inputFocused: false,
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.items !== this.props.items) {
+			// Update the list of suggestions to consider the already selected items
+			this.fetchSuggestions()
+		}
+	}
+
 	handleInputFocus = () => {
 		if (this.state.inputFocused === true) {
 			return
@@ -182,6 +189,22 @@ export default class AttendeesMultiSelect extends Component {
 		this.setState({shortcutKey}, () => this.fetchSuggestions())
 	}
 
+	_getSelectedItemsUuids = () => {
+		const selectedItems = this.props.items
+		if (Array.isArray(selectedItems)) {
+			return selectedItems.map(object => object.uuid)
+		}
+		return []
+	}
+
+	filterSuggestions = (suggestions) => {
+		const excludedUuids =  this._getSelectedItemsUuids()
+		if (excludedUuids) {
+			suggestions = suggestions.filter(suggestion => suggestion && suggestion.uuid && excludedUuids.indexOf(suggestion.uuid) === -1)
+		}
+		return suggestions
+	}
+
 	fetchSuggestions = () => {
 		const {shortcutKey} = this.state
 		const shortcutDefs = this.props.shortcutDefs[shortcutKey]
@@ -204,7 +227,7 @@ export default class AttendeesMultiSelect extends Component {
 				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
 			}
 			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-				this.setState({suggestions: data[listName].list})
+				this.setState({suggestions: this.filterSuggestions(data[listName].list)})
 			})
 		}
 		else {
@@ -213,7 +236,7 @@ export default class AttendeesMultiSelect extends Component {
 						list { ` + this.props.fields + ` }
 					}`
 			).then(data => {
-				this.setState({suggestions: data[listName].list})
+				this.setState({suggestions: this.filterSuggestions(data[listName].list)})
 			})
 		}
 	}
