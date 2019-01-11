@@ -166,7 +166,7 @@ class BaseReportForm extends Component {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		const advisorPositionSingular = Settings.fields.advisor.position.name
-		const advisorsShortcuts = {
+		const advisorsFilters = {
 			myColleagues: {
 				label: 'My colleagues',
 				searchQuery: true,
@@ -183,7 +183,7 @@ class BaseReportForm extends Component {
 				searchQuery: true,
 			},
 		}
-		const principalsShortcuts = {
+		const principalsFilters = {
 			relatedCounterparts: {
 				label: 'Related counterparts',
 				searchQuery: true,
@@ -385,7 +385,7 @@ class BaseReportForm extends Component {
 
 						<Fieldset title={!values.cancelled ? "Meeting attendance" : "Planned attendance"} id="attendance-fieldset">
 							<AttendeesMultiSelector
-								items={values.advisors}
+								selectedItems={values.advisors}
 								objectType={Person}
 								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.ADVISOR, matchPositionName: true}}
 								placeholder="Start typing to search for advisors who attended the meeting..."
@@ -396,12 +396,12 @@ class BaseReportForm extends Component {
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.advisors} onChange={value => setFieldValue('advisors', value)} showDelete={true} />}
 								onChange={value => this.updateAttendees(setFieldValue, 'advisors', value)}
-								shortcutDefs={advisorsShortcuts}
+								filterDefs={advisorsFilters}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}
 							/>
 							<AttendeesMultiSelector
-								items={values.principals}
+								selectedItems={values.principals}
 								objectType={Person}
 								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.PRINCIPAL, matchPositionName: true}}
 								placeholder="Start typing to search for principals who attended the meeting..."
@@ -412,7 +412,7 @@ class BaseReportForm extends Component {
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.principals} onChange={value => setFieldValue('principals', value)} showDelete={true} />}
 								onChange={value => this.updateAttendees(setFieldValue, 'principals', value)}
-								shortcutDefs={principalsShortcuts}
+								filterDefs={principalsFilters}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}
 							/>

@@ -61,21 +61,16 @@ export default class AttendeesMultiSelect extends Component {
 	static propTypes = {
 		addFieldName: PropTypes.string.isRequired, // name of the autocomplete field
 		addFieldLabel: PropTypes.string, // label of the autocomplete field
-		items: PropTypes.array.isRequired,
+		selectedItems: PropTypes.array.isRequired,
 		renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired, // how to render the selected items
 		onAddItem: PropTypes.func.isRequired,
 		onRemoveItem: PropTypes.func,
-		shortcutDefs: PropTypes.object,
+		filterDefs: PropTypes.object,
 		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
 		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 
-		//Needed for the autocomplete widget
 		//Required: ANET Object Type (Person, Report, etc) to search for.
 		objectType: PropTypes.func.isRequired,
-		//Optional: The property of the selected object to display.
-		valueKey: PropTypes.string,
-		//Optional: A function to render each item in the list of suggestions.
-		template: PropTypes.func,
 		//Optional: Parameters to pass to search function.
 		queryParams: PropTypes.object,
 		//Optional: GraphQL string of fields to return from search.
@@ -85,22 +80,22 @@ export default class AttendeesMultiSelect extends Component {
 
 	static defaultProps = {
 		addFieldLabel: 'Add item',
-		shortcutDefs: {},
+		filterDefs: {},
 		renderExtraCol: true,
 	}
 
 	state = {
 		searchTerms: '',
-		shortcutKey: Object.keys(this.props.shortcutDefs)[0],
-		suggestions: {},
+		filterType: Object.keys(this.props.filterDefs)[0], // per default use the first filter
+		results: {},
 		showOverlay: false,
 		inputFocused: false,
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-		if (prevProps.items !== this.props.items) {
-			// Update the list of suggestions to consider the already selected items
-			this.fetchSuggestions()
+		if (prevProps.selectedItems !== this.props.selectedItems) {
+			// Update the list of filter results to consider the already selected items
+			this.fetchResults()
 		}
 	}
 
@@ -130,10 +125,10 @@ export default class AttendeesMultiSelect extends Component {
 	}
 
 	render() {
-		const {addFieldName, addFieldLabel, renderSelected, items, onAddItem, onRemoveItem, shortcutDefs, renderExtraCol, addon, ...autocompleteProps} = this.props
+		const {addFieldName, addFieldLabel, renderSelected, selectedItems, onAddItem, onRemoveItem, filterDefs, renderExtraCol, addon, ...autocompleteProps} = this.props
+		const { results, filterType } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
-		const { suggestions, shortcutKey } = this.state
-		const attendees = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].list : []
+		const attendees = results && results[filterType] ? results[filterType].list : []
 		return (
 				<Field
 					name={addFieldName}
@@ -158,12 +153,12 @@ export default class AttendeesMultiSelect extends Component {
 						<Popover id={addFieldName} title={null} placement="bottom" style={{left: 0, width: '100%', maxWidth: '100%'}}>
 							<Row>
 								<Col sm={12}>
-									<ButtonToggleGroup value={this.state.shortcutKey} onChange={this.changeShortcut} className="hide-for-print">
-										{Object.keys(shortcutDefs).map(shortcutKey =>
-											<Button key={shortcutKey} value={shortcutKey}>{shortcutDefs[shortcutKey].label}</Button>
+									<ButtonToggleGroup value={this.state.filterType} onChange={this.changeFilterType} className="hide-for-print">
+										{Object.keys(filterDefs).map(filterType =>
+											<Button key={filterType} value={filterType}>{filterDefs[filterType].label}</Button>
 										)}
 									</ButtonToggleGroup>
-									{attendees.length && this.paginationFor(this.state.shortcutKey)}
+									{attendees.length ? this.paginationFor(this.state.filterType) : null}
 									<AttendeesTable
 										attendees={attendees}
 										addItem={this.addItem}
@@ -179,38 +174,38 @@ export default class AttendeesMultiSelect extends Component {
 	}
 
 	changeSearchTerms = (event) => {
-		this.setState({searchTerms: event.target.value}, () => this.fetchSuggestionsDebounced())
+		this.setState({searchTerms: event.target.value}, () => this.fetchResultsDebounced())
 	}
 
-	changeShortcut = (shortcutKey) => {
-		this.setState({shortcutKey}, () => this.fetchSuggestions())
+	changeFilterType = (filterType) => {
+		this.setState({filterType}, () => this.fetchResults())
 	}
 
 	_getSelectedItemsUuids = () => {
-		const selectedItems = this.props.items
+		const {selectedItems} = this.props
 		if (Array.isArray(selectedItems)) {
 			return selectedItems.map(object => object.uuid)
 		}
 		return []
 	}
 
-	filterSuggestions = (suggestions) => {
+	filterItems = (items) => {
 		const excludedUuids =  this._getSelectedItemsUuids()
 		if (excludedUuids) {
-			suggestions = suggestions.filter(suggestion => suggestion && suggestion.uuid && excludedUuids.indexOf(suggestion.uuid) === -1)
+			items = items.filter(suggestion => suggestion && suggestion.uuid && excludedUuids.indexOf(suggestion.uuid) === -1)
 		}
-		return suggestions
+		return items
 	}
 
-	fetchSuggestions = (pageNum) => {
-		const { shortcutKey, suggestions } = this.state
+	fetchResults = (pageNum) => {
+		const { filterType, results } = this.state
 		if (pageNum === undefined) {
-			pageNum = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].pageNum : 0
+			pageNum = results && results[filterType] ? results[filterType].pageNum : 0
 		}
-		const shortcutDefs = this.props.shortcutDefs[shortcutKey]
+		const filterDefs = this.props.filterDefs[filterType]
 		const resourceName = this.props.objectType.resourceName
-		const listName = shortcutDefs.listName || this.props.objectType.listName
-		if (shortcutDefs.searchQuery) {
+		const listName = filterDefs.listName || this.props.objectType.listName
+		if (filterDefs.searchQuery) {
 			// GraphQL search type of query
 			let graphQlQuery = listName + ' (query: $query) { '
 			+ 'pageNum, pageSize, totalCount, list { ' + this.props.fields + '}'
@@ -220,59 +215,59 @@ export default class AttendeesMultiSelect extends Component {
 			if (this.props.queryParams) {
 				Object.assign(queryVars, this.props.queryParams)
 			}
-			if (shortcutDefs.queryVars) {
-				Object.assign(queryVars, shortcutDefs.queryVars)
+			if (filterDefs.queryVars) {
+				Object.assign(queryVars, filterDefs.queryVars)
 			}
 			if (this.state.searchTerms) {
 				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
 			}
 			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
 				this.setState({
-					suggestions: {
-						...suggestions,
-						[shortcutKey]: data[listName]
+					results: {
+						...results,
+						[filterType]: data[listName]
 					}
 				})
 			})
 		}
 		else {
 			API.query(/* GraphQL */`
-					` + listName + `(` + shortcutDefs.listArgs + `) {
+					` + listName + `(` + filterDefs.listArgs + `) {
 				pageNum, pageSize, totalCount, list { ` + this.props.fields + ` }
 					}`
 			).then(data => {
 				this.setState({
-					suggestions: {
-						...suggestions,
-						[shortcutKey]: data[listName]
+					results: {
+						...results,
+						[filterType]: data[listName]
 					}
 				})
 			})
 		}
 	}
 
-	fetchSuggestionsDebounced = _debounce(this.fetchSuggestions, 200)
+	fetchResultsDebounced = _debounce(this.fetchResults, 200)
 
 	addItem = (newItem) => {
 		if (!newItem || !newItem.uuid) {
 			return
 		}
-		if (!this.props.items.find(obj => obj.uuid === newItem.uuid)) {
+		if (!this.props.selectedItems.find(obj => obj.uuid === newItem.uuid)) {
 			this.props.onAddItem(newItem)
 		}
 	}
 
 	removeItem = (oldItem) => {
-		if (this.props.items.find(obj => obj.uuid === oldItem.uuid)) {
+		if (this.props.selectedItems.find(obj => obj.uuid === oldItem.uuid)) {
 			this.props.onRemoveItem(oldItem)
 		}
 	}
 
-	paginationFor = (shortcutKey) => {
-		const {suggestions} = this.state
-		const pageSize = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].pageSize : 6
-		const pageNum = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].pageNum : 0
-		const totalCount = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].totalCount : 0
+	paginationFor = (filterType) => {
+		const {results} = this.state
+		const pageSize = results && results[filterType] ? results[filterType].pageSize : 6
+		const pageNum = results && results[filterType] ? results[filterType].pageNum : 0
+		const totalCount = results && results[filterType] ? results[filterType].totalCount : 0
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
 		return <header className="searchPagination">
@@ -291,6 +286,6 @@ export default class AttendeesMultiSelect extends Component {
 	}
 
 	goToPage = (pageNum) => {
-		this.fetchSuggestions(pageNum)
+		this.fetchResults(pageNum)
 	}
 }

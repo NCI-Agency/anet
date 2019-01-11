@@ -7,10 +7,10 @@ import _cloneDeep from 'lodash/cloneDeep'
 
 export default class AttendeesMultiSelector extends Component {
 	static propTypes = {
-		items: PropTypes.array.isRequired,
+		selectedItems: PropTypes.array.isRequired,
 		objectType: PropTypes.func.isRequired,
 		onChange: PropTypes.func.isRequired,
-		shortcutDefs: PropTypes.object,
+		filterDefs: PropTypes.object,
 		queryParams: PropTypes.object,
 		addFieldName: PropTypes.string,
 		addFieldLabel: PropTypes.string,
@@ -31,16 +31,16 @@ export default class AttendeesMultiSelector extends Component {
 	}
 
 	render() {
-		const { items, objectType, shortcutDefs, queryParams, addFieldName, addFieldLabel, renderSelected, placeholder, addon, fields, template, renderExtraCol } = this.props
+		const { selectedItems, objectType, filterDefs, queryParams, addFieldName, addFieldLabel, renderSelected, placeholder, addon, fields, template, renderExtraCol } = this.props
 		return (
 			<AttendeesMultiSelect
 				addFieldName={addFieldName}
 				addFieldLabel={addFieldLabel}
-				items={items}
+				selectedItems={selectedItems}
 				renderSelected={renderSelected}
 				onAddItem={this.addItem}
 				onRemoveItem={this.removeItem}
-				shortcutDefs={shortcutDefs}
+				filterDefs={filterDefs}
 				renderExtraCol={renderExtraCol}
 				addon={addon}
 				objectType={objectType}
@@ -54,15 +54,15 @@ export default class AttendeesMultiSelector extends Component {
 	}
 
 	addItem = (newItem) => {
-		const items = _cloneDeep(this.props.items)
-		items.push(newItem)
-		this.props.onChange(items)
+		const selectedItems = _cloneDeep(this.props.selectedItems)
+		selectedItems.push(newItem)
+		this.props.onChange(selectedItems)
 	}
 
 	removeItem = (oldItem) => {
-		const items = _cloneDeep(this.props.items)
-		const index = items.findIndex(item => item.uuid === oldItem.uuid)
-		items.splice(index, 1)
-		this.props.onChange(items)
+		const selectedItems = _cloneDeep(this.props.selectedItems)
+		const index = selectedItems.findIndex(item => item.uuid === oldItem.uuid)
+		selectedItems.splice(index, 1)
+		this.props.onChange(selectedItems)
 	}
 }
