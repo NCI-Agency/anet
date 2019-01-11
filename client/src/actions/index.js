@@ -67,3 +67,9 @@ export function setPagination(pageKey, pageNum) {
 		}
 	}
 }
+
+export function resetPages() {
+	return {
+		type: types.RESET_PAGES
+	}
+}
