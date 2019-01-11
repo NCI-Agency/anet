@@ -158,7 +158,7 @@ export default class AttendeesMultiSelect extends Component {
 											<Button key={filterType} value={filterType}>{filterDefs[filterType].label}</Button>
 										)}
 									</ButtonToggleGroup>
-									{attendees.length ? this.paginationFor(this.state.filterType) : null}
+									{this.paginationFor(this.state.filterType)}
 									<AttendeesTable
 										attendees={attendees}
 										addItem={this.addItem}
@@ -222,6 +222,7 @@ export default class AttendeesMultiSelect extends Component {
 				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
 			}
 			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
+				data[listName].list = this.filterItems(data[listName].list)
 				this.setState({
 					results: {
 						...results,
@@ -236,6 +237,7 @@ export default class AttendeesMultiSelect extends Component {
 				pageNum, pageSize, totalCount, list { ` + this.props.fields + ` }
 					}`
 			).then(data => {
+				data[listName].list = this.filterItems(data[listName].list)
 				this.setState({
 					results: {
 						...results,
@@ -269,7 +271,7 @@ export default class AttendeesMultiSelect extends Component {
 		const pageNum = results && results[filterType] ? results[filterType].pageNum : 0
 		const totalCount = results && results[filterType] ? results[filterType].totalCount : 0
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
-		if (numPages === 1) { return }
+		if (numPages <= 1) { return }
 		return <header className="searchPagination">
 			<UltimatePagination
 				className="pull-right"
