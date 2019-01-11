@@ -45,7 +45,7 @@ class BaseMyReports extends Page {
 
 		const queryConstPart = {
 			pageSize: 10,
-			pageNum: pagePart ? pagePart.pageNum  : 0,
+			pageNum: pagePart === undefined ? 0 : pagePart.pageNum,
 			authorUuid: authorUuid,
 			state: state
 		}

@@ -80,7 +80,7 @@ class BaseOrganizationShow extends Page {
 		const orgLabel = this.orgLabel(organization)
 		const reports = pagination[orgLabel]
 		let reportQuery = {
-			pageNum: reports ? reports.pageNum : 0,
+			pageNum: reports === undefined ? 0 : reports.pageNum,
 			pageSize: 10,
 			orgUuid: orgUuid,
 			state: (this.reportsFilterIsSet()) ? this.state.reportsFilter : null
