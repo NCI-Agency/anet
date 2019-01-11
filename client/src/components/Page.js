@@ -18,8 +18,9 @@ import {
 	setSearchQuery,
 	clearSearchQuery,
 	setPagination,
+	resetPages,
 	DEFAULT_PAGE_PROPS,
-	DEFAULT_SEARCH_PROPS
+	DEFAULT_SEARCH_PROPS,
 } from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -30,6 +31,7 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
 	setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
 	clearSearchQuery: () => dispatch(clearSearchQuery()),
 	setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum)),
+	resetPages: () => dispatch(resetPages()),
 })
 
 export const propTypes = {
@@ -45,6 +47,8 @@ export const propTypes = {
 		objectType: PropTypes.string
 	}),
 	clearSearchQuery: PropTypes.func.isRequired,
+	setPagination: PropTypes.func.isRequired,
+	resetPages: PropTypes.func.isRequired,
 }
 
 export const AnchorLink = function(props) {

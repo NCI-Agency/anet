@@ -27,7 +27,7 @@ export default class Header extends Component {
 								{
 									this.props.minimalHeader ?
 										<span className="logo hidden-xs"><img src={logo} alt="ANET Logo" /></span> :
-										<Link to="/" className="logo hidden-xs">
+										<Link to="/" onClick={this.props.onHomeClick} className="logo hidden-xs">
 											<img src={logo} alt="ANET logo" />
 										</Link>
 								}

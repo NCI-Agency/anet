@@ -93,8 +93,10 @@ class Search extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
+		setPagination: PropTypes.func.isRequired,
 	}
 
+	componentPrefix = 'SEARCH_'
 	successToastId = 'success-message';
 	errorToastId = 'error-message';
 	notify = (success) => {
@@ -119,25 +121,29 @@ class Search extends Page {
 		showSaveSearch: false,
 	}
 
-	getSearchPart(type, query, pageNum, pageSize) {
-		type = type.toLowerCase()
-		let subQuery = Object.assign({}, query)
-		subQuery.pageNum = (pageNum === undefined) ? 0 : pageNum
-		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
+	getSearchPart(type, query, pageNum = 0, pageSize = 10) {
+		const { pagination } = this.props
+		const typeLower = type.toLowerCase()
+		const pageLabel = this.pageLabel(typeLower)
+		const paginatedPart = pagination[pageLabel]
 
-		let config = SEARCH_CONFIG[type]
+		let subQuery = Object.assign({}, query)
+		subQuery.pageNum = (paginatedPart === undefined) ? pageNum : paginatedPart.pageNum
+		subQuery.pageSize = pageSize
+
+		let config = SEARCH_CONFIG[typeLower]
 		if (config.sortBy) {
 			subQuery.sortBy = config.sortBy
 		}
 		if (config.sortOrder) {
 			subQuery.sortOrder = config.sortOrder
 		}
-		let part = new GQL.Part(/* GraphQL */`
-			${config.listName} (query:$${type}Query) {
+		let gqlPart = new GQL.Part(/* GraphQL */`
+			${config.listName} (query:$${typeLower}Query) {
 				pageNum, pageSize, totalCount, list { ${config.fields} }
 			}
-			`).addVariable(type + "Query", config.variableType, subQuery)
-		return part
+			`).addVariable(typeLower + "Query", config.variableType, subQuery)
+		return gqlPart
 	}
 
 	@autobind
@@ -288,6 +294,10 @@ class Search extends Page {
 		)
 	}
 
+	pageLabel = (type, prefix = this.componentPrefix) => {
+		return `${prefix}${type}`
+	}
+
 	@autobind
 	paginationFor(type) {
 		const {pageSize, pageNum, totalCount} = this.state.results[type]
@@ -310,12 +320,14 @@ class Search extends Page {
 
 	@autobind
 	goToPage(type, pageNum) {
+		const { setPagination } = this.props
 		const query = this.getSearchQuery()
 		const part = this.getSearchPart(type, query, pageNum)
+		
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
-			this.setState({results})
+			this.setState({results}, () => setPagination(this.pageLabel(type), pageNum))
 		}).catch(error =>
 			this.setState({success: null, error: error})
 		)
@@ -525,6 +537,7 @@ class Search extends Page {
 
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery,
+	pagination: state.pagination,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Search))

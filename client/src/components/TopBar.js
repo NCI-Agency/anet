@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
+import { connect } from 'react-redux'
+import { resetPages } from 'actions'
 
 import NoPositionBanner from 'components/NoPositionBanner'
 import GeneralBanner from 'components/GeneralBanner'
@@ -23,6 +25,7 @@ class BaseTopBar extends Component {
 		currentUser: PropTypes.instanceOf(Person),
         appSettings: PropTypes.object,
         topbarHeight: PropTypes.func.isRequired,
+        resetPages: PropTypes.func.isRequired,
 	}
 
     constructor(props) {
@@ -56,6 +59,10 @@ class BaseTopBar extends Component {
         }
     }
 
+    handleOnHomeClick = () => {
+        this.props.resetPages()
+    }
+
     updateBannerVisibility(){
         let visibilitySetting = parseInt(this.props.appSettings[GENERAL_BANNER_VISIBILITY], 10)
         let output = false
@@ -84,7 +91,13 @@ class BaseTopBar extends Component {
     }
 
     render() {
-        const { currentUser } = this.props
+        const {
+            currentUser,
+            minimalHeader,
+            toggleMenuAction,
+            location,
+        } = this.props
+
         return (
             <div
                 style={{ flex:'0 0 auto', zIndex: 100}}
@@ -92,9 +105,13 @@ class BaseTopBar extends Component {
             >
                 <div id="topbar">
                     <GeneralBanner options={this.bannerOptions()} />
-                    <SecurityBanner location={this.props.location} />
+                    <SecurityBanner location={location} />
                     {currentUser && !currentUser.hasActivePosition() && !currentUser.isNewUser() && <NoPositionBanner />}
-                    <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
+                    <Header
+                        minimalHeader={minimalHeader}
+                        toggleMenuAction={toggleMenuAction}
+                        onHomeClick={this.handleOnHomeClick}
+                    />
                 </div>
             </div>
         )
@@ -109,4 +126,9 @@ const TopBar = (props) => (
 	</AppContext.Consumer>
 )
 
-export default TopBar
+const mapDispatchToProps = (dispatch) => ({
+	resetPages: () => dispatch(resetPages()),
+})
+
+
+export default connect(null, mapDispatchToProps)(TopBar)
