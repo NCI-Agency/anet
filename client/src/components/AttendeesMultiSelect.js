@@ -18,8 +18,7 @@ import API from 'api'
 import _debounce from 'lodash/debounce'
 
 const AttendeesTable = (props) => {
-	const { attendees, selectedAttendees, addItem, removeItem } = props
-	const selectedAttendeesUuids = selectedAttendees.map(a => a.uuid)
+	const { attendees, addItem } = props
 	return (
 		<Table responsive hover striped className="people-search-results">
 			<thead>
@@ -32,8 +31,7 @@ const AttendeesTable = (props) => {
 				</tr>
 			</thead>
 			<tbody>
-				{Person.map(props.attendees, person => {
-					const isSelected = selectedAttendeesUuids.includes(person.uuid)
+				{Person.map(attendees, person => {
 					return <tr key={person.uuid}>
 						<td>
 							<button
@@ -168,9 +166,7 @@ export default class AttendeesMultiSelect extends Component {
 									{attendees.length && this.paginationFor(this.state.shortcutKey)}
 									<AttendeesTable
 										attendees={attendees}
-										selectedAttendees={items}
 										addItem={this.addItem}
-										removeItem={this.removeItem}
 									/>
 								</Col>
 							</Row>
