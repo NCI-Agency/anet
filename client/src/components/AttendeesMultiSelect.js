@@ -10,6 +10,8 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import Checkbox from 'components/Checkbox'
 import {Person, Position} from 'models'
 import LinkTo from 'components/LinkTo'
+import UltimatePagination from 'components/UltimatePagination'
+
 import { Field } from 'formik'
 import { renderInputField } from 'components/FieldHelper'
 import API from 'api'
@@ -92,8 +94,7 @@ export default class AttendeesMultiSelect extends Component {
 	state = {
 		searchTerms: '',
 		shortcutKey: Object.keys(this.props.shortcutDefs)[0],
-		suggestions: [],
-		pageNum: 0,
+		suggestions: {},
 		showOverlay: false,
 		inputFocused: false,
 	}
@@ -121,7 +122,6 @@ export default class AttendeesMultiSelect extends Component {
 		})
 	}
 
-
 	handleHideOverlay = () => {
 		if (this.state.inputFocused) {
 			return
@@ -134,6 +134,8 @@ export default class AttendeesMultiSelect extends Component {
 	render() {
 		const {addFieldName, addFieldLabel, renderSelected, items, onAddItem, onRemoveItem, shortcutDefs, renderExtraCol, addon, ...autocompleteProps} = this.props
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
+		const { suggestions, shortcutKey } = this.state
+		const attendees = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].list : []
 		return (
 				<Field
 					name={addFieldName}
@@ -163,8 +165,9 @@ export default class AttendeesMultiSelect extends Component {
 											<Button key={shortcutKey} value={shortcutKey}>{shortcutDefs[shortcutKey].label}</Button>
 										)}
 									</ButtonToggleGroup>
+									{attendees.length && this.paginationFor(this.state.shortcutKey)}
 									<AttendeesTable
-										attendees={this.state.suggestions}
+										attendees={attendees}
 										selectedAttendees={items}
 										addItem={this.addItem}
 										removeItem={this.removeItem}
@@ -203,18 +206,21 @@ export default class AttendeesMultiSelect extends Component {
 		return suggestions
 	}
 
-	fetchSuggestions = () => {
-		const {shortcutKey} = this.state
+	fetchSuggestions = (pageNum) => {
+		const { shortcutKey, suggestions } = this.state
+		if (pageNum === undefined) {
+			pageNum = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].pageNum : 0
+		}
 		const shortcutDefs = this.props.shortcutDefs[shortcutKey]
 		const resourceName = this.props.objectType.resourceName
 		const listName = shortcutDefs.listName || this.props.objectType.listName
 		if (shortcutDefs.searchQuery) {
 			// GraphQL search type of query
 			let graphQlQuery = listName + ' (query: $query) { '
-			+ 'list { ' + this.props.fields + '}'
+			+ 'pageNum, pageSize, totalCount, list { ' + this.props.fields + '}'
 			+ '}'
 			const variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-			let queryVars = {pageNum: 0, pageSize: 6}
+			let queryVars = {pageNum: pageNum, pageSize: 6}
 			if (this.props.queryParams) {
 				Object.assign(queryVars, this.props.queryParams)
 			}
@@ -225,16 +231,26 @@ export default class AttendeesMultiSelect extends Component {
 				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
 			}
 			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-				this.setState({suggestions: this.filterSuggestions(data[listName].list)})
+				this.setState({
+					suggestions: {
+						...suggestions,
+						[shortcutKey]: data[listName]
+					}
+				})
 			})
 		}
 		else {
 			API.query(/* GraphQL */`
 					` + listName + `(` + shortcutDefs.listArgs + `) {
-						list { ` + this.props.fields + ` }
+				pageNum, pageSize, totalCount, list { ` + this.props.fields + ` }
 					}`
 			).then(data => {
-				this.setState({suggestions: this.filterSuggestions(data[listName].list)})
+				this.setState({
+					suggestions: {
+						...suggestions,
+						[shortcutKey]: data[listName]
+					}
+				})
 			})
 		}
 	}
@@ -254,5 +270,31 @@ export default class AttendeesMultiSelect extends Component {
 		if (this.props.items.find(obj => obj.uuid === oldItem.uuid)) {
 			this.props.onRemoveItem(oldItem)
 		}
+	}
+
+	paginationFor = (shortcutKey) => {
+		const {suggestions} = this.state
+		const pageSize = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].pageSize : 6
+		const pageNum = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].pageNum : 0
+		const totalCount = suggestions && suggestions[shortcutKey] ? suggestions[shortcutKey].totalCount : 0
+		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
+		if (numPages === 1) { return }
+		return <header className="searchPagination">
+			<UltimatePagination
+				className="pull-right"
+				currentPage={pageNum + 1}
+				totalPages={numPages}
+				boundaryPagesRange={1}
+				siblingPagesRange={2}
+				hideEllipsis={false}
+				hidePreviousAndNextPageLinks={false}
+				hideFirstAndLastPageLinks={true}
+				onChange={(value) => this.goToPage(value - 1)}
+			/>
+		</header>
+	}
+
+	goToPage = (pageNum) => {
+		this.fetchSuggestions(pageNum)
 	}
 }
