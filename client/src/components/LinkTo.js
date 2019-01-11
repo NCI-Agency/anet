@@ -16,6 +16,15 @@ const MODEL_NAMES = Object.keys(Models).map(key => {
 	return camel
 })
 
+const modelPropTypes = MODEL_NAMES.reduce((map, name) => ({
+	...map,
+	[name]: PropTypes.oneOfType([
+		PropTypes.instanceOf(Models[name]),
+		PropTypes.object,
+		PropTypes.string,
+	])
+}), {})
+
 export default class LinkTo extends Component {
 	static propTypes = {
 		componentClass: PropTypes.oneOfType([
@@ -33,6 +42,7 @@ export default class LinkTo extends Component {
 		]),
 
 		target: PropTypes.string,
+		...modelPropTypes,
 	}
 
 	static defaultProps = {
@@ -81,9 +91,3 @@ export default class LinkTo extends Component {
 		</Component>
 	}
 }
-
-MODEL_NAMES.forEach(key => LinkTo.propTypes[key] = PropTypes.oneOfType([
-	PropTypes.instanceOf(Models[key]),
-	PropTypes.object,
-	PropTypes.string,
-]))
