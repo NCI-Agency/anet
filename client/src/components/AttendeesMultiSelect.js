@@ -174,11 +174,11 @@ export default class AttendeesMultiSelect extends Component {
 	}
 
 	changeSearchTerms = (event) => {
-		this.setState({searchTerms: event.target.value}, () => this.fetchResultsDebounced())
+		this.setState({searchTerms: event.target.value}, () => this.fetchResultsDebounced(0))
 	}
 
 	changeFilterType = (filterType) => {
-		this.setState({filterType}, () => this.fetchResults())
+		this.setState({filterType}, () => this.fetchResults(0))
 	}
 
 	_getSelectedItemsUuids = () => {
