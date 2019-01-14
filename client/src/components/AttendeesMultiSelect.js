@@ -161,11 +161,16 @@ export default class AttendeesMultiSelect extends Component {
 								</div>
 							</Col>
 							<Col sm={9}>
-								{this.paginationFor(this.state.filterType)}
+								<header className="searchPagination">
+									{this.paginationFor(this.state.filterType)}
+								</header>
 								<AttendeesTable
 									attendees={attendees}
 									addItem={this.addItem}
 								/>
+								<footer className="searchPagination">
+									{this.paginationFor(this.state.filterType)}
+								</footer>
 							</Col>
 						</Row>
 					</Popover>
@@ -282,19 +287,17 @@ export default class AttendeesMultiSelect extends Component {
 		const totalCount = results && results[filterType] ? results[filterType].totalCount : 0
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages <= 1) { return }
-		return <header className="searchPagination">
-			<UltimatePagination
-				className="pull-right"
-				currentPage={pageNum + 1}
-				totalPages={numPages}
-				boundaryPagesRange={1}
-				siblingPagesRange={2}
-				hideEllipsis={false}
-				hidePreviousAndNextPageLinks={false}
-				hideFirstAndLastPageLinks={true}
-				onChange={(value) => this.goToPage(value - 1)}
-			/>
-		</header>
+		return <UltimatePagination
+			className="pull-right"
+			currentPage={pageNum + 1}
+			totalPages={numPages}
+			boundaryPagesRange={1}
+			siblingPagesRange={2}
+			hideEllipsis={false}
+			hidePreviousAndNextPageLinks={false}
+			hideFirstAndLastPageLinks={true}
+			onChange={(value) => this.goToPage(value - 1)}
+		/>
 	}
 
 	goToPage = (pageNum) => {
