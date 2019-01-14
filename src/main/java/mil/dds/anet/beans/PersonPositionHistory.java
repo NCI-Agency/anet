@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -10,8 +11,6 @@ import javax.ws.rs.WebApplicationException;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-
-import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -28,8 +27,8 @@ public class PersonPositionHistory extends AbstractAnetBean {
 
 	private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
 	private ForeignObjectHolder<Position> position = new ForeignObjectHolder<>();
-	DateTime startTime;
-	DateTime endTime;
+	Instant startTime;
+	Instant endTime;
 
 	@Override
 	@JsonIgnore
@@ -99,20 +98,20 @@ public class PersonPositionHistory extends AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="startTime")
-	public DateTime getStartTime() {
+	public Instant getStartTime() {
 		return startTime;
 	}
 	
-	public void setStartTime(DateTime startTime) {
+	public void setStartTime(Instant startTime) {
 		this.startTime = startTime;
 	}
 	
 	@GraphQLQuery(name="endTime")
-	public DateTime getEndTime() {
+	public Instant getEndTime() {
 		return endTime;
 	}
 	
-	public void setEndTime(DateTime endTime) {
+	public void setEndTime(Instant endTime) {
 		this.endTime = endTime;
 	}
 

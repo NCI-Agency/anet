@@ -3,6 +3,7 @@ package mil.dds.anet.resources;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,7 +38,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dataloader.DataLoaderRegistry;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -395,8 +395,8 @@ public class GraphQLResource {
 		} else if (value instanceof Integer) {
 			return (Integer) value;
 		} else if (value instanceof Long) {
-			// FIXME: For now, assume that this is really a DateTime in disguise!
-			return new DateTime((Long) value).toDate();
+			// FIXME: For now, assume that this is really an Instant in disguise!
+			return Instant.ofEpochMilli((Long) value);
 		} else if (value instanceof Number) {
 			return (Number) value;
 		} else {

@@ -1,6 +1,7 @@
 package mil.dds.anet.database;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
@@ -69,6 +69,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 					+ "status, \"organizationUuid\", \"locationUuid\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :code, :type, :status, :organizationUuid, :locationUuid, :createdAt, :updatedAt)")
 				.bindBean(p)
+				.bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+				.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
 				.bind("type", DaoUtils.getEnumId(p.getType()))
 				.bind("status", DaoUtils.getEnumId(p.getStatus()))
 				.execute();
@@ -119,6 +121,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 					+ "code = :code, \"organizationUuid\" = :organizationUuid, type = :type, status = :status, "
 					+ "\"locationUuid\" = :locationUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(p)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
 				.bind("type", DaoUtils.getEnumId(p.getType()))
 				.bind("status", DaoUtils.getEnumId(p.getStatus()))
 				.execute();
@@ -130,7 +133,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 	
 	public int setPersonInPosition(String personUuid, String positionUuid) {
 		return dbHandle.inTransaction(h -> {
-				DateTime now = DateTime.now();
+				Instant now = Instant.now();
 				//If this person is in a position already, we need to remove them. 
 				Position currPos = h.createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS 
 						+ " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
@@ -147,7 +150,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 							+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
 							+ "VALUES (:positionUuid, NULL, :createdAt)")
 						.bind("positionUuid", currPos.getUuid())
-						.bind("createdAt", now)
+						.bind("createdAt", DaoUtils.asLocalDateTime(now))
 						.execute();
 				}
 				
@@ -162,7 +165,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 						+ "VALUES (:positionUuid, :personUuid, :createdAt)")
 					.bind("positionUuid", positionUuid)
 					.bind("personUuid", personUuid)
-					.bind("createdAt", now.plusMillis(1)) // Need to ensure this timestamp is greater than previous INSERT. 
+					.bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))) // Need to ensure this timestamp is greater than previous INSERT.
 					.execute();
 		});
 		
@@ -170,12 +173,12 @@ public class PositionDao extends AnetBaseDao<Position> {
 	
 	public int removePersonFromPosition(String positionUuid) {
 		return dbHandle.inTransaction(h -> {
-				DateTime now = DateTime.now();
+				Instant now = Instant.now();
 				h.createUpdate("/* positionRemovePerson.update */ UPDATE positions "
 						+ "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
 						+ "WHERE uuid = :positionUuid")
 					.bind("personUuid", (Integer) null)
-					.bind("updatedAt", now)
+					.bind("updatedAt", DaoUtils.asLocalDateTime(now))
 					.bind("positionUuid", positionUuid)
 					.execute();
 					
@@ -197,14 +200,14 @@ public class PositionDao extends AnetBaseDao<Position> {
 				}
 				h.createUpdate(sql)
 					.bind("positionUuid", positionUuid)
-					.bind("createdAt", now)
+					.bind("createdAt", DaoUtils.asLocalDateTime(now))
 					.execute();
 			
 				return h.createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
 						+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
 						+ "VALUES (:positionUuid, null, :createdAt)")
 					.bind("positionUuid", positionUuid)
-					.bind("createdAt", now)
+					.bind("createdAt", DaoUtils.asLocalDateTime(now))
 					.execute();
 		});
 	}
@@ -220,7 +223,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return people.get(0);
 	}
 	
-	public Person getPersonInPosition(String positionUuid, DateTime dtg) {
+	public Person getPersonInPosition(String positionUuid, Instant dtg) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
 			sql = "/* positionFindPerson */ SELECT TOP(1) " + PersonDao.PERSON_FIELDS + " FROM \"peoplePositions\" "
@@ -284,7 +287,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 	}
 
 	public int associatePosition(String positionUuidA, String positionUuidB) {
-		DateTime now = DateTime.now();
+		Instant now = Instant.now();
 		final List<String> uuids = Arrays.asList(positionUuidA, positionUuidB);
 		Collections.sort(uuids);
 		return dbHandle.createUpdate("/* associatePosition */ INSERT INTO \"positionRelationships\" "
@@ -292,8 +295,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 				+ "VALUES (:positionUuid_a, :positionUuid_b, :createdAt, :updatedAt, :deleted)")
 			.bind("positionUuid_a", uuids.get(0))
 			.bind("positionUuid_b", uuids.get(1))
-			.bind("createdAt", now)
-			.bind("updatedAt", now)
+			.bind("createdAt", DaoUtils.asLocalDateTime(now))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(now))
 			.bind("deleted", false)
 			.execute();
 	}
@@ -311,7 +314,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 			.bind("deleted", true)
 			.bind("positionUuid_a", uuids.get(0))
 			.bind("positionUuid_b", uuids.get(1))
-			.bind("updatedAt", DateTime.now())
+			.bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now()))
 			.execute();
 		
 	}

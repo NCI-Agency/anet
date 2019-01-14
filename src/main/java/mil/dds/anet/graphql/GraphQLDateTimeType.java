@@ -1,9 +1,9 @@
 package mil.dds.anet.graphql;
 
 import java.math.BigInteger;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import graphql.language.IntValue;
 import graphql.schema.Coercing;
@@ -11,37 +11,37 @@ import graphql.schema.GraphQLScalarType;
 
 public class GraphQLDateTimeType extends GraphQLScalarType {
 
-	private static final Coercing<DateTime, Long> coercing = new Coercing<DateTime, Long>() {
+	private static final Coercing<Instant, Long> coercing = new Coercing<Instant, Long>() {
 		@Override
 		public Long serialize(Object input) {
-			return ((DateTime) input).getMillis();
+			return ((Instant) input).toEpochMilli();
 		}
 
 		@Override
-		public DateTime parseValue(Object input) {
+		public Instant parseValue(Object input) {
 			if (input instanceof Long) {
-				return new DateTime((Long)input);
+				return Instant.ofEpochMilli((Long)input);
 			}
 			else if (input instanceof String) {
-				return DateTime.parse((String)input, ISODateTimeFormat.dateTimeParser());
+				return ZonedDateTime.parse((String)input, DateTimeFormatter.ISO_DATE_TIME).toInstant();
 			}
 			else {
-				return new DateTime(Long.parseLong(input.toString()));
+				return Instant.ofEpochMilli(Long.parseLong(input.toString()));
 			}
 		}
 
 		@Override
-		public DateTime parseLiteral(Object input) {
+		public Instant parseLiteral(Object input) {
 			if (input.getClass().equals(IntValue.class)) {
 				BigInteger value = ((IntValue) input).getValue();
-				return new DateTime(value.longValue());
+				return Instant.ofEpochMilli(value.longValue());
 			}
 			throw new RuntimeException("Unexpected input, expected Unix Millis as long");
 		}
 	};
 
 	public GraphQLDateTimeType() {
-		super("DateTime", null, coercing);
+		super("Instant", null, coercing);
 	}
 
 }

@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -14,8 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.WebApplicationException;
-
-import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -41,9 +40,9 @@ public class Report extends AbstractAnetBean {
 
 	private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
 	ReportState state;
-	DateTime releasedAt;
+	Instant releasedAt;
 	
-	DateTime engagementDate;
+	Instant engagementDate;
 	private Integer engagementDayOfWeek;
 	private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
 	String intent;
@@ -113,20 +112,20 @@ public class Report extends AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="releasedAt")
-	public DateTime getReleasedAt() {
+	public Instant getReleasedAt() {
 		return releasedAt;
 	}
 
-	public void setReleasedAt(DateTime releasedAt) {
+	public void setReleasedAt(Instant releasedAt) {
 		this.releasedAt = releasedAt;
 	}
 
 	@GraphQLQuery(name="engagementDate")
-	public DateTime getEngagementDate() {
+	public Instant getEngagementDate() {
 		return engagementDate;
 	}
 
-	public void setEngagementDate(DateTime engagementDate) {
+	public void setEngagementDate(Instant engagementDate) {
 		this.engagementDate = engagementDate;
 	}
 

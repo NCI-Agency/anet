@@ -59,6 +59,8 @@ public class TagDao implements IAnetDao<Tag> {
 				"/* tagInsert */ INSERT INTO tags (uuid, name, description, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt)")
 			.bindBean(t)
+			.bind("createdAt", DaoUtils.asLocalDateTime(t.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt()))
 			.execute();
 		return t;
 	}
@@ -68,6 +70,7 @@ public class TagDao implements IAnetDao<Tag> {
 		return dbHandle.createUpdate("/* updateTag */ UPDATE tags "
 					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(t)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt()))
 				.execute();
 	}
 

@@ -1,9 +1,8 @@
 package mil.dds.anet.beans;
 
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.joda.time.DateTime;
 
 import mil.dds.anet.emails.AnetEmailAction;
 
@@ -11,7 +10,7 @@ public class AnetEmail {
 	private Integer id;
 	private AnetEmailAction action;
 	private List<String> toAddresses;
-	private DateTime createdAt;
+	private Instant createdAt;
 	private String comment;
 
 	public Integer getId() {
@@ -43,11 +42,11 @@ public class AnetEmail {
 		toAddresses.add(toAddress);
 	}
 
-	public DateTime getCreatedAt() {
+	public Instant getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(DateTime createdAt) {
+	public void setCreatedAt(Instant createdAt) {
 		this.createdAt = createdAt;
 	}
 
