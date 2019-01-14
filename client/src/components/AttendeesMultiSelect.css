@@ -1,0 +1,19 @@
+.border-between > [class*='col-']:before,
+.border-between > [class*='col-']:after {
+  background: #e3e3e3;
+  bottom: 0;
+  content: " ";
+  position: absolute;
+  width: 1px;
+  top: 0;
+}
+.border-between > [class*='col-']:before {
+  left: 0;
+}
+.border-between > [class*='col-']:after {
+  right: -1px;
+}
+.border-between > [class*='col-']:first-child:before,
+.border-between > [class*='col-']:last-child:after {
+  display: none;
+}

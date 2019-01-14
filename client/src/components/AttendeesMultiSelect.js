@@ -1,19 +1,19 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import { Button, Col, Row, Table, Overlay, Popover } from 'react-bootstrap'
+import { Button, Col, Row, Table, Overlay, Popover, FormGroup } from 'react-bootstrap'
 import { Classes, Icon } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
 
-import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import Checkbox from 'components/Checkbox'
 import {Person, Position} from 'models'
 import LinkTo from 'components/LinkTo'
 import UltimatePagination from 'components/UltimatePagination'
+import './AttendeesMultiSelect.css'
 
 import { Field } from 'formik'
 import { renderInputField } from 'components/FieldHelper'
+
 import API from 'api'
 import _debounce from 'lodash/debounce'
 
@@ -130,6 +130,7 @@ export default class AttendeesMultiSelect extends Component {
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const attendees = results && results[filterType] ? results[filterType].list : []
 		return (
+			<React.Fragment>
 				<Field
 					name={addFieldName}
 					label={addFieldLabel}
@@ -139,37 +140,46 @@ export default class AttendeesMultiSelect extends Component {
 					onFocus={this.handleInputFocus}
 					onBlur={this.handleInputBlur}
 					innerRef={el => {this.overlayTarget = el}}
+				/>
+				<Overlay
+					show={this.state.showOverlay}
+					container={this.overlayContainer}
+					target={this.overlayTarget}
+					rootClose={true}
+					onHide={this.handleHideOverlay}
+					placement="bottom"
+					animation={false}
+					delayHide={200}
 				>
-					<Overlay
-						show={this.state.showOverlay}
-						container={this.overlayContainer}
-						target={this.overlayTarget}
-						rootClose={true}
-						onHide={this.handleHideOverlay}
-						placement="bottom"
-						animation={false}
-						delayHide={200}
-					>
-						<Popover id={addFieldName} title={null} placement="bottom" style={{left: 0, width: '100%', maxWidth: '100%'}}>
-							<Row>
-								<Col sm={12}>
-									<ButtonToggleGroup value={this.state.filterType} onChange={this.changeFilterType} className="hide-for-print">
-										{Object.keys(filterDefs).map(filterType =>
-											<Button key={filterType} value={filterType}>{filterDefs[filterType].label}</Button>
-										)}
-									</ButtonToggleGroup>
-									{this.paginationFor(this.state.filterType)}
-									<AttendeesTable
-										attendees={attendees}
-										addItem={this.addItem}
-									/>
-								</Col>
-							</Row>
-						</Popover>
-					</Overlay>
-					<div ref={el => {this.overlayContainer = el}} style={{position: 'relative'}} />
-					{renderSelectedWithDelete}
-				</Field>
+					<Popover id={addFieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%'}}>
+						<Row className="border-between">
+							<Col sm={3}>
+								<div className="hide-for-print">
+									{Object.keys(filterDefs).map(filterType =>
+										<Button key={filterType} style={{textAlign: 'right'}} bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
+									)}
+								</div>
+							</Col>
+							<Col sm={9}>
+								{this.paginationFor(this.state.filterType)}
+								<AttendeesTable
+									attendees={attendees}
+									addItem={this.addItem}
+								/>
+							</Col>
+						</Row>
+					</Popover>
+				</Overlay>
+				<Row>
+					<Col sm={9} className="form-group" ref={el => {this.overlayContainer = el}} style={{position: 'relative'}} />
+					<Col sm={3} />
+				</Row>
+				<Row>
+					<Col sm={2} />
+					<Col sm={7}>{renderSelectedWithDelete}</Col>
+					<Col sm={3} />
+				</Row>
+			</React.Fragment>
 		)
 	}
 
