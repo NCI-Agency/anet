@@ -44,6 +44,17 @@ class App extends Page {
 					uuid, name, code, type, status, isApprover
 					organization { uuid, shortName , allDescendantOrgs { uuid }}
 					location {uuid, name}
+					associatedPositions {
+						uuid, name,
+						person { uuid, name, rank,
+							position {
+								uuid, name, code, type
+								organization { uuid, shortName}
+								location {uuid, name}
+							}
+						}
+						organization { uuid, shortName }
+					}
 				}
 			}
 

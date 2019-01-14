@@ -227,7 +227,15 @@ export default class AttendeesMultiSelect extends Component {
 		const filterDefs = this.props.filterDefs[filterType]
 		const resourceName = this.props.objectType.resourceName
 		const listName = filterDefs.listName || this.props.objectType.listName
-		if (filterDefs.searchQuery) {
+		if (filterDefs.list) {
+			this.setState({
+				results: {
+					...results,
+					[filterType]: {list: filterDefs.list, pageNum: pageNum, pageSize: 6, totalCount: filterDefs.list.length}
+				}
+			})
+		}
+		else if (filterDefs.searchQuery) {
 			// GraphQL search type of query
 			let graphQlQuery = listName + ' (query: $query) { '
 			+ 'pageNum, pageSize, totalCount, list { ' + this.props.fields + '}'

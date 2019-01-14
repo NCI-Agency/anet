@@ -157,7 +157,7 @@ class BaseReportForm extends Component {
 	}
 
 	render() {
-		const { currentUser, edit, title, initialValues, ...myFormProps } = this.props
+		const { currentUser, edit, title, ...myFormProps } = this.props
 		const { recents, tagSuggestions } = this.state
 		const submitText = currentUser.hasActivePosition() ? 'Preview and submit' : 'Save draft'
 		const showAssignedPositionWarning = !currentUser.hasAssignedPosition()
@@ -166,48 +166,33 @@ class BaseReportForm extends Component {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		const advisorPositionSingular = Settings.fields.advisor.position.name
-		const advisorsFilters = {
-			myColleagues: {
-				label: 'My colleagues',
-				searchQuery: true,
-				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
-			},
+		const attendeesFilters = {
 			recentContacts: {
 				label: 'Recent contacts',
 				searchQuery: false,
 				listName: 'personRecents',
 				listArgs: 'maxResults:6',
 			},
-			all: {
-				label: 'All',
+			myColleagues: {
+				label: 'My colleagues',
 				searchQuery: true,
-			},
-		}
-		const principalsFilters = {
-			relatedCounterparts: {
-				label: 'Related counterparts',
-				searchQuery: true,
-				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
+				queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true, orgUuid: this.props.currentUser.position.organization.uuid},
 			},
 			myCounterparts: {
 				label: 'My counterparts',
+				searchQuery: false,
+				list: this.props.currentUser.position.associatedPositions.filter(ap => ap.person).map(ap => ap.person),
+			},
+			activeAdvisors: {
+				label: 'All advisors',
 				searchQuery: true,
-				queryVars: {orgUuid: this.props.currentUser.position.organization.uuid},
+				queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true},
 			},
 			activePrincipals: {
-				label: 'Active principals',
+				label: 'All principals',
 				searchQuery: true,
-				queryVars: {status: Person.STATUS.ACTIVE},
+				queryVars: {role: Person.ROLE.PRINCIPAL},
 			},
-			all: {
-				label: 'All',
-				searchQuery: true,
-			},
-		}
-		let updatedInitialValues = _cloneDeep(initialValues)
-		if (initialValues.attendees.length && !initialValues.advisors.length && !initialValues.principals.length) {
-			updatedInitialValues.advisors = initialValues.attendees.filter(attendee => attendee.role === Person.ROLE.ADVISOR)
-			updatedInitialValues.principals = initialValues.attendees.filter(attendee => attendee.role === Person.ROLE.PRINCIPAL)
 		}
 
 		return (
@@ -215,8 +200,7 @@ class BaseReportForm extends Component {
 				enableReinitialize={true}
 				onSubmit={this.onSubmit}
 				validationSchema={Report.yupSchema}
-				isInitialValid={() => Report.yupSchema.isValidSync(updatedInitialValues)}
-				initialValues={updatedInitialValues}
+				isInitialValid={() => Report.yupSchema.isValidSync(this.props.initialValues)}
 				{...myFormProps}
 			>
 			{({
@@ -385,34 +369,18 @@ class BaseReportForm extends Component {
 
 						<Fieldset title={!values.cancelled ? "Meeting attendance" : "Planned attendance"} id="attendance-fieldset">
 							<AttendeesMultiSelector
-								selectedItems={values.advisors}
+								selectedItems={values.attendees}
 								objectType={Person}
-								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.ADVISOR, matchPositionName: true}}
-								placeholder="Start typing to search for advisors who attended the meeting..."
+								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]}}
+								placeholder="Start typing to search for attendees who attended the meeting..."
 								fields={Person.autocompleteQuery}
 								template={Person.autocompleteTemplate}
-								addFieldName='advisors'
-								addFieldLabel="Advisors"
+								addFieldName='attendees'
+								addFieldLabel="Attendees"
 								addon={PEOPLE_ICON}
-								renderSelected={<AttendeesTable attendees={values.advisors} onChange={value => setFieldValue('advisors', value)} showDelete={true} />}
-								onChange={value => this.updateAttendees(setFieldValue, 'advisors', value)}
-								filterDefs={advisorsFilters}
-								renderExtraCol={true}
-								currentUser={this.props.currentUser}
-							/>
-							<AttendeesMultiSelector
-								selectedItems={values.principals}
-								objectType={Person}
-								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER], role: Person.ROLE.PRINCIPAL, matchPositionName: true}}
-								placeholder="Start typing to search for principals who attended the meeting..."
-								fields={Person.autocompleteQuery}
-								template={Person.autocompleteTemplate}
-								addFieldName='principals'
-								addFieldLabel="Principals"
-								addon={PEOPLE_ICON}
-								renderSelected={<AttendeesTable attendees={values.principals} onChange={value => setFieldValue('principals', value)} showDelete={true} />}
-								onChange={value => this.updateAttendees(setFieldValue, 'principals', value)}
-								filterDefs={principalsFilters}
+								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
+								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
+								filterDefs={attendeesFilters}
 								renderExtraCol={true}
 								currentUser={this.props.currentUser}
 							/>
@@ -642,8 +610,8 @@ class BaseReportForm extends Component {
 
 	save = (values, sendEmail) => {
 		let report = new Report(values)
-		report.attendees = report.advisors.concat(report.principals)
-		report = Object.without(report, 'cancelled', 'reportTags', 'showReportText', 'advisors', 'principals')
+		const attendees = report.attendees
+		report = Object.without(report, 'cancelled', 'reportTags', 'showReportText', 'attendees')
 		if (!values.cancelled) {
 			delete report.cancelledReason
 		}
@@ -658,7 +626,7 @@ class BaseReportForm extends Component {
 		//reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
 		report.tags = values.reportTags.map(tag => ({uuid: tag.id}))
 		//strip attendees fields not in data model
-		report.attendees = report.attendees.map(a =>
+		report.attendees = attendees.map(a =>
 			Object.without(a, 'firstName', 'lastName', 'position', '_loaded')
 		)
 		report.location = utils.getReference(report.location)
