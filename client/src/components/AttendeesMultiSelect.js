@@ -18,7 +18,8 @@ import API from 'api'
 import _debounce from 'lodash/debounce'
 
 const AttendeesTable = (props) => {
-	const { attendees, addItem } = props
+	const { attendees, selectedAttendees, addItem, removeItem } = props
+	const selectedAttendeesUuids = selectedAttendees.map(a => a.uuid)
 	return (
 		<Table responsive hover striped className="people-search-results">
 			<thead>
@@ -32,16 +33,28 @@ const AttendeesTable = (props) => {
 			</thead>
 			<tbody>
 				{Person.map(attendees, person => {
+					const isSelected = selectedAttendeesUuids.includes(person.uuid)
 					return <tr key={person.uuid}>
 						<td>
+						{isSelected ?
 							<button
 								type="button"
 								className={classNames(Classes.BUTTON)}
-								title="Add attendee"
-								onClick={() => addItem(person)}
+								title="Remove attendee"
+								onClick={() => removeItem(person)}
+							>
+								<Icon icon={IconNames.REMOVE} />
+							</button>
+						:
+						<button
+							type="button"
+							className={classNames(Classes.BUTTON)}
+							title="Add attendee"
+							onClick={() => addItem(person)}
 							>
 								<Icon icon={IconNames.ADD} />
 							</button>
+						}
 						</td>
 						<td>
 							<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
@@ -125,7 +138,7 @@ export default class AttendeesMultiSelect extends Component {
 	}
 
 	render() {
-		const {addFieldName, addFieldLabel, renderSelected, selectedItems, onAddItem, onRemoveItem, filterDefs, renderExtraCol, addon, ...autocompleteProps} = this.props
+		const { addFieldName, addFieldLabel, renderSelected, selectedItems, onAddItem, onRemoveItem, filterDefs, renderExtraCol, addon, ...autocompleteProps } = this.props
 		const { results, filterType } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const attendees = results && results[filterType] ? results[filterType].list : []
@@ -166,7 +179,9 @@ export default class AttendeesMultiSelect extends Component {
 								</header>
 								<AttendeesTable
 									attendees={attendees}
+									selectedAttendees={selectedItems}
 									addItem={this.addItem}
+									removeItem={this.removeItem}
 								/>
 								<footer className="searchPagination">
 									{this.paginationFor(this.state.filterType)}
@@ -204,14 +219,6 @@ export default class AttendeesMultiSelect extends Component {
 		return []
 	}
 
-	filterItems = (items) => {
-		const excludedUuids =  this._getSelectedItemsUuids()
-		if (excludedUuids) {
-			items = items.filter(suggestion => suggestion && suggestion.uuid && excludedUuids.indexOf(suggestion.uuid) === -1)
-		}
-		return items
-	}
-
 	fetchResults = (pageNum) => {
 		const { filterType, results } = this.state
 		if (pageNum === undefined) {
@@ -237,7 +244,6 @@ export default class AttendeesMultiSelect extends Component {
 				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
 			}
 			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-				data[listName].list = this.filterItems(data[listName].list)
 				this.setState({
 					results: {
 						...results,
@@ -252,7 +258,6 @@ export default class AttendeesMultiSelect extends Component {
 				pageNum, pageSize, totalCount, list { ` + this.props.fields + ` }
 					}`
 			).then(data => {
-				data[listName].list = this.filterItems(data[listName].list)
 				this.setState({
 					results: {
 						...results,
