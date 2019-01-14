@@ -35,7 +35,7 @@ class OrganizationEdit extends Page {
 				uuid, shortName, longName, status, identificationCode, type,
 				parentOrg { uuid, shortName, longName, identificationCode }
 				approvalSteps { uuid, name
-					approvers { uuid, name, person { uuid, name, rank}}
+					approvers { uuid, name, person { uuid, name, rank, role }}
 				},
 				tasks { uuid, shortName, longName}
 				${GRAPHQL_NOTES_FIELDS}

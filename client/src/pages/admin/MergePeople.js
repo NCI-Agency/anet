@@ -55,7 +55,7 @@ class MergePeople extends Page {
 
 	render() {
 		const personFields = `uuid, name, emailAddress, domainUsername, createdAt, role, status, rank,
-			position { uuid, name, organization { uuid, shortName, longName, identificationCode }},
+			position { uuid, name, type, organization { uuid, shortName, longName, identificationCode }},
 			authoredReports(pageNum:0,pageSize:1) { totalCount }
 			attendedReports(pageNum:0,pageSize:1) { totalCount }`
 

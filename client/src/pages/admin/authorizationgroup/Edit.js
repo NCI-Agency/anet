@@ -32,7 +32,7 @@ class AuthorizationGroupEdit extends Page {
 		return API.query(/* GraphQL */`
 				authorizationGroup(uuid:"${props.match.params.uuid}") {
 				uuid, name, description
-				positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
+				positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
 				status
 				${GRAPHQL_NOTES_FIELDS}
 			}

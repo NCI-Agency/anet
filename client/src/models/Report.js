@@ -6,6 +6,8 @@ import {Person, Position} from 'models'
 
 import * as yup from 'yup'
 
+import REPORTS_ICON from 'resources/reports.png'
+
 export default class Report extends Model {
 	static resourceName = 'Report'
 	static listName = 'reportList'
@@ -178,6 +180,10 @@ export default class Report extends Model {
 		return this.state && !this.isDraft() && !this.isFuture()
 	}
 
+	iconUrl() {
+		return REPORTS_ICON
+	}
+
 	toString() {
 		return this.intent || 'None'
 	}
@@ -235,5 +241,4 @@ export default class Report extends Model {
 		this.attendees.push(person)
 		return true
 	}
-
 }

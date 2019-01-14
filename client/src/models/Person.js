@@ -7,6 +7,7 @@ import Settings from 'Settings'
 
 import {Position, Organization} from 'models'
 
+import PEOPLE_ICON from 'resources/people.png'
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
@@ -69,7 +70,7 @@ export default class Person extends Model {
 		status: yup.string().nullable().default(() => Person.STATUS.ACTIVE),
 	}).concat(Model.yupSchema)
 
-	static autocompleteQuery = "uuid, name, role, rank, status, endOfTourDate, position { uuid, name, code, status, organization { uuid, shortName }, location {uuid, name} }"
+	static autocompleteQuery = "uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, code, status, organization { uuid, shortName }, location {uuid, name} }"
 
 	static autocompleteTemplate(person) {
 		return <span>
@@ -169,9 +170,9 @@ export default class Person extends Model {
 			return RS_ICON
 		} else if (this.isPrincipal()) {
 			return AFG_ICON
+		} else {
+			return PEOPLE_ICON
 		}
-
-		return ''
 	}
 
 	toString() {

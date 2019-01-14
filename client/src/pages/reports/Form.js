@@ -26,9 +26,9 @@ import NavigationWarning from 'components/NavigationWarning'
 import AttendeesTable from './AttendeesTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
 
-import LOCATION_ICON from 'resources/locations.png'
+import LOCATIONS_ICON from 'resources/locations.png'
 import PEOPLE_ICON from 'resources/people.png'
-import TASK_ICON from 'resources/tasks.png'
+import TASKS_ICON from 'resources/tasks.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
 
@@ -125,7 +125,7 @@ class BaseReportForm extends Component {
 				list { uuid, name }
 			}
 			personRecents(maxResults:6) {
-				list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, status, organization {uuid, shortName}, location {uuid, name} } }
+				list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
 			}
 			taskRecents(maxResults:6) {
 				list { uuid, shortName, longName }
@@ -255,7 +255,7 @@ class BaseReportForm extends Component {
 								name="location"
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('location', value)}
-								addon={LOCATION_ICON}
+								addon={LOCATIONS_ICON}
 								extraColElem={recents.locations && recents.locations.length > 0 &&
 									<div className="location-form-group shortcut-list">
 										<h5>Recent Locations</h5>
@@ -368,7 +368,7 @@ class BaseReportForm extends Component {
 									template={Task.autocompleteTemplate}
 									addFieldName='tasks'
 									addFieldLabel={Settings.fields.task.shortLabel}
-									addon={TASK_ICON}
+									addon={TASKS_ICON}
 									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
 									onChange={value => setFieldValue('tasks', value)}
 									shortcutsTitle={`Recent ${Settings.fields.task.shortLabel}`}

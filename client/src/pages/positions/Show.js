@@ -5,7 +5,6 @@ import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'c
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
-import {Link} from 'react-router-dom'
 import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
 
@@ -59,13 +58,13 @@ class BasePositionShow extends Page {
 			position(uuid:"${props.match.params.uuid}") {
 				uuid, name, type, status, code,
 				organization { uuid, shortName, longName, identificationCode },
-				person { uuid, name, rank },
+				person { uuid, name, rank, role },
 				associatedPositions {
-					uuid, name,
-					person { uuid, name, rank }
+					uuid, name, type
+					person { uuid, name, rank, role }
 					organization { uuid, shortName }
 				},
-				previousPeople { startTime, endTime, person { uuid, name, rank }}
+				previousPeople { startTime, endTime, person { uuid, name, rank, role }}
 				location { uuid, name }
 				${GRAPHQL_NOTES_FIELDS}
 			}
@@ -268,7 +267,7 @@ class BasePositionShow extends Page {
 		}
 		return <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
 			<td>{personName}</td>
-			<td><Link to={Position.pathFor(pos)}>{pos.name}</Link></td>
+			<td><LinkTo position={pos} /></td>
 		</tr>
 	}
 

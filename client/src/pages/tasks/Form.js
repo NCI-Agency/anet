@@ -16,8 +16,8 @@ import API from 'api'
 import {Organization, Person, Task} from 'models'
 import Settings from 'Settings'
 
-import ORGANIZATION_ICON from 'resources/organizations.png'
-import TASK_ICON from 'resources/tasks.png'
+import ORGANIZATIONS_ICON from 'resources/organizations.png'
+import TASKS_ICON from 'resources/tasks.png'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -126,7 +126,7 @@ class BaseTaskForm extends Component {
 								label={Settings.fields.task.responsibleOrg}
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('responsibleOrg', value)}
-								addon={ORGANIZATION_ICON}
+								addon={ORGANIZATIONS_ICON}
 								widget={
 									<Autocomplete
 										objectType={Organization}
@@ -144,7 +144,7 @@ class BaseTaskForm extends Component {
 									name="customFieldRef1"
 									component={FieldHelper.renderSpecialField}
 									onChange={value => setFieldValue('customFieldRef1', value)}
-									addon={TASK_ICON}
+									addon={TASKS_ICON}
 									widget={
 										<Autocomplete
 											objectType={Task}
