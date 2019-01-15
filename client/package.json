@@ -65,7 +65,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.10.0",
-    "@blueprintjs/datetime": "^3.5.0",
+    "@blueprintjs/datetime": "^3.6.0",
     "bootstrap": "^3.4.0",
     "change-case": "^3.0.1",
     "classnames": "^2.2.6",
