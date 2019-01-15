@@ -100,12 +100,12 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@blueprintjs/core@^3.10.0":
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.10.0.tgz#9f760168356cc96df5456ddf5b050af48dac52e9"
-  integrity sha512-GAxyOQBwRaVEaE/5KVRVuhYuo3ihjn6uhKuzyBta6kHvdBdk5m+1S3v0o1bzzvnJHyeJzBZQOq684q+FJCLNoQ==
+"@blueprintjs/core@^3.10.0", "@blueprintjs/core@^3.11.0":
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.11.0.tgz#7657a4f1db9e6e3d3dbddc64867ed3ef72d9ccd9"
+  integrity sha512-efCny6krIYtaXNo9d38EFeQfLuLSn+76t94N8vdjSICeuL5pm8q8cbmypNv2BQ01TJR6juO6Ori0MBW+zf3LHw==
   dependencies:
-    "@blueprintjs/icons" "^3.4.0"
+    "@blueprintjs/icons" "^3.5.0"
     "@types/dom4" "^2.0.0"
     classnames "^2.2"
     dom4 "^2.0.1"
@@ -126,10 +126,10 @@
     react-day-picker "^7.1.10"
     tslib "^1.9.0"
 
-"@blueprintjs/icons@^3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-3.4.0.tgz#893250c32dbc09add6b988f1ed27b239d6aea6a5"
-  integrity sha512-e7YqPzDYjXJquBD4+ZAKkIcVt52MusaEb7mbYGb8ikVXS3wVDhYOc+5csMK++uwMzIm0fqmFUZe8We3eeegprw==
+"@blueprintjs/icons@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-3.5.0.tgz#d5600b1d736367a90e9c186975dc8e6efa719f7d"
+  integrity sha512-+euHGqIgRJzcUXmtnWUp4vPY++YGA4YztSx2uzCgpTiL0BcFm+syw8yIviyjdhTqMXk8sttk4W2pEALcTJtX6A==
   dependencies:
     classnames "^2.2"
     tslib "^1.9.0"
