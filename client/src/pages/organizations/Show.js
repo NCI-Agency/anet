@@ -332,9 +332,7 @@ class BaseOrganizationShow extends Page {
 	}
 
 	orgLabel = (organization) => {
-		const shortName = organization.shortName
-		const label = shortName.replace(/\s/g, '')
-		return `reports_${label}`
+		return `r_${organization.uuid}`
 	}
 
 	goToReportsPage = (pageNum) => {
