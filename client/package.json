@@ -5,6 +5,8 @@
   "proxy": "http://localhost:8080",
   "homepage": "/assets/client",
   "devDependencies": {
+    "@storybook/addon-actions": "^4.1.6",
+    "@storybook/addons": "^4.1.6",
     "@storybook/react": "^4.1.6",
     "artillery": "^1.6.0-24",
     "autobind-decorator": "^2.4.0",
