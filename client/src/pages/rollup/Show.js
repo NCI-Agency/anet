@@ -353,8 +353,8 @@ class BaseRollupShow extends Page {
 	}
 
 	render() {
-		const flexStyle = {display: 'flex', flexDirection: 'column', flex: '1 1 auto'}
-		const mosaicLayoutStyle = { display: 'flex', flex: '1 1 auto' }
+		const flexStyle = { display: 'flex', flexDirection: 'column', flex: '1 1 auto', height: '100%' }
+		const mosaicLayoutStyle = { display: 'flex', flex: '1 1 auto', height: '100%' }
 
 		return (
 			<div id="daily-rollup" style={flexStyle}>
