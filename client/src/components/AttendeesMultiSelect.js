@@ -169,7 +169,7 @@ export default class AttendeesMultiSelect extends Component {
 							<Col sm={3}>
 								<div className="hide-for-print">
 									{Object.keys(filterDefs).map(filterType =>
-										<Button key={filterType} style={{textAlign: 'right'}} bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
+										!filterDefs[filterType].doNotDisplay && <Button key={filterType} style={{textAlign: 'right'}} bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
 									)}
 								</div>
 							</Col>

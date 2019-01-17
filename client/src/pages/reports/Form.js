@@ -166,34 +166,6 @@ class BaseReportForm extends Component {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		const advisorPositionSingular = Settings.fields.advisor.position.name
-		const attendeesFilters = {
-			recentContacts: {
-				label: 'Recent contacts',
-				searchQuery: false,
-				listName: 'personRecents',
-				listArgs: 'maxResults:6',
-			},
-			myColleagues: {
-				label: 'My colleagues',
-				searchQuery: true,
-				queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true, orgUuid: this.props.currentUser.position.organization.uuid},
-			},
-			myCounterparts: {
-				label: 'My counterparts',
-				searchQuery: false,
-				list: this.props.currentUser.position.associatedPositions.filter(ap => ap.person).map(ap => ap.person),
-			},
-			activeAdvisors: {
-				label: 'All advisors',
-				searchQuery: true,
-				queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true},
-			},
-			activePrincipals: {
-				label: 'All principals',
-				searchQuery: true,
-				queryVars: {role: Person.ROLE.PRINCIPAL},
-			},
-		}
 
 		return (
 			<Formik
@@ -215,6 +187,40 @@ class BaseReportForm extends Component {
 				submitForm,
 				resetForm
 			}) => {
+				const attendeesFilters = {
+					recentContacts: {
+						label: 'Recent contacts',
+						searchQuery: false,
+						listName: 'personRecents',
+						listArgs: 'maxResults:6',
+					},
+					myColleagues: {
+						label: 'My colleagues',
+						searchQuery: true,
+						queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true, orgUuid: this.props.currentUser.position.organization.uuid},
+					},
+					myCounterparts: {
+						label: 'My counterparts',
+						searchQuery: false,
+						list: this.props.currentUser.position.associatedPositions.filter(ap => ap.person).map(ap => ap.person),
+					},
+					atLocation: {
+						label: 'At location',
+						searchQuery: true,
+						doNotDisplay: !values.location.uuid,
+						queryVars: {locationUuid: values.location.uuid},
+					},
+					activeAdvisors: {
+						label: 'All advisors',
+						searchQuery: true,
+						queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true},
+					},
+					activePrincipals: {
+						label: 'All principals',
+						searchQuery: true,
+						queryVars: {role: Person.ROLE.PRINCIPAL},
+					},
+				}
 				// need up-to-date copies of these in the autosave handler
 				this.autoSaveSettings.dirty = dirty
 				this.autoSaveSettings.values = values
