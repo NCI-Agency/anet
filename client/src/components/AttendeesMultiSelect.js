@@ -15,6 +15,7 @@ import { Field } from 'formik'
 import { renderInputField } from 'components/FieldHelper'
 
 import API from 'api'
+import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 
 const AttendeesTable = (props) => {
@@ -76,8 +77,7 @@ export default class AttendeesMultiSelect extends Component {
 		addFieldLabel: PropTypes.string, // label of the autocomplete field
 		selectedItems: PropTypes.array.isRequired,
 		renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired, // how to render the selected items
-		onAddItem: PropTypes.func.isRequired,
-		onRemoveItem: PropTypes.func,
+		onChange: PropTypes.func.isRequired,
 		filterDefs: PropTypes.object,
 		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
 		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
@@ -280,13 +280,18 @@ export default class AttendeesMultiSelect extends Component {
 			return
 		}
 		if (!this.props.selectedItems.find(obj => obj.uuid === newItem.uuid)) {
-			this.props.onAddItem(newItem)
+			const selectedItems = _cloneDeep(this.props.selectedItems)
+			selectedItems.push(newItem)
+			this.props.onChange(selectedItems)
 		}
 	}
 
 	removeItem = (oldItem) => {
 		if (this.props.selectedItems.find(obj => obj.uuid === oldItem.uuid)) {
-			this.props.onRemoveItem(oldItem)
+			const selectedItems = _cloneDeep(this.props.selectedItems)
+			const index = selectedItems.findIndex(item => item.uuid === oldItem.uuid)
+			selectedItems.splice(index, 1)
+			this.props.onChange(selectedItems)
 		}
 	}
 
