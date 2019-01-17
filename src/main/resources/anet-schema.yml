@@ -149,7 +149,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,reportTags]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,reportTags,nextSteps,keyOutcomes,reportText]
         properties:
           intent:
             type: string
@@ -171,6 +171,18 @@ properties:
             type: string
             title: The label for report's tags
             description: Used in the UI where report's tags are shown.
+          nextSteps:
+            type: string
+            title: The label for report's next steps
+            description: Used in the UI where report's next steps are shown.
+          keyOutcomes:
+            type: string
+            title: The label for report's key outcomes
+            description: Used in the UI where report's key outcomes are shown.
+          reportText:
+            type: string
+            title: The label for report's engagement details
+            description: Used in the UI where report's engagement details are shown.
 
       person:
         type: object

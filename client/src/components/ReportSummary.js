@@ -94,22 +94,22 @@ export default class ReportSummary extends Component {
 			}
 			<Row>
 				<Col md={12}>
-					{report.intent && <span><strong>Meeting goal:</strong> {report.intent}</span> }
+					{report.intent && <span><strong>{Settings.fields.report.intent}:</strong> {report.intent}</span> }
 				</Col>
 			</Row>
 			<Row>
 				<Col md={12}>
-					{report.keyOutcomes && <span><strong>Key outcomes:</strong> {report.keyOutcomes}</span> }
+					{report.keyOutcomes && <span><strong>{Settings.fields.report.keyOutcomes}:</strong> {report.keyOutcomes}</span> }
 				</Col>
 			</Row>
 			<Row>
 				<Col md={12}>
-					{report.nextSteps && <span><strong>Next steps:</strong> {report.nextSteps}</span> }
+					{report.nextSteps && <span><strong>{Settings.fields.report.nextSteps}:</strong> {report.nextSteps}</span> }
 				</Col>
 			</Row>
 			<Row>
 				<Col md={12}>
-					{report.atmosphere && <span><strong>Atmospherics:</strong> {utils.sentenceCase(report.atmosphere)}
+					{report.atmosphere && <span><strong>{Settings.fields.report.atmosphere}:</strong> {utils.sentenceCase(report.atmosphere)}
 						{report.atmosphereDetails && ` – ${report.atmosphereDetails}`}</span> }
 				</Col>
 			</Row>

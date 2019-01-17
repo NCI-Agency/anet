@@ -60,14 +60,14 @@ test('Draft and submit a report', async t => {
     await pageHelpers.writeInForm('#keyOutcomes', 'key outcomes')
     await pageHelpers.writeInForm('#nextSteps', 'next steps')
 
-    let $reportTextField = await $('.reportTextField')
-    t.false(await $reportTextField.isDisplayed(), 'Add details field should not be present before "add details" button is clicked"')
+    let $reportSensitiveInformationField = await $('.reportSensitiveInformationField')
+    t.false(await $reportSensitiveInformationField.isDisplayed(), 'Report sensitive info should not be present before "add sensitive information" button is clicked"')
 
-    let $addDetailsButton = await $('#toggleReportDetails')
-    await $addDetailsButton.click()
+    let $addSensitiveInfoButton = await $('#toggleSensitiveInfo')
+    await $addSensitiveInfoButton.click()
 
-    await t.context.driver.wait(until.elementIsVisible($reportTextField))
-    await pageHelpers.writeInForm('.reportTextField .public-DraftEditor-content', 'report details')
+    await t.context.driver.wait(until.elementIsVisible($reportSensitiveInformationField))
+    await pageHelpers.writeInForm('.reportSensitiveInformationField .public-DraftEditor-content', 'sensitive info')
 
     let $formButtonSubmit = await $('#formBottomSubmit')
     await t.context.driver.wait(until.elementIsEnabled($formButtonSubmit))

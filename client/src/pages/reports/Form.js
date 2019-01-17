@@ -46,7 +46,7 @@ class BaseReportForm extends Component {
 		initialValues: PropTypes.object,
 		title: PropTypes.string,
 		edit: PropTypes.bool,
-		showReportText: PropTypes.bool,
+		showSensitiveInfo: PropTypes.bool,
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
@@ -54,7 +54,7 @@ class BaseReportForm extends Component {
 		initialValues: new Report(),
 		title: '',
 		edit: false,
-		showReportText: false,
+		showSensitiveInfo: false,
 	}
 
 	atmosphereButtons = [
@@ -116,7 +116,7 @@ class BaseReportForm extends Component {
 			authorizationGroups: [],
 		},
 		tagSuggestions: [],
-		showReportText: this.props.showReportText,
+		showSensitiveInfo: this.props.showSensitiveInfo,
 	}
 
 	componentDidMount() {
@@ -382,6 +382,7 @@ class BaseReportForm extends Component {
 							{!values.cancelled &&
 								<Field
 									name="keyOutcomes"
+									label={Settings.fields.report.keyOutcomes}
 									component={FieldHelper.renderInputField}
 									componentClass="textarea"
 									maxLength={250}
@@ -392,6 +393,7 @@ class BaseReportForm extends Component {
 
 							<Field
 								name="nextSteps"
+								label={Settings.fields.report.nextSteps}
 								component={FieldHelper.renderInputField}
 								componentClass="textarea"
 								maxLength={250}
@@ -399,50 +401,50 @@ class BaseReportForm extends Component {
 								extraColElem={<React.Fragment><span id="nextStepsCharsLeft">{250 - this.props.initialValues.nextSteps.length}</span> characters remaining</React.Fragment>}
 							/>
 
-							<Button className="center-block toggle-section-button" onClick={this.toggleReportText} id="toggleReportDetails" >
-								{this.state.showReportText ? 'Hide' : 'Add'} detailed report
+							<Field
+								id="reportText"
+								name="reportText"
+								label={Settings.fields.report.reportText}
+								component={FieldHelper.renderSpecialField}
+								onChange={value => setFieldValue('reportText', value)}
+								widget={
+									<RichTextEditor className="reportTextField" />
+								}
+							/>
+
+							<Button className="center-block toggle-section-button" onClick={this.toggleReportText} id="toggleSensitiveInfo" >
+								{this.state.showSensitiveInfo ? 'Hide' : 'Add'} sensitive information
 							</Button>
 
-							<Collapse in={this.state.showReportText}>
-								<div>
-									<Field
-										name="reportText"
-										component={FieldHelper.renderSpecialField}
-										onChange={value => setFieldValue('reportText', value)}
-										widget={
-											<RichTextEditor className="reportTextField" />
-										}
-									/>
-
-									{(values.reportSensitiveInformation || !this.props.edit) &&
-										<div>
-											<Field
-												name="reportSensitiveInformation.text"
-												component={FieldHelper.renderSpecialField}
-												label="Report sensitive information text"
-												onChange={value => setFieldValue('reportSensitiveInformation.text', value)}
-												widget={
-													<RichTextEditor className="reportSensitiveInformationField" />
-												}
-											/>
-											<MultiSelector
-												items={values.authorizationGroups}
-												objectType={AuthorizationGroup}
-												queryParams={{status: AuthorizationGroup.STATUS.ACTIVE}}
-												placeholder="Start typing to search for a group..."
-												fields={AuthorizationGroup.autocompleteQuery}
-												template={AuthorizationGroup.autocompleteTemplate}
-												addFieldName='authorizationGroups'
-												addFieldLabel='Authorization Groups'
-												renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
-												onChange={value => setFieldValue('authorizationGroups', value)}
-												shortcutsTitle={`Recent Authorization Groups`}
-												shortcuts={recents.authorizationGroups}
-												renderExtraCol={true}
-											/>
-										</div>
-									}
-								</div>
+							<Collapse in={this.state.showSensitiveInfo}>
+								{(values.reportSensitiveInformation || !this.props.edit) &&
+									<div>
+										<Field
+											name="reportSensitiveInformation.text"
+											component={FieldHelper.renderSpecialField}
+											label="Report sensitive information text"
+											onChange={value => setFieldValue('reportSensitiveInformation.text', value)}
+											widget={
+												<RichTextEditor className="reportSensitiveInformationField" />
+											}
+										/>
+										<MultiSelector
+											items={values.authorizationGroups}
+											objectType={AuthorizationGroup}
+											queryParams={{status: AuthorizationGroup.STATUS.ACTIVE}}
+											placeholder="Start typing to search for a group..."
+											fields={AuthorizationGroup.autocompleteQuery}
+											template={AuthorizationGroup.autocompleteTemplate}
+											addFieldName='authorizationGroups'
+											addFieldLabel='Authorization Groups'
+											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
+											onChange={value => setFieldValue('authorizationGroups', value)}
+											shortcutsTitle={`Recent Authorization Groups`}
+											shortcuts={recents.authorizationGroups}
+											renderExtraCol={true}
+										/>
+									</div>
+								}
 							</Collapse>
 						</Fieldset>
 
@@ -496,7 +498,7 @@ class BaseReportForm extends Component {
 	}
 
 	toggleReportText = () => {
-		this.setState({showReportText: !this.state.showReportText})
+		this.setState({showSensitiveInfo: !this.state.showSensitiveInfo})
 	}
 
 	autoSave = (form) => {
@@ -580,7 +582,7 @@ class BaseReportForm extends Component {
 	}
 
 	save = (values, sendEmail) => {
-		const report = Object.without(new Report(values), 'cancelled', 'reportTags', 'showReportText')
+		const report = Object.without(new Report(values), 'cancelled', 'reportTags', 'showSensitiveInfo')
 		if (!values.cancelled) {
 			delete report.cancelledReason
 		}

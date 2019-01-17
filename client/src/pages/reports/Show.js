@@ -261,8 +261,8 @@ class BaseReportShow extends Page {
 								widget={
 									<div id="intent" className="form-control-static">
 										<p><strong>{Settings.fields.report.intent}:</strong> {report.intent}</p>
-										{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
-										<p><strong>Next steps:</strong> {report.nextSteps}</p>
+										{report.keyOutcomes && <p><span><strong>{Settings.fields.report.keyOutcomes}:</strong> {report.keyOutcomes}&nbsp;</span></p>}
+										<p><strong>{Settings.fields.report.nextSteps}:</strong> {report.nextSteps}</p>
 									</div>
 								}
 							/>
@@ -341,7 +341,7 @@ class BaseReportShow extends Page {
 						</Fieldset>
 
 						{report.reportText &&
-							<Fieldset title="Meeting discussion">
+							<Fieldset title={Settings.fields.report.reportText}>
 								<div dangerouslySetInnerHTML={{__html: report.reportText}} />
 							</Fieldset>
 						}

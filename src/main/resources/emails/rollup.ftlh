@@ -136,7 +136,7 @@ a {
 	</div>
 
 	<div>
-		<strong>Atmospherics:</strong> ${(report.atmosphere)!}
+		<strong>${fields.report.atmosphere}:</strong> ${(report.atmosphere)!}
 		<#if report.atmosphereDetails??>
 			- ${(report.atmosphereDetails)!}
 		</#if>
@@ -169,15 +169,15 @@ a {
 
     <div class="row">
         <div class="col-md-8">
-            <p><strong>Meeting Goal:</strong> ${(report.intent)!}</p>
+            <p><strong>${fields.report.intent}:</strong> ${(report.intent)!}</p>
             <#if report.keyOutcomes??>
-                <p><strong>Key outcomes:</strong> ${(report.keyOutcomes)!}</p>
+                <p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
             </#if>
             <#if report.nextSteps??>
-                <p><strong>Next steps:</strong> ${(report.nextSteps)!}</p>
+                <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>
             </#if>
             <#if showReportText >
-                <p><strong>Report Details</strong> ${(report.reportText)!?no_esc}</p>
+                <p><strong>${fields.report.reportText}</strong> ${(report.reportText)!?no_esc}</p>
             </#if>
         </div>
     </div>
