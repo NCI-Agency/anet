@@ -110,7 +110,7 @@
     "redux": "^4.0.1",
     "redux-persist": "^5.10.0",
     "whatwg-fetch": "^2.0.3",
-    "yup": "^0.26.6"
+    "yup": "^0.26.7"
   },
   "resolutions": {
     "autobind-decorator": "2.4.0"
