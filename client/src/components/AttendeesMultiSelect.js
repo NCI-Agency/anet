@@ -167,11 +167,11 @@ export default class AttendeesMultiSelect extends Component {
 					<Popover id={addFieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%'}}>
 						<Row className="border-between">
 							<Col sm={3}>
-								<div className="hide-for-print">
+								<ul className="overlayFilters">
 									{Object.keys(filterDefs).map(filterType =>
-										!filterDefs[filterType].doNotDisplay && <Button key={filterType} style={{textAlign: 'right'}} bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
+										!filterDefs[filterType].doNotDisplay && <li key={filterType} className={(this.state.filterType === filterType) ? 'active' : null}><Button bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button></li>
 									)}
-								</div>
+								</ul>
 							</Col>
 							<Col sm={9}>
 								<header className="searchPagination">
