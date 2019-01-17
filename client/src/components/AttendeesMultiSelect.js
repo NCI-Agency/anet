@@ -105,13 +105,6 @@ export default class AttendeesMultiSelect extends Component {
 		inputFocused: false,
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		if (prevProps.selectedItems !== this.props.selectedItems) {
-			// Update the list of filter results to consider the already selected items
-			this.fetchResults()
-		}
-	}
-
 	handleInputFocus = () => {
 		if (this.state.inputFocused === true) {
 			return
@@ -204,11 +197,13 @@ export default class AttendeesMultiSelect extends Component {
 	}
 
 	changeSearchTerms = (event) => {
-		this.setState({searchTerms: event.target.value}, () => this.fetchResultsDebounced(0))
+		// Reset the results state when the search terms change
+		this.setState({searchTerms: event.target.value, results: {}}, () => this.fetchResultsDebounced(0))
 	}
 
 	changeFilterType = (filterType) => {
-		this.setState({filterType}, () => this.fetchResults(0))
+		// When changing the filter type, only fetch the results if they were not fetched before
+		this.setState({filterType}, () => (!this.state.results[filterType] ? this.fetchResults(0) : null))
 	}
 
 	_getSelectedItemsUuids = () => {
@@ -228,6 +223,7 @@ export default class AttendeesMultiSelect extends Component {
 		const resourceName = this.props.objectType.resourceName
 		const listName = filterDefs.listName || this.props.objectType.listName
 		if (filterDefs.list) {
+			// No need to fetch the data, it is already provided in the filter definition
 			this.setState({
 				results: {
 					...results,
@@ -237,9 +233,9 @@ export default class AttendeesMultiSelect extends Component {
 		}
 		else if (filterDefs.searchQuery) {
 			// GraphQL search type of query
-			let graphQlQuery = listName + ' (query: $query) { '
-			+ 'pageNum, pageSize, totalCount, list { ' + this.props.fields + '}'
-			+ '}'
+			const graphQlQuery = listName + ' (query: $query) { '
+				+ 'pageNum, pageSize, totalCount, list { ' + this.props.fields + '}'
+				+ '}'
 			const variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
 			let queryVars = {pageNum: pageNum, pageSize: 6}
 			if (this.props.queryParams) {
@@ -261,6 +257,7 @@ export default class AttendeesMultiSelect extends Component {
 			})
 		}
 		else {
+			// GraphQL query other than search type
 			API.query(/* GraphQL */`
 					` + listName + `(` + filterDefs.listArgs + `) {
 				pageNum, pageSize, totalCount, list { ` + this.props.fields + ` }
