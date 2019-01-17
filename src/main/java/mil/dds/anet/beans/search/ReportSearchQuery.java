@@ -1,8 +1,7 @@
 package mil.dds.anet.beans.search;
 
+import java.time.Instant;
 import java.util.List;
-
-import org.joda.time.DateTime;
 
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
@@ -13,16 +12,16 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 	public enum ReportSearchSortBy { CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT } 
 
 	String authorUuid;
-	DateTime engagementDateStart;
-	DateTime engagementDateEnd;
+	Instant engagementDateStart;
+	Instant engagementDateEnd;
 	private Integer engagementDayOfWeek;
 	private Boolean includeEngagementDayOfWeek;
-	DateTime createdAtStart;
-	DateTime createdAtEnd;
-	DateTime updatedAtStart;
-	DateTime updatedAtEnd;
-	DateTime releasedAtStart;
-	DateTime releasedAtEnd;
+	Instant createdAtStart;
+	Instant createdAtEnd;
+	Instant updatedAtStart;
+	Instant updatedAtEnd;
+	Instant releasedAtStart;
+	Instant releasedAtEnd;
 	String attendeeUuid;
 	Atmosphere atmosphere;
 	
@@ -64,19 +63,19 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.authorUuid = authorUuid;
 	}
 
-	public DateTime getEngagementDateStart() {
+	public Instant getEngagementDateStart() {
 		return engagementDateStart;
 	}
 
-	public void setEngagementDateStart(DateTime engagementDateStart) {
+	public void setEngagementDateStart(Instant engagementDateStart) {
 		this.engagementDateStart = engagementDateStart;
 	}
 
-	public DateTime getEngagementDateEnd() {
+	public Instant getEngagementDateEnd() {
 		return engagementDateEnd;
 	}
 
-	public void setEngagementDateEnd(DateTime engagementDateEnd) {
+	public void setEngagementDateEnd(Instant engagementDateEnd) {
 		this.engagementDateEnd = engagementDateEnd;
 	}
 
@@ -96,51 +95,51 @@ public class ReportSearchQuery extends AbstractSearchQuery {
 		this.includeEngagementDayOfWeek = includeEngagementDayOfWeek;
 	}
 
-	public DateTime getCreatedAtStart() {
+	public Instant getCreatedAtStart() {
 		return createdAtStart;
 	}
 
-	public void setCreatedAtStart(DateTime createdAtStart) {
+	public void setCreatedAtStart(Instant createdAtStart) {
 		this.createdAtStart = createdAtStart;
 	}
 
-	public DateTime getCreatedAtEnd() {
+	public Instant getCreatedAtEnd() {
 		return createdAtEnd;
 	}
 
-	public void setCreatedAtEnd(DateTime createdAtEnd) {
+	public void setCreatedAtEnd(Instant createdAtEnd) {
 		this.createdAtEnd = createdAtEnd;
 	}
 
-	public DateTime getUpdatedAtStart() {
+	public Instant getUpdatedAtStart() {
 		return updatedAtStart;
 	}
 
-	public void setUpdatedAtStart(DateTime updatedAtStart) {
+	public void setUpdatedAtStart(Instant updatedAtStart) {
 		this.updatedAtStart = updatedAtStart;
 	}
 
-	public DateTime getUpdatedAtEnd() {
+	public Instant getUpdatedAtEnd() {
 		return updatedAtEnd;
 	}
 
-	public void setUpdatedAtEnd(DateTime updatedAtEnd) {
+	public void setUpdatedAtEnd(Instant updatedAtEnd) {
 		this.updatedAtEnd = updatedAtEnd;
 	}
 
-	public DateTime getReleasedAtStart() {
+	public Instant getReleasedAtStart() {
 		return releasedAtStart;
 	}
 
-	public void setReleasedAtStart(DateTime releasedAtStart) {
+	public void setReleasedAtStart(Instant releasedAtStart) {
 		this.releasedAtStart = releasedAtStart;
 	}
 
-	public DateTime getReleasedAtEnd() {
+	public Instant getReleasedAtEnd() {
 		return releasedAtEnd;
 	}
 
-	public void setReleasedAtEnd(DateTime releasedAtEnd) {
+	public void setReleasedAtEnd(Instant releasedAtEnd) {
 		this.releasedAtEnd = releasedAtEnd;
 	}
 

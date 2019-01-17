@@ -1,6 +1,6 @@
 package mil.dds.anet.beans.search;
 
-import org.joda.time.DateTime;
+import java.time.Instant;
 
 import mil.dds.anet.beans.Task.TaskStatus;
 
@@ -12,10 +12,10 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 	Boolean includeChildrenOrgs;
 	String category;
 	TaskStatus status;
-	private DateTime plannedCompletionEnd;
-	private DateTime plannedCompletionStart;
-	private DateTime projectedCompletionEnd;
-	private DateTime projectedCompletionStart;
+	private Instant plannedCompletionEnd;
+	private Instant plannedCompletionStart;
+	private Instant projectedCompletionEnd;
+	private Instant projectedCompletionStart;
 	private String projectStatus;
 	private String customField;
 
@@ -54,35 +54,35 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 		this.status = status;
 	}
 
-	public DateTime getPlannedCompletionEnd() {
+	public Instant getPlannedCompletionEnd() {
 		return plannedCompletionEnd;
 	}
 
-	public void setPlannedCompletionEnd(DateTime plannedCompletionEnd) {
+	public void setPlannedCompletionEnd(Instant plannedCompletionEnd) {
 		this.plannedCompletionEnd = plannedCompletionEnd;
 	}
 
-	public DateTime getPlannedCompletionStart() {
+	public Instant getPlannedCompletionStart() {
 		return plannedCompletionStart;
 	}
 
-	public void setPlannedCompletionStart(DateTime plannedCompletionStart) {
+	public void setPlannedCompletionStart(Instant plannedCompletionStart) {
 		this.plannedCompletionStart = plannedCompletionStart;
 	}
 
-	public DateTime getProjectedCompletionEnd() {
+	public Instant getProjectedCompletionEnd() {
 		return projectedCompletionEnd;
 	}
 
-	public void setProjectedCompletionEnd(DateTime projectedCompletionEnd) {
+	public void setProjectedCompletionEnd(Instant projectedCompletionEnd) {
 		this.projectedCompletionEnd = projectedCompletionEnd;
 	}
 
-	public DateTime getProjectedCompletionStart() {
+	public Instant getProjectedCompletionStart() {
 		return projectedCompletionStart;
 	}
 
-	public void setProjectedCompletionStart(DateTime projectedCompletionStart) {
+	public void setProjectedCompletionStart(Instant projectedCompletionStart) {
 		this.projectedCompletionStart = projectedCompletionStart;
 	}
 

@@ -2,12 +2,11 @@ package mil.dds.anet.test.beans;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.joda.time.DateTime;
-import org.joda.time.chrono.ISOChronology;
 import org.junit.Test;
 
 import mil.dds.anet.beans.Comment;
@@ -26,8 +25,8 @@ public class ReportTest extends BeanTester<Report> {
 
 	public static Report getTestReport() {
 		Report r = new Report();
-		r.setCreatedAt(new DateTime(1453753380000L, ISOChronology.getInstanceUTC()));
-		r.setUpdatedAt(new DateTime(1453753380000L, ISOChronology.getInstanceUTC()));
+		r.setCreatedAt(Instant.ofEpochMilli(1453753380000L));
+		r.setUpdatedAt(Instant.ofEpochMilli(1453753380000L));
 		r.setState(ReportState.DRAFT);
 		
 		Location loc = TestData.createLocation("The Boat Dock", 32.456,-123.4999);
@@ -35,7 +34,7 @@ public class ReportTest extends BeanTester<Report> {
 		r.setIntent("Check up with Steve");
 		r.setAtmosphere(Atmosphere.POSITIVE);
 		r.setAtmosphereDetails("This was a great meeting!!!");
-		r.setEngagementDate(new DateTime(1453753380000L, ISOChronology.getInstanceUTC()));
+		r.setEngagementDate(Instant.ofEpochMilli(1453753380000L));
 		
 		r.setAuthor(PersonTest.getJackJacksonStub());
 		
@@ -60,7 +59,7 @@ public class ReportTest extends BeanTester<Report> {
 		r.setNextSteps("Go for a boat ride with Steve tomorrow");
 		
 		Comment c = new Comment();
-		c.setCreatedAt(new DateTime(1453815803000L, ISOChronology.getInstanceUTC()));
+		c.setCreatedAt(Instant.ofEpochMilli(1453815803000L));
 		c.setAuthor(PersonTest.getJackJacksonStub());
 		c.setText("I really like this report, it's awesome!!!");
 		c.setReportUuid(null);

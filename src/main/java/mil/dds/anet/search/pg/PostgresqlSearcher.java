@@ -14,7 +14,7 @@ public class PostgresqlSearcher extends Searcher {
 
 	public PostgresqlSearcher() {
 		 super(
-			new SqliteReportSearcher("EXTRACT(ISODOW FROM reports.\"%s\")", null),
+			new SqliteReportSearcher("EXTRACT(ISODOW FROM reports.\"%s\")"),
 			new SqlitePersonSearcher(), new SqliteOrganizationSearcher(), new SqlitePositionSearcher(),
 			new SqliteTaskSearcher(), new SqliteLocationSearcher(), new SqliteTagSearcher(),
 			new SqliteAuthorizationGroupSearcher()

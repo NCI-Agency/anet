@@ -49,6 +49,8 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
 				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
 			.bindBean(obj)
+			.bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
 			.bind("objectType", DaoUtils.getEnumId(obj.getObjectType()))
 			.execute();
 		return obj;
@@ -60,6 +62,7 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
 				+ "WHERE uuid = :uuid")
 			.bindBean(obj)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
 			.execute();
 	}
 

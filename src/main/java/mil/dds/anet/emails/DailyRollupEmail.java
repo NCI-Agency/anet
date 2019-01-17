@@ -1,6 +1,8 @@
 package mil.dds.anet.emails;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,8 +10,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +22,7 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
+import mil.dds.anet.utils.DaoUtils;
 
 public class DailyRollupEmail extends AnetEmailAction {
 
@@ -30,8 +31,8 @@ public class DailyRollupEmail extends AnetEmailAction {
 	public static String SHOW_REPORT_TEXT_FLAG = "showReportText";
 
 	private final DateTimeFormatter dtf;
-	DateTime startDate;
-	DateTime endDate;
+	Instant startDate;
+	Instant endDate;
 	OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG; // show the table based off this organization type. 
 	String advisorOrganizationUuid;
 	String principalOrganizationUuid;
@@ -44,10 +45,10 @@ public class DailyRollupEmail extends AnetEmailAction {
 
 	@Override
 	public String getSubject() {
-		if (startDate.withTimeAtStartOfDay().equals(endDate.withTimeAtStartOfDay())) {
-			return "Rollup for " + dtf.print(startDate);
+		if (startDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate().equals(endDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate())) {
+			return "Rollup for " + dtf.format(startDate);
 		} else {
-			return "Rollup from " + dtf.print(startDate) + " to " + dtf.print(endDate);
+			return "Rollup from " + dtf.format(startDate) + " to " + dtf.format(endDate);
 		}
 	}
 
@@ -55,7 +56,7 @@ public class DailyRollupEmail extends AnetEmailAction {
 	public Map<String, Object> execute() {
 		String maxReportAgeStr = AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
 		Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
-		DateTime engagementDateStart = startDate.minusDays(maxReportAge);
+		Instant engagementDateStart = startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageSize(Integer.MAX_VALUE);
 		query.setReleasedAtStart(startDate);
@@ -197,19 +198,19 @@ public class DailyRollupEmail extends AnetEmailAction {
 
 	}
 
-	public DateTime getStartDate() {
+	public Instant getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(DateTime startDate) {
+	public void setStartDate(Instant startDate) {
 		this.startDate = startDate;
 	}
 
-	public DateTime getEndDate() {
+	public Instant getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(DateTime endDate) {
+	public void setEndDate(Instant endDate) {
 		this.endDate = endDate;
 	}
 

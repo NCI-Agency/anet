@@ -64,12 +64,12 @@ properties:
       email:
         type: string
         title: The date format for email
-        description: Used in report emails, e.g. "6 December 1998"; see https://www.joda.org/joda-time/key_format.html#Pattern-based_formatting for format specifiers.
+        description: Used in report emails, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
         examples: ["d MMMM yyyy"]
       excel:
         type: string
         title: The date format for Excel export
-        description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://www.joda.org/joda-time/key_format.html#Pattern-based_formatting for format specifiers.
+        description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
         examples: ["d MMMM yyyy"]
       forms:
         type: object

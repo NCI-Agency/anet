@@ -1,8 +1,8 @@
 package mil.dds.anet.database;
 
+import java.time.Instant;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +11,7 @@ import com.google.common.base.Joiner;
 
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.database.mappers.AnetEmailMapper;
+import mil.dds.anet.utils.DaoUtils;
 
 public class EmailDao {
 
@@ -41,7 +42,7 @@ public class EmailDao {
 		logger.debug("Running execute on {}", dbHandle);
 		dbHandle.createUpdate("/* SendEmailAsync */ INSERT INTO \"pendingEmails\" (\"jobSpec\", \"createdAt\") VALUES (:jobSpec, :createdAt)")
 			.bind("jobSpec", jobSpec)
-			.bind("createdAt", new DateTime())
+			.bind("createdAt", DaoUtils.asLocalDateTime(Instant.now()))
 			.execute();
 	}
 }

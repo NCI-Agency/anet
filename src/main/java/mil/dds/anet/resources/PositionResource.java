@@ -1,5 +1,6 @@
 package mil.dds.anet.resources;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,8 +22,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import org.joda.time.DateTime;
 
 import com.codahale.metrics.annotation.Timed;
 
@@ -230,7 +229,7 @@ public class PositionResource {
 	@Path("/{uuid}/person")
 	public Person getAdvisorInPosition(@PathParam("uuid") String positionUuid, @QueryParam("atTime") Long atTimeMillis) {
 		//TODO: it doesn't seem to be used
-		DateTime dtg = (atTimeMillis == null) ? DateTime.now() : new DateTime(atTimeMillis);
+		Instant dtg = (atTimeMillis == null) ? Instant.now() : Instant.ofEpochMilli(atTimeMillis);
 		return dao.getPersonInPosition(positionUuid, dtg);
 	}
 

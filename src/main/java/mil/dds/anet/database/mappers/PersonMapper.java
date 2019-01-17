@@ -2,9 +2,7 @@ package mil.dds.anet.database.mappers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.statement.StatementContext;
 import org.jdbi.v3.core.mapper.RowMapper;
 
@@ -41,12 +39,7 @@ public class PersonMapper implements RowMapper<Person> {
 		a.setPhoneNumber(r.getString("people_phoneNumber"));
 		a.setCountry(r.getString("people_country"));
 		a.setGender(r.getString("people_gender"));
-		
-		Timestamp endOfTourDate = r.getTimestamp("people_endOfTourDate");
-		if (endOfTourDate != null) { 
-			a.setEndOfTourDate(new DateTime(endOfTourDate));
-		}
-		
+		a.setEndOfTourDate(DaoUtils.getInstantAsLocalDateTime(r, "people_endOfTourDate"));
 		a.setRank(r.getString("people_rank"));
 		a.setBiography(r.getString("people_biography"));
 		a.setDomainUsername(r.getString("people_domainUsername"));

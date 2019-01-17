@@ -3,6 +3,9 @@ package mil.dds.anet.resources;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,10 +36,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,15 +101,13 @@ public class ReportResource {
 	AnetConfiguration config;
 
 	private final RollupGraphComparator rollupGraphComparator;
-	private final String dateFormat;
 	private final DateTimeFormatter dtf;
 
 	public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.engine = engine;
 		this.dao = engine.getReportDao();
 		this.config = config;
-		this.dateFormat = (String) this.config.getDictionaryEntry("dateFormats.email");
-		this.dtf = DateTimeFormat.forPattern(this.dateFormat);
+		this.dtf = DateTimeFormatter.ofPattern((String) this.config.getDictionaryEntry("dateFormats.email")).withZone(DaoUtils.getDefaultZoneId());
 		@SuppressWarnings("unchecked")
 		List<String> pinnedOrgNames = (List<String>)this.config.getDictionaryEntry("pinned_ORGs");
 		this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
@@ -140,10 +137,10 @@ public class ReportResource {
 		return r;
 	}
 
-	//Returns a dateTime representing the very end of today.
+	//Returns an instant representing the very end of today.
 	// Used to determine if a date is tomorrow or later.
-	private DateTime tomorrow() {
-		return DateTime.now().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59);
+	private Instant tomorrow() {
+		return Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59).withSecond(59).withNano(999999999).toInstant();
 	}
 
 	// Helper method to determine if a report should be pushed into FUTURE state.
@@ -614,7 +611,7 @@ public class ReportResource {
 				if (step.getNextStepUuid() == null) {
 					//Done with approvals, move to released (or cancelled) state!
 					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
-					r.setReleasedAt(DateTime.now());
+					r.setReleasedAt(Instant.now());
 					sendReportReleasedEmail(r);
 				} else {
 					sendApprovalNeededEmail(r);
@@ -924,8 +921,8 @@ public class ReportResource {
 			@QueryParam("orgType") @GraphQLArgument(name="orgType") OrganizationType orgType,
 			@QueryParam("advisorOrganizationUuid") @GraphQLArgument(name="advisorOrganizationUuid") String advisorOrgUuid,
 			@QueryParam("principalOrganizationUuid") @GraphQLArgument(name="principalOrganizationUuid") String principalOrgUuid) {
-		DateTime startDate = new DateTime(start);
-		DateTime endDate = new DateTime(end);
+		Instant startDate = Instant.ofEpochMilli(start);
+		Instant endDate = Instant.ofEpochMilli(end);
 
 		final List<RollupGraph> dailyRollupGraph;
 
@@ -968,8 +965,8 @@ public class ReportResource {
 			Long start, Long end, OrganizationType orgType,
 			String advisorOrgUuid, String principalOrgUuid, AnetEmail email) {
 		DailyRollupEmail action = new DailyRollupEmail(dtf);
-		action.setStartDate(new DateTime(start));
-		action.setEndDate(new DateTime(end));
+		action.setStartDate(Instant.ofEpochMilli(start));
+		action.setEndDate(Instant.ofEpochMilli(end));
 		action.setComment(email.getComment());
 		action.setAdvisorOrganizationUuid(advisorOrgUuid);
 		action.setPrincipalOrganizationUuid(principalOrgUuid);
@@ -1025,8 +1022,8 @@ public class ReportResource {
 			OrganizationType orgType, String advisorOrgUuid,
 			String principalOrgUuid, Boolean showReportText) {
 		DailyRollupEmail action = new DailyRollupEmail(dtf);
-		action.setStartDate(new DateTime(start));
-		action.setEndDate(new DateTime(end));
+		action.setStartDate(Instant.ofEpochMilli(start));
+		action.setEndDate(Instant.ofEpochMilli(end));
 		action.setChartOrgType(orgType);
 		action.setAdvisorOrganizationUuid(advisorOrgUuid);
 		action.setPrincipalOrganizationUuid(principalOrgUuid);
@@ -1041,7 +1038,7 @@ public class ReportResource {
 		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 		context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
-		context.put("dateFormat", dateFormat);
+		context.put("dateFormatter", dtf);
 		context.put("fields", fields);
 
 		try {
@@ -1078,9 +1075,9 @@ public class ReportResource {
 		@DefaultValue("3") 	@QueryParam("weeksAgo") @GraphQLArgument(name="weeksAgo", defaultValue="3") int weeksAgo,
 		@DefaultValue(Organization.DUMMY_ORG_UUID) @QueryParam("orgUuid") @GraphQLArgument(name="orgUuid", defaultValue=Organization.DUMMY_ORG_UUID) String orgUuid) {
 
-		DateTime now = DateTime.now();
-		DateTime weekStart = now.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay();
-		DateTime startDate = weekStart.minusWeeks(weeksAgo);
+		Instant now = Instant.now();
+		Instant weekStart = now.atZone(DaoUtils.getDefaultZoneId()).with(DayOfWeek.MONDAY).withHour(0).withMinute(0).withSecond(0).withNano(0).toInstant();
+		Instant startDate = weekStart.atZone(DaoUtils.getDefaultZoneId()).minusWeeks(weeksAgo).toInstant();
 		final List<Map<String, Object>> list = dao.getAdvisorReportInsights(startDate, now, orgUuid);
 
 		final String groupName = "stats";
