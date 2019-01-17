@@ -58,18 +58,14 @@ export const clearSearchQuery = () => ({
 	type: 'CLEAR_SEARCH_QUERY',
 })
 
-export function setPagination(pageKey, pageNum) {
-	return {
-		type: types.SET_PAGINATION,
-		payload: {
-			pageKey,
-			pageNum
-		}
+export const setPagination = (pageKey, pageNum) => ({
+	type: types.SET_PAGINATION,
+	payload: {
+		pageKey,
+		pageNum
 	}
-}
+})
 
-export function resetPages() {
-	return {
-		type: types.RESET_PAGES
-	}
-}
+export const resetPages = () => ({
+	type: types.RESET_PAGES
+})
