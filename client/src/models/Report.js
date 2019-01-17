@@ -66,26 +66,6 @@ export default class Report extends Model {
 			.default('')
 			.label(Settings.fields.report.atmosphereDetails),
 		location: yup.object().nullable().default({}),
-		// not actually in the database, but used for the report form
-		advisors: yup.array().nullable()
-			.test('primary-advisor', 'primary advisor error',
-					// can't use arrow function here because of binding to 'this'
-					function(attendees) {
-						const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
-						return err ? this.createError({message: err}) : true
-					}
-				)
-				.default([]),
-		// not actually in the database, but used for the report form
-		principals: yup.array().nullable()
-			.test('primary-principal', 'primary principal error',
-					// can't use arrow function here because of binding to 'this'
-					function(attendees) {
-						const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.PRINCIPAL)
-						return err ? this.createError({message: err}) : true
-					}
-				)
-				.default([]),
 		attendees: yup.array().nullable().default([]),
 		principalOrg: yup.object().nullable().default({}),
 		advisorOrg: yup.object().nullable().default({}),
