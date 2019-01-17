@@ -18,7 +18,7 @@ import Fieldset from 'components/Fieldset'
 import CustomDateInput from 'components/CustomDateInput'
 import ConfirmDelete from 'components/ConfirmDelete'
 import ReportTags from 'components/ReportTags'
-import AttendeesMultiSelect from 'components/AttendeesMultiSelect'
+import MultiSelect from 'components/MultiSelect'
 import MultiSelector from 'components/MultiSelector'
 import TaskTable from 'components/TaskTable'
 import RichTextEditor from 'components/RichTextEditor'
@@ -374,7 +374,7 @@ class BaseReportForm extends Component {
 						</Fieldset>
 
 						<Fieldset title={!values.cancelled ? "Meeting attendance" : "Planned attendance"} id="attendance-fieldset">
-							<AttendeesMultiSelect
+							<MultiSelect
 								selectedItems={values.attendees}
 								objectType={Person}
 								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]}}

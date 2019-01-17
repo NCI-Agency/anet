@@ -17,7 +17,7 @@ import API from 'api'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 
-import './AttendeesMultiSelect.css'
+import './MultiSelect.css'
 
 const AttendeesTable = (props) => {
 	const { attendees, selectedAttendees, addItem, removeItem } = props
@@ -72,7 +72,7 @@ const AttendeesTable = (props) => {
 	)
 }
 
-export default class AttendeesMultiSelect extends Component {
+export default class MultiSelect extends Component {
 	static propTypes = {
 		addFieldName: PropTypes.string.isRequired, // name of the autocomplete field
 		addFieldLabel: PropTypes.string, // label of the autocomplete field
