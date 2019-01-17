@@ -70,7 +70,7 @@
     "@blueprintjs/core": "^3.10.0",
     "@blueprintjs/datetime": "^3.6.0",
     "bootstrap": "^3.4.0",
-    "change-case": "^3.0.1",
+    "change-case": "^3.1.0",
     "classnames": "^2.2.6",
     "core-js": "^2.6.2",
     "create-react-class": "^15.6.3",
