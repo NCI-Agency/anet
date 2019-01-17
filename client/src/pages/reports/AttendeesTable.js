@@ -51,7 +51,7 @@ export default class AttendeesTable extends Component {
 						title="Remove attendee"
 						onClick={() => this.props.onDelete(person)}
 					>
-						<Icon icon={IconNames.DELETE} />
+						<Icon icon={IconNames.REMOVE} />
 					</button>
 				</td>}
 			</tr>
