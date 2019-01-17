@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import { Button, Col, Row, Table, Overlay, Popover, FormGroup } from 'react-bootstrap'
+import { Button, Col, Row, Table, Overlay, Popover } from 'react-bootstrap'
 import { Classes, Icon } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
@@ -9,7 +9,6 @@ import classNames from 'classnames'
 import {Person, Position} from 'models'
 import LinkTo from 'components/LinkTo'
 import UltimatePagination from 'components/UltimatePagination'
-import './AttendeesMultiSelect.css'
 
 import { Field } from 'formik'
 import { renderInputField } from 'components/FieldHelper'
@@ -17,6 +16,8 @@ import { renderInputField } from 'components/FieldHelper'
 import API from 'api'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
+
+import './AttendeesMultiSelect.css'
 
 const AttendeesTable = (props) => {
 	const { attendees, selectedAttendees, addItem, removeItem } = props
