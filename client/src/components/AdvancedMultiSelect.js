@@ -75,7 +75,9 @@ export default class AdvancedMultiSelect extends Component {
 			return
 		}
 		this.setState({
-			showOverlay: false
+			filterType: Object.keys(this.props.filterDefs)[0],
+			results: {},
+			showOverlay: false,
 		})
 	}
 
