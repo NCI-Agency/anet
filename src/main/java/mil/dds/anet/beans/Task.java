@@ -4,11 +4,10 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
-import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -22,8 +21,8 @@ public class Task extends AbstractAnetBean {
 
 	public enum TaskStatus { ACTIVE, INACTIVE }
 	
-	DateTime plannedCompletion;
-	DateTime projectedCompletion;
+	Instant plannedCompletion;
+	Instant projectedCompletion;
 
 	String shortName;
 	String longName;
@@ -38,21 +37,21 @@ public class Task extends AbstractAnetBean {
 
 	private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
 
-	public void setPlannedCompletion(DateTime plannedCompletion) {
+	public void setPlannedCompletion(Instant plannedCompletion) {
 		this.plannedCompletion = plannedCompletion;
 	}
 
 	@GraphQLQuery(name="plannedCompletion")
-	public DateTime getPlannedCompletion() {
+	public Instant getPlannedCompletion() {
 		return plannedCompletion;
 	}
 
-	public void setProjectedCompletion(DateTime projectedCompletion) {
+	public void setProjectedCompletion(Instant projectedCompletion) {
 		this.projectedCompletion = projectedCompletion;
 	}
 
 	@GraphQLQuery(name="projectedCompletion")
-	public DateTime getProjectedCompletion() {
+	public Instant getProjectedCompletion() {
 		return projectedCompletion;
 	}
 

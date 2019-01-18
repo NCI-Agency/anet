@@ -6,16 +6,15 @@ import io.leangen.graphql.generator.OperationMapper;
 import io.leangen.graphql.generator.mapping.common.CachingMapper;
 
 import java.lang.reflect.AnnotatedType;
-
-import org.joda.time.DateTime;
+import java.time.Instant;
 
 public class DateTimeMapper extends CachingMapper<GraphQLScalarType, GraphQLScalarType> {
 
-	public static final GraphQLScalarType GraphQLJodaDateTime = new GraphQLDateTimeType();
+	public static final GraphQLScalarType GraphQLInstant = new GraphQLDateTimeType();
 
 	@Override
 	public GraphQLScalarType toGraphQLType(String typeName, AnnotatedType javaType, OperationMapper operationMapper, BuildContext buildContext) {
-		return GraphQLJodaDateTime;
+		return GraphQLInstant;
 	}
 
 	@Override
@@ -25,12 +24,12 @@ public class DateTimeMapper extends CachingMapper<GraphQLScalarType, GraphQLScal
 
 	@Override
 	public boolean supports(AnnotatedType type) {
-		return type.getType() == DateTime.class;
+		return type.getType() == Instant.class;
 	}
 
 	@Override
 	protected String getTypeName(AnnotatedType type, BuildContext buildContext) {
-		return GraphQLJodaDateTime.getName();
+		return GraphQLInstant.getName();
 	}
 
 	@Override

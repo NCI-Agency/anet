@@ -48,6 +48,8 @@ public class CommentDao implements IAnetDao<Comment> {
 				+ "INSERT INTO comments (uuid, \"reportUuid\", \"authorUuid\", \"createdAt\", \"updatedAt\", text)"
 				+ "VALUES (:uuid, :reportUuid, :authorUuid, :createdAt, :updatedAt, :text)")
 			.bindBean(c)
+			.bind("createdAt", DaoUtils.asLocalDateTime(c.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(c.getUpdatedAt()))
 			.execute();
 		return c;
 	}
@@ -56,6 +58,7 @@ public class CommentDao implements IAnetDao<Comment> {
 		DaoUtils.setUpdateFields(c);
 		return dbHandle.createUpdate("/* updateComment */ UPDATE comments SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 			.bindBean(c)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(c.getUpdatedAt()))
 			.execute();
 	}
 

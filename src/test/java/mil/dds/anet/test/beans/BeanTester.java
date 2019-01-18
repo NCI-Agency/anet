@@ -2,14 +2,13 @@ package mil.dds.anet.test.beans;
 
 import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.assertj.core.api.Assertions.assertThat;
+import mil.dds.anet.database.mappers.MapperUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.dropwizard.jackson.Jackson;
-
 public abstract class BeanTester<T> {
 
-	static final ObjectMapper MAPPER = Jackson.newObjectMapper();
+	static final ObjectMapper MAPPER = MapperUtils.getDefaultMapper();
 
 	/** 
 	 * Tests that a given object, when serialized to JSON, matches the JSON In the specified file path.

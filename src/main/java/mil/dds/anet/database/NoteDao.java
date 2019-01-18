@@ -77,6 +77,8 @@ public class NoteDao implements IAnetDao<Note> {
 					"/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", text, \"createdAt\", \"updatedAt\") "
 						+ "VALUES (:uuid, :authorUuid, :text, :createdAt, :updatedAt)")
 				.bindBean(n)
+				.bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
+				.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
 				.bind("authorUuid", n.getAuthorUuid())
 				.execute();
 			insertNoteRelatedObjects(h, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
@@ -92,6 +94,7 @@ public class NoteDao implements IAnetDao<Note> {
 			return h.createUpdate("/* updateNote */ UPDATE notes "
 						+ "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 					.bindBean(n)
+					.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
 					.execute();
 		});
 	}

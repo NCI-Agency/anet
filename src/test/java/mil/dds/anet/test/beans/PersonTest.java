@@ -1,15 +1,15 @@
 package mil.dds.anet.test.beans;
 
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 import mil.dds.anet.beans.ReportPerson;
+import mil.dds.anet.utils.DaoUtils;
 
 public class PersonTest extends BeanTester<Person> {
 
@@ -25,7 +25,7 @@ public class PersonTest extends BeanTester<Person> {
 		person.setDomainUsername("jack");
 		person.setGender("Male");
 		person.setCountry("United States of America");
-		person.setEndOfTourDate(new DateTime(2017,6,30,0,0,0,DateTimeZone.UTC));
+		person.setEndOfTourDate(ZonedDateTime.of(2017,6,30,0,0,0,0, DaoUtils.getDefaultZoneId()).toInstant());
 		return person;
 	}
 
@@ -79,7 +79,7 @@ public class PersonTest extends BeanTester<Person> {
 		person.setDomainUsername("elizabeth");
 		person.setGender("Female");
 		person.setCountry("United States of America");
-		person.setEndOfTourDate(new DateTime(2017,3,22,0,0,0));
+		person.setEndOfTourDate(ZonedDateTime.of(2017,3,22,0,0,0,0, DaoUtils.getDefaultZoneId()).toInstant());
 		return person;
 	}
 
@@ -95,7 +95,7 @@ public class PersonTest extends BeanTester<Person> {
 		p.setDomainUsername("nick");
 		p.setGender("Male");
 		p.setCountry("United States of America");
-		p.setEndOfTourDate(new DateTime(2017,8,1,0,0,0));
+		p.setEndOfTourDate(ZonedDateTime.of(2017,8,1,0,0,0,0, DaoUtils.getDefaultZoneId()).toInstant());
 		return p;
 	}
 	
@@ -111,7 +111,7 @@ public class PersonTest extends BeanTester<Person> {
 		p.setDomainUsername("bob");
 		p.setGender("Male");
 		p.setCountry("Germany");
-		p.setEndOfTourDate(new DateTime(2017,2,12,0,0,0));
+		p.setEndOfTourDate(ZonedDateTime.of(2017,2,12,0,0,0,0, DaoUtils.getDefaultZoneId()).toInstant());
 		return p;
 	}
 	
@@ -151,7 +151,7 @@ public class PersonTest extends BeanTester<Person> {
 		p.setDomainUsername("arthur");
 		p.setGender("Male");
 		p.setCountry("United States of America");
-		p.setEndOfTourDate(new DateTime(2020,1,1,0,0,0));
+		p.setEndOfTourDate(ZonedDateTime.of(2020,1,1,0,0,0,0, DaoUtils.getDefaultZoneId()).toInstant());
 		return p;
 	}
 

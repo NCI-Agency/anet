@@ -60,6 +60,8 @@ public class LocationDao implements IAnetDao<Location> {
 				"/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, :updatedAt)")
 			.bindBean(l)
+			.bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
 			.bind("status", DaoUtils.getEnumId(l.getStatus()))
 			.execute();
 		return l;
@@ -70,6 +72,7 @@ public class LocationDao implements IAnetDao<Location> {
 		return dbHandle.createUpdate("/* updateLocation */ UPDATE locations "
 					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(l)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
 				.bind("status", DaoUtils.getEnumId(l.getStatus()))
 				.execute();
 	}

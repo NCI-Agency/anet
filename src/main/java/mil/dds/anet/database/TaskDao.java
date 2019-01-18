@@ -1,12 +1,12 @@
 package mil.dds.anet.database;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
-import org.joda.time.DateTime;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -61,6 +61,10 @@ public class TaskDao implements IAnetDao<Task> {
 				+ "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :responsibleOrgUuid, :createdAt, :updatedAt, :status, "
 				+ ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion)")
 			.bindBean(p)
+			.bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+			.bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
+			.bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.execute();
 		return p;
@@ -75,6 +79,9 @@ public class TaskDao implements IAnetDao<Task> {
 				+ "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion "
 				+ "WHERE uuid = :uuid")
 			.bindBean(p)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+			.bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
+			.bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.execute();
 	}
@@ -84,7 +91,7 @@ public class TaskDao implements IAnetDao<Task> {
 				+ "SET \"organizationUuid\" = :orgUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 			.bind("orgUuid", organizationUuid)
 			.bind("uuid", taskUuid)
-			.bind("updatedAt", DateTime.now())
+			.bind("updatedAt", DaoUtils.asLocalDateTime(Instant.now()))
 			.execute();
 	}
 	

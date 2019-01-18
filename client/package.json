@@ -7,7 +7,7 @@
   "devDependencies": {
     "artillery": "^1.6.0-24",
     "autobind-decorator": "^2.4.0",
-    "autoprefixer": "^9.4.4",
+    "autoprefixer": "^9.4.5",
     "ava": "^0.25.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^7.2.3",
@@ -57,7 +57,7 @@
     "wdio-mocha-framework": "^0.6.4",
     "wdio-spec-reporter": "^0.1.5",
     "webdriverio": "^4.14.1",
-    "webpack": "^4.28.2",
+    "webpack": "^4.28.4",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14",
@@ -65,11 +65,11 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.10.0",
-    "@blueprintjs/datetime": "^3.5.0",
+    "@blueprintjs/datetime": "^3.6.0",
     "bootstrap": "^3.4.0",
-    "change-case": "^3.0.1",
+    "change-case": "^3.1.0",
     "classnames": "^2.2.6",
-    "core-js": "^2.6.1",
+    "core-js": "^2.6.2",
     "create-react-class": "^15.6.3",
     "d3": "^5.7.0",
     "draft-convert": "^2.1.4",
@@ -99,7 +99,7 @@
     "react-mosaic-component": "^2.0.0",
     "react-notification-badge": "^1.4.0",
     "react-redux": "^5.1.1",
-    "react-redux-loading-bar": "^4.1.0",
+    "react-redux-loading-bar": "^4.2.0",
     "react-router": "^4.3.1",
     "react-router-bootstrap": "^0.24.4",
     "react-router-dom": "^4.3.1",
@@ -110,7 +110,7 @@
     "redux": "^4.0.1",
     "redux-persist": "^5.10.0",
     "whatwg-fetch": "^2.0.3",
-    "yup": "^0.26.6"
+    "yup": "^0.26.7"
   },
   "resolutions": {
     "autobind-decorator": "2.4.0"
