@@ -19,59 +19,6 @@ import _debounce from 'lodash/debounce'
 
 import './MultiSelect.css'
 
-const AttendeesTable = (props) => {
-	const { attendees, selectedAttendees, addItem, removeItem } = props
-	const selectedAttendeesUuids = selectedAttendees.map(a => a.uuid)
-	return (
-		<Table responsive hover striped className="people-search-results">
-			<thead>
-				<tr>
-					<th />
-					<th>Name</th>
-					<th>Position</th>
-					<th>Location</th>
-					<th>Organization</th>
-				</tr>
-			</thead>
-			<tbody>
-				{Person.map(attendees, person => {
-					const isSelected = selectedAttendeesUuids.includes(person.uuid)
-					return <tr key={person.uuid}>
-						<td>
-						{isSelected ?
-							<button
-								type="button"
-								className={classNames(Classes.BUTTON)}
-								title="Remove attendee"
-								onClick={() => removeItem(person)}
-							>
-								<Icon icon={IconNames.REMOVE} />
-							</button>
-						:
-						<button
-							type="button"
-							className={classNames(Classes.BUTTON)}
-							title="Add attendee"
-							onClick={() => addItem(person)}
-							>
-								<Icon icon={IconNames.ADD} />
-							</button>
-						}
-						</td>
-						<td>
-							<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-							<LinkTo person={person}/>
-						</td>
-						<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-						<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
-						<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>
-					</tr>
-				})}
-			</tbody>
-		</Table>
-	)
-}
-
 export default class MultiSelect extends Component {
 	static propTypes = {
 		addFieldName: PropTypes.string.isRequired, // name of the autocomplete field
@@ -90,6 +37,7 @@ export default class MultiSelect extends Component {
 		//Optional: GraphQL string of fields to return from search.
 		fields: PropTypes.string,
 		currentUser: PropTypes.instanceOf(Person),
+		overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 	}
 
 	static defaultProps = {
@@ -135,7 +83,7 @@ export default class MultiSelect extends Component {
 		const { addFieldName, addFieldLabel, renderSelected, selectedItems, onAddItem, onRemoveItem, filterDefs, renderExtraCol, addon, ...autocompleteProps } = this.props
 		const { results, filterType } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
-		const attendees = results && results[filterType] ? results[filterType].list : []
+		const items = results && results[filterType] ? results[filterType].list : []
 		return (
 			<React.Fragment>
 				<Field
@@ -171,9 +119,9 @@ export default class MultiSelect extends Component {
 								<header className="searchPagination">
 									{this.paginationFor(this.state.filterType)}
 								</header>
-								<AttendeesTable
-									attendees={attendees}
-									selectedAttendees={selectedItems}
+								<this.props.overlayComponent
+									items={items}
+									selectedItems={selectedItems}
 									addItem={this.addItem}
 									removeItem={this.removeItem}
 								/>

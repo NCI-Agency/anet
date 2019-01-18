@@ -25,6 +25,7 @@ import RichTextEditor from 'components/RichTextEditor'
 import Messages from 'components/Messages'
 import NavigationWarning from 'components/NavigationWarning'
 import AttendeesTable from './AttendeesTable'
+import AttendeesOverlayTable from './AttendeesOverlayTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
 
 import LOCATION_ICON from 'resources/locations.png'
@@ -385,6 +386,7 @@ class BaseReportForm extends Component {
 								addFieldLabel="Attendees"
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
+								overlayComponent={AttendeesOverlayTable}
 								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
 								filterDefs={attendeesFilters}
 								renderExtraCol={true}
