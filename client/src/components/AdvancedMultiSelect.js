@@ -1,49 +1,43 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-
 import { Button, Col, Row, Table, Overlay, Popover } from 'react-bootstrap'
 import { Classes, Icon } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
-
-import {Person, Position} from 'models'
-import LinkTo from 'components/LinkTo'
-import UltimatePagination from 'components/UltimatePagination'
-
 import { Field } from 'formik'
-import { renderInputField } from 'components/FieldHelper'
-
-import API from 'api'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 
+import { renderInputField } from 'components/FieldHelper'
+import LinkTo from 'components/LinkTo'
+import UltimatePagination from 'components/UltimatePagination'
 import './AdvancedMultiSelect.css'
+import { Person, Position } from 'models'
+import API from 'api'
 
 export default class AdvancedMultiSelect extends Component {
 	static propTypes = {
-		addFieldName: PropTypes.string.isRequired, // name of the autocomplete field
-		addFieldLabel: PropTypes.string, // label of the autocomplete field
-		selectedItems: PropTypes.array.isRequired,
-		renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired, // how to render the selected items
-		overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
-		filterDefs: PropTypes.object,
+		fieldName: PropTypes.string.isRequired,  // input field name
+		fieldLabel: PropTypes.string,  // input field label
+		placeholder: PropTypes.string,  // input field placeholder
+		selectedItems: PropTypes.array.isRequired,  // already selected items
+		renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,  // how to render the selected items
+		overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),  // search results component for in the overlay
+		filterDefs: PropTypes.object,  // config of the search filters
 		onChange: PropTypes.func.isRequired,
-		placeholder: PropTypes.string,
 		//Required: ANET Object Type (Person, Report, etc) to search for.
 		objectType: PropTypes.func.isRequired,
-		//Optional: Parameters to pass to search function.
+		//Optional: Parameters to pass to all search filters.
 		queryParams: PropTypes.object,
 		//Optional: GraphQL string of fields to return from search.
 		fields: PropTypes.string,
 		currentUser: PropTypes.instanceOf(Person),
-		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
 		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 	}
 
 	static defaultProps = {
-		addFieldLabel: 'Add item',
+		fieldLabel: 'Add item',
 		filterDefs: {},
-		renderExtraCol: true,
 	}
 
 	state = {
@@ -54,43 +48,16 @@ export default class AdvancedMultiSelect extends Component {
 		inputFocused: false,
 	}
 
-	handleInputFocus = () => {
-		if (this.state.inputFocused === true) {
-			return
-		}
-		this.setState({
-			inputFocused: true,
-			showOverlay: true,
-		})
-	}
-
-	handleInputBlur = () => {
-		this.setState({
-			inputFocused: false,
-		})
-	}
-
-	handleHideOverlay = () => {
-		if (this.state.inputFocused) {
-			return
-		}
-		this.setState({
-			filterType: Object.keys(this.props.filterDefs)[0],
-			results: {},
-			showOverlay: false,
-		})
-	}
-
 	render() {
-		const { addFieldName, addFieldLabel, renderSelected, placeholder, selectedItems, onAddItem, onRemoveItem, filterDefs, renderExtraCol, addon, ...autocompleteProps } = this.props
+		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs } = this.props
 		const { results, filterType } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const items = results && results[filterType] ? results[filterType].list : []
 		return (
 			<React.Fragment>
 				<Field
-					name={addFieldName}
-					label={addFieldLabel}
+					name={fieldName}
+					label={fieldLabel}
 					component={renderInputField}
 					value={this.state.searchTerms}
 					placeholder={placeholder}
@@ -109,13 +76,16 @@ export default class AdvancedMultiSelect extends Component {
 					animation={false}
 					delayHide={200}
 				>
-					<Popover id={addFieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%'}}>
+					<Popover id={fieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%'}}>
 						<Row className="border-between">
 							<Col sm={3}>
 								<ul className="overlayFilters">
-									{Object.keys(filterDefs).map(filterType =>
-										!filterDefs[filterType].doNotDisplay && <li key={filterType} className={(this.state.filterType === filterType) ? 'active' : null}><Button bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button></li>
-									)}
+									{Object.keys(filterDefs).map(filterType => (
+										!filterDefs[filterType].doNotDisplay && 
+										<li key={filterType} className={(this.state.filterType === filterType) ? 'active' : null}>
+											<Button bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
+										</li>
+									))}
 								</ul>
 							</Col>
 							<Col sm={9}>
@@ -148,6 +118,33 @@ export default class AdvancedMultiSelect extends Component {
 		)
 	}
 
+	handleInputFocus = () => {
+		if (this.state.inputFocused === true) {
+			return
+		}
+		this.setState({
+			inputFocused: true,
+			showOverlay: true,
+		})
+	}
+
+	handleInputBlur = () => {
+		this.setState({
+			inputFocused: false,
+		})
+	}
+
+	handleHideOverlay = () => {
+		if (this.state.inputFocused) {
+			return
+		}
+		this.setState({
+			filterType: Object.keys(this.props.filterDefs)[0],
+			results: {},
+			showOverlay: false,
+		})
+	}
+
 	changeSearchTerms = (event) => {
 		// Reset the results state when the search terms change
 		this.setState({searchTerms: event.target.value, results: {}}, () => this.fetchResultsDebounced(0))
@@ -156,14 +153,6 @@ export default class AdvancedMultiSelect extends Component {
 	changeFilterType = (filterType) => {
 		// When changing the filter type, only fetch the results if they were not fetched before
 		this.setState({filterType}, () => (!this.state.results[filterType] ? this.fetchResults(0) : null))
-	}
-
-	_getSelectedItemsUuids = () => {
-		const {selectedItems} = this.props
-		if (Array.isArray(selectedItems)) {
-			return selectedItems.map(object => object.uuid)
-		}
-		return []
 	}
 
 	fetchResults = (pageNum) => {

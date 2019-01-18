@@ -376,21 +376,19 @@ class BaseReportForm extends Component {
 
 						<Fieldset title={!values.cancelled ? "Meeting attendance" : "Planned attendance"} id="attendance-fieldset">
 							<AdvancedMultiSelect
-								selectedItems={values.attendees}
-								objectType={Person}
-								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]}}
+								fieldName='attendees'
+								fieldLabel="Attendees"
 								placeholder="Search for attendees who attended the meeting..."
-								fields={Person.autocompleteQuery}
-								template={Person.autocompleteTemplate}
-								addFieldName='attendees'
-								addFieldLabel="Attendees"
-								addon={PEOPLE_ICON}
+								selectedItems={values.attendees}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
 								overlayComponent={AttendeesOverlayTable}
-								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
 								filterDefs={attendeesFilters}
-								renderExtraCol={true}
+								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
+								objectType={Person}
+								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]}}
+								fields={Person.autocompleteQuery}
 								currentUser={this.props.currentUser}
+								addon={PEOPLE_ICON}
 							/>
 						</Fieldset>
 
