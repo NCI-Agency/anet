@@ -25,11 +25,10 @@ export default class AdvancedMultiSelect extends Component {
 		addFieldLabel: PropTypes.string, // label of the autocomplete field
 		selectedItems: PropTypes.array.isRequired,
 		renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired, // how to render the selected items
-		onChange: PropTypes.func.isRequired,
+		overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 		filterDefs: PropTypes.object,
-		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
-		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
-
+		onChange: PropTypes.func.isRequired,
+		placeholder: PropTypes.string,
 		//Required: ANET Object Type (Person, Report, etc) to search for.
 		objectType: PropTypes.func.isRequired,
 		//Optional: Parameters to pass to search function.
@@ -37,7 +36,8 @@ export default class AdvancedMultiSelect extends Component {
 		//Optional: GraphQL string of fields to return from search.
 		fields: PropTypes.string,
 		currentUser: PropTypes.instanceOf(Person),
-		overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
+		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
+		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 	}
 
 	static defaultProps = {
@@ -82,7 +82,7 @@ export default class AdvancedMultiSelect extends Component {
 	}
 
 	render() {
-		const { addFieldName, addFieldLabel, renderSelected, selectedItems, onAddItem, onRemoveItem, filterDefs, renderExtraCol, addon, ...autocompleteProps } = this.props
+		const { addFieldName, addFieldLabel, renderSelected, placeholder, selectedItems, onAddItem, onRemoveItem, filterDefs, renderExtraCol, addon, ...autocompleteProps } = this.props
 		const { results, filterType } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const items = results && results[filterType] ? results[filterType].list : []
@@ -93,6 +93,7 @@ export default class AdvancedMultiSelect extends Component {
 					label={addFieldLabel}
 					component={renderInputField}
 					value={this.state.searchTerms}
+					placeholder={placeholder}
 					onChange={this.changeSearchTerms}
 					onFocus={this.handleInputFocus}
 					onBlur={this.handleInputBlur}

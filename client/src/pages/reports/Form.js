@@ -379,7 +379,7 @@ class BaseReportForm extends Component {
 								selectedItems={values.attendees}
 								objectType={Person}
 								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]}}
-								placeholder="Start typing to search for attendees who attended the meeting..."
+								placeholder="Search for attendees who attended the meeting..."
 								fields={Person.autocompleteQuery}
 								template={Person.autocompleteTemplate}
 								addFieldName='attendees'
