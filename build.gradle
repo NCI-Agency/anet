@@ -265,7 +265,7 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
 	description = "Waiting until the DB server has started"
 	targetContainerId { "anet-mssql-server" }
-	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
+	withCommand(["/opt/waitTillServiceStarted.sh"])
 }
 
 task dbLoad(dependsOn: 'compileJava', type: JavaExec) {
