@@ -10,7 +10,7 @@ function principalName(_gender) {
         firstName: faker.random.arrayElement(afghanFirstNames.filter((d) => d.gender === gender)).name,
         lastName: faker.random.arrayElement(afghanSurnames).name
     }
-    return result;
+    return result
 }
 
 function advisorName(gender) {
@@ -63,7 +63,7 @@ function modifiedPerson() {
     }
 }
 
-const createPerson = async function (user) {
+const _createPerson = async function (user) {
     const person = new Person()
     populate(person, randomPerson())
         .name.always()
@@ -117,7 +117,7 @@ const updatePerson = async function (user) {
         })
 }
 
-const deletePerson = async function (user) {
+const _deletePerson = async function (user) {
     const people = await runGQL(user,
         {
             query: `query {
@@ -127,26 +127,48 @@ const deletePerson = async function (user) {
                     position { uuid }
                   }
                 }
-              }
-            }`,
+              }`,
             variables: {}
         })
-    const person = faker.random.arrayElement(people.data.personList.list)
-    if (person) {
-        console.debug(`Removing ${person.name.green}`)
+    const person0 = faker.random.arrayElement(people.data.personList.list.filter(p => !(p.position && p.position.length)))
+    if (person0) {
+        const person = (await runGQL(user,
+            {
+                query: `query {
+                    person(uuid: "${person0.uuid}") {
+                        biography
+                        country
+                        emailAddress
+                        endOfTourDate
+                        gender
+                        name
+                        phoneNumber
+                        rank
+                        role
+                        status
+                        uuid
+                    }
+                  }`,
+                variables: {}
+            })).data.person
+        person.status = Person.STATUS.ACTIVE
+
+        console.debug(`Deleting/Deactivating ${person.name.green}`)
+        // This should DEACTIVATE a person. Note: only possible if (s)he is removed from position.
         return await runGQL(user,
             {
-                query: `mutation() { deletePerson(uuid: ${person.uuid}) }`,
-                variable: {}
+                query: `mutation($person: PersonInput!) { updatePerson(person: $person) }`,
+                variables: { person: person }
             })
-    }
+        }
     else {
-        return null;
+        console.debug(`No person to delete`)
+        return null
     }
 }
 
-const personsBuildup = async function (user, number) {
-    var count = (await runGQL(user,
+async function countPersons(user) {
+    return (await runGQL(user,
         {
             query: `query {
                 personList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
@@ -154,88 +176,30 @@ const personsBuildup = async function (user, number) {
                 }
             }`,
             variables: {}
-        })).data.personList.totalCount
-    for (; count < number; count++) {
-        await createPerson(user)
-    }
-
-    // TODO: this should actually work in one of the following ways:
-    // 
-    // --- 1) based on fix frequency and probability of 'success'
-    // input parameters user, mean, variance
-    // const f = simutils.norm(mean, variance)
-    // const p = f(await count(user))
-    // if (fuzzy.withProbability(1 - p)) {
-    //    await createPerson(user)
-    // }
-    // --- Note: you'd have to run this at a rate of frequency / f(mean) to get the correct frequency at count===mean
-    // --- Also, the frequency will not go any faster than frequency / f(mean)
-    // --- This could be 'fixed' by introducing refresh rate (r), i.e. run at r*frequency/f(mean) and use (1-p)/r as
-    // --- input for fuzzy.withProbability()
-    //
-    //
-    // --- 1b) Same as above, by provide an accept function that works with the current count as input.
-    // --- This separates the probability logic from the story (database) logic
-    // function accept(x) {
-    //   const f = simutils.norm(mean, variance)
-    //   const p = f(x)
-    //   return fuzzy.withProbability((1 - p) / r)
-    // }
-    // input parameters user, accept
-    // if (accept(await count(user))) {
-    //   await createPerson(user)
-    // }
-    //
-    //
-    // --- 2) base delay on frequency at mean and the probability curve of mean an variance
-    // input parameters user, mean, variance, frequency (#/s)
-    // const f = simutils.norm(mean, variance)
-    // var delayS
-    // while (true) {
-    //   delayS = (f(await count(user)) / f(mean)) / frequency   --- i.e. when count===mean, then delayS=1/frequency
-    //   await Aigle.delay(delayS * 1000)
-    //   await createPerson(user)
-    // }
-    // --- Note: this will not be very accurate if count changes a lot during the delay...
-    // --- Also, delay will be very constant
-    //
-    //
+        })).data.personList.totalCount;
 }
 
-const createPerson2 = async function (user, accept) {
-    var count = (await runGQL(user,
-        {
-            query: `query {
-                personList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
-                    totalCount
-                }
-            }`,
-            variables: {}
-        })).data.personList.totalCount
-    if (accept(count)) {
-        return await createPerson(user)
+const createPerson = async function (user, grow) {
+    if (grow) {
+        const count = await countPersons(user)
+        if (!grow(count)) {
+            console.debug(`Skipping delete person (currenty ${count} persons exist)`)
+            return '(skipped)'
+        }
     }
-    else {
-        return '(NOP)'
-    }
+    return await _createPerson(user)
 }
 
-const deletePerson2 = async function (user, accept) {
-    var count = (await runGQL(user,
-        {
-            query: `query {
-                personList(query: {pageNum: 0, pageSize: 0, status: ACTIVE}) {
-                    totalCount
-                }
-            }`,
-            variables: {}
-        })).data.personList.totalCount
-    if (accept(count)) {
-        return await deletePerson(user)
+const deletePerson = async function (user, grow) {
+    console.log(user)
+    if (grow) {
+        const count = await countPersons(user)
+        if (grow(count)) {
+            console.debug(`Skipping delete person (currenty ${count} persons exist)`)
+            return '(skipped)'
+        }
     }
-    else {
-        return '(NOP)'
-    }
+    return await _deletePerson(user)
 }
 
-export { personsBuildup, createPerson, updatePerson, createPerson2, deletePerson2 }
+export { createPerson, updatePerson, deletePerson }

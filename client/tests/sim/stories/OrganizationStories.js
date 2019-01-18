@@ -52,14 +52,23 @@ function randomOrganization () {
  * Creates an organization with a hiearchical structure for sub-organizations
  * @param {*} user The user that will insert the organization into the database
  */
-async function createHiearchy(user) {
+async function createHiearchy(user, grow) {
+
+    if (grow) {
+        const count = await countOrganizations(user)
+        if (!grow(count)) {
+            console.debug(`Skipping create organization hiearchy (${count} organizations exist)`)
+            return '(skipped)'
+        }
+    }   
+
     const longName = faker.company.companyName()
     const shortName = abbreviateCompanyName(longName)
     const type = Organization.TYPE.PRINCIPAL_ORG        //faker.random.objectElement(Organization.TYPE)
     const status = Organization.STATUS.ACTIVE           // faker.random.objectElement(Organization.STATUS)
     const usedServices = []
 
-    console.debug(`Creating ${type.toLowerCase.green} organization ${longName.green} (${shortName.green})`)
+    console.debug(`Creating ${type.toLowerCase().green} organization ${longName.green} (${shortName.green})`)
     return await createSubOrg(undefined, [])
 
     /**
@@ -233,6 +242,18 @@ const organizationsBuildup = async function (user, number) {
     if ((await count()) < number) {
         await createHiearchy(user)
     }
+}
+
+async function countOrganizations (user) {
+    return (await runGQL(user,
+        {
+            query: `query {
+                organizations(pageNum: 0, pageSize: 1) {
+                    totalCount
+                }
+            }`,
+            variables: {}
+        })).data.organizations.totalCount
 }
 
 export { organizationsBuildup, createOrganization, createHiearchy }
