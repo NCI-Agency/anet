@@ -17,9 +17,9 @@ import API from 'api'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 
-import './MultiSelect.css'
+import './AdvancedMultiSelect.css'
 
-export default class MultiSelect extends Component {
+export default class AdvancedMultiSelect extends Component {
 	static propTypes = {
 		addFieldName: PropTypes.string.isRequired, // name of the autocomplete field
 		addFieldLabel: PropTypes.string, // label of the autocomplete field
