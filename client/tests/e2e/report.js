@@ -3,9 +3,9 @@ let test = require('../util/test'),
     _includes = require('lodash/includes')
 
 test('Draft and submit a report', async t => {
-    t.plan(12)
+    t.plan(14)
 
-    let {pageHelpers, $, $$, assertElementText, By, until, shortWaitMs} = t.context
+    let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, until, shortWaitMs} = t.context
 
     await pageHelpers.goHomeAndThenToReportsPage()
     await pageHelpers.writeInForm('#intent', 'meeting goal')
@@ -68,6 +68,9 @@ test('Draft and submit a report', async t => {
 
     await t.context.driver.wait(until.elementIsVisible($reportSensitiveInformationField))
     await pageHelpers.writeInForm('.reportSensitiveInformationField .public-DraftEditor-content', 'sensitive info')
+    let $addAuthGroupShortcutButtons = await $$('#meeting-details .shortcut-list button')
+    // Add all recent authorization groups
+    await Promise.all($addAuthGroupShortcutButtons.map($button => $button.click()))
 
     let $formButtonSubmit = await $('#formBottomSubmit')
     await t.context.driver.wait(until.elementIsEnabled($formButtonSubmit))
@@ -79,8 +82,9 @@ test('Draft and submit a report', async t => {
 
     let $submitReportButton = await $('#submitReportButton')
     await $submitReportButton.click()
-    // This assertion bombs out with a StaleElementReferenceError and I'm not sure why.
-    // await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
+    await t.context.driver.wait(until.stalenessOf($submitReportButton))
+    await assertElementNotPresent(t, '#submitReportButton', 'Submit button should be gone', shortWaitMs)
+    await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
 
     let $allertSuccess = await t.context.driver.findElement(By.css('.alert-success'))
     await t.context.driver.wait(until.elementIsVisible($allertSuccess))
@@ -138,6 +142,7 @@ test('Approve report chain', async t => {
     await pageHelpers.assertReportShowStatusText(t, "This report is PENDING approvals.")
     let $rebeccaApproveButton = await $('.approve-button')
     await $rebeccaApproveButton.click()
+    await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
 
     // check if page is redirected to search results
 
@@ -149,14 +154,15 @@ test('Approve report chain', async t => {
     //     'When a report is approved, the user sees a message indicating that it has been added to the daily rollup'
     // )
 
-    await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
-    await t.context.get('/rollup')
-    await $('#daily-rollup')
-
+    let $rollupLink = await t.context.driver.findElement(By.linkText('Daily rollup'))
+    await t.context.driver.wait(until.elementIsEnabled($rollupLink))
+    await $rollupLink.click()
     let currentPathname = await t.context.getCurrentPathname()
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
+    await $('#daily-rollup')
 
-    let $reportCollection = await $('.report-collection')
+    let $reportCollection = await $('.report-collection table')
+    await t.context.driver.wait(until.elementIsVisible($reportCollection))
     let $approvedIntent = await $reportCollection.findElement(By.linkText('meeting goal'))
     await assertElementText(
         t,

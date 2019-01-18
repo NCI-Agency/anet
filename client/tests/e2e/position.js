@@ -17,13 +17,17 @@ test('Move someone in and out of a position', async t => {
     await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(personName, positionName)
 
     let $changeAssignedPositionButton = await $('.change-assigned-position')
+    await t.context.driver.wait(until.elementIsVisible($changeAssignedPositionButton))
     await $changeAssignedPositionButton.click()
 
     let $removePersonButton = await $('.remove-person-from-position')
+    await t.context.driver.wait(until.elementIsVisible($removePersonButton))
     await $removePersonButton.click()
     await t.context.driver.wait(until.stalenessOf($removePersonButton))
 
-    await assertElementText(t, await $('p.not-assigned-to-position-message'), 'ERINSON, Erin is not assigned to a position.')
+    let $notAssignedMsg = await $('p.not-assigned-to-position-message')
+    await t.context.driver.wait(until.elementIsVisible($notAssignedMsg))
+    await assertElementText(t, $notAssignedMsg, 'ERINSON, Erin is not assigned to a position.')
     
     await t.context.pageHelpers.clickMyOrgLink()
 

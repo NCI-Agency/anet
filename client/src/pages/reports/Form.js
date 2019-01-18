@@ -379,7 +379,7 @@ class BaseReportForm extends Component {
 							</Fieldset>
 						}
 
-						<Fieldset title={!values.cancelled ? "Meeting discussion" : "Next steps and details"}>
+						<Fieldset title={!values.cancelled ? "Meeting discussion" : "Next steps and details"} id="meeting-details">
 							{!values.cancelled &&
 								<Field
 									name="keyOutcomes"
