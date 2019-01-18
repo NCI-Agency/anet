@@ -31,7 +31,6 @@ export default class AdvancedMultiSelect extends Component {
 		queryParams: PropTypes.object,
 		//Optional: GraphQL string of fields to return from search.
 		fields: PropTypes.string,
-		currentUser: PropTypes.instanceOf(Person),
 		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 	}
 
