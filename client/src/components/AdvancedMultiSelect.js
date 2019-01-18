@@ -49,7 +49,7 @@ export default class AdvancedMultiSelect extends Component {
 	}
 
 	render() {
-		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs } = this.props
+		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, addon } = this.props
 		const { results, filterType } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const items = results && results[filterType] ? results[filterType].list : []
@@ -65,6 +65,7 @@ export default class AdvancedMultiSelect extends Component {
 					onFocus={this.handleInputFocus}
 					onBlur={this.handleInputBlur}
 					innerRef={el => {this.overlayTarget = el}}
+					addon={addon}
 				/>
 				<Overlay
 					show={this.state.showOverlay}
