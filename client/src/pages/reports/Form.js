@@ -9,6 +9,7 @@ import * as FieldHelper from 'components/FieldHelper'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
 import _cloneDeep from 'lodash/cloneDeep'
+import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 
@@ -351,7 +352,7 @@ class BaseReportForm extends Component {
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
 								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
-								shortcutsTitle={`Recent attendees`}
+								shortcutsTitle="Recent Attendees"
 								shortcuts={recents.persons}
 								renderExtraCol={true}
 							/>
@@ -363,7 +364,7 @@ class BaseReportForm extends Component {
 									items={values.tasks}
 									objectType={Task}
 									queryParams={{status: Task.STATUS.ACTIVE}}
-									placeholder={`Start typing to search for ${Settings.fields.task.shortLabel}...`}
+									placeholder={`Start typing to search for ${pluralize(Settings.fields.task.shortLabel)}...`}
 									fields={Task.autocompleteQuery}
 									template={Task.autocompleteTemplate}
 									addFieldName='tasks'
@@ -371,7 +372,7 @@ class BaseReportForm extends Component {
 									addon={TASK_ICON}
 									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
 									onChange={value => setFieldValue('tasks', value)}
-									shortcutsTitle={`Recent ${Settings.fields.task.shortLabel}`}
+									shortcutsTitle={`Recent ${pluralize(Settings.fields.task.shortLabel)}`}
 									shortcuts={recents.tasks}
 									renderExtraCol={true}
 								/>
@@ -432,14 +433,14 @@ class BaseReportForm extends Component {
 											items={values.authorizationGroups}
 											objectType={AuthorizationGroup}
 											queryParams={{status: AuthorizationGroup.STATUS.ACTIVE}}
-											placeholder="Start typing to search for a group..."
+											placeholder="Start typing to search for authorization groups..."
 											fields={AuthorizationGroup.autocompleteQuery}
 											template={AuthorizationGroup.autocompleteTemplate}
 											addFieldName='authorizationGroups'
 											addFieldLabel='Authorization Groups'
 											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
 											onChange={value => setFieldValue('authorizationGroups', value)}
-											shortcutsTitle={`Recent Authorization Groups`}
+											shortcutsTitle="Recent Authorization Groups"
 											shortcuts={recents.authorizationGroups}
 											renderExtraCol={true}
 										/>
