@@ -107,7 +107,7 @@ export default class AdvancedMultiSelect extends Component {
 					</Popover>
 				</Overlay>
 				<Row>
-					<Col sm={9} className="form-group" ref={el => {this.overlayContainer = el}} style={{position: 'relative'}} />
+					<Col sm={9} className="form-group" ref={el => {this.overlayContainer = el}} style={{position: 'relative', marginBottom: 0}} />
 					<Col sm={3} />
 				</Row>
 				<Row>
