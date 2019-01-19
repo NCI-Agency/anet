@@ -3,6 +3,7 @@ package mil.dds.anet.resources;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,7 +38,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dataloader.DataLoaderRegistry;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +58,7 @@ import io.leangen.graphql.GraphQLSchemaGenerator;
 import io.leangen.graphql.generator.mapping.common.ScalarMapper;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.graphql.DateTimeMapper;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.ResponseUtils;
@@ -76,13 +77,15 @@ public class GraphQLResource {
 	private static final String RESULT_KEY_DATA = "data";
 
 	private final AnetObjectEngine engine;
+	private final AnetConfiguration config;
 	private List<Object> resources;
 	private boolean developmentMode;
 	private final MetricRegistry metricRegistry;
 	private GraphQLSchema graphqlSchema;
 
-	public GraphQLResource(AnetObjectEngine engine, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {
+	public GraphQLResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {
 		this.engine = engine;
+		this.config = config;
 		this.resources = resources;
 		this.metricRegistry = metricRegistry;
 		this.developmentMode = developmentMode;
@@ -178,31 +181,39 @@ public class GraphQLResource {
 	private ExecutionResult dispatchRequest(Person user, String query, Map<String, Object> variables) {
 		final DataLoaderRegistry dataLoaderRegistry
 			= BatchingUtils.registerDataLoaders(engine, true, true);
-		final DataLoaderDispatcherInstrumentation dispatcherInstrumentation
-			= new DataLoaderDispatcherInstrumentation(dataLoaderRegistry);
-
 		final Map<String, Object> context = new HashMap<>();
 		context.put("user", user);
 		context.put("dataLoaderRegistry", dataLoaderRegistry);
 		final ExecutionInput executionInput = ExecutionInput.newExecutionInput()
 				.query(query)
+				.dataLoaderRegistry(dataLoaderRegistry)
 				.context(context)
 				.variables(variables)
 				.build();
+
 		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
-				.instrumentation(dispatcherInstrumentation)
+				.instrumentation(new DataLoaderDispatcherInstrumentation())
 				.build();
 		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
 		final Runnable dispatcher = () -> {
 			while (!request.isDone()) {
+				// Wait a while, giving other threads the chance to do some work
+				try {
+					Thread.yield();
+					Thread.sleep(25);
+				} catch (InterruptedException ignored) {}
+
 				// Dispatch all our data loaders until the request is done;
 				// we have data loaders at various depths (one dependent on another),
 				// e.g. in {@link Report#loadApprovalStatus}
-				CompletableFuture.allOf(
-						dataLoaderRegistry.getDataLoaders()
-						.stream()
-						.map(dl -> (CompletableFuture<?>)dl.dispatch())
-						.toArray(CompletableFuture<?>[]::new));
+				final CompletableFuture<?>[] dispatchersWithWork = dataLoaderRegistry.getDataLoaders()
+					.stream()
+					.filter(dl -> dl.dispatchDepth() > 0)
+					.map(dl -> (CompletableFuture<?>)dl.dispatch())
+					.toArray(CompletableFuture<?>[]::new);
+				if (dispatchersWithWork.length > 0) {
+					CompletableFuture.allOf(dispatchersWithWork).join();
+				}
 			}
 		};
 		dispatcher.run();
@@ -294,8 +305,7 @@ public class GraphQLResource {
 
 		final CellStyle dateStyle = workbook.createCellStyle();
 		final CreationHelper createHelper = workbook.getCreationHelper();
-		// TODO: Get the date format from the dictionary
-		final short dateFormat = createHelper.createDataFormat().getFormat("dd MMM yyyy");
+		final short dateFormat = createHelper.createDataFormat().getFormat((String) config.getDictionaryEntry("dateFormats.excel"));
 		dateStyle.setDataFormat(dateFormat);
 		
 		XSSFRow header = sheet.createRow(0);
@@ -385,8 +395,8 @@ public class GraphQLResource {
 		} else if (value instanceof Integer) {
 			return (Integer) value;
 		} else if (value instanceof Long) {
-			// FIXME: For now, assume that this is really a DateTime in disguise!
-			return new DateTime((Long) value).toDate();
+			// FIXME: For now, assume that this is really an Instant in disguise!
+			return Instant.ofEpochMilli((Long) value);
 		} else if (value instanceof Number) {
 			return (Number) value;
 		} else {

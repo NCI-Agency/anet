@@ -2,6 +2,14 @@
   background: #fff;
 }
 
+.mosaic.mosaic-blueprint-theme .mosaic-window .mosaic-window-body {
+  background-color: #f9f9f9;
+}
+
+.mosaic-tile {
+  margin: 8px;
+}
+
 .mosaic-root {
   top: 0;
   right: 0;
@@ -10,8 +18,10 @@
 }
 
 .mosaic-container {
-  flex: 1;
-  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 80vh;
 }
 
 .mosaic-container .scrollable {
@@ -38,9 +48,16 @@
 	z-index: 100;
 }
 
+.bp3-navbar {
+  margin: 8px;
+  width: inherit;
+}
+
 @media print {
   .bp3-navbar,
   .mosaic-preview {
     display: none;
   }
 }
+
+@import './BlueprintOverrides.css'

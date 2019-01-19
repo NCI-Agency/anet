@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import './ReportApprovals.css'
+import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 
 import Fieldset from 'components/Fieldset'
@@ -36,7 +37,7 @@ export default class ReportApprovals extends Component {
             case APPROVE:
                 return {text: 'Approved', cssClass: 'btn-success approved'}
             case REJECT:
-                return {text: 'Rejected', cssClass: 'btn-danger rejected'}
+                return {text: 'Changes requested', cssClass: 'btn-danger rejected'}
             default:
                 return {text: 'Unknown', cssClass: 'btn-pending default'}
         }
@@ -95,7 +96,7 @@ export default class ReportApprovals extends Component {
                 <div className="approval-details">
                     <span>By <LinkTo person={action.person} /></span><br/>
                     <small>
-                        On {moment(action.createdAt).format('D MMM YYYY')}<br/>
+                        On {moment(action.createdAt).format(Settings.dateFormats.forms.short)}<br/>
                         At {moment(action.createdAt).format('h:mm a')}
                     </small>
                 </div>
@@ -157,7 +158,7 @@ export default class ReportApprovals extends Component {
             let cssClass = 'label ' + approvalType.cssClass
             return (
                 <span className={cssClass}> {approvalType.text} by <LinkTo person={action.person} isLink= {false}/> on
-                    <small> {moment(action.createdAt).format('D MMM YYYY, h:mm a')}</small>
+                    <small> {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}</small>
                 </span>
             )
         }

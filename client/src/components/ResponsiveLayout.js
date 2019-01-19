@@ -23,17 +23,25 @@ const contentContainer = {
 }
 const mainViewportContainer = {
 	flex:'1 1 auto',
+	width: '100%',
 	overflowY: 'auto',
 	overflowX: 'hidden',
-	paddingTop: 5,
+	paddingTop: 15,
 	paddingLeft: 18,
 	paddingRight: 18,
 }
+const notesViewportContainer = {
+	paddingTop: 18,
+	maxWidth: '20%',
+	overflow: 'auto',
+}
 const sidebarContainer = {
+	position: 'relative',
 	flex:'0 0 auto',
 	overflowY: 'auto',
 	overflowX: 'hidden',
 	msOverflowStyle: '-ms-autohiding-scrollbar',
+	fontSize: 15,
 	paddingRight: 0,
 	paddingLeft: 15,
 	paddingBottom: 5,
@@ -41,7 +49,7 @@ const sidebarContainer = {
 const sidebar = {
 	flexGrow: 1,
 	minWidth: 200,
-	paddingTop: 15,
+	paddingTop: 25,
 }
 const glassPane = {
 	position: 'absolute',
@@ -56,6 +64,7 @@ const loadingBar = {
 	backgroundColor: '#29d'
 }
 
+export const ResponsiveLayoutContext = React.createContext()
 
 class ResponsiveLayout extends Component {
 	static propTypes = {
@@ -102,6 +111,12 @@ class ResponsiveLayout extends Component {
 		const sidebarClass = floatingMenu ? "nav-overlay" : "hidden-xs"
 
 		return (
+		<ResponsiveLayoutContext.Provider
+			value={{
+				showFloatingMenu: this.showFloatingMenu,
+				topbarOffset: topbarHeight,
+			}}
+		>
 			<div style={anetContainer} className="anet" >
 				<TopBar
 					topbarHeight={this.handleTopbarHeight}
@@ -124,7 +139,7 @@ class ResponsiveLayout extends Component {
 							className={`main-sidebar ${sidebarClass}`}
 						>
 							<div style={sidebar}>
-								{<Nav showFloatingMenu={this.showFloatingMenu} organizations={sidebarData} topbarOffset={topbarHeight} />}
+								<Nav organizations={sidebarData} />
 							</div>
 						</div>
 					}
@@ -135,8 +150,14 @@ class ResponsiveLayout extends Component {
 					>
 						{children}
 					</Element>
+					<Element
+						style={notesViewportContainer}
+						name="notesView"
+						id="notes-view"
+					/>
 				</div>
 			</div>
+		</ResponsiveLayoutContext.Provider>
 		)
 	}
 }

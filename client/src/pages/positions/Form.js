@@ -1,18 +1,18 @@
 import PropTypes from 'prop-types'
-import React from 'react'
-import {Button, HelpBlock} from 'react-bootstrap'
-import autobind from 'autobind-decorator'
+import React, { Component } from 'react'
 
-import ValidatableFormWrapper from 'components/ValidatableFormWrapper'
+import {Button, HelpBlock} from 'react-bootstrap'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
 import Fieldset from 'components/Fieldset'
-import Form from 'components/Form'
-import Messages from 'components/Messages'
 import Autocomplete from 'components/Autocomplete'
-import ButtonToggleGroup from 'components/ButtonToggleGroup'
+import Messages from 'components/Messages'
 
 import API from 'api'
-import Settings from 'Settings'
 import {Location, Organization, Person, Position} from 'models'
+import Settings from 'Settings'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -22,172 +22,258 @@ import { jumpToTop } from 'components/Page'
 import DictionaryField from 'HOC/DictionaryField'
 import utils from 'utils'
 
+import LOCATION_ICON from 'resources/locations.png'
+import ORGANIZATION_ICON from 'resources/organizations.png'
 import WARNING_ICON from 'resources/warning.png'
 
-class BasePositionForm extends ValidatableFormWrapper {
+class BasePositionForm extends Component {
 	static propTypes = {
-		position: PropTypes.object.isRequired,
-		original: PropTypes.object.isRequired,
+		initialValues: PropTypes.object.isRequired,
+		title: PropTypes.string,
 		edit: PropTypes.bool,
-		error: PropTypes.object,
-		success: PropTypes.object,
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
-	constructor(props) {
-		super(props)
+	static defaultProps = {
+		initialValues: new Position(),
+		title: '',
+		edit: false,
+	}
 
-		this.state = {
-			success: null,
-			error: null,
-			isBlocking: false,
-			errors: {},
-		}
-		this.CodeFieldWithLabel = DictionaryField(Form.Field)
+	statusButtons = [
+		{
+			id: 'statusActiveButton',
+			value: Position.STATUS.ACTIVE,
+			label: 'Active',
+		},
+		{
+			id: 'statusInactiveButton',
+			value: Position.STATUS.INACTIVE,
+			label: 'Inactive'
+		},
+	]
+	typeButtons = [
+		{
+			id: 'typeAdvisorButton',
+			value: Position.TYPE.ADVISOR,
+			label: Settings.fields.advisor.position.name,
+		},
+		{
+			id: 'typePrincipalButton',
+			value: Position.TYPE.PRINCIPAL,
+			label: Settings.fields.principal.position.name
+		},
+	]
+	nonAdminPermissionsButtons = [
+		{
+			id: 'permsAdvisorButton',
+			value: Position.TYPE.ADVISOR,
+			label: Settings.fields.advisor.position.type,
+		},
+	]
+	adminPermissionsButtons = this.nonAdminPermissionsButtons.concat([
+		{
+			id: 'permsSuperUserButton',
+			value: Position.TYPE.SUPER_USER,
+			label: Settings.fields.superUser.position.type,
+		},
+		{
+			id: 'permsAdminButton',
+			value: Position.TYPE.ADMINISTRATOR,
+			label: Settings.fields.administrator.position.type,
+		},
+	])
+	CodeFieldWithLabel = DictionaryField(Field)
+	state = {
+		error: null,
 	}
 
 	render() {
-		let {position, error, success, edit} = this.props
-		error = this.props.error || (this.state && this.state.error)
-		const { errors } = this.state
-		const hasErrors = Object.keys(errors).length > 0
-		const isPrincipal = position.type === Position.TYPE.PRINCIPAL
-		const positionSettings = isPrincipal ? Settings.fields.principal.position : Settings.fields.advisor.position
-
-		const { currentUser } = this.props
-		const isAdmin = currentUser && currentUser.isAdmin()
-
-		let orgSearchQuery = {status: Organization.STATUS.ACTIVE}
-		if (position.isPrincipal()) {
-			orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
-		} else {
-			orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
-			if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
-				orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
-				orgSearchQuery.parentOrgRecursively = true
-			}
+		const { currentUser, edit, title, ...myFormProps } = this.props
+		const { initialValues } = myFormProps
+		// For advisor types of positions, add permissions property.
+		// The permissions property allows selecting a
+		// specific advisor type and is removed in the onSubmit method.
+		if ([Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR].includes(initialValues.type)) {
+			initialValues.permissions = initialValues.type
 		}
-
-		// Reset the organization property when changing the organization type
-		if (position.organization && position.organization.type && (position.organization.type !== orgSearchQuery.type)) {
-			position.organization = ''
-		}
-
-		const {ValidatableForm, RequiredField} = this
-
-		let willAutoKickPerson = position.status === Position.STATUS.INACTIVE && position.person && position.person.uuid
 
 		return (
-			<div>
-			<NavigationWarning isBlocking={this.state.isBlocking} />
-
-			<ValidatableForm
-				formFor={position}
-				onChange={this.onChange}
+			<Formik
+				enableReinitialize={true}
 				onSubmit={this.onSubmit}
-				submitDisabled={hasErrors}
-				submitText="Save position"
-				horizontal
+				validationSchema={Position.yupSchema}
+				isInitialValid={() => Position.yupSchema.isValidSync(this.props.initialValues)}
+				{...myFormProps}
 			>
+			{({
+				handleSubmit,
+				isSubmitting,
+				isValid,
+				dirty,
+				errors,
+				setFieldValue,
+				values,
+				submitForm
+			}) => {
+				const isPrincipal = values.type === Position.TYPE.PRINCIPAL
+				const positionSettings = isPrincipal ? Settings.fields.principal.position : Settings.fields.advisor.position
 
-				<Messages error={error} success={success} />
+				const isAdmin = currentUser && currentUser.isAdmin()
+				const permissionsButtons = isAdmin ? this.adminPermissionsButtons : this.nonAdminPermissionsButtons
 
-				<Fieldset title={edit ? `Edit Position ${position.name}` : "Create a new Position"}>
-					<Form.Field id="type" disabled={this.props.edit}>
-						<ButtonToggleGroup>
-							<Button id="typeAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.name}</Button>
-							<Button id="typePrincipalButton" value={Position.TYPE.PRINCIPAL}>{Settings.fields.principal.position.name}</Button>
-						</ButtonToggleGroup>
-					</Form.Field>
-
-					<Form.Field id="status" >
-						<ButtonToggleGroup>
-							<Button id="statusActiveButton" value={ Position.STATUS.ACTIVE }>Active</Button>
-							<Button id="statusInactiveButton" value={ Position.STATUS.INACTIVE }>Inactive</Button>
-						</ButtonToggleGroup>
-
-						{willAutoKickPerson && <HelpBlock>
-							<span className="text-danger">Setting this position to inactive will automatically remove <LinkTo person={position.person}/> from this position.</span>
-						</HelpBlock> }
-					</Form.Field>
-
-					<RequiredField id="organization" validationState={errors.organization}>
-						<Autocomplete
-							placeholder="Select the organization for this position"
-							objectType={Organization}
-							fields="uuid, longName, shortName, identificationCode, type"
-							template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
-							queryParams={orgSearchQuery}
-							valueKey="shortName"
-						/>
-
-						{errors.organization && <HelpBlock>
-							<img src={WARNING_ICON} alt="" height="20px" />
-							Organization not found in ANET Database.
-						</HelpBlock>}
-					</RequiredField>
-
-					<this.CodeFieldWithLabel dictProps={positionSettings.code} id="code" />
-
-					<RequiredField id="name" label="Position Name" placeholder="Name/Description of Position"/>
-
-					{!isPrincipal &&
-						<Form.Field id="permissions">
-							<ButtonToggleGroup>
-								<Button id="permsAdvisorButton" value={Position.TYPE.ADVISOR}>{Settings.fields.advisor.position.type}</Button>
-								{isAdmin &&
-									<Button id="permsSuperUserButton" value={Position.TYPE.SUPER_USER}>{Settings.fields.superUser.position.type}</Button>
-								}
-								{isAdmin &&
-									<Button id="permsAdminButton" value={Position.TYPE.ADMINISTRATOR}>{Settings.fields.administrator.position.type}</Button>
-								}
-							</ButtonToggleGroup>
-						</Form.Field>
+				const orgSearchQuery = {status: Organization.STATUS.ACTIVE}
+				if (isPrincipal) {
+					orgSearchQuery.type = Organization.TYPE.PRINCIPAL_ORG
+				} else {
+					orgSearchQuery.type = Organization.TYPE.ADVISOR_ORG
+					if (currentUser && currentUser.position && currentUser.position.type === Position.TYPE.SUPER_USER) {
+						orgSearchQuery.parentOrgUuid = currentUser.position.organization.uuid
+						orgSearchQuery.parentOrgRecursively = true
 					}
+				}
+				// Reset the organization property when changing the organization type
+				if (values.organization && values.organization.type && (values.organization.type !== orgSearchQuery.type)) {
+					values.organization = {}
+				}
+				const willAutoKickPerson = values.status === Position.STATUS.INACTIVE && values.person && values.person.uuid
+				const action = <div>
+					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Position</Button>
+				</div>
+				return <div>
+					<NavigationWarning isBlocking={dirty} />
+					<Messages error={this.state.error} />
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={title} action={action} />
+						<Fieldset>
+							{this.props.edit
+								? <Field
+									name="type"
+									component={FieldHelper.renderReadonlyField}
+									humanValue={Position.humanNameOfType}
+								/>
+								: <Field
+									name="type"
+									component={FieldHelper.renderButtonToggleGroup}
+									buttons={this.typeButtons}
+								/>
+							}
 
-				</Fieldset>
+							<Field
+								name="status"
+								component={FieldHelper.renderButtonToggleGroup}
+								buttons={this.statusButtons}
+							>
+								{willAutoKickPerson &&
+									<HelpBlock>
+										<span className="text-danger">Setting this position to inactive will automatically remove <LinkTo person={values.person}/> from this position.</span>
+									</HelpBlock>
+								}
+							</Field>
 
-				<Fieldset title="Additional information">
-					<Form.Field id="location">
-						<Autocomplete
-							objectType={Location}
-							valueKey="name"
-							fields={Location.autocompleteQuery}
-							placeholder="Start typing to find a location where this Position will operate from..."
-							queryParams={{status: Location.STATUS.ACTIVE}}
-						/>
-					</Form.Field>
-				</Fieldset>
-			</ValidatableForm>
-			</div>
+							<Field
+								name="organization"
+								component={FieldHelper.renderSpecialField}
+								onChange={value => setFieldValue('organization', value)}
+								addon={ORGANIZATION_ICON}
+								widget={
+									<Autocomplete
+										objectType={Organization}
+										valueKey="shortName"
+										fields={Organization.autocompleteQuery}
+										placeholder="Select the organization for this position"
+										queryParams={orgSearchQuery}
+										template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
+									/>
+								}
+							/>
+
+							<this.CodeFieldWithLabel
+								dictProps={positionSettings.code}
+								name="code"
+								component={FieldHelper.renderInputField}
+							/>
+
+							<Field
+								name="name"
+								component={FieldHelper.renderInputField}
+								label={Settings.fields.position.name}
+								placeholder="Name/Description of Position"
+							/>
+
+							{!isPrincipal &&
+								<Field
+									name="permissions"
+									component={FieldHelper.renderButtonToggleGroup}
+									buttons={permissionsButtons}
+								/>
+							}
+						</Fieldset>
+
+						<Fieldset title="Additional information">
+							<Field
+								name="location"
+								component={FieldHelper.renderSpecialField}
+								onChange={value => setFieldValue('location', value)}
+								addon={LOCATION_ICON}
+								widget={
+									<Autocomplete
+										objectType={Location}
+										valueKey="name"
+										fields={Location.autocompleteQuery}
+										placeholder="Start typing to find a location where this Position will operate from..."
+										queryParams={{status: Location.STATUS.ACTIVE}}
+									/>
+								}
+							/>
+						</Fieldset>
+
+						<div className="submit-buttons">
+							<div>
+								<Button onClick={this.onCancel}>Cancel</Button>
+							</div>
+							<div>
+								<Button id="formBottomSubmit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Position</Button>
+							</div>
+						</div>
+					</Form>
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	onChange() {
-		this.setState({
-			errors : this.validatePosition(),
-			isBlocking: this.formHasUnsavedChanges(this.props.position, this.props.original),
+	onCancel = () => {
+		this.props.history.goBack()
+	}
+
+	onSubmit = (values, form) => {
+		return this.save(values, form)
+			.then(response => this.onSubmitSuccess(response, values, form))
+			.catch(error => {
+				this.setState({error})
+				jumpToTop()
+			})
+	}
+
+	onSubmitSuccess = (response, values, form) => {
+		const { edit } = this.props
+		const operation = edit ? 'updatePosition' : 'createPosition'
+		const position = new Position({uuid: (response[operation].uuid ? response[operation].uuid : this.props.initialValues.uuid)})
+		// After successful submit, reset the form in order to make sure the dirty
+		// prop is also reset (otherwise we would get a blocking navigation warning)
+		form.resetForm()
+		this.props.history.replace(Position.pathForEdit(position))
+		this.props.history.push({
+			pathname: Position.pathFor(position),
+			state: {
+				success: 'Position saved',
+			}
 		})
 	}
 
-	@autobind
-	validatePosition() {
-		let position = this.props.position
-		let errors = this.state.errors
-		if (position.organization && (typeof position.organization !== 'object')) {
-			errors.organization = 'error'
-		} else {
-			delete errors.organization
-		}
-
-		return errors
-	}
-
-	@autobind
-	onSubmit(event) {
-		let {position, edit} = this.props
-		position = Object.assign({}, position)
+	save = (values, form) => {
+		const position = new Position(values)
 		if (position.type !== Position.TYPE.PRINCIPAL) {
 			position.type = position.permissions || Position.TYPE.ADVISOR
 		}
@@ -198,31 +284,14 @@ class BasePositionForm extends ValidatableFormWrapper {
 		position.organization = utils.getReference(position.organization)
 		position.person = utils.getReference(position.person)
 		position.code = position.code || null //Need to null out empty position codes
-
+		const { edit } = this.props
 		const operation = edit ? 'updatePosition' : 'createPosition'
 		let graphql = operation + '(position: $position)'
 		graphql += edit ? '' : ' { uuid }'
 		const variables = { position: position }
 		const variableDef = '($position: PositionInput!)'
-		this.setState({isBlocking: false})
-		API.mutation(graphql, variables, variableDef, {disableSubmits: true})
-			.then(data => {
-				if (data[operation].uuid) {
-					position.uuid = data[operation].uuid
-				}
-				this.props.history.replace(Position.pathForEdit(position))
-				this.props.history.push({
-					pathname: Position.pathFor(position),
-					state: {
-						success: 'Position saved',
-					}
-				})
-			}).catch(error => {
-				this.setState({success: null, error: error})
-				jumpToTop()
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
-
 }
 
 const PositionForm = (props) => (

@@ -32,20 +32,20 @@ export function dateToQuery(queryKey, value) {
 	if (value.relative === BETWEEN) {
 		// Between start and end date
 		return {
-			[startKey]: moment(value.start).startOf('day').valueOf(),
-			[endKey]: moment(value.end).endOf('day').valueOf(),
+			[startKey]: moment(value.start).startOf('day'),
+			[endKey]: moment(value.end).endOf('day'),
 		}
 	}
 	else if (value.relative === BEFORE) {
 		// Before end date
 		return {
-			[endKey]: moment(value.end).endOf('day').valueOf(),
+			[endKey]: moment(value.end).endOf('day'),
 		}
 	}
 	else if (value.relative === AFTER) {
 		// After start date
 		return {
-			[startKey]: moment(value.start).startOf('day').valueOf(),
+			[startKey]: moment(value.start).startOf('day'),
 		}
 	}
 	else {

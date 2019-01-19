@@ -84,15 +84,16 @@ class BaseTopBar extends Component {
     }
 
     render() {
+        const { currentUser } = this.props
         return (
             <div
                 style={{ flex:'0 0 auto', zIndex: 100}}
                 ref={this.topbarDiv}
             >
-                <div>
-                    {this.props.currentUser && this.props.position && this.props.position.uuid === 0 && !this.props.isNewUser() && <NoPositionBanner />}
+                <div id="topbar">
                     <GeneralBanner options={this.bannerOptions()} />
                     <SecurityBanner location={this.props.location} />
+                    {currentUser && !currentUser.hasActivePosition() && !currentUser.isNewUser() && <NoPositionBanner />}
                     <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
                 </div>
             </div>

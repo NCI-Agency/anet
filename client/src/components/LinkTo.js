@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import decodeQuery from 'querystring/decode'
 import utils from 'utils'
+import _isEmpty from 'lodash/isEmpty'
 
 import * as Models from 'models'
 
@@ -14,6 +15,15 @@ const MODEL_NAMES = Object.keys(Models).map(key => {
 	Models[camel] = Models[key]
 	return camel
 })
+
+const modelPropTypes = MODEL_NAMES.reduce((map, name) => ({
+	...map,
+	[name]: PropTypes.oneOfType([
+		PropTypes.instanceOf(Models[name]),
+		PropTypes.object,
+		PropTypes.string,
+	])
+}), {})
 
 export default class LinkTo extends Component {
 	static propTypes = {
@@ -32,6 +42,7 @@ export default class LinkTo extends Component {
 		]),
 
 		target: PropTypes.string,
+		...modelPropTypes,
 	}
 
 	static defaultProps = {
@@ -54,7 +65,7 @@ export default class LinkTo extends Component {
 		}
 
 		let modelInstance = this.props[modelName]
-		if (!modelInstance)
+		if (_isEmpty(modelInstance))
 			return <span>{whenUnspecified}</span>
 
 		let modelClass = Models[modelName]
@@ -80,9 +91,3 @@ export default class LinkTo extends Component {
 		</Component>
 	}
 }
-
-MODEL_NAMES.forEach(key => LinkTo.propTypes[key] = PropTypes.oneOfType([
-	PropTypes.instanceOf(Models[key]),
-	PropTypes.object,
-	PropTypes.string,
-]))

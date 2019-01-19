@@ -37,7 +37,6 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
@@ -115,7 +114,7 @@ public class OrganizationResource {
 				if (org.getTasks() != null) {
 					//Assign all of these tasks to this organization.
 					for (Task p : org.getTasks()) {
-						engine.getTaskDao().setResponsibleOrgForTask(p, created);
+						engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(p), DaoUtils.getUuid(created));
 					}
 				}
 				if (org.getApprovalSteps() != null) {
@@ -159,7 +158,7 @@ public class OrganizationResource {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(h -> {
 				//Verify correct Organization
-				AuthUtils.assertSuperUserForOrg(user, org);
+				AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org));
 				final int numRows;
 				try {
 					numRows = dao.update(org);
@@ -178,8 +177,8 @@ public class OrganizationResource {
 					if (org.getTasks() != null) {
 						logger.debug("Editing tasks for {}", org);
 						Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
-								newTask -> engine.getTaskDao().setResponsibleOrgForTask(newTask, existing),
-								oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(Task.createWithUuid(oldTaskUuid), null));
+								newTask -> engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(newTask), DaoUtils.getUuid(existing)),
+								oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(oldTaskUuid, null));
 					}
 
 					if (org.getApprovalSteps() != null) {
@@ -229,8 +228,8 @@ public class OrganizationResource {
 		if (newStep.getApprovers() != null) {
 			try {
 				Utils.addRemoveElementsByUuid(oldStep.loadApprovers(engine.getContext()).get(), newStep.getApprovers(),
-					newPosition -> approvalStepDao.addApprover(newStep, newPosition),
-					oldPositionUuid -> approvalStepDao.removeApprover(newStep, Position.createWithUuid(oldPositionUuid)));
+					newPosition -> approvalStepDao.addApprover(newStep, DaoUtils.getUuid(newPosition)),
+					oldPositionUuid -> approvalStepDao.removeApprover(newStep, oldPositionUuid));
 			} catch (InterruptedException | ExecutionException e) {
 				throw new WebApplicationException("failed to load Approvers", e);
 			}

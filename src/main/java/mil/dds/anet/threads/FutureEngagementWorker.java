@@ -1,11 +1,11 @@
 package mil.dds.anet.threads;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +16,7 @@ import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.emails.FutureEngagementUpdated;
+import mil.dds.anet.utils.DaoUtils;
 
 public class FutureEngagementWorker implements Runnable {
 
@@ -43,7 +44,7 @@ public class FutureEngagementWorker implements Runnable {
 		ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageSize(Integer.MAX_VALUE);
 		query.setState(Collections.singletonList(ReportState.FUTURE));
-		DateTime endOfToday = DateTime.now().withHourOfDay(23).withMinuteOfHour(59).withSecondOfMinute(59);
+		Instant endOfToday = Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59).withSecond(59).withNano(999999999).toInstant();
 		query.setEngagementDateEnd(endOfToday);
 		List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
 		

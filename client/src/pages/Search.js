@@ -1,16 +1,18 @@
 import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {Alert, Table, Modal, Button, Nav, NavItem, Badge} from 'react-bootstrap'
+import {Alert, Table, Modal, Button, Nav, Badge} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 import pluralize from 'pluralize'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
 
 import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
-import Form from 'components/Form'
 import Messages from 'components/Messages'
 import PositionTable from 'components/PositionTable'
 
@@ -22,7 +24,6 @@ import {Person, Organization, Task} from 'models'
 import FileSaver from 'file-saver'
 
 import DOWNLOAD_ICON from 'resources/download.png'
-import EVERYTHING_ICON from 'resources/search-alt.png'
 import REPORTS_ICON from 'resources/reports.png'
 import PEOPLE_ICON from 'resources/people.png'
 import LOCATIONS_ICON from 'resources/locations.png'
@@ -36,11 +37,9 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import _isEqualWith from 'lodash/isEqualWith'
 import utils from 'utils'
-import ReactDOM from 'react-dom'
 import { jumpToTop } from 'components/Page'
 
-import AppContext from 'components/AppContext'
-import Scrollspy from 'react-scrollspy'
+import { AnchorNavItem } from 'components/Nav'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
@@ -90,11 +89,10 @@ const SEARCH_CONFIG = {
 	}
 }
 
-class BaseSearch extends Page {
+class Search extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		scrollspyOffset: PropTypes.number,
 	}
 
 	successToastId = 'success-message';
@@ -105,40 +103,27 @@ class BaseSearch extends Page {
 			toastId: this.successToastId
 		})
 	}
-
-	constructor(props) {
-		super(props)
-
-		Object.assign(this.state, {
-			success: null,
-			error: null,
-			didSearch: false,
-			query: props.searchQuery.text || null,
-			pageNum: {
-				reports: 0,
-				people: 0,
-				organizations: 0,
-				positions: 0,
-				locations: 0,
-				tasks: 0,
-			},
-			saveSearch: {show: false},
-			results: {
-				reports: null,
-				people: null,
-				organizations: null,
-				positions: null,
-				locations: null,
-				tasks: null,
-			},
-		})
+	state = {
+		success: null,
+		error: null,
+		didSearch: false,
+		query: this.props.searchQuery.text || null,
+		results: {
+			reports: null,
+			people: null,
+			organizations: null,
+			positions: null,
+			locations: null,
+			tasks: null,
+		},
+		showSaveSearch: false,
 	}
 
-	getSearchPart(type, query, pageSize) {
+	getSearchPart(type, query, pageNum, pageSize) {
 		type = type.toLowerCase()
 		let subQuery = Object.assign({}, query)
+		subQuery.pageNum = (pageNum === undefined) ? 0 : pageNum
 		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
-		subQuery.pageNum = this.state.pageNum[type]
 
 		let config = SEARCH_CONFIG[type]
 		if (config.sortBy) {
@@ -156,16 +141,15 @@ class BaseSearch extends Page {
 	}
 
 	@autobind
-	_dataFetcher(props, callback, pageSize) {
-
+	_dataFetcher(props, callback, pageNum, pageSize) {
 		let {searchQuery} = props
 		let query = this.getSearchQuery(props)
 		let parts = []
 		if (searchQuery.objectType) {
-			parts.push(this.getSearchPart(searchQuery.objectType, query, pageSize))
+			parts.push(this.getSearchPart(searchQuery.objectType, query, pageNum, pageSize))
 		} else {
 			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, query, pageSize))
+				parts.push(this.getSearchPart(key, query, pageNum, pageSize))
 			})
 		}
 		return callback(parts)
@@ -207,42 +191,39 @@ class BaseSearch extends Page {
 		const taskShortLabel = Settings.fields.task.shortLabel
 		return (
 			<div>
-				<ToastContainer/>
+				<ToastContainer />
 				<SubNav subnavElemId="search-nav">
 					<div><Button onClick={this.props.history.goBack} bsStyle="link">&lt; Return to previous page</Button></div>
 					<Nav stacked bsStyle="pills">
-						<Scrollspy className="nav" currentClassName="active" offset={this.props.scrollspyOffset}
-							items={ ['organizations', 'people', 'positions', 'tasks', 'locations', 'reports'] }>
-							<NavItem href="#organizations" disabled={!numOrganizations}>
-								<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
-								{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="organizations" disabled={!numOrganizations}>
+							<img src={ORGANIZATIONS_ICON} alt="" /> Organizations
+							{numOrganizations > 0 && <Badge pullRight>{numOrganizations}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#people" disabled={!numPeople}>
-								<img src={PEOPLE_ICON} alt="" /> People
-								{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="people" disabled={!numPeople}>
+							<img src={PEOPLE_ICON} alt="" /> People
+							{numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#positions" disabled={!numPositions}>
-								<img src={POSITIONS_ICON} alt="" /> Positions
-								{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="positions" disabled={!numPositions}>
+							<img src={POSITIONS_ICON} alt="" /> Positions
+							{numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#tasks" disabled={!numTasks}>
-								<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
-								{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="tasks" disabled={!numTasks}>
+							<img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
+							{numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#locations" disabled={!numLocations}>
-								<img src={LOCATIONS_ICON} alt="" /> Locations
-								{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
-							</NavItem>
+						<AnchorNavItem to="locations" disabled={!numLocations}>
+							<img src={LOCATIONS_ICON} alt="" /> Locations
+							{numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
+						</AnchorNavItem>
 
-							<NavItem href="#reports" disabled={!numReports}>
-								<img src={REPORTS_ICON} alt="" /> Reports
-								{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
-							</NavItem>
-						</Scrollspy>
+						<AnchorNavItem to="reports" disabled={!numReports}>
+							<img src={REPORTS_ICON} alt="" /> Reports
+							{numReports > 0 && <Badge pullRight>{numReports}</Badge>}
+						</AnchorNavItem>
 					</Nav>
 				</SubNav>
 
@@ -252,7 +233,7 @@ class BaseSearch extends Page {
 							<img src={DOWNLOAD_ICON} height={16} alt="Export search results" />
 						</Button>
 					}
-					<Button onClick={this.showSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
+					<Button onClick={this.openSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
 				</div>
 
 				<Breadcrumbs items={[['Search results', '']]} />
@@ -329,11 +310,8 @@ class BaseSearch extends Page {
 
 	@autobind
 	goToPage(type, pageNum) {
-		const pageNums = this.state.pageNum
-		pageNums[type] = pageNum
-
 		const query = this.getSearchQuery()
-		const part = this.getSearchPart(type, query)
+		const part = this.getSearchPart(type, query, pageNum)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
@@ -446,35 +424,70 @@ class BaseSearch extends Page {
 	}
 
 	renderSaveModal() {
-		return <Modal show={this.state.saveSearch.show} onHide={this.closeSaveModal}>
+		return <Modal show={this.state.showSaveSearch} onHide={this.closeSaveModal}>
 			<Modal.Header closeButton>
 				<Modal.Title>Save search</Modal.Title>
 			</Modal.Header>
 
 			<Modal.Body>
-				<Form formFor={this.state.saveSearch} onChange={this.onChangeSaveSearch}
-					onSubmit={this.onSubmitSaveSearch} submitText={false}>
-					<Form.Field id="name" placeholder="Give this saved search a name" />
-					<Button type="submit" bsStyle="primary" id="saveSearchModalSubmitButton" >Save</Button>
-				</Form>
+				<Formik
+					enableReinitialize
+					onSubmit={this.onSubmitSaveSearch}
+					initialValues={{name: ''}}
+				>
+				{({
+					values,
+					submitForm
+				}) => {
+					return <Form>
+						<Field
+							name="name"
+							component={FieldHelper.renderInputField}
+							placeholder="Give this saved search a name"
+							vertical={true}
+						/>
+						<div className="submit-buttons">
+							<div>
+								<Button id="saveSearchModalSubmitButton" bsStyle="primary" type="button" onClick={submitForm}>Save</Button>
+							</div>
+						</div>
+					</Form>
+					}
+				}
+				</Formik>
 			</Modal.Body>
 		</Modal>
 	}
 
-
-	@autobind
-	onChangeSaveSearch() {
-		let savedSearch = this.state.saveSearch
-		this.setState({saveSearch: savedSearch})
+	onSubmitSaveSearch = (values, form) => {
+		this.saveSearch(values, form)
+			.then(response => this.onSubmitSaveSearchSuccess(response, values, form))
+			.catch(error => {
+				this.setState({
+					success: null,
+					error: error,
+					showSaveSearch: false,
+				})
+				jumpToTop()
+			})
 	}
 
-	@autobind
-	onSubmitSaveSearch(event) {
-		event.stopPropagation()
-		event.preventDefault()
+	onSubmitSaveSearchSuccess = (response, values, form) => {
+		if (response.createSavedSearch.uuid) {
+			this.setState({
+				success: 'Search saved',
+				error: null,
+				showSaveSearch: false,
+			})
+			jumpToTop()
+		}
+	}
 
-		const savedSearch = Object.without(this.state.saveSearch, 'show')
-		savedSearch.query = JSON.stringify(this.getSearchQuery())
+	saveSearch = (values, form) => {
+		const savedSearch = {
+			name: values.name,
+			query: JSON.stringify(this.getSearchQuery())
+		}
 		if (this.props.searchQuery.objectType) {
 			savedSearch.objectType = this.props.searchQuery.objectType.toUpperCase()
 		}
@@ -482,29 +495,17 @@ class BaseSearch extends Page {
 		let graphql = operation + '(savedSearch: $savedSearch) { uuid }'
 		const variables = { savedSearch: savedSearch }
 		const variableDef = '($savedSearch: SavedSearchInput!)'
-		API.mutation(graphql, variables, variableDef)
-			.then(data => {
-				if (data[operation].uuid) {
-					this.setState({
-						success: 'Search saved',
-						error: null,
-						saveSearch: {show: false}
-					})
-					jumpToTop()
-				}
-			}).catch(error => {
-				this.setState({
-					success: null,
-					error: error,
-					saveSearch: {show: false}
-				})
-				jumpToTop()
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
 
 	@autobind
-	showSaveModal() {
-		this.setState({saveSearch: {show: true, name: ''}})
+	openSaveModal() {
+		this.setState({showSaveSearch: true})
+	}
+
+	@autobind
+	closeSaveModal() {
+		this.setState({showSaveSearch: false})
 	}
 
 	@autobind
@@ -518,25 +519,12 @@ class BaseSearch extends Page {
 
 	@autobind
 	exportSearchResults() {
-		this._dataFetcher(this.props, this._exportSearchResultsCallback, 0)
-	}
-
-	@autobind
-	closeSaveModal() {
-		this.setState({saveSearch: {show: false}})
+		this._dataFetcher(this.props, this._exportSearchResultsCallback, 0, 0)
 	}
 }
 
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery,
 })
-
-const Search = (props) => (
-	<AppContext.Consumer>
-		{context =>
-			<BaseSearch scrollspyOffset={context.scrollspyOffset} {...props} />
-		}
-	</AppContext.Consumer>
-)
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Search))

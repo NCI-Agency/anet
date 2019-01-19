@@ -11,6 +11,7 @@ test('checking super user permissions', async t => {
     let $rebeccaLink = await findSuperUserLink(t, 'CTR BECCABON, Rebecca')
 
     await $rebeccaLink.click()
+    await t.context.driver.wait(t.context.until.stalenessOf($rebeccaLink))
 
     await validateUserCanEditUserForCurrentPage(t)
 
@@ -22,6 +23,7 @@ test('checking super user permissions', async t => {
     await t.context.pageHelpers.clickMyOrgLink()
     let $jacobLink = await findSuperUserLink(t, 'CIV JACOBSON, Jacob')
     await $jacobLink.click()
+    await t.context.driver.wait(t.context.until.stalenessOf($jacobLink))
 
     await validateUserCanEditUserForCurrentPage(t)
 
@@ -71,6 +73,7 @@ test('checking admin permissions', async t => {
     await t.context.pageHelpers.clickMyOrgLink()
     let $arthurLink = await findSuperUserLink(t, 'CIV DMIN, Arthur')
     await $arthurLink.click()
+    await t.context.driver.wait(t.context.until.stalenessOf($arthurLink))
 
     await validateUserCanEditUserForCurrentPage(t)
     // User is admin, and can therefore edit an admin position type
@@ -91,6 +94,7 @@ test('admins can edit superusers and their positions', async t => {
     let [$rebeccaPersonLink] =
         await getUserPersonAndPositionFromSearchResults(t, 'rebecca', 'CTR BECCABON, Rebecca', 'EF 2.2 Final Reviewer')
     await $rebeccaPersonLink.click()
+    await t.context.driver.wait(t.context.until.stalenessOf($rebeccaPersonLink))
     await validateUserCanEditUserForCurrentPage(t)
 
     // User is admin, and can therefore edit a super user position type
@@ -118,7 +122,7 @@ function validateUserCannotEditOtherUser(testTitle, user, searchQuery, otherUser
 }
 
 async function findSuperUserLink(t, desiredSuperUserName) {
-    let $superUserLinks = await t.context.$$('#superUsers p a')
+    let $superUserLinks = await t.context.$$('[name=superUsers] p a')
     let $foundLink
     for (let $superUserLink of $superUserLinks) {
         let superUserName = await $superUserLink.getText()
@@ -159,7 +163,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
     await t.context.pageHelpers.clickFormBottomSubmit()
 
     await assertElementText(t, await $('.alert'), 'Person saved')
-    await assertElementText(t, await $('#biography p'), fakeBioText + originalBioText)
+    await assertElementText(t, await $('.biography p'), fakeBioText + originalBioText)
 }
 
 async function editAndSavePositionFromCurrentUserPage(t, validateTrue) {
@@ -240,23 +244,23 @@ async function getPrincipalOrgFromSearchResults(t, principalOrgName) {
 }
 
 async function validateSuperUserPrincipalOrgPermissions(t) {
-  let {$, assertElementDisabled, assertElementEnabled} = t.context
+  let {$, assertElementNotPresent} = t.context
 
   let $editPrincipalOrgButton = await $('#editButton')
   await t.context.driver.wait(t.context.until.elementIsVisible($editPrincipalOrgButton))
   await $editPrincipalOrgButton.click()
-  await assertElementDisabled(t, '#advisorOrgButton',
-    'Field advisorOrgButton of a principal organization should be disabled for super users')
-  await assertElementDisabled(t, '#principalOrgButton',
-  'Field principalOrgButton of a principal organization should be disabled for super users')
-  await assertElementDisabled(t, '#parentOrg',
-    'Field parentOrganization of a principal organization should be disabled for super users')
-  await assertElementDisabled(t, '#shortName',
-      'Field shortName of a principal organization should be disabled for super users')
-  await assertElementDisabled(t, '#longName',
-      'Field longName of a principal organization should be disabled for super users')
-  await assertElementDisabled(t, '#identificationCode',
-      'Field identificationCode of a principal organization should be disabled for super users')
+  await assertElementNotPresent(t, '#typeAdvisorButton',
+    'Field advisorOrgButton of a principal organization should be absent for super users')
+  await assertElementNotPresent(t, '#typePrincipalButton',
+  'Field principalOrgButton of a principal organization should be absent for super users')
+  await assertElementNotPresent(t, '#parentOrg',
+    'Field parentOrganization of a principal organization should be absent for super users')
+  await assertElementNotPresent(t, '#shortName',
+      'Field shortName of a principal organization should be absent for super users')
+  await assertElementNotPresent(t, '#longName',
+      'Field longName of a principal organization should be absent for super users')
+  await assertElementNotPresent(t, '#identificationCode',
+      'Field identificationCode of a principal organization should be absent for super users')
 }
 
 async function validateAdminPrincipalOrgPermissions(t) {
@@ -265,10 +269,10 @@ async function validateAdminPrincipalOrgPermissions(t) {
   let $editPrincipalOrgButton = await $('#editButton')
   await t.context.driver.wait(t.context.until.elementIsVisible($editPrincipalOrgButton))
   await $editPrincipalOrgButton.click()
-  await assertElementEnabled(t, '#advisorOrgButton',
+  await assertElementEnabled(t, '#typeAdvisorButton',
     'Field advisorOrgButton of a principal organization should be enabled for admins')
-  await assertElementEnabled(t, '#principalOrgButton',
-  'Field principalOrgButton of a principal organization should be enabled for admins')
+  await assertElementEnabled(t, '#typePrincipalButton',
+    'Field principalOrgButton of a principal organization should be enabled for admins')
   await assertElementEnabled(t, '#parentOrg',
     'Field parentOrganization of a principal organization should be enabled for admins')
   await assertElementEnabled(t, '#shortName',

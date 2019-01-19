@@ -14,7 +14,7 @@ public class NewReportCommentEmail extends AnetEmailAction {
 	Comment comment;
 	
 	public NewReportCommentEmail() { 
-		templateName = "/emails/newReportComment.ftl";
+		templateName = "/emails/newReportComment.ftlh";
 		subject = "New Comment on your ANET Report";
 	}
 	
@@ -43,7 +43,8 @@ public class NewReportCommentEmail extends AnetEmailAction {
 	}
 
 	public void setComment(Comment comment) {
-		this.comment = Comment.createWithUuid(comment.getUuid());
+		this.comment = new Comment();
+		this.comment.setUuid(comment.getUuid());
 	}
 
 }

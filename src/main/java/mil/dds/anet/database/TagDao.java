@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.Handle;
@@ -43,10 +44,7 @@ public class TagDao implements IAnetDao<Tag> {
 	}
 
 	public Tag getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getTagByUuid */ SELECT * from tags where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new TagMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -61,6 +59,8 @@ public class TagDao implements IAnetDao<Tag> {
 				"/* tagInsert */ INSERT INTO tags (uuid, name, description, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt)")
 			.bindBean(t)
+			.bind("createdAt", DaoUtils.asLocalDateTime(t.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt()))
 			.execute();
 		return t;
 	}
@@ -70,6 +70,7 @@ public class TagDao implements IAnetDao<Tag> {
 		return dbHandle.createUpdate("/* updateTag */ UPDATE tags "
 					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(t)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt()))
 				.execute();
 	}
 

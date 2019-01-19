@@ -6,13 +6,11 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import org.joda.time.DateTime;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -34,13 +32,13 @@ public class Person extends AbstractAnetBean implements Principal {
 	private String phoneNumber;
 	private String gender;
 	private String country;
-	private DateTime endOfTourDate;
+	private Instant endOfTourDate;
 	
 	private String rank;
 	private String biography;
 	private String domainUsername;
 		
-	private Optional<Position> position;
+	private ForeignObjectHolder<Position> position = new ForeignObjectHolder<>();
 
 	private List<PersonPositionHistory> previousPositions;
 	
@@ -121,11 +119,11 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 
 	@GraphQLQuery(name="endOfTourDate")
-	public DateTime getEndOfTourDate() {
+	public Instant getEndOfTourDate() {
 		return endOfTourDate;
 	}
 
-	public void setEndOfTourDate(DateTime endOfTourDate) {
+	public void setEndOfTourDate(Instant endOfTourDate) {
 		this.endOfTourDate = endOfTourDate;
 	}
 
@@ -157,28 +155,30 @@ public class Person extends AbstractAnetBean implements Principal {
 	}
 
 	@GraphQLQuery(name="position")
-	public Position loadPosition() {
-		if (position == null) {
-			position = Optional.ofNullable(AnetObjectEngine.getInstance()
-					.getPositionDao().getCurrentPositionForPerson(this));
+	public synchronized Position loadPosition() {
+		if (position.hasForeignObject()) {
+			return position.getForeignObject();
 		}
-		return position.orElse(null);
+		final Position o = AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
+		position.setForeignObject(o);
+		return o;
 	}
-	
+
+	public void setPosition(Position position) {
+		this.position = new ForeignObjectHolder<>(position);
+	}
+
 	@GraphQLIgnore
 	public Position getPosition() {
-		return (position == null) ? null : position.orElse(null);
-	}
-	
-	public void setPosition(Position position) { 
-		if (position != null) { 
-			this.position = Optional.of(position);
-		}
+		return position.getForeignObject();
 	}
 
 	@GraphQLQuery(name="previousPositions")
 	public CompletableFuture<List<PersonPositionHistory>> loadPreviousPositions(@GraphQLRootContext Map<String, Object> context) {
-		return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, this)
+		if (previousPositions != null) {
+			return CompletableFuture.completedFuture(previousPositions);
+		}
+		return AnetObjectEngine.getInstance().getPersonDao().getPositionHistory(context, uuid)
 				.thenApply(o -> { previousPositions = o; return o; });
 	}
 
@@ -226,8 +226,8 @@ public class Person extends AbstractAnetBean implements Principal {
 			&& Objects.equals(other.getRank(), rank)
 			&& Objects.equals(other.getBiography(), biography)
 			&& Objects.equals(other.getPendingVerification(), pendingVerification)
-			&& (createdAt != null) ? (createdAt.isEqual(other.getCreatedAt())) : (other.getCreatedAt() == null)
-			&& (updatedAt != null) ? (updatedAt.isEqual(other.getUpdatedAt())) : (other.getUpdatedAt() == null);
+			&& (createdAt != null) ? (createdAt.equals(other.getCreatedAt())) : (other.getCreatedAt() == null)
+			&& (updatedAt != null) ? (updatedAt.equals(other.getUpdatedAt())) : (other.getUpdatedAt() == null);
 		return b;
  	}
 	

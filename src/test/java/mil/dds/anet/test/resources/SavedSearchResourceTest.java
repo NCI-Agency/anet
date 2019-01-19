@@ -6,10 +6,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.core.GenericType;
-
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import mil.dds.anet.beans.Location;
@@ -37,11 +36,11 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ss.setQuery("{\"text\" : \"spreadsheets\"}");
 		
 		final String ssUuid = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch", "SavedSearchInput",
-				ss, new GenericType<GraphQLResponse<SavedSearch>>() {});
+				ss, new TypeReference<GraphQLResponse<SavedSearch>>() {});
 		assertThat(ssUuid).isNotNull();
 		
 		//Fetch a list of all of my saved searches
-		List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});
+		List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
 		final Optional<SavedSearch> optional = mine.stream().filter(e -> e.getUuid().equals(ssUuid)).findFirst();
 		assertThat(optional).get().isNotNull();
 		SavedSearch created = optional.get();
@@ -51,14 +50,14 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 
 		ReportSearchQuery query = mapper.readValue(created.getQuery(), ReportSearchQuery.class);
 		final AnetBeanList<Report> results = graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput",
-				"uuid intent state", query, new GenericType<GraphQLResponse<AnetBeanList<Report>>>() {});
+				"uuid intent state", query, new TypeReference<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(results.getList()).isNotEmpty();
 		
 		//Delete it
 		final Integer nrDeleted = graphQLHelper.deleteObject(jack, "deleteSavedSearch", created.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 		
-		mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});
+		mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
 		assertThat(mine).doesNotContain(created);
 		
 	}
@@ -74,11 +73,11 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 		ss.setQuery("{\"text\" : \"kabul\"}");
 
 		final String ssUuid = graphQLHelper.createObject(jack, "createSavedSearch", "savedSearch", "SavedSearchInput",
-				ss, new GenericType<GraphQLResponse<SavedSearch>>() {});
+				ss, new TypeReference<GraphQLResponse<SavedSearch>>() {});
 		assertThat(ssUuid).isNotNull();
 
 		//Fetch a list of all of my saved searches
-		List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});
+		List<SavedSearch> mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
 		final Optional<SavedSearch> optional = mine.stream().filter(e -> e.getUuid().equals(ssUuid)).findFirst();
 		assertThat(optional).get().isNotNull();
 		SavedSearch created = optional.get();
@@ -88,14 +87,14 @@ public class SavedSearchResourceTest extends AbstractResourceTest {
 
 		LocationSearchQuery query = mapper.readValue(created.getQuery(), LocationSearchQuery.class);
 		final AnetBeanList<Location> results = graphQLHelper.searchObjects(jack, "locationList", "query", "LocationSearchQueryInput",
-				"uuid name status lat lng", query, new GenericType<GraphQLResponse<AnetBeanList<Location>>>() {});
+				"uuid name status lat lng", query, new TypeReference<GraphQLResponse<AnetBeanList<Location>>>() {});
 		assertThat(results.getList()).isNotEmpty();
 
 		//Delete it
 		final Integer nrDeleted = graphQLHelper.deleteObject(jack, "deleteSavedSearch", created.getUuid());
 		assertThat(nrDeleted).isEqualTo(1);
 
-		mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new GenericType<GraphQLResponse<List<SavedSearch>>>() {});
+		mine = graphQLHelper.getObjectList(jack, "mySearches", FIELDS, new TypeReference<GraphQLResponse<List<SavedSearch>>>() {});
 		assertThat(mine).doesNotContain(created);
 	}
 }

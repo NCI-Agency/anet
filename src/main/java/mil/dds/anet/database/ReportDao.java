@@ -2,6 +2,7 @@ package mil.dds.anet.database;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
@@ -44,7 +44,6 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
-import mil.dds.anet.search.sqlite.SqliteReportSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -69,10 +68,9 @@ public class ReportDao implements IAnetDao<Report> {
 	public ReportDao(Handle db) {
 		this.dbHandle = db;
 		this.weekFormat = getWeekFormat(DaoUtils.getDbType(db));
-		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM reports, people "
-				+ "WHERE reports.uuid IN ( <uuids> ) "
-				+ "AND reports.\"authorUuid\" = people.uuid";
+		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
+				+ "FROM reports "
+				+ "WHERE reports.uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Report>(db, idBatcherSql, "uuids", new ReportMapper());
 
 		final String attendeesBatcherSql = "/* batch.getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS
@@ -114,7 +112,7 @@ public class ReportDao implements IAnetDao<Report> {
 
 	public AnetBeanList<Report> getAll(int pageNum, int pageSize, Person user) {
 		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle),
-				"Reports", "reports join people on reports.\"authorUuid\" = people.uuid", REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS,
+				"Reports", "reports", REPORT_FIELDS,
 				"reports.\"createdAt\"");
 		final Query query = dbHandle.createQuery(sql)
 			.bind("limit", pageSize)
@@ -150,13 +148,13 @@ public class ReportDao implements IAnetDao<Report> {
 
 				h.createUpdate(sql.toString())
 					.bindBean(r)
+					.bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
+					.bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
+					.bind("engagementDate", DaoUtils.asLocalDateTime(r.getEngagementDate()))
+					.bind("releasedAt", DaoUtils.asLocalDateTime(r.getReleasedAt()))
 					.bind("state", DaoUtils.getEnumId(r.getState()))
 					.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
 					.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
-					.bind("locationUuid", DaoUtils.getUuid(r.getLocation()))
-					.bind("authorUuid", DaoUtils.getUuid(r.getAuthor()))
-					.bind("advisorOrgUuid", DaoUtils.getUuid(r.getAdvisorOrg()))
-					.bind("principalOrgUuid", DaoUtils.getUuid(r.getPrincipalOrg()))
 					.execute();
 
 				// Write sensitive information (if allowed)
@@ -227,13 +225,12 @@ public class ReportDao implements IAnetDao<Report> {
 			keyField = "uuid";
 			key = uuid;
 		}
-		final Report result = dbHandle.createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS
-				+ "FROM reports, people "
-				+ "WHERE reports.\"" + keyField + "\" = :key "
-				+ "AND reports.\"authorUuid\" = people.uuid")
-				.bind("key", key)
-				.map(new ReportMapper())
-				.findFirst().orElse(null);
+		final Report result = dbHandle.createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS
+				+ "FROM reports "
+				+ "WHERE reports.\"" + keyField + "\" = :key")
+			.bind("key", key)
+			.map(new ReportMapper())
+			.findFirst().orElse(null);
 		if (result == null) { return null; }
 		result.setUser(user);
 		return result;
@@ -278,14 +275,12 @@ public class ReportDao implements IAnetDao<Report> {
 
 		return dbHandle.createUpdate(sql.toString())
 			.bindBean(r)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
+			.bind("engagementDate", DaoUtils.asLocalDateTime(r.getEngagementDate()))
+			.bind("releasedAt", DaoUtils.asLocalDateTime(r.getReleasedAt()))
 			.bind("state", DaoUtils.getEnumId(r.getState()))
-			.bind("locationUuid", DaoUtils.getUuid(r.getLocation()))
-			.bind("authorUuid", DaoUtils.getUuid(r.getAuthor()))
-			.bind("approvalStepUuid", DaoUtils.getUuid(r.getApprovalStep()))
 			.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
 			.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
-			.bind("advisorOrgUuid", DaoUtils.getUuid(r.getAdvisorOrg()))
-			.bind("principalOrgUuid", DaoUtils.getUuid(r.getPrincipalOrg()))
 			.execute();
 	}
 
@@ -345,11 +340,11 @@ public class ReportDao implements IAnetDao<Report> {
 			.execute();
 	}
 
-	public int removeTaskFromReport(Task p, Report r) {
+	public int removeTaskFromReport(String taskUuid, Report r) {
 		return dbHandle.createUpdate("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"taskUuid\" = :taskUuid")
 				.bind("reportUuid", r.getUuid())
-				.bind("taskUuid", p.getUuid())
+				.bind("taskUuid", taskUuid)
 				.execute();
 	}
 
@@ -436,17 +431,17 @@ public class ReportDao implements IAnetDao<Report> {
 		
 	}
 
-	private DateTime getRollupEngagmentStart(DateTime start) { 
+	private Instant getRollupEngagmentStart(Instant start) {
 		String maxReportAgeStr = AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
 		if (maxReportAgeStr == null) { 
 			throw new WebApplicationException("Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS); 
 		} 
 		Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
-		return start.minusDays(maxReportAge);
+		return start.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
 	}
 	
 	/* Generates the Rollup Graph for a particular Organization Type, starting at the root of the org hierarchy */
-	public List<RollupGraph> getDailyRollupGraph(DateTime start, DateTime end, OrganizationType orgType, Map<String, Organization> nonReportingOrgs) {
+	public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, OrganizationType orgType, Map<String, Organization> nonReportingOrgs) {
 		final List<Map<String, Object>> results = rollupQuery(start, end, orgType, null, false);
 		final Map<String,Organization> orgMap = AnetObjectEngine.getInstance().buildTopLevelOrgHash(orgType);
 		
@@ -454,7 +449,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 	
 	/* Generates a Rollup graph for a particular organization.  Starting with a given parent Organization */
-	public List<RollupGraph> getDailyRollupGraph(DateTime start, DateTime end, String parentOrgUuid, OrganizationType orgType, Map<String, Organization> nonReportingOrgs) {
+	public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, String parentOrgUuid, OrganizationType orgType, Map<String, Organization> nonReportingOrgs) {
 		List<Organization> orgList = null;
 		final Map<String, Organization> orgMap;
 		if (!parentOrgUuid.equals(Organization.DUMMY_ORG_UUID)) {
@@ -479,7 +474,7 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	/* Generates Advisor Report Insights for Organizations */
-	public List<Map<String,Object>> getAdvisorReportInsights(DateTime start, DateTime end, String orgUuid) {
+	public List<Map<String,Object>> getAdvisorReportInsights(Instant start, Instant end, String orgUuid) {
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		StringBuilder sql = new StringBuilder();
 
@@ -598,8 +593,8 @@ public class ReportDao implements IAnetDao<Report> {
 					""};
 		}
 
-		sqlArgs.put("startDate", start);
-		sqlArgs.put("endDate", end);
+		DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
+		DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
 		sqlArgs.put("positionAdvisor", Position.PositionType.ADVISOR.ordinal());
 		sqlArgs.put("reportDraft", ReportState.DRAFT.ordinal());
 		sqlArgs.put("reportPending", ReportState.PENDING_APPROVAL.ordinal());
@@ -618,11 +613,11 @@ public class ReportDao implements IAnetDao<Report> {
 	 * @param orgs: the list of orgs for whose reports to find, null means all
 	 * @param missingOrgReports: true if we want to look for reports specifically with NULL org uuid's.
 	 */
-	private List<Map<String,Object>> rollupQuery(DateTime start, 
-			DateTime end, 
-			OrganizationType orgType, 
-			List<Organization> orgs, 
-			boolean missingOrgReports) { 
+	private List<Map<String,Object>> rollupQuery(Instant start,
+			Instant end,
+			OrganizationType orgType,
+			List<Organization> orgs,
+			boolean missingOrgReports) {
 		String orgColumn = String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationUuid" : "principalOrganizationUuid");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
@@ -635,16 +630,13 @@ public class ReportDao implements IAnetDao<Report> {
 		if (DaoUtils.getDbType(dbHandle) != DaoUtils.DbType.SQLITE) {
 			sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
 					+ "AND \"engagementDate\" > :engagementDateStart ");
-			sqlArgs.put("startDate", start);
-			sqlArgs.put("endDate", end.plusMillis(1));
-			sqlArgs.put("engagementDateStart", getRollupEngagmentStart(start));
 		} else { 
 			sql.append("\"releasedAt\"  >= DateTime(:startDate) AND \"releasedAt\" <= DateTime(:endDate) "
 					+ "AND \"engagementDate\" > DateTime(:engagementDateStart) ");
-			sqlArgs.put("startDate", SqliteReportSearcher.sqlitePattern.print(start));
-			sqlArgs.put("endDate", SqliteReportSearcher.sqlitePattern.print(end));
-			sqlArgs.put("engagementDateStart", SqliteReportSearcher.sqlitePattern.print(getRollupEngagmentStart(start)));
 		}
+		DaoUtils.addInstantAsLocalDateTime(sqlArgs, "startDate", start);
+		DaoUtils.addInstantAsLocalDateTime(sqlArgs, "endDate", end);
+		DaoUtils.addInstantAsLocalDateTime(sqlArgs, "engagementDateStart", getRollupEngagmentStart(start));
 		
 		if (!Utils.isEmptyOrNull(orgs)) {
 			sql.append("AND " + orgColumn + " IN ( <orgUuids> ) ");

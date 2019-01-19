@@ -117,7 +117,7 @@ public class PersonResource {
 		Person created = dao.insert(p);
 		
 		if (created.getPosition() != null) { 
-			AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(created, created.getPosition());
+			AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(created.getUuid(), created.getPosition().getUuid());
 		}
 		
 		AnetAuditLogger.log("Person {} created by {}", created, user);
@@ -146,7 +146,7 @@ public class PersonResource {
 				//Super Users can edit position-less people.
 				return true;
 			}
-			return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganization());
+			return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganizationUuid());
 		}
 		return false;
 	}
@@ -188,17 +188,17 @@ public class PersonResource {
 			if (existingPos == null && p.getPosition().getUuid() != null) {
 				//Update the position for this person.
 				AuthUtils.assertSuperUser(user);
-				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(p, p.getPosition());
+				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), p.getPosition().getUuid());
 				AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
 			} else if (existingPos != null && existingPos.getUuid().equals(p.getPosition().getUuid()) == false) {
 				//Update the position for this person.
 				AuthUtils.assertSuperUser(user);
-				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(p, p.getPosition());
+				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), p.getPosition().getUuid());
 				AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
 			} else if (existingPos != null && p.getPosition().getUuid() == null) {
 				//Remove this person from their position.
 				AuthUtils.assertSuperUser(user);
-				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos);
+				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos.getUuid());
 				AnetAuditLogger.log("Person {} removed from position   by {}", p, user);
 			}
 		}
@@ -219,7 +219,7 @@ public class PersonResource {
 					AuthUtils.assertSuperUser(user);
 				}
 				AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive", p, user);	
-				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos);
+				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos.getUuid());
 			}
 		}
 		
@@ -271,7 +271,7 @@ public class PersonResource {
 	@Path("/{uuid}/position")
 	public Position getPositionForPerson(@PathParam("uuid") String uuid) {
 		//TODO: it doesn't seem to be used
-		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(Person.createWithUuid(uuid));
+		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
 	}
 	
 	/** 
@@ -338,7 +338,7 @@ public class PersonResource {
 		Position loserPosition = loser.getPosition();
 		if (loserPosition != null) { 
 			AnetObjectEngine.getInstance().getPositionDao()
-				.removePersonFromPosition(loserPosition);
+				.removePersonFromPosition(loserPosition.getUuid());
 		}
 
 		int merged = dao.mergePeople(winner, loser, copyPosition);
@@ -346,14 +346,14 @@ public class PersonResource {
 		
 		if (loserPosition != null && copyPosition) { 
 			AnetObjectEngine.getInstance().getPositionDao()
-				.setPersonInPosition(winner, loserPosition);
+				.setPersonInPosition(winner.getUuid(), loserPosition.getUuid());
 			AnetAuditLogger.log("Person {} put in position {} as part of merge by {}", winner, loserPosition, user);
 		} else if (winner.getPosition() != null) { 
 			//We need to always re-put the winner back into their position
 			// because when we removed the loser, and then updated the peoplePositions table
 			// it now has a record saying the winner has no position. 
 			AnetObjectEngine.getInstance().getPositionDao()
-				.setPersonInPosition(winner, winner.getPosition());
+				.setPersonInPosition(winner.getUuid(), winner.getPosition().getUuid());
 		}
 		
 		return merged;
@@ -383,7 +383,7 @@ public class PersonResource {
 		final String domainName = splittedEmail[1].toLowerCase();
 
 		@SuppressWarnings("unchecked")
-		final List<String> whitelistDomainNames = ((List<String>)this.config.getDictionary().get("domainNames"))
+		final List<String> whitelistDomainNames = ((List<String>)this.config.getDictionaryEntry("domainNames"))
 			.stream().map(String::toLowerCase).collect(Collectors.toList());
 
 		final List<String> wildcardDomainNames = whitelistDomainNames.stream()
@@ -402,7 +402,7 @@ public class PersonResource {
 	}
 
 	private String validateEmailErrorMessage() {
-		final String supportEmailAddr = (String)this.config.getDictionary().get("SUPPORT_EMAIL_ADDR");
+		final String supportEmailAddr = (String)this.config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
 		final String messageBody = "Only valid email domain names are allowed. If your email domain name is not in the list, please contact the support team";
 		final String errorMessage = Utils.isEmptyOrNull(supportEmailAddr) ? messageBody : String.format("%s at %s", messageBody, supportEmailAddr);
 		return errorMessage;

@@ -1,16 +1,16 @@
 package mil.dds.anet.test.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.UnsupportedEncodingException;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.GenericType;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -21,9 +21,6 @@ public class TagResourceTest extends AbstractResourceTest {
 
 	private static final String FIELDS = "uuid name description createdAt";
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Test
 	public void tagCreateTest() throws UnsupportedEncodingException {
 		final Tag t = new Tag();
@@ -31,9 +28,9 @@ public class TagResourceTest extends AbstractResourceTest {
 		t.setDescription("desc");
 
 		// Create
-		final String tUuid = graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", t, new GenericType<GraphQLResponse<Tag>>() {});
+		final String tUuid = graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", t, new TypeReference<GraphQLResponse<Tag>>() {});
 		assertThat(tUuid).isNotNull();
-		final Tag created = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid, new GenericType<GraphQLResponse<Tag>>() {});
+		final Tag created = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid, new TypeReference<GraphQLResponse<Tag>>() {});
 		assertThat(created.getName()).isEqualTo(t.getName());
 		assertThat(created.getDescription()).isEqualTo(t.getDescription());
 		assertThat(created.getCreatedAt()).isNotNull();
@@ -45,26 +42,30 @@ public class TagResourceTest extends AbstractResourceTest {
 		assertThat(nrUpdated).isEqualTo(1);
 
 		// Get
-		final Tag updated = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid, new GenericType<GraphQLResponse<Tag>>() {});
+		final Tag updated = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid, new TypeReference<GraphQLResponse<Tag>>() {});
 		assertThat(updated).isEqualTo(created);
 	}
 
 	@Test
 	public void tagExceptionTest() throws UnsupportedEncodingException {
 		// Get with unknown uuid
-		thrown.expect(NotFoundException.class);
-		graphQLHelper.getObjectById(admin, "tag", FIELDS, "-1", new GenericType<GraphQLResponse<Tag>>() {});
+		try {
+			graphQLHelper.getObjectById(admin, "tag", FIELDS, "-1", new TypeReference<GraphQLResponse<Tag>>() {});
+			fail("Expected NotFoundException");
+		} catch (NotFoundException expectedException) {}
 
 		// Create with empty name
-		thrown.expect(BadRequestException.class);
-		graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", new Tag(), new GenericType<GraphQLResponse<Tag>>() {});
+		try {
+			graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", new Tag(), new TypeReference<GraphQLResponse<Tag>>() {});
+			fail("Expected BadRequestException");
+		} catch (BadRequestException expectedException) {}
 	}
 
 	@Test
 	public void tagListTest() throws UnsupportedEncodingException {
 		// All
 		final AnetBeanList<Tag> tagList = graphQLHelper.getAllObjects(admin, "tags",
-				FIELDS, new GenericType<GraphQLResponse<AnetBeanList<Tag>>>() {});
+				FIELDS, new TypeReference<GraphQLResponse<AnetBeanList<Tag>>>() {});
 		assertThat(tagList).isNotNull();
 	}
 
@@ -74,7 +75,7 @@ public class TagResourceTest extends AbstractResourceTest {
 		final TagSearchQuery query = new TagSearchQuery();
 		query.setText("bribery");
 		final AnetBeanList<Tag> searchObjects = graphQLHelper.searchObjects(admin, "tagList", "query", "TagSearchQueryInput",
-				FIELDS, query, new GenericType<GraphQLResponse<AnetBeanList<Tag>>>() {});
+				FIELDS, query, new TypeReference<GraphQLResponse<AnetBeanList<Tag>>>() {});
 		assertThat(searchObjects).isNotNull();
 		assertThat(searchObjects.getList()).isNotEmpty();
 	}

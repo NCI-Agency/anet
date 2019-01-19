@@ -12,6 +12,8 @@ html {
 
 body {
 	font-family: -apple-system, BlinkMacSystemFont, “Segoe UI”, Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 15px !important;
+	color: hsl(0, 0%, 13%);
 	background: #f2f2f2;
 	height: 100%;
 	overflow: hidden;
@@ -42,10 +44,10 @@ input[type=checkbox][readonly] {
 
 fieldset {
 	background: #fff;
-	border: 1px solid #e0e0e0;
-	padding: .75em;
+	box-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.1);
+	padding: 1.75em;
 	margin: 0;
-	margin-bottom: 3rem;
+	margin-bottom: 4rem;
 	width: 100%;
 }
 
@@ -89,7 +91,6 @@ fieldset .negative-bottom {
 }
 
 fieldset .help-text {
-	font-size: 12px;
 	font-weight: bold;
 	color: #888;
 	text-transform: uppercase;
@@ -136,6 +137,11 @@ fieldset.danger {
 
 .input-group {
 	width: 100%;
+}
+
+.form-control {
+	height: 38px;
+	font-size: 1.1em;
 }
 
 .form-control-icon {
@@ -229,6 +235,10 @@ span.asLink:hover,
 span.asLink:focus {
 	text-decoration: underline;
 	color: #23527c;
+}
+
+.add-search-filter {
+	padding-top: 8px;
 }
 
 .banner {
@@ -356,12 +366,13 @@ li#search-nav .nav > li a {
 }
 
 .nav-overlay {
+	position: relative;
 	border: 1px solid #e0e0e0;
 	flex-grow: 1;
 	background: #f2f2f2;
 	padding: 5px 8px 5px;
 	left: 0;
-	z-index: 99;
+	z-index: 999;
 }
 
 .report-sub-form .form-group {
@@ -390,13 +401,20 @@ li#search-nav .nav > li a {
 }
 
 .report-summary {
-	margin-top: 18px;
-	padding-top: 18px;
-	border-top: 1px solid #ccc;
+	margin-top: 25px;
+	padding-top: 15px;
+	box-shadow: 0 1px 3px hsla(0, 0%, 0%, 0.15);
+}
+
+.read-report-actions {
+	background-color: hsl(220, 12%, 99%);
+	margin-top: 5px;
+	padding-top: 9px;
+	padding-bottom: 9px;
 }
 
 .report-summary .row {
-	margin-top: 3px;
+	margin-top: 5px;
 }
 
 .report-summary .engagement-date {
@@ -412,7 +430,6 @@ li#search-nav .nav > li a {
 }
 
 .report-summary h2 {
-	font-size: 14px;
 	font-weight: bold;
 }
 
@@ -540,14 +557,14 @@ table hr.attendee-divider {
 	padding-left: 1rem;
 }
 
-.report-form fieldset:last-child {
+.form-horizontal fieldset:last-child {
 	margin-bottom: 10px;
 }
 
 .submit-buttons {
 	display: flex;
 	align-items: flex-end;
-	margin: 5rem 0 5rem 0;
+	margin-bottom: 10px;
 }
 
 .submit-buttons > div {
@@ -563,6 +580,14 @@ table hr.attendee-divider {
 .submit-buttons .btn-primary {
 	font-weight: bold;
 	height: 38px;
+}
+
+.submit-buttons :not(.btn-group) .btn + .btn {
+	margin-left: 1rem;
+}
+
+.submit-buttons .btn:last-child {
+	margin-right: 0.5rem;
 }
 
 .report-form .report-details {
@@ -590,7 +615,7 @@ table hr.attendee-divider {
 
 .show-report-overview label.col-sm-2 {
 	/* This clobbers the grid system but w/e. */
-	width: 130px;
+	width: 190px;
 }
 
 /* Specific styling for report tags in edit mode */
@@ -715,6 +740,10 @@ header.searchPagination {
 .general-banner.alert-danger {
 	background-color: #f22a2a;
 	color: #fff;
+}
+
+.alert {
+	border: none;
 }
 
 .reports-filter {

@@ -5,12 +5,12 @@ import autobind from 'autobind-decorator'
 import ContainerDimensions from 'react-container-dimensions'
 import { createBalancedTreeFromLeaves, getLeaves, getNodeAtPath, getOtherDirection, getPathToCorner, updateTree,
 	Corner, Mosaic, MosaicWindow } from 'react-mosaic-component'
-import { Classes } from '@blueprintjs/core'
+import { Classes, Icon } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
 import _dropRight from 'lodash/dropRight'
 import '@blueprintjs/core/lib/css/blueprint.css'
-import '@blueprintjs/icons/lib/css/blueprint-icons.css'
+import '@blueprintjs/icons/lib/css/blueprint-icons.css' // needed for the mosaic tile buttons (expand, close)
 import 'react-mosaic-component/react-mosaic-component.css'
 import './MosaicLayout.css'
 
@@ -25,7 +25,7 @@ export default class MosaicLayout extends Component {
     ).isRequired,
     initialNode: PropTypes.object, // FIXME: actually MosaicNode
     description: PropTypes.string,
-    style: PropTypes.object,
+    style: PropTypes.object,
   }
 
   constructor(props) {
@@ -37,23 +37,23 @@ export default class MosaicLayout extends Component {
 
   render() {
     return <div className="mosaic-box" style={this.props.style}>
-      {this.props.description &&
-        <p className="chart-description">{this.props.description}</p>
-      }
-      {this.renderNavBar()}
       <div className="mosaic-container">
-      <Mosaic
-        value={this.state.currentNode}
-        onChange={this.updateCurrentNode}
-        renderTile={(id, path) => {
-          const viz = this.props.visualizations.find(viz => viz.id === id)
-          return <MosaicWindow
-            title={viz.title}
-            path={path}>
-            {viz.renderer(id)}
-          </MosaicWindow>
-        }}
-      />
+        {this.props.description &&
+          <p className="chart-description">{this.props.description}</p>
+        }
+        {this.renderNavBar()}
+        <Mosaic
+          value={this.state.currentNode}
+          onChange={this.updateCurrentNode}
+          renderTile={(id, path) => {
+            const viz = this.props.visualizations.find(viz => viz.id === id)
+            return <MosaicWindow
+              title={viz.title}
+              path={path}>
+              {viz.renderer(id)}
+            </MosaicWindow>
+          }}
+        />
       </div>
     </div>
   }
@@ -63,11 +63,14 @@ export default class MosaicLayout extends Component {
     return (
       <div className={classNames(Classes.NAVBAR)}>
         <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)}>
-          <span className={classNames(Classes.ICON_LARGE, Classes.iconClass(IconNames.MENU))} />
+          <Icon iconSize={Icon.SIZE_LARGE} icon={IconNames.MENU} />
           <button
-            className={classNames(Classes.BUTTON, Classes.iconClass(IconNames.GRID_VIEW))}
+            className={classNames(Classes.BUTTON)}
             onClick={this.autoArrange}
-            title="Auto Arrange" />
+            title="Auto Arrange"
+          >
+            <Icon icon={IconNames.GRID_VIEW} />
+          </button>
           {this.renderButtons()}
         </div>
       </div>
@@ -84,8 +87,9 @@ export default class MosaicLayout extends Component {
             key={viz.id}
             className={classNames(Classes.BUTTON)}
             onClick={this.addChart.bind(this, viz.id)}
-            title={viz.title}>
-            {viz.icons.map((icon, i) => <span key={i} className={classNames(Classes.ICON_STANDARD, Classes.iconClass(icon))} />)}
+            title={viz.title}
+          >
+            {viz.icons.map((icon, i) => <Icon key={i} icon={icon} />)}
           </button>
         )
       }

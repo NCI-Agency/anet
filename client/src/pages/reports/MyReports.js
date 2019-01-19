@@ -7,6 +7,9 @@ import GQL from 'graphqlapi'
 import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
 import {Person, Report} from 'models'
+import { Nav } from 'react-bootstrap'
+import SubNav from 'components/SubNav'
+import { AnchorNavItem } from 'components/Nav'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -82,6 +85,14 @@ class BaseMyReports extends Page {
 	render() {
 		return <div>
 			<Breadcrumbs items={[['My Reports', window.location.pathname]]} />
+			<SubNav subnavElemId="reports-nav">
+				<Nav>
+					<AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
+					<AnchorNavItem to="upcoming-engagements">Upcoming Engagements</AnchorNavItem>
+					<AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
+					<AnchorNavItem to="published-reports">Published reports</AnchorNavItem>
+				</Nav>
+			</SubNav>
 
 			{this.renderSection('Draft Reports', this.state.draft, this.goToPage.bind(this, 'draft'), 'draft-reports')}
 			{this.renderSection('Upcoming Engagements', this.state.future, this.goToPage.bind(this, 'future'), 'upcoming-engagements')}

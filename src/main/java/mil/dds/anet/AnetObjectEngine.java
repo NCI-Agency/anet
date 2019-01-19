@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.AdminDao;
@@ -31,6 +30,7 @@ import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.database.LocationDao;
+import mil.dds.anet.database.NoteDao;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.TaskDao;
@@ -64,6 +64,7 @@ public class AnetObjectEngine {
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
+	private final NoteDao noteDao;
 	private final Map<String, Object> context;
 
 	ISearcher searcher;
@@ -91,6 +92,7 @@ public class AnetObjectEngine {
 		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
 		emailDao = new EmailDao(dbHandle);
 		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
+		noteDao = new NoteDao(dbHandle);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
 		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
 		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
@@ -160,6 +162,10 @@ public class AnetObjectEngine {
 		return authorizationGroupDao;
 	}
 
+	public NoteDao getNoteDao() {
+		return noteDao;
+	}
+
 	public EmailDao getEmailDao() {
 		return emailDao;
 	}
@@ -172,11 +178,11 @@ public class AnetObjectEngine {
 		return getAdminSetting(AdminSettingKeys.DEFAULT_APPROVAL_ORGANIZATION);
 	}
 
-	public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context, Person person) {
-		if (person == null) {
-			return CompletableFuture.supplyAsync(() -> null);
+	public CompletableFuture<Organization> getOrganizationForPerson(Map<String, Object> context, String personUuid) {
+		if (personUuid == null) {
+			return CompletableFuture.completedFuture(null);
 		}
-		return orgDao.getOrganizationsForPerson(context, person.getUuid())
+		return orgDao.getOrganizationsForPerson(context, personUuid)
 				.thenApply(l -> l.isEmpty() ? null : l.get(0));
 	}
 
@@ -221,7 +227,7 @@ public class AnetObjectEngine {
 		}
 		for (Position approverPosition: approvers) {
 			//approverPosition.getPerson() has the currentPersonUuid already loaded, so this is safe.
-			if (Objects.equals(userUuid, DaoUtils.getUuid(approverPosition.getPerson()))) { return true; }
+			if (Objects.equals(userUuid, approverPosition.getPersonUuid())) { return true; }
 		}
 		return false;
 	}

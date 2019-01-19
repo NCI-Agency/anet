@@ -22,6 +22,8 @@ SET QUOTED_IDENTIFIER ON
 --DROP TABLE authorizationGroupPositions;
 --DROP TABLE authorizationGroups;
 --DROP TABLE reportAuthorizationGroups;
+--DROP TABLE notes;
+--DROP TABLE noteRelatedObjects;
 --DROP TABLE DATABASECHANGELOG;
 --DROP TABLE DATABASECHANGELOGLOCK;
 
@@ -37,6 +39,7 @@ TRUNCATE TABLE savedSearches;
 TRUNCATE TABLE reportsSensitiveInformation;
 TRUNCATE TABLE authorizationGroupPositions;
 TRUNCATE TABLE reportAuthorizationGroups;
+TRUNCATE TABLE noteRelatedObjects;
 DELETE FROM positions;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NOT NULL;
 DELETE FROM tasks WHERE customFieldRef1Uuid IS NULL;
@@ -48,6 +51,7 @@ DELETE FROM organizations;
 DELETE FROM adminSettings;
 DELETE FROM tags;
 DELETE FROM authorizationGroups;
+DELETE FROM notes;
 
 --Advisors
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
@@ -55,7 +59,7 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ELIZAWELL, Elizabeth', 0, 0, 'hunter+liz@dds.mil', '+1-777-7777', 'Capt', 'Elizabeth is a test advisor we have in the database who is in EF 1.1', 'elizabeth', 'United States of America', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@dds.mil', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can release her own reports', 'erin', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+	VALUES (lower(newid()), 'ERINSON, Erin', 0, 0, 'hunter+erin@dds.mil', '+9-23-2323-2323', 'CIV', 'Erin is an Advisor in EF 2.2 who can approve reports', 'erin', 'Australia', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
 	VALUES (lower(newid()), 'REINTON, Reina', 0, 0, 'hunter+reina@dds.mil', '+23-23-11222', 'CIV', 'Reina is an Advisor in EF 2.2', 'reina', 'Italy', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
@@ -68,27 +72,27 @@ INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, b
 INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
 	VALUES (lower(newid()), 'TOPFERNESS, Christopf', 0, 1, 'hunter+christopf@dds.mil', '+1-422222222', 'CIV', 'Christopf works in the MoD Office', 'Afghanistan', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Super Users
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@dds.mil', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'HENDERSON, Henry', 0, 0, 'hunter+henry@dds.mil', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'JACOBSON, Jacob', 0, 0, 'hunter+jacob@dds.mil', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', 'Italy', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@dds.mil', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', 'Germany', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, createdAt, endOfTourDate, updatedAt)
-	VALUES (lower(newid()), 'ANDERSON, Andrew', 0, 0, 'hunter+andrew@dds.mil', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'BOBTOWN, Bob', 0, 0, 'hunter+bob@dds.mil', '+1-444-7324', 'CIV', 'Bob is a Super User in EF 1.1', 'bob', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'HENDERSON, Henry', 0, 0, 'hunter+henry@dds.mil', '+2-456-7324', 'BGen', 'Henry is a Super User in EF 2.1', 'henry', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'JACOBSON, Jacob', 0, 0, 'hunter+jacob@dds.mil', '+2-456-7324', 'CIV', 'Jacob is a Super User in EF 2.2', 'jacob', 'Italy', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'BECCABON, Rebecca', 0, 0, 'hunter+rebecca@dds.mil', '+2-456-7324', 'CTR', 'Rebecca is a Super User in EF 2.2', 'rebecca', 'Germany', 'FEMALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, createdAt, endOfTourDate, updatedAt)
+	VALUES (lower(newid()), 'ANDERSON, Andrew', 0, 0, 'hunter+andrew@dds.mil', '+1-412-7324', 'CIV', 'Andrew is the EF 1 Manager', 'andrew', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 -- Administrator
-INSERT INTO people (uuid, name, status, role, emailAddress, domainUsername, rank, country, biography, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'DMIN, Arthur', '0', '0', 'hunter+arthur@dds.mil', 'arthur', 'CIV', 'Albania', 'An administrator', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'DMIN, Arthur', '0', '0', 'hunter+arthur@dds.mil', NULL, 'CIV', 'An administrator', 'arthur', 'Albania', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 --People
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, createdAt, updatedAt)
-	VALUES (lower(newid()), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@dds.mil', '+1-412-9314', 'CIV', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, endOfTourDate, createdAt, updatedAt)
-	VALUES (lower(newid()), 'NICHOLSON, Nick', 0, 0, 'hunter+nick@dds.mil', '+1-202-7324', 'CIV', '', 'nick', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, createdAt, updatedAt)
-	VALUES (lower(newid()), 'SHARTON, Shardul', 1, 1, 'hunter+shardul@dds.mil', '+99-9999-9999', 'CIV', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
+	VALUES (lower(newid()), 'HUNTMAN, Hunter', 0, 1, 'hunter+hunter@dds.mil', '+1-412-9314', 'CIV', '', 'United States of America', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, domainUsername, country, gender, endOfTourDate, createdAt, updatedAt)
+	VALUES (lower(newid()), 'NICHOLSON, Nick', 0, 0, 'hunter+nick@dds.mil', '+1-202-7324', 'CIV', '', 'nick', 'United States of America', 'MALE', DATEADD(year, 1, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO people (uuid, name, status, role, emailAddress, phoneNumber, rank, biography, country, gender, createdAt, updatedAt)
+	VALUES (lower(newid()), 'SHARTON, Shardul', 1, 1, 'hunter+shardul@dds.mil', '+99-9999-9999', 'CIV', '', 'Italy', 'MALE', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO positions (uuid, name, type, status, currentPersonUuid, createdAt, updatedAt)
 	VALUES (lower(newid()), 'ANET Administrator', 3, 0, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -840,12 +844,90 @@ INSERT INTO reportAuthorizationGroups (reportUuid, authorizationGroupUuid)
     AND rap.authorizationGroupUuid = agp.authorizationGroupUuid
   );
 
+-- Add some notes and link them to the objects they relate to
+DECLARE @authorUuid varchar(36);
+DECLARE @noteUuid varchar(36);
+
+SET @authorUuid = (SELECT uuid FROM people WHERE name = 'BECCABON, Rebecca');
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'people', p.uuid
+	FROM people p
+	WHERE p.rank = 'CIV';
+
+SET @authorUuid = (SELECT uuid FROM people WHERE name = 'DMIN, Arthur');
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'positions', p.uuid
+	FROM positions p
+	WHERE p.type = 3;
+
+SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ERINSON, Erin');
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'reports', r.uuid
+	FROM reports r
+	WHERE r.atmosphere = 0;
+
+SET @noteUuid = lower(newid());
+INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+	SELECT @noteUuid, 'reports', r.uuid
+	FROM reports r
+	WHERE r.text LIKE 'Today%';
+
 -- LEAVE THIS AS LAST STATEMENT
--- Truncate all the dates on reports to dates that could have been generated by
+-- Truncate all the dates (on reports etc.) to dates that could have been generated by
 -- Java (millisecond precision) rather than by the database itself (microsecond precision)
 -- Note: keep SET on same line as UPDATE so mssql2sqlite.sh works correctly
 UPDATE reports SET
     createdAt=cast(createdAt as datetime2(3)),
     updatedAt=cast(updatedAt as datetime2(3)),
+    releasedAt=cast(updatedAt as datetime2(3)),
     engagementDate=cast(engagementDate as datetime2(0))
+  ;
+UPDATE people SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3)),
+    endOfTourDate=cast(endOfTourDate as datetime2(0))
+  ;
+UPDATE positions SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3))
+  ;
+UPDATE peoplePositions SET
+    createdAt=cast(createdAt as datetime2(3))
+  ;
+UPDATE organizations SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3))
+  ;
+UPDATE tasks SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3)),
+    plannedCompletion=cast(updatedAt as datetime2(0)),
+    projectedCompletion=cast(updatedAt as datetime2(0))
+  ;
+UPDATE locations SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3))
+  ;
+UPDATE tags SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3))
+  ;
+UPDATE authorizationGroups SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3))
+  ;
+UPDATE notes SET
+    createdAt=cast(createdAt as datetime2(3)),
+    updatedAt=cast(updatedAt as datetime2(3))
   ;

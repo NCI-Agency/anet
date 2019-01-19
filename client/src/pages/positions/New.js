@@ -1,12 +1,11 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
+import PositionForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
-import PositionForm from './Form'
-
 import API from 'api'
-import {Organization, Person, Position} from 'models'
+import {Organization, Position} from 'models'
 
 import utils from 'utils'
 
@@ -19,13 +18,12 @@ class PositionNew extends Page {
 		...pagePropTypes,
 	}
 
+	state = {
+		position: new Position(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			position: setDefaultPermissions(new Position( {type: Position.TYPE.ADVISOR})),
-			originalPosition: setDefaultPermissions(new Position( {type: Position.TYPE.ADVISOR})),
-		}
 	}
 
 	fetchData(props) {
@@ -38,40 +36,25 @@ class PositionNew extends Page {
 					uuid, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
-				function getPositionFromData() {
-					let organization = new Organization(data.organization)
-					return setDefaultPermissions(new Position({
-						type: organization.isAdvisorOrg() ? Position.TYPE.ADVISOR : Position.TYPE.PRINCIPAL,
-						organization,
-					}))
-				}
-
-				this.setState({
-					position: getPositionFromData(),
-					originalPosition: getPositionFromData()
+				const organization = new Organization(data.organization)
+				const position = new Position({
+					type: organization.isAdvisorOrg() ? Position.TYPE.ADVISOR : Position.TYPE.PRINCIPAL,
+					organization,
 				})
+				this.setState({position})
 			})
 		}
 	}
 
 	render() {
-		let position = this.state.position
-
+		const { position } = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new Position', Position.pathForNew()]]} />
-
-				<PositionForm original={this.state.originalPosition} position={position} />
+				<Breadcrumbs items={[['New Position', Position.pathForNew()]]} />
+				<PositionForm initialValues={position} title='Create a new Position' />
 			</div>
 		)
 	}
-}
-
-function setDefaultPermissions(position) {
-	if (!position.permissions) {
-		position.permissions = position.type
-	}
-	return position
 }
 
 export default connect(null, mapDispatchToProps)(PositionNew)

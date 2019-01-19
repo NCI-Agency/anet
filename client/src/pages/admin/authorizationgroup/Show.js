@@ -2,17 +2,19 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Form from 'components/Form'
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
 import ReportCollection from 'components/ReportCollection'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import {AuthorizationGroup, Person} from 'models'
 import GQL from 'graphqlapi'
-import autobind from 'autobind-decorator'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
@@ -24,26 +26,30 @@ class BaseAuthorizationGroupShow extends Page {
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
+	static modelName = 'AuthorizationGroup'
+
+	state = {
+		authorizationGroup: new AuthorizationGroup(),
+		positions: null,
+		reports: null,
+		positionsPageNum: 0,
+		reportsPageNum: 0,
+		success: null,
+		error: null,
+	}
+
 	constructor(props) {
 		super(props)
-
-		this.state = {
-			authorizationGroup: new AuthorizationGroup(),
-			positions: null,
-			reports: null
-		}
-		this.positionsPageNum = 0
-		this.reportsPageNum = 0
 		setMessages(props,this.state)
 	}
 
 	getPositionQueryPart(authGroupUuid) {
-		let positionQuery = {
-			pageNum: this.positionsPageNum,
+		const positionQuery = {
+			pageNum: this.state.positionsPageNum,
 			pageSize: 10,
 			authorizationGroupUuid: authGroupUuid
 		}
-		let positionsPart = new GQL.Part(/* GraphQL */`
+		const positionsPart = new GQL.Part(/* GraphQL */`
 			paginatedPositions: positionList(query:$positionQuery) {
 				pageNum, pageSize, totalCount, list { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
 			}`)
@@ -52,12 +58,12 @@ class BaseAuthorizationGroupShow extends Page {
 	}
 
 	getReportQueryPart(authGroupUuid) {
-		let reportQuery = {
-			pageNum: this.reportsPageNum,
+		const reportQuery = {
+			pageNum: this.state.reportsPageNum,
 			pageSize: 10,
 			authorizationGroupUuid: authGroupUuid
 		}
-		let reportsPart = new GQL.Part(/* GraphQL */`
+		const reportsPart = new GQL.Part(/* GraphQL */`
 			reports: reportList(query:$reportQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
@@ -68,14 +74,15 @@ class BaseAuthorizationGroupShow extends Page {
 	}
 
 	fetchData(props) {
-		let authGroupPart = new GQL.Part(/* GraphQL */`
+		const authGroupPart = new GQL.Part(/* GraphQL */`
 			authorizationGroup(uuid:"${props.match.params.uuid}") {
 			uuid, name, description
 			positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
 			status
+			${GRAPHQL_NOTES_FIELDS}
 		}` )
-		let positionsPart = this.getPositionQueryPart(props.match.params.uuid)
-		let reportsPart = this.getReportQueryPart(props.match.params.uuid)
+		const positionsPart = this.getPositionQueryPart(props.match.params.uuid)
+		const reportsPart = this.getReportQueryPart(props.match.params.uuid)
 		return this.runGQL([authGroupPart, positionsPart, reportsPart])
 	}
 
@@ -90,54 +97,77 @@ class BaseAuthorizationGroupShow extends Page {
 	}
 
 	render() {
-		let authorizationGroup = this.state.authorizationGroup
-		const { currentUser } = this.props
+		const { authorizationGroup, reports, positions } = this.state
+		const { currentUser, ...myFormProps } = this.props
+
+		const canEdit = currentUser.isSuperUser()
+
 		return (
+			<Formik
+				enableReinitialize={true}
+				initialValues={authorizationGroup}
+				{...myFormProps}
+			>
+			{({
+				values,
+			}) => {
+				const action = canEdit && <LinkTo authorizationGroup={authorizationGroup} edit button="primary">Edit</LinkTo>
+				return <div>
+					<RelatedObjectNotes notes={authorizationGroup.notes} relatedObject={authorizationGroup.uuid && {relatedObjectType: 'authorizationGroups', relatedObjectUuid: authorizationGroup.uuid}} />
+					<Breadcrumbs items={[[`Authorization Group ${authorizationGroup.name}`, AuthorizationGroup.pathFor(authorizationGroup)]]} />
+					<Messages success={this.state.success} error={this.state.error} />
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={`Authorization Group ${authorizationGroup.name}`} action={action} />
+						<Fieldset>
+							<Field
+								name="name"
+								component={FieldHelper.renderReadonlyField}
+							/>
 
-			<div>
-				<Breadcrumbs items={[[authorizationGroup.name, AuthorizationGroup.pathFor(authorizationGroup)]]} />
-				<Messages success={this.state.success} error={this.state.error} />
+							<Field
+								name="status"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={AuthorizationGroup.humanNameOfStatus}
+							/>
+						</Fieldset>
 
-				<Form static formFor={authorizationGroup} horizontal >
-					<Fieldset title={authorizationGroup.name} action={currentUser.isSuperUser() && <LinkTo authorizationGroup={authorizationGroup} edit button="primary">Edit</LinkTo>}>
-						<Form.Field id="description" />
-						<Form.Field id="status">{authorizationGroup.humanNameOfStatus()}</Form.Field>
-					</Fieldset>
-					<Fieldset title="Positions">
-						<PositionTable
-							paginatedPositions={this.state.positions}
-							goToPage={this.goToPositionsPage}
-						/>
-					</Fieldset>
-					<Fieldset title="Reports">
-						<ReportCollection
-							paginatedReports={this.state.reports}
-							goToPage={this.goToReportsPage}
-						/>
-					</Fieldset>
-				</Form>
-			</div>
+						<Fieldset title="Positions">
+							<PositionTable
+								paginatedPositions={positions}
+								goToPage={this.goToPositionsPage}
+							/>
+						</Fieldset>
+
+						<Fieldset title="Reports">
+							<ReportCollection
+								paginatedReports={reports}
+								goToPage={this.goToReportsPage}
+							/>
+						</Fieldset>
+					</Form>
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	goToPositionsPage(pageNum) {
-		this.positionsPageNum = pageNum
-		let positionQueryPart = this.getPositionQueryPart(this.state.authorizationGroup.uuid)
-		GQL.run([positionQueryPart]).then(data =>
-			this.setState({positions: data.paginatedPositions})
-		)
+	goToPositionsPage = (pageNum) => {
+		this.setState({positionsPageNum: pageNum}, () => {
+			const positionQueryPart = this.getPositionQueryPart(this.state.authorizationGroup.uuid)
+			GQL.run([positionQueryPart]).then(data =>
+				this.setState({positions: data.paginatedPositions})
+			)
+		})
 	}
 
-	@autobind
-	goToReportsPage(pageNum) {
-		this.reportsPageNum = pageNum
-		let reportQueryPart = this.getReportQueryPart(this.state.authorizationGroup.uuid)
-		GQL.run([reportQueryPart]).then(data =>
-			this.setState({reports: data.reports})
-		)
+	goToReportsPage = (pageNum) => {
+		this.setState({reportsPageNum: pageNum}, () => {
+			const reportQueryPart = this.getReportQueryPart(this.state.authorizationGroup.uuid)
+			GQL.run([reportQueryPart]).then(data =>
+				this.setState({reports: data.reports})
+			)
+		})
 	}
-
 }
 
 const AuthorizationGroupShow = (props) => (

@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
@@ -28,7 +26,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
-import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
@@ -40,37 +37,29 @@ import mil.dds.anet.utils.Utils;
 
 public class SqliteReportSearcher implements IReportSearcher {
 
-	public static final DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS Z");
-
 	private String isoDowFormat;
 	private String isoDowComparison;
-	private DateTimeFormatter dateTimeFormatter;
 
 
-	public SqliteReportSearcher(String isoDowFormat, DateTimeFormatter dateTimeFormatter) {
+	public SqliteReportSearcher(String isoDowFormat) {
 		this.isoDowFormat = isoDowFormat;
-		this.dateTimeFormatter = dateTimeFormatter;
 		this.isoDowComparison = "(" + this.isoDowFormat + ") = :%s";
 	}
 
 	public SqliteReportSearcher() {
-		this(
-			"strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1", 	// %w day of week 0-6 with Sunday==0
-			sqlitePattern);
+		this("strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1");	// %w day of week 0-6 with Sunday==0
 	}
 
 	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
 		StringBuffer sql = new StringBuffer();
-		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS + "," + PersonDao.PERSON_FIELDS);
+		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
 		if (query.getIncludeEngagementDayOfWeek()) {
 			sql.append(", ");
 			sql.append(String.format(this.isoDowFormat, "engagementDate"));
 			sql.append(" as \"engagementDayOfWeek\" ");
 		}
 		sql.append(" FROM reports ");
-		sql.append(", people ");
-		sql.append("WHERE reports.\"authorUuid\" = people.uuid ");
-		sql.append("AND reports.uuid IN ( SELECT reports.uuid FROM reports ");
+		sql.append("WHERE reports.uuid IN ( SELECT reports.uuid FROM reports ");
 		sql.append("LEFT JOIN \"reportTags\" ON \"reportTags\".\"reportUuid\" = reports.uuid ");
 		sql.append("LEFT JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid ");
 		
@@ -78,7 +67,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		Map<String,Object> args = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
 		List<String> whereClauses = new LinkedList<String>();
-		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses, this.dateTimeFormatter);
+		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses);
 		if (query.getAuthorUuid() != null) {
 			whereClauses.add("reports.\"authorUuid\" = :authorUuid");
 			args.put("authorUuid", query.getAuthorUuid());
@@ -209,6 +198,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		}
 		
 		if (query.getPendingApprovalOf() != null) { 
+			whereClauses.add("reports.\"authorUuid\" != :approverUuid");
 			whereClauses.add("reports.\"approvalStepUuid\" IN "
 				+ "(SELECT \"approvalStepUuid\" from approvers where \"positionUuid\" IN "
 				+ "(SELECT uuid FROM positions where \"currentPersonUuid\" = :approverUuid))");

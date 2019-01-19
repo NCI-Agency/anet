@@ -249,13 +249,13 @@ ${sender.name} sent you a report from ANET:
         <div class="col-sm-7">
           <div id="intent" class="form-control-static">
             <p>
-              <strong>Meeting goal:</strong> ${report.intent}
+              <strong>Meeting goal:</strong> ${(report.intent)!}
             </p>
             <p>
-              <span><strong>Key outcomes:</strong> ${report.keyOutcomes}</span>
+              <span><strong>Key outcomes:</strong> ${(report.keyOutcomes)!}</span>
             </p>
             <p>
-              <strong>Next steps:</strong> ${report.nextSteps}
+              <strong>Next steps:</strong> ${(report.nextSteps)!}
             </p>
           </div>
         </div>
@@ -265,7 +265,7 @@ ${sender.name} sent you a report from ANET:
         <label for="engagementDate" class="col-sm-2 control-label">Engagement Date</label>
         <div class="col-sm-7">
           <div id="engagementDate" class="form-control-static">
-            ${(report.engagementDate.toString('dd MMM yyyy'))!}
+            ${(dateFormatter.format(report.engagementDate))!}
           </div>
         </div>
       </div>
@@ -295,7 +295,7 @@ ${sender.name} sent you a report from ANET:
           <label for="atmosphere" class="col-sm-2 control-label">Atmospherics</label>
           <div class="col-sm-7">
             <div id="atmosphere" class="form-control-static">
-              ${report.atmosphere?capitalize} - ${report.atmosphereDetails}
+              ${(report.atmosphere)!?capitalize} - ${(report.atmosphereDetails)!}
             </div>
           </div>
         </#if>
@@ -319,7 +319,8 @@ ${sender.name} sent you a report from ANET:
         <label for="author" class="col-sm-2 control-label">Report author</label>
         <div class="col-sm-7">
           <div id="author" class="form-control-static">
-            <a href="/people/${report.author.uuid}">${(report.author.rank)!} ${(report.author.name)!}</a>
+            <#assign reportAuthor = report.loadAuthor(context).get()>
+            <a href="/people/${reportAuthor.uuid}">${(reportAuthor.rank)!} ${(reportAuthor.name)!}</a>
           </div>
         </div>
       </div>
@@ -462,7 +463,7 @@ ${sender.name} sent you a report from ANET:
       <fieldset>
         <div>
           <p>
-            ${report.reportText}
+            ${report.reportText?no_esc}
           </p>
         </div>
       </fieldset>
@@ -484,7 +485,7 @@ ${sender.name} sent you a report from ANET:
             <#assign type = "Approved">
             <#assign styleClass = "btn-success approved">
           <#elseif approvalAction.type == "REJECT">
-            <#assign type = "Rejected">
+            <#assign type = "Changes requested">
             <#assign styleClass = "btn-danger rejected">
           <#else>
             <#assign type = "Unknown">
@@ -505,7 +506,7 @@ ${sender.name} sent you a report from ANET:
                 <#assign person = approvalAction.getPerson()>
                 <div class="approval-details">
                   <span>By ${(person.name)!}</span><br>
-                  <small>On ${(approvalAction.createdAt.toString('dd MMM yyyy'))!}
+                  <small>On ${(dateFormatter.format(approvalAction.createdAt))!}
                   <br>At ${(approvalAction.createdAt.toString('h:mm a'))!}</small>
                 </div>
               </#if>

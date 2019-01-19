@@ -244,7 +244,7 @@ test.beforeEach(t => {
             await $createButton.click()
         },
         async clickTodayButton() {
-            let $todayButton = await t.context.$('.u-today-button')
+            let $todayButton = await t.context.driver.findElement(By.xpath('//button/span[text()="Today"]'))
             await $todayButton.click()
         },
         async chooseAutocompleteOption(autocompleteSelector, text) {
@@ -283,6 +283,7 @@ test.beforeEach(t => {
                     await t.context.driver.wait(until.elementIsVisible($advisorCell))
                     let $advisorLink = await $advisorCell.findElement(By.css('a'))
                     await $advisorLink.click()
+                    await t.context.driver.wait(until.stalenessOf($advisorLink))
                     return
                 }
             }

@@ -11,6 +11,7 @@ import {Report} from 'models'
 import Settings from 'Settings'
 
 import moment from 'moment'
+import _isEmpty from 'lodash/isEmpty'
 
 export default class ReportSummary extends Component {
 	static propTypes = {
@@ -23,22 +24,20 @@ export default class ReportSummary extends Component {
 		return <Grid fluid className="report-summary">
 			{report.state === Report.STATE.DRAFT &&
 				<p className="report-draft">
-					<strong>Draft{report.updatedAt && ':'}</strong>
+					<strong>Draft</strong>
 					{
 						/* If the parent does not fetch report.updatedAt, we will not display this
-							so we do not get a broken view. It would be better to go through and
-							find all the places where report is passed in and ensure that the graphql
-							query includes updatedAt, but I don't have time for that now.
+							so we do not get a broken view.
 						*/
 						report.updatedAt &&
-							<span> last saved at {moment(report.updatedAt).format('D MMMM, YYYY @ HHmm')}</span>
+							<span>: last saved at {moment(report.updatedAt).format(Settings.dateFormats.forms.withTime)}</span>
 					}
 				</p>
 			}
 
 			{report.isRejected() &&
 				<p className="report-rejected">
-					<strong>Rejected</strong>
+					<strong>Changes requested</strong>
 				</p>
 			}
 
@@ -70,13 +69,8 @@ export default class ReportSummary extends Component {
 				<Col md={12}>
 					{report.engagementDate &&
 						<Label bsStyle="default" className="engagement-date">
-							{moment(report.engagementDate).format('D MMM YYYY')}
+							{moment(report.engagementDate).format(Settings.dateFormats.forms.short)}
 						</Label>
-					}
-					{report.location &&
-						<span>
-							<LinkTo anetLocation={report.location} />
-						</span>
 					}
 				</Col>
 			</Row>
@@ -91,22 +85,16 @@ export default class ReportSummary extends Component {
 
 				</Col>
 			</Row>
-
-			<Row>
-				<Col md={12}>
-					{report.atmosphere && <span><strong>Atmospherics:</strong> {utils.sentenceCase(report.atmosphere)}
-						{report.atmosphereDetails && ` – ${report.atmosphereDetails}`}</span> }
-				</Col>
-			</Row>
+			{!_isEmpty(report.location) &&
+				<Row>
+					<Col md={12}>
+						<span><strong>Location: </strong><LinkTo anetLocation={report.location} /></span>
+					</Col>
+				</Row>
+			}
 			<Row>
 				<Col md={12}>
 					{report.intent && <span><strong>Meeting goal:</strong> {report.intent}</span> }
-				</Col>
-			</Row>
-			<Row>
-				<Col md={12}>
-					{report.tasks.length > 0 && <span><strong>{pluralize(Settings.fields.task.shortLabel)}:</strong> {report.tasks.map((task,i) =>
-    {return task.shortName + (i < report.tasks.length - 1 ? ", " : "")})}</span> }
 				</Col>
 			</Row>
 			<Row>
@@ -119,14 +107,26 @@ export default class ReportSummary extends Component {
 					{report.nextSteps && <span><strong>Next steps:</strong> {report.nextSteps}</span> }
 				</Col>
 			</Row>
-      <Row>
-        <Col md={12}>
-        {report.tags && <Row><Col md={12}>{report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}</Col></Row>}
-        </Col>
-      </Row>
+			<Row>
+				<Col md={12}>
+					{report.atmosphere && <span><strong>Atmospherics:</strong> {utils.sentenceCase(report.atmosphere)}
+						{report.atmosphereDetails && ` – ${report.atmosphereDetails}`}</span> }
+				</Col>
+			</Row>
+			<Row>
+				<Col md={12}>
+					{report.tasks.length > 0 && <span><strong>{pluralize(Settings.fields.task.shortLabel)}:</strong> {report.tasks.map((task,i) =>
+    {return task.shortName + (i < report.tasks.length - 1 ? ", " : "")})}</span> }
+				</Col>
+			</Row>
+			<Row>
+				<Col md={12}>
+				{report.tags && <Row><Col md={12}>{report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}</Col></Row>}
+				</Col>
+			</Row>
 			<Row className="hide-for-print">
-				<Col mdOffset={9} md={3}>
-					<LinkTo report={report} button className="pull-right read-report-button">Read report</LinkTo>
+				<Col className="read-report-actions" md={12}>
+					<LinkTo report={report} button className="read-report-button">Read report</LinkTo>
 				</Col>
 			</Row>
 		</Grid>

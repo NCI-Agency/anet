@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Table} from 'react-bootstrap'
 
+import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 import {Report} from 'models'
 
@@ -36,7 +37,7 @@ export default class ReportTable extends Component {
 						<td>{<LinkTo organization={report.advisorOrg} />}</td>
 						<td>{<LinkTo report={report} className="read-report-button" />}</td>
 						{showStatus && <td>{report.state}</td>}
-						<td>{moment(report.engagementDate).format('DD MMM YYYY')}</td>
+						<td>{moment(report.engagementDate).format(Settings.dateFormats.forms.short)}</td>
 					</tr>
 				)}
 			</tbody>

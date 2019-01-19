@@ -1,27 +1,32 @@
 import PropTypes from 'prop-types'
-
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import {Alert, Table, Button, Col, HelpBlock, Modal, Checkbox} from 'react-bootstrap'
+
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
+
+import {Alert, Button, Col, HelpBlock, Modal} from 'react-bootstrap'
 import Confirm from 'react-confirm-bootstrap'
-import autobind from 'autobind-decorator'
 import moment from 'moment'
 import utils from 'utils'
 
 import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
-import Form from 'components/Form'
-import Messages from 'components/Messages'
+import Messages, {setMessages} from 'components/Messages'
+import ConfirmDelete from 'components/ConfirmDelete'
 import LinkTo from 'components/LinkTo'
+import TaskTable from 'components/TaskTable'
+import AttendeesTable from './AttendeesTable'
+import AuthorizationGroupTable from './AuthorizationGroupTable'
 import ReportApprovals from 'components/ReportApprovals'
 import Tag from 'components/Tag'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
 import Settings from 'Settings'
-import {Report, Person, Task, Comment, Position} from 'models'
+import {Report, Person, Comment, Position} from 'models'
 import _isEmpty from 'lodash/isEmpty'
-
-import ConfirmDelete from 'components/ConfirmDelete'
+import _concat from 'lodash/concat'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -40,18 +45,18 @@ class BaseReportShow extends Page {
 
 	static modelName = 'Report'
 
+	state = {
+		report: new Report(),
+		validationErrors: null,
+		validationWarnings: null,
+		success: null,
+		error: null,
+		showEmailModal: false,
+	}
+
 	constructor(props) {
 		super(props)
-
-		this.state = {
-			success: null,
-			error: null,
-			report: new Report({uuid: props.match.params.uuid}),
-			newComment: new Comment(),
-			approvalComment: new Comment(),
-			showEmailModal: false,
-			email: { toAddresses: '', comment: '' , errors: null}
-		}
+		setMessages(props, this.state)
 	}
 
 	fetchData(props) {
@@ -109,9 +114,17 @@ class BaseReportShow extends Page {
 				tags { uuid, name, description }
 				reportSensitiveInformation { uuid, text }
 				authorizationGroups { uuid, name, description }
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
-			this.setState({report: new Report(data.report)})
+			data.report.cancelled = !!data.report.cancelledReason
+			data.report.to = ''
+			const report = new Report(data.report)
+			this.setState({report})
+			Report.yupSchema.validate(report, {abortEarly: false})
+				.catch(e => this.setState({validationErrors: e.errors}))
+			Report.yupWarningSchema.validate(report, {abortEarly: false})
+				.catch(e => this.setState({validationWarnings: e.errors}))
 		})
 	}
 
@@ -138,277 +151,289 @@ class BaseReportShow extends Page {
 	}
 
 	render() {
-		const {report} = this.state
+		const { report } = this.state
 		const { currentUser } = this.props
+		const isAdmin = currentUser && currentUser.isAdmin()
+		const isAuthor = Person.isEqual(currentUser, report.author)
 
-		//User can approve if report is pending approval and user is one of the approvers in the current approval step
-		const canApprove = report.isPending() && currentUser.position &&
+		//When either admin or not the author, user can approve if report is pending approval and user is one of the approvers in the current approval step
+		const canApprove = (isAdmin || !isAuthor) && report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
+		//Warn admins when they try to approve their own report
+		const warnApproveOwnReport = canApprove && isAuthor
 
 		//Authors can edit in draft mode (also future engagements) or rejected mode
-		let canEdit = (report.isDraft() || report.isFuture() || report.isRejected()) && Person.isEqual(currentUser, report.author)
+		let canEdit = isAuthor && (report.isDraft() || report.isFuture() || report.isRejected())
 		//Approvers can edit.
 		canEdit = canEdit || canApprove
 
 		//Only the author can submit when report is in draft or rejected AND author has a position
 		const hasAssignedPosition = currentUser.hasAssignedPosition()
 		const hasActivePosition = currentUser.hasActivePosition()
-		const canSubmit = (report.isDraft() || report.isRejected()) && Person.isEqual(currentUser, report.author) && hasActivePosition
+		const canSubmit = isAuthor && hasActivePosition && (report.isDraft() || report.isRejected())
 
 		//Anybody can email a report as long as it's not in draft.
-		let canEmail = !report.isDraft()
-
-		const {errors, warnings} = (!report.isReleased() && !report.isCancelled()) && report.validateForSubmit()
-
-		let isCancelled = report.cancelledReason ? true : false
-
-		const formattedReportReleasedAt = moment(report.getReportReleasedAt()).format('D MMM YYYY, [at] h:mm a')
+		const canEmail = !report.isDraft()
 
 		return (
-			<div className="report-show">
-				<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
-				<Messages error={this.state.error} success={this.state.success} />
+			<Formik
+				enableReinitialize={true}
+				validationSchema={Report.yupSchema}
+				isInitialValid={() => Report.yupSchema.isValidSync(report)}
+				initialValues={report}
+			>
+			{({
+				isSubmitting,
+				setSubmitting,
+				isValid,
+				setFieldValue,
+				values,
+			}) => {
+				const action = <div>
+					{canEmail && <Button onClick={this.toggleEmailModal}>Email report</Button>}
+					{canEdit && <LinkTo report={report} edit button="primary">Edit</LinkTo>}
+					{canSubmit && this.renderSubmitButton(isSubmitting || !isValid, () => setSubmitting(false))}
+				</div>
+				return <div className="report-show">
+					{this.renderEmailModal(values, setFieldValue)}
 
-				{report.isReleased() &&
-					<Fieldset style={{textAlign: 'center' }}>
-						<h4 className="text-danger">This report is RELEASED.</h4>
-						<p>This report has been approved and released to the ANET community on {formattedReportReleasedAt}</p>
-					</Fieldset>
-				}
+					<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
+					<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
+					<Messages success={this.state.success} error={this.state.error} />
 
-				{report.isRejected() &&
-					<Fieldset style={{textAlign: 'center' }}>
-						<h4 className="text-danger">This report was REJECTED. </h4>
-						<p>You can review the comments below, fix the report and re-submit</p>
-						<div style={{textAlign: 'left'}}>
-							{this.renderValidationMessages(errors, warnings)}
-						</div>
-					</Fieldset>
-				}
-
-				{report.isDraft() &&
-					<Fieldset style={{textAlign: 'center'}}>
-						<h4 className="text-danger">This is a DRAFT report and hasn't been submitted.</h4>
-						<p>You can review the draft below to make sure all the details are correct.</p>
-						{(!hasAssignedPosition || !hasActivePosition) &&
-							this.renderNoPositionAssignedText()
-						}
-						<div style={{textAlign: 'left'}}>
-							{this.renderValidationMessages(errors, warnings)}
-						</div>
-					</Fieldset>
-				}
-
-				{report.isPending() &&
-					<Fieldset style={{textAlign: 'center'}}>
-						<h4 className="text-danger">This report is PENDING approvals.</h4>
-						<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
-					</Fieldset>
-				}
-
-				{report.isFuture() &&
-					<Fieldset style={{textAlign: 'center'}}>
-						<h4 className="text-success">This report is for an UPCOMING engagement.</h4>
-						<p>After your engagement has taken place, edit and submit this document as an engagement report.</p>
-						<div style={{textAlign: 'left'}}>
-							{this.renderValidationMessages(errors, warnings)}
-						</div>
-					</Fieldset>
-				}
-
-				{this.renderEmailModal()}
-
-				<Form static formFor={report} horizontal>
-					<Fieldset title={`Report #${report.uuid}`} className="show-report-overview" action={<div>
-						{canEmail && <Button onClick={this.toggleEmailModal}>Email report</Button>}
-						{canEdit && <LinkTo report={report} edit button="primary">Edit</LinkTo>}
-						{canSubmit && _isEmpty(errors) && this.renderSubmitButton(errors, warnings)}
-					</div>
-					}>
-
-						<Form.Field id="intent" label="Summary" >
-							<p><strong>Meeting goal:</strong> {report.intent}</p>
-							{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
-							<p><strong>Next steps:</strong> {report.nextSteps}</p>
-						</Form.Field>
-
-						<Form.Field id="engagementDate" label="Engagement Date" getter={date => date && moment(date).format('D MMMM, YYYY')} />
-
-						<Form.Field id="location" label="Location">
-							{report.location && <LinkTo anetLocation={report.location} />}
-						</Form.Field>
-
-						{!isCancelled &&
-							<Form.Field id="atmosphere" label="Atmospherics">
-								{utils.sentenceCase(report.atmosphere)}
-								{report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
-							</Form.Field>
-						}
-						{isCancelled &&
-							<Form.Field id="cancelledReason" label="Cancelled Reason">
-								{utils.sentenceCase(report.cancelledReason)}
-							</Form.Field>
-						}
-						<Form.Field id="tags" label="Tags">
-							{report.tags && report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}
-						</Form.Field>
-						<Form.Field id="author" label="Report author">
-							<LinkTo person={report.author} />
-						</Form.Field>
-						<Form.Field id="advisorOrg" label={Settings.fields.advisor.org.name}>
-							<LinkTo organization={report.advisorOrg} />
-						</Form.Field>
-						<Form.Field id="principalOrg" label={Settings.fields.principal.org.name}>
-							<LinkTo organization={report.principalOrg} />
-						</Form.Field>
-					</Fieldset>
-
-					<Fieldset title="Meeting attendees">
-						<Table condensed className="borderless">
-							<thead>
-								<tr>
-									<th style={{textAlign: 'center'}}>Primary</th>
-									<th>Name</th>
-									<th>Position</th>
-									<th>Location</th>
-									<th>Organization</th>
-								</tr>
-							</thead>
-
-							<tbody>
-								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.ADVISOR), person =>
-									this.renderAttendeeRow(person)
-								)}
-								<tr><td colSpan={5}><hr className="attendee-divider" /></td></tr>
-								{Person.map(report.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL), person =>
-									this.renderAttendeeRow(person)
-								)}
-							</tbody>
-						</Table>
-					</Fieldset>
-
-					<Fieldset title={Settings.fields.task.longLabel} >
-						<Table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Organization</th>
-								</tr>
-							</thead>
-
-							<tbody>
-								{Task.map(report.tasks, (task, idx) =>
-									<tr key={task.uuid} id={"task_" + idx}>
-										<td className="taskName" ><LinkTo task={task} >{task.shortName} - {task.longName}</LinkTo></td>
-										<td className="taskOrg" ><LinkTo organization={task.responsibleOrg} /></td>
-									</tr>
-								)}
-							</tbody>
-						</Table>
-					</Fieldset>
-
-					{report.reportText &&
-						<Fieldset title="Meeting discussion">
-							<div dangerouslySetInnerHTML={{__html: report.reportText}} />
+					{report.isReleased() &&
+						<Fieldset style={{textAlign: 'center' }}>
+							<h4 className="text-danger">This report is RELEASED.</h4>
+							<p>This report has been approved and released to the ANET community on {moment(report.getReportReleasedAt()).format(Settings.dateFormats.forms.withTime)}</p>
 						</Fieldset>
 					}
 
-					{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
-						<Fieldset title="Sensitive information">
-							<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
-							{(report.authorizationGroups && report.authorizationGroups.length > 0 &&
-								<div>
-									<h5>Authorized groups:</h5>
-									<Table>
-										<thead>
-											<tr>
-												<th>Name</th>
-												<th>Description</th>
-											</tr>
-										</thead>
-										<tbody>
-											{report.authorizationGroups.map(ag => {
-												return (
-													<tr key={ag.uuid}>
-														<td>{ag.name}</td>
-														<td>{ag.description}</td>
-													</tr>
-												)}
-											)}
-										</tbody>
-									</Table>
-								</div>
-							) || (
-								<h5>No groups are authorized!</h5>
-							)}
-						</Fieldset>
-					}
-
-					{report.showApprovals() &&
-						<ReportApprovals report={report} fullReport={true} />
-					}
-
-					{canSubmit &&
-						<Fieldset>
-							<Col md={9}>
-								{_isEmpty(errors) &&
-									<p>
-										By pressing submit, this report will be sent to
-										<strong> {Object.get(report, 'author.position.organization.name') || 'your organization approver'} </strong>
-										to go through the approval workflow.
-									</p>
-								}
-								{this.renderValidationMessages(errors, warnings)}
-							</Col>
-
-							<Col md={3}>
-								{this.renderSubmitButton(errors, warnings, "large", "submitReportButton")}
-							</Col>
-						</Fieldset>
-					}
-
-					<Fieldset className="report-sub-form" title="Comments">
-						{report.comments.map(comment => {
-							let createdAt = moment(comment.createdAt)
-							return (
-								<p key={comment.uuid}>
-									<LinkTo person={comment.author} />
-									<span title={createdAt.format('L LT')}> {createdAt.fromNow()}: </span>
-									"{comment.text}"
-								</p>
-							)
-						})}
-
-						{!report.comments.length && <p>There are no comments yet.</p>}
-
-						<Form formFor={this.state.newComment} horizontal onSubmit={this.submitComment} submitText={false} className="add-new-comment">
-							<Form.Field id="text" placeholder="Type a comment here" label="Add a comment" componentClass="textarea" />
-
-							<div className="right-button">
-								<Button bsStyle="primary" type="submit">Save comment</Button>
+					{report.isRejected() &&
+						<Fieldset style={{textAlign: 'center' }}>
+							<h4 className="text-danger">This report has CHANGES REQUESTED.</h4>
+							<p>You can review the comments below, fix the report and re-submit</p>
+							<div style={{textAlign: 'left'}}>
+								{this.renderValidationMessages()}
 							</div>
-						</Form>
-					</Fieldset>
+						</Fieldset>
+					}
 
-					{canApprove && this.renderApprovalForm(errors, warnings)}
-				</Form>
-				{currentUser.isAdmin() &&
-					<div className="submit-buttons"><div>
-						<ConfirmDelete
-							onConfirmDelete={this.onConfirmDelete}
-							objectType="report"
-							objectDisplay={'#' + this.state.report.uuid}
-							bsStyle="warning"
-							buttonLabel="Delete report"
-							className="pull-right" />
-					</div></div>
-				}
-			</div>
+					{report.isDraft() &&
+						<Fieldset style={{textAlign: 'center'}}>
+							<h4 className="text-danger">This is a DRAFT report and hasn't been submitted.</h4>
+							<p>You can review the draft below to make sure all the details are correct.</p>
+							{(!hasAssignedPosition || !hasActivePosition) &&
+								this.renderNoPositionAssignedText()
+							}
+							<div style={{textAlign: 'left'}}>
+								{this.renderValidationMessages()}
+							</div>
+						</Fieldset>
+					}
+
+					{report.isPending() &&
+						<Fieldset style={{textAlign: 'center'}}>
+							<h4 className="text-danger">This report is PENDING approvals.</h4>
+							<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
+							<div style={{textAlign: 'left'}}>
+								{this.renderValidationMessages('approving')}
+							</div>
+						</Fieldset>
+					}
+
+					{report.isFuture() &&
+						<Fieldset style={{textAlign: 'center'}}>
+							<h4 className="text-success">This report is for an UPCOMING engagement.</h4>
+							<p>After your engagement has taken place, edit and submit this document as an engagement report.</p>
+							<div style={{textAlign: 'left'}}>
+								{this.renderValidationMessages()}
+							</div>
+						</Fieldset>
+					}
+
+					<Form className="form-horizontal" method="post">
+						<Fieldset title={`Report #${report.uuid}`} action={action} />
+						<Fieldset className="show-report-overview">
+							<Field
+								name="intent"
+								label="Summary"
+								component={FieldHelper.renderSpecialField}
+								widget={
+									<div id="intent" className="form-control-static">
+										<p><strong>{Settings.fields.report.intent}:</strong> {report.intent}</p>
+										{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
+										<p><strong>Next steps:</strong> {report.nextSteps}</p>
+									</div>
+								}
+							/>
+
+							<Field
+								name="engagementDate"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={report.engagementDate && moment(report.engagementDate).format(Settings.dateFormats.forms.long)}
+							/>
+
+							<Field
+								name="location"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={report.location &&
+									<LinkTo anetLocation={report.location} />
+								}
+							/>
+
+							{report.cancelled &&
+								<Field
+									name="cancelledReason"
+									label="Cancelled Reason"
+									component={FieldHelper.renderReadonlyField}
+									humanValue={utils.sentenceCase(report.cancelledReason)}
+								/>
+							}
+
+							{!report.cancelled &&
+								<Field
+									name="atmosphere"
+									label={Settings.fields.report.atmosphere}
+									component={FieldHelper.renderReadonlyField}
+									humanValue={
+										<React.Fragment>
+											{utils.sentenceCase(report.atmosphere)}
+											{report.atmosphereDetails && ` – ${report.atmosphereDetails}`}
+										</React.Fragment>
+									}
+								/>
+							}
+
+							<Field
+								name="reportTags"
+								label={Settings.fields.report.reportTags}
+								component={FieldHelper.renderReadonlyField}
+								humanValue={report.tags && report.tags.map((tag,i) => <Tag key={tag.uuid} tag={tag} />)}
+							/>
+
+							<Field
+								name="author"
+								component={FieldHelper.renderReadonlyField}
+								humanValue={<LinkTo person={report.author} />}
+							/>
+
+							<Field
+								name="advisorOrg"
+								label={Settings.fields.advisor.org.name}
+								component={FieldHelper.renderReadonlyField}
+								humanValue={<LinkTo organization={report.advisorOrg} />}
+							/>
+
+							<Field
+								name="principalOrg"
+								label={Settings.fields.principal.org.name}
+								component={FieldHelper.renderReadonlyField}
+								humanValue={<LinkTo organization={report.principalOrg} />}
+							/>
+						</Fieldset>
+
+						<Fieldset title="Meeting attendees">
+							<AttendeesTable attendees={report.attendees} disabled={true} />
+						</Fieldset>
+
+						<Fieldset title={Settings.fields.task.longLabel}>
+							<TaskTable tasks={report.tasks} showOrganization={true} />
+						</Fieldset>
+
+						{report.reportText &&
+							<Fieldset title="Meeting discussion">
+								<div dangerouslySetInnerHTML={{__html: report.reportText}} />
+							</Fieldset>
+						}
+
+						{report.reportSensitiveInformation && report.reportSensitiveInformation.text &&
+							<Fieldset title="Sensitive information">
+								<div dangerouslySetInnerHTML={{__html: report.reportSensitiveInformation.text}} />
+								{(report.authorizationGroups && report.authorizationGroups.length > 0 &&
+									<div>
+										<h5>Authorized groups:</h5>
+										<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} />
+									</div>
+								) || (
+									<h5>No groups are authorized!</h5>
+								)}
+							</Fieldset>
+						}
+
+						{report.showApprovals() &&
+							<ReportApprovals report={report} fullReport={true} />
+						}
+
+						{canSubmit &&
+							<Fieldset>
+								<Col md={9}>
+									{_isEmpty(this.state.validationErrors) &&
+										<p>
+											By pressing submit, this report will be sent to
+											<strong> {Object.get(report, 'author.position.organization.name') || 'your organization approver'} </strong>
+											to go through the approval workflow.
+										</p>
+									}
+									{this.renderValidationMessages()}
+								</Col>
+
+								<Col md={3}>
+									{this.renderSubmitButton(isSubmitting || !isValid, () => setSubmitting(false), "large", "submitReportButton")}
+								</Col>
+							</Fieldset>
+						}
+
+						<Fieldset className="report-sub-form" title="Comments">
+							{report.comments.map(comment => {
+								let createdAt = moment(comment.createdAt)
+								return (
+									<p key={comment.uuid}>
+										<LinkTo person={comment.author} />,
+										<span title={createdAt.format(Settings.dateFormats.forms.withTime)}> {createdAt.fromNow()}: </span>
+										"{comment.text}"
+									</p>
+								)
+							})}
+
+							{!report.comments.length && <p>There are no comments yet.</p>}
+
+							<Field
+								name="newComment"
+								label="Add a comment"
+								component={FieldHelper.renderInputField}
+								componentClass="textarea"
+								placeholder="Type a comment here"
+								className="add-new-comment"
+							/>
+							<div className="right-button">
+								<Button bsStyle="primary" type="button" onClick={() => this.submitComment(values.newComment, setFieldValue)}>Save comment</Button>
+							</div>
+						</Fieldset>
+
+						{canApprove && this.renderApprovalForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
+					</Form>
+
+					{currentUser.isAdmin() &&
+						<div className="submit-buttons">
+							<div>
+								<ConfirmDelete
+									onConfirmDelete={this.onConfirmDelete}
+									objectType="report"
+									objectDisplay={'#' + report.uuid}
+									bsStyle="warning"
+									buttonLabel="Delete report"
+									className="pull-right"
+								/>
+							</div>
+						</div>
+					}
+				</div>
+			}}
+			</Formik>
 		)
 	}
 
-	@autobind
-	onConfirmDelete() {
+	onConfirmDelete = () => {
 		const operation = 'deleteReport'
 		let graphql = operation + '(uuid: $uuid)'
 		const variables = { uuid: this.state.report.uuid }
@@ -425,90 +450,79 @@ class BaseReportShow extends Page {
 			})
 	}
 
-	@autobind
-	renderApprovalForm(errors, warnings) {
+	renderApprovalForm = (values, disabled, warnApproveOwnReport, cancelHandler) => {
 		return <Fieldset className="report-sub-form" title="Report approval">
-			<h5>You can approve, reject, or edit this report</h5>
+			<h5>You can approve, request changes to, or edit this report</h5>
+			{this.renderValidationMessages('approving')}
 
-			<Form.Field
-				id="approvalComment"
-				componentClass="textarea"
+			<Field
+				name="approvalComment"
 				label="Approval comment"
-				placeholder="Type a comment here; required for a rejection"
-				getter={this.getApprovalComment}
-				onChange={this.onChangeComment}
+				component={FieldHelper.renderInputField}
+				componentClass="textarea"
+				placeholder="Type a comment here; required when requesting changes"
 			/>
 
-			<Button bsStyle="warning" onClick={this.handleRejectReport}>Reject with comment</Button>
+			{this.renderRejectButton(warnApproveOwnReport, "Request changes", () => this.rejectReport(values.approvalComment), cancelHandler)}
 			<div className="right-button">
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
-				{this.renderApproveButton(errors, warnings)}
+				{this.renderApproveButton(warnApproveOwnReport, disabled, () => this.approveReport(values.approvalComment), cancelHandler)}
 			</div>
 		</Fieldset>
 	}
 
-	@autobind
-	renderAttendeeRow(person) {
-		return <tr key={person.uuid}>
-			<td className="primary-attendee">
-				{person.primary && <Checkbox readOnly checked />}
-			</td>
-			<td>
-				<img src={person.iconUrl()} alt={person.role} height={20} width={20} className="person-icon" />
-				<LinkTo person={person} />
-			</td>
-			<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
-			<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
-			<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
-		</tr>
-	}
-
-	@autobind
-	renderEmailModal() {
-		let email = this.state.email
-		return <Modal show={this.state.showEmailModal} onHide={this.toggleEmailModal}>
-			<Form formFor={email} onChange={this.onChange} submitText={false}>
+	renderEmailModal = (values, setFieldValue) => {
+		return (
+			<Modal show={this.state.showEmailModal} onHide={this.toggleEmailModal}>
 				<Modal.Header closeButton>
 					<Modal.Title>Email Report</Modal.Title>
 				</Modal.Header>
 
 				<Modal.Body>
-					{email.errors &&
-						<Alert bsStyle="danger">{email.errors}</Alert>
-					}
+					<Field
+						name="to"
+						component={FieldHelper.renderInputField}
+						validate={(email) => this.handleEmailValidation(email)}
+						vertical={true}
+					>
+						<HelpBlock>
+							One or more email addresses, comma separated, e.g.:<br />
+							<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
+						</HelpBlock>
+					</Field>
 
-					<Form.Field id="to" />
-					<HelpBlock>
-						One or more email addresses, comma separated, e.g.:<br />
-						<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
-					</HelpBlock>
-					<Form.Field id="comment" componentClass="textarea" />
+					<Field
+						name="comment"
+						component={FieldHelper.renderInputField}
+						componentClass="textarea"
+						vertical={true}
+					/>
 				</Modal.Body>
 
 				<Modal.Footer>
-					<Button bsStyle="primary" onClick={this.emailReport}>Send Email</Button>
+					<Button bsStyle="primary" onClick={() => this.emailReport(values, setFieldValue)}>Send Email</Button>
 				</Modal.Footer>
-			</Form>
-		</Modal>
+			</Modal>
+		)
 	}
 
-	@autobind
-	toggleEmailModal() {
+	toggleEmailModal = () => {
 		this.setState({showEmailModal : !this.state.showEmailModal})
 	}
 
-	@autobind
-	emailReport() {
-		let email = this.state.email
-		let r = utils.parseEmailAddresses(email.to)
+	handleEmailValidation = (value) => {
+		const r = utils.parseEmailAddresses(value)
+		return r.isValid ? null : r.message
+	}
+
+	emailReport = (values, setFieldValue) => {
+		const r = utils.parseEmailAddresses(values.to)
 		if (!r.isValid) {
-			email.errors = r.message
-			this.setState({email})
 			return
 		}
 		const emailDelivery = {
 			toAddresses: r.to,
-			comment: email.comment
+			comment: values.comment
 		}
 
 		let graphql = 'emailReport(uuid: $uuid, email: $email)'
@@ -519,91 +533,83 @@ class BaseReportShow extends Page {
 		const variableDef = '($uuid: String!, $email: AnetEmailInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
+				setFieldValue('to', '')
+				setFieldValue('comment', '')
 				this.setState({
 					success: 'Email successfully sent',
-					error:null,
+					error: null,
 					showEmailModal: false,
-					email: {}
 				})
 			}).catch(error => {
 				this.setState({
 					showEmailModal: false,
-					email: {}
 				})
 				this.handleError(error)
 			})
 	}
 
-	@autobind
-	submitDraft() {
+	submitDraft = () => {
 		let graphql = 'submitReport(uuid: $uuid) { uuid }'
 		const variables = {
-			uuid: this.state.report.uuid
+			uuid: this.state.report.uuid,
 		}
 		const variableDef = '($uuid: String!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
 				this.updateReport()
-				this.setState({error:null, success: 'Report submitted'})
+				this.setState({success: 'Report submitted', error: null})
 			}).catch(error => {
 				this.handleError(error)
 			})
 	}
 
-	@autobind
-	submitComment(event){
+	submitComment = (text, setFieldValue) => {
+		if (_isEmpty(text)) {
+			return
+		}
 		let graphql = 'addComment(uuid: $uuid, comment: $comment) { uuid }'
 		const variables = {
 			uuid: this.state.report.uuid,
-			comment: this.state.newComment
+			comment: new Comment({text}),
 		}
 		const variableDef = '($uuid: String!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
+				setFieldValue('newComment', '')
 				this.updateReport()
-				this.setState({newComment:new Comment(), error:null, success: 'Comment saved'})
+				this.setState({success: 'Comment saved', error: null})
 			}).catch(error => {
 				this.handleError(error)
 			})
-		event.stopPropagation()
-		event.preventDefault()
 	}
 
-	@autobind
-	rejectReport() {
-		if (this.state.approvalComment.text.length === 0){
-			this.handleError({message:'Please include a comment when rejecting a report.'})
+	rejectReport = (rejectionComment) => {
+		if (_isEmpty(rejectionComment)) {
+			this.handleError({message: 'Please include a comment when requesting changes.'})
 			return
 		}
 
-		this.state.approvalComment.text = 'REJECTED: ' + this.state.approvalComment.text
+		const text = 'REQUESTED CHANGES: ' + rejectionComment
 		let graphql = 'rejectReport(uuid: $uuid, comment: $comment) { uuid }'
 		const variables = {
 			uuid: this.state.report.uuid,
-			comment: this.state.approvalComment
+			comment: new Comment({text}),
 		}
 		const variableDef = '($uuid: String!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
-				const { currentUser } = this.props
-				const queryDetails = this.pendingMyApproval(currentUser)
-				const message = 'Successfully rejected report.'
+				const queryDetails = this.pendingMyApproval(this.props.currentUser)
+				const message = 'Successfully requested changes.'
 				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback.bind(this, message))
 			}).catch(error => {
 				this.handleError(error)
 			})
 	}
 
-	handleRejectReport = (event) => {
-		this.rejectReport()
-		event.preventDefault()
-		event.stopPropagation()
-	}
-
 	pendingMyApproval = (currentUser) => {
 		return {
 			title: "Reports pending my approval",
-			query: { pendingApprovalOf: currentUser.id },
+			query: { pendingApprovalOf: currentUser.uuid },
 		}
 	}
 
@@ -622,22 +628,17 @@ class BaseReportShow extends Page {
 		})
 	}
 
-	@autobind
-	approveReport() {
-		const { approvalComment, report } = this.state
-		const comment = (approvalComment.text.length > 0) ? approvalComment : {}
-		const graphql = 'approveReport(uuid: $uuid, comment: $comment) { uuid }'
-		const variableDef = '($uuid: String!, $comment: CommentInput!)'
+	approveReport = (text) => {
+		let graphql = 'approveReport(uuid: $uuid, comment: $comment) { uuid }'
 		const variables = {
-			uuid: report.uuid,
-			comment: comment
+			uuid: this.state.report.uuid,
+			comment: new Comment({text}),
 		}
+		const variableDef = '($uuid: String!, $comment: CommentInput!)'
 		API.mutation(graphql, variables, variableDef)
 			.then(data => {
-				const { currentUser } = this.props
-				const queryDetails = this.pendingMyApproval(currentUser)
-				const { report } = this.state
-				const lastApproval = (report.approvalStep.nextStepId === null)
+				const queryDetails = this.pendingMyApproval(this.props.currentUser)
+				const lastApproval = (this.state.report.approvalStep.nextStepId === null)
 				const message = 'Successfully approved report.' + (lastApproval ? ' It has been added to the daily rollup' : '')
 				deserializeQueryParams(SEARCH_OBJECT_TYPES.REPORTS, queryDetails.query, this.deserializeCallback.bind(this, message))
 			})
@@ -646,115 +647,118 @@ class BaseReportShow extends Page {
 			})
 	}
 
-	handleApproveReport = (event) => {
-		this.approveReport()
-		event.preventDefault()
-		event.stopPropagation()
-	}
-
-	@autobind
-	onChange() {
-		let report = this.state.report
-		let email = this.state.email
-		this.setState({report, email})
-	}
-
-	@autobind
-	getApprovalComment(){
-		return this.state.approvalComment.text
-	}
-
-	@autobind
-	onChangeComment(value) {
-		let approvalComment = this.state.approvalComment
-		approvalComment.text = value.target.value
-		this.setState({approvalComment})
-	}
-
-	@autobind
-	updateReport() {
+	updateReport = () => {
 		this.fetchData(this.props)
 		jumpToTop()
 	}
 
-	@autobind
-	handleError(response) {
+	handleError = (response) => {
 		this.setState({success: null, error: response})
 		jumpToTop()
 	}
 
-	renderSubmitButton(errors, warnings, size, id) {
-		return this.renderValidationButton("Submit report?", "Submit report", "Submit anyway", "Cancel submit", this.submitDraft, errors, warnings, size, id)
-	}
-
-	renderApproveButton(errors, warnings, size, id) {
-		return this.renderValidationButton("Approve report?", "Approve", "Approve anyway", "Cancel approve", this.handleApproveReport, errors, warnings, size, id, "approve-button")
-	}
-
-	renderValidationButton(title, label, confirmText, cancelText, handler, errors, warnings, size, id, className) {
-		return _isEmpty(warnings)
+	renderRejectButton = (warnApproveOwnReport, label, confirmHandler, cancelHandler) => {
+		const validationWarnings = warnApproveOwnReport ? ["You are requesting changes to your own report"] : []
+		return _isEmpty(validationWarnings)
 			?
-			<Button type="submit" bsStyle="primary" bsSize={size} className={className}
-				onClick={handler}
-				disabled={!_isEmpty(errors)}
+			<Button bsStyle="warning" onClick={confirmHandler}>{label}</Button>
+			:
+			<Confirm
+				onConfirm={confirmHandler}
+				onClose={cancelHandler}
+				title="Request changes?"
+				body={this.renderValidationWarnings(validationWarnings, "rejecting")}
+				confirmText="Request changes anyway"
+				cancelText="Cancel change request"
+				dialogClassName="react-confirm-bootstrap-modal"
+				confirmBSStyle="primary">
+			<Button bsStyle="warning" onClick={confirmHandler}>{label}</Button>
+			</Confirm>
+	}
+
+	renderSubmitButton = (disabled, cancelHandler, size, id) => {
+		return this.renderValidationButton(false, disabled, "submitting", "Submit report?", "Submit report", "Submit anyway", this.submitDraft, "Cancel submit", cancelHandler, size, id)
+	}
+
+	renderApproveButton = (warnApproveOwnReport, disabled, confirmHandler, cancelHandler, size, id) => {
+		return this.renderValidationButton(warnApproveOwnReport, disabled, "approving", "Approve report?", "Approve", "Approve anyway", confirmHandler, "Cancel approve", cancelHandler, size, id, "approve-button")
+	}
+
+	renderValidationButton = (warnApproveOwnReport, disabled, submitType, title, label, confirmText, confirmHandler, cancelText, cancelHandler, size, id, className) => {
+		let validationWarnings = warnApproveOwnReport ? ["You are approving your own report"] : []
+		if (!_isEmpty(this.state.validationWarnings)) {
+			validationWarnings = _concat(validationWarnings, this.state.validationWarnings)
+		}
+		return _isEmpty(validationWarnings)
+			?
+			<Button type="button" bsStyle="primary" bsSize={size} className={className}
+				onClick={confirmHandler}
+				disabled={disabled}
 				id={id}>
 				{label}
 			</Button>
 			:
 			<Confirm
-				onConfirm={handler}
+				onConfirm={confirmHandler}
+				onClose={cancelHandler}
 				title={title}
-				body={this.renderValidationWarnings(warnings)}
+				body={this.renderValidationWarnings(validationWarnings, submitType)}
 				confirmText={confirmText}
 				cancelText={cancelText}
 				dialogClassName="react-confirm-bootstrap-modal"
 				confirmBSStyle="primary">
-				<Button type="submit" bsStyle="primary" bsSize={size} className={className}
-					disabled={!_isEmpty(errors)}
+				<Button type="button" bsStyle="primary" bsSize={size} className={className}
+					disabled={disabled}
 					id={id}>
 					{label}
 				</Button>
 			</Confirm>
 	}
 
-	renderValidationMessages(errors, warnings) {
-		return <React.Fragment>
-			{this.renderValidationErrors(errors)}
-			{this.renderValidationWarnings(warnings)}
-		</React.Fragment>
+	renderValidationMessages = (submitType) => {
+		submitType = submitType || 'submitting'
+		return (
+			<React.Fragment>
+				{this.renderValidationErrors(submitType)}
+				{this.renderValidationWarnings(this.state.validationWarnings, submitType)}
+			</React.Fragment>
+		)
 	}
 
-	renderValidationErrors(errors) {
-		if (_isEmpty(errors)) {
+	renderValidationErrors = (submitType) => {
+		if (_isEmpty(this.state.validationErrors)) {
 			return null
 		}
-		let warning = this.state.report.isFuture() ?
-			'You\'ll need to fill out these required fields before you can submit your final report:'
-			:
-			'The following errors must be fixed before submitting this report:'
-		let style = this.state.report.isFuture() ? "info" : "danger"
-		return <Alert bsStyle={style}>
-			{warning}
-			<ul>
-			{ errors.map((error,idx) =>
-				<li key={idx}>{error}</li>
-			)}
-			</ul>
-		</Alert>
+		const warning = this.state.report.isFuture()
+			? 'You\'ll need to fill out these required fields before you can submit your final report:'
+			: `The following errors must be fixed before ${submitType} this report:`
+		const style = this.state.report.isFuture() ? "info" : "danger"
+		return (
+			<Alert bsStyle={style}>
+				{warning}
+				<ul>
+					{ this.state.validationErrors.map((error,idx) =>
+						<li key={idx}>{error}</li>
+					)}
+				</ul>
+			</Alert>
+		)
 	}
 
-	renderValidationWarnings(warnings) {
-		if (_isEmpty(warnings)) {
+	renderValidationWarnings = (validationWarnings, submitType) => {
+		if (_isEmpty(validationWarnings)) {
 			return null
 		}
-		return <Alert bsStyle="warning">
-			The following warnings should be addressed before submitting this report:
-			<ul>
-			{warnings.map((warning ,idx) =>
-				<li key={idx}>{warning}</li>
-			)}
-			</ul>
-		</Alert>
+		return (
+			<Alert bsStyle="warning">
+				The following warnings should be addressed before {submitType} this report:
+				<ul>
+					{validationWarnings.map((warning, idx) =>
+						<li key={idx}>{warning}</li>
+					)}
+				</ul>
+			</Alert>
+		)
 	}
 }
 

@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,11 +50,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	}
 
 	public Organization getByUuid(String uuid) {
-		return dbHandle.createQuery(
-				"/* getOrgByUuid */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new OrganizationMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -111,6 +108,8 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 				"/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\") "
 				+ "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid)")
 			.bindBean(org)
+			.bind("createdAt", DaoUtils.asLocalDateTime(org.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
 			.bind("status", DaoUtils.getEnumId(org.getStatus()))
 			.bind("type", DaoUtils.getEnumId(org.getType()))
 			.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
@@ -124,6 +123,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
 				+ "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid where uuid = :uuid")
 				.bindBean(org)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(org.getUpdatedAt()))
 				.bind("status", DaoUtils.getEnumId(org.getStatus()))
 				.bind("type", DaoUtils.getEnumId(org.getType()))
 				.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))

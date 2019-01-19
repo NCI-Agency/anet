@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.Handle;
@@ -44,10 +45,7 @@ public class LocationDao implements IAnetDao<Location> {
 	}
 
 	public Location getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getLocationByUuid */ SELECT * from locations where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new LocationMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -62,6 +60,8 @@ public class LocationDao implements IAnetDao<Location> {
 				"/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, :updatedAt)")
 			.bindBean(l)
+			.bind("createdAt", DaoUtils.asLocalDateTime(l.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
 			.bind("status", DaoUtils.getEnumId(l.getStatus()))
 			.execute();
 		return l;
@@ -72,6 +72,7 @@ public class LocationDao implements IAnetDao<Location> {
 		return dbHandle.createUpdate("/* updateLocation */ UPDATE locations "
 					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(l)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
 				.bind("status", DaoUtils.getEnumId(l.getStatus()))
 				.execute();
 	}

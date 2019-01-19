@@ -17,25 +17,15 @@ export default class Autocomplete extends Component {
 	static propTypes = {
 		value: PropTypes.oneOfType([
 			PropTypes.object,
-			PropTypes.array,
 			PropTypes.string,
+			PropTypes.array, // MultiSelectAutocomplete
 		]),
 
 		//The property of the selected object to display.
 		valueKey: PropTypes.string,
 
-		//If this Autocomplete should clear the text area after a valid selection.
-		clearOnSelect: PropTypes.bool,
-
 		//Optional: A function to render each item in the list of suggestions.
 		template: PropTypes.func,
-
-		//Function to call when a selection is made.
-		onChange: PropTypes.func,
-
-		//Optional: Function to call when the error state changes.
-		// Specifically if the user leaves invalid text in the component.
-		onErrorChange: PropTypes.func,
 
 		//Optional: Parameters to pass to search function.
 		queryParams: PropTypes.object,
@@ -45,54 +35,39 @@ export default class Autocomplete extends Component {
 
 		//GraphQL string of fields to return from search.
 		fields: PropTypes.string,
+
+		//Function to call when a selection is made.
+		onChange: PropTypes.func,
+
+		//If this Autocomplete should clear the text area after a valid selection.
+		//This is being used when the autocomplete is used for adding a value to an
+		//array. After the selection was made, the autocomplete is being cleared
+		//in order to make it possible to make a new selection.
+		clearOnSelect: PropTypes.bool,
+
+		// Array of values to exclude from the list of suggestions when searching
+		excludeValues: PropTypes.array,
 	}
 
 	constructor(props) {
 		super(props)
 
 		this.fetchSuggestionsDebounced = _debounce(this.fetchSuggestions, 200)
-		this.noSuggestions = <span><i>No suggestions found</i></span>
+		this.noSuggestions = <i>No suggestions found</i>
 
-		const selectedUuids = this._getSelectedUuids(props)
-		const value = this._getValue(props)
-		const stringValue = this.getStringValue(value, props.valueKey)
-
+		const stringValue = this.getStringValue(props.value, props.valueKey)
 		this.state = {
 			suggestions: [],
-			selectedUuids: selectedUuids,
 			stringValue: stringValue,
 			originalStringValue: stringValue,
 		}
 	}
 
-	@autobind
-	_getValue(props) {
-		const {value} = props
-		if (Array.isArray(value)) {
-			return {}
-		}
-
-		return value
-	}
-
-	@autobind
-	_getSelectedUuids(props) {
-		const {value} = props
-		if (Array.isArray(value)) {
-			return value.map(object => object.uuid)
-		}
-
-		return []
-	}
-
 	componentDidUpdate(prevProps, prevState) {
 		//Ensure that we update the stringValue if we get an updated value
 		if (!_isEqual(prevProps.value, this.props.value)) {
-			const selectedUuids = this._getSelectedUuids(this.props)
-			const value = this._getValue(this.props)
-			const stringValue = this.getStringValue(value, this.props.valueKey)
+			const stringValue = this.getStringValue(this.props.value, this.props.valueKey)
 			this.setState({
-				selectedUuids: selectedUuids,
 				stringValue: stringValue,
 				originalStringValue: stringValue
 			})
@@ -100,11 +75,10 @@ export default class Autocomplete extends Component {
 	}
 
 	render() {
-		let inputProps = Object.without(this.props, 'clearOnSelect', 'valueKey', 'template', 'queryParams', 'objectType', 'fields', 'onErrorChange')
+		let inputProps = Object.without(this.props, 'clearOnSelect', 'valueKey', 'template', 'queryParams', 'objectType', 'fields', 'excludeValues')
 		inputProps.value = this.state.stringValue
 		inputProps.onChange = this.onInputChange
 		inputProps.onBlur = this.onInputBlur
-		const { valueKey } = this.props
 		const renderSuggestion = this.props.template ? this.renderSuggestionTemplate : this.renderSuggestion
 
 		return <div style={{position: 'relative'}} ref={(el) => this.container = el}>
@@ -115,7 +89,7 @@ export default class Autocomplete extends Component {
 				onSuggestionsFetchRequested={this.fetchSuggestionsDebounced}
 				onSuggestionsClearRequested={this.clearSuggestions}
 				onSuggestionSelected={this.onSuggestionSelected}
-				getSuggestionValue={this.getStringValue.bind(this, valueKey)}
+				getSuggestionValue={() => this.getStringValue(this.props.value, this.props.valueKey)}
 				inputProps={inputProps}
 				renderInputComponent={this.renderInputComponent}
 				renderSuggestion={renderSuggestion}
@@ -126,9 +100,12 @@ export default class Autocomplete extends Component {
 
 	@autobind
 	renderSuggestion(suggestion) {
-		return _isEmpty(suggestion)
+		return (
+			<span>{_isEmpty(suggestion)
 				? this.noSuggestions
-				: <span>{this.getStringValue(suggestion, this.props.valueKey)}</span>
+				: this.getStringValue(suggestion, this.props.valueKey)
+			}</span>
+		)
 	}
 
 	@autobind
@@ -145,16 +122,29 @@ export default class Autocomplete extends Component {
 
 	@autobind
 	getStringValue(suggestion, valueKey) {
+		if (this.props.clearOnSelect) {
+			return ''
+		}
 		if (typeof suggestion === 'object') {
 			return suggestion[valueKey] || ''
 		}
-		return suggestion
+		return suggestion || ''
 	}
 
 	@autobind
-	_setFilteredSuggestions(list) {
-		if (this.state.selectedUuids) {
-			list = list.filter(suggestion => suggestion && suggestion.uuid && this.state.selectedUuids.indexOf(suggestion.uuid) === -1)
+	_getExcludedUuids() {
+		const {excludeValues} = this.props
+		if (Array.isArray(excludeValues)) {
+			return excludeValues.map(object => object.uuid)
+		}
+		return []
+	}
+
+	@autobind
+	_setSuggestions(list) {
+		const excludedUuids =  this._getExcludedUuids()
+		if (excludedUuids) {
+			list = list.filter(suggestion => suggestion && suggestion.uuid && excludedUuids.indexOf(suggestion.uuid) === -1)
 		}
 		if (!list.length) {
 			list = [{}] // use an empty object so we render the 'noSuggestions' text
@@ -174,8 +164,8 @@ export default class Autocomplete extends Component {
 		if (this.props.queryParams) {
 			Object.assign(queryVars, this.props.queryParams)
 		}
-		API.query(graphQlQuery, {query: queryVars}, variableDef, {disableSubmits: false}).then(data => {
-			this._setFilteredSuggestions(data[listName].list)
+		API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
+			this._setSuggestions(data[listName].list)
 		})
 	}
 
@@ -192,14 +182,8 @@ export default class Autocomplete extends Component {
 		let stringValue = this.props.clearOnSelect ? '' : suggestionValue
 		this.currentSelected = suggestion
 		this.setState({stringValue: stringValue})
-
 		if (this.props.onChange) {
 			this.props.onChange(suggestion)
-		}
-
-		if (this.props.onErrorChange) {
-			//Clear any error state.
-			this.props.onErrorChange(false)
 		}
 	}
 
@@ -208,14 +192,11 @@ export default class Autocomplete extends Component {
 		if (!event.target.value) {
 			if (!this.props.clearOnSelect) {
 				//If the component had a value, and the user just cleared the input
-				// then set the selection to an empty object. We need to do this because we need to
-				// tell the server that value was cleared, rather than that there was no change.
+				//then set the selection to an empty object. We need to do this because we need to
+				//tell the server that value was cleared, rather than that there was no change.
 				//This is so the server sees that the value is not-null, but that uuid is NULL.
 				//Which tells the server specifically that the uuid should be set to NULL on the foreignKey
 				this.onSuggestionSelected(event, {suggestion: {}, suggestionValue: ''})
-			}
-			if (this.props.onErrorChange) {
-				this.props.onErrorChange(false) //clear any errors.
 			}
 		}
 
@@ -228,21 +209,21 @@ export default class Autocomplete extends Component {
 	@autobind
 	onInputBlur(event) {
 		if (this.currentSelected) { return }
-		// If the user clicks off this Autocomplete with a value left in the Input Box
-		// Send that up to the parent. The user probably thinks they just 'set' this value
-		// so we should oblige, _unless_ the value is the original string value that was
-		// passed in. In this case, they probably tabbed past the field, so we should
-		// do nothing.
 		let val = this.state.stringValue
 		if (val) {
+			//If the value is the original string value that was passed in, the user
+			//probably tabbed past the field, so we should do nothing.
 			if (val === this.state.originalStringValue) { return }
-
+			//If the user clicks off this Autocomplete with a value left in the input
+			//field we call the onChange and further it is the responsibility of the
+			//form field validation to decide on what to do.
 			this.setState({stringValue: val})
-			if (this.props.onErrorChange) {
-				this.props.onErrorChange(true, val)
-			} else if (this.props.onChange) {
-				this.props.onChange(val)
+			if (this.props.onChange) {
+				this.props.onChange(val)  // make sure field validation is called
 			}
+		}
+		if (this.props.onBlur) {
+			this.props.onBlur(event)  // make sure the field is being marked as touched
 		}
 	}
 

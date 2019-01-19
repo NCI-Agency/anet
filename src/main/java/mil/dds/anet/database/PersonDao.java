@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -36,12 +37,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 		super(h, "Person", tableName, PERSON_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, "uuids", new PersonMapper());
-		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT \"peoplePositions\".\"positionUuid\" AS \"positionUuid\", "
-				+ "\"peoplePositions\".\"personUuid\" AS \"personUuid\", "
-				+ "\"peoplePositions\".\"createdAt\" AS pph_createdAt, "
-				+ PositionDao.POSITIONS_FIELDS + " FROM \"peoplePositions\" "
-				+ "LEFT JOIN positions ON \"peoplePositions\".\"positionUuid\" = positions.uuid "
-				+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"peoplePositions\".\"createdAt\" ASC";
+
+		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT * FROM \"peoplePositions\" "
+				+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
 	}
 	
@@ -52,10 +50,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 	}
 
 	public Person getByUuid(String uuid) {
-		return dbHandle.createQuery("/* personGetByUuid */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid = :uuid")
-				.bind("uuid",  uuid)
-				.map(new PersonMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -85,6 +80,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 
 		dbHandle.createUpdate(sql.toString())
 			.bindBean(p)
+			.bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+			.bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
 			.execute();
@@ -108,6 +106,8 @@ public class PersonDao extends AnetBaseDao<Person> {
 		sql.append("WHERE uuid = :uuid");
 		return dbHandle.createUpdate(sql.toString())
 			.bindBean(p)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+			.bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
 			.execute();
@@ -177,36 +177,57 @@ public class PersonDao extends AnetBaseDao<Person> {
 					.bind("loserUuid", loser.getUuid())
 					.bind("isPrimary", true)
 					.execute();
+
 				//update report attendance, should now be unique
 				h.createUpdate("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-				
+
 				// update approvals this person might have done
 				h.createUpdate("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-				
+
 				// report author update
 				h.createUpdate("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-			
+
 				// comment author update
 				h.createUpdate("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-				
+
 				// update position history
 				h.createUpdate("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();
-		
+
+				// update note authors
+				h.createUpdate("UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
+					.execute();
+
+				// update note related objects where we don't already have the same note for the winnerUuid
+				h.createUpdate("UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
+						+ " AND \"noteUuid\" NOT IN ("
+							+ "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
+						+ ")")
+					.bind("winnerUuid", winner.getUuid())
+					.bind("loserUuid", loser.getUuid())
+					.execute();
+
+				// now delete obsolete note related objects
+				h.createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
+					.bind("loserUuid", loser.getUuid())
+					.execute();
+
 				//delete the person!
 				return h.createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
 					.bind("loserUuid", loser.getUuid())
@@ -215,9 +236,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 
 	}
 
-	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, Person person) {
+	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, String personUuid) {
 		return new ForeignKeyFetcher<PersonPositionHistory>()
-				.load(context, "person.personPositionHistory", person.getUuid())
+				.load(context, "person.personPositionHistory", personUuid)
 				.thenApply(l ->
 		{
 			return PersonPositionHistory.getDerivedHistory(l);

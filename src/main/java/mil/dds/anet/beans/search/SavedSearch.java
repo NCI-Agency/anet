@@ -1,16 +1,26 @@
 package mil.dds.anet.beans.search;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import io.leangen.graphql.annotations.GraphQLIgnore;
+import io.leangen.graphql.annotations.GraphQLQuery;
+import io.leangen.graphql.annotations.GraphQLRootContext;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 
+import mil.dds.anet.beans.ForeignObjectHolder;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.views.AbstractAnetBean;
+import mil.dds.anet.views.UuidFetcher;
 
 public class SavedSearch extends AbstractAnetBean {
 
 	public enum SearchObjectType { REPORTS, PEOPLE, TASKS, POSITIONS, ORGANIZATIONS, LOCATIONS }
 	
 	String name;
-	Person owner;
+	private ForeignObjectHolder<Person> owner = new ForeignObjectHolder<>();
 	SearchObjectType objectType;
 	String query;
 	
@@ -21,15 +31,37 @@ public class SavedSearch extends AbstractAnetBean {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	@GraphQLQuery(name="owner")
+	public CompletableFuture<Person> loadOwner(@GraphQLRootContext Map<String, Object> context) {
+		if (owner.hasForeignObject()) {
+			return CompletableFuture.completedFuture(owner.getForeignObject());
+		}
+		return new UuidFetcher<Person>().load(context, "people", owner.getForeignUuid())
+				.thenApply(o -> { owner.setForeignObject(o); return o; });
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public void setOwnerUuid(String ownerUuid) {
+		this.owner = new ForeignObjectHolder<>(ownerUuid);
+	}
+
+	@JsonIgnore
+	@GraphQLIgnore
+	public String getOwnerUuid() {
+		return owner.getForeignUuid();
+	}
+
+	@GraphQLIgnore
 	public Person getOwner() {
-		return owner;
+		return owner.getForeignObject();
 	}
-	
+
 	public void setOwner(Person owner) {
-		this.owner = owner;
+		this.owner = new ForeignObjectHolder<>(owner);
 	}
-	
+
 	public SearchObjectType getObjectType() {
 		return objectType;
 	}
@@ -54,7 +86,7 @@ public class SavedSearch extends AbstractAnetBean {
 		SavedSearch other = (SavedSearch) o;
 		return Objects.equal(getUuid(), other.getUuid())
 				&& Objects.equal(name, other.getName())
-				&& Objects.equal(owner, other.getOwner())
+				&& Objects.equal(getOwnerUuid(), other.getOwnerUuid())
 				&& Objects.equal(objectType, other.getObjectType())
 				&& Objects.equal(query, other.getQuery());
 	}
@@ -62,7 +94,7 @@ public class SavedSearch extends AbstractAnetBean {
 	@Override
 	public String toString() {
 		return String.format("SavedSearch[uuid:%s, name:%s, query:%s, owner:%s]",
-				getUuid(), name, query, owner.getUuid());
+				getUuid(), name, query, getOwnerUuid());
 	}
 	
 	@Override

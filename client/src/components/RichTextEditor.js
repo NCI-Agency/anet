@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 import {ContentState, CompositeDecorator, Editor, EditorState, RichUtils, convertFromHTML, getDefaultKeyBinding } from 'draft-js'
 import { convertToHTML } from 'draft-convert'
 import 'draft-js/dist/Draft.css'
@@ -9,7 +10,9 @@ class RichTextEditor extends Component {
 	static propTypes = {
 		value: PropTypes.string,
 		onChange: PropTypes.func,
+		className: PropTypes.string,
 	}
+
 	constructor(props) {
 		super(props)
 		const decorator = new CompositeDecorator([
@@ -134,7 +137,7 @@ class RichTextEditor extends Component {
 		}
 
 		return (
-			<div className="RichEditor-root">
+			<div className={classNames("RichEditor-root", this.props.className)}>
 				<BlockStyleControls
 					editorState={editorState}
 					onToggle={this.toggleBlockType}

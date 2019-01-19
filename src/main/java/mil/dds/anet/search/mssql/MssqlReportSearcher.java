@@ -27,7 +27,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
-import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
@@ -45,7 +44,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		final Map<String,List<?>> listArgs = new HashMap<>();
 		final StringBuilder sql = new StringBuilder();
 		sql.append("/* MssqlReportSearch */ SELECT *, count(*) OVER() AS totalCount FROM (");
-		sql.append(" SELECT DISTINCT " + ReportDao.REPORT_FIELDS + ", " + PersonDao.PERSON_FIELDS);
+		sql.append(" SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
 
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
@@ -183,6 +182,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 		}
 
 		if (query.getPendingApprovalOf() != null) {
+			whereClauses.add("reports.authorUuid != :approverUuid");
 			whereClauses.add("reports.approvalStepUuid IN "
 				+ "(SELECT approvalStepUuid from approvers where positionUuid IN "
 				+ "(SELECT uuid FROM positions where currentPersonUuid = :approverUuid))");
@@ -264,10 +264,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 			args.put("userUuid", user.getUuid());
 		}
 
-		sql.append(", people");  // join condition added at the end
-
 		sql.append(" WHERE ");
-		whereClauses.add(0, "reports.authorUuid = people.uuid");  // add join condition at the front
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		sql.append(" ) l");
 

@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -62,10 +63,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public AuthorizationGroup getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getAuthorizationGroupByUuid */ SELECT * from \"authorizationGroups\" where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new AuthorizationGroupMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -85,6 +83,8 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 						"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
 							+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
 					.bindBean(a)
+					.bind("createdAt", DaoUtils.asLocalDateTime(a.getCreatedAt()))
+					.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
 					.bind("status", DaoUtils.getEnumId(a.getStatus()))
 					.execute();
 		
@@ -108,6 +108,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				return dbHandle.createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
 							+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
 						.bindBean(a)
+						.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
 						.bind("status", DaoUtils.getEnumId(a.getStatus()))
 						.execute();
 		});
@@ -174,10 +175,9 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
-		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS  + ", " + PersonDao.PERSON_FIELDS
-				+ " FROM reports, people, \"reportAuthorizationGroups\" "
-				+ "WHERE reports.\"authorUuid\" = people.uuid "
-				+ "AND \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = :authorizationGroupUuid "
+		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS
+				+ "FROM reports, \"reportAuthorizationGroups\" "
+				+ "WHERE \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = :authorizationGroupUuid "
 				+ "AND \"reportAuthorizationGroups\".\"reportUuid\" = reports.uuid")
 				.bind("authorizationGroupUuid", a.getUuid())
 				.map(new ReportMapper())

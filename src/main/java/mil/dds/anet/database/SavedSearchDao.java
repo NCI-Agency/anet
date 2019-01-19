@@ -1,5 +1,6 @@
 package mil.dds.anet.database;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.Handle;
@@ -27,10 +28,7 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 	}
 
 	public SavedSearch getByUuid(String uuid) {
-		return dbHandle.createQuery("/* getSavedSearchByUuid */ SELECT * from \"savedSearches\" where uuid = :uuid")
-				.bind("uuid", uuid)
-				.map(new SavedSearchMapper())
-				.findFirst().orElse(null);
+		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
 	@Override
@@ -51,7 +49,8 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
 				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
 			.bindBean(obj)
-			.bind("ownerUuid", obj.getOwner().getUuid())
+			.bind("createdAt", DaoUtils.asLocalDateTime(obj.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
 			.bind("objectType", DaoUtils.getEnumId(obj.getObjectType()))
 			.execute();
 		return obj;
@@ -63,6 +62,7 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
 				+ "WHERE uuid = :uuid")
 			.bindBean(obj)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(obj.getUpdatedAt()))
 			.execute();
 	}
 

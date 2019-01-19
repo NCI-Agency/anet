@@ -5,8 +5,8 @@ import TaskForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
+import {Organization, Task} from 'models'
 import Settings from 'Settings'
-import {Organization, Person, Task} from 'models'
 
 import utils from 'utils'
 
@@ -19,13 +19,12 @@ class TaskNew extends Page {
 		...pagePropTypes,
 	}
 
+	state = {
+		task: new Task(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			task: new Task(),
-			originalTask: new Task()
-		}
 	}
 
 	fetchData(props) {
@@ -36,22 +35,19 @@ class TaskNew extends Page {
 					uuid, shortName, longName, identificationCode, type
 				}
 			`).then(data => {
-				let task = this.state.task
+				const {task} = this.state
 				task.responsibleOrg = new Organization(data.organization)
-				this.state.originalTask.responsibleOrg = new Organization(data.organization)
 				this.setState({task})
 			})
 		}
 	}
 
 	render() {
-		let task = this.state.task
-
+		const { task } = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new ' + Settings.fields.task.shortLabel, Task.pathForNew()]]} />
-
-				<TaskForm original={this.state.originalTask} task={task} />
+				<Breadcrumbs items={[[`New ${Settings.fields.task.shortLabel}`, Task.pathForNew()]]} />
+				<TaskForm initialValues={task} title={`Create a new ${Settings.fields.task.shortLabel}`} />
 			</div>
 		)
 	}

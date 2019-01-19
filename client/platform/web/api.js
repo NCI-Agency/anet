@@ -45,33 +45,13 @@ const API = {
 
 	_send(url, data, params) {
 		params = params || {}
-		params.disableSubmits = typeof params.disableSubmits === 'undefined' ? true : params.disableSubmits
 		params.method = params.method || 'POST'
 		params.body = JSON.stringify(data)
 
 		params.headers = params.headers || {}
 		params.headers['Content-Type'] = 'application/json'
 
-		let promise = API._fetch(url, params)
-		let buttons = document.querySelectorAll('[type=submit]')
-		let toggleButtons =  function(onOff) {
-			for (let button of buttons) {
-				button.disabled = !onOff
-			}
-		}
-
-		if (params.disableSubmits) {
-			toggleButtons(false)
-
-			promise.then(response => {
-				toggleButtons(true)
-				return response
-			}, response => {
-				toggleButtons(true)
-				return response
-			})
-		}
-		return promise
+		return API._fetch(url, params)
 	},
 
 	_queryCommon(query, variables, variableDef, output, isMutation, params) {

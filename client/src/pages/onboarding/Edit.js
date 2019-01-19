@@ -43,17 +43,20 @@ class BaseOnboardingEdit extends Page {
 			if (data.person.endOfTourDate) {
 				data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
 			}
-
-			this.setState({person: new Person(data.person)})
+			const parsedFullName = Person.parseFullName(data.person.name)
+			data.person.firstName = parsedFullName.firstName
+			data.person.lastName = parsedFullName.lastName
+			this.setState({ person: new Person(data.person) })
 		})
 	}
 
 	render() {
 		return <div>
 			<PersonForm
-				person={this.state.person} edit
-				legendText={"Create your account"}
-				saveText={"Create profile"}
+				initialValues={this.state.person}
+				edit
+				title="Create your account"
+				saveText="Create profile"
 			/>
 		</div>
 	}

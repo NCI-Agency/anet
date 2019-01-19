@@ -29,10 +29,10 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 		dbHandle.createUpdate("/* insertApprovalAction */ INSERT INTO \"approvalActions\" "
 				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
-			.bind("approvalStepUuid", action.getStep().getUuid())
-			.bind("personUuid", action.getPerson().getUuid())
-			.bind("reportUuid", action.getReport().getUuid())
-			.bind("createdAt", action.getCreatedAt())
+			.bind("approvalStepUuid", action.getStepUuid())
+			.bind("personUuid", action.getPersonUuid())
+			.bind("reportUuid", action.getReportUuid())
+			.bind("createdAt", DaoUtils.asLocalDateTime(action.getCreatedAt()))
 			.bind("type", DaoUtils.getEnumId(action.getType()))
 			.execute();
 		return action;

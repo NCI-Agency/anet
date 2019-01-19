@@ -5,30 +5,28 @@ import moment from 'moment'
 
 import PersonForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
+import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
 import {Person} from 'models'
 
-import AppContext from 'components/AppContext'
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
-class BasePersonEdit extends Page {
+class PersonEdit extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
-		currentUser: PropTypes.instanceOf(Person),
 	}
 
 	static modelName = 'User'
 
+	state = {
+		person: new Person(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			originalPerson: new Person(),
-			person: new Person(),
-		}
 	}
 
 	fetchData(props) {
@@ -40,48 +38,37 @@ class BasePersonEdit extends Page {
 				position {
 					uuid, name
 				}
+				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
 			if (data.person.endOfTourDate) {
 				data.person.endOfTourDate = moment(data.person.endOfTourDate).format()
 			}
-			this.setState({person: new Person(data.person), originalPerson: new Person(data.person)})
+			const parsedFullName = Person.parseFullName(data.person.name)
+			data.person.firstName = parsedFullName.firstName
+			data.person.lastName = parsedFullName.lastName
+			this.setState({ person: new Person(data.person) })
 		})
 	}
 
 	render() {
-		let {person, originalPerson} = this.state
-
-		const { currentUser } = this.props
-		let canEditPosition = currentUser && currentUser.isSuperUser()
-
+		const { person } = this.state
 		const legendText = person.isNewUser() ? 'Create your account' : `Edit ${person.name}`
-		const saveText = person.isNewUser() ? 'Create profile' : null
-
+		const saveText = person.isNewUser() ? 'Create profile' : 'Save Person'
 		return (
 			<div>
+				<RelatedObjectNotes notes={person.notes} relatedObject={person.uuid && {relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
 				{!person.isNewUser() &&
 					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
 				}
-
 				<PersonForm
-					original={originalPerson}
-					person={person}
+					initialValues={person}
 					edit
-					showPositionAssignment={canEditPosition}
-					legendText={legendText}
+					title={legendText}
 					saveText={saveText} />
 			</div>
 		)
 	}
 }
-
-const PersonEdit = (props) => (
-	<AppContext.Consumer>
-		{context =>
-			<BasePersonEdit currentUser={context.currentUser} {...props} />
-		}
-	</AppContext.Consumer>
-)
 
 export default connect(null, mapDispatchToProps)(PersonEdit)

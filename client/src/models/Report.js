@@ -1,13 +1,16 @@
 import Settings from 'Settings'
-import Model from 'components/Model'
+import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
-import {Organization, Person, Position} from 'models'
+import {Person, Position} from 'models'
+
+import * as yup from 'yup'
 
 export default class Report extends Model {
 	static resourceName = 'Report'
 	static listName = 'reportList'
 	static getInstanceName = 'report'
+	static getModelNameLinkTo = 'report'
 
 	static STATE = {
 		DRAFT: 'DRAFT',
@@ -27,46 +30,148 @@ export default class Report extends Model {
 		CANCELLED_DUE_TO_THREAT: 'CANCELLED_DUE_TO_THREAT',
 	}
 
-	static schema = {
-		intent: '',
-		engagementDate: null,
-		cancelledReason: null,
-		atmosphere: null,
-		atmosphereDetails: '',
-		location: {},
-		attendees: [],
-		tasks: [],
-		comments: [],
-		reportText: '',
-		nextSteps: '',
-		keyOutcomes: '',
-		tags: [],
-		reportSensitiveInformation: null,
-		authorizationGroups: [],
+	static ATMOSPHERE = {
+		POSITIVE: 'POSITIVE',
+		NEGATIVE: 'NEGATIVE',
+		NEUTRAL: 'NEUTRAL',
+	}
+
+	static yupSchema = yup.object().shape({
+		intent: yup.string().nullable().required(`You must provide the ${Settings.fields.report.intent}`).default('')
+			.label(Settings.fields.report.intent),
+		engagementDate: yupDate.nullable().required('You must provide the Date of Engagement')
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema : schema.test('future-engagement', 'You cannot submit reports for future dates, except for cancelled engagements',
+					engagementDate => !moment(engagementDate).isAfter(moment().endOf('day'))
+			)))
+			.default(null),
+		// not actually in the database, but used for validation:
+		cancelled: yup.boolean().default(false)
+			.label(Settings.fields.report.cancelled),
+		cancelledReason: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.required('You must provide a reason for cancellation') : schema.nullable()
+			))
+			.default(null),
+		atmosphere: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.required('You must provide the overall atmospherics of the engagement')
+			))
+			.default(null)
+			.label(Settings.fields.report.atmosphere),
+		atmosphereDetails: yup.string().nullable()
+			.when(['cancelled', 'atmosphere'], (cancelled, atmosphere, schema) => (
+				cancelled ? schema.nullable() : (atmosphere === Report.ATMOSPHERE.POSITIVE) ? schema.nullable() : schema.required('You must provide atmospherics details if the engagement was not Positive')
+			))
+			.default('')
+			.label(Settings.fields.report.atmosphereDetails),
+		location: yup.object().nullable().default({}),
+		attendees: yup.array().nullable()
+			.test('primary-principal', 'primary principal error',
+				// can't use arrow function here because of binding to 'this'
+				function(attendees) {
+					const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.PRINCIPAL)
+					return err ? this.createError({message: err}) : true
+				}
+			)
+			.test('primary-advisor', 'primary advisor error',
+				// can't use arrow function here because of binding to 'this'
+				function(attendees) {
+					const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
+					return err ? this.createError({message: err}) : true
+				}
+			)
+			.default([]),
+		principalOrg: yup.object().nullable().default({}),
+		advisorOrg: yup.object().nullable().default({}),
+		tasks: yup.array().nullable().default([]),
+		comments: yup.array().nullable().default([]),
+		reportText: yup.string().nullable().default(''),
+		nextSteps: yup.string().nullable().required('You must provide a brief summary of the Next Steps')
+			.default('')
+			.label('Next steps description'),
+		keyOutcomes: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.required('You must provide a brief summary of the Key Outcomes')
+			))
+			.default('')
+			.label('Key outcome description'),
+		tags: yup.array().nullable().default([]),
+		reportTags: yup.array().nullable().default([])
+			.label(Settings.fields.report.reportTags),
+		reportSensitiveInformation: yup.object().nullable().default({}), // null?
+		authorizationGroups: yup.array().nullable().default([]),
+	}).concat(Model.yupSchema)
+
+	static yupWarningSchema = yup.object().shape({
+		state: yup.string().nullable().default(''),
+		tasks: yup.array().nullable()
+			.when('state', (state, schema) => (
+				(Report.isReleased(state) || Report.isCancelled(state))
+					? schema.nullable()
+					: schema.required(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement.
+						Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
+			)),
+		reportSensitiveInformation: yup.object().nullable().default({}),
+		authorizationGroups: yup.array().nullable()
+			.when(['reportSensitiveInformation', 'reportSensitiveInformation.text'], (reportSensitiveInformation, reportSensitiveInformationText, schema) => (
+				(_isEmpty(reportSensitiveInformation) || _isEmpty(reportSensitiveInformationText))
+					? schema.nullable()
+					: schema.required(`You should provide authorization groups who can access the sensitive information.
+						If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
+			)),
+	})
+
+	constructor(props) {
+		super(Model.fillObject(props, Report.yupSchema))
+	}
+
+	static isDraft(state) {
+		return state === Report.STATE.DRAFT
 	}
 
 	isDraft() {
-		return this.state === Report.STATE.DRAFT
+		return Report.isDraft(this.state)
+	}
+
+	static isPending(state) {
+		return state === Report.STATE.PENDING_APPROVAL
 	}
 
 	isPending() {
-		return this.state === Report.STATE.PENDING_APPROVAL
+		return Report.isPending(this.state)
 	}
 
-	isReleased() {
+	static isReleased() {
 		return this.state === Report.STATE.RELEASED
 	}
 
-	isRejected() {
-		return this.state === Report.STATE.REJECTED
+	isReleased() {
+		return Report.isReleased(this.state)
 	}
 
-	isCancelled() {
+	static isRejected(state) {
+		return state === Report.STATE.REJECTED
+	}
+
+	isRejected() {
+		return Report.isRejected(this.state)
+	}
+
+	static isCancelled() {
 		return this.state === Report.STATE.CANCELLED
 	}
 
+	isCancelled() {
+		return Report.isCancelled(this.state)
+	}
+
+	static isFuture(state) {
+		return state === Report.STATE.FUTURE
+	}
+
 	isFuture() {
-		return this.state === Report.STATE.FUTURE
+		return Report.isFuture(this.state)
 	}
 
 	showApprovals() {
@@ -77,78 +182,25 @@ export default class Report extends Model {
 		return this.intent || 'None'
 	}
 
-	validateForSubmit() {
-		const errors = []
-		const warnings = []
-
-		let isCancelled = this.cancelledReason ? true : false
-		if (!isCancelled) {
-			if (!this.atmosphere) {
-				errors.push('You must provide the overall atmospherics of the engagement')
-			} else {
-				if (this.atmosphere !== 'POSITIVE' && !this.atmosphereDetails) {
-					errors.push('You must provide atmospherics details if the engagement was not Positive')
-				}
-			}
-		}
-		if (!this.engagementDate) {
-			errors.push('You must provide the Date of Engagement')
-		} else if (!isCancelled && moment(this.engagementDate).isAfter(moment().endOf('day'))) {
-			errors.push('You cannot submit reports for future dates, except for cancelled engagements')
-		}
-
-		this.checkPrimaryAttendee(this.getPrimaryPrincipal(), this.principalOrg, Person.ROLE.PRINCIPAL, Organization.TYPE.PRINCIPAL_ORG, errors)
-		this.checkPrimaryAttendee(this.getPrimaryAdvisor(), this.advisorOrg, Person.ROLE.ADVISOR, Organization.TYPE.ADVISOR_ORG, errors)
-
-		if (!this.intent) {
-			errors.push("You must provide the Meeting Goal (purpose)")
-		}
-
-		if (!this.nextSteps) {
-			errors.push('You must provide a brief summary of the Next Steps')
-		}
-
-		if (!isCancelled && !this.keyOutcomes) {
-			errors.push('You must provide a brief summary of the Key Outcomes')
-		}
-
-		if (_isEmpty(this.tasks)) {
-			warnings.push(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement. Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
-		}
-
-		if (!_isEmpty(this.reportSensitiveInformation) && !_isEmpty(this.reportSensitiveInformation.text) && _isEmpty(this.authorizationGroups)) {
-			warnings.push(`You should provide authorization groups who can access the sensitive information. If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
-		}
-
-		return {errors, warnings}
-	}
-
-	checkPrimaryAttendee(primaryAttendee, primaryOrg, role, orgType, errors) {
+	static checkPrimaryAttendee(attendees, role) {
+		const primaryAttendee = Report.getPrimaryAttendee(attendees, role)
 		const roleName = Person.humanNameOfRole(role)
 		if (!primaryAttendee) {
-			errors.push(`You must provide the primary ${roleName} for the Engagement`)
+			return `You must provide the primary ${roleName} for the Engagement`
 		} else if (primaryAttendee.status !== Person.STATUS.ACTIVE) {
-			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`)
+			return `The primary ${roleName} - ${primaryAttendee.name} - needs to have an active profile`
 		} else if (primaryAttendee.endOfTourDate && moment(primaryAttendee.endOfTourDate).isBefore(moment().startOf('day'))) {
-			errors.push(`The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`)
+			return `The primary ${roleName}'s - ${primaryAttendee.name} - end of tour date has passed`
 		} else if (!primaryAttendee.position) {
-			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`)
+			return `The primary ${roleName} - ${primaryAttendee.name} - needs to be assigned to a position`
 		} else if (primaryAttendee.position.status !== Position.STATUS.ACTIVE) {
-			errors.push(`The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`)
-		} else if (primaryOrg && (primaryOrg.type !== orgType)) {
-			errors.push(`The primary ${roleName}'s - ${primaryAttendee.name} - organization should be ${Organization.humanNameOfType(orgType)}`)
+			return `The primary ${roleName} - ${primaryAttendee.name} - needs to be in an active position`
 		}
 	}
 
-	getPrimaryPrincipal() {
-		return this.attendees.find( el =>
-			el.role === Person.ROLE.PRINCIPAL && el.primary
-		)
-	}
-
-	getPrimaryAdvisor() {
-		return this.attendees.find( el =>
-			el.role === Person.ROLE.ADVISOR && el.primary
+	static getPrimaryAttendee(attendees, role) {
+		return attendees.find( el =>
+			el.role === role && el.primary
 		)
 	}
 

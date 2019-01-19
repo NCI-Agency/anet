@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.core.GenericType;
 
 import org.junit.ClassRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -17,6 +18,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.util.Duration;
 import mil.dds.anet.AnetApplication;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
@@ -67,11 +69,11 @@ public abstract class AbstractResourceTest {
 		final String fields = "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
 				+ " position {"
 				+ "   uuid name type status "
-				+ "   organization { uuid shortName }"
+				+ "   organization { uuid shortName parentOrg { uuid shortName } }"
 				+ " }";
 		if (stub.getDomainUsername() != null) { 
 			try { 
-				final Person user = graphQLHelper.getObject(stub, "me", fields, new GenericType<GraphQLResponse<Person>>() {});
+				final Person user = graphQLHelper.getObject(stub, "me", fields, new TypeReference<GraphQLResponse<Person>>() {});
 				if (user != null) { return user; }
 			} catch (Exception e) {
 				logger.error("error getting user", e);
@@ -81,15 +83,15 @@ public abstract class AbstractResourceTest {
 			query.setText(stub.getName());
 			final AnetBeanList<Person> searchObjects = graphQLHelper.searchObjects(
 					PersonTest.getJackJacksonStub(), "personList", "query", "PersonSearchQueryInput", fields, query,
-					new GenericType<GraphQLResponse<AnetBeanList<Person>>>() {});
+					new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
 			for (Person p : searchObjects.getList()) {
 				if (p.getEmailAddress().equals(stub.getEmailAddress())) { return p; } 
 			}
 		}
 
 		//Create insert into DB
-		final String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput", stub, new GenericType<GraphQLResponse<Person>>() {});
-		return graphQLHelper.getObjectById(admin, "person", fields, newPersonUuid, new GenericType<GraphQLResponse<Person>>() {});
+		final String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput", stub, new TypeReference<GraphQLResponse<Person>>() {});
+		return graphQLHelper.getObjectById(admin, "person", fields, newPersonUuid, new TypeReference<GraphQLResponse<Person>>() {});
 	}
 	
 	public Person getJackJackson() { 
@@ -114,6 +116,12 @@ public abstract class AbstractResourceTest {
 	
 	public Person getBobBobtown() { 
 		return findOrPutPersonInDb(PersonTest.getBobBobtown());
+	}
+
+	public Organization createOrganizationWithUuid(String uuid) {
+		final Organization ao = new Organization();
+		ao.setUuid(uuid);
+		return ao;
 	}
 
 }

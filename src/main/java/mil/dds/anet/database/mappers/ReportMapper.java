@@ -2,16 +2,10 @@ package mil.dds.anet.database.mappers;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.statement.StatementContext;
 import org.jdbi.v3.core.mapper.RowMapper;
 
-import mil.dds.anet.beans.ApprovalStep;
-import mil.dds.anet.beans.Location;
-import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
@@ -26,27 +20,10 @@ public class ReportMapper implements RowMapper<Report> {
 		DaoUtils.setCommonBeanFields(r, rs, "reports");
 		
 		r.setState(MapperUtils.getEnumIdx(rs, "reports_state", ReportState.class));
-		
-		Timestamp engagementDate = rs.getTimestamp("reports_engagementDate");
-		if (engagementDate != null) { 
-			r.setEngagementDate(new DateTime(engagementDate));
-		}
-		
-		Timestamp releasedAt = rs.getTimestamp("reports_releasedAt");
-		if (releasedAt != null) { 
-			r.setReleasedAt(new DateTime(releasedAt));
-		}
-		
-		String locationUuid = rs.getString("reports_locationUuid");
-		if (locationUuid != null) {
-			Location l = Location.createWithUuid(locationUuid);
-			r.setLocation(l);
-		}
-		
-		String approvalStepUuid = rs.getString("reports_approvalStepUuid");
-		if (approvalStepUuid != null) {
-			r.setApprovalStep(ApprovalStep.createWithUuid(approvalStepUuid));
-		}
+		r.setEngagementDate(DaoUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));
+		r.setReleasedAt(DaoUtils.getInstantAsLocalDateTime(rs, "reports_releasedAt"));
+		r.setLocationUuid(rs.getString("reports_locationUuid"));
+		r.setApprovalStepUuid(rs.getString("reports_approvalStepUuid"));
 		
 		r.setIntent(rs.getString("reports_intent"));
 		r.setExsum(rs.getString("reports_exsum"));
@@ -58,19 +35,9 @@ public class ReportMapper implements RowMapper<Report> {
 		r.setKeyOutcomes(rs.getString("reports_keyOutcomes"));
 		r.setNextSteps(rs.getString("reports_nextSteps"));
 		
-		Person author = Person.createWithUuid((rs.getString("reports_authorUuid")));
-		PersonMapper.fillInFields(author, rs);
-		r.setAuthor(author);
-		
-		String advisorOrgUuid = rs.getString("reports_advisorOrganizationUuid");
-		if (advisorOrgUuid != null) {
-			r.setAdvisorOrg(Organization.createWithUuid(advisorOrgUuid));
-		}
-		
-		String principalOrgUuid = rs.getString("reports_principalOrganizationUuid");
-		if (principalOrgUuid != null) {
-			r.setPrincipalOrg(Organization.createWithUuid(principalOrgUuid));
-		}
+		r.setAuthorUuid(rs.getString("reports_authorUuid"));
+		r.setAdvisorOrgUuid(rs.getString("reports_advisorOrganizationUuid"));
+		r.setPrincipalOrgUuid(rs.getString("reports_principalOrganizationUuid"));
 		
 		if (MapperUtils.containsColumnNamed(rs, "totalCount")) { 
 			ctx.define("totalCount", rs.getInt("totalCount"));

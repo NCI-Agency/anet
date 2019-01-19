@@ -1,9 +1,8 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
+import LocationForm from './Form'
 import Breadcrumbs from 'components/Breadcrumbs'
-import Messages from 'components/Messages'
-import LocationForm from 'pages/locations/Form'
 
 import {Location} from 'models'
 
@@ -16,24 +15,20 @@ class LocationNew extends Page {
 		...pagePropTypes,
 	}
 
+	state = {
+		location: new Location(),
+	}
+
 	constructor(props) {
 		super(props, PAGE_PROPS_NO_NAV)
-
-		this.state = {
-			location: new Location(),
-			originalLocation : new Location()
-		}
 	}
 
 	render() {
-		let location = this.state.location
-
+		const { location } = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[['Create new Location', Location.pathForNew()]]} />
-				<Messages success={this.state.success} error={this.state.error} />
-
-				<LocationForm original={this.state.originalLocation} anetLocation={location} />
+				<Breadcrumbs items={[['New Location', Location.pathForNew()]]} />
+				<LocationForm initialValues={location} title='Create a new Location' />
 			</div>
 		)
 	}

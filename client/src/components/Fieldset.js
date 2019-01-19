@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Element} from 'react-scroll'
+import _isEmpty from 'lodash/isEmpty'
 
 export default class Fieldset extends Component {
 	static propTypes = {
@@ -20,7 +21,7 @@ export default class Fieldset extends Component {
 			</h2>
 			}
 
-			<fieldset style={this.props.style} {...props} />
+			{!_isEmpty(props) && <fieldset style={this.props.style} {...props} />}
 		</Element>
 	}
 }

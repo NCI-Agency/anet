@@ -10,9 +10,10 @@ import Fieldset from 'components/Fieldset'
 import Breadcrumbs from 'components/Breadcrumbs'
 import DailyRollupChart from 'components/DailyRollupChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE, GQL_REPORT_FIELDS} from 'components/ReportCollection'
-import CalendarButton from 'components/CalendarButton'
+import CustomDateInput from 'components/CustomDateInput'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
-import Form from 'components/Form'
+import { Formik, Form, Field } from 'formik'
+import * as FieldHelper from 'components/FieldHelper'
 import Messages from 'components/Messages'
 import Settings from 'Settings'
 
@@ -56,8 +57,7 @@ class BaseRollupShow extends Page {
 		date: PropTypes.object,
 	}
 
-	get dateStr() { return this.state.date.format('DD MMM YYYY') }
-	get dateLongStr() { return this.state.date.format('DD MMMM YYYY') }
+	get dateStr() { return this.state.date.format(Settings.dateFormats.forms.short) }
 	get rollupStart() { return moment(this.state.date).subtract(1, 'days').startOf('day').hour(19) } //7pm yesterday
 	get rollupEnd() { return moment(this.state.date).endOf('day').hour(18) } // 6:59:59pm today.
 
@@ -113,7 +113,6 @@ class BaseRollupShow extends Page {
 			reportsPageNum: 0,
 			graphData: [],
 			showEmailModal: false,
-			email: {},
 			maxReportAge: null,
 			hoveredBar: {org: {}},
 			orgType: Organization.TYPE.ADVISOR_ORG,
@@ -354,7 +353,8 @@ class BaseRollupShow extends Page {
 	}
 
 	render() {
-		const flexStyle = {display: 'flex', flexDirection: 'column', height: '100%', flex: 1}
+		const flexStyle = {display: 'flex', flexDirection: 'column', flex: '1 1 auto'}
+		const mosaicLayoutStyle = { display: 'flex', flex: '1 1 auto' }
 
 		return (
 			<div id="daily-rollup" style={flexStyle}>
@@ -362,9 +362,11 @@ class BaseRollupShow extends Page {
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset title={
-					<span>
-						Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`} - {this.dateLongStr}
-						<CalendarButton onChange={this.changeRollupDate} value={this.state.date.format('YYYY-MM-DD')} style={calendarButtonCss} />
+					<div>
+						<div style={{ paddingBottom: 8, display: 'flex', alignItems: 'center' }}>
+							<div style={{ marginRight: 5}}>Daily Rollup{this.state.focusedOrg && ` for ${this.state.focusedOrg.shortName}`}</div>
+							<CustomDateInput id="rollupDate" value={this.state.date.toDate()} onChange={this.changeRollupDate} />
+						</div>
 						{this.state.focusedOrg
 							? <Button onClick={() => this.goToOrg()}>All organizations</Button>
 							: <ButtonToggleGroup value={this.state.orgType} onChange={this.changeOrgType}>
@@ -372,7 +374,7 @@ class BaseRollupShow extends Page {
 								<Button value={Organization.TYPE.PRINCIPAL_ORG}>{pluralize(Settings.fields.principal.org.name)}</Button>
 							  </ButtonToggleGroup>
 						}
-					</span>
+					</div>
 				} action={
 					<span>
 						<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.printPreview}>Print</Button>
@@ -381,15 +383,20 @@ class BaseRollupShow extends Page {
 				} style={flexStyle}>
 					<Context.Provider value={this.state}>
 						<MosaicLayout
-							style={flexStyle}
+							style={mosaicLayoutStyle}
 							visualizations={this.VISUALIZATIONS}
 							initialNode={this.INITIAL_LAYOUT}
 							description={this.DESCRIPTION}
 						/>
 					</Context.Provider>
 				</Fieldset>
-
-				{this.renderEmailModal()}
+				<Formik
+					enableReinitialize
+					onSubmit={this.onSubmitEmailRollup}
+					initialValues={{to: '', comment:''}}
+				>
+				{(formikProps) => this.renderEmailModal(formikProps)}
+				</Formik>
 			</div>
 		)
 	}
@@ -429,14 +436,13 @@ class BaseRollupShow extends Page {
 	}
 
 	@autobind
-	renderEmailModal() {
-		let email = this.state.email
+	renderEmailModal(formikProps) {
+		const {values, isSubmitting, isValid, submitForm} = formikProps
 		return <Modal show={this.state.showEmailModal} onHide={this.toggleEmailModal}>
-			<Form formFor={email} onChange={this.onChange} submitText={false} >
+			<Form>
 				<Modal.Header closeButton>
 					<Modal.Title>Email rollup - {this.dateStr}</Modal.Title>
 				</Modal.Header>
-
 				<Modal.Body>
 					<h5>
 						{this.state.focusedOrg ?
@@ -444,25 +450,35 @@ class BaseRollupShow extends Page {
 							`All reports by ${this.state.orgType.replace('_', ' ').toLowerCase()}`
 						}
 					</h5>
-
-					{email.errors &&
-						<Alert bsStyle="danger">{email.errors}</Alert>
-					}
-
-					<Form.Field id="to" />
-					<HelpBlock>
-						One or more email addresses, comma separated, e.g.:<br />
-						<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
-					</HelpBlock>
-					<Form.Field componentClass="textarea" id="comment" />
+					<Field
+						name="to"
+						component={FieldHelper.renderInputField}
+						validate={(email) => this.handleEmailValidation(email)}
+						vertical={true}
+					>
+						<HelpBlock>
+							One or more email addresses, comma separated, e.g.:<br />
+							<em>jane@nowhere.invalid, John Doe &lt;john@example.org&gt;, "Mr. X" &lt;x@example.org&gt;</em>
+						</HelpBlock>
+					</Field>
+					<Field
+						name="comment"
+						component={FieldHelper.renderInputField}
+						componentClass="textarea"
+						vertical={true}
+					/>
 				</Modal.Body>
-
 				<Modal.Footer>
 					<Button href={this.previewPlaceholderUrl} target="rollup" onClick={this.showPreview}>Preview</Button>
-					<Button bsStyle="primary" onClick={this.emailRollup}>Send email</Button>
+					<Button bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Send email</Button>
 				</Modal.Footer>
 			</Form>
 		</Modal>
+	}
+
+	handleEmailValidation = (value) => {
+		const r = utils.parseEmailAddresses(value)
+		return r.isValid ? null : r.message
 	}
 
 	@autobind
@@ -484,9 +500,9 @@ class BaseRollupShow extends Page {
 		`
 		if (this.state.focusedOrg) {
 			if (this.state.orgType === Organization.TYPE.PRINCIPAL_ORG) {
-				graphQL += `, principalOrganizationUuid: ${this.state.focusedOrg.uuid}`
+				graphQL += `, principalOrganizationUuid: "${this.state.focusedOrg.uuid}"`
 			} else {
-				graphQL += `, advisorOrganizationUuid: ${this.state.focusedOrg.uuid}`
+				graphQL += `, advisorOrganizationUuid: "${this.state.focusedOrg.uuid}"`
 			}
 		}
 		if (this.state.orgType) {
@@ -506,23 +522,41 @@ class BaseRollupShow extends Page {
 		})
 	}
 
-	@autobind
-	emailRollup() {
-		let email = this.state.email
-		let r = utils.parseEmailAddresses(email.to)
+	onSubmitEmailRollup = (values, form) => {
+		this.emailRollup(values, form)
+			.then(response => this.onSubmitEmailRollupSuccess(response, values, form))
+			.catch(error => {
+				this.setState({
+					success: null,
+					error: error,
+					showEmailModal: false,
+				})
+			})
+	}
+
+	onSubmitEmailRollupSuccess = (response, values, form) => {
+		this.setState({
+			success: 'Email successfully sent',
+			error: null,
+			showEmailModal: false,
+		})
+		form.resetForm()  // Reset the email modal field values
+	}
+
+	emailRollup = (values, form) => {
+		const r = utils.parseEmailAddresses(values.to)
 		if (!r.isValid) {
-			email.errors = r.message
-			this.setState({email})
 			return
 		}
 		const emailDelivery = {
 			toAddresses: r.to,
-			comment: email.comment
+			comment: values.comment
 		}
 		let graphql = 'emailRollup(startDate: $startDate, endDate: $endDate'
 		const variables = {
-				startDate: this.rollupStart.valueOf(),
-				endDate: this.rollupEnd.valueOf()
+			startDate: this.rollupStart.valueOf(),
+			endDate: this.rollupEnd.valueOf(),
+			email: emailDelivery,
 		}
 		let variableDef = '($startDate: Long!, $endDate: Long!'
 		if (this.state.focusedOrg) {
@@ -542,24 +576,8 @@ class BaseRollupShow extends Page {
 			variableDef += ', $orgType: OrganizationType!'
 		}
 		graphql += ', email: $email)'
-		variables.email = emailDelivery
 		variableDef += ', $email: AnetEmailInput!)'
-
-		API.mutation(graphql, variables, variableDef)
-			.then(data => {
-				this.setState({
-					success: 'Email successfully sent',
-					error:null,
-					showEmailModal: false,
-					email: {}
-				})
-			}).catch(error => {
-				this.setState({
-					showEmailModal: false,
-					email: {}
-				})
-				this.handleError(error)
-			})
+		return API.mutation(graphql, variables, variableDef)
 	}
 }
 

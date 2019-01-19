@@ -55,7 +55,7 @@ class SearchBar extends Component {
 				</InputGroup>
 			</Form>
 
-			<small ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: !this.state.showAdvancedSearch})}>
+			<div className="add-search-filter" ref={(el) => this.advancedSearchLink = el} onClick={() => this.setState({showAdvancedSearch: !this.state.showAdvancedSearch})}>
 				<span className="asLink">
 					{(this.props.query.objectType) ?
 						<React.Fragment>
@@ -74,7 +74,7 @@ class SearchBar extends Component {
 					:
 						"Add filters"
 					}
-				</span></small>
+				</span></div>
 			<Overlay show={this.state.showAdvancedSearch} onHide={() => this.setState({showAdvancedSearch: false})} placement="bottom" target={this.advancedSearchLink}>
 				<Popover id="advanced-search" placement="bottom" title="Filters">
 					<AdvancedSearch onSearch={this.runAdvancedSearch} onCancel={() => this.setState({showAdvancedSearch: false})} text={this.state.searchTerms} />
