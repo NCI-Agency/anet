@@ -60,7 +60,7 @@ class ReportEdit extends Page {
 			<div className="report-edit">
 				<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 				<Breadcrumbs items={[[`Report #${report.uuid}`, Report.pathForEdit(report)]]} />
-				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} showSensitiveInfo={!!report.reportSensitiveInformation} />
+				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} showSensitiveInfo={!!report.reportSensitiveInformation && !!report.reportSensitiveInformation.text} />
 			</div>
 		)
 	}
