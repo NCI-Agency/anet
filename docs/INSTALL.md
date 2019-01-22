@@ -252,7 +252,7 @@ dictionary:
 
       org:
         name: Advisor Organization
-        allOrgName: All EFs / AOs
+        allOrgName: Advisor Organizations
         longName:
           label: Description
           placeholder: e.g. Force Sustainment
