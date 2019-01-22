@@ -183,7 +183,7 @@ class BasePositionForm extends Component {
 										fields={Organization.autocompleteQuery}
 										placeholder="Select the organization for this position"
 										queryParams={orgSearchQuery}
-										template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
+										template={Organization.autocompleteTemplate}
 									/>
 								}
 							/>
