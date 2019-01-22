@@ -128,7 +128,7 @@ class BaseTaskShow extends Page {
 								component={FieldHelper.renderReadonlyField}
 								humanValue={task.responsibleOrg &&
 									<LinkTo organization={task.responsibleOrg}>
-										{task.responsibleOrg.shortName} {task.responsibleOrg.longName} {task.responsibleOrg.identificationCode}
+										{task.responsibleOrg.shortName}
 									</LinkTo>
 								}
 							/>
