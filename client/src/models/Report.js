@@ -55,13 +55,13 @@ export default class Report extends Model {
 			.default(null),
 		atmosphere: yup.string().nullable()
 			.when('cancelled', (cancelled, schema) => (
-				cancelled ? schema.nullable() : schema.required('You must provide the overall atmospherics of the engagement')
+				cancelled ? schema.nullable() : schema.required(`You must provide the overall ${Settings.fields.report.atmosphere} of the engagement`)
 			))
 			.default(null)
 			.label(Settings.fields.report.atmosphere),
 		atmosphereDetails: yup.string().nullable()
 			.when(['cancelled', 'atmosphere'], (cancelled, atmosphere, schema) => (
-				cancelled ? schema.nullable() : (atmosphere === Report.ATMOSPHERE.POSITIVE) ? schema.nullable() : schema.required('You must provide atmospherics details if the engagement was not Positive')
+				cancelled ? schema.nullable() : (atmosphere === Report.ATMOSPHERE.POSITIVE) ? schema.nullable() : schema.required(`You must provide ${Settings.fields.report.atmosphereDetails} if the engagement was not Positive`)
 			))
 			.default('')
 			.label(Settings.fields.report.atmosphereDetails),
@@ -86,16 +86,17 @@ export default class Report extends Model {
 		advisorOrg: yup.object().nullable().default({}),
 		tasks: yup.array().nullable().default([]),
 		comments: yup.array().nullable().default([]),
-		reportText: yup.string().nullable().default(''),
-		nextSteps: yup.string().nullable().required('You must provide a brief summary of the Next Steps')
+		reportText: yup.string().nullable().default('')
+			.label(Settings.fields.report.reportText),
+		nextSteps: yup.string().nullable().required(`You must provide a brief summary of the ${Settings.fields.report.nextSteps}`)
 			.default('')
-			.label('Next steps description'),
+			.label(Settings.fields.report.nextSteps),
 		keyOutcomes: yup.string().nullable()
 			.when('cancelled', (cancelled, schema) => (
-				cancelled ? schema.nullable() : schema.required('You must provide a brief summary of the Key Outcomes')
+				cancelled ? schema.nullable() : schema.required(`You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`)
 			))
 			.default('')
-			.label('Key outcome description'),
+			.label(Settings.fields.report.keyOutcomes),
 		tags: yup.array().nullable().default([]),
 		reportTags: yup.array().nullable().default([])
 			.label(Settings.fields.report.reportTags),

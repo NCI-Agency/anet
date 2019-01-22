@@ -184,7 +184,7 @@ export default {
 				State: {
 					component: ReportStateSearch,
 				},
-				Atmospherics: {
+				[Settings.fields.report.atmosphere]: {
 					component: SelectSearchFilter,
 					props: {
 						queryKey: "atmosphere",
