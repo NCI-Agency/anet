@@ -192,7 +192,7 @@ class BaseOrganizationForm extends Component {
 												fields={Organization.autocompleteQuery}
 												placeholder="Start typing to search for a higher level organization..."
 												queryParams={orgSearchQuery}
-												template={org => <span>{org.shortName} - {org.longName} {org.identificationCode}</span>}
+												template={Organization.autocompleteTemplate}
 											/>
 										}
 									/>

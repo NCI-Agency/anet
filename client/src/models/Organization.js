@@ -44,6 +44,10 @@ export default class Organization extends Model {
 
 	static autocompleteQuery = "uuid, shortName, longName, identificationCode, type"
 
+	static autocompleteTemplate(org) {
+		return <span>{org.shortName} - {org.longName} {org.identificationCode}</span>
+	}
+
 	static humanNameOfStatus(status) {
 		return utils.sentenceCase(status)
 	}

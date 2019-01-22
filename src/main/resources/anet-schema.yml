@@ -306,7 +306,7 @@ properties:
                 type: string
                 title: The name used to represent 'all organizations'
                 description: Used in the UI to refer to all organizations collectively.
-                examples: [All EFs / AOs]
+                examples: [Advisor Organizations]
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:

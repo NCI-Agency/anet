@@ -111,7 +111,7 @@ Keeping track of who you’re advising is a critical part of the TAA mission. AN
 
 One way to find this information is to search for your name in the search bar at the top of the homepage. When you find yourself among the search results, click on your name. You’ll be taken to a page with your profile information, including your contact information, the position you hold, and reports you’ve authored or are mentioned in. In the “Position” section of the page, you’ll see a subsection called “Advises”. This section lists principals you advice. 
 
-You can also get to your profile information by navigating to your advising organization. You do this by clicking on “EFs / AOs” on the left hand menu, and selecting your advising organization. Once there, click on “Laydown” in the submenu on the left-hand of the page. You can find yourself under “Supported Laydown”.  
+You can also get to your profile information by navigating to your advising organization. You do this by clicking on “Advisor Organizations” on the left hand menu, and selecting your advising organization. Once there, click on “Laydown” in the submenu on the left-hand of the page. You can find yourself under “Supported Laydown”.
 
 To see if other advisors are advising your principal, you can click on their name to view their profile information. Under the “Position” section, you’ll see the subsection called “Advised by” which lists their advisors. 
 
