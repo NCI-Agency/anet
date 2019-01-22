@@ -80,6 +80,8 @@ server:
   applicationConnectors:
     - type: http
       port: 8080
+      acceptorThreads: 2
+      selectorThreads: 4
 #    - type: https
 #      port: 8443
 #      keyStorePath: example.keystore
