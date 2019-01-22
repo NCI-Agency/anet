@@ -36,6 +36,7 @@ const notesViewportContainer = {
 	overflow: 'auto',
 }
 const sidebarContainer = {
+	position: 'relative',
 	flex:'0 0 auto',
 	overflowY: 'auto',
 	overflowX: 'hidden',

@@ -80,6 +80,8 @@ server:
   applicationConnectors:
     - type: http
       port: 8080
+      acceptorThreads: 2
+      selectorThreads: 4
 #    - type: https
 #      port: 8443
 #      keyStorePath: example.keystore
@@ -249,7 +251,7 @@ dictionary:
 
       org:
         name: Advisor Organization
-        allOrgName: All EFs / AOs
+        allOrgName: Advisor Organizations
         longName:
           label: Description
           placeholder: e.g. Force Sustainment
