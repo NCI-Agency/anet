@@ -9,6 +9,7 @@ import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import {Location} from 'models'
 import Leaflet from 'components/Leaflet'
+import _escape from 'lodash/escape'
 import _get from 'lodash/get'
 
 export const FORMAT_SUMMARY = 'summary'
@@ -166,7 +167,9 @@ export default class ReportCollection extends Component {
 		let markers = []
 		reports.forEach(report => {
 			if (Location.hasCoordinates(report.location)) {
-				markers.push({id: report.uuid, lat: report.location.lat, lng: report.location.lng, name: report.intent})
+				let label = _escape(report.intent || '<undefined>') // escape HTML in intent!
+				label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
+				markers.push({id: report.uuid, lat: report.location.lat, lng: report.location.lng, name: label})
 			}
 		})
 		return <Leaflet markers={markers} mapId={this.props.mapId} width={this.props.width} height={this.props.height} marginBottom={this.props.marginBottom} />

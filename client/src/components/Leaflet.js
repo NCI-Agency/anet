@@ -3,7 +3,6 @@ import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
 import {Location} from 'models'
 import AppContext from 'components/AppContext'
-import _escape from 'lodash/escape'
 import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
@@ -145,7 +144,7 @@ class BaseLeaflet extends Component {
 			let latLng = (Location.hasCoordinates(m)) ? [m.lat, m.lng] : this.state.map.getCenter()
 			let marker = new Marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
 			if (m.name) {
-				marker.bindPopup(_escape(m.name)) // escape HTML!
+				marker.bindPopup(m.name)
 			}
 			if (m.onMove) {
 				marker.on('move', m.onMove)
