@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,13 +13,11 @@ import java.util.concurrent.CompletableFuture;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 
-import org.joda.time.DateTime;
-
 public abstract class AbstractAnetBean {
 
 	protected String uuid;
-	protected DateTime createdAt;
-	protected DateTime updatedAt;
+	protected Instant createdAt;
+	protected Instant updatedAt;
 	private List<Note> notes;
 
 	public AbstractAnetBean() { 
@@ -35,20 +34,20 @@ public abstract class AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="createdAt")
-	public DateTime getCreatedAt() {
+	public Instant getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(DateTime createdAt) {
+	public void setCreatedAt(Instant createdAt) {
 		this.createdAt = createdAt;
 	}
 
 	@GraphQLQuery(name="updatedAt")
-	public DateTime getUpdatedAt() {
+	public Instant getUpdatedAt() {
 		return updatedAt;
 	}
 
-	public void setUpdatedAt(DateTime updatedAt) {
+	public void setUpdatedAt(Instant updatedAt) {
 		this.updatedAt = updatedAt;
 	}
 

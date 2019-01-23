@@ -41,7 +41,7 @@ a {
 
 <#if comment??>
 	<div>
-		<h3 style="color: #981B1E;">Daily Rollup Notes:</h3>
+		<h3 style="color: #981B1E;">Rollup Notes:</h3>
 		<p>${comment}</p>
 	</div>
 </#if>
@@ -136,7 +136,7 @@ a {
 	</div>
 
 	<div>
-		<strong>Atmospherics:</strong> ${(report.atmosphere)!}
+		<strong>${fields.report.atmosphere}:</strong> ${(report.atmosphere)!}
 		<#if report.atmosphereDetails??>
 			- ${(report.atmosphereDetails)!}
 		</#if>
@@ -153,7 +153,7 @@ a {
 
 	<div >
 <!--		<img height="20" alt="Location" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAeCAYAAAAy2w7YAAAAAXNSR0IArs4c6QAABNpJREFUSA2VlmtMm2UUx+mFcsm4hMVkJYM0ypxLNpJF1GyhlDFdRB1ui7BI1DiNic7ED8ZbMCZkZn7QLRovIYLZkn0xcyYiH/ZhFCgF3FR0shBv0U3aKcxNxIwxC5T6O2/f07wttKtP8vSc55z/Of/nOc973re2nCxHfX19fjQavTkWi5XbbLZVdrv9EvrFYDAYziaFLROovb3d3tfX10LCvcwdYAtT8ZCex/d5bm5uZyAQ+DHVr+u0RLW1tXcDOkySagVnkhBG8R9xOp1tEF5Jxa5IBMmrELwOWP1X0U9Srj7sYZLKeg36BuRO5B0W7AS4pqGhoXPYEkMTJQyQfEDgftNwnaSHy8rK3uzp6ZHkKw5ibifmLZzbBEDMNWYDZF9pQBIRAc8S8L4JDrOzB7nsswrOJImz1dXVvba0tNQODh7bZEFBQU1vb+8fEmeXHxmA1gF+W3RAl10ulzdbEjMmxgkOoL8ka3K55+bmukSXkSBiJ2+wzjWsOTkt/f39E6b+v8TIyMghNvqJGXSfz+czyukUAyWT/nhIdECfDg8PB0S3DvpozeLi4kFwPuxu5hilPcapPyQmZsWiv4itCaz0npxwQE+0S4EA5FKTBmXdvLCwME7gEzhuYUo/baEKHWyyG3vSXbPREHmOSxJ8DY2NjcVKdK8YGb+zw6/javy3ubnZxa6OsVotFhL0MjuY+kZo8nq9z8XRSb/d5so1OzvboEQeMRL8LTOpDFNTU1twbRQ/4wC73cHcn5+fvwns+bg55ylTJoTD4RjVBSf3KFG5aTQeRQWIBLRZ13l5eZ2q+/3+fyDS8myQd6H6TDmFNDYNzm0QWWostU8a7OyyGubn59eqLpI4Y02iqwMDAxGrr7i4uIC1cXf47cZTh/IXQUKy3goWnXfXGe5oCVU21cl9PFpaWvrLzMxMKzGtgmF8QY6kkk9PT98adxkbuqKl0/fSesvpDBz99CtJ3pEFvmpKOUaSa8gu1g58EeYLmlQlj/5tqoM7ZxABDIoRQwkNtlMBKouKitrQ3xOI2kQSN4nYxRvhe6tddKrwmGlb4BNy2qghF7mWPpnAIcSjdLe8jZcN+mkTJ/HicEMyxv35+STMpALJV0M+o03AfcZTuifRaDTecU7UIkE4W3F+nJogmzUkTkhOgd0meO64bnBwcEjvSAwvY78uTsZRLn17XM3+l43aIDlKhEHChk8IiWRIEFGC33DsZUYJyGN2Q3Z/tjScZBVVkT57xIw5y3fsSY1PlE4NJH+ce5Bd6TjJJ+N5+uQnNaRKCB5mY4ewl4uPzV6gQlvZvDStMRyqqAyFQt95PJ4/CbwHm/jXQfxMRUXFeDgc/kFxKiH5COxB1kVig+RLSHZDElKMYbcurDonqybBu0yfAbTZZklyl/VRBvM0m+gw/X8jX8HfBS6pDQy//GQa7HgfZEcEQ4KfeZneKe85HvWt9EoAs3wsp3nUa3jzX0BfcSwrXSpKSllZWVmCXd7iq0m+saqqKshH0M+6BHL5m7WbdvgGmXYknrq0CBx0tvGVFAyneyASiYwh3bKGqI0G7xU901j21KUDcx83kXyUWakYSE5wEqPJ1ZZOZnUiCeaS5XOxh+T/msnGCwsL95n6DcUN78iagfua5DG/CFk95dzO//JLVn8m/T+fNBtEUB+vwQAAAABJRU5ErkJggg==" /> -->
-		<strong>Time and Place:</strong> ${(report.engagementDate.toString(dateFormat))!} @ ${(report.loadLocation(context).get().name)!}
+		<strong>Time and Place:</strong> ${(dateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
 	</div>
 	<#assign tasks = report.loadTasks(context).get() >
     <#list tasks as task>
@@ -169,15 +169,15 @@ a {
 
     <div class="row">
         <div class="col-md-8">
-            <p><strong>Meeting Goal:</strong> ${(report.intent)!}</p>
+            <p><strong>${fields.report.intent}:</strong> ${(report.intent)!}</p>
             <#if report.keyOutcomes??>
-                <p><strong>Key outcomes:</strong> ${(report.keyOutcomes)!}</p>
+                <p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
             </#if>
             <#if report.nextSteps??>
-                <p><strong>Next steps:</strong> ${(report.nextSteps)!}</p>
+                <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>
             </#if>
             <#if showReportText >
-                <p><strong>Report Details</strong> ${(report.reportText)!?no_esc}</p>
+                <p><strong>${fields.report.reportText}</strong> ${(report.reportText)!?no_esc}</p>
             </#if>
         </div>
     </div>

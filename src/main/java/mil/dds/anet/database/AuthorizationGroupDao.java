@@ -83,6 +83,8 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 						"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
 							+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
 					.bindBean(a)
+					.bind("createdAt", DaoUtils.asLocalDateTime(a.getCreatedAt()))
+					.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
 					.bind("status", DaoUtils.getEnumId(a.getStatus()))
 					.execute();
 		
@@ -106,6 +108,7 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				return dbHandle.createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
 							+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
 						.bindBean(a)
+						.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
 						.bind("status", DaoUtils.getEnumId(a.getStatus()))
 						.execute();
 		});

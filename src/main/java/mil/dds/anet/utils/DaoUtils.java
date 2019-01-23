@@ -3,12 +3,15 @@ package mil.dds.anet.utils;
 import java.lang.invoke.MethodHandles;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,13 +83,13 @@ public class DaoUtils {
 
 	public static void setInsertFields(AbstractAnetBean bean) {
 		bean.setUuid(getNewUuid());
-		final DateTime now = DateTime.now();
+		final Instant now = Instant.now();
 		bean.setCreatedAt(now);
 		bean.setUpdatedAt(now);
 	}
 
 	public static void setUpdateFields(AbstractAnetBean bean) {
-		final DateTime now = DateTime.now();
+		final Instant now = Instant.now();
 		bean.setUpdatedAt(now);
 	}
 
@@ -98,11 +101,11 @@ public class DaoUtils {
 		// Not all beans have createdAt and/or updatedAt
 		final String createdAtCol = getQualifiedFieldName(tableName, "createdAt");
 		if (MapperUtils.containsColumnNamed(rs, createdAtCol)) {
-			bean.setCreatedAt(new DateTime(rs.getTimestamp(createdAtCol)));
+			bean.setCreatedAt(getInstantAsLocalDateTime(rs, createdAtCol));
 		}
 		final String updatedAtCol = getQualifiedFieldName(tableName, "updatedAt");
 		if (MapperUtils.containsColumnNamed(rs, updatedAtCol)) {
-			bean.setUpdatedAt(new DateTime(rs.getTimestamp(updatedAtCol)));
+			bean.setUpdatedAt(getInstantAsLocalDateTime(rs, updatedAtCol));
 		}
 	}
 
@@ -175,5 +178,60 @@ public class DaoUtils {
 
 	public static Person getUserFromContext(Map<String, Object> context) {
 		return (Person) context.get("user");
+	}
+
+	public static ZoneId getDefaultZoneId() {
+		return ZoneId.of("UTC");
+	}
+
+	public static ZoneOffset getDefaultZoneOffset() {
+		return ZoneOffset.UTC;
+	}
+
+	public static Instant getInstantAsLocalDateTime(ResultSet rs, String field)
+			throws SQLException {
+		// We would like to do <code>rs.getObject(field, java.time.Instant.class)</code>
+		// but the MSSQL JDBC driver does not support that (yet).
+		// However, as of the 7.1.0 preview, at least java.time.LocalDateTime *is* supported.
+		final LocalDateTime result = rs.getObject(field, LocalDateTime.class);
+		if (result != null) {
+			return result.toInstant(getDefaultZoneOffset());
+		}
+		return null;
+	}
+
+	public static void addInstantAsLocalDateTime(Map<String, Object> args, String parameterName, Instant parameterValue) {
+		// Likewise, the conversion by the MSSQL JDBC driver from java.time.Instant to a query parameter
+		// uses the local time zone, so use java.time.LocalDateTime with an explicit time zone.
+		final LocalDateTime localValue;
+		if (parameterValue == null) {
+			localValue = null;
+		} else {
+			// Convert relative time if needed
+			final Instant convertedParameterValue = handleRelativeDate(parameterValue);
+			localValue = asLocalDateTime(convertedParameterValue);
+		}
+		args.put(parameterName, localValue);
+	}
+
+	public static LocalDateTime asLocalDateTime(final Instant instant) {
+		return instant == null ? null : LocalDateTime.ofInstant(instant, getDefaultZoneId());
+	}
+
+	/* For all search interfaces we accept either specific dates
+	 * as number of milliseconds since the Unix Epoch, OR a number of milliseconds
+	 * relative to today's date.
+	 * Relative times should be milliseconds less than one year. Since it doesn't
+	 * make sense to look for any data between 1968 and 1971.
+	 */
+	private static final long MILLIS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
+
+	private static Instant handleRelativeDate(Instant input) {
+		final Long millis = input.toEpochMilli();
+		if (millis < MILLIS_IN_YEAR) {
+			long now = Instant.now().toEpochMilli();
+			return Instant.ofEpochMilli(now + millis);
+		}
+		return input;
 	}
 }

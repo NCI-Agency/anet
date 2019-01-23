@@ -215,6 +215,9 @@ dictionary:
       atmosphereDetails: Atmospherics details
       cancelled: ''
       reportTags: Tags
+      nextSteps: Next steps
+      keyOutcomes: Key outcomes
+      reportText: Engagement details
 
     person:
       firstName: First name
@@ -252,7 +255,7 @@ dictionary:
 
       org:
         name: Advisor Organization
-        allOrgName: All EFs / AOs
+        allOrgName: Advisor Organizations
         longName:
           label: Description
           placeholder: e.g. Force Sustainment

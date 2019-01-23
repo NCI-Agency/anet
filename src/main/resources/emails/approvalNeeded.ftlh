@@ -95,7 +95,7 @@ Dear ${approvalStepName},
 </div>
 
 <div>
-  <strong>Atmospherics:</strong> ${(report.atmosphere)!}
+  <strong>${fields.report.atmosphere}:</strong> ${(report.atmosphere)!}
   <#if report.atmosphereDetails??>
 	  - ${(report.atmosphereDetails)!}
   </#if>
@@ -104,7 +104,7 @@ Dear ${approvalStepName},
 <#if report.loadTags(context).get()??>
   <#assign tags = report.getTags()>
   <div>
-    <strong>Tags:</strong>
+    <strong>${fields.report.reportTags}:</strong>
     <ul>
       <#list tags as tag>
         <li>
@@ -116,7 +116,7 @@ Dear ${approvalStepName},
 </#if>
 
 <div>
-  <strong>Engagement date and location:</strong> ${(report.engagementDate.toString(dateFormat))!} @ ${(report.loadLocation(context).get().name)!}
+  <strong>Engagement date and location:</strong> ${(dateFormatter.format(report.engagementDate))!} @ ${(report.loadLocation(context).get().name)!}
 </div>
 
 <#assign tasks = report.loadTasks(context).get()>
@@ -132,12 +132,12 @@ Dear ${approvalStepName},
 
 <div class="row">
   <div class="col-md-8">
-    <p><strong>Meeting goal:</strong> ${report.intent}</p>
+    <p><strong>${fields.report.intent}:</strong> ${report.intent}</p>
     <#if report.keyOutcomes??>
-      <p><strong>Key outcomes:</strong> ${(report.keyOutcomes)!}</p>
+      <p><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</p>
     </#if>
     <#if report.nextSteps??>
-      <p><strong>Next steps:</strong> ${(report.nextSteps)!}</p>
+      <p><strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}</p>
     </#if>
   </div>
 </div>

@@ -80,6 +80,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 
 		dbHandle.createUpdate(sql.toString())
 			.bindBean(p)
+			.bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+			.bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
 			.execute();
@@ -103,6 +106,8 @@ public class PersonDao extends AnetBaseDao<Person> {
 		sql.append("WHERE uuid = :uuid");
 		return dbHandle.createUpdate(sql.toString())
 			.bindBean(p)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
+			.bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
 			.execute();

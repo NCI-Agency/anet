@@ -1,10 +1,10 @@
 package mil.dds.anet.database;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.joda.time.DateTime;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
@@ -62,7 +62,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	}
 
 	public ReportSensitiveInformation insert(ReportSensitiveInformation rsi, Person user, Report report) {
-		if (rsi == null || !isAuthorized(user, report)) {
+		if (rsi == null || !isAuthorized(user, report) || Utils.isEmptyHtml(rsi.getText())) {
 			return null;
 		}
 		DaoUtils.setInsertFields(rsi);
@@ -71,6 +71,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 					+ " (uuid, text, \"reportUuid\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :text, :reportUuid, :createdAt, :updatedAt)")
 				.bindBean(rsi)
+				.bind("createdAt", DaoUtils.asLocalDateTime(rsi.getCreatedAt()))
+				.bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
 				.bind("reportUuid", report.getUuid())
 				.execute();
 		AnetAuditLogger.log("ReportSensitiveInformation {} created by {} ", rsi, user);
@@ -85,14 +87,25 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		if (rsi == null || !isAuthorized(user, report)) {
 			return 0;
 		}
-		// Update relevant fields, but do not allow the reportUuid to be updated by the query!
-		rsi.setUpdatedAt(DateTime.now());
-		final int numRows = dbHandle.createUpdate(
-				"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
-					+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-				.bindBean(rsi)
-				.execute();
-		AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
+		final int numRows;
+		if (Utils.isEmptyHtml(rsi.getText())) {
+			numRows = dbHandle.createUpdate(
+					"/* deleteReportsSensitiveInformation */ DELETE FROM \"" + tableName + "\""
+							+ " WHERE uuid = :uuid")
+							.bind("uuid", rsi.getUuid())
+							.execute();
+			AnetAuditLogger.log("Empty ReportSensitiveInformation {} deleted by {} ", rsi, user);
+		} else {
+			// Update relevant fields, but do not allow the reportUuid to be updated by the query!
+			rsi.setUpdatedAt(Instant.now());
+			numRows = dbHandle.createUpdate(
+					"/* updateReportsSensitiveInformation */ UPDATE \"" + tableName + "\""
+							+ " SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+							.bindBean(rsi)
+							.bind("updatedAt", DaoUtils.asLocalDateTime(rsi.getUpdatedAt()))
+							.execute();
+			AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
+		}
 		return numRows;
 	}
 

@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
@@ -39,23 +37,17 @@ import mil.dds.anet.utils.Utils;
 
 public class SqliteReportSearcher implements IReportSearcher {
 
-	public static final DateTimeFormatter sqlitePattern = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS Z");
-
 	private String isoDowFormat;
 	private String isoDowComparison;
-	private DateTimeFormatter dateTimeFormatter;
 
 
-	public SqliteReportSearcher(String isoDowFormat, DateTimeFormatter dateTimeFormatter) {
+	public SqliteReportSearcher(String isoDowFormat) {
 		this.isoDowFormat = isoDowFormat;
-		this.dateTimeFormatter = dateTimeFormatter;
 		this.isoDowComparison = "(" + this.isoDowFormat + ") = :%s";
 	}
 
 	public SqliteReportSearcher() {
-		this(
-			"strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1", 	// %w day of week 0-6 with Sunday==0
-			sqlitePattern);
+		this("strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1");	// %w day of week 0-6 with Sunday==0
 	}
 
 	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
@@ -75,7 +67,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		Map<String,Object> args = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
 		List<String> whereClauses = new LinkedList<String>();
-		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses, this.dateTimeFormatter);
+		ReportSearchBuilder searchBuilder = new ReportSearchBuilder(args, whereClauses);
 		if (query.getAuthorUuid() != null) {
 			whereClauses.add("reports.\"authorUuid\" = :authorUuid");
 			args.put("authorUuid", query.getAuthorUuid());

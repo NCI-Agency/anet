@@ -64,12 +64,12 @@ properties:
       email:
         type: string
         title: The date format for email
-        description: Used in report emails, e.g. "6 December 1998"; see https://www.joda.org/joda-time/key_format.html#Pattern-based_formatting for format specifiers.
+        description: Used in report emails, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
         examples: ["d MMMM yyyy"]
       excel:
         type: string
         title: The date format for Excel export
-        description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://www.joda.org/joda-time/key_format.html#Pattern-based_formatting for format specifiers.
+        description: Used in Excel exports of report lists, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
         examples: ["d MMMM yyyy"]
       forms:
         type: object
@@ -149,7 +149,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,reportTags]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,reportTags,nextSteps,keyOutcomes,reportText]
         properties:
           intent:
             type: string
@@ -171,6 +171,18 @@ properties:
             type: string
             title: The label for report's tags
             description: Used in the UI where report's tags are shown.
+          nextSteps:
+            type: string
+            title: The label for report's next steps
+            description: Used in the UI where report's next steps are shown.
+          keyOutcomes:
+            type: string
+            title: The label for report's key outcomes
+            description: Used in the UI where report's key outcomes are shown.
+          reportText:
+            type: string
+            title: The label for report's engagement details
+            description: Used in the UI where report's engagement details are shown.
 
       person:
         type: object
@@ -306,7 +318,7 @@ properties:
                 type: string
                 title: The name used to represent 'all organizations'
                 description: Used in the UI to refer to all organizations collectively.
-                examples: [All EFs / AOs]
+                examples: [Advisor Organizations]
               longName:
                 "$ref": "#/definitions/inputField"
               identificationCode:

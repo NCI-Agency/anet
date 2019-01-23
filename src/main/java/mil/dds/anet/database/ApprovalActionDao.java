@@ -32,7 +32,7 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 			.bind("approvalStepUuid", action.getStepUuid())
 			.bind("personUuid", action.getPersonUuid())
 			.bind("reportUuid", action.getReportUuid())
-			.bind("createdAt", action.getCreatedAt())
+			.bind("createdAt", DaoUtils.asLocalDateTime(action.getCreatedAt()))
 			.bind("type", DaoUtils.getEnumId(action.getType()))
 			.execute();
 		return action;

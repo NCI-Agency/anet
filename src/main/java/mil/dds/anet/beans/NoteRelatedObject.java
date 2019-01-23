@@ -1,12 +1,11 @@
 package mil.dds.anet.beans;
 
+import java.time.Instant;
 import java.util.List;
 
 import io.leangen.graphql.annotations.GraphQLIgnore;
 
 import javax.ws.rs.WebApplicationException;
-
-import org.joda.time.DateTime;
 
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -24,13 +23,13 @@ public class NoteRelatedObject extends AbstractAnetBean {
 
 	@Override
 	@GraphQLIgnore
-	public DateTime getCreatedAt() {
+	public Instant getCreatedAt() {
 		throw new WebApplicationException("no createdAt field on NoteRelatedObject");
 	}
 
 	@Override
 	@GraphQLIgnore
-	public DateTime getUpdatedAt() {
+	public Instant getUpdatedAt() {
 		throw new WebApplicationException("no updatedAt field on NoteRelatedObject");
 	}
 

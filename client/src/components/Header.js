@@ -5,7 +5,6 @@ import {Grid, Row, Col} from 'react-bootstrap'
 
 import SearchBar from 'components/SearchBar'
 import CreateButton from 'components/CreateButton'
-
 import logo from 'resources/logo.png'
 import menuLogo from 'resources/anet-menu.png'
 
@@ -33,7 +32,7 @@ export default class Header extends Component {
 						<Col xs={3} sm={3} md={2} lg={2}>
 								{minimalHeader ?
 										<span className="logo hidden-xs"><img src={logo} alt="ANET Logo" /></span> :
-										<Link to="/" onClick={onHomeClick} className="logo hidden-xs">
+										<Link to="/" className="logo hidden-xs" onClick={onHomeClick}>
 											<img src={logo} alt="ANET logo" />
 										</Link>
 								}

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import org.joda.time.DateTime;
+import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
@@ -185,26 +185,22 @@ public class Utils {
 		return POLICY_DEFINITION.sanitize(input);
 	}
 	
-	/* For all search interfaces we accept either specific dates 
-	 * as number of milliseconds since the Unix Epoch, OR a number of milliseconds
-	 * relative to today's date.  
-	 * Relative times should be milliseconds less than one year.  Since it doesn't 
-	 * make sense to look for any data between 1968 and 1971. 
-	 */
-	public static final long MILLIS_IN_YEAR = 1000 * 60 * 60 * 24 * 365;
-	
-	public static DateTime handleRelativeDate(DateTime input) { 
-		Long millis = input.getMillis();
-		if (millis < MILLIS_IN_YEAR)  { 
-			long now = System.currentTimeMillis();
-			return new DateTime(now + millis);
-		}
-		return input;
-	}
 	
 	public static String trimStringReturnNull(String input) {
 		if (input == null) { return null; }
 		return input.trim();
+	}
+
+	/**
+	 * @param s string
+	 * @return true if string renders to 'empty' HTML, i.e. just whitespace
+	 */
+	public static boolean isEmptyHtml(String s) {
+		return isEmptyOrNull(trimStringReturnNull(s)) || isEmptyOrNull(trimStringReturnNull(htmlToText(s)));
+	}
+
+	private static String htmlToText(String s) {
+		return Jsoup.parse(s).text();
 	}
 
 	/**

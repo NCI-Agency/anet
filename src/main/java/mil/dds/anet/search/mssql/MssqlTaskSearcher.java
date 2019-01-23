@@ -80,22 +80,22 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 
 		if (query.getPlannedCompletionStart() != null) {
 			whereClauses.add("plannedCompletion >= :plannedCompletionStart");
-			args.put("plannedCompletionStart", Utils.handleRelativeDate(query.getPlannedCompletionStart()));
+			DaoUtils.addInstantAsLocalDateTime(args, "plannedCompletionStart", query.getPlannedCompletionStart());
 		}
 
 		if (query.getPlannedCompletionEnd() != null) {
 			whereClauses.add("plannedCompletion <= :plannedCompletionEnd");
-			args.put("plannedCompletionEnd", Utils.handleRelativeDate(query.getPlannedCompletionEnd()));
+			DaoUtils.addInstantAsLocalDateTime(args, "plannedCompletionEnd", query.getPlannedCompletionEnd());
 		}
 
 		if (query.getProjectedCompletionStart() != null) {
 			whereClauses.add("projectedCompletion >= :projectedCompletionStart");
-			args.put("projectedCompletionStart", Utils.handleRelativeDate(query.getProjectedCompletionStart()));
+			DaoUtils.addInstantAsLocalDateTime(args, "projectedCompletionStart", query.getProjectedCompletionStart());
 		}
 
 		if (query.getProjectedCompletionEnd() != null) {
 			whereClauses.add("projectedCompletion <= :projectedCompletionEnd");
-			args.put("projectedCompletionEnd", Utils.handleRelativeDate(query.getProjectedCompletionEnd()));
+			DaoUtils.addInstantAsLocalDateTime(args, "projectedCompletionEnd", query.getProjectedCompletionEnd());
 		}
 
 		if (query.getCustomField() != null) {
