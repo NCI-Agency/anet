@@ -9,7 +9,7 @@ import './RichTextEditor.css'
 class RichTextEditor extends Component {
 	static propTypes = {
 		value: PropTypes.string,
-		onChange: PropTypes.func,
+		onChange: PropTypes.func.isRequired,
 		className: PropTypes.string,
 	}
 
