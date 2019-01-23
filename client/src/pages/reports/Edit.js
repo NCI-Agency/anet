@@ -55,13 +55,12 @@ class ReportEdit extends Page {
 
 	render() {
 		const { report } = this.state
-		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
 
 		return (
 			<div className="report-edit">
 				<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 				<Breadcrumbs items={[[`Report #${report.uuid}`, Report.pathForEdit(report)]]} />
-				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} showReportText={showReportText} />
+				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} showSensitiveInfo={!!report.reportSensitiveInformation && !!report.reportSensitiveInformation.text} />
 			</div>
 		)
 	}
