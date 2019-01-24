@@ -358,26 +358,27 @@ class BaseReportForm extends Component {
 							/>
 						</Fieldset>
 
-						{!values.cancelled &&
-							<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
-								<MultiSelector
-									items={values.tasks}
-									objectType={Task}
-									queryParams={{status: Task.STATUS.ACTIVE}}
-									placeholder={`Start typing to search for ${pluralize(Settings.fields.task.shortLabel)}...`}
-									fields={Task.autocompleteQuery}
-									template={Task.autocompleteTemplate}
-									addFieldName='tasks'
-									addFieldLabel={Settings.fields.task.shortLabel}
-									addon={TASKS_ICON}
-									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
-									onChange={value => setFieldValue('tasks', value)}
-									shortcutsTitle={`Recent ${pluralize(Settings.fields.task.shortLabel)}`}
-									shortcuts={recents.tasks}
-									renderExtraCol={true}
-								/>
-							</Fieldset>
-						}
+						<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
+							<MultiSelector
+								items={values.tasks}
+								objectType={Task}
+								queryParams={{status: Task.STATUS.ACTIVE}}
+								placeholder={`Start typing to search for ${pluralize(Settings.fields.task.shortLabel)}...`}
+								fields={Task.autocompleteQuery}
+								template={Task.autocompleteTemplate}
+								addFieldName='tasks'
+								addFieldLabel={Settings.fields.task.shortLabel}
+								addon={TASKS_ICON}
+								renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
+								onChange={value => {
+									setFieldValue('tasks', value)
+									setFieldTouched('tasks', true)
+								}}
+								shortcutsTitle={`Recent ${pluralize(Settings.fields.task.shortLabel)}`}
+								shortcuts={recents.tasks}
+								renderExtraCol={true}
+							/>
+						</Fieldset>
 
 						<Fieldset title={!values.cancelled ? "Meeting discussion" : "Next steps and details"} id="meeting-details">
 							{!values.cancelled &&
