@@ -67,7 +67,14 @@ export default class Report extends Model {
 			))
 			.default('')
 			.label(Settings.fields.report.atmosphereDetails),
-		location: yup.object().nullable().default({}),
+		location: yup.object().nullable()
+			.test('location', 'location error',
+				// can't use arrow function here because of binding to 'this'
+				function(location) {
+					return _isEmpty(location) ? this.createError({message: 'You must provide the Location'}) : true
+				}
+			)
+			.default({}),
 		attendees: yup.array().nullable()
 			.test('primary-principal', 'primary principal error',
 				// can't use arrow function here because of binding to 'this'
