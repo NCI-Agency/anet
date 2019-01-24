@@ -2,6 +2,7 @@ import Settings from 'Settings'
 import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
+import utils from 'utils'
 import {Person, Position} from 'models'
 
 import * as yup from 'yup'
@@ -102,7 +103,16 @@ export default class Report extends Model {
 			)
 			.default([]),
 		comments: yup.array().nullable().default([]),
-		reportText: yup.string().nullable().default('')
+		reportText: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.test('reportText', 'reportText error',
+					// can't use arrow function here because of binding to 'this'
+					function(reportText) {
+						return utils.isEmptyHtml(reportText) ? this.createError({message: `You must provide the ${Settings.fields.report.reportText}`}) : true
+					}
+				)
+			))
+			.default('')
 			.label(Settings.fields.report.reportText),
 		nextSteps: yup.string().nullable().required(`You must provide a brief summary of the ${Settings.fields.report.nextSteps}`)
 			.default('')

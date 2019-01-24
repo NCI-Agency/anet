@@ -59,6 +59,7 @@ test('Draft and submit a report', async t => {
 
     await pageHelpers.writeInForm('#keyOutcomes', 'key outcomes')
     await pageHelpers.writeInForm('#nextSteps', 'next steps')
+    await pageHelpers.writeInForm('.reportTextField .public-DraftEditor-content', 'engagement details')
 
     let $reportSensitiveInformationField = await $('.reportSensitiveInformationField')
     t.false(await $reportSensitiveInformationField.isDisplayed(), 'Report sensitive info should not be present before "add sensitive information" button is clicked"')

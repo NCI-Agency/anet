@@ -404,13 +404,15 @@ class BaseReportForm extends Component {
 							/>
 
 							<Field
-								id="reportText"
 								name="reportText"
 								label={Settings.fields.report.reportText}
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('reportText', value)}
 								widget={
-									<RichTextEditor className="reportTextField" />
+									<RichTextEditor
+										className="reportTextField"
+										onHandleBlur={() => setFieldTouched('reportText', true)}
+									/>
 								}
 							/>
 
