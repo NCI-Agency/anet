@@ -176,7 +176,7 @@ async function countPersons(user) {
                 }
             }`,
             variables: {}
-        })).data.personList.totalCount;
+        })).data.personList.totalCount
 }
 
 const createPerson = async function (user, grow) {

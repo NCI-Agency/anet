@@ -17,7 +17,7 @@ const simulate = async () => {
     //     }
     // })
 
-    const cycle = 3;
+    const cycle = 3
 
     const storyRuns = simpleScenario.stories.map(story => {        
         const period = cycle * (1 / story.frequency) * 1000

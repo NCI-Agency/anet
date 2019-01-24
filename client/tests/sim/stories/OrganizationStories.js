@@ -225,8 +225,6 @@ const deleteOrganization = function (user) {
 }
 
 const organizationsBuildup = async function (user, number) {
-    var count
-    
     async function count() {
         return (await runGQL(user,
             {

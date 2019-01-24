@@ -468,7 +468,7 @@ const deletePersonFromPosition = async function (user) {
  * @param {*} user The user to do the association
  */
 const updateAssociatedPosition = async function (user) {
-    function listPositions(type) {
+    async function listPositions(type) {
         return (await runGQL(user,
             {
                 query: `query ($positionsQuery: PositionSearchQueryInput) {

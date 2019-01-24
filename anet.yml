@@ -289,7 +289,7 @@ dictionary:
   pinned_ORGs: [Key Leader Engagement]
   non_reporting_ORGs: [ANET Administrators]
   tasking_ORGs: [EF 2.2]
-  domainNames: ["*" cmil.mil, mission.ita, nato.int, dds.mil, "*.isaf.nato.int"]
+  domainNames: [cmil.mil, mission.ita, nato.int, dds.mil, "*.isaf.nato.int"]
   imagery:
     mapOptions:
       crs: EPSG3857
