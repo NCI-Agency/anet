@@ -249,13 +249,13 @@ ${sender.name} sent you a report from ANET:
         <div class="col-sm-7">
           <div id="intent" class="form-control-static">
             <p>
-              <strong>Meeting goal:</strong> ${(report.intent)!}
+              <strong>${fields.report.intent}:</strong> ${(report.intent)!}
             </p>
             <p>
-              <span><strong>Key outcomes:</strong> ${(report.keyOutcomes)!}</span>
+              <span><strong>${fields.report.keyOutcomes}:</strong> ${(report.keyOutcomes)!}</span>
             </p>
             <p>
-              <strong>Next steps:</strong> ${(report.nextSteps)!}
+              <strong>${fields.report.nextSteps}:</strong> ${(report.nextSteps)!}
             </p>
           </div>
         </div>
@@ -292,7 +292,7 @@ ${sender.name} sent you a report from ANET:
             </div>
           </div>
         <#else>
-          <label for="atmosphere" class="col-sm-2 control-label">Atmospherics</label>
+          <label for="atmosphere" class="col-sm-2 control-label">${fields.report.atmosphere}</label>
           <div class="col-sm-7">
             <div id="atmosphere" class="form-control-static">
               ${(report.atmosphere)!?capitalize} - ${(report.atmosphereDetails)!}
@@ -304,7 +304,7 @@ ${sender.name} sent you a report from ANET:
       <#if report.loadTags(context).get()??>
         <#assign tags = report.getTags()>
         <div class="form-group">
-          <label for="tags" class="col-sm-2 control-label">Tags</label>
+          <label for="tags" class="col-sm-2 control-label">${fields.report.reportTags}</label>
           <div class="col-sm-7">
             <div id="tags" class="form-control-static">
               <#list tags as tag>
@@ -458,7 +458,7 @@ ${sender.name} sent you a report from ANET:
   <#if report.reportText??>
     <div>
       <h2 class="legend">
-        <span class="title-text">Meeting discussion</span>
+        <span class="title-text">${fields.report.reportText}</span>
       </h2>
       <fieldset>
         <div>

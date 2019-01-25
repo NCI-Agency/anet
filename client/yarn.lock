@@ -2513,10 +2513,10 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0, chalk@^2.3.1, chalk@^2.4
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
-change-case@^3.0.1:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/change-case/-/change-case-3.0.2.tgz#fd48746cce02f03f0a672577d1d3a8dc2eceb037"
-  integrity sha512-Mww+SLF6MZ0U6kdg11algyKd5BARbyM4TbFBepwowYSR5ClfQGCGtxNXgykpN0uF/bstWeaGDT4JWaDh8zWAHA==
+change-case@^3.0.1, change-case@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/change-case/-/change-case-3.1.0.tgz#0e611b7edc9952df2e8513b27b42de72647dd17e"
+  integrity sha512-2AZp7uJZbYEzRPsFoa+ijKdvp9zsrnnt6+yFokfwEpeJm0xuJDVoxiRCAaTzyJND8GJkofo2IcKWaUZ/OECVzw==
   dependencies:
     camel-case "^3.0.0"
     constant-case "^2.0.0"
@@ -9923,10 +9923,10 @@ react-prop-types@^0.4.0:
   dependencies:
     warning "^3.0.0"
 
-react-redux-loading-bar@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/react-redux-loading-bar/-/react-redux-loading-bar-4.1.0.tgz#3ca460569d979450d9d1dc992328efa449c10a7a"
-  integrity sha512-9L51ZvPqnlPs97j44FZLio6maQ/2BMP8xXFPArDWxByyLyGYs2fXpSZw+Lby9qr8Px3SsH9dylfC8HfQrmc/Mw==
+react-redux-loading-bar@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/react-redux-loading-bar/-/react-redux-loading-bar-4.2.0.tgz#491469bcdcbc54366f502e1a6a685b324807a45a"
+  integrity sha512-UkdBa7973LtJu86Aq9v0sdoBPuMR5S3hgQj3prpBUvz4IZjxh11ZP2gc4rzotr4atmKCdQoN1WRuBnazUAq5/A==
   dependencies:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.2"

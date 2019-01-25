@@ -53,7 +53,7 @@ class DailyRollupChart extends Component {
     }
     let { width, onBarClick, barColors } = this.props
     let chartBox = this.node.getBoundingClientRect()
-    let chartWidth = this.isNumeric(width) ? width : (chartBox.right - chartBox.left)
+    let chartWidth = this.isNumeric(width) ? (width - 30) : (chartBox.right - chartBox.left - 30)
     let chartData = this.props.data
     let chart = d3.select(this.node)
     let xLabels = [].concat.apply(
