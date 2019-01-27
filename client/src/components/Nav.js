@@ -96,7 +96,7 @@ class BaseNav extends Component {
 
 				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="advisor-organizations" active={inOrg && orgUuid !== myOrgUuid}>
 					{Organization.map(organizations, org =>
-						<LinkTo organization={org} componentClass={Link} key={org.uuid} onClick={this.props.clearSearchQuery}>
+						<LinkTo organization={org} componentClass={Link} showIcon={false} key={org.uuid} onClick={this.props.clearSearchQuery}>
 							<MenuItem>{org.shortName}</MenuItem>
 						</LinkTo>
 					)}

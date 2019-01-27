@@ -19,9 +19,9 @@ import Settings from 'Settings'
 
 import DictionaryField from '../../HOC/DictionaryField'
 
-import ORGANIZATION_ICON from 'resources/organizations.png'
-import POSITION_ICON from 'resources/positions.png'
-import TASK_ICON from 'resources/tasks.png'
+import ORGANIZATIONS_ICON from 'resources/organizations.png'
+import POSITIONS_ICON from 'resources/positions.png'
+import TASKS_ICON from 'resources/tasks.png'
 import REMOVE_ICON from 'resources/delete.png'
 
 import AppContext from 'components/AppContext'
@@ -184,7 +184,7 @@ class BaseOrganizationForm extends Component {
 										component={FieldHelper.renderSpecialField}
 										label={Settings.fields.organization.parentOrg}
 										onChange={value => setFieldValue('parentOrg', value)}
-										addon={ORGANIZATION_ICON}
+										addon={ORGANIZATIONS_ICON}
 										widget={
 											<Autocomplete
 												objectType={Organization}
@@ -270,7 +270,7 @@ class BaseOrganizationForm extends Component {
 											template={Task.autocompleteTemplate}
 											addFieldName='tasks'
 											addFieldLabel={Settings.fields.task.shortLabel}
-											addon={TASK_ICON}
+											addon={TASKS_ICON}
 											renderSelected={<TaskTable tasks={values.tasks} showDelete={true} />}
 											onChange={value => setFieldValue('tasks', value)}
 										/>
@@ -313,13 +313,13 @@ class BaseOrganizationForm extends Component {
 				objectType={Position}
 				queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
 				placeholder="Search for the approver's position"
-				fields="uuid, name, code, type, person { uuid, name, rank }"
+				fields="uuid, name, code, type, person { uuid, name, rank, role }"
 				template={position =>
 					<span> {position.person && <span> <LinkTo person={position.person} isLink={false}/> - </span>} <LinkTo position={position} isLink={false}/> {position.code && <span> - {position.code} </span>} </span>
 				}
 				addFieldName={`approvalSteps.${index}.approvers`}
 				addFieldLabel="Add an approver"
-				addon={POSITION_ICON}
+				addon={POSITIONS_ICON}
 				renderSelected={<ApproverTable approvers={approvers} />}
 				onChange={value => setFieldValue(`approvalSteps.${index}.approvers`, value)}
 			/>

@@ -6,6 +6,8 @@ import Settings from 'Settings'
 
 import * as yup from 'yup'
 
+import TASKS_ICON from 'resources/tasks.png'
+
 export const {
 	shortLabel,
 	longLabel,
@@ -67,6 +69,10 @@ export default class Task extends Model {
 
 	constructor(props) {
 		super(Model.fillObject(props, Task.yupSchema))
+	}
+
+	iconUrl() {
+		return TASKS_ICON
 	}
 
 	toString() {

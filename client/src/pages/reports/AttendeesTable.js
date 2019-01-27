@@ -43,11 +43,7 @@ export default class AttendeesTable extends Component {
 				<td className="primary-attendee">
 					<Checkbox checked={person.primary} disabled={this.props.disabled} onChange={() => !this.props.disabled && this.setPrimaryAttendee(person)} />
 				</td>
-
-				<td>
-					<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-					<LinkTo person={person}/>
-				</td>
+				<td><LinkTo person={person} /></td>
 				<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 				<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 				<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
