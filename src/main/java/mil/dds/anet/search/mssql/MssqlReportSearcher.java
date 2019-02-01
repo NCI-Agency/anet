@@ -33,6 +33,7 @@ import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ReportSearchBuilder;
 import mil.dds.anet.search.ReportSearchBuilder.Comparison;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
@@ -251,17 +252,24 @@ public class MssqlReportSearcher implements IReportSearcher {
 			return new AnetBeanList<Report>(query.getPageNum(), query.getPageSize(), new ArrayList<Report>());
 		}
 
-		//Apply a filter to restrict access to other's draft reports
+		//Apply a filter to restrict access to other's draft, rejected or approved reports
 		if (user == null) {
 			whereClauses.add("reports.state != :draftState");
 			whereClauses.add("reports.state != :rejectedState");
+			whereClauses.add("reports.state != :approvedState");
 			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+			args.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
 		} else {
 			whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.authorUuid = :userUuid))");
 			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
 			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
 			args.put("userUuid", user.getUuid());
+			if (AuthUtils.isAdmin(user) == false) {
+				//Admin users may access all approved reports, other users only owned approved reports
+				whereClauses.add("((reports.state != :approvedState) OR (reports.authorUuid = :userUuid))");
+				args.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
+			}
 		}
 
 		sql.append(" WHERE ");
