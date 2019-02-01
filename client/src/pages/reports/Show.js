@@ -242,6 +242,13 @@ class BaseReportShow extends Page {
 						</Fieldset>
 					}
 
+					{report.isApproved() &&
+						<Fieldset style={{textAlign: 'center' }}>
+							<h4 className="text-danger">This report is APPROVED.</h4>
+							<p>This report has been approved. We expect it to be released to the ANET community on {moment(report.getReportApprovedAt()).add(24, 'hours').format(Settings.dateFormats.forms.withTime)}</p>
+						</Fieldset>
+					}
+
 					{report.isFuture() &&
 						<Fieldset style={{textAlign: 'center'}}>
 							<h4 className="text-success">This report is for an UPCOMING engagement.</h4>

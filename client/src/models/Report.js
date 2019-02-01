@@ -220,6 +220,16 @@ export default class Report extends Model {
 		)
 	}
 
+	getReportApprovedAt() {
+		if (this.approvalStatus) {
+			const approvalSteps = Object.assign([], this.approvalStatus)
+			const lastApprovalStep = approvalSteps.pop()
+			return !lastApprovalStep ? '' : lastApprovalStep.createdAt
+		} else {
+			return
+		}
+	}
+
 	getReportReleasedAt() {
 		if (this.approvalStatus) {
 			const approvalSteps = Object.assign([], this.approvalStatus)
