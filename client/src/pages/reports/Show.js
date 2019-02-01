@@ -159,6 +159,7 @@ class BaseReportShow extends Page {
 		//When either admin or not the author, user can approve if report is pending approval and user is one of the approvers in the current approval step
 		const canApprove = (isAdmin || !isAuthor) && report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
+		const canRequestChanges = canApprove || (report.isPendingRelease() && isAdmin)
 		//Warn admins when they try to approve their own report
 		const warnApproveOwnReport = canApprove && isAuthor
 
@@ -410,7 +411,8 @@ class BaseReportShow extends Page {
 							</div>
 						</Fieldset>
 
-						{canApprove && this.renderApprovalForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
+						{(canApprove) && this.renderApprovalForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
+						{(!canApprove && canRequestChanges) && this.renderRequestChangesForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
 					</Form>
 
 					{currentUser.isAdmin() &&
@@ -468,6 +470,21 @@ class BaseReportShow extends Page {
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
 				{this.renderApproveButton(warnApproveOwnReport, disabled, () => this.approveReport(values.approvalComment), cancelHandler)}
 			</div>
+		</Fieldset>
+	}
+
+	renderRequestChangesForm = (values, disabled, warnApproveOwnReport, cancelHandler) => {
+		return <Fieldset className="report-sub-form" title="Request changes">
+			<h5>You can request changes to this report</h5>
+			<Field
+				name="requestChangesComment"
+				label="Request changes comment"
+				component={FieldHelper.renderInputField}
+				componentClass="textarea"
+				placeholder="Type a comment here; required when requesting changes"
+			/>
+
+			{this.renderRejectButton(warnApproveOwnReport, "Request changes", () => this.rejectReport(values.requestChangesComment), cancelHandler)}
 		</Fieldset>
 	}
 

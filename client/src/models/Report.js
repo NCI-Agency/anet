@@ -20,7 +20,8 @@ export default class Report extends Model {
 		RELEASED: 'RELEASED',
 		REJECTED: 'REJECTED',
 		CANCELLED: 'CANCELLED',
-		FUTURE: 'FUTURE'
+		FUTURE: 'FUTURE',
+		PENDING_RELEASE: 'PENDING_RELEASE',
 	}
 
 	static CANCELLATION_REASON = {
@@ -175,6 +176,14 @@ export default class Report extends Model {
 
 	isFuture() {
 		return Report.isFuture(this.state)
+	}
+
+	static isPendingRelease(state) {
+		return state === Report.STATE.PENDING_RELEASE
+	}
+
+	isPendingRelease() {
+		return Report.isPendingRelease(this.state)
 	}
 
 	showApprovals() {
