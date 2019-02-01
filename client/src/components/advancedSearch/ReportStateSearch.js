@@ -9,6 +9,7 @@ import utils from 'utils'
 const STATE_LABELS = {
 	[Report.STATE.DRAFT]: 'Draft',
 	[Report.STATE.PENDING_APPROVAL]: 'Pending Approval',
+	[Report.STATE.APPROVED]: 'Approved',
 	[Report.STATE.RELEASED]: 'Released',
 	[Report.STATE.CANCELLED]: 'Cancelled',
 	[Report.STATE.FUTURE]: 'Upcoming Engagement',
