@@ -417,7 +417,7 @@ public class ReportResource {
 				throw new WebApplicationException(permError + "Must be the current approver.", Status.FORBIDDEN);
 			}
 			break;
-		case PENDING_RELEASE:
+		case APPROVED:
 		case RELEASED:
 		case CANCELLED:
 			AnetAuditLogger.log("attempt to edit released report {} by editor {} (uuid: {}) was forbidden",
@@ -604,7 +604,7 @@ public class ReportResource {
 				r.setApprovalStepUuid(step.getNextStepUuid());
 				if (step.getNextStepUuid() == null) {
 					//Done with approvals, move to pending release (or cancelled) state!
-					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.PENDING_RELEASE);
+					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.APPROVED);
 					r.setReleasedAt(Instant.now());
 					sendReportReleasedEmail(r);
 				} else {

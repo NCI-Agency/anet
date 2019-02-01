@@ -28,7 +28,7 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Report extends AbstractAnetBean {
 
-	public enum ReportState { DRAFT, PENDING_APPROVAL, RELEASED, REJECTED, CANCELLED, FUTURE, PENDING_RELEASE }
+	public enum ReportState { DRAFT, PENDING_APPROVAL, RELEASED, REJECTED, CANCELLED, FUTURE, APPROVED }
 	public enum Atmosphere { POSITIVE, NEUTRAL, NEGATIVE }
 	public enum ReportCancelledReason { CANCELLED_BY_ADVISOR,
 										CANCELLED_BY_PRINCIPAL,
@@ -443,7 +443,7 @@ public class Report extends AbstractAnetBean {
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		return engine.getApprovalActionDao().getActionsForReport(context, uuid)
 				.thenApply(actions -> {
-			if (state == ReportState.PENDING_RELEASE || state == ReportState.RELEASED) {
+			if (state == ReportState.APPROVED || state == ReportState.RELEASED) {
 				approvalStatus = compactActions(actions);
 			} else {
 				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();

@@ -159,7 +159,7 @@ class BaseReportShow extends Page {
 		//When either admin or not the author, user can approve if report is pending approval and user is one of the approvers in the current approval step
 		const canApprove = (isAdmin || !isAuthor) && report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
-		const canRequestChanges = canApprove || (report.isPendingRelease() && isAdmin)
+		const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
 		//Warn admins when they try to approve their own report
 		const warnApproveOwnReport = canApprove && isAuthor
 
