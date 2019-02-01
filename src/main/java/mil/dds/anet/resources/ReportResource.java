@@ -602,8 +602,8 @@ public class ReportResource {
 				//Update the report
 				r.setApprovalStepUuid(step.getNextStepUuid());
 				if (step.getNextStepUuid() == null) {
-					//Done with approvals, move to released (or cancelled) state!
-					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.RELEASED);
+					//Done with approvals, move to pending release (or cancelled) state!
+					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.PENDING_RELEASE);
 					r.setReleasedAt(Instant.now());
 					sendReportReleasedEmail(r);
 				} else {
