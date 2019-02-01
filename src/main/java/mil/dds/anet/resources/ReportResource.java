@@ -417,6 +417,7 @@ public class ReportResource {
 				throw new WebApplicationException(permError + "Must be the current approver.", Status.FORBIDDEN);
 			}
 			break;
+		case PENDING_RELEASE:
 		case RELEASED:
 		case CANCELLED:
 			AnetAuditLogger.log("attempt to edit released report {} by editor {} (uuid: {}) was forbidden",
