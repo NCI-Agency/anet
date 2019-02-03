@@ -7,7 +7,6 @@ import moment from 'moment'
 import pluralize from 'pluralize'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import DailyRollupChart from 'components/DailyRollupChart'
 import ReportCollection, {FORMAT_MAP, FORMAT_SUMMARY, FORMAT_TABLE, GQL_REPORT_FIELDS} from 'components/ReportCollection'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
@@ -381,7 +380,6 @@ class BaseRollupShow extends Page {
 
 		return (
 			<div id="daily-rollup" style={flexStyle}>
-				<Breadcrumbs items={[[`Rollup ${this.dateStr}`, '/rollup']]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<Fieldset title={

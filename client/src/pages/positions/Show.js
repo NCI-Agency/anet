@@ -9,7 +9,6 @@ import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import AssignPersonModal from 'components/AssignPersonModal'
@@ -111,7 +110,6 @@ class BasePositionShow extends Page {
 					</div>
 
 					<RelatedObjectNotes notes={position.notes} relatedObject={position.uuid && {relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
-					<Breadcrumbs items={[[`Position ${position.name}`, Position.pathFor(position)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`Position ${position.name}`} action={action} />

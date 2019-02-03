@@ -6,7 +6,6 @@ import CancelledEngagementReports from 'components/CancelledEngagementReports'
 import ReportsByTask from 'components/ReportsByTask'
 import ReportsByDayOfWeek from 'components/ReportsByDayOfWeek'
 import FutureEngagementsByLocation from 'components/FutureEngagementsByLocation'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Messages from 'components/Messages'
 import Fieldset from 'components/Fieldset'
 import autobind from 'autobind-decorator'
@@ -206,7 +205,6 @@ class BaseInsightsShow extends Page {
 
     return (
       <div style={flexStyle}>
-        <Breadcrumbs items={[['Insights ' + insightConfig.navTitle, insightPath]]} />
         <Messages error={this.state.error} success={this.state.success} />
         <Fieldset id={this.props.match.params.insight} title={insightConfig.title} style={flexStyle}>
           <InsightComponent

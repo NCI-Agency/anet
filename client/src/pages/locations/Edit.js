@@ -1,7 +1,6 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import LocationForm from './Form'
@@ -44,7 +43,6 @@ class LocationEdit extends Page {
 		return (
 			<div>
 				<RelatedObjectNotes notes={location.notes} relatedObject={location.uuid && {relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
-				<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)], ["Edit", Location.pathForEdit(location)]]} />
 				<LocationForm edit initialValues={location} title={`Location ${location.name}`} />
 			</div>
 		)

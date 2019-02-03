@@ -1,8 +1,6 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Breadcrumbs from 'components/Breadcrumbs'
-
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'
 
@@ -40,7 +38,6 @@ class GraphiQL extends Page {
 	render() {
 		// TODO: fix the below hack with inlined height after layout refactoring in NCI-Agency/anet#551
 		return <div style={{height:'600px'}}>
-			<Breadcrumbs items={[['Run GraphQL queries', '/graphiql']]} />
 			{GraphiQLreq ? <GraphiQLreq fetcher={this.fetch} /> : 'Loading...'}
 		</div>
 	}
