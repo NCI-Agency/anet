@@ -94,7 +94,7 @@ class BaseTopBar extends Component {
                     <GeneralBanner options={this.bannerOptions()} />
                     <SecurityBanner location={this.props.location} />
                     {currentUser && !currentUser.hasActivePosition() && !currentUser.isNewUser() && <NoPositionBanner />}
-                    <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction}/>
+                    <Header minimalHeader={this.props.minimalHeader} toggleMenuAction={this.props.toggleMenuAction} clearSearchQuery={this.props.clearSearchQuery}/>
                 </div>
             </div>
         )
