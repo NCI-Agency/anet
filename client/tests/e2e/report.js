@@ -162,6 +162,11 @@ test('Approve report chain', async t => {
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
     await $('#daily-rollup')
 
+    let $rollupDateRange = await $('.rollupDateRange .bp3-input')
+    await $rollupDateRange.click()
+    let $todayButton = await t.context.driver.findElement(By.xpath('//a/div[text()="Today"]'))
+    await $todayButton.click()
+
     let $reportCollection = await $('.report-collection table')
     await t.context.driver.wait(until.elementIsVisible($reportCollection))
     let $approvedIntent = await $reportCollection.findElement(By.linkText('meeting goal'))
