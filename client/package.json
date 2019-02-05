@@ -57,7 +57,7 @@
     "wdio-mocha-framework": "^0.6.4",
     "wdio-spec-reporter": "^0.1.5",
     "webdriverio": "^4.14.1",
-    "webpack": "^4.29.0",
+    "webpack": "^4.29.1",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14",
