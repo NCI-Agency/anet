@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.AdminDao;
@@ -41,6 +42,7 @@ import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -218,6 +220,11 @@ public class AnetObjectEngine {
 	}
 	
 	public boolean canUserApproveStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
+		final Person p = personDao.getByUuid(userUuid);
+		//Admin users may approve any step
+		if (AuthUtils.isAdmin(p)) {
+			return true;
+		}
 		ApprovalStep as = asDao.getByUuid(approvalStepUuid);
 		final List<Position> approvers;
 		try {
