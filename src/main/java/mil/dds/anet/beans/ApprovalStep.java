@@ -84,7 +84,7 @@ public class ApprovalStep extends AbstractAnetBean {
 	
 	@Override
 	public String toString() {
-		return String.format("%s - %s, aoid: %d, nsid: %d", uuid, name, advisorOrganizationUuid, nextStepUuid);
+		return String.format("%s - %s, aoid: %s, nsid: %s", uuid, name, advisorOrganizationUuid, nextStepUuid);
 	}
 	
 }
