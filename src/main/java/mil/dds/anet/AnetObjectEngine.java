@@ -239,6 +239,11 @@ public class AnetObjectEngine {
 		return false;
 	}
 
+	public boolean canUserRejectStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
+		//Rejection access rules are the same as the approval access rules
+		return canUserApproveStep(context, userUuid, approvalStepUuid);
+	}
+
 	/*
 	 * Helper function to build a map of organization UUIDs to their top level parent organization object.
 	 * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to get all orgs.

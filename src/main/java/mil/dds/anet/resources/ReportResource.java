@@ -670,23 +670,24 @@ public class ReportResource {
 				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
-				if (step == null) {
-					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
-					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
-				}
-
 				//Report author cannot reject own report, unless admin
 				if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
 					logger.info("Author {} cannot request changes to own report UUID {}", approver.getUuid(), r.getUuid());
 					throw new WebApplicationException("You cannot request changes to your own report", Status.FORBIDDEN);
 				}
-				//Verify that this user can reject for this step.
-				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
-				if (canApprove == false) {
-					logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
-					throw new WebApplicationException("User cannot request changes to report", Status.FORBIDDEN);
+				//Report can be rejected when pending approval or by an admin when pending approval or in approved state
+				if (step == null && !((r.getState() == ReportState.APPROVED) && AuthUtils.isAdmin(approver))) {
+					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
+					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
 				}
-
+				else if (step != null) {
+					//Verify that this user can reject for this step.
+					boolean canReject = engine.canUserRejectStep(engine.getContext(), approver.getUuid(), step.getUuid());
+					if (canReject == false) {
+						logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
+						throw new WebApplicationException("User cannot request changes to report", Status.FORBIDDEN);
+					}
+				}
 				//Write the rejection
 				ApprovalAction approval = new ApprovalAction();
 				approval.setReportUuid(r.getUuid());
