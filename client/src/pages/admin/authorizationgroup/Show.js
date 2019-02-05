@@ -51,7 +51,7 @@ class BaseAuthorizationGroupShow extends Page {
 		}
 		const positionsPart = new GQL.Part(/* GraphQL */`
 			paginatedPositions: positionList(query:$positionQuery) {
-				pageNum, pageSize, totalCount, list { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
+				pageNum, pageSize, totalCount, list { uuid, name, code, type, status, organization { uuid, shortName }, person { uuid, name, rank, role } }
 			}`)
 			.addVariable("positionQuery", "PositionSearchQueryInput", positionQuery)
 		return positionsPart
@@ -77,7 +77,7 @@ class BaseAuthorizationGroupShow extends Page {
 		const authGroupPart = new GQL.Part(/* GraphQL */`
 			authorizationGroup(uuid:"${props.match.params.uuid}") {
 			uuid, name, description
-			positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
+			positions { uuid, name, code, type, status, organization { uuid, shortName }, person { uuid, name, rank, role } }
 			status
 			${GRAPHQL_NOTES_FIELDS}
 		}` )

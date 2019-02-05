@@ -22,8 +22,8 @@ import { jumpToTop } from 'components/Page'
 import DictionaryField from 'HOC/DictionaryField'
 import utils from 'utils'
 
-import LOCATION_ICON from 'resources/locations.png'
-import ORGANIZATION_ICON from 'resources/organizations.png'
+import LOCATIONS_ICON from 'resources/locations.png'
+import ORGANIZATIONS_ICON from 'resources/organizations.png'
 import WARNING_ICON from 'resources/warning.png'
 
 class BasePositionForm extends Component {
@@ -175,7 +175,7 @@ class BasePositionForm extends Component {
 								name="organization"
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('organization', value)}
-								addon={ORGANIZATION_ICON}
+								addon={ORGANIZATIONS_ICON}
 								widget={
 									<Autocomplete
 										objectType={Organization}
@@ -215,7 +215,7 @@ class BasePositionForm extends Component {
 								name="location"
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('location', value)}
-								addon={LOCATION_ICON}
+								addon={LOCATIONS_ICON}
 								widget={
 									<Autocomplete
 										objectType={Location}

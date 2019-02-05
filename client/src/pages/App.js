@@ -39,7 +39,7 @@ class App extends Page {
 	fetchData(props) {
 		return API.query(/* GraphQL */`
 			me {
-				uuid, name, role, emailAddress, rank, status
+				uuid, name, rank, role, emailAddress, status
 				position {
 					uuid, name, code, type, status, isApprover
 					organization { uuid, shortName , allDescendantOrgs { uuid }}

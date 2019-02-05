@@ -34,11 +34,11 @@ class ReportEdit extends Page {
 			report(uuid:"${props.match.params.uuid}") {
 				uuid, intent, engagementDate, atmosphere, atmosphereDetails, state
 				keyOutcomes, reportText, nextSteps, cancelledReason,
-				author { uuid, name },
+				author { uuid, name, rank, role },
 				location { uuid, name },
 				attendees {
-					uuid, name, role, primary, status, endOfTourDate
-					position { uuid, name, code, status, organization { uuid, shortName}, location {uuid, name} }
+					uuid, name, rank, role, primary, status, endOfTourDate
+					position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
 				}
 				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
 				tags { uuid, name, description }
@@ -55,13 +55,12 @@ class ReportEdit extends Page {
 
 	render() {
 		const { report } = this.state
-		const showReportText = !!report.reportText || !!report.reportSensitiveInformation
 
 		return (
 			<div className="report-edit">
 				<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 				<Breadcrumbs items={[[`Report #${report.uuid}`, Report.pathForEdit(report)]]} />
-				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} showReportText={showReportText} />
+				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} showSensitiveInfo={!!report.reportSensitiveInformation && !!report.reportSensitiveInformation.text} />
 			</div>
 		)
 	}

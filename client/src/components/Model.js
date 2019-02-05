@@ -7,7 +7,7 @@ import moment from 'moment'
 import * as yup from 'yup'
 
 export const GRAPHQL_NOTE_FIELDS = /* GraphQL */`
-	uuid createdAt updatedAt text author { uuid name rank } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
+	uuid createdAt updatedAt text author { uuid name rank role } noteRelatedObjects { noteUuid relatedObjectType relatedObjectUuid }
 `
 export const GRAPHQL_NOTES_FIELDS = /* GraphQL */`
 	notes { ${GRAPHQL_NOTE_FIELDS} }
@@ -52,6 +52,7 @@ export default class Model {
 			uuid: PropTypes.string,
 			name: PropTypes.string,
 			rank: PropTypes.string,
+			role: PropTypes.string,
 		}),
 		noteRelatedObjects: PropTypes.arrayOf(PropTypes.shape({
 			noteUuid: PropTypes.string,
@@ -154,6 +155,10 @@ export default class Model {
 		})
 
 		return this
+	}
+
+	iconUrl() {
+		return ''
 	}
 
 	toPath(query) {

@@ -1,10 +1,12 @@
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
+import { mapDispatchToProps, propTypes as pagePropTypes } from 'components/Page'
 import {Grid, Row, Col} from 'react-bootstrap'
 
 import SearchBar from 'components/SearchBar'
 import CreateButton from 'components/CreateButton'
 import {Person} from 'models'
+import { connect } from 'react-redux'
 
 import logo from 'resources/logo.png'
 import menuLogo from 'resources/anet-menu.png'
@@ -17,7 +19,11 @@ const backgroundCss = {
 	boxShadow: '0 4px 6px hsla(0, 0%, 0%, 0.2)',
 }
 
-export default class Header extends Component {
+class Header extends Component {
+	static propTypes = {
+		...pagePropTypes,
+	}
+
 	render() {
 		return (
 			<header style={backgroundCss} className="header">
@@ -27,7 +33,7 @@ export default class Header extends Component {
 								{
 									this.props.minimalHeader ?
 										<span className="logo hidden-xs"><img src={logo} alt="ANET Logo" /></span> :
-										<Link to="/" className="logo hidden-xs">
+										<Link to="/" className="logo hidden-xs" onClick={this.props.clearSearchQuery}>
 											<img src={logo} alt="ANET logo" />
 										</Link>
 								}
@@ -53,3 +59,5 @@ export default class Header extends Component {
 		)
 	}
 }
+
+export default connect(null, mapDispatchToProps)(Header)

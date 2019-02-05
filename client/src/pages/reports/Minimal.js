@@ -53,7 +53,7 @@ class ReportMinimal extends Page {
 
 				location { uuid, name }
 				author {
-					uuid, name, rank,
+					uuid, name, rank, role
 					position {
 						organization {
 							shortName, longName, identificationCode
@@ -61,7 +61,7 @@ class ReportMinimal extends Page {
 								uuid, name,
 								approvers {
 									uuid, name,
-									person { uuid, name rank }
+									person { uuid, name, rank, role }
 								}
 							}
 						}
@@ -69,8 +69,8 @@ class ReportMinimal extends Page {
 				}
 
 				attendees {
-					uuid, name, role, primary, rank, status, endOfTourDate
-					position { uuid, name, code, status, organization { uuid, shortName}, location {uuid, name} }
+					uuid, name, primary, rank, role, status, endOfTourDate
+					position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
 				}
 				primaryAdvisor { uuid }
 				primaryPrincipal { uuid }
@@ -79,7 +79,7 @@ class ReportMinimal extends Page {
 
 				comments {
 					uuid, text, createdAt, updatedAt
-					author { uuid, name, rank }
+					author { uuid, name, rank, role }
 				}
 
 				principalOrg { uuid, shortName, longName, identificationCode, type }
@@ -88,9 +88,9 @@ class ReportMinimal extends Page {
 				approvalStatus {
 					type, createdAt
 					step { uuid , name
-						approvers { uuid, name, person { uuid, name, rank } }
+						approvers { uuid, name, person { uuid, name, rank, role } }
 					},
-					person { uuid, name, rank}
+					person { uuid, name, rank, role }
 				}
 
 				approvalStep { name, approvers { uuid }, nextStepUuid }
@@ -162,8 +162,8 @@ class ReportMinimal extends Page {
 								widget={
 									<div id="intent" className="form-control-static">
 										<p><strong>{Settings.fields.report.intent}:</strong> {report.intent}</p>
-										{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
-										<p><strong>Next steps:</strong> {report.nextSteps}</p>
+										{report.keyOutcomes && <p><span><strong>{Settings.fields.report.keyOutcomes}:</strong> {report.keyOutcomes}&nbsp;</span></p>}
+										<p><strong>{Settings.fields.report.nextSteps}:</strong> {report.nextSteps}</p>
 									</div>
 								}
 							/>
@@ -242,7 +242,7 @@ class ReportMinimal extends Page {
 						</Fieldset>
 
 						{report.reportText &&
-							<Fieldset title="Meeting discussion">
+							<Fieldset title={Settings.fields.report.reportText}>
 								<div dangerouslySetInnerHTML={{__html: report.reportText}} />
 							</Fieldset>
 						}

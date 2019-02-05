@@ -41,8 +41,8 @@ class BaseLocationShow extends Page {
 		setMessages(props,this.state)
 	}
 
-	fetchData(props) {
-		const reportsQuery = new GQL.Part(/* GraphQL */`
+	getReportQueryPart = (locationUuid) => {
+		return new GQL.Part(/* GraphQL */`
 			reports: reportList(query: $reportsQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
@@ -51,8 +51,12 @@ class BaseLocationShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			locationUuid: props.match.params.uuid,
+			locationUuid,
 		})
+	}
+
+	fetchData(props) {
+		const reportsQuery = this.getReportQueryPart(props.match.params.uuid)
 
 		const locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
@@ -142,7 +146,12 @@ class BaseLocationShow extends Page {
 	}
 
 	goToReportsPage = (pageNum) => {
-		this.setState({reportsPageNum: pageNum}, this.loadData)
+		this.setState({reportsPageNum: pageNum}, () => {
+			const reportQueryPart = this.getReportQueryPart(this.state.location.uuid)
+			GQL.run([reportQueryPart]).then(data =>
+				this.setState({reports: data.reports})
+			)
+		})
 	}
 }
 
