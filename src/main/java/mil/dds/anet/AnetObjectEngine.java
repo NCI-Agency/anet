@@ -220,11 +220,6 @@ public class AnetObjectEngine {
 	}
 	
 	public boolean canUserApproveStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
-		final Person p = personDao.getByUuid(userUuid);
-		//Admin users may approve any step
-		if (AuthUtils.isAdmin(p)) {
-			return true;
-		}
 		ApprovalStep as = asDao.getByUuid(approvalStepUuid);
 		final List<Position> approvers;
 		try {
@@ -240,7 +235,11 @@ public class AnetObjectEngine {
 	}
 
 	public boolean canUserRejectStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
-		//Rejection access rules are the same as the approval access rules
+		final Person p = personDao.getByUuid(userUuid);
+		//Admin users may approve any step
+		if (AuthUtils.isAdmin(p)) {
+			return true;
+		}
 		return canUserApproveStep(context, userUuid, approvalStepUuid);
 	}
 
