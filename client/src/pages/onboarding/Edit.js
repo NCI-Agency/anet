@@ -36,7 +36,7 @@ class BaseOnboardingEdit extends Page {
 				name, rank, role, emailAddress, phoneNumber, status
 				biography, country, gender, endOfTourDate, domainUsername
 				position {
-					uuid, name
+					uuid, name, type
 				}
 			}
 		`).then(data => {

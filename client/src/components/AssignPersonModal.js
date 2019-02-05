@@ -66,7 +66,7 @@ export default class AssignPersonModal extends Component {
 									placeholder="Select a person for this position"
 									objectType={Person}
 									className="select-person-autocomplete"
-									fields={'uuid, name, rank, role, position { uuid, name}'}
+									fields={'uuid, name, rank, role, position { uuid, name, type }'}
 									template={person =>
 										<LinkTo person={person} isLink={false} />
 									}

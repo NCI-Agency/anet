@@ -3,6 +3,8 @@ import utils from 'utils'
 
 import * as yup from 'yup'
 
+import LOCATIONS_ICON from 'resources/locations.png'
+
 export default class Location extends Model {
 	static resourceName = 'Location'
 	static listName = 'locationList'
@@ -33,6 +35,10 @@ export default class Location extends Model {
 
 	constructor(props) {
 		super(Model.fillObject(props, Location.yupSchema))
+	}
+
+	iconUrl() {
+		return LOCATIONS_ICON
 	}
 
 	toString() {

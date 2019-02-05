@@ -6,6 +6,8 @@ import Settings from 'Settings'
 
 import * as yup from 'yup'
 
+import ORGANIZATIONS_ICON from 'resources/organizations.png'
+
 export default class Organization extends Model {
 	static resourceName = 'Organization'
 	static listName = 'organizationList'
@@ -77,6 +79,10 @@ export default class Organization extends Model {
 
 	isTaskEnabled() {
 		return Organization.isTaskEnabled(this.shortName)
+	}
+
+	iconUrl() {
+		return ORGANIZATIONS_ICON
 	}
 
 	toString() {

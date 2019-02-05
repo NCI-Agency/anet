@@ -36,7 +36,7 @@ class PersonEdit extends Page {
 				name, rank, role, emailAddress, phoneNumber, status, domainUsername,
 				biography, country, gender, endOfTourDate,
 				position {
-					uuid, name
+					uuid, name, type
 				}
 				${GRAPHQL_NOTES_FIELDS}
 			}
