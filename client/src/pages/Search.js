@@ -57,14 +57,14 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PersonSearchQueryInput',
-		fields: 'uuid, name, rank, emailAddress, role , position { uuid, name, code, location { uuid, name }, organization { uuid, shortName} }'
+		fields: 'uuid, name, rank, role, emailAddress, position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQueryInput',
-		fields: 'uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank }'
+		fields: 'uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
@@ -348,10 +348,7 @@ class Search extends Page {
 				<tbody>
 					{Person.map(this.state.results.people.list, person =>
 						<tr key={person.uuid}>
-							<td>
-								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-								<LinkTo person={person}/>
-							</td>
+							<td><LinkTo person={person} /></td>
 							<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>

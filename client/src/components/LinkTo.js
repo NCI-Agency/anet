@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import {Link} from 'react-router-dom'
 import PropTypes from 'prop-types'
-import decodeQuery from 'querystring/decode'
 import utils from 'utils'
 import _isEmpty from 'lodash/isEmpty'
 
@@ -31,7 +30,10 @@ export default class LinkTo extends Component {
 			PropTypes.string,
 			PropTypes.func,
 		]),
+		className: PropTypes.string,
 
+		showIcon: PropTypes.bool,
+		isLink: PropTypes.bool,
 		edit: PropTypes.bool,
 
 		// Configures this link to look like a button. Set it to true to make it a button,
@@ -42,16 +44,21 @@ export default class LinkTo extends Component {
 		]),
 
 		target: PropTypes.string,
+		whenUnspecified: PropTypes.string,
 		...modelPropTypes,
 	}
 
 	static defaultProps = {
+		componentClass: Link,
+		showIcon: true,
 		isLink: true,
+		edit: false,
+		button: false,
 		whenUnspecified: "Unspecified"
 	}
 
 	render() {
-		let {componentClass, children, edit, button, isLink, whenUnspecified, className, ...componentProps} = this.props
+		let {componentClass, children, edit, button, showIcon, isLink, whenUnspecified, className, ...componentProps} = this.props
 
 		if (button) {
 			componentProps.className = [className, 'btn', `btn-${button === true ? 'default' : button}`].join(' ')
@@ -64,17 +71,21 @@ export default class LinkTo extends Component {
 			return null
 		}
 
-		let modelInstance = this.props[modelName]
-		if (_isEmpty(modelInstance))
+		const modelFields = this.props[modelName]
+		if (_isEmpty(modelFields))
 			return <span>{whenUnspecified}</span>
 
-		let modelClass = Models[modelName]
+		const modelClass = Models[modelName]
+		const isModel = typeof modelFields !== 'string'
+		const modelInstance = new modelClass(isModel ? modelFields : {})
+		showIcon = showIcon && !button
+		const modelIcon = showIcon && modelInstance.iconUrl()
 
 		if (!isLink)
-			return <span> {modelClass.prototype.toString.call(modelInstance)} </span>
+			return <span>{modelInstance.toString()}</span>
 
-		let to = modelInstance
-		if (typeof to === 'string') {
+		let to = modelFields
+		if (!isModel) {
 			if (to.indexOf('?')) {
 				let components = to.split('?')
 				to = {pathname: components[0], search: components[1]}
@@ -85,9 +96,12 @@ export default class LinkTo extends Component {
 
 		componentProps = Object.without(componentProps, modelName)
 
-		let Component = componentClass || Link
-		return <Component to={to} {...componentProps}>
-			{children || modelClass.prototype.toString.call(modelInstance)}
-		</Component>
+		const LinkToComponent = componentClass
+		return <LinkToComponent to={to} {...componentProps}>
+			<React.Fragment>
+				{showIcon && modelIcon && <img src={modelIcon} alt="" style={{marginLeft: 5, marginRight: 5, height: '1em'}} />}
+				{children || modelInstance.toString()}
+			</React.Fragment>
+		</LinkToComponent>
 	}
 }

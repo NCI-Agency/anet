@@ -6,6 +6,7 @@ import Settings from 'Settings'
 
 import * as yup from 'yup'
 
+import POSITIONS_ICON from 'resources/positions.png'
 import RS_ICON from 'resources/rs_small.png'
 import AFG_ICON from 'resources/afg_small.png'
 
@@ -47,7 +48,7 @@ export default class Position extends Model {
 		location: yup.object().nullable().default({}),
 	}).concat(Model.yupSchema)
 
-	static autocompleteQuery = "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name }"
+	static autocompleteQuery = "uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role }"
 
 	static autocompleteTemplate(position) {
 		return <span>
@@ -80,6 +81,10 @@ export default class Position extends Model {
 		return Position.humanNameOfType(this.type)
 	}
 
+	isAdvisor() {
+		return this.type === Position.TYPE.ADVISOR
+	}
+
 	isPrincipal() {
 		return this.type === Position.TYPE.PRINCIPAL
 	}
@@ -89,10 +94,12 @@ export default class Position extends Model {
 	}
 
 	iconUrl() {
-		if (this.type === Position.TYPE.PRINCIPAL) {
+		if (this.isAdvisor()) {
+			return RS_ICON
+		} else if (this.isPrincipal()) {
 			return AFG_ICON
+		} else {
+			return POSITIONS_ICON
 		}
-
-		return RS_ICON
 	}
 }
