@@ -150,6 +150,7 @@ export default class Page extends Component {
 		const propFilter = ['match', 'location', 'history']
 		// Also filter out generic pageProps
 		propFilter.push('pageProps')
+		propFilter.push('pagination')
 		const filteredNextProps = Object.without(this.props, ...propFilter)
 		const filteredProps = Object.without(prevProps, ...propFilter)
 		if (!_isEqualWith(filteredProps, filteredNextProps, utils.treatFunctionsAsEqual)) {
