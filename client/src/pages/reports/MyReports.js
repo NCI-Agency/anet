@@ -18,6 +18,7 @@ class BaseMyReports extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
+		pagination: PropTypes.object,
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
@@ -39,13 +40,10 @@ class BaseMyReports extends Page {
 	}
 
 	@autobind
-	getPart(partName, state, authorUuid) {
-		const { pagination } = this.props
-		const pagePart = pagination[partName]
-
+	getPart(partName, state, authorUuid, pageNum = 0) {
 		const queryConstPart = {
 			pageSize: 10,
-			pageNum: pagePart === undefined ? 0 : pagePart.pageNum,
+			pageNum: pageNum,
 			authorUuid: authorUuid,
 			state: state
 		}
@@ -91,17 +89,28 @@ class BaseMyReports extends Page {
 				</Nav>
 			</SubNav>
 
-			{this.renderSection('Draft Reports', this.state.draft, this.goToPage.bind(this, 'draft'), 'draft-reports')}
-			{this.renderSection('Upcoming Engagements', this.state.future, this.goToPage.bind(this, 'future'), 'upcoming-engagements')}
-			{this.renderSection("Pending Approval", this.state.pending, this.goToPage.bind(this, 'pending'), 'pending-approval')}
-			{this.renderSection("Published Reports", this.state.released, this.goToPage.bind(this, 'released'), 'published-reports')}
+			{this.renderSection('Draft Reports', this.state.draft, this.goToPage.bind(this, 'draft'), 'draft-reports', 'draft')}
+			{this.renderSection('Upcoming Engagements', this.state.future, this.goToPage.bind(this, 'future'), 'upcoming-engagements', 'future')}
+			{this.renderSection("Pending Approval", this.state.pending, this.goToPage.bind(this, 'pending'), 'pending-approval', 'pending')}
+			{this.renderSection("Published Reports", this.state.released, this.goToPage.bind(this, 'released'), 'published-reports', 'released')}
 		</div>
 	}
 
-	renderSection(title, reports, goToPage, id) {
+	getPaginatedNum = (part, pageNum = 0) => {
+		let goToPageNum = pageNum
+		if (part !== undefined) {
+			goToPageNum = part.pageNum
+		}
+		return goToPageNum
+	}
+
+	renderSection = (title, reports, goToPage, id, section) => {
+		const paginatedPart = this.props.pagination[section]
+		const goToPageNum = this.getPaginatedNum(paginatedPart)
 		let content = <p>Loading...</p>
 		if (reports && reports.list) {
-			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} mapId={id} />
+			const paginatedReports = Object.assign(reports, {pageNum: goToPageNum})
+			content = <ReportCollection paginatedReports={paginatedReports} goToPage={goToPage} mapId={id} />
 		}
 
 		return <Fieldset title={title} id={id}>
@@ -112,7 +121,7 @@ class BaseMyReports extends Page {
 	@autobind
 	goToPage(section, pageNum) {
 		const { currentUser, setPagination } = this.props
-		const part = (this.partFuncs[section])(currentUser.uuid)
+		const part = (this.partFuncs[section])(currentUser.uuid, pageNum)
 		GQL.run([part]).then( data => {
 			let stateChange = {}
 			stateChange[section] = data[section]
