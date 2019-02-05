@@ -351,7 +351,10 @@ class BaseReportForm extends Component {
 								addFieldLabel="Attendees"
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
-								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
+								onChange={value => {
+									this.updateAttendees(setFieldValue, 'attendees', value)
+									setFieldTouched('attendees', true)
+								}}
 								shortcutsTitle="Recent Attendees"
 								shortcuts={recents.persons}
 								renderExtraCol={true}

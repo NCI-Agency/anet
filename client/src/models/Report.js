@@ -84,13 +84,15 @@ export default class Report extends Model {
 					return err ? this.createError({message: err}) : true
 				}
 			)
-			.test('primary-advisor', 'primary advisor error',
-				// can't use arrow function here because of binding to 'this'
-				function(attendees) {
-					const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
-					return err ? this.createError({message: err}) : true
-				}
-			)
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.test('primary-advisor', 'primary advisor error',
+					// can't use arrow function here because of binding to 'this'
+					function(attendees) {
+						const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
+						return err ? this.createError({message: err}) : true
+					}
+				)
+			))
 			.default([]),
 		principalOrg: yup.object().nullable().default({}),
 		advisorOrg: yup.object().nullable().default({}),
