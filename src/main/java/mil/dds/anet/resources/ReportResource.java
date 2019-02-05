@@ -669,7 +669,7 @@ public class ReportResource {
 		return dbHandle.inTransaction(h -> {
 				final Report r = dao.getByUuid(uuid, approver);
 				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
-				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
+				ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
 				//Report author cannot reject own report, unless admin
 				if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
 					logger.info("Author {} cannot request changes to own report UUID {}", approver.getUuid(), r.getUuid());
@@ -688,6 +688,29 @@ public class ReportResource {
 						throw new WebApplicationException("User cannot request changes to report", Status.FORBIDDEN);
 					}
 				}
+				if (step == null) {
+					final String orgUuid;
+					try {
+						final Organization org = engine.getOrganizationForPerson(engine.getContext(), r.getAuthorUuid()).get();
+						if (org == null) {
+							// Author missing Org, use the Default Approval Workflow
+							orgUuid = engine.getDefaultOrgUuid();
+						} else {
+							orgUuid = org.getUuid();
+						}
+					} catch (InterruptedException | ExecutionException e) {
+						throw new WebApplicationException("failed to load Organization for Author", e);
+					}
+					List<ApprovalStep> steps = null;
+					try {
+						steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+						throwExceptionNoApprovalSteps(steps);
+					} catch (InterruptedException | ExecutionException e) {
+						throw new WebApplicationException("failed to load Organization for Author", e);
+					}
+					step = steps.get(steps.size() - 1);
+				}
+
 				//Write the rejection
 				ApprovalAction approval = new ApprovalAction();
 				approval.setReportUuid(r.getUuid());
