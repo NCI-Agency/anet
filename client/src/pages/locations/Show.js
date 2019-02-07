@@ -18,6 +18,7 @@ import {Location, Person} from 'models'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
+import _escape from 'lodash/escape'
 
 class BaseLocationShow extends Page {
 
@@ -94,7 +95,7 @@ class BaseLocationShow extends Page {
 			}) => {
 				const marker = {
 					id: location.uuid || 0,
-					name: location.name || '',
+					name: _escape(location.name) || '', // escape HTML in location name!
 				}
 				if (Location.hasCoordinates(location)) {
 					Object.assign(marker, {
