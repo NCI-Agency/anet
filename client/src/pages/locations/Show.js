@@ -6,7 +6,6 @@ import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import Leaflet from 'components/Leaflet'
 import LinkTo from 'components/LinkTo'
@@ -106,7 +105,6 @@ class BaseLocationShow extends Page {
 				const action = canEdit && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>
 				return <div>
 					<RelatedObjectNotes notes={location.notes} relatedObject={location.uuid && {relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
-					<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`Location ${location.name}`} action={action} />

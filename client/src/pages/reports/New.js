@@ -3,7 +3,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import ReportForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 
 import GuidedTour from 'components/GuidedTour'
 import {reportTour} from 'pages/HopscotchTour'
@@ -57,7 +56,6 @@ class BaseReportNew extends Page {
 					/>
 				</div>
 
-				<Breadcrumbs items={[['New Report', Report.pathForNew()]]} />
 				<ReportForm initialValues={report} title='Create a new Report' />
 			</div>
 		)
