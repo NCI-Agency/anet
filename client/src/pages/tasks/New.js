@@ -2,7 +2,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import TaskForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
 import {Organization, Task} from 'models'
@@ -45,10 +44,7 @@ class TaskNew extends Page {
 	render() {
 		const { task } = this.state
 		return (
-			<div>
-				<Breadcrumbs items={[[`New ${Settings.fields.task.shortLabel}`, Task.pathForNew()]]} />
-				<TaskForm initialValues={task} title={`Create a new ${Settings.fields.task.shortLabel}`} />
-			</div>
+			<TaskForm initialValues={task} title={`Create a new ${Settings.fields.task.shortLabel}`} />
 		)
 	}
 }

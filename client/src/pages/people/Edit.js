@@ -4,7 +4,6 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import moment from 'moment'
 
 import PersonForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
@@ -58,9 +57,6 @@ class PersonEdit extends Page {
 		return (
 			<div>
 				<RelatedObjectNotes notes={person.notes} relatedObject={person.uuid && {relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
-				{!person.isNewUser() &&
-					<Breadcrumbs items={[[`Edit ${person.name}`, Person.pathForEdit(person)]]} />
-				}
 				<PersonForm
 					initialValues={person}
 					edit

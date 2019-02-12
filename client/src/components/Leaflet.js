@@ -3,16 +3,18 @@ import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
 import {Location} from 'models'
 import AppContext from 'components/AppContext'
-import _escape from 'lodash/escape'
 import _isEqual from 'lodash/isEqual'
 import _sortBy from 'lodash/sortBy'
 
-import {Map, Control, CRS, FeatureGroup, Icon, Marker, TileLayer} from 'leaflet'
+import {Map, Control, CRS, Icon, Marker, TileLayer} from 'leaflet'
 import { GeoSearchControl, OpenStreetMapProvider, EsriProvider } from 'leaflet-geosearch'
 import { GestureHandling } from 'leaflet-gesture-handling'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-geosearch/assets/css/leaflet.css'
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
+import { MarkerClusterGroup } from 'leaflet.markercluster'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import Settings from 'Settings'
 
 import MARKER_ICON from 'resources/leaflet/marker-icon.png'
@@ -106,7 +108,7 @@ class BaseLeaflet extends Component {
 
 		map.on('moveend', this.moveEnd)
 
-		const markerLayer = new FeatureGroup([]).addTo(map)
+		const markerLayer = new MarkerClusterGroup().addTo(map)
 		this.setState({map, markerLayer})
 	}
 
@@ -142,7 +144,7 @@ class BaseLeaflet extends Component {
 			let latLng = (Location.hasCoordinates(m)) ? [m.lat, m.lng] : this.state.map.getCenter()
 			let marker = new Marker(latLng, {icon: this.icon, draggable: (m.draggable || false), id: m.id})
 			if (m.name) {
-				marker.bindPopup(_escape(m.name)) // escape HTML!
+				marker.bindPopup(m.name)
 			}
 			if (m.onMove) {
 				marker.on('move', m.onMove)

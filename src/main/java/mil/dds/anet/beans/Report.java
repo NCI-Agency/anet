@@ -493,7 +493,7 @@ public class Report extends AbstractAnetBean {
 		for (final ApprovalStep step : steps) {
 			//If there is an Action for this step, grab the last one (date wise)
 			final Optional<ApprovalAction> existing = actions.stream().filter(a ->
-					Objects.equals(DaoUtils.getUuid(step), DaoUtils.getUuid(a.getStep()))
+					Objects.equals(DaoUtils.getUuid(step), a.getStepUuid())
 				).max(new Comparator<ApprovalAction>() {
 					public int compare(ApprovalAction a, ApprovalAction b) {
 						return a.getCreatedAt().compareTo(b.getCreatedAt());

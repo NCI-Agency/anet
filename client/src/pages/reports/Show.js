@@ -11,7 +11,6 @@ import moment from 'moment'
 import utils from 'utils'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import ConfirmDelete from 'components/ConfirmDelete'
 import LinkTo from 'components/LinkTo'
@@ -198,7 +197,6 @@ class BaseReportShow extends Page {
 					{this.renderEmailModal(values, setFieldValue)}
 
 					<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
-					<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 
 					{report.isReleased() &&

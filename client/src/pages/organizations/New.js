@@ -2,7 +2,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import OrganizationForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
 import {Organization, Person} from 'models'
@@ -45,10 +44,7 @@ class OrganizationNew extends Page {
 	render() {
 		const { organization } = this.state
 		return (
-			<div>
-				<Breadcrumbs items={[['New Organization', Organization.pathForNew()]]} />
-				<OrganizationForm initialValues={organization} title='Create a new Organization' />
-			</div>
+			<OrganizationForm initialValues={organization} title='Create a new Organization' />
 		)
 	}
 }
