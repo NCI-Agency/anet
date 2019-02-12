@@ -1,7 +1,6 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import ReportForm from './Form'
@@ -59,7 +58,6 @@ class ReportEdit extends Page {
 		return (
 			<div className="report-edit">
 				<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
-				<Breadcrumbs items={[[`Report #${report.uuid}`, Report.pathForEdit(report)]]} />
 				<ReportForm edit initialValues={report} title={`Report #${report.uuid}`} showSensitiveInfo={!!report.reportSensitiveInformation && !!report.reportSensitiveInformation.text} />
 			</div>
 		)
