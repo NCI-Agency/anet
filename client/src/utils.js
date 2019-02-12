@@ -118,7 +118,7 @@ export default {
 		if (document && typeof document.createElement === 'function') {
 			const tmpDiv = document.createElement("div")
 			tmpDiv.innerHTML = html
-			text = tmpDiv.textContent || tmpDiv.innerText || html
+			text = tmpDiv.textContent || tmpDiv.innerText || ''
 		} else {
 			text = html // no document context, what else can we do?
 		}
