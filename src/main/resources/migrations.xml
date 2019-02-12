@@ -2234,4 +2234,34 @@
 			onDelete="NO ACTION" onUpdate="NO ACTION" />
 	</changeSet>
 
+	<changeSet id="add_subscriptions" author="gjvoosten">
+		<createTable tableName="subscriptions">
+			<column name="uuid" type="${uuid_type}">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="subscriberUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="subscribedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="subscribedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="subscriptions" constraintName="FK_subscriptions_subscriber" baseColumnNames="subscriberUuid"
+			referencedTableName="positions" referencedColumnNames="uuid"
+			onDelete="NO ACTION" onUpdate="NO ACTION" />
+	</changeSet>
+
+	<changeSet id="add-subscriptions-unique-constraints" author="gjvoosten" dbms="mssql,postgresql">
+		<addUniqueConstraint
+			tableName="subscriptions" constraintName="UQ_SubscriptionSubScriberSubscribedObject" columnNames="subscriberUuid, subscribedObjectType, subscribedObjectUuid" />
+	</changeSet>
+
 </databaseChangeLog>

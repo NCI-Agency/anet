@@ -23,6 +23,7 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportPerson;
 import mil.dds.anet.beans.ReportSensitiveInformation;
+import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.Task;
 
@@ -135,6 +136,12 @@ public final class BatchingUtils {
 				return CompletableFuture.supplyAsync(() -> engine.getPositionDao().getPersonPositionHistory(foreignKeys), dispatcherService);
 			}
 		}, dataLoaderOptions));
+		dataLoaderRegistry.register("position.subscriptions", new DataLoader<>(new BatchLoader<String, List<Subscription>>() {
+			@Override
+			public CompletionStage<List<List<Subscription>>> load(List<String> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getSubscriptionDao().getPositionSubscriptions(foreignKeys), dispatcherService);
+			}
+		}, dataLoaderOptions));
 		dataLoaderRegistry.register("reports", new DataLoader<>(new BatchLoader<String, Report>() {
 			@Override
 			public CompletionStage<List<Report>> load(List<String> keys) {
@@ -169,6 +176,12 @@ public final class BatchingUtils {
 			@Override
 			public CompletionStage<List<List<Task>>> load(List<String> foreignKeys) {
 				return CompletableFuture.supplyAsync(() -> engine.getReportDao().getTasks(foreignKeys), dispatcherService);
+			}
+		}, dataLoaderOptions));
+		dataLoaderRegistry.register("subscribedObject.subscriptions", new DataLoader<>(new BatchLoader<String, List<Subscription>>() {
+			@Override
+			public CompletionStage<List<List<Subscription>>> load(List<String> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getSubscriptionDao().getSubscribedObjectSubscriptions(foreignKeys), dispatcherService);
 			}
 		}, dataLoaderOptions));
 		dataLoaderRegistry.register("tags", new DataLoader<>(new BatchLoader<String, Tag>() {

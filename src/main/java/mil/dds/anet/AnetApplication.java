@@ -72,6 +72,7 @@ import mil.dds.anet.resources.TaskResource;
 import mil.dds.anet.resources.PositionResource;
 import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
+import mil.dds.anet.resources.SubscriptionResource;
 import mil.dds.anet.resources.TagResource;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
@@ -233,6 +234,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		final TagResource tagResource = new TagResource(engine);
 		final AuthorizationGroupResource authorizationGroupResource = new AuthorizationGroupResource(engine);
 		final NoteResource noteResource = new NoteResource(engine);
+		final SubscriptionResource subscriptionResource = new SubscriptionResource(engine);
 
 		//Register all of the HTTP Resources
 		environment.jersey().register(loggingResource);
@@ -253,7 +255,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 						positionResource, locationResource,
 						orgResource, taskResource,
 						adminResource, savedSearchResource, tagResource,
-						authorizationGroupResource, noteResource),
+						authorizationGroupResource, noteResource, subscriptionResource),
 						metricRegistry, configuration.isDevelopmentMode()));
 	}
 
