@@ -12,6 +12,7 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
@@ -19,15 +20,14 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterRowMapper(SubscriptionMapper.class)
-public class SubscriptionDao implements IAnetDao<Subscription> {
+public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<Subscription> idBatcher;
 	private final ForeignKeyBatcher<Subscription> positionSubscriptionsBatcher;
 	private final ForeignKeyBatcher<Subscription> subscribedObjectSubscriptionsBatcher;
 
 	public SubscriptionDao(Handle h) {
-		this.dbHandle = h;
+		super(h, "Subscriptions", "subscriptions", "*", null);
 		final String idBatcherSql = "/* batch.getSubscriptionsByUuids */ SELECT * FROM subscriptions WHERE uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Subscription>(h, idBatcherSql, "uuids", new SubscriptionMapper());
 
@@ -69,51 +69,47 @@ public class SubscriptionDao implements IAnetDao<Subscription> {
 	}
 
 	@Override
-	public Subscription insert(Subscription s) {
-		return dbHandle.inTransaction(h -> {
-			DaoUtils.setInsertFields(s);
-			h.createUpdate(
-					"/* insertSubscription */ INSERT INTO subscriptions (uuid, \"subscriberUuid\", \"subscribedObjectType\", \"subscribedObjectUuid\", \"createdAt\", \"updatedAt\") "
-						+ "VALUES (:uuid, :subscriberUuid, :subscribedObjectType, :subscribedObjectUuid, :createdAt, :updatedAt)")
+	public Subscription insertInternal(Subscription s) {
+		dbHandle.createUpdate(
+				"/* insertSubscription */ INSERT INTO subscriptions (uuid, \"subscriberUuid\", \"subscribedObjectType\", \"subscribedObjectUuid\", \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:uuid, :subscriberUuid, :subscribedObjectType, :subscribedObjectUuid, :createdAt, :updatedAt)")
+			.bindBean(s)
+			.bind("createdAt", DaoUtils.asLocalDateTime(s.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(s.getUpdatedAt()))
+			.execute();
+		return s;
+	}
+
+	@Override
+	public int updateInternal(Subscription s) {
+		return dbHandle.createUpdate("/* updateSubscription */ UPDATE subscriptions "
+					+ "SET \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(s)
-				.bind("createdAt", DaoUtils.asLocalDateTime(s.getCreatedAt()))
 				.bind("updatedAt", DaoUtils.asLocalDateTime(s.getUpdatedAt()))
 				.execute();
-			return s;
-		});
 	}
 
-	public int update(Subscription s) {
-		return dbHandle.inTransaction(h -> {
-			DaoUtils.setUpdateFields(s);
-			return h.createUpdate("/* updateSubscription */ UPDATE subscriptions "
-						+ "SET \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-					.bindBean(s)
-					.bind("updatedAt", DaoUtils.asLocalDateTime(s.getUpdatedAt()))
-					.execute();
-		});
-	}
-
-	public int delete(String uuid) {
-		return dbHandle.inTransaction(h -> {
-			return h.createUpdate("/* deleteSubscription */ DELETE FROM subscriptions where uuid = :uuid")
-				.bind("uuid", uuid)
-				.execute();
-		});
+	@Override
+	public int deleteInternal(String uuid) {
+		return dbHandle.createUpdate("/* deleteSubscription */ DELETE FROM subscriptions where uuid = :uuid")
+			.bind("uuid", uuid)
+			.execute();
 	}
 
 	public int updateSubscriptions(String subscribedObjectType, String subscribedObjectUuid) {
-		return dbHandle.inTransaction(h -> {
-			final Instant now = Instant.now();
-			return h.createUpdate("/* updateSubscriptions */ UPDATE subscriptions "
-						+ "SET \"updatedAt\" = :updatedAt"
-						+ " WHERE \"subscribedObjectType\" = :subscribedObjectType"
-						+ " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
-					.bind("updatedAt", DaoUtils.asLocalDateTime(now))
-					.bind("subscribedObjectType", subscribedObjectType)
-					.bind("subscribedObjectUuid", subscribedObjectUuid)
-					.execute();
-		});
+		return AnetObjectEngine.getInstance().executeInTransaction(this::updateSubscriptionsTransactional, subscribedObjectType, subscribedObjectUuid);
+	}
+
+	public int updateSubscriptionsTransactional(String subscribedObjectType, String subscribedObjectUuid) {
+		final Instant now = Instant.now();
+		return dbHandle.createUpdate("/* updateSubscriptions */ UPDATE subscriptions "
+					+ "SET \"updatedAt\" = :updatedAt"
+					+ " WHERE \"subscribedObjectType\" = :subscribedObjectType"
+					+ " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
+				.bind("updatedAt", DaoUtils.asLocalDateTime(now))
+				.bind("subscribedObjectType", subscribedObjectType)
+				.bind("subscribedObjectUuid", subscribedObjectUuid)
+				.execute();
 	}
 
 	public CompletableFuture<List<Subscription>> getSubscriptionsForPosition(@GraphQLRootContext Map<String, Object> context, String subscriberUuid) {

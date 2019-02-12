@@ -33,7 +33,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	private final ForeignKeyBatcher<Organization> personIdBatcher;
 
 	public OrganizationDao(Handle dbHandle) { 
-		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
+		super(dbHandle, "Organizations", tableName, ORGANIZATION_FIELDS, null);
 		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, "uuids", new OrganizationMapper());
 
@@ -102,8 +102,8 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return dbHandle.attach(OrgListQueries.class).getOrgsByShortNames(shortNames);
 	}
 
-	public Organization insert(Organization org) {
-		DaoUtils.setInsertFields(org);
+	@Override
+	public Organization insertInternal(Organization org) {
 		dbHandle.createUpdate(
 				"/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\") "
 				+ "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid)")
@@ -116,10 +116,10 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 			.execute();
 		return org;
 	}
-	
-	public int update(Organization org) {
-		DaoUtils.setUpdateFields(org);
-		int numRows = dbHandle.createUpdate("/* updateOrg */ UPDATE organizations "
+
+	@Override
+	public int updateInternal(Organization org) {
+		return dbHandle.createUpdate("/* updateOrg */ UPDATE organizations "
 				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
 				+ "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid where uuid = :uuid")
 				.bindBean(org)
@@ -128,8 +128,11 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 				.bind("type", DaoUtils.getEnumId(org.getType()))
 				.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
 				.execute();
-			
-		return numRows;
+	}
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
 	}
 
 	public AnetBeanList<Organization> search(OrganizationSearchQuery query) {

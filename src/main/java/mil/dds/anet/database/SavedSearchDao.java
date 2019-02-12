@@ -11,13 +11,12 @@ import mil.dds.anet.beans.search.SavedSearch;
 import mil.dds.anet.database.mappers.SavedSearchMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-public class SavedSearchDao implements IAnetDao<SavedSearch> {
+public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<SavedSearch> idBatcher;
 
 	public SavedSearchDao(Handle h) { 
-		this.dbHandle = h;
+		super(h, "SavedSearches", "savedSearches", "*", null);
 		final String idBatcherSql = "/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<SavedSearch>(h, idBatcherSql, "uuids", new SavedSearchMapper());
 	}
@@ -42,9 +41,9 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 			.map(new SavedSearchMapper())
 			.list();
 	}
-	
-	public SavedSearch insert(SavedSearch obj) {
-		DaoUtils.setInsertFields(obj);
+
+	@Override
+	public SavedSearch insertInternal(SavedSearch obj) {
 		dbHandle.createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
 				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
 				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
@@ -56,8 +55,8 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 		return obj;
 	}
 
-	public int update(SavedSearch obj) {
-		DaoUtils.setUpdateFields(obj);
+	@Override
+	public int updateInternal(SavedSearch obj) {
 		return dbHandle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
 				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
 				+ "WHERE uuid = :uuid")
@@ -66,11 +65,11 @@ public class SavedSearchDao implements IAnetDao<SavedSearch> {
 			.execute();
 	}
 
-	public int deleteSavedSearch(String uuid, Person owner) {
+	@Override
+	public int deleteInternal(String uuid) {
 		return dbHandle.createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
-				+ "WHERE uuid = :uuid AND \"ownerUuid\" = :ownerUuid")
+				+ "WHERE uuid = :uuid")
 			.bind("uuid", uuid)
-			.bind("ownerUuid", owner.getUuid())
 			.execute();
 	}
 	

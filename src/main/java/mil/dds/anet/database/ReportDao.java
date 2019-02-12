@@ -48,7 +48,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class ReportDao implements IAnetDao<Report> {
+public class ReportDao extends AnetBaseDao<Report> {
 
 	private static final String[] fields = { "uuid", "state", "createdAt", "updatedAt", "engagementDate",
 			"locationUuid", "approvalStepUuid", "intent", "exsum", "atmosphere", "cancelledReason",
@@ -58,7 +58,6 @@ public class ReportDao implements IAnetDao<Report> {
 	private static final String tableName = "reports";
 	public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
-	final Handle dbHandle;
 	private final String weekFormat;
 	private final IdBatcher<Report> idBatcher;
 	private final ForeignKeyBatcher<ReportPerson> attendeesBatcher;
@@ -66,8 +65,8 @@ public class ReportDao implements IAnetDao<Report> {
 	private final ForeignKeyBatcher<Task> tasksBatcher;
 
 	public ReportDao(Handle db) {
-		this.dbHandle = db;
-		this.weekFormat = getWeekFormat(DaoUtils.getDbType(db));
+		super(db, "Reports", tableName, REPORT_FIELDS, "reports.\"createdAt\"");
+		this.weekFormat = getWeekFormat(getDbType());
 		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
 				+ "FROM reports "
 				+ "WHERE reports.uuid IN ( <uuids> )";
@@ -111,79 +110,76 @@ public class ReportDao implements IAnetDao<Report> {
 	}
 
 	public AnetBeanList<Report> getAll(int pageNum, int pageSize, Person user) {
-		String sql = DaoUtils.buildPagedGetAllSql(DaoUtils.getDbType(dbHandle),
-				"Reports", "reports", REPORT_FIELDS,
-				"reports.\"createdAt\"");
-		final Query query = dbHandle.createQuery(sql)
-			.bind("limit", pageSize)
-			.bind("offset", pageSize * pageNum);
+		final Query query = getPagedQuery(pageNum, pageSize);
 		return AnetBeanList.getReportList(user, query, pageNum, pageSize, new ReportMapper());
 	}
 
-	public Report insert(Report r) {
-		// Create a report without sensitive information
-		return insert(r, null);
+	public Report insert(Report r, Person user) {
+		DaoUtils.setInsertFields(r);
+		return AnetObjectEngine.getInstance().executeInTransaction(this::insertInternal, r, user);
 	}
 
-	public Report insert(Report r, Person user) {
-		return dbHandle.inTransaction(h -> {
-				DaoUtils.setInsertFields(r);
+	@Override
+	public Report insertInternal(Report r) {
+		// Create a report without sensitive information
+		return insertInternal(r, null);
+	}
 
-				//MSSQL requires explicit CAST when a datetime2 might be NULL.
-				StringBuilder sql = new StringBuilder("/* insertReport */ INSERT INTO reports "
-						+ "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, "
-						+ "text, \"keyOutcomes\", \"nextSteps\", \"authorUuid\", "
-						+ "\"engagementDate\", \"releasedAt\", atmosphere, \"cancelledReason\", "
-						+ "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
-						+ "\"principalOrganizationUuid\") VALUES "
-						+ "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
-						+ ":exsum, :reportText, :keyOutcomes, "
-						+ ":nextSteps, :authorUuid, ");
-				if (DaoUtils.isMsSql(h)) {
-					sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
-				} else {
-					sql.append(":engagementDate, :releasedAt, ");
-				}
-				sql.append(":atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
+	public Report insertInternal(Report r, Person user) {
+		//MSSQL requires explicit CAST when a datetime2 might be NULL.
+		StringBuilder sql = new StringBuilder("/* insertReport */ INSERT INTO reports "
+				+ "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, "
+				+ "text, \"keyOutcomes\", \"nextSteps\", \"authorUuid\", "
+				+ "\"engagementDate\", \"releasedAt\", atmosphere, \"cancelledReason\", "
+				+ "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
+				+ "\"principalOrganizationUuid\") VALUES "
+				+ "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
+				+ ":exsum, :reportText, :keyOutcomes, "
+				+ ":nextSteps, :authorUuid, ");
+		if (DaoUtils.isMsSql(dbHandle)) {
+			sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
+		} else {
+			sql.append(":engagementDate, :releasedAt, ");
+		}
+		sql.append(":atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
 
-				h.createUpdate(sql.toString())
-					.bindBean(r)
-					.bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
-					.bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
-					.bind("engagementDate", DaoUtils.asLocalDateTime(r.getEngagementDate()))
-					.bind("releasedAt", DaoUtils.asLocalDateTime(r.getReleasedAt()))
-					.bind("state", DaoUtils.getEnumId(r.getState()))
-					.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
-					.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
-					.execute();
+		dbHandle.createUpdate(sql.toString())
+			.bindBean(r)
+			.bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
+			.bind("engagementDate", DaoUtils.asLocalDateTime(r.getEngagementDate()))
+			.bind("releasedAt", DaoUtils.asLocalDateTime(r.getReleasedAt()))
+			.bind("state", DaoUtils.getEnumId(r.getState()))
+			.bind("atmosphere", DaoUtils.getEnumId(r.getAtmosphere()))
+			.bind("cancelledReason", DaoUtils.getEnumId(r.getCancelledReason()))
+			.execute();
 
-				// Write sensitive information (if allowed)
-				ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
-				if (rsi != null) {
-					rsi.setText(Utils.sanitizeHtml(rsi.getText()));
-				}
-				rsi = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insert(rsi, user, r);
-				r.setReportSensitiveInformation(rsi);
+		// Write sensitive information (if allowed)
+		ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
+		if (rsi != null) {
+			rsi.setText(Utils.sanitizeHtml(rsi.getText()));
+		}
+		rsi = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insert(rsi, user, r);
+		r.setReportSensitiveInformation(rsi);
 
-				final ReportBatch rb = h.attach(ReportBatch.class);
-				if (r.getAttendees() != null) {
-					//Setify based on attendeeUuid to prevent violations of unique key constraint.
-					Map<String,ReportPerson> attendeeMap = new HashMap<>();
-					r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getUuid(), rp));
-					rb.insertReportAttendees(r.getUuid(), new ArrayList<ReportPerson>(attendeeMap.values()));
-				}
+		final ReportBatch rb = dbHandle.attach(ReportBatch.class);
+		if (r.getAttendees() != null) {
+			//Setify based on attendeeUuid to prevent violations of unique key constraint.
+			Map<String,ReportPerson> attendeeMap = new HashMap<>();
+			r.getAttendees().stream().forEach(rp -> attendeeMap.put(rp.getUuid(), rp));
+			rb.insertReportAttendees(r.getUuid(), new ArrayList<ReportPerson>(attendeeMap.values()));
+		}
 
-				if (r.getAuthorizationGroups() != null) {
-					rb.insertReportAuthorizationGroups(r.getUuid(), r.getAuthorizationGroups());
-				}
-				if (r.getTasks() != null) {
-					rb.insertReportTasks(r.getUuid(), r.getTasks());
-				}
-				if (r.getTags() != null) {
-					rb.insertReportTags(r.getUuid(), r.getTags());
-				}
-				return r;
-		});
+		if (r.getAuthorizationGroups() != null) {
+			rb.insertReportAuthorizationGroups(r.getUuid(), r.getAuthorizationGroups());
+		}
+		if (r.getTasks() != null) {
+			rb.insertReportTasks(r.getUuid(), r.getTasks());
+		}
+		if (r.getTags() != null) {
+			rb.insertReportTags(r.getUuid(), r.getTags());
+		}
+		return r;
 	}
 
 	public interface ReportBatch {
@@ -236,19 +232,23 @@ public class ReportDao implements IAnetDao<Report> {
 		return result;
 	}
 
-	/** This should always be wrapped in a transaction! But actually it's never used at all. */
-	public int update(Report r) {
-		// Update the report without sensitive information
-		return update(r, null);
+	public int update(Report r, Person user) {
+		DaoUtils.setUpdateFields(r);
+		return AnetObjectEngine.getInstance().executeInTransaction(this::updateInternal, r, user);
 	}
 
-	/** NOTE: this should always be wrapped in a transaction! (If JDBI were able to handle nested calls to inTransaction, we would have
-	 * one inside this method, but it isn't.)
+	@Override
+	public int updateInternal(Report r) {
+		// Update the report without sensitive information
+		return updateInternal(r, null);
+	}
+
+	/**
 	 * @param r the report to update, in its updated state
 	 * @param user the user attempting the update, for authorization purposes
 	 * @return the number of rows updated by the final update call (should be 1 in all cases).
 	 */
-	public int update(Report r, Person user) {
+	public int updateInternal(Report r, Person user) {
 		// Write sensitive information (if allowed)
 		ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
 		if (rsi != null) {
@@ -402,33 +402,31 @@ public class ReportDao implements IAnetDao<Report> {
 	 * Deletes a given report from the database. 
 	 * Ensures consistency by removing all references to a report before deleting a report. 
 	 */
-	public int deleteReport(final Report report) {
-		return dbHandle.inTransaction(h -> {
-				// Delete tags
-				h.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", report.getUuid());
+	@Override
+	public int deleteInternal(String reportUuid) {
+		// Delete tags
+		dbHandle.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", reportUuid);
 
-				//Delete tasks
-				h.execute("/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?", report.getUuid());
-				
-				//Delete attendees
-				h.execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?", report.getUuid());
-				
-				//Delete comments
-				h.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", report.getUuid());
-				
-				//Delete \"approvalActions\"
-				h.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportUuid\" = ?", report.getUuid());
-
-				//Delete relation to authorization groups
-				h.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", report.getUuid());
-
-				//Delete report
-				// GraphQL mutations *have* to return something, so we return the number of deleted report rows
-				return h.createUpdate("/* deleteReport.report */ DELETE FROM reports where uuid = :reportUuid")
-					.bind("reportUuid", report.getUuid())
-					.execute();
-		});
+		//Delete tasks
+		dbHandle.execute("/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?", reportUuid);
 		
+		//Delete attendees
+		dbHandle.execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?", reportUuid);
+		
+		//Delete comments
+		dbHandle.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", reportUuid);
+		
+		//Delete \"approvalActions\"
+		dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportUuid\" = ?", reportUuid);
+
+		//Delete relation to authorization groups
+		dbHandle.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", reportUuid);
+
+		//Delete report
+		// GraphQL mutations *have* to return something, so we return the number of deleted report rows
+		return dbHandle.createUpdate("/* deleteReport.report */ DELETE FROM reports where uuid = :reportUuid")
+			.bind("reportUuid", reportUuid)
+			.execute();
 	}
 
 	private Instant getRollupEngagmentStart(Instant start) {
@@ -627,7 +625,7 @@ public class ReportDao implements IAnetDao<Report> {
 		sql.append("FROM reports WHERE ");
 
 		// NOTE: more date-comparison work here that might be worth abstracting, but might not
-		if (DaoUtils.getDbType(dbHandle) != DaoUtils.DbType.SQLITE) {
+		if (getDbType() != DaoUtils.DbType.SQLITE) {
 			sql.append("\"releasedAt\" >= :startDate and \"releasedAt\" < :endDate "
 					+ "AND \"engagementDate\" > :engagementDateStart ");
 		} else { 

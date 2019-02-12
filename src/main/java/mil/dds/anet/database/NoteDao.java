@@ -20,15 +20,14 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterRowMapper(NoteMapper.class)
-public class NoteDao implements IAnetDao<Note> {
+public class NoteDao extends AnetBaseDao<Note> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<Note> idBatcher;
 	private final ForeignKeyBatcher<Note> notesBatcher;
 	private final ForeignKeyBatcher<NoteRelatedObject> noteRelatedObjectsBatcher;
 
 	public NoteDao(Handle h) {
-		this.dbHandle = h;
+		super(h, "Notes", "notes", "*", null);
 		final String idBatcherSql = "/* batch.getNotesByUuids */ SELECT * FROM notes WHERE uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Note>(h, idBatcherSql, "uuids", new NoteMapper());
 
@@ -70,42 +69,36 @@ public class NoteDao implements IAnetDao<Note> {
 	}
 
 	@Override
-	public Note insert(Note n) {
-		return dbHandle.inTransaction(h -> {
-			DaoUtils.setInsertFields(n);
-			h.createUpdate(
-					"/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", text, \"createdAt\", \"updatedAt\") "
-						+ "VALUES (:uuid, :authorUuid, :text, :createdAt, :updatedAt)")
+	public Note insertInternal(Note n) {
+		dbHandle.createUpdate(
+				"/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", text, \"createdAt\", \"updatedAt\") "
+					+ "VALUES (:uuid, :authorUuid, :text, :createdAt, :updatedAt)")
+			.bindBean(n)
+			.bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
+			.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
+			.bind("authorUuid", n.getAuthorUuid())
+			.execute();
+		insertNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
+		return n;
+	}
+
+	@Override
+	public int updateInternal(Note n) {
+		deleteNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n)); // seems the easiest thing to do
+		insertNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
+		return dbHandle.createUpdate("/* updateNote */ UPDATE notes "
+					+ "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(n)
-				.bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
 				.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
-				.bind("authorUuid", n.getAuthorUuid())
 				.execute();
-			insertNoteRelatedObjects(h, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
-			return n;
-		});
 	}
 
-	public int update(Note n) {
-		return dbHandle.inTransaction(h -> {
-			DaoUtils.setUpdateFields(n);
-			deleteNoteRelatedObjects(h, DaoUtils.getUuid(n)); // seems the easiest thing to do
-			insertNoteRelatedObjects(h, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
-			return h.createUpdate("/* updateNote */ UPDATE notes "
-						+ "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-					.bindBean(n)
-					.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
-					.execute();
-		});
-	}
-
-	public int delete(String uuid) {
-		return dbHandle.inTransaction(h -> {
-			deleteNoteRelatedObjects(h, uuid);
-			return h.createUpdate("/* deleteNote */ DELETE FROM notes where uuid = :uuid")
-				.bind("uuid", uuid)
-				.execute();
-		});
+	@Override
+	public int deleteInternal(String uuid) {
+		deleteNoteRelatedObjects(dbHandle, uuid);
+		return dbHandle.createUpdate("/* deleteNote */ DELETE FROM notes where uuid = :uuid")
+			.bind("uuid", uuid)
+			.execute();
 	}
 
 	public CompletableFuture<List<Note>> getNotesForRelatedObject(@GraphQLRootContext Map<String, Object> context, String relatedObjectUuid) {

@@ -18,13 +18,12 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 @RegisterRowMapper(TaskMapper.class)
-public class TaskDao implements IAnetDao<Task> {
+public class TaskDao extends AnetBaseDao<Task> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<Task> idBatcher;
 
 	public TaskDao(Handle h) { 
-		this.dbHandle = h; 
+		super(h, "Tasks", "tasks", "*", null);
 		final String idBatcherSql = "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, "uuids", new TaskMapper());
 	}
@@ -53,8 +52,7 @@ public class TaskDao implements IAnetDao<Task> {
 	}
 
 	@Override
-	public Task insert(Task p) {
-		DaoUtils.setInsertFields(p);
+	public Task insertInternal(Task p) {
 		dbHandle.createUpdate("/* insertTask */ INSERT INTO tasks "
 				+ "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"organizationUuid\", \"createdAt\", \"updatedAt\", status, "
 				+ "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\") "
@@ -69,9 +67,9 @@ public class TaskDao implements IAnetDao<Task> {
 			.execute();
 		return p;
 	}
-	
-	public int update(Task p) { 
-		DaoUtils.setUpdateFields(p);
+
+	@Override
+	public int updateInternal(Task p) {
 		return dbHandle.createUpdate("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
 				+ "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, \"updatedAt\" = :updatedAt, "
 				+ "\"organizationUuid\" = :responsibleOrgUuid, status = :status, "
@@ -85,7 +83,12 @@ public class TaskDao implements IAnetDao<Task> {
 			.bind("status", DaoUtils.getEnumId(p.getStatus()))
 			.execute();
 	}
-	
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
+	}
+
 	public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {
 		return dbHandle.createUpdate("/* setReponsibleOrgForTask */ UPDATE tasks "
 				+ "SET \"organizationUuid\" = :orgUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
