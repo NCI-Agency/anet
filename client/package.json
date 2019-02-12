@@ -90,7 +90,7 @@
     "object-assign": "^4.1.1",
     "pluralize": "^7.0.0",
     "promise": "^8.0.2",
-    "prop-types": "^15.6.2",
+    "prop-types": "^15.7.1",
     "react": "^16.7.0",
     "react-autosuggest-ie11-compatible": "https://github.com/VassilIordanov/react-autosuggest-ie11-compatible/releases/download/v9.4.2/react-autosuggest-ie11-compatible.tar.gz",
     "react-bootstrap": "^0.32.4",
