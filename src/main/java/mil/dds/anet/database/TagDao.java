@@ -15,13 +15,12 @@ import mil.dds.anet.database.mappers.TagMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 @RegisterRowMapper(TagMapper.class)
-public class TagDao implements IAnetDao<Tag> {
+public class TagDao extends AnetBaseDao<Tag> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<Tag> idBatcher;
 
 	public TagDao(Handle h) {
-		this.dbHandle = h;
+		super(h, "Tags", "tags", "*", null);
 		final String idBatcherSql = "/* batch.getTagsByUuids */ SELECT * from tags where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Tag>(h, idBatcherSql, "uuids", new TagMapper());
 	}
@@ -53,8 +52,7 @@ public class TagDao implements IAnetDao<Tag> {
 	}
 
 	@Override
-	public Tag insert(Tag t) {
-		DaoUtils.setInsertFields(t);
+	public Tag insertInternal(Tag t) {
 		dbHandle.createUpdate(
 				"/* tagInsert */ INSERT INTO tags (uuid, name, description, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt)")
@@ -65,13 +63,18 @@ public class TagDao implements IAnetDao<Tag> {
 		return t;
 	}
 
-	public int update(Tag t) {
-		DaoUtils.setUpdateFields(t);
+	@Override
+	public int updateInternal(Tag t) {
 		return dbHandle.createUpdate("/* updateTag */ UPDATE tags "
 					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(t)
 				.bind("updatedAt", DaoUtils.asLocalDateTime(t.getUpdatedAt()))
 				.execute();
+	}
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
 	}
 
 	public AnetBeanList<Tag> search(TagSearchQuery query) {

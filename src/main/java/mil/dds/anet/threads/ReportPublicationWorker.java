@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,16 +59,12 @@ public class ReportPublicationWorker implements Runnable {
 				if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(now)) {
 					//Publish the report
 					try {
-						final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-						dbHandle.inTransaction(h -> {
-							final int numRows = dao.publish(r, null);
-							if (numRows == 0) {
-								logger.error("Couldn't process report publication for report {}", r.getUuid());
-							} else {
-								AnetAuditLogger.log("report {} automatically published by the ReportPublicationWorker", r.getUuid());
-							}
-							return numRows;
-						});
+						final int numRows = AnetObjectEngine.getInstance().executeInTransaction(dao::publish, r, null);
+						if (numRows == 0) {
+							logger.error("Couldn't process report publication for report {}", r.getUuid());
+						} else {
+							AnetAuditLogger.log("report {} automatically published by the ReportPublicationWorker", r.getUuid());
+						}
 					} catch (Exception e) {
 						logger.error("Exception when publishing report", e);
 					}

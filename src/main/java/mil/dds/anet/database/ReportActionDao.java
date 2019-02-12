@@ -12,20 +12,19 @@ import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class ReportActionDao implements IAnetDao<ReportAction> {
+public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
-	Handle dbHandle;
 	private final ForeignKeyBatcher<ReportAction> reportIdBatcher;
 
 	public ReportActionDao(Handle db) { 
-		this.dbHandle = db;
+		super(db, "ReportActions", "reportActions", "*", null);
 		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
 				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 		this.reportIdBatcher = new ForeignKeyBatcher<ReportAction>(db, reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
 	}
-	
-	public ReportAction insert(ReportAction action) {
-		DaoUtils.setInsertFields(action);
+
+	@Override
+	public ReportAction insertInternal(ReportAction action) {
 		dbHandle.createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
 				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
@@ -77,7 +76,12 @@ public class ReportActionDao implements IAnetDao<ReportAction> {
 	}
 
 	@Override
-	public int update(ReportAction obj) {
+	public int updateInternal(ReportAction obj) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int deleteInternal(String uuid) {
 		throw new UnsupportedOperationException();
 	}
 

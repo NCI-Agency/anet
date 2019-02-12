@@ -16,18 +16,16 @@ import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ApprovalStepMapper;
 import mil.dds.anet.database.mappers.PositionMapper;
-import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
+public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<ApprovalStep> idBatcher;
 	private final ForeignKeyBatcher<Position> approversBatcher;
 	private final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher;
 
 	public ApprovalStepDao(Handle h) {
-		this.dbHandle = h;
+		super(h, "ApprovalSteps", "approvalSteps", "*", null);
 		final String idBatcherSql = "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<ApprovalStep>(dbHandle, idBatcherSql, "uuids", new ApprovalStepMapper());
 
@@ -69,8 +67,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	}
 
 	@Override
-	public ApprovalStep insert(ApprovalStep as) {
-		DaoUtils.setInsertFields(as);
+	public ApprovalStep insertInternal(ApprovalStep as) {
 		dbHandle.createUpdate(
 				"/* insertApprovalStep */ INSERT into \"approvalSteps\" (uuid, name, \"nextStepUuid\", \"advisorOrganizationUuid\") "
 				+ "VALUES (:uuid, :name, :nextStepUuid, :advisorOrganizationUuid)")
@@ -112,13 +109,18 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	 * Updates the name, nextStepUuid, and advisorOrgUuid on this Approval Step
 	 * DOES NOT update the list of members for this step. 
 	 */
-	public int update(ApprovalStep as) {
-		DaoUtils.setUpdateFields(as);
+	@Override
+	public int updateInternal(ApprovalStep as) {
 		return dbHandle.createUpdate("/* updateApprovalStep */ UPDATE \"approvalSteps\" SET name = :name, "
 				+ "\"nextStepUuid\" = :nextStepUuid, \"advisorOrganizationUuid\" = :advisorOrganizationUuid "
 				+ "WHERE uuid = :uuid")
 			.bindBean(as)
 			.execute();
+	}
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
 	}
 
 	/**

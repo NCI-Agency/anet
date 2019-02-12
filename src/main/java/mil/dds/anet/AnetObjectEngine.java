@@ -189,13 +189,23 @@ public class AnetObjectEngine {
 	}
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
-		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(h -> processor.apply(input));
+		if (dbHandle.isInTransaction()) {
+			logger.debug("Already in transaction for {}", processor);
+			return processor.apply(input);
+		} else {
+			logger.debug("Wrapping a transaction around {}", processor);
+			return getDbHandle().inTransaction(h -> processor.apply(input));
+		}
 	}
 
 	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
-		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
+		if (dbHandle.isInTransaction()) {
+			logger.debug("Already in transaction for {}", processor);
+			return processor.apply(arg1, arg2);
+		} else {
+			logger.debug("Wrapping a transaction around {}", processor);
+			return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
+		}
 	}
 
 	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, String aoUuid) {

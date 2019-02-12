@@ -16,13 +16,12 @@ import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 @RegisterRowMapper(LocationMapper.class)
-public class LocationDao implements IAnetDao<Location> {
+public class LocationDao extends AnetBaseDao<Location> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<Location> idBatcher;
 
 	public LocationDao(Handle h) { 
-		this.dbHandle = h;
+		super(h, "Locations", "locations", "*", null);
 		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, "uuids", new LocationMapper());
 	}
@@ -54,8 +53,7 @@ public class LocationDao implements IAnetDao<Location> {
 	}
 
 	@Override
-	public Location insert(Location l) {
-		DaoUtils.setInsertFields(l);
+	public Location insertInternal(Location l) {
 		dbHandle.createUpdate(
 				"/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, :updatedAt)")
@@ -66,9 +64,9 @@ public class LocationDao implements IAnetDao<Location> {
 			.execute();
 		return l;
 	}
-	
-	public int update(Location l) {
-		DaoUtils.setUpdateFields(l);
+
+	@Override
+	public int updateInternal(Location l) {
 		return dbHandle.createUpdate("/* updateLocation */ UPDATE locations "
 					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(l)
@@ -76,7 +74,12 @@ public class LocationDao implements IAnetDao<Location> {
 				.bind("status", DaoUtils.getEnumId(l.getStatus()))
 				.execute();
 	}
-	
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
+	}
+
 	public List<Location> getRecentLocations(Person author, int maxResults) {
 		String sql;
 		if (DaoUtils.isMsSql(dbHandle)) {
