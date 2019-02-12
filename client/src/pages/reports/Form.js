@@ -184,15 +184,17 @@ class BaseReportForm extends Component {
 				setFieldValue,
 				setFieldTouched,
 				values,
+				touched,
 				submitForm,
 				resetForm
 			}) => {
 				// need up-to-date copies of these in the autosave handler
 				this.autoSaveSettings.dirty = dirty
 				this.autoSaveSettings.values = values
+				this.autoSaveSettings.touched = touched
 				if (!this.autoSaveSettings.timeoutId) {
 					// Schedule the auto-save timer
-					const autosaveHandler = () => this.autoSave({setFieldValue, resetForm})
+					const autosaveHandler = () => this.autoSave({setFieldValue, setFieldTouched, resetForm})
 					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
 				}
 				//Only the author can delete a report, and only in DRAFT.
@@ -523,7 +525,12 @@ class BaseReportForm extends Component {
 					Object.assign(newValues, response[operation])
 					// After successful autosave, reset the form with the new values in order to make sure the dirty
 					// prop is also reset (otherwise we would get a blocking navigation warning)
+					const touched = _cloneDeep(this.autoSaveSettings.touched) // save previous touched
 					form.resetForm(newValues)
+					Object.entries(touched).forEach(([field, value]) =>
+						// re-set touched so we keep messages
+						form.setFieldTouched(field, value)
+					)
 					this.autoSaveSettings.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
 					this.setState({autoSavedAt: moment()})
 					toast.success('Your report has been automatically saved')
