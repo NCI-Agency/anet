@@ -236,7 +236,7 @@ public class AnetObjectEngine {
 
 	public boolean canUserRejectStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
 		final Person p = personDao.getByUuid(userUuid);
-		//Admin users may approve any step
+		//Admin users may reject any step
 		if (AuthUtils.isAdmin(p)) {
 			return true;
 		}
