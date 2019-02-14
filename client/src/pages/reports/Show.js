@@ -64,7 +64,7 @@ class BaseReportShow extends Page {
 				uuid, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
-				state
+				state, isSubscribed
 
 				location { uuid, name }
 				author {
@@ -250,7 +250,11 @@ class BaseReportShow extends Page {
 					}
 
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={`Report #${report.uuid}`} action={action} />
+						<Fieldset title={
+							<React.Fragment>
+								{this.getSubscriptionIcon(report.isSubscribed, this.toggleSubscription)} Report #{report.uuid}
+							</React.Fragment>
+						} action={action} />
 						<Fieldset className="show-report-overview">
 							<Field
 								name="intent"
@@ -757,6 +761,14 @@ class BaseReportShow extends Page {
 				</ul>
 			</Alert>
 		)
+	}
+
+	toggleSubscription = () => {
+		const { report } = this.state
+		return this.toggleSubscriptionCommon('reports', report.uuid, report.isSubscribed).then(data => {
+			report.isSubscribed = !report.isSubscribed
+			this.setState(report)
+		})
 	}
 }
 

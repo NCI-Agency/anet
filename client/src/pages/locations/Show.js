@@ -59,7 +59,7 @@ class BaseLocationShow extends Page {
 
 		const locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
-				uuid, name, lat, lng, status
+				uuid, name, lat, lng, status, isSubscribed
 				${GRAPHQL_NOTES_FIELDS}
 			}
 		`)
@@ -107,7 +107,11 @@ class BaseLocationShow extends Page {
 					<RelatedObjectNotes notes={location.notes} relatedObject={location.uuid && {relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={`Location ${location.name}`} action={action} />
+						<Fieldset title={
+							<React.Fragment>
+								{this.getSubscriptionIcon(location.isSubscribed, this.toggleSubscription)} Location {location.name}
+							</React.Fragment>
+						} action={action} />
 						<Fieldset>
 							<Field
 								name="name"
@@ -149,6 +153,14 @@ class BaseLocationShow extends Page {
 			GQL.run([reportQueryPart]).then(data =>
 				this.setState({reports: data.reports})
 			)
+		})
+	}
+
+	toggleSubscription = () => {
+		const { location } = this.state
+		return this.toggleSubscriptionCommon('locations', location.uuid, location.isSubscribed).then(data => {
+			location.isSubscribed = !location.isSubscribed
+			this.setState(location)
 		})
 	}
 }

@@ -108,7 +108,7 @@ class BaseOrganizationShow extends Page {
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
 			organization(uuid:"${props.match.params.uuid}") {
-				uuid, shortName, longName, status, identificationCode, type
+				uuid, shortName, longName, status, isSubscribed, identificationCode, type
 				parentOrg { uuid, shortName, longName, identificationCode }
 				childrenOrgs { uuid, shortName, longName, identificationCode },
 				positions {
@@ -223,7 +223,11 @@ class BaseOrganizationShow extends Page {
 					<RelatedObjectNotes notes={organization.notes} relatedObject={organization.uuid && {relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={`Organization ${organization.shortName}`} action={action} />
+						<Fieldset title={
+							<React.Fragment>
+								{this.getSubscriptionIcon(organization.isSubscribed, this.toggleSubscription)} Organization {organization.shortName}
+							</React.Fragment>
+						} action={action} />
 						<Fieldset id="info">
 							<Field
 								name="status"
@@ -338,6 +342,14 @@ class BaseOrganizationShow extends Page {
 			GQL.run([taskQueryPart]).then(data =>
 				this.setState({tasks: data.tasks})
 			)
+		})
+	}
+
+	toggleSubscription = () => {
+		const { organization } = this.state
+		return this.toggleSubscriptionCommon('organizations', organization.uuid, organization.isSubscribed).then(data => {
+			organization.isSubscribed = !organization.isSubscribed
+			this.setState(organization)
 		})
 	}
 }

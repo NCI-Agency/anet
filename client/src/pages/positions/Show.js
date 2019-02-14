@@ -55,7 +55,7 @@ class BasePositionShow extends Page {
 	fetchData(props) {
 		return API.query(/* GraphQL */`
 			position(uuid:"${props.match.params.uuid}") {
-				uuid, name, type, status, code,
+				uuid, name, type, status, isSubscribed, code,
 				organization { uuid, shortName, longName, identificationCode },
 				person { uuid, name, rank, role },
 				associatedPositions {
@@ -112,7 +112,11 @@ class BasePositionShow extends Page {
 					<RelatedObjectNotes notes={position.notes} relatedObject={position.uuid && {relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={`Position ${position.name}`} action={action} />
+						<Fieldset title={
+							<React.Fragment>
+								{this.getSubscriptionIcon(position.isSubscribed, this.toggleSubscription)} Position {position.name}
+							</React.Fragment>
+						} action={action} />
 						<Fieldset>
 							<Field
 								name="name"
@@ -306,6 +310,14 @@ class BasePositionShow extends Page {
 				this.setState({success: null, error: error})
 				jumpToTop()
 			})
+	}
+
+	toggleSubscription = () => {
+		const { position } = this.state
+		return this.toggleSubscriptionCommon('positions', position.uuid, position.isSubscribed).then(data => {
+			position.isSubscribed = !position.isSubscribed
+			this.setState(position)
+		})
 	}
 }
 

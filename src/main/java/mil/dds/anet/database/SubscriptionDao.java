@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.Handle;
+import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.slf4j.Logger;
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
@@ -100,8 +103,22 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
 	@Override
 	public int deleteInternal(String uuid) {
-		return dbHandle.createUpdate("/* deleteSubscription */ DELETE FROM subscriptions where uuid = :uuid")
+		return dbHandle.createUpdate("/* deleteSubscription */ DELETE FROM subscriptions WHERE uuid = :uuid")
 			.bind("uuid", uuid)
+			.execute();
+	}
+
+	public int deleteObjectSubscription(Person user, String uuid) {
+		return AnetObjectEngine.getInstance().executeInTransaction(this::deleteObjectSubscriptionInternal, user, uuid);
+	}
+
+	private int deleteObjectSubscriptionInternal(Person user, String subscribedObjectUuid) {
+		final Position position = user.loadPosition();
+		return dbHandle.createUpdate("/* deleteObjectSubscription */ DELETE FROM subscriptions"
+				+ " WHERE subscriberUuid = :subscriberUuid"
+				+ " AND subscribedObjectUuid = :subscribedObjectUuid")
+			.bind("subscriberUuid", DaoUtils.getUuid(position))
+			.bind("subscribedObjectUuid", subscribedObjectUuid)
 			.execute();
 	}
 
@@ -154,6 +171,23 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
 	public List<List<Subscription>> getSubscribedObjectSubscriptions(List<String> foreignKeys) {
 		return subscribedObjectSubscriptionsBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	public boolean isSubscribedObject(Map<String, Object> context, String subscribedObjectUuid) {
+		final Person user = DaoUtils.getUserFromContext(context);
+		final Position position = user.loadPosition();
+		final String sql = "/* isSubscribedObject */ SELECT COUNT(*) AS count"
+				+ " FROM subscriptions"
+				+ " WHERE subscriberUuid = :subscriberUuid"
+				+ " AND subscribedObjectUuid = :subscribedObjectUuid";
+		final List<Map<String, Object>> rs = dbHandle.createQuery(sql)
+			.bind("subscriberUuid", DaoUtils.getUuid(position))
+			.bind("subscribedObjectUuid", subscribedObjectUuid)
+			.map(new MapMapper(false))
+			.list();
+		final Map<String,Object> result = rs.get(0);
+		final int count = ((Number) result.get("count")).intValue();
+		return (count > 0);
 	}
 
 }

@@ -19,6 +19,7 @@ public abstract class AbstractAnetBean {
 	protected Instant createdAt;
 	protected Instant updatedAt;
 	private List<Note> notes;
+	private Boolean isSubscribed;
 
 	public AbstractAnetBean() { 
 		uuid = null;
@@ -64,6 +65,14 @@ public abstract class AbstractAnetBean {
 
 	public void setNotes(List<Note> notes) {
 		this.notes = notes;
+	}
+
+	@GraphQLQuery(name="isSubscribed")
+	public synchronized Boolean isSubscribed(@GraphQLRootContext Map<String, Object> context) {
+		if (this.isSubscribed == null) {
+			this.isSubscribed = AnetObjectEngine.getInstance().getSubscriptionDao().isSubscribedObject(context, uuid);
+		}
+		return isSubscribed;
 	}
 
 	/*Determines if two beans are "uuid" equal.

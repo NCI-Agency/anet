@@ -65,6 +65,18 @@ public class SubscriptionResource {
 		return numRows;
 	}
 
+	@GraphQLMutation(name="deleteObjectSubscription")
+	public Integer deleteObjectSubscription(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String subscribedObjectUuid) {
+		final Person user = DaoUtils.getUserFromContext(context);
+		final int numRows = dao.deleteObjectSubscription(user, subscribedObjectUuid);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process subscription delete", Status.NOT_FOUND);
+		}
+		AnetAuditLogger.log("Subscription to {} deleted by {}", subscribedObjectUuid, user);
+		// GraphQL mutations *have* to return something, so we return the number of deleted rows
+		return numRows;
+	}
+
 	@GraphQLQuery(name="mySubscriptions")
 	public CompletableFuture<List<Subscription>> getMySubscriptions(@GraphQLRootContext Map<String, Object> context) {
 		final Person user = DaoUtils.getUserFromContext(context);

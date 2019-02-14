@@ -88,7 +88,7 @@ class BasePersonShow extends Page {
 		let personPart = new GQL.Part(/* GraphQL */`
 			person(uuid:"${props.match.params.uuid}") {
 				uuid,
-				name, rank, role, status, emailAddress, phoneNumber, domainUsername,
+				name, rank, role, status, isSubscribed, emailAddress, phoneNumber, domainUsername,
 				biography, country, gender, endOfTourDate,
 				position {
 					uuid,
@@ -167,7 +167,11 @@ class BasePersonShow extends Page {
 					<RelatedObjectNotes notes={person.notes} relatedObject={person.uuid && {relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
 					<Messages error={this.state.error} success={this.state.success} />
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={`${person.rank} ${person.name}`} action={action} />
+						<Fieldset title={
+							<React.Fragment>
+								{this.getSubscriptionIcon(person.isSubscribed, this.toggleSubscription)} {person.rank} {person.name}
+							</React.Fragment>
+						} action={action} />
 						<Fieldset>
 							<Field
 								name="rank"
@@ -400,6 +404,13 @@ class BasePersonShow extends Page {
 		})
 	}
 
+	toggleSubscription = () => {
+		const { person } = this.state
+		return this.toggleSubscriptionCommon('people', person.uuid, person.isSubscribed).then(data => {
+			person.isSubscribed = !person.isSubscribed
+			this.setState(person)
+		})
+	}
 }
 
 const PersonShow = (props) => (

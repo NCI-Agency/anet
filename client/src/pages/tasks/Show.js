@@ -66,7 +66,7 @@ class BaseTaskShow extends Page {
 
 		const taskQuery = new GQL.Part(/* GraphQL */`
 			task(uuid:"${props.match.params.uuid}") {
-				uuid, shortName, longName, status,
+				uuid, shortName, longName, status, isSubscribed,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
 				responsibleOrg { uuid, shortName, longName, identificationCode },
@@ -104,7 +104,11 @@ class BaseTaskShow extends Page {
 					<RelatedObjectNotes notes={task.notes} relatedObject={task.uuid && {relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
-						<Fieldset title={`${Settings.fields.task.shortLabel} ${task.shortName}`} action={action} />
+						<Fieldset title={
+							<React.Fragment>
+								{this.getSubscriptionIcon(task.isSubscribed, this.toggleSubscription)} {Settings.fields.task.shortLabel} {task.shortName}
+							</React.Fragment>
+						} action={action} />
 						<Fieldset>
 							<Field
 								name="shortName"
@@ -205,6 +209,14 @@ class BaseTaskShow extends Page {
 			GQL.run([reportQueryPart]).then(data =>
 				this.setState({reports: data.reports})
 			)
+		})
+	}
+
+	toggleSubscription = () => {
+		const { task } = this.state
+		return this.toggleSubscriptionCommon('tasks', task.uuid, task.isSubscribed).then(data => {
+			task.isSubscribed = !task.isSubscribed
+			this.setState(task)
 		})
 	}
 }
