@@ -11,7 +11,6 @@ import moment from 'moment'
 import utils from 'utils'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import ConfirmDelete from 'components/ConfirmDelete'
 import LinkTo from 'components/LinkTo'
@@ -200,7 +199,6 @@ class BaseReportShow extends Page {
 					{this.renderEmailModal(values, setFieldValue)}
 
 					<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
-					<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 
 					{report.isReleased() &&
@@ -726,7 +724,7 @@ class BaseReportShow extends Page {
 	}
 
 	renderPublishButton = (disabled, cancelHandler, size, id) => {
-		return this.renderValidationButton(false, disabled, "publishing", "Publish report?", "Publish report", "Publish anyway", this.publishReport, "Cancel publish", cancelHandler, size, id)
+		return this.renderValidationButton(false, disabled, "publishing", "Publish report?", "Publish", "Publish anyway", this.publishReport, "Cancel publish", cancelHandler, size, id)
 	}
 
 	renderValidationButton = (warnApproveOwnReport, disabled, submitType, title, label, confirmText, confirmHandler, cancelText, cancelHandler, size, id, className) => {

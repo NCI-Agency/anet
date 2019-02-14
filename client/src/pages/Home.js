@@ -10,7 +10,6 @@ import GQL from 'graphqlapi'
 
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
-import Breadcrumbs from 'components/Breadcrumbs'
 import SavedSearchTable from 'components/SavedSearchTable'
 import searchFilters from 'components/SearchFilters'
 
@@ -199,7 +198,6 @@ class BaseHome extends Page {
 					/>
 				</div>
 
-				<Breadcrumbs />
 				{!currentUser.hasAssignedPosition() &&
 					<div className="alert alert-warning" style={alertStyle}>
 						You are not assigned to a {Settings.fields.advisor.position.name} position.<br/>

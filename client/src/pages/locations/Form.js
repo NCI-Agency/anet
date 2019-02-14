@@ -16,6 +16,7 @@ import {Location} from 'models'
 import { withRouter } from 'react-router-dom'
 import NavigationWarning from 'components/NavigationWarning'
 import { jumpToTop } from 'components/Page'
+import _escape from 'lodash/escape'
 
 class LocationForm extends Component {
 	static propTypes = {
@@ -74,7 +75,7 @@ class LocationForm extends Component {
 			}) => {
 				const marker = {
 					id: values.uuid || 0,
-					name: values.name || '',
+					name: _escape(values.name) || '', // escape HTML in location name!
 					draggable: true,
 					onMove: (event) => this.onMarkerMove(event, setFieldValue)
 				}
