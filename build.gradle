@@ -11,14 +11,23 @@ apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport
 
 sourceCompatibility = 1.8
 
-// Defaults for variables
+// Defaults for development variables
 run.environment("DB_DRIVER", "sqlserver")
 run.environment("ANET_DB_SERVER", "localhost")
-run.environment("ANET_DB_NAME", "testAnet")
+run.environment("ANET_DB_NAME", "devAnet")
 run.environment("ANET_DB_USERNAME", "anetUser")
-run.environment("ANET_DB_PASSWORD", "Test-P@ssw0rd")
+run.environment("ANET_DB_PASSWORD", "Dev-P@ssw0rd")
 run.environment("ANET_SA_PASSWORD", "SA-P@ssw0rd")
-run.environment("ANET_DB_PORT", "1433")
+run.environment("ANET_DB_PORT", "1401")
+
+// Defaults for test variables
+test.environment("DB_DRIVER", "sqlserver")
+test.environment("ANET_DB_SERVER", "localhost")
+test.environment("ANET_DB_NAME", "testAnet")
+test.environment("ANET_DB_USERNAME", "anetTestUser")
+test.environment("ANET_DB_PASSWORD", "Test-P@ssw0rd")
+test.environment("ANET_SA_PASSWORD", "SA-P@ssw0rd")
+test.environment("ANET_DB_PORT", "1402")
 
 // If defined, load alternatives for variables
 if (file('localSettings.gradle').exists()) {
@@ -102,12 +111,20 @@ String anetConfig = "anet.yml"
 
 applicationDefaultJvmArgs = ["-Djava.library.path=MY_APP_HOME/lib"]
 
-// Set up DB parameters, with sensible defaults:
+// Set up developer DB parameters, with sensible defaults:
 String dbDriver = run.environment['DB_DRIVER'] ?: 'sqlite'
 String dbLoc = run.environment['ANET_DB_SERVER'] ?: 'localhost'
 String dbName = run.environment['ANET_DB_NAME'] ?: 'anet'
+
+// Set up test DB parameters, with sensible defaults:
+String dbTestDriver = test.environment['DB_DRIVER'] ?: 'sqlite'
+String dbTestLoc = test.environment['ANET_DB_SERVER'] ?: 'localhost'
+String dbTestName = test.environment['ANET_DB_NAME'] ?: 'testAnet'
 if (run.environment['ANET_DB_PORT']) {
 	dbLoc = dbLoc + ":" + run.environment['ANET_DB_PORT'].toString()
+}
+if (test.environment['ANET_DB_PORT']) {
+	dbTestLoc = dbTestLoc + ":" + test.environment['ANET_DB_PORT'].toString()
 }
 if (!run.environment['ANET_DB_USERNAME']) {
 	run.environment('ANET_DB_USERNAME', run.environment['USER'])
@@ -116,6 +133,8 @@ if (!run.environment['ANET_DB_USERNAME']) {
 if (dbDriver == "sqlserver") {
 	run.environment("ANET_DB_DRIVER", "com.microsoft.sqlserver.jdbc.SQLServerDriver")
 	run.environment("ANET_DB_URL", "jdbc:sqlserver://${dbLoc};databaseName=${dbName}")
+	test.environment("ANET_DB_DRIVER", "com.microsoft.sqlserver.jdbc.SQLServerDriver")
+	test.environment("ANET_DB_URL", "jdbc:sqlserver://${dbTestLoc};databaseName=${dbTestName}")
 } else if (dbDriver == "postgresql") {
 	run.environment("ANET_DB_DRIVER", "org.postgresql.Driver")
 	run.environment("ANET_DB_URL", "jdbc:postgresql://${dbLoc}/${dbName}")
@@ -127,8 +146,6 @@ if (dbDriver == "sqlserver") {
 } else {
 	throw new GradleException( "Unsupported DB_DRIVER value \'${dbDriver}\'")
 }
-
-test.environment = run.environment
 
 run.args = ["server", anetConfig]
 
@@ -174,9 +191,41 @@ task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
 	}
 }
 
+task runTest(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(test.environment)
+	main = mainClassName
+	args = ["server", anetConfig]
+}
+
+task dbTestInit(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(test.environment)
+	main = mainClassName
+	args = ["init", anetConfig]
+	standardInput = System.in
+}
+
+task dbTestStatus(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(test.environment)
+	main = mainClassName
+	args = ["db", "status", anetConfig]
+}
+
+task dbTestMigrate(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(test.environment)
+	main = mainClassName
+	args = ["db", "migrate", anetConfig]
+	if (project.hasProperty("dry-run")) {
+		args += "--dry-run"
+	}
+}
+
 task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
+	environment(test.environment)
 	main = mainClassName
 	args = ["db", "test", anetConfig]
 }
@@ -189,6 +238,13 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 	if (project.hasProperty("dry-run")) {
 		args += "--dry-run"
 	}
+}
+
+task dbTestDrop(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(test.environment)
+	main = mainClassName
+	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 
 task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
@@ -246,7 +302,20 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
 	withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
 	withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
-	portBindings = ["1433:"+run.environment["ANET_DB_PORT"]]
+	portBindings = [run.environment["ANET_DB_PORT"]+"1433:"]
+}
+
+task dockerCreateTestDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	imageId = dockerPullDB.getImageId()
+	containerName = "anet-mssql-test-server"
+	description = "Creates an ANET MS SQL DB container named " + containerName
+	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
+	withEnvVar('ACCEPT_EULA', 'Y')
+	withEnvVar('SA_PASSWORD', test.environment["ANET_SA_PASSWORD"])
+	withEnvVar('DB_NAME', test.environment["ANET_DB_NAME"])
+	withEnvVar('DB_USER', test.environment["ANET_DB_USERNAME"])
+	withEnvVar('DB_USER_PASSWORD', test.environment["ANET_DB_PASSWORD"])
+	portBindings = [test.environment["ANET_DB_PORT"]+"1433:"]
 }
 
 // need to make this invoke dbCreateContainer if there is no anet-mssql-server and possibly get newer image if available
@@ -278,6 +347,33 @@ task dbLoad(dependsOn: 'compileJava', type: JavaExec) {
 	args = ["dbScript", "-S", "insertBaseData.sql", anetConfig]
 }
 
+task dockerStartTestDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+	description = "Starts anet-mssql-server container"
+	targetContainerId { "anet-mssql-test-server" }
+}
+
+task dockerStopTestDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
+	description = "Stops anet-mssql-server container"
+	targetContainerId { "anet-mssql-test-server" }
+}
+
+task dockerRemoveTestDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+	description = "Removes anet-mssql-server container"
+	targetContainerId { "anet-mssql-test-server" }
+}
+
+task dockerWaitForTestDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	description = "Waiting until the DB server has started"
+	targetContainerId { "anet-mssql-test-server" }
+	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
+}
+
+task dbTestLoad(dependsOn: 'compileJava', type: JavaExec) {
+	classpath = sourceSets.main.runtimeClasspath
+	environment(test.environment)
+	main = mainClassName
+	args = ["dbScript", "-S", "insertBaseData.sql", anetConfig]
+}
 
 classes.dependsOn buildClient
 
