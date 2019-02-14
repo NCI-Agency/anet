@@ -391,4 +391,9 @@ public class PositionDao extends AnetBaseDao<Position> {
 				+ " AND maxPp.\"createdAt\" IS NULL ",
 				personJoinColumn, dateFilterColumn, placeholderName);
 	}
+
+	@Override
+	public SubscriptionUpdate getSubscriptionUpdate(Position obj) {
+		return getCommonSubscriptionUpdate(obj, tableName, "positionUuid");
+	}
 }

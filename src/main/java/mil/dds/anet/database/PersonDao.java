@@ -251,4 +251,8 @@ public class PersonDao extends AnetBaseDao<Person> {
 		});
 	}
 
+	@Override
+	public SubscriptionUpdate getSubscriptionUpdate(Person obj) {
+		return getCommonSubscriptionUpdate(obj, tableName, "personUuid");
+	}
 }

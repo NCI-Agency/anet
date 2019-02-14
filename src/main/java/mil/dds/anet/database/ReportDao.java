@@ -4,6 +4,7 @@ import io.leangen.graphql.annotations.GraphQLRootContext;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -234,7 +235,17 @@ public class ReportDao extends AnetBaseDao<Report> {
 
 	public int update(Report r, Person user) {
 		DaoUtils.setUpdateFields(r);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateInternal, r, user);
+		return AnetObjectEngine.getInstance().executeInTransaction(this::updateWithSubscriptions, r, user);
+	}
+
+	private int updateWithSubscriptions(Report r, Person user) {
+		final int n = updateInternal(r, user);
+		if (n > 0) {
+			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(r);
+			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+			subscriptionDao.updateSubscriptions(subscriptionUpdate);
+		}
+		return n;
 	}
 
 	@Override
@@ -724,5 +735,56 @@ public class ReportDao extends AnetBaseDao<Report> {
 
 	public List<List<Task>> getTasks(List<String> foreignKeys) {
 		return tasksBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	@Override
+	public SubscriptionUpdate getSubscriptionUpdate(Report obj) {
+		if (obj.getState() != ReportState.RELEASED && obj.getState() != ReportState.CANCELLED) {
+			return null;
+		}
+
+		final SubscriptionUpdate update = getCommonSubscriptionUpdate(obj, tableName, "reportUuid");
+		// update author
+		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAuthorUuid(), "people", "report.authorUuid"));
+		// update attendees
+		new SubscriptionUpdateStatement("people",
+				"SELECT personUuid"
+				+ " FROM reportPeople"
+				+ " WHERE reportUuid = :reportUuid",
+				// param is already added above
+				Collections.emptyMap());
+		// update author position
+		new SubscriptionUpdateStatement("positions",
+				"SELECT uuid"
+				+ " FROM positions"
+				+ " WHERE currentPersonUuid = :report.authorUuid",
+				// param is already added above
+				Collections.emptyMap());
+		// update attendee positions
+		new SubscriptionUpdateStatement("positions",
+				"SELECT uuid"
+				+ " FROM positions"
+				+ " WHERE currentPersonUuid in ("
+				+ "   SELECT personUuid"
+				+ "   FROM reportPeople"
+				+ "   WHERE reportUuid = :reportUuid"
+				+ " )",
+				// param is already added above
+				Collections.emptyMap());
+		// update organizations
+		// TODO: is this correct?
+		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAdvisorOrgUuid(), "organizations", "report.advisorOrganizationUuid"));
+		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getPrincipalOrgUuid(), "organizations", "report.principalOrganizationUuid"));
+		// update tasks
+		new SubscriptionUpdateStatement("tasks",
+				"SELECT taskUuid"
+				+ " FROM reportTasks"
+				+ " WHERE reportUuid = :reportUuid",
+				// param is already added above
+				Collections.emptyMap());
+		// update location
+		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getLocationUuid(), "locations", "report.locationUuid"));
+
+		return update;
 	}
 }

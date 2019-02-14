@@ -23,4 +23,6 @@ public interface IAnetDao<T> {
 	public int delete(String uuid);
 
 	public int deleteInternal(String uuid);
+
+	public SubscriptionUpdate getSubscriptionUpdate(T obj);
 }

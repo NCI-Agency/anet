@@ -139,4 +139,9 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher()
 				.runSearch(query, dbHandle);
 	}
+
+	@Override
+	public SubscriptionUpdate getSubscriptionUpdate(Organization obj) {
+		return getCommonSubscriptionUpdate(obj, tableName, "organizationUuid");
+	}
 }

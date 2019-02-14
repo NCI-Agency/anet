@@ -2,15 +2,22 @@ package mil.dds.anet.database;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
-import java.time.Instant;
+import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Joiner;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Subscription;
@@ -21,6 +28,8 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterRowMapper(SubscriptionMapper.class)
 public class SubscriptionDao extends AnetBaseDao<Subscription> {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final IdBatcher<Subscription> idBatcher;
 	private final ForeignKeyBatcher<Subscription> positionSubscriptionsBatcher;
@@ -96,19 +105,36 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 			.execute();
 	}
 
-	public int updateSubscriptions(String subscribedObjectType, String subscribedObjectUuid) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateSubscriptionsTransactional, subscribedObjectType, subscribedObjectUuid);
+	public int updateSubscriptions(SubscriptionUpdate subscriptionUpdate) {
+		return AnetObjectEngine.getInstance().executeInTransaction(this::updateSubscriptionsTransactional, subscriptionUpdate);
 	}
 
-	public int updateSubscriptionsTransactional(String subscribedObjectType, String subscribedObjectUuid) {
-		final Instant now = Instant.now();
-		return dbHandle.createUpdate("/* updateSubscriptions */ UPDATE subscriptions "
-					+ "SET \"updatedAt\" = :updatedAt"
-					+ " WHERE \"subscribedObjectType\" = :subscribedObjectType"
-					+ " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
-				.bind("updatedAt", DaoUtils.asLocalDateTime(now))
-				.bind("subscribedObjectType", subscribedObjectType)
-				.bind("subscribedObjectUuid", subscribedObjectUuid)
+	public int updateSubscriptionsTransactional(SubscriptionUpdate subscriptionUpdate) {
+		if (subscriptionUpdate == null || subscriptionUpdate.updatedAt == null || subscriptionUpdate.stmts == null) {
+			return 0;
+		}
+		final StringBuilder sqlPre = new StringBuilder("/* updateSubscriptions */ UPDATE subscriptions"
+					+ " SET \"updatedAt\" = :updatedAt WHERE ");
+		final String paramObjectTypeTpl = "objectType%1$d";
+		final String stmtTpl = "( \"subscribedObjectType\" = :%1$s"
+					+ " AND \"subscribedObjectUuid\" IN ( %2$s ) )";
+		final List<String> stmts = new ArrayList<>();
+		final Map<String, Object> params = new HashMap<>();
+		final ListIterator<SubscriptionUpdateStatement> iter = subscriptionUpdate.stmts.listIterator();
+		while (iter.hasNext()) {
+			final String objectTypeParam = String.format(paramObjectTypeTpl, iter.nextIndex());
+			final SubscriptionUpdateStatement stmt = iter.next();
+			if (stmt != null && stmt.sql != null && stmt.objectType != null && stmt.params != null) {
+				stmts.add(String.format(stmtTpl, objectTypeParam, stmt.sql));
+				params.put(objectTypeParam, stmt.objectType);
+				params.putAll(stmt.params);
+			}
+		}
+		final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
+		logger.info("Updating subscriptions: sql={}, updatedAt={}, params={}", sqlSuf, subscriptionUpdate.updatedAt, params);
+		return dbHandle.createUpdate(sqlPre + sqlSuf)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt))
+				.bindMap(params)
 				.execute();
 	}
 

@@ -18,10 +18,12 @@ import mil.dds.anet.utils.DaoUtils;
 @RegisterRowMapper(LocationMapper.class)
 public class LocationDao extends AnetBaseDao<Location> {
 
+	private static final String tableName = "locations";
+
 	private final IdBatcher<Location> idBatcher;
 
 	public LocationDao(Handle h) { 
-		super(h, "Locations", "locations", "*", null);
+		super(h, "Locations", tableName, "*", null);
 		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, "uuids", new LocationMapper());
 	}
@@ -113,5 +115,9 @@ public class LocationDao extends AnetBaseDao<Location> {
 	}
 	
 	//TODO: Don't delete any location if any references exist. 
-	
+
+	@Override
+	public SubscriptionUpdate getSubscriptionUpdate(Location obj) {
+		return getCommonSubscriptionUpdate(obj, tableName, "locationUuid");
+	}
 }

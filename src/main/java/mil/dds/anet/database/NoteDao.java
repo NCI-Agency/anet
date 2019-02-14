@@ -2,8 +2,10 @@ package mil.dds.anet.database;
 
 import io.leangen.graphql.annotations.GraphQLRootContext;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -134,4 +136,16 @@ public class NoteDao extends AnetBaseDao<Note> {
 		h.execute("/* deleteNoteRelatedObjects */ DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" = ?", uuid);
 	}
 
+	@Override
+	public SubscriptionUpdate getSubscriptionUpdate(Note obj) {
+		final String paramTpl = "noteRelatedObject%1$d";
+		final List<SubscriptionUpdateStatement> stmts = new ArrayList<>();
+		final ListIterator<NoteRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
+		while (iter.hasNext()) {
+			final String param = String.format(paramTpl, iter.nextIndex());
+			final NoteRelatedObject nro = iter.next();
+			stmts.add(getCommonSubscriptionUpdateStatement(nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param));
+		}
+		return new SubscriptionUpdate(obj.getUpdatedAt(), stmts);
+	}
 }

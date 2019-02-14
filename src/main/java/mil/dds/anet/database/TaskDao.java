@@ -20,10 +20,12 @@ import mil.dds.anet.utils.DaoUtils;
 @RegisterRowMapper(TaskMapper.class)
 public class TaskDao extends AnetBaseDao<Task> {
 
+	private static final String tableName = "tasks";
+
 	private final IdBatcher<Task> idBatcher;
 
 	public TaskDao(Handle h) { 
-		super(h, "Tasks", "tasks", "*", null);
+		super(h, "Tasks", tableName, "*", null);
 		final String idBatcherSql = "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, "uuids", new TaskMapper());
 	}
@@ -142,5 +144,10 @@ public class TaskDao extends AnetBaseDao<Task> {
 			.bind("orgUuid", orgUuid)
 			.map(new TaskMapper())
 			.list();
+	}
+
+	@Override
+	public SubscriptionUpdate getSubscriptionUpdate(Task obj) {
+		return getCommonSubscriptionUpdate(obj, tableName, "taskUuid");
 	}
 }
