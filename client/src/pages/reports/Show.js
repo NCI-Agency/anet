@@ -160,6 +160,7 @@ class BaseReportShow extends Page {
 		const canApprove = (isAdmin || !isAuthor) && report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
 		const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
+		const canPublish = report.isApproved() && isAdmin
 		//Warn admins when they try to approve their own report
 		const warnApproveOwnReport = canApprove && isAuthor
 
@@ -245,7 +246,8 @@ class BaseReportShow extends Page {
 					{report.isApproved() &&
 						<Fieldset style={{textAlign: 'center' }}>
 							<h4 className="text-danger">This report is APPROVED.</h4>
-							<p>This report has been approved. We expect it to be released to the ANET community on {moment(report.getReportApprovedAt()).add(24, 'hours').format(Settings.dateFormats.forms.withTime)}</p>
+							<p>This report has been approved and will be automatically published to the ANET community in {moment(report.getReportApprovedAt()).add(24, 'hours').toNow(true)}</p>
+							{canPublish && <p>You can also {this.renderPublishButton(isSubmitting || !isValid, () => setSubmitting(false))} it immediately.</p>}
 						</Fieldset>
 					}
 
@@ -587,6 +589,21 @@ class BaseReportShow extends Page {
 			})
 	}
 
+	publishReport = () => {
+		const graphql = 'publishReport(uuid: $uuid) { uuid }'
+		const variables = {
+			uuid: this.state.report.uuid,
+		}
+		const variableDef = '($uuid: String!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({success: 'Report published', error: null})
+			}).catch(error => {
+				this.handleError(error)
+			})
+	}
+
 	submitComment = (text, setFieldValue) => {
 		if (_isEmpty(text)) {
 			return
@@ -706,6 +723,10 @@ class BaseReportShow extends Page {
 
 	renderApproveButton = (warnApproveOwnReport, disabled, confirmHandler, cancelHandler, size, id) => {
 		return this.renderValidationButton(warnApproveOwnReport, disabled, "approving", "Approve report?", "Approve", "Approve anyway", confirmHandler, "Cancel approve", cancelHandler, size, id, "approve-button")
+	}
+
+	renderPublishButton = (disabled, cancelHandler, size, id) => {
+		return this.renderValidationButton(false, disabled, "publishing", "Publish report?", "Publish report", "Publish anyway", this.publishReport, "Cancel publish", cancelHandler, size, id)
 	}
 
 	renderValidationButton = (warnApproveOwnReport, disabled, submitType, title, label, confirmText, confirmHandler, cancelText, cancelHandler, size, id, className) => {

@@ -603,10 +603,9 @@ public class ReportResource {
 				//Update the report
 				r.setApprovalStepUuid(step.getNextStepUuid());
 				if (step.getNextStepUuid() == null) {
-					//Done with approvals, move to pending release (or cancelled) state!
+					//Done with approvals, move to APPROVED (or CANCELLED) state!
 					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.APPROVED);
 					r.setReleasedAt(Instant.now());
-					sendReportReleasedEmail(r);
 				} else {
 					sendApprovalNeededEmail(r);
 				}
@@ -760,6 +759,53 @@ public class ReportResource {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new WebApplicationException("failed to load Author", e);
 		}
+	}
+
+	/**
+	 * Publishes a report
+	 * Moves a report from APPROVED to RELEASED and saves the publish action
+	 * @param uuid the Report UUID to publish
+	 * @return 200 on a successful publish, 401 if you don't have privileges to publish this report.
+	 */
+	@POST
+	@Timed
+	@Path("/{uuid}/publish")
+	public Report publishReport(@Auth Person user, @PathParam("uuid") String uuid)
+			throws InterruptedException, ExecutionException, Exception {
+		return publishReportCommon(user, uuid);
+	}
+
+	private Report publishReportCommon(Person user, String uuid)
+			throws InterruptedException, ExecutionException, Exception {
+		final Report r = dao.getByUuid(uuid, user);
+		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
+		logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
+
+		//Only admin may publish a report
+		if (!AuthUtils.isAdmin(user)) {
+			logger.info("User {} cannot publish report UUID {}", user.getUuid(), r.getUuid());
+			throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
+		}
+
+		//Move the report to RELEASED state
+		r.setState(ReportState.RELEASED);
+		r.setReleasedAt(Instant.now());
+		final int numRows = dao.update(r, user);
+		if (numRows == 0) {
+			throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
+		}
+		sendReportReleasedEmail(r);
+
+		AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());
+		return r;
+	}
+
+	@GraphQLMutation(name="publishReport")
+	public Report publishReport(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="uuid") String uuid)
+			throws InterruptedException, ExecutionException, Exception {
+		// GraphQL mutations *have* to return something
+		return publishReportCommon(DaoUtils.getUserFromContext(context), uuid);
 	}
 
 	@POST
