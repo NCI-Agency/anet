@@ -76,7 +76,7 @@ export default class ReportApprovals extends Component {
         let approvalStatus = this.renderApprovalStatus(action)
         let approvalDetails = this.renderApprovalDetails(action)
         return (
-            <div className="approval-action" key={action.createdAt}>
+            <div className="approval-action" key={`${action.createdAt}-${action.step.uuid}`}>
                 { approvalStatus }
                 { approvalButton }
                 { approvalDetails }
@@ -87,7 +87,7 @@ export default class ReportApprovals extends Component {
     renderCompactApprovalAction(action) {
         let approvalButton = this.renderApprovalButton(action)
         return (
-            <div className="approval-action" key={action.createdAt}>
+            <div className="approval-action" key={`${action.createdAt}-${action.step.uuid}`}>
                 { approvalButton }
             </div>
         )
