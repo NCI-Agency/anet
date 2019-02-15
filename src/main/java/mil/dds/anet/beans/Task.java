@@ -15,7 +15,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Task extends AbstractAnetBean {
+public class Task extends AbstractAnetBean implements SubscribableObject {
 
 	public static final String DUMMY_TASK_UUID = "-1"; // pseudo uuid to represent 'no task'
 

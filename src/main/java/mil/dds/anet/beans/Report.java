@@ -26,7 +26,7 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class Report extends AbstractAnetBean {
+public class Report extends AbstractAnetBean implements SubscribableObject {
 
 	public enum ReportState { DRAFT, PENDING_APPROVAL, RELEASED, REJECTED, CANCELLED, FUTURE }
 	public enum Atmosphere { POSITIVE, NEUTRAL, NEGATIVE }

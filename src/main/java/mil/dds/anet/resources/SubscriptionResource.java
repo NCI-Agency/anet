@@ -1,8 +1,6 @@
 package mil.dds.anet.resources;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.WebApplicationException;
@@ -18,6 +16,8 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
+import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -78,10 +78,8 @@ public class SubscriptionResource {
 	}
 
 	@GraphQLQuery(name="mySubscriptions")
-	public CompletableFuture<List<Subscription>> getMySubscriptions(@GraphQLRootContext Map<String, Object> context) {
-		final Person user = DaoUtils.getUserFromContext(context);
-		final Position position = user.loadPosition();
-		return dao.getSubscriptionsForPosition(context, DaoUtils.getUuid(position));
+	public AnetBeanList<Subscription> getMySubscriptions(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="query") SubscriptionSearchQuery query) {
+		return dao.search(DaoUtils.getUserFromContext(context), query);
 	}
 
 	private void checkPermission(Subscription s, Person user) {

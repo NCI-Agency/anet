@@ -15,6 +15,7 @@ public abstract class Searcher implements ISearcher {
 	private final ILocationSearcher locationSearcher;
 	private final ITagSearcher tagSearcher;
 	private final IAuthorizationGroupSearcher authorizationGroupSearcher;
+	private final ISubscriptionSearcher subscriptionSearcher;
 
 	public static Searcher getSearcher(DaoUtils.DbType dbType) {
 		switch (dbType) {
@@ -27,7 +28,7 @@ public abstract class Searcher implements ISearcher {
 
 	protected Searcher(IReportSearcher reportSearcher, IPersonSearcher personSearcher, IOrganizationSearcher orgSearcher,
 			IPositionSearcher positionSearcher, ITaskSearcher taskSearcher, ILocationSearcher locationSearcher, ITagSearcher tagSearcher,
-			IAuthorizationGroupSearcher authorizationGroupSearcher) {
+			IAuthorizationGroupSearcher authorizationGroupSearcher, ISubscriptionSearcher subscriptionSearcher) {
 		super();
 		this.reportSearcher = reportSearcher;
 		this.personSearcher = personSearcher;
@@ -37,6 +38,7 @@ public abstract class Searcher implements ISearcher {
 		this.locationSearcher = locationSearcher;
 		this.tagSearcher = tagSearcher;
 		this.authorizationGroupSearcher = authorizationGroupSearcher;
+		this.subscriptionSearcher = subscriptionSearcher;
 	}
 
 	@Override
@@ -77,5 +79,9 @@ public abstract class Searcher implements ISearcher {
 	@Override
 	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher() {
 		return authorizationGroupSearcher;
+	}
+
+	public ISubscriptionSearcher getSubscriptionSearcher() {
+		return subscriptionSearcher;
 	}
 }

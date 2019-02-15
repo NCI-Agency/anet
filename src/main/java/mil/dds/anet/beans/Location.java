@@ -7,7 +7,7 @@ import java.util.Objects;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class Location extends AbstractAnetBean {
+public class Location extends AbstractAnetBean implements SubscribableObject {
 
 	public static final String DUMMY_LOCATION_UUID = "-1"; // pseudo uuid to represent 'no location'
 

@@ -17,6 +17,7 @@ public class Subscription extends AbstractAnetBean {
 	private ForeignObjectHolder<Position> subscriber = new ForeignObjectHolder<>();
 	private String subscribedObjectType;
 	private String subscribedObjectUuid;
+	private SubscribableObject subscribedObject;
 
 	@GraphQLQuery(name="subscriber")
 	public CompletableFuture<Position> loadSubscriber(@GraphQLRootContext Map<String, Object> context) {
@@ -62,6 +63,15 @@ public class Subscription extends AbstractAnetBean {
 
 	public void setSubscribedObjectUuid(String subscribedObjectUuid) {
 		this.subscribedObjectUuid = subscribedObjectUuid;
+	}
+
+	@GraphQLQuery(name="subscribedObject")
+	public CompletableFuture<SubscribableObject> loadSubscribedObject(@GraphQLRootContext Map<String, Object> context) {
+		if (subscribedObject != null) {
+			return CompletableFuture.completedFuture(subscribedObject);
+		}
+		return new UuidFetcher<AbstractAnetBean>().load(context, subscribedObjectType, subscribedObjectUuid)
+				.thenApply(o -> { subscribedObject = (SubscribableObject)o; return subscribedObject; });
 	}
 
 	@Override

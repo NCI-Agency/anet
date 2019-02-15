@@ -18,4 +18,6 @@ public interface ISearcher {
 
 	public IAuthorizationGroupSearcher getAuthorizationGroupSearcher();
 
+	public ISubscriptionSearcher getSubscriptionSearcher();
+
 }

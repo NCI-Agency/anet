@@ -25,6 +25,7 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -35,18 +36,12 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final IdBatcher<Subscription> idBatcher;
-	private final ForeignKeyBatcher<Subscription> positionSubscriptionsBatcher;
 	private final ForeignKeyBatcher<Subscription> subscribedObjectSubscriptionsBatcher;
 
 	public SubscriptionDao(Handle h) {
 		super(h, "Subscriptions", "subscriptions", "*", null);
 		final String idBatcherSql = "/* batch.getSubscriptionsByUuids */ SELECT * FROM subscriptions WHERE uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Subscription>(h, idBatcherSql, "uuids", new SubscriptionMapper());
-
-		final String positionSubscriptionsBatcherSql = "/* batch.getSubscriptionsForPosition */ SELECT * FROM \"subscriptions\" "
-				+ "WHERE \"subscriptions\".\"subscriberUuid\" IN ( <foreignKeys> ) "
-				+ "ORDER BY subscriptions.\"updatedAt\" DESC";
-		this.positionSubscriptionsBatcher = new ForeignKeyBatcher<Subscription>(h, positionSubscriptionsBatcherSql, "foreignKeys", new SubscriptionMapper(), "subscriberUuid");
 
 		final String subscribedObjectSubscriptionsBatcherSql = "/* batch.getSubscriptionsForSubscribedObject */ SELECT * FROM \"subscriptions\" "
 				+ "WHERE \"subscriptions\".\"subscribedObjectUuid\" IN ( <foreignKeys> ) "
@@ -155,15 +150,6 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 				.execute();
 	}
 
-	public CompletableFuture<List<Subscription>> getSubscriptionsForPosition(@GraphQLRootContext Map<String, Object> context, String subscriberUuid) {
-		return new ForeignKeyFetcher<Subscription>()
-				.load(context, "position.subscriptions", subscriberUuid);
-	}
-
-	public List<List<Subscription>> getPositionSubscriptions(List<String> foreignKeys) {
-		return positionSubscriptionsBatcher.getByForeignKeys(foreignKeys);
-	}
-
 	public CompletableFuture<List<Subscription>> getSubscriptionsForSubscribedObject(@GraphQLRootContext Map<String, Object> context, String subscribedObjectUuid) {
 		return new ForeignKeyFetcher<Subscription>()
 				.load(context, "subscribedObject.subscriptions", subscribedObjectUuid);
@@ -188,6 +174,11 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 		final Map<String,Object> result = rs.get(0);
 		final int count = ((Number) result.get("count")).intValue();
 		return (count > 0);
+	}
+
+	public AnetBeanList<Subscription> search(Person user, SubscriptionSearchQuery query) {
+		return AnetObjectEngine.getInstance().getSearcher().getSubscriptionSearcher()
+				.runSearch(query, dbHandle, user);
 	}
 
 }

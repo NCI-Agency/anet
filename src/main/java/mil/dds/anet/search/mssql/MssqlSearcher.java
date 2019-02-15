@@ -14,7 +14,7 @@ public class MssqlSearcher extends Searcher {
 	public MssqlSearcher() { 
 		super(new MssqlReportSearcher(), new MssqlPersonSearcher(), new MssqlOrganizationSearcher(),
 				new MssqlPositionSearcher(), new MssqlTaskSearcher(), new MssqlLocationSearcher(), new MssqlTagSearcher(),
-				new MssqlAuthorizationGroupSearcher());
+				new MssqlAuthorizationGroupSearcher(), new MssqlSubscriptionSearcher());
 	}
 
 	protected static Query addPagination(AbstractSearchQuery query,

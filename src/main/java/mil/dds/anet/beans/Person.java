@@ -18,7 +18,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 
-public class Person extends AbstractAnetBean implements Principal {
+public class Person extends AbstractAnetBean implements Principal, SubscribableObject {
 
 	public static enum PersonStatus { ACTIVE, INACTIVE, NEW_USER }
 	public static enum Role { ADVISOR, PRINCIPAL }

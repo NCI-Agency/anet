@@ -3,14 +3,13 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'components/Page'
 import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-bootstrap'
-import {Link} from 'react-router-dom'
-import moment from 'moment'
 import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import SavedSearchTable from 'components/SavedSearchTable'
 import searchFilters from 'components/SearchFilters'
+import MySubscriptions from 'components/MySubscriptions'
 
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
@@ -231,6 +230,8 @@ class BaseHome extends Page {
 						</Row>
 					</Grid>
 				</Fieldset>
+
+				<MySubscriptions />
 
 				<Fieldset title="Saved searches">
 					<FormGroup controlId="savedSearchSelect">
