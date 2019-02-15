@@ -616,9 +616,15 @@ public class ReportResource {
 			//Update the report
 			r.setApprovalStepUuid(step.getNextStepUuid());
 			if (step.getNextStepUuid() == null) {
-				//Done with approvals, move to APPROVED (or CANCELLED) state!
-				r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.APPROVED);
-				r.setReleasedAt(Instant.now());
+				if (r.getCancelledReason() != null) {
+					//Done with cancel, move to CANCELLED and set releasedAt
+					r.setState(ReportState.CANCELLED);
+					r.setReleasedAt(Instant.now());
+				}
+				else {
+					//Done with approvals, move to APPROVED
+					r.setState(ReportState.APPROVED);
+				}
 			} else {
 				sendApprovalNeededEmail(r);
 			}
