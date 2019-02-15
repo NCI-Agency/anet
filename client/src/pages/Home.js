@@ -99,7 +99,7 @@ class BaseHome extends Page {
 
 	allApproved() { return {
 		title: "All approved reports",
-		query: { state: [Report.STATE.APPROVED] },
+		query: { state: [Report.STATE.APPROVED], sortOrder: 'ASC' },
 	}}
 
 	myOrgRecent(currentUser) {
