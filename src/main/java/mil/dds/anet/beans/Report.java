@@ -444,7 +444,8 @@ public class Report extends AbstractAnetBean {
 		return engine.getApprovalActionDao().getActionsForReport(context, uuid)
 				.thenApply(actions -> {
 			if (state == ReportState.APPROVED || state == ReportState.RELEASED) {
-				approvalStatus = compactActions(actions);
+				//For APPROVED and RELEASED reports, show the whole workflow of actions
+				approvalStatus = actions;
 			} else {
 				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();
 				final String aoUuid = DaoUtils.getUuid(ao);
@@ -471,6 +472,7 @@ public class Report extends AbstractAnetBean {
 	}
 
 	private List<ApprovalAction> compactActions(List<ApprovalAction> actions) {
+		// TODO: do we still need this method?
 		//Compact to only get the most recent event for each step.
 		if (actions.size() == 0) {
 			//Magically released, probably imported this way.

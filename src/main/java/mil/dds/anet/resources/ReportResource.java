@@ -432,85 +432,98 @@ public class ReportResource {
 	@POST
 	@Timed
 	@Path("/{uuid}/submit")
-	public Report submitReport(@Auth Person user, @PathParam("uuid") String uuid) {
+	public Report submitReport(@Auth Person user, @PathParam("uuid") String uuid)
+			throws InterruptedException, ExecutionException, Exception {
 		return submitReportCommon(user, uuid);
 	}
 
-	private Report submitReportCommon(Person user, String uuid) {
-		final Report r = dao.getByUuid(uuid, user);
-		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
-		logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
+	private Report submitReportCommon(Person user, String uuid)
+			throws InterruptedException, ExecutionException, Exception {
+		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+		return dbHandle.inTransaction(h -> {
+			final Report r = dao.getByUuid(uuid, user);
+			if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
+			logger.debug("Attempting to submit report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-		// TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
-		if (r.getAdvisorOrgUuid() == null) {
-			ReportPerson advisor;
-			try {
-				advisor = r.loadPrimaryAdvisor(engine.getContext()).get();
-				if (advisor == null) {
-					throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
+			// TODO: this needs to be done by either the Author, a Superuser for the AO, or an Administrator
+			if (r.getAdvisorOrgUuid() == null) {
+				ReportPerson advisor;
+				try {
+					advisor = r.loadPrimaryAdvisor(engine.getContext()).get();
+					if (advisor == null) {
+						throw new WebApplicationException("Report missing primary advisor", Status.BAD_REQUEST);
+					}
+					r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).get());
+				} catch (InterruptedException | ExecutionException e) {
+					throw new WebApplicationException("failed to load PrimaryAdvisor", e);
 				}
-				r.setAdvisorOrg(engine.getOrganizationForPerson(engine.getContext(), advisor.getUuid()).get());
-			} catch (InterruptedException | ExecutionException e) {
-				throw new WebApplicationException("failed to load PrimaryAdvisor", e);
 			}
-		}
-		if (r.getPrincipalOrgUuid() == null) {
-			ReportPerson principal;
-			try {
-				principal = r.loadPrimaryPrincipal(engine.getContext()).get();
-				if (principal == null) {
-					throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
+			if (r.getPrincipalOrgUuid() == null) {
+				ReportPerson principal;
+				try {
+					principal = r.loadPrimaryPrincipal(engine.getContext()).get();
+					if (principal == null) {
+						throw new WebApplicationException("Report missing primary principal", Status.BAD_REQUEST);
+					}
+					r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).get());
+				} catch (InterruptedException | ExecutionException e) {
+					throw new WebApplicationException("failed to load PrimaryPrincipal", e);
 				}
-				r.setPrincipalOrg(engine.getOrganizationForPerson(engine.getContext(), principal.getUuid()).get());
+			}
+
+			if (r.getEngagementDate() == null) {
+				throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
+			} else if (r.getEngagementDate().isAfter(tomorrow()) && r.getCancelledReason() == null) {
+				throw new WebApplicationException("You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
+			}
+
+			final String orgUuid;
+			try {
+				final Organization org = engine.getOrganizationForPerson(engine.getContext(), r.getAuthorUuid()).get();
+				if (org == null) {
+					// Author missing Org, use the Default Approval Workflow
+					orgUuid = engine.getDefaultOrgUuid();
+				} else {
+					orgUuid = org.getUuid();
+				}
 			} catch (InterruptedException | ExecutionException e) {
-				throw new WebApplicationException("failed to load PrimaryPrincipal", e);
+				throw new WebApplicationException("failed to load Organization for Author", e);
 			}
-		}
-
-		if (r.getEngagementDate() == null) {
-			throw new WebApplicationException("Missing engagement date", Status.BAD_REQUEST);
-		} else if (r.getEngagementDate().isAfter(tomorrow()) && r.getCancelledReason() == null) {
-			throw new WebApplicationException("You cannot submit future engagements less they are cancelled", Status.BAD_REQUEST);
-		}
-
-		final String orgUuid;
-		try {
-			final Organization org = engine.getOrganizationForPerson(engine.getContext(), r.getAuthorUuid()).get();
-			if (org == null) {
-				// Author missing Org, use the Default Approval Workflow
-				orgUuid = engine.getDefaultOrgUuid();
-			} else {
-				orgUuid = org.getUuid();
+			List<ApprovalStep> steps = null;
+			try {
+				steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
+				throwExceptionNoApprovalSteps(steps);
+			} catch (InterruptedException | ExecutionException e) {
+				throw new WebApplicationException("failed to load Organization for Author", e);
 			}
-		} catch (InterruptedException | ExecutionException e) {
-			throw new WebApplicationException("failed to load Organization for Author", e);
-		}
-		List<ApprovalStep> steps = null;
-		try {
-			steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
-			throwExceptionNoApprovalSteps(steps);
-		} catch (InterruptedException | ExecutionException e) {
-			throw new WebApplicationException("failed to load Organization for Author", e);
-		}
 
-		//Push the report into the first step of this workflow
-		r.setApprovalStep(steps.get(0));
-		r.setState(ReportState.PENDING_APPROVAL);
-		final int numRows = engine.executeInTransaction(dao::update, r, user);
-		sendApprovalNeededEmail(r);
-		logger.info("Putting report {} into step {} because of org {} on author {}",
-				r.getUuid(), steps.get(0).getUuid(), orgUuid, r.getAuthorUuid());
+			//Write the submission action
+			ApprovalAction action = new ApprovalAction();
+			action.setReportUuid(r.getUuid());
+			action.setPersonUuid(user.getUuid());
+			action.setType(ApprovalType.SUBMIT);
+			engine.getApprovalActionDao().insert(action);
 
-		if (numRows != 1) {
-			throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
-		}
+			//Push the report into the first step of this workflow
+			r.setApprovalStep(steps.get(0));
+			r.setState(ReportState.PENDING_APPROVAL);
+			final int numRows = dao.update(r, user);
+			sendApprovalNeededEmail(r);
+			logger.info("Putting report {} into step {} because of org {} on author {}",
+					r.getUuid(), steps.get(0).getUuid(), orgUuid, r.getAuthorUuid());
 
-		AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(), r.loadAuthor(engine.getContext()).join(), r.getAuthorUuid());
-		return r;
+			if (numRows != 1) {
+				throw new WebApplicationException("No records updated", Status.BAD_REQUEST);
+			}
+
+			AnetAuditLogger.log("report {} submitted by author {} (uuid: {})", r.getUuid(), r.loadAuthor(engine.getContext()).join(), r.getAuthorUuid());
+			return r;
+		});
 	}
 
 	@GraphQLMutation(name="submitReport")
-	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String uuid) {
+	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String uuid)
+			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something, we return the report
 		return submitReportCommon(DaoUtils.getUserFromContext(context), uuid);
 	}
@@ -572,57 +585,57 @@ public class ReportResource {
 			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(h -> {
-				final Report r = dao.getByUuid(uuid, approver);
-				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
-				final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
-				if (step == null) {
-					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
-					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
-				}
+			final Report r = dao.getByUuid(uuid, approver);
+			if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
+			final ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
+			if (step == null) {
+				logger.info("Report UUID {} does not currently need an approval", r.getUuid());
+				throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+			}
 
-				//Report author cannot approve own report, unless admin
-				if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
-					logger.info("Author {} cannot approve own report UUID {}", approver.getUuid(), r.getUuid());
-					throw new WebApplicationException("You cannot approve your own report", Status.FORBIDDEN);
-				}
-				//Verify that this user can approve for this step.
-				boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
-				if (canApprove == false) {
-					logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
-					throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
-				}
+			//Report author cannot approve own report, unless admin
+			if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
+				logger.info("Author {} cannot approve own report UUID {}", approver.getUuid(), r.getUuid());
+				throw new WebApplicationException("You cannot approve your own report", Status.FORBIDDEN);
+			}
+			//Verify that this user can approve for this step.
+			boolean canApprove = engine.canUserApproveStep(engine.getContext(), approver.getUuid(), step.getUuid());
+			if (canApprove == false) {
+				logger.info("User UUID {} cannot approve report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
+				throw new WebApplicationException("User cannot approve report", Status.FORBIDDEN);
+			}
 
-				//Write the approval
-				ApprovalAction approval = new ApprovalAction();
-				approval.setReportUuid(r.getUuid());
-				approval.setStepUuid(step.getUuid());
-				approval.setPersonUuid(approver.getUuid());
-				approval.setType(ApprovalType.APPROVE);
-				engine.getApprovalActionDao().insert(approval);
+			//Write the approval action
+			ApprovalAction approval = new ApprovalAction();
+			approval.setReportUuid(r.getUuid());
+			approval.setStepUuid(step.getUuid());
+			approval.setPersonUuid(approver.getUuid());
+			approval.setType(ApprovalType.APPROVE);
+			engine.getApprovalActionDao().insert(approval);
 
-				//Update the report
-				r.setApprovalStepUuid(step.getNextStepUuid());
-				if (step.getNextStepUuid() == null) {
-					//Done with approvals, move to APPROVED (or CANCELLED) state!
-					r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.APPROVED);
-					r.setReleasedAt(Instant.now());
-				} else {
-					sendApprovalNeededEmail(r);
-				}
-				final int numRows = dao.update(r, approver);
-				if (numRows == 0) {
-					throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
-				}
+			//Update the report
+			r.setApprovalStepUuid(step.getNextStepUuid());
+			if (step.getNextStepUuid() == null) {
+				//Done with approvals, move to APPROVED (or CANCELLED) state!
+				r.setState((r.getCancelledReason() != null) ? ReportState.CANCELLED : ReportState.APPROVED);
+				r.setReleasedAt(Instant.now());
+			} else {
+				sendApprovalNeededEmail(r);
+			}
+			final int numRows = dao.update(r, approver);
+			if (numRows == 0) {
+				throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
+			}
 
-				//Add the comment
-				if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
-					comment.setReportUuid(r.getUuid());
-					comment.setAuthorUuid(approver.getUuid());
-					engine.getCommentDao().insert(comment);
-				}
+			//Add the comment
+			if (comment != null && comment.getText() != null && comment.getText().trim().length() > 0)  {
+				comment.setReportUuid(r.getUuid());
+				comment.setAuthorUuid(approver.getUuid());
+				engine.getCommentDao().insert(comment);
+			}
 
-				AnetAuditLogger.log("Report {} approved by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
-				return r;
+			AnetAuditLogger.log("Report {} approved by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
+			return r;
 		});
 	}
 
@@ -666,74 +679,55 @@ public class ReportResource {
 			throws InterruptedException, ExecutionException, Exception {
 		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
 		return dbHandle.inTransaction(h -> {
-				final Report r = dao.getByUuid(uuid, approver);
-				if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
-				ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
-				//Report author cannot reject own report, unless admin
-				if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
-					logger.info("Author {} cannot request changes to own report UUID {}", approver.getUuid(), r.getUuid());
-					throw new WebApplicationException("You cannot request changes to your own report", Status.FORBIDDEN);
+			final Report r = dao.getByUuid(uuid, approver);
+			if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
+			ApprovalStep step = r.loadApprovalStep(engine.getContext()).get();
+			//Report author cannot reject own report, unless admin
+			if (Objects.equals(r.getAuthorUuid(), approver.getUuid()) && !AuthUtils.isAdmin(approver)) {
+				logger.info("Author {} cannot request changes to own report UUID {}", approver.getUuid(), r.getUuid());
+				throw new WebApplicationException("You cannot request changes to your own report", Status.FORBIDDEN);
+			}
+			//Report can be rejected when pending approval or by an admin when pending approval or in approved state
+			if (step == null && !((r.getState() == ReportState.APPROVED) && AuthUtils.isAdmin(approver))) {
+				logger.info("Report UUID {} does not currently need an approval", r.getUuid());
+				throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
+			}
+			else if (step != null) {
+				//Verify that this user can reject for this step.
+				boolean canReject = engine.canUserRejectStep(engine.getContext(), approver.getUuid(), step.getUuid());
+				if (canReject == false) {
+					logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
+					throw new WebApplicationException("User cannot request changes to report", Status.FORBIDDEN);
 				}
-				//Report can be rejected when pending approval or by an admin when pending approval or in approved state
-				if (step == null && !((r.getState() == ReportState.APPROVED) && AuthUtils.isAdmin(approver))) {
-					logger.info("Report UUID {} does not currently need an approval", r.getUuid());
-					throw new WebApplicationException("This report is not pending approval", Status.BAD_REQUEST);
-				}
-				else if (step != null) {
-					//Verify that this user can reject for this step.
-					boolean canReject = engine.canUserRejectStep(engine.getContext(), approver.getUuid(), step.getUuid());
-					if (canReject == false) {
-						logger.info("User UUID {} cannot request changes to report UUID {} for step UUID {}", approver.getUuid(), r.getUuid(), step.getUuid());
-						throw new WebApplicationException("User cannot request changes to report", Status.FORBIDDEN);
-					}
-				}
-				if (step == null) {
-					final String orgUuid;
-					try {
-						final Organization org = engine.getOrganizationForPerson(engine.getContext(), r.getAuthorUuid()).get();
-						if (org == null) {
-							// Author missing Org, use the Default Approval Workflow
-							orgUuid = engine.getDefaultOrgUuid();
-						} else {
-							orgUuid = org.getUuid();
-						}
-					} catch (InterruptedException | ExecutionException e) {
-						throw new WebApplicationException("failed to load Organization for Author", e);
-					}
-					List<ApprovalStep> steps = null;
-					try {
-						steps = engine.getApprovalStepsForOrg(engine.getContext(), orgUuid).get();
-						throwExceptionNoApprovalSteps(steps);
-					} catch (InterruptedException | ExecutionException e) {
-						throw new WebApplicationException("failed to load Organization for Author", e);
-					}
-					step = steps.get(steps.size() - 1);
-				}
+			}
 
-				//Write the rejection
-				ApprovalAction approval = new ApprovalAction();
-				approval.setReportUuid(r.getUuid());
+			//Write the rejection action
+			ApprovalAction approval = new ApprovalAction();
+			approval.setReportUuid(r.getUuid());
+			if (step != null) {
+				//Step is null when an approved report is being rejected by an admin
 				approval.setStepUuid(step.getUuid());
-				approval.setPersonUuid(approver.getUuid());
-				approval.setType(ApprovalType.REJECT);
-				engine.getApprovalActionDao().insert(approval);
+			}
+			approval.setPersonUuid(approver.getUuid());
+			approval.setType(ApprovalType.REJECT);
+			engine.getApprovalActionDao().insert(approval);
 
-				//Update the report
-				r.setApprovalStep(null);
-				r.setState(ReportState.REJECTED);
-				final int numRows = dao.update(r, approver);
-				if (numRows == 0) {
-					throw new WebApplicationException("Couldn't process report change request", Status.NOT_FOUND);
-				}
+			//Update the report
+			r.setApprovalStep(null);
+			r.setState(ReportState.REJECTED);
+			final int numRows = dao.update(r, approver);
+			if (numRows == 0) {
+				throw new WebApplicationException("Couldn't process report change request", Status.NOT_FOUND);
+			}
 
-				//Add the comment
-				reason.setReportUuid(r.getUuid());
-				reason.setAuthorUuid(approver.getUuid());
-				engine.getCommentDao().insert(reason);
+			//Add the comment
+			reason.setReportUuid(r.getUuid());
+			reason.setAuthorUuid(approver.getUuid());
+			engine.getCommentDao().insert(reason);
 
-				sendReportRejectEmail(r, approver, reason);
-				AnetAuditLogger.log("report {} has requested changes by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
-				return r;
+			sendReportRejectEmail(r, approver, reason);
+			AnetAuditLogger.log("report {} has requested changes by {} (uuid: {})", r.getUuid(), approver.getName(), approver.getUuid());
+			return r;
 		});
 	}
 
@@ -770,40 +764,47 @@ public class ReportResource {
 	@POST
 	@Timed
 	@Path("/{uuid}/publish")
-	public Report publishReport(@Auth Person user, @PathParam("uuid") String uuid)
-			throws InterruptedException, ExecutionException, Exception {
+	public Report publishReport(@Auth Person user, @PathParam("uuid") String uuid) {
 		return publishReportCommon(user, uuid);
 	}
 
-	private Report publishReportCommon(Person user, String uuid)
-			throws InterruptedException, ExecutionException, Exception {
-		final Report r = dao.getByUuid(uuid, user);
-		if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
-		logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
+	private Report publishReportCommon(Person user, String uuid) {
+		final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+		return dbHandle.inTransaction(h -> {
+			final Report r = dao.getByUuid(uuid, user);
+			if (r == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
+			logger.debug("Attempting to publish report {}, which has advisor org {} and primary advisor {}", r, r.getAdvisorOrg(), r.getPrimaryAdvisor());
 
-		//Only admin may publish a report
-		if (!AuthUtils.isAdmin(user)) {
-			logger.info("User {} cannot publish report UUID {}", user.getUuid(), r.getUuid());
-			throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
-		}
+			//Only admin may publish a report
+			if (!AuthUtils.isAdmin(user)) {
+				logger.info("User {} cannot publish report UUID {}", user.getUuid(), r.getUuid());
+				throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
+			}
 
-		//Move the report to RELEASED state
-		r.setState(ReportState.RELEASED);
-		r.setReleasedAt(Instant.now());
-		final int numRows = dao.update(r, user);
-		if (numRows == 0) {
-			throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
-		}
-		sendReportReleasedEmail(r);
+			//Write the publication action
+			ApprovalAction approval = new ApprovalAction();
+			approval.setReportUuid(r.getUuid());
+			approval.setPersonUuid(user.getUuid());
+			approval.setType(ApprovalType.PUBLISH);
+			engine.getApprovalActionDao().insert(approval);
 
-		AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());
-		return r;
+			//Move the report to RELEASED state
+			r.setState(ReportState.RELEASED);
+			r.setReleasedAt(Instant.now());
+			final int numRows = dao.update(r, user);
+			if (numRows == 0) {
+				throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
+			}
+			sendReportReleasedEmail(r);
+
+			AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());
+			return r;
+		});
 	}
 
 	@GraphQLMutation(name="publishReport")
 	public Report publishReport(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="uuid") String uuid)
-			throws InterruptedException, ExecutionException, Exception {
+			@GraphQLArgument(name="uuid") String uuid) {
 		// GraphQL mutations *have* to return something
 		return publishReportCommon(DaoUtils.getUserFromContext(context), uuid);
 	}

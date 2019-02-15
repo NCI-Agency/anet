@@ -17,7 +17,7 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class ApprovalAction extends AbstractAnetBean {
 
-	public enum ApprovalType { APPROVE, REJECT }
+	public enum ApprovalType { APPROVE, REJECT, SUBMIT, PUBLISH }
 	
 	private ForeignObjectHolder<ApprovalStep> step = new ForeignObjectHolder<>();
 	private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();

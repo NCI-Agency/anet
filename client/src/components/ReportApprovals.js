@@ -9,6 +9,9 @@ import moment from 'moment'
 
 const APPROVE = 'APPROVE'
 const REJECT = 'REJECT'
+const SUBMIT = 'SUBMIT'
+const PUBLISH = 'PUBLISH'
+
 
 export default class ReportApprovals extends Component {
 
@@ -38,6 +41,10 @@ export default class ReportApprovals extends Component {
                 return {text: 'Approved', cssClass: 'btn-success approved'}
             case REJECT:
                 return {text: 'Changes requested', cssClass: 'btn-danger rejected'}
+            case SUBMIT:
+              return {text: 'Submitted', cssClass: 'btn-pending submitted'}
+            case PUBLISH:
+              return {text: 'Published', cssClass: 'btn-danger published'}
             default:
                 return {text: 'Unknown', cssClass: 'btn-pending default'}
         }
@@ -46,7 +53,7 @@ export default class ReportApprovals extends Component {
     renderFullApprovalView(report, title){
         return (
             <Fieldset id="approvals" className="approval-fieldset" title={title}>
-                { report.approvalStatus.filter(action => action.step).map(action =>
+                { report.approvalStatus.map(action =>
                     this.renderApprovalAction(action)
                 )}
             </Fieldset>
@@ -56,7 +63,7 @@ export default class ReportApprovals extends Component {
     renderCompactApprovalView(report, title){
         return (
             <Fieldset className="approval-fieldset compact" title={title}>
-                { report.approvalStatus.filter(action => action.step).map(action =>
+                { report.approvalStatus.map(action =>
                     this.renderCompactApprovalAction(action)
                 )}
             </Fieldset>
@@ -66,26 +73,22 @@ export default class ReportApprovals extends Component {
     renderApprovalAction(action) {
         let step = action.step
         let approvalButton = this.renderApprovalButton(action)
-        let approvalModal = this.renderApprovalModal(action)
         let approvalStatus = this.renderApprovalStatus(action)
         let approvalDetails = this.renderApprovalDetails(action)
         return (
-            <div className="approval-action" key={step.uuid}>
+            <div className="approval-action" key={action.createdAt}>
                 { approvalStatus }
                 { approvalButton }
                 { approvalDetails }
-                { approvalModal }
             </div>
         )
     }
 
     renderCompactApprovalAction(action) {
         let approvalButton = this.renderApprovalButton(action)
-        let approvalModal = this.renderApprovalModal(action)
         return (
-            <div className="approval-action" key={action.step.uuid}>
+            <div className="approval-action" key={action.createdAt}>
                 { approvalButton }
-                { approvalModal }
             </div>
         )
     }
@@ -111,11 +114,20 @@ export default class ReportApprovals extends Component {
 
     renderApprovalButton(action) {
         const step = action.step
+        const approvalModal = this.renderApprovalModal(action)
         const approvalTypeCss =  this.approvalType(action.type).cssClass
         return (
-            <Button className={approvalTypeCss + ' btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
-                <span>{step.name}</span>
-            </Button>
+          step ?
+            <React.Fragment>
+              <Button className={approvalTypeCss + ' btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
+                  <span>{step.name}</span>
+              </Button>
+              { approvalModal }
+            </React.Fragment>
+           :
+           <Button className={approvalTypeCss + ' btn-sm'}>
+             <span>{action.type}</span>
+           </Button>
         )
     }
 
@@ -133,21 +145,24 @@ export default class ReportApprovals extends Component {
         let step = action.step
         let approvalStatus = this.renderApprovalModalStatus(action)
         return (
-            <Modal show={step.showModal} onHide={this.closeApproversModal.bind(this, step)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Approvers for {step.name}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <ul>
-                    {step.approvers.map(position =>
-                        <li key={position.uuid}>
-                            <LinkTo position={position} /> - <LinkTo person={position.person} />
-                        </li>
-                    )}
-                    </ul>
-                </Modal.Body>
-                <Modal.Footer>{ approvalStatus }</Modal.Footer>
-            </Modal>
+          step ?
+          <Modal show={step.showModal} onHide={this.closeApproversModal.bind(this, step)}>
+              <Modal.Header closeButton>
+                  <Modal.Title>Approvers for {step.name}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                  <ul>
+                  {step.approvers.map(position =>
+                      <li key={position.uuid}>
+                          <LinkTo position={position} /> - <LinkTo person={position.person} />
+                      </li>
+                  )}
+                  </ul>
+              </Modal.Body>
+              <Modal.Footer>{ approvalStatus }</Modal.Footer>
+          </Modal>
+          :
+          null
         )
     }
 
