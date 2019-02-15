@@ -230,16 +230,6 @@ export default class Report extends Model {
 		}
 	}
 
-	getReportReleasedAt() {
-		if (this.approvalStatus) {
-			const approvalSteps = Object.assign([], this.approvalStatus)
-			const lastApprovalStep = approvalSteps.pop()
-			return !lastApprovalStep ? '' : lastApprovalStep.createdAt
-		} else {
-			return
-		}
-	}
-
 	addAttendee(newAttendee) {
 		if (!newAttendee || !newAttendee.uuid) {
 			return

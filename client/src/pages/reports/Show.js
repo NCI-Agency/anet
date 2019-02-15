@@ -204,7 +204,7 @@ class BaseReportShow extends Page {
 					{report.isReleased() &&
 						<Fieldset style={{textAlign: 'center' }}>
 							<h4 className="text-danger">This report is RELEASED.</h4>
-							<p>This report has been approved and released to the ANET community on {moment(report.getReportReleasedAt()).format(Settings.dateFormats.forms.withTime)}</p>
+							<p>This report has been approved and released to the ANET community on {moment(report.releasedAt).format(Settings.dateFormats.forms.withTime)}</p>
 						</Fieldset>
 					}
 
