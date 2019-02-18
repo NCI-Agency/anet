@@ -23,7 +23,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class OrganizationDao extends AnetBaseDao<Organization> {
+public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
 
 	private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgUuid"};
 	private static String tableName = "organizations";

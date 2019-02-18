@@ -1,8 +1,5 @@
 package mil.dds.anet.database;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
@@ -30,42 +27,7 @@ public abstract class AnetBaseDao<T extends AbstractAnetBean> implements IAnetDa
 
 	public int update(T obj) {
 		DaoUtils.setUpdateFields(obj);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateWithSubscriptions, obj);
-	}
-
-	private int updateWithSubscriptions(T obj) {
-		final int n = updateInternal(obj);
-		if (n > 0) {
-			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
-			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
-			subscriptionDao.updateSubscriptions(subscriptionUpdate);
-		}
-		return n;
-	}
-
-	@Override
-	public SubscriptionUpdate getSubscriptionUpdate(T obj) {
-		return null;
-	}
-
-	protected SubscriptionUpdate getCommonSubscriptionUpdate(AbstractAnetBean obj, String tableName, String paramName) {
-		if (obj == null) {
-			return null;
-		}
-		final SubscriptionUpdateStatement update = getCommonSubscriptionUpdateStatement(obj.getUuid(), tableName, paramName);
-		if (update == null) {
-			return null;
-		}
-		return new SubscriptionUpdate(obj.getUpdatedAt(), update);
-	}
-
-	protected SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(String uuid, String tableName, String paramName) {
-		if (uuid == null || tableName == null || paramName == null) {
-			return null;
-		}
-		final Map<String, Object> params = new HashMap<>();
-		params.put(paramName, uuid);
-		return new SubscriptionUpdateStatement(tableName, ":" + paramName, params);
+		return AnetObjectEngine.getInstance().executeInTransaction(this::updateInternal, obj);
 	}
 
 	public int delete(String uuid) {

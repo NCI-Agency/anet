@@ -29,7 +29,7 @@ import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class PositionDao extends AnetBaseDao<Position> {
+public class PositionDao extends AnetSubscribableObjectDao<Position> {
 
 	private static String[] fields = {"uuid", "name", "code", "createdAt",
 			"updatedAt", "organizationUuid", "currentPersonUuid", "type",

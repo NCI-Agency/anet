@@ -49,7 +49,7 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class ReportDao extends AnetBaseDao<Report> {
+public class ReportDao extends AnetSubscribableObjectDao<Report> {
 
 	private static final String[] fields = { "uuid", "state", "createdAt", "updatedAt", "engagementDate",
 			"locationUuid", "approvalStepUuid", "intent", "exsum", "atmosphere", "cancelledReason",

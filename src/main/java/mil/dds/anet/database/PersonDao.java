@@ -19,7 +19,7 @@ import mil.dds.anet.database.mappers.PersonPositionHistoryMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class PersonDao extends AnetBaseDao<Person> {
+public class PersonDao extends AnetSubscribableObjectDao<Person> {
 
 	private static String[] fields = {"uuid","name","status","role",
 			"emailAddress","phoneNumber","rank","biography",

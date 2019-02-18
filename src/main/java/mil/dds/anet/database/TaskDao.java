@@ -18,7 +18,7 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 @RegisterRowMapper(TaskMapper.class)
-public class TaskDao extends AnetBaseDao<Task> {
+public class TaskDao extends AnetSubscribableObjectDao<Task> {
 
 	private static final String tableName = "tasks";
 

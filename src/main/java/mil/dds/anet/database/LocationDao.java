@@ -16,7 +16,7 @@ import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
 
 @RegisterRowMapper(LocationMapper.class)
-public class LocationDao extends AnetBaseDao<Location> {
+public class LocationDao extends AnetSubscribableObjectDao<Location> {
 
 	private static final String tableName = "locations";
 

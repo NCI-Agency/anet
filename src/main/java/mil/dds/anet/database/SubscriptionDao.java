@@ -1,7 +1,5 @@
 package mil.dds.anet.database;
 
-import io.leangen.graphql.annotations.GraphQLRootContext;
-
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
@@ -28,7 +25,6 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterRowMapper(SubscriptionMapper.class)
 public class SubscriptionDao extends AnetBaseDao<Subscription> {
@@ -36,17 +32,11 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	private final IdBatcher<Subscription> idBatcher;
-	private final ForeignKeyBatcher<Subscription> subscribedObjectSubscriptionsBatcher;
 
 	public SubscriptionDao(Handle h) {
 		super(h, "Subscriptions", "subscriptions", "*", null);
 		final String idBatcherSql = "/* batch.getSubscriptionsByUuids */ SELECT * FROM subscriptions WHERE uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Subscription>(h, idBatcherSql, "uuids", new SubscriptionMapper());
-
-		final String subscribedObjectSubscriptionsBatcherSql = "/* batch.getSubscriptionsForSubscribedObject */ SELECT * FROM \"subscriptions\" "
-				+ "WHERE \"subscriptions\".\"subscribedObjectUuid\" IN ( <foreignKeys> ) "
-				+ "ORDER BY subscriptions.\"updatedAt\" DESC";
-		this.subscribedObjectSubscriptionsBatcher = new ForeignKeyBatcher<Subscription>(h, subscribedObjectSubscriptionsBatcherSql, "foreignKeys", new SubscriptionMapper(), "subscribedObjectUuid");
 	}
 
 	public AnetBeanList<Subscription> getAll(int pageNum, int pageSize) {
@@ -148,15 +138,6 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 				.bind("updatedAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt))
 				.bindMap(params)
 				.execute();
-	}
-
-	public CompletableFuture<List<Subscription>> getSubscriptionsForSubscribedObject(@GraphQLRootContext Map<String, Object> context, String subscribedObjectUuid) {
-		return new ForeignKeyFetcher<Subscription>()
-				.load(context, "subscribedObject.subscriptions", subscribedObjectUuid);
-	}
-
-	public List<List<Subscription>> getSubscribedObjectSubscriptions(List<String> foreignKeys) {
-		return subscribedObjectSubscriptionsBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	public boolean isSubscribedObject(Map<String, Object> context, String subscribedObjectUuid) {

@@ -13,6 +13,7 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -71,6 +72,18 @@ public class NoteDao extends AnetBaseDao<Note> {
 	}
 
 	@Override
+	public Note insert(Note obj) {
+		DaoUtils.setInsertFields(obj);
+		return AnetObjectEngine.getInstance().executeInTransaction(this::insertWithSubscriptions, obj);
+	}
+
+	private Note insertWithSubscriptions(Note obj) {
+		final Note note = insertInternal(obj);
+		updateSubscriptions(1, note);
+		return note;
+	}
+
+	@Override
 	public Note insertInternal(Note n) {
 		dbHandle.createUpdate(
 				"/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", text, \"createdAt\", \"updatedAt\") "
@@ -85,6 +98,18 @@ public class NoteDao extends AnetBaseDao<Note> {
 	}
 
 	@Override
+	public int update(Note obj) {
+		DaoUtils.setUpdateFields(obj);
+		return AnetObjectEngine.getInstance().executeInTransaction(this::updateWithSubscriptions, obj);
+	}
+
+	private int updateWithSubscriptions(Note obj) {
+		final int numRows = updateInternal(obj);
+		updateSubscriptions(numRows, obj);
+		return numRows;
+	}
+
+	@Override
 	public int updateInternal(Note n) {
 		deleteNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n)); // seems the easiest thing to do
 		insertNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
@@ -93,6 +118,19 @@ public class NoteDao extends AnetBaseDao<Note> {
 				.bindBean(n)
 				.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
 				.execute();
+	}
+
+	@Override
+	public int delete(String uuid) {
+		return AnetObjectEngine.getInstance().executeInTransaction(this::deleteWithSubscriptions, uuid);
+	}
+
+	private int deleteWithSubscriptions(String uuid) {
+		final Note note = getByUuid(uuid);
+		note.loadNoteRelatedObjects(AnetObjectEngine.getInstance().getContext()).join();
+		DaoUtils.setUpdateFields(note);
+		updateSubscriptions(1, note);
+		return deleteInternal(uuid);
 	}
 
 	@Override
@@ -136,15 +174,22 @@ public class NoteDao extends AnetBaseDao<Note> {
 		h.execute("/* deleteNoteRelatedObjects */ DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" = ?", uuid);
 	}
 
-	@Override
-	public SubscriptionUpdate getSubscriptionUpdate(Note obj) {
+	private void updateSubscriptions(int numRows, Note obj) {
+		if (numRows > 0) {
+			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
+			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+			subscriptionDao.updateSubscriptions(subscriptionUpdate);
+		}
+	}
+
+	private SubscriptionUpdate getSubscriptionUpdate(Note obj) {
 		final String paramTpl = "noteRelatedObject%1$d";
 		final List<SubscriptionUpdateStatement> stmts = new ArrayList<>();
 		final ListIterator<NoteRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
 		while (iter.hasNext()) {
 			final String param = String.format(paramTpl, iter.nextIndex());
 			final NoteRelatedObject nro = iter.next();
-			stmts.add(getCommonSubscriptionUpdateStatement(nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param));
+			stmts.add(AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param));
 		}
 		return new SubscriptionUpdate(obj.getUpdatedAt(), stmts);
 	}
