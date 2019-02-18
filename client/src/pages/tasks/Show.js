@@ -106,7 +106,7 @@ class BaseTaskShow extends Page {
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={
 							<React.Fragment>
-								{this.getSubscriptionIcon(task.isSubscribed, this.toggleSubscription)} {Settings.fields.task.shortLabel} {task.shortName}
+								{Page.getSubscriptionIcon(task.isSubscribed, this.toggleSubscription)} {Settings.fields.task.shortLabel} {task.shortName}
 							</React.Fragment>
 						} action={action} />
 						<Fieldset>
@@ -214,7 +214,7 @@ class BaseTaskShow extends Page {
 
 	toggleSubscription = () => {
 		const { task } = this.state
-		return this.toggleSubscriptionCommon('tasks', task.uuid, task.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('tasks', task.uuid, task.isSubscribed).then(data => {
 			task.isSubscribed = !task.isSubscribed
 			this.setState(task)
 		})

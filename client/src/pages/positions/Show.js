@@ -114,7 +114,7 @@ class BasePositionShow extends Page {
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={
 							<React.Fragment>
-								{this.getSubscriptionIcon(position.isSubscribed, this.toggleSubscription)} Position {position.name}
+								{Page.getSubscriptionIcon(position.isSubscribed, this.toggleSubscription)} Position {position.name}
 							</React.Fragment>
 						} action={action} />
 						<Fieldset>
@@ -314,7 +314,7 @@ class BasePositionShow extends Page {
 
 	toggleSubscription = () => {
 		const { position } = this.state
-		return this.toggleSubscriptionCommon('positions', position.uuid, position.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('positions', position.uuid, position.isSubscribed).then(data => {
 			position.isSubscribed = !position.isSubscribed
 			this.setState(position)
 		})

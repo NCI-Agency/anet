@@ -5,6 +5,7 @@ import GQL from 'graphqlapi'
 
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
+import Page from 'components/Page'
 import UltimatePagination from 'components/UltimatePagination'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
@@ -57,6 +58,7 @@ class BaseMySubscriptions extends Component {
 				<Table striped condensed hover responsive className="subscriptions_table">
 					<thead>
 						<tr>
+							<th />
 							<th>Updated</th>
 							<th>Subscription</th>
 						</tr>
@@ -64,7 +66,10 @@ class BaseMySubscriptions extends Component {
 					<tbody>
 						{subscriptions.map((subscription) => {
 							const updatedAt = moment(subscription.updatedAt).fromNow()
-							const objectType = pluralize.singular(subscription.subscribedObjectType)
+							let objectType = pluralize.singular(subscription.subscribedObjectType)
+							if (objectType === 'location') {
+								objectType = 'anetLocation'
+							}
 							const linkToProps = {
 								[objectType]: {
 									uuid: subscription.subscribedObjectUuid,
@@ -72,6 +77,7 @@ class BaseMySubscriptions extends Component {
 								}
 							}
 							return <tr key={subscription.uuid}>
+								<td>{Page.getSubscriptionIcon(true, this.toggleSubscription.bind(this, subscription.subscribedObjectUuid))}</td>
 								<td>{updatedAt}</td>
 								<td><LinkTo {...linkToProps} /></td>
 							</tr>
@@ -148,6 +154,14 @@ class BaseMySubscriptions extends Component {
 		this.setState({
 			pageNum: 0
 		}, () => this.fetchData())
+	}
+
+	toggleSubscription = (subscribedObjectUuid) => {
+		return Page.toggleSubscriptionCommon('locations', subscribedObjectUuid, true).then(data => {
+			this.setState({
+				pageNum: 0
+			}, () => this.fetchData())
+		})
 	}
 
 }

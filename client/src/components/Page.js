@@ -189,14 +189,14 @@ export default class Page extends Component {
 		return query
 	}
 
-	getSubscriptionIcon = (isSubscribed, onClick) => {
+	static getSubscriptionIcon = (isSubscribed, onClick) => {
 		const icon = isSubscribed ? IconNames.FEED_SUBSCRIBED : IconNames.FEED
 		// or perhaps: const icon = isSubscribed ? IconNames.EYE_ON : IconNames.EYE_OFF
 		const color = isSubscribed ? 'green' : 'grey'
 		return <Icon icon={icon} color={color} style={{verticalAlign: 'middle', cursor: 'pointer'}} onClick={onClick} />
 	}
 
-	toggleSubscriptionCommon = (subscribedObjectType, subscribedObjectUuid, isSubscribed) => {
+	static toggleSubscriptionCommon = (subscribedObjectType, subscribedObjectUuid, isSubscribed) => {
 		let graphql, variables, variableDef
 		if (isSubscribed) {
 			graphql = 'deleteObjectSubscription(uuid: $subscribedObjectUuid)'
