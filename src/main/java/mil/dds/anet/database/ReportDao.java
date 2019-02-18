@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -25,7 +26,10 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.ApprovalAction.ApprovalType;
 import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
@@ -44,6 +48,8 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
+import mil.dds.anet.emails.ReportReleasedEmail;
+import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -726,5 +732,45 @@ public class ReportDao implements IAnetDao<Report> {
 
 	public List<List<Task>> getTasks(List<String> foreignKeys) {
 		return tasksBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	private void sendReportReleasedEmail(Report r) {
+		AnetEmail email = new AnetEmail();
+		ReportReleasedEmail action = new ReportReleasedEmail();
+		action.setReport(r);
+		email.setAction(action);
+		try {
+			email.addToAddress(r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
+			AnetEmailWorker.sendEmailAsync(email);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Author", e);
+		}
+	}
+
+	/** NOTE: this should always be wrapped in a transaction! (If JDBI were able to handle nested calls to inTransaction, we would have
+	 * one inside this method, but it isn't.)
+	 * @param r the report to update, in its updated state
+	 * @param user the user attempting the update, for authorization purposes
+	 * @return the number of rows updated by the final update call (should be 1 in all cases).
+	 */
+	public int publish(Report r, Person user) {
+		//Write the publication action
+		ApprovalAction approval = new ApprovalAction();
+		approval.setReportUuid(r.getUuid());
+		if (user != null) {
+			//User is null when the publication action is being done automatically by a worker
+			approval.setPersonUuid(user.getUuid());
+		}
+		approval.setType(ApprovalType.PUBLISH);
+		AnetObjectEngine.getInstance().getApprovalActionDao().insert(approval);
+
+		//Move the report to RELEASED state
+		r.setState(ReportState.RELEASED);
+		r.setReleasedAt(Instant.now());
+		final int numRows = this.update(r, r.getAuthor());
+		if (numRows != 0) {
+			sendReportReleasedEmail(r);
+		}
+		return numRows;
 	}
 }

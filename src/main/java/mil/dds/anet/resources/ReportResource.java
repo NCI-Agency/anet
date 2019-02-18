@@ -81,7 +81,6 @@ import mil.dds.anet.emails.NewReportCommentEmail;
 import mil.dds.anet.emails.ReportEditedEmail;
 import mil.dds.anet.emails.ReportEmail;
 import mil.dds.anet.emails.ReportRejectionEmail;
-import mil.dds.anet.emails.ReportReleasedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
@@ -654,19 +653,6 @@ public class ReportResource {
 		return approveReportCommon(DaoUtils.getUserFromContext(context), uuid, comment);
 	}
 
-	private void sendReportReleasedEmail(Report r) {
-		AnetEmail email = new AnetEmail();
-		ReportReleasedEmail action = new ReportReleasedEmail();
-		action.setReport(r);
-		email.setAction(action);
-		try {
-			email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
-			AnetEmailWorker.sendEmailAsync(email);
-		} catch (InterruptedException | ExecutionException e) {
-			throw new WebApplicationException("failed to load Author", e);
-		}
-	}
-
 	/**
 	 * Rejects a report and moves it back to the author with state REJECTED.
 	 * @param uuid the Report UUID to reject
@@ -787,21 +773,10 @@ public class ReportResource {
 				throw new WebApplicationException("You cannot publish this report", Status.FORBIDDEN);
 			}
 
-			//Write the publication action
-			ApprovalAction approval = new ApprovalAction();
-			approval.setReportUuid(r.getUuid());
-			approval.setPersonUuid(user.getUuid());
-			approval.setType(ApprovalType.PUBLISH);
-			engine.getApprovalActionDao().insert(approval);
-
-			//Move the report to RELEASED state
-			r.setState(ReportState.RELEASED);
-			r.setReleasedAt(Instant.now());
-			final int numRows = dao.update(r, user);
+			final int numRows = dao.publish(r, user);
 			if (numRows == 0) {
 				throw new WebApplicationException("Couldn't process report approval", Status.NOT_FOUND);
 			}
-			sendReportReleasedEmail(r);
 
 			AnetAuditLogger.log("report {} published by admin UUID {}", r.getUuid(), user.getUuid());
 			return r;
