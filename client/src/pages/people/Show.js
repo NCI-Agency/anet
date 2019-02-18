@@ -88,7 +88,7 @@ class BasePersonShow extends Page {
 		let personPart = new GQL.Part(/* GraphQL */`
 			person(uuid:"${props.match.params.uuid}") {
 				uuid,
-				name, rank, role, status, isSubscribed, emailAddress, phoneNumber, domainUsername,
+				name, rank, role, status, isSubscribed, updatedAt, emailAddress, phoneNumber, domainUsername,
 				biography, country, gender, endOfTourDate,
 				position {
 					uuid,
@@ -406,7 +406,7 @@ class BasePersonShow extends Page {
 
 	toggleSubscription = () => {
 		const { person } = this.state
-		return Page.toggleSubscriptionCommon('people', person.uuid, person.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('people', person.uuid, person.isSubscribed, person.updatedAt).then(data => {
 			person.isSubscribed = !person.isSubscribed
 			this.setState(person)
 		})

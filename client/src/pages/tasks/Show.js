@@ -66,7 +66,7 @@ class BaseTaskShow extends Page {
 
 		const taskQuery = new GQL.Part(/* GraphQL */`
 			task(uuid:"${props.match.params.uuid}") {
-				uuid, shortName, longName, status, isSubscribed,
+				uuid, shortName, longName, status, isSubscribed, updatedAt,
 				customField, customFieldEnum1, customFieldEnum2,
 				plannedCompletion, projectedCompletion,
 				responsibleOrg { uuid, shortName, longName, identificationCode },
@@ -214,7 +214,7 @@ class BaseTaskShow extends Page {
 
 	toggleSubscription = () => {
 		const { task } = this.state
-		return Page.toggleSubscriptionCommon('tasks', task.uuid, task.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('tasks', task.uuid, task.isSubscribed, task.updatedAt).then(data => {
 			task.isSubscribed = !task.isSubscribed
 			this.setState(task)
 		})

@@ -108,7 +108,7 @@ class BaseOrganizationShow extends Page {
 	fetchData(props) {
 		let orgPart = new GQL.Part(/* GraphQL */`
 			organization(uuid:"${props.match.params.uuid}") {
-				uuid, shortName, longName, status, isSubscribed, identificationCode, type
+				uuid, shortName, longName, status, isSubscribed, updatedAt, identificationCode, type
 				parentOrg { uuid, shortName, longName, identificationCode }
 				childrenOrgs { uuid, shortName, longName, identificationCode },
 				positions {
@@ -347,7 +347,7 @@ class BaseOrganizationShow extends Page {
 
 	toggleSubscription = () => {
 		const { organization } = this.state
-		return Page.toggleSubscriptionCommon('organizations', organization.uuid, organization.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('organizations', organization.uuid, organization.isSubscribed, organization.updatedAt).then(data => {
 			organization.isSubscribed = !organization.isSubscribed
 			this.setState(organization)
 		})

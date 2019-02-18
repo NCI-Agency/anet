@@ -196,7 +196,7 @@ export default class Page extends Component {
 		return <Icon icon={icon} color={color} style={{verticalAlign: 'middle', cursor: 'pointer'}} onClick={onClick} />
 	}
 
-	static toggleSubscriptionCommon = (subscribedObjectType, subscribedObjectUuid, isSubscribed) => {
+	static toggleSubscriptionCommon = (subscribedObjectType, subscribedObjectUuid, isSubscribed, updatedAt) => {
 		let graphql, variables, variableDef
 		if (isSubscribed) {
 			graphql = 'deleteObjectSubscription(uuid: $subscribedObjectUuid)'
@@ -207,7 +207,8 @@ export default class Page extends Component {
 			variables = {
 				subscription: {
 					subscribedObjectType,
-					subscribedObjectUuid
+					subscribedObjectUuid,
+					updatedAt
 				}
 			}
 			variableDef = '($subscription: SubscriptionInput!)'

@@ -1,6 +1,7 @@
 package mil.dds.anet.database;
 
 import java.lang.invoke.MethodHandles;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +59,16 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
 	public Subscription getByUuid(String uuid) {
 		return getByIds(Arrays.asList(uuid)).get(0);
+	}
+
+	@Override
+	public Subscription insert(Subscription obj) {
+		final Instant updatedAt = obj.getUpdatedAt();
+		DaoUtils.setInsertFields(obj);
+		if (updatedAt != null) {
+			obj.setUpdatedAt(updatedAt); // keep supplied value
+		}
+		return AnetObjectEngine.getInstance().executeInTransaction(this::insertInternal, obj);
 	}
 
 	@Override

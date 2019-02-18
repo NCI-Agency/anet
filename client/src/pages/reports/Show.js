@@ -64,7 +64,7 @@ class BaseReportShow extends Page {
 				uuid, intent, engagementDate, atmosphere, atmosphereDetails
 				keyOutcomes, reportText, nextSteps, cancelledReason
 
-				state, isSubscribed
+				state, isSubscribed, updatedAt
 
 				location { uuid, name }
 				author {
@@ -766,7 +766,7 @@ class BaseReportShow extends Page {
 
 	toggleSubscription = () => {
 		const { report } = this.state
-		return Page.toggleSubscriptionCommon('reports', report.uuid, report.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('reports', report.uuid, report.isSubscribed, report.updatedAt).then(data => {
 			report.isSubscribed = !report.isSubscribed
 			this.setState(report)
 		})

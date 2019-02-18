@@ -59,7 +59,7 @@ class BaseLocationShow extends Page {
 
 		const locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
-				uuid, name, lat, lng, status, isSubscribed
+				uuid, name, lat, lng, status, isSubscribed, updatedAt
 				${GRAPHQL_NOTES_FIELDS}
 			}
 		`)
@@ -158,7 +158,7 @@ class BaseLocationShow extends Page {
 
 	toggleSubscription = () => {
 		const { location } = this.state
-		return Page.toggleSubscriptionCommon('locations', location.uuid, location.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('locations', location.uuid, location.isSubscribed, location.updatedAt).then(data => {
 			location.isSubscribed = !location.isSubscribed
 			this.setState(location)
 		})

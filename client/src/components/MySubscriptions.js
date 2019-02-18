@@ -169,7 +169,7 @@ class BaseMySubscriptions extends Component {
 	}
 
 	toggleSubscription = (subscribedObjectUuid) => {
-		return Page.toggleSubscriptionCommon('locations', subscribedObjectUuid, true).then(data => {
+		return Page.toggleSubscriptionCommon('locations', subscribedObjectUuid, true, null).then(data => {
 			this.setState({
 				pageNum: 0
 			}, () => this.fetchData())

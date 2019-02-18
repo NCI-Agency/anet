@@ -55,7 +55,7 @@ class BasePositionShow extends Page {
 	fetchData(props) {
 		return API.query(/* GraphQL */`
 			position(uuid:"${props.match.params.uuid}") {
-				uuid, name, type, status, isSubscribed, code,
+				uuid, name, type, status, isSubscribed, updatedAt, code,
 				organization { uuid, shortName, longName, identificationCode },
 				person { uuid, name, rank, role },
 				associatedPositions {
@@ -314,7 +314,7 @@ class BasePositionShow extends Page {
 
 	toggleSubscription = () => {
 		const { position } = this.state
-		return Page.toggleSubscriptionCommon('positions', position.uuid, position.isSubscribed).then(data => {
+		return Page.toggleSubscriptionCommon('positions', position.uuid, position.isSubscribed, position.updatedAt).then(data => {
 			position.isSubscribed = !position.isSubscribed
 			this.setState(position)
 		})
