@@ -101,6 +101,18 @@ properties:
             description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998 @ 13:45"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
             examples: ["D MMMM YYYY @ HH:mm"]
 
+  reportWorkflow:
+    type: object
+    additionalProperties: false
+    required: [nbOfHoursQuarantineApproved]
+    properties:
+      nbOfHoursQuarantineApproved:
+        type: integer
+        minimum: 0
+        title: The number of hours between the approval of the report and the automatic publication
+        description: Used in the UI of an approved report to show how many hours are left till publication.
+        examples: [24]
+
   fields:
     type: object
     additionalProperties: false
