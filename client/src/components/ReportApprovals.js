@@ -71,12 +71,12 @@ export default class ReportApprovals extends Component {
     }
 
     renderApprovalAction(action) {
-        let step = action.step
         let approvalButton = this.renderApprovalButton(action)
         let approvalStatus = this.renderApprovalStatus(action)
         let approvalDetails = this.renderApprovalDetails(action)
+        const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
         return (
-            <div className="approval-action" key={`${action.createdAt}-${action.step.uuid}`}>
+            <div className="approval-action" key={key}>
                 { approvalStatus }
                 { approvalButton }
                 { approvalDetails }
@@ -86,8 +86,9 @@ export default class ReportApprovals extends Component {
 
     renderCompactApprovalAction(action) {
         let approvalButton = this.renderApprovalButton(action)
+        const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
         return (
-            <div className="approval-action" key={`${action.createdAt}-${action.step.uuid}`}>
+            <div className="approval-action" key={key}>
                 { approvalButton }
             </div>
         )
