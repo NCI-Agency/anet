@@ -239,13 +239,13 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 	}
 
 	private int updateWithSubscriptions(Report r, Person user) {
-		final int n = updateInternal(r, user);
-		if (n > 0) {
+		final int numRows = updateInternal(r, user);
+		if (numRows > 0) {
 			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(r);
 			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
 			subscriptionDao.updateSubscriptions(subscriptionUpdate);
 		}
-		return n;
+		return numRows;
 	}
 
 	@Override
@@ -407,6 +407,14 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 	public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher().getReportSearcher()
 			.runSearch(query, dbHandle, user);
+	}
+
+	@Override
+	protected Report getObjectForSubscriptionDelete(String uuid) {
+		final Report obj = new Report();
+		final Report tmp = getByUuid(uuid);
+		obj.setState(tmp.getState());
+		return obj;
 	}
 
 	/*

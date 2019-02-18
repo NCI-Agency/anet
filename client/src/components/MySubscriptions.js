@@ -70,16 +70,28 @@ class BaseMySubscriptions extends Component {
 							if (objectType === 'location') {
 								objectType = 'anetLocation'
 							}
-							const linkToProps = {
-								[objectType]: {
-									uuid: subscription.subscribedObjectUuid,
-									...subscription.subscribedObject
+							let linkTo
+							if (subscription.subscribedObject) {
+								const linkToProps = {
+									[objectType]: {
+										uuid: subscription.subscribedObjectUuid,
+										...subscription.subscribedObject
+									}
 								}
+								linkTo = <LinkTo {...linkToProps} />
+							} else {
+								const linkToProps = {
+									componentClass: 'span',
+									[objectType]: {
+										uuid: subscription.subscribedObjectUuid
+									}
+								}
+								linkTo = <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
 							}
 							return <tr key={subscription.uuid}>
 								<td>{Page.getSubscriptionIcon(true, this.toggleSubscription.bind(this, subscription.subscribedObjectUuid))}</td>
 								<td>{updatedAt}</td>
-								<td><LinkTo {...linkToProps} /></td>
+								<td>{linkTo}</td>
 							</tr>
 						})}
 					</tbody>

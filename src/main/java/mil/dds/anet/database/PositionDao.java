@@ -365,6 +365,11 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
 	}
 
 	@Override
+	protected Position getObjectForSubscriptionDelete(String uuid) {
+		return new Position();
+	}
+
+	@Override
 	public int deleteInternal(String positionUuid) {
 		//if this position has any history, we'll just delete it
 		dbHandle.execute("DELETE FROM \"peoplePositions\" WHERE \"positionUuid\" = ?", positionUuid);

@@ -25,13 +25,36 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 	}
 
 	private int updateWithSubscriptions(T obj) {
-		final int n = updateInternal(obj);
-		if (n > 0) {
+		final int numRows = updateInternal(obj);
+		if (numRows > 0) {
 			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
 			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
 			subscriptionDao.updateSubscriptions(subscriptionUpdate);
 		}
-		return n;
+		return numRows;
+	}
+
+	@Override
+	public int delete(String uuid) {
+		return AnetObjectEngine.getInstance().executeInTransaction(this::deleteWithSubscriptions, uuid);
+	}
+
+	/* override this method if you want to update subscriptions on delete */
+	protected T getObjectForSubscriptionDelete(String uuid) {
+		return null;
+	}
+
+	private int deleteWithSubscriptions(String uuid) {
+		final T obj = getObjectForSubscriptionDelete(uuid);
+		final int numRows = deleteInternal(uuid);
+		if (numRows > 0 && obj != null) {
+			obj.setUuid(uuid);
+			DaoUtils.setUpdateFields(obj);
+			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
+			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
+			subscriptionDao.updateSubscriptions(subscriptionUpdate);
+		}
+		return numRows;
 	}
 
 	protected SubscriptionUpdate getCommonSubscriptionUpdate(AbstractAnetBean obj, String tableName, String paramName) {
