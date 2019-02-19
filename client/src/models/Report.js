@@ -163,8 +163,8 @@ export default class Report extends Model {
 		return Report.isPending(this.state)
 	}
 
-	static isReleased() {
-		return this.state === Report.STATE.RELEASED
+	static isReleased(state) {
+		return state === Report.STATE.RELEASED
 	}
 
 	isReleased() {
@@ -179,8 +179,8 @@ export default class Report extends Model {
 		return Report.isRejected(this.state)
 	}
 
-	static isCancelled() {
-		return this.state === Report.STATE.CANCELLED
+	static isCancelled(state) {
+		return state === Report.STATE.CANCELLED
 	}
 
 	isCancelled() {
