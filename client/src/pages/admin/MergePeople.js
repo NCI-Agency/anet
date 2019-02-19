@@ -5,7 +5,6 @@ import * as yup from 'yup'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
-import Breadcrumbs from 'components/Breadcrumbs'
 import {Grid, Col, Row, Alert, Button, Checkbox} from 'react-bootstrap'
 import Autocomplete from 'components/Autocomplete'
 import LinkTo from 'components/LinkTo'
@@ -61,7 +60,6 @@ class MergePeople extends Page {
 
 		return (
 			<div>
-				<Breadcrumbs items={[['Merge People Tool', '/admin/mergePeople']]} />
 				<Messages error={this.state.error} success={this.state.success} />
 
 				<h2 className="form-header">Merge People Tool</h2>

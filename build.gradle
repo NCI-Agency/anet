@@ -44,7 +44,7 @@ dependencies {
 
 	compile 'org.xerial:sqlite-jdbc:3.25.2' //If using SQLite
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
-	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.2' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
+	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.3' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
 	compile 'javax.mail:mail:1.4.7'
 	compile 'ch.qos.logback:logback-classic:1.2.3'
@@ -61,7 +61,7 @@ dependencies {
 	// For JSON schema validation
 	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.0'
 
-	compile 'com.microsoft.sqlserver:mssql-jdbc:7.1.4.jre8-preview'
+	compile 'com.microsoft.sqlserver:mssql-jdbc:7.2.1.jre8'
 
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.0.1'
@@ -311,7 +311,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.3.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.4.1'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }

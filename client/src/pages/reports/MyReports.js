@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import Breadcrumbs from 'components/Breadcrumbs'
 import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import Fieldset from 'components/Fieldset'
@@ -79,7 +78,6 @@ class BaseMyReports extends Page {
 
 	render() {
 		return <div>
-			<Breadcrumbs items={[['My Reports', window.location.pathname]]} />
 			<SubNav subnavElemId="reports-nav">
 				<Nav>
 					<AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>

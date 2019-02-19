@@ -4,7 +4,6 @@ import { mapDispatchToProps, propTypes as pagePropTypes } from 'components/Page'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link, LinkContainer} from 'react-router-bootstrap'
 import Settings from 'Settings'
-import LinkTo from 'components/LinkTo'
 import pluralize from 'pluralize'
 
 import {Organization, Person} from 'models'
@@ -107,9 +106,9 @@ class BaseNav extends Component {
 
 				<NavDropdown title={Settings.fields.advisor.org.allOrgName} id="advisor-organizations" active={inOrg && orgUuid !== myOrgUuid}>
 					{Organization.map(organizations, org =>
-						<LinkTo organization={org} componentClass={Link} showIcon={false} key={org.uuid} onClick={this.props.clearSearchQuery}>
+						<Link to={Organization.pathFor(org)} key={org.uuid} onClick={this.props.clearSearchQuery}>
 							<MenuItem>{org.shortName}</MenuItem>
-						</LinkTo>
+						</Link>
 					)}
 				</NavDropdown>
 

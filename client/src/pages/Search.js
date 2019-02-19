@@ -10,7 +10,6 @@ import * as FieldHelper from 'components/FieldHelper'
 
 import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
 import Messages from 'components/Messages'
@@ -256,8 +255,6 @@ class Search extends Page {
 					}
 					<Button onClick={this.openSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
 				</div>
-
-				<Breadcrumbs items={[['Search results', '']]} />
 
 				<Messages error={error} /> {/* success is shown through toast */}
 
