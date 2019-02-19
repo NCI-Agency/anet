@@ -244,7 +244,11 @@ task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) 
 
 task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
 	imageId = dockerPullDB.getImageId()
-	containerName = "anet-mssql-server"
+	if(project.hasProperty("testEnv")) {
+		containerName = "anet-mssql-test-server"
+	} else {
+		containerName = "anet-mssql-server"
+	}
 	description = "Creates an ANET MS SQL DB container named " + containerName
 	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	withEnvVar('ACCEPT_EULA', 'Y')
