@@ -20,7 +20,8 @@ run.environment("ANET_DB_NAME", isTestEnv ? "testAnet" : "devAnet")
 run.environment("ANET_DB_USERNAME", isTestEnv ? "anetTestUser" : "anetUser")
 run.environment("ANET_DB_PASSWORD", isTestEnv ? "Test-P@ssw0rd" : "Dev-P@ssw0rd")
 run.environment("ANET_SA_PASSWORD", "SA-P@ssw0rd")
-run.environment("ANET_DB_PORT", isTestEnv ? "1402" : "1401")
+run.environment("ANET_DB_PORT", "1433")
+run.environment("ANET_DB_EXPOSED_PORT", isTestEnv ? "1434" : "1433")
 
 // If defined, load alternatives for variables
 if (file('localSettings.gradle').exists()) {
@@ -109,8 +110,8 @@ String dbDriver = run.environment['DB_DRIVER'] ?: 'sqlite'
 String dbLoc = run.environment['ANET_DB_SERVER'] ?: 'localhost'
 String dbName = run.environment['ANET_DB_NAME'] ?: 'anet'
 
-if (run.environment['ANET_DB_PORT']) {
-	dbLoc = dbLoc + ":" + run.environment['ANET_DB_PORT'].toString()
+if (run.environment['ANET_DB_EXPOSED_PORT']) {
+	dbLoc = dbLoc + ":" + run.environment['ANET_DB_EXPOSED_PORT'].toString()
 }
 if (!run.environment['ANET_DB_USERNAME']) {
 	run.environment('ANET_DB_USERNAME', run.environment['USER'])
@@ -249,7 +250,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
 	withEnvVar('DB_USER', run.environment["ANET_DB_USERNAME"])
 	withEnvVar('DB_USER_PASSWORD', run.environment["ANET_DB_PASSWORD"])
-	portBindings = [run.environment["ANET_DB_PORT"]+"1433:"]
+	portBindings = [run.environment["ANET_DB_EXPOSED_PORT"]+":"+run.environment["ANET_DB_PORT"]]
 }
 
 // need to make this invoke dbCreateContainer if there is no anet-mssql-server and possibly get newer image if available
