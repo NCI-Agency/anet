@@ -2256,7 +2256,7 @@
 		<addForeignKeyConstraint
 			baseTableName="subscriptions" constraintName="FK_subscriptions_subscriber" baseColumnNames="subscriberUuid"
 			referencedTableName="positions" referencedColumnNames="uuid"
-			onDelete="NO ACTION" onUpdate="NO ACTION" />
+			onDelete="CASCADE" onUpdate="NO ACTION" />
 	</changeSet>
 
 	<changeSet id="add-subscriptions-unique-constraints" author="gjvoosten" dbms="mssql,postgresql">
