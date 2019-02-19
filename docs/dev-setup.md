@@ -76,6 +76,14 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
 1. Run `./gradlew build` to download all dependencies and build the project.
    - Some tests will fail if you are using SQLite, because it has a bad implementation of some timezone stuff. You'll need to use MSSQL to see all the tests passing.
 
+#### Initial Setup Test Database
+After successfully creating and building the MSSQL Docker container it is posisble to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
+1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
+1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
+1. Wait until the container is fully started, then run `./gradlew -PtestEnv dbMigrate`
+1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
+1. Seed initial data - MSSQL: `./gradlew -PtestEnv dbLoad`.
+
 _Note_: You can run the backend with either `gradle` or with Eclipse. Eclipse does not use gradle's configurations, so you'll have to set them up yourself.  You'll want to create a run configuration with:
    - Main Class: `mil.dds.anet.AnetApplication`
    - Program Arguments: `server anet.yml`
@@ -137,6 +145,11 @@ To log in as one of the base data users, when prompted for a username and passwo
     The web page will say ***Template Error***
 
 1. If you want to see the app running, continue to the [React Frontend](#react-frontend) instructions.
+
+### Testing
+1. Start with a clean database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. Run tests with a clean build: `./gradlew -Ptest cleanTest test`
+1. For client side E2E tests run the server against the test database: `./gradlew -PtestEnv run`
 
 ## React Frontend
 ### Initial Setup
