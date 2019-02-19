@@ -63,7 +63,7 @@ dependencies {
 	// For JSON schema validation
 	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.0'
 
-	compile 'com.microsoft.sqlserver:mssql-jdbc:7.2.0.jre8'
+	compile 'com.microsoft.sqlserver:mssql-jdbc:7.2.1.jre8'
 
 	// used for writing Excel documents
 	compile group: 'org.apache.poi', name: 'poi', version: '4.0.1'
@@ -333,7 +333,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.4.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.4.1'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }
