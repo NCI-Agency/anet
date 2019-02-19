@@ -24,8 +24,10 @@ run.environment("ANET_DB_PORT", "1433")
 run.environment("ANET_DB_EXPOSED_PORT", isTestEnv ? "1434" : "1433")
 
 // If defined, load alternatives for variables
-if (file('localSettings.gradle').exists()) {
+if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localSettings.gradle'
+} else if (isTestEnv && file('localTestSettings.gradle').exists()) {
+	apply from: 'localTestSettings.gradle'
 }
 
 // In this section you declare where to find the dependencies of your project
