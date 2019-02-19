@@ -755,21 +755,21 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 		// update author
 		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAuthorUuid(), "people", "report.authorUuid"));
 		// update attendees
-		new SubscriptionUpdateStatement("people",
+		update.stmts.add(new SubscriptionUpdateStatement("people",
 				"SELECT personUuid"
 				+ " FROM reportPeople"
 				+ " WHERE reportUuid = :reportUuid",
 				// param is already added above
-				Collections.emptyMap());
+				Collections.emptyMap()));
 		// update author position
-		new SubscriptionUpdateStatement("positions",
+		update.stmts.add(new SubscriptionUpdateStatement("positions",
 				"SELECT uuid"
 				+ " FROM positions"
 				+ " WHERE currentPersonUuid = :report.authorUuid",
 				// param is already added above
-				Collections.emptyMap());
+				Collections.emptyMap()));
 		// update attendee positions
-		new SubscriptionUpdateStatement("positions",
+		update.stmts.add(new SubscriptionUpdateStatement("positions",
 				"SELECT uuid"
 				+ " FROM positions"
 				+ " WHERE currentPersonUuid in ("
@@ -778,18 +778,18 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 				+ "   WHERE reportUuid = :reportUuid"
 				+ " )",
 				// param is already added above
-				Collections.emptyMap());
+				Collections.emptyMap()));
 		// update organizations
 		// TODO: is this correct?
 		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAdvisorOrgUuid(), "organizations", "report.advisorOrganizationUuid"));
 		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getPrincipalOrgUuid(), "organizations", "report.principalOrganizationUuid"));
 		// update tasks
-		new SubscriptionUpdateStatement("tasks",
+		update.stmts.add(new SubscriptionUpdateStatement("tasks",
 				"SELECT taskUuid"
 				+ " FROM reportTasks"
 				+ " WHERE reportUuid = :reportUuid",
 				// param is already added above
-				Collections.emptyMap());
+				Collections.emptyMap()));
 		// update location
 		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getLocationUuid(), "locations", "report.locationUuid"));
 
