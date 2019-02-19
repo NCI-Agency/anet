@@ -297,6 +297,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 			case RELEASED_AT:
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_releasedAt"));
 				break;
+			case UPDATED_AT:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_updatedAt"));
+				break;
 			case ENGAGEMENT_DATE:
 			default:
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_engagementDate"));

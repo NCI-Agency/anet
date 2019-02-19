@@ -260,6 +260,9 @@ public class SqliteReportSearcher implements IReportSearcher {
 			case RELEASED_AT:
 				sql.append("reports.\"releasedAt\"");
 				break;
+			case UPDATED_AT:
+				sql.append("reports.\"updatedAt\"");
+				break;
 			case CREATED_AT:
 			default:
 				sql.append("reports.\"createdAt\"");
