@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {Component} from 'react'
+import {OverlayTrigger, Tooltip} from 'react-bootstrap'
 import _get from 'lodash/get'
 import autobind from 'autobind-decorator'
 
@@ -190,10 +191,15 @@ export default class Page extends Component {
 	}
 
 	static getSubscriptionIcon = (isSubscribed, onClick) => {
+		const tooltip = isSubscribed ? "Click to unsubscribe" : "Click to subscribe"
 		const icon = isSubscribed ? IconNames.FEED_SUBSCRIBED : IconNames.FEED
 		// or perhaps: const icon = isSubscribed ? IconNames.EYE_ON : IconNames.EYE_OFF
 		const color = isSubscribed ? 'green' : 'grey'
-		return <Icon icon={icon} color={color} style={{verticalAlign: 'middle', cursor: 'pointer'}} onClick={onClick} />
+		return (
+			<OverlayTrigger placement="top" overlay={<Tooltip id="subscribe">{tooltip}</Tooltip>}>
+				<Icon icon={icon} color={color} style={{verticalAlign: 'middle', cursor: 'pointer'}} onClick={onClick} />
+			</OverlayTrigger>
+		)
 	}
 
 	static toggleSubscriptionCommon = (subscribedObjectType, subscribedObjectUuid, isSubscribed, updatedAt) => {
