@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
@@ -11,6 +12,7 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalAction;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -23,12 +25,15 @@ import mil.dds.anet.utils.DaoUtils;
 public class ReportPublicationWorker implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+	private final ReportDao dao;
 	private final Integer nbOfHoursQuarantineApproved;
-	private ReportDao dao;
+	private final Map<String, Object> context;
 
 	public ReportPublicationWorker(ReportDao dao, AnetConfiguration config) {
 		this.dao = dao;
 		this.nbOfHoursQuarantineApproved = (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved");
+		this.context = AnetObjectEngine.getInstance().getContext();
 	}
 
 	@Override
@@ -44,12 +49,12 @@ public class ReportPublicationWorker implements Runnable {
 
 	private void runInternal() {
 		//Get a list of all APPROVED reports
-		ReportSearchQuery query = new ReportSearchQuery();
+		final ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageSize(Integer.MAX_VALUE);
 		query.setState(Collections.singletonList(ReportState.APPROVED));
-		List<Report> reports = dao.search(query).getList();
-		for (Report r : reports) {
-			final List<ApprovalAction> approvalStatus = r.getApprovalStatus();
+		final List<Report> reports = dao.search(query, null, true).getList();
+		for (final Report r : reports) {
+			final List<ApprovalAction> approvalStatus = r.loadApprovalStatus(context).join();
 			if (approvalStatus.get(approvalStatus.size()-1).getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(this.nbOfHoursQuarantineApproved).toInstant())) {
 				//Publish the report
 				try { 
