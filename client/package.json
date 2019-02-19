@@ -38,7 +38,7 @@
     "formik": "^1.4.3",
     "git-describe": "^4.0.3",
     "graphql-cli": "^3.0.9",
-    "handlebars": "^4.0.12",
+    "handlebars": "^4.1.0",
     "handlebars-loader": "^1.7.1",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.0.7",
