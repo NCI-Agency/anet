@@ -65,4 +65,19 @@ describe('pagination reducer', () => {
 			},
 		)
 	})
+	it('should handle RESET_PAGINATION', () => {
+		expect(
+			reducer(
+				{
+					REPORT_DRAFT: { pageNum: 1 },
+					SEARCH_REPORT: { pageNum: 2 },
+				},
+				{
+					type: types.RESET_PAGINATION,
+				}
+			)
+		).toEqual(
+			{}
+		)
+	})
 })

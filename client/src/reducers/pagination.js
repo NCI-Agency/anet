@@ -1,4 +1,4 @@
-import { SET_PAGINATION } from '../constants/ActionTypes'
+import { SET_PAGINATION, RESET_PAGINATION } from '../constants/ActionTypes'
 
 const initialState = {}
 
@@ -12,6 +12,8 @@ const pages = (state = initialState, action) => {
 					pageNum
 				},
 			}
+		case RESET_PAGINATION:
+			return {}
 		default:
 			return state
 	}

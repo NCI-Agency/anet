@@ -9,7 +9,7 @@ import searchFilters from 'components/SearchFilters'
 import SEARCH_ICON from 'resources/search-alt.png'
 
 import { withRouter } from 'react-router-dom'
-import { resetPages, setSearchQuery } from 'actions'
+import { resetPages, resetPagination, setSearchQuery } from 'actions'
 import { connect } from 'react-redux'
 
 class SearchBar extends Component {
@@ -23,6 +23,7 @@ class SearchBar extends Component {
 		}),
 		searchObjectTypes: PropTypes.array,
 		resetPages: PropTypes.func,
+		resetPagination: PropTypes.func,
 	}
 
 	constructor(props) {
@@ -93,7 +94,7 @@ class SearchBar extends Component {
 	onSubmit(event) {
 		if (!this.state.showAdvancedSearch) {
 			// We only update the Redux state on submit
-			this.props.resetPages()
+			this.props.resetPagination()
 			this.props.setSearchQuery({text: this.state.searchTerms})
 			if (this.props.onSearchGoToSearchPage) {
 				this.props.history.push({
@@ -120,6 +121,7 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = (dispatch, ownProps) => ({
 	setSearchQuery: searchTerms => dispatch(setSearchQuery(searchTerms)),
 	resetPages: () => dispatch(resetPages()),
+	resetPagination: () => dispatch(resetPagination()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SearchBar))

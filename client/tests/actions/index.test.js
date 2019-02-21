@@ -14,6 +14,12 @@ describe('actions', () => {
     }
     expect(actions.setPagination('REPORT_DRAFT', pageNum)).toEqual(expectedAction)
   })
+  it('should create an action to `reset` the pagination', () => {
+    const expectedAction = {
+      type: types.RESET_PAGINATION,
+    }
+    expect(actions.resetPagination()).toEqual(expectedAction)
+  })
   it('should create an action to `reset` all the pages redux stores', () => {
     const expectedAction = {
       type: types.RESET_PAGES,

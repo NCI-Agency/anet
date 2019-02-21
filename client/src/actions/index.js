@@ -66,6 +66,10 @@ export const setPagination = (pageKey, pageNum) => ({
 	}
 })
 
+export const resetPagination = () => ({
+	type: types.RESET_PAGINATION,
+})
+
 export const resetPages = () => ({
 	type: types.RESET_PAGES
 })
