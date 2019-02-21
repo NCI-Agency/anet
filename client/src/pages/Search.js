@@ -143,7 +143,7 @@ class Search extends Page {
 	getSearchPart(type, query, pageNum = 0, pageSize = 10) {
 		const typeLower = type.toLowerCase()
 		let subQuery = Object.assign({}, query)
-		subQuery.pageNum = pageNum //(paginatedPart === undefined) ? pageNum : paginatedPart.pageNum
+		subQuery.pageNum = pageNum
 		subQuery.pageSize = pageSize
 		let config = SEARCH_CONFIG[typeLower]
 		if (config.sortBy) {
