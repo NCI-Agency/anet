@@ -281,7 +281,7 @@ task dockerStopDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStopCon
 }
 
 task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
-	if ((project.hasProperty("testEnv")) {
+	if (project.hasProperty("testEnv")){
 		description = "Removes anet-mssql-test-server container"
 		targetContainerId { "anet-mssql-test-server" }
 	} else {
@@ -291,7 +291,7 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 }
 
 task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	if ((project.hasProperty("testEnv")) {
+	if (project.hasProperty("testEnv")) {
 		description = "Waiting until the DB testserver has started"
 		targetContainerId { "anet-mssql-test-server" }
 	} else {
