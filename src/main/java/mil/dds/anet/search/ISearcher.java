@@ -20,4 +20,6 @@ public interface ISearcher {
 
 	public ISubscriptionSearcher getSubscriptionSearcher();
 
+	public ISubscriptionUpdateSearcher getSubscriptionUpdateSearcher();
+
 }

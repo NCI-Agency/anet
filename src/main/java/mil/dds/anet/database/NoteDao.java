@@ -181,21 +181,24 @@ public class NoteDao extends AnetBaseDao<Note> {
 
 	private void updateSubscriptions(int numRows, Note obj) {
 		if (numRows > 0) {
-			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
+			final List<SubscriptionUpdateGroup> subscriptionUpdates = getSubscriptionUpdates(obj);
 			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
-			subscriptionDao.updateSubscriptions(subscriptionUpdate);
+			for (final SubscriptionUpdateGroup subscriptionUpdate : subscriptionUpdates) {
+				subscriptionDao.updateSubscriptions(subscriptionUpdate);
+			}
 		}
 	}
 
-	private SubscriptionUpdate getSubscriptionUpdate(Note obj) {
+	private List<SubscriptionUpdateGroup> getSubscriptionUpdates(Note obj) {
 		final String paramTpl = "noteRelatedObject%1$d";
-		final List<SubscriptionUpdateStatement> stmts = new ArrayList<>();
+		final List<SubscriptionUpdateGroup> updates = new ArrayList<>();
 		final ListIterator<NoteRelatedObject> iter = obj.getNoteRelatedObjects().listIterator();
 		while (iter.hasNext()) {
 			final String param = String.format(paramTpl, iter.nextIndex());
 			final NoteRelatedObject nro = iter.next();
-			stmts.add(AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param));
+			final SubscriptionUpdateStatement stmt = AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param);
+			updates.add(new SubscriptionUpdateGroup(nro.getRelatedObjectType(), nro.getRelatedObjectUuid(), obj.getUpdatedAt(), stmt, true));
 		}
-		return new SubscriptionUpdate(obj.getUpdatedAt(), stmts);
+		return updates;
 	}
 }

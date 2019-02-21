@@ -26,7 +26,9 @@ public class SqliteSubscriptionSearcher extends AbstractSearcherBase implements 
 		args.put("positionUuid", DaoUtils.getUuid(position));
 		final StringBuilder sql = new StringBuilder("/* getSubscriptionsForPosition */ SELECT * FROM \"subscriptions\" "
 				+ "WHERE \"subscriptions\".\"subscriberUuid\" = :positionUuid "
-				+ "ORDER BY subscriptions.\"updatedAt\" DESC");
+				+ "ORDER BY subscriptions.\"updatedAt\" DESC,"
+				+ " subscriptions.\"subscribedObjectType\","
+				+ " subscriptions.\"subscribedObjectUuid\"");
 		sql.append(" LIMIT :limit OFFSET :offset)");
 		final AnetBeanList<Subscription> result = new AnetBeanList<>(query.getPageNum(), query.getPageSize(), new ArrayList<Subscription>());
 

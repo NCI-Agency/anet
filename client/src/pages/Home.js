@@ -10,7 +10,7 @@ import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
 import SavedSearchTable from 'components/SavedSearchTable'
 import searchFilters from 'components/SearchFilters'
-import MySubscriptions from 'components/MySubscriptions'
+import MySubscriptionUpdates from 'components/MySubscriptionUpdates'
 
 import GuidedTour from 'components/GuidedTour'
 import {userTour, superUserTour} from 'pages/HopscotchTour'
@@ -227,7 +227,7 @@ class BaseHome extends Page {
 					</Grid>
 				</Fieldset>
 
-				<MySubscriptions />
+				<MySubscriptionUpdates />
 
 				<Fieldset title="Saved searches">
 					<FormGroup controlId="savedSearchSelect">

@@ -9,6 +9,7 @@ import mil.dds.anet.search.sqlite.SqliteOrganizationSearcher;
 import mil.dds.anet.search.sqlite.SqlitePersonSearcher;
 import mil.dds.anet.search.sqlite.SqlitePositionSearcher;
 import mil.dds.anet.search.sqlite.SqliteSubscriptionSearcher;
+import mil.dds.anet.search.sqlite.SqliteSubscriptionUpdateSearcher;
 import mil.dds.anet.search.sqlite.SqliteTagSearcher;
 import mil.dds.anet.search.sqlite.SqliteTaskSearcher;
 
@@ -24,7 +25,8 @@ public class PostgresqlSearcher extends Searcher {
 			injector.getInstance(SqliteLocationSearcher.class),
 			injector.getInstance(SqliteTagSearcher.class),
 			injector.getInstance(SqliteAuthorizationGroupSearcher.class),
-			injector.getInstance(SqliteSubscriptionSearcher.class)
+			injector.getInstance(SqliteSubscriptionSearcher.class),
+			new SqliteSubscriptionUpdateSearcher()
 		);
 	}
 }

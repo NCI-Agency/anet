@@ -14,6 +14,7 @@ import Messages, {setMessages} from 'components/Messages'
 import AssignPositionModal from 'components/AssignPositionModal'
 import EditAssociatedPositionsModal from 'components/EditAssociatedPositionsModal'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
+import MySubscriptions from 'components/MySubscriptions'
 
 import GuidedTour from 'components/GuidedTour'
 import {personTour} from 'pages/HopscotchTour'
@@ -228,6 +229,10 @@ class BasePersonShow extends Page {
 								humanValue={<div dangerouslySetInnerHTML={{__html: person.biography}} />}
 							/>
 						</Fieldset>
+
+						{person.uuid === currentUser.uuid &&
+							<MySubscriptions uuid={person.position.uuid} />
+						}
 
 						<Fieldset title="Position" >
 							<Fieldset title="Current Position" id="current-position"

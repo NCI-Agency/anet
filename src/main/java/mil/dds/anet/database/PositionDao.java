@@ -422,7 +422,7 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
 	}
 
 	@Override
-	public SubscriptionUpdate getSubscriptionUpdate(Position obj) {
+	public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj) {
 		return getCommonSubscriptionUpdate(obj, tableName, "positionUuid");
 	}
 }

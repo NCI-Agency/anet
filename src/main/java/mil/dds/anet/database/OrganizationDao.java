@@ -154,7 +154,7 @@ public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
 	}
 
 	@Override
-	public SubscriptionUpdate getSubscriptionUpdate(Organization obj) {
+	public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj) {
 		return getCommonSubscriptionUpdate(obj, tableName, "organizationUuid");
 	}
 }

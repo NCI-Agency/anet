@@ -2300,4 +2300,27 @@
 		<addUniqueConstraint
 			tableName="subscriptions" constraintName="UQ_SubscriptionSubScriberSubscribedObject" columnNames="subscriberUuid, subscribedObjectType, subscribedObjectUuid" />
 	</changeSet>
+
+	<changeSet id="add_subscription_updatess" author="gjvoosten">
+		<createTable tableName="subscriptionUpdates">
+			<column name="subscriptionUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<!-- The next two columns combined act as a generic foreign key reference to a (table name, uuid)-tuple -->
+			<column name="updatedObjectType" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedObjectUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="isNote" type="boolean" defaultValue="false" />
+			<column name="createdAt" type="datetime" />
+		</createTable>
+
+		<addForeignKeyConstraint
+			baseTableName="subscriptionUpdates" constraintName="FK_subscriptionUpdates_subscription" baseColumnNames="subscriptionUuid"
+			referencedTableName="subscriptions" referencedColumnNames="uuid"
+			onDelete="CASCADE" onUpdate="NO ACTION" />
+	</changeSet>
+
 </databaseChangeLog>

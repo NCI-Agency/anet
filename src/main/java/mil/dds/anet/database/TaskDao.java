@@ -152,7 +152,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 	}
 
 	@Override
-	public SubscriptionUpdate getSubscriptionUpdate(Task obj) {
+	public SubscriptionUpdateGroup getSubscriptionUpdate(Task obj) {
 		return getCommonSubscriptionUpdate(obj, tableName, "taskUuid");
 	}
 }

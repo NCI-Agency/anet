@@ -229,7 +229,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 	private int updateWithSubscriptions(Report r, Person user) {
 		final int numRows = updateInternal(r, user);
 		if (numRows > 0) {
-			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(r);
+			final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(r);
 			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
 			subscriptionDao.updateSubscriptions(subscriptionUpdate);
 		}
@@ -827,12 +827,12 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 	}
 
 	@Override
-	public SubscriptionUpdate getSubscriptionUpdate(Report obj) {
+	public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj) {
 		if (obj.getState() != ReportState.PUBLISHED && obj.getState() != ReportState.CANCELLED) {
 			return null;
 		}
 
-		final SubscriptionUpdate update = getCommonSubscriptionUpdate(obj, tableName, "reportUuid");
+		final SubscriptionUpdateGroup update = getCommonSubscriptionUpdate(obj, tableName, "reportUuid");
 		// update author
 		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAuthorUuid(), "people", "report.authorUuid"));
 		// update attendees

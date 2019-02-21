@@ -26,7 +26,9 @@ public class MssqlSubscriptionSearcher extends AbstractSearcherBase implements I
 				+ ", count(*) over() as totalCount"
 				+ " FROM \"subscriptions\" "
 				+ "WHERE \"subscriptions\".\"subscriberUuid\" = :positionUuid "
-				+ "ORDER BY subscriptions.\"updatedAt\" DESC");
+				+ "ORDER BY subscriptions.\"updatedAt\" DESC,"
+				+ " subscriptions.\"subscribedObjectType\","
+				+ " subscriptions.\"subscribedObjectUuid\"");
 		final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, args);
 		return new AnetBeanList<Subscription>(sqlQuery, query.getPageNum(), query.getPageSize(), new SubscriptionMapper(), null);
 	}

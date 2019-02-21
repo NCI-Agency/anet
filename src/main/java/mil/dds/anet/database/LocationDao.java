@@ -122,7 +122,7 @@ public class LocationDao extends AnetSubscribableObjectDao<Location> {
 	//TODO: Don't delete any location if any references exist. 
 
 	@Override
-	public SubscriptionUpdate getSubscriptionUpdate(Location obj) {
+	public SubscriptionUpdateGroup getSubscriptionUpdate(Location obj) {
 		return getCommonSubscriptionUpdate(obj, tableName, "locationUuid");
 	}
 }

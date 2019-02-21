@@ -16,14 +16,14 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 		super(entityTag, tableName, fieldList, orderBy);
 	}
 
-	public abstract SubscriptionUpdate getSubscriptionUpdate(T obj);
+	public abstract SubscriptionUpdateGroup getSubscriptionUpdate(T obj);
 
 	@Override
 	public int update(T obj) {
 		DaoUtils.setUpdateFields(obj);
 		final int numRows = updateInternal(obj);
 		if (numRows > 0) {
-			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
+			final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
 			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
 			subscriptionDao.updateSubscriptions(subscriptionUpdate);
 		}
@@ -37,7 +37,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 		if (numRows > 0 && obj != null) {
 			obj.setUuid(uuid);
 			DaoUtils.setUpdateFields(obj);
-			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
+			final SubscriptionUpdateGroup subscriptionUpdate = getSubscriptionUpdate(obj);
 			final SubscriptionDao subscriptionDao = AnetObjectEngine.getInstance().getSubscriptionDao();
 			subscriptionDao.updateSubscriptions(subscriptionUpdate);
 		}
@@ -49,7 +49,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 		return null;
 	}
 
-	protected SubscriptionUpdate getCommonSubscriptionUpdate(AbstractAnetBean obj, String tableName, String paramName) {
+	protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractAnetBean obj, String tableName, String paramName) {
 		if (obj == null) {
 			return null;
 		}
@@ -57,7 +57,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 		if (update == null) {
 			return null;
 		}
-		return new SubscriptionUpdate(obj.getUpdatedAt(), update);
+		return new SubscriptionUpdateGroup(tableName, obj.getUuid(), obj.getUpdatedAt(), update);
 	}
 
 	protected static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(String uuid, String tableName, String paramName) {
