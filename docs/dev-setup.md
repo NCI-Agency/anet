@@ -84,6 +84,11 @@ After successfully creating and building the MSSQL Docker container it is posisb
 1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
 1. Seed initial data - MSSQL: `./gradlew -PtestEnv dbLoad`.
 
+##### Override Default Gradle Settings
+Override the default gradle settings if you want to run your tests on a different database:
+   1. Open a command line in the `anet` directory that was retrieved from github.
+   1. Create a new empty file at `localTestSettings.gradle`. (`touch localTestSettings.gradle` on linux/mac).  This will be a file for all of your local test settings and passwords that should not be checked into GitHub.
+
 _Note_: You can run the backend with either `gradle` or with Eclipse. Eclipse does not use gradle's configurations, so you'll have to set them up yourself.  You'll want to create a run configuration with:
    - Main Class: `mil.dds.anet.AnetApplication`
    - Program Arguments: `server anet.yml`
