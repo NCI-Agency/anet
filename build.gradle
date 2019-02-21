@@ -244,7 +244,7 @@ task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) 
 
 task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
 	imageId = dockerPullDB.getImageId()
-	if(project.hasProperty("testEnv")) {
+	if (project.hasProperty("testEnv")) {
 		containerName = "anet-mssql-test-server"
 	} else {
 		containerName = "anet-mssql-server"
@@ -261,7 +261,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 
 // need to make this invoke dbCreateContainer if there is no anet-mssql-server and possibly get newer image if available
 task dockerStartDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
-	if(project.hasProperty("testEnv")) {
+	if (project.hasProperty("testEnv")) {
 		description = "Starts anet-mssql-test-server container"
 		targetContainerId { "anet-mssql-test-server" }
 	} else {
@@ -271,7 +271,7 @@ task dockerStartDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStartC
 }
 
 task dockerStopDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
-	if(project.hasProperty("testEnv")) {
+	if (project.hasProperty("testEnv")) {
 		description = "Stops anet-mssql-test-server container"
 		targetContainerId { "anet-mssql-test-server" }
 	} else {
@@ -281,7 +281,7 @@ task dockerStopDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStopCon
 }
 
 task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
-	if(project.hasProperty("testEnv")) {
+	if ((project.hasProperty("testEnv")) {
 		description = "Removes anet-mssql-test-server container"
 		targetContainerId { "anet-mssql-test-server" }
 	} else {
@@ -291,7 +291,7 @@ task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemov
 }
 
 task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	if(project.hasProperty("testEnv")) {
+	if ((project.hasProperty("testEnv")) {
 		description = "Waiting until the DB testserver has started"
 		targetContainerId { "anet-mssql-test-server" }
 	} else {
