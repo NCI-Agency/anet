@@ -32,7 +32,7 @@ class BaseOrganizationTasks extends Component {
 		return <Fieldset id="tasks" title={pluralize(taskShortLabel)} action={
 			isAdminUser && <LinkTo task={Task.pathForNew({responsibleOrgUuid: org.uuid})} button>Create {taskShortLabel}</LinkTo>
 		}>
-			{this.pagination()}
+			{tasks.length > 0 && this.pagination()}
 			<Table>
 				<thead>
 					<tr>
