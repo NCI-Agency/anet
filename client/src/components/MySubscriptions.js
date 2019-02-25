@@ -89,7 +89,7 @@ class BaseMySubscriptions extends Component {
 								linkTo = <LinkTo {...linkToProps}>[object was deleted]</LinkTo>
 							}
 							return <tr key={subscription.uuid}>
-								<td>{Page.getSubscriptionIcon(true, this.toggleSubscription.bind(this, subscription.subscribedObjectUuid))}</td>
+								<td>{Page.getSubscriptionIcon(true, this.toggleSubscription.bind(this, subscription.subscribedObjectType, subscription.subscribedObjectUuid))}</td>
 								<td>{updatedAt}</td>
 								<td>{linkTo}</td>
 							</tr>
@@ -168,8 +168,8 @@ class BaseMySubscriptions extends Component {
 		}, () => this.fetchData())
 	}
 
-	toggleSubscription = (subscribedObjectUuid) => {
-		return Page.toggleSubscriptionCommon('locations', subscribedObjectUuid, true, null).then(data => {
+	toggleSubscription = (subscribedObjectType, subscribedObjectUuid) => {
+		return Page.toggleSubscriptionCommon(subscribedObjectType, subscribedObjectUuid, true, null).then(data => {
 			this.setState({
 				pageNum: 0
 			}, () => this.fetchData())
