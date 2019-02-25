@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.ApprovalAction;
+import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -54,7 +54,7 @@ public class ReportPublicationWorker implements Runnable {
 		query.setState(Collections.singletonList(ReportState.APPROVED));
 		final List<Report> reports = dao.search(query, null, true).getList();
 		for (final Report r : reports) {
-			final List<ApprovalAction> approvalStatus = r.loadApprovalStatus(context).join();
+			final List<ReportAction> approvalStatus = r.loadApprovalStatus(context).join();
 			if (approvalStatus.get(approvalStatus.size()-1).getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(this.nbOfHoursQuarantineApproved).toInstant())) {
 				//Publish the report
 				try { 

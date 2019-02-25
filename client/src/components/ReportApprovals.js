@@ -18,7 +18,7 @@ export default class ReportApprovals extends Component {
     constructor(props) {
         super(props)
         this.state = { }
-        this.renderApprovalAction = this.renderApprovalAction.bind(this)
+        this.renderReportAction = this.renderReportAction.bind(this)
         this.showApproversModal = this.showApproversModal.bind(this)
         this.closeApproversModal = this.closeApproversModal.bind(this)
     }
@@ -54,7 +54,7 @@ export default class ReportApprovals extends Component {
         return (
             <Fieldset id="approvals" className="approval-fieldset" title={title}>
                 { report.approvalStatus.map(action =>
-                    this.renderApprovalAction(action)
+                    this.renderReportAction(action)
                 )}
             </Fieldset>
         )
@@ -64,13 +64,13 @@ export default class ReportApprovals extends Component {
         return (
             <Fieldset className="approval-fieldset compact" title={title}>
                 { report.approvalStatus.map(action =>
-                    this.renderCompactApprovalAction(action)
+                    this.renderCompactReportAction(action)
                 )}
             </Fieldset>
         )
     }
 
-    renderApprovalAction(action) {
+    renderReportAction(action) {
         let approvalButton = this.renderApprovalButton(action)
         let approvalStatus = this.renderApprovalStatus(action)
         let approvalDetails = this.renderApprovalDetails(action)
@@ -84,7 +84,7 @@ export default class ReportApprovals extends Component {
         )
     }
 
-    renderCompactApprovalAction(action) {
+    renderCompactReportAction(action) {
         let approvalButton = this.renderApprovalButton(action)
         const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
         return (

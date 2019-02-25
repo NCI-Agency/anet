@@ -26,10 +26,10 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.ApprovalAction.ApprovalType;
+import mil.dds.anet.beans.ReportAction.ApprovalType;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.AnetEmail;
-import mil.dds.anet.beans.ApprovalAction;
+import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
@@ -426,8 +426,8 @@ public class ReportDao implements IAnetDao<Report> {
 				//Delete comments
 				h.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", report.getUuid());
 				
-				//Delete \"approvalActions\"
-				h.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportUuid\" = ?", report.getUuid());
+				//Delete \"reportActions\"
+				h.execute("/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?", report.getUuid());
 
 				//Delete relation to authorization groups
 				h.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", report.getUuid());
@@ -759,14 +759,14 @@ public class ReportDao implements IAnetDao<Report> {
 	 */
 	public int publish(Report r, Person user) {
 		//Write the publication action
-		ApprovalAction approval = new ApprovalAction();
+		ReportAction approval = new ReportAction();
 		approval.setReportUuid(r.getUuid());
 		if (user != null) {
 			//User is null when the publication action is being done automatically by a worker
 			approval.setPersonUuid(user.getUuid());
 		}
 		approval.setType(ApprovalType.PUBLISH);
-		AnetObjectEngine.getInstance().getApprovalActionDao().insert(approval);
+		AnetObjectEngine.getInstance().getReportActionDao().insert(approval);
 
 		//Move the report to RELEASED state
 		r.setState(ReportState.RELEASED);

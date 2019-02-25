@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.ApprovalAction;
+import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
@@ -309,14 +309,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(pending.getList().size()).isGreaterThan(0);
 
 		//Check on Report status for who needs to approve
-		List<ApprovalAction> approvalStatus = returned.getApprovalStatus();
+		List<ReportAction> approvalStatus = returned.getApprovalStatus();
 		assertThat(approvalStatus.size()).isEqualTo(2);
-		ApprovalAction approvalAction = approvalStatus.get(0);
-		assertThat(approvalAction.getPerson()).isNull(); //Because this hasn't been approved yet.
-		assertThat(approvalAction.getCreatedAt()).isNull();
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
+		ReportAction reportAction = approvalStatus.get(0);
+		assertThat(reportAction.getPerson()).isNull(); //Because this hasn't been approved yet.
+		assertThat(reportAction.getCreatedAt()).isNull();
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
+		reportAction = approvalStatus.get(1);
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Reject the report
 		variables = new HashMap<>();
@@ -365,12 +365,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//check on report status to see that it got approved.
 		approvalStatus = returned.getApprovalStatus();
 		assertThat(approvalStatus.size()).isEqualTo(2);
-		approvalAction = approvalStatus.get(0);
-		assertThat(approvalAction.getPersonUuid()).isEqualTo(approver1.getUuid());
-		assertThat(approvalAction.getCreatedAt()).isNotNull();
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
+		reportAction = approvalStatus.get(0);
+		assertThat(reportAction.getPersonUuid()).isEqualTo(approver1.getUuid());
+		assertThat(reportAction.getCreatedAt()).isNotNull();
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
+		reportAction = approvalStatus.get(1);
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Post a comment on the report because it's awesome
 		variables = new HashMap<>();

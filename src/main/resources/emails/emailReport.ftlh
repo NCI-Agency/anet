@@ -477,14 +477,14 @@ ${sender.name} sent you a report from ANET:
         <span class="title-text">Approval State</span>
       </h2>
       <fieldset class="approval-fieldset">
-        <#list approvalStatus as approvalAction>
-          <#if !approvalAction.type??>
+        <#list approvalStatus as reportAction>
+          <#if !reportAction.type??>
             <#assign type = "Pending">
             <#assign styleClass = "btn-pending default">
-          <#elseif approvalAction.type == "APPROVE">
+          <#elseif reportAction.type == "APPROVE">
             <#assign type = "Approved">
             <#assign styleClass = "btn-success approved">
-          <#elseif approvalAction.type == "REJECT">
+          <#elseif reportAction.type == "REJECT">
             <#assign type = "Changes requested">
             <#assign styleClass = "btn-danger rejected">
           <#else>
@@ -495,19 +495,19 @@ ${sender.name} sent you a report from ANET:
             <div class="approval-status">
               ${type}
             </div>
-            <#if approvalAction.loadStep(context).get()??>
-              <#assign step = approvalAction.getStep()>
+            <#if reportAction.loadStep(context).get()??>
+              <#assign step = reportAction.getStep()>
               <button type="button" class="${styleClass} btn-sm btn btn-default">
                 <span>
                   ${(step.name)!}
                 </span>
               </button>
-              <#if approvalAction.loadPerson(context).get()??>
-                <#assign person = approvalAction.getPerson()>
+              <#if reportAction.loadPerson(context).get()??>
+                <#assign person = reportAction.getPerson()>
                 <div class="approval-details">
                   <span>By ${(person.name)!}</span><br>
-                  <small>On ${(dateFormatter.format(approvalAction.createdAt))!}
-                  <br>At ${(approvalAction.createdAt.toString('h:mm a'))!}</small>
+                  <small>On ${(dateFormatter.format(reportAction.createdAt))!}
+                  <br>At ${(reportAction.createdAt.toString('h:mm a'))!}</small>
                 </div>
               </#if>
             </#if>

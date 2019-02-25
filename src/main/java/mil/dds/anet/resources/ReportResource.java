@@ -54,8 +54,8 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdvisorReportsEntry;
 import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
-import mil.dds.anet.beans.ApprovalAction;
-import mil.dds.anet.beans.ApprovalAction.ApprovalType;
+import mil.dds.anet.beans.ReportAction;
+import mil.dds.anet.beans.ReportAction.ApprovalType;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
@@ -497,11 +497,11 @@ public class ReportResource {
 			}
 
 			//Write the submission action
-			ApprovalAction action = new ApprovalAction();
+			ReportAction action = new ReportAction();
 			action.setReportUuid(r.getUuid());
 			action.setPersonUuid(user.getUuid());
 			action.setType(ApprovalType.SUBMIT);
-			engine.getApprovalActionDao().insert(action);
+			engine.getReportActionDao().insert(action);
 
 			//Push the report into the first step of this workflow
 			r.setApprovalStep(steps.get(0));
@@ -605,12 +605,12 @@ public class ReportResource {
 			}
 
 			//Write the approval action
-			ApprovalAction approval = new ApprovalAction();
+			ReportAction approval = new ReportAction();
 			approval.setReportUuid(r.getUuid());
 			approval.setStepUuid(step.getUuid());
 			approval.setPersonUuid(approver.getUuid());
 			approval.setType(ApprovalType.APPROVE);
-			engine.getApprovalActionDao().insert(approval);
+			engine.getReportActionDao().insert(approval);
 
 			//Update the report
 			r.setApprovalStepUuid(step.getNextStepUuid());
@@ -694,7 +694,7 @@ public class ReportResource {
 			}
 
 			//Write the rejection action
-			ApprovalAction approval = new ApprovalAction();
+			ReportAction approval = new ReportAction();
 			approval.setReportUuid(r.getUuid());
 			if (step != null) {
 				//Step is null when an approved report is being rejected by an admin
@@ -702,7 +702,7 @@ public class ReportResource {
 			}
 			approval.setPersonUuid(approver.getUuid());
 			approval.setType(ApprovalType.REJECT);
-			engine.getApprovalActionDao().insert(approval);
+			engine.getReportActionDao().insert(approval);
 
 			//Update the report
 			r.setApprovalStep(null);

@@ -185,7 +185,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 					.execute();
 
 				// update approvals this person might have done
-				h.createUpdate("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+				h.createUpdate("UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 					.bind("winnerUuid", winner.getUuid())
 					.bind("loserUuid", loser.getUuid())
 					.execute();

@@ -2234,4 +2234,16 @@
 			onDelete="NO ACTION" onUpdate="NO ACTION" />
 	</changeSet>
 
+	<changeSet id="renameApprovalActions-to-ReportActions-sqlite-combined-tables" author="maradragan" dbms="mssql,postgresql">
+		<comment>Rename approvalActions table to reportActions.</comment>
+		<!-- reportActions -->
+		<renameTable
+			newTableName="reportActions"
+			oldTableName="approvalActions" />
+		<rollback>
+			<renameTable
+				newTableName="approvalActions"
+				oldTableName="reportActions" />
+		</rollback>
+	</changeSet>
 </databaseChangeLog>
