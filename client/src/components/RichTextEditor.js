@@ -10,6 +10,7 @@ class RichTextEditor extends Component {
 	static propTypes = {
 		value: PropTypes.string,
 		onChange: PropTypes.func,
+		onHandleBlur: PropTypes.func,
 		className: PropTypes.string,
 	}
 
@@ -153,6 +154,7 @@ class RichTextEditor extends Component {
 						handleKeyCommand={this.handleKeyCommand}
 						keyBindingFn={this.mapKeyToEditorCommand}
 						onChange={this.onChange}
+						onBlur={this.props.onHandleBlur}
 						placeholder="..."
 						ref="editor"
 						spellCheck

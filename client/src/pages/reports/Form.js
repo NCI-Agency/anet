@@ -184,15 +184,17 @@ class BaseReportForm extends Component {
 				setFieldValue,
 				setFieldTouched,
 				values,
+				touched,
 				submitForm,
 				resetForm
 			}) => {
 				// need up-to-date copies of these in the autosave handler
 				this.autoSaveSettings.dirty = dirty
 				this.autoSaveSettings.values = values
+				this.autoSaveSettings.touched = touched
 				if (!this.autoSaveSettings.timeoutId) {
 					// Schedule the auto-save timer
-					const autosaveHandler = () => this.autoSave({setFieldValue, resetForm})
+					const autosaveHandler = () => this.autoSave({setFieldValue, setFieldTouched, resetForm})
 					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
 				}
 				//Only the author can delete a report, and only in DRAFT.
@@ -351,33 +353,37 @@ class BaseReportForm extends Component {
 								addFieldLabel="Attendees"
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
-								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
+								onChange={value => {
+									this.updateAttendees(setFieldValue, 'attendees', value)
+									setFieldTouched('attendees', true)
+								}}
 								shortcutsTitle="Recent Attendees"
 								shortcuts={recents.persons}
 								renderExtraCol={true}
 							/>
 						</Fieldset>
 
-						{!values.cancelled &&
-							<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
-								<MultiSelector
-									items={values.tasks}
-									objectType={Task}
-									queryParams={{status: Task.STATUS.ACTIVE}}
-									placeholder={`Start typing to search for ${pluralize(Settings.fields.task.shortLabel)}...`}
-									fields={Task.autocompleteQuery}
-									template={Task.autocompleteTemplate}
-									addFieldName='tasks'
-									addFieldLabel={Settings.fields.task.shortLabel}
-									addon={TASKS_ICON}
-									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
-									onChange={value => setFieldValue('tasks', value)}
-									shortcutsTitle={`Recent ${pluralize(Settings.fields.task.shortLabel)}`}
-									shortcuts={recents.tasks}
-									renderExtraCol={true}
-								/>
-							</Fieldset>
-						}
+						<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
+							<MultiSelector
+								items={values.tasks}
+								objectType={Task}
+								queryParams={{status: Task.STATUS.ACTIVE}}
+								placeholder={`Start typing to search for ${pluralize(Settings.fields.task.shortLabel)}...`}
+								fields={Task.autocompleteQuery}
+								template={Task.autocompleteTemplate}
+								addFieldName='tasks'
+								addFieldLabel={Settings.fields.task.shortLabel}
+								addon={TASKS_ICON}
+								renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
+								onChange={value => {
+									setFieldValue('tasks', value)
+									setFieldTouched('tasks', true)
+								}}
+								shortcutsTitle={`Recent ${pluralize(Settings.fields.task.shortLabel)}`}
+								shortcuts={recents.tasks}
+								renderExtraCol={true}
+							/>
+						</Fieldset>
 
 						<Fieldset title={!values.cancelled ? "Meeting discussion" : "Next steps and details"} id="meeting-details">
 							{!values.cancelled &&
@@ -403,13 +409,15 @@ class BaseReportForm extends Component {
 							/>
 
 							<Field
-								id="reportText"
 								name="reportText"
 								label={Settings.fields.report.reportText}
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('reportText', value)}
 								widget={
-									<RichTextEditor className="reportTextField" />
+									<RichTextEditor
+										className="reportTextField"
+										onHandleBlur={() => setFieldTouched('reportText', true)}
+									/>
 								}
 							/>
 
@@ -517,7 +525,12 @@ class BaseReportForm extends Component {
 					Object.assign(newValues, response[operation])
 					// After successful autosave, reset the form with the new values in order to make sure the dirty
 					// prop is also reset (otherwise we would get a blocking navigation warning)
+					const touched = _cloneDeep(this.autoSaveSettings.touched) // save previous touched
 					form.resetForm(newValues)
+					Object.entries(touched).forEach(([field, value]) =>
+						// re-set touched so we keep messages
+						form.setFieldTouched(field, value)
+					)
 					this.autoSaveSettings.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
 					this.setState({autoSavedAt: moment()})
 					toast.success('Your report has been automatically saved')
