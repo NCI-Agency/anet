@@ -2,6 +2,7 @@ import Settings from 'Settings'
 import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
+import utils from 'utils'
 import {Person, Position} from 'models'
 
 import * as yup from 'yup'
@@ -68,7 +69,14 @@ export default class Report extends Model {
 			))
 			.default('')
 			.label(Settings.fields.report.atmosphereDetails),
-		location: yup.object().nullable().default({}),
+		location: yup.object().nullable()
+			.test('location', 'location error',
+				// can't use arrow function here because of binding to 'this'
+				function(location) {
+					return _isEmpty(location) ? this.createError({message: 'You must provide the Location'}) : true
+				}
+			)
+			.default({}),
 		attendees: yup.array().nullable()
 			.test('primary-principal', 'primary principal error',
 				// can't use arrow function here because of binding to 'this'
@@ -77,19 +85,37 @@ export default class Report extends Model {
 					return err ? this.createError({message: err}) : true
 				}
 			)
-			.test('primary-advisor', 'primary advisor error',
-				// can't use arrow function here because of binding to 'this'
-				function(attendees) {
-					const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
-					return err ? this.createError({message: err}) : true
-				}
-			)
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.test('primary-advisor', 'primary advisor error',
+					// can't use arrow function here because of binding to 'this'
+					function(attendees) {
+						const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
+						return err ? this.createError({message: err}) : true
+					}
+				)
+			))
 			.default([]),
 		principalOrg: yup.object().nullable().default({}),
 		advisorOrg: yup.object().nullable().default({}),
-		tasks: yup.array().nullable().default([]),
+		tasks: yup.array().nullable()
+			.test('tasks', 'tasks error',
+				// can't use arrow function here because of binding to 'this'
+				function(tasks) {
+					return _isEmpty(tasks) ? this.createError({message: `You must provide at least one ${Settings.fields.task.shortLabel}`}) : true
+				}
+			)
+			.default([]),
 		comments: yup.array().nullable().default([]),
-		reportText: yup.string().nullable().default('')
+		reportText: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.test('reportText', 'reportText error',
+					// can't use arrow function here because of binding to 'this'
+					function(reportText) {
+						return utils.isEmptyHtml(reportText) ? this.createError({message: `You must provide the ${Settings.fields.report.reportText}`}) : true
+					}
+				)
+			))
+			.default('')
 			.label(Settings.fields.report.reportText),
 		nextSteps: yup.string().nullable().required(`You must provide a brief summary of the ${Settings.fields.report.nextSteps}`)
 			.default('')
@@ -108,14 +134,6 @@ export default class Report extends Model {
 	}).concat(Model.yupSchema)
 
 	static yupWarningSchema = yup.object().shape({
-		state: yup.string().nullable().default(''),
-		tasks: yup.array().nullable()
-			.when('state', (state, schema) => (
-				(Report.isReleased(state) || Report.isCancelled(state))
-					? schema.nullable()
-					: schema.required(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement.
-						Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
-			)),
 		reportSensitiveInformation: yup.object().nullable().default({}),
 		authorizationGroups: yup.array().nullable()
 			.when(['reportSensitiveInformation', 'reportSensitiveInformation.text'], (reportSensitiveInformation, reportSensitiveInformationText, schema) => (

@@ -3,6 +3,7 @@ import * as changeCase from 'change-case'
 import parseAddressList from 'email-addresses'
 import pluralize from 'pluralize'
 import decodeQuery from 'querystring/decode'
+import _isEmpty from 'lodash/isEmpty'
 import encodeQuery from 'querystring/encode'
 
 import Settings from 'Settings'
@@ -110,6 +111,18 @@ export default {
 
 	getReference: function(obj) {
 		return (obj && obj.uuid) ? {uuid: obj.uuid} : {}
+	},
+
+	isEmptyHtml: function(html) {
+		let text
+		if (document && typeof document.createElement === 'function') {
+			const tmpDiv = document.createElement("div")
+			tmpDiv.innerHTML = html
+			text = tmpDiv.textContent || tmpDiv.innerText || ''
+		} else {
+			text = html // no document context, what else can we do?
+		}
+		return _isEmpty(text)
 	},
 }
 
