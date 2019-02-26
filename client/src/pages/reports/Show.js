@@ -724,7 +724,7 @@ class BaseReportShow extends Page {
 	}
 
 	renderPublishButton = (disabled, cancelHandler, size, id) => {
-		return this.renderValidationButton(false, disabled, "publishing", "Publish report?", "Publish", "Publish anyway", this.publishReport, "Cancel publish", cancelHandler, size, id)
+		return this.renderValidationButton(false, disabled, "publishing", "Publish report?", "Publish", "Publish anyway", this.publishReport, "Cancel publish", cancelHandler, size, id, "publish-button")
 	}
 
 	renderValidationButton = (warnApproveOwnReport, disabled, submitType, title, label, confirmText, confirmHandler, cancelText, cancelHandler, size, id, className) => {
