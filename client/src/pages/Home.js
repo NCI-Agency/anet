@@ -110,7 +110,7 @@ class BaseHome extends Page {
 				orgUuid: currentUser.position.organization.uuid,
 				includeOrgChildren: false,
 				createdAtStart: LAST_WEEK,
-				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
+				state: [Report.STATE.PUBLISHED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			},
 		}
 	}
@@ -138,7 +138,7 @@ class BaseHome extends Page {
 	mySensitiveInfo() {
 		return {
 			title: "Reports with sensitive information",
-			query: { state: [Report.STATE.RELEASED], sensitiveInfo: true },
+			query: { state: [Report.STATE.PUBLISHED], sensitiveInfo: true },
 		}
 	}
 

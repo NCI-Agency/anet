@@ -201,10 +201,10 @@ class BaseReportShow extends Page {
 					<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 					<Messages success={this.state.success} error={this.state.error} />
 
-					{report.isReleased() &&
+					{report.isPublished() &&
 						<Fieldset style={{textAlign: 'center' }}>
-							<h4 className="text-danger">This report is RELEASED.</h4>
-							<p>This report has been approved and released to the ANET community on {moment(report.releasedAt).format(Settings.dateFormats.forms.withTime)}</p>
+							<h4 className="text-danger">This report is PUBLISHED.</h4>
+							<p>This report has been approved and published to the ANET community on {moment(report.releasedAt).format(Settings.dateFormats.forms.withTime)}</p>
 						</Fieldset>
 					}
 

@@ -19,7 +19,7 @@ export default class Report extends Model {
 		DRAFT: 'DRAFT',
 		PENDING_APPROVAL: 'PENDING_APPROVAL',
 		APPROVED: 'APPROVED',
-		RELEASED: 'RELEASED',
+		PUBLISHED: 'PUBLISHED',
 		REJECTED: 'REJECTED',
 		CANCELLED: 'CANCELLED',
 		FUTURE: 'FUTURE',
@@ -164,12 +164,12 @@ export default class Report extends Model {
 		return Report.isPending(this.state)
 	}
 
-	static isReleased(state) {
-		return state === Report.STATE.RELEASED
+	static isPublished(state) {
+		return state === Report.STATE.PUBLISHED
 	}
 
-	isReleased() {
-		return Report.isReleased(this.state)
+	isPublished() {
+		return Report.isPublished(this.state)
 	}
 
 	static isRejected(state) {

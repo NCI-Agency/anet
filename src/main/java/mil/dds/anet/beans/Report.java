@@ -28,7 +28,7 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Report extends AbstractAnetBean {
 
-	public enum ReportState { DRAFT, PENDING_APPROVAL, RELEASED, REJECTED, CANCELLED, FUTURE, APPROVED }
+	public enum ReportState { DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, FUTURE, APPROVED }
 	public enum Atmosphere { POSITIVE, NEUTRAL, NEGATIVE }
 	public enum ReportCancelledReason { CANCELLED_BY_ADVISOR,
 										CANCELLED_BY_PRINCIPAL,
@@ -443,8 +443,8 @@ public class Report extends AbstractAnetBean {
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		return engine.getReportActionDao().getActionsForReport(context, uuid)
 				.thenApply(actions -> {
-			if (state == ReportState.APPROVED || state == ReportState.RELEASED) {
-				//For APPROVED and RELEASED reports, show the whole workflow of actions
+			if (state == ReportState.APPROVED || state == ReportState.PUBLISHED) {
+				//For APPROVED and PUBLISHED reports, show the whole workflow of actions
 				approvalStatus = actions;
 			} else {
 				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();
@@ -475,7 +475,7 @@ public class Report extends AbstractAnetBean {
 		// TODO: do we still need this method?
 		//Compact to only get the most recent event for each step.
 		if (actions.size() == 0) {
-			//Magically released, probably imported this way.
+			//Magically published, probably imported this way.
 			return actions;
 		}
 		ReportAction last = actions.get(0);

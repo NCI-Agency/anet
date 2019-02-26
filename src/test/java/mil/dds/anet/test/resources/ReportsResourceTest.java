@@ -804,7 +804,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(searchResults.getList()).isNotEmpty();
 		final int numCancelled = searchResults.getTotalCount();
 
-		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.RELEASED));
+		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.PUBLISHED));
 		searchResults = graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput",
 				FIELDS, query, new TypeReference<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
@@ -1114,7 +1114,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		variables.put("startDate", startDate.toEpochMilli());
 		variables.put("endDate", endDate.toEpochMilli());
 		final List<RollupGraph> startGraph = graphQLHelper.getObjectList(admin,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		//Submit the report
@@ -1144,26 +1144,26 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
 		assertThat(published).isNotNull();
 
-		//Verify report is in RELEASED state.
+		//Verify report is in PUBLISHED state.
 		r = graphQLHelper.getObjectById(admin, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
-		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
+		assertThat(r.getState()).isEqualTo(ReportState.PUBLISHED);
 
 		//Check on the daily rollup graph now.
 		final List<RollupGraph> endGraph = graphQLHelper.getObjectList(admin,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		final Position pos = admin.loadPosition();
 		final Organization org = pos.loadOrganization(context).get();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
-		//Admin's organization should have one more report RELEASED only if it is not in the non-reporting orgs
+		//Admin's organization should have one more report PUBLISHED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
 		final String orgUuid = org.getUuid();
 		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
+		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
 		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
+		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
 		assertThat(startCt).isEqualTo(endCt - diff);
 	}
 
@@ -1192,7 +1192,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		variables.put("startDate", startDate.toEpochMilli());
 		variables.put("endDate", endDate.toEpochMilli());
 		final List<RollupGraph> startGraph = graphQLHelper.getObjectList(elizabeth,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		//Submit the report
@@ -1222,27 +1222,27 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
 		assertThat(published).isNotNull();
 
-		//Verify report is in RELEASED state.
+		//Verify report is in PUBLISHED state.
 		r = graphQLHelper.getObjectById(elizabeth, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
-		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
+		assertThat(r.getState()).isEqualTo(ReportState.PUBLISHED);
 
 		//Check on the daily rollup graph now.
 		final List<RollupGraph> endGraph = graphQLHelper.getObjectList(elizabeth,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		final Position pos = elizabeth.loadPosition();
 		final Organization org = pos.loadOrganization(context).get();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
-		//Elizabeth's organization should have one more report RELEASED only if it is not in the non-reporting orgs
+		//Elizabeth's organization should have one more report PUBLISHED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
 		final Organization po = org.loadParentOrg(context).get();
 		final String orgUuid = po.getUuid();
 		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
+		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
 		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
+		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
 		assertThat(startCt).isEqualTo(endCt - diff);
 	}
 
@@ -1372,7 +1372,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 	private ReportSearchQuery setupQueryEngagementDayOfWeek() {
 		final ReportSearchQuery query = new ReportSearchQuery();
-		query.setState(ImmutableList.of(ReportState.RELEASED));
+		query.setState(ImmutableList.of(ReportState.PUBLISHED));
 		return query;
 	}
 

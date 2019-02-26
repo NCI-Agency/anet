@@ -14,7 +14,7 @@ public class TestData {
 		RollupGraph rollupGraph = new RollupGraph();
 		rollupGraph.setCancelled(0);
 		rollupGraph.setOrg(createOrganization());
-		rollupGraph.setReleased(1);
+		rollupGraph.setPublished(1);
 		
 		return rollupGraph;
 	}

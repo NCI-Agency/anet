@@ -28,21 +28,24 @@ class BaseMyReports extends Page {
 			future: null,
 			pending: null,
 			approved: null,
-			released: null
+			published: null,
+			cancelled: null
 		}
 		this.pageNums = {
 			draft: 0,
 			future: 0,
 			pending: 0,
 			approved: 0,
-			released: 0
+			published: 0,
+			cancelled: 0
 		}
 		this.partFuncs = {
 			draft: this.getPart.bind(this, 'draft', [Report.STATE.DRAFT, Report.STATE.REJECTED]),
 			future: this.getPart.bind(this, 'future', [Report.STATE.FUTURE]),
 			pending: this.getPart.bind(this, 'pending', [Report.STATE.PENDING_APPROVAL]),
 			approved: this.getPart.bind(this, 'approved', [Report.STATE.APPROVED]),
-			released: this.getPart.bind(this, 'released', [Report.STATE.RELEASED, Report.STATE.CANCELLED])
+			published: this.getPart.bind(this, 'published', [Report.STATE.PUBLISHED]),
+			cancelled: this.getPart.bind(this, 'cancelled', [Report.STATE.CANCELLED])
 		}
 	}
 
@@ -73,15 +76,17 @@ class BaseMyReports extends Page {
 		let approved = this.partFuncs.approved(authorUuid)
 		let draft = this.partFuncs.draft(authorUuid)
 		let future = this.partFuncs.future(authorUuid)
-		let released = this.partFuncs.released(authorUuid)
+		let published = this.partFuncs.published(authorUuid)
+		let cancelled = this.partFuncs.cancelled(authorUuid)
 
-		return GQL.run([pending, approved, draft, future, released]).then(data =>
+		return GQL.run([pending, approved, draft, future, published, cancelled]).then(data =>
 			this.setState({
 				pending: data.pending,
 				approved: data.approved,
 				draft: data.draft,
-				released: data.released,
-				future: data.future
+				future: data.future,
+				published: data.published,
+				cancelled: data.cancelled
 			})
 		)
 	}
@@ -95,6 +100,7 @@ class BaseMyReports extends Page {
 					<AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
 					<AnchorNavItem to="approved">Approved reports</AnchorNavItem>
 					<AnchorNavItem to="published-reports">Published reports</AnchorNavItem>
+					<AnchorNavItem to="cancelled-reports">Cancelled reports</AnchorNavItem>
 				</Nav>
 			</SubNav>
 
@@ -102,7 +108,8 @@ class BaseMyReports extends Page {
 			{this.renderSection('Upcoming Engagements', this.state.future, this.goToPage.bind(this, 'future'), 'upcoming-engagements')}
 			{this.renderSection("Pending Approval", this.state.pending, this.goToPage.bind(this, 'pending'), 'pending-approval')}
 			{this.renderSection("Approved", this.state.approved, this.goToPage.bind(this, 'approved'), 'approved')}
-			{this.renderSection("Published Reports", this.state.released, this.goToPage.bind(this, 'released'), 'published-reports')}
+			{this.renderSection("Published Reports", this.state.published, this.goToPage.bind(this, 'published'), 'published-reports')}
+			{this.renderSection("Cancelled Reports", this.state.cancelled, this.goToPage.bind(this, 'cancelled'), 'cancelled-reports')}
 		</div>
 	}
 

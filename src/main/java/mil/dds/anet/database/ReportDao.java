@@ -48,7 +48,7 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
-import mil.dds.anet.emails.ReportReleasedEmail;
+import mil.dds.anet.emails.ReportPublishedEmail;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -518,7 +518,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append(" %6$s");
 			sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
 			sql.append(" AND positions.type = :positionAdvisor");
-			sql.append(" AND reports.state IN ( :reportReleased, :reportPending, :reportDraft )");
+			sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
 			sql.append(" AND reports.\"createdAt\" BETWEEN :startDate and :endDate");
 			sql.append(" %11$s");
 
@@ -551,7 +551,7 @@ public class ReportDao implements IAnetDao<Report> {
 			sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
 			sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
 			sql.append(" AND positions.type = :positionAdvisor");
-			sql.append(" AND reports.state IN ( :reportReleased, :reportPending, :reportDraft )");
+			sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
 			sql.append(" AND reports.\"engagementDate\" BETWEEN :startDate and :endDate");
 			sql.append(" %11$s");
 
@@ -608,7 +608,7 @@ public class ReportDao implements IAnetDao<Report> {
 		sqlArgs.put("positionAdvisor", Position.PositionType.ADVISOR.ordinal());
 		sqlArgs.put("reportDraft", ReportState.DRAFT.ordinal());
 		sqlArgs.put("reportPending", ReportState.PENDING_APPROVAL.ordinal());
-		sqlArgs.put("reportReleased", ReportState.RELEASED.ordinal());
+		sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
 
 		return dbHandle.createQuery(String.format(sql.toString(), fmtArgs))
 			.bindMap(sqlArgs)
@@ -702,7 +702,7 @@ public class ReportDao implements IAnetDao<Report> {
 			final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
 			if (!rollup.keySet().contains(parentOrgUuid)) {
 				final Map<ReportState, Integer> orgBar = new HashMap<ReportState, Integer>();
-				orgBar.put(ReportState.RELEASED, 0);
+				orgBar.put(ReportState.PUBLISHED, 0);
 				orgBar.put(ReportState.CANCELLED, 0);
 				rollup.put(parentOrgUuid, orgBar);
 			}
@@ -713,7 +713,7 @@ public class ReportDao implements IAnetDao<Report> {
 			Map<ReportState,Integer> values = entry.getValue();
 			RollupGraph bar = new RollupGraph();
 			bar.setOrg(orgMap.get(entry.getKey()));
-			bar.setReleased(Utils.orIfNull(values.get(ReportState.RELEASED), 0));
+			bar.setPublished(Utils.orIfNull(values.get(ReportState.PUBLISHED), 0));
 			bar.setCancelled(Utils.orIfNull(values.get(ReportState.CANCELLED), 0));
 			result.add(bar);
 		}
@@ -738,9 +738,9 @@ public class ReportDao implements IAnetDao<Report> {
 		return tasksBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	private void sendReportReleasedEmail(Report r) {
+	private void sendReportPublisheddEmail(Report r) {
 		AnetEmail email = new AnetEmail();
-		ReportReleasedEmail action = new ReportReleasedEmail();
+		ReportPublishedEmail action = new ReportPublishedEmail();
 		action.setReport(r);
 		email.setAction(action);
 		try {
@@ -769,11 +769,11 @@ public class ReportDao implements IAnetDao<Report> {
 		AnetObjectEngine.getInstance().getReportActionDao().insert(approval);
 
 		//Move the report to RELEASED state
-		r.setState(ReportState.RELEASED);
+		r.setState(ReportState.PUBLISHED);
 		r.setReleasedAt(Instant.now());
 		final int numRows = this.update(r, r.getAuthor());
 		if (numRows != 0) {
-			sendReportReleasedEmail(r);
+			sendReportPublisheddEmail(r);
 		}
 		return numRows;
 	}

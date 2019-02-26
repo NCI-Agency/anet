@@ -417,11 +417,11 @@ public class ReportResource {
 			}
 			break;
 		case APPROVED:
-		case RELEASED:
+		case PUBLISHED:
 		case CANCELLED:
-			AnetAuditLogger.log("attempt to edit released report {} by editor {} (uuid: {}) was forbidden",
+			AnetAuditLogger.log("attempt to edit published report {} by editor {} (uuid: {}) was forbidden",
 					report.getUuid(), editor.getName(), editor.getUuid());
-			throw new WebApplicationException("Cannot edit a released report", Status.FORBIDDEN);
+			throw new WebApplicationException("Cannot edit a published report", Status.FORBIDDEN);
 		}
 	}
 
@@ -749,7 +749,7 @@ public class ReportResource {
 
 	/**
 	 * Publishes a report
-	 * Moves a report from APPROVED to RELEASED and saves the publish action
+	 * Moves a report from APPROVED to PUBLISHED and saves the publish action
 	 * @param uuid the Report UUID to publish
 	 * @return 200 on a successful publish, 401 if you don't have privileges to publish this report.
 	 */
