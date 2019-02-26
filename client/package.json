@@ -4,6 +4,9 @@
   "private": true,
   "homepage": "/assets/client",
   "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@storybook/addon-actions": "^4.1.12",
+    "@storybook/react": "^4.1.12",
     "artillery": "^1.6.0-27",
     "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.4.7",
@@ -123,6 +126,7 @@
     "test": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; yarn run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; wdio -b ${SERVER_URL} ./config/wdio.config.js",
     "load-test": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; artillery run -t ${SERVER_URL} tests/load/load.yml",
+    "storybook": "start-storybook -p 9001 -c .storybook",
     "graphql": "graphql"
   },
   "jest": {
