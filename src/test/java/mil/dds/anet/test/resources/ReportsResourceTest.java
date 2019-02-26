@@ -359,18 +359,23 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Check on Report status to verify it got moved forward
 		returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
-		assertThat(returned.getState()).isEqualTo(ReportState.RELEASED);
+		assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
 		assertThat(returned.getApprovalStepUuid()).isNull();
 
 		//check on report status to see that it got approved.
 		approvalStatus = returned.getApprovalStatus();
-		assertThat(approvalStatus.size()).isEqualTo(2);
-		reportAction = approvalStatus.get(0);
+		//there were 5 actions on the report: submit, reject, submit, approve, approve
+		assertThat(approvalStatus.size()).isEqualTo(5);
+		reportAction = approvalStatus.get(3);
 		assertThat(reportAction.getPersonUuid()).isEqualTo(approver1.getUuid());
 		assertThat(reportAction.getCreatedAt()).isNotNull();
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		reportAction = approvalStatus.get(1);
+		reportAction = approvalStatus.get(4);
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
+
+		//Admin can publish approved reports.
+		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", created.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(published).isNotNull();
 
 		//Post a comment on the report because it's awesome
 		variables = new HashMap<>();
@@ -1131,6 +1136,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report approved = graphQLHelper.updateObject(admin, "approveReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
 		assertThat(approved).isNotNull();
 
+		//Verify report is in APPROVED state.
+		r = graphQLHelper.getObjectById(admin, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
+
+		//Admin can publish approved reports.
+		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(published).isNotNull();
+
 		//Verify report is in RELEASED state.
 		r = graphQLHelper.getObjectById(admin, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
 		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
@@ -1200,6 +1213,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		//Approve report.
 		Report approved = graphQLHelper.updateObject(bob, "approveReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
 		assertThat(approved).isNotNull();
+
+		//Verify report is in APPROVED state.
+		r = graphQLHelper.getObjectById(elizabeth, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
+
+		//Admin can publish approved reports.
+		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(published).isNotNull();
 
 		//Verify report is in RELEASED state.
 		r = graphQLHelper.getObjectById(elizabeth, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
