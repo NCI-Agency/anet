@@ -1,5 +1,6 @@
 env:
   global:
+    - BROWSERSTACK_DEBUG=true
     - secure: "RhX0c51DkTgr4ub347If+KsjWJU+zGt3dshGknnmgrCOCuDkuBN0vjD4gLNMVH1K8Z+tmC8ESyW4duBuRkY4B/t2PRmEddCo7+t6gfmylq659LhGa3KUEEQd9vOuI+cN5NEGSN6GP6ckU11tiCmiomzTApLnNxWgqDBI7CQkezZl1DpNQ7cShhmYjPSBtFfQcfepZvOM7pY7oYvijvPsBmy0GsYu6RixxkBS42LgSY7FtBL7N2sdG80e+E9A1GThMUHJMAMpprpxPtd7BV2mQ3PwRcyWp11pZt+wCUFNDSnYb/h+5MI45JKIzzwvnOHZr4/rUByi6Qiw0RSh5k0sGZtNw+NcOjrtlS1g1XVxYBD5bzNxn7BgIg3nqNGiHYti/uIIG/AdwzHCG964Yqlww2jZ1UoyxNSb6ms1gKM8Rwx/gDO46pM0l750hwAjR25yDSW+w5xyW0YC+WKyHAoweSY1wsfzqchwJ9bP8qk5cwPrqGgiXsKU5N9SKfqJM4TKDE2DCDAE1NEWwglqnZTuQNjloCdl6KmctdSAHvF6o/t8sIcpIWs0zfhBoRAj3yZh/W7gQbXstyT1NGAswIMl1Rf9SspIm0noOUOObDMLkUhJWvxA/7zMoe3DaXgTAiSh1Xdm0FxdhmRkZFvGm74s9mGpyUvH6ePjwRNTM4CdfvI="
 
 language: java
@@ -9,6 +10,13 @@ jdk:
 
 services:
   - docker
+
+addons:
+  browserstack:
+    username:
+      secure: "GEWbqI/5uac+JESr0Xoh3YGqcAbAYWisUdtu7kZ23i1ng/XwvBX6BI1ElqpFRMcgui8Xsq0kefI50R4XoICcsjunR5CjfUvsM/otwOBO2DHVDm34tt956jeN/Dxi7Z/iWH73DRxSZd+qTcqx9Q/WweoB8h6Vx2SK1WYb5o5iomIh4eRL7/C22Ms1Mc5hLemyY4iwJmMm5lQ08jM7Qa7n8GBYnTSNfOTmOjp0aZjzULSVnQNZK4lIr+dxh8RglcAtdvSz1n0N7vSqwXueSe0oPzJD49XPDBdvjtueZhBkYBBO+xuPqtD+a4cNnFNktr1BVU54g5CSzkipqJbpmM4wBaEhTzsSVeydV07LYnRTdwcvldG3WoVav6UY7uPW15T3Ke/k90G75c4iv3Leg23zBm+8P1Gr9QcY8v3hUWIpaWSFCmGjRH3NhHnduIe51mozdRkNQrFE5obHLgBtcsbDDWCdfjCaTUt6mk4jFXupsuYGxfD38QGBLYs5y55GTRBLWe8gS1p7PskuUN4o4HbBHWA5wow57nKanu+IQz0ZWz3pxXwPHCx1OFZsfUKDRED2MP8sPXmlGTTF3gBBx62tK8RoBzPh107+z+ZehcJ4F+FUYgpSVprCLUJwI3kKZhez6kKKPGOC3CaDZlQgPsoTPm5G1bxXeVo92R146H/2eYs="
+    access_key:
+      secure: "qdAOB8JBxVGEdPkmL4HfvErWmRKcKwOCCABS1f5n8QJPysnAMZILOTA5/ocg7srrIqaZ4Z+L+zXigbecyFC2N5DBVjjsnbejZLn4DMfi+3S+dpFt+W2BFx4XpKHs4F3gb8QIXYoXVyL37J1HeCPhzWZuMdfOQFdV7xK6WkJsKXxWIgox0UVNAu8GB9170s3XEkmhBwRSYLgB7XP5sI5wdrQjDS3NP9xp4sH5uIvlVlvyWgwPX0sms8ChKicKEuseJvOVHA+7yxsTHi05DJh/hOiO2mkFXKKM2Nnkk6yOMG8bkCtWAi4rXN+a4GVE1umovzr1QWPeuDsgsW8IrgoNw57vtMBcok0sGHJoiTAjTU7LKIcYjzX+bVtEt86bR+W94TozoMfGNundj0Js4UfxVC7splXM94FVGbu3w2zlz8T7IMjSsLnFCwx412pUR+UDLGkBLE9FQ75yi+ogBeTn+kJAfVh7HO5nWyaOD6Huxq6jJp+2rMqjNpNwS1guV7Rlk/zCDnE0gXFBiVxnXHRnaMVKLrwNAJ23CAd6/cWsLoVNqOgaZGXaEDvC32VWvvNWO+d2MNNvcoor9URfuWDE15qcWc+TJ2GZsMXdlLpXkRbuqW/FOP/e3/FEL5SGWtmDOsi47FxYp54z83yViHLg5To87Gx8vgmm/QRzGE6f0EU="
 
 notifications:
     slack: nci-agency:TvRV22whtaRGflaCPPfv2G1v
@@ -28,7 +36,16 @@ cache:
 install: true
 
 script:
-  - ./gradlew --parallel dockerCreateDB dockerStartDB jar dockerWaitForDB dbMigrate dbLoad check test jacocoTestReport
+  - ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerWaitForDB dbMigrate dbLoad
+  - ./gradlew -PtestEnv jar check test jacocoTestReport
+  - |
+    ./gradlew -PtestEnv run &
+    SERVER_PID=$!
+    sleep 60
+  - |
+    cd client
+    env TEST_ENV=remote yarn run test
+  - kill $SERVER_PID
 
 after_script:
   - docker logs anet-mssql-server
