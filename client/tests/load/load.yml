@@ -1,5 +1,5 @@
 config:
-  target: 'http://localhost:8080'
+  #target: 'http://localhost:8080' -- set via artillery command line in package.json
   phases:
     - duration: 600
       arrivalRate: 60
