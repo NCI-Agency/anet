@@ -93,7 +93,7 @@ test.beforeEach(t => {
     // pass the information along via window.fetch.
     t.context.get = async (pathname, userPw) => {
         let credentials = userPw || 'erin'
-        let urlToGet = `http://localhost:8080${pathname}?user=${credentials}&pass=${credentials}`
+        let urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
         debugLog('Getting URL', urlToGet)
         await t.context.driver.get(urlToGet)
 
