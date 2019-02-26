@@ -85,7 +85,7 @@ exports.config = {
     // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
     // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
     // gets prepended directly.
-    baseUrl: 'http://localhost:8080',
+    //baseUrl: 'http://localhost:8080', -- set via wdio command line in package.json
     //
     //
     // A key-value store of headers to be added to every selenium request. Values must be strings. Type: Object
