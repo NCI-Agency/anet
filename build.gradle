@@ -22,6 +22,8 @@ run.environment("ANET_DB_PASSWORD", isTestEnv ? "Test-P@ssw0rd" : "Dev-P@ssw0rd"
 run.environment("ANET_SA_PASSWORD", "SA-P@ssw0rd")
 run.environment("ANET_DB_PORT", "1433")
 run.environment("ANET_DB_EXPOSED_PORT", isTestEnv ? "1434" : "1433")
+run.environment("ANET_PORT", isTestEnv ? "8180" : "8080")
+run.environment("ANET_ADMIN_PORT", isTestEnv ? "8181" : "8081")
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
