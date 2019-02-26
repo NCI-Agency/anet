@@ -38,7 +38,7 @@ public class Person extends AbstractAnetBean implements Principal, SubscribableO
 	private String biography;
 	private String domainUsername;
 		
-	private ForeignObjectHolder<Position> position = new ForeignObjectHolder<>();
+	private Position position;
 
 	private List<PersonPositionHistory> previousPositions;
 	
@@ -155,22 +155,30 @@ public class Person extends AbstractAnetBean implements Principal, SubscribableO
 	}
 
 	@GraphQLQuery(name="position")
-	public synchronized Position loadPosition() {
-		if (position.hasForeignObject()) {
-			return position.getForeignObject();
+	public CompletableFuture<Position> loadPositionBatched(@GraphQLRootContext Map<String, Object> context) {
+		if (position != null) {
+			return CompletableFuture.completedFuture(position);
 		}
-		final Position o = AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
-		position.setForeignObject(o);
-		return o;
+		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(context, uuid)
+				.thenApply(o -> { position = o; return o; });
+	}
+
+	/* When loaded through means other than GraphQL */
+	public synchronized Position loadPosition() {
+		if (position != null) {
+			return position;
+		}
+		position = AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
+		return position;
 	}
 
 	public void setPosition(Position position) {
-		this.position = new ForeignObjectHolder<>(position);
+		this.position = position;
 	}
 
 	@GraphQLIgnore
 	public Position getPosition() {
-		return position.getForeignObject();
+		return position;
 	}
 
 	@GraphQLQuery(name="previousPositions")
