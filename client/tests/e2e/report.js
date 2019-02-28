@@ -59,6 +59,7 @@ test('Draft and submit a report', async t => {
 
     await pageHelpers.writeInForm('#keyOutcomes', 'key outcomes')
     await pageHelpers.writeInForm('#nextSteps', 'next steps')
+    await pageHelpers.writeInForm('.reportTextField .public-DraftEditor-content', 'engagement details')
 
     let $reportSensitiveInformationField = await $('.reportSensitiveInformationField')
     t.false(await $reportSensitiveInformationField.isDisplayed(), 'Report sensitive info should not be present before "add sensitive information" button is clicked"')
@@ -160,6 +161,11 @@ test('Approve report chain', async t => {
     let currentPathname = await t.context.getCurrentPathname()
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
     await $('#daily-rollup')
+
+    let $rollupDateRange = await $('.rollupDateRange .bp3-input')
+    await $rollupDateRange.click()
+    let $todayButton = await t.context.driver.findElement(By.xpath('//a/div[text()="Today"]'))
+    await $todayButton.click()
 
     let $reportCollection = await $('.report-collection table')
     await t.context.driver.wait(until.elementIsVisible($reportCollection))
