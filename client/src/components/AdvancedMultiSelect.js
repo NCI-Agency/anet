@@ -125,7 +125,7 @@ export default class AdvancedMultiSelect extends Component {
 		this.setState({
 			inputFocused: true,
 			showOverlay: true,
-		})
+		}, () => this.fetchResults(0))
 	}
 
 	handleInputBlur = () => {
