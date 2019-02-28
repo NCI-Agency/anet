@@ -125,6 +125,7 @@
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "test": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; yarn run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; wdio -b ${SERVER_URL} ./config/wdio.config.js",
+    "test-jest": "jest --testPathPattern='tests/(actions|reducers)'",
     "load-test": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; artillery run -t ${SERVER_URL} tests/load/load.yml",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "graphql": "graphql"
