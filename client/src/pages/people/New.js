@@ -2,7 +2,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import PersonForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 
 import {Person} from 'models'
 
@@ -26,10 +25,7 @@ class PersonNew extends Page {
 	render() {
 		const {person} = this.state
 		return (
-			<div>
-				<Breadcrumbs items={[['New Person', Person.pathForNew()]]} />
-				<PersonForm initialValues={person} title='Create a new Person' />
-			</div>
+			<PersonForm initialValues={person} title='Create a new Person' />
 		)
 	}
 }

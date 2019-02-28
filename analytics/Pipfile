@@ -18,6 +18,7 @@ pillow = "*"
 panda = "*"
 keras = "*"
 click = "*"
+pytext-nlp = "*"
 
 [dev-packages]
 

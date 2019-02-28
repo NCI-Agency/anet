@@ -113,7 +113,7 @@ const reportTour = (currentUser, history) => {
 	id: 'report',
 	steps: [
 		{
-			title: 'Meeting goal(s)',
+			title: Settings.fields.report.intent,
 			content: `Use this section to tell readers why you met with your ${principalSingular}. Were you working on a specific goal or problem with them? This will be part of your report's summary, so use this space to tell readers the high-level purpose of your engagement.`,
 			target: 'intent',
 			placement: 'bottom',
@@ -132,8 +132,8 @@ const reportTour = (currentUser, history) => {
 			placement: 'right',
 		},
 		{
-			title: 'Atmospherics',
-			content: 'Select the atmospherics of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.',
+			title: Settings.fields.report.atmosphere,
+			content: `Select the ${Settings.fields.report.atmosphere} of your meeting. This information is used in threat assessments. Highlight specific issues or concerns in the details section below.`,
 			target: '#neutralAtmos',
 			placement: 'bottom',
 		},
@@ -162,21 +162,27 @@ const reportTour = (currentUser, history) => {
 			placement: 'right',
 		},
 		{
-			title: 'Key outcomes',
+			title: Settings.fields.report.keyOutcomes,
 			content: "Use this section to tell readers what the main information or results from your engagement were. This will be displayed in your report's summary, so include information that you think would be valuable for leadership and other organizations to know.",
 			target: '#keyOutcomes',
 			placement: 'right',
 		},
 		{
-			title: 'Next steps',
+			title: Settings.fields.report.nextSteps,
 			content: "Here, tell readers about the next concrete steps that you'll be taking to build on the progress made in your engagement. This will be displayed in your report's summary, so include information that will explain to leadership what you are doing next, as a result of your meeting's outcomes.",
 			target: '#nextSteps',
 			placement: 'right',
 		},
 		{
-			title: 'Detailed report',
-			content: `If there's more information from your meeting that you'd like to include, click on the "Add detailed comments" button. You will have additional space to record discussion topics and notes that may be helpful to you, your organization, or leadership later on. This section does not display in the report summary.`,
-			target: '#toggleReportDetails',
+			title: Settings.fields.report.reportText,
+			content: "Record here discussion topics and notes that may be helpful to you, your organization, or leadership later on. This section does not display in the report summary.",
+			target: '.reportTextField',
+			placement: 'right',
+		},
+		{
+			title: 'Sensitive information',
+			content: `If there's sensitive information from your meeting that you'd like to include, click on the "Add sensitive information" button. You will have additional space to record sensitive information, visible only to the groups that you authorize. This section does not display in the report summary.`,
+			target: '#toggleSensitiveInfo',
 			placement: 'right',
 		},
 		{

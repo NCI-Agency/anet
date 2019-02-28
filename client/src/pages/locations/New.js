@@ -2,7 +2,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import LocationForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 
 import {Location} from 'models'
 
@@ -26,10 +25,7 @@ class LocationNew extends Page {
 	render() {
 		const { location } = this.state
 		return (
-			<div>
-				<Breadcrumbs items={[['New Location', Location.pathForNew()]]} />
-				<LocationForm initialValues={location} title='Create a new Location' />
-			</div>
+			<LocationForm initialValues={location} title='Create a new Location' />
 		)
 	}
 }

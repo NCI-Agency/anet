@@ -8,7 +8,6 @@ import * as FieldHelper from 'components/FieldHelper'
 import {ListGroup, ListGroupItem, Nav} from 'react-bootstrap'
 import pluralize from 'pluralize'
 
-import Breadcrumbs from 'components/Breadcrumbs'
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
@@ -114,14 +113,14 @@ class BaseOrganizationShow extends Page {
 				childrenOrgs { uuid, shortName, longName, identificationCode },
 				positions {
 					uuid, name, code, status, type,
-					person { uuid, name, status, rank }
+					person { uuid, name, status, rank, role }
 					associatedPositions {
-						uuid, name, code, status
-						person { uuid, name, status, rank}
+						uuid, name, type, code, status
+						person { uuid, name, status, rank, role }
 					}
 				},
 				approvalSteps {
-					uuid, name, approvers { uuid, name, person { uuid, name, rank}}
+					uuid, name, approvers { uuid, name, person { uuid, name, rank, role }}
 				}
 				${GRAPHQL_NOTES_FIELDS}
 			}`)
@@ -222,7 +221,6 @@ class BaseOrganizationShow extends Page {
 					</div>}
 
 					<RelatedObjectNotes notes={organization.notes} relatedObject={organization.uuid && {relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
-					<Breadcrumbs items={[[`Organization ${organization.shortName}`, Organization.pathFor(organization)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`Organization ${organization.shortName}`} action={action} />

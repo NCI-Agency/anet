@@ -3,7 +3,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import ReportForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 
 import GuidedTour from 'components/GuidedTour'
 import {reportTour} from 'pages/HopscotchTour'
@@ -32,18 +31,20 @@ class BaseReportNew extends Page {
 	}
 
 	render() {
-		return <div className="report-new">
-			<div className="pull-right">
-				<GuidedTour
-					title="Take a guided tour of the report page."
-					tour={reportTour}
-					autostart={localStorage.newUser === 'true' && localStorage.hasSeenReportTour !== 'true'}
-					onEnd={() => localStorage.hasSeenReportTour = 'true'}
-				/>
-			</div>
-			<Breadcrumbs items={[['New Report', Report.pathForNew()]]} />
-			<ReportForm initialValues={this.report} title='Create a new Report' />
+		return (
+			<div className="report-new">
+				<div className="pull-right">
+					<GuidedTour
+						title="Take a guided tour of the report page."
+						tour={reportTour}
+						autostart={localStorage.newUser === 'true' && localStorage.hasSeenReportTour !== 'true'}
+						onEnd={() => localStorage.hasSeenReportTour = 'true'}
+					/>
+				</div>
+
+				<ReportForm initialValues={this.report} title='Create a new Report' />
 		</div>
+		)
 	}
 }
 

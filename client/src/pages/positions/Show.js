@@ -5,12 +5,10 @@ import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'c
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
-import {Link} from 'react-router-dom'
 import {Table, Button} from 'react-bootstrap'
 import moment from 'moment'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import AssignPersonModal from 'components/AssignPersonModal'
@@ -59,13 +57,13 @@ class BasePositionShow extends Page {
 			position(uuid:"${props.match.params.uuid}") {
 				uuid, name, type, status, code,
 				organization { uuid, shortName, longName, identificationCode },
-				person { uuid, name, rank },
+				person { uuid, name, rank, role },
 				associatedPositions {
-					uuid, name,
-					person { uuid, name, rank }
+					uuid, name, type
+					person { uuid, name, rank, role }
 					organization { uuid, shortName }
 				},
-				previousPeople { startTime, endTime, person { uuid, name, rank }}
+				previousPeople { startTime, endTime, person { uuid, name, rank, role }}
 				location { uuid, name }
 				${GRAPHQL_NOTES_FIELDS}
 			}
@@ -112,7 +110,6 @@ class BasePositionShow extends Page {
 					</div>
 
 					<RelatedObjectNotes notes={position.notes} relatedObject={position.uuid && {relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
-					<Breadcrumbs items={[[`Position ${position.name}`, Position.pathFor(position)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`Position ${position.name}`} action={action} />
@@ -268,7 +265,7 @@ class BasePositionShow extends Page {
 		}
 		return <tr key={pos.uuid} id={`associatedPosition_${idx}`}>
 			<td>{personName}</td>
-			<td><Link to={Position.pathFor(pos)}>{pos.name}</Link></td>
+			<td><LinkTo position={pos} /></td>
 		</tr>
 	}
 

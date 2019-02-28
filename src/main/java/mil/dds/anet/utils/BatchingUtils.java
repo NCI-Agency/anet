@@ -129,6 +129,12 @@ public final class BatchingUtils {
 				return CompletableFuture.supplyAsync(() -> engine.getPositionDao().getByIds(keys), dispatcherService);
 			}
 		}, dataLoaderOptions));
+		dataLoaderRegistry.register("position.currentPositionForPerson", new DataLoader<>(new BatchLoader<String, List<Position>>() {
+			@Override
+			public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getPositionDao().getCurrentPersonForPosition(foreignKeys), dispatcherService);
+			}
+		}, dataLoaderOptions));
 		dataLoaderRegistry.register("position.personPositionHistory", new DataLoader<>(new BatchLoader<String, List<PersonPositionHistory>>() {
 			@Override
 			public CompletionStage<List<List<PersonPositionHistory>>> load(List<String> foreignKeys) {

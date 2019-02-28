@@ -1,3 +1,15 @@
+/* Tweak rollup date range input */
+.rollupDateRange div.bp3-input-group:first-child::before {
+	vertical-align: middle;
+	content: "from";
+	margin-right: 5px;
+}
+.rollupDateRange div.bp3-input-group:last-child::before {
+	vertical-align: middle;
+	margin-left: 5px;
+	content: "to";
+	margin-right: 5px;
+}
 .bp3-transition-container {
 	/* Make sure it is on top of the advanced search popup */
 	z-index: 1070 !important;

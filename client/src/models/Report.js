@@ -2,9 +2,12 @@ import Settings from 'Settings'
 import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
+import utils from 'utils'
 import {Person, Position} from 'models'
 
 import * as yup from 'yup'
+
+import REPORTS_ICON from 'resources/reports.png'
 
 export default class Report extends Model {
 	static resourceName = 'Report'
@@ -55,32 +58,73 @@ export default class Report extends Model {
 			.default(null),
 		atmosphere: yup.string().nullable()
 			.when('cancelled', (cancelled, schema) => (
-				cancelled ? schema.nullable() : schema.required('You must provide the overall atmospherics of the engagement')
+				cancelled ? schema.nullable() : schema.required(`You must provide the overall ${Settings.fields.report.atmosphere} of the engagement`)
 			))
 			.default(null)
 			.label(Settings.fields.report.atmosphere),
 		atmosphereDetails: yup.string().nullable()
 			.when(['cancelled', 'atmosphere'], (cancelled, atmosphere, schema) => (
-				cancelled ? schema.nullable() : (atmosphere === Report.ATMOSPHERE.POSITIVE) ? schema.nullable() : schema.required('You must provide atmospherics details if the engagement was not Positive')
+				cancelled ? schema.nullable() : (atmosphere === Report.ATMOSPHERE.POSITIVE) ? schema.nullable() : schema.required(`You must provide ${Settings.fields.report.atmosphereDetails} if the engagement was not Positive`)
 			))
 			.default('')
 			.label(Settings.fields.report.atmosphereDetails),
-		location: yup.object().nullable().default({}),
-		attendees: yup.array().nullable().default([]),
+		location: yup.object().nullable()
+			.test('location', 'location error',
+				// can't use arrow function here because of binding to 'this'
+				function(location) {
+					return _isEmpty(location) ? this.createError({message: 'You must provide the Location'}) : true
+				}
+			)
+			.default({}),
+		attendees: yup.array().nullable()
+			.test('primary-principal', 'primary principal error',
+				// can't use arrow function here because of binding to 'this'
+				function(attendees) {
+					const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.PRINCIPAL)
+					return err ? this.createError({message: err}) : true
+				}
+			)
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.test('primary-advisor', 'primary advisor error',
+					// can't use arrow function here because of binding to 'this'
+					function(attendees) {
+						const err = Report.checkPrimaryAttendee(attendees, Person.ROLE.ADVISOR)
+						return err ? this.createError({message: err}) : true
+					}
+				)
+			))
+			.default([]),
 		principalOrg: yup.object().nullable().default({}),
 		advisorOrg: yup.object().nullable().default({}),
-		tasks: yup.array().nullable().default([]),
+		tasks: yup.array().nullable()
+			.test('tasks', 'tasks error',
+				// can't use arrow function here because of binding to 'this'
+				function(tasks) {
+					return _isEmpty(tasks) ? this.createError({message: `You must provide at least one ${Settings.fields.task.shortLabel}`}) : true
+				}
+			)
+			.default([]),
 		comments: yup.array().nullable().default([]),
-		reportText: yup.string().nullable().default(''),
-		nextSteps: yup.string().nullable().required('You must provide a brief summary of the Next Steps')
-			.default('')
-			.label('Next steps description'),
-		keyOutcomes: yup.string().nullable()
+		reportText: yup.string().nullable()
 			.when('cancelled', (cancelled, schema) => (
-				cancelled ? schema.nullable() : schema.required('You must provide a brief summary of the Key Outcomes')
+				cancelled ? schema.nullable() : schema.test('reportText', 'reportText error',
+					// can't use arrow function here because of binding to 'this'
+					function(reportText) {
+						return utils.isEmptyHtml(reportText) ? this.createError({message: `You must provide the ${Settings.fields.report.reportText}`}) : true
+					}
+				)
 			))
 			.default('')
-			.label('Key outcome description'),
+			.label(Settings.fields.report.reportText),
+		nextSteps: yup.string().nullable().required(`You must provide a brief summary of the ${Settings.fields.report.nextSteps}`)
+			.default('')
+			.label(Settings.fields.report.nextSteps),
+		keyOutcomes: yup.string().nullable()
+			.when('cancelled', (cancelled, schema) => (
+				cancelled ? schema.nullable() : schema.required(`You must provide a brief summary of the ${Settings.fields.report.keyOutcomes}`)
+			))
+			.default('')
+			.label(Settings.fields.report.keyOutcomes),
 		tags: yup.array().nullable().default([]),
 		reportTags: yup.array().nullable().default([])
 			.label(Settings.fields.report.reportTags),
@@ -89,14 +133,6 @@ export default class Report extends Model {
 	}).concat(Model.yupSchema)
 
 	static yupWarningSchema = yup.object().shape({
-		state: yup.string().nullable().default(''),
-		tasks: yup.array().nullable()
-			.when('state', (state, schema) => (
-				(Report.isReleased(state) || Report.isCancelled(state))
-					? schema.nullable()
-					: schema.required(`You should provide the ${Settings.fields.task.longLabel} that have been addressed in this engagement.
-						Either edit the report to do so, or you are acknowledging that this engagement did not address any ${Settings.fields.task.longLabel}`)
-			)),
 		reportSensitiveInformation: yup.object().nullable().default({}),
 		authorizationGroups: yup.array().nullable()
 			.when(['reportSensitiveInformation', 'reportSensitiveInformation.text'], (reportSensitiveInformation, reportSensitiveInformationText, schema) => (
@@ -127,8 +163,8 @@ export default class Report extends Model {
 		return Report.isPending(this.state)
 	}
 
-	static isReleased() {
-		return this.state === Report.STATE.RELEASED
+	static isReleased(state) {
+		return state === Report.STATE.RELEASED
 	}
 
 	isReleased() {
@@ -143,8 +179,8 @@ export default class Report extends Model {
 		return Report.isRejected(this.state)
 	}
 
-	static isCancelled() {
-		return this.state === Report.STATE.CANCELLED
+	static isCancelled(state) {
+		return state === Report.STATE.CANCELLED
 	}
 
 	isCancelled() {
@@ -161,6 +197,10 @@ export default class Report extends Model {
 
 	showApprovals() {
 		return this.state && !this.isDraft() && !this.isFuture()
+	}
+
+	iconUrl() {
+		return REPORTS_ICON
 	}
 
 	toString() {

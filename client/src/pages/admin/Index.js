@@ -4,7 +4,6 @@ import Page, {mapDispatchToProps, jumpToTop, propTypes as pagePropTypes} from 'c
 import {Button} from 'react-bootstrap'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 import Messages from 'components/Messages'
@@ -41,7 +40,6 @@ class BaseAdminIndex extends Page {
 		let {settings} = this.state
 		return (
 			<div>
-				<Breadcrumbs items={[['Admin settings', '/admin']]} />
 				<Messages success={this.state.success} error={this.state.error} />
 				<Formik
 					enableReinitialize

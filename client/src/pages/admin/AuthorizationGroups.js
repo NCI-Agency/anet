@@ -1,7 +1,6 @@
 import React from 'react'
 
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Fieldset from 'components/Fieldset'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
 
@@ -34,7 +33,6 @@ class AuthorizationGroups extends Page {
 	render() {
 		return (
 			<div>
-				<Breadcrumbs items={[['Authorization Groups', '/admin/authorizationGroups']]} />
 				<Fieldset title='Authorization Groups'>
 					<AuthorizationGroupTable authorizationGroups={this.state.authorizationGroups} />
 				</Fieldset>

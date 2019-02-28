@@ -1,7 +1,6 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import PositionForm from './Form'
@@ -33,9 +32,9 @@ class PositionEdit extends Page {
 			position(uuid:"${props.match.params.uuid}") {
 				uuid, name, code, status, type
 				location { uuid, name },
-				associatedPositions { uuid, name, person { uuid, name, rank } },
+				associatedPositions { uuid, name, type, person { uuid, name, rank, role } },
 				organization {uuid, shortName, longName, identificationCode, type},
-				person { uuid, name, rank}
+				person { uuid, name, rank, role }
 				${GRAPHQL_NOTES_FIELDS}
 			}
 		`).then(data => {
@@ -48,7 +47,6 @@ class PositionEdit extends Page {
 		return (
 			<div>
 				<RelatedObjectNotes notes={position.notes} relatedObject={position.uuid && {relatedObjectType: 'positions', relatedObjectUuid: position.uuid}} />
-				<Breadcrumbs items={[[`Position ${position.name}`, Position.pathFor(position)], ["Edit", Position.pathForEdit(position)]]} />
 				<PositionForm edit initialValues={position} title={`Position ${position.name}`} />
 			</div>
 		)

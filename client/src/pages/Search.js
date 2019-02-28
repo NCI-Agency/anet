@@ -10,7 +10,6 @@ import * as FieldHelper from 'components/FieldHelper'
 
 import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import ReportCollection from 'components/ReportCollection'
 import Messages from 'components/Messages'
@@ -57,14 +56,14 @@ const SEARCH_CONFIG = {
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PersonSearchQueryInput',
-		fields: 'uuid, name, rank, emailAddress, role , position { uuid, name, code, location { uuid, name }, organization { uuid, shortName} }'
+		fields: 'uuid, name, rank, role, emailAddress, position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }'
 	},
 	positions : {
 		listName: 'positions: positionList',
 		sortBy: 'NAME',
 		sortOrder: 'ASC',
 		variableType: 'PositionSearchQueryInput',
-		fields: 'uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank }'
+		fields: 'uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role }'
 	},
 	tasks : {
 		listName: 'tasks: taskList',
@@ -236,8 +235,6 @@ class Search extends Page {
 					<Button onClick={this.openSaveModal} id="saveSearchButton" style={{marginRight: 12}}>Save search</Button>
 				</div>
 
-				<Breadcrumbs items={[['Search results', '']]} />
-
 				<Messages error={error} /> {/* success is shown through toast */}
 
 				{this.state.query && <h2 className="only-show-for-print">Search query: '{this.state.query}'</h2>}
@@ -336,10 +333,7 @@ class Search extends Page {
 				<tbody>
 					{Person.map(this.state.results.people.list, person =>
 						<tr key={person.uuid}>
-							<td>
-								<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
-								<LinkTo person={person}/>
-							</td>
+							<td><LinkTo person={person} /></td>
 							<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 							<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 							<td>{person.position && person.position.organization && <LinkTo organization={person.position.organization} />}</td>

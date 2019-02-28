@@ -6,7 +6,6 @@ import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import LinkTo from 'components/LinkTo'
 import PositionTable from 'components/PositionTable'
@@ -51,7 +50,7 @@ class BaseAuthorizationGroupShow extends Page {
 		}
 		const positionsPart = new GQL.Part(/* GraphQL */`
 			paginatedPositions: positionList(query:$positionQuery) {
-				pageNum, pageSize, totalCount, list { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
+				pageNum, pageSize, totalCount, list { uuid, name, code, type, status, organization { uuid, shortName }, person { uuid, name, rank, role } }
 			}`)
 			.addVariable("positionQuery", "PositionSearchQueryInput", positionQuery)
 		return positionsPart
@@ -77,7 +76,7 @@ class BaseAuthorizationGroupShow extends Page {
 		const authGroupPart = new GQL.Part(/* GraphQL */`
 			authorizationGroup(uuid:"${props.match.params.uuid}") {
 			uuid, name, description
-			positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name } }
+			positions { uuid, name, code, type, status, organization { uuid, shortName }, person { uuid, name, rank, role } }
 			status
 			${GRAPHQL_NOTES_FIELDS}
 		}` )
@@ -114,7 +113,6 @@ class BaseAuthorizationGroupShow extends Page {
 				const action = canEdit && <LinkTo authorizationGroup={authorizationGroup} edit button="primary">Edit</LinkTo>
 				return <div>
 					<RelatedObjectNotes notes={authorizationGroup.notes} relatedObject={authorizationGroup.uuid && {relatedObjectType: 'authorizationGroups', relatedObjectUuid: authorizationGroup.uuid}} />
-					<Breadcrumbs items={[[`Authorization Group ${authorizationGroup.name}`, AuthorizationGroup.pathFor(authorizationGroup)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`Authorization Group ${authorizationGroup.name}`} action={action} />
