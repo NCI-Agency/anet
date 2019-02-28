@@ -1,18 +1,13 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import { Button, Col, Row, Table, Overlay, Popover } from 'react-bootstrap'
-import { Classes, Icon } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import classNames from 'classnames'
+import { Button, Col, Row, Overlay, Popover } from 'react-bootstrap'
 import { Field } from 'formik'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 
 import { renderInputField } from 'components/FieldHelper'
-import LinkTo from 'components/LinkTo'
 import UltimatePagination from 'components/UltimatePagination'
 import './AdvancedMultiSelect.css'
-import { Person, Position } from 'models'
 import API from 'api'
 
 export default class AdvancedMultiSelect extends Component {
