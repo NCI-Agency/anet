@@ -147,7 +147,7 @@ export default class AdvancedMultiSelect extends Component {
 
 	changeSearchTerms = (event) => {
 		// Reset the results state when the search terms change
-		this.setState({searchTerms: event.target.value, results: {}}, () => this.fetchResultsDebounced(0))
+		this.setState({searchTerms: event.target.value}, () => this.fetchResultsDebounced(0, true))
 	}
 
 	changeFilterType = (filterType) => {
@@ -155,11 +155,10 @@ export default class AdvancedMultiSelect extends Component {
 		this.setState({filterType}, () => (!this.state.results[filterType] ? this.fetchResults(0) : null))
 	}
 
-	fetchResults = (pageNum) => {
-		const { filterType, results } = this.state
-		if (pageNum === undefined) {
-			pageNum = results && results[filterType] ? results[filterType].pageNum : 0
-		}
+	fetchResults = (pageNum, resetResults) => {
+		// Reset results without extra state change
+		const results = resetResults ? {} : this.state.results
+		const { filterType } = this.state
 		const filterDefs = this.props.filterDefs[filterType]
 		const resourceName = this.props.objectType.resourceName
 		const listName = filterDefs.listName || this.props.objectType.listName
