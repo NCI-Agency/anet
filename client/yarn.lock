@@ -7770,10 +7770,10 @@ graphql-cli-prepare@1.4.19:
     graphql-static-binding "0.9.3"
     lodash "4.17.5"
 
-graphql-cli@^3.0.9:
-  version "3.0.9"
-  resolved "https://registry.yarnpkg.com/graphql-cli/-/graphql-cli-3.0.9.tgz#5f4a7a6b5358b786f24e9165d5d2f5a53c5d43ec"
-  integrity sha512-V0lI0WlRk7U437NNT5WojjLxz8eYfKO/7cftQBPHU/feD1KjCevCQ5qLnDr/lL/sscBBcyk+YpNH8rBZ2CiHig==
+graphql-cli@^3.0.11:
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/graphql-cli/-/graphql-cli-3.0.11.tgz#135d845c1cd7c2a2aac8be543de334543a0ff437"
+  integrity sha512-VK2lehlwL/PAA7aiUIouomV4ITIjjBA/Xxwr0AOvpAS0nE2q0STKBsGZ/ScMeS7Qv0bCyxKWXJ1dti8Hrfzd+Q==
   dependencies:
     apollo-codegen "^0.20.2"
     chalk "^2.4.1"
@@ -7788,8 +7788,8 @@ graphql-cli@^3.0.9:
     graphql-cli-prepare "1.4.19"
     graphql-config "2.2.1"
     graphql-config-extension-graphcool "1.0.11"
-    graphql-config-extension-prisma "0.2.5"
-    graphql-playground-middleware-express "1.7.11"
+    graphql-config-extension-prisma "0.3.0"
+    graphql-playground-middleware-express "1.7.12"
     graphql-schema-linter "0.2.0"
     inquirer "6.2.0"
     is-url-superb "2.0.0"
@@ -7815,13 +7815,13 @@ graphql-config-extension-graphcool@1.0.11:
     graphcool-yml "0.4.15"
     graphql-config "2.2.1"
 
-graphql-config-extension-prisma@0.2.5:
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/graphql-config-extension-prisma/-/graphql-config-extension-prisma-0.2.5.tgz#f67db5b6f882ac76096fb2e68a18ec81c7d51fd2"
-  integrity sha512-7Qh3TzZS3hwZpJbTNfTHXBM6UbzV7DMik9Mc95Rz76yTAs7Wr83xBFsH4Ap1NWlqBgANfO3cLLI4YomDJmO5SA==
+graphql-config-extension-prisma@0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/graphql-config-extension-prisma/-/graphql-config-extension-prisma-0.3.0.tgz#06758aadb7eb85b12dc1538807873d5890d4d4de"
+  integrity sha512-bOufkkog0cSfHJ9gVD3Wy+KHmkSTHWcFfPaV/NVpIvfJx15gU0/CzuC6lcTjioWmn+UGzYdoqmP7OrJAWT57sw==
   dependencies:
     graphql-config "2.2.1"
-    prisma-yml "1.20.0-beta.18"
+    prisma-yml "1.26.6"
 
 graphql-config@2.0.1:
   version "2.0.1"
@@ -7898,10 +7898,10 @@ graphql-playground-html@1.6.12:
   resolved "https://registry.yarnpkg.com/graphql-playground-html/-/graphql-playground-html-1.6.12.tgz#8b3b34ab6013e2c877f0ceaae478fafc8ca91b85"
   integrity sha512-yOYFwwSMBL0MwufeL8bkrNDgRE7eF/kTHiwrqn9FiR9KLcNIl1xw9l9a+6yIRZM56JReQOHpbQFXTZn1IuSKRg==
 
-graphql-playground-middleware-express@1.7.11:
-  version "1.7.11"
-  resolved "https://registry.yarnpkg.com/graphql-playground-middleware-express/-/graphql-playground-middleware-express-1.7.11.tgz#bbffd784a37133bfa7165bdd8f429081dbf4bcf6"
-  integrity sha512-sKItB4s3FxqlwCgXdMfwRAfssSoo31bcFsGAAg/HzaZLicY6CDlofKXP8G5iPDerB6NaoAcAaBLutLzl9sd4fQ==
+graphql-playground-middleware-express@1.7.12:
+  version "1.7.12"
+  resolved "https://registry.yarnpkg.com/graphql-playground-middleware-express/-/graphql-playground-middleware-express-1.7.12.tgz#de4b2402a02159b2125561fe38eb378b56cf6d99"
+  integrity sha512-17szgonnVSxWVrgblLRHHLjWnMUONfkULIwSunaMvYx8k5oG3yL86cyGCbHuDFUFkyr2swLhdfYl4mDfDXuvOA==
   dependencies:
     graphql-playground-html "1.6.12"
 
@@ -12025,10 +12025,10 @@ prisma-json-schema@0.1.3:
   resolved "https://registry.yarnpkg.com/prisma-json-schema/-/prisma-json-schema-0.1.3.tgz#6c302db8f464f8b92e8694d3f7dd3f41ac9afcbe"
   integrity sha512-XZrf2080oR81mY8/OC8al68HiwBm0nXlFE727JIia0ZbNqwuV4MyRYk6E0+OIa6/9KEYxZrcAmoBs3EW1cCvnA==
 
-prisma-yml@1.20.0-beta.18:
-  version "1.20.0-beta.18"
-  resolved "https://registry.yarnpkg.com/prisma-yml/-/prisma-yml-1.20.0-beta.18.tgz#fc5f3d2b14f12110e4c64c00305088c5118adb3d"
-  integrity sha512-wI/lOQrD78de2+ZNzJlbEYcYiUANtpdyT0VzAS+YbF5+1/O+shOnpwYsBtjrVL5Er0RwMkwH7j+oZQM61ENBMQ==
+prisma-yml@1.26.6:
+  version "1.26.6"
+  resolved "https://registry.yarnpkg.com/prisma-yml/-/prisma-yml-1.26.6.tgz#e91b63c6cfb49bcb0ae09b76d8524f58fc0668a9"
+  integrity sha512-dWBTeQbyWr/4d97ZKjxFPvIHytnNlBsNzgsJC1eew3qoZ9A8vtRIFhsnPiD3kYIf67w56i2QO2O5Infe2FzMww==
   dependencies:
     ajv "5"
     bluebird "^3.5.1"
