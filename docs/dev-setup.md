@@ -81,8 +81,8 @@ After successfully creating and building the MSSQL Docker container it is posisb
 1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
 1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
 1. Wait until the container is fully started, then run `./gradlew -PtestEnv dbMigrate`
-1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
 1. Seed initial data - MSSQL: `./gradlew -PtestEnv dbLoad`.
+1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
 
 ##### Override Default Gradle Settings
 Override the default gradle settings if you want to run your tests on a different database:
