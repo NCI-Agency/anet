@@ -162,16 +162,14 @@ class Search extends Page {
 
 	@autobind
 	_dataFetcher(props, callback, pageNum, pageSize) {
-		let {searchQuery} = props
-		let query = this.getSearchQuery(props)
-		let parts = []
-		if (searchQuery.objectType) {
-			parts.push(this.getSearchPart(searchQuery.objectType, query, pageNum, pageSize))
-		} else {
-			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, query, pageNum, pageSize))
-			})
-		}
+		const { searchQuery } = props
+		const queryTypes = searchQuery.objectType ? { [searchQuery.objectType]: {} } : SEARCH_CONFIG
+		const query = this.getSearchQuery(props)
+		const parts = Object.keys(queryTypes).map(type => {
+			const paginatedPart = this.getPaginated(type)
+			const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
+			return this.getSearchPart(type, query, goToPageNum, pageSize)
+		})
 		return callback(parts)
 	}
 
@@ -309,9 +307,9 @@ class Search extends Page {
 
 	@autobind
 	paginationFor(type) {
-		const {pageSize, pageNum, totalCount} = this.state.results[type]
+		const { pageSize, totalCount } = this.state.results[type]
 		const paginatedPart = this.getPaginated(type)
-		const goToPage = this.getPaginatedNum(paginatedPart, pageNum)
+		const goToPage = this.getPaginatedNum(paginatedPart)
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
 		return <header className="searchPagination">

@@ -55,24 +55,23 @@ class BaseMyReports extends Page {
 			}`).addVariable(partName + "Query", "ReportSearchQueryInput", query)
 	}
 
+	_approvalStepParts = props => {
+		const { currentUser, pagination } = props
+		const authorUuid = currentUser.uuid
+		return Object.keys(this.partFuncs).map(part => {
+			const goToPageNum = this.getPaginatedNum(pagination[part])
+			return this.partFuncs[part](authorUuid, goToPageNum)
+		})
+	}
+
 	fetchData(props) {
 		const { currentUser } = props
 		if (!currentUser || !currentUser.uuid) {
 			return
 		}
-		const authorUuid = currentUser.uuid
-		let pending = this.partFuncs.pending(authorUuid)
-		let draft = this.partFuncs.draft(authorUuid)
-		let future = this.partFuncs.future(authorUuid)
-		let released = this.partFuncs.released(authorUuid)
-
-		return GQL.run([pending, draft, future, released]).then(data =>
-			this.setState({
-				pending: data.pending,
-				draft: data.draft,
-				released: data.released,
-				future: data.future
-			})
+		const parts = this._approvalStepParts(props)
+		return GQL.run(parts).then(approvalSteps =>
+			this.setState({ ...approvalSteps })
 		)
 	}
 
