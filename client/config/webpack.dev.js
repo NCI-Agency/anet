@@ -20,7 +20,7 @@ module.exports = merge(common, {
         port: process.env.DEV_PORT,
         proxy: [{
             context: ["/graphql", "/api"],
-            target: JSON.stringify(process.env.SERVER_URL),
+            target: process.env.SERVER_URL,
         }]
     },
     plugins: [
