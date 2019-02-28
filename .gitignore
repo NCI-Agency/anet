@@ -34,6 +34,7 @@ local.properties
 build/
 bin/
 localSettings.gradle
+localTestSettings.gradle
 
 #webdriver-io local test files
 errorShots/

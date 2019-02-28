@@ -557,7 +557,7 @@ public class ReportResource {
 		action.setReport(r);
 		approverEmail.setAction(action);
 		approverEmail.setToAddresses(approvers.stream()
-				.filter(a -> a.getPersonUuid() != null)
+				.filter(a -> (a.getPersonUuid() != null) && !a.getPersonUuid().equals(r.getAuthorUuid()))
 				.map(a -> {
 					try {
 						return a.loadPerson(engine.getContext()).get().getEmailAddress();
