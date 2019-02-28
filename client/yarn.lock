@@ -12576,10 +12576,10 @@ react-modal@^3.6.1:
     react-lifecycles-compat "^3.0.0"
     warning "^3.0.0"
 
-react-mosaic-component@^2.0.0:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/react-mosaic-component/-/react-mosaic-component-2.0.2.tgz#818cb4ca6902e48ab6f7bd402c1918af8fec0148"
-  integrity sha512-EaF6gidkDa333aG0i/tvSIdKHoSeEC1W2XHRN0dOKTJ87Z9GmoD/ZohBXTiJtUayvpm+cBL3E2dc1C9OvXymfg==
+react-mosaic-component@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/react-mosaic-component/-/react-mosaic-component-2.1.0.tgz#3959032616aa7aca0a3519da81be4b1ed3f6d504"
+  integrity sha512-3DTrbMnzpECD3tWEbvcfrOHxIeiq+2GIMW+Vlx/TttP6aV/VU0+NsDOZLSOhdZGH9wt7+gTVkY0nZrP764PRNQ==
   dependencies:
     classnames "^2.2.6"
     immutability-helper "~2.4.0"
