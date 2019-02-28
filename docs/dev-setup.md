@@ -153,7 +153,7 @@ To log in as one of the base data users, when prompted for a username and passwo
 
 ### Testing
 1. Start with a clean database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`
-1. Run tests with a clean build: `./gradlew -Ptest cleanTest test`
+1. Run tests with a clean build: `./gradlew -PtestEnv cleanTest test`
 1. For client side E2E tests run the server against the test database: `./gradlew -PtestEnv run`
 
 ## React Frontend
