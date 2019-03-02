@@ -11,7 +11,7 @@ import searchFilters , { POSTITION_POSITION_TYPE_FILTER_KEY, POSTITION_ORGANIZAT
 
 import REMOVE_ICON from 'resources/delete.png'
 
-import { setSearchQuery } from 'actions'
+import { setSearchQuery, resetPagination } from 'actions'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
 import _isEqual from 'lodash/isEqual'
@@ -39,6 +39,7 @@ class AdvancedSearch extends Component {
 		onSearch: PropTypes.func,
 		onCancel: PropTypes.func,
 		setSearchQuery: PropTypes.func.isRequired,
+		resetPagination: PropTypes.func.isRequired,
 		query: PropTypes.shape({
 			text: PropTypes.string,
 			filters: PropTypes.any,
@@ -192,6 +193,7 @@ class AdvancedSearch extends Component {
 			this.props.onSearch()
 		}
 		// We only update the Redux state on submit
+		this.props.resetPagination()
 		this.props.setSearchQuery({
 			objectType: this.state.objectType,
 			filters: this.state.filters,
@@ -216,7 +218,8 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-	setSearchQuery: advancedSearchQuery => dispatch(setSearchQuery(advancedSearchQuery))
+	setSearchQuery: advancedSearchQuery => dispatch(setSearchQuery(advancedSearchQuery)),
+	resetPagination: () => dispatch(resetPagination()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(AdvancedSearch))

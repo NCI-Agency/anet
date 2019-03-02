@@ -8,20 +8,23 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import {Route} from 'react-router'
 import {BrowserRouter} from 'react-router-dom'
-import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/lib/integration/react'
-import { jumpToTop } from 'components/Page'
-import { persistor, store } from './store'
+import { persistStore } from 'redux-persist'
 
 import App from 'pages/App'
+import { jumpToTop } from 'components/Page'
 
+import configureStore from './store/configureStore'
 import API from 'api'
+
+const store = configureStore()
+const persistor = persistStore(store)
 
 window.onerror = function(message, url, lineNumber, columnNumber) {
 	API.logOnServer('ERROR', url, lineNumber+":"+columnNumber, message)
 	return false
-  }
+}
 
 ReactDOM.render((
 	<Provider store={store}>

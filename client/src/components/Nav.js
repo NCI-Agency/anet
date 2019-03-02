@@ -42,12 +42,21 @@ export const AnchorNavItem = (props) => {
 	)
 }
 
+function SidebarLink({ linkTo, children, handleOnClick }) {
+	return (
+		<Link to={linkTo} onClick={handleOnClick}>
+			<NavItem>{children}</NavItem>
+		</Link>
+		)
+}
+
 class BaseNav extends Component {
 	static propTypes = {
 		...pagePropTypes,
 		currentUser: PropTypes.instanceOf(Person),
 		appSettings: PropTypes.object,
 		organizations: PropTypes.array,
+		resetPages: PropTypes.func,
 	}
 
 	componentDidMount() {
@@ -58,6 +67,7 @@ class BaseNav extends Component {
 		const { currentUser } = this.props
 		const { organizations } = this.props || []
 		const { appSettings } = this.props || {}
+		const { resetPages } = this.props
 		const externalDocumentationUrl = appSettings.EXTERNAL_DOCUMENTATION_LINK_URL
 		const externalDocumentationUrlText = appSettings.EXTERNAL_DOCUMENTATION_LINK_TEXT
 
@@ -75,21 +85,22 @@ class BaseNav extends Component {
 
 		return (
 			<BSNav bsStyle="pills" stacked id="leftNav" className="hide-for-print">
-				<Link to="/" onClick={this.props.clearSearchQuery}>
-					<NavItem>Home</NavItem>
-				</Link>
+
+				<SidebarLink linkTo="/" handleOnClick={resetPages}>Home</SidebarLink>
 
 				<BSNav id="search-nav" />
 
-				{currentUser.uuid && <Link to={{pathname: '/reports/mine'}} onClick={this.props.clearSearchQuery}>
-					<NavItem>My reports</NavItem>
-				</Link>}
+				{currentUser.uuid &&
+					<SidebarLink linkTo={{pathname: '/reports/mine'}} handleOnClick={resetPages}>My reports</SidebarLink>
+				}
 
 				<BSNav id="reports-nav" />
 
-				{myOrg && <Link to={Organization.pathFor(myOrg)} onClick={this.props.clearSearchQuery}>
-					<NavItem id="my-organization">My organization <br /><small>{myOrg.shortName}</small></NavItem>
-				</Link>}
+				{myOrg &&
+					<SidebarLink linkTo={Organization.pathFor(myOrg)} handleOnClick={resetPages}>
+						My organization <br /><small>{myOrg.shortName}</small>
+					</SidebarLink>
+				}
 
 				<BSNav id="myorg-nav" />
 
@@ -102,15 +113,10 @@ class BaseNav extends Component {
 				</NavDropdown>
 
 				<BSNav id="org-nav" />
-
-				<Link to="/rollup" onClick={this.props.clearSearchQuery}>
-					<NavItem>Daily rollup</NavItem>
-				</Link>
+				<SidebarLink linkTo="/rollup" handleOnClick={resetPages}>Daily rollup</SidebarLink>
 
 				{process.env.NODE_ENV === 'development' &&
-					<Link to="/graphiql" onClick={this.props.clearSearchQuery}>
-						<NavItem>GraphQL</NavItem>
-					</Link>
+					<SidebarLink linkTo="/graphiql" handleOnClick={resetPages}>GraphQL</SidebarLink>
 				}
 
 				{currentUser.isAdmin() &&
@@ -121,8 +127,8 @@ class BaseNav extends Component {
 
 				{inAdmin &&
 					<BSNav>
-						<LinkContainer to={"/admin/mergePeople"} onClick={this.props.clearSearchQuery}><NavItem>Merge people</NavItem></LinkContainer>
-						<LinkContainer to={"/admin/authorizationGroups"} onClick={this.props.clearSearchQuery}><NavItem>Authorization groups</NavItem></LinkContainer>
+						<LinkContainer to={"/admin/mergePeople"} onClick={resetPages}><NavItem>Merge people</NavItem></LinkContainer>
+						<LinkContainer to={"/admin/authorizationGroups"} onClick={resetPages}><NavItem>Authorization groups</NavItem></LinkContainer>
 					</BSNav>
 				}
 
@@ -130,14 +136,12 @@ class BaseNav extends Component {
 					<NavItem href={externalDocumentationUrl} target="_extdocs">{externalDocumentationUrlText}</NavItem>
 				}
 
-				<Link to="/help" onClick={this.props.clearSearchQuery}>
-					<NavItem>Help</NavItem>
-				</Link>
+				<SidebarLink linkTo="/help" handleOnClick={resetPages}>Help</SidebarLink>
 
 				{(currentUser.isAdmin() || currentUser.isSuperUser()) &&
 					<NavDropdown title="Insights" id="insights" active={inInsights}>
 						{INSIGHTS.map(insight =>
-							<Link to={"/insights/" + insight} key={insight} onClick={this.props.clearSearchQuery}>
+							<Link to={"/insights/" + insight} key={insight} onClick={resetPages}>
 								<MenuItem>{INSIGHT_DETAILS[insight].navTitle}</MenuItem>
 							</Link>)
 						}
