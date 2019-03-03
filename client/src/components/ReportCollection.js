@@ -9,6 +9,7 @@ import ReportTable from 'components/ReportTable'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import {Location} from 'models'
 import Leaflet from 'components/Leaflet'
+import _escape from 'lodash/escape'
 import _get from 'lodash/get'
 
 export const FORMAT_SUMMARY = 'summary'
@@ -18,9 +19,9 @@ export const FORMAT_MAP = 'map'
 export const GQL_REPORT_FIELDS =  /* GraphQL */`
 	uuid, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
 	atmosphere, atmosphereDetails, state
-	author { uuid, name, rank }
-	primaryAdvisor { uuid, name, rank },
-	primaryPrincipal { uuid, name, rank },
+	author { uuid, name, rank, role }
+	primaryAdvisor { uuid, name, rank, role },
+	primaryPrincipal { uuid, name, rank, role },
 	advisorOrg { uuid, shortName },
 	principalOrg { uuid, shortName },
 	location { uuid, name, lat, lng },
@@ -29,9 +30,9 @@ export const GQL_REPORT_FIELDS =  /* GraphQL */`
 	approvalStatus {
 		type, createdAt
 		step { uuid, name
-			approvers { uuid, name, person { uuid, name, rank } }
+			approvers { uuid, name, person { uuid, name, rank, role } }
 		},
-		person { uuid, name, rank }
+		person { uuid, name, rank, role }
 	}
 	updatedAt
 `
@@ -166,7 +167,9 @@ export default class ReportCollection extends Component {
 		let markers = []
 		reports.forEach(report => {
 			if (Location.hasCoordinates(report.location)) {
-				markers.push({id: report.uuid, lat: report.location.lat, lng: report.location.lng, name: report.intent})
+				let label = _escape(report.intent || '<undefined>') // escape HTML in intent!
+				label += `<br/>@ <b>${_escape(report.location.name)}</b>` // escape HTML in locationName!
+				markers.push({id: report.uuid, lat: report.location.lat, lng: report.location.lng, name: label})
 			}
 		})
 		return <Leaflet markers={markers} mapId={this.props.mapId} width={this.props.width} height={this.props.height} marginBottom={this.props.marginBottom} />

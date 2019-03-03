@@ -2,7 +2,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import OrganizationForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
 import API from 'api'
@@ -35,7 +34,7 @@ class OrganizationEdit extends Page {
 				uuid, shortName, longName, status, identificationCode, type,
 				parentOrg { uuid, shortName, longName, identificationCode }
 				approvalSteps { uuid, name
-					approvers { uuid, name, person { uuid, name, rank}}
+					approvers { uuid, name, person { uuid, name, rank, role }}
 				},
 				tasks { uuid, shortName, longName}
 				${GRAPHQL_NOTES_FIELDS}
@@ -53,7 +52,6 @@ class OrganizationEdit extends Page {
 		return (
 			<div>
 				<RelatedObjectNotes notes={organization.notes} relatedObject={organization.uuid && {relatedObjectType: 'organizations', relatedObjectUuid: organization.uuid}} />
-				<Breadcrumbs items={[[`Organization ${organization.shortName}`, Organization.pathForEdit(organization)]]} />
 				<OrganizationForm edit initialValues={organization} title={`Organization ${organization.shortName}`} />
 			</div>
 		)

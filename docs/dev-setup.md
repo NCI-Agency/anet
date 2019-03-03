@@ -76,21 +76,6 @@ The frontend is run with `yarn`.  We recommend running the backend via `eclipse`
 1. Run `./gradlew build` to download all dependencies and build the project.
    - Some tests will fail if you are using SQLite, because it has a bad implementation of some timezone stuff. You'll need to use MSSQL to see all the tests passing.
 
-_Note_: You can run the backend with either `gradle` or with Eclipse. Eclipse does not use gradle's configurations, so you'll have to set them up yourself.  You'll want to create a run configuration with:
-   - Main Class: `mil.dds.anet.AnetApplication`
-   - Program Arguments: `server anet.yml`
-   - Environment Variables: These values are used in anet.yml. We set them through environment variables rather than checking them into the git repository to allow each developer to use different settings. 
-     - SQLite: 
-       - `ANET_DB_DATE_CLASS` : `text`
-       - `ANET_DB_DATE_STRING_FORMAT` : `yyyy-MM-dd hh:mm:ss`
-       - `ANET_DB_URL` : `jdbc:sqlite:development.db`
-       - `ANET_DB_DRIVER` : `org.sqlite.JDBC`
-     - MSSQL: 
-       - `ANET_DB_URL` : `jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]`
-       - `ANET_DB_USERNAME` : username to your db
-       - `ANET_DB_PASSWORD` : password to your db
-       - `ANET_DB_DRIVER` : `com.microsoft.sqlserver.jdbc.SQLServerDriver`
-
 ### The Base Data Set
 Provided with the ANET source code is the file `insertBaseData.sql`.  This file contains a series of raw SQL commands that insert some sample data into the database that is both required in order to pass all the unit tests, and also helpful for quickly developing and testing new features.  The Base Data Set includes a set of fake users, organizations, locations, and reports.  Here are some of the accounts that you can use to log in and test with:
 
@@ -137,6 +122,103 @@ To log in as one of the base data users, when prompted for a username and passwo
     The web page will say ***Template Error***
 
 1. If you want to see the app running, continue to the [React Frontend](#react-frontend) instructions.
+
+## Testing
+### Initial Setup Test Database
+After successfully creating and building the MSSQL Docker container it is posisble to create a dedicated container for testing. Use the `-PtestEnv` property to access the test environment settings in `gradle`.
+1. Create the MSSQL Docker container and test database `./gradlew -PtestEnv dockerCreateDB`
+1. Start the MSSQL Docker container: `./gradlew -PtestEnv dockerStartDB`
+1. Wait until the container is fully started, then run `./gradlew -PtestEnv dbMigrate`
+1. Seed initial data - MSSQL: `./gradlew -PtestEnv dbLoad`.
+1. Run `./gradlew -PtestEnv build` to download all dependencies and build the project.
+
+#### Override Default Gradle Settings
+Override the default gradle settings if you want to run your tests on a different database:
+   1. Open a command line in the `anet` directory that was retrieved from github.
+   1. Create a new empty file at `localTestSettings.gradle`. (`touch localTestSettings.gradle` on linux/mac).  This will be a file for all of your local test settings and passwords that should not be checked into GitHub.
+
+_Note_: You can run the backend with either `gradle` or with Eclipse. Eclipse does not use gradle's configurations, so you'll have to set them up yourself.  You'll want to create a run configuration with:
+   - Main Class: `mil.dds.anet.AnetApplication`
+   - Program Arguments: `server anet.yml`
+   - Environment Variables: These values are used in anet.yml. We set them through environment variables rather than checking them into the git repository to allow each developer to use different settings.
+     - SQLite:
+       - `ANET_DB_DATE_CLASS` : `text`
+       - `ANET_DB_DATE_STRING_FORMAT` : `yyyy-MM-dd hh:mm:ss`
+       - `ANET_DB_URL` : `jdbc:sqlite:development.db`
+       - `ANET_DB_DRIVER` : `org.sqlite.JDBC`
+     - MSSQL:
+       - `ANET_DB_URL` : `jdbc:sqlserver://[sqlserver hostname]:1433;databaseName=[dbName]`
+       - `ANET_DB_USERNAME` : username to your db
+       - `ANET_DB_PASSWORD` : password to your db
+       - `ANET_DB_DRIVER` : `com.microsoft.sqlserver.jdbc.SQLServerDriver`
+
+### Server side tests
+1. Start with a clean test-database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. Run the server side tests with a clean build: `./gradlew -PtestEnv cleanTest test`
+
+### Client-side tests
+#### How the client-side tests work
+Our tests use selenium to simulate interacting with the app like a user. To do this, we need to connect a browser to the JavaScript tests. We do that via a driver.
+This driver can either run the tests locally on your system, or remotely via [BrowserStack](https://www.browserstack.com/).
+
+The tests are reliant on the data looking pretty similar to what you'd get after a fresh run of `insertBaseData.sql`. If the tests crash and do not complete, they could leave the data set in a state which would cause future test runs to fail. Make sure you start with a clean test-database.
+
+#### Prerequisites
+1. Start with a clean test-database when running tests: `/gradlew -PtestEnv dbDrop dbMigrate dbLoad`
+1. In order to run the client-side tests you must start a server using the test-database: `./gradlew -PtestEnv run`
+
+Run `yarn lint-fix` to automatically fix some kinds of lint errors.
+
+#### Client-side testing locally
+To run the tests locally, make sure you have the server using the test-database running as above.
+1. Run the client side E2E tests against the test database: yarn test
+1. Run the client side wdio tests against the test database: yarn run wdio
+
+To run the tests locally, by having [`chromedriver`](https://www.npmjs.com/package/chromedriver) as an npm dependency, we automatically have access to run in Chrome. To use Firefox instead, see [`geckodriver`](https://www.npmjs.com/package/geckodriver).
+
+When writing browser tests, remember that when you take an action, you need to give the browser time to update in response before you start making assertions. Use the `driver.wait` method to do this.
+
+If the tests are failing and you don't know why, run them with env var `DEBUG_LOG=true`:
+
+```
+$ DEBUG_LOG=true yarn test
+```
+
+You can also insert the following into your code to make the browser pause, allowing you to investigate what is currently happening:
+
+```js
+await t.context.waitForever()
+```
+
+In rare circumstances, when using Chrome, the tests will hang on the `data:,` URL. I don't know why this is. If you re-run the test, you should not see the issue a second time.
+
+#### Client-side testing remotely
+To run the tests remotely, two things are needed:
+1. a [username and access key](https://www.browserstack.com/accounts/settings) for BrowserStack
+1. a [Local Testing connection](https://www.browserstack.com/local-testing#command-line) to BrowserStack
+
+Look up your settings and put them in `client/config/default.json`:
+```json
+{
+	"browserstack_user": "myusername123",
+	"browserstack_key": "mYbRoWsErStAcKkEy"
+}
+```
+If you want step-by-step screenshots from your tests (_Visual Logs_ on BrowserStack) you can also add:
+```
+	"browserstack_debug": "true"
+```
+to your `default.json`.
+
+Then download the appropriate `BrowserStackLocal`, unpack it.
+
+When all is set up, run the remote tests:
+1. Run `BrowserStackLocal` with your key: ./BrowserStackLocal --key mYbRoWsErStAcKkEy
+1. Run the tests: ```
+$ export TEST_ENV=remote
+$ yarn test
+```
+1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
 ## React Frontend
 ### Initial Setup

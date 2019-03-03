@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
@@ -188,6 +189,18 @@ public class Utils {
 	public static String trimStringReturnNull(String input) {
 		if (input == null) { return null; }
 		return input.trim();
+	}
+
+	/**
+	 * @param s string
+	 * @return true if string renders to 'empty' HTML, i.e. just whitespace
+	 */
+	public static boolean isEmptyHtml(String s) {
+		return isEmptyOrNull(trimStringReturnNull(s)) || isEmptyOrNull(trimStringReturnNull(htmlToText(s)));
+	}
+
+	private static String htmlToText(String s) {
+		return Jsoup.parse(s).text();
 	}
 
 	/**

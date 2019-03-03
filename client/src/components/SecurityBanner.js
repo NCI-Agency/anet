@@ -31,7 +31,7 @@ class BaseSecurityBanner extends Component {
 			<div className="banner" style={{...css, background: appSettings[SETTING_KEY_COLOR]}}>
 				{appSettings[SETTING_KEY_TEXT]}
 				{' '}||{' '}
-				{currentUser.name} <LinkTo person={currentUser} style={aCss}>(edit)</LinkTo>
+				{currentUser.name} <LinkTo person={currentUser} style={aCss} showIcon={false}>(edit)</LinkTo>
 			</div>
 		)
 	}

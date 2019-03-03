@@ -224,14 +224,6 @@ public class ReportResource {
 			}
 		}
 
-		// Possibly load sensitive information; needed in case of autoSave by the client form
-		r.setUser(editor);
-		try {
-			r.loadReportSensitiveInformation(engine.getContext()).get();
-		} catch (InterruptedException | ExecutionException e) {
-			throw new WebApplicationException("failed to load ReportSensitiveInformation", e);
-		}
-
 		// Return the report in the response; used in autoSave by the client form
 		return r;
 	}
@@ -394,9 +386,10 @@ public class ReportResource {
 			}
 		}
 
-		// Possibly load sensitive information; needed in case of autoSave by the client form
+		// Clear and re-load sensitive information; needed in case of autoSave by the client form, or when sensitive info is 'empty' HTML
 		r.setUser(editor);
 		try {
+			r.setReportSensitiveInformation(null);
 			r.loadReportSensitiveInformation(engine.getContext()).get();
 		} catch (InterruptedException | ExecutionException e) {
 			throw new WebApplicationException("failed to load ReportSensitiveInformation", e);
@@ -551,7 +544,7 @@ public class ReportResource {
 		action.setReport(r);
 		approverEmail.setAction(action);
 		approverEmail.setToAddresses(approvers.stream()
-				.filter(a -> a.getPersonUuid() != null)
+				.filter(a -> (a.getPersonUuid() != null) && !a.getPersonUuid().equals(r.getAuthorUuid()))
 				.map(a -> {
 					try {
 						return a.loadPerson(engine.getContext()).get().getEmailAddress();

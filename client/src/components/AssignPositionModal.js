@@ -77,7 +77,7 @@ class BaseAssignPositionModal extends Component {
 								<Autocomplete valueKey="name"
 									placeholder="Select a position for this person"
 									objectType={Position}
-									fields={'uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name }'}
+									fields={'uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role }'}
 									template={pos =>
 										<span>{[pos.name, pos.code].join(' - ')}</span>
 									}

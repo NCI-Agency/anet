@@ -6,7 +6,6 @@ import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import Leaflet from 'components/Leaflet'
 import LinkTo from 'components/LinkTo'
@@ -18,6 +17,7 @@ import {Location, Person} from 'models'
 
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
+import _escape from 'lodash/escape'
 
 class BaseLocationShow extends Page {
 
@@ -40,8 +40,8 @@ class BaseLocationShow extends Page {
 		setMessages(props,this.state)
 	}
 
-	fetchData(props) {
-		const reportsQuery = new GQL.Part(/* GraphQL */`
+	getReportQueryPart = (locationUuid) => {
+		return new GQL.Part(/* GraphQL */`
 			reports: reportList(query: $reportsQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
@@ -50,8 +50,12 @@ class BaseLocationShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			locationUuid: props.match.params.uuid,
+			locationUuid,
 		})
+	}
+
+	fetchData(props) {
+		const reportsQuery = this.getReportQueryPart(props.match.params.uuid)
 
 		const locationQuery = new GQL.Part(/* GraphQL */`
 			location(uuid:"${props.match.params.uuid}") {
@@ -90,7 +94,7 @@ class BaseLocationShow extends Page {
 			}) => {
 				const marker = {
 					id: location.uuid || 0,
-					name: location.name || '',
+					name: _escape(location.name) || '', // escape HTML in location name!
 				}
 				if (Location.hasCoordinates(location)) {
 					Object.assign(marker, {
@@ -101,7 +105,6 @@ class BaseLocationShow extends Page {
 				const action = canEdit && <LinkTo anetLocation={location} edit button="primary">Edit</LinkTo>
 				return <div>
 					<RelatedObjectNotes notes={location.notes} relatedObject={location.uuid && {relatedObjectType: 'locations', relatedObjectUuid: location.uuid}} />
-					<Breadcrumbs items={[[`Location ${location.name}`, Location.pathFor(location)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`Location ${location.name}`} action={action} />
@@ -141,7 +144,12 @@ class BaseLocationShow extends Page {
 	}
 
 	goToReportsPage = (pageNum) => {
-		this.setState({reportsPageNum: pageNum}, this.loadData)
+		this.setState({reportsPageNum: pageNum}, () => {
+			const reportQueryPart = this.getReportQueryPart(this.state.location.uuid)
+			GQL.run([reportQueryPart]).then(data =>
+				this.setState({reports: data.reports})
+			)
+		})
 	}
 }
 

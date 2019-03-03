@@ -8,7 +8,6 @@ import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import ReportCollection from 'components/ReportCollection'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
@@ -99,8 +98,8 @@ class BasePersonShow extends Page {
 						uuid, shortName
 					},
 					associatedPositions {
-						uuid, name,
-						person { uuid, name, rank },
+						uuid, name, type
+						person { uuid, name, rank, role },
 						organization { uuid, shortName }
 					}
 				}
@@ -166,7 +165,6 @@ class BasePersonShow extends Page {
 					</div>
 
 					<RelatedObjectNotes notes={person.notes} relatedObject={person.uuid && {relatedObjectType: 'people', relatedObjectUuid: person.uuid}} />
-					<Breadcrumbs items={[[person.name, Person.pathFor(person)]]} />
 					<Messages error={this.state.error} success={this.state.success} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`${person.rank} ${person.name}`} action={action} />

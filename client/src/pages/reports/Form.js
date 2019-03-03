@@ -9,6 +9,7 @@ import * as FieldHelper from 'components/FieldHelper'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
 import _cloneDeep from 'lodash/cloneDeep'
+import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 
@@ -26,9 +27,9 @@ import NavigationWarning from 'components/NavigationWarning'
 import AttendeesTable from './AttendeesTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
 
-import LOCATION_ICON from 'resources/locations.png'
+import LOCATIONS_ICON from 'resources/locations.png'
 import PEOPLE_ICON from 'resources/people.png'
-import TASK_ICON from 'resources/tasks.png'
+import TASKS_ICON from 'resources/tasks.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
 
@@ -46,7 +47,7 @@ class BaseReportForm extends Component {
 		initialValues: PropTypes.object,
 		title: PropTypes.string,
 		edit: PropTypes.bool,
-		showReportText: PropTypes.bool,
+		showSensitiveInfo: PropTypes.bool,
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
@@ -54,7 +55,7 @@ class BaseReportForm extends Component {
 		initialValues: new Report(),
 		title: '',
 		edit: false,
-		showReportText: false,
+		showSensitiveInfo: false,
 	}
 
 	atmosphereButtons = [
@@ -116,7 +117,7 @@ class BaseReportForm extends Component {
 			authorizationGroups: [],
 		},
 		tagSuggestions: [],
-		showReportText: this.props.showReportText,
+		showSensitiveInfo: this.props.showSensitiveInfo,
 	}
 
 	componentDidMount() {
@@ -125,7 +126,7 @@ class BaseReportForm extends Component {
 				list { uuid, name }
 			}
 			personRecents(maxResults:6) {
-				list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, status, organization {uuid, shortName}, location {uuid, name} } }
+				list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
 			}
 			taskRecents(maxResults:6) {
 				list { uuid, shortName, longName }
@@ -183,15 +184,17 @@ class BaseReportForm extends Component {
 				setFieldValue,
 				setFieldTouched,
 				values,
+				touched,
 				submitForm,
 				resetForm
 			}) => {
 				// need up-to-date copies of these in the autosave handler
 				this.autoSaveSettings.dirty = dirty
 				this.autoSaveSettings.values = values
+				this.autoSaveSettings.touched = touched
 				if (!this.autoSaveSettings.timeoutId) {
 					// Schedule the auto-save timer
-					const autosaveHandler = () => this.autoSave({setFieldValue, resetForm})
+					const autosaveHandler = () => this.autoSave({setFieldValue, setFieldTouched, resetForm})
 					this.autoSaveSettings.timeoutId = window.setTimeout(autosaveHandler, this.autoSaveSettings.autoSaveTimeout.asMilliseconds())
 				}
 				//Only the author can delete a report, and only in DRAFT.
@@ -255,7 +258,7 @@ class BaseReportForm extends Component {
 								name="location"
 								component={FieldHelper.renderSpecialField}
 								onChange={value => setFieldValue('location', value)}
-								addon={LOCATION_ICON}
+								addon={LOCATIONS_ICON}
 								extraColElem={recents.locations && recents.locations.length > 0 &&
 									<div className="location-form-group shortcut-list">
 										<h5>Recent Locations</h5>
@@ -350,38 +353,43 @@ class BaseReportForm extends Component {
 								addFieldLabel="Attendees"
 								addon={PEOPLE_ICON}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
-								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
-								shortcutsTitle={`Recent attendees`}
+								onChange={value => {
+									this.updateAttendees(setFieldValue, 'attendees', value)
+									setFieldTouched('attendees', true)
+								}}
+								shortcutsTitle="Recent Attendees"
 								shortcuts={recents.persons}
 								renderExtraCol={true}
 							/>
 						</Fieldset>
 
-						{!values.cancelled &&
-							<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
-								<MultiSelector
-									items={values.tasks}
-									objectType={Task}
-									queryParams={{status: Task.STATUS.ACTIVE}}
-									placeholder={`Start typing to search for ${Settings.fields.task.shortLabel}...`}
-									fields={Task.autocompleteQuery}
-									template={Task.autocompleteTemplate}
-									addFieldName='tasks'
-									addFieldLabel={Settings.fields.task.shortLabel}
-									addon={TASK_ICON}
-									renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
-									onChange={value => setFieldValue('tasks', value)}
-									shortcutsTitle={`Recent ${Settings.fields.task.shortLabel}`}
-									shortcuts={recents.tasks}
-									renderExtraCol={true}
-								/>
-							</Fieldset>
-						}
+						<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
+							<MultiSelector
+								items={values.tasks}
+								objectType={Task}
+								queryParams={{status: Task.STATUS.ACTIVE}}
+								placeholder={`Start typing to search for ${pluralize(Settings.fields.task.shortLabel)}...`}
+								fields={Task.autocompleteQuery}
+								template={Task.autocompleteTemplate}
+								addFieldName='tasks'
+								addFieldLabel={Settings.fields.task.shortLabel}
+								addon={TASKS_ICON}
+								renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
+								onChange={value => {
+									setFieldValue('tasks', value)
+									setFieldTouched('tasks', true)
+								}}
+								shortcutsTitle={`Recent ${pluralize(Settings.fields.task.shortLabel)}`}
+								shortcuts={recents.tasks}
+								renderExtraCol={true}
+							/>
+						</Fieldset>
 
-						<Fieldset title={!values.cancelled ? "Meeting discussion" : "Next steps and details"}>
+						<Fieldset title={!values.cancelled ? "Meeting discussion" : "Next steps and details"} id="meeting-details">
 							{!values.cancelled &&
 								<Field
 									name="keyOutcomes"
+									label={Settings.fields.report.keyOutcomes}
 									component={FieldHelper.renderInputField}
 									componentClass="textarea"
 									maxLength={250}
@@ -392,6 +400,7 @@ class BaseReportForm extends Component {
 
 							<Field
 								name="nextSteps"
+								label={Settings.fields.report.nextSteps}
 								component={FieldHelper.renderInputField}
 								componentClass="textarea"
 								maxLength={250}
@@ -399,50 +408,52 @@ class BaseReportForm extends Component {
 								extraColElem={<React.Fragment><span id="nextStepsCharsLeft">{250 - this.props.initialValues.nextSteps.length}</span> characters remaining</React.Fragment>}
 							/>
 
-							<Button className="center-block toggle-section-button" onClick={this.toggleReportText} id="toggleReportDetails" >
-								{this.state.showReportText ? 'Hide' : 'Add'} detailed report
+							<Field
+								name="reportText"
+								label={Settings.fields.report.reportText}
+								component={FieldHelper.renderSpecialField}
+								onChange={value => setFieldValue('reportText', value)}
+								widget={
+									<RichTextEditor
+										className="reportTextField"
+										onHandleBlur={() => setFieldTouched('reportText', true)}
+									/>
+								}
+							/>
+
+							<Button className="center-block toggle-section-button" onClick={this.toggleReportText} id="toggleSensitiveInfo" >
+								{this.state.showSensitiveInfo ? 'Hide' : 'Add'} sensitive information
 							</Button>
 
-							<Collapse in={this.state.showReportText}>
-								<div>
-									<Field
-										name="reportText"
-										component={FieldHelper.renderSpecialField}
-										onChange={value => setFieldValue('reportText', value)}
-										widget={
-											<RichTextEditor className="reportTextField" />
-										}
-									/>
-
-									{(values.reportSensitiveInformation || !this.props.edit) &&
-										<div>
-											<Field
-												name="reportSensitiveInformation.text"
-												component={FieldHelper.renderSpecialField}
-												label="Report sensitive information text"
-												onChange={value => setFieldValue('reportSensitiveInformation.text', value)}
-												widget={
-													<RichTextEditor className="reportSensitiveInformationField" />
-												}
-											/>
-											<MultiSelector
-												items={values.authorizationGroups}
-												objectType={AuthorizationGroup}
-												queryParams={{status: AuthorizationGroup.STATUS.ACTIVE}}
-												placeholder="Start typing to search for a group..."
-												fields={AuthorizationGroup.autocompleteQuery}
-												template={AuthorizationGroup.autocompleteTemplate}
-												addFieldName='authorizationGroups'
-												addFieldLabel='Authorization Groups'
-												renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
-												onChange={value => setFieldValue('authorizationGroups', value)}
-												shortcutsTitle={`Recent Authorization Groups`}
-												shortcuts={recents.authorizationGroups}
-												renderExtraCol={true}
-											/>
-										</div>
-									}
-								</div>
+							<Collapse in={this.state.showSensitiveInfo}>
+								{(values.reportSensitiveInformation || !this.props.edit) &&
+									<div>
+										<Field
+											name="reportSensitiveInformation.text"
+											component={FieldHelper.renderSpecialField}
+											label="Report sensitive information text"
+											onChange={value => setFieldValue('reportSensitiveInformation.text', value)}
+											widget={
+												<RichTextEditor className="reportSensitiveInformationField" />
+											}
+										/>
+										<MultiSelector
+											items={values.authorizationGroups}
+											objectType={AuthorizationGroup}
+											queryParams={{status: AuthorizationGroup.STATUS.ACTIVE}}
+											placeholder="Start typing to search for authorization groups..."
+											fields={AuthorizationGroup.autocompleteQuery}
+											template={AuthorizationGroup.autocompleteTemplate}
+											addFieldName='authorizationGroups'
+											addFieldLabel='Authorization Groups'
+											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
+											onChange={value => setFieldValue('authorizationGroups', value)}
+											shortcutsTitle="Recent Authorization Groups"
+											shortcuts={recents.authorizationGroups}
+											renderExtraCol={true}
+										/>
+									</div>
+								}
 							</Collapse>
 						</Fieldset>
 
@@ -496,7 +507,7 @@ class BaseReportForm extends Component {
 	}
 
 	toggleReportText = () => {
-		this.setState({showReportText: !this.state.showReportText})
+		this.setState({showSensitiveInfo: !this.state.showSensitiveInfo})
 	}
 
 	autoSave = (form) => {
@@ -514,7 +525,12 @@ class BaseReportForm extends Component {
 					Object.assign(newValues, response[operation])
 					// After successful autosave, reset the form with the new values in order to make sure the dirty
 					// prop is also reset (otherwise we would get a blocking navigation warning)
+					const touched = _cloneDeep(this.autoSaveSettings.touched) // save previous touched
 					form.resetForm(newValues)
+					Object.entries(touched).forEach(([field, value]) =>
+						// re-set touched so we keep messages
+						form.setFieldTouched(field, value)
+					)
 					this.autoSaveSettings.autoSaveTimeout = this.defaultTimeout.clone() // reset to default
 					this.setState({autoSavedAt: moment()})
 					toast.success('Your report has been automatically saved')
@@ -580,7 +596,7 @@ class BaseReportForm extends Component {
 	}
 
 	save = (values, sendEmail) => {
-		const report = Object.without(new Report(values), 'cancelled', 'reportTags', 'showReportText')
+		const report = Object.without(new Report(values), 'cancelled', 'reportTags', 'showSensitiveInfo')
 		if (!values.cancelled) {
 			delete report.cancelledReason
 		}

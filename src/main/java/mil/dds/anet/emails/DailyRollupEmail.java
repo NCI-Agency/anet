@@ -45,7 +45,11 @@ public class DailyRollupEmail extends AnetEmailAction {
 
 	@Override
 	public String getSubject() {
-		return "Daily Rollup for " + dtf.format(endDate);
+		if (startDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate().equals(endDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate())) {
+			return "Rollup for " + dtf.format(startDate);
+		} else {
+			return "Rollup from " + dtf.format(startDate) + " to " + dtf.format(endDate);
+		}
 	}
 
 	@Override

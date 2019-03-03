@@ -9,6 +9,7 @@ export default class MultiSelector extends Component {
 		objectType: PropTypes.func.isRequired,
 		onChange: PropTypes.func.isRequired,
 		shortcuts: PropTypes.array,
+		shortcutsTitle: PropTypes.string,
 		queryParams: PropTypes.object,
 		addFieldName: PropTypes.string,
 		addFieldLabel: PropTypes.string,
@@ -28,7 +29,7 @@ export default class MultiSelector extends Component {
 	}
 
 	render() {
-		const { items, objectType, shortcuts, queryParams, addFieldName, addFieldLabel, renderSelected, placeholder, addon, fields, template, renderExtraCol } = this.props
+		const { items, objectType, shortcuts, shortcutsTitle, queryParams, addFieldName, addFieldLabel, renderSelected, placeholder, addon, fields, template, renderExtraCol } = this.props
 		return (
 			<MultiSelectAutocomplete
 				addFieldName={addFieldName}
@@ -38,6 +39,7 @@ export default class MultiSelector extends Component {
 				onAddItem={this.addItem}
 				onRemoveItem={this.removeItem}
 				shortcuts={shortcuts}
+				shortcutsTitle={shortcutsTitle}
 				renderExtraCol={renderExtraCol}
 				addon={addon}
 				objectType={objectType}

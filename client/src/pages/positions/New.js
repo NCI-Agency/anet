@@ -2,7 +2,6 @@ import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
 import PositionForm from './Form'
-import Breadcrumbs from 'components/Breadcrumbs'
 
 import API from 'api'
 import {Organization, Position} from 'models'
@@ -49,10 +48,7 @@ class PositionNew extends Page {
 	render() {
 		const { position } = this.state
 		return (
-			<div>
-				<Breadcrumbs items={[['New Position', Position.pathForNew()]]} />
-				<PositionForm initialValues={position} title='Create a new Position' />
-			</div>
+			<PositionForm initialValues={position} title='Create a new Position' />
 		)
 	}
 }

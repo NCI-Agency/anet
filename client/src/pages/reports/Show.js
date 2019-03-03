@@ -11,7 +11,6 @@ import moment from 'moment'
 import utils from 'utils'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import Messages, {setMessages} from 'components/Messages'
 import ConfirmDelete from 'components/ConfirmDelete'
 import LinkTo from 'components/LinkTo'
@@ -69,7 +68,7 @@ class BaseReportShow extends Page {
 
 				location { uuid, name }
 				author {
-					uuid, name, rank,
+					uuid, name, rank, role
 					position {
 						organization {
 							shortName, longName, identificationCode
@@ -77,7 +76,7 @@ class BaseReportShow extends Page {
 								uuid, name,
 								approvers {
 									uuid, name,
-									person { uuid, name rank }
+									person { uuid, name, rank, role }
 								}
 							}
 						}
@@ -85,8 +84,8 @@ class BaseReportShow extends Page {
 				}
 
 				attendees {
-					uuid, name, role, primary, rank, status, endOfTourDate
-					position { uuid, name, code, status, organization { uuid, shortName}, location {uuid, name} }
+					uuid, name, primary, rank, role, status, endOfTourDate
+					position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
 				}
 				primaryAdvisor { uuid }
 				primaryPrincipal { uuid }
@@ -95,7 +94,7 @@ class BaseReportShow extends Page {
 
 				comments {
 					uuid, text, createdAt, updatedAt
-					author { uuid, name, rank }
+					author { uuid, name, rank, role }
 				}
 
 				principalOrg { uuid, shortName, longName, identificationCode, type }
@@ -104,9 +103,9 @@ class BaseReportShow extends Page {
 				approvalStatus {
 					type, createdAt
 					step { uuid , name
-						approvers { uuid, name, person { uuid, name, rank } }
+						approvers { uuid, name, person { uuid, name, rank, role } }
 					},
-					person { uuid, name, rank}
+					person { uuid, name, rank, role }
 				}
 
 				approvalStep { name, approvers { uuid }, nextStepUuid }
@@ -198,7 +197,6 @@ class BaseReportShow extends Page {
 					{this.renderEmailModal(values, setFieldValue)}
 
 					<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
-					<Breadcrumbs items={[['Report #' + report.uuid, Report.pathFor(report)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 
 					{report.isReleased() &&
@@ -261,8 +259,8 @@ class BaseReportShow extends Page {
 								widget={
 									<div id="intent" className="form-control-static">
 										<p><strong>{Settings.fields.report.intent}:</strong> {report.intent}</p>
-										{report.keyOutcomes && <p><span><strong>Key outcomes:</strong> {report.keyOutcomes}&nbsp;</span></p>}
-										<p><strong>Next steps:</strong> {report.nextSteps}</p>
+										{report.keyOutcomes && <p><span><strong>{Settings.fields.report.keyOutcomes}:</strong> {report.keyOutcomes}&nbsp;</span></p>}
+										<p><strong>{Settings.fields.report.nextSteps}:</strong> {report.nextSteps}</p>
 									</div>
 								}
 							/>
@@ -341,7 +339,7 @@ class BaseReportShow extends Page {
 						</Fieldset>
 
 						{report.reportText &&
-							<Fieldset title="Meeting discussion">
+							<Fieldset title={Settings.fields.report.reportText}>
 								<div dangerouslySetInnerHTML={{__html: report.reportText}} />
 							</Fieldset>
 						}

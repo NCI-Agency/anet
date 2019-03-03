@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
-import Breadcrumbs from 'components/Breadcrumbs'
 import ReportCollection from 'components/ReportCollection'
 import GQL from 'graphqlapi'
 import Fieldset from 'components/Fieldset'
@@ -18,6 +17,7 @@ class BaseMyReports extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
+		pagination: PropTypes.object,
 		currentUser: PropTypes.instanceOf(Person),
 	}
 
@@ -30,12 +30,6 @@ class BaseMyReports extends Page {
 			pending: null,
 			released: null
 		}
-		this.pageNums = {
-			draft: 0,
-			future: 0,
-			pending: 0,
-			released: 0
-		}
 		this.partFuncs = {
 			draft: this.getPart.bind(this, 'draft', [Report.STATE.DRAFT, Report.STATE.REJECTED]),
 			future: this.getPart.bind(this, 'future', [Report.STATE.FUTURE]),
@@ -45,10 +39,10 @@ class BaseMyReports extends Page {
 	}
 
 	@autobind
-	getPart(partName, state, authorUuid) {
+	getPart(partName, state, authorUuid, pageNum = 0) {
 		const queryConstPart = {
 			pageSize: 10,
-			pageNum: this.pageNums[partName],
+			pageNum: pageNum,
 			authorUuid: authorUuid,
 			state: state
 		}
@@ -61,30 +55,28 @@ class BaseMyReports extends Page {
 			}`).addVariable(partName + "Query", "ReportSearchQueryInput", query)
 	}
 
+	_approvalStepParts = props => {
+		const { currentUser, pagination } = props
+		const authorUuid = currentUser.uuid
+		return Object.keys(this.partFuncs).map(part => {
+			const goToPageNum = this.getPaginatedNum(pagination[part])
+			return this.partFuncs[part](authorUuid, goToPageNum)
+		})
+	}
+
 	fetchData(props) {
 		const { currentUser } = props
 		if (!currentUser || !currentUser.uuid) {
 			return
 		}
-		const authorUuid = currentUser.uuid
-		let pending = this.partFuncs.pending(authorUuid)
-		let draft = this.partFuncs.draft(authorUuid)
-		let future = this.partFuncs.future(authorUuid)
-		let released = this.partFuncs.released(authorUuid)
-
-		return GQL.run([pending, draft, future, released]).then(data =>
-			this.setState({
-				pending: data.pending,
-				draft: data.draft,
-				released: data.released,
-				future: data.future
-			})
+		const parts = this._approvalStepParts(props)
+		return GQL.run(parts).then(approvalSteps =>
+			this.setState({ ...approvalSteps })
 		)
 	}
 
 	render() {
 		return <div>
-			<Breadcrumbs items={[['My Reports', window.location.pathname]]} />
 			<SubNav subnavElemId="reports-nav">
 				<Nav>
 					<AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
@@ -94,17 +86,28 @@ class BaseMyReports extends Page {
 				</Nav>
 			</SubNav>
 
-			{this.renderSection('Draft Reports', this.state.draft, this.goToPage.bind(this, 'draft'), 'draft-reports')}
-			{this.renderSection('Upcoming Engagements', this.state.future, this.goToPage.bind(this, 'future'), 'upcoming-engagements')}
-			{this.renderSection("Pending Approval", this.state.pending, this.goToPage.bind(this, 'pending'), 'pending-approval')}
-			{this.renderSection("Published Reports", this.state.released, this.goToPage.bind(this, 'released'), 'published-reports')}
+			{this.renderSection('Draft Reports', this.state.draft, this.goToPage.bind(this, 'draft'), 'draft-reports', 'draft')}
+			{this.renderSection('Upcoming Engagements', this.state.future, this.goToPage.bind(this, 'future'), 'upcoming-engagements', 'future')}
+			{this.renderSection("Pending Approval", this.state.pending, this.goToPage.bind(this, 'pending'), 'pending-approval', 'pending')}
+			{this.renderSection("Published Reports", this.state.released, this.goToPage.bind(this, 'released'), 'published-reports', 'released')}
 		</div>
 	}
 
-	renderSection(title, reports, goToPage, id) {
+	getPaginatedNum = (part, pageNum = 0) => {
+		let goToPageNum = pageNum
+		if (part !== undefined) {
+			goToPageNum = part.pageNum
+		}
+		return goToPageNum
+	}
+
+	renderSection = (title, reports, goToPage, id, section) => {
+		const paginatedPart = this.props.pagination[section]
+		const goToPageNum = this.getPaginatedNum(paginatedPart)
 		let content = <p>Loading...</p>
 		if (reports && reports.list) {
-			content = <ReportCollection paginatedReports={reports} goToPage={goToPage} mapId={id} />
+			const paginatedReports = Object.assign(reports, {pageNum: goToPageNum})
+			content = <ReportCollection paginatedReports={paginatedReports} goToPage={goToPage} mapId={id} />
 		}
 
 		return <Fieldset title={title} id={id}>
@@ -114,20 +117,22 @@ class BaseMyReports extends Page {
 
 	@autobind
 	goToPage(section, pageNum) {
-		this.pageNums[section] = pageNum
-		const part = (this.partFuncs[section])(this.props.currentUser.uuid)
+		const { currentUser, setPagination } = this.props
+		const part = (this.partFuncs[section])(currentUser.uuid, pageNum)
 		GQL.run([part]).then( data => {
 			let stateChange = {}
 			stateChange[section] = data[section]
 			console.log(stateChange)
-			this.setState(stateChange)
+			this.setState(stateChange, () => setPagination(section, pageNum))
 		})
 	}
 }
 
 const mapStateToProps = (state, ownProps) => ({
-	searchQuery: state.searchQuery
+	searchQuery: state.searchQuery,
+	pagination: state.pagination,
 })
+
 const MyReports = (props) => (
 	<AppContext.Consumer>
 		{context =>

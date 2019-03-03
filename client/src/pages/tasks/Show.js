@@ -6,7 +6,6 @@ import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
 import Fieldset from 'components/Fieldset'
-import Breadcrumbs from 'components/Breadcrumbs'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
 import ReportCollection from 'components/ReportCollection'
@@ -48,8 +47,8 @@ class BaseTaskShow extends Page {
 		setMessages(props, this.state)
 	}
 
-	fetchData(props) {
-		const reportsQuery = new GQL.Part(/* GraphQL */`
+	getReportQueryPart(taskUuid) {
+		return new GQL.Part(/* GraphQL */`
 			reports: reportList(query: $reportsQuery) {
 				pageNum, pageSize, totalCount, list {
 					${ReportCollection.GQL_REPORT_FIELDS}
@@ -58,8 +57,12 @@ class BaseTaskShow extends Page {
 		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
 			pageSize: 10,
 			pageNum: this.state.reportsPageNum,
-			taskUuid: props.match.params.uuid,
+			taskUuid,
 		})
+	}
+
+	fetchData(props) {
+		const reportsQuery = this.getReportQueryPart(props.match.params.uuid)
 
 		const taskQuery = new GQL.Part(/* GraphQL */`
 			task(uuid:"${props.match.params.uuid}") {
@@ -99,7 +102,6 @@ class BaseTaskShow extends Page {
 				const action = canEdit && <LinkTo task={task} edit button="primary">Edit</LinkTo>
 				return <div>
 					<RelatedObjectNotes notes={task.notes} relatedObject={task.uuid && {relatedObjectType: 'tasks', relatedObjectUuid: task.uuid}} />
-					<Breadcrumbs items={[[`${Settings.fields.task.shortLabel} ${task.shortName}`, Task.pathFor(task)]]} />
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`${Settings.fields.task.shortLabel} ${task.shortName}`} action={action} />
@@ -128,7 +130,7 @@ class BaseTaskShow extends Page {
 								component={FieldHelper.renderReadonlyField}
 								humanValue={task.responsibleOrg &&
 									<LinkTo organization={task.responsibleOrg}>
-										{task.responsibleOrg.shortName} {task.responsibleOrg.longName} {task.responsibleOrg.identificationCode}
+										{task.responsibleOrg.shortName}
 									</LinkTo>
 								}
 							/>
@@ -198,7 +200,12 @@ class BaseTaskShow extends Page {
 	}
 
 	goToReportsPage = (pageNum) => {
-		this.setState({reportsPageNum: pageNum}, this.loadData)
+		this.setState({reportsPageNum: pageNum}, () => {
+			const reportQueryPart = this.getReportQueryPart(this.state.task.uuid)
+			GQL.run([reportQueryPart]).then(data =>
+				this.setState({reports: data.reports})
+			)
+		})
 	}
 }
 
