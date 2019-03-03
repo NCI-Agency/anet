@@ -1,4 +1,9 @@
-import got from 'got'
+import jsyaml from 'js-yaml'
+import fs from 'fs'
+
+console.log(`Using configuration file ` + process.argv[2])
+const anetConfig = jsyaml.safeLoad(fs.readFileSync(process.argv[2], 'utf8'))
+const Settings = anetConfig.dictionary
 
 const API = {
 	_fetch(pathName, params, accept) {
@@ -47,4 +52,4 @@ const API = {
 	}
 }
 
-export default API
+export {Settings, API as default}

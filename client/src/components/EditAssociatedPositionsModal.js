@@ -5,8 +5,7 @@ import { Formik, Form } from 'formik'
 
 import {Modal, Button, Table} from 'react-bootstrap'
 import {Position,Person} from 'models'
-import API from 'api'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 import _isEqual from 'lodash/isEqual'
 
 import Messages from'components/Messages'

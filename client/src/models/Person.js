@@ -3,7 +3,7 @@ import React from 'react'
 import Model, { yupDate } from 'components/Model'
 import LinkTo from 'components/LinkTo'
 import utils from 'utils'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import {Position, Organization} from 'models'
 

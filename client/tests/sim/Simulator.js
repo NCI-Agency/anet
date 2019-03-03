@@ -4,7 +4,6 @@ import Aigle from 'aigle'
 import colors from 'colors'
 import faker from 'faker'
 
-
 const simulate = async () => {
     console.log('Sim starting'.green)
 

@@ -6,7 +6,7 @@ import pluralize from 'pluralize'
 import AdvisorReportsModal from 'components/AdvisorReports/AdvisorReportsModal'
 import AdvisorReportsRow from 'components/AdvisorReports/AdvisorReportsRow'
 import AdvisorReportsTableHead from 'components/AdvisorReports/AdvisorReportsTableHead'
-import Settings from 'Settings'
+import {Settings} from 'api'
 import './OrganizationAdvisorsTable.css'
 
 class OrganizationAdvisorsTable extends Component {

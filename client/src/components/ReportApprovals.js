@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import './ReportApprovals.css'
-import Settings from 'Settings'
+import {Settings} from 'api'
 import LinkTo from 'components/LinkTo'
 
 import Fieldset from 'components/Fieldset'

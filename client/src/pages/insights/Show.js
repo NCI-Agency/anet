@@ -15,7 +15,7 @@ import FilterableAdvisorReportsTable from 'components/AdvisorReports/FilterableA
 
 import {Report} from 'models'
 import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES, DEFAULT_SEARCH_QUERY } from 'actions'
-import Settings from 'Settings'
+import {Settings} from 'api'
 import AppContext from 'components/AppContext'
 import { connect } from 'react-redux'
 import {deserializeQueryParams} from 'searchUtils'

@@ -8,7 +8,7 @@ import LinkTo from 'components/LinkTo'
 import ReportApprovals from 'components/ReportApprovals'
 import Tag from 'components/Tag'
 import {Report} from 'models'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'

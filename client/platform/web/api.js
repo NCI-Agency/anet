@@ -1,5 +1,7 @@
 import querystring from 'querystring'
 
+const Settings = JSON.parse(window.ANET_DATA.dictionary)
+
 const API = {
 	_fetch(pathName, params, accept) {
 		params = params || {}
@@ -115,4 +117,4 @@ const API = {
 	}
 }
 
-export default API
+export {Settings, API as default}
