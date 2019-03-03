@@ -1,5 +1,4 @@
-import XMLHttpRequest from 'xhr2'
-import fetch from 'node-fetch'
+import got from 'got'
 
 const API = {
 	_fetch(pathName, params, accept) {
@@ -29,11 +28,6 @@ const API = {
 
 	queryExport(query, variables, variableDef, output) {
 		return API._queryCommon(query, variables, variableDef, output).then(response => response.blob())
-	},
-
-	loadFileAjaxSync(filePath, mimeType) {
-		// TODO implement
-		return "{}"
 	},
 
 	_getAuthParams: function() {

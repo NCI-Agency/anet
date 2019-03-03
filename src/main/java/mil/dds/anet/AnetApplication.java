@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -219,42 +220,47 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		}
 		scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
 		
-		//Create all of the HTTP Resources.  
-		LoggingResource loggingResource = new LoggingResource();
-		PersonResource personResource = new PersonResource(engine, configuration);
-		TaskResource taskResource =  new TaskResource(engine, configuration);
-		LocationResource locationResource = new LocationResource(engine);
-		OrganizationResource orgResource = new OrganizationResource(engine);
-		PositionResource positionResource = new PositionResource(engine);
-		ReportResource reportResource = new ReportResource(engine, configuration);
-		AdminResource adminResource = new AdminResource(engine, configuration);
-		HomeResource homeResource = new HomeResource(engine);
-		SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
-		final TagResource tagResource = new TagResource(engine);
-		final AuthorizationGroupResource authorizationGroupResource = new AuthorizationGroupResource(engine);
-		final NoteResource noteResource = new NoteResource(engine);
+		try {
+			//Create all of the HTTP Resources.  
+			LoggingResource loggingResource = new LoggingResource();
+			PersonResource personResource = new PersonResource(engine, configuration);
+			TaskResource taskResource =  new TaskResource(engine, configuration);
+			LocationResource locationResource = new LocationResource(engine);
+			OrganizationResource orgResource = new OrganizationResource(engine);
+			PositionResource positionResource = new PositionResource(engine);
+			ReportResource reportResource = new ReportResource(engine, configuration);
+			AdminResource adminResource = new AdminResource(engine, configuration);
+			HomeResource homeResource = new HomeResource(engine, jsonMapper.writeValueAsString(configuration.getDictionary()));
+			SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
+			final TagResource tagResource = new TagResource(engine);
+			final AuthorizationGroupResource authorizationGroupResource = new AuthorizationGroupResource(engine);
+			final NoteResource noteResource = new NoteResource(engine);
 
-		//Register all of the HTTP Resources
-		environment.jersey().register(loggingResource);
-		environment.jersey().register(personResource);
-		environment.jersey().register(taskResource);
-		environment.jersey().register(locationResource);
-		environment.jersey().register(orgResource);
-		environment.jersey().register(positionResource);
-		environment.jersey().register(reportResource);
-		environment.jersey().register(adminResource);
-		environment.jersey().register(homeResource);
-		environment.jersey().register(savedSearchResource);
-		environment.jersey().register(tagResource);
-		environment.jersey().register(authorizationGroupResource);
-		environment.jersey().register(new ViewResponseFilter(configuration));
-		environment.jersey().register(new GraphQLResource(engine, configuration,
-				ImmutableList.of(reportResource, personResource,
-						positionResource, locationResource,
-						orgResource, taskResource,
-						adminResource, savedSearchResource, tagResource,
-						authorizationGroupResource, noteResource),
-						metricRegistry, configuration.isDevelopmentMode()));
+			//Register all of the HTTP Resources
+			environment.jersey().register(loggingResource);
+			environment.jersey().register(personResource);
+			environment.jersey().register(taskResource);
+			environment.jersey().register(locationResource);
+			environment.jersey().register(orgResource);
+			environment.jersey().register(positionResource);
+			environment.jersey().register(reportResource);
+			environment.jersey().register(adminResource);
+			environment.jersey().register(homeResource);
+			environment.jersey().register(savedSearchResource);
+			environment.jersey().register(tagResource);
+			environment.jersey().register(authorizationGroupResource);
+			environment.jersey().register(new ViewResponseFilter(configuration));
+			environment.jersey().register(new GraphQLResource(engine, configuration,
+					ImmutableList.of(reportResource, personResource,
+							positionResource, locationResource,
+							orgResource, taskResource,
+							adminResource, savedSearchResource, tagResource,
+							authorizationGroupResource, noteResource),
+							metricRegistry, configuration.isDevelopmentMode()));
+
+		} catch (JsonProcessingException exception) {
+			logger.error("Error creating HTTP resources",exception);
+		}
 	}
 
 	protected static JSONObject getDictionary(AnetConfiguration configuration)

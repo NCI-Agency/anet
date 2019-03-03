@@ -1,11 +1,14 @@
 package mil.dds.anet.views;
 
+import java.util.Map;
+
 import mil.dds.anet.beans.Person;
 
 public class IndexView extends SimpleView {
 	private Person currentUser;
 	private String securityBannerText;
 	private String securityBannerColor;
+	private String dictionary;
 
 	public IndexView(String path) {
 		super(path);
@@ -33,6 +36,14 @@ public class IndexView extends SimpleView {
 
 	public void setSecurityBannerColor(String securityBannerColor) {
 		this.securityBannerColor = securityBannerColor;
+	}
+
+	public String getDictionary() {
+		return dictionary;
+	}
+
+	public void setDictionary(String dictionary) {
+		this.dictionary = dictionary;
 	}
 
 }

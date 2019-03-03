@@ -87,27 +87,6 @@ const API = {
 		API._send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
 	},
 
-	loadFileAjaxSync(filePath, mimeType) {
-		let xmlhttp=new XMLHttpRequest()
-		xmlhttp.open("GET",filePath,false)
-		const authHeader = API._getAuthHeader()
-		if (authHeader) {
-			xmlhttp.setRequestHeader(authHeader[0], authHeader[1])
-		}
-		if (mimeType != null) {
-			if (xmlhttp.overrideMimeType) {
-				xmlhttp.overrideMimeType(mimeType)
-			}
-		}
-		xmlhttp.send()
-		if (xmlhttp.status===200) {
-			return xmlhttp.responseText
-		}
-		else {
-			throw new Error("unable to load " + filePath)
-		}
-	},
-
 	_getAuthParams: function() {
 		const query = querystring.parse(window.location.search.slice(1))
 		if (query.user && query.pass) {
