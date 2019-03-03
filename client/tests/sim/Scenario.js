@@ -100,51 +100,51 @@ const simpleScenario =
         ],
     buildup: 
         [
-            // {
-            //     name: "Create person",
-            //     number: 100,
-            //     runnable: personsBuildup,
-            //     userTypes: ["existingAdmin"]
-            // },
-            // {
-            //     name: "Create organization",
-            //     number: 50,
-            //     runnable: organizationsBuildup,
-            //     userTypes: ["existingAdmin"]
-            // },
-            // {
-            //     name: "Create position",
-            //     number: 50,
-            //     runnable: positionsBuildup,
-            //     userTypes: ["existingAdmin"]
-            // },
-            // {
-            //     name: "Put person in position",
-            //     number: 50,
-            //     runnable: assignedPositionsBuildup,
-            //     userTypes: ["existingAdmin"]
-            // }
-            // {
-            //     name: "Associated advisor position with principal position",
-            //     number: 750,
-            //     runnable: updateAssociatedPosition,
-            //     userTypes: ["existingAdmin"]
-            // }
+            {
+                name: "Create person",
+                number: 100,
+                runnable: createPerson,
+                userTypes: ["existingAdmin"]
+            },
+            {
+                name: "Create organization",
+                number: 50,
+                runnable: createHiearchy,
+                userTypes: ["existingAdmin"]
+            },
+            {
+                name: "Create position",
+                number: 50,
+                runnable: createPosition,
+                userTypes: ["existingAdmin"]
+            },
+            {
+                name: "Put person in position",
+                number: 50,
+                runnable: putPersonInPosition,
+                userTypes: ["existingAdmin"]
+            },
+            {
+                name: "Associated advisor position with principal position",
+                number: 750,
+                runnable: updateAssociatedPosition,
+                userTypes: ["existingAdmin"]
+            }
         ],
     stories:
         [
-            // {
-            //     name: "Create Report",
-            //     frequency: 2,
-            //     runnable: createReport,
-            //     userTypes: ["existingAdvisor"]
-            // },
-            // {
-            //     name: "Create profile",
-            //     frequency: 1,
-            //     runnable: createReport,
-            //     userTypes: ["newUser"]
-            // },
+            {
+                name: "Create Report",
+                frequency: 20,
+                runnable: createReport,
+                userTypes: ["existingAdvisor"]
+            },
+            {
+                name: "Create profile",
+                frequency: 1,
+                runnable: createReport,
+                userTypes: ["newUser"]
+            },
             {
                 name: "Create person",
                 frequency: 1,
@@ -177,7 +177,7 @@ const simpleScenario =
             },
             {
                 name: "Create position",
-                frequency: 9 / 10,
+                frequency: 1 / 10,
                 mean: 75,
                 stddev: 20,
                 runnable: createPosition,

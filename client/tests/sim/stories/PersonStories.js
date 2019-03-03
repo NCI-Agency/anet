@@ -76,11 +76,13 @@ const _createPerson = async function (user) {
         .biography.always()
 
     console.debug(`Creating ${person.gender.toLowerCase().green} ${person.role.toLowerCase().green} ${person.name.green}`)
+
+    const {firstName, lastName, ...personStripped} = person // TODO: we need to do this more generically
     return await runGQL(
         user,
         {
             query: `mutation($person: PersonInput!) { createPerson(person: $person) { uuid } }`,
-            variables: { person: person }
+            variables: { person: personStripped }
         })
 }
 
@@ -94,21 +96,20 @@ const updatePerson = async function (user) {
                     uuid
                   }
                 }
-              }
             }`,
             variables: {}
         })
     const person = faker.random.arrayElement(people.data.personList.list)
 
     populate(person, modifiedPerson())
-        .name.seldom()
+        .name.rarely()
         .phoneNumber.sometimes()
         .rank.sometimes()
         .country.never()
         .gender.never()
         .endOfTourDate.sometimes()
         .biography.often()
-        .emailAddress.seldom()
+        .emailAddress.rarely()
 
     const json = await runGQL(user,
         {

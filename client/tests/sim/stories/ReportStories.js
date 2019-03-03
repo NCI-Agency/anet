@@ -35,17 +35,20 @@ const populateReport = function (report) {
         .reportText.often()
         .nextSteps.often()
         .keyOutcomes.often()
-        .tags.seldom()
-        .reportSensitiveInformation.and().authorizationGroups.seldom()
+        .tags.rarely()
+        .reportSensitiveInformation.and().authorizationGroups.rarely()
     }
 
 const createReport = async function (user) {
     const report = new Report()
     populateReport(report)
+
+    const {reportTags, cancelled, ...reportStripped} = report // TODO: we need to do this more generically
+
     return await runGQL(user,
         {
             query: `mutation($report: ReportInput!) { createReport(report: $report) { uuid } }`,
-            variables: { report: report }
+            variables: { report: reportStripped }
         })
 }
 
