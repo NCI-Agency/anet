@@ -44,7 +44,7 @@ script:
     sleep 60
   - |
     cd client
-    env TEST_ENV=remote yarn run test
+    env TEST_ENV=remote yarn run test-all
   - kill $SERVER_PID
 
 after_script:
