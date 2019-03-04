@@ -125,8 +125,8 @@
     "autobind-decorator": "2.4.0"
   },
   "scripts": {
-    "build": "NODE_ENV=production webpack --mode production --config config/webpack.prod.js",
-    "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack-dev-server --mode development --open --config config/webpack.dev.js",
+    "build": "NODE_ENV=production webpack --mode production --config config/webpack.client.prod.js",
+    "start": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} DEV_PORT=${DEV_PORT:-3000} ; NODE_ENV=development webpack-dev-server --mode development --open --config config/webpack.client.dev.js",
     "lint": "eslint src tests/e2e/**/*.js tests/util/**/*.js",
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "test": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; yarn run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
@@ -134,7 +134,7 @@
     "test-jest": "jest --testPathPattern='tests/(actions|reducers)'",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "graphql": "graphql",
-    "sim": "NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js ../anet.yml"
+    "sim": "NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js ../anet.yml  "
   },
   "jest": {
     "moduleFileExtensions": [

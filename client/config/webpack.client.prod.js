@@ -7,7 +7,7 @@ const webpack = require('webpack')
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
 const path = require('path')
 
-const clientConfig = merge(common[0], {
+const clientConfig = merge(common.clientConfig, {
   bail: true,
   devtool: 'source-map',
   output: {

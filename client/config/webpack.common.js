@@ -67,53 +67,54 @@ const commonConfig = {
 }
 
 
-const commonClientConfig = merge(commonConfig, {
-    resolve: {
-        modules: [paths.appSrc, "node_modules", "platform/web"]
-    },
-    target: 'web',
-    entry: {
-        anet: [require.resolve('./polyfills'),'./src/index.js']
-    },
-    // A strange workaround for a strange compile-time bug:   Error in
-    // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
-    // in ./node_modules/xmlhttprequest/lib This fix suggested in:
-    // https://github.com/webpack/webpack-dev-server/issues/66#issuecomment-61577531
-    externals: [
-        {
-            xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
+module.exports = { 
+    
+    clientConfig: merge(commonConfig, {
+        resolve: {
+            modules: [paths.appSrc, "node_modules", "platform/web"]
+        },
+        target: 'web',
+        entry: {
+            anet: [require.resolve('./polyfills'),'./src/index.js']
+        },
+        // A strange workaround for a strange compile-time bug:   Error in
+        // ./~/xmlhttprequest/lib/XMLHttpRequest.js   Module not found: 'child_process'
+        // in ./node_modules/xmlhttprequest/lib This fix suggested in:
+        // https://github.com/webpack/webpack-dev-server/issues/66#issuecomment-61577531
+        externals: [
+            {
+                xmlhttprequest: '{XMLHttpRequest:XMLHttpRequest}'
+            }
+        ],
+        output: {
+            path: paths.appBuild,
+        },
+        plugins: [
+            new webpack.DefinePlugin({"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)}),
+            new ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
+            new CopyWebpackPlugin([
+                { from: 'public', ignore : ['index.html'] },
+            ])
+            // new webpack.optimize.CommonsChunkPlugin({
+            //     name: "dependencies",
+            //     minChunks: ({ resource }) => /node_modules/.test(resource)
+            // }),
+            // new webpack.optimize.CommonsChunkPlugin({
+            //     name: 'manifest'
+            //   })
+        ]
+    }), 
+    
+    simConfig: merge(commonConfig, {
+        resolve: {
+            modules: [paths.appSrc, "node_modules", "platform/node"]
+        },
+        target: 'node',
+        node: {
+            __dirname: true
+        },
+        entry: {
+            anet: [require.resolve('./polyfills_node'),'./tests/sim/Simulator.js']
         }
-    ],
-    output: {
-        path: paths.appBuild,
-    },
-    plugins: [
-        new webpack.DefinePlugin({"process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)}),
-        new ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
-        new CopyWebpackPlugin([
-            { from: 'public', ignore : ['index.html'] },
-        ])
-        // new webpack.optimize.CommonsChunkPlugin({
-        //     name: "dependencies",
-        //     minChunks: ({ resource }) => /node_modules/.test(resource)
-        // }),
-        // new webpack.optimize.CommonsChunkPlugin({
-        //     name: 'manifest'
-        //   })
-    ]
-})
-
-const commonSimConfig = merge(commonConfig, {
-    resolve: {
-        modules: [paths.appSrc, "node_modules", "platform/node"]
-    },
-    target: 'node',
-    node: {
-        __dirname: true
-    },
-    entry: {
-        anet: [require.resolve('./polyfills_node'),'./tests/sim/Simulator.js']
-    }
-  })
-
-module.exports = [ commonClientConfig, commonSimConfig ]
+      })
+}
