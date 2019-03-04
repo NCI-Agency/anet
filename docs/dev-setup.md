@@ -220,6 +220,11 @@ $ yarn test
 ```
 1. You can view the progress and results on [BrowserStack](https://www.browserstack.com/automate).
 
+### Simulator
+ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.   
+
+The simulator can be started by running 'yarn sim' in 'client'.
+
 ## React Frontend
 ### Initial Setup
 1. Make sure you have node.js v8.x installed: ( http://nodejs.org )
