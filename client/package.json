@@ -53,6 +53,7 @@
     "style-loader": "^0.23.1",
     "uuid": "^3.3.2",
     "wdio": "^3.0.3",
+    "wdio-browserstack-service": "^0.1.18",
     "wdio-chromedriver-service": "^0.1.5",
     "wdio-dot-reporter": "^0.0.10",
     "wdio-mocha-framework": "^0.6.4",

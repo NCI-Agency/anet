@@ -1,4 +1,4 @@
-exports.config = {
+var config = {
     
     //
     // ==================
@@ -126,9 +126,9 @@ exports.config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: ['chromedriver'],
-    port: '9515',
-    path: '/',
+    //services: ['chromedriver'],
+    //port: '9515',
+    //path: '/',
     //
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -172,8 +172,12 @@ exports.config = {
      * @param {Array.<Object>} capabilities list of capabilities details
      * @param {Array.<String>} specs List of spec file paths that are to be run
      */
-    // beforeSession: function (config, capabilities, specs) {
-    // },
+    beforeSession: function (config, capabilities, specs) {
+        var path = require('path')
+        var spec = specs[0]
+        var basename = path.basename(spec)
+        capabilities.name = basename
+    },
     /**
      * Gets executed before test execution begins. At this point you can access to all global
      * variables like `browser`. It is the perfect place to define custom commands.
@@ -263,3 +267,51 @@ exports.config = {
     // onComplete: function(exitCode, config, capabilities) {
     // }
 }
+if (process.env.CI) {
+    config.services = ['browserstack']
+    config.maxInstances = 1
+    config.user = process.env.BROWSERSTACK_USER
+    config.key = process.env.BROWSERSTACK_ACCESS_KEY
+    //config.browserstackLocal = true -- already started by Travis CI
+    capabilities = {
+        maxInstances: 1,
+        // Ideally, we'd like to test with:
+        //   browserName: 'IE',
+        //   browser_version: '11.0',
+        // but that is so prone to unexpected failures as to be unusable.
+        // So test with latest stable Chrome instead.
+        browserName: 'Chrome',
+        browser_version: '67.0',
+        chromeOptions: {
+            // Maximize the window so we can see what's going on
+            args: ['--start-maximized']
+        },
+        os: 'Windows',
+        os_version: '7',
+        resolution: '2048x1536',
+        project: 'ANET',
+        build: require("git-describe").gitDescribeSync(".", {match: '[0-9]*'}).semverString,
+        // Will be replaced for each test:
+        name: 'frontend tests',
+        // Credentials for BrowserStack:
+        'browserstack.user': process.env.BROWSERSTACK_USER,
+        'browserstack.key': process.env.BROWSERSTACK_ACCESS_KEY,
+        // For Travis CI
+        'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER,
+        // This requires that BrowserStackLocal is running!
+        'browserstack.local': 'true',
+        'browserstack.debug': 'true'
+    }
+    let util = require('util')
+    capabilities.build = util.format(capabilities.build,
+                                     capabilities.os,
+                                     capabilities.os_version,
+                                     capabilities.browserName,
+                                     capabilities.browser_version)
+    config.capabilities = [capabilities]
+} else {
+    config.services = ['chromedriver']
+    config.port = '9515'
+    config.path = '/'
+}
+exports.config = config
