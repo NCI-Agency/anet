@@ -2,8 +2,12 @@ const merge = require('webpack-merge')
 const common = require('./webpack.common.js')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const paths = require('./paths')
 
 module.exports = merge(common.clientConfig, {
+    resolve: {
+        modules: [paths.appSrc, "node_modules", "platform/web-dev"]
+    },
     // not using source maps due to https://github.com/facebook/create-react-app/issues/343#issuecomment-237241875
     // switched from 'eval' to 'cheap-module-source-map' to address https://github.com/facebook/create-react-app/issues/920
     devtool: 'cheap-module-source-map',

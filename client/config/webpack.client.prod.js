@@ -10,6 +10,9 @@ const path = require('path')
 const clientConfig = merge(common.clientConfig, {
   bail: true,
   devtool: 'source-map',
+  resolve: {
+    modules: [paths.appSrc, "node_modules", "platform/web"]
+  },
   output: {
     publicPath: '/assets/client/',
     filename: 'static/js/[name].[chunkhash:8].js',

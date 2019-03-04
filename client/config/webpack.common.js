@@ -70,9 +70,6 @@ const commonConfig = {
 module.exports = { 
     
     clientConfig: merge(commonConfig, {
-        resolve: {
-            modules: [paths.appSrc, "node_modules", "platform/web"]
-        },
         target: 'web',
         entry: {
             anet: [require.resolve('./polyfills'),'./src/index.js']
