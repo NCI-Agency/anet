@@ -113,7 +113,7 @@ const updatePerson = async function (user) {
 
     const json = await runGQL(user,
         {
-            query: `mutation($person: PersonInput!) { updatePerson(person: $person) { uuid } }`,
+            query: `mutation($person: PersonInput!) { updatePerson(person: $person) }`,
             variables: { person: person }
         })
 }
