@@ -126,7 +126,7 @@
     "lint-fix": "eslint src tests/e2e/**/*.js  tests/util/**/*.js --fix",
     "test": "echo 'Run \"test-all\" to execute all client-side tests, or pick a specific test target: \"test-jest\", \"test-wdio\", \"test-e2e\".' ; exit 1",
     "test-all": "yarn run test-jest ; yarn run test-wdio ; yarn run test-e2e",
-    "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; yarn run lint && node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
+    "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; wdio -b ${SERVER_URL} ./config/wdio.config.js",
     "test-jest": "jest --testPathPattern='tests/(actions|reducers)'",
     "load-test": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; artillery run -t ${SERVER_URL} tests/load/load.yml",
