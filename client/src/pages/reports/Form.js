@@ -29,6 +29,7 @@ import NavigationWarning from 'components/NavigationWarning'
 import AttendeesTable from './AttendeesTable'
 import AttendeesOverlayTable from './AttendeesOverlayTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
+import LinkTo from 'components/LinkTo'
 
 import LOCATIONS_ICON from 'resources/locations.png'
 import PEOPLE_ICON from 'resources/people.png'
@@ -132,7 +133,7 @@ class BaseReportForm extends Component {
 				list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
 			}
 			taskRecents(maxResults:6) {
-				list { uuid, shortName, longName }
+				list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
 			}
 			authorizationGroupRecents(maxResults:6) {
 				list { uuid, name, description }
@@ -225,6 +226,18 @@ class BaseReportForm extends Component {
 						queryVars: {role: Person.ROLE.PRINCIPAL},
 					},
 				}
+				const tasksFilters = {
+						allTasks: {
+							label: 'All tasks',
+							searchQuery: true,
+						},
+						recentTasks: {
+							label: 'Recent tasks',
+							searchQuery: false,
+							listName: 'taskRecents',
+							listArgs: 'maxResults:6',
+						},
+					}
 				const authorizationGroupsFilters = {
 					recentAuthorizationGroups: {
 						label: 'Recent authorization groups',
@@ -413,21 +426,24 @@ class BaseReportForm extends Component {
 						</Fieldset>
 
 						<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
-							<MultiSelector
-								items={values.tasks}
-								objectType={Task}
-								queryParams={{status: Task.STATUS.ACTIVE}}
-								placeholder={`Start typing to search for ${pluralize(Settings.fields.task.shortLabel)}...`}
-								fields={Task.autocompleteQuery}
-								template={Task.autocompleteTemplate}
-								addFieldName='tasks'
-								addFieldLabel={Settings.fields.task.shortLabel}
-								addon={TASKS_ICON}
-								renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
+							<AdvancedMultiSelect
+								fieldName='tasks'
+								fieldLabel={Settings.fields.task.shortLabel}
+								placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
+								selectedItems={values.tasks}
+								renderSelected={<TaskTable tasks={values.tasks} onChange={value => setFieldValue('tasks', value)} showDelete={true} showOrganization={true} />}
+								overlayComponent={AdvancedMultiSelectOverlayTable}
+								overlayColumns={['Name', 'Organization']}
+								overlayRenderRow={this.renderTaskOverlayRow}
+								filterDefs={tasksFilters}
 								onChange={value => {
 									setFieldValue('tasks', value)
 									setFieldTouched('tasks', true)
 								}}
+								objectType={Task}
+								queryParams={{status: Task.STATUS.ACTIVE}}
+								fields={Task.autocompleteQuery}
+								addon={TASKS_ICON}
 								shortcutsTitle={`Recent ${pluralize(Settings.fields.task.shortLabel)}`}
 								shortcuts={recents.tasks}
 								renderExtraCol={true}
@@ -692,6 +708,14 @@ class BaseReportForm extends Component {
 		)
 	}
 
+	renderTaskOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td className="taskName"><LinkTo task={item} >{item.shortName} - {item.longName}</LinkTo></td>
+				<td className="taskOrg" ><LinkTo organization={item.responsibleOrg} /></td>
+			</React.Fragment>
+		)
+	}
 }
 
 const ReportForm = (props) => (
