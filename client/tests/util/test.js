@@ -257,7 +257,7 @@ test.beforeEach(t => {
         async chooseAutocompleteOption(autocompleteSelector, text) {
             let $autocompleteTextbox = await t.context.$(autocompleteSelector)
             await $autocompleteTextbox.sendKeys(text)
-            t.context.driver.sleep(shortWaitMs) // give the autocomplete some time to send the request (debounce!)
+            await t.context.driver.sleep(shortWaitMs) // give the autocomplete some time to send the request (debounce!)
             let $autocompleteSuggestion = await t.context.$('#react-autowhatever-1--item-0')
             await $autocompleteSuggestion.click()
             return $autocompleteTextbox
