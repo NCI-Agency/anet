@@ -10,6 +10,16 @@ import UltimatePagination from 'components/UltimatePagination'
 import './AdvancedMultiSelect.css'
 import API from 'api'
 
+const AdvancedMultiSelectTarget = ({ overlayRef, children }) =>
+	<React.Fragment>
+		<Row>
+			<Col sm={9} className="form-group" ref={overlayRef} style={{position: 'relative', marginBottom: 0}} />
+		</Row>
+		<Row>
+			<Col smOffset={2} sm={7}>{children}</Col>
+		</Row>
+	</React.Fragment>
+
 export default class AdvancedMultiSelect extends Component {
 	static propTypes = {
 		fieldName: PropTypes.string.isRequired,  // input field name
@@ -107,6 +117,7 @@ export default class AdvancedMultiSelect extends Component {
 						</Row>
 					</Popover>
 				</Overlay>
+<<<<<<< HEAD
 				<Row>
 					<Col sm={9} className="form-group" ref={el => {this.overlayContainer = el}} style={{position: 'relative', marginBottom: 0}} />
 					<Col sm={3} />
@@ -116,6 +127,11 @@ export default class AdvancedMultiSelect extends Component {
 					<Col sm={7}>{renderSelectedWithDelete}</Col>
 					<Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
 				</Row>
+=======
+				<AdvancedMultiSelectTarget overlayRef={el => this.overlayContainer = el}>
+					{renderSelectedWithDelete}
+				</AdvancedMultiSelectTarget>
+>>>>>>> NCI-Agency/anet#255: Add AdvancedMultiSelectTarget component
 			</React.Fragment>
 		)
 	}
