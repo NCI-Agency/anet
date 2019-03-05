@@ -38,7 +38,7 @@ describe('Create new Person form page', () => {
             expect(errorMessage.getText()).to.equal('Email must be a valid email')
 
             // perform submit form to prevent warning dialog
-            CreatePerson.emailAddress.setValue('test@dds.mil')
+            CreatePerson.emailAddress.setValue('\uE003'.repeat(CreatePerson.emailAddress.getValue().length) + 'test@dds.mil')
             CreatePerson.lastName.click()
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
@@ -88,7 +88,7 @@ describe('Create new Person form page', () => {
             CreatePerson.firstName.setValue(VALID_PERSON_ADVISOR.firstName)
             CreatePerson.roleAdvisorButton.waitForExist()
             CreatePerson.roleAdvisorButton.click()
-            CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
+            CreatePerson.emailAddress.setValue('\uE003'.repeat(CreatePerson.emailAddress.getValue().length) + VALID_PERSON_ADVISOR.emailAddress)
             CreatePerson.lastName.click()
             const errorMessage = browser.element('input#emailAddress + span.help-block')
             errorMessage.waitForVisible(1000, true) // element should *not* be visible!
