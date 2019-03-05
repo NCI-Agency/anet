@@ -101,9 +101,6 @@ export default class AdvancedMultiSelect extends Component {
 								</ul>
 							</Col>
 							<Col sm={8} md={9}>
-								<header className="searchPagination">
-									{this.paginationFor(this.state.filterType)}
-								</header>
 								<this.props.overlayComponent
 									items={items}
 									selectedItems={selectedItems}
