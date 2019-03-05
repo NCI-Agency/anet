@@ -108,7 +108,7 @@ export default class AdvancedMultiSelect extends Component {
 									removeItem={this.removeItem}
 								/>
 								<footer className="searchPagination">
-									{this.paginationFor(this.state.filterType)}
+									{this.paginationFor(filterType)}
 								</footer>
 							</Col>
 						</Row>
