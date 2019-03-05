@@ -228,7 +228,7 @@ export default class AdvancedMultiSelect extends Component {
 		}
 	}
 
-	fetchResultsDebounced = _debounce(this.fetchResults, 200)
+	fetchResultsDebounced = _debounce(this.fetchResults, 400)
 
 	addItem = (newItem) => {
 		if (!newItem || !newItem.uuid) {
