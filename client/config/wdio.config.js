@@ -267,51 +267,18 @@ var config = {
     // onComplete: function(exitCode, config, capabilities) {
     // }
 }
-if (process.env.CI) {
-    config.services = ['browserstack']
-    config.maxInstances = 1
-    config.user = process.env.BROWSERSTACK_USER
-    config.key = process.env.BROWSERSTACK_ACCESS_KEY
-    //config.browserstackLocal = true -- already started by Travis CI
-    capabilities = {
-        maxInstances: 1,
-        // Ideally, we'd like to test with:
-        //   browserName: 'IE',
-        //   browser_version: '11.0',
-        // but that is so prone to unexpected failures as to be unusable.
-        // So test with latest stable Chrome instead.
-        browserName: 'Chrome',
-        browser_version: '67.0',
-        chromeOptions: {
-            // Maximize the window so we can see what's going on
-            args: ['--start-maximized']
-        },
-        os: 'Windows',
-        os_version: '7',
-        resolution: '2048x1536',
-        project: 'ANET',
-        build: require("git-describe").gitDescribeSync(".", {match: '[0-9]*'}).semverString,
-        // Will be replaced for each test:
-        name: 'frontend tests',
-        // Credentials for BrowserStack:
-        'browserstack.user': process.env.BROWSERSTACK_USER,
-        'browserstack.key': process.env.BROWSERSTACK_ACCESS_KEY,
-        // For Travis CI
-        'browserstack.localIdentifier': process.env.BROWSERSTACK_LOCAL_IDENTIFIER,
-        // This requires that BrowserStackLocal is running!
-        'browserstack.local': 'true',
-        'browserstack.debug': 'true'
-    }
-    let util = require('util')
-    capabilities.build = util.format(capabilities.build,
-                                     capabilities.os,
-                                     capabilities.os_version,
-                                     capabilities.browserName,
-                                     capabilities.browser_version)
-    config.capabilities = [capabilities]
-} else {
+let testEnv = (process.env.CI && 'remote') || process.env.TEST_ENV || 'local'
+if (testEnv === 'local') {
     config.services = ['chromedriver']
     config.port = '9515'
     config.path = '/'
+} else {
+    let capabilities = require('./browserstack.config.js')
+    config.services = ['browserstack']
+    config.capabilities = [capabilities]
+    config.maxInstances = 1
+    config.user = capabilities['browserstack.user']
+    config.key = capabilities['browserstack.key']
+    //config.browserstackLocal = true -- already started by Travis CI
 }
 exports.config = config

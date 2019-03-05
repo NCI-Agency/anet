@@ -8,56 +8,15 @@ let test = require('ava'),
     path = require('path'),
     chalk = require('chalk')
 
-let capabilities = {},
-    testEnv = process.env.TEST_ENV || 'local'
+let capabilities = {}
+let testEnv = (process.env.CI && 'remote') || process.env.TEST_ENV || 'local'
 if (testEnv === 'local') {
     // This gives us access to send Chrome commands.
     require('chromedriver')
 } else {
     // Set capabilities for BrowserStack
     require('./keep-alive.js')
-    let config = require('config')
-    let browserstack_user = config.has('browserstack_user') ? config.get('browserstack_user') : process.env.BROWSERSTACK_USER
-    let browserstack_key = config.has('browserstack_key') ? config.get('browserstack_key') : process.env.BROWSERSTACK_ACCESS_KEY
-    let browserstack_debug = config.has('browserstack_debug') ? config.get('browserstack_debug') : process.env.BROWSERSTACK_DEBUG
-    capabilities = {
-        // Ideally, we'd like to test with:
-        //   browserName: 'IE',
-        //   browser_version: '11.0',
-        // but that is so prone to unexpected failures as to be unusable.
-        // So test with latest stable Chrome instead.
-        browserName: 'Chrome',
-        browser_version: '67.0',
-        chromeOptions: {
-            // Maximize the window so we can see what's going on
-            args: ['--start-maximized']
-        },
-        os: 'Windows',
-        os_version: '7',
-        resolution: '2048x1536',
-        project: 'ANET',
-        build: require("git-describe").gitDescribeSync(".", {match: '[0-9]*'}).semverString,
-        // Will be replaced for each test:
-        name: 'frontend tests',
-        // Credentials for BrowserStack:
-        'browserstack.user': browserstack_user,
-        'browserstack.key': browserstack_key,
-        // This requires that BrowserStackLocal is running!
-        'browserstack.local': 'true'
-    }
-    if (browserstack_debug) {
-        capabilities['browserstack.debug'] = browserstack_debug
-    }
-    if (process.env.BROWSERSTACK_LOCAL_IDENTIFIER) {
-        // For Travis CI
-        capabilities['browserstack.localIdentifier'] = process.env.BROWSERSTACK_LOCAL_IDENTIFIER
-    }
-    let util = require('util')
-    capabilities.build = util.format(capabilities.build,
-                                     capabilities.os,
-                                     capabilities.os_version,
-                                     capabilities.browserName,
-                                     capabilities.browser_version)
+    capabilities = require('../../config/browserstack.config.js')
 }
 
 // Webdriver's promise manager only made sense before Node had async/await support.

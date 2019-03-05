@@ -45,7 +45,7 @@ script:
   - |
     cd client
     yarn run lint
-    env TEST_ENV=remote yarn run test-all
+    yarn run test-all
   - kill $SERVER_PID
 
 after_script:
