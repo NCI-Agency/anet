@@ -271,4 +271,11 @@ public class OrganizationResource {
 			throw new WebApplicationException("An approver is required for every approval step", Status.BAD_REQUEST);
 		}
 	}
+
+	@GET
+	@Timed
+	@GraphQLQuery(name="approvalStepInUse")
+	public boolean isApprovalStepInUse(@GraphQLArgument(name="uuid") String uuid) {
+		return engine.getApprovalStepDao().isStepInUse(uuid);
+	}
 }
