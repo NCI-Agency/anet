@@ -88,9 +88,9 @@ export default class AdvancedMultiSelect extends Component {
 					animation={false}
 					delayHide={200}
 				>
-					<Popover id={fieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%'}}>
+					<Popover id={fieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%', boxShadow: '0 6px 20px hsla(0, 0%, 0%, 0.4)'}}>
 						<Row className="border-between">
-							<Col sm={3}>
+							<Col sm={4} md={3}>
 								<ul className="overlayFilters">
 									{Object.keys(filterDefs).map(filterType => (
 										!filterDefs[filterType].doNotDisplay && 
@@ -100,7 +100,7 @@ export default class AdvancedMultiSelect extends Component {
 									))}
 								</ul>
 							</Col>
-							<Col sm={9}>
+							<Col sm={8} md={9}>
 								<header className="searchPagination">
 									{this.paginationFor(this.state.filterType)}
 								</header>
