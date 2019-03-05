@@ -13,6 +13,7 @@ import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 
+import AdvancedMultiSelectOverlayTable from 'components/AdvancedMultiSelectOverlayTable'
 import AppContext from 'components/AppContext'
 import Autocomplete from 'components/Autocomplete'
 import Fieldset from 'components/Fieldset'
@@ -224,6 +225,18 @@ class BaseReportForm extends Component {
 						queryVars: {role: Person.ROLE.PRINCIPAL},
 					},
 				}
+				const authorizationGroupsFilters = {
+					recentAuthorizationGroups: {
+						label: 'Recent authorization groups',
+						searchQuery: false,
+						listName: 'authorizationGroupRecents',
+						listArgs: 'maxResults:6',
+					},
+					allAuthorizationGroups: {
+						label: 'All authorization groups',
+						searchQuery: true,
+					},
+				}
 				// need up-to-date copies of these in the autosave handler
 				this.autoSaveSettings.dirty = dirty
 				this.autoSaveSettings.values = values
@@ -385,6 +398,8 @@ class BaseReportForm extends Component {
 								selectedItems={values.attendees}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
 								overlayComponent={AttendeesOverlayTable}
+								overlayColumns={['Name', 'Description']}
+								overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
 								filterDefs={attendeesFilters}
 								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
 								objectType={Person}
@@ -471,17 +486,20 @@ class BaseReportForm extends Component {
 												<RichTextEditor className="reportSensitiveInformationField" />
 											}
 										/>
-										<MultiSelector
-											items={values.authorizationGroups}
+										<AdvancedMultiSelect
+											fieldName='authorizationGroups'
+											fieldLabel="Authorization Groups"
+											placeholder="Search for authorization groups..."
+											selectedItems={values.authorizationGroups}
+											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} onChange={value => setFieldValue('authorizationGroups', value)} showDelete={true} />}
+											overlayComponent={AdvancedMultiSelectOverlayTable}
+											overlayColumns={['Name', 'Description']}
+											overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
+											filterDefs={authorizationGroupsFilters}
+											onChange={value => setFieldValue('authorizationGroups', value)}
 											objectType={AuthorizationGroup}
 											queryParams={{status: AuthorizationGroup.STATUS.ACTIVE}}
-											placeholder="Start typing to search for authorization groups..."
 											fields={AuthorizationGroup.autocompleteQuery}
-											template={AuthorizationGroup.autocompleteTemplate}
-											addFieldName='authorizationGroups'
-											addFieldLabel='Authorization Groups'
-											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
-											onChange={value => setFieldValue('authorizationGroups', value)}
 											shortcutsTitle="Recent Authorization Groups"
 											shortcuts={recents.authorizationGroups}
 											renderExtraCol={true}
@@ -663,6 +681,15 @@ class BaseReportForm extends Component {
 		}
 		const variableDef = '($report: ReportInput!' + (edit ? ', $sendEditEmail: Boolean!' : '') + ')'
 		return API.mutation(graphql, variables, variableDef)
+	}
+
+	renderAuthorizationGroupOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td>{item.name}</td>
+				<td>{item.description}</td>
+			</React.Fragment>
+		)
 	}
 
 }

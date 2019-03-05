@@ -60,7 +60,9 @@ export default class AdvancedMultiSelect extends Component {
 		placeholder: PropTypes.string,  // input field placeholder
 		selectedItems: PropTypes.array.isRequired,  // already selected items
 		renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,  // how to render the selected items
-		overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),  // search results component for in the overlay
+		overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]).isRequired,  // search results component for in the overlay
+		overlayColumns: PropTypes.array.isRequired,
+		overlayRenderRow: PropTypes.func.isRequired,
 		filterDefs: PropTypes.object,  // config of the search filters
 		onChange: PropTypes.func.isRequired,
 		//Required: ANET Object Type (Person, Report, etc) to search for.
