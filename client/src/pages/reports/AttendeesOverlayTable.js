@@ -1,20 +1,20 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Table } from 'react-bootstrap'
-import { Classes, Icon } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import classNames from 'classnames'
 
-import {Person} from 'models'
+import { Person } from 'models'
 import LinkTo from 'components/LinkTo'
+import Checkbox from 'components/Checkbox'
+
+import _isEmpty from 'lodash/isEmpty'
 
 const AttendeesOverlayTable = (props) => {
 	const { items, selectedItems, addItem, removeItem } = props
 	const selectedItemsUuids = selectedItems.map(a => a.uuid)
 	return (
-		<Table responsive hover striped>
+		<Table responsive hover striped className="attendeesOverlayTable">
 			<thead>
 				<tr>
-					<th />
+					<th>Attendee</th>
 					<th>Name</th>
 					<th>Position</th>
 					<th>Location</th>
@@ -25,25 +25,11 @@ const AttendeesOverlayTable = (props) => {
 				{Person.map(items, person => {
 					const isSelected = selectedItemsUuids.includes(person.uuid)
 					return <tr key={person.uuid}>
-						<td>
+						<td style={{ textAlign: "center" }} onClick={isSelected ? () => removeItem(person) : () => addItem(person)}>
 						{isSelected ?
-							<button
-								type="button"
-								className={classNames(Classes.BUTTON)}
-								title="Remove attendee"
-								onClick={() => removeItem(person)}
-							>
-								<Icon icon={IconNames.REMOVE} />
-							</button>
+							<Checkbox checked={isSelected} onChange={() => removeItem(person)} />
 						:
-						<button
-							type="button"
-							className={classNames(Classes.BUTTON)}
-							title="Add attendee"
-							onClick={() => addItem(person)}
-							>
-								<Icon icon={IconNames.ADD} />
-							</button>
+							<Checkbox checked={isSelected} onChange={() => addItem(person)} />
 						}
 						</td>
 						<td>
