@@ -13,8 +13,8 @@ Our code style conventions are automatically checked on both the Java server sid
 
 Before we merge any code into master we verify that all tests run.  You can run these yourself with: 
 
-- Backend Unit Tests `export DB_DRIVER='sqlserver'; ./gradlew test`
-- Front-end Integration Tests `cd client; yarn run test`
+- Backend Unit Tests `export DB_DRIVER='sqlserver'; ./gradlew -PtestEnv test`
+- Front-end Integration Tests `cd client; yarn run test-all`
 
 If you are adding any new features, please write test cases that cover your features. 
 
