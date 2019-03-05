@@ -22,11 +22,13 @@ const LoaderHOC = (isLoading) => (dataPropName) => (WrappedComponent) => {
         render() {
             const dataIsEmpty = _isEmpty(this.props[dataPropName])
             const showLoader =  dataIsEmpty && this.isLoadingData(this.props[isLoading])
+            const loaderMessage = this.props.loaderMessage
+            const defaultMessage = <div><em>No data</em></div>
 
             if (showLoader) {
                 return <div className='loader'></div>
             } else if (dataIsEmpty) {
-                return <div><em>No data</em></div>
+                return _isEmpty(loaderMessage) ? defaultMessage : loaderMessage
             }
             else {
                 return <WrappedComponent {...this.props} />
