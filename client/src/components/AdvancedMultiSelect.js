@@ -31,12 +31,18 @@ export default class AdvancedMultiSelect extends Component {
 		queryParams: PropTypes.object,
 		//Optional: GraphQL string of fields to return from search.
 		fields: PropTypes.string,
+		shortcuts: PropTypes.array,
+		shortcutsTitle: PropTypes.string,
+		renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
 		addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
 	}
 
 	static defaultProps = {
 		fieldLabel: 'Add item',
 		filterDefs: {},
+		shortcuts: [],
+		shortcutsTitle: 'Recents',
+		renderExtraCol: true,
 	}
 
 	state = {
@@ -48,7 +54,7 @@ export default class AdvancedMultiSelect extends Component {
 	}
 
 	render() {
-		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, addon } = this.props
+		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, shortcuts, shortcutsTitle, renderExtraCol, addon } = this.props
 		const { results, filterType } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const items = results && results[filterType] ? results[filterType].list : []
@@ -64,6 +70,7 @@ export default class AdvancedMultiSelect extends Component {
 					onFocus={this.handleInputFocus}
 					onBlur={this.handleInputBlur}
 					innerRef={el => {this.overlayTarget = el}}
+					extraColElem={renderExtraCol ? this.renderShortcutsTitle() : null}
 					addon={addon}
 				/>
 				<Overlay
@@ -112,7 +119,7 @@ export default class AdvancedMultiSelect extends Component {
 				<Row>
 					<Col sm={2} />
 					<Col sm={7}>{renderSelectedWithDelete}</Col>
-					<Col sm={3} />
+					<Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
 				</Row>
 			</React.Fragment>
 		)
@@ -257,5 +264,25 @@ export default class AdvancedMultiSelect extends Component {
 
 	goToPage = (pageNum) => {
 		this.fetchResults(pageNum)
+	}
+
+	renderShortcutsTitle = () => {
+		return <div className="shortcut-title"><h5>{this.props.shortcutsTitle}</h5></div>
+	}
+
+	renderShortcuts = () => {
+		const shortcuts = this.props.shortcuts
+		return (shortcuts && shortcuts.length > 0 &&
+			<div className="shortcut-list">
+				{shortcuts.map(shortcut => {
+					const shortcutLinkProps = {
+						[this.props.objectType.getModelNameLinkTo]: shortcut,
+						isLink: false,
+						forShortcut: true
+					}
+					return <Button key={shortcut.uuid} bsStyle="link" onClick={() => this.addItem(shortcut)}>Add <LinkTo {...shortcutLinkProps} /></Button>
+				})}
+			</div>
+		)
 	}
 }

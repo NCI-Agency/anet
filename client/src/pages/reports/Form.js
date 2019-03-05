@@ -391,6 +391,9 @@ class BaseReportForm extends Component {
 								queryParams={{status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]}}
 								fields={Person.autocompleteQuery}
 								addon={PEOPLE_ICON}
+								shortcutsTitle="Recent Attendees"
+								shortcuts={recents.persons}
+								renderExtraCol={true}
 							/>
 						</Fieldset>
 
