@@ -1,62 +1,111 @@
 import React, { Component } from 'react'
-import {Checkbox, Table} from 'react-bootstrap'
-import { Classes, Icon } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import classNames from 'classnames'
+import { Button, Label, Radio, Table } from 'react-bootstrap'
 
 import _isEmpty from 'lodash/isEmpty'
 
 import {Person} from 'models'
 import LinkTo from 'components/LinkTo'
 
+import REMOVE_ICON from 'resources/delete.png'
+
+const RemoveIcon = () =>
+	<img src={REMOVE_ICON} height={14} alt="Remove attendee" />
+
+const RemoveButton = props =>
+	<Button bsStyle="link"
+		title={props.title}
+		onClick={props.handleOnClick}
+	>
+		<RemoveIcon />
+	</Button>
+
+const AttendeeDividerRow = () =>
+	<tr className="attendee-divider-row"><td colSpan={6}><hr /></td></tr>
+
+const TableHeader = props => {
+	const { showDelete, hide } = props
+	return <thead>
+		<tr>
+			<th className="col-xs-1" style={{textAlign: 'center'}}>{!hide && 'Primary'}</th>
+			<th className="col-xs-3">{!hide && 'Name'}</th>
+			<th className="col-xs-3">{!hide && 'Position'}</th>
+			<th className="col-xs-2">{!hide && 'Location'}</th>
+			<th className="col-xs-2">{!hide && 'Organization'}</th>
+			{showDelete && <th className="col-xs-1"></th>}
+		</tr>
+	</thead>
+}
+
+const TableBody = props => {
+	const { attendees, handleAttendeeRow, role, enableDivider } = props
+	return <tbody>
+		{enableDivider && 
+			<AttendeeDividerRow />
+		}
+		{Person.map(attendees.filter(p => p.role === role),
+			person => handleAttendeeRow(person)
+		)}
+	</tbody>
+}
+
+const TableContainer = props =>
+	<Table striped condensed hover responsive className="attendeesTable">
+		{props.children}
+	</Table>
+
+
+const RadioButton = ({ person, disabled, handleOnChange }) =>
+	<Radio name={`primaryAttendee${person.role}`}
+		checked={person.primary}
+		disabled={disabled}
+		style={{paddingTop: '3px', textAlign: 'center'}}
+		onChange={() => !disabled && handleOnChange(person)}>
+		{person.primary && 
+			<Label bsStyle="primary">Primary</Label>
+		}
+	</Radio>
+
 export default class AttendeesTable extends Component {
 	render() {
+		const { attendees } = this.props
 		return (
-			<Table striped condensed hover responsive id="attendeesTable">
-				<thead>
-					<tr>
-						<th style={{textAlign: 'center'}}>Primary</th>
-						<th>Name</th>
-						<th>Position</th>
-						<th>Location</th>
-						<th>Organization</th>
-						{this.props.showDelete && <th></th>}
-					</tr>
-				</thead>
-				<tbody>
-					{Person.map(this.props.attendees.filter(p => p.role === Person.ROLE.ADVISOR),
-						person => this.renderAttendeeRow(person)
-					)}
-
-					<tr className="attendee-divider-row"><td colSpan={6}><hr /></td></tr>
-
-					{Person.map(this.props.attendees.filter(p => p.role === Person.ROLE.PRINCIPAL),
-						person => this.renderAttendeeRow(person)
-					)}
-				</tbody>
-			</Table>
+			<React.Fragment id="attendeesContainer">
+				<TableContainer>
+					<TableHeader showDelete={this.props.showDelete} />
+					<TableBody
+						attendees={attendees}
+						role={Person.ROLE.ADVISOR}
+						handleAttendeeRow={this.renderAttendeeRow}
+					/>
+				</TableContainer>
+				<TableContainer>
+					<TableHeader hide />
+					<TableBody
+						attendees={attendees}
+						role={Person.ROLE.PRINCIPAL}
+						handleAttendeeRow={this.renderAttendeeRow}
+						enableDivider
+					/>
+				</TableContainer>
+			</React.Fragment>
 		)
 	}
 
 	renderAttendeeRow = (person) => {
+		const { disabled, showDelete, onDelete } = this.props
 		return (
 			<tr key={person.uuid}>
 				<td className="primary-attendee">
-					<Checkbox checked={person.primary} disabled={this.props.disabled} onChange={() => !this.props.disabled && this.setPrimaryAttendee(person)} />
+					<RadioButton person={person} handleOnChange={this.setPrimaryAttendee} disabled={disabled}/>
 				</td>
 				<td><LinkTo person={person} /></td>
 				<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
 				<td><LinkTo whenUnspecified="" anetLocation={person.position && person.position.location} /></td>
 				<td><LinkTo whenUnspecified="" organization={person.position && person.position.organization} /> </td>
-				{this.props.showDelete && <td>
-					<button
-						type="button"
-						className={classNames(Classes.BUTTON)}
+				{showDelete && <td>
+					<RemoveButton
 						title="Remove attendee"
-						onClick={() => this.props.onDelete(person)}
-					>
-						<Icon icon={IconNames.REMOVE} />
-					</button>
+						handleOnClick={()=> onDelete(person)} />
 				</td>}
 			</tr>
 		)
