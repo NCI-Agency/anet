@@ -8,11 +8,10 @@ import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
 
-import org.apache.commons.text.StringEscapeUtils;
-
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.views.IndexView;
 
@@ -21,12 +20,11 @@ import mil.dds.anet.views.IndexView;
 public class HomeResource {
 
 	AnetObjectEngine engine;
-	String serializedDictionary;
+	AnetConfiguration config;
 	
-	public HomeResource(AnetObjectEngine engine, String dictionaryString) { 
+	public HomeResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.engine = engine;
-		//TODO: should try to pass the dictionary to the client as literal JSON instead of serializing it to a string
-		this.serializedDictionary = StringEscapeUtils.escapeEcmaScript(dictionaryString);
+		this.config = config;
 	}
 	
 	/**
@@ -46,7 +44,7 @@ public class HomeResource {
 		
 		view.setSecurityBannerText(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		view.setSecurityBannerColor(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-		view.setDictionary(serializedDictionary);
+		view.setDictionary(config.getDictionary());
 		
 		return view;
 	}
