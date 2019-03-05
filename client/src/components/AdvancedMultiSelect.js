@@ -4,6 +4,7 @@ import { Button, Col, Row, Overlay, Popover } from 'react-bootstrap'
 import { Field } from 'formik'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
+import _isEmpty from 'lodash/isEmpty'
 
 import { renderInputField } from 'components/FieldHelper'
 import UltimatePagination from 'components/UltimatePagination'
@@ -56,11 +57,17 @@ export default class AdvancedMultiSelect extends Component {
 		results: {},
 		showOverlay: false,
 		inputFocused: false,
+		isLoading: false,
 	}
 
 	render() {
+<<<<<<< HEAD
 		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, shortcuts, shortcutsTitle, renderExtraCol, addon } = this.props
 		const { results, filterType } = this.state
+=======
+		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, addon } = this.props
+		const { results, filterType, isLoading } = this.state
+>>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const items = results && results[filterType] ? results[filterType].list : []
 		return (
@@ -106,6 +113,8 @@ export default class AdvancedMultiSelect extends Component {
 									selectedItems={selectedItems}
 									addItem={this.addItem}
 									removeItem={this.removeItem}
+									isLoading={isLoading}
+									loaderMessage={"No results found"}
 								/>
 								<footer className="searchPagination">
 									{this.paginationFor(filterType)}
@@ -140,7 +149,12 @@ export default class AdvancedMultiSelect extends Component {
 		this.setState({
 			inputFocused: true,
 			showOverlay: true,
+<<<<<<< HEAD
 		}, () => this.fetchResults(0))
+=======
+			isLoading: true,
+		}, this.fetchResults())
+>>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
 	}
 
 	handleInputBlur = () => {
@@ -156,20 +170,37 @@ export default class AdvancedMultiSelect extends Component {
 		this.setState({
 			filterType: Object.keys(this.props.filterDefs)[0],
 			results: {},
+			isLoading: false,
 			showOverlay: false,
 		})
 	}
 
 	changeSearchTerms = (event) => {
 		// Reset the results state when the search terms change
+<<<<<<< HEAD
 		this.setState({searchTerms: event.target.value}, () => this.fetchResultsDebounced(0, true))
+=======
+		this.setState({
+			isLoading: true,
+			searchTerms: event.target.value,
+			results: {}
+		}, () => this.fetchResultsDebounced(0))
+>>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
 	}
 
 	changeFilterType = (filterType) => {
 		// When changing the filter type, only fetch the results if they were not fetched before
-		this.setState({filterType}, () => (!this.state.results[filterType] ? this.fetchResults(0) : null))
+		const { results } = this.state
+		const filterResults = results[filterType]
+		const fetchResults = _isEmpty(filterResults)
+		this.setState({	filterType,	isLoading: fetchResults }, () => {
+			if (fetchResults) {
+				this.fetchResults(0)
+			}
+		})
 	}
 
+<<<<<<< HEAD
 	fetchResults = (pageNum, resetResults) => {
 		// Reset results without extra state change
 		const results = resetResults ? {} : this.state.results
@@ -177,55 +208,77 @@ export default class AdvancedMultiSelect extends Component {
 		const filterDefs = this.props.filterDefs[filterType]
 		const resourceName = this.props.objectType.resourceName
 		const listName = filterDefs.listName || this.props.objectType.listName
+=======
+	fetchResults = (pageNum) => {
+		const { filterType, results } = this.state
+		const filterDefs = this.props.filterDefs[filterType]
+		if (pageNum === undefined) {
+			pageNum = results && results[filterType] ? results[filterType].pageNum : 0
+		}
+>>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
 		if (filterDefs.list) {
 			// No need to fetch the data, it is already provided in the filter definition
 			this.setState({
+				isLoading: !_isEmpty(filterDefs.list),
 				results: {
 					...results,
 					[filterType]: {list: filterDefs.list, pageNum: pageNum, pageSize: 6, totalCount: filterDefs.list.length}
 				}
 			})
+		} else {
+			this.queryResults(filterDefs, filterType, results, pageNum)
 		}
-		else if (filterDefs.searchQuery) {
-			// GraphQL search type of query
-			const graphQlQuery = listName + ' (query: $query) { '
-				+ 'pageNum, pageSize, totalCount, list { ' + this.props.fields + '}'
-				+ '}'
-			const variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
-			let queryVars = {pageNum: pageNum, pageSize: 6}
-			if (this.props.queryParams) {
-				Object.assign(queryVars, this.props.queryParams)
-			}
-			if (filterDefs.queryVars) {
-				Object.assign(queryVars, filterDefs.queryVars)
-			}
-			if (this.state.searchTerms) {
-				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
-			}
-			API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
-				this.setState({
-					results: {
-						...results,
-						[filterType]: data[listName]
-					}
+	}
+
+	queryResults = (filterDefs, filterType, oldResults, pageNum) => {
+		const resourceName = this.props.objectType.resourceName
+		const listName = filterDefs.listName || this.props.objectType.listName
+		this.setState({isLoading: true}, () => {
+			if (filterDefs.searchQuery) {
+				// GraphQL search type of query
+				const graphQlQuery = listName + ' (query: $query) { '
+					+ 'pageNum, pageSize, totalCount, list { ' + this.props.fields + '}'
+					+ '}'
+				const variableDef = '($query: ' + resourceName + 'SearchQueryInput)'
+				let queryVars = {pageNum: pageNum, pageSize: 6}
+				if (this.props.queryParams) {
+					Object.assign(queryVars, this.props.queryParams)
+				}
+				if (filterDefs.queryVars) {
+					Object.assign(queryVars, filterDefs.queryVars)
+				}
+				if (this.state.searchTerms) {
+					Object.assign(queryVars, {text: this.state.searchTerms + "*"})
+				}
+				API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
+					const isLoading = data[listName].totalCount !== 0
+					this.setState({
+						isLoading,
+						results: {
+							...oldResults,
+							[filterType]: data[listName]
+						}
+					})
 				})
-			})
-		}
-		else {
-			// GraphQL query other than search type
-			API.query(/* GraphQL */`
-					` + listName + `(` + filterDefs.listArgs + `) {
-				pageNum, pageSize, totalCount, list { ` + this.props.fields + ` }
-					}`
-			).then(data => {
-				this.setState({
-					results: {
-						...results,
-						[filterType]: data[listName]
-					}
+			}
+			else {
+				// GraphQL query other than search type
+				API.query(/* GraphQL */`
+						` + listName + `(` + filterDefs.listArgs + `) {
+					pageNum, pageSize, totalCount, list { ` + this.props.fields + ` }
+						}`
+				).then(data => {
+					const isLoading = data[listName].totalCount !== 0
+					this.setState({
+						isLoading,
+						results: {
+							...oldResults,
+							[filterType]: data[listName]
+						}
+					})
 				})
-			})
-		}
+			}
+		})
 	}
 
 	fetchResultsDebounced = _debounce(this.fetchResults, 400)

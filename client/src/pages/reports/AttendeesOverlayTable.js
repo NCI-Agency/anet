@@ -4,6 +4,7 @@ import { Table } from 'react-bootstrap'
 import { Person } from 'models'
 import LinkTo from 'components/LinkTo'
 import Checkbox from 'components/Checkbox'
+import LoaderHOC from 'HOC/LoaderHOC'
 
 import _isEmpty from 'lodash/isEmpty'
 
@@ -46,4 +47,4 @@ const AttendeesOverlayTable = (props) => {
 	)
 }
 
-export default AttendeesOverlayTable
+export default LoaderHOC('isLoading')('items')(AttendeesOverlayTable)
