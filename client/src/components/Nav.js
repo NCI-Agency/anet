@@ -42,10 +42,10 @@ export const AnchorNavItem = (props) => {
 	)
 }
 
-function SidebarLink({ linkTo, children, handleOnClick }) {
+function SidebarLink({ linkTo, children, handleOnClick, id }) {
 	return (
 		<Link to={linkTo} onClick={handleOnClick}>
-			<NavItem>{children}</NavItem>
+			<NavItem id={id}>{children}</NavItem>
 		</Link>
 		)
 }
@@ -97,7 +97,7 @@ class BaseNav extends Component {
 				<BSNav id="reports-nav" />
 
 				{myOrg &&
-					<SidebarLink linkTo={Organization.pathFor(myOrg)} handleOnClick={resetPages}>
+					<SidebarLink linkTo={Organization.pathFor(myOrg)} handleOnClick={resetPages} id="my-organization">
 						My organization <br /><small>{myOrg.shortName}</small>
 					</SidebarLink>
 				}
