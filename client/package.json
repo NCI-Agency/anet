@@ -6,7 +6,7 @@
   "devDependencies": {
     "@babel/core": "^7.3.4",
     "@storybook/addon-actions": "^4.1.13",
-    "@storybook/react": "^4.1.13",
+    "@storybook/react": "^5.0.0",
     "artillery": "^1.6.0-27",
     "autobind-decorator": "^2.4.0",
     "autoprefixer": "^9.4.9",
