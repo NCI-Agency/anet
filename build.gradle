@@ -274,7 +274,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	imageId = dockerPullDB.getImageId()
 	containerName = dbContainerName
 	description = "Creates an ANET MS SQL DB container named " + dbContainerName + "."
-	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
+	Map<String, String> binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	withEnvVar('ACCEPT_EULA', 'Y')
 	withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
 	withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
