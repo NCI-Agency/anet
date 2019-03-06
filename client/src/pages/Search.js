@@ -92,8 +92,11 @@ class Search extends Page {
 
 	static propTypes = {
 		...pagePropTypes,
+		setPagination: PropTypes.func.isRequired,
+		pagination: PropTypes.object,
 	}
 
+	componentPrefix = 'SEARCH_'
 	successToastId = 'success-message';
 	errorToastId = 'error-message';
 	notify = (success) => {
@@ -118,39 +121,55 @@ class Search extends Page {
 		showSaveSearch: false,
 	}
 
-	getSearchPart(type, query, pageNum, pageSize) {
-		type = type.toLowerCase()
-		let subQuery = Object.assign({}, query)
-		subQuery.pageNum = (pageNum === undefined) ? 0 : pageNum
-		subQuery.pageSize = (pageSize === undefined) ? 10 : pageSize
+	getPaginatedNum = (part, pageNum = 0) => {
+		let goToPageNum = pageNum
+		if (part !== undefined) {
+			goToPageNum = part.pageNum
+		}
+		return goToPageNum
+	}
 
-		let config = SEARCH_CONFIG[type]
+	getPaginated = type => {
+		const { pagination } = this.props
+		const typeLower = type.toLowerCase()
+		const pageLabel = this.pageLabel(typeLower)
+		return  pagination[pageLabel]
+	}
+
+	pageLabel = (type, prefix = this.componentPrefix) => {
+		return `${prefix}${type}`
+	}
+
+	getSearchPart(type, query, pageNum = 0, pageSize = 10) {
+		const typeLower = type.toLowerCase()
+		let subQuery = Object.assign({}, query)
+		subQuery.pageNum = pageNum
+		subQuery.pageSize = pageSize
+		let config = SEARCH_CONFIG[typeLower]
 		if (config.sortBy) {
 			subQuery.sortBy = config.sortBy
 		}
 		if (config.sortOrder) {
 			subQuery.sortOrder = config.sortOrder
 		}
-		let part = new GQL.Part(/* GraphQL */`
-			${config.listName} (query:$${type}Query) {
+		let gqlPart = new GQL.Part(/* GraphQL */`
+			${config.listName} (query:$${typeLower}Query) {
 				pageNum, pageSize, totalCount, list { ${config.fields} }
 			}
-			`).addVariable(type + "Query", config.variableType, subQuery)
-		return part
+			`).addVariable(typeLower + "Query", config.variableType, subQuery)
+		return gqlPart
 	}
 
 	@autobind
 	_dataFetcher(props, callback, pageNum, pageSize) {
-		let {searchQuery} = props
-		let query = this.getSearchQuery(props)
-		let parts = []
-		if (searchQuery.objectType) {
-			parts.push(this.getSearchPart(searchQuery.objectType, query, pageNum, pageSize))
-		} else {
-			Object.keys(SEARCH_CONFIG).forEach(key => {
-				parts.push(this.getSearchPart(key, query, pageNum, pageSize))
-			})
-		}
+		const { searchQuery } = props
+		const queryTypes = searchQuery.objectType ? { [searchQuery.objectType]: {} } : SEARCH_CONFIG
+		const query = this.getSearchQuery(props)
+		const parts = Object.keys(queryTypes).map(type => {
+			const paginatedPart = this.getPaginated(type)
+			const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
+			return this.getSearchPart(type, query, goToPageNum, pageSize)
+		})
 		return callback(parts)
 	}
 
@@ -276,7 +295,7 @@ class Search extends Page {
 				}
 				{numReports > 0 &&
 					<Fieldset id="reports" title="Reports">
-						<ReportCollection paginatedReports={results.reports} goToPage={this.goToPage.bind(this, 'reports')} />
+						{this.renderReports()}
 					</Fieldset>
 				}
 
@@ -285,15 +304,18 @@ class Search extends Page {
 		)
 	}
 
+
 	@autobind
 	paginationFor(type) {
-		const {pageSize, pageNum, totalCount} = this.state.results[type]
+		const { pageSize, totalCount } = this.state.results[type]
+		const paginatedPart = this.getPaginated(type)
+		const goToPage = this.getPaginatedNum(paginatedPart)
 		const numPages = (pageSize <= 0) ? 1 : Math.ceil(totalCount / pageSize)
 		if (numPages === 1) { return }
 		return <header className="searchPagination">
 			<UltimatePagination
 				className="pull-right"
-				currentPage={pageNum + 1}
+				currentPage={goToPage + 1}
 				totalPages={numPages}
 				boundaryPagesRange={1}
 				siblingPagesRange={2}
@@ -307,15 +329,27 @@ class Search extends Page {
 
 	@autobind
 	goToPage(type, pageNum) {
+		const { setPagination } = this.props
 		const query = this.getSearchQuery()
 		const part = this.getSearchPart(type, query, pageNum)
 		GQL.run([part]).then(data => {
 			let results = this.state.results //TODO: @nickjs this feels wrong, help!
 			results[type] = data[type]
-			this.setState({results})
+			this.setState({results}, () => setPagination(this.pageLabel(type), pageNum))
 		}).catch(error =>
 			this.setState({success: null, error: error})
 		)
+	}
+
+	renderReports() {
+		const { results } = this.state
+		const { pagination } = this.props
+		const reports = results.reports
+		const paginatedPart = pagination[this.pageLabel('reports')]
+		const goToPageNum = this.getPaginatedNum(paginatedPart)
+		const paginatedReports = Object.assign(reports, {pageNum: goToPageNum})
+		return <ReportCollection paginatedReports={paginatedReports} goToPage={this.goToPage.bind(this, 'reports')} />
+
 	}
 
 	renderPeople() {
@@ -519,6 +553,7 @@ class Search extends Page {
 
 const mapStateToProps = (state, ownProps) => ({
 	searchQuery: state.searchQuery,
+	pagination: state.pagination,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Search))

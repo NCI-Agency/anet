@@ -17,7 +17,16 @@ import { Icon } from '@blueprintjs/core'
 
 import { showLoading, hideLoading } from 'react-redux-loading-bar'
 import { animateScroll, Link } from 'react-scroll'
-import { setPageProps, setSearchProps, setSearchQuery, clearSearchQuery, DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS} from 'actions'
+import {
+	setPageProps,
+	setSearchProps,
+	setSearchQuery,
+	clearSearchQuery,
+	setPagination,
+	resetPages,
+	DEFAULT_PAGE_PROPS,
+	DEFAULT_SEARCH_PROPS,
+} from 'actions'
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
 	showLoading: () => dispatch(showLoading()),
@@ -26,6 +35,8 @@ export const mapDispatchToProps = (dispatch, ownProps) => ({
 	setSearchProps: searchProps => dispatch(setSearchProps(searchProps)),
 	setSearchQuery: searchQuery => dispatch(setSearchQuery(searchQuery)),
 	clearSearchQuery: () => dispatch(clearSearchQuery()),
+	setPagination: (pageKey, pageNum) => dispatch(setPagination(pageKey, pageNum)),
+	resetPages: () => dispatch(resetPages()),
 })
 
 export const propTypes = {
@@ -41,6 +52,8 @@ export const propTypes = {
 		objectType: PropTypes.string
 	}),
 	clearSearchQuery: PropTypes.func.isRequired,
+	setPagination: PropTypes.func.isRequired,
+	resetPages: PropTypes.func.isRequired,
 }
 
 export const AnchorLink = function(props) {
@@ -142,6 +155,7 @@ export default class Page extends Component {
 		const propFilter = ['match', 'location', 'history']
 		// Also filter out generic pageProps
 		propFilter.push('pageProps')
+		propFilter.push('pagination')
 		const filteredNextProps = Object.without(this.props, ...propFilter)
 		const filteredProps = Object.without(prevProps, ...propFilter)
 		if (!_isEqualWith(filteredProps, filteredNextProps, utils.treatFunctionsAsEqual)) {

@@ -65,15 +65,21 @@ class BaseOrganizationShow extends Page {
 		if (this.props.match.params.uuid !== prevProps.match.params.uuid) {
 			this.loadData()
 		}
-		else if (prevState.reportsFilter !== this.state.reportsFilter) {
+		else if (prevState.reportsFilter !== this.state.reportsFilter ||
+			prevProps.pagination !== this.props.pagination ||
+			prevState.organization !== this.state.organization) {
 			let reports = this.getReportQueryPart(this.props.match.params.uuid)
 			this.runGQLReports([reports])
 		}
 	}
 
 	getReportQueryPart = (orgUuid) => {
+		const { organization } = this.state
+		const { pagination } = this.props
+		const orgLabel = this.orgLabel(organization)
+		const reports = pagination[orgLabel]
 		let reportQuery = {
-			pageNum: this.state.reportsPageNum,
+			pageNum: reports === undefined ? 0 : reports.pageNum,
 			pageSize: 10,
 			orgUuid: orgUuid,
 			state: (this.reportsFilterIsSet()) ? this.state.reportsFilter : null
@@ -327,13 +333,18 @@ class BaseOrganizationShow extends Page {
 		)
 	}
 
+	orgLabel = (organization) => {
+		return `r_${organization.uuid}`
+	}
+
 	goToReportsPage = (pageNum) => {
-		this.setState({reportsPageNum: pageNum}, () => {
-			const reportQueryPart = this.getReportQueryPart(this.state.organization.uuid)
-			GQL.run([reportQueryPart]).then(data =>
-				this.setState({reports: data.reports})
-			)
-		})
+		const { organization } = this.state
+		const { setPagination } = this.props
+		const orgLabel = this.orgLabel(organization)
+		const reportQueryPart = this.getReportQueryPart(this.state.organization.uuid)
+		GQL.run([reportQueryPart]).then(data =>
+			this.setState({reports: data.reports}, () => setPagination(orgLabel, pageNum))
+		)
 	}
 
 	goToTasksPage = (pageNum) => {
@@ -354,6 +365,10 @@ class BaseOrganizationShow extends Page {
 	}
 }
 
+const mapStateToProps = (state, ownProps) => ({
+	pagination: state.pagination,
+})
+
 const OrganizationShow = (props) => (
 	<AppContext.Consumer>
 		{context =>
@@ -362,4 +377,4 @@ const OrganizationShow = (props) => (
 	</AppContext.Consumer>
 )
 
-export default connect(null, mapDispatchToProps)(OrganizationShow)
+export default connect(mapStateToProps, mapDispatchToProps)(OrganizationShow)

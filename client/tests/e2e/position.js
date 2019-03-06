@@ -24,6 +24,7 @@ test('Move someone in and out of a position', async t => {
     await t.context.driver.wait(until.elementIsVisible($removePersonButton))
     await $removePersonButton.click()
     await t.context.driver.wait(until.stalenessOf($removePersonButton))
+    await t.context.driver.sleep(500) // wait for dialog to disappear
 
     let $notAssignedMsg = await $('p.not-assigned-to-position-message')
     await t.context.driver.wait(until.elementIsVisible($notAssignedMsg))
@@ -68,6 +69,8 @@ test('Move someone in and out of a position', async t => {
     )
     let $saveButton = await $('button.save-button')
     await $saveButton.click()
+    await t.context.driver.wait(until.stalenessOf($saveButton))
+    await t.context.driver.sleep(500) // wait for dialog to disappear
 
     await assertElementText(t, await $('h4.assigned-person-name'), personName)
 
