@@ -111,8 +111,8 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 	private int deleteObjectSubscriptionInternal(Person user, String subscribedObjectUuid) {
 		final Position position = user.loadPosition();
 		return dbHandle.createUpdate("/* deleteObjectSubscription */ DELETE FROM subscriptions"
-				+ " WHERE subscriberUuid = :subscriberUuid"
-				+ " AND subscribedObjectUuid = :subscribedObjectUuid")
+				+ " WHERE \"subscriberUuid\" = :subscriberUuid"
+				+ " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
 			.bind("subscriberUuid", DaoUtils.getUuid(position))
 			.bind("subscribedObjectUuid", subscribedObjectUuid)
 			.execute();
@@ -156,8 +156,8 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 		final Position position = user.loadPosition();
 		final String sql = "/* isSubscribedObject */ SELECT COUNT(*) AS count"
 				+ " FROM subscriptions"
-				+ " WHERE subscriberUuid = :subscriberUuid"
-				+ " AND subscribedObjectUuid = :subscribedObjectUuid";
+				+ " WHERE \"subscriberUuid\" = :subscriberUuid"
+				+ " AND \"subscribedObjectUuid\" = :subscribedObjectUuid";
 		final List<Map<String, Object>> rs = dbHandle.createQuery(sql)
 			.bind("subscriberUuid", DaoUtils.getUuid(position))
 			.bind("subscribedObjectUuid", subscribedObjectUuid)

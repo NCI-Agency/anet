@@ -756,26 +756,26 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAuthorUuid(), "people", "report.authorUuid"));
 		// update attendees
 		update.stmts.add(new SubscriptionUpdateStatement("people",
-				"SELECT personUuid"
-				+ " FROM reportPeople"
-				+ " WHERE reportUuid = :reportUuid",
+				"SELECT \"personUuid\""
+				+ " FROM \"reportPeople\""
+				+ " WHERE \"reportUuid\" = :reportUuid",
 				// param is already added above
 				Collections.emptyMap()));
 		// update author position
 		update.stmts.add(new SubscriptionUpdateStatement("positions",
 				"SELECT uuid"
 				+ " FROM positions"
-				+ " WHERE currentPersonUuid = :report.authorUuid",
+				+ " WHERE \"currentPersonUuid\" = :report.authorUuid",
 				// param is already added above
 				Collections.emptyMap()));
 		// update attendee positions
 		update.stmts.add(new SubscriptionUpdateStatement("positions",
 				"SELECT uuid"
 				+ " FROM positions"
-				+ " WHERE currentPersonUuid in ("
-				+ "   SELECT personUuid"
-				+ "   FROM reportPeople"
-				+ "   WHERE reportUuid = :reportUuid"
+				+ " WHERE \"currentPersonUuid\" in ("
+				+ "   SELECT \"personUuid\""
+				+ "   FROM \"reportPeople\""
+				+ "   WHERE \"reportUuid\" = :reportUuid"
 				+ " )",
 				// param is already added above
 				Collections.emptyMap()));
@@ -785,9 +785,9 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getPrincipalOrgUuid(), "organizations", "report.principalOrganizationUuid"));
 		// update tasks
 		update.stmts.add(new SubscriptionUpdateStatement("tasks",
-				"SELECT taskUuid"
-				+ " FROM reportTasks"
-				+ " WHERE reportUuid = :reportUuid",
+				"SELECT \"taskUuid\""
+				+ " FROM \"reportTasks\""
+				+ " WHERE \"reportUuid\" = :reportUuid",
 				// param is already added above
 				Collections.emptyMap()));
 		// update location
