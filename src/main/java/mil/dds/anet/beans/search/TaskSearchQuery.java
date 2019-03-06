@@ -4,7 +4,7 @@ import java.time.Instant;
 
 import mil.dds.anet.beans.Task.TaskStatus;
 
-public class TaskSearchQuery extends AbstractSearchQuery {
+public class TaskSearchQuery extends SubscribableObjectSearchQuery {
 
 	public enum TaskSearchSortBy { CREATED_AT, NAME, CATEGORY }
 

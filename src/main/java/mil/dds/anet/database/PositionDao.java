@@ -361,9 +361,9 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
 			.list();
 	}
 	
-	public AnetBeanList<Position> search(PositionSearchQuery query) {
+	public AnetBeanList<Position> search(PositionSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher()
-				.getPositionSearcher().runSearch(query);
+				.getPositionSearcher().runSearch(query, user);
 	}
 
 	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, String positionUuid) {
@@ -423,6 +423,6 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
 
 	@Override
 	public SubscriptionUpdateGroup getSubscriptionUpdate(Position obj) {
-		return getCommonSubscriptionUpdate(obj, tableName, "positionUuid");
+		return getCommonSubscriptionUpdate(obj, tableName, "positions.uuid");
 	}
 }

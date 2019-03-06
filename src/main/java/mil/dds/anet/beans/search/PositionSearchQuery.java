@@ -5,7 +5,7 @@ import java.util.List;
 import mil.dds.anet.beans.Position.PositionStatus;
 import mil.dds.anet.beans.Position.PositionType;
 
-public class PositionSearchQuery extends AbstractSearchQuery {
+public class PositionSearchQuery extends SubscribableObjectSearchQuery {
 
 	public enum PositionSearchSortBy { CREATED_AT, NAME, CODE }
 

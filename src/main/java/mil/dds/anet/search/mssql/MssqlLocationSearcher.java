@@ -10,7 +10,9 @@ import com.google.common.base.Joiner;
 
 import org.jdbi.v3.core.statement.Query;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.LocationSearchQuery;
@@ -18,13 +20,14 @@ import mil.dds.anet.beans.search.LocationSearchQuery.LocationSearchSortBy;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ILocationSearcher;
+import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlLocationSearcher extends AbstractSearcherBase implements ILocationSearcher {
 
 	@Override
-	public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
+	public AnetBeanList<Location> runSearch(LocationSearchQuery query, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlLocationSearch */ SELECT locations.*");
@@ -49,6 +52,11 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
 		if (query.getStatus() != null) {
 			whereClauses.add("status = :status");
 			sqlArgs.put("status", DaoUtils.getEnumId(query.getStatus()));
+		}
+
+		if (user != null && query.getSubscribed()) {
+			whereClauses.add(Searcher.getSubscriptionReferences(user, sqlArgs,
+					AnetObjectEngine.getInstance().getLocationDao().getSubscriptionUpdate(null)));
 		}
 
 		if (whereClauses.isEmpty()) {

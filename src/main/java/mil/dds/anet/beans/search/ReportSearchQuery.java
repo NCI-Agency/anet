@@ -7,7 +7,7 @@ import mil.dds.anet.beans.Report.Atmosphere;
 import mil.dds.anet.beans.Report.ReportCancelledReason;
 import mil.dds.anet.beans.Report.ReportState;
 
-public class ReportSearchQuery extends AbstractSearchQuery {
+public class ReportSearchQuery extends SubscribableObjectSearchQuery {
 
 	public enum ReportSearchSortBy { CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT, UPDATED_AT }
 

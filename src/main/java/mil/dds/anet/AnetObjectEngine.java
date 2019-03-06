@@ -249,7 +249,7 @@ public class AnetObjectEngine {
 		OrganizationSearchQuery orgQuery = new OrganizationSearchQuery();
 		orgQuery.setPageSize(Integer.MAX_VALUE);
 		orgQuery.setType(orgType);
-		List<Organization> orgs = getOrganizationDao().search(orgQuery).getList();
+		List<Organization> orgs = getOrganizationDao().search(orgQuery, null).getList();
 
 		return Utils.buildParentOrgMapping(orgs, null);
 	}
@@ -265,7 +265,7 @@ public class AnetObjectEngine {
 		query.setParentOrgUuid(parentOrgUuid);
 		query.setParentOrgRecursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
-		final List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+		final List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query, null).getList();
 		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
 	}
 

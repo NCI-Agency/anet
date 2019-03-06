@@ -5,7 +5,7 @@ import java.util.List;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 
-public class PersonSearchQuery extends AbstractSearchQuery {
+public class PersonSearchQuery extends SubscribableObjectSearchQuery {
 
 	public enum PersonSearchSortBy { CREATED_AT, NAME, RANK }
 

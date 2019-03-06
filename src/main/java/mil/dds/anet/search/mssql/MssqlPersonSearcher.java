@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
+
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -19,13 +21,14 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IPersonSearcher;
+import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlPersonSearcher extends AbstractSearcherBase implements IPersonSearcher {
 
 	@Override
-	public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
+	public AnetBeanList<Person> runSearch(PersonSearchQuery query, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
@@ -124,6 +127,11 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
 		if (query.getLocationUuid() != null) {
 			whereClauses.add(" positions.locationUuid = :locationUuid ");
 			sqlArgs.put("locationUuid", query.getLocationUuid());
+		}
+
+		if (user != null && query.getSubscribed()) {
+			whereClauses.add(Searcher.getSubscriptionReferences(user, sqlArgs,
+					AnetObjectEngine.getInstance().getPersonDao().getSubscriptionUpdate(null)));
 		}
 
 		if (whereClauses.isEmpty() && !doSoundex) {

@@ -13,6 +13,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -148,13 +149,13 @@ public class OrganizationDao extends AnetSubscribableObjectDao<Organization> {
 		throw new UnsupportedOperationException();
 	}
 
-	public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
+	public AnetBeanList<Organization> search(OrganizationSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher()
-				.runSearch(query);
+				.runSearch(query, user);
 	}
 
 	@Override
 	public SubscriptionUpdateGroup getSubscriptionUpdate(Organization obj) {
-		return getCommonSubscriptionUpdate(obj, tableName, "organizationUuid");
+		return getCommonSubscriptionUpdate(obj, tableName, "organizations.uuid");
 	}
 }

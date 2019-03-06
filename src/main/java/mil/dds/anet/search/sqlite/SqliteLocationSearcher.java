@@ -9,6 +9,7 @@ import java.util.Map;
 import com.google.common.base.Joiner;
 
 import mil.dds.anet.beans.Location;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
@@ -20,7 +21,7 @@ import mil.dds.anet.utils.Utils;
 public class SqliteLocationSearcher extends AbstractSearcherBase implements ILocationSearcher {
 
 	@Override
-	public AnetBeanList<Location> runSearch(LocationSearchQuery query) {
+	public AnetBeanList<Location> runSearch(LocationSearchQuery query, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* SqliteLocationSearch */ SELECT * FROM locations");

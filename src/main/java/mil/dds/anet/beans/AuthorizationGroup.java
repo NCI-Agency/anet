@@ -89,7 +89,7 @@ public class AuthorizationGroup extends AbstractAnetBean {
 		query.setPageNum(pageNum);
 		query.setPageSize(pageSize);
 		query.setAuthorizationGroupUuid(uuid);
-		return AnetObjectEngine.getInstance().getPositionDao().search(query);
+		return AnetObjectEngine.getInstance().getPositionDao().search(query, null);
 	}
 
 	@Override

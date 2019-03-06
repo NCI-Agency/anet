@@ -56,7 +56,7 @@ public class SqlitePersonSearcher extends AbstractSearcherBase implements IPerso
 	}
 
 	@Override
-	public AnetBeanList<Person> runSearch(PersonSearchQuery query) {
+	public AnetBeanList<Person> runSearch(PersonSearchQuery query, Person user) {
 		StringBuilder sql = new StringBuilder("/* SqlitePersonSearch */ SELECT " + PersonDao.PERSON_FIELDS 
 				+ " FROM people WHERE people.uuid IN (SELECT people.uuid FROM people ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();

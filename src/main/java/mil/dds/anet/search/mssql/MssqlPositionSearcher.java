@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
+
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -19,13 +22,14 @@ import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IPositionSearcher;
+import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlPositionSearcher extends AbstractSearcherBase implements IPositionSearcher {
 
 	@Override
-	public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
+	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
@@ -110,6 +114,11 @@ public class MssqlPositionSearcher extends AbstractSearcherBase implements IPosi
 			whereClauses.add("positions.uuid IN ( SELECT ap.positionUuid FROM authorizationGroupPositions ap "
 							+ "WHERE ap.authorizationGroupUuid = :authorizationGroupUuid) ");
 			sqlArgs.put("authorizationGroupUuid", query.getAuthorizationGroupUuid());
+		}
+
+		if (user != null && query.getSubscribed()) {
+			whereClauses.add(Searcher.getSubscriptionReferences(user, sqlArgs,
+					AnetObjectEngine.getInstance().getPositionDao().getSubscriptionUpdate(null)));
 		}
 
 		if (whereClauses.isEmpty()) {

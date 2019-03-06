@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
+
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
@@ -25,7 +27,7 @@ import mil.dds.anet.utils.Utils;
 public class SqlitePositionSearcher extends AbstractSearcherBase implements IPositionSearcher {
 
 	@Override
-	public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
+	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Person user) {
 		StringBuilder sql = new StringBuilder("/* SqlitePositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS 
 				+ " FROM positions WHERE positions.uuid IN (SELECT positions.uuid FROM positions ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();

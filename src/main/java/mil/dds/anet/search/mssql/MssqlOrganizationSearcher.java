@@ -9,7 +9,10 @@ import java.util.Map;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
+
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
@@ -18,13 +21,14 @@ import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IOrganizationSearcher;
+import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlOrganizationSearcher extends AbstractSearcherBase implements IOrganizationSearcher {
 
 	@Override
-	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
+	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlOrganizationSearch */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS);
@@ -74,6 +78,11 @@ public class MssqlOrganizationSearcher extends AbstractSearcherBase implements I
 				whereClauses.add("organizations.parentOrgUuid = :parentOrgUuid");
 			}
 			sqlArgs.put("parentOrgUuid", query.getParentOrgUuid());
+		}
+
+		if (user != null && query.getSubscribed()) {
+			whereClauses.add(Searcher.getSubscriptionReferences(user, sqlArgs,
+					AnetObjectEngine.getInstance().getOrganizationDao().getSubscriptionUpdate(null)));
 		}
 
 		if (whereClauses.isEmpty()) {

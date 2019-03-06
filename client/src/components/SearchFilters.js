@@ -80,6 +80,15 @@ const taskFilters = props => {
 export default {
 	searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
 		const filters = {}
+		const subscriptionFilterLabel = 'Subscribed'
+		const subscriptionFilter = {
+			component: CheckboxSearchFilter,
+			props: {
+				queryKey: "subscribed",
+				msg: "By me",
+			}
+		}
+
 		filters.Reports = {
 			filters: {
 				Author: {
@@ -222,6 +231,7 @@ export default {
 				placeholder: `Filter reports by ${taskShortLabel}...`,
 			}
 		}
+		filters.Reports.filters[subscriptionFilterLabel] = subscriptionFilter
 
 		const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
 		const ranks = Settings.fields.person.ranks || []
@@ -277,6 +287,7 @@ export default {
 				}
 			}
 		}
+		filters.People.filters[subscriptionFilterLabel] = subscriptionFilter
 
 		filters.Organizations = {
 			filters: {
@@ -297,6 +308,7 @@ export default {
 				}
 			}
 		}
+		filters.Organizations.filters[subscriptionFilterLabel] = subscriptionFilter
 
 		filters.Positions = {
 			filters: {
@@ -344,6 +356,7 @@ export default {
 				}
 			}
 		}
+		filters.Positions.filters[subscriptionFilterLabel] = subscriptionFilter
 
 		filters.Locations = {
 			filters: {
@@ -356,11 +369,13 @@ export default {
 				}
 			}
 		}
+		filters.Locations.filters[subscriptionFilterLabel] = subscriptionFilter
 
 		//Task filters
 		filters[pluralize(taskShortLabel)] = {
 			filters: taskFilters()
 		}
+		filters[pluralize(taskShortLabel)].filters[subscriptionFilterLabel] = subscriptionFilter
 
 		return filters
 	},

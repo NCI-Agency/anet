@@ -15,6 +15,7 @@ import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Person;
@@ -33,6 +34,7 @@ import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ReportSearchBuilder;
 import mil.dds.anet.search.ReportSearchBuilder.Comparison;
+import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -246,6 +248,11 @@ public class MssqlReportSearcher extends AbstractSearcherBase implements IReport
 			sql.append(" LEFT JOIN positions pos ON pos.uuid = agp.positionUuid");
 			whereClauses.add("pos.currentPersonUuid = :userUuid");
 			args.put("userUuid", user.getUuid());
+		}
+
+		if (user != null && query.getSubscribed()) {
+			whereClauses.add(Searcher.getSubscriptionReferences(user, args,
+					AnetObjectEngine.getInstance().getReportDao().getSubscriptionUpdate(null)));
 		}
 
 		if (whereClauses.isEmpty()) {

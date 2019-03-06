@@ -6,6 +6,6 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 
 public interface IPersonSearcher {
 
-	public AnetBeanList<Person> runSearch(PersonSearchQuery query);
+	public AnetBeanList<Person> runSearch(PersonSearchQuery query, Person user);
 	
 }

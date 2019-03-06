@@ -6,6 +6,7 @@ import autobind from 'autobind-decorator'
 export default class CheckboxSearchFilter extends Component {
 	static propTypes = {
 		queryKey: PropTypes.string.isRequired,
+		msg: PropTypes.string,
 
 		//Passed by the SearchFilterDisplay row
 		asFormField: PropTypes.bool,
@@ -16,7 +17,8 @@ export default class CheckboxSearchFilter extends Component {
 	}
 
 	static defaultProps = {
-		asFormField: true
+		asFormField: true,
+		msg: "Authorized for me",
 	}
 
 	constructor(props) {
@@ -34,12 +36,11 @@ export default class CheckboxSearchFilter extends Component {
 	}
 
 	render() {
-		const msg = "Authorized for me"
 		return (
 			!this.props.asFormField ?
-				<React.Fragment>{msg}</React.Fragment>
+				<React.Fragment>{this.props.msg}</React.Fragment>
 			:
-				<Checkbox readOnly checked={this.state.value.value}>{msg}</Checkbox>
+				<Checkbox readOnly checked={this.state.value.value}>{this.props.msg}</Checkbox>
 		)
 	}
 

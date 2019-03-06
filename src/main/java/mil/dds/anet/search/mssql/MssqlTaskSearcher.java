@@ -9,6 +9,9 @@ import java.util.Map;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
+
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -17,13 +20,14 @@ import mil.dds.anet.beans.search.TaskSearchQuery.TaskSearchSortBy;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ITaskSearcher;
+import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlTaskSearcher extends AbstractSearcherBase implements ITaskSearcher {
 
 	@Override
-	public AnetBeanList<Task> runSearch(TaskSearchQuery query) {
+	public AnetBeanList<Task> runSearch(TaskSearchQuery query, Person user) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*");
@@ -115,6 +119,11 @@ public class MssqlTaskSearcher extends AbstractSearcherBase implements ITaskSear
 				whereClauses.add("tasks.customFieldRef1Uuid = :customFieldRef1Uuid");
 			}
 			args.put("customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
+		}
+
+		if (user != null && query.getSubscribed()) {
+			whereClauses.add(Searcher.getSubscriptionReferences(user, args,
+					AnetObjectEngine.getInstance().getTaskDao().getSubscriptionUpdate(null)));
 		}
 
 		if (whereClauses.isEmpty()) {

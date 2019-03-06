@@ -131,9 +131,9 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
 		throw new UnsupportedOperationException();
 	}
 
-	public AnetBeanList<Person> search(PersonSearchQuery query) {
+	public AnetBeanList<Person> search(PersonSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher()
-				.getPersonSearcher().runSearch(query);
+				.getPersonSearcher().runSearch(query, user);
 	}
 
 	public List<Person> findByDomainUsername(String domainUsername) {
@@ -259,6 +259,6 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
 
 	@Override
 	public SubscriptionUpdateGroup getSubscriptionUpdate(Person obj) {
-		return getCommonSubscriptionUpdate(obj, tableName, "personUuid");
+		return getCommonSubscriptionUpdate(obj, tableName, "people.uuid");
 	}
 }

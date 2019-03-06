@@ -467,7 +467,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 			query.setParentOrgUuid(parentOrgUuid);
 			query.setParentOrgRecursively(true);
 			query.setPageSize(Integer.MAX_VALUE);
-			orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+			orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query, null).getList();
 			Optional<Organization> parentOrg = orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();
 			if (parentOrg.isPresent() == false) { 
 				throw new WebApplicationException("No such organization with uuid " + parentOrgUuid, Status.NOT_FOUND);
@@ -828,25 +828,27 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 
 	@Override
 	public SubscriptionUpdateGroup getSubscriptionUpdate(Report obj) {
-		if (obj.getState() != ReportState.PUBLISHED && obj.getState() != ReportState.CANCELLED) {
+		final boolean isParam = (obj != null);
+		if (isParam && obj.getState() != ReportState.PUBLISHED && obj.getState() != ReportState.CANCELLED) {
 			return null;
 		}
 
-		final SubscriptionUpdateGroup update = getCommonSubscriptionUpdate(obj, tableName, "reportUuid");
+		final SubscriptionUpdateGroup update = getCommonSubscriptionUpdate(obj, tableName, "reports.uuid");
 		// update author
-		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAuthorUuid(), "people", "report.authorUuid"));
+		final String authorUuid = isParam ? obj.getAuthorUuid() : null;
+		update.stmts.add(getCommonSubscriptionUpdateStatement(authorUuid, "people", "reports.authorUuid"));
 		// update attendees
 		update.stmts.add(new SubscriptionUpdateStatement("people",
 				"SELECT \"personUuid\""
 				+ " FROM \"reportPeople\""
-				+ " WHERE \"reportUuid\" = :reportUuid",
+				+ " WHERE \"reportUuid\" = " + paramOrJoin("reports.uuid", isParam),
 				// param is already added above
 				Collections.emptyMap()));
 		// update author position
 		update.stmts.add(new SubscriptionUpdateStatement("positions",
 				"SELECT uuid"
 				+ " FROM positions"
-				+ " WHERE \"currentPersonUuid\" = :report.authorUuid",
+				+ " WHERE \"currentPersonUuid\" = " + paramOrJoin("reports.authorUuid", isParam),
 				// param is already added above
 				Collections.emptyMap()));
 		// update attendee positions
@@ -856,23 +858,26 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 				+ " WHERE \"currentPersonUuid\" in ("
 				+ "   SELECT \"personUuid\""
 				+ "   FROM \"reportPeople\""
-				+ "   WHERE \"reportUuid\" = :reportUuid"
+				+ "   WHERE \"reportUuid\" = " + paramOrJoin("reports.uuid", isParam)
 				+ " )",
 				// param is already added above
 				Collections.emptyMap()));
 		// update organizations
 		// TODO: is this correct?
-		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getAdvisorOrgUuid(), "organizations", "report.advisorOrganizationUuid"));
-		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getPrincipalOrgUuid(), "organizations", "report.principalOrganizationUuid"));
+		final String advisorOrgUuid = isParam ? obj.getAdvisorOrgUuid() : null;
+		update.stmts.add(getCommonSubscriptionUpdateStatement(advisorOrgUuid, "organizations", "reports.advisorOrganizationUuid"));
+		final String principalOrgUuid = isParam ? obj.getPrincipalOrgUuid() : null;
+		update.stmts.add(getCommonSubscriptionUpdateStatement(principalOrgUuid, "organizations", "reports.principalOrganizationUuid"));
 		// update tasks
 		update.stmts.add(new SubscriptionUpdateStatement("tasks",
 				"SELECT \"taskUuid\""
 				+ " FROM \"reportTasks\""
-				+ " WHERE \"reportUuid\" = :reportUuid",
+				+ " WHERE \"reportUuid\" = " + paramOrJoin("reports.uuid", isParam),
 				// param is already added above
 				Collections.emptyMap()));
 		// update location
-		update.stmts.add(getCommonSubscriptionUpdateStatement(obj.getLocationUuid(), "locations", "report.locationUuid"));
+		final String locationUuid = isParam ? obj.getLocationUuid() : null;
+		update.stmts.add(getCommonSubscriptionUpdateStatement(locationUuid, "locations", "reports.locationUuid"));
 
 		return update;
 	}

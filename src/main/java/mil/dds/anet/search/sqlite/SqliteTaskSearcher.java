@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Joiner;
+
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -19,7 +21,7 @@ import mil.dds.anet.utils.Utils;
 public class SqliteTaskSearcher extends AbstractSearcherBase implements ITaskSearcher {
 
 	@Override
-	public AnetBeanList<Task> runSearch(TaskSearchQuery query) {
+	public AnetBeanList<Task> runSearch(TaskSearchQuery query, Person user) {
 		StringBuilder sql = new StringBuilder("/* SqliteTaskSearch */ SELECT tasks.* FROM tasks");
 		Map<String,Object> args = new HashMap<String,Object>();
 		

@@ -3,7 +3,7 @@ package mil.dds.anet.beans.search;
 import mil.dds.anet.beans.Organization.OrganizationStatus;
 import mil.dds.anet.beans.Organization.OrganizationType;
 
-public class OrganizationSearchQuery extends AbstractSearchQuery {
+public class OrganizationSearchQuery extends SubscribableObjectSearchQuery {
 
 	public enum OrganizationSearchSortBy { CREATED_AT, NAME, TYPE }
 

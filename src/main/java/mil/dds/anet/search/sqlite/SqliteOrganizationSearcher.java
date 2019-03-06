@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
@@ -20,7 +21,7 @@ import mil.dds.anet.utils.Utils;
 public class SqliteOrganizationSearcher extends AbstractSearcherBase implements IOrganizationSearcher {
 
 	@Override
-	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
+	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Person user) {
 		StringBuilder sql = new StringBuilder("/* SqliteOrganizationSearch */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
 				+ " FROM organizations WHERE organizations.uuid IN (SELECT organizations.uuid FROM organizations ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();

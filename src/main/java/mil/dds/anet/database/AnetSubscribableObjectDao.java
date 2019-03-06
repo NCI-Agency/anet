@@ -1,7 +1,12 @@
 package mil.dds.anet.database;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.google.common.base.Joiner;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.SubscribableObject;
@@ -50,23 +55,38 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 	}
 
 	protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractAnetBean obj, String tableName, String paramName) {
-		if (obj == null) {
-			return null;
-		}
-		final SubscriptionUpdateStatement update = getCommonSubscriptionUpdateStatement(obj.getUuid(), tableName, paramName);
+		final boolean isParam = (obj != null);
+		final String uuid = isParam ? obj.getUuid() : null;
+		final SubscriptionUpdateStatement update = getCommonSubscriptionUpdateStatement(uuid, tableName, paramName);
 		if (update == null) {
 			return null;
 		}
-		return new SubscriptionUpdateGroup(tableName, obj.getUuid(), obj.getUpdatedAt(), update);
+		final Instant updatedAt = isParam ? obj.getUpdatedAt() : null;
+		return new SubscriptionUpdateGroup(tableName, uuid, updatedAt, update);
 	}
 
 	protected static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(String uuid, String tableName, String paramName) {
-		if (uuid == null || tableName == null || paramName == null) {
+		final boolean isParam = (uuid != null);
+		if ((isParam && uuid == null) || tableName == null || paramName == null) {
 			return null;
 		}
 		final Map<String, Object> params = new HashMap<>();
-		params.put(paramName, uuid);
-		return new SubscriptionUpdateStatement(tableName, ":" + paramName, params);
+		if (isParam) {
+			params.put(paramName, uuid);
+		}
+		return new SubscriptionUpdateStatement(tableName, paramOrJoin(paramName, isParam), params);
+	}
+
+	protected static String paramOrJoin(String field, boolean isParam) {
+		return isParam ? (":" + field) : escapeSqlField(field);
+	}
+
+	private static String escapeSqlField(String field) {
+		final List<String> parts = new ArrayList<>();
+		for (final String part : field.split("\\.")) {
+			parts.add("\"" + part + "\"");
+		}
+		return Joiner.on(".").join(parts);
 	}
 
 }

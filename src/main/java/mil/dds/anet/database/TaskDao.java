@@ -111,9 +111,9 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 			.list();
 	}
 
-	public AnetBeanList<Task> search(TaskSearchQuery query) {
+	public AnetBeanList<Task> search(TaskSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher()
-				.getTaskSearcher().runSearch(query);
+				.getTaskSearcher().runSearch(query, user);
 	}
 	
 	public List<Task> getRecentTasks(Person author, int maxResults) {
@@ -153,6 +153,6 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 
 	@Override
 	public SubscriptionUpdateGroup getSubscriptionUpdate(Task obj) {
-		return getCommonSubscriptionUpdate(obj, tableName, "taskUuid");
+		return getCommonSubscriptionUpdate(obj, tableName, "tasks.uuid");
 	}
 }

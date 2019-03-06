@@ -150,7 +150,7 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
 			query.setPageSize(Integer.MAX_VALUE);
 			query.setParentOrgUuid(uuid);
 			query.setParentOrgRecursively(false);
-			childrenOrgs = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+			childrenOrgs = AnetObjectEngine.getInstance().getOrganizationDao().search(query, null).getList();
 		}
 		return childrenOrgs;
 	}
@@ -162,7 +162,7 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
 			query.setPageSize(Integer.MAX_VALUE);
 			query.setParentOrgUuid(uuid);
 			query.setParentOrgRecursively(true);
-			descendants = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+			descendants = AnetObjectEngine.getInstance().getOrganizationDao().search(query, null).getList();
 		}
 		return descendants;
 	}

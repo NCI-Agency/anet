@@ -2,7 +2,7 @@ package mil.dds.anet.beans.search;
 
 import mil.dds.anet.beans.Location.LocationStatus;
 
-public class LocationSearchQuery extends AbstractSearchQuery {
+public class LocationSearchQuery extends SubscribableObjectSearchQuery {
 
 	public enum LocationSearchSortBy { CREATED_AT, NAME }
 

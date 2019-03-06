@@ -114,15 +114,15 @@ public class LocationDao extends AnetSubscribableObjectDao<Location> {
 				.list();
 	}
 
-	public AnetBeanList<Location> search(LocationSearchQuery query) {
+	public AnetBeanList<Location> search(LocationSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher()
-				.getLocationSearcher().runSearch(query);
+				.getLocationSearcher().runSearch(query, user);
 	}
 	
 	//TODO: Don't delete any location if any references exist. 
 
 	@Override
 	public SubscriptionUpdateGroup getSubscriptionUpdate(Location obj) {
-		return getCommonSubscriptionUpdate(obj, tableName, "locationUuid");
+		return getCommonSubscriptionUpdate(obj, tableName, "locations.uuid");
 	}
 }
