@@ -301,9 +301,6 @@ span.asLink:focus {
 }
 
 button.home-tile.btn {
-	display: table-cell;
-	float: none;
-	vertical-align: top;
 	text-align: center;
 	padding: 10px;
 	color: #5c5c5c;
