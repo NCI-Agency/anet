@@ -274,7 +274,7 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 	imageId = dockerPullDB.getImageId()
 	containerName = dbContainerName
 	description = "Creates an ANET MS SQL DB container named " + dbContainerName + "."
-	Map<String, String> binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
+	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	withEnvVar('ACCEPT_EULA', 'Y')
 	withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
 	withEnvVar('DB_NAME', run.environment["ANET_DB_NAME"])
@@ -341,7 +341,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.6.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.5.0'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }
