@@ -49,7 +49,8 @@ const TableBody = props => {
 }
 
 const TableContainer = props =>
-	<Table striped condensed hover responsive className="attendeesTable">
+	<Table striped condensed hover responsive 
+		className={props.className}>
 		{props.children}
 	</Table>
 
@@ -69,8 +70,8 @@ export default class AttendeesTable extends Component {
 	render() {
 		const { attendees } = this.props
 		return (
-			<React.Fragment id="attendeesContainer">
-				<TableContainer>
+			<div id="attendeesContainer">
+				<TableContainer className="advisorAttendeesTable">
 					<TableHeader showDelete={this.props.showDelete} />
 					<TableBody
 						attendees={attendees}
@@ -78,7 +79,7 @@ export default class AttendeesTable extends Component {
 						handleAttendeeRow={this.renderAttendeeRow}
 					/>
 				</TableContainer>
-				<TableContainer>
+				<TableContainer	className="principalAttendeesTable">
 					<TableHeader hide />
 					<TableBody
 						attendees={attendees}
@@ -87,7 +88,7 @@ export default class AttendeesTable extends Component {
 						enableDivider
 					/>
 				</TableContainer>
-			</React.Fragment>
+			</div>
 		)
 	}
 

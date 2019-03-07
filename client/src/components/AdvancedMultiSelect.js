@@ -93,29 +93,33 @@ export default class AdvancedMultiSelect extends Component {
 				>
 					<Popover id={fieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%', boxShadow: '0 6px 20px hsla(0, 0%, 0%, 0.4)'}}>
 						<Row className="border-between">
-							<Col sm={4} md={3}>
-								<ul className="overlayFilters">
-									{Object.keys(filterDefs).map(filterType => (
-										!filterDefs[filterType].doNotDisplay && 
-										<li key={filterType} className={(this.state.filterType === filterType) ? 'active' : null}>
-											<Button bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
-										</li>
-									))}
-								</ul>
-							</Col>
-							<Col sm={8} md={9}>
-								<this.props.overlayComponent
-									items={items}
-									selectedItems={selectedItems}
-									addItem={this.addItem}
-									removeItem={this.removeItem}
-									isLoading={isLoading}
-									loaderMessage={"No results found"}
-								/>
-								<footer className="searchPagination">
-									{this.paginationFor(filterType)}
-								</footer>
-							</Col>
+							<div className="sideBar">
+								<Col sm={4} md={3}>
+									<ul className="overlayFilters">
+										{Object.keys(filterDefs).map(filterType => (
+											!filterDefs[filterType].doNotDisplay && 
+											<li key={filterType} className={(this.state.filterType === filterType) ? 'active' : null}>
+												<Button bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
+											</li>
+										))}
+									</ul>
+								</Col>
+							</div>
+							<div className="multiSelectContent">
+								<Col sm={8} md={9}>
+									<this.props.overlayComponent
+										items={items}
+										selectedItems={selectedItems}
+										addItem={this.addItem}
+										removeItem={this.removeItem}
+										isLoading={isLoading}
+										loaderMessage={"No results found"}
+									/>
+									<footer className="searchPagination">
+										{this.paginationFor(filterType)}
+									</footer>
+								</Col>
+							</div>
 						</Row>
 					</Popover>
 				</Overlay>
@@ -149,6 +153,7 @@ export default class AdvancedMultiSelect extends Component {
 		}
 		this.setState({
 			filterType: Object.keys(this.props.filterDefs)[0],
+			searchTerms: '',
 			results: {},
 			isLoading: false,
 			showOverlay: false,
