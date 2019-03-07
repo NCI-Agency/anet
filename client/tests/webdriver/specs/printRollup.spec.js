@@ -20,7 +20,6 @@ describe('Print rollup page', () => {
 			browser.waitForText(rollupClassification, 3000)
 			const title = browser.getText(rollupClassification)
 			
-			console.log(title)
 			expect(title).to.equal("Classification: DEMO USE ONLY")
 		})
 	})

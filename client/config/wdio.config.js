@@ -1,4 +1,4 @@
-exports.config = {
+var config = {
     
     //
     // ==================
@@ -126,9 +126,9 @@ exports.config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: ['chromedriver'],
-    port: '9515',
-    path: '/',
+    //services: ['chromedriver'],
+    //port: '9515',
+    //path: '/',
     //
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -172,8 +172,12 @@ exports.config = {
      * @param {Array.<Object>} capabilities list of capabilities details
      * @param {Array.<String>} specs List of spec file paths that are to be run
      */
-    // beforeSession: function (config, capabilities, specs) {
-    // },
+    beforeSession: function (config, capabilities, specs) {
+        var path = require('path')
+        var spec = specs[0]
+        var basename = path.basename(spec)
+        capabilities.name = basename
+    },
     /**
      * Gets executed before test execution begins. At this point you can access to all global
      * variables like `browser`. It is the perfect place to define custom commands.
@@ -263,3 +267,18 @@ exports.config = {
     // onComplete: function(exitCode, config, capabilities) {
     // }
 }
+let testEnv = (process.env.CI && 'remote') || process.env.TEST_ENV || 'local'
+if (testEnv === 'local') {
+    config.services = ['chromedriver']
+    config.port = '9515'
+    config.path = '/'
+} else {
+    let capabilities = require('./browserstack.config.js')
+    config.services = ['browserstack']
+    config.capabilities = [capabilities]
+    config.maxInstances = 1
+    config.user = capabilities['browserstack.user']
+    config.key = capabilities['browserstack.key']
+    //config.browserstackLocal = true -- already started by Travis CI
+}
+exports.config = config

@@ -12,6 +12,7 @@ test('Draft and submit a report', async t => {
 
     let $engagementDate = await $('#engagementDate')
     await $engagementDate.click()
+    await t.context.driver.sleep(500) // wait for the datepicker to pop up
 
     await pageHelpers.clickTodayButton()
 
@@ -238,6 +239,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     let $engagementDate = await $('#engagementDate')
     t.is(await $engagementDate.getAttribute('value'), '', 'Engagement date field starts blank')
     await $engagementDate.click()
+    await t.context.driver.sleep(500) // wait for the datepicker to pop up
 
     await pageHelpers.clickTodayButton()
 
