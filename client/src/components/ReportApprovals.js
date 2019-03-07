@@ -97,7 +97,7 @@ export default class ReportApprovals extends Component {
     renderApprovalDetails(action) {
         if(action.type){
             return(
-                <div className="approval-details">
+                <div>
                     <span>By <LinkTo person={action.person} /></span><br/>
                     <small>
                         On {moment(action.createdAt).format(Settings.dateFormats.forms.short)}<br/>
@@ -108,9 +108,12 @@ export default class ReportApprovals extends Component {
         }
     }
 
+    getApprovalStatus(action) {
+      return (action.type) ? this.approvalType(action.type).text : 'Pending'
+    }
+
     renderApprovalStatus(action) {
-        let status = (action.type) ? this.approvalType(action.type).text : 'Pending'
-        return <div className="approval-status">{status}</div>
+        return <div className="approval-status">{this.getApprovalStatus(action)}</div>
     }
 
     renderApprovalButton(action) {
@@ -127,7 +130,7 @@ export default class ReportApprovals extends Component {
             </React.Fragment>
            :
            <Button className={approvalTypeCss + ' btn-sm'}>
-             <span>{action.type}</span>
+             <span>{this.getApprovalStatus(action)}</span>
            </Button>
         )
     }

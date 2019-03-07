@@ -2,16 +2,13 @@
 	display: none;
 }
 
-fieldset.approval-fieldset .approval-details {
-	text-align: center;
-}
-
 fieldset.approval-fieldset .approval-action {
 	position: relative;
 	display: inline-block;
 	padding-right: 18px;
 	margin-top: 3px;
 	vertical-align: top;
+	text-align: center;
 }
 
 fieldset.approval-fieldset .approval-action .btn-pending {
@@ -74,5 +71,4 @@ fieldset.approval-fieldset.compact{
 .approval-status{
 	text-transform: uppercase;
 	font-weight: bold;
-	text-align: center;
 }
