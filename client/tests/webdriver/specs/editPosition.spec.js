@@ -11,12 +11,12 @@ describe('Create position page', () => {
   beforeEach('Open the create position page', () => {
     EditPosition.open()
     EditPosition.form.waitForExist()
-    EditPosition.form.waitForVisible()
+    EditPosition.form.waitForDisplayed()
   })
 
   describe('When changing the position type from principal to advisor and putting back', () => {
     it('Should update the position type to advisor and back to principal', () => {
-        EditPosition.typePrincipalButton.waitForVisible()
+        EditPosition.typePrincipalButton.waitForDisplayed()
         expect(EditPosition.typePrincipalButton.getAttribute('class')).to.not.include('active')
         expect(EditPosition.typeAdvisorButton.getAttribute('class')).to.include('active')
         expect(EditPosition.organization.getValue()).to.equal('')
