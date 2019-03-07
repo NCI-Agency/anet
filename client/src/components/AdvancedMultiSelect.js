@@ -8,6 +8,7 @@ import _isEmpty from 'lodash/isEmpty'
 
 import { renderInputField } from 'components/FieldHelper'
 import UltimatePagination from 'components/UltimatePagination'
+import LinkTo from 'components/LinkTo'
 import './AdvancedMultiSelect.css'
 import API from 'api'
 
@@ -61,13 +62,8 @@ export default class AdvancedMultiSelect extends Component {
 	}
 
 	render() {
-<<<<<<< HEAD
-		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, shortcuts, shortcutsTitle, renderExtraCol, addon } = this.props
-		const { results, filterType } = this.state
-=======
-		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, addon } = this.props
+		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, renderExtraCol, addon } = this.props
 		const { results, filterType, isLoading } = this.state
->>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: this.removeItem})
 		const items = results && results[filterType] ? results[filterType].list : []
 		return (
@@ -123,21 +119,9 @@ export default class AdvancedMultiSelect extends Component {
 						</Row>
 					</Popover>
 				</Overlay>
-<<<<<<< HEAD
-				<Row>
-					<Col sm={9} className="form-group" ref={el => {this.overlayContainer = el}} style={{position: 'relative', marginBottom: 0}} />
-					<Col sm={3} />
-				</Row>
-				<Row>
-					<Col sm={2} />
-					<Col sm={7}>{renderSelectedWithDelete}</Col>
-					<Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
-				</Row>
-=======
 				<AdvancedMultiSelectTarget overlayRef={el => this.overlayContainer = el}>
 					{renderSelectedWithDelete}
 				</AdvancedMultiSelectTarget>
->>>>>>> NCI-Agency/anet#255: Add AdvancedMultiSelectTarget component
 			</React.Fragment>
 		)
 	}
@@ -149,12 +133,8 @@ export default class AdvancedMultiSelect extends Component {
 		this.setState({
 			inputFocused: true,
 			showOverlay: true,
-<<<<<<< HEAD
-		}, () => this.fetchResults(0))
-=======
 			isLoading: true,
-		}, this.fetchResults())
->>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
+		}, this.fetchResults(0))
 	}
 
 	handleInputBlur = () => {
@@ -177,15 +157,11 @@ export default class AdvancedMultiSelect extends Component {
 
 	changeSearchTerms = (event) => {
 		// Reset the results state when the search terms change
-<<<<<<< HEAD
-		this.setState({searchTerms: event.target.value}, () => this.fetchResultsDebounced(0, true))
-=======
 		this.setState({
 			isLoading: true,
 			searchTerms: event.target.value,
 			results: {}
 		}, () => this.fetchResultsDebounced(0))
->>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
 	}
 
 	changeFilterType = (filterType) => {
@@ -200,22 +176,12 @@ export default class AdvancedMultiSelect extends Component {
 		})
 	}
 
-<<<<<<< HEAD
-	fetchResults = (pageNum, resetResults) => {
-		// Reset results without extra state change
-		const results = resetResults ? {} : this.state.results
-		const { filterType } = this.state
-		const filterDefs = this.props.filterDefs[filterType]
-		const resourceName = this.props.objectType.resourceName
-		const listName = filterDefs.listName || this.props.objectType.listName
-=======
 	fetchResults = (pageNum) => {
 		const { filterType, results } = this.state
 		const filterDefs = this.props.filterDefs[filterType]
 		if (pageNum === undefined) {
 			pageNum = results && results[filterType] ? results[filterType].pageNum : 0
 		}
->>>>>>> NCI-Agency/anet#255: Add loading indicator to advanced multiselect
 		if (filterDefs.list) {
 			// No need to fetch the data, it is already provided in the filter definition
 			this.setState({
