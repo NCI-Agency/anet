@@ -361,16 +361,17 @@ class BaseOrganizationForm extends Component {
 	}
 
 	removeApprovalStep = (arrayHelpers, index, step) => {
-		return API.query(/* GraphQL */`
-			approvalStepInUse(uuid:"${step.uuid}") 
-		`).then(data => {
+		return API.query(
+		  /* GraphQL */ `
+				approvalStepInUse(uuid:"${step.uuid}")   
+			`
+		).then(data => {
 			if (data) {
-				this.setState({showRemoveApprovalStepAlert: true})
-			}
-			else {
+				this.setState({ showRemoveApprovalStepAlert: true })
+			} else {
 				arrayHelpers.remove(index)
 			}
-		})		
+		})
 	}
 
 	onCancel = () => {
