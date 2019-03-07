@@ -93,7 +93,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 			+ " tags { uuid name description }"
 			+ " comments { %6$s }"
 			+ " authorizationGroups { uuid name }"
-			+ " approvalStatus { step { uuid } person { uuid } type createdAt }",
+			+ " workflow { step { uuid } person { uuid } type createdAt }",
 			REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS, COMMENT_FIELDS);
 
 	@Test
@@ -309,13 +309,13 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(pending.getList().size()).isGreaterThan(0);
 
 		//Check on Report status for who needs to approve
-		List<ReportAction> approvalStatus = returned.getApprovalStatus();
-		assertThat(approvalStatus.size()).isEqualTo(2);
-		ReportAction reportAction = approvalStatus.get(0);
+		List<ReportAction> workflow = returned.getWorkflow();
+		assertThat(workflow.size()).isEqualTo(2);
+		ReportAction reportAction = workflow.get(0);
 		assertThat(reportAction.getPerson()).isNull(); //Because this hasn't been approved yet.
 		assertThat(reportAction.getCreatedAt()).isNull();
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		reportAction = approvalStatus.get(1);
+		reportAction = workflow.get(1);
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Reject the report
@@ -363,14 +363,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(returned.getApprovalStepUuid()).isNull();
 
 		//check on report status to see that it got approved.
-		approvalStatus = returned.getApprovalStatus();
+		workflow = returned.getWorkflow();
 		//there were 5 actions on the report: submit, reject, submit, approve, approve
-		assertThat(approvalStatus.size()).isEqualTo(5);
-		reportAction = approvalStatus.get(3);
+		assertThat(workflow.size()).isEqualTo(5);
+		reportAction = workflow.get(3);
 		assertThat(reportAction.getPersonUuid()).isEqualTo(approver1.getUuid());
 		assertThat(reportAction.getCreatedAt()).isNotNull();
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		reportAction = approvalStatus.get(4);
+		reportAction = workflow.get(4);
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Admin can publish approved reports.

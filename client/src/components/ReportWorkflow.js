@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
-import './ReportApprovals.css'
+import './ReportWorkflow.css'
 import Settings from 'Settings'
 import LinkTo from 'components/LinkTo'
 
@@ -13,7 +13,7 @@ const SUBMIT = 'SUBMIT'
 const PUBLISH = 'PUBLISH'
 
 
-export default class ReportApprovals extends Component {
+export default class ReportWorkflow extends Component {
 
     constructor(props) {
         super(props)
@@ -25,17 +25,17 @@ export default class ReportApprovals extends Component {
 
     render() {
         let report = this.props.report
-        let title = "Approval State"
+        let title = "Workflow"
         let fieldset = null
         if(this.props.fullReport) {
-            fieldset = this.renderFullApprovalView(report, title)
+            fieldset = this.renderFullWorkflowView(report, title)
         } else {
-            fieldset = this.renderCompactApprovalView(report, title)
+            fieldset = this.renderCompactWorkflowView(report, title)
         }
         return fieldset
     }
 
-    approvalType(type) {
+    actionType(type) {
         switch(type) {
             case APPROVE:
                 return {text: 'Approved', cssClass: 'btn-success approved'}
@@ -50,20 +50,20 @@ export default class ReportApprovals extends Component {
         }
     }
 
-    renderFullApprovalView(report, title){
+    renderFullWorkflowView(report, title){
         return (
-            <Fieldset id="approvals" className="approval-fieldset" title={title}>
-                { report.approvalStatus.map(action =>
+            <Fieldset id="workflow" className="workflow-fieldset" title={title}>
+                { report.workflow.map(action =>
                     this.renderReportAction(action)
                 )}
             </Fieldset>
         )
     }
 
-    renderCompactApprovalView(report, title){
+    renderCompactWorkflowView(report, title){
         return (
-            <Fieldset className="approval-fieldset compact" title={title}>
-                { report.approvalStatus.map(action =>
+            <Fieldset className="workflow-fieldset compact" title={title}>
+                { report.workflow.map(action =>
                     this.renderCompactReportAction(action)
                 )}
             </Fieldset>
@@ -71,30 +71,30 @@ export default class ReportApprovals extends Component {
     }
 
     renderReportAction(action) {
-        let approvalButton = this.renderApprovalButton(action)
-        let approvalStatus = this.renderApprovalStatus(action)
-        let approvalDetails = this.renderApprovalDetails(action)
+        let actionStatus = this.renderActionStatus(action)
+        let actionButton = this.renderActionButton(action)
+        let actionDetails = this.renderActionDetails(action)
         const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
         return (
-            <div className="approval-action" key={key}>
-                { approvalStatus }
-                { approvalButton }
-                { approvalDetails }
+            <div className="workflow-action" key={key}>
+                { actionStatus }
+                { actionButton }
+                { actionDetails }
             </div>
         )
     }
 
     renderCompactReportAction(action) {
-        let approvalButton = this.renderApprovalButton(action)
+        let actionButton = this.renderActionButton(action)
         const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
         return (
-            <div className="approval-action" key={key}>
-                { approvalButton }
+            <div className="workflow-action" key={key}>
+                { actionButton }
             </div>
         )
     }
 
-    renderApprovalDetails(action) {
+    renderActionDetails(action) {
         if(action.type){
             return(
                 <div>
@@ -108,29 +108,29 @@ export default class ReportApprovals extends Component {
         }
     }
 
-    getApprovalStatus(action) {
-      return (action.type) ? this.approvalType(action.type).text : 'Pending'
+    getActionStatus(action) {
+      return (action.type) ? this.actionType(action.type).text : 'Pending'
     }
 
-    renderApprovalStatus(action) {
-        return <div className="approval-status">{this.getApprovalStatus(action)}</div>
+    renderActionStatus(action) {
+        return <div className="action-status">{this.getActionStatus(action)}</div>
     }
 
-    renderApprovalButton(action) {
+    renderActionButton(action) {
         const step = action.step
-        const approvalModal = this.renderApprovalModal(action)
-        const approvalTypeCss =  this.approvalType(action.type).cssClass
+        const actionModal = this.renderActionModal(action)
+        const actionTypeCss =  this.actionType(action.type).cssClass
         return (
           step ?
             <React.Fragment>
-              <Button className={approvalTypeCss + ' btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
+              <Button className={actionTypeCss + ' btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
                   <span>{step.name}</span>
               </Button>
-              { approvalModal }
+              { actionModal }
             </React.Fragment>
            :
-           <Button className={approvalTypeCss + ' btn-sm'}>
-             <span>{this.getApprovalStatus(action)}</span>
+           <Button className={actionTypeCss + ' btn-sm'}>
+             <span>{this.getActionStatus(action)}</span>
            </Button>
         )
     }
@@ -145,9 +145,9 @@ export default class ReportApprovals extends Component {
         this.setState(this.state)
     }
 
-    renderApprovalModal(action) {
+    renderActionModal(action) {
         let step = action.step
-        let approvalStatus = this.renderApprovalModalStatus(action)
+        let actionStatus = this.renderActionModalStatus(action)
         return (
           step ?
           <Modal show={step.showModal} onHide={this.closeApproversModal.bind(this, step)}>
@@ -163,20 +163,20 @@ export default class ReportApprovals extends Component {
                   )}
                   </ul>
               </Modal.Body>
-              <Modal.Footer>{ approvalStatus }</Modal.Footer>
+              <Modal.Footer>{ actionStatus }</Modal.Footer>
           </Modal>
           :
           null
         )
     }
 
-    renderApprovalModalStatus(action){
+    renderActionModalStatus(action){
         let pending = <span className="label pending">Pending</span>
         if(action.type){
-            let approvalType = this.approvalType(action.type)
-            let cssClass = 'label ' + approvalType.cssClass
+            let actionType = this.actionType(action.type)
+            let cssClass = 'label ' + actionType.cssClass
             return (
-                <span className={cssClass}> {approvalType.text} by <LinkTo person={action.person} isLink= {false}/> on
+                <span className={cssClass}> {actionType.text} by <LinkTo person={action.person} isLink= {false}/> on
                     <small> {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}</small>
                 </span>
             )

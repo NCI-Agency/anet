@@ -5,7 +5,7 @@ import utils from 'utils'
 import pluralize from 'pluralize'
 
 import LinkTo from 'components/LinkTo'
-import ReportApprovals from 'components/ReportApprovals'
+import ReportWorkflow from 'components/ReportWorkflow'
 import Tag from 'components/Tag'
 import {Report} from 'models'
 import Settings from 'Settings'
@@ -62,7 +62,7 @@ export default class ReportSummary extends Component {
 
 			{report.isPending() &&
 				<Row>
-					<Col md={12}><ReportApprovals report={report} /></Col>
+					<Col md={12}><ReportWorkflow report={report} /></Col>
 				</Row>
 			}
 			<Row>

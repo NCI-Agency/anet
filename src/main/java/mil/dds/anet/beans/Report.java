@@ -70,7 +70,7 @@ public class Report extends AbstractAnetBean {
 	// The user who instantiated this; needed to determine access to sensitive information
 	private Person user;
 	private List<AuthorizationGroup> authorizationGroups;
-	private List<ReportAction> approvalStatus;
+	private List<ReportAction> workflow;
 
 	@GraphQLQuery(name="approvalStep")
 	public CompletableFuture<ApprovalStep> loadApprovalStep(@GraphQLRootContext Map<String, Object> context) {
@@ -435,17 +435,17 @@ public class Report extends AbstractAnetBean {
 	 * There will be an approval action for each approval step for this report
 	 * With information about the 
 	 */
-	@GraphQLQuery(name="approvalStatus")
-	public CompletableFuture<List<ReportAction>> loadApprovalStatus(@GraphQLRootContext Map<String, Object> context) {
-		if (approvalStatus != null) {
-			return CompletableFuture.completedFuture(approvalStatus);
+	@GraphQLQuery(name="workflow")
+	public CompletableFuture<List<ReportAction>> loadWorkflow(@GraphQLRootContext Map<String, Object> context) {
+		if (workflow != null) {
+			return CompletableFuture.completedFuture(workflow);
 		}
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		return engine.getReportActionDao().getActionsForReport(context, uuid)
 				.thenApply(actions -> {
 			if (state == ReportState.APPROVED || state == ReportState.PUBLISHED) {
 				//For APPROVED and PUBLISHED reports, show the whole workflow of actions
-				approvalStatus = actions;
+				workflow = actions;
 			} else {
 				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();
 				final String aoUuid = DaoUtils.getUuid(ao);
@@ -456,19 +456,19 @@ public class Report extends AbstractAnetBean {
 						steps = getDefaultWorkflow(context, engine, defaultOrgUuid).join();
 					}
 				}
-				approvalStatus = createWorkflow(actions, steps);
+				workflow = createWorkflow(actions, steps);
 			}
-			return approvalStatus;
+			return workflow;
 		});
 	}
 
 	@GraphQLIgnore
-	public List<ReportAction> getApprovalStatus() {
-		return approvalStatus;
+	public List<ReportAction> getWorkflow() {
+		return workflow;
 	}
 
-	public void setApprovalStatus(List<ReportAction> approvalStatus) {
-		this.approvalStatus = approvalStatus;
+	public void setWorkflow(List<ReportAction> workflow) {
+		this.workflow = workflow;
 	}
 
 	private List<ReportAction> compactActions(List<ReportAction> actions) {

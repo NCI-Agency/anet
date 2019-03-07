@@ -2,7 +2,7 @@
 	display: none;
 }
 
-fieldset.approval-fieldset .approval-action {
+fieldset.workflow-fieldset .workflow-action {
 	position: relative;
 	display: inline-block;
 	padding-right: 18px;
@@ -11,21 +11,21 @@ fieldset.approval-fieldset .approval-action {
 	text-align: center;
 }
 
-fieldset.approval-fieldset .approval-action .btn-pending {
+fieldset.workflow-fieldset .workflow-action .btn-pending {
 	background-color: #969696;
 	color: #fff;
 }
 
-fieldset.approval-fieldset .approval-action .btn-pending:hover {
+fieldset.workflow-fieldset .workflow-action .btn-pending:hover {
 	background-color: #777;
 	color: #fff;
 }
 
-fieldset.approval-fieldset .approval-action .btn {
+fieldset.workflow-fieldset .workflow-action .btn {
 	border-radius: 30px;
 }
 
-fieldset.approval-fieldset .approval-action button::after {
+fieldset.workflow-fieldset .workflow-action button::after {
 	position: relative;
     font-family: 'Glyphicons Halflings';
     font-style: normal;
@@ -40,11 +40,11 @@ fieldset.approval-fieldset .approval-action button::after {
 	right: -26px;
 }
 
-fieldset.approval-fieldset :last-child button::after {
+fieldset.workflow-fieldset :last-child button::after {
 	content: "";
 }
 
-fieldset.approval-fieldset.compact{
+fieldset.workflow-fieldset.compact{
 	border: 0;
 	border-bottom: 2px solid hsla(0, 0%, 0%, 0.06);
 	margin-bottom: 1rem;
@@ -68,7 +68,7 @@ fieldset.approval-fieldset.compact{
 	background-color: #c23030;
 }
 
-.approval-status{
+.action-status{
 	text-transform: uppercase;
 	font-weight: bold;
 }

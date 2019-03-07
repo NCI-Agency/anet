@@ -204,7 +204,7 @@ export default class Report extends Model {
 		return Report.isApproved(this.state)
 	}
 
-	showApprovals() {
+	showWorkflow() {
 		return this.state && !this.isDraft() && !this.isFuture()
 	}
 
@@ -239,9 +239,9 @@ export default class Report extends Model {
 	}
 
 	getReportApprovedAt() {
-		if (this.approvalStatus) {
-			const approvalSteps = Object.assign([], this.approvalStatus)
-			const lastApprovalStep = approvalSteps.pop()
+		if (this.workflow && this.isApproved()) {
+			const actions = Object.assign([], this.workflow)
+			const lastApprovalStep = actions.pop()
 			return !lastApprovalStep ? '' : lastApprovalStep.createdAt
 		} else {
 			return

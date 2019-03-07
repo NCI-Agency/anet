@@ -17,7 +17,7 @@ import LinkTo from 'components/LinkTo'
 import TaskTable from 'components/TaskTable'
 import AttendeesTable from './AttendeesTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
-import ReportApprovals from 'components/ReportApprovals'
+import ReportWorkflow from 'components/ReportWorkflow'
 import Tag from 'components/Tag'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
@@ -100,7 +100,7 @@ class BaseReportShow extends Page {
 				principalOrg { uuid, shortName, longName, identificationCode, type }
 				advisorOrg { uuid, shortName, longName, identificationCode, type }
 
-				approvalStatus {
+				workflow {
 					type, createdAt
 					step { uuid , name
 						approvers { uuid, name, person { uuid, name, rank, role } }
@@ -234,7 +234,7 @@ class BaseReportShow extends Page {
 					{report.isPending() &&
 						<Fieldset style={{textAlign: 'center'}}>
 							<h4 className="text-danger">This report is PENDING approvals.</h4>
-							<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
+							<p>It won't be available in the ANET database until your <AnchorLink to="workflow">approval organization</AnchorLink> marks it as approved.</p>
 							<div style={{textAlign: 'left'}}>
 								{this.renderValidationMessages('approving')}
 							</div>
@@ -368,8 +368,8 @@ class BaseReportShow extends Page {
 							</Fieldset>
 						}
 
-						{report.showApprovals() &&
-							<ReportApprovals report={report} fullReport={true} />
+						{report.showWorkflow() &&
+							<ReportWorkflow report={report} fullReport={true} />
 						}
 
 						{canSubmit &&

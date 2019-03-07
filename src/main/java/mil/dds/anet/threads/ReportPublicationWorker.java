@@ -54,8 +54,8 @@ public class ReportPublicationWorker implements Runnable {
 		query.setState(Collections.singletonList(ReportState.APPROVED));
 		final List<Report> reports = dao.search(query, null, true).getList();
 		for (final Report r : reports) {
-			final List<ReportAction> approvalStatus = r.loadApprovalStatus(context).join();
-			if (approvalStatus.get(approvalStatus.size()-1).getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(this.nbOfHoursQuarantineApproved).toInstant())) {
+			final List<ReportAction> workflow = r.loadWorkflow(context).join();
+			if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(this.nbOfHoursQuarantineApproved).toInstant())) {
 				//Publish the report
 				try { 
 					final int numRows = dao.publish(r, null);
