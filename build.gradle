@@ -12,6 +12,7 @@ apply plugin: 'project-report' // adds dependencyReport and htmlDependencyReport
 sourceCompatibility = 1.8
 
 boolean isTestEnv = project.hasProperty("testEnv")
+String dbContainerName = isTestEnv ? "anet-mssql-test-server" : "anet-mssql-server"
 
 // Defaults for development variables
 run.environment("DB_DRIVER", "sqlserver")
@@ -148,8 +149,10 @@ task checkConfig(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task buildClient(dependsOn: 'yarn', type: YarnTask) {
-    inputs.file("client/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
-    inputs.dir("client/src").withPathSensitivity(PathSensitivity.RELATIVE)
+	group = "build"
+	description = "Builds the client application."
+	inputs.file("client/yarn.lock").withPathSensitivity(PathSensitivity.RELATIVE)
+	inputs.dir("client/src").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/config").withPathSensitivity(PathSensitivity.RELATIVE)
 	inputs.dir("client/public").withPathSensitivity(PathSensitivity.RELATIVE)
 	outputs.dir("$buildDir/resources/main/assets/client")
@@ -158,6 +161,8 @@ task buildClient(dependsOn: 'yarn', type: YarnTask) {
 }
 
 task dbInit(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database initialization command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
@@ -166,6 +171,8 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database status (Liquibase)command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
@@ -173,6 +180,8 @@ task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database migration (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
@@ -183,6 +192,8 @@ task dbMigrate(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task dbTest(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database migration test (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
@@ -190,6 +201,8 @@ task dbTest(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database migration rollback (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
@@ -200,14 +213,25 @@ task dbRollback(dependsOn: 'compileJava', type: JavaExec) {
 }
 
 task dbDrop(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database drop-all (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
 	args = ["db", "drop-all", "--confirm-delete-everything", anetConfig]
 }
 
+task dbLoad(dependsOn: 'compileJava', type: JavaExec) {
+	group = "database"
+	description = "Runs the ANET database load command; loads demo data."
+	classpath = sourceSets.main.runtimeClasspath
+	environment(run.environment)
+	main = mainClassName
+	args = ["dbScript", "-S", "insertBaseData.sql", anetConfig]
+}
+
 task dockerBuildImage(dependsOn: installDist, type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
-	description = "Builds anet-app-server container image"
+	description = "Builds anet-app-server container image."
 	doFirst {
 		copy {
 			from 'docker/anet-app-server/Dockerfile'
@@ -239,19 +263,17 @@ task dockerPushImage(type: com.bmuschko.gradle.docker.tasks.image.DockerPushImag
 }
 
 task dockerPullDB(type: com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+	group = "database container"
 	repository = "ncia/anet-mssql-linux"
-	description = "Pulls a docker image for the ANET DB from " + repository
+	description = "Pulls a docker image for the ANET DB from " + repository + "."
 	tag = "latest"
 }
 
 task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+	group = "database container"
 	imageId = dockerPullDB.getImageId()
-	if (isTestEnv) {
-		containerName = "anet-mssql-test-server"
-	} else {
-		containerName = "anet-mssql-server"
-	}
-	description = "Creates an ANET MS SQL DB container named " + containerName
+	containerName = dbContainerName
+	description = "Creates an ANET MS SQL DB container named " + dbContainerName + "."
 	binds = ["${projectDir}":"/hostdata"] + run.environment.get("DOCKER_MOUNTS", [:])
 	withEnvVar('ACCEPT_EULA', 'Y')
 	withEnvVar('SA_PASSWORD', run.environment["ANET_SA_PASSWORD"])
@@ -263,51 +285,28 @@ task dockerCreateDB(dependsOn: dockerPullDB, type: com.bmuschko.gradle.docker.ta
 
 // need to make this invoke dbCreateContainer if there is no anet-mssql-server and possibly get newer image if available
 task dockerStartDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
-	if (isTestEnv) {
-		description = "Starts anet-mssql-test-server container"
-		targetContainerId { "anet-mssql-test-server" }
-	} else {
-		description = "Starts anet-mssql-server container"
-		targetContainerId { "anet-mssql-server" }
-	}
+	group = "database container"
+	description = "Starts " + dbContainerName + " container."
+	targetContainerId { dbContainerName }
 }
 
 task dockerStopDB(type: com.bmuschko.gradle.docker.tasks.container.DockerStopContainer) {
-	if (isTestEnv) {
-		description = "Stops anet-mssql-test-server container"
-		targetContainerId { "anet-mssql-test-server" }
-	} else {
-		description = "Stops anet-mssql-server container"
-		targetContainerId { "anet-mssql-server" }
-	}
+	group = "database container"
+	description = "Stops " + dbContainerName + " container."
+	targetContainerId { dbContainerName }
 }
 
 task dockerRemoveDB(type: com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
-	if (isTestEnv){
-		description = "Removes anet-mssql-test-server container"
-		targetContainerId { "anet-mssql-test-server" }
-	} else {
-		description = "Removes anet-mssql-server container"
-		targetContainerId { "anet-mssql-server" }
-	}
+	group = "database container"
+	description = "Removes " + dbContainerName + " container."
+	targetContainerId { dbContainerName }
 }
 
 task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
-	if (isTestEnv) {
-		description = "Waiting until the DB testserver has started"
-		targetContainerId { "anet-mssql-test-server" }
-	} else {
-		description = "Waiting until the DB testserver has started"
-		targetContainerId { "anet-mssql-server" }
-	}
+	group = "database container"
+	description = "Waiting until the " + dbContainerName + " DB has started."
+	targetContainerId { dbContainerName }
 	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
-}
-
-task dbLoad(dependsOn: 'compileJava', type: JavaExec) {
-	classpath = sourceSets.main.runtimeClasspath
-	environment(run.environment)
-	main = mainClassName
-	args = ["dbScript", "-S", "insertBaseData.sql", anetConfig]
 }
 
 classes.dependsOn buildClient
@@ -342,7 +341,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
-		classpath 'com.bmuschko:gradle-docker-plugin:4.5.0'
+		classpath 'com.bmuschko:gradle-docker-plugin:4.6.1'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
 	}
 }
