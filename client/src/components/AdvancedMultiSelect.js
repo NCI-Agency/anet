@@ -134,7 +134,7 @@ export default class AdvancedMultiSelect extends Component {
 			inputFocused: true,
 			showOverlay: true,
 			isLoading: true,
-		}, this.fetchResults(0))
+		}, this.fetchResults())
 	}
 
 	handleInputBlur = () => {
@@ -161,7 +161,7 @@ export default class AdvancedMultiSelect extends Component {
 			isLoading: true,
 			searchTerms: event.target.value,
 			results: {}
-		}, () => this.fetchResultsDebounced(0))
+		}, () => this.fetchResultsDebounced())
 	}
 
 	changeFilterType = (filterType) => {
@@ -171,12 +171,12 @@ export default class AdvancedMultiSelect extends Component {
 		const fetchResults = _isEmpty(filterResults)
 		this.setState({	filterType,	isLoading: fetchResults }, () => {
 			if (fetchResults) {
-				this.fetchResults(0)
+				this.fetchResults()
 			}
 		})
 	}
 
-	fetchResults = (pageNum) => {
+	fetchResults = (pageNum = 0) => {
 		const { filterType, results } = this.state
 		const filterDefs = this.props.filterDefs[filterType]
 		if (pageNum === undefined) {
