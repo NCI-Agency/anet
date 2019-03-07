@@ -3,15 +3,15 @@ import Page from './page'
 const Page_URL = '/admin/authorizationGroups/new'
 
 class CreateAuthorizationGroup extends Page {
-    get form()                   { return browser.element('form') }
-    get alertSuccess()           { return browser.element('.alert-success') }
-    get name()                   { return browser.element('#name') }
-    get description()            { return browser.element('#description') }
-    get statusActiveButton()     { return browser.element('#statusActiveButton') }
-    get statusInactiveButton()   { return browser.element('#statusInactiveButton') }
-    get positions()              { return browser.element('#positions') }
-    get positionsAutocomplete()  { return browser.element('#react-autowhatever-1--item-0') }
-    get submitButton()           { return browser.element('#formBottomSubmit') }
+    get form()                   { return browser.$('form') }
+    get alertSuccess()           { return browser.$('.alert-success') }
+    get name()                   { return browser.$('#name') }
+    get description()            { return browser.$('#description') }
+    get statusActiveButton()     { return browser.$('#statusActiveButton') }
+    get statusInactiveButton()   { return browser.$('#statusInactiveButton') }
+    get positions()              { return browser.$('#positions') }
+    get positionsAutocomplete()  { return browser.$('#react-autowhatever-1--item-0') }
+    get submitButton()           { return browser.$('#formBottomSubmit') }
 
     open() {
         // Only admin users can create authorization groups
@@ -19,9 +19,9 @@ class CreateAuthorizationGroup extends Page {
     }
 
     waitForAlertSuccessToLoad() {
-        if(!this.alertSuccess.isVisible()) {
+        if(!this.alertSuccess.isDisplayed()) {
             this.alertSuccess.waitForExist()
-            this.alertSuccess.waitForVisible()
+            this.alertSuccess.waitForDisplayed()
         }
     }
 

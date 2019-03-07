@@ -42,7 +42,7 @@ test.beforeEach(t => {
         builder = builder
             .forBrowser('chrome')
     } else {
-        capabilities.name = t.title.replace(/^beforeEach for /, '')
+        capabilities.name = t.title.replace(/^beforeEach hook for /, '')
         builder = builder
             .usingServer('http://hub-cloud.browserstack.com/wd/hub')
             .withCapabilities(capabilities)
