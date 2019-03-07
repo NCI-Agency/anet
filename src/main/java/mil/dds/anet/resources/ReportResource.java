@@ -55,7 +55,7 @@ import mil.dds.anet.beans.AdvisorReportsEntry;
 import mil.dds.anet.beans.AdvisorReportsStats;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ReportAction;
-import mil.dds.anet.beans.ReportAction.ApprovalType;
+import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
@@ -500,7 +500,7 @@ public class ReportResource {
 			ReportAction action = new ReportAction();
 			action.setReportUuid(r.getUuid());
 			action.setPersonUuid(user.getUuid());
-			action.setType(ApprovalType.SUBMIT);
+			action.setType(ActionType.SUBMIT);
 			engine.getReportActionDao().insert(action);
 
 			//Push the report into the first step of this workflow
@@ -609,7 +609,7 @@ public class ReportResource {
 			approval.setReportUuid(r.getUuid());
 			approval.setStepUuid(step.getUuid());
 			approval.setPersonUuid(approver.getUuid());
-			approval.setType(ApprovalType.APPROVE);
+			approval.setType(ActionType.APPROVE);
 			engine.getReportActionDao().insert(approval);
 
 			//Update the report
@@ -701,7 +701,7 @@ public class ReportResource {
 				rejection.setStepUuid(step.getUuid());
 			}
 			rejection.setPersonUuid(approver.getUuid());
-			rejection.setType(ApprovalType.REJECT);
+			rejection.setType(ActionType.REJECT);
 			engine.getReportActionDao().insert(rejection);
 
 			//Update the report

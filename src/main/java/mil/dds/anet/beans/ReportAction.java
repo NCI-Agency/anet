@@ -17,12 +17,12 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class ReportAction extends AbstractAnetBean {
 
-	public enum ApprovalType { APPROVE, REJECT, SUBMIT, PUBLISH }
+	public enum ActionType { APPROVE, REJECT, SUBMIT, PUBLISH }
 	
 	private ForeignObjectHolder<ApprovalStep> step = new ForeignObjectHolder<>();
 	private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
 	private ForeignObjectHolder<Report> report = new ForeignObjectHolder<>();
-	ApprovalType type;
+	ActionType type;
 	
 	@Override
 	@JsonIgnore
@@ -116,11 +116,11 @@ public class ReportAction extends AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="type")
-	public ApprovalType getType() {
+	public ActionType getType() {
 		return type;
 	}
 	
-	public void setType(ApprovalType type) {
+	public void setType(ActionType type) {
 		this.type = type;
 	}
 	

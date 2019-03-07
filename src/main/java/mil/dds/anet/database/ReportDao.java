@@ -26,7 +26,7 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
-import mil.dds.anet.beans.ReportAction.ApprovalType;
+import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.ReportAction;
@@ -765,7 +765,7 @@ public class ReportDao implements IAnetDao<Report> {
 			//User is null when the publication action is being done automatically by a worker
 			action.setPersonUuid(user.getUuid());
 		}
-		action.setType(ApprovalType.PUBLISH);
+		action.setType(ActionType.PUBLISH);
 		AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
 		//Move the report to RELEASED state
