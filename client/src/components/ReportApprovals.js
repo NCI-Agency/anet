@@ -44,7 +44,7 @@ export default class ReportApprovals extends Component {
             case SUBMIT:
               return {text: 'Submitted', cssClass: 'btn-pending submitted'}
             case PUBLISH:
-              return {text: 'Published', cssClass: 'btn-danger published'}
+              return {text: 'Published', cssClass: 'btn-success published'}
             default:
                 return {text: 'Unknown', cssClass: 'btn-pending default'}
         }
