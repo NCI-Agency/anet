@@ -471,25 +471,6 @@ public class Report extends AbstractAnetBean {
 		this.workflow = workflow;
 	}
 
-	private List<ReportAction> compactActions(List<ReportAction> actions) {
-		// TODO: do we still need this method?
-		//Compact to only get the most recent event for each step.
-		if (actions.size() == 0) {
-			//Magically published, probably imported this way.
-			return actions;
-		}
-		ReportAction last = actions.get(0);
-		final List<ReportAction> compacted = new LinkedList<ReportAction>();
-		for (final ReportAction action : actions) {
-			if (action.getStepUuid() != null && last.getStepUuid() != null && !action.getStepUuid().equals(last.getStepUuid())) {
-				compacted.add(last);
-			}
-			last = action;
-		}
-		compacted.add(actions.get(actions.size() - 1));
-		return compacted;
-	}
-
 	private List<ReportAction> createWorkflow(List<ReportAction> actions, List<ApprovalStep> steps) {
 		final List<ReportAction> workflow = new LinkedList<ReportAction>();
 		for (final ApprovalStep step : steps) {
