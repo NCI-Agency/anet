@@ -431,9 +431,10 @@ public class Report extends AbstractAnetBean {
 		return comments;
 	}
 	
-	/*Returns a full list of the approval steps and statuses for this report
-	 * There will be an approval action for each approval step for this report
-	 * With information about the 
+	/*Returns a list of report actions. It depends on the report status:
+	 * - for APPROVED or PUBLISHED reports, it returns all report actions
+	 * - for reports in other steps it only returns report actions related to
+	 *   approval steps, and for each of the steps only the latest report action
 	 */
 	@GraphQLQuery(name="workflow")
 	public CompletableFuture<List<ReportAction>> loadWorkflow(@GraphQLRootContext Map<String, Object> context) {
