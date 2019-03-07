@@ -237,6 +237,11 @@ class BaseReportForm extends Component {
 							listName: 'taskRecents',
 							listArgs: 'maxResults:6',
 						},
+						assignedToMyOrg: {
+							label: 'Assigned to my organization',
+							searchQuery: true,
+							queryVars: {responsibleOrgUuid: this.props.currentUser.position.organization.uuid},
+						},
 					}
 				const authorizationGroupsFilters = {
 					recentAuthorizationGroups: {
