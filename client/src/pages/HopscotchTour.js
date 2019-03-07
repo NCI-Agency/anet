@@ -152,7 +152,7 @@ const reportTour = (currentUser, history) => {
 		{
 			title: `Primary ${advisorSingular} and ${principalSingular}`,
 			content: `Use these check boxes to indicate who the primary ${advisorSingular} and primary ${principalSingular} was. The people you choose will display on your report's summary as the main individuals involved in your engagement.`,
-			target: '#attendeesTable',
+			target: '#attendeesContainer',
 			placement: 'bottom',
 		},
 		{
