@@ -12,15 +12,10 @@ import LinkTo from 'components/LinkTo'
 import './AdvancedMultiSelect.css'
 import API from 'api'
 
-const AdvancedMultiSelectTarget = ({ overlayRef, children }) =>
-	<React.Fragment>
-		<Row>
-			<Col sm={9} className="form-group" ref={overlayRef} style={{position: 'relative', marginBottom: 0}} />
-		</Row>
-		<Row>
-			<Col smOffset={2} sm={7}>{children}</Col>
-		</Row>
-	</React.Fragment>
+const AdvancedMultiSelectTarget = ({ overlayRef }) =>
+	<Row>
+		<Col sm={9} className="form-group" ref={overlayRef} style={{position: 'relative', marginBottom: 0}} />
+	</Row>
 
 export default class AdvancedMultiSelect extends Component {
 	static propTypes = {
@@ -123,9 +118,12 @@ export default class AdvancedMultiSelect extends Component {
 						</Row>
 					</Popover>
 				</Overlay>
-				<AdvancedMultiSelectTarget overlayRef={el => this.overlayContainer = el}>
-					{renderSelectedWithDelete}
-				</AdvancedMultiSelectTarget>
+				<AdvancedMultiSelectTarget overlayRef={el => {this.overlayContainer = el}}/>
+				<Row>
+					<Col sm={2} />
+					<Col sm={7}>{renderSelectedWithDelete}</Col>
+					<Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
+				</Row>
 			</React.Fragment>
 		)
 	}
