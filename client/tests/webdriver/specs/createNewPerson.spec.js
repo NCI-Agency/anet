@@ -13,12 +13,13 @@ const VALID_PERSON_ADVISOR = {
 describe('Create new Person form page', () => {
 
     describe('When creating a Principle user', () => {
-        it('Should save a principle with only a last name', () => {
+        it('Should not save a principle with only a last name', () => {
             CreatePerson.openAsSuperUser()
             CreatePerson.form.waitForExist()
             CreatePerson.form.waitForVisible()
             CreatePerson.lastName.waitForVisible()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
+            CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
@@ -30,6 +31,7 @@ describe('Create new Person form page', () => {
             CreatePerson.form.waitForVisible()
             CreatePerson.lastName.waitForVisible()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
+            CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
             CreatePerson.emailAddress.setValue('notValidEmail@')
             CreatePerson.lastName.click()
             const errorMessage = browser.element('input#emailAddress + span.help-block')
