@@ -127,7 +127,7 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	 */
 	public boolean deleteStep(String uuid) {
 		//ensure there is nothing currently on this step
-		if (this.isStepInUse(uuid)) {
+		if (isStepInUse(uuid)) {
 			throw new WebApplicationException("Reports are currently pending at this step", Status.NOT_ACCEPTABLE);
 		}
 
@@ -149,9 +149,8 @@ public class ApprovalStepDao implements IAnetDao<ApprovalStep> {
 	}
 
 	/**
-	 * Check whether the Approval Step is beign by a report
+	 * Check whether the Approval Step is being by a report
 	 */
-
 	public boolean isStepInUse(String uuid) {
 		List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepUuid\" = ?", uuid)
 				.map(new MapMapper(false))

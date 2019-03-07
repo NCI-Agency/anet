@@ -253,10 +253,10 @@ class BaseOrganizationForm extends Component {
 												</Modal>
 												<Modal show={this.state.showRemoveApprovalStepAlert} onHide={this.hideRemoveApprovalStepAlert}>
 													<Modal.Header closeButton>
-														<Modal.Title>Step not added</Modal.Title>
+														<Modal.Title>Step not removed</Modal.Title>
 													</Modal.Header>
 													<Modal.Body>
-														You cannot remove this step; it is beign used in a report.
+														You cannot remove this step; it is being used in a report.
 													</Modal.Body>
 													<Modal.Footer>
 														<Button className="pull-right" onClick={this.hideRemoveApprovalStepAlert} bsStyle="primary">OK</Button>
@@ -366,9 +366,10 @@ class BaseOrganizationForm extends Component {
 		`).then(data => {
 			if (data) {
 				this.setState({showRemoveApprovalStepAlert: true})
-				return
 			}
-			arrayHelpers.remove(index)
+			else {
+				arrayHelpers.remove(index)
+			}
 		})		
 	}
 
