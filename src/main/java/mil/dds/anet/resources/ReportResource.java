@@ -694,15 +694,15 @@ public class ReportResource {
 			}
 
 			//Write the rejection action
-			ReportAction approval = new ReportAction();
-			approval.setReportUuid(r.getUuid());
+			ReportAction rejection = new ReportAction();
+			rejection.setReportUuid(r.getUuid());
 			if (step != null) {
 				//Step is null when an approved report is being rejected by an admin
-				approval.setStepUuid(step.getUuid());
+				rejection.setStepUuid(step.getUuid());
 			}
-			approval.setPersonUuid(approver.getUuid());
-			approval.setType(ApprovalType.REJECT);
-			engine.getReportActionDao().insert(approval);
+			rejection.setPersonUuid(approver.getUuid());
+			rejection.setType(ApprovalType.REJECT);
+			engine.getReportActionDao().insert(rejection);
 
 			//Update the report
 			r.setApprovalStep(null);

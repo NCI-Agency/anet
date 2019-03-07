@@ -759,14 +759,14 @@ public class ReportDao implements IAnetDao<Report> {
 	 */
 	public int publish(Report r, Person user) {
 		//Write the publication action
-		ReportAction approval = new ReportAction();
-		approval.setReportUuid(r.getUuid());
+		ReportAction action = new ReportAction();
+		action.setReportUuid(r.getUuid());
 		if (user != null) {
 			//User is null when the publication action is being done automatically by a worker
-			approval.setPersonUuid(user.getUuid());
+			action.setPersonUuid(user.getUuid());
 		}
-		approval.setType(ApprovalType.PUBLISH);
-		AnetObjectEngine.getInstance().getReportActionDao().insert(approval);
+		action.setType(ApprovalType.PUBLISH);
+		AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
 		//Move the report to RELEASED state
 		r.setState(ReportState.PUBLISHED);
