@@ -27,20 +27,19 @@ test('Draft and submit a report', async t => {
     let $positiveAtmosphereButton = await $('#positiveAtmos')
     await $positiveAtmosphereButton.click()
 
-    let $attendeesAutocomplete = await pageHelpers.chooseAutocompleteOption('#attendees', 'christopf topferness')
+    let $attendeesAutocomplete = await pageHelpers.chooseAdvancedMultiSelectOption('#attendees', 'christopf topferness')
 
     t.is(
-        await $attendeesAutocomplete.getAttribute('value'), 
+        await $attendeesAutocomplete.getText('value'), 
         '', 
-        'Clicking an attendee autocomplete suggestion empties the autocomplete field.'
-    )
+        'Closing the advanced multi select empties the autocomplete field.'
+    ) 
 
-    let [$principalPrimaryCheckbox, $principalName, $principalPosition, $principalLocation, $principalOrg] =
-        await $$('#attendeesTable tbody tr:last-child td')
+    let [$principalPrimaryInput, $principalName, $principalPosition, $principalLocation, $principalOrg] =
+        await $$('.principalAttendeesTable tbody tr:last-child td')
 
-    t.is(
-        await $principalPrimaryCheckbox.findElement(By.css('input')).getAttribute('value'), 
-        'on', 
+    t.true(
+        await $principalPrimaryInput.findElement(By.css('input')).isSelected(), 
         'Principal primary attendee checkbox should be checked'
     )
     await assertElementText(t, $principalName, 'CIV TOPFERNESS, Christopf')
@@ -290,11 +289,14 @@ test('Verify that validation and other reports/new interactions work', async t =
         'Meeting attendance fieldset should have correct title for a cancelled enagement'
     )
 
-    let $attendeesRows = await $$('#attendeesTable tbody tr')
-    t.is($attendeesRows.length, 2, 'Attendees table starts with 2 body rows')
+    let $advisorAttendeesRows = await $$('.advisorAttendeesTable tbody tr')
+    t.is($advisorAttendeesRows.length, 1, 'Advisor attendees table starts with 1 body rows')
+
+    let $principalAttendeesRows = await $$('.principalAttendeesTable tbody tr')
+    t.is($principalAttendeesRows.length, 1, 'Principal attendees table starts with 1 body rows')
 
     let [$advisorPrimaryCheckbox, $advisorName, $advisorPosition, $advisorLocation, $advisorOrg] =
-        await $$('#attendeesTable tbody tr:first-child td')
+        await $$('.advisorAttendeesTable tbody tr:first-child td')
     
     t.is(
         await $advisorPrimaryCheckbox.findElement(By.css('input')).getAttribute('value'), 

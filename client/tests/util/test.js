@@ -221,6 +221,14 @@ test.beforeEach(t => {
             await $autocompleteSuggestion.click()
             return $autocompleteTextbox
         },
+        async chooseAdvancedMultiSelectOption(autocompleteSelector, text) {
+            let $advancedMultiSelectInput = await t.context.$(autocompleteSelector)
+            await $advancedMultiSelectInput.sendKeys(text)
+            await t.context.driver.sleep(shortWaitMs) // give the autocomplete some time to send the request (debounce!)
+            let $autocompleteSuggestion = await t.context.$(`${autocompleteSelector} tbody tr:first-child td input`)
+            await $autocompleteSuggestion.click()
+            return $advancedMultiSelectInput
+        },
         async writeInForm(inputSelector, text) {
             let $meetingGoalInput = await t.context.$(inputSelector)
             await $meetingGoalInput.sendKeys(text)
