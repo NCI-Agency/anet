@@ -100,7 +100,7 @@ const ActionButton = ({action}) => {
       <ApprovalStepModal action={action} />
     :
       <Button className={actionType.cssClass + ' btn-sm'}>
-        <span>{actionType.text}</span>
+        <span><LinkTo person={action.person} isLink={false} /></span>
       </Button>
   )
 }
