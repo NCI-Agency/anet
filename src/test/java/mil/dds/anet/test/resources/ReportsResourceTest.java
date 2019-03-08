@@ -310,12 +310,12 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Check on Report status for who needs to approve
 		List<ReportAction> workflow = returned.getWorkflow();
-		assertThat(workflow.size()).isEqualTo(2);
-		ReportAction reportAction = workflow.get(0);
+		assertThat(workflow.size()).isEqualTo(3);
+		ReportAction reportAction = workflow.get(1);
 		assertThat(reportAction.getPerson()).isNull(); //Because this hasn't been approved yet.
 		assertThat(reportAction.getCreatedAt()).isNull();
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		reportAction = workflow.get(1);
+		reportAction = workflow.get(2);
 		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Reject the report
