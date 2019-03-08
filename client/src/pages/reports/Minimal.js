@@ -13,7 +13,7 @@ import Messages from 'components/Messages'
 import LinkTo from 'components/LinkTo'
 import TaskTable from 'components/TaskTable'
 import AttendeesTable from './AttendeesTable'
-import ReportWorkflow from 'components/ReportWorkflow'
+import {ReportCompactWorkflow} from 'components/ReportWorkflow'
 import Tag from 'components/Tag'
 
 import API from 'api'
@@ -254,7 +254,7 @@ class ReportMinimal extends Page {
 						}
 
 						{report.showWorkflow() &&
-							<ReportWorkflow report={report} />
+							<ReportCompactWorkflow report={report} />
 						}
 
 						<Fieldset className="report-sub-form" title="Comments">

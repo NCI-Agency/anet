@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import './ReportWorkflow.css'
@@ -12,175 +13,149 @@ const REJECT = 'REJECT'
 const SUBMIT = 'SUBMIT'
 const PUBLISH = 'PUBLISH'
 
+const ACTION_TYPE_DETAILS = {
+  APPROVE: {text: 'Approved', cssClass: 'btn-success approved'},
+  REJECT: {text: 'Changes requested', cssClass: 'btn-danger rejected'},
+  SUBMIT: {text: 'Submitted', cssClass: 'btn-pending submitted'},
+  PUBLISH: {text: 'Published', cssClass: 'btn-success published'},
+  null: {text: 'Pending', cssClass: 'btn-pending default'}
+}
 
-export default class ReportWorkflow extends Component {
+const ApprovalStepModalStatus = ({action}) => {
+  if (action.type) {
+    const actionType = ACTION_TYPE_DETAILS[action.type]
+    const cssClass = 'label ' + actionType.cssClass
+    return (
+      <span className={cssClass}>{actionType.text} by <LinkTo person={action.person} isLink= {false} /> on
+        <small> {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}</small>
+      </span>
+    )
+  }
+  return <span className="label pending">Pending</span>
+}
 
-    constructor(props) {
-        super(props)
-        this.state = { }
-        this.renderReportAction = this.renderReportAction.bind(this)
-        this.showApproversModal = this.showApproversModal.bind(this)
-        this.closeApproversModal = this.closeApproversModal.bind(this)
+class ApprovalStepModal extends Component {
+  static propTypes = {
+    action: PropTypes.object.isRequired,
+  }
+
+  constructor(props){
+    super(props)
+    this.state = {
+      showModal: false
     }
+  }
 
-    render() {
-        let report = this.props.report
-        let title = "Workflow"
-        let fieldset = null
-        if(this.props.fullReport) {
-            fieldset = this.renderFullWorkflowView(report, title)
-        } else {
-            fieldset = this.renderCompactWorkflowView(report, title)
-        }
-        return fieldset
-    }
+  closeModal = () => {
+    this.setState({ showModal: false })
+  }
 
-    actionType(type) {
-        switch(type) {
-            case APPROVE:
-                return {text: 'Approved', cssClass: 'btn-success approved'}
-            case REJECT:
-                return {text: 'Changes requested', cssClass: 'btn-danger rejected'}
-            case SUBMIT:
-              return {text: 'Submitted', cssClass: 'btn-pending submitted'}
-            case PUBLISH:
-              return {text: 'Published', cssClass: 'btn-success published'}
-            default:
-                return {text: 'Unknown', cssClass: 'btn-pending default'}
-        }
-    }
+  openModal = () => {
+    this.setState({ showModal: true })
+  }
 
-    renderFullWorkflowView(report, title){
-        return (
-            <Fieldset id="workflow" className="workflow-fieldset" title={title}>
-                { report.workflow.map(action =>
-                    this.renderReportAction(action)
-                )}
-            </Fieldset>
-        )
-    }
-
-    renderCompactWorkflowView(report, title){
-        return (
-            <Fieldset className="workflow-fieldset compact" title={title}>
-                { report.workflow.map(action =>
-                    this.renderCompactReportAction(action)
-                )}
-            </Fieldset>
-        )
-    }
-
-    renderReportAction(action) {
-        let actionStatus = this.renderActionStatus(action)
-        let actionButton = this.renderActionButton(action)
-        let actionDetails = this.renderActionDetails(action)
-        const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
-        return (
-            <div className="workflow-action" key={key}>
-                { actionStatus }
-                { actionButton }
-                { actionDetails }
-            </div>
-        )
-    }
-
-    renderCompactReportAction(action) {
-        let actionButton = this.renderActionButton(action)
-        const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
-        return (
-            <div className="workflow-action" key={key}>
-                { actionButton }
-            </div>
-        )
-    }
-
-    renderActionDetails(action) {
-        if(action.type){
-            return(
-                <div>
-                    <span>By <LinkTo person={action.person} /></span><br/>
-                    <small>
-                        On {moment(action.createdAt).format(Settings.dateFormats.forms.short)}<br/>
-                        At {moment(action.createdAt).format('h:mm a')}
-                    </small>
-                </div>
-            )
-        }
-    }
-
-    getActionStatus(action) {
-      return (action.type) ? this.actionType(action.type).text : 'Pending'
-    }
-
-    renderActionStatus(action) {
-        return <div className="action-status">{this.getActionStatus(action)}</div>
-    }
-
-    renderActionButton(action) {
-        const step = action.step
-        const actionModal = this.renderActionModal(action)
-        const actionTypeCss =  this.actionType(action.type).cssClass
-        return (
-          step ?
-            <React.Fragment>
-              <Button className={actionTypeCss + ' btn-sm'} onClick={this.showApproversModal.bind(this, step)}>
-                  <span>{step.name}</span>
-              </Button>
-              { actionModal }
-            </React.Fragment>
-           :
-           <Button className={actionTypeCss + ' btn-sm'}>
-             <span>{this.getActionStatus(action)}</span>
-           </Button>
-        )
-    }
-
-    showApproversModal(step) {
-        step.showModal = true
-        this.setState(this.state)
-    }
-
-    closeApproversModal(step) {
-        step.showModal = false
-        this.setState(this.state)
-    }
-
-    renderActionModal(action) {
-        let step = action.step
-        let actionStatus = this.renderActionModalStatus(action)
-        return (
-          step ?
-          <Modal show={step.showModal} onHide={this.closeApproversModal.bind(this, step)}>
-              <Modal.Header closeButton>
-                  <Modal.Title>Approvers for {step.name}</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                  <ul>
-                  {step.approvers.map(position =>
-                      <li key={position.uuid}>
-                          <LinkTo position={position} /> - <LinkTo person={position.person} />
-                      </li>
-                  )}
-                  </ul>
-              </Modal.Body>
-              <Modal.Footer>{ actionStatus }</Modal.Footer>
+  render() {
+    const { action } = this.props
+    const step = action.step
+    const actionTypeCss =  ACTION_TYPE_DETAILS[action.type].cssClass
+    return (
+      step ?
+        <React.Fragment>
+          <Button className={actionTypeCss + ' btn-sm'} onClick={this.openModal}>
+            <span>{step.name}</span>
+          </Button>
+          <Modal show={this.state.showModal} onHide={this.closeModal}>
+            <Modal.Header closeButton>
+                <Modal.Title>Approvers for {step.name}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <ul>
+              {step.approvers.map(position =>
+                <li key={position.uuid}>
+                  <LinkTo position={position} /> - <LinkTo person={position.person} />
+                </li>
+              )}
+              </ul>
+            </Modal.Body>
+            <Modal.Footer>
+              <ApprovalStepModalStatus action={action} />
+            </Modal.Footer>
           </Modal>
-          :
-          null
-        )
-    }
+        </React.Fragment>
+      :
+        null
+    )
+  }
+}
 
-    renderActionModalStatus(action){
-        let pending = <span className="label pending">Pending</span>
-        if(action.type){
-            let actionType = this.actionType(action.type)
-            let cssClass = 'label ' + actionType.cssClass
-            return (
-                <span className={cssClass}> {actionType.text} by <LinkTo person={action.person} isLink= {false}/> on
-                    <small> {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}</small>
-                </span>
-            )
-        }
-        return pending
-    }
+const ActionStatus = ({action}) => {
+  return <div className="action-status">{ACTION_TYPE_DETAILS[action.type].text}</div>
+}
+
+const ActionButton = ({action}) => {
+  const step = action.step
+  const actionType =  ACTION_TYPE_DETAILS[action.type]
+  return (
+    step ?
+      <ApprovalStepModal action={action} />
+    :
+      <Button className={actionType.cssClass + ' btn-sm'}>
+        <span>{actionType.text}</span>
+      </Button>
+  )
+}
+
+const ActionDetails = ({action}) => {
+  if (action.type) {
+    return(
+      <div>
+        <span>By <LinkTo person={action.person} /></span><br/>
+        <small>
+          On {moment(action.createdAt).format(Settings.dateFormats.forms.short)}<br/>
+          At {moment(action.createdAt).format('h:mm a')}
+        </small>
+      </div>
+    )
+  }
+  return null
+}
+
+const ReportAction = ({action}) => {
+  return (
+    <div className="workflow-action">
+      <ActionStatus action={action} />
+      <ActionButton action={action} />
+      <ActionDetails action={action} />
+    </div>
+  )
+}
+
+const CompactReportAction = ({action}) => {
+  return (
+    <div className="workflow-action">
+      <ActionButton action={action} />
+    </div>
+  )
+}
+
+export const ReportFullWorkflow = ({report}) => {
+  return (
+    <Fieldset id="workflow" className="workflow-fieldset" title="Workflow">
+      { report.workflow.map(action => {
+        const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
+        return <ReportAction action={action} key={key} />
+      })}
+    </Fieldset>
+  )
+}
+
+export const ReportCompactWorkflow = ({report}) => {
+  return (
+    <Fieldset className="workflow-fieldset compact" title="Workflow">
+      { report.workflow.map(action => {
+        const key = action.step ? `${action.createdAt}-${action.step.uuid}` : action.createdAt
+        return <CompactReportAction action={action} key={key} />
+      })}
+    </Fieldset>
+  )
 }

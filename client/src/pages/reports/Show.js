@@ -17,7 +17,7 @@ import LinkTo from 'components/LinkTo'
 import TaskTable from 'components/TaskTable'
 import AttendeesTable from './AttendeesTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
-import ReportWorkflow from 'components/ReportWorkflow'
+import {ReportFullWorkflow} from 'components/ReportWorkflow'
 import Tag from 'components/Tag'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
@@ -369,7 +369,7 @@ class BaseReportShow extends Page {
 						}
 
 						{report.showWorkflow() &&
-							<ReportWorkflow report={report} fullReport={true} />
+							<ReportFullWorkflow report={report} />
 						}
 
 						{canSubmit &&
