@@ -179,7 +179,7 @@ test('Approve report chain', async t => {
 })
 
 test('Verify that validation and other reports/new interactions work', async t => {
-    t.plan(28)
+    t.plan(29)
 
     let {assertElementText, $, $$, assertElementNotPresent, pageHelpers, shortWaitMs, By} = t.context
 
@@ -307,13 +307,15 @@ test('Verify that validation and other reports/new interactions work', async t =
     await assertElementText(t, $advisorPosition, 'EF 2.2 Advisor D')
     await assertElementText(t, $advisorOrg, 'EF 2.2')
 
-    // TODO fix split attendeestable
-    // $attendeesRows = await $$('.attendeesTable tbody tr')
-    // let $addAttendeeShortcutButtons = await $$('#attendance-fieldset .shortcut-list button')
-    // // Add all recent attendees
-    // await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
+    let $addAttendeeShortcutButtons = await $$('#attendance-fieldset .shortcut-list button')
+    // Add all recent attendees
+    await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
 
-    // t.is((await $$('.attendeesTable tbody tr')).length, $attendeesRows.length + $addAttendeeShortcutButtons.length, 'Clicking the shortcut buttons adds rows to the table')
+    $advisorAttendeesRows = await $$('.advisorAttendeesTable tbody tr')
+    $principalAttendeesRows = await $$('.principalAttendeesTable tbody tr')
+    t.is($advisorAttendeesRows.length  + $principalAttendeesRows.length,
+        4,
+        'Clicking the shortcut buttons adds rows to the table')
 
     let $submitButton = await $('#formBottomSubmit')
     await $submitButton.click()
