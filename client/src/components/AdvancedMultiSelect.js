@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { Button, Col, Row, Overlay, Popover } from 'react-bootstrap'
+import ContainerDimensions from 'react-container-dimensions'
 import { Field } from 'formik'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
@@ -12,10 +13,45 @@ import LinkTo from 'components/LinkTo'
 import './AdvancedMultiSelect.css'
 import API from 'api'
 
+const MOBILE_WIDTH = 733
+
 const AdvancedMultiSelectTarget = ({ overlayRef }) =>
 	<Row>
-		<Col sm={9} className="form-group" ref={overlayRef} style={{position: 'relative', marginBottom: 0}} />
+		<Col sm={12} lg={9} className="form-group" ref={overlayRef} style={{position: 'relative', marginBottom: 0}} />
 	</Row>
+
+const FilterList = (props) => {
+	const { items, currentFilter, handleOnClick } = props
+	return <ul className="overlayFilters">
+		{Object.keys(items).map(filterType => (
+			!items[filterType].doNotDisplay &&
+			<li key={filterType} className={(currentFilter === filterType) ? 'active' : null}>
+				<Button bsStyle="link" onClick={() => handleOnClick(filterType)}>{items[filterType].label}</Button>
+			</li>
+		))}
+	</ul>
+}
+
+const SelectFilterInputField = (props) => {
+	const { items, className, handleOnChange } = props
+	return <React.Fragment>
+		<p style={{ padding: '5px 0' }}>
+			Filter:
+			<select
+				onChange={handleOnChange}
+				className={className}
+				style={{ marginLeft: '5px' }}
+			>
+				{Object.keys(items).map(filterType => (
+					!items[filterType].doNotDisplay &&
+					<option key={filterType} value={filterType}>
+						{items[filterType].label}
+					</option>
+				))}
+			</select>
+		</p>
+	</React.Fragment>
+}
 
 export default class AdvancedMultiSelect extends Component {
 	static propTypes = {
@@ -87,35 +123,36 @@ export default class AdvancedMultiSelect extends Component {
 					delayHide={200}
 				>
 					<Popover id={fieldName} title={null} placement="bottom" style={{width: '100%', maxWidth: '100%', boxShadow: '0 6px 20px hsla(0, 0%, 0%, 0.4)'}}>
-						<Row className="border-between">
-							<div className="sideBar">
-								<Col sm={4} md={3}>
-									<ul className="overlayFilters">
-										{Object.keys(filterDefs).map(filterType => (
-											!filterDefs[filterType].doNotDisplay && 
-											<li key={filterType} className={(this.state.filterType === filterType) ? 'active' : null}>
-												<Button bsStyle="link" onClick={() => this.changeFilterType(filterType)}>{filterDefs[filterType].label}</Button>
-											</li>
-										))}
-									</ul>
-								</Col>
-							</div>
-							<div className="multiSelectContent">
-								<Col sm={8} md={9}>
-									<this.props.overlayComponent
-										items={items}
-										selectedItems={selectedItems}
-										addItem={this.addItem}
-										removeItem={this.removeItem}
-										isLoading={isLoading}
-										loaderMessage={"No results found"}
-									/>
-									<footer className="searchPagination">
-										{this.paginationFor(filterType)}
-									</footer>
-								</Col>
-							</div>
-						</Row>
+						<ContainerDimensions>
+							{({ width }) =>
+								<Row className="border-between">
+									<div className="sideBar">
+										<Col sm={4} md={3}>
+										{ width < MOBILE_WIDTH ?
+											<div>{console.log(width)}<SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
+											:
+											<div>{console.log(width)}<FilterList items={filterDefs} currentFilter={this.state.filterType} handleOnClick={this.changeFilterType}/></div>
+										}
+										</Col>
+									</div>
+									<div className="multiSelectContent" style={{ minHeight: '80px' }}>
+										<Col sm={8} md={9}>
+											<this.props.overlayComponent
+												items={items}
+												selectedItems={selectedItems}
+												addItem={this.addItem}
+												removeItem={this.removeItem}
+												isLoading={isLoading}
+												loaderMessage={"No results found"}
+											/>
+											<footer className="searchPagination">
+												{this.paginationFor(filterType)}
+											</footer>
+										</Col>
+									</div>
+								</Row>
+							}
+						</ContainerDimensions>
 					</Popover>
 				</Overlay>
 				<AdvancedMultiSelectTarget overlayRef={el => {this.overlayContainer = el}}/>
@@ -165,6 +202,10 @@ export default class AdvancedMultiSelect extends Component {
 			searchTerms: event.target.value,
 			results: {}
 		}, () => this.fetchResultsDebounced())
+	}
+
+	handleOnChangeSelect = (event) => {
+		this.changeFilterType(event.target.value)
 	}
 
 	changeFilterType = (filterType) => {
