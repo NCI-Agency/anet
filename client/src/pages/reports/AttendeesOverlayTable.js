@@ -34,7 +34,6 @@ const AttendeesOverlayTable = (props) => {
 						}
 						</td>
 						<td>
-							<img src={person.iconUrl()} alt={person.role} height={20} className="person-icon" />
 							<LinkTo person={person}/>
 						</td>
 						<td><LinkTo position={person.position} />{person.position && person.position.code ? `, ${person.position.code}`: ``}</td>
