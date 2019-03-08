@@ -3,21 +3,21 @@ import Page from './page'
 const Page_URL = '/people/new'
 
 class CreatePerson extends Page {
-    get form()                  { return browser.element('form') }
-    get alertSuccess()          { return browser.element('.alert-success') }
-    get lastName()              { return browser.element('#lastName') }
-    get firstName()             { return browser.element('#firstName') }
-    get rolePrincipalButton()   { return browser.element('#rolePrincipalButton') }
-    get roleAdvisorButton()     { return browser.element('#roleAdvisorButton') }
-    get emailAddress()          { return browser.element('#emailAddress') }
-    get phoneNumber()           { return browser.element('#phoneNumber') }
-    get rank()                  { return browser.element('select[name="rank"]') }
-    get gender()                { return browser.element('select[name="gender"]') }
-    get country()               { return browser.element('select[name="country"]') }
-    get endOfTourDate()         { return browser.element('#endOfTourDate') }
-    get biography()             { return browser.element('.biography .text-editor p') }
-    get submitButton()          { return browser.element('#formBottomSubmit') }
-    get endOfTourDay()          { return browser.element('.bp3-datepicker-footer button.bp3-button:first-child') }
+    get form()                  { return browser.$('form') }
+    get alertSuccess()          { return browser.$('.alert-success') }
+    get lastName()              { return browser.$('#lastName') }
+    get firstName()             { return browser.$('#firstName') }
+    get rolePrincipalButton()   { return browser.$('#rolePrincipalButton') }
+    get roleAdvisorButton()     { return browser.$('#roleAdvisorButton') }
+    get emailAddress()          { return browser.$('#emailAddress') }
+    get phoneNumber()           { return browser.$('#phoneNumber') }
+    get rank()                  { return browser.$('select[name="rank"]') }
+    get gender()                { return browser.$('select[name="gender"]') }
+    get country()               { return browser.$('select[name="country"]') }
+    get endOfTourDate()         { return browser.$('#endOfTourDate') }
+    get biography()             { return browser.$('.biography .text-editor p') }
+    get submitButton()          { return browser.$('#formBottomSubmit') }
+    get endOfTourDay()          { return browser.$('.bp3-datepicker-footer button.bp3-button:first-child') }
 
     openAsSuperUser() {
         super.openAsSuperUser(Page_URL)
@@ -28,9 +28,9 @@ class CreatePerson extends Page {
     }
 
     waitForAlertSuccessToLoad() {
-        if(!this.alertSuccess.isVisible()) {
+        if(!this.alertSuccess.isDisplayed()) {
             this.alertSuccess.waitForExist()
-            this.alertSuccess.waitForVisible()
+            this.alertSuccess.waitForDisplayed()
         }
     }
 
