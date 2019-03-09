@@ -65,7 +65,6 @@ public class AnetEmailWorker implements Runnable {
 	private final DateTimeFormatter dtf;
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
-	private boolean noEmailConfiguration;
 	
 	@SuppressWarnings("unchecked")
 	public AnetEmailWorker(EmailDao dao, AnetConfiguration config, ScheduledExecutorService scheduler) {
@@ -78,7 +77,7 @@ public class AnetEmailWorker implements Runnable {
 		this.dtf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email")).withZone(DaoUtils.getDefaultZoneId());
 		this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 		instance = this;
- 
+
 		SmtpConfiguration smtpConfig = config.getSmtp();
 		props = new Properties();
 		props.put("mail.smtp.starttls.enable", smtpConfig.getStartTls().toString());
@@ -86,7 +85,6 @@ public class AnetEmailWorker implements Runnable {
 		props.put("mail.smtp.port", smtpConfig.getPort().toString());
 		auth = null;
 		this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
-		this.noEmailConfiguration = config.isDevelopmentMode() && smtpConfig.getHostname().startsWith("${");
 
 		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) {
 			props.put("mail.smtp.auth", "true");
@@ -180,9 +178,6 @@ public class AnetEmailWorker implements Runnable {
 	}
 
 	private void sendEmail(final AnetEmail email, final Map<String,Object> context) throws MessagingException, IOException, TemplateException {
-		if (this.noEmailConfiguration) {
-			return;
-		}
 		//Remove any null email addresses
 		email.getToAddresses().removeIf(s -> Objects.equals(s, null));
 		if (email.getToAddresses().size() == 0) {
