@@ -5,28 +5,13 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-public abstract class AnetEmailAction {
+public interface AnetEmailAction {
 
-	protected static final int MAX_REPORT_INTENT_LENGTH = 50;
-
-	String templateName;
-	String subject;
+	static final int MAX_REPORT_INTENT_LENGTH = 50;
 	
-	public abstract Map<String,Object> execute();
+	void buildContext(Map<String,Object> context);
 	
-	public String getTemplateName() {
-		return templateName;
-	}
+	String getTemplateName();
 	
-	public void setTemplateName(String templateName) {
-		this.templateName = templateName;
-	}
-	
-	public String getSubject() {
-		return subject;
-	}
-	
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
+	String getSubject(Map<String,Object> context);
 }

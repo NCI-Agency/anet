@@ -1,6 +1,5 @@
 package mil.dds.anet.emails;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,26 +8,30 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 
-public class ReportEmail extends AnetEmailAction {
+public class ReportEmail implements AnetEmailAction {
 	Report report;
 	Person sender;
 	String comment;
 	
-	public ReportEmail() { 
-		templateName = "/emails/emailReport.ftlh";
-		subject = "Sharing a report in ANET";
-	}
-	
 	@Override
-	public Map<String, Object> execute() {
+	public String getTemplateName() {
+		return "/emails/emailReport.ftlh";
+	}
+
+	@Override
+	public String getSubject(Map<String, Object> context) {
+		return "Sharing a report in ANET";
+	}
+
+	@Override
+	public void buildContext(Map<String, Object> context) {
 		Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
 		sender = AnetObjectEngine.getInstance().getPersonDao().getByUuid(sender.getUuid());
-		Map<String,Object> context = new HashMap<String,Object>();
+
 		context.put("report", r);
 		context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
 		context.put("sender", sender);
 		context.put("comment", comment);
-		return context;
 	}
 
 	public Report getReport() {
@@ -54,4 +57,5 @@ public class ReportEmail extends AnetEmailAction {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
+
 }

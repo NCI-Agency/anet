@@ -1,6 +1,5 @@
 package mil.dds.anet.emails;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,22 +7,25 @@ import org.apache.commons.lang3.StringUtils;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Report;
 
-public class FutureEngagementUpdated extends AnetEmailAction {
+public class FutureEngagementUpdated implements AnetEmailAction {
 
-	Report report;
+	private Report report;
 	
-	public FutureEngagementUpdated() { 
-		templateName = "/emails/futureEngagementUpdated.ftlh";
-		subject = "ANET: Upcoming Engagement Report";
+	@Override
+	public String getTemplateName() {
+		return "/emails/futureEngagementUpdated.ftlh";
+	}
+
+	@Override
+	public String getSubject(Map<String, Object> context) {
+		return "ANET: Upcoming Engagement Report";
 	}
 	
 	@Override
-	public Map<String, Object> execute() {
+	public void buildContext(Map<String, Object> context) {
 		Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
-		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("report", r);
 		context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
-		return context;
 	}
 
 	public Report getReport() {
@@ -33,7 +35,5 @@ public class FutureEngagementUpdated extends AnetEmailAction {
 	public void setReport(Report report) {
 		this.report = Report.createWithUuid(report.getUuid());
 	}
-	
-	
 
 }
