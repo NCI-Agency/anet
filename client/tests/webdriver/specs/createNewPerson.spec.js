@@ -13,12 +13,13 @@ const VALID_PERSON_ADVISOR = {
 describe('Create new Person form page', () => {
 
     describe('When creating a Principle user', () => {
-        it('Should save a principle with only a last name', () => {
+        it('Should not save a principle with only a last name', () => {
             CreatePerson.openAsSuperUser()
             CreatePerson.form.waitForExist()
-            CreatePerson.form.waitForVisible()
-            CreatePerson.lastName.waitForVisible()
+            CreatePerson.form.waitForDisplayed()
+            CreatePerson.lastName.waitForDisplayed()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
+            CreatePerson.rank.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.rank))
             CreatePerson.submitForm()
             CreatePerson.waitForAlertSuccessToLoad()
             const alertMessage = CreatePerson.alertSuccess.getText()
@@ -27,14 +28,15 @@ describe('Create new Person form page', () => {
         it('Should not save a principle without a valid email address', () => {
             CreatePerson.openAsSuperUser()
             CreatePerson.form.waitForExist()
-            CreatePerson.form.waitForVisible()
-            CreatePerson.lastName.waitForVisible()
+            CreatePerson.form.waitForDisplayed()
+            CreatePerson.lastName.waitForDisplayed()
             CreatePerson.lastName.setValue(VALID_PERSON_PRINCIPAL.lastName)
+            CreatePerson.rank.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.rank))
             CreatePerson.emailAddress.setValue('notValidEmail@')
             CreatePerson.lastName.click()
-            const errorMessage = browser.element('input#emailAddress + span.help-block')
+            const errorMessage = browser.$('input#emailAddress + span.help-block')
             errorMessage.waitForExist()
-            errorMessage.waitForVisible()
+            errorMessage.waitForDisplayed()
             expect(errorMessage.getText()).to.equal('Email must be a valid email')
 
             // perform submit form to prevent warning dialog
@@ -52,12 +54,12 @@ describe('Create new Person form page', () => {
             // Only admin users can create an advisor user
             CreatePerson.openAsAdmin()
             CreatePerson.form.waitForExist()
-            CreatePerson.form.waitForVisible()
+            CreatePerson.form.waitForDisplayed()
             CreatePerson.roleAdvisorButton.waitForExist()
             CreatePerson.roleAdvisorButton.click()
-            const warningMessage = browser.element('.alert.alert-warning')
+            const warningMessage = browser.$('.alert.alert-warning')
             warningMessage.waitForExist()
-            warningMessage.waitForVisible()
+            warningMessage.waitForDisplayed()
             expect(warningMessage.getText()).to.equal('Creating a NATO Member in ANET could result in duplicate accounts if this person logs in later. If you notice duplicate accounts, please contact an ANET administrator.')
         })
         it('Should not save if endOfTourDate is not filled in', () => {
@@ -68,17 +70,17 @@ describe('Create new Person form page', () => {
             CreatePerson.roleAdvisorButton.click()
             CreatePerson.emailAddress.setValue(VALID_PERSON_ADVISOR.emailAddress)
             CreatePerson.lastName.click()
-            let errorMessage = browser.element('input#emailAddress + span.help-block')
-            errorMessage.waitForVisible(1000, true) // element should *not* be visible!
-            CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
-            CreatePerson.gender.selectByValue(CreatePerson.getRandomOption(CreatePerson.gender))
-            CreatePerson.country.selectByValue(CreatePerson.getRandomOption(CreatePerson.country))
+            let errorMessage = browser.$('input#emailAddress + span.help-block')
+            errorMessage.waitForDisplayed(1000, true) // element should *not* be visible!
+            CreatePerson.rank.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.rank))
+            CreatePerson.gender.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.gender))
+            CreatePerson.country.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.country))
             // This makes sure the help-block is displayed after form submit
             CreatePerson.endOfTourDate.setValue('')
             CreatePerson.lastName.click()
             errorMessage = CreatePerson.endOfTourDate.$('..').$('..').$('..').$('..').$('span.help-block')
             errorMessage.waitForExist()
-            errorMessage.waitForVisible()
+            errorMessage.waitForDisplayed()
             expect(errorMessage.getText()).to.equal('You must provide the End of tour')
         })
 
@@ -90,11 +92,11 @@ describe('Create new Person form page', () => {
             CreatePerson.roleAdvisorButton.click()
             CreatePerson.emailAddress.setValue('\uE003'.repeat(CreatePerson.emailAddress.getValue().length) + VALID_PERSON_ADVISOR.emailAddress)
             CreatePerson.lastName.click()
-            const errorMessage = browser.element('input#emailAddress + span.help-block')
-            errorMessage.waitForVisible(1000, true) // element should *not* be visible!
-            CreatePerson.rank.selectByValue(CreatePerson.getRandomOption(CreatePerson.rank))
-            CreatePerson.gender.selectByValue(CreatePerson.getRandomOption(CreatePerson.gender))
-            CreatePerson.country.selectByValue(CreatePerson.getRandomOption(CreatePerson.country))
+            const errorMessage = browser.$('input#emailAddress + span.help-block')
+            errorMessage.waitForDisplayed(1000, true) // element should *not* be visible!
+            CreatePerson.rank.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.rank))
+            CreatePerson.gender.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.gender))
+            CreatePerson.country.selectByAttribute('value', CreatePerson.getRandomOption(CreatePerson.country))
             CreatePerson.endOfTourDate.click()
             CreatePerson.endOfTourDay.waitForExist()
             // select a date

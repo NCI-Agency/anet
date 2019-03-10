@@ -10,7 +10,7 @@ React structures the application into components instead of technologies. This m
   - If you are using sqlite, then run `cat insertBaseData.sql | ./mssql2sqlite.sh | sqlite3 development.db`
   - If you are using sqlserver, then use your favorite SQL connector to run the insertBaseData.sql file.
 1. Re launch the backend server with `./gradlew run`
-1. Re launch the frontend server with `./yarn start`
+1. Re launch the frontend server with `./yarn run start`
 
 # Random Documentation!!
 

@@ -9,20 +9,20 @@ describe('Create authorization group form page', () => {
     beforeEach('On the create authorization group page...', () => {
         CreateAuthorizationGroup.open()
         CreateAuthorizationGroup.form.waitForExist()
-        CreateAuthorizationGroup.form.waitForVisible()
+        CreateAuthorizationGroup.form.waitForDisplayed()
     })
 
     describe('When creating an authorization group', () => {
         it('Should save an authorization group with only a name', () => {
-            CreateAuthorizationGroup.name.waitForVisible()
+            CreateAuthorizationGroup.name.waitForDisplayed()
             CreateAuthorizationGroup.name.setValue('authorization group 1')
             CreateAuthorizationGroup.description.setValue('this is just a test authorization group')
-            CreateAuthorizationGroup.statusActiveButton.waitForVisible()
+            CreateAuthorizationGroup.statusActiveButton.waitForDisplayed()
             expect(CreateAuthorizationGroup.statusActiveButton.getAttribute('class')).to.include('active')
-            CreateAuthorizationGroup.statusInactiveButton.waitForVisible()
+            CreateAuthorizationGroup.statusInactiveButton.waitForDisplayed()
             expect(CreateAuthorizationGroup.statusInactiveButton.getAttribute('class')).to.not.include('active')
             CreateAuthorizationGroup.statusInactiveButton.click()
-            expect(browser.isExisting('.positions_table')).to.equal(false)
+            expect($('.positions_table').isExisting()).to.equal(false)
             CreateAuthorizationGroup.positions.setValue(POSITION_AUTOCOMPLETE)
             CreateAuthorizationGroup.waitForPositionsAutoCompleteToChange(POSITION)
             expect(CreateAuthorizationGroup.positionsAutocomplete.getText()).to.include(POSITION)
@@ -30,7 +30,7 @@ describe('Create authorization group form page', () => {
             // Autocomplete gets empty, the position is added to a table underneath
             expect(CreateAuthorizationGroup.positions.getValue()).to.equal('')
             // positions table exists now
-            expect(browser.isExisting('.positions_table'))
+            expect($('.positions_table').isExisting())
             CreateAuthorizationGroup.submitForm()
             CreateAuthorizationGroup.waitForAlertSuccessToLoad()
             const alertMessage = CreateAuthorizationGroup.alertSuccess.getText()
