@@ -99,7 +99,27 @@ const updatePerson = async function (user) {
             }`,
             variables: {}
         })
-    const person = faker.random.arrayElement(people.data.personList.list)
+
+    let person = faker.random.arrayElement(people.data.personList.list)
+    person = (await runGQL(user,
+        {
+            query: `query {
+                    person (uuid:"${person.uuid}") {
+                        uuid
+                        biography
+                        country
+                        emailAddress
+                        endOfTourDate
+                        gender
+                        name
+                        phoneNumber
+                        rank
+                        role
+                        status
+                    }
+                }`,
+            variables: {}
+        })).data.person
 
     populate(person, modifiedPerson())
         .name.rarely()
