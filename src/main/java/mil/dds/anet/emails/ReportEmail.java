@@ -9,9 +9,9 @@ import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 
 public class ReportEmail implements AnetEmailAction {
-	Report report;
-	Person sender;
-	String comment;
+	private Report report;
+	private Person sender;
+	private String comment;
 	
 	@Override
 	public String getTemplateName() {

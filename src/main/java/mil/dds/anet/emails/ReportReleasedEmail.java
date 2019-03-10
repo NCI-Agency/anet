@@ -8,7 +8,7 @@ import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Report;
 
 public class ReportReleasedEmail implements AnetEmailAction {
-	Report report;
+	private Report report;
 	
 	@Override
 	public String getTemplateName() {
