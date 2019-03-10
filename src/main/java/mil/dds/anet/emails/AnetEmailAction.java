@@ -2,6 +2,7 @@ package mil.dds.anet.emails;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
@@ -11,7 +12,9 @@ public interface AnetEmailAction {
 	
 	void buildContext(Map<String,Object> context);
 	
+	@JsonIgnore
 	String getTemplateName();
 	
+	@JsonIgnore
 	String getSubject(Map<String,Object> context);
 }
