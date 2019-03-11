@@ -167,7 +167,9 @@ dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
 
   dateFormats:
-    email: d MMMM yyyy
+    email:
+      short: d MMMM yyyy
+      withTime: d MMMM yyyy @ HH:mm
     excel: d MMMM yyyy
     forms:
       input: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
