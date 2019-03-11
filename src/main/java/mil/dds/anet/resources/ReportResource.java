@@ -106,7 +106,7 @@ public class ReportResource {
 		this.engine = engine;
 		this.dao = engine.getReportDao();
 		this.config = config;
-		this.dtf = DateTimeFormatter.ofPattern((String) this.config.getDictionaryEntry("dateFormats.email")).withZone(DaoUtils.getDefaultZoneId());
+		this.dtf = DateTimeFormatter.ofPattern((String) this.config.getDictionaryEntry("dateFormats.email.short")).withZone(DaoUtils.getDefaultZoneId());
 		@SuppressWarnings("unchecked")
 		List<String> pinnedOrgNames = (List<String>)this.config.getDictionaryEntry("pinned_ORGs");
 		this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
@@ -1010,7 +1010,7 @@ public class ReportResource {
 	public int emailRollupCommon(Person user,
 			Long start, Long end, OrganizationType orgType,
 			String advisorOrgUuid, String principalOrgUuid, AnetEmail email) {
-		DailyRollupEmail action = new DailyRollupEmail(dtf);
+		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(Instant.ofEpochMilli(start));
 		action.setEndDate(Instant.ofEpochMilli(end));
 		action.setComment(email.getComment());
@@ -1067,18 +1067,17 @@ public class ReportResource {
 	private String showRollupEmailCommon(Long start, Long end,
 			OrganizationType orgType, String advisorOrgUuid,
 			String principalOrgUuid, Boolean showReportText) {
-		DailyRollupEmail action = new DailyRollupEmail(dtf);
+		DailyRollupEmail action = new DailyRollupEmail();
 		action.setStartDate(Instant.ofEpochMilli(start));
 		action.setEndDate(Instant.ofEpochMilli(end));
 		action.setChartOrgType(orgType);
 		action.setAdvisorOrganizationUuid(advisorOrgUuid);
 		action.setPrincipalOrganizationUuid(principalOrgUuid);
 
-		Map<String,Object> context = action.execute();
-
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 
+		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("context", engine.getContext());
 		context.put("serverUrl", config.getServerUrl());
 		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
@@ -1098,7 +1097,7 @@ public class ReportResource {
 
 			Template temp = freemarkerConfig.getTemplate(action.getTemplateName());
 			StringWriter writer = new StringWriter();
-			temp.process(context, writer);
+			temp.process(action.buildContext(context), writer);
 
 			return writer.toString();
 		} catch (Exception e) {

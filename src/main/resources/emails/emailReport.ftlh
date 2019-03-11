@@ -503,8 +503,7 @@ ${sender.name} sent you a report from ANET:
                 <#assign person = reportAction.getPerson()>
                 <div>
                   <span>By ${(person.name)!}</span><br>
-                  <small>On ${(dateFormatter.format(reportAction.createdAt))!}
-                  <br>At ${(reportAction.createdAt.toString('h:mm a'))!}</small>
+                  <small>On ${(dateTimeFormatter.format(approvalAction.createdAt))!}</small>
                 </div>
               </#if>
             </#if>
