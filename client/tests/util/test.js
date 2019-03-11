@@ -39,8 +39,10 @@ let shortWaitMs = moment.duration(.5, 'seconds').asMilliseconds()
 test.beforeEach(t => {
     let builder = new webdriver.Builder()
     if (testEnv === 'local') {
+        let chrome = require('selenium-webdriver/chrome')
         builder = builder
             .forBrowser('chrome')
+            .setChromeOptions(new chrome.Options().headless())
     } else {
         capabilities.name = t.title.replace(/^beforeEach hook for /, '')
         builder = builder
