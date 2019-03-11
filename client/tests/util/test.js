@@ -252,6 +252,7 @@ test.beforeEach(t => {
                     let $advisorLink = await $advisorCell.findElement(By.css('a'))
                     await $advisorLink.click()
                     await t.context.driver.wait(until.stalenessOf($advisorLink))
+                    await t.context.driver.sleep(shortWaitMs) // wait for transition
                     return
                 }
             }
