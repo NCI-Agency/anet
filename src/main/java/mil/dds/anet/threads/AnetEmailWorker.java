@@ -63,6 +63,7 @@ public class AnetEmailWorker implements Runnable {
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
 	private final DateTimeFormatter dtf;
+	private final DateTimeFormatter dttf;
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
 	private boolean noEmailConfiguration;
@@ -75,7 +76,8 @@ public class AnetEmailWorker implements Runnable {
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
-		this.dtf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email")).withZone(DaoUtils.getDefaultZoneId());
+		this.dtf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.short")).withZone(DaoUtils.getDefaultZoneId());
+		this.dttf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime")).withZone(DaoUtils.getDefaultZoneId());
 		this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 		instance = this;
 
@@ -181,6 +183,7 @@ public class AnetEmailWorker implements Runnable {
 			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
 			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
 			context.put("dateFormatter", dtf);
+			context.put("dateTimeFormatter", dttf);
 			context.put("fields", fields);
 			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
 

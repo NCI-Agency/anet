@@ -157,6 +157,8 @@ dictionary:
 
   dateFormats:
     email: d MMMM yyyy
+      short: d MMMM YYYY
+      withTime: d MMMM YYYY @ H:m
     excel: d MMMM yyyy
     forms:
       input: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
