@@ -130,25 +130,22 @@ public class AnetEmailWorker implements Runnable {
 				context = buildContext(email);
 				logger.info("{} Sending email to {} re: {}", disabled ? "[Disabled] " : "" , email.getToAddresses(), email.getAction().getSubject(context));
 
-				if (!disabled)
-				{
+				if (!disabled) {
 					sendEmail(email, context);
 				}
 
 				processedEmails.add(email.getId());
 			} catch (Throwable t) {
-				//This email will never complete, just kill it.
 				logger.error("Error sending email", t);
 
 				//Process stale emails
 				if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(nbOfHoursForStaleEmails).toInstant())) {
 					String message = "Purging stale email to ";
-					try{
+					try {
 						message += email.getToAddresses();
 						message += email.getAction().getSubject(context);
 					}
-					finally
-					{
+					finally {
 						logger.info(message);
 						processedEmails.add(email.getId());
 					}
@@ -160,7 +157,7 @@ public class AnetEmailWorker implements Runnable {
 		dao.deletePendingEmails(processedEmails);
 	}
 
-	private Map<String,Object> buildContext(final AnetEmail email) {
+	private Map<String, Object> buildContext(final AnetEmail email) {
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("context", engine.getContext());
@@ -171,10 +168,7 @@ public class AnetEmailWorker implements Runnable {
 		context.put("dateFormatter", dtf);
 		context.put("fields", fields);
 
-		email.getAction().buildContext(context);
-
-
-		return context;
+		return email.getAction().buildContext(context);
 	}
 
 	private void sendEmail(final AnetEmail email, final Map<String,Object> context) throws MessagingException, IOException, TemplateException {

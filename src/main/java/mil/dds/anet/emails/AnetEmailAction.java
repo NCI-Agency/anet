@@ -10,11 +10,11 @@ public interface AnetEmailAction {
 
 	static final int MAX_REPORT_INTENT_LENGTH = 50;
 	
-	void buildContext(Map<String,Object> context);
+	Map<String, Object> buildContext(Map<String, Object> context);
 	
 	@JsonIgnore
 	String getTemplateName();
 	
 	@JsonIgnore
-	String getSubject(Map<String,Object> context);
+	String getSubject(Map<String, Object> context);
 }

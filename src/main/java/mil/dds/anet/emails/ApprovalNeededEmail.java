@@ -29,19 +29,21 @@ public class ApprovalNeededEmail implements AnetEmailAction {
 	}
 
 	@Override
-	public void buildContext(Map<String,Object> context) {
+	public Map<String, Object> buildContext(Map<String, Object> context) {
 		Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
 		ApprovalStep step;
 		try {
 			step = r.loadApprovalStep(AnetObjectEngine.getInstance().getContext()).get();
 		} catch (InterruptedException | ExecutionException e) {
 			logger.error("failed to load ApprovalStep", e);
-			return;
+			return context;
 		}
 		
 		context.put("report", r);
 		context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
 		context.put("approvalStepName", (step != null) ? step.getName() : "");
+
+		return context;
 	}
 
 	public Report getReport() {

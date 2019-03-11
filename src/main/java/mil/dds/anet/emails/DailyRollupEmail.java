@@ -43,7 +43,7 @@ public class DailyRollupEmail implements AnetEmailAction {
 	}
 
 	@Override
-	public String getSubject(Map<String,Object> context) {
+	public String getSubject(Map<String, Object> context) {
 
 		DateTimeFormatter dtf = (DateTimeFormatter) context.get("dateFormatter");
 
@@ -55,7 +55,7 @@ public class DailyRollupEmail implements AnetEmailAction {
 	}
 
 	@Override
-	public void buildContext(Map<String, Object> context) {
+	public Map<String, Object> buildContext(Map<String, Object> context) {
 		String maxReportAgeStr = AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
 		Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
 		Instant engagementDateStart = startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
@@ -66,7 +66,6 @@ public class DailyRollupEmail implements AnetEmailAction {
 		query.setEngagementDateStart(engagementDateStart);
 		query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
 		query.setSortOrder(SortOrder.DESC);
-		
 		query.setPrincipalOrgUuid(principalOrganizationUuid);
 		query.setIncludePrincipalOrgChildren(true);
 		query.setAdvisorOrgUuid(advisorOrganizationUuid);
@@ -96,6 +95,8 @@ public class DailyRollupEmail implements AnetEmailAction {
 			(OrganizationType.ADVISOR_ORG.equals(chartOrgType)) ? OrganizationType.PRINCIPAL_ORG : OrganizationType.ADVISOR_ORG);
 		context.put("outerGrouping", outerGrouping);
 		context.put(SHOW_REPORT_TEXT_FLAG, false);
+
+		return context;
 	}
 
 	public static class ReportGrouping {

@@ -1021,7 +1021,6 @@ public class ReportResource {
 		action.setAdvisorOrganizationUuid(advisorOrgUuid);
 		action.setPrincipalOrganizationUuid(principalOrgUuid);
 
-
 		@SuppressWarnings("unchecked")
 		final Map<String,Object> fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 
@@ -1034,8 +1033,6 @@ public class ReportResource {
 		context.put("dateFormatter", dtf);
 		context.put("fields", fields);
 
-		action.buildContext(context);
-
 		try {
 			Configuration freemarkerConfig = new Configuration(Configuration.getVersion());
 			freemarkerConfig.setRecognizeStandardFileExtensions(true); // auto-escape HTML in our .ftlh templates
@@ -1047,7 +1044,7 @@ public class ReportResource {
 
 			Template temp = freemarkerConfig.getTemplate(action.getTemplateName());
 			StringWriter writer = new StringWriter();
-			temp.process(context, writer);
+			temp.process(action.buildContext(context), writer);
 
 			return writer.toString();
 		} catch (Exception e) {
