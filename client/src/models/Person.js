@@ -51,10 +51,7 @@ export default class Person extends Model {
 				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.emailAddress}`) : schema.nullable()
 			)).default('').label(Settings.fields.person.emailAddress),
 		country: yup.string().nullable().required(`You must provide the ${Settings.fields.person.country}`).default('').label(Settings.fields.person.country),
-		rank: yup.string().nullable()
-			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${Settings.fields.person.rank}`) : schema.nullable()
-			)).default('').label(Settings.fields.person.rank),
+		rank: yup.string().nullable().required(`You must provide the ${Settings.fields.person.rank} (Military rank, CIV and CTR values are available)`).default('').label(Settings.fields.person.rank),
 		gender: yup.string().nullable()
 			.when('role', (role, schema) => (
 				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.gender}`) : schema.nullable()
