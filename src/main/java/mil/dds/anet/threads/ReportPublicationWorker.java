@@ -54,21 +54,25 @@ public class ReportPublicationWorker implements Runnable {
 		final List<Report> reports = dao.search(query, null, true).getList();
 		for (final Report r : reports) {
 			final List<ReportAction> workflow = r.loadWorkflow(context).join();
-			if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(now)) {
-				//Publish the report
-				try { 
-					final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
-					dbHandle.inTransaction(h -> {
-						final int numRows = dao.publish(r, null);
-						if (numRows == 0) {
-							logger.error("Couldn't process report publication for report {}", r.getUuid());
-						} else {
-							AnetAuditLogger.log("report {} automatically published by the ReportPublicationWorker", r.getUuid());
-						}
-						return numRows;
-					});
-				} catch (Exception e) { 
-					logger.error("Exception when publishing report", e);
+			if (workflow.isEmpty()) {
+				logger.error("Couldn't process report publication for report {}, it has no workflow", r.getUuid());
+			} else {
+				if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(now)) {
+					//Publish the report
+					try {
+						final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+						dbHandle.inTransaction(h -> {
+							final int numRows = dao.publish(r, null);
+							if (numRows == 0) {
+								logger.error("Couldn't process report publication for report {}", r.getUuid());
+							} else {
+								AnetAuditLogger.log("report {} automatically published by the ReportPublicationWorker", r.getUuid());
+							}
+							return numRows;
+						});
+					} catch (Exception e) {
+						logger.error("Exception when publishing report", e);
+					}
 				}
 			}
 		}
