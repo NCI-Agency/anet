@@ -768,8 +768,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 		}
 	}
 
-	/** NOTE: this should always be wrapped in a transaction! (If JDBI were able to handle nested calls to inTransaction, we would have
-	 * one inside this method, but it isn't.)
+	/**
 	 * @param r the report to update, in its updated state
 	 * @param user the user attempting the update, for authorization purposes
 	 * @return the number of rows updated by the final update call (should be 1 in all cases).
