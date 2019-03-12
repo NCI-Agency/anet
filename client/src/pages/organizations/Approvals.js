@@ -23,7 +23,9 @@ export default class OrganizationApprovals extends Component {
 						<tbody>
 							{step.approvers.map((position, approverIdx) =>
 								<tr key={position.uuid} id={`step_${idx}_approver_${approverIdx}`} >
-									<td>{position.person && <LinkTo person={position.person} />}</td>
+									<td>{(position.person && position.person.uuid)
+										? <td>{position.person && <LinkTo person={position.person} />}</td>
+										: <td className="text-danger">Unfilled</td>}</td>
 									<td><LinkTo position={position} /></td>
 								</tr>
 							)}
