@@ -9,19 +9,16 @@ describe('Print rollup page', () => {
 
 	describe('When clicking the print button, the daily rollup should be generated', () => {
 		it('Should show the correct header for the rollup', () => {
-			Rollup.printButton.waitForVisible(5000)
+			Rollup.printButton.waitForDisplayed(5000)
 			Rollup.printButton.click()
 
-			const handles = browser.windowHandles().value
+			const handles = browser.getWindowHandles()
 			const switchHandle = handles.pop()
-			browser.switchTab(switchHandle)
+			browser.switchToWindow(switchHandle)
 
-			const rollupClassification = 'p:nth-of-type(1) i'
-			browser.waitForText(rollupClassification, 3000)
-			const title = browser.getText(rollupClassification)
-			
-			console.log(title)
-			expect(title).to.equal("Classification: DEMO USE ONLY")
+			browser.waitUntil(() => {
+				return $('p:nth-of-type(1) i').getText() === "Classification: DEMO USE ONLY"
+			}, 3000, 'Expected classification')
 		})
 	})
 

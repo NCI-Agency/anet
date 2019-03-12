@@ -8,49 +8,15 @@ let test = require('ava'),
     path = require('path'),
     chalk = require('chalk')
 
-let capabilities = {},
-    testEnv = process.env.TEST_ENV || 'local'
+let capabilities = {}
+let testEnv = (process.env.CI && 'remote') || process.env.TEST_ENV || 'local'
 if (testEnv === 'local') {
     // This gives us access to send Chrome commands.
     require('chromedriver')
 } else {
     // Set capabilities for BrowserStack
     require('./keep-alive.js')
-    let config = require('config')
-    capabilities = {
-        // Ideally, we'd like to test with:
-        //   browserName: 'IE',
-        //   browser_version: '11.0',
-        // but that is so prone to unexpected failures as to be unusable.
-        // So test with latest stable Chrome instead.
-        browserName: 'Chrome',
-        browser_version: '67.0',
-        chromeOptions: {
-            // Maximize the window so we can see what's going on
-            args: ['--start-maximized']
-        },
-        os: 'Windows',
-        os_version: '7',
-        resolution: '2048x1536',
-        project: 'ANET',
-        build: require("git-describe").gitDescribeSync(".", {match: '[0-9]*'}).semverString,
-        // Will be replaced for each test:
-        name: 'frontend tests',
-        // Credentials for BrowserStack, get from config:
-        'browserstack.user': config.get('browserstack_user'),
-        'browserstack.key': config.get('browserstack_key'),
-        // This requires that BrowserStackLocal is running!
-        'browserstack.local': 'true'
-    }
-    if (config.has('browserstack_debug')) {
-        capabilities['browserstack.debug'] = config.get('browserstack_debug')
-    }
-    let util = require('util')
-    capabilities.build = util.format(capabilities.build,
-                                     capabilities.os,
-                                     capabilities.os_version,
-                                     capabilities.browserName,
-                                     capabilities.browser_version)
+    capabilities = require('../../config/browserstack.config.js')
 }
 
 // Webdriver's promise manager only made sense before Node had async/await support.
@@ -67,25 +33,31 @@ function debugLog(...args) {
     }
 }
 
-let shortWaitMs = moment.duration(.5, 'seconds').asMilliseconds()
-
 // We use the before hook to put helpers on t.context and set up test scaffolding.
 test.beforeEach(t => {
     let builder = new webdriver.Builder()
     if (testEnv === 'local') {
+        let chrome = require('selenium-webdriver/chrome')
         builder = builder
             .forBrowser('chrome')
+            .setChromeOptions(new chrome.Options().headless())
     } else {
-        capabilities.name = t.title.replace(/^beforeEach for /, '')
+        capabilities.name = t.title.replace(/^beforeEach hook for /, '')
         builder = builder
             .usingServer('http://hub-cloud.browserstack.com/wd/hub')
             .withCapabilities(capabilities)
     }
     t.context.driver = builder.build()
 
+    let shortWaitMs = moment.duration(1, 'seconds').asMilliseconds()
+    let mediumWaitMs = moment.duration(3, 'seconds').asMilliseconds()
+    let longWaitMs = moment.duration(9, 'seconds').asMilliseconds()
+
     t.context.By = By
     t.context.until = until
     t.context.shortWaitMs = shortWaitMs
+    t.context.mediumWaitMs = mediumWaitMs
+    t.context.longWaitMs = longWaitMs
     t.context.Key = Key
 
     // This method is a helper so we don't have to keep repeating the hostname.
@@ -93,7 +65,7 @@ test.beforeEach(t => {
     // pass the information along via window.fetch.
     t.context.get = async (pathname, userPw) => {
         let credentials = userPw || 'erin'
-        let urlToGet = `http://localhost:8080${pathname}?user=${credentials}&pass=${credentials}`
+        let urlToGet = `${process.env.SERVER_URL}${pathname}?user=${credentials}&pass=${credentials}`
         debugLog('Getting URL', urlToGet)
         await t.context.driver.get(urlToGet)
 
@@ -124,7 +96,6 @@ test.beforeEach(t => {
         await t.context.driver.wait(() => {})
     }
 
-    let longWaitMs = moment.duration(10, 'seconds').asMilliseconds()
     t.context.$ = async (cssSelector, timeoutMs) => {
         debugLog(`Find element: $('${cssSelector}')`)
         let waitTimeoutMs = timeoutMs || longWaitMs
@@ -250,7 +221,7 @@ test.beforeEach(t => {
         async chooseAutocompleteOption(autocompleteSelector, text) {
             let $autocompleteTextbox = await t.context.$(autocompleteSelector)
             await $autocompleteTextbox.sendKeys(text)
-            t.context.driver.sleep(shortWaitMs) // give the autocomplete some time to send the request (debounce!)
+            await t.context.driver.sleep(shortWaitMs) // give the autocomplete some time to send the request (debounce!)
             let $autocompleteSuggestion = await t.context.$('#react-autowhatever-1--item-0')
             await $autocompleteSuggestion.click()
             return $autocompleteTextbox

@@ -79,7 +79,7 @@ database:
 server:
   applicationConnectors:
     - type: http
-      port: 8080
+      port: ${ANET_PORT}
       acceptorThreads: 2
       selectorThreads: 4
 #    - type: https
@@ -90,7 +90,7 @@ server:
 # The AdminConnector is used for administrative functions of Dropwizard and should not be exposed to users. 
   adminConnectors:
     - type: http
-      port: 8081
+      port: ${ANET_ADMIN_PORT}
   requestLog:
     appenders: 
       - type: file
@@ -167,7 +167,9 @@ dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
 
   dateFormats:
-    email: d MMMM yyyy
+    email:
+      short: d MMMM yyyy
+      withTime: d MMMM yyyy @ HH:mm
     excel: d MMMM yyyy
     forms:
       input: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,

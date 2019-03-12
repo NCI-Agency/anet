@@ -96,8 +96,7 @@ export default class ReportApprovals extends Component {
                 <div className="approval-details">
                     <span>By <LinkTo person={action.person} /></span><br/>
                     <small>
-                        On {moment(action.createdAt).format(Settings.dateFormats.forms.short)}<br/>
-                        At {moment(action.createdAt).format('h:mm a')}
+                        On {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}
                     </small>
                 </div>
             )

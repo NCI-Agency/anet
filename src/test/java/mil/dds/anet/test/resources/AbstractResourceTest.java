@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.ws.rs.client.Client;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,27 +47,28 @@ public abstract class AbstractResourceTest {
 
 	protected static Client client;
 	protected static GraphQLHelper graphQLHelper;
+	protected static Person admin;
+	protected static Map<String, Object> context;
 
-	protected final Person admin;
-	protected final Map<String, Object> context;
-
-	public AbstractResourceTest() {
-		if (client == null) {
-			client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
-		}
-		if (graphQLHelper == null) {
-			graphQLHelper = new GraphQLHelper(client, RULE.getLocalPort());
-		}
+	@BeforeClass
+	public static void setUp() {
+		client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
+		graphQLHelper = new GraphQLHelper(client, RULE.getLocalPort());
 		admin = findOrPutPersonInDb(PersonTest.getArthurDmin());
 		context = new HashMap<>();
 		context.put("dataLoaderRegistry", BatchingUtils.registerDataLoaders(AnetObjectEngine.getInstance(), false, false));
 	}
-	
+
+	@AfterClass
+	public static void tearDown() {
+		client.close();
+	}
+
 	/*
 	 * Finds the specified person in the database. 
 	 * If missing, creates them. 
 	 */
-	public Person findOrPutPersonInDb(Person stub) {
+	public static Person findOrPutPersonInDb(Person stub) {
 		final String fields = "uuid name domainUsername role emailAddress rank status phoneNumber biography pendingVerification createdAt updatedAt"
 				+ " position {"
 				+ "   uuid name type status "

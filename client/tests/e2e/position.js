@@ -3,7 +3,7 @@ let test = require('../util/test')
 test('Move someone in and out of a position', async t => {
     t.plan(9)
 
-    let {$, $$, assertElementText, By, until} = t.context
+    let {$, $$, assertElementText, By, until, shortWaitMs, mediumWaitMs} = t.context
 
     await t.context.get('/', 'rebecca')
 
@@ -15,15 +15,18 @@ test('Move someone in and out of a position', async t => {
     let personName = rank + ' ' + person
 
     await t.context.pageHelpers.clickPersonNameFromSupportedPositionsFieldset(personName, positionName)
+    await t.context.driver.sleep(mediumWaitMs) // wait for transition
 
-    let $changeAssignedPositionButton = await $('.change-assigned-position')
+    let $changeAssignedPositionButton = await $('button.change-assigned-position')
     await t.context.driver.wait(until.elementIsVisible($changeAssignedPositionButton))
     await $changeAssignedPositionButton.click()
+    await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
-    let $removePersonButton = await $('.remove-person-from-position')
+    let $removePersonButton = await $('button.remove-person-from-position')
     await t.context.driver.wait(until.elementIsVisible($removePersonButton))
     await $removePersonButton.click()
     await t.context.driver.wait(until.stalenessOf($removePersonButton))
+    await t.context.driver.sleep(mediumWaitMs) // wait (a bit longer) for dialog to disappear
 
     let $notAssignedMsg = await $('p.not-assigned-to-position-message')
     await t.context.driver.wait(until.elementIsVisible($notAssignedMsg))
@@ -59,6 +62,7 @@ test('Move someone in and out of a position', async t => {
 
     let $changeAssignedPersonButton = await $('button.change-assigned-person')
     await $changeAssignedPersonButton.click()
+    await t.context.driver.sleep(shortWaitMs) // wait for dialog to appear
 
     let $assignedPerson = await t.context.pageHelpers.chooseAutocompleteOption('.select-person-autocomplete', personName)
     t.is(
@@ -68,11 +72,14 @@ test('Move someone in and out of a position', async t => {
     )
     let $saveButton = await $('button.save-button')
     await $saveButton.click()
+    await t.context.driver.wait(until.stalenessOf($saveButton))
+    await t.context.driver.sleep(shortWaitMs) // wait for dialog to disappear
 
     await assertElementText(t, await $('h4.assigned-person-name'), personName)
 
     let $personLink = await $('h4.assigned-person-name a')
     await $personLink.click()
+    await t.context.driver.sleep(mediumWaitMs) // wait for transition
     currentPathname = await t.context.getCurrentPathname()
     t.regex(currentPathname, /people\/[0-9a-f-]+/, 'URL is updated to people/show page')
 

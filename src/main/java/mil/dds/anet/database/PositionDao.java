@@ -39,6 +39,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 
 	private final IdBatcher<Position> idBatcher;
 	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
+	private final ForeignKeyBatcher<Position> currentPositionForPersonBatcher;
 
 	public PositionDao(Handle h) { 
 		super(h, "positions", tableName, POSITIONS_FIELDS, null);
@@ -50,6 +51,11 @@ public class PositionDao extends AnetBaseDao<Position> {
 		final String personPositionHistoryBatcherSql = "/* batch.getPositionHistory */ SELECT * FROM \"peoplePositions\" "
 				+ "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "positionUuid");
+
+		final String currentPositionForPersonBatcherSql = "/* batch.getCurrentPositionForPerson */ SELECT "
+				+ POSITIONS_FIELDS + " FROM positions "
+				+ "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> )";
+		this.currentPositionForPersonBatcher = new ForeignKeyBatcher<Position>(h, currentPositionForPersonBatcherSql, "foreignKeys", new PositionMapper(), "positions_currentPersonUuid");
 	}
 	
 	public AnetBeanList<Position> getAll(int pageNum, int pageSize) {
@@ -106,6 +112,10 @@ public class PositionDao extends AnetBaseDao<Position> {
 
 	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
 		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
+	}
+
+	public List<List<Position>> getCurrentPersonForPosition(List<String> foreignKeys) {
+		return currentPositionForPersonBatcher.getByForeignKeys(foreignKeys);
 	}
 
 	/*
@@ -349,6 +359,12 @@ public class PositionDao extends AnetBaseDao<Position> {
 		{
 			return PersonPositionHistory.getDerivedHistory(l);
 		});
+	}
+
+	public CompletableFuture<Position> getCurrentPositionForPerson(Map<String, Object> context, String personUuid) {
+		return new ForeignKeyFetcher<Position>()
+				.load(context, "position.currentPositionForPerson", personUuid)
+				.thenApply(l -> l.isEmpty() ? null : l.get(0));
 	}
 
 	public Boolean getIsApprover(String positionUuid) {
