@@ -5,7 +5,7 @@ import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
 
 
-const AdvancedMultiSelectOverlayTable = (props) => {
+const AdvancedSingleSelectOverlayTable = (props) => {
 	const { objectType, items, selectedItems, handleAddItem, removeItem, columns, renderRow } = props
 	const selectedItemsUuids = selectedItems.map(a => a.uuid)
 	return (
@@ -49,4 +49,4 @@ const AdvancedMultiSelectOverlayTable = (props) => {
 	)
 }
 
-export default AdvancedMultiSelectOverlayTable
+export default AdvancedSingleSelectOverlayTable

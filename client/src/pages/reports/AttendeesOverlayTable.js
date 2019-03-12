@@ -9,7 +9,7 @@ import LoaderHOC from 'HOC/LoaderHOC'
 import _isEmpty from 'lodash/isEmpty'
 
 const AttendeesOverlayTable = (props) => {
-	const { items, selectedItems, addItem, removeItem } = props
+	const { items, selectedItems, handleAddItem, handleRemoveItem } = props
 	const selectedItemsUuids = selectedItems.map(a => a.uuid)
 	return (
 		<Table responsive hover striped className="attendeesOverlayTable">
@@ -26,11 +26,11 @@ const AttendeesOverlayTable = (props) => {
 				{Person.map(items, person => {
 					const isSelected = selectedItemsUuids.includes(person.uuid)
 					return <tr key={person.uuid}>
-						<td style={{ textAlign: "center" }} onClick={isSelected ? () => removeItem(person) : () => addItem(person)}>
+						<td style={{ textAlign: "center" }} onClick={isSelected ? () => handleRemoveItem(person) : () => handleAddItem(person)}>
 						{isSelected ?
-							<Checkbox checked={isSelected} onChange={() => removeItem(person)} />
+							<Checkbox checked={isSelected} onChange={() => handleRemoveItem(person)} />
 						:
-							<Checkbox checked={isSelected} onChange={() => addItem(person)} />
+							<Checkbox checked={isSelected} onChange={() => handleAddItem(person)} />
 						}
 						</td>
 						<td>

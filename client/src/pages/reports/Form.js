@@ -192,6 +192,20 @@ class BaseReportForm extends Component {
 				submitForm,
 				resetForm
 			}) => {
+				console.log(values)
+				const locationFilters = {
+					recentLocations: {
+						label: 'Recent locations',
+						searchQuery: false,
+						listName: 'locationRecents',
+						listArgs: 'maxResults:6',
+					},
+					activeLocations: {
+						label: 'All',
+						searchQuery: true,
+						queryVars: {status: Location.STATUS.ACTIVE},
+					},
+				}
 				const attendeesFilters = {
 					recentContacts: {
 						label: 'Recent contacts',
@@ -270,6 +284,7 @@ class BaseReportForm extends Component {
 				const action = <div>
 					<Button bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm})} disabled={isSubmitting}>{submitText}</Button>
 				</div>
+				const locName = <div>{values.location.name}</div>
 				return <div className="report-form">
 					<NavigationWarning isBlocking={dirty} />
 					<ToastContainer />
@@ -321,28 +336,23 @@ class BaseReportForm extends Component {
 								}
 							</Field>
 
-							<Field
-								name="location"
-								component={FieldHelper.renderSpecialField}
+							<AdvancedMultiSelect
+								fieldName='location'
+								placeholder="Search for the location where this happened..."
+								selectedItems={[values.location]}
+								renderSelected={locName}
+								overlayComponent={AdvancedMultiSelectOverlayTable}
+								overlayColumns={['Name']}
+								overlayRenderRow={this.renderLocationOverlayRow}
+								filterDefs={locationFilters}
 								onChange={value => setFieldValue('location', value)}
+								objectType={Location}
+								fields={Location.autocompleteQuery}
+								valueKey="name"
 								addon={LOCATIONS_ICON}
-								extraColElem={recents.locations && recents.locations.length > 0 &&
-									<div className="location-form-group shortcut-list">
-										<h5>Recent Locations</h5>
-										{recents.locations.map(location => (
-											<Button key={location.uuid} bsStyle="link" onClick={() => setFieldValue('location', location)}>Add {location.name}</Button>
-										))}
-									</div>
-								}
-								widget={
-									<Autocomplete
-										objectType={Location}
-										valueKey="name"
-										fields={Location.autocompleteQuery}
-										placeholder="Start typing to search for the location where this happened..."
-										queryParams={{status: Location.STATUS.ACTIVE}}
-									/>
-								}
+								shortcutsTitle="Recent Locations"
+								shortcuts={recents.locations}
+								renderExtraCol={true}
 							/>
 
 							<Field
@@ -702,6 +712,14 @@ class BaseReportForm extends Component {
 		}
 		const variableDef = '($report: ReportInput!' + (edit ? ', $sendEditEmail: Boolean!' : '') + ')'
 		return API.mutation(graphql, variables, variableDef)
+	}
+
+	renderLocationOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td>{item.name}</td>
+			</React.Fragment>
+		)
 	}
 
 	renderAuthorizationGroupOverlayRow = (item) => {
