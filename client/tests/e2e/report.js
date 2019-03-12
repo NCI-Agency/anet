@@ -102,7 +102,7 @@ test('Draft and submit a report', async t => {
 test('Approve report chain', async t => {
     t.plan(5)
 
-    let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, until, shortWaitMs} = t.context
+    let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, Key, until, shortWaitMs, longWaitMs} = t.context
     // Try to have Erin approve her own report
     await t.context.get('/', 'erin')
     let $homeTileErin = await $$('.home-tile')
@@ -164,10 +164,14 @@ test('Approve report chain', async t => {
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
     await $('#daily-rollup')
 
-    let $rollupDateRange = await $('.rollupDateRange .bp3-input')
-    await $rollupDateRange.click()
+    let $$rollupDateRange = await $$('.rollupDateRange .bp3-input')
+    await $$rollupDateRange[0].click()
     let $todayButton = await t.context.driver.findElement(By.xpath('//a/div[text()="Today"]'))
     await $todayButton.click()
+    // Now dismiss the date popup
+    await $$rollupDateRange[0].sendKeys(Key.TAB)
+    await $$rollupDateRange[1].sendKeys(Key.TAB)
+    await t.context.driver.sleep(longWaitMs) // wait for report collection to load
 
     let $reportCollection = await $('.report-collection table')
     await t.context.driver.wait(until.elementIsVisible($reportCollection))
