@@ -2183,10 +2183,10 @@
   dependencies:
     "@wdio/config" "^5.7.0"
 
-"@wdio/reporter@^5.7.0":
-  version "5.7.0"
-  resolved "https://registry.yarnpkg.com/@wdio/reporter/-/reporter-5.7.0.tgz#92efddfa3cdff01e1c290b14f60dc9b9e9ce630f"
-  integrity sha512-gT6AYDq5rQiZA82ehRs8NMQsZMK5RE7+TBnRoqZkNfvpXxl4cOtFW0XjAecGFNAeZC2qGwHWQ3sGejRiXtQa7A==
+"@wdio/reporter@^5.7.0", "@wdio/reporter@^5.7.2":
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/@wdio/reporter/-/reporter-5.7.2.tgz#e88e2ea796eacd2feea32d1188529d84c64f2f0c"
+  integrity sha512-sFVJXvrnYblpQoq5ySf11HBMzIQThnTHeiAZCKlQe5NSls40UEFbrVESlEpZI1g0pKHwJqkK/Ixg8EtyQZipDA==
   dependencies:
     fs-extra "^7.0.1"
 
@@ -2202,12 +2202,12 @@
     gaze "^1.1.2"
     webdriverio "^5.7.1"
 
-"@wdio/spec-reporter@^5.7.0":
-  version "5.7.0"
-  resolved "https://registry.yarnpkg.com/@wdio/spec-reporter/-/spec-reporter-5.7.0.tgz#a06cf6cada8f43f0bb77404842a49f375a0771aa"
-  integrity sha512-d3rlHZXe/X8f5ejNNpU7ekIAVayHejVvl7XVPBT9lrkABHPL5gSy8yw8K+BSN3Azzho4KFFAXTNKvlT32UMipw==
+"@wdio/spec-reporter@^5.7.2":
+  version "5.7.2"
+  resolved "https://registry.yarnpkg.com/@wdio/spec-reporter/-/spec-reporter-5.7.2.tgz#dd4294231cc2d33a452cb86a83ac6bb39c7cb054"
+  integrity sha512-3IXwjrZxNeHrtaou8iGyI10rVZ7GYMUtJmS+nmbk5yy93ChmD5GrLuZDH/WkRiM6NttNZ3r4mAvK7E5MxM77dA==
   dependencies:
-    "@wdio/reporter" "^5.7.0"
+    "@wdio/reporter" "^5.7.2"
     chalk "^2.3.2"
     pretty-ms "^3.1.0"
 
