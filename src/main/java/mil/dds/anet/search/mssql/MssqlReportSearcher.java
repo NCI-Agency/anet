@@ -33,12 +33,13 @@ import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ReportSearchBuilder;
 import mil.dds.anet.search.ReportSearchBuilder.Comparison;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
 public class MssqlReportSearcher implements IReportSearcher {
 
-	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, boolean systemSearch) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
@@ -251,17 +252,27 @@ public class MssqlReportSearcher implements IReportSearcher {
 			return new AnetBeanList<Report>(query.getPageNum(), query.getPageSize(), new ArrayList<Report>());
 		}
 
-		//Apply a filter to restrict access to other's draft reports
-		if (user == null) {
-			whereClauses.add("reports.state != :draftState");
-			whereClauses.add("reports.state != :rejectedState");
-			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-		} else {
-			whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.authorUuid = :userUuid))");
-			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-			args.put("userUuid", user.getUuid());
+		if (!systemSearch) {
+			//Apply a filter to restrict access to other's draft, rejected or approved reports.
+			//When the search is performed by the system (for instance by a worker, systemSearch = true) do not apply this filter.
+			if (user == null) {
+				whereClauses.add("reports.state != :draftState");
+				whereClauses.add("reports.state != :rejectedState");
+				whereClauses.add("reports.state != :approvedState");
+				args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
+				args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+				args.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
+			} else {
+				whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.authorUuid = :userUuid))");
+				args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
+				args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+				args.put("userUuid", user.getUuid());
+				if (AuthUtils.isAdmin(user) == false) {
+					//Admin users may access all approved reports, other users only owned approved reports
+					whereClauses.add("((reports.state != :approvedState) OR (reports.authorUuid = :userUuid))");
+					args.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
+				}
+			}
 		}
 
 		sql.append(" WHERE ");
@@ -285,6 +296,9 @@ public class MssqlReportSearcher implements IReportSearcher {
 				break;
 			case RELEASED_AT:
 				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_releasedAt"));
+				break;
+			case UPDATED_AT:
+				orderByClauses.addAll(Utils.addOrderBy(query.getSortOrder(), null, "reports_updatedAt"));
 				break;
 			case ENGAGEMENT_DATE:
 			default:

@@ -205,7 +205,7 @@ public class GraphQLResource {
 
 				// Dispatch all our data loaders until the request is done;
 				// we have data loaders at various depths (one dependent on another),
-				// e.g. in {@link Report#loadApprovalStatus}
+				// e.g. in {@link Report#loadWorkflow}
 				final CompletableFuture<?>[] dispatchersWithWork = dataLoaderRegistry.getDataLoaders()
 					.stream()
 					.filter(dl -> dl.dispatchDepth() > 0)

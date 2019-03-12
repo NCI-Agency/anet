@@ -1,7 +1,7 @@
 SET QUOTED_IDENTIFIER ON
 
 --DROP TABLE approvers;
---DROP TABLE approvalActions;
+--DROP TABLE reportActions;
 --DROP TABLE positionRelationships;
 --DROP TABLE reportTasks;
 --DROP TABLE reportPeople;
@@ -29,7 +29,7 @@ SET QUOTED_IDENTIFIER ON
 
 TRUNCATE TABLE peoplePositions;
 TRUNCATE TABLE approvers;
-TRUNCATE TABLE approvalActions;
+TRUNCATE TABLE reportActions;
 TRUNCATE TABLE positionRelationships;
 TRUNCATE TABLE reportTasks;
 TRUNCATE TABLE reportPeople;

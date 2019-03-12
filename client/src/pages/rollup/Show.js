@@ -84,7 +84,7 @@ class BaseRollupShow extends Page {
 		this.CHART_ID = 'reports_by_day_of_week'
 		this.GQL_CHART_FIELDS = /* GraphQL */`
 			org {uuid shortName}
-			released
+			published
 			cancelled
 		`
 		this.GQL_MAP_FIELDS = /* GraphQL */`
@@ -239,7 +239,7 @@ class BaseRollupShow extends Page {
 
 	reportsQueryParams = (forMap) => {
 		const reportsQueryParams = {
-			state: [Report.STATE.RELEASED], //Specifically excluding cancelled engagements.
+			state: [Report.STATE.PUBLISHED], //Specifically excluding cancelled engagements.
 			releasedAtStart: this.rollupStart.valueOf(),
 			releasedAtEnd: this.rollupEnd.valueOf(),
 			engagementDateStart: moment(this.rollupStart).subtract(this.state.maxReportAge, 'days').valueOf(),
@@ -322,15 +322,15 @@ class BaseRollupShow extends Page {
 					target={() => context.graphPopover}
 				>
 					<Popover id="graph-popover" title={context.hoveredBar && context.hoveredBar.org.shortName}>
-						<p>Released: {context.hoveredBar && context.hoveredBar.released}</p>
+						<p>Published: {context.hoveredBar && context.hoveredBar.published}</p>
 						<p>Cancelled: {context.hoveredBar && context.hoveredBar.cancelled}</p>
 						<p>Click to view details</p>
 					</Popover>
 				</Overlay>
 
 				<div className="graph-legend">
-					<div style={{...legendCss, background: barColors.verified}}></div> Released reports:&nbsp;
-					<strong>{context.graphData.reduce((acc, org) => acc + org.released, 0)}</strong>
+					<div style={{...legendCss, background: barColors.verified}}></div> Published reports:&nbsp;
+					<strong>{context.graphData.reduce((acc, org) => acc + org.published, 0)}</strong>
 				</div>
 				<div className="graph-legend">
 					<div style={{...legendCss, background: barColors.cancelled}}></div> Cancelled engagements:&nbsp;

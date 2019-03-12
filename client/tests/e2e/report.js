@@ -99,8 +99,8 @@ test('Draft and submit a report', async t => {
     )
 })
 
-test('Approve report chain', async t => {
-    t.plan(5)
+test('Publish report chain', async t => {
+    t.plan(6)
 
     let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, Key, until, shortWaitMs, longWaitMs} = t.context
     // Try to have Erin approve her own report
@@ -146,6 +146,23 @@ test('Approve report chain', async t => {
     let $rebeccaApproveButton = await $('.approve-button')
     await $rebeccaApproveButton.click()
     await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
+
+    //Admin user needs to publish the report
+    await t.context.get('/', 'arthur')
+    let $homeTileArthur = await $$('.home-tile')
+    let [$draftReportsArthur, $reportsPendingAll, $reportsPendingArthur, $upcomingEngagementsArthur, $reportsSensitiveInfo, $approvedReports] = $homeTileArthur
+    await t.context.driver.wait(until.elementIsVisible($approvedReports))
+    await $approvedReports.click()
+
+    await t.context.driver.wait(until.stalenessOf($approvedReports))
+    let $firstReadApprovedReportButton = await $('.read-report-button')
+    await t.context.driver.wait(until.elementIsEnabled($firstReadApprovedReportButton))
+    await $firstReadApprovedReportButton.click()
+
+    await pageHelpers.assertReportShowStatusText(t, "This report is APPROVED.")
+    let $arthurPublishButton = await $('.publish-button')
+    await $arthurPublishButton.click()
+    await t.context.driver.wait(until.stalenessOf($arthurPublishButton))
 
     // check if page is redirected to search results
 
