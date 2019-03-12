@@ -11,7 +11,7 @@ test('Home Page', async t => {
     // do not offer test planning.
     t.plan(6)
 
-    let {assertElementText, assertElementNotPresent, assertElementTextIsInt, $, $$} = t.context
+    let {assertElementText, assertElementNotPresent, assertElementTextIsInt, $, $$, shortWaitMs} = t.context
 
     await t.context.get('/')
 
@@ -35,5 +35,6 @@ test('Home Page', async t => {
 
     let $myReportsLink = await $('#leftNav > li:nth-child(3) > a')
     await $myReportsLink.click()
-    await assertElementNotPresent(t, '.hopscotch-title', 'Navigating to a new page clears the hopscotch tour')
+    await t.context.driver.sleep(shortWaitMs) // wait for transition
+    await assertElementNotPresent(t, '.hopscotch-title', 'Navigating to a new page clears the hopscotch tour', shortWaitMs)
 })
