@@ -135,6 +135,7 @@ logging:
     "mil.dds.anet.auth.AnetAuthenticationFilter" : TRACE
     "mil.dds.anet.threads.AnetEmailWorker" : DEBUG
     "mil.dds.anet.threads.FutureEngagementWorker" : DEBUG
+    "mil.dds.anet.threads.ReportPublicationWorker" : DEBUG
     "mil.dds.anet.resources.TestingResource" :
       level: INFO
       appenders:
@@ -177,6 +178,9 @@ dictionary:
       short: D MMMM YYYY
       long: dddd, D MMMM YYYY
       withTime: D MMMM YYYY @ HH:mm
+
+  reportWorkflow:
+    nbOfHoursQuarantineApproved: 24
 
   fields:
 

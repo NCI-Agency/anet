@@ -193,7 +193,7 @@ public class PersonDao extends AnetSubscribableObjectDao<Person> {
 			.execute();
 
 		// update approvals this person might have done
-		dbHandle.createUpdate("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+		dbHandle.createUpdate("UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 			.bind("winnerUuid", winner.getUuid())
 			.bind("loserUuid", loser.getUuid())
 			.execute();

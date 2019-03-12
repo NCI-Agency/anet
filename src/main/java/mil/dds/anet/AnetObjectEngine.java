@@ -20,11 +20,12 @@ import org.slf4j.LoggerFactory;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.database.ApprovalActionDao;
+import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
@@ -42,6 +43,7 @@ import mil.dds.anet.database.SubscriptionDao;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -56,7 +58,7 @@ public class AnetObjectEngine {
 	OrganizationDao orgDao;
 	PositionDao positionDao;
 	ApprovalStepDao asDao;
-	ApprovalActionDao approvalActionDao;
+	ReportActionDao reportActionDao;
 	ReportDao reportDao;
 	CommentDao commentDao;
 	AdminDao adminDao;
@@ -85,7 +87,7 @@ public class AnetObjectEngine {
 		orgDao = new OrganizationDao(dbHandle);
 		positionDao = new PositionDao(dbHandle);
 		asDao = new ApprovalStepDao(dbHandle);
-		approvalActionDao = new ApprovalActionDao(dbHandle);
+		reportActionDao = new ReportActionDao(dbHandle);
 		reportDao = new ReportDao(dbHandle);
 		commentDao = new CommentDao(dbHandle);
 		adminDao = new AdminDao(dbHandle);
@@ -125,8 +127,8 @@ public class AnetObjectEngine {
 		return orgDao;
 	}
 
-	public ApprovalActionDao getApprovalActionDao() {
-		return approvalActionDao;
+	public ReportActionDao getReportActionDao() {
+		return reportActionDao;
 	}
 
 	public PositionDao getPositionDao() {
@@ -247,6 +249,15 @@ public class AnetObjectEngine {
 			if (Objects.equals(userUuid, approverPosition.getPersonUuid())) { return true; }
 		}
 		return false;
+	}
+
+	public boolean canUserRejectStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
+		final Person p = personDao.getByUuid(userUuid);
+		//Admin users may reject any step
+		if (AuthUtils.isAdmin(p)) {
+			return true;
+		}
+		return canUserApproveStep(context, userUuid, approvalStepUuid);
 	}
 
 	/*

@@ -2234,6 +2234,43 @@
 			onDelete="NO ACTION" onUpdate="NO ACTION" />
 	</changeSet>
 
+	<changeSet id="renameApprovalActions-to-ReportActions-sqlite-combined-tables" author="maradragan" dbms="mssql,postgresql">
+		<comment>Rename approvalActions table to reportActions.</comment>
+		<!-- reportActions -->
+		<renameTable
+			newTableName="reportActions"
+			oldTableName="approvalActions" />
+		<rollback>
+			<renameTable
+				newTableName="approvalActions"
+				oldTableName="reportActions" />
+		</rollback>
+	</changeSet>
+
+	<changeSet id="migrate_submit_and_publish_action" author="maradragan" dbms="mssql">
+		<comment>Add submit and publish report actions for existing reports.</comment>
+		<sql>
+			INSERT INTO reportActions (reportUuid, createdAt, type)
+				SELECT
+					uuid, releasedAt, 3
+				FROM reports
+				WHERE state = 2
+			;
+			INSERT INTO reportActions (reportUuid, createdAt, personUuid, type)
+				SELECT ra.reportUuid, DATEADD(SECOND, -1, ra.createdAt), r.authorUuid, 2
+				FROM (
+					SELECT
+					reportUuid, MIN(createdAt) as createdAt
+					FROM reportActions
+					GROUP BY reportUuid ) ra,
+				reports r
+				WHERE
+					ra.reportUuid = r.uuid
+			;
+		</sql>
+		<!-- Rolling back is not useful -->
+	</changeSet>
+
 	<changeSet id="add_subscriptions" author="gjvoosten">
 		<createTable tableName="subscriptions">
 			<column name="uuid" type="${uuid_type}">
@@ -2263,5 +2300,4 @@
 		<addUniqueConstraint
 			tableName="subscriptions" constraintName="UQ_SubscriptionSubScriberSubscribedObject" columnNames="subscriberUuid, subscribedObjectType, subscribedObjectUuid" />
 	</changeSet>
-
 </databaseChangeLog>

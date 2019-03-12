@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -26,7 +27,10 @@ import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.ReportAction.ActionType;
 import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.AnetEmail;
+import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.Position;
@@ -45,6 +49,8 @@ import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.database.mappers.ReportMapper;
 import mil.dds.anet.database.mappers.ReportPersonMapper;
 import mil.dds.anet.database.mappers.TagMapper;
+import mil.dds.anet.emails.ReportPublishedEmail;
+import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
@@ -406,7 +412,11 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 	
 	public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
 		return AnetObjectEngine.getInstance().getSearcher().getReportSearcher()
-			.runSearch(query, dbHandle, user);
+			.runSearch(query, dbHandle, user, false);
+	}
+	public AnetBeanList<Report> search(ReportSearchQuery query, Person user, Boolean systemSearch) {
+		return AnetObjectEngine.getInstance().getSearcher().getReportSearcher()
+			.runSearch(query, dbHandle, null, systemSearch);
 	}
 
 	@Override
@@ -428,13 +438,16 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 
 		//Delete tasks
 		dbHandle.execute("/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?", reportUuid);
-		
+
 		//Delete attendees
 		dbHandle.execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?", reportUuid);
-		
+
 		//Delete comments
 		dbHandle.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", reportUuid);
-		
+
+		//Delete \"reportActions\"
+		dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?", reportUuid);
+
 		//Delete \"approvalActions\"
 		dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportUuid\" = ?", reportUuid);
 
@@ -525,7 +538,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 			sql.append(" %6$s");
 			sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
 			sql.append(" AND positions.type = :positionAdvisor");
-			sql.append(" AND reports.state IN ( :reportReleased, :reportPending, :reportDraft )");
+			sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
 			sql.append(" AND reports.\"createdAt\" BETWEEN :startDate and :endDate");
 			sql.append(" %11$s");
 
@@ -558,7 +571,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 			sql.append(" AND \"reportPeople\".\"reportUuid\" = reports.uuid");
 			sql.append(" AND reports.\"advisorOrganizationUuid\" = organizations.uuid");
 			sql.append(" AND positions.type = :positionAdvisor");
-			sql.append(" AND reports.state IN ( :reportReleased, :reportPending, :reportDraft )");
+			sql.append(" AND reports.state IN ( :reportPublished, :reportPending, :reportDraft )");
 			sql.append(" AND reports.\"engagementDate\" BETWEEN :startDate and :endDate");
 			sql.append(" %11$s");
 
@@ -615,7 +628,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 		sqlArgs.put("positionAdvisor", Position.PositionType.ADVISOR.ordinal());
 		sqlArgs.put("reportDraft", ReportState.DRAFT.ordinal());
 		sqlArgs.put("reportPending", ReportState.PENDING_APPROVAL.ordinal());
-		sqlArgs.put("reportReleased", ReportState.RELEASED.ordinal());
+		sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
 
 		return dbHandle.createQuery(String.format(sql.toString(), fmtArgs))
 			.bindMap(sqlArgs)
@@ -709,7 +722,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 			final String parentOrgUuid = DaoUtils.getUuid(orgMap.get(orgUuid));
 			if (!rollup.keySet().contains(parentOrgUuid)) {
 				final Map<ReportState, Integer> orgBar = new HashMap<ReportState, Integer>();
-				orgBar.put(ReportState.RELEASED, 0);
+				orgBar.put(ReportState.PUBLISHED, 0);
 				orgBar.put(ReportState.CANCELLED, 0);
 				rollup.put(parentOrgUuid, orgBar);
 			}
@@ -720,7 +733,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 			Map<ReportState,Integer> values = entry.getValue();
 			RollupGraph bar = new RollupGraph();
 			bar.setOrg(orgMap.get(entry.getKey()));
-			bar.setReleased(Utils.orIfNull(values.get(ReportState.RELEASED), 0));
+			bar.setPublished(Utils.orIfNull(values.get(ReportState.PUBLISHED), 0));
 			bar.setCancelled(Utils.orIfNull(values.get(ReportState.CANCELLED), 0));
 			result.add(bar);
 		}
@@ -745,9 +758,49 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 		return tasksBatcher.getByForeignKeys(foreignKeys);
 	}
 
+	private void sendReportPublishedEmail(Report r) {
+		AnetEmail email = new AnetEmail();
+		ReportPublishedEmail action = new ReportPublishedEmail();
+		action.setReport(r);
+		email.setAction(action);
+		try {
+			email.addToAddress(r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
+			AnetEmailWorker.sendEmailAsync(email);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new WebApplicationException("failed to load Author", e);
+		}
+	}
+
+	/** NOTE: this should always be wrapped in a transaction! (If JDBI were able to handle nested calls to inTransaction, we would have
+	 * one inside this method, but it isn't.)
+	 * @param r the report to update, in its updated state
+	 * @param user the user attempting the update, for authorization purposes
+	 * @return the number of rows updated by the final update call (should be 1 in all cases).
+	 */
+	public int publish(Report r, Person user) {
+		//Write the publication action
+		ReportAction action = new ReportAction();
+		action.setReportUuid(r.getUuid());
+		if (user != null) {
+			//User is null when the publication action is being done automatically by a worker
+			action.setPersonUuid(user.getUuid());
+		}
+		action.setType(ActionType.PUBLISH);
+		AnetObjectEngine.getInstance().getReportActionDao().insert(action);
+
+		//Move the report to PUBLISHED state
+		r.setState(ReportState.PUBLISHED);
+		r.setReleasedAt(Instant.now());
+		final int numRows = this.update(r, r.getAuthor());
+		if (numRows != 0) {
+			sendReportPublishedEmail(r);
+		}
+		return numRows;
+	}
+
 	@Override
 	public SubscriptionUpdate getSubscriptionUpdate(Report obj) {
-		if (obj.getState() != ReportState.RELEASED && obj.getState() != ReportState.CANCELLED) {
+		if (obj.getState() != ReportState.PUBLISHED && obj.getState() != ReportState.CANCELLED) {
 			return null;
 		}
 

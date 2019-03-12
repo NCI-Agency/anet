@@ -17,7 +17,7 @@ import LinkTo from 'components/LinkTo'
 import TaskTable from 'components/TaskTable'
 import AttendeesTable from './AttendeesTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
-import ReportApprovals from 'components/ReportApprovals'
+import {ReportFullWorkflow} from 'components/ReportWorkflow'
 import Tag from 'components/Tag'
 import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObjectNotes'
 
@@ -100,7 +100,7 @@ class BaseReportShow extends Page {
 				principalOrg { uuid, shortName, longName, identificationCode, type }
 				advisorOrg { uuid, shortName, longName, identificationCode, type }
 
-				approvalStatus {
+				workflow {
 					type, createdAt
 					step { uuid , name
 						approvers { uuid, name, person { uuid, name, rank, role } }
@@ -158,6 +158,8 @@ class BaseReportShow extends Page {
 		//When either admin or not the author, user can approve if report is pending approval and user is one of the approvers in the current approval step
 		const canApprove = (isAdmin || !isAuthor) && report.isPending() && currentUser.position &&
 			report.approvalStep && report.approvalStep.approvers.find(member => Position.isEqual(member, currentUser.position))
+		const canRequestChanges = canApprove || (report.isApproved() && isAdmin)
+		const canPublish = report.isApproved() && isAdmin
 		//Warn admins when they try to approve their own report
 		const warnApproveOwnReport = canApprove && isAuthor
 
@@ -200,10 +202,10 @@ class BaseReportShow extends Page {
 					<RelatedObjectNotes notes={report.notes} relatedObject={report.uuid && {relatedObjectType: 'reports', relatedObjectUuid: report.uuid}} />
 					<Messages success={this.state.success} error={this.state.error} />
 
-					{report.isReleased() &&
+					{report.isPublished() &&
 						<Fieldset style={{textAlign: 'center' }}>
-							<h4 className="text-danger">This report is RELEASED.</h4>
-							<p>This report has been approved and released to the ANET community on {moment(report.getReportReleasedAt()).format(Settings.dateFormats.forms.withTime)}</p>
+							<h4 className="text-danger">This report is PUBLISHED.</h4>
+							<p>This report has been approved and published to the ANET community on {moment(report.releasedAt).format(Settings.dateFormats.forms.withTime)}</p>
 						</Fieldset>
 					}
 
@@ -233,10 +235,18 @@ class BaseReportShow extends Page {
 					{report.isPending() &&
 						<Fieldset style={{textAlign: 'center'}}>
 							<h4 className="text-danger">This report is PENDING approvals.</h4>
-							<p>It won't be available in the ANET database until your <AnchorLink to="approvals">approval organization</AnchorLink> marks it as approved.</p>
+							<p>It won't be available in the ANET database until your <AnchorLink to="workflow">approval organization</AnchorLink> marks it as approved.</p>
 							<div style={{textAlign: 'left'}}>
 								{this.renderValidationMessages('approving')}
 							</div>
+						</Fieldset>
+					}
+
+					{report.isApproved() &&
+						<Fieldset style={{textAlign: 'center' }}>
+							<h4 className="text-danger">This report is APPROVED.</h4>
+							<p>This report has been approved and will be automatically published to the ANET community in {moment(report.getReportApprovedAt()).add(24, 'hours').toNow(true)}</p>
+							{canPublish && <p>You can also {this.renderPublishButton(isSubmitting || !isValid, () => setSubmitting(false))} it immediately.</p>}
 						</Fieldset>
 					}
 
@@ -363,8 +373,8 @@ class BaseReportShow extends Page {
 							</Fieldset>
 						}
 
-						{report.showApprovals() &&
-							<ReportApprovals report={report} fullReport={true} />
+						{report.showWorkflow() &&
+							<ReportFullWorkflow report={report} />
 						}
 
 						{canSubmit &&
@@ -413,7 +423,8 @@ class BaseReportShow extends Page {
 							</div>
 						</Fieldset>
 
-						{canApprove && this.renderApprovalForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
+						{(canApprove) && this.renderApprovalForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
+						{(!canApprove && canRequestChanges) && this.renderRequestChangesForm(values, !_isEmpty(this.state.validationErrors), warnApproveOwnReport, () => setSubmitting(false))}
 					</Form>
 
 					{currentUser.isAdmin() &&
@@ -471,6 +482,21 @@ class BaseReportShow extends Page {
 				<LinkTo report={this.state.report} edit button>Edit report</LinkTo>
 				{this.renderApproveButton(warnApproveOwnReport, disabled, () => this.approveReport(values.approvalComment), cancelHandler)}
 			</div>
+		</Fieldset>
+	}
+
+	renderRequestChangesForm = (values, disabled, warnApproveOwnReport, cancelHandler) => {
+		return <Fieldset className="report-sub-form" title="Request changes">
+			<h5>You can request changes to this report</h5>
+			<Field
+				name="requestChangesComment"
+				label="Request changes comment"
+				component={FieldHelper.renderInputField}
+				componentClass="textarea"
+				placeholder="Type a comment here; required when requesting changes"
+			/>
+
+			{this.renderRejectButton(warnApproveOwnReport, "Request changes", () => this.rejectReport(values.requestChangesComment), cancelHandler)}
 		</Fieldset>
 	}
 
@@ -561,6 +587,21 @@ class BaseReportShow extends Page {
 			.then(data => {
 				this.updateReport()
 				this.setState({success: 'Report submitted', error: null})
+			}).catch(error => {
+				this.handleError(error)
+			})
+	}
+
+	publishReport = () => {
+		const graphql = 'publishReport(uuid: $uuid) { uuid }'
+		const variables = {
+			uuid: this.state.report.uuid,
+		}
+		const variableDef = '($uuid: String!)'
+		API.mutation(graphql, variables, variableDef)
+			.then(data => {
+				this.updateReport()
+				this.setState({success: 'Report published', error: null})
 			}).catch(error => {
 				this.handleError(error)
 			})
@@ -685,6 +726,10 @@ class BaseReportShow extends Page {
 
 	renderApproveButton = (warnApproveOwnReport, disabled, confirmHandler, cancelHandler, size, id) => {
 		return this.renderValidationButton(warnApproveOwnReport, disabled, "approving", "Approve report?", "Approve", "Approve anyway", confirmHandler, "Cancel approve", cancelHandler, size, id, "approve-button")
+	}
+
+	renderPublishButton = (disabled, cancelHandler, size, id) => {
+		return this.renderValidationButton(false, disabled, "publishing", "Publish report?", "Publish", "Publish anyway", this.publishReport, "Cancel publish", cancelHandler, size, id, "publish-button")
 	}
 
 	renderValidationButton = (warnApproveOwnReport, disabled, submitType, title, label, confirmText, confirmHandler, cancelText, cancelHandler, size, id, className) => {

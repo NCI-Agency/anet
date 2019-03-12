@@ -9,6 +9,6 @@ import mil.dds.anet.beans.search.ReportSearchQuery;
 
 public interface IReportSearcher {
 
-	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user);
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, boolean systemSearch);
 	
 }
