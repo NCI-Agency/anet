@@ -341,7 +341,7 @@ class BaseReportForm extends Component {
 								placeholder="Search for the location where this happened..."
 								selectedItems={[values.location]}
 								renderSelected={locName}
-								overlayComponent={AdvancedMultiSelectOverlayTable}
+								overlayTable={AdvancedMultiSelectOverlayTable}
 								overlayColumns={['Name']}
 								overlayRenderRow={this.renderLocationOverlayRow}
 								filterDefs={locationFilters}
@@ -425,7 +425,7 @@ class BaseReportForm extends Component {
 								placeholder="Search for attendees who attended the meeting..."
 								selectedItems={values.attendees}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
-								overlayComponent={AttendeesOverlayTable}
+								overlayTable={AttendeesOverlayTable}
 								overlayColumns={['Name', 'Description']}
 								overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
 								filterDefs={attendeesFilters}
@@ -447,7 +447,7 @@ class BaseReportForm extends Component {
 								placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
 								selectedItems={values.tasks}
 								renderSelected={<TaskTable tasks={values.tasks} onChange={value => setFieldValue('tasks', value)} showDelete={true} showOrganization={true} />}
-								overlayComponent={AdvancedMultiSelectOverlayTable}
+								overlayTable={AdvancedMultiSelectOverlayTable}
 								overlayColumns={['Name', 'Organization']}
 								overlayRenderRow={this.renderTaskOverlayRow}
 								filterDefs={tasksFilters}
@@ -523,7 +523,7 @@ class BaseReportForm extends Component {
 											placeholder="Search for authorization groups..."
 											selectedItems={values.authorizationGroups}
 											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} onChange={value => setFieldValue('authorizationGroups', value)} showDelete={true} />}
-											overlayComponent={AdvancedMultiSelectOverlayTable}
+											overlayTable={AdvancedMultiSelectOverlayTable}
 											overlayColumns={['Name', 'Description']}
 											overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
 											filterDefs={authorizationGroupsFilters}

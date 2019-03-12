@@ -59,7 +59,7 @@ export const propTypes = {
 	placeholder: PropTypes.string,  // input field placeholder
 	selectedItems: PropTypes.array.isRequired,  // already selected items
 	renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,  // how to render the selected items
-	overlayComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]).isRequired,  // search results component for in the overlay
+	overlayTable: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]).isRequired,  // search results component for in the overlay
 	overlayColumns: PropTypes.array.isRequired,
 	overlayRenderRow: PropTypes.func.isRequired,
 	filterDefs: PropTypes.object,  // config of the search filters
@@ -129,15 +129,16 @@ export default class AdvancedSelect extends Component {
 					<ContainerDimensions>
 						{({ width }) =>
 							<Row className="border-between">
+<<<<<<< HEAD
 								<Col sm={4} md={3}>
 								{ width < MOBILE_WIDTH ?
-									<div>{console.log(width)}<SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
+									<div><SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
 									:
-									<div>{console.log(width)}<FilterList items={filterDefs} currentFilter={this.state.filterType} handleOnClick={this.changeFilterType}/></div>
+									<div><FilterList items={filterDefs} currentFilter={this.state.filterType} handleOnClick={this.changeFilterType}/></div>
 								}
 								</Col>
 								<Col sm={8} md={9} style={{ minHeight: '80px' }}>
-									<this.props.overlayComponent
+									<this.props.overlayTable
 										items={items}
 										selectedItems={selectedItems}
 										handleAddItem={handleAddItem}
