@@ -448,9 +448,6 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 		//Delete \"reportActions\"
 		dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?", reportUuid);
 
-		//Delete \"approvalActions\"
-		dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"approvalActions\" where \"reportUuid\" = ?", reportUuid);
-
 		//Delete relation to authorization groups
 		dbHandle.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", reportUuid);
 
