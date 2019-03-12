@@ -75,6 +75,7 @@ import mil.dds.anet.resources.SavedSearchResource;
 import mil.dds.anet.resources.TagResource;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
+import mil.dds.anet.threads.ReportPublicationWorker;
 import mil.dds.anet.utils.AnetDbLogger;
 import mil.dds.anet.utils.HttpsRedirectFilter;
 import mil.dds.anet.views.ViewResponseFilter;
@@ -204,14 +205,20 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 		AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration, scheduler);
 		FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
+		ReportPublicationWorker reportPublicationWorker = new ReportPublicationWorker(engine.getReportDao(), configuration);
 		
+		//Check for any reports that need to be published every 5 minutes.
+		//And run once in 5 seconds from boot-up. (give the server time to boot up).
+		scheduler.scheduleAtFixedRate(reportPublicationWorker, 5, 5, TimeUnit.MINUTES);
+		scheduler.schedule(reportPublicationWorker, 5, TimeUnit.SECONDS);
+
 		//Check for any emails that need to be sent every 5 minutes. 
-		//And run once in 5 seconds from boot-up. (give the server time to boot up).   
+		//And run once in 5 seconds from boot-up. (give the server time to boot up).
 		scheduler.scheduleAtFixedRate(emailWorker, 5, 5, TimeUnit.MINUTES);
 		scheduler.schedule(emailWorker, 5, TimeUnit.SECONDS);
 		
-		//Check for any future engagements every 1 hour.
-		//And check in 10 seconds (give the server time to boot up)
+		//Check for any future engagements every 1 minutes in development mode or every 3 hours otherwise.
+		//And run once in 10 seconds from boot-up. (give the server time to boot up).
 		if (configuration.isDevelopmentMode()) { 
 			scheduler.scheduleAtFixedRate(futureWorker, 0, 1, TimeUnit.MINUTES);
 		} else { 

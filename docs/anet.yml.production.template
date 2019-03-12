@@ -167,6 +167,9 @@ dictionary:
       long: dddd, D MMMM YYYY
       withTime: D MMMM YYYY @ HH:mm
 
+  reportWorkflow:
+    nbOfHoursQuarantineApproved: 24
+
   fields:
 
     task:

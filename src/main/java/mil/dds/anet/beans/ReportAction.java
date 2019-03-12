@@ -15,20 +15,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
 
-public class ApprovalAction extends AbstractAnetBean {
+public class ReportAction extends AbstractAnetBean {
 
-	public enum ApprovalType { APPROVE, REJECT }
+	public enum ActionType { APPROVE, REJECT, SUBMIT, PUBLISH }
 	
 	private ForeignObjectHolder<ApprovalStep> step = new ForeignObjectHolder<>();
 	private ForeignObjectHolder<Person> person = new ForeignObjectHolder<>();
 	private ForeignObjectHolder<Report> report = new ForeignObjectHolder<>();
-	ApprovalType type;
+	ActionType type;
 	
 	@Override
 	@JsonIgnore
 	@GraphQLIgnore
 	public String getUuid() {
-		throw new WebApplicationException("no UUID field on ApprovalAction");
+		throw new WebApplicationException("no UUID field on ReportAction");
 	}
 
 	@GraphQLQuery(name="step")
@@ -116,11 +116,11 @@ public class ApprovalAction extends AbstractAnetBean {
 	}
 
 	@GraphQLQuery(name="type")
-	public ApprovalType getType() {
+	public ActionType getType() {
 		return type;
 	}
 	
-	public void setType(ApprovalType type) {
+	public void setType(ActionType type) {
 		this.type = type;
 	}
 	
@@ -129,7 +129,7 @@ public class ApprovalAction extends AbstractAnetBean {
 		if (o == null || o.getClass() != this.getClass()) {
 			return false;
 		}
-		ApprovalAction other = (ApprovalAction) o;
+		ReportAction other = (ReportAction) o;
 		return Objects.equals(getStepUuid(), other.getStepUuid())
 				&& Objects.equals(getPersonUuid(), other.getPersonUuid())
 				&& Objects.equals(getReportUuid(), other.getReportUuid())
@@ -144,6 +144,6 @@ public class ApprovalAction extends AbstractAnetBean {
 	
 	@Override
 	public String toString() { 
-		return String.format("[ApprovalAction: step:%s, type:%s, person:%s, report:%s]", getStepUuid(), type, getPersonUuid(), getReportUuid());
+		return String.format("[ReportAction: step:%s, type:%s, person:%s, report:%s]", getStepUuid(), type, getPersonUuid(), getReportUuid());
 	}
 }
