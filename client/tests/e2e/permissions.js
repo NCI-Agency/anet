@@ -1,5 +1,4 @@
 let test = require('../util/test'),
-    moment = require('moment'),
     uuidv4 = require('uuid/v4')
 
 test('checking super user permissions', async t => {
@@ -51,6 +50,7 @@ test('checking regular user permissions', async t => {
     await t.context.get('/', 'jack')
     await pageHelpers.clickMyOrgLink()
     await pageHelpers.clickPersonNameFromSupportedPositionsFieldset('OF-9 JACKSON, Jack')
+    await t.context.driver.sleep(shortWaitMs) // wait for transition
 
     await validateUserCanEditUserForCurrentPage(t)
 
@@ -143,9 +143,9 @@ async function findSuperUserLink(t, desiredSuperUserName) {
 }
 
 async function validateUserCanEditUserForCurrentPage(t) {
-    let {$, assertElementText, shortWaitMs} = t.context
+    let {$, assertElementText, shortWaitMs, mediumWaitMs, longWaitMs} = t.context
 
-    await t.context.driver.sleep(shortWaitMs) // wait for transition
+    await t.context.driver.sleep(mediumWaitMs) // wait for transition
     let $editPersonButton = await $('.edit-person')
     await t.context.driver.wait(t.context.until.elementIsVisible($editPersonButton))
     await $editPersonButton.click()
@@ -156,7 +156,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
             let originalBioText = await $bioTextArea.getText()
             return originalBioText !== ''
         },
-        moment.duration(5, 'seconds').asMilliseconds(),
+        longWaitMs,
         'This test assumes that the current user has a non-empty biography.'
     )
     let originalBioText = await $bioTextArea.getText()
@@ -165,6 +165,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
     await $bioTextArea.sendKeys(fakeBioText)
 
     await t.context.pageHelpers.clickFormBottomSubmit()
+    await t.context.driver.sleep(shortWaitMs) // wait for transition
 
     await assertElementText(t, await $('.alert'), 'Person saved')
     await assertElementText(t, await $('.biography p'), fakeBioText + originalBioText)
@@ -179,11 +180,12 @@ async function editAndSavePositionFromCurrentUserPage(t, validateTrue) {
 }
 
 async function validationEditPositionOnCurrentPage(t, validateTrue) {
-    let {$, assertElementText, until} = t.context
+    let {$, assertElementText, until, shortWaitMs} = t.context
     let $editButton = await $('.edit-position')
     await t.context.driver.wait(until.elementIsVisible($editButton))
     await $editButton.click()
     await t.context.pageHelpers.clickFormBottomSubmit()
+    await t.context.driver.sleep(shortWaitMs) // wait for transition
     if (validateTrue) {
       await assertElementText(t, await $('.alert'), 'Position saved')
     }
