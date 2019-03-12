@@ -51,7 +51,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		this("strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1");	// %w day of week 0-6 with Sunday==0
 	}
 
-	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, Boolean systemSearch) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, boolean systemSearch) {
 		StringBuffer sql = new StringBuffer();
 		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
 		if (query.getIncludeEngagementDayOfWeek()) {
@@ -239,7 +239,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 				args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
 				args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
 				args.put("userUuid", user.getUuid());
-				if (AuthUtils.isAdmin(user) == false) {
+				if (!AuthUtils.isAdmin(user)) {
 					//Admin users may access all approved reports, other users only owned approved reports
 					whereClauses.add("((reports.state != :approvedState) OR (reports.\"authorUuid\" = :userUuid))");
 					args.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));

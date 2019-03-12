@@ -39,7 +39,7 @@ import mil.dds.anet.utils.Utils;
 
 public class MssqlReportSearcher implements IReportSearcher {
 
-	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, Boolean systemSearch) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, boolean systemSearch) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();

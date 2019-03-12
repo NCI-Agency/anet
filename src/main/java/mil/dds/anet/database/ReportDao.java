@@ -738,7 +738,7 @@ public class ReportDao implements IAnetDao<Report> {
 		return tasksBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	private void sendReportPublisheddEmail(Report r) {
+	private void sendReportPublishedEmail(Report r) {
 		AnetEmail email = new AnetEmail();
 		ReportPublishedEmail action = new ReportPublishedEmail();
 		action.setReport(r);
@@ -768,12 +768,12 @@ public class ReportDao implements IAnetDao<Report> {
 		action.setType(ActionType.PUBLISH);
 		AnetObjectEngine.getInstance().getReportActionDao().insert(action);
 
-		//Move the report to RELEASED state
+		//Move the report to PUBLISHED state
 		r.setState(ReportState.PUBLISHED);
 		r.setReleasedAt(Instant.now());
 		final int numRows = this.update(r, r.getAuthor());
 		if (numRows != 0) {
-			sendReportPublisheddEmail(r);
+			sendReportPublishedEmail(r);
 		}
 		return numRows;
 	}

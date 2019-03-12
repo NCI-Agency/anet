@@ -6,9 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
+import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +46,7 @@ public class ReportPublicationWorker implements Runnable {
 	}
 
 	private void runInternal() {
+		final Instant now = Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(this.nbOfHoursQuarantineApproved).toInstant();
 		//Get a list of all APPROVED reports
 		final ReportSearchQuery query = new ReportSearchQuery();
 		query.setPageSize(Integer.MAX_VALUE);
@@ -55,16 +54,19 @@ public class ReportPublicationWorker implements Runnable {
 		final List<Report> reports = dao.search(query, null, true).getList();
 		for (final Report r : reports) {
 			final List<ReportAction> workflow = r.loadWorkflow(context).join();
-			if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(this.nbOfHoursQuarantineApproved).toInstant())) {
+			if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(now)) {
 				//Publish the report
 				try { 
-					final int numRows = dao.publish(r, null);
-					if (numRows == 0) {
-						throw new WebApplicationException("Couldn't process report publication", Status.NOT_FOUND);
-					}
-
-					AnetAuditLogger.log("report {} automatically published by the ReportPublicationWorker", r.getUuid());
-
+					final Handle dbHandle = AnetObjectEngine.getInstance().getDbHandle();
+					dbHandle.inTransaction(h -> {
+						final int numRows = dao.publish(r, null);
+						if (numRows == 0) {
+							logger.error("Couldn't process report publication for report {}", r.getUuid());
+						} else {
+							AnetAuditLogger.log("report {} automatically published by the ReportPublicationWorker", r.getUuid());
+						}
+						return numRows;
+					});
 				} catch (Exception e) { 
 					logger.error("Exception when publishing report", e);
 				}

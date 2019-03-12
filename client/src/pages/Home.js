@@ -97,10 +97,12 @@ class BaseHome extends Page {
 		}
 	}
 
-	allApproved() { return {
-		title: "All approved reports",
-		query: { state: [Report.STATE.APPROVED], sortBy: 'UPDATED_AT', sortOrder: 'ASC' },
-	}}
+	allApproved() {
+		return {
+			title: "All approved reports",
+			query: { state: [Report.STATE.APPROVED], sortBy: 'UPDATED_AT', sortOrder: 'ASC' },
+		}
+	}
 
 	myOrgRecent(currentUser) {
 		if (!currentUser.position || !currentUser.position.organization) { return { query: {}} }
@@ -164,8 +166,7 @@ class BaseHome extends Page {
 			q.query.pageNum = 0
 			q.query.pageSize = 1  // we're only interested in the totalCount, so just get at most one report
 			queryParts.push(
-				new GQL.Part(/* GraphQL */`tile`+index+`
-					: reportList(query:$query` + index + `) { totalCount}`)
+				new GQL.Part(/* GraphQL */`tile${index}: reportList(query:$query${index}) { totalCount}`)
 				.addVariable("query" + index, "ReportSearchQueryInput", q.query)
 			)
 		})

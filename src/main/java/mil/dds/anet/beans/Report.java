@@ -456,7 +456,7 @@ public class Report extends AbstractAnetBean {
 						steps = getDefaultWorkflow(context, engine, defaultOrgUuid).join();
 					}
 				}
-				List<ReportAction> newApprovalStepsActions = createApprovalStepsActions(actions, steps);
+				final List<ReportAction> newApprovalStepsActions = createApprovalStepsActions(actions, steps);
 				actions.addAll(newApprovalStepsActions);
 				return actions;
 			} else {
