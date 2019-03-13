@@ -212,7 +212,6 @@ const createPerson = async function (user, grow) {
 }
 
 const deletePerson = async function (user, grow) {
-    console.log(user)
     if (grow) {
         const count = await countPersons(user)
         if (grow(count)) {

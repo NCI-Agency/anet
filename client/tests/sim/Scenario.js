@@ -1,4 +1,4 @@
-import { createReport } from './stories/ReportStories'
+import { createReport, updateDraftReport, submitDraftReport, approveReport} from './stories/ReportStories'
 import faker from 'faker'
 import {runGQL, fuzzy} from './simutils'
 import { updatePerson, createPerson, deletePerson } from './stories/PersonStories'
@@ -135,8 +135,26 @@ const simpleScenario =
         [
             {
                 name: "Create Report",
-                frequency: 20,
+                frequency: 10,
                 runnable: createReport,
+                userTypes: ["existingAdvisor"]
+            },
+            {
+                name: "Update Draft Report",
+                frequency: 40,
+                runnable: updateDraftReport,
+                userTypes: ["existingAdvisor"]
+            },
+            {
+                name: "Submit Draft Report",
+                frequency: 10,
+                runnable: submitDraftReport,
+                userTypes: ["existingAdvisor"]
+            },
+            {
+                name: "Approve Report",
+                frequency: 10,
+                runnable: approveReport,
                 userTypes: ["existingAdvisor"]
             },
             {
@@ -193,7 +211,7 @@ const simpleScenario =
             },
             {
                 name: "Delete position",
-                frequency: 10 / 10,
+                frequency: 1 / 100,
                 mean: 75,
                 stddev: 20,
                 runnable: deletePosition,
@@ -219,7 +237,7 @@ const simpleScenario =
             },           
             {
                 name: "Remove person from position",
-                frequency: 1,
+                frequency: 1 / 50,
                 runnable: deletePersonFromPosition,
                 userTypes: ["existingAdmin"]
             },           

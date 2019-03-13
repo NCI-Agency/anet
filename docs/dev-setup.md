@@ -225,7 +225,7 @@ $ yarn run test-e2e
 ### Simulator
 ANET has a simulator that can exercise of the functions. It is located in 'client/test/sim'. It works by interfacing with ANET through GraphQL queries. The simulator executes `stories` which are assigned to different user types and have different probabilities.   
 
-The simulator can be started by running 'yarn sim' in 'client'.
+The simulator can be started by running 'yarn run sim' in 'client'.
 
 ## React Frontend
 ### Initial Setup

@@ -204,7 +204,6 @@ const createOrganization = async function (user, parentOrg, path) {
         path[0] = abbreviateCompanyName(org.longName)
     }
 
-    console.log(org)
     return {
         data: {
             createOrganization: {
