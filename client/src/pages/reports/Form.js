@@ -605,7 +605,6 @@ class BaseReportForm extends Component {
 			//They might have been set before the report has been marked as cancelled.
 			report.atmosphere = null
 			report.atmosphereDetails = ''
-			report.tasks = null
 			report.keyOutcomes = ''
 		}
 		//reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
