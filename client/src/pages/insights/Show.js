@@ -133,11 +133,11 @@ class BaseInsightsShow extends Page {
         releasedAtStart: this.defaultPastDates.referenceDate.startOf('day').valueOf()
       },
       [REPORTS_BY_TASK]: {
-        state: [Report.STATE.RELEASED],
+        state: [Report.STATE.PUBLISHED],
         releasedAtStart: this.defaultPastDates.referenceDate.startOf('day').valueOf()
       },
       [REPORTS_BY_DAY_OF_WEEK]: {
-        state: [Report.STATE.RELEASED],
+        state: [Report.STATE.PUBLISHED],
         releasedAtStart: this.defaultPastDates.startDate.startOf('day').valueOf(),
         releasedAtEnd: this.defaultPastDates.endDate.endOf('day').valueOf(),
         includeEngagementDayOfWeek: 1

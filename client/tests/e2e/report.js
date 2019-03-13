@@ -12,7 +12,7 @@ test('Draft and submit a report', async t => {
 
     let $engagementDate = await $('#engagementDate')
     await $engagementDate.click()
-    await t.context.driver.sleep(500) // wait for the datepicker to pop up
+    await t.context.driver.sleep(shortWaitMs) // wait for the datepicker to pop up
 
     await pageHelpers.clickTodayButton()
 
@@ -62,14 +62,15 @@ test('Draft and submit a report', async t => {
     await pageHelpers.writeInForm('#nextSteps', 'next steps')
     await pageHelpers.writeInForm('.reportTextField .public-DraftEditor-content', 'engagement details')
 
-    let $reportSensitiveInformationField = await $('.reportSensitiveInformationField')
+    let editorCssPath = '.reportSensitiveInformationField .public-DraftEditor-content'
+    let $reportSensitiveInformationField = await $(editorCssPath)
     t.false(await $reportSensitiveInformationField.isDisplayed(), 'Report sensitive info should not be present before "add sensitive information" button is clicked"')
 
     let $addSensitiveInfoButton = await $('#toggleSensitiveInfo')
     await $addSensitiveInfoButton.click()
 
     await t.context.driver.wait(until.elementIsVisible($reportSensitiveInformationField))
-    await pageHelpers.writeInForm('.reportSensitiveInformationField .public-DraftEditor-content', 'sensitive info')
+    await pageHelpers.writeInForm(editorCssPath, 'sensitive info')
     let $addAuthGroupShortcutButtons = await $$('#meeting-details .shortcut-list button')
     // Add all recent authorization groups
     await Promise.all($addAuthGroupShortcutButtons.map($button => $button.click()))
@@ -98,10 +99,10 @@ test('Draft and submit a report', async t => {
     )
 })
 
-test('Approve report chain', async t => {
-    t.plan(5)
+test('Publish report chain', async t => {
+    t.plan(6)
 
-    let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, until, shortWaitMs} = t.context
+    let {pageHelpers, $, $$, assertElementText, assertElementNotPresent, By, Key, until, shortWaitMs, longWaitMs} = t.context
     // Try to have Erin approve her own report
     await t.context.get('/', 'erin')
     let $homeTileErin = await $$('.home-tile')
@@ -110,7 +111,7 @@ test('Approve report chain', async t => {
     await $reportsPendingErin.click()
 
     await t.context.driver.wait(until.stalenessOf($reportsPendingErin))
-    await assertElementNotPresent(t, '.read-report-button', 'Erin should not be allowed to approve her own reports')
+    await assertElementNotPresent(t, '.read-report-button', 'Erin should not be allowed to approve her own reports', shortWaitMs)
 
     // First Jacob needs to approve the report, then rebecca can approve the report
     await t.context.get('/', 'jacob')
@@ -146,6 +147,23 @@ test('Approve report chain', async t => {
     await $rebeccaApproveButton.click()
     await t.context.driver.wait(until.stalenessOf($rebeccaApproveButton))
 
+    //Admin user needs to publish the report
+    await t.context.get('/', 'arthur')
+    let $homeTileArthur = await $$('.home-tile')
+    let [$draftReportsArthur, $reportsPendingAll, $reportsPendingArthur, $upcomingEngagementsArthur, $reportsSensitiveInfo, $approvedReports] = $homeTileArthur
+    await t.context.driver.wait(until.elementIsVisible($approvedReports))
+    await $approvedReports.click()
+
+    await t.context.driver.wait(until.stalenessOf($approvedReports))
+    let $firstReadApprovedReportButton = await $('.read-report-button')
+    await t.context.driver.wait(until.elementIsEnabled($firstReadApprovedReportButton))
+    await $firstReadApprovedReportButton.click()
+
+    await pageHelpers.assertReportShowStatusText(t, "This report is APPROVED.")
+    let $arthurPublishButton = await $('.publish-button')
+    await $arthurPublishButton.click()
+    await t.context.driver.wait(until.stalenessOf($arthurPublishButton))
+
     // check if page is redirected to search results
 
     // let $notificationDailyRollup = await t.context.driver.findElement(By.css('.Toastify__toast-body'))
@@ -163,10 +181,14 @@ test('Approve report chain', async t => {
     t.is(currentPathname, '/rollup', 'Clicking the "daily rollup" link takes the user to the rollup page')
     await $('#daily-rollup')
 
-    let $rollupDateRange = await $('.rollupDateRange .bp3-input')
-    await $rollupDateRange.click()
+    let $$rollupDateRange = await $$('.rollupDateRange .bp3-input')
+    await $$rollupDateRange[0].click()
     let $todayButton = await t.context.driver.findElement(By.xpath('//a/div[text()="Today"]'))
     await $todayButton.click()
+    // Now dismiss the date popup
+    await $$rollupDateRange[0].sendKeys(Key.TAB)
+    await $$rollupDateRange[1].sendKeys(Key.TAB)
+    await t.context.driver.sleep(longWaitMs) // wait for report collection to load
 
     let $reportCollection = await $('.report-collection table')
     await t.context.driver.wait(until.elementIsVisible($reportCollection))
@@ -222,7 +244,7 @@ test('Verify that validation and other reports/new interactions work', async t =
     let $engagementDate = await $('#engagementDate')
     t.is(await $engagementDate.getAttribute('value'), '', 'Engagement date field starts blank')
     await $engagementDate.click()
-    await t.context.driver.sleep(500) // wait for the datepicker to pop up
+    await t.context.driver.sleep(shortWaitMs) // wait for the datepicker to pop up
 
     await pageHelpers.clickTodayButton()
 

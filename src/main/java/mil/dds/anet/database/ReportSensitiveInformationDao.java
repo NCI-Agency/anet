@@ -21,17 +21,16 @@ import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterRowMapper(ReportSensitiveInformationMapper.class)
-public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveInformation> {
+public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveInformation> {
 
 	private static final String[] fields = { "uuid", "text", "reportUuid", "createdAt", "updatedAt" };
 	private static final String tableName = "reportsSensitiveInformation";
 	public static final String REPORTS_SENSITIVE_INFORMATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
-	private Handle dbHandle;
 	private final ForeignKeyBatcher<ReportSensitiveInformation> reportIdBatcher;
 
 	public ReportSensitiveInformationDao(Handle h) {
-		this.dbHandle = h;
+		super(h, "ReportsSensitiveInformation", tableName, REPORTS_SENSITIVE_INFORMATION_FIELDS, null);
 		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
 				+ " FROM \"" + tableName + "\""
 				+ " WHERE \"reportUuid\" IN ( <foreignKeys> )";
@@ -57,7 +56,7 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 	}
 
 	@Override
-	public ReportSensitiveInformation insert(ReportSensitiveInformation rsi) {
+	public ReportSensitiveInformation insertInternal(ReportSensitiveInformation rsi) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -79,7 +78,8 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 		return rsi;
 	}
 
-	public int update(ReportSensitiveInformation rsi) {
+	@Override
+	public int updateInternal(ReportSensitiveInformation rsi) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -107,6 +107,11 @@ public class ReportSensitiveInformationDao implements IAnetDao<ReportSensitiveIn
 			AnetAuditLogger.log("ReportSensitiveInformation {} updated by {} ", rsi, user);
 		}
 		return numRows;
+	}
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
 	}
 
 	public Object insertOrUpdate(ReportSensitiveInformation rsi, Person user, Report report) {

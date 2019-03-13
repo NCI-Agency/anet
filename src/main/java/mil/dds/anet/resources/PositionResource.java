@@ -394,7 +394,7 @@ public class PositionResource {
 		//if this position is in an approval chain, we just delete it
 		//if this position is in an organization, just remove it
 		//if this position has any associated positions, just remove them
-		return dao.deletePosition(positionUuid);
+		return dao.delete(positionUuid);
 	}
 
 	@GraphQLMutation(name="deletePosition")

@@ -18,10 +18,11 @@ export default class Report extends Model {
 	static STATE = {
 		DRAFT: 'DRAFT',
 		PENDING_APPROVAL: 'PENDING_APPROVAL',
-		RELEASED: 'RELEASED',
+		APPROVED: 'APPROVED',
+		PUBLISHED: 'PUBLISHED',
 		REJECTED: 'REJECTED',
 		CANCELLED: 'CANCELLED',
-		FUTURE: 'FUTURE'
+		FUTURE: 'FUTURE',
 	}
 
 	static CANCELLATION_REASON = {
@@ -163,12 +164,12 @@ export default class Report extends Model {
 		return Report.isPending(this.state)
 	}
 
-	static isReleased(state) {
-		return state === Report.STATE.RELEASED
+	static isPublished(state) {
+		return state === Report.STATE.PUBLISHED
 	}
 
-	isReleased() {
-		return Report.isReleased(this.state)
+	isPublished() {
+		return Report.isPublished(this.state)
 	}
 
 	static isRejected(state) {
@@ -195,7 +196,15 @@ export default class Report extends Model {
 		return Report.isFuture(this.state)
 	}
 
-	showApprovals() {
+	static isApproved(state) {
+		return state === Report.STATE.APPROVED
+	}
+
+	isApproved() {
+		return Report.isApproved(this.state)
+	}
+
+	showWorkflow() {
 		return this.state && !this.isDraft() && !this.isFuture()
 	}
 
@@ -229,10 +238,10 @@ export default class Report extends Model {
 		)
 	}
 
-	getReportReleasedAt() {
-		if (this.approvalStatus) {
-			const approvalSteps = Object.assign([], this.approvalStatus)
-			const lastApprovalStep = approvalSteps.pop()
+	getReportApprovedAt() {
+		if (this.workflow && this.isApproved()) {
+			const actions = Object.assign([], this.workflow)
+			const lastApprovalStep = actions.pop()
 			return !lastApprovalStep ? '' : lastApprovalStep.createdAt
 		} else {
 			return

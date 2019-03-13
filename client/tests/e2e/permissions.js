@@ -1,12 +1,13 @@
 let test = require('../util/test'),
-    moment = require('moment'),
     uuidv4 = require('uuid/v4')
 
 test('checking super user permissions', async t => {
     t.plan(12)
 
+    let {pageHelpers, shortWaitMs} = t.context
+
     await t.context.get('/', 'rebecca')
-    await t.context.pageHelpers.clickMyOrgLink()
+    await pageHelpers.clickMyOrgLink()
 
     let $rebeccaLink = await findSuperUserLink(t, 'CTR BECCABON, Rebecca')
 
@@ -20,7 +21,7 @@ test('checking super user permissions', async t => {
     // We are now still on the edit position page
 
     await t.context.get('/', 'rebecca')
-    await t.context.pageHelpers.clickMyOrgLink()
+    await pageHelpers.clickMyOrgLink()
     let $jacobLink = await findSuperUserLink(t, 'CIV JACOBSON, Jacob')
     await $jacobLink.click()
     await t.context.driver.wait(t.context.until.stalenessOf($jacobLink))
@@ -47,8 +48,9 @@ test('checking regular user permissions', async t => {
     let {pageHelpers, $, assertElementNotPresent, shortWaitMs} = t.context
 
     await t.context.get('/', 'jack')
-    await t.context.pageHelpers.clickMyOrgLink()
+    await pageHelpers.clickMyOrgLink()
     await pageHelpers.clickPersonNameFromSupportedPositionsFieldset('OF-9 JACKSON, Jack')
+    await t.context.driver.sleep(shortWaitMs) // wait for transition
 
     await validateUserCanEditUserForCurrentPage(t)
 
@@ -112,6 +114,7 @@ function validateUserCannotEditOtherUser(testTitle, user, searchQuery, otherUser
         let [$arthurPersonLink] =
             await getUserPersonAndPositionFromSearchResults(t, searchQuery, otherUserName, otherUserPosition)
         await $arthurPersonLink.click()
+        await t.context.driver.sleep(shortWaitMs) // wait for transition
         await assertElementNotPresent(t, '.edit-person', `${user} should not be able to edit ${otherUserName}`, shortWaitMs)
 
         let $arthurPositionLink =
@@ -140,8 +143,9 @@ async function findSuperUserLink(t, desiredSuperUserName) {
 }
 
 async function validateUserCanEditUserForCurrentPage(t) {
-    let {$, assertElementText} = t.context
+    let {$, assertElementText, shortWaitMs, mediumWaitMs, longWaitMs} = t.context
 
+    await t.context.driver.sleep(mediumWaitMs) // wait for transition
     let $editPersonButton = await $('.edit-person')
     await t.context.driver.wait(t.context.until.elementIsVisible($editPersonButton))
     await $editPersonButton.click()
@@ -152,7 +156,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
             let originalBioText = await $bioTextArea.getText()
             return originalBioText !== ''
         },
-        moment.duration(5, 'seconds').asMilliseconds(),
+        longWaitMs,
         'This test assumes that the current user has a non-empty biography.'
     )
     let originalBioText = await $bioTextArea.getText()
@@ -161,6 +165,7 @@ async function validateUserCanEditUserForCurrentPage(t) {
     await $bioTextArea.sendKeys(fakeBioText)
 
     await t.context.pageHelpers.clickFormBottomSubmit()
+    await t.context.driver.sleep(shortWaitMs) // wait for transition
 
     await assertElementText(t, await $('.alert'), 'Person saved')
     await assertElementText(t, await $('.biography p'), fakeBioText + originalBioText)
@@ -175,11 +180,12 @@ async function editAndSavePositionFromCurrentUserPage(t, validateTrue) {
 }
 
 async function validationEditPositionOnCurrentPage(t, validateTrue) {
-    let {$, assertElementText, until} = t.context
+    let {$, assertElementText, until, shortWaitMs} = t.context
     let $editButton = await $('.edit-position')
     await t.context.driver.wait(until.elementIsVisible($editButton))
     await $editButton.click()
     await t.context.pageHelpers.clickFormBottomSubmit()
+    await t.context.driver.sleep(shortWaitMs) // wait for transition
     if (validateTrue) {
       await assertElementText(t, await $('.alert'), 'Position saved')
     }
@@ -244,27 +250,28 @@ async function getPrincipalOrgFromSearchResults(t, principalOrgName) {
 }
 
 async function validateSuperUserPrincipalOrgPermissions(t) {
-  let {$, assertElementNotPresent} = t.context
+  let {$, assertElementNotPresent, shortWaitMs} = t.context
 
   let $editPrincipalOrgButton = await $('#editButton')
   await t.context.driver.wait(t.context.until.elementIsVisible($editPrincipalOrgButton))
   await $editPrincipalOrgButton.click()
+  await t.context.driver.sleep(shortWaitMs) // wait for transition
   await assertElementNotPresent(t, '#typeAdvisorButton',
-    'Field advisorOrgButton of a principal organization should be absent for super users')
+    'Field advisorOrgButton of a principal organization should be absent for super users', shortWaitMs)
   await assertElementNotPresent(t, '#typePrincipalButton',
-  'Field principalOrgButton of a principal organization should be absent for super users')
+  'Field principalOrgButton of a principal organization should be absent for super users', shortWaitMs)
   await assertElementNotPresent(t, '#parentOrg',
-    'Field parentOrganization of a principal organization should be absent for super users')
+    'Field parentOrganization of a principal organization should be absent for super users', shortWaitMs)
   await assertElementNotPresent(t, '#shortName',
-      'Field shortName of a principal organization should be absent for super users')
+      'Field shortName of a principal organization should be absent for super users', shortWaitMs)
   await assertElementNotPresent(t, '#longName',
-      'Field longName of a principal organization should be absent for super users')
+      'Field longName of a principal organization should be absent for super users', shortWaitMs)
   await assertElementNotPresent(t, '#identificationCode',
-      'Field identificationCode of a principal organization should be absent for super users')
+      'Field identificationCode of a principal organization should be absent for super users', shortWaitMs)
 }
 
 async function validateAdminPrincipalOrgPermissions(t) {
-  let {$, assertElementEnabled} = t.context
+  let {$, assertElementEnabled, shortWaitMs} = t.context
 
   let $editPrincipalOrgButton = await $('#editButton')
   await t.context.driver.wait(t.context.until.elementIsVisible($editPrincipalOrgButton))

@@ -1,6 +1,5 @@
 package mil.dds.anet.emails;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,27 +9,32 @@ import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 
-public class ReportRejectionEmail extends AnetEmailAction {
-	Report report;
-	Person rejector;
-	Comment comment;
+public class ReportRejectionEmail implements AnetEmailAction {
+	private Report report;
+	private Person rejector;
+	private Comment comment;
 	
-	public ReportRejectionEmail() { 
-		templateName = "/emails/reportRejection.ftlh";
-		subject = "ANET Report Returned to You for Editing";
+	@Override
+	public String getTemplateName() {
+		return "/emails/reportRejection.ftlh";
+	}
+
+	@Override
+	public String getSubject(Map<String, Object> context) {
+		return "ANET Report Returned to You for Editing";
 	}
 	
 	@Override
-	public Map<String, Object> execute() {
+	public Map<String, Object> buildContext(Map<String, Object> context) {
 		Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
 		rejector = AnetObjectEngine.getInstance().getPersonDao().getByUuid(rejector.getUuid());
 		comment = AnetObjectEngine.getInstance().getCommentDao().getByUuid(comment.getUuid());
 		
-		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("report", r);
 		context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
 		context.put("rejector", rejector);
 		context.put("comment", comment);
+
 		return context;
 	}
 

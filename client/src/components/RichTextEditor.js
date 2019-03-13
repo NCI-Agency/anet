@@ -71,6 +71,26 @@ class RichTextEditor extends Component {
 		this.props.onChange(html)
 	}
 
+	pushEditorState = (contentState) => {
+		const editorState = EditorState.push(this.state.editorState, contentState, 'change-block-data')
+		this.onChange(editorState)
+	}
+
+	handlePastedText = (text, html) => {
+		const htmlRegex = new RegExp(/<[a-z][\s\S]*>/i)
+		if(htmlRegex.test(html)) {
+			this.setEditorStateFromHTML(html)
+		} else {
+			this.setEditorStateFromText(text)
+		}
+		return true
+	}
+
+	setEditorStateFromText(text) {
+		const contentState = ContentState.createFromText(text)
+		this.pushEditorState(contentState)
+	}
+
 	_setEditorStateFromHTML(html) {
 		const blocksFromHTML = convertFromHTML(html)
 		if (blocksFromHTML.contentBlocks === null) { return }
@@ -78,8 +98,7 @@ class RichTextEditor extends Component {
 			blocksFromHTML.contentBlocks,
 			blocksFromHTML.entityMap,
 		)
-		const editorState = EditorState.push(this.state.editorState, contentState, 'change-block-data')
-		this.onChange(editorState)
+		this.pushEditorState(contentState)
 	}
 
 	_handleKeyCommand(command, editorState) {
@@ -151,6 +170,7 @@ class RichTextEditor extends Component {
 					<Editor
 						blockStyleFn={getBlockStyle}
 						editorState={editorState}
+						handlePastedText={this.handlePastedText}
 						handleKeyCommand={this.handleKeyCommand}
 						keyBindingFn={this.mapKeyToEditorCommand}
 						onChange={this.onChange}

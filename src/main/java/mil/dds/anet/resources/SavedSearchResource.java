@@ -2,6 +2,7 @@ package mil.dds.anet.resources;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.DELETE;
@@ -79,16 +80,23 @@ public class SavedSearchResource {
 	@Timed
 	@Path("/{uuid}")
 	public Response deleteSavedSearch(@Auth Person user, @PathParam("uuid") String uuid) {
-	    deleteSavedSearchCommon(user, uuid);
-	    return Response.ok().build();
+		deleteSavedSearchCommon(user, uuid);
+		return Response.ok().build();
 	}
 
 	private int deleteSavedSearchCommon(Person user, String savedSearchUuid) {
-	    int numDeleted = dao.deleteSavedSearch(savedSearchUuid, user);
-	    if (numDeleted == 0) {
-		throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
-	    }
-	    return numDeleted;
+		final SavedSearch s = dao.getByUuid(savedSearchUuid);
+		if (s == null) {
+			throw new WebApplicationException("Saved search not found", Status.NOT_FOUND);
+		}
+		if (!Objects.equals(s.getOwnerUuid(), user.getUuid())) {
+			throw new WebApplicationException("Saved search can only be deleted by owner", Status.FORBIDDEN);
+		}
+		int numDeleted = dao.delete(savedSearchUuid);
+		if (numDeleted == 0) {
+			throw new WebApplicationException("Couldn't process saved search delete", Status.NOT_FOUND);
+		}
+		return numDeleted;
 	}
 
 	@GraphQLMutation(name="deleteSavedSearch")

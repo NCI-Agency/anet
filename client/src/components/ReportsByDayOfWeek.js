@@ -17,7 +17,7 @@ const BarChartWithLoader = connect(null, mapDispatchToProps)(LoaderHOC('isLoadin
 const Context = React.createContext()
 
 /*
- * Component displaying a chart with number of reports released within a certain
+ * Component displaying a chart with number of reports published within a certain
  * period. The counting is done grouped by day of the week. 
  */
 class ReportsByDayOfWeek extends ReportsVisualisation {

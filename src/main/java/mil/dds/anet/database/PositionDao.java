@@ -42,7 +42,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 	private final ForeignKeyBatcher<Position> currentPositionForPersonBatcher;
 
 	public PositionDao(Handle h) { 
-		super(h, "positions", tableName, POSITIONS_FIELDS, null);
+		super(h, "Positions", tableName, POSITIONS_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
 				+ "FROM positions "
 				+ "WHERE positions.uuid IN ( <uuids> )";
@@ -63,9 +63,9 @@ public class PositionDao extends AnetBaseDao<Position> {
 		Long manualRowCount = getSqliteRowCount();
 		return new AnetBeanList<Position>(query, pageNum, pageSize, new PositionMapper(), manualRowCount);
 	}
-	
-	public Position insert(Position p) {
-		DaoUtils.setInsertFields(p);
+
+	@Override
+	public Position insertInternal(Position p) {
 		//prevent code conflicts
 		if (p.getCode() != null && p.getCode().trim().length() == 0) { p.setCode(null); }
 		
@@ -121,8 +121,8 @@ public class PositionDao extends AnetBaseDao<Position> {
 	/*
 	 * @return: number of rows updated. 
 	 */
-	public int update(Position p) { 
-		DaoUtils.setUpdateFields(p);
+	@Override
+	public int updateInternal(Position p) {
 		//prevent code conflicts
 		if (p.getCode() != null && p.getCode().trim().length() == 0) { p.setCode(null); }
 		
@@ -142,84 +142,87 @@ public class PositionDao extends AnetBaseDao<Position> {
 	}
 	
 	public int setPersonInPosition(String personUuid, String positionUuid) {
-		return dbHandle.inTransaction(h -> {
-				Instant now = Instant.now();
-				//If this person is in a position already, we need to remove them. 
-				Position currPos = h.createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS 
-						+ " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
-					.bind("personUuid", personUuid)
-					.map(new PositionMapper())
-					.findFirst().orElse(null);
-				if (currPos != null) { 
-					h.createUpdate("/* positionSetPerson.remove1 */ UPDATE positions set \"currentPersonUuid\" = null "
-							+ "WHERE \"currentPersonUuid\" = :personUuid")
-						.bind("personUuid", personUuid)
-						.execute();
-					
-					h.createUpdate("/* positionSetPerson.remove2 */ INSERT INTO \"peoplePositions\" "
-							+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-							+ "VALUES (:positionUuid, NULL, :createdAt)")
-						.bind("positionUuid", currPos.getUuid())
-						.bind("createdAt", DaoUtils.asLocalDateTime(now))
-						.execute();
-				}
-				
-				h.createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
-						+ "SET \"currentPersonUuid\" = :personUuid WHERE uuid = :positionUuid")
-					.bind("personUuid", personUuid)
-					.bind("positionUuid", positionUuid)
-					.execute();
-				// GraphQL mutations *have* to return something, so we return the number of inserted rows
-				return h.createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
-						+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-						+ "VALUES (:positionUuid, :personUuid, :createdAt)")
-					.bind("positionUuid", positionUuid)
-					.bind("personUuid", personUuid)
-					.bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))) // Need to ensure this timestamp is greater than previous INSERT.
-					.execute();
-		});
+		return AnetObjectEngine.getInstance().executeInTransaction(this::setPersonInPositionTransactional, personUuid, positionUuid);
+	}
+
+	private int setPersonInPositionTransactional(String personUuid, String positionUuid) {
+		Instant now = Instant.now();
+		//If this person is in a position already, we need to remove them. 
+		Position currPos = dbHandle.createQuery("/* positionSetPerson.find */ SELECT " + POSITIONS_FIELDS
+				+ " FROM positions WHERE \"currentPersonUuid\" = :personUuid")
+			.bind("personUuid", personUuid)
+			.map(new PositionMapper())
+			.findFirst().orElse(null);
+		if (currPos != null) { 
+			dbHandle.createUpdate("/* positionSetPerson.remove1 */ UPDATE positions set \"currentPersonUuid\" = null "
+					+ "WHERE \"currentPersonUuid\" = :personUuid")
+				.bind("personUuid", personUuid)
+				.execute();
+			
+			dbHandle.createUpdate("/* positionSetPerson.remove2 */ INSERT INTO \"peoplePositions\" "
+					+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+					+ "VALUES (:positionUuid, NULL, :createdAt)")
+				.bind("positionUuid", currPos.getUuid())
+				.bind("createdAt", DaoUtils.asLocalDateTime(now))
+				.execute();
+		}
 		
+		dbHandle.createUpdate("/* positionSetPerson.set1 */ UPDATE positions "
+				+ "SET \"currentPersonUuid\" = :personUuid WHERE uuid = :positionUuid")
+			.bind("personUuid", personUuid)
+			.bind("positionUuid", positionUuid)
+			.execute();
+		// GraphQL mutations *have* to return something, so we return the number of inserted rows
+		return dbHandle.createUpdate("/* positionSetPerson.set2 */ INSERT INTO \"peoplePositions\" "
+				+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+				+ "VALUES (:positionUuid, :personUuid, :createdAt)")
+			.bind("positionUuid", positionUuid)
+			.bind("personUuid", personUuid)
+			.bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))) // Need to ensure this timestamp is greater than previous INSERT.
+			.execute();
 	}
 	
 	public int removePersonFromPosition(String positionUuid) {
-		return dbHandle.inTransaction(h -> {
-				Instant now = Instant.now();
-				h.createUpdate("/* positionRemovePerson.update */ UPDATE positions "
-						+ "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
-						+ "WHERE uuid = :positionUuid")
-					.bind("personUuid", (Integer) null)
-					.bind("updatedAt", DaoUtils.asLocalDateTime(now))
-					.bind("positionUuid", positionUuid)
-					.execute();
-					
-				String sql;
-				if (DaoUtils.isMsSql(h)) { 
-					sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-						+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-						+ "VALUES(null, " 
-							+ "(SELECT TOP(1)\"personUuid\" FROM \"peoplePositions\" "
-							+ "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), "
-						+ ":createdAt)";
-				} else { 
-					sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
-							+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-						+ "VALUES(null, " 
-							+ "(SELECT \"personUuid\" FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
-							+ "ORDER BY \"createdAt\" DESC LIMIT 1), "
-						+ ":createdAt)";
-				}
-				h.createUpdate(sql)
-					.bind("positionUuid", positionUuid)
-					.bind("createdAt", DaoUtils.asLocalDateTime(now))
-					.execute();
+		return AnetObjectEngine.getInstance().executeInTransaction(this::removePersonFromPositionTransactional, positionUuid);
+	}
+
+	private int removePersonFromPositionTransactional(String positionUuid) {
+		Instant now = Instant.now();
+		dbHandle.createUpdate("/* positionRemovePerson.update */ UPDATE positions "
+				+ "SET \"currentPersonUuid\" = :personUuid, \"updatedAt\" = :updatedAt "
+				+ "WHERE uuid = :positionUuid")
+			.bind("personUuid", (Integer) null)
+			.bind("updatedAt", DaoUtils.asLocalDateTime(now))
+			.bind("positionUuid", positionUuid)
+			.execute();
 			
-				return h.createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
-						+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
-						+ "VALUES (:positionUuid, null, :createdAt)")
-					.bind("positionUuid", positionUuid)
-					.bind("createdAt", DaoUtils.asLocalDateTime(now))
-					.execute();
-		});
+		String sql;
+		if (DaoUtils.isMsSql(dbHandle)) {
+			sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+				+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+				+ "VALUES(null, " 
+					+ "(SELECT TOP(1)\"personUuid\" FROM \"peoplePositions\" "
+					+ "WHERE \"positionUuid\" = :positionUuid ORDER BY \"createdAt\" DESC), "
+				+ ":createdAt)";
+		} else { 
+			sql = "/* positionRemovePerson.insert1 */ INSERT INTO \"peoplePositions\" "
+					+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+				+ "VALUES(null, " 
+					+ "(SELECT \"personUuid\" FROM \"peoplePositions\" WHERE \"positionUuid\" = :positionUuid "
+					+ "ORDER BY \"createdAt\" DESC LIMIT 1), "
+				+ ":createdAt)";
+		}
+		dbHandle.createUpdate(sql)
+			.bind("positionUuid", positionUuid)
+			.bind("createdAt", DaoUtils.asLocalDateTime(now))
+			.execute();
+	
+		return dbHandle.createUpdate("/* positionRemovePerson.insert2 */ INSERT INTO \"peoplePositions\" "
+				+ "(\"positionUuid\", \"personUuid\", \"createdAt\") "
+				+ "VALUES (:positionUuid, null, :createdAt)")
+			.bind("positionUuid", positionUuid)
+			.bind("createdAt", DaoUtils.asLocalDateTime(now))
+			.execute();
 	}
 	
 	public Person getPersonInPositionNow(String personUuid) {
@@ -377,23 +380,22 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return count.longValue() > 0;
 	}
 
-	public int deletePosition(String positionUuid) {
-		return dbHandle.inTransaction(h -> {
-				//if this position has any history, we'll just delete it
-				h.execute("DELETE FROM \"peoplePositions\" WHERE \"positionUuid\" = ?", positionUuid);
-				
-				//if this position is in an approval chain, we just delete it
-				h.execute("DELETE FROM approvers WHERE \"positionUuid\" = ?", positionUuid);
-				
-				//if this position is in an organization, it'll be automatically removed. 
-				
-				//if this position has any associated positions, just remove them.
-				h.execute("DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?", positionUuid, positionUuid);
-				
-				return h.createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
-					.bind("positionUuid", positionUuid)
-					.execute();
-		});
+	@Override
+	public int deleteInternal(String positionUuid) {
+		//if this position has any history, we'll just delete it
+		dbHandle.execute("DELETE FROM \"peoplePositions\" WHERE \"positionUuid\" = ?", positionUuid);
+		
+		//if this position is in an approval chain, we just delete it
+		dbHandle.execute("DELETE FROM approvers WHERE \"positionUuid\" = ?", positionUuid);
+		
+		//if this position is in an organization, it'll be automatically removed. 
+		
+		//if this position has any associated positions, just remove them.
+		dbHandle.execute("DELETE FROM \"positionRelationships\" WHERE \"positionUuid_a\" = ? OR \"positionUuid_b\"= ?", positionUuid, positionUuid);
+		
+		return dbHandle.createUpdate("DELETE FROM positions WHERE uuid = :positionUuid")
+			.bind("positionUuid", positionUuid)
+			.execute();
 	}
 
 	public static String generateCurrentPositionFilter(String personJoinColumn, String dateFilterColumn, String placeholderName) {

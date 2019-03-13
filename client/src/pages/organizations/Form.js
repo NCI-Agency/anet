@@ -95,6 +95,7 @@ class BaseOrganizationForm extends Component {
 	state = {
 		error: null,
 		showAddApprovalStepAlert: false,
+		showRemoveApprovalStepAlert: false,
 	}
 
 	render() {
@@ -249,6 +250,17 @@ class BaseOrganizationForm extends Component {
 														<Button className="pull-right" onClick={this.hideAddApprovalStepAlert} bsStyle="primary">OK</Button>
 													</Modal.Footer>
 												</Modal>
+												<Modal show={this.state.showRemoveApprovalStepAlert} onHide={this.hideRemoveApprovalStepAlert}>
+													<Modal.Header closeButton>
+														<Modal.Title>Step not removed</Modal.Title>
+													</Modal.Header>
+													<Modal.Body>
+														You cannot remove this step; it is being used in a report.
+													</Modal.Body>
+													<Modal.Footer>
+														<Button className="pull-right" onClick={this.hideRemoveApprovalStepAlert} bsStyle="primary">OK</Button>
+													</Modal.Footer>
+												</Modal>
 
 												{values.approvalSteps.map((step, index) => (
 													this.renderApprovalStep(arrayHelpers, setFieldValue, step, index)
@@ -297,7 +309,7 @@ class BaseOrganizationForm extends Component {
 		const approvers = step.approvers
 
 		return <Fieldset title={`Step ${index + 1}`} key={index}>
-			<Button className="pull-right" title="Remove this step" onClick={() => arrayHelpers.remove(index)}>
+			<Button className="pull-right" title="Remove this step" onClick={() => this.removeApprovalStep(arrayHelpers, index, step)}>
 				<img src={REMOVE_ICON} height={14} alt="Remove this step" />
 			</Button>
 
@@ -329,6 +341,10 @@ class BaseOrganizationForm extends Component {
 		this.setState({showAddApprovalStepAlert: false})
 	}
 
+	hideRemoveApprovalStepAlert = () => {
+		this.setState({showRemoveApprovalStepAlert: false})
+	}
+
 	addApprovalStep = (arrayHelpers, values) => {
 		const approvalSteps = values.approvalSteps || []
 
@@ -341,6 +357,18 @@ class BaseOrganizationForm extends Component {
 		}
 
 		arrayHelpers.push({name: '', approvers: []})
+	}
+
+	removeApprovalStep = (arrayHelpers, index, step) => {
+		return API.query(/* GraphQL */`
+			approvalStepInUse(uuid:"${step.uuid}")
+		`).then(data => {
+			if (data) {
+				this.setState({ showRemoveApprovalStepAlert: true })
+			} else {
+				arrayHelpers.remove(index)
+			}
+		})
 	}
 
 	onCancel = () => {
