@@ -10,17 +10,16 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.CommentMapper;
 import mil.dds.anet.utils.DaoUtils;
 
-public class CommentDao implements IAnetDao<Comment> {
+public class CommentDao extends AnetBaseDao<Comment> {
 
 	private static String[] fields = {"uuid", "createdAt", "updatedAt", "authorUuid", "reportUuid", "text"};
 	private static String tableName = "comments";
 	public static String COMMENT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
-	private final Handle dbHandle;
 	private final IdBatcher<Comment> idBatcher;
 
 	public CommentDao(Handle dbHandle) { 
-		this.dbHandle = dbHandle;
+		super(dbHandle, "Comments", tableName, COMMENT_FIELDS, null);
 		final String idBatcherSql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS
 				+ "FROM comments "
 				+ "WHERE comments.uuid IN ( <uuids> )";
@@ -42,8 +41,7 @@ public class CommentDao implements IAnetDao<Comment> {
 	}
 
 	@Override
-	public Comment insert(Comment c) {
-		DaoUtils.setInsertFields(c);
+	public Comment insertInternal(Comment c) {
 		dbHandle.createUpdate("/* insertComment */ "
 				+ "INSERT INTO comments (uuid, \"reportUuid\", \"authorUuid\", \"createdAt\", \"updatedAt\", text)"
 				+ "VALUES (:uuid, :reportUuid, :authorUuid, :createdAt, :updatedAt, :text)")
@@ -54,8 +52,8 @@ public class CommentDao implements IAnetDao<Comment> {
 		return c;
 	}
 
-	public int update(Comment c) {
-		DaoUtils.setUpdateFields(c);
+	@Override
+	public int updateInternal(Comment c) {
 		return dbHandle.createUpdate("/* updateComment */ UPDATE comments SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 			.bindBean(c)
 			.bind("updatedAt", DaoUtils.asLocalDateTime(c.getUpdatedAt()))
@@ -71,11 +69,11 @@ public class CommentDao implements IAnetDao<Comment> {
 			.list();
 	}
 
-	public int delete(String commentUuid) {
+	@Override
+	public int deleteInternal(String commentUuid) {
 		return dbHandle.createUpdate("/* deleteComment */ DELETE FROM comments where uuid = :uuid")
 			.bind("uuid", commentUuid)
 			.execute();
-		
 	}
 
 }
