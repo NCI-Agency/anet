@@ -8,9 +8,11 @@ import * as FieldHelper from 'components/FieldHelper'
 import pluralize from 'pluralize'
 
 import AdvancedMultiSelect from 'components/AdvancedMultiSelect'
+import AdvancedSingleSelect from 'components/AdvancedSingleSelect'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import MultiSelector from 'components/MultiSelector'
+import OrganizationTable from 'components/OrganizationTable'
 import TaskTable from 'components/TaskTable'
 import LinkTo from 'components/LinkTo'
 import Messages from 'components/Messages'
@@ -146,7 +148,13 @@ class BaseOrganizationForm extends Component {
 						queryVars: {responsibleOrgUuid: this.props.currentUser.position.organization.uuid},
 					},
 				}
-
+				const organizationFilters = {
+						allOrganizations: {
+							label: 'All organizations',
+							searchQuery: true,
+						},
+					}
+				const parentOrgAsList= values.parentOrg && values.parentOrg.uuid ? [values.parentOrg] : []
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />
@@ -195,22 +203,21 @@ class BaseOrganizationForm extends Component {
 									/>
 								</React.Fragment>
 								: <React.Fragment>
-									<Field
-										name="parentOrg"
-										component={FieldHelper.renderSpecialField}
-										label={Settings.fields.organization.parentOrg}
+									<AdvancedSingleSelect
+										fieldName='parentOrg'
+										fieldLabel={Settings.fields.organization.parentOrg}
+										placeholder="Search for the a higher level organization..."
+										selectedItems={parentOrgAsList}
+										renderSelected={<OrganizationTable items={parentOrgAsList} showDelete={true} />}
+										overlayColumns={['Parent Organization', 'Name']}
+										overlayRenderRow={this.renderOrganizationOverlayRow}
+										filterDefs={organizationFilters}
 										onChange={value => setFieldValue('parentOrg', value)}
+										objectType={Organization}
+										fields={Organization.autocompleteQuery}
+										queryParams={orgSearchQuery}
+										valueKey="shortName"
 										addon={ORGANIZATIONS_ICON}
-										widget={
-											<Autocomplete
-												objectType={Organization}
-												valueKey="shortName"
-												fields={Organization.autocompleteQuery}
-												placeholder="Start typing to search for a higher level organization..."
-												queryParams={orgSearchQuery}
-												template={Organization.autocompleteTemplate}
-											/>
-										}
 									/>
 									<Field
 										name="shortName"
@@ -437,6 +444,14 @@ class BaseOrganizationForm extends Component {
 		return (
 			<React.Fragment key={item.uuid}>
 				<td className="taskName"><LinkTo task={item}>{item.shortName} - {item.longName}</LinkTo></td>
+			</React.Fragment>
+		)
+	}
+
+	renderOrganizationOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td className="orgShortName"><LinkTo organization={item} /></td>
 			</React.Fragment>
 		)
 	}
