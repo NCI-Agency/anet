@@ -118,7 +118,7 @@ export default class AdvancedSelect extends Component {
 					onFocus={this.handleInputFocus}
 					onBlur={this.handleInputBlur}
 					innerRef={el => {this.overlayTarget = el}}
-					extraColElem={renderExtraCol ? this.renderShortcutsTitle() : null}
+					extraColElem={renderExtraCol ? this.renderShortcutsTitle() : ''}
 					addon={addon}
 				/>
 				<Overlay
