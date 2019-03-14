@@ -242,15 +242,15 @@ class BaseReportForm extends Component {
 					},
 				}
 				const tasksFilters = {
-						allTasks: {
-							label: 'All tasks',
-							searchQuery: true,
-						},
 						recentTasks: {
 							label: 'Recent tasks',
 							searchQuery: false,
 							listName: 'taskRecents',
 							listArgs: 'maxResults:6',
+						},
+						allTasks: {
+							label: 'All tasks',
+							searchQuery: true,
 						},
 						assignedToMyOrg: {
 							label: 'Assigned to my organization',
