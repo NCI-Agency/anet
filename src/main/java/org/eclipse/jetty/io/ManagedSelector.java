@@ -386,6 +386,7 @@ public class ManagedSelector extends ContainerLifeCycle implements Dumpable
     {
         private Set<SelectionKey> _keys = Collections.emptySet();
         private Iterator<SelectionKey> _cursor = Collections.emptyIterator();
+        private int selectFailures = 0;
 
         @Override
         public Runnable produce()
@@ -488,6 +489,18 @@ public class ManagedSelector extends ContainerLifeCycle implements Dumpable
 
                     _keys = selector.selectedKeys();
                     _cursor = _keys.isEmpty() ? Collections.emptyIterator() : _keys.iterator();
+                    // detect a select that had no effect (should have blocked instead)
+                    if (selected == 0 && selector.isOpen() && _keys.size() == 0 && updates == 0) {
+                          selectFailures++;
+                          if (selectFailures >= 5 && FORCE_SELECT_NOW) {
+                              LOG.warn("bad selector detected; reopening");
+                              closeNoExceptions(_selector);
+                              _selector = _selectorManager.newSelector();
+                              selectFailures = 0;
+                          }
+                    } else {
+                          selectFailures = 0;
+                    }
                     if (LOG.isDebugEnabled())
                         LOG.debug("Selector {} processing {} keys, {} updates", selector, _keys.size(), updates);
 
