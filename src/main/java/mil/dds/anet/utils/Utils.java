@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.views.AbstractAnetBean;
 
@@ -166,6 +167,39 @@ public class Utils {
 				parentUuid = orgMap.get(parentUuid).getParentOrgUuid();
 			}
 			result.put(o.getUuid(), orgMap.get(curr));
+		}
+
+		return result;
+	}
+
+	/**
+	 * Given a list of tasks and a topParentUuid, this function maps all of the tasks to their highest parent
+	 * within this list excluding the topParent. This can be used to check for loops.
+	 */
+	public static Map<String, Task> buildParentTaskMapping(List<Task> tasks, @Nullable String topParentUuid) {
+		final Map<String, Task> result = new HashMap<>();
+		final Map<String, Task> taskMap = new HashMap<>();
+
+		for (final Task t : tasks) {
+			taskMap.put(t.getUuid(), t);
+		}
+
+		for (final Task t : tasks) {
+			final Set<String> seenUuids = new HashSet<>();
+			String curr = t.getUuid();
+			seenUuids.add(curr);
+			String parentUuid = t.getCustomFieldRef1Uuid();
+			while (!Objects.equals(parentUuid, topParentUuid) && taskMap.containsKey(parentUuid)) {
+				curr = parentUuid;
+				if (seenUuids.contains(curr)) {
+					final String errorMsg = String.format("Loop detected in task hierarchy: %1$s is its own (grand…)parent!", curr);
+					logger.error(errorMsg);
+					throw new IllegalArgumentException(errorMsg);
+				}
+				seenUuids.add(curr);
+				parentUuid = taskMap.get(parentUuid).getCustomFieldRef1Uuid();
+			}
+			result.put(t.getUuid(), taskMap.get(curr));
 		}
 
 		return result;

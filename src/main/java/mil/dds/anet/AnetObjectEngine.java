@@ -22,7 +22,9 @@ import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.database.ReportActionDao;
@@ -279,6 +281,21 @@ public class AnetObjectEngine {
 		query.setPageSize(Integer.MAX_VALUE);
 		final List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
 		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
+	}
+
+	/**
+	 * Helper function to build a map of task UUIDs to their top parent
+	 * capped at a certain point in the hierarchy.
+	 * parentTask will map to parentTask, and all children will map to the highest
+	 * parent that is NOT the parentTaskUuid.
+	 */
+	public Map<String, Task> buildTopLevelTaskHash(String parentTaskUuid) {
+		final TaskSearchQuery query = new TaskSearchQuery();
+		query.setCustomFieldRef1Uuid(parentTaskUuid);
+		query.setCustomFieldRef1Recursively(true);
+		query.setPageSize(Integer.MAX_VALUE);
+		final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+		return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
 	}
 	
 	public static AnetObjectEngine getInstance() { 

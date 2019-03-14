@@ -48,14 +48,13 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			args.put("likeQuery", Utils.prepForLikeQuery(text) + "%");
 		}
 
-		String commonTableExpression = null;
 		if (query.getResponsibleOrgUuid() != null) {
-			if (query.getIncludeChildrenOrgs() != null && query.getIncludeChildrenOrgs()) {
-				commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+			if (Boolean.TRUE.equals(query.getIncludeChildrenOrgs())) {
+				sql.insert(0, "WITH parent_orgs(uuid) AS ( "
 						+ "SELECT uuid FROM organizations WHERE uuid = :orgUuid "
 					+ "UNION ALL "
 						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid "
-					+ ") ";
+					+ ") ");
 				whereClauses.add(" organizationUuid IN (SELECT uuid from parent_orgs)");
 			} else {
 				whereClauses.add("organizationUuid = :orgUuid");
@@ -103,6 +102,21 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 			args.put("customField", Utils.prepForLikeQuery(query.getCustomField()) + "%");
 		}
 
+		if (query.getCustomFieldRef1Uuid() != null) {
+			if (Boolean.TRUE.equals(query.getCustomFieldRef1Recursively())) {
+				sql.insert(0, "WITH parent_tasks(uuid) AS ( "
+						+ "SELECT uuid FROM tasks WHERE uuid = :customFieldRef1Uuid "
+					+ "UNION ALL "
+						+ "SELECT t.uuid from parent_tasks pt, tasks t WHERE t.customFieldRef1Uuid = pt.uuid AND t.uuid != :customFieldRef1Uuid"
+					+ ") ");
+				whereClauses.add("( tasks.customFieldRef1Uuid IN (SELECT uuid from parent_tasks) "
+					+ "OR tasks.uuid = :customFieldRef1Uuid)");
+			} else {
+				whereClauses.add("tasks.customFieldRef1Uuid = :customFieldRef1Uuid");
+			}
+			args.put("customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
+		}
+
 		if (whereClauses.isEmpty()) {
 			return new AnetBeanList<Task>(query.getPageNum(), query.getPageSize(), new ArrayList<Task>());
 		}
@@ -134,10 +148,6 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "tasks", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
-
-		if (commonTableExpression != null) {
-			sql.insert(0, commonTableExpression);
-		}
 
 		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args);
 		return new AnetBeanList<Task>(sqlQuery, query.getPageNum(), query.getPageSize(), new TaskMapper(), null);
