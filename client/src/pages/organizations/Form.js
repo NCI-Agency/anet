@@ -218,7 +218,7 @@ class BaseOrganizationForm extends Component {
 									<AdvancedSingleSelect
 										fieldName='parentOrg'
 										fieldLabel={Settings.fields.organization.parentOrg}
-										placeholder="Search for the a higher level organization..."
+										placeholder="Search for a higher level organization..."
 										selectedItems={parentOrgAsList}
 										renderSelected={<OrganizationTable items={parentOrgAsList} showDelete={true} />}
 										overlayColumns={['Parent Organization', 'Name']}

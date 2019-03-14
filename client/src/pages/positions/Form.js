@@ -6,9 +6,11 @@ import {Button, HelpBlock} from 'react-bootstrap'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
+import AdvancedSingleSelect from 'components/AdvancedSingleSelect'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import Messages from 'components/Messages'
+import OrganizationTable from 'components/OrganizationTable'
 
 import API from 'api'
 import {Location, Organization, Person, Position} from 'models'
@@ -140,6 +142,13 @@ class BasePositionForm extends Component {
 				const action = <div>
 					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Position</Button>
 				</div>
+				const organizationFilters = {
+					allOrganizations: {
+						label: 'All organizations',
+						searchQuery: true,
+					},
+				}
+				const organizationAsList= values.organization && values.organization.uuid ? [values.organization] : []
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />
@@ -171,21 +180,21 @@ class BasePositionForm extends Component {
 								}
 							</Field>
 
-							<Field
-								name="organization"
-								component={FieldHelper.renderSpecialField}
+							<AdvancedSingleSelect
+								fieldName="organization"
+								fieldLabel="Organization"
+								placeholder="Search the organization for this position..."
+								selectedItems={organizationAsList}
+								renderSelected={<OrganizationTable items={organizationAsList} showDelete={true} />}
+								overlayColumns={['Organization', 'Name']}
+								overlayRenderRow={this.renderOrganizationOverlayRow}
+								filterDefs={organizationFilters}
 								onChange={value => setFieldValue('organization', value)}
+								objectType={Organization}
+								fields={Organization.autocompleteQuery}
+								queryParams={orgSearchQuery}
+								valueKey="shortName"
 								addon={ORGANIZATIONS_ICON}
-								widget={
-									<Autocomplete
-										objectType={Organization}
-										valueKey="shortName"
-										fields={Organization.autocompleteQuery}
-										placeholder="Select the organization for this position"
-										queryParams={orgSearchQuery}
-										template={Organization.autocompleteTemplate}
-									/>
-								}
 							/>
 
 							<this.CodeFieldWithLabel
@@ -292,6 +301,15 @@ class BasePositionForm extends Component {
 		const variableDef = '($position: PositionInput!)'
 		return API.mutation(graphql, variables, variableDef)
 	}
+
+	renderOrganizationOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td className="orgShortName"><LinkTo organization={item} /></td>
+			</React.Fragment>
+		)
+	}
+
 }
 
 const PositionForm = (props) => (
