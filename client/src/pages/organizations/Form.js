@@ -149,11 +149,23 @@ class BaseOrganizationForm extends Component {
 					},
 				}
 				const organizationFilters = {
-						allOrganizations: {
-							label: 'All organizations',
-							searchQuery: true,
-						},
-					}
+					allOrganizations: {
+						label: 'All organizations',
+						searchQuery: true,
+					},
+				}
+				const approversFilters = {
+					allAdvisorPositions: {
+						label: 'All advisor positions',
+						searchQuery: true,
+						queryVars: {type: Position.TYPE.ADVISOR, matchPersonName: true},
+					},
+					colleagues: {
+						label: 'Colleagues',
+						searchQuery: true,
+						queryVars: {type: Position.TYPE.ADVISOR, matchPersonName: true, organizationUuid: this.props.currentUser.position.organization.uuid},
+					},
+				}
 				const parentOrgAsList= values.parentOrg && values.parentOrg.uuid ? [values.parentOrg] : []
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
@@ -286,7 +298,7 @@ class BaseOrganizationForm extends Component {
 												</Modal>
 
 												{values.approvalSteps.map((step, index) => (
-													this.renderApprovalStep(arrayHelpers, setFieldValue, step, index)
+													this.renderApprovalStep(arrayHelpers, setFieldValue, step, index, approversFilters)
 												))}
 											</div>
 										)}
@@ -333,7 +345,7 @@ class BaseOrganizationForm extends Component {
 		)
 	}
 
-	renderApprovalStep = (arrayHelpers, setFieldValue, step, index) => {
+	renderApprovalStep = (arrayHelpers, setFieldValue, step, index, approversFilters) => {
 		const approvers = step.approvers
 
 		return <Fieldset title={`Step ${index + 1}`} key={index}>
@@ -347,20 +359,20 @@ class BaseOrganizationForm extends Component {
 				label="Step name"
 			/>
 
-			<MultiSelector
-				items={approvers}
+			<AdvancedMultiSelect
+				fieldName={`approvalSteps.${index}.approvers`}
+				fieldLabel="Add an approver"
+				placeholder="Search for the approver's position..."
+				selectedItems={approvers}
+				renderSelected={<ApproverTable approvers={approvers} onChange={value => setFieldValue(`approvalSteps.${index}.approvers`, value)} />}
+				overlayColumns={['Approver', 'Name', 'Position']}
+				overlayRenderRow={this.renderApproverOverlayRow}
+				filterDefs={approversFilters}
+				onChange={value => setFieldValue(`approvalSteps.${index}.approvers`, value)}
 				objectType={Position}
 				queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR], matchPersonName: true}}
-				placeholder="Search for the approver's position"
 				fields="uuid, name, code, type, person { uuid, name, rank, role }"
-				template={position =>
-					<span> {position.person && <span> <LinkTo person={position.person} isLink={false}/> - </span>} <LinkTo position={position} isLink={false}/> {position.code && <span> - {position.code} </span>} </span>
-				}
-				addFieldName={`approvalSteps.${index}.approvers`}
-				addFieldLabel="Add an approver"
 				addon={POSITIONS_ICON}
-				renderSelected={<ApproverTable approvers={approvers} />}
-				onChange={value => setFieldValue(`approvalSteps.${index}.approvers`, value)}
 			/>
 		</Fieldset>
 	}
@@ -456,6 +468,14 @@ class BaseOrganizationForm extends Component {
 		)
 	}
 
+	renderApproverOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td><LinkTo person={item.person} target="_blank" /></td>
+				<td><LinkTo position={item} target="_blank" /></td>
+			</React.Fragment>
+		)
+	}
 }
 
 const OrganizationForm = (props) => (
