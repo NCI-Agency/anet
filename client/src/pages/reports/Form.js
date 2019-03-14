@@ -13,7 +13,7 @@ import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 
-import AdvancedMultiSelectOverlayTable from 'components/AdvancedMultiSelectOverlayTable'
+import {AdvancedMultiSelectOverlayTable} from 'components/AdvancedSelectOverlayTable'
 import AppContext from 'components/AppContext'
 import Autocomplete from 'components/Autocomplete'
 import Fieldset from 'components/Fieldset'
@@ -21,7 +21,9 @@ import CustomDateInput from 'components/CustomDateInput'
 import ConfirmDelete from 'components/ConfirmDelete'
 import ReportTags from 'components/ReportTags'
 import AdvancedMultiSelect from 'components/AdvancedMultiSelect'
+import AdvancedSingleSelect from 'components/AdvancedSingleSelect'
 import MultiSelector from 'components/MultiSelector'
+import LocationTable from 'components/LocationTable'
 import TaskTable from 'components/TaskTable'
 import RichTextEditor from 'components/RichTextEditor'
 import Messages from 'components/Messages'
@@ -192,7 +194,6 @@ class BaseReportForm extends Component {
 				submitForm,
 				resetForm
 			}) => {
-				console.log(values)
 				const locationFilters = {
 					recentLocations: {
 						label: 'Recent locations',
@@ -226,8 +227,8 @@ class BaseReportForm extends Component {
 					atLocation: {
 						label: 'At location',
 						searchQuery: true,
-						doNotDisplay: !values.location.uuid,
-						queryVars: {locationUuid: values.location.uuid},
+						doNotDisplay: !(values.location && values.location.uuid),
+						queryVars: {locationUuid: (values.location && values.location.uuid ? values.location.uuid : null)},
 					},
 					activeAdvisors: {
 						label: 'All advisors',
@@ -284,7 +285,7 @@ class BaseReportForm extends Component {
 				const action = <div>
 					<Button bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm})} disabled={isSubmitting}>{submitText}</Button>
 				</div>
-				const locName = <div>{values.location.name}</div>
+				const locationAsList= values.location && values.location.uuid ? [values.location] : []
 				return <div className="report-form">
 					<NavigationWarning isBlocking={dirty} />
 					<ToastContainer />
@@ -336,12 +337,12 @@ class BaseReportForm extends Component {
 								}
 							</Field>
 
-							<AdvancedMultiSelect
+							<AdvancedSingleSelect
 								fieldName='location'
+								fieldLabel='Location'
 								placeholder="Search for the location where this happened..."
-								selectedItems={[values.location]}
-								renderSelected={locName}
-								overlayTable={AdvancedMultiSelectOverlayTable}
+								selectedItems={locationAsList}
+								renderSelected={<LocationTable items={locationAsList} showDelete={true} />}
 								overlayColumns={['Name']}
 								overlayRenderRow={this.renderLocationOverlayRow}
 								filterDefs={locationFilters}
@@ -447,7 +448,6 @@ class BaseReportForm extends Component {
 								placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
 								selectedItems={values.tasks}
 								renderSelected={<TaskTable tasks={values.tasks} onChange={value => setFieldValue('tasks', value)} showDelete={true} showOrganization={true} />}
-								overlayTable={AdvancedMultiSelectOverlayTable}
 								overlayColumns={['Name', 'Organization']}
 								overlayRenderRow={this.renderTaskOverlayRow}
 								filterDefs={tasksFilters}
@@ -523,7 +523,6 @@ class BaseReportForm extends Component {
 											placeholder="Search for authorization groups..."
 											selectedItems={values.authorizationGroups}
 											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} onChange={value => setFieldValue('authorizationGroups', value)} showDelete={true} />}
-											overlayTable={AdvancedMultiSelectOverlayTable}
 											overlayColumns={['Name', 'Description']}
 											overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
 											filterDefs={authorizationGroupsFilters}
@@ -717,7 +716,7 @@ class BaseReportForm extends Component {
 	renderLocationOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td>{item.name}</td>
+				<td><LinkTo anetLocation={item} /></td>
 			</React.Fragment>
 		)
 	}
@@ -734,7 +733,7 @@ class BaseReportForm extends Component {
 	renderTaskOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td className="taskName"><LinkTo task={item} >{item.shortName} - {item.longName}</LinkTo></td>
+				<td className="taskName"><LinkTo task={item}>{item.shortName} - {item.longName}</LinkTo></td>
 				<td className="taskOrg" ><LinkTo organization={item.responsibleOrg} /></td>
 			</React.Fragment>
 		)

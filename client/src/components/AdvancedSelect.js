@@ -15,7 +15,7 @@ import API from 'api'
 
 const MOBILE_WIDTH = 733
 
-const AdvancedMultiSelectTarget = ({ overlayRef }) =>
+const AdvancedSelectTarget = ({ overlayRef }) =>
 	<Row>
 		<Col sm={12} lg={9} className="form-group" ref={overlayRef} style={{position: 'relative', marginBottom: 0}} />
 	</Row>
@@ -59,7 +59,7 @@ export const propTypes = {
 	placeholder: PropTypes.string,  // input field placeholder
 	selectedItems: PropTypes.array.isRequired,  // already selected items
 	renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,  // how to render the selected items
-	overlayTable: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]).isRequired,  // search results component for in the overlay
+	overlayTable: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),  // search results component for in the overlay
 	overlayColumns: PropTypes.array.isRequired,
 	overlayRenderRow: PropTypes.func.isRequired,
 	filterDefs: PropTypes.object,  // config of the search filters
@@ -129,7 +129,6 @@ export default class AdvancedSelect extends Component {
 					<ContainerDimensions>
 						{({ width }) =>
 							<Row className="border-between">
-<<<<<<< HEAD
 								<Col sm={4} md={3}>
 								{ width < MOBILE_WIDTH ?
 									<div><SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
@@ -139,10 +138,11 @@ export default class AdvancedSelect extends Component {
 								</Col>
 								<Col sm={8} md={9} style={{ minHeight: '80px' }}>
 									<this.props.overlayTable
+										fieldName={fieldName}
 										items={items}
 										selectedItems={selectedItems}
 										handleAddItem={handleAddItem}
-										removeItem={handleRemoveItem}
+										handleRemoveItem={handleRemoveItem}
 										objectType={this.props.objectType}
 										columns={this.props.overlayColumns}
 										renderRow={this.props.overlayRenderRow}
@@ -158,7 +158,7 @@ export default class AdvancedSelect extends Component {
 						</ContainerDimensions>
 					</Popover>
 				</Overlay>
-				<AdvancedMultiSelectTarget overlayRef={el => {this.overlayContainer = el}}/>
+				<AdvancedSelectTarget overlayRef={el => {this.overlayContainer = el}}/>
 				<Row>
 					<Col sm={2} />
 					<Col sm={7}>{renderSelectedWithDelete}</Col>

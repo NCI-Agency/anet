@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 
 import AdvancedSelect, {propTypes as advancedSelectPropTypes} from 'components/AdvancedSelect'
+import {AdvancedSingleSelectOverlayTable} from 'components/AdvancedSelectOverlayTable'
 import _cloneDeep from 'lodash/cloneDeep'
 
 
@@ -9,11 +10,16 @@ export default class AdvancedSingleSelect extends Component {
 		...advancedSelectPropTypes
 	}
 
+	static defaultProps = {
+		overlayTable: AdvancedSingleSelectOverlayTable
+	}
+
 	render() {
-		return (
-			<AdvancedSelect {...this.props} handleAddItem={this.handleAddItem} handleRemoveItem={this.handleRemoveItem} />
-		)
-		
+		return <AdvancedSelect
+			{...this.props}
+			handleAddItem={this.handleAddItem}
+			handleRemoveItem={this.handleRemoveItem}
+		/>
 	}
 
 	handleAddItem = (newItem) => {
