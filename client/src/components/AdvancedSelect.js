@@ -59,6 +59,7 @@ export const propTypes = {
 	placeholder: PropTypes.string,  // input field placeholder
 	selectedItems: PropTypes.array.isRequired,  // already selected items
 	renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,  // how to render the selected items
+	overlayTableClassName: PropTypes.string,
 	overlayTable: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),  // search results component for in the overlay
 	overlayColumns: PropTypes.array.isRequired,
 	overlayRenderRow: PropTypes.func.isRequired,
@@ -74,6 +75,8 @@ export const propTypes = {
 	shortcutsTitle: PropTypes.string,
 	renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
 	addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
+	handleAddItem: PropTypes.func,
+	handleRemoveItem: PropTypes.func,
 }
 
 export default class AdvancedSelect extends Component {
@@ -96,7 +99,10 @@ export default class AdvancedSelect extends Component {
 	}
 
 	render() {
-		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected, filterDefs, renderExtraCol, addon, handleAddItem, handleRemoveItem } = this.props
+		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected,
+			onChange, objectType, queryParams, fields, shortcuts, shortcutsTitle,
+			renderExtraCol, addon, handleAddItem, handleRemoveItem, ...overlayProps } = this.props
+		const { overlayTableClassName, overlayTable, overlayColumns, overlayRenderRow, filterDefs } = overlayProps
 		const { results, filterType, isLoading } = this.state
 		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: handleRemoveItem})
 		const items = results && results[filterType] ? results[filterType].list : []
@@ -143,11 +149,12 @@ export default class AdvancedSelect extends Component {
 										selectedItems={selectedItems}
 										handleAddItem={handleAddItem}
 										handleRemoveItem={handleRemoveItem}
-										objectType={this.props.objectType}
-										columns={this.props.overlayColumns}
-										renderRow={this.props.overlayRenderRow}
+										objectType={objectType}
+										columns={overlayColumns}
+										renderRow={overlayRenderRow}
 										isLoading={isLoading}
 										loaderMessage={"No results found"}
+										tableClassName={overlayTableClassName}
 									/>
 									<footer className="searchPagination">
 										{this.paginationFor(filterType)}

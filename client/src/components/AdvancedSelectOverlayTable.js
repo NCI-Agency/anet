@@ -4,16 +4,16 @@ import { Classes, Icon } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
 import Checkbox from 'components/Checkbox'
+import LoaderHOC from 'HOC/LoaderHOC'
 
-
-const AdvancedSelectOverlayTable = (props) => {
-	const { fieldName, objectType, items, selectedItems, handleAddItem, handleRemoveItem, columns, renderRow, selectItemComponent } = props
+const AdvancedSelectOverlayTable = ({
+		fieldName, objectType, items, selectedItems, handleAddItem, handleRemoveItem,
+		columns, renderRow, selectItemComponent, tableClassName }) => {
 	const selectedItemsUuids = selectedItems.map(a => a.uuid)
 	return (
-		<Table responsive hover striped>
+		<Table responsive hover striped className={tableClassName}>
 			<thead>
 				<tr>
-					<th />
 					{columns.map(col => <th key={col}>{col}</th>)}
 				</tr>
 			</thead>
@@ -30,7 +30,7 @@ const AdvancedSelectOverlayTable = (props) => {
 	)
 }
 
-export const AdvancedSingleSelectOverlayTable = (props) => {
+const AdvancedSingleSelectOverlayTableBase = (props) => {
 	return (
 		<AdvancedSelectOverlayTable
 			{...props}
@@ -49,7 +49,7 @@ export const AdvancedSingleSelectOverlayTable = (props) => {
 	)
 }
 
-export const AdvancedMultiSelectOverlayTable = (props) => {
+const AdvancedMultiSelectOverlayTableBase = (props) => {
 	return (
 		<AdvancedSelectOverlayTable
 			{...props}
@@ -67,3 +67,6 @@ export const AdvancedMultiSelectOverlayTable = (props) => {
 		/>
 	)
 }
+
+export const AdvancedSingleSelectOverlayTable = LoaderHOC('isLoading')('items')(AdvancedSingleSelectOverlayTableBase)
+export const AdvancedMultiSelectOverlayTable = LoaderHOC('isLoading')('items')(AdvancedMultiSelectOverlayTableBase)

@@ -13,7 +13,6 @@ import pluralize from 'pluralize'
 
 import Settings from 'Settings'
 
-import {AdvancedMultiSelectOverlayTable} from 'components/AdvancedSelectOverlayTable'
 import AppContext from 'components/AppContext'
 import Autocomplete from 'components/Autocomplete'
 import Fieldset from 'components/Fieldset'
@@ -343,7 +342,7 @@ class BaseReportForm extends Component {
 								placeholder="Search for the location where this happened..."
 								selectedItems={locationAsList}
 								renderSelected={<LocationTable items={locationAsList} showDelete={true} />}
-								overlayColumns={['Name']}
+								overlayColumns={['Location', 'Name']}
 								overlayRenderRow={this.renderLocationOverlayRow}
 								filterDefs={locationFilters}
 								onChange={value => setFieldValue('location', value)}
@@ -426,9 +425,8 @@ class BaseReportForm extends Component {
 								placeholder="Search for attendees who attended the meeting..."
 								selectedItems={values.attendees}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
-								overlayTable={AttendeesOverlayTable}
-								overlayColumns={['Name', 'Description']}
-								overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
+								overlayColumns={['Attendee', 'Name', 'Position', 'Location', 'Organization']}
+								overlayRenderRow={this.renderAttendeeOverlayRow}
 								filterDefs={attendeesFilters}
 								onChange={value => this.updateAttendees(setFieldValue, 'attendees', value)}
 								objectType={Person}
@@ -448,7 +446,7 @@ class BaseReportForm extends Component {
 								placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
 								selectedItems={values.tasks}
 								renderSelected={<TaskTable tasks={values.tasks} onChange={value => setFieldValue('tasks', value)} showDelete={true} showOrganization={true} />}
-								overlayColumns={['Name', 'Organization']}
+								overlayColumns={['Task', 'Name', 'Organization']}
 								overlayRenderRow={this.renderTaskOverlayRow}
 								filterDefs={tasksFilters}
 								onChange={value => {
@@ -523,7 +521,7 @@ class BaseReportForm extends Component {
 											placeholder="Search for authorization groups..."
 											selectedItems={values.authorizationGroups}
 											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} onChange={value => setFieldValue('authorizationGroups', value)} showDelete={true} />}
-											overlayColumns={['Name', 'Description']}
+											overlayColumns={['Authorization Group', 'Name', 'Description']}
 											overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
 											filterDefs={authorizationGroupsFilters}
 											onChange={value => setFieldValue('authorizationGroups', value)}
@@ -721,11 +719,15 @@ class BaseReportForm extends Component {
 		)
 	}
 
-	renderAuthorizationGroupOverlayRow = (item) => {
+	renderAttendeeOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td>{item.name}</td>
-				<td>{item.description}</td>
+				<td>
+					<LinkTo person={item}/>
+				</td>
+				<td><LinkTo position={item.position} />{item.position && item.position.code ? `, ${item.position.code}`: ``}</td>
+				<td><LinkTo whenUnspecified="" anetLocation={item.position && item.position.location} /></td>
+				<td>{item.position && item.position.organization && <LinkTo organization={item.position.organization} />}</td>
 			</React.Fragment>
 		)
 	}
@@ -738,6 +740,16 @@ class BaseReportForm extends Component {
 			</React.Fragment>
 		)
 	}
+
+	renderAuthorizationGroupOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td>{item.name}</td>
+				<td>{item.description}</td>
+			</React.Fragment>
+		)
+	}
+
 }
 
 const ReportForm = (props) => (
