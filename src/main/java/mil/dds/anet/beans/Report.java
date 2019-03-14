@@ -28,7 +28,7 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Report extends AbstractAnetBean {
 
-	public enum ReportState { DRAFT, PENDING_APPROVAL, RELEASED, REJECTED, CANCELLED, FUTURE }
+	public enum ReportState { DRAFT, PENDING_APPROVAL, PUBLISHED, REJECTED, CANCELLED, FUTURE, APPROVED }
 	public enum Atmosphere { POSITIVE, NEUTRAL, NEGATIVE }
 	public enum ReportCancelledReason { CANCELLED_BY_ADVISOR,
 										CANCELLED_BY_PRINCIPAL,
@@ -70,7 +70,7 @@ public class Report extends AbstractAnetBean {
 	// The user who instantiated this; needed to determine access to sensitive information
 	private Person user;
 	private List<AuthorizationGroup> authorizationGroups;
-	private List<ApprovalAction> approvalStatus;
+	private List<ReportAction> workflow;
 
 	@GraphQLQuery(name="approvalStep")
 	public CompletableFuture<ApprovalStep> loadApprovalStep(@GraphQLRootContext Map<String, Object> context) {
@@ -425,27 +425,28 @@ public class Report extends AbstractAnetBean {
 	public void setComments(List<Comment> comments) {
 		this.comments = comments;
 	}
-	
+
 	@GraphQLIgnore
 	public List<Comment> getComments() { 
 		return comments;
 	}
-	
-	/*Returns a full list of the approval steps and statuses for this report
-	 * There will be an approval action for each approval step for this report
-	 * With information about the 
+
+	/*Returns a list of report actions. It depends on the report status:
+	 * - for APPROVED or PUBLISHED reports, it returns all existing report actions
+	 * - for reports in other steps it also creates report actions for all the
+	 *   approval steps for which it does not have related report actions yet.
 	 */
-	@GraphQLQuery(name="approvalStatus")
-	public CompletableFuture<List<ApprovalAction>> loadApprovalStatus(@GraphQLRootContext Map<String, Object> context) {
-		if (approvalStatus != null) {
-			return CompletableFuture.completedFuture(approvalStatus);
+	@GraphQLQuery(name="workflow")
+	public CompletableFuture<List<ReportAction>> loadWorkflow(@GraphQLRootContext Map<String, Object> context) {
+		if (workflow != null) {
+			return CompletableFuture.completedFuture(workflow);
 		}
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-		return engine.getApprovalActionDao().getActionsForReport(context, uuid)
+		return engine.getReportActionDao().getActionsForReport(context, uuid)
 				.thenApply(actions -> {
-			if (state == ReportState.RELEASED) {
-				approvalStatus = compactActions(actions);
-			} else {
+			//For reports which are not approved or published, make sure there
+			//is a report action for each approval step.
+			if (!(state == ReportState.APPROVED || state == ReportState.PUBLISHED)) {
 				final Organization ao = loadAdvisorOrg(context).join();
 				final String aoUuid = DaoUtils.getUuid(ao);
 				List<ApprovalStep> steps = getWorkflowForOrg(context, engine, aoUuid).join();
@@ -455,61 +456,44 @@ public class Report extends AbstractAnetBean {
 						steps = getDefaultWorkflow(context, engine, defaultOrgUuid).join();
 					}
 				}
-				approvalStatus = createWorkflow(actions, steps);
+				final List<ReportAction> newApprovalStepsActions = createApprovalStepsActions(actions, steps);
+				actions.addAll(newApprovalStepsActions);
+				return actions;
+			} else {
+				return actions;
 			}
-			return approvalStatus;
 		});
 	}
 
 	@GraphQLIgnore
-	public List<ApprovalAction> getApprovalStatus() {
-		return approvalStatus;
+	public List<ReportAction> getWorkflow() {
+		return workflow;
 	}
 
-	public void setApprovalStatus(List<ApprovalAction> approvalStatus) {
-		this.approvalStatus = approvalStatus;
+	public void setWorkflow(List<ReportAction> workflow) {
+		this.workflow = workflow;
 	}
 
-	private List<ApprovalAction> compactActions(List<ApprovalAction> actions) {
-		//Compact to only get the most recent event for each step.
-		if (actions.size() == 0) {
-			//Magically released, probably imported this way.
-			return actions;
-		}
-		ApprovalAction last = actions.get(0);
-		final List<ApprovalAction> compacted = new LinkedList<ApprovalAction>();
-		for (final ApprovalAction action : actions) {
-			if (action.getStepUuid() != null && last.getStepUuid() != null && !action.getStepUuid().equals(last.getStepUuid())) {
-				compacted.add(last);
-			}
-			last = action;
-		}
-		compacted.add(actions.get(actions.size() - 1));
-		return compacted;
-	}
-
-	private List<ApprovalAction> createWorkflow(List<ApprovalAction> actions, List<ApprovalStep> steps) {
-		final List<ApprovalAction> workflow = new LinkedList<ApprovalAction>();
+	private List<ReportAction> createApprovalStepsActions(List<ReportAction> actions, List<ApprovalStep> steps) {
+		final List<ReportAction> newActions = new LinkedList<ReportAction>();
 		for (final ApprovalStep step : steps) {
-			//If there is an Action for this step, grab the last one (date wise)
-			final Optional<ApprovalAction> existing = actions.stream().filter(a ->
+			//Check if there are report actions for this step
+			final Optional<ReportAction> existing = actions.stream().filter(a ->
 					Objects.equals(DaoUtils.getUuid(step), a.getStepUuid())
-				).max(new Comparator<ApprovalAction>() {
-					public int compare(ApprovalAction a, ApprovalAction b) {
+				).max(new Comparator<ReportAction>() {
+					public int compare(ReportAction a, ReportAction b) {
 						return a.getCreatedAt().compareTo(b.getCreatedAt());
 					}
 				});
-			final ApprovalAction action;
-			if (existing.isPresent()) {
-				action = existing.get();
-			} else {
-				//If not then create a new one and attach this step
-				action = new ApprovalAction();
+			if (!existing.isPresent()) {
+				//If there is no action for this step, create a new one and attach this step
+				final ReportAction action;
+				action = new ReportAction();
+				action.setStep(step);
+				newActions.add(action);
 			}
-			action.setStep(step);
-			workflow.add(action);
 		}
-		return workflow;
+		return newActions;
 	}
 
 	private CompletableFuture<List<ApprovalStep>> getWorkflowForOrg(Map<String, Object> context, AnetObjectEngine engine, String aoUuid) {

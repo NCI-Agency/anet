@@ -9,7 +9,7 @@ import mil.dds.anet.beans.Report.ReportState;
 
 public class ReportSearchQuery extends AbstractSearchQuery {
 
-	public enum ReportSearchSortBy { CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT } 
+	public enum ReportSearchSortBy { CREATED_AT, ENGAGEMENT_DATE, RELEASED_AT, UPDATED_AT }
 
 	String authorUuid;
 	Instant engagementDateStart;

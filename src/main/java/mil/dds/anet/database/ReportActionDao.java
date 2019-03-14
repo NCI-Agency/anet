@@ -6,27 +6,26 @@ import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.Handle;
 
-import mil.dds.anet.beans.ApprovalAction;
+import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.lists.AnetBeanList;
-import mil.dds.anet.database.mappers.ApprovalActionMapper;
+import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
-public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
+public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
-	Handle dbHandle;
-	private final ForeignKeyBatcher<ApprovalAction> reportIdBatcher;
+	private final ForeignKeyBatcher<ReportAction> reportIdBatcher;
 
-	public ApprovalActionDao(Handle db) { 
-		this.dbHandle = db;
-		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"approvalActions\" "
+	public ReportActionDao(Handle db) { 
+		super(db, "ReportActions", "reportActions", "*", null);
+		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
 				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		this.reportIdBatcher = new ForeignKeyBatcher<ApprovalAction>(db, reportIdBatcherSql, "foreignKeys", new ApprovalActionMapper(), "reportUuid");
+		this.reportIdBatcher = new ForeignKeyBatcher<ReportAction>(db, reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
 	}
-	
-	public ApprovalAction insert(ApprovalAction action) {
-		DaoUtils.setInsertFields(action);
-		dbHandle.createUpdate("/* insertApprovalAction */ INSERT INTO \"approvalActions\" "
+
+	@Override
+	public ReportAction insertInternal(ReportAction action) {
+		dbHandle.createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
 				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
 			.bind("approvalStepUuid", action.getStepUuid())
@@ -42,9 +41,9 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 * Returns all approval actions ever taken for a particular report. 
 	 * Ordered by their date ascending (earliest to most recent). 
 	 */
-	public CompletableFuture<List<ApprovalAction>> getActionsForReport(Map<String, Object> context, String reportUuid) {
-		return new ForeignKeyFetcher<ApprovalAction>()
-				.load(context, "report.approvalActions", reportUuid);
+	public CompletableFuture<List<ReportAction>> getActionsForReport(Map<String, Object> context, String reportUuid) {
+		return new ForeignKeyFetcher<ReportAction>()
+				.load(context, "report.reportActions", reportUuid);
 	}
 
 	/**
@@ -52,13 +51,13 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 	 * where there were multiple actions on the same step (ie a reject then an approval
 	 * will only return the approval).
 	 */
-	public List<ApprovalAction> getFinalActionsForReport(String reportUuid) {
+	public List<ReportAction> getFinalActionsForReport(String reportUuid) {
 		//TODO: test this. I don't think it works.... 
-		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM \"approvalActions\" "
+		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM \"reportActions\" "
 				+ "WHERE \"reportUuid\" = :reportUuid GROUP BY \"approvalStepUuid\" "
 				+ "ORDER BY \"createdAt\" DESC")
 			.bind("reportUuid", reportUuid)
-			.map(new ApprovalActionMapper())
+			.map(new ReportActionMapper())
 			.list();
 	}
 	
@@ -67,21 +66,26 @@ public class ApprovalActionDao implements IAnetDao<ApprovalAction> {
 		throw new UnsupportedOperationException();
 	}
 
-	public ApprovalAction getByUuid(String uuid) {
+	public ReportAction getByUuid(String uuid) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public List<ApprovalAction> getByIds(List<String> uuids) {
+	public List<ReportAction> getByIds(List<String> uuids) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public int update(ApprovalAction obj) {
+	public int updateInternal(ReportAction obj) {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<List<ApprovalAction>> getApprovalActions(List<String> foreignKeys) {
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
+	}
+
+	public List<List<ReportAction>> getReportActions(List<String> foreignKeys) {
 		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 }

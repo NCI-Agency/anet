@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import com.codahale.metrics.MetricRegistry;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.ApprovalAction;
+import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.Comment;
@@ -147,10 +147,10 @@ public final class BatchingUtils {
 				return CompletableFuture.supplyAsync(() -> engine.getReportDao().getByIds(keys), dispatcherService);
 			}
 		}, dataLoaderOptions));
-		dataLoaderRegistry.register("report.approvalActions", new DataLoader<>(new BatchLoader<String, List<ApprovalAction>>() {
+		dataLoaderRegistry.register("report.reportActions", new DataLoader<>(new BatchLoader<String, List<ReportAction>>() {
 			@Override
-			public CompletionStage<List<List<ApprovalAction>>> load(List<String> foreignKeys) {
-				return CompletableFuture.supplyAsync(() -> engine.getApprovalActionDao().getApprovalActions(foreignKeys), dispatcherService);
+			public CompletionStage<List<List<ReportAction>>> load(List<String> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getReportActionDao().getReportActions(foreignKeys), dispatcherService);
 			}
 		}, dataLoaderOptions));
 		dataLoaderRegistry.register("report.attendees", new DataLoader<>(new BatchLoader<String, List<ReportPerson>>() {

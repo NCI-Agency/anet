@@ -28,13 +28,17 @@ class BaseMyReports extends Page {
 			draft: null,
 			future: null,
 			pending: null,
-			released: null
+			approved: null,
+			published: null,
+			cancelled: null
 		}
 		this.partFuncs = {
 			draft: this.getPart.bind(this, 'draft', [Report.STATE.DRAFT, Report.STATE.REJECTED]),
 			future: this.getPart.bind(this, 'future', [Report.STATE.FUTURE]),
 			pending: this.getPart.bind(this, 'pending', [Report.STATE.PENDING_APPROVAL]),
-			released: this.getPart.bind(this, 'released', [Report.STATE.RELEASED, Report.STATE.CANCELLED])
+			approved: this.getPart.bind(this, 'approved', [Report.STATE.APPROVED]),
+			published: this.getPart.bind(this, 'published', [Report.STATE.PUBLISHED]),
+			cancelled: this.getPart.bind(this, 'cancelled', [Report.STATE.CANCELLED])
 		}
 	}
 
@@ -82,14 +86,18 @@ class BaseMyReports extends Page {
 					<AnchorNavItem to="draft-reports">Draft reports</AnchorNavItem>
 					<AnchorNavItem to="upcoming-engagements">Upcoming Engagements</AnchorNavItem>
 					<AnchorNavItem to="pending-approval">Pending approval</AnchorNavItem>
+					<AnchorNavItem to="approved">Approved reports</AnchorNavItem>
 					<AnchorNavItem to="published-reports">Published reports</AnchorNavItem>
+					<AnchorNavItem to="cancelled-reports">Cancelled reports</AnchorNavItem>
 				</Nav>
 			</SubNav>
 
 			{this.renderSection('Draft Reports', this.state.draft, this.goToPage.bind(this, 'draft'), 'draft-reports', 'draft')}
 			{this.renderSection('Upcoming Engagements', this.state.future, this.goToPage.bind(this, 'future'), 'upcoming-engagements', 'future')}
 			{this.renderSection("Pending Approval", this.state.pending, this.goToPage.bind(this, 'pending'), 'pending-approval', 'pending')}
-			{this.renderSection("Published Reports", this.state.released, this.goToPage.bind(this, 'released'), 'published-reports', 'released')}
+			{this.renderSection("Approved", this.state.approved, this.goToPage.bind(this, 'approved'), 'approved', 'approved')}
+			{this.renderSection("Published Reports", this.state.published, this.goToPage.bind(this, 'published'), 'published-reports', 'published')}
+			{this.renderSection("Cancelled Reports", this.state.cancelled, this.goToPage.bind(this, 'cancelled'), 'cancelled-reports', 'cancelled')}
 		</div>
 	}
 

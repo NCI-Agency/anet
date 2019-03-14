@@ -34,7 +34,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
 
 	public PersonDao(Handle h) { 
-		super(h, "Person", tableName, PERSON_FIELDS, null);
+		super(h, "People", tableName, PERSON_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, "uuids", new PersonMapper());
 
@@ -62,8 +62,8 @@ public class PersonDao extends AnetBaseDao<Person> {
 		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	public Person insert(Person p) {
-		DaoUtils.setInsertFields(p);
+	@Override
+	public Person insertInternal(Person p) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("/* personInsert */ INSERT INTO people " 
 				+ "(uuid, name, status, role, \"emailAddress\", \"phoneNumber\", rank, \"pendingVerification\", "
@@ -88,9 +88,9 @@ public class PersonDao extends AnetBaseDao<Person> {
 			.execute();
 		return p;
 	}
-	
-	public int update(Person p) {
-		DaoUtils.setUpdateFields(p);
+
+	@Override
+	public int updateInternal(Person p) {
 		StringBuilder sql = new StringBuilder("/* personUpdate */ UPDATE people "
 				+ "SET name = :name, status = :status, role = :role, "
 				+ "gender = :gender, country = :country,  \"emailAddress\" = :emailAddress, "
@@ -112,7 +112,12 @@ public class PersonDao extends AnetBaseDao<Person> {
 			.bind("role", DaoUtils.getEnumId(p.getRole()))
 			.execute();
 	}
-	
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
+	}
+
 	public AnetBeanList<Person> search(PersonSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
 				.getPersonSearcher().runSearch(query, dbHandle);
@@ -160,80 +165,81 @@ public class PersonDao extends AnetBaseDao<Person> {
 				.list();
 	}
 
-	public int mergePeople(Person winner, Person loser, Boolean copyPosition) {
-		return dbHandle.inTransaction(h -> {
-				//delete duplicates where other is primary, or where neither is primary
-				h.createUpdate("DELETE FROM \"reportPeople\" WHERE ("
-						+ "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
-							+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
-						+ ")) OR ("
-						+ "\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
-							+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
-						+ ")) OR ("
-						+ "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("
-							+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" != :isPrimary"
-						+ "))")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.bind("isPrimary", true)
-					.execute();
+	public int mergePeople(Person winner, Person loser) {
+		return AnetObjectEngine.getInstance().executeInTransaction(this::mergePeopleTransactional, winner, loser);
+	}
 
-				//update report attendance, should now be unique
-				h.createUpdate("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+	private int mergePeopleTransactional(Person winner, Person loser) {
+		//delete duplicates where other is primary, or where neither is primary
+		dbHandle.createUpdate("DELETE FROM \"reportPeople\" WHERE ("
+				+ "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
+					+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
+				+ ")) OR ("
+				+ "\"personUuid\" = :winnerUuid AND \"reportUuid\" IN ("
+					+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :loserUuid AND \"isPrimary\" = :isPrimary"
+				+ ")) OR ("
+				+ "\"personUuid\" = :loserUuid AND \"isPrimary\" != :isPrimary AND \"reportUuid\" IN ("
+					+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" != :isPrimary"
+				+ "))")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.bind("isPrimary", true)
+			.execute();
 
-				// update approvals this person might have done
-				h.createUpdate("UPDATE \"approvalActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+		//update report attendance, should now be unique
+		dbHandle.createUpdate("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
-				// report author update
-				h.createUpdate("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+		// update approvals this person might have done
+		dbHandle.createUpdate("UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
-				// comment author update
-				h.createUpdate("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+		// report author update
+		dbHandle.createUpdate("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
-				// update position history
-				h.createUpdate("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+		// comment author update
+		dbHandle.createUpdate("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
-				// update note authors
-				h.createUpdate("UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+		// update position history
+		dbHandle.createUpdate("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
-				// update note related objects where we don't already have the same note for the winnerUuid
-				h.createUpdate("UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
-						+ " AND \"noteUuid\" NOT IN ("
-							+ "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
-						+ ")")
-					.bind("winnerUuid", winner.getUuid())
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+		// update note authors
+		dbHandle.createUpdate("UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
-				// now delete obsolete note related objects
-				h.createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
-					.bind("loserUuid", loser.getUuid())
-					.execute();
+		// update note related objects where we don't already have the same note for the winnerUuid
+		dbHandle.createUpdate("UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
+				+ " AND \"noteUuid\" NOT IN ("
+					+ "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
+				+ ")")
+			.bind("winnerUuid", winner.getUuid())
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
-				//delete the person!
-				return h.createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
-					.bind("loserUuid", loser.getUuid())
-					.execute();
-		});
+		// now delete obsolete note related objects
+		dbHandle.createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 
+		//delete the person!
+		return dbHandle.createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
+			.bind("loserUuid", loser.getUuid())
+			.execute();
 	}
 
 	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, String personUuid) {

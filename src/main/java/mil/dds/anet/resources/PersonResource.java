@@ -341,7 +341,7 @@ public class PersonResource {
 				.removePersonFromPosition(loserPosition.getUuid());
 		}
 
-		int merged = dao.mergePeople(winner, loser, copyPosition);
+		int merged = dao.mergePeople(winner, loser);
 		AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
 		
 		if (loserPosition != null && copyPosition) { 

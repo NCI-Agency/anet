@@ -58,7 +58,7 @@ class DailyRollupChart extends Component {
     let chart = d3.select(this.node)
     let xLabels = [].concat.apply(
       [],
-      chartData.map(d => d.released + d.cancelled)
+      chartData.map(d => d.published + d.cancelled)
     )
     let yLabels = {}
     let yDomain = chartData.map(d => {
@@ -156,25 +156,25 @@ class DailyRollupChart extends Component {
     }
 
     bar.append('rect')
-      .attr('width', d => d.released && xScale(d.released))
+      .attr('width', d => d.published && xScale(d.published))
       .attr('height', BAR_HEIGHT)
       .attr('fill', barColors.verified)
 
     bar.append('text')
-      .attr('x', d => xScale(d.released) - 6)
+      .attr('x', d => xScale(d.published) - 6)
       .attr('y', BAR_HEIGHT / 2)
       .attr('dy', '.35em')
       .style('text-anchor', 'end')
-      .text(d => d.released || '')
+      .text(d => d.published || '')
 
     bar.append('rect')
-      .attr('x', d => d.released && xScale(d.released))
+      .attr('x', d => d.published && xScale(d.published))
       .attr('width', d => d.cancelled && xScale(d.cancelled))
       .attr('height', BAR_HEIGHT)
       .attr('fill', barColors.cancelled)
 
     bar.append('text')
-      .attr('x', d => xScale(d.released) + xScale(d.cancelled) - 6)
+      .attr('x', d => xScale(d.published) + xScale(d.cancelled) - 6)
       .attr('y', BAR_HEIGHT / 2)
       .attr('dy', '.35em')
       .style('text-anchor', 'end')
