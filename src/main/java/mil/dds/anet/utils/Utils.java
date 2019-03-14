@@ -138,18 +138,19 @@ public class Utils {
 
 	/**
 	 * Given a list of organizations and a topParentUuid, this function maps all of the organizations to their highest parent
-	 * within this list excluding the topParent.  This is used to generate graphs/tables that bubble things up to their highest parent
+	 * within this list excluding the topParent. This can be used to check for loops, or to generate graphs/tables that bubble
+	 * things up to their highest parent.
 	 * This is used in the daily rollup graphs. 
 	 */
 	public static Map<String, Organization> buildParentOrgMapping(List<Organization> orgs, @Nullable String topParentUuid) {
 		final Map<String, Organization> result = new HashMap<>();
 		final Map<String, Organization> orgMap = new HashMap<>();
 
-		for (Organization o : orgs) {
+		for (final Organization o : orgs) {
 			orgMap.put(o.getUuid(), o);
 		}
 
-		for (Organization o : orgs) {
+		for (final Organization o : orgs) {
 			final Set<String> seenUuids = new HashSet<>();
 			String curr = o.getUuid();
 			seenUuids.add(curr);

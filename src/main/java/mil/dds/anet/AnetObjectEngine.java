@@ -266,17 +266,18 @@ public class AnetObjectEngine {
 		return Utils.buildParentOrgMapping(orgs, null);
 	}
 	
-	/* Helper function to build a map or organization UUIDs to their top parent
+	/**
+	 * Helper function to build a map of organization UUIDs to their top parent
 	 * capped at a certain point in the hierarchy.
 	 * parentOrg will map to parentOrg, and all children will map to the highest
 	 * parent that is NOT the parentOrgUuid.
 	 */
-	public Map<String,Organization> buildTopLevelOrgHash(String parentOrgUuid) {
-		OrganizationSearchQuery query = new OrganizationSearchQuery();
+	public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
+		final OrganizationSearchQuery query = new OrganizationSearchQuery();
 		query.setParentOrgUuid(parentOrgUuid);
 		query.setParentOrgRecursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
-		List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+		final List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
 		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
 	}
 	
