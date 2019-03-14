@@ -446,7 +446,7 @@ public class Report extends AbstractAnetBean {
 			if (state == ReportState.RELEASED) {
 				approvalStatus = compactActions(actions);
 			} else {
-				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();
+				final Organization ao = loadAdvisorOrg(context).join();
 				final String aoUuid = DaoUtils.getUuid(ao);
 				List<ApprovalStep> steps = getWorkflowForOrg(context, engine, aoUuid).join();
 				if (Utils.isEmptyOrNull(steps)) {
