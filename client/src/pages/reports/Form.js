@@ -21,14 +21,12 @@ import ConfirmDelete from 'components/ConfirmDelete'
 import ReportTags from 'components/ReportTags'
 import AdvancedMultiSelect from 'components/AdvancedMultiSelect'
 import AdvancedSingleSelect from 'components/AdvancedSingleSelect'
-import MultiSelector from 'components/MultiSelector'
 import LocationTable from 'components/LocationTable'
 import TaskTable from 'components/TaskTable'
 import RichTextEditor from 'components/RichTextEditor'
 import Messages from 'components/Messages'
 import NavigationWarning from 'components/NavigationWarning'
 import AttendeesTable from './AttendeesTable'
-import AttendeesOverlayTable from './AttendeesOverlayTable'
 import AuthorizationGroupTable from './AuthorizationGroupTable'
 import LinkTo from 'components/LinkTo'
 
@@ -241,22 +239,22 @@ class BaseReportForm extends Component {
 					},
 				}
 				const tasksFilters = {
-						recentTasks: {
-							label: 'Recent tasks',
-							searchQuery: false,
-							listName: 'taskRecents',
-							listArgs: 'maxResults:6',
-						},
-						allTasks: {
-							label: 'All tasks',
-							searchQuery: true,
-						},
-						assignedToMyOrg: {
-							label: 'Assigned to my organization',
-							searchQuery: true,
-							queryVars: {responsibleOrgUuid: this.props.currentUser.position.organization.uuid},
-						},
-					}
+					recentTasks: {
+						label: 'Recent tasks',
+						searchQuery: false,
+						listName: 'taskRecents',
+						listArgs: 'maxResults:6',
+					},
+					allTasks: {
+						label: 'All tasks',
+						searchQuery: true,
+					},
+					assignedToMyOrg: {
+						label: 'Assigned to my organization',
+						searchQuery: true,
+						queryVars: {responsibleOrgUuid: this.props.currentUser.position.organization.uuid},
+					},
+				}
 				const authorizationGroupsFilters = {
 					recentAuthorizationGroups: {
 						label: 'Recent authorization groups',
