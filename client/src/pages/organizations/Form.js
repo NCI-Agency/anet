@@ -5,7 +5,9 @@ import {Button, Modal, Table} from 'react-bootstrap'
 
 import { Formik, Form, Field, FieldArray } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
+import pluralize from 'pluralize'
 
+import AdvancedMultiSelect from 'components/AdvancedMultiSelect'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import MultiSelector from 'components/MultiSelector'
@@ -117,6 +119,7 @@ class BaseOrganizationForm extends Component {
 				dirty,
 				errors,
 				setFieldValue,
+				setFieldTouched,
 				values,
 				submitForm
 			}) => {
@@ -132,6 +135,18 @@ class BaseOrganizationForm extends Component {
 				const action = (isAdmin || !isPrincipalOrg) && <div>
 					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Organization</Button>
 				</div>
+				const tasksFilters = {
+					allTasks: {
+						label: 'All tasks',
+						searchQuery: true,
+					},
+					assignedToMyOrg: {
+						label: 'Assigned to my organization',
+						searchQuery: true,
+						queryVars: {responsibleOrgUuid: this.props.currentUser.position.organization.uuid},
+					},
+				}
+
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />
@@ -273,18 +288,23 @@ class BaseOrganizationForm extends Component {
 
 								{Organization.isTaskEnabled(values.shortName) &&
 									<Fieldset title={Settings.fields.task.longLabel} className="tasks-selector">
-										<MultiSelector
-											items={values.tasks}
+										<AdvancedMultiSelect
+											fieldName='tasks'
+											fieldLabel={Settings.fields.task.shortLabel}
+											placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
+											selectedItems={values.tasks}
+											renderSelected={<TaskTable tasks={values.tasks} onChange={value => setFieldValue('tasks', value)} showDelete={true} />}
+											overlayColumns={['Task', 'Name']}
+											overlayRenderRow={this.renderTaskOverlayRow}
+											filterDefs={tasksFilters}
+											onChange={value => {
+												setFieldValue('tasks', value)
+												setFieldTouched('tasks', true)
+											}}
 											objectType={Task}
 											queryParams={{status: Task.STATUS.ACTIVE}}
-											placeholder={`Start typing to search for ${Settings.fields.task.shortLabel}...`}
 											fields={Task.autocompleteQuery}
-											template={Task.autocompleteTemplate}
-											addFieldName='tasks'
-											addFieldLabel={Settings.fields.task.shortLabel}
 											addon={TASKS_ICON}
-											renderSelected={<TaskTable tasks={values.tasks} showDelete={true} />}
-											onChange={value => setFieldValue('tasks', value)}
 										/>
 									</Fieldset>
 								}
@@ -412,6 +432,15 @@ class BaseOrganizationForm extends Component {
 		const variableDef = '($organization: OrganizationInput!)'
 		return API.mutation(graphql, variables, variableDef)
 	}
+
+	renderTaskOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td className="taskName"><LinkTo task={item}>{item.shortName} - {item.longName}</LinkTo></td>
+			</React.Fragment>
+		)
+	}
+
 }
 
 const OrganizationForm = (props) => (

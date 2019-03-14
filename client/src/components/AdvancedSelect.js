@@ -86,7 +86,7 @@ export default class AdvancedSelect extends Component {
 		filterDefs: {},
 		shortcuts: [],
 		shortcutsTitle: 'Recents',
-		renderExtraCol: true,
+		renderExtraCol: false,
 	}
 
 	state = {
