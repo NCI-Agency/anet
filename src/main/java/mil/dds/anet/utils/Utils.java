@@ -1,8 +1,10 @@
 package mil.dds.anet.utils;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,12 +18,16 @@ import javax.annotation.Nullable;
 import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Utils {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	/**
 	 * Crude method to check whether a uuid is purely integer,
@@ -144,10 +150,18 @@ public class Utils {
 		}
 
 		for (Organization o : orgs) {
+			final Set<String> seenUuids = new HashSet<>();
 			String curr = o.getUuid();
+			seenUuids.add(curr);
 			String parentUuid = o.getParentOrgUuid();
-			while (Objects.equals(parentUuid,topParentUuid) == false && orgMap.containsKey(parentUuid)) {
+			while (!Objects.equals(parentUuid, topParentUuid) && orgMap.containsKey(parentUuid)) {
 				curr = parentUuid;
+				if (seenUuids.contains(curr)) {
+					final String errorMsg = String.format("Loop detected in organization hierarchy: %1$s is its own (grand…)parent!", curr);
+					logger.error(errorMsg);
+					throw new IllegalArgumentException(errorMsg);
+				}
+				seenUuids.add(curr);
 				parentUuid = orgMap.get(parentUuid).getParentOrgUuid();
 			}
 			result.put(o.getUuid(), orgMap.get(curr));
