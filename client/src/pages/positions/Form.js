@@ -10,6 +10,7 @@ import AdvancedSingleSelect from 'components/AdvancedSingleSelect'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import Messages from 'components/Messages'
+import LocationTable from 'components/LocationTable'
 import OrganizationTable from 'components/OrganizationTable'
 
 import API from 'api'
@@ -148,7 +149,15 @@ class BasePositionForm extends Component {
 						searchQuery: true,
 					},
 				}
+				const locationFilters = {
+					activeLocations: {
+						label: 'All',
+						searchQuery: true,
+						queryVars: {status: Location.STATUS.ACTIVE},
+					},
+				}
 				const organizationAsList= values.organization && values.organization.uuid ? [values.organization] : []
+				const locationAsList= values.location && values.location.uuid ? [values.location] : []
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />
@@ -220,20 +229,21 @@ class BasePositionForm extends Component {
 						</Fieldset>
 
 						<Fieldset title="Additional information">
-							<Field
-								name="location"
-								component={FieldHelper.renderSpecialField}
+							<AdvancedSingleSelect
+								fieldName='location'
+								fieldLabel='Location'
+								placeholder="Search for the location where this Position will operate from..."
+								selectedItems={locationAsList}
+								renderSelected={<LocationTable items={locationAsList} showDelete={true} />}
+								overlayColumns={['Location', 'Name']}
+								overlayRenderRow={this.renderLocationOverlayRow}
+								filterDefs={locationFilters}
 								onChange={value => setFieldValue('location', value)}
+								objectType={Location}
+								fields={Location.autocompleteQuery}
+								queryParams={{status: Location.STATUS.ACTIVE}}
+								valueKey="name"
 								addon={LOCATIONS_ICON}
-								widget={
-									<Autocomplete
-										objectType={Location}
-										valueKey="name"
-										fields={Location.autocompleteQuery}
-										placeholder="Start typing to find a location where this Position will operate from..."
-										queryParams={{status: Location.STATUS.ACTIVE}}
-									/>
-								}
 							/>
 						</Fieldset>
 
@@ -306,6 +316,14 @@ class BasePositionForm extends Component {
 		return (
 			<React.Fragment key={item.uuid}>
 				<td className="orgShortName"><LinkTo organization={item} /></td>
+			</React.Fragment>
+		)
+	}
+
+	renderLocationOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td><LinkTo anetLocation={item} /></td>
 			</React.Fragment>
 		)
 	}
