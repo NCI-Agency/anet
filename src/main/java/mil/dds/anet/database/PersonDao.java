@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.AnetObjectEngine;
@@ -33,14 +32,14 @@ public class PersonDao extends AnetBaseDao<Person> {
 	private final IdBatcher<Person> idBatcher;
 	private final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher;
 
-	public PersonDao(Handle h) { 
-		super(h, "People", tableName, PERSON_FIELDS, null);
+	public PersonDao(AnetObjectEngine engine) {
+		super(engine, "People", tableName, PERSON_FIELDS, null);
 		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Person>(h, idBatcherSql, "uuids", new PersonMapper());
+		this.idBatcher = new IdBatcher<Person>(engine, idBatcherSql, "uuids", new PersonMapper());
 
 		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT * FROM \"peoplePositions\" "
 				+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(h, personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
+		this.personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(engine, personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
 	}
 	
 	public AnetBeanList<Person> getAll(int pageNum, int pageSize) {
@@ -70,7 +69,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 				+ "gender, country, \"endOfTourDate\", biography, \"domainUsername\", \"createdAt\", \"updatedAt\") "
 				+ "VALUES (:uuid, :name, :status, :role, :emailAddress, :phoneNumber, :rank, :pendingVerification, "
 				+ ":gender, :country, ");
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			//MsSql requires an explicit CAST when datetime2 might be NULL. 
 			sql.append("CAST(:endOfTourDate AS datetime2), ");
 		} else {
@@ -78,7 +77,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 		}
 		sql.append(":biography, :domainUsername, :createdAt, :updatedAt);");
 
-		dbHandle.createUpdate(sql.toString())
+		engine.getDbHandle().createUpdate(sql.toString())
 			.bindBean(p)
 			.bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
 			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
@@ -97,14 +96,14 @@ public class PersonDao extends AnetBaseDao<Person> {
 				+ "\"phoneNumber\" = :phoneNumber, rank = :rank, biography = :biography, "
 				+ "\"pendingVerification\" = :pendingVerification, \"domainUsername\" = :domainUsername, "
 				+ "\"updatedAt\" = :updatedAt, ");
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			//MsSql requires an explicit CAST when datetime2 might be NULL. 
 			sql.append("\"endOfTourDate\" = CAST(:endOfTourDate AS datetime2) ");
 		} else {
 			sql.append("\"endOfTourDate\" = :endOfTourDate ");
 		}
 		sql.append("WHERE uuid = :uuid");
-		return dbHandle.createUpdate(sql.toString())
+		return engine.getDbHandle().createUpdate(sql.toString())
 			.bindBean(p)
 			.bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
 			.bind("endOfTourDate", DaoUtils.asLocalDateTime(p.getEndOfTourDate()))
@@ -119,12 +118,12 @@ public class PersonDao extends AnetBaseDao<Person> {
 	}
 
 	public AnetBeanList<Person> search(PersonSearchQuery query) {
-		return AnetObjectEngine.getInstance().getSearcher()
-				.getPersonSearcher().runSearch(query, dbHandle);
+		return engine.getSearcher()
+				.getPersonSearcher().runSearch(query, engine.getDbHandle());
 	}
 
 	public List<Person> findByDomainUsername(String domainUsername) {
-		return dbHandle.createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITIONS_FIELDS 
+		return engine.getDbHandle().createQuery("/* findByDomainUsername */ SELECT " + PERSON_FIELDS + "," + PositionDao.POSITIONS_FIELDS
 				+ "FROM people LEFT JOIN positions ON people.uuid = positions.\"currentPersonUuid\" "
 				+ "WHERE people.\"domainUsername\" = :domainUsername "
 				+ "AND people.status != :inactiveStatus")
@@ -136,7 +135,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 
 	public List<Person> getRecentPeople(Person author, int maxResults) {
 		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			sql = "/* getRecentPeople */ SELECT " + PersonDao.PERSON_FIELDS
 				+ "FROM people WHERE people.uuid IN ( "
 					+ "SELECT top(:maxResults) \"reportPeople\".\"personUuid\" "
@@ -158,7 +157,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
-		return dbHandle.createQuery(sql)
+		return engine.getDbHandle().createQuery(sql)
 				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.map(new PersonMapper())
@@ -166,12 +165,12 @@ public class PersonDao extends AnetBaseDao<Person> {
 	}
 
 	public int mergePeople(Person winner, Person loser) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::mergePeopleTransactional, winner, loser);
+		return engine.executeInTransaction(this::mergePeopleTransactional, winner, loser);
 	}
 
 	private int mergePeopleTransactional(Person winner, Person loser) {
 		//delete duplicates where other is primary, or where neither is primary
-		dbHandle.createUpdate("DELETE FROM \"reportPeople\" WHERE ("
+		engine.getDbHandle().createUpdate("DELETE FROM \"reportPeople\" WHERE ("
 				+ "\"personUuid\" = :loserUuid AND \"reportUuid\" IN ("
 					+ "SELECT \"reportUuid\" FROM \"reportPeople\" WHERE \"personUuid\" = :winnerUuid AND \"isPrimary\" = :isPrimary"
 				+ ")) OR ("
@@ -187,43 +186,43 @@ public class PersonDao extends AnetBaseDao<Person> {
 			.execute();
 
 		//update report attendance, should now be unique
-		dbHandle.createUpdate("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+		engine.getDbHandle().createUpdate("UPDATE \"reportPeople\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 			.bind("winnerUuid", winner.getUuid())
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 
 		// update approvals this person might have done
-		dbHandle.createUpdate("UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+		engine.getDbHandle().createUpdate("UPDATE \"reportActions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 			.bind("winnerUuid", winner.getUuid())
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 
 		// report author update
-		dbHandle.createUpdate("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+		engine.getDbHandle().createUpdate("UPDATE reports SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 			.bind("winnerUuid", winner.getUuid())
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 
 		// comment author update
-		dbHandle.createUpdate("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+		engine.getDbHandle().createUpdate("UPDATE comments SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 			.bind("winnerUuid", winner.getUuid())
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 
 		// update position history
-		dbHandle.createUpdate("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
+		engine.getDbHandle().createUpdate("UPDATE \"peoplePositions\" SET \"personUuid\" = :winnerUuid WHERE \"personUuid\" = :loserUuid")
 			.bind("winnerUuid", winner.getUuid())
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 
 		// update note authors
-		dbHandle.createUpdate("UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
+		engine.getDbHandle().createUpdate("UPDATE \"notes\" SET \"authorUuid\" = :winnerUuid WHERE \"authorUuid\" = :loserUuid")
 			.bind("winnerUuid", winner.getUuid())
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 
 		// update note related objects where we don't already have the same note for the winnerUuid
-		dbHandle.createUpdate("UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
+		engine.getDbHandle().createUpdate("UPDATE \"noteRelatedObjects\" SET \"relatedObjectUuid\" = :winnerUuid WHERE \"relatedObjectUuid\" = :loserUuid"
 				+ " AND \"noteUuid\" NOT IN ("
 					+ "SELECT \"noteUuid\" FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :winnerUuid"
 				+ ")")
@@ -232,12 +231,12 @@ public class PersonDao extends AnetBaseDao<Person> {
 			.execute();
 
 		// now delete obsolete note related objects
-		dbHandle.createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
+		engine.getDbHandle().createUpdate("DELETE FROM \"noteRelatedObjects\" WHERE \"relatedObjectUuid\" = :loserUuid")
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 
 		//delete the person!
-		return dbHandle.createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
+		return engine.getDbHandle().createUpdate("DELETE FROM people WHERE uuid = :loserUuid")
 			.bind("loserUuid", loser.getUuid())
 			.execute();
 	}

@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -70,30 +69,30 @@ public class ReportDao extends AnetBaseDao<Report> {
 	private final ForeignKeyBatcher<Tag> tagsBatcher;
 	private final ForeignKeyBatcher<Task> tasksBatcher;
 
-	public ReportDao(Handle db) {
-		super(db, "Reports", tableName, REPORT_FIELDS, "reports.\"createdAt\"");
+	public ReportDao(AnetObjectEngine engine) {
+		super(engine, "Reports", tableName, REPORT_FIELDS, "reports.\"createdAt\"");
 		this.weekFormat = getWeekFormat(getDbType());
 		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
 				+ "FROM reports "
 				+ "WHERE reports.uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Report>(db, idBatcherSql, "uuids", new ReportMapper());
+		this.idBatcher = new IdBatcher<Report>(engine, idBatcherSql, "uuids", new ReportMapper());
 
 		final String attendeesBatcherSql = "/* batch.getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS
 				+ ", \"reportPeople\".\"reportUuid\" , \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
 				+ "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
 				+ "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> )";
-		this.attendeesBatcher = new ForeignKeyBatcher<ReportPerson>(db, attendeesBatcherSql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
+		this.attendeesBatcher = new ForeignKeyBatcher<ReportPerson>(engine, attendeesBatcherSql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
 
 		final String tagsBatcherSql = "/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
 				+ "INNER JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid "
 				+ "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> )"
 				+ "ORDER BY tags.name";
-		this.tagsBatcher = new ForeignKeyBatcher<Tag>(db, tagsBatcherSql, "foreignKeys", new TagMapper(), "reportUuid");
+		this.tagsBatcher = new ForeignKeyBatcher<Tag>(engine, tagsBatcherSql, "foreignKeys", new TagMapper(), "reportUuid");
 
 		final String tasksBatcherSql = "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
 				+ "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
 				+ "AND \"reportTasks\".\"taskUuid\" = tasks.uuid";
-		this.tasksBatcher = new ForeignKeyBatcher<Task>(db, tasksBatcherSql, "foreignKeys", new TaskMapper(), "reportUuid");
+		this.tasksBatcher = new ForeignKeyBatcher<Task>(engine, tasksBatcherSql, "foreignKeys", new TaskMapper(), "reportUuid");
 	}
 
 	private String getWeekFormat(DaoUtils.DbType dbType) {
@@ -122,7 +121,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 
 	public Report insert(Report r, Person user) {
 		DaoUtils.setInsertFields(r);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::insertInternal, r, user);
+		return engine.executeInTransaction(this::insertInternal, r, user);
 	}
 
 	@Override
@@ -142,14 +141,14 @@ public class ReportDao extends AnetBaseDao<Report> {
 				+ "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
 				+ ":exsum, :reportText, :keyOutcomes, "
 				+ ":nextSteps, :authorUuid, ");
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			sql.append("CAST(:engagementDate AS datetime2), CAST(:releasedAt AS datetime2), ");
 		} else {
 			sql.append(":engagementDate, :releasedAt, ");
 		}
 		sql.append(":atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
 
-		dbHandle.createUpdate(sql.toString())
+		engine.getDbHandle().createUpdate(sql.toString())
 			.bindBean(r)
 			.bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
 			.bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
@@ -165,10 +164,10 @@ public class ReportDao extends AnetBaseDao<Report> {
 		if (rsi != null) {
 			rsi.setText(Utils.sanitizeHtml(rsi.getText()));
 		}
-		rsi = AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insert(rsi, user, r);
+		rsi = engine.getReportSensitiveInformationDao().insert(rsi, user, r);
 		r.setReportSensitiveInformation(rsi);
 
-		final ReportBatch rb = dbHandle.attach(ReportBatch.class);
+		final ReportBatch rb = engine.getDbHandle().attach(ReportBatch.class);
 		if (r.getAttendees() != null) {
 			//Setify based on attendeeUuid to prevent violations of unique key constraint.
 			Map<String,ReportPerson> attendeeMap = new HashMap<>();
@@ -227,7 +226,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 			keyField = "uuid";
 			key = uuid;
 		}
-		final Report result = dbHandle.createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS
+		final Report result = engine.getDbHandle().createQuery("/* " + queryDescriptor + " */ SELECT " + REPORT_FIELDS
 				+ "FROM reports "
 				+ "WHERE reports.\"" + keyField + "\" = :key")
 			.bind("key", key)
@@ -240,7 +239,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 
 	public int update(Report r, Person user) {
 		DaoUtils.setUpdateFields(r);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateInternal, r, user);
+		return engine.executeInTransaction(this::updateInternal, r, user);
 	}
 
 	@Override
@@ -260,7 +259,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 		if (rsi != null) {
 			rsi.setText(Utils.sanitizeHtml(rsi.getText()));
 		}
-		AnetObjectEngine.getInstance().getReportSensitiveInformationDao().insertOrUpdate(rsi, user, r);
+		engine.getReportSensitiveInformationDao().insertOrUpdate(rsi, user, r);
 
 		DaoUtils.setUpdateFields(r);
 
@@ -269,7 +268,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 				+ "intent = :intent, exsum = :exsum, text = :reportText, "
 				+ "\"keyOutcomes\" = :keyOutcomes, \"nextSteps\" = :nextSteps, "
 				+ "\"approvalStepUuid\" = :approvalStepUuid, ");
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			sql.append("\"engagementDate\" = CAST(:engagementDate AS datetime2), \"releasedAt\" = CAST(:releasedAt AS datetime2), ");
 		} else {
 			sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
@@ -279,7 +278,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 				+ "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
 				+ "WHERE uuid = :uuid");
 
-		return dbHandle.createUpdate(sql.toString())
+		return engine.getDbHandle().createUpdate(sql.toString())
 			.bindBean(r)
 			.bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))
 			.bind("engagementDate", DaoUtils.asLocalDateTime(r.getEngagementDate()))
@@ -291,12 +290,12 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public void updateToDraftState(Report r) {
-		dbHandle.execute("/* UpdateFutureEngagement */ UPDATE reports SET state = ? "
+		engine.getDbHandle().execute("/* UpdateFutureEngagement */ UPDATE reports SET state = ? "
 				+ "WHERE uuid = ?", DaoUtils.getEnumId(ReportState.DRAFT), r.getUuid());
 	}
 
 	public int addAttendeeToReport(ReportPerson rp, Report r) {
-		return dbHandle.createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
+		return engine.getDbHandle().createUpdate("/* addReportAttendee */ INSERT INTO \"reportPeople\" "
 				+ "(\"personUuid\", \"reportUuid\", \"isPrimary\") VALUES (:personUuid, :reportUuid, :isPrimary)")
 			.bind("personUuid", rp.getUuid())
 			.bind("reportUuid", r.getUuid())
@@ -305,7 +304,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public int removeAttendeeFromReport(Person p, Report r) {
-		return dbHandle.createUpdate("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
+		return engine.getDbHandle().createUpdate("/* deleteReportAttendee */ DELETE FROM \"reportPeople\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
 			.bind("reportUuid", r.getUuid())
 			.bind("personUuid", p.getUuid())
@@ -313,7 +312,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public int updateAttendeeOnReport(ReportPerson rp, Report r) {
-		return dbHandle.createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
+		return engine.getDbHandle().createUpdate("/* updateAttendeeOnReport*/ UPDATE \"reportPeople\" "
 				+ "SET \"isPrimary\" = :isPrimary WHERE \"reportUuid\" = :reportUuid AND \"personUuid\" = :personUuid")
 			.bind("reportUuid", r.getUuid())
 			.bind("personUuid", rp.getUuid())
@@ -323,7 +322,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 
 
 	public int addAuthorizationGroupToReport(AuthorizationGroup a, Report r) {
-		return dbHandle.createUpdate("/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupUuid\", \"reportUuid\") "
+		return engine.getDbHandle().createUpdate("/* addAuthorizationGroupToReport */ INSERT INTO \"reportAuthorizationGroups\" (\"authorizationGroupUuid\", \"reportUuid\") "
 				+ "VALUES (:authorizationGroupUuid, :reportUuid)")
 			.bind("reportUuid", r.getUuid())
 			.bind("authorizationGroupUuid", a.getUuid())
@@ -331,7 +330,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public int removeAuthorizationGroupFromReport(AuthorizationGroup a, Report r) {
-		return dbHandle.createUpdate("/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
+		return engine.getDbHandle().createUpdate("/* removeAuthorizationGroupFromReport*/ DELETE FROM \"reportAuthorizationGroups\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"authorizationGroupUuid\" = :authorizationGroupUuid")
 				.bind("reportUuid", r.getUuid())
 				.bind("authorizationGroupUuid", a.getUuid())
@@ -339,7 +338,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public int addTaskToReport(Task p, Report r) {
-		return dbHandle.createUpdate("/* addTaskToReport */ INSERT INTO \"reportTasks\" (\"taskUuid\", \"reportUuid\") "
+		return engine.getDbHandle().createUpdate("/* addTaskToReport */ INSERT INTO \"reportTasks\" (\"taskUuid\", \"reportUuid\") "
 				+ "VALUES (:taskUuid, :reportUuid)")
 			.bind("reportUuid", r.getUuid())
 			.bind("taskUuid", p.getUuid())
@@ -347,7 +346,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public int removeTaskFromReport(String taskUuid, Report r) {
-		return dbHandle.createUpdate("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
+		return engine.getDbHandle().createUpdate("/* removeTaskFromReport*/ DELETE FROM \"reportTasks\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"taskUuid\" = :taskUuid")
 				.bind("reportUuid", r.getUuid())
 				.bind("taskUuid", taskUuid)
@@ -355,7 +354,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public int addTagToReport(Tag t, Report r) {
-		return dbHandle.createUpdate("/* addTagToReport */ INSERT INTO \"reportTags\" (\"reportUuid\", \"tagUuid\") "
+		return engine.getDbHandle().createUpdate("/* addTagToReport */ INSERT INTO \"reportTags\" (\"reportUuid\", \"tagUuid\") "
 				+ "VALUES (:reportUuid, :tagUuid)")
 			.bind("reportUuid", r.getUuid())
 			.bind("tagUuid", t.getUuid())
@@ -363,7 +362,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public int removeTagFromReport(Tag t, Report r) {
-		return dbHandle.createUpdate("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
+		return engine.getDbHandle().createUpdate("/* removeTagFromReport */ DELETE FROM \"reportTags\" "
 				+ "WHERE \"reportUuid\" = :reportUuid AND \"tagUuid\" = :tagUuid")
 				.bind("reportUuid", r.getUuid())
 				.bind("tagUuid", t.getUuid())
@@ -376,7 +375,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 
 	public List<AuthorizationGroup> getAuthorizationGroupsForReport(String reportUuid) {
-		return dbHandle.createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
+		return engine.getDbHandle().createQuery("/* getAuthorizationGroupsForReport */ SELECT * FROM \"authorizationGroups\", \"reportAuthorizationGroups\" "
 				+ "WHERE \"reportAuthorizationGroups\".\"reportUuid\" = :reportUuid "
 				+ "AND \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = \"authorizationGroups\".uuid")
 				.bind("reportUuid", reportUuid)
@@ -400,12 +399,12 @@ public class ReportDao extends AnetBaseDao<Report> {
 	}
 	
 	public AnetBeanList<Report> search(ReportSearchQuery query, Person user) {
-		return AnetObjectEngine.getInstance().getSearcher().getReportSearcher()
-			.runSearch(query, dbHandle, user, false);
+		return engine.getSearcher().getReportSearcher()
+			.runSearch(query, engine.getDbHandle(), user, false);
 	}
 	public AnetBeanList<Report> search(ReportSearchQuery query, Person user, Boolean systemSearch) {
-		return AnetObjectEngine.getInstance().getSearcher().getReportSearcher()
-			.runSearch(query, dbHandle, null, systemSearch);
+		return engine.getSearcher().getReportSearcher()
+			.runSearch(query, engine.getDbHandle(), null, systemSearch);
 	}
 
 	/*
@@ -415,32 +414,32 @@ public class ReportDao extends AnetBaseDao<Report> {
 	@Override
 	public int deleteInternal(String reportUuid) {
 		// Delete tags
-		dbHandle.execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", reportUuid);
+		engine.getDbHandle().execute("/* deleteReport.tags */ DELETE FROM \"reportTags\" where \"reportUuid\" = ?", reportUuid);
 
 		//Delete tasks
-		dbHandle.execute("/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?", reportUuid);
+		engine.getDbHandle().execute("/* deleteReport.tasks */ DELETE FROM \"reportTasks\" where \"reportUuid\" = ?", reportUuid);
 		
 		//Delete attendees
-		dbHandle.execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?", reportUuid);
+		engine.getDbHandle().execute("/* deleteReport.attendees */ DELETE FROM \"reportPeople\" where \"reportUuid\" = ?", reportUuid);
 		
 		//Delete comments
-		dbHandle.execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", reportUuid);
+		engine.getDbHandle().execute("/* deleteReport.comments */ DELETE FROM comments where \"reportUuid\" = ?", reportUuid);
 		
 		//Delete \"reportActions\"
-		dbHandle.execute("/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?", reportUuid);
+		engine.getDbHandle().execute("/* deleteReport.actions */ DELETE FROM \"reportActions\" where \"reportUuid\" = ?", reportUuid);
 
 		//Delete relation to authorization groups
-		dbHandle.execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", reportUuid);
+		engine.getDbHandle().execute("/* deleteReport.\"authorizationGroups\" */ DELETE FROM \"reportAuthorizationGroups\" where \"reportUuid\" = ?", reportUuid);
 
 		//Delete report
 		// GraphQL mutations *have* to return something, so we return the number of deleted report rows
-		return dbHandle.createUpdate("/* deleteReport.report */ DELETE FROM reports where uuid = :reportUuid")
+		return engine.getDbHandle().createUpdate("/* deleteReport.report */ DELETE FROM reports where uuid = :reportUuid")
 			.bind("reportUuid", reportUuid)
 			.execute();
 	}
 
 	private Instant getRollupEngagmentStart(Instant start) {
-		String maxReportAgeStr = AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
+		String maxReportAgeStr = engine.getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
 		if (maxReportAgeStr == null) { 
 			throw new WebApplicationException("Missing Admin Setting for " + AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS); 
 		} 
@@ -451,7 +450,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 	/* Generates the Rollup Graph for a particular Organization Type, starting at the root of the org hierarchy */
 	public List<RollupGraph> getDailyRollupGraph(Instant start, Instant end, OrganizationType orgType, Map<String, Organization> nonReportingOrgs) {
 		final List<Map<String, Object>> results = rollupQuery(start, end, orgType, null, false);
-		final Map<String,Organization> orgMap = AnetObjectEngine.getInstance().buildTopLevelOrgHash(orgType);
+		final Map<String,Organization> orgMap = engine.buildTopLevelOrgHash(orgType);
 		
 		return generateRollupGraphFromResults(results, orgMap, nonReportingOrgs);
 	}
@@ -466,7 +465,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 			query.setParentOrgUuid(parentOrgUuid);
 			query.setParentOrgRecursively(true);
 			query.setPageSize(Integer.MAX_VALUE);
-			orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+			orgList = engine.getOrganizationDao().search(query).getList();
 			Optional<Organization> parentOrg = orgList.stream().filter(o -> o.getUuid().equals(parentOrgUuid)).findFirst();
 			if (parentOrg.isPresent() == false) { 
 				throw new WebApplicationException("No such organization with uuid " + parentOrgUuid, Status.NOT_FOUND);
@@ -608,7 +607,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 		sqlArgs.put("reportPending", ReportState.PENDING_APPROVAL.ordinal());
 		sqlArgs.put("reportPublished", ReportState.PUBLISHED.ordinal());
 
-		return dbHandle.createQuery(String.format(sql.toString(), fmtArgs))
+		return engine.getDbHandle().createQuery(String.format(sql.toString(), fmtArgs))
 			.bindMap(sqlArgs)
 			.map(new MapMapper(false))
 			.list();
@@ -655,7 +654,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 		
 		sql.append("GROUP BY " + orgColumn + ", state");
 
-		final Query q = dbHandle.createQuery(sql.toString())
+		final Query q = engine.getDbHandle().createQuery(sql.toString())
 			.bindMap(sqlArgs);
 		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
 			q.bindList(listArg.getKey(), listArg.getValue());
@@ -742,7 +741,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 		action.setReport(r);
 		email.setAction(action);
 		try {
-			email.addToAddress(r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
+			email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
 			AnetEmailWorker.sendEmailAsync(email);
 		} catch (InterruptedException | ExecutionException e) {
 			throw new WebApplicationException("failed to load Author", e);
@@ -763,7 +762,7 @@ public class ReportDao extends AnetBaseDao<Report> {
 			action.setPersonUuid(user.getUuid());
 		}
 		action.setType(ActionType.PUBLISH);
-		AnetObjectEngine.getInstance().getReportActionDao().insert(action);
+		engine.getReportActionDao().insert(action);
 
 		//Move the report to PUBLISHED state
 		r.setState(ReportState.PUBLISHED);

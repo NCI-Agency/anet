@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
-
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.database.mappers.AdminSettingMapper;
 
@@ -25,11 +24,11 @@ public class AdminDao {
 		GENERAL_BANNER_VISIBILITY,
 	}
 
-	private Handle dbHandle;
+	private AnetObjectEngine engine;
 	private Map<String,String> cachedSettings = null;
 	
-	public AdminDao(Handle db) { 
-		this.dbHandle = db;
+	public AdminDao(AnetObjectEngine engine) {
+		this.engine = engine;
 	}
 
 	private void initCache() { 
@@ -46,7 +45,7 @@ public class AdminDao {
 	}
 	
 	public List<AdminSetting> getAllSettings() { 
-		return dbHandle.createQuery("/* getAllAdminSettings */ SELECT * FROM \"adminSettings\"")
+		return engine.getDbHandle().createQuery("/* getAllAdminSettings */ SELECT * FROM \"adminSettings\"")
 				.map(new AdminSettingMapper())
 				.list();
 	}
@@ -63,7 +62,7 @@ public class AdminDao {
 			sql = "/* insertAdminSetting */ INSERT INTO \"adminSettings\" (\"key\", value) VALUES (:key, :value)";
 		}
 		cachedSettings.put(setting.getKey(), setting.getValue());
-		return dbHandle.createUpdate(sql)
+		return engine.getDbHandle().createUpdate(sql)
 			.bind("key", setting.getKey())
 			.bind("value", setting.getValue())
 			.execute();

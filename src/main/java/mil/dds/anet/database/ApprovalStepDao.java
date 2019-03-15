@@ -8,9 +8,9 @@ import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -24,19 +24,19 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 	private final ForeignKeyBatcher<Position> approversBatcher;
 	private final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher;
 
-	public ApprovalStepDao(Handle h) {
-		super(h, "ApprovalSteps", "approvalSteps", "*", null);
+	public ApprovalStepDao(AnetObjectEngine engine) {
+		super(engine, "ApprovalSteps", "approvalSteps", "*", null);
 		final String idBatcherSql = "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<ApprovalStep>(dbHandle, idBatcherSql, "uuids", new ApprovalStepMapper());
+		this.idBatcher = new IdBatcher<ApprovalStep>(engine, idBatcherSql, "uuids", new ApprovalStepMapper());
 
 		final String approversBatcherSql = "/* batch.getApproversForStep */ SELECT \"approvalStepUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM approvers "
 				+ "LEFT JOIN positions ON \"positions\".\"uuid\" = approvers.\"positionUuid\" "
 				+ "WHERE \"approvalStepUuid\" IN ( <foreignKeys> )";
-		this.approversBatcher = new ForeignKeyBatcher<Position>(h, approversBatcherSql, "foreignKeys", new PositionMapper(), "approvalStepUuid");
+		this.approversBatcher = new ForeignKeyBatcher<Position>(engine, approversBatcherSql, "foreignKeys", new PositionMapper(), "approvalStepUuid");
 
 		final String organizationIdBatcherSql = "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> )";
-		this.organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(h, organizationIdBatcherSql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid");
+		this.organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(engine, organizationIdBatcherSql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid");
 	}
 	
 	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
@@ -68,7 +68,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 
 	@Override
 	public ApprovalStep insertInternal(ApprovalStep as) {
-		dbHandle.createUpdate(
+		engine.getDbHandle().createUpdate(
 				"/* insertApprovalStep */ INSERT into \"approvalSteps\" (uuid, name, \"nextStepUuid\", \"advisorOrganizationUuid\") "
 				+ "VALUES (:uuid, :name, :nextStepUuid, :advisorOrganizationUuid)")
 			.bindBean(as)
@@ -79,7 +79,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 				if (approver.getUuid() == null) {
 					throw new WebApplicationException("Invalid Position UUID of Null for Approver");
 				}
-				dbHandle.createUpdate("/* insertApprovalStep.approvers */ "
+				engine.getDbHandle().createUpdate("/* insertApprovalStep.approvers */ "
 						+ "INSERT INTO approvers (\"positionUuid\", \"approvalStepUuid\") VALUES (:positionUuid, :stepUuid)")
 					.bind("positionUuid", approver.getUuid())
 					.bind("stepUuid", as.getUuid())
@@ -97,7 +97,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 		as = insert(as);
 		
 		//Add this Step to the current org list. 
-		dbHandle.createUpdate("/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepUuid\" = :uuid "
+		engine.getDbHandle().createUpdate("/* insertApprovalAtEnd */ UPDATE \"approvalSteps\" SET \"nextStepUuid\" = :uuid "
 				+ "WHERE \"advisorOrganizationUuid\" = :advisorOrganizationUuid "
 				+ "AND \"nextStepUuid\" IS NULL AND uuid != :uuid")
 			.bindBean(as)
@@ -111,7 +111,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 	 */
 	@Override
 	public int updateInternal(ApprovalStep as) {
-		return dbHandle.createUpdate("/* updateApprovalStep */ UPDATE \"approvalSteps\" SET name = :name, "
+		return engine.getDbHandle().createUpdate("/* updateApprovalStep */ UPDATE \"approvalSteps\" SET name = :name, "
 				+ "\"nextStepUuid\" = :nextStepUuid, \"advisorOrganizationUuid\" = :advisorOrganizationUuid "
 				+ "WHERE uuid = :uuid")
 			.bindBean(as)
@@ -134,19 +134,19 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 		}
 
 		//fix up the linked list.
-		dbHandle.createUpdate("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
+		engine.getDbHandle().createUpdate("/* deleteApproval.update */ UPDATE \"approvalSteps\" "
 				+ "SET \"nextStepUuid\" = (SELECT \"nextStepUuid\" from \"approvalSteps\" where uuid = :stepToDeleteUuid) "
 				+ "WHERE \"nextStepUuid\" = :stepToDeleteUuid")
 			.bind("stepToDeleteUuid", uuid)
 			.execute();
 
 		//Remove all approvers from this step
-		dbHandle.execute("/* deleteApproval.delete1 */ DELETE FROM approvers where \"approvalStepUuid\" = ?", uuid);
+		engine.getDbHandle().execute("/* deleteApproval.delete1 */ DELETE FROM approvers where \"approvalStepUuid\" = ?", uuid);
 
 		//Update any approvals that happened at this step
-		dbHandle.execute("/* deleteApproval.updateActions */ UPDATE \"reportActions\" SET \"approvalStepUuid\" = ? WHERE \"approvalStepUuid\" = ?", null, uuid);
+		engine.getDbHandle().execute("/* deleteApproval.updateActions */ UPDATE \"reportActions\" SET \"approvalStepUuid\" = ? WHERE \"approvalStepUuid\" = ?", null, uuid);
 
-		dbHandle.execute("/* deleteApproval.delete2 */ DELETE FROM \"approvalSteps\" where uuid = ?", uuid);
+		engine.getDbHandle().execute("/* deleteApproval.delete2 */ DELETE FROM \"approvalSteps\" where uuid = ?", uuid);
 		return true;
 	}
 
@@ -154,7 +154,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 	 * Check whether the Approval Step is being by a report
 	 */
 	public boolean isStepInUse(String uuid) {
-		List<Map<String, Object>> rs = dbHandle.select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepUuid\" = ?", uuid)
+		List<Map<String, Object>> rs = engine.getDbHandle().select("/* deleteApproval.check */ SELECT count(*) AS ct FROM reports WHERE \"approvalStepUuid\" = ?", uuid)
 				.map(new MapMapper(false))
 				.list();
 		Map<String,Object> result = rs.get(0);
@@ -166,7 +166,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 	 * Returns the previous step for a given stepUuid.
 	 */
 	public ApprovalStep getStepByNextStepUuid(String uuid) {
-		List<ApprovalStep> list = dbHandle.createQuery("/* getNextStep */ SELECT * FROM \"approvalSteps\" WHERE \"nextStepUuid\" = :uuid")
+		List<ApprovalStep> list = engine.getDbHandle().createQuery("/* getNextStep */ SELECT * FROM \"approvalSteps\" WHERE \"nextStepUuid\" = :uuid")
 			.bind("uuid", uuid)
 			.map(new ApprovalStepMapper())
 			.list();
@@ -183,14 +183,14 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 	}
 
 	public int addApprover(ApprovalStep step, String positionUuid) {
-		return dbHandle.createUpdate("/* addApprover */ INSERT INTO approvers (\"approvalStepUuid\", \"positionUuid\") VALUES (:stepUuid, :positionUuid)")
+		return engine.getDbHandle().createUpdate("/* addApprover */ INSERT INTO approvers (\"approvalStepUuid\", \"positionUuid\") VALUES (:stepUuid, :positionUuid)")
 				.bind("stepUuid", step.getUuid())
 				.bind("positionUuid", positionUuid)
 				.execute();
 	}
 	
 	public int removeApprover(ApprovalStep step, String positionUuid) {
-		return dbHandle.createUpdate("/* removeApprover */ DELETE FROM approvers WHERE \"approvalStepUuid\" = :stepUuid AND \"positionUuid\" = :positionUuid")
+		return engine.getDbHandle().createUpdate("/* removeApprover */ DELETE FROM approvers WHERE \"approvalStepUuid\" = :stepUuid AND \"positionUuid\" = :positionUuid")
 				.bind("stepUuid", step.getUuid())
 				.bind("positionUuid", positionUuid)
 				.execute();

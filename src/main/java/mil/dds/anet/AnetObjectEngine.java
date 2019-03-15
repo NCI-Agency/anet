@@ -1,5 +1,7 @@
 package mil.dds.anet;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -75,29 +77,31 @@ public class AnetObjectEngine {
 	private final DataLoaderRegistry dataLoaderRegistry;
 
 	private static AnetObjectEngine instance; 
-	
-	private final Handle dbHandle;
-	
-	public AnetObjectEngine(Jdbi jdbi) {
-		dbHandle = jdbi.open();
-		
-		personDao = new PersonDao(dbHandle);
-		taskDao = new TaskDao(dbHandle);
-		locationDao =  new LocationDao(dbHandle);
-		orgDao = new OrganizationDao(dbHandle);
-		positionDao = new PositionDao(dbHandle);
-		asDao = new ApprovalStepDao(dbHandle);
-		reportActionDao = new ReportActionDao(dbHandle);
-		reportDao = new ReportDao(dbHandle);
-		commentDao = new CommentDao(dbHandle);
-		adminDao = new AdminDao(dbHandle);
-		savedSearchDao = new SavedSearchDao(dbHandle);
-		tagDao = new TagDao(dbHandle);
-		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
-		emailDao = new EmailDao(dbHandle);
-		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
-		noteDao = new NoteDao(dbHandle);
-		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
+
+	private final String dbUrl;
+	private final Jdbi jdbi;
+
+	public AnetObjectEngine(String dbUrl, Jdbi jdbi) {
+		this.dbUrl = dbUrl;
+		this.jdbi = jdbi;
+
+		personDao = new PersonDao(this);
+		taskDao = new TaskDao(this);
+		locationDao =  new LocationDao(this);
+		orgDao = new OrganizationDao(this);
+		positionDao = new PositionDao(this);
+		asDao = new ApprovalStepDao(this);
+		reportActionDao = new ReportActionDao(this);
+		reportDao = new ReportDao(this);
+		commentDao = new CommentDao(this);
+		adminDao = new AdminDao(this);
+		savedSearchDao = new SavedSearchDao(this);
+		tagDao = new TagDao(this);
+		reportSensitiveInformationDao = new ReportSensitiveInformationDao(this);
+		emailDao = new EmailDao(this);
+		authorizationGroupDao = new AuthorizationGroupDao(this);
+		noteDao = new NoteDao(this);
+		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl));
 		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
 		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
 		context = new HashMap<>();
@@ -106,8 +110,71 @@ public class AnetObjectEngine {
 		instance = this;
 	}
 
+	public String getDbUrl() {
+		return dbUrl;
+	}
+
+	public static class HandleWrapper implements Closeable {
+
+		private final Jdbi jdbi;
+
+		private Handle dbHandle;
+		private Integer refCount = 0;
+
+		public HandleWrapper(Jdbi jdbi) {
+			this.jdbi = jdbi;
+		}
+
+		public HandleWrapper open() {
+			synchronized(this) {
+				if (dbHandle == null || dbHandle.isClosed()) {
+					dbHandle = jdbi.open();
+					refCount = 0;
+				}
+				refCount++;
+				return this;
+			}
+		}
+
+		@Override
+		public void close() throws IOException {
+			synchronized(this) {
+				if (refCount == 0) {
+					logger.warn("too many closes, refCount would become negative; refCount={}, dbHandle={}", refCount, dbHandle);
+				} else {
+					refCount--;
+				}
+				if (refCount == 0 && dbHandle != null) {
+					dbHandle.close();
+					dbHandle = null;
+				}
+			}
+		}
+
+		public Handle getDbHandle() {
+			synchronized(this) {
+				if (dbHandle == null || dbHandle.isClosed()) {
+					logger.warn("possible resource leak; refCount={}, dbHandle={}", refCount, dbHandle);
+					dbHandle = jdbi.open();
+					refCount = 1;
+				}
+				return dbHandle;
+			}
+		}
+
+	}
+
+	private ThreadLocal<HandleWrapper> handleWrapper;
+
+	public synchronized HandleWrapper openDbHandleWrapper() {
+		if (handleWrapper == null) {
+			handleWrapper = ThreadLocal.withInitial(() -> new HandleWrapper(jdbi));
+		}
+		return handleWrapper.get().open();
+	}
+
 	public Handle getDbHandle() {
-		return dbHandle;
+		return handleWrapper.get().getDbHandle();
 	}
 
 	public PersonDao getPersonDao() { 
@@ -191,7 +258,7 @@ public class AnetObjectEngine {
 	}
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
-		if (dbHandle.isInTransaction()) {
+		if (getDbHandle().isInTransaction()) {
 			logger.debug("Already in transaction for {}", processor);
 			return processor.apply(input);
 		} else {
@@ -201,7 +268,7 @@ public class AnetObjectEngine {
 	}
 
 	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
-		if (dbHandle.isInTransaction()) {
+		if (getDbHandle().isInTransaction()) {
 			logger.debug("Already in transaction for {}", processor);
 			return processor.apply(arg1, arg2);
 		} else {
@@ -279,7 +346,7 @@ public class AnetObjectEngine {
 		query.setParentOrgUuid(parentOrgUuid);
 		query.setParentOrgRecursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
-		final List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+		final List<Organization> orgList = getOrganizationDao().search(query).getList();
 		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
 	}
 
@@ -294,7 +361,7 @@ public class AnetObjectEngine {
 		query.setCustomFieldRef1Uuid(parentTaskUuid);
 		query.setCustomFieldRef1Recursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
-		final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+		final List<Task> taskList = getTaskDao().search(query).getList();
 		return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
 	}
 	
@@ -309,4 +376,5 @@ public class AnetObjectEngine {
 	public Map<String, Object> getContext() {
 		return context;
 	}
+
 }

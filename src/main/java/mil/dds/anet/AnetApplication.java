@@ -55,6 +55,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import mil.dds.anet.auth.AnetAuthenticationFilter;
 import mil.dds.anet.auth.AnetDevAuthenticator;
+import mil.dds.anet.auth.DbHandleFilter;
 import mil.dds.anet.auth.TimedNegotiateSecurityFilter;
 import mil.dds.anet.auth.UrlParamsAuthFilter;
 import mil.dds.anet.beans.Person;
@@ -149,7 +150,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 	@Override
 	public void run(AnetConfiguration configuration, Environment environment) {
 		//Get the Database connection up and running
-		logger.info("datasource url: {}", configuration.getDataSourceFactory().getUrl());
+		final String dbUrl = configuration.getDataSourceFactory().getUrl();
+		logger.info("datasource url: {}", dbUrl);
 		final JdbiFactory factory = new JdbiFactory();
 		final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "anet-data-layer");
 
@@ -163,9 +165,12 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
 		//The Object Engine is the core place where we store all of the Dao's
 		//You can always grab the engine from anywhere with AnetObjectEngine.getInstance()
-		final AnetObjectEngine engine = new AnetObjectEngine(jdbi);
+		final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, jdbi);
 		environment.servlets().setSessionHandler(new SessionHandler());
 		
+		environment.getApplicationContext().addFilter(
+				new FilterHolder(new DbHandleFilter(engine)),
+				"/*", EnumSet.of(DispatcherType.REQUEST));
 		if (configuration.isDevelopmentMode()) {
 			// In development mode chain URL params (used during testing) and basic HTTP Authentication
 			final UrlParamsAuthFilter<Person> urlParamsAuthFilter = new UrlParamsAuthFilter.Builder<Person>()
@@ -203,9 +208,9 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
 		//Schedule any tasks that need to run on an ongoing basis. 
 		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-		AnetEmailWorker emailWorker = new AnetEmailWorker(engine.getEmailDao(), configuration, scheduler);
-		FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine.getReportDao());
-		ReportPublicationWorker reportPublicationWorker = new ReportPublicationWorker(engine.getReportDao(), configuration);
+		AnetEmailWorker emailWorker = new AnetEmailWorker(engine, configuration, scheduler);
+		FutureEngagementWorker futureWorker = new FutureEngagementWorker(engine);
+		ReportPublicationWorker reportPublicationWorker = new ReportPublicationWorker(engine, configuration);
 		
 		//Check for any reports that need to be published every 5 minutes.
 		//And run once in 5 seconds from boot-up. (give the server time to boot up).

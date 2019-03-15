@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.AnetObjectEngine.HandleWrapper;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -22,16 +23,18 @@ public class FutureEngagementWorker implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 	
-	private ReportDao dao;
+	private final AnetObjectEngine engine;
+	private final ReportDao dao;
 
-	public FutureEngagementWorker(ReportDao dao) {
-		this.dao = dao;
+	public FutureEngagementWorker(AnetObjectEngine engine) {
+		this.engine = engine;
+		this.dao = engine.getReportDao();
 	}
 	
 	@Override
 	public void run() {
 		logger.debug("Future Engagement Worker waking up to check for Future Engagements");
-		try {
+		try (final HandleWrapper h = engine.openDbHandleWrapper()) {
 			runInternal();
 		} catch (Throwable e) { 
 			//CAnnot let this thread die. Otherwise ANET will stop checking for future engagements. 
@@ -46,7 +49,7 @@ public class FutureEngagementWorker implements Runnable {
 		query.setState(Collections.singletonList(ReportState.FUTURE));
 		Instant endOfToday = Instant.now().atZone(DaoUtils.getDefaultZoneId()).withHour(23).withMinute(59).withSecond(59).withNano(999999999).toInstant();
 		query.setEngagementDateEnd(endOfToday);
-		List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
+		List<Report> reports = engine.getReportDao().search(query).getList();
 		
 		//send them all emails to let them know we updated their report. 
 		for (Report r : reports) { 
@@ -56,7 +59,7 @@ public class FutureEngagementWorker implements Runnable {
 				action.setReport(r);
 				email.setAction(action);
 				try {
-					email.addToAddress(r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
+					email.addToAddress(r.loadAuthor(engine.getContext()).get().getEmailAddress());
 					AnetEmailWorker.sendEmailAsync(email);
 					dao.updateToDraftState(r);
 				} catch (InterruptedException | ExecutionException e) {

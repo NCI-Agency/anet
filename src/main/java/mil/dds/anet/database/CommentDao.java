@@ -3,8 +3,7 @@ package mil.dds.anet.database;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdbi.v3.core.Handle;
-
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.CommentMapper;
@@ -18,12 +17,12 @@ public class CommentDao extends AnetBaseDao<Comment> {
 
 	private final IdBatcher<Comment> idBatcher;
 
-	public CommentDao(Handle dbHandle) { 
-		super(dbHandle, "Comments", tableName, COMMENT_FIELDS, null);
+	public CommentDao(AnetObjectEngine engine) {
+		super(engine, "Comments", tableName, COMMENT_FIELDS, null);
 		final String idBatcherSql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS
 				+ "FROM comments "
 				+ "WHERE comments.uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Comment>(dbHandle, idBatcherSql, "uuids", new CommentMapper());
+		this.idBatcher = new IdBatcher<Comment>(engine, idBatcherSql, "uuids", new CommentMapper());
 	}
 	
 	@Override
@@ -42,7 +41,7 @@ public class CommentDao extends AnetBaseDao<Comment> {
 
 	@Override
 	public Comment insertInternal(Comment c) {
-		dbHandle.createUpdate("/* insertComment */ "
+		engine.getDbHandle().createUpdate("/* insertComment */ "
 				+ "INSERT INTO comments (uuid, \"reportUuid\", \"authorUuid\", \"createdAt\", \"updatedAt\", text)"
 				+ "VALUES (:uuid, :reportUuid, :authorUuid, :createdAt, :updatedAt, :text)")
 			.bindBean(c)
@@ -54,14 +53,14 @@ public class CommentDao extends AnetBaseDao<Comment> {
 
 	@Override
 	public int updateInternal(Comment c) {
-		return dbHandle.createUpdate("/* updateComment */ UPDATE comments SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
+		return engine.getDbHandle().createUpdate("/* updateComment */ UPDATE comments SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 			.bindBean(c)
 			.bind("updatedAt", DaoUtils.asLocalDateTime(c.getUpdatedAt()))
 			.execute();
 	}
 
 	public List<Comment> getCommentsForReport(String reportUuid) {
-		return dbHandle.createQuery("/* getCommentForReport */ SELECT " + COMMENT_FIELDS
+		return engine.getDbHandle().createQuery("/* getCommentForReport */ SELECT " + COMMENT_FIELDS
 				+ "FROM comments "
 				+ "WHERE comments.\"reportUuid\" = :reportUuid ORDER BY comments.\"createdAt\" ASC")
 			.bind("reportUuid", reportUuid)
@@ -71,7 +70,7 @@ public class CommentDao extends AnetBaseDao<Comment> {
 
 	@Override
 	public int deleteInternal(String commentUuid) {
-		return dbHandle.createUpdate("/* deleteComment */ DELETE FROM comments where uuid = :uuid")
+		return engine.getDbHandle().createUpdate("/* deleteComment */ DELETE FROM comments where uuid = :uuid")
 			.bind("uuid", commentUuid)
 			.execute();
 	}

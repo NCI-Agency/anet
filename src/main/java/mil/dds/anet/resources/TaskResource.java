@@ -45,11 +45,13 @@ import mil.dds.anet.utils.ResponseUtils;
 @PermitAll
 public class TaskResource {
 
-	TaskDao dao;
+	private final TaskDao dao;
+	private final AnetObjectEngine engine;
 	private final String duplicateTaskShortName;
 	
 	public TaskResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.dao = engine.getTaskDao();
+		this.engine = engine;
 		final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortLabel");
 		duplicateTaskShortName = String.format("Duplicate %s number", taskShortLabel);
 	}
@@ -129,7 +131,7 @@ public class TaskResource {
 		}
 
 		// Check for loops in the hierarchy
-		final Map<String, Task> children = AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(p));
+		final Map<String, Task> children = engine.buildTopLevelTaskHash(DaoUtils.getUuid(p));
 		if (p.getCustomFieldRef1Uuid() != null && children.containsKey(p.getCustomFieldRef1Uuid())) {
 			throw new WebApplicationException("Task can not be its own (grand…)parent");
 		}

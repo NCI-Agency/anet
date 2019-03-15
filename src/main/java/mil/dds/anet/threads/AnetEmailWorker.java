@@ -38,6 +38,7 @@ import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.AnetObjectEngine.HandleWrapper;
 import mil.dds.anet.beans.AnetEmail;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
@@ -52,7 +53,8 @@ public class AnetEmailWorker implements Runnable {
 
 	private static AnetEmailWorker instance;
 
-	private EmailDao dao;
+	private final AnetObjectEngine engine;
+	private final EmailDao dao;
 	private ObjectMapper mapper;
 	private Properties props;
 	private Authenticator auth;
@@ -68,8 +70,9 @@ public class AnetEmailWorker implements Runnable {
 	private final boolean disabled;
 	
 	@SuppressWarnings("unchecked")
-	public AnetEmailWorker(EmailDao dao, AnetConfiguration config, ScheduledExecutorService scheduler) {
-		this.dao = dao;
+	public AnetEmailWorker(AnetObjectEngine engine, AnetConfiguration config, ScheduledExecutorService scheduler) {
+		this.engine = engine;
+		this.dao = engine.getEmailDao();
 		this.scheduler = scheduler;
 		this.mapper = MapperUtils.getDefaultMapper();
 		this.fromAddr = config.getEmailFromAddr();
@@ -111,7 +114,7 @@ public class AnetEmailWorker implements Runnable {
 	@Override
 	public void run() {
 		logger.debug("AnetEmailWorker waking up to send emails!");
-		try {
+		try (final HandleWrapper h = engine.openDbHandleWrapper()) {
 			runInternal();
 		} catch (Throwable e) {
 			//Cannot let this thread die, otherwise ANET will stop sending emails until you reboot the server :(
@@ -160,7 +163,6 @@ public class AnetEmailWorker implements Runnable {
 	}
 
 	private Map<String, Object> buildContext(final AnetEmail email) {
-		AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("context", engine.getContext());
 		context.put("serverUrl", serverUrl);

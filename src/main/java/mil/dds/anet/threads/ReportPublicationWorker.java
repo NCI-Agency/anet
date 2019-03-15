@@ -4,12 +4,12 @@ import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.AnetObjectEngine.HandleWrapper;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.Report.ReportState;
@@ -23,20 +23,20 @@ public class ReportPublicationWorker implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+	private final AnetObjectEngine engine;
 	private final ReportDao dao;
 	private final Integer nbOfHoursQuarantineApproved;
-	private final Map<String, Object> context;
 
-	public ReportPublicationWorker(ReportDao dao, AnetConfiguration config) {
-		this.dao = dao;
+	public ReportPublicationWorker(AnetObjectEngine engine, AnetConfiguration config) {
+		this.engine = engine;
+		this.dao = engine.getReportDao();
 		this.nbOfHoursQuarantineApproved = (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved");
-		this.context = AnetObjectEngine.getInstance().getContext();
 	}
 
 	@Override
 	public void run() {
 		logger.debug("Report Publication Worker waking up to check for reports to be published");
-		try {
+		try (final HandleWrapper h = engine.openDbHandleWrapper()) {
 			runInternal();
 		} catch (Throwable e) { 
 			//Cannot let this thread die. Otherwise ANET will stop checking for reports which are to be published. 
@@ -52,14 +52,14 @@ public class ReportPublicationWorker implements Runnable {
 		query.setState(Collections.singletonList(ReportState.APPROVED));
 		final List<Report> reports = dao.search(query, null, true).getList();
 		for (final Report r : reports) {
-			final List<ReportAction> workflow = r.loadWorkflow(context).join();
+			final List<ReportAction> workflow = r.loadWorkflow(engine.getContext()).join();
 			if (workflow.isEmpty()) {
 				logger.error("Couldn't process report publication for report {}, it has no workflow", r.getUuid());
 			} else {
 				if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(now)) {
 					//Publish the report
 					try {
-						final int numRows = AnetObjectEngine.getInstance().executeInTransaction(dao::publish, r, null);
+						final int numRows = engine.executeInTransaction(dao::publish, r, null);
 						if (numRows == 0) {
 							logger.error("Couldn't process report publication for report {}", r.getUuid());
 						} else {

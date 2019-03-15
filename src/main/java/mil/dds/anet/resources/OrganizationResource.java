@@ -56,8 +56,8 @@ public class OrganizationResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private OrganizationDao dao;
-	private AnetObjectEngine engine;
+	private final OrganizationDao dao;
+	private final AnetObjectEngine engine;
 	
 	public OrganizationResource(AnetObjectEngine engine) {
 		this.dao = engine.getOrganizationDao(); 
@@ -96,7 +96,7 @@ public class OrganizationResource {
 	@Path("/new")
 	@RolesAllowed("ADMINISTRATOR")
 	public Organization createOrganization(@Auth Person user, Organization org) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::createOrganizationCommon, user, org);
+		return engine.executeInTransaction(this::createOrganizationCommon, user, org);
 	}
 
 	private Organization createOrganizationCommon(Person user, Organization org) {
@@ -129,7 +129,7 @@ public class OrganizationResource {
 	@GraphQLMutation(name="createOrganization")
 	@RolesAllowed("ADMINISTRATOR")
 	public Organization createOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::createOrganizationCommon, DaoUtils.getUserFromContext(context), org);
+		return engine.executeInTransaction(this::createOrganizationCommon, DaoUtils.getUserFromContext(context), org);
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class OrganizationResource {
 	@RolesAllowed("SUPER_USER")
 	public Response updateOrganization(@Auth Person user, Organization org)
 			throws InterruptedException, ExecutionException, Exception {
-		AnetObjectEngine.getInstance().executeInTransaction(this::updateOrganizationCommon, user, org);
+		engine.executeInTransaction(this::updateOrganizationCommon, user, org);
 		return Response.ok().build();
 	}
 
@@ -153,7 +153,7 @@ public class OrganizationResource {
 		AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org));
 
 		// Check for loops in the hierarchy
-		final Map<String, Organization> children = AnetObjectEngine.getInstance().buildTopLevelOrgHash(DaoUtils.getUuid(org));
+		final Map<String, Organization> children = engine.buildTopLevelOrgHash(DaoUtils.getUuid(org));
 		if (org.getParentOrgUuid() != null && children.containsKey(org.getParentOrgUuid())) {
 			throw new WebApplicationException("Organization can not be its own (grand…)parent");
 		}
@@ -214,7 +214,6 @@ public class OrganizationResource {
 
 	//Helper method that diffs the name/members of an approvalStep
 	private void updateStep(ApprovalStep newStep, ApprovalStep oldStep) {
-		final AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		final ApprovalStepDao approvalStepDao = engine.getApprovalStepDao();
 		newStep.setUuid(oldStep.getUuid()); //Always want to make changes to the existing group
 		if (!newStep.getName().equals(oldStep.getName())) {
@@ -239,7 +238,7 @@ public class OrganizationResource {
 	public Integer updateOrganization(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="organization") Organization org)
 			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something, so we return the number of updated rows
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateOrganizationCommon, DaoUtils.getUserFromContext(context), org);
+		return engine.executeInTransaction(this::updateOrganizationCommon, DaoUtils.getUserFromContext(context), org);
 	}
 
 	@POST

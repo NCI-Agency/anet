@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jdbi.v3.core.Handle;
-
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportActionMapper;
@@ -16,16 +15,16 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
 	private final ForeignKeyBatcher<ReportAction> reportIdBatcher;
 
-	public ReportActionDao(Handle db) { 
-		super(db, "ReportActions", "reportActions", "*", null);
+	public ReportActionDao(AnetObjectEngine engine) {
+		super(engine, "ReportActions", "reportActions", "*", null);
 		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
 				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		this.reportIdBatcher = new ForeignKeyBatcher<ReportAction>(db, reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
+		this.reportIdBatcher = new ForeignKeyBatcher<ReportAction>(engine, reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
 	}
 
 	@Override
 	public ReportAction insertInternal(ReportAction action) {
-		dbHandle.createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
+		engine.getDbHandle().createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
 				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
 			.bind("approvalStepUuid", action.getStepUuid())
@@ -53,7 +52,7 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 	 */
 	public List<ReportAction> getFinalActionsForReport(String reportUuid) {
 		//TODO: test this. I don't think it works.... 
-		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM \"reportActions\" "
+		return engine.getDbHandle().createQuery("/* getReportFinalActions */ SELECT * FROM \"reportActions\" "
 				+ "WHERE \"reportUuid\" = :reportUuid GROUP BY \"approvalStepUuid\" "
 				+ "ORDER BY \"createdAt\" DESC")
 			.bind("reportUuid", reportUuid)

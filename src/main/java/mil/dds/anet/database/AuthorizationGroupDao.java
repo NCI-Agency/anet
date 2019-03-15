@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -32,21 +31,21 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 	private final IdBatcher<AuthorizationGroup> idBatcher;
 	private final ForeignKeyBatcher<Position> positionsBatcher;
 
-	public AuthorizationGroupDao(Handle h) {
-		super(h, "ApprovalSteps", "approvalSteps", "*", null);
+	public AuthorizationGroupDao(AnetObjectEngine engine) {
+		super(engine, "ApprovalSteps", "approvalSteps", "*", null);
 		final String idBatcherSql = "/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<AuthorizationGroup>(h, idBatcherSql, "uuids", new AuthorizationGroupMapper());
+		this.idBatcher = new IdBatcher<AuthorizationGroup>(engine, idBatcherSql, "uuids", new AuthorizationGroupMapper());
 
 		final String positionsBatcherSql = "/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM positions, \"authorizationGroupPositions\" "
 				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupUuid\" IN ( <foreignKeys> ) "
 				+ "AND \"authorizationGroupPositions\".\"positionUuid\" = positions.uuid";
-		this.positionsBatcher = new ForeignKeyBatcher<Position>(h, positionsBatcherSql, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
+		this.positionsBatcher = new ForeignKeyBatcher<Position>(engine, positionsBatcherSql, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
 	}
 
 	public AnetBeanList<AuthorizationGroup> getAll(int pageNum, int pageSize) {
 		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			sql = "/* getAllAuthorizationGroups */ SELECT \"authorizationGroups\".*, COUNT(*) OVER() AS totalCount "
 					+ "FROM \"authorizationGroups\" ORDER BY name ASC "
 					+ "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
@@ -55,7 +54,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 					+ "ORDER BY name ASC LIMIT :limit OFFSET :offset";
 		}
 
-		final Query sqlQuery = dbHandle.createQuery(sql)
+		final Query sqlQuery = engine.getDbHandle().createQuery(sql)
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum);
 		return new AnetBeanList<AuthorizationGroup>(sqlQuery, pageNum, pageSize, new AuthorizationGroupMapper(), null);
@@ -76,7 +75,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
 	@Override
 	public AuthorizationGroup insertInternal(AuthorizationGroup a) {
-		dbHandle.createUpdate(
+		engine.getDbHandle().createUpdate(
 					"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
 						+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
 				.bindBean(a)
@@ -85,7 +84,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 				.bind("status", DaoUtils.getEnumId(a.getStatus()))
 				.execute();
 	
-			final AuthorizationGroupBatch ab = dbHandle.attach(AuthorizationGroupBatch.class);
+			final AuthorizationGroupBatch ab = engine.getDbHandle().attach(AuthorizationGroupBatch.class);
 			if (a.getPositions() != null) {
 				ab.insertAuthorizationGroupPositions(a.getUuid(), a.getPositions());
 			}
@@ -100,7 +99,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
 	@Override
 	public int updateInternal(AuthorizationGroup a) {
-		return dbHandle.createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
+		return engine.getDbHandle().createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
 					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
 				.bindBean(a)
 				.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
@@ -114,7 +113,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 	}
 
 	public int addPositionToAuthorizationGroup(Position p, AuthorizationGroup a) {
-		return dbHandle.createUpdate("/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupUuid\", \"positionUuid\") "
+		return engine.getDbHandle().createUpdate("/* addPositionToAuthorizationGroup */ INSERT INTO \"authorizationGroupPositions\" (\"authorizationGroupUuid\", \"positionUuid\") "
 				+ "VALUES (:authorizationGroupUuid, :positionUuid)")
 			.bind("authorizationGroupUuid", a.getUuid())
 			.bind("positionUuid", p.getUuid())
@@ -122,7 +121,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 	}
 
 	public int removePositionFromAuthorizationGroup(Position p, AuthorizationGroup a) {
-		return dbHandle.createUpdate("/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupPositions\" "
+		return engine.getDbHandle().createUpdate("/* removePositionFromAuthorizationGroup*/ DELETE FROM \"authorizationGroupPositions\" "
 				+ "WHERE \"authorizationGroupUuid\" = :authorizationGroupUuid AND \"positionUuid\" = :positionUuid")
 				.bind("authorizationGroupUuid", a.getUuid())
 				.bind("positionUuid", p.getUuid())
@@ -135,13 +134,13 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 	}
 
 	public AnetBeanList<AuthorizationGroup> search(AuthorizationGroupSearchQuery query) {
-		return AnetObjectEngine.getInstance().getSearcher()
-				.getAuthorizationGroupSearcher().runSearch(query, dbHandle);
+		return engine.getSearcher()
+				.getAuthorizationGroupSearcher().runSearch(query, engine.getDbHandle());
 	}
 
 	public List<AuthorizationGroup> getRecentAuthorizationGroups(Person author, int maxResults) {
 		final String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			sql = "/* getRecentAuthorizationGroups */ SELECT \"authorizationGroups\".* FROM \"authorizationGroups\" WHERE \"authorizationGroups\".uuid IN ("
 					+ "SELECT TOP(:maxResults) \"reportAuthorizationGroups\".\"authorizationGroupUuid\" "
 					+ "FROM reports "
@@ -165,7 +164,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
-		return dbHandle.createQuery(sql)
+		return engine.getDbHandle().createQuery(sql)
 				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.bind("activeStatus", DaoUtils.getEnumId(AuthorizationGroupStatus.ACTIVE))
@@ -174,7 +173,7 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 	}
 
 	public List<Report> getReportsForAuthorizationGroup(AuthorizationGroup a) {
-		return dbHandle.createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS
+		return engine.getDbHandle().createQuery("/* getReportsForAuthorizationGroup */ SELECT " + ReportDao.REPORT_FIELDS
 				+ "FROM reports, \"reportAuthorizationGroups\" "
 				+ "WHERE \"reportAuthorizationGroups\".\"authorizationGroupUuid\" = :authorizationGroupUuid "
 				+ "AND \"reportAuthorizationGroups\".\"reportUuid\" = reports.uuid")

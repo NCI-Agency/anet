@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jdbi.v3.core.Handle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,23 +57,18 @@ public class DaoUtils {
 	/*This never changes during execution, so statically cache it. */
 	private static DbType DB_TYPE = null;
 
-	public static DbType getDbType(Handle dbHandle) {
+	public static DbType getDbType(String dbUrl) {
 		// No locking because this operation is idempotent and safe
 		if (DB_TYPE == null) {
-			try { 
-				String databaseUrl = dbHandle.getConnection().getMetaData().getURL();
-				String driverType = databaseUrl.split(":", 3)[1].toLowerCase();
-				DB_TYPE = DbType.fromTag(driverType);
-				logger.info("Detected and cached database type as {}", DB_TYPE);
-			} catch (SQLException e) { 
-				throw new RuntimeException("Error determining database type", e);
-			}
+			final String driverType = dbUrl.split(":", 3)[1].toLowerCase();
+			DB_TYPE = DbType.fromTag(driverType);
+			logger.info("Detected and cached database type as {}", DB_TYPE);
 		}
 		return DB_TYPE;
 	}
 
-	public static boolean isMsSql(Handle dbHandle) {
-		return getDbType(dbHandle) == DbType.MSSQL;
+	public static boolean isMsSql(String dbUrl) {
+		return getDbType(dbUrl) == DbType.MSSQL;
 	}
 
 	public static String getNewUuid() {

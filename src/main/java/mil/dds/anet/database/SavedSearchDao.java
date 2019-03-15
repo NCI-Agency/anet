@@ -3,8 +3,7 @@ package mil.dds.anet.database;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdbi.v3.core.Handle;
-
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SavedSearch;
@@ -15,10 +14,10 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
 	private final IdBatcher<SavedSearch> idBatcher;
 
-	public SavedSearchDao(Handle h) { 
-		super(h, "SavedSearches", "savedSearches", "*", null);
+	public SavedSearchDao(AnetObjectEngine engine) {
+		super(engine, "SavedSearches", "savedSearches", "*", null);
 		final String idBatcherSql = "/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<SavedSearch>(h, idBatcherSql, "uuids", new SavedSearchMapper());
+		this.idBatcher = new IdBatcher<SavedSearch>(engine, idBatcherSql, "uuids", new SavedSearchMapper());
 	}
 	
 	@Override
@@ -36,7 +35,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 	}
 
 	public List<SavedSearch> getSearchesByOwner(Person owner) { 
-		return dbHandle.createQuery("/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
+		return engine.getDbHandle().createQuery("/* getSavedSearchByOwner */ SELECT * FROM \"savedSearches\" WHERE \"ownerUuid\" = :ownerUuid")
 			.bind("ownerUuid", owner.getUuid())
 			.map(new SavedSearchMapper())
 			.list();
@@ -44,7 +43,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
 	@Override
 	public SavedSearch insertInternal(SavedSearch obj) {
-		dbHandle.createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
+		engine.getDbHandle().createUpdate("/* insertSavedSearch */ INSERT INTO \"savedSearches\" "
 				+ "(uuid, \"ownerUuid\", name, \"objectType\", query) "
 				+ "VALUES (:uuid, :ownerUuid, :name, :objectType, :query)")
 			.bindBean(obj)
@@ -57,7 +56,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
 	@Override
 	public int updateInternal(SavedSearch obj) {
-		return dbHandle.createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
+		return engine.getDbHandle().createUpdate("/* updateSavedSearch */ UPDATE \"savedSearches\" "
 				+ "SET name = :name, \"objectType\" = :objectType, query = :query "
 				+ "WHERE uuid = :uuid")
 			.bindBean(obj)
@@ -67,7 +66,7 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 
 	@Override
 	public int deleteInternal(String uuid) {
-		return dbHandle.createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
+		return engine.getDbHandle().createUpdate("/* deleteSavedSearch */ DELETE FROM \"savedSearches\" "
 				+ "WHERE uuid = :uuid")
 			.bind("uuid", uuid)
 			.execute();

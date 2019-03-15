@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -26,25 +26,25 @@ public class NoteDao extends AnetBaseDao<Note> {
 	private final ForeignKeyBatcher<Note> notesBatcher;
 	private final ForeignKeyBatcher<NoteRelatedObject> noteRelatedObjectsBatcher;
 
-	public NoteDao(Handle h) {
-		super(h, "Notes", "notes", "*", null);
+	public NoteDao(AnetObjectEngine engine) {
+		super(engine, "Notes", "notes", "*", null);
 		final String idBatcherSql = "/* batch.getNotesByUuids */ SELECT * FROM notes WHERE uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Note>(h, idBatcherSql, "uuids", new NoteMapper());
+		this.idBatcher = new IdBatcher<Note>(engine, idBatcherSql, "uuids", new NoteMapper());
 
 		final String notesBatcherSql = "/* batch.getNotesForRelatedObject */ SELECT * FROM \"noteRelatedObjects\" "
 				+ "INNER JOIN notes ON \"noteRelatedObjects\".\"noteUuid\" = notes.uuid "
 				+ "WHERE \"noteRelatedObjects\".\"relatedObjectUuid\" IN ( <foreignKeys> ) "
 				+ "ORDER BY notes.\"updatedAt\" DESC";
-		this.notesBatcher = new ForeignKeyBatcher<Note>(h, notesBatcherSql, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
+		this.notesBatcher = new ForeignKeyBatcher<Note>(engine, notesBatcherSql, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
 
 		final String noteRelatedObjectsBatcherSql = "/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
 				+ "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectuuid\" ASC";
-		this.noteRelatedObjectsBatcher = new ForeignKeyBatcher<NoteRelatedObject>(h, noteRelatedObjectsBatcherSql, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
+		this.noteRelatedObjectsBatcher = new ForeignKeyBatcher<NoteRelatedObject>(engine, noteRelatedObjectsBatcherSql, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
 	}
 
 	public AnetBeanList<Note> getAll(int pageNum, int pageSize) {
 		final String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql(engine.getDbUrl())) {
 			sql = "/* getAllNotes */ SELECT notes.*, COUNT(*) OVER() AS totalCount "
 					+ "FROM notes ORDER BY \"updatedAt\" DESC "
 					+ "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
@@ -53,7 +53,7 @@ public class NoteDao extends AnetBaseDao<Note> {
 					+ "ORDER BY \"updatedAt\" DESC LIMIT :limit OFFSET :offset";
 		}
 
-		final Query query = dbHandle.createQuery(sql)
+		final Query query = engine.getDbHandle().createQuery(sql)
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum);
 		return new AnetBeanList<Note>(query, pageNum, pageSize, new NoteMapper(), null);
@@ -70,7 +70,7 @@ public class NoteDao extends AnetBaseDao<Note> {
 
 	@Override
 	public Note insertInternal(Note n) {
-		dbHandle.createUpdate(
+		engine.getDbHandle().createUpdate(
 				"/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", text, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :authorUuid, :text, :createdAt, :updatedAt)")
 			.bindBean(n)
@@ -78,15 +78,15 @@ public class NoteDao extends AnetBaseDao<Note> {
 			.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
 			.bind("authorUuid", n.getAuthorUuid())
 			.execute();
-		insertNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
+		insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
 		return n;
 	}
 
 	@Override
 	public int updateInternal(Note n) {
-		deleteNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n)); // seems the easiest thing to do
-		insertNoteRelatedObjects(dbHandle, DaoUtils.getUuid(n), n.getNoteRelatedObjects());
-		return dbHandle.createUpdate("/* updateNote */ UPDATE notes "
+		deleteNoteRelatedObjects(DaoUtils.getUuid(n)); // seems the easiest thing to do
+		insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
+		return engine.getDbHandle().createUpdate("/* updateNote */ UPDATE notes "
 					+ "SET text = :text, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(n)
 				.bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
@@ -95,8 +95,8 @@ public class NoteDao extends AnetBaseDao<Note> {
 
 	@Override
 	public int deleteInternal(String uuid) {
-		deleteNoteRelatedObjects(dbHandle, uuid);
-		return dbHandle.createUpdate("/* deleteNote */ DELETE FROM notes where uuid = :uuid")
+		deleteNoteRelatedObjects(uuid);
+		return engine.getDbHandle().createUpdate("/* deleteNote */ DELETE FROM notes where uuid = :uuid")
 			.bind("uuid", uuid)
 			.execute();
 	}
@@ -119,9 +119,9 @@ public class NoteDao extends AnetBaseDao<Note> {
 				.load(context, "note.noteRelatedObjects", note.getUuid());
 	}
 
-	private void insertNoteRelatedObjects(Handle h, String uuid, List<NoteRelatedObject> noteRelatedObjects) {
+	private void insertNoteRelatedObjects(String uuid, List<NoteRelatedObject> noteRelatedObjects) {
 		for (final NoteRelatedObject nro : noteRelatedObjects) {
-			h.createUpdate(
+			engine.getDbHandle().createUpdate(
 					"/* insertNoteRelatedObject */ INSERT INTO \"noteRelatedObjects\" (\"noteUuid\", \"relatedObjectType\", \"relatedObjectUuid\") "
 						+ "VALUES (:noteUuid, :relatedObjectType, :relatedObjectUuid)")
 				.bindBean(nro)
@@ -130,8 +130,8 @@ public class NoteDao extends AnetBaseDao<Note> {
 		}
 	}
 
-	private void deleteNoteRelatedObjects(Handle h, String uuid) {
-		h.execute("/* deleteNoteRelatedObjects */ DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" = ?", uuid);
+	private void deleteNoteRelatedObjects(String uuid) {
+		engine.getDbHandle().execute("/* deleteNoteRelatedObjects */ DELETE FROM \"noteRelatedObjects\" WHERE \"noteUuid\" = ?", uuid);
 	}
 
 }

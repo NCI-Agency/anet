@@ -48,11 +48,13 @@ import mil.dds.anet.utils.Utils;
 @PermitAll
 public class PersonResource {
 	
-	private PersonDao dao;
-	private AnetConfiguration config;
+	private final PersonDao dao;
+	private final AnetObjectEngine engine;
+	private final AnetConfiguration config;
 	
 	public PersonResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.dao = engine.getPersonDao();
+		this.engine = engine;
 		this.config = config;
 	}
 	
@@ -106,7 +108,7 @@ public class PersonResource {
 		}
 
 		if (p.getPosition() != null && p.getPosition().getUuid() != null) {
-			Position position = AnetObjectEngine.getInstance().getPositionDao().getByUuid(p.getPosition().getUuid());
+			Position position = engine.getPositionDao().getByUuid(p.getPosition().getUuid());
 			if (position == null) { 
 				throw new WebApplicationException("Position " + p.getPosition() + " does not exist", Status.BAD_REQUEST);
 			}
@@ -117,7 +119,7 @@ public class PersonResource {
 		Person created = dao.insert(p);
 		
 		if (created.getPosition() != null) { 
-			AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(created.getUuid(), created.getPosition().getUuid());
+			engine.getPositionDao().setPersonInPosition(created.getUuid(), created.getPosition().getUuid());
 		}
 		
 		AnetAuditLogger.log("Person {} created by {}", created, user);
@@ -188,17 +190,17 @@ public class PersonResource {
 			if (existingPos == null && p.getPosition().getUuid() != null) {
 				//Update the position for this person.
 				AuthUtils.assertSuperUser(user);
-				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), p.getPosition().getUuid());
+				engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), p.getPosition().getUuid());
 				AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
 			} else if (existingPos != null && existingPos.getUuid().equals(p.getPosition().getUuid()) == false) {
 				//Update the position for this person.
 				AuthUtils.assertSuperUser(user);
-				AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), p.getPosition().getUuid());
+				engine.getPositionDao().setPersonInPosition(DaoUtils.getUuid(p), p.getPosition().getUuid());
 				AnetAuditLogger.log("Person {} put in position {}  by {}", p, p.getPosition(), user);
 			} else if (existingPos != null && p.getPosition().getUuid() == null) {
 				//Remove this person from their position.
 				AuthUtils.assertSuperUser(user);
-				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos.getUuid());
+				engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
 				AnetAuditLogger.log("Person {} removed from position   by {}", p, user);
 			}
 		}
@@ -219,7 +221,7 @@ public class PersonResource {
 					AuthUtils.assertSuperUser(user);
 				}
 				AnetAuditLogger.log("Person {} removed from position by {} because they are now inactive", p, user);	
-				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos.getUuid());
+				engine.getPositionDao().removePersonFromPosition(existingPos.getUuid());
 			}
 		}
 		
@@ -271,7 +273,7 @@ public class PersonResource {
 	@Path("/{uuid}/position")
 	public Position getPositionForPerson(@PathParam("uuid") String uuid) {
 		//TODO: it doesn't seem to be used
-		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
+		return engine.getPositionDao().getCurrentPositionForPerson(uuid);
 	}
 	
 	/** 
@@ -337,7 +339,7 @@ public class PersonResource {
 		//Remove the loser from their position.
 		Position loserPosition = loser.getPosition();
 		if (loserPosition != null) { 
-			AnetObjectEngine.getInstance().getPositionDao()
+			engine.getPositionDao()
 				.removePersonFromPosition(loserPosition.getUuid());
 		}
 
@@ -345,14 +347,14 @@ public class PersonResource {
 		AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
 		
 		if (loserPosition != null && copyPosition) { 
-			AnetObjectEngine.getInstance().getPositionDao()
+			engine.getPositionDao()
 				.setPersonInPosition(winner.getUuid(), loserPosition.getUuid());
 			AnetAuditLogger.log("Person {} put in position {} as part of merge by {}", winner, loserPosition, user);
 		} else if (winner.getPosition() != null) { 
 			//We need to always re-put the winner back into their position
 			// because when we removed the loser, and then updated the peoplePositions table
 			// it now has a record saying the winner has no position. 
-			AnetObjectEngine.getInstance().getPositionDao()
+			engine.getPositionDao()
 				.setPersonInPosition(winner.getUuid(), winner.getPosition().getUuid());
 		}
 		

@@ -45,8 +45,9 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 				bootstrap.getMetricRegistry(),
 				bootstrap.getClassLoader(),
 				bootstrap.getHealthCheckRegistry());
+		final String dbUrl = configuration.getDataSourceFactory().getUrl();
 		final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
-		final AnetObjectEngine engine = new AnetObjectEngine(jdbi);
+		final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, jdbi);
 		
 		System.out.println("-------- WELCOME TO ANET! --------");
 		System.out.println("We're going to ask you a few questions to get ANET set up.");
