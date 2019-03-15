@@ -447,7 +447,7 @@ public class Report extends AbstractAnetBean {
 			//For reports which are not approved or published, make sure there
 			//is a report action for each approval step.
 			if (!(state == ReportState.APPROVED || state == ReportState.PUBLISHED)) {
-				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();
+				final Organization ao = loadAdvisorOrg(context).join();
 				final String aoUuid = DaoUtils.getUuid(ao);
 				List<ApprovalStep> steps = getWorkflowForOrg(context, engine, aoUuid).join();
 				if (Utils.isEmptyOrNull(steps)) {
