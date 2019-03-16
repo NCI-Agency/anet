@@ -151,6 +151,13 @@ public class OrganizationResource {
 	private int updateOrganizationCommon(Person user, Organization org) {
 		//Verify correct Organization
 		AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org));
+
+		// Check for loops in the hierarchy
+		final Map<String, Organization> children = AnetObjectEngine.getInstance().buildTopLevelOrgHash(DaoUtils.getUuid(org));
+		if (org.getParentOrgUuid() != null && children.containsKey(org.getParentOrgUuid())) {
+			throw new WebApplicationException("Organization can not be its own (grand…)parent");
+		}
+
 		final int numRows;
 		try {
 			numRows = dao.update(org);

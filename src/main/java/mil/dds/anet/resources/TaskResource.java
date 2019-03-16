@@ -127,7 +127,13 @@ public class TaskResource {
 				AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrgUuid());
 			}
 		}
-		
+
+		// Check for loops in the hierarchy
+		final Map<String, Task> children = AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(p));
+		if (p.getCustomFieldRef1Uuid() != null && children.containsKey(p.getCustomFieldRef1Uuid())) {
+			throw new WebApplicationException("Task can not be its own (grand…)parent");
+		}
+
 		try {
 			final int numRows = dao.update(p);
 			if (numRows == 0) {

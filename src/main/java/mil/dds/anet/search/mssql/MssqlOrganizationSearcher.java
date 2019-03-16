@@ -61,14 +61,13 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 			sqlArgs.put("type", DaoUtils.getEnumId(query.getType()));
 		}
 
-		String commonTableExpression = null;
 		if (query.getParentOrgUuid() != null) {
-			if (query.getParentOrgRecursively() != null && query.getParentOrgRecursively()) {
-				commonTableExpression = "WITH parent_orgs(uuid) AS ( "
+			if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
+				sql.insert(0, "WITH parent_orgs(uuid) AS ( "
 						+ "SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid "
 					+ "UNION ALL "
 						+ "SELECT o.uuid from parent_orgs po, organizations o WHERE o.parentOrgUuid = po.uuid AND o.uuid != :parentOrgUuid"
-					+ ") ";
+					+ ") ");
 				whereClauses.add("( organizations.parentOrgUuid IN (SELECT uuid from parent_orgs) "
 					+ "OR organizations.uuid = :parentOrgUuid)");
 			} else {
@@ -109,10 +108,6 @@ public class MssqlOrganizationSearcher implements IOrganizationSearcher {
 		orderByClauses.addAll(Utils.addOrderBy(SortOrder.ASC, "organizations", "uuid"));
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
-
-		if (commonTableExpression != null) {
-			sql.insert(0, commonTableExpression);
-		}
 
 		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
 		return new AnetBeanList<Organization>(sqlQuery, query.getPageNum(), query.getPageSize(), new OrganizationMapper(), null);
