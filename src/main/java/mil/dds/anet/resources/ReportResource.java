@@ -899,6 +899,7 @@ public class ReportResource {
 		if (report == null) { throw new WebApplicationException("Report not found", Status.NOT_FOUND); }
 
 		assertCanDeleteReport(report, user);
+		AnetAuditLogger.log("report {} deleted by {} (uuid: {})", reportUuid, user.getName(), user.getUuid());
 
 		return dao.delete(reportUuid);
 	}
