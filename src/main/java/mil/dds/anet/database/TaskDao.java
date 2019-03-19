@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -18,7 +17,6 @@ import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-@RegisterRowMapper(TaskMapper.class)
 public class TaskDao extends AnetBaseDao<Task> {
 
 	public TaskDao() {

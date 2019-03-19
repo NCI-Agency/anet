@@ -78,9 +78,10 @@ public class GraphQLResource {
 
 	private final AnetObjectEngine engine;
 	private final AnetConfiguration config;
-	private List<Object> resources;
-	private boolean developmentMode;
+	private final List<Object> resources;
+	private final boolean developmentMode;
 	private final MetricRegistry metricRegistry;
+
 	private GraphQLSchema graphqlSchema;
 
 	public GraphQLResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {

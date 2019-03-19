@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
@@ -21,7 +20,6 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-@RegisterRowMapper(ReportSensitiveInformationMapper.class)
 public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveInformation> {
 
 	private static final String[] fields = { "uuid", "text", "reportUuid", "createdAt", "updatedAt" };

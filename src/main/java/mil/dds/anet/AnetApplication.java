@@ -248,17 +248,8 @@ public class AnetApplication extends Application<AnetConfiguration> {
 
 		//Register all of the HTTP Resources
 		environment.jersey().register(loggingResource);
-		environment.jersey().register(personResource);
-		environment.jersey().register(taskResource);
-		environment.jersey().register(locationResource);
-		environment.jersey().register(orgResource);
-		environment.jersey().register(positionResource);
-		environment.jersey().register(reportResource);
 		environment.jersey().register(adminResource);
 		environment.jersey().register(homeResource);
-		environment.jersey().register(savedSearchResource);
-		environment.jersey().register(tagResource);
-		environment.jersey().register(authorizationGroupResource);
 		environment.jersey().register(new ViewResponseFilter(configuration));
 		environment.jersey().register(new GraphQLResource(engine, configuration,
 				ImmutableList.of(reportResource, personResource,
