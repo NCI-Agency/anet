@@ -311,7 +311,7 @@ class BaseOrganizationForm extends Component {
 											fieldLabel={Settings.fields.task.shortLabel}
 											placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
 											selectedItems={values.tasks}
-											renderSelected={<TaskTable tasks={values.tasks} onChange={value => setFieldValue('tasks', value)} showDelete={true} />}
+											renderSelected={<TaskTable tasks={values.tasks} showDelete={true} />}
 											overlayColumns={['Task', 'Name']}
 											overlayRenderRow={this.renderTaskOverlayRow}
 											filterDefs={tasksFilters}
@@ -363,7 +363,7 @@ class BaseOrganizationForm extends Component {
 				fieldLabel="Add an approver"
 				placeholder="Search for the approver's position..."
 				selectedItems={approvers}
-				renderSelected={<ApproverTable approvers={approvers} onChange={value => setFieldValue(`approvalSteps.${index}.approvers`, value)} />}
+				renderSelected={<ApproverTable approvers={approvers} />}
 				overlayColumns={['Approver', 'Name', 'Position']}
 				overlayRenderRow={this.renderApproverOverlayRow}
 				filterDefs={approversFilters}

@@ -443,7 +443,7 @@ class BaseReportForm extends Component {
 								fieldLabel={Settings.fields.task.shortLabel}
 								placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
 								selectedItems={values.tasks}
-								renderSelected={<TaskTable tasks={values.tasks} onChange={value => setFieldValue('tasks', value)} showDelete={true} showOrganization={true} />}
+								renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
 								overlayColumns={['Task', 'Name', 'Organization']}
 								overlayRenderRow={this.renderTaskOverlayRow}
 								filterDefs={tasksFilters}
@@ -518,7 +518,7 @@ class BaseReportForm extends Component {
 											fieldLabel="Authorization Groups"
 											placeholder="Search for authorization groups..."
 											selectedItems={values.authorizationGroups}
-											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} onChange={value => setFieldValue('authorizationGroups', value)} showDelete={true} />}
+											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
 											overlayColumns={['Authorization Group', 'Name', 'Description']}
 											overlayRenderRow={this.renderAuthorizationGroupOverlayRow}
 											filterDefs={authorizationGroupsFilters}
