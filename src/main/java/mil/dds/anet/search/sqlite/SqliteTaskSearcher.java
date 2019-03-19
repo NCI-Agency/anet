@@ -6,21 +6,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
-
 import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class SqliteTaskSearcher implements ITaskSearcher {
+public class SqliteTaskSearcher extends AbstractSearcherBase implements ITaskSearcher {
 
 	@Override
-	public AnetBeanList<Task> runSearch(TaskSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Task> runSearch(TaskSearchQuery query) {
 		StringBuilder sql = new StringBuilder("/* SqliteTaskSearch */ SELECT tasks.* FROM tasks");
 		Map<String,Object> args = new HashMap<String,Object>();
 		
@@ -78,7 +77,7 @@ public class SqliteTaskSearcher implements ITaskSearcher {
 		sql.append(Joiner.on(" AND ").join(whereClauses));
 		sql.append(" ORDER BY \"shortName\" ASC LIMIT :limit OFFSET :offset");
 		
-		result.setList(dbHandle.createQuery(sql.toString())
+		result.setList(getDbHandle().createQuery(sql.toString())
 			.bindMap(args)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())

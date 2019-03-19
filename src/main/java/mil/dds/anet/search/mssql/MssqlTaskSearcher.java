@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
@@ -16,14 +15,15 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TaskSearchQuery.TaskSearchSortBy;
 import mil.dds.anet.database.mappers.TaskMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ITaskSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class MssqlTaskSearcher implements ITaskSearcher {
+public class MssqlTaskSearcher extends AbstractSearcherBase implements ITaskSearcher {
 
 	@Override
-	public AnetBeanList<Task> runSearch(TaskSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Task> runSearch(TaskSearchQuery query) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlTaskSearch */ SELECT tasks.*");
@@ -149,7 +149,7 @@ public class MssqlTaskSearcher implements ITaskSearcher {
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
-		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, args);
 		return new AnetBeanList<Task>(sqlQuery, query.getPageNum(), query.getPageSize(), new TaskMapper(), null);
 	}
 

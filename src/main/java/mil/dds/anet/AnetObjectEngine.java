@@ -1,6 +1,5 @@
 package mil.dds.anet;
 
-import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,15 +7,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import org.dataloader.DataLoaderRegistry;
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.Handle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.google.inject.Injector;
+
+import io.dropwizard.Application;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
@@ -48,23 +44,22 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
 public class AnetObjectEngine {
 
-	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-	PersonDao personDao;
-	TaskDao taskDao;
-	LocationDao locationDao;
-	OrganizationDao orgDao;
-	PositionDao positionDao;
-	ApprovalStepDao asDao;
-	ReportActionDao reportActionDao;
-	ReportDao reportDao;
-	CommentDao commentDao;
-	AdminDao adminDao;
-	SavedSearchDao savedSearchDao;
-	private EmailDao emailDao;
+	private final PersonDao personDao;
+	private final TaskDao taskDao;
+	private final LocationDao locationDao;
+	private final OrganizationDao orgDao;
+	private final PositionDao positionDao;
+	private final ApprovalStepDao asDao;
+	private final ReportActionDao reportActionDao;
+	private final ReportDao reportDao;
+	private final CommentDao commentDao;
+	private final AdminDao adminDao;
+	private final SavedSearchDao savedSearchDao;
+	private final EmailDao emailDao;
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
@@ -76,28 +71,28 @@ public class AnetObjectEngine {
 
 	private static AnetObjectEngine instance; 
 	
-	private final Handle dbHandle;
+	private final String dbUrl;
 	
-	public AnetObjectEngine(Jdbi jdbi) {
-		dbHandle = jdbi.open();
-		
-		personDao = new PersonDao(dbHandle);
-		taskDao = new TaskDao(dbHandle);
-		locationDao =  new LocationDao(dbHandle);
-		orgDao = new OrganizationDao(dbHandle);
-		positionDao = new PositionDao(dbHandle);
-		asDao = new ApprovalStepDao(dbHandle);
-		reportActionDao = new ReportActionDao(dbHandle);
-		reportDao = new ReportDao(dbHandle);
-		commentDao = new CommentDao(dbHandle);
-		adminDao = new AdminDao(dbHandle);
-		savedSearchDao = new SavedSearchDao(dbHandle);
-		tagDao = new TagDao(dbHandle);
-		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
-		emailDao = new EmailDao(dbHandle);
-		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
-		noteDao = new NoteDao(dbHandle);
-		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
+	public AnetObjectEngine(String dbUrl, Application<?> application) {
+		this.dbUrl = dbUrl;
+		final Injector injector = InjectorLookup.getInjector(application).get();
+		personDao = injector.getInstance(PersonDao.class);
+		taskDao = injector.getInstance(TaskDao.class);
+		locationDao =  injector.getInstance(LocationDao.class);
+		orgDao = injector.getInstance(OrganizationDao.class);
+		positionDao = injector.getInstance(PositionDao.class);
+		asDao = injector.getInstance(ApprovalStepDao.class);
+		reportActionDao = injector.getInstance(ReportActionDao.class);
+		reportDao = injector.getInstance(ReportDao.class);
+		commentDao = injector.getInstance(CommentDao.class);
+		adminDao = injector.getInstance(AdminDao.class);
+		savedSearchDao = injector.getInstance(SavedSearchDao.class);
+		tagDao = injector.getInstance(TagDao.class);
+		reportSensitiveInformationDao = injector.getInstance(ReportSensitiveInformationDao.class);
+		emailDao = injector.getInstance(EmailDao.class);
+		authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
+		noteDao = injector.getInstance(NoteDao.class);
+		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
 		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
 		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
 		context = new HashMap<>();
@@ -106,8 +101,8 @@ public class AnetObjectEngine {
 		instance = this;
 	}
 
-	public Handle getDbHandle() {
-		return dbHandle;
+	public String getDbUrl() {
+		return dbUrl;
 	}
 
 	public PersonDao getPersonDao() { 
@@ -188,26 +183,6 @@ public class AnetObjectEngine {
 		}
 		return orgDao.getOrganizationsForPerson(context, personUuid)
 				.thenApply(l -> l.isEmpty() ? null : l.get(0));
-	}
-
-	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
-		if (dbHandle.isInTransaction()) {
-			logger.debug("Already in transaction for {}", processor);
-			return processor.apply(input);
-		} else {
-			logger.debug("Wrapping a transaction around {}", processor);
-			return getDbHandle().inTransaction(h -> processor.apply(input));
-		}
-	}
-
-	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
-		if (dbHandle.isInTransaction()) {
-			logger.debug("Already in transaction for {}", processor);
-			return processor.apply(arg1, arg2);
-		} else {
-			logger.debug("Wrapping a transaction around {}", processor);
-			return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
-		}
 	}
 
 	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, String aoUuid) {

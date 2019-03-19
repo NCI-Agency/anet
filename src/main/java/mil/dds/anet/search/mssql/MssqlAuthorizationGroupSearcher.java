@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.google.common.base.Joiner;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.beans.AuthorizationGroup;
@@ -17,14 +16,15 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery.AuthorizationGroupSearchSortBy;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IAuthorizationGroupSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearcher {
+public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase implements IAuthorizationGroupSearcher {
 
 	@Override
-	public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlAuthorizationGroupSearch */ SELECT authorizationGroups.*");
@@ -93,7 +93,7 @@ public class MssqlAuthorizationGroupSearcher implements IAuthorizationGroupSearc
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
-		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs);
 		return new AnetBeanList<AuthorizationGroup>(sqlQuery, query.getPageNum(), query.getPageSize(), new AuthorizationGroupMapper(), null);
 	}
 
