@@ -6,9 +6,10 @@ import {Button} from 'react-bootstrap'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
+import AdvancedMultiSelect from 'components/AdvancedMultiSelect'
 import Fieldset from 'components/Fieldset'
+import LinkTo from 'components/LinkTo'
 import Messages from 'components/Messages'
-import MultiSelector from 'components/MultiSelector'
 import PositionTable from 'components/PositionTable'
 import { jumpToTop } from 'components/Page'
 
@@ -70,6 +71,13 @@ class AuthorizationGroupForm extends Component {
 				values,
 				submitForm
 			}) => {
+				const positionsFilters = {
+					allAdvisorPositions: {
+						label: 'All advisor positions',
+						searchQuery: true,
+						queryVars: {type: Position.TYPE.ADVISOR, matchPersonName: true},
+					}
+				}
 				const action = <div>
 					<Button key="submit" bsStyle="primary" type="button" onClick={submitForm} disabled={isSubmitting || !isValid}>Save Authorization Group</Button>
 				</div>
@@ -99,18 +107,20 @@ class AuthorizationGroupForm extends Component {
 								buttons={this.statusButtons}
 							/>
 
-							<MultiSelector
-								items={values.positions}
+							<AdvancedMultiSelect
+								fieldName="positions"
+								fieldLabel="Positions"
+								placeholder="Search for a position..."
+								selectedItems={values.positions}
+								renderSelected={<PositionTable positions={values.positions} onChange={value => setFieldValue(`positions`, value)} showDelete={true} />}
+								overlayColumns={['', 'Name', 'Position']}
+								overlayRenderRow={this.renderPositionOverlayRow}
+								filterDefs={positionsFilters}
+								onChange={value => setFieldValue('positions', value)}
 								objectType={Position}
 								queryParams={{status: Position.STATUS.ACTIVE, type: [Position.TYPE.ADVISOR, Position.TYPE.SUPER_USER, Position.TYPE.ADMINISTRATOR]}}
-								addFieldName='positions'
-								addFieldLabel='Positions'
-								addon={POSITIONS_ICON}
-								placeholder='Start typing to search for a position...'
 								fields={Position.autocompleteQuery}
-								template={Position.autocompleteTemplate}
-								renderSelected={<PositionTable positions={values.positions} showDelete={true} />}
-								onChange={value => setFieldValue('positions', value)}
+								addon={POSITIONS_ICON}
 							/>
 						</Fieldset>
 
@@ -174,6 +184,16 @@ class AuthorizationGroupForm extends Component {
 		const variableDef = '($authorizationGroup: AuthorizationGroupInput!)'
 		return API.mutation(graphql, variables, variableDef)
 	}
+
+	renderPositionOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td><LinkTo person={item.person} target="_blank" /></td>
+				<td><LinkTo position={item} target="_blank" /></td>
+			</React.Fragment>
+		)
+	}
+
 }
 
 export default withRouter(AuthorizationGroupForm)
