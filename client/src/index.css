@@ -273,7 +273,7 @@ span.asLink:focus {
 }
 
 .home-tile-row .row {
-	display: table;
+	display: flex;
 	width: 100%;
 	margin: 0;
 }
@@ -297,10 +297,6 @@ span.asLink:focus {
 }
 
 button.home-tile.btn {
-	display: table-cell;
-	width: 20%;
-	float: none;
-	vertical-align: top;
 	text-align: center;
 	padding: 10px;
 	color: #5c5c5c;

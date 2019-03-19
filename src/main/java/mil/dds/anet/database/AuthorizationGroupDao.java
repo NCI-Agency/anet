@@ -27,14 +27,13 @@ import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
 
 @RegisterRowMapper(AuthorizationGroupMapper.class)
-public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
+public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
-	private final Handle dbHandle;
 	private final IdBatcher<AuthorizationGroup> idBatcher;
 	private final ForeignKeyBatcher<Position> positionsBatcher;
 
 	public AuthorizationGroupDao(Handle h) {
-		this.dbHandle = h;
+		super(h, "ApprovalSteps", "approvalSteps", "*", null);
 		final String idBatcherSql = "/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( <uuids> )";
 		this.idBatcher = new IdBatcher<AuthorizationGroup>(h, idBatcherSql, "uuids", new AuthorizationGroupMapper());
 
@@ -76,24 +75,21 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 	}
 
 	@Override
-	public AuthorizationGroup insert(AuthorizationGroup a) {
-		return dbHandle.inTransaction(h -> {
-				DaoUtils.setInsertFields(a);
-				dbHandle.createUpdate(
-						"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
-							+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
-					.bindBean(a)
-					.bind("createdAt", DaoUtils.asLocalDateTime(a.getCreatedAt()))
-					.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
-					.bind("status", DaoUtils.getEnumId(a.getStatus()))
-					.execute();
-		
-				final AuthorizationGroupBatch ab = dbHandle.attach(AuthorizationGroupBatch.class);
-				if (a.getPositions() != null) {
-					ab.insertAuthorizationGroupPositions(a.getUuid(), a.getPositions());
-				}
-				return a;
-		});
+	public AuthorizationGroup insertInternal(AuthorizationGroup a) {
+		dbHandle.createUpdate(
+					"/* authorizationGroupInsert */ INSERT INTO \"authorizationGroups\" (uuid, name, description, \"createdAt\", \"updatedAt\", status) "
+						+ "VALUES (:uuid, :name, :description, :createdAt, :updatedAt, :status)")
+				.bindBean(a)
+				.bind("createdAt", DaoUtils.asLocalDateTime(a.getCreatedAt()))
+				.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
+				.bind("status", DaoUtils.getEnumId(a.getStatus()))
+				.execute();
+	
+			final AuthorizationGroupBatch ab = dbHandle.attach(AuthorizationGroupBatch.class);
+			if (a.getPositions() != null) {
+				ab.insertAuthorizationGroupPositions(a.getUuid(), a.getPositions());
+			}
+			return a;
 	}
 
 	public interface AuthorizationGroupBatch {
@@ -102,16 +98,19 @@ public class AuthorizationGroupDao implements IAnetDao<AuthorizationGroup> {
 				@BindBean List<Position> positions);
 	}
 
-	public int update(AuthorizationGroup a) {
-		return dbHandle.inTransaction(h -> {
-				DaoUtils.setUpdateFields(a);
-				return dbHandle.createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
-							+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
-						.bindBean(a)
-						.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
-						.bind("status", DaoUtils.getEnumId(a.getStatus()))
-						.execute();
-		});
+	@Override
+	public int updateInternal(AuthorizationGroup a) {
+		return dbHandle.createUpdate("/* updateAuthorizationGroup */ UPDATE \"authorizationGroups\" "
+					+ "SET name = :name, description = :description, \"updatedAt\" = :updatedAt, status = :status  WHERE uuid = :uuid")
+				.bindBean(a)
+				.bind("updatedAt", DaoUtils.asLocalDateTime(a.getUpdatedAt()))
+				.bind("status", DaoUtils.getEnumId(a.getStatus()))
+				.execute();
+	}
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
 	}
 
 	public int addPositionToAuthorizationGroup(Position p, AuthorizationGroup a) {

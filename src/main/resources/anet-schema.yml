@@ -48,7 +48,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -62,10 +62,20 @@ properties:
     required: [email, excel, forms]
     properties:
       email:
-        type: string
-        title: The date format for email
-        description: Used in report emails, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
-        examples: ["d MMMM yyyy"]
+        type: object
+        additionalProperties: false
+        required: [short, withTime]
+        properties:
+          short:
+            type: string
+            title: The short date format for email
+            description: Used in report emails; should be easy to read, e.g. "6 December 1998"; see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
+            examples: ["d MMMM yyyy"]
+          withTime:
+            type: string
+            title: The date format including the time for email
+            description: Used in report emails; should be easy to read, e.g. "6 December 1998 @ 13:45"; see see https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns for format specifiers.
+            examples: ["d MMMM yyyy @ HH:mm"]
       excel:
         type: string
         title: The date format for Excel export
@@ -100,6 +110,18 @@ properties:
             title: The date format including the time for forms
             description: Used to show dates in forms in the user interface; should be easy to read, e.g. "6 December 1998 @ 13:45"; see https://momentjs.com/docs/#/displaying/format/ for format specifiers.
             examples: ["D MMMM YYYY @ HH:mm"]
+
+  reportWorkflow:
+    type: object
+    additionalProperties: false
+    required: [nbOfHoursQuarantineApproved]
+    properties:
+      nbOfHoursQuarantineApproved:
+        type: integer
+        minimum: 0
+        title: The number of hours between the approval of the report and the automatic publication
+        description: Used in the UI of an approved report to show how many hours are left till publication.
+        examples: [24]
 
   fields:
     type: object

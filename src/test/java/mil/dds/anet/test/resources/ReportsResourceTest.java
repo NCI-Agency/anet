@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import mil.dds.anet.AnetObjectEngine;
-import mil.dds.anet.beans.ApprovalAction;
+import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.Location;
@@ -93,7 +93,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 			+ " tags { uuid name description }"
 			+ " comments { %6$s }"
 			+ " authorizationGroups { uuid name }"
-			+ " approvalStatus { step { uuid } person { uuid } type createdAt }",
+			+ " workflow { step { uuid } person { uuid } type createdAt }",
 			REPORT_FIELDS, ORGANIZATION_FIELDS, PERSON_FIELDS, TASK_FIELDS, LOCATION_FIELDS, COMMENT_FIELDS);
 
 	@Test
@@ -309,14 +309,14 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(pending.getList().size()).isGreaterThan(0);
 
 		//Check on Report status for who needs to approve
-		List<ApprovalAction> approvalStatus = returned.getApprovalStatus();
-		assertThat(approvalStatus.size()).isEqualTo(2);
-		ApprovalAction approvalAction = approvalStatus.get(0);
-		assertThat(approvalAction.getPerson()).isNull(); //Because this hasn't been approved yet.
-		assertThat(approvalAction.getCreatedAt()).isNull();
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
+		List<ReportAction> workflow = returned.getWorkflow();
+		assertThat(workflow.size()).isEqualTo(3);
+		ReportAction reportAction = workflow.get(1);
+		assertThat(reportAction.getPerson()).isNull(); //Because this hasn't been approved yet.
+		assertThat(reportAction.getCreatedAt()).isNull();
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
+		reportAction = workflow.get(2);
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
 
 		//Reject the report
 		variables = new HashMap<>();
@@ -359,18 +359,23 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 		//Check on Report status to verify it got moved forward
 		returned = graphQLHelper.getObjectById(author, "report", FIELDS, created.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
-		assertThat(returned.getState()).isEqualTo(ReportState.RELEASED);
+		assertThat(returned.getState()).isEqualTo(ReportState.APPROVED);
 		assertThat(returned.getApprovalStepUuid()).isNull();
 
 		//check on report status to see that it got approved.
-		approvalStatus = returned.getApprovalStatus();
-		assertThat(approvalStatus.size()).isEqualTo(2);
-		approvalAction = approvalStatus.get(0);
-		assertThat(approvalAction.getPersonUuid()).isEqualTo(approver1.getUuid());
-		assertThat(approvalAction.getCreatedAt()).isNotNull();
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
-		approvalAction = approvalStatus.get(1);
-		assertThat(approvalAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
+		workflow = returned.getWorkflow();
+		//there were 5 actions on the report: submit, reject, submit, approve, approve
+		assertThat(workflow.size()).isEqualTo(5);
+		reportAction = workflow.get(3);
+		assertThat(reportAction.getPersonUuid()).isEqualTo(approver1.getUuid());
+		assertThat(reportAction.getCreatedAt()).isNotNull();
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(0).getUuid());
+		reportAction = workflow.get(4);
+		assertThat(reportAction.getStepUuid()).isEqualTo(steps.get(1).getUuid());
+
+		//Admin can publish approved reports.
+		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", created.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(published).isNotNull();
 
 		//Post a comment on the report because it's awesome
 		variables = new HashMap<>();
@@ -799,7 +804,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		assertThat(searchResults.getList()).isNotEmpty();
 		final int numCancelled = searchResults.getTotalCount();
 
-		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.RELEASED));
+		query.setState(ImmutableList.of(ReportState.CANCELLED, ReportState.PUBLISHED));
 		searchResults = graphQLHelper.searchObjects(jack, "reportList", "query", "ReportSearchQueryInput",
 				FIELDS, query, new TypeReference<GraphQLResponse<AnetBeanList<Report>>>() {});
 		assertThat(searchResults.getList()).isNotEmpty();
@@ -1109,7 +1114,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		variables.put("startDate", startDate.toEpochMilli());
 		variables.put("endDate", endDate.toEpochMilli());
 		final List<RollupGraph> startGraph = graphQLHelper.getObjectList(admin,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		//Submit the report
@@ -1131,26 +1136,34 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report approved = graphQLHelper.updateObject(admin, "approveReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
 		assertThat(approved).isNotNull();
 
-		//Verify report is in RELEASED state.
+		//Verify report is in APPROVED state.
 		r = graphQLHelper.getObjectById(admin, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
-		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
+		assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
+
+		//Admin can publish approved reports.
+		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(published).isNotNull();
+
+		//Verify report is in PUBLISHED state.
+		r = graphQLHelper.getObjectById(admin, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(r.getState()).isEqualTo(ReportState.PUBLISHED);
 
 		//Check on the daily rollup graph now.
 		final List<RollupGraph> endGraph = graphQLHelper.getObjectList(admin,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		final Position pos = admin.loadPosition();
 		final Organization org = pos.loadOrganization(context).get();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
-		//Admin's organization should have one more report RELEASED only if it is not in the non-reporting orgs
+		//Admin's organization should have one more report PUBLISHED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
 		final String orgUuid = org.getUuid();
 		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
+		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
 		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
+		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
 		assertThat(startCt).isEqualTo(endCt - diff);
 	}
 
@@ -1179,7 +1192,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		variables.put("startDate", startDate.toEpochMilli());
 		variables.put("endDate", endDate.toEpochMilli());
 		final List<RollupGraph> startGraph = graphQLHelper.getObjectList(elizabeth,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		//Submit the report
@@ -1201,27 +1214,35 @@ public class ReportsResourceTest extends AbstractResourceTest {
 		Report approved = graphQLHelper.updateObject(bob, "approveReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
 		assertThat(approved).isNotNull();
 
-		//Verify report is in RELEASED state.
+		//Verify report is in APPROVED state.
 		r = graphQLHelper.getObjectById(elizabeth, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
-		assertThat(r.getState()).isEqualTo(ReportState.RELEASED);
+		assertThat(r.getState()).isEqualTo(ReportState.APPROVED);
+
+		//Admin can publish approved reports.
+		Report published = graphQLHelper.updateObject(admin, "publishReport", "uuid", FIELDS, "String", r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(published).isNotNull();
+
+		//Verify report is in PUBLISHED state.
+		r = graphQLHelper.getObjectById(elizabeth, "report", FIELDS, r.getUuid(), new TypeReference<GraphQLResponse<Report>>() {});
+		assertThat(r.getState()).isEqualTo(ReportState.PUBLISHED);
 
 		//Check on the daily rollup graph now.
 		final List<RollupGraph> endGraph = graphQLHelper.getObjectList(elizabeth,
-				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} released cancelled } }",
+				"query ($startDate: Long!, $endDate: Long!) { payload: rollupGraph(startDate: $startDate, endDate: $endDate) { org {" + ORGANIZATION_FIELDS + "} published cancelled } }",
 				variables, new TypeReference<GraphQLResponse<List<RollupGraph>>>() {});
 
 		final Position pos = elizabeth.loadPosition();
 		final Organization org = pos.loadOrganization(context).get();
 		@SuppressWarnings("unchecked")
 		final List<String> nro = (List<String>) RULE.getConfiguration().getDictionaryEntry("non_reporting_ORGs");
-		//Elizabeth's organization should have one more report RELEASED only if it is not in the non-reporting orgs
+		//Elizabeth's organization should have one more report PUBLISHED only if it is not in the non-reporting orgs
 		final int diff = (nro == null || !nro.contains(org.getShortName())) ? 1 : 0;
 		final Organization po = org.loadParentOrg(context).get();
 		final String orgUuid = po.getUuid();
 		Optional<RollupGraph> orgReportsStart = startGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getReleased()) : 0;
+		final int startCt = orgReportsStart.isPresent() ? (orgReportsStart.get().getPublished()) : 0;
 		Optional<RollupGraph> orgReportsEnd = endGraph.stream().filter(rg -> rg.getOrg() != null && rg.getOrg().getUuid().equals(orgUuid)).findFirst();
-		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getReleased()) : 0;
+		final int endCt = orgReportsEnd.isPresent() ? (orgReportsEnd.get().getPublished()) : 0;
 		assertThat(startCt).isEqualTo(endCt - diff);
 	}
 
@@ -1351,7 +1372,7 @@ public class ReportsResourceTest extends AbstractResourceTest {
 
 	private ReportSearchQuery setupQueryEngagementDayOfWeek() {
 		final ReportSearchQuery query = new ReportSearchQuery();
-		query.setState(ImmutableList.of(ReportState.RELEASED));
+		query.setState(ImmutableList.of(ReportState.PUBLISHED));
 		return query;
 	}
 

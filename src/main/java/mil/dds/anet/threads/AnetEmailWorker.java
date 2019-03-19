@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +63,9 @@ public class AnetEmailWorker implements Runnable {
 	private ScheduledExecutorService scheduler;
 	private final String supportEmailAddr;
 	private final DateTimeFormatter dtf;
+	private final DateTimeFormatter dttf;
 	private final Integer nbOfHoursForStaleEmails;
 	private final boolean disabled;
-	private boolean noEmailConfiguration;
 	
 	@SuppressWarnings("unchecked")
 	public AnetEmailWorker(EmailDao dao, AnetConfiguration config, ScheduledExecutorService scheduler) {
@@ -75,7 +75,8 @@ public class AnetEmailWorker implements Runnable {
 		this.fromAddr = config.getEmailFromAddr();
 		this.serverUrl = config.getServerUrl();
 		this.supportEmailAddr = (String) config.getDictionaryEntry("SUPPORT_EMAIL_ADDR");
-		this.dtf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email")).withZone(DaoUtils.getDefaultZoneId());
+		this.dtf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.short")).withZone(DaoUtils.getDefaultZoneId());
+		this.dttf = DateTimeFormatter.ofPattern((String) config.getDictionaryEntry("dateFormats.email.withTime")).withZone(DaoUtils.getDefaultZoneId());
 		this.fields = (Map<String, Object>) config.getDictionaryEntry("fields");
 		instance = this;
 
@@ -86,7 +87,6 @@ public class AnetEmailWorker implements Runnable {
 		props.put("mail.smtp.port", smtpConfig.getPort().toString());
 		auth = null;
 		this.nbOfHoursForStaleEmails = smtpConfig.getNbOfHoursForStaleEmails();
-		this.noEmailConfiguration = config.isDevelopmentMode() && smtpConfig.getHostname().startsWith("${");
 
 		if (smtpConfig.getUsername() != null && smtpConfig.getUsername().trim().length() > 0) {
 			props.put("mail.smtp.auth", "true");
@@ -126,22 +126,31 @@ public class AnetEmailWorker implements Runnable {
 		//Send the emails!
 		final List<Integer> processedEmails = new LinkedList<Integer>();
 		for (final AnetEmail email : emails) {
-			if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(nbOfHoursForStaleEmails).toInstant())) {
-				logger.info("Purging stale email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
+			Map<String,Object> context = null;
+
+			try {
+				context = buildContext(email);
+				logger.info("{} Sending email to {} re: {}", disabled ? "[Disabled] " : "" , email.getToAddresses(), email.getAction().getSubject(context));
+
+				if (!disabled) {
+					sendEmail(email, context);
+				}
+
 				processedEmails.add(email.getId());
-			}
-			else {
-				try {
-					if (disabled) {
-						logger.info("Disabled, not sending email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
-					} else {
-						logger.info("Sending email to {} re: {}", email.getToAddresses(), email.getAction().getSubject());
-						sendEmail(email);
+			} catch (Throwable t) {
+				logger.error("Error sending email", t);
+
+				//Process stale emails
+				if (this.nbOfHoursForStaleEmails != null && email.getCreatedAt().isBefore(Instant.now().atZone(DaoUtils.getDefaultZoneId()).minusHours(nbOfHoursForStaleEmails).toInstant())) {
+					String message = "Purging stale email to ";
+					try {
+						message += email.getToAddresses();
+						message += email.getAction().getSubject(context);
 					}
-					processedEmails.add(email.getId());
-				} catch (Exception e) {
-					final Throwable rootCause = ExceptionUtils.getRootCause(e);
-					logger.error("Error sending email", rootCause == null ? e.getMessage() : rootCause.getMessage());
+					finally {
+						logger.info(message);
+						processedEmails.add(email.getId());
+					}
 				}
 			}
 		}
@@ -150,10 +159,22 @@ public class AnetEmailWorker implements Runnable {
 		dao.deletePendingEmails(processedEmails);
 	}
 
-	private void sendEmail(AnetEmail email) throws MessagingException, IOException, TemplateException {
-		if (this.noEmailConfiguration) {
-			return;
-		}
+	private Map<String, Object> buildContext(final AnetEmail email) {
+		AnetObjectEngine engine = AnetObjectEngine.getInstance();
+		Map<String,Object> context = new HashMap<String,Object>();
+		context.put("context", engine.getContext());
+		context.put("serverUrl", serverUrl);
+		context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
+		context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+		context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
+		context.put("dateFormatter", dtf);
+		context.put("dateTimeFormatter", dttf);
+		context.put("fields", fields);
+
+		return email.getAction().buildContext(context);
+	}
+
+	private void sendEmail(final AnetEmail email, final Map<String,Object> context) throws MessagingException, IOException, TemplateException {
 		//Remove any null email addresses
 		email.getToAddresses().removeIf(s -> Objects.equals(s, null));
 		if (email.getToAddresses().size() == 0) {
@@ -162,34 +183,9 @@ public class AnetEmailWorker implements Runnable {
 			return;
 		}
 
-		Map<String,Object> context;
-		try {
-			context = email.getAction().execute();
-		} catch (Throwable t) {
-			//This email will never complete, just kill it.
-			logger.error("Error execution action", t);
-			return;
-		}
-
-		AnetObjectEngine engine = AnetObjectEngine.getInstance();
-
 		StringWriter writer = new StringWriter();
-		try {
-			context.put("context", engine.getContext());
-			context.put("serverUrl", serverUrl);
-			context.put(AdminSettingKeys.SECURITY_BANNER_TEXT.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
-			context.put(AdminSettingKeys.SECURITY_BANNER_COLOR.name(), engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
-			context.put("SUPPORT_EMAIL_ADDR", supportEmailAddr);
-			context.put("dateFormatter", dtf);
-			context.put("fields", fields);
-			Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
-
-			temp.process(context, writer);
-		} catch (Exception e) {
-			//Exceptions thrown while processing the template are unlikely to ever get fixed, so we just log this and drop the email.
-			logger.error("Error when processing template", e);
-			return;
-		}
+		Template temp = freemarkerConfig.getTemplate(email.getAction().getTemplateName());
+		temp.process(context, writer);
 
 		Session session = Session.getInstance(props, auth);
 		Message message = new MimeMessage(session);
@@ -197,7 +193,7 @@ public class AnetEmailWorker implements Runnable {
 		String toAddress = Joiner.on(", ").join(email.getToAddresses());
 		message.setRecipients(Message.RecipientType.TO,
 			InternetAddress.parse(toAddress));
-		message.setSubject(email.getAction().getSubject());
+		message.setSubject(email.getAction().getSubject(context));
 		message.setContent(writer.toString(), "text/html; charset=utf-8");
 
 		try {

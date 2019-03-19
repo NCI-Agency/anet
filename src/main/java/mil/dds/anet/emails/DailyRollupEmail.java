@@ -24,27 +24,29 @@ import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.utils.DaoUtils;
 
-public class DailyRollupEmail extends AnetEmailAction {
+public class DailyRollupEmail implements AnetEmailAction {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	public static String SHOW_REPORT_TEXT_FLAG = "showReportText";
 
-	private final DateTimeFormatter dtf;
-	Instant startDate;
-	Instant endDate;
-	OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG; // show the table based off this organization type. 
-	String advisorOrganizationUuid;
-	String principalOrganizationUuid;
-	String comment;
+	private Instant startDate;
+	private Instant endDate;
+	private OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG; // show the table based off this organization type. 
+	private String advisorOrganizationUuid;
+	private String principalOrganizationUuid;
+	private String comment;
 
-	public DailyRollupEmail(DateTimeFormatter dtf) {
-		this.dtf = dtf;
-		templateName = "/emails/rollup.ftlh";
+	@Override
+	public String getTemplateName() {
+		return "/emails/rollup.ftlh";
 	}
 
 	@Override
-	public String getSubject() {
+	public String getSubject(Map<String, Object> context) {
+
+		DateTimeFormatter dtf = (DateTimeFormatter) context.get("dateFormatter");
+
 		if (startDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate().equals(endDate.atZone(DaoUtils.getDefaultZoneId()).toLocalDate())) {
 			return "Rollup for " + dtf.format(startDate);
 		} else {
@@ -53,7 +55,7 @@ public class DailyRollupEmail extends AnetEmailAction {
 	}
 
 	@Override
-	public Map<String, Object> execute() {
+	public Map<String, Object> buildContext(Map<String, Object> context) {
 		String maxReportAgeStr = AnetObjectEngine.getInstance().getAdminSetting(AdminSettingKeys.DAILY_ROLLUP_MAX_REPORT_AGE_DAYS);
 		Integer maxReportAge = Integer.parseInt(maxReportAgeStr);
 		Instant engagementDateStart = startDate.atZone(DaoUtils.getDefaultZoneId()).minusDays(maxReportAge).toInstant();
@@ -64,7 +66,6 @@ public class DailyRollupEmail extends AnetEmailAction {
 		query.setEngagementDateStart(engagementDateStart);
 		query.setSortBy(ReportSearchSortBy.ENGAGEMENT_DATE);
 		query.setSortOrder(SortOrder.DESC);
-		
 		query.setPrincipalOrgUuid(principalOrganizationUuid);
 		query.setIncludePrincipalOrgChildren(true);
 		query.setAdvisorOrgUuid(advisorOrganizationUuid);
@@ -76,10 +77,9 @@ public class DailyRollupEmail extends AnetEmailAction {
 
 		if (chartOrgType == null) { chartOrgType = OrganizationType.PRINCIPAL_ORG; } 
 		
-		Map<String,Object> context = new HashMap<String,Object>();
 		context.put("reports", allReports);
 		context.put("cancelledReasons", ReportCancelledReason.values());
-		context.put("title", getSubject());
+		context.put("title", getSubject(context));
 		context.put("comment", comment);
 		
 		List<ReportGrouping> outerGrouping = null;
@@ -95,6 +95,7 @@ public class DailyRollupEmail extends AnetEmailAction {
 			(OrganizationType.ADVISOR_ORG.equals(chartOrgType)) ? OrganizationType.PRINCIPAL_ORG : OrganizationType.ADVISOR_ORG);
 		context.put("outerGrouping", outerGrouping);
 		context.put(SHOW_REPORT_TEXT_FLAG, false);
+
 		return context;
 	}
 
@@ -245,6 +246,4 @@ public class DailyRollupEmail extends AnetEmailAction {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-
-
 }

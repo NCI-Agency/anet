@@ -38,7 +38,7 @@ report(uuid:"${reportUuid}") {
     principalOrg { uuid, shortName, longName }
     advisorOrg { uuid, shortName, longName }
 
-    approvalStatus {
+    workflow {
         type, createdAt
         step { uuid , name
             approvers { uuid, name, person { uuid, name } }

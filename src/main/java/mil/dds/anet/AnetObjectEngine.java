@@ -20,11 +20,14 @@ import org.slf4j.LoggerFactory;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.database.ApprovalActionDao;
+import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
@@ -41,6 +44,7 @@ import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -55,7 +59,7 @@ public class AnetObjectEngine {
 	OrganizationDao orgDao;
 	PositionDao positionDao;
 	ApprovalStepDao asDao;
-	ApprovalActionDao approvalActionDao;
+	ReportActionDao reportActionDao;
 	ReportDao reportDao;
 	CommentDao commentDao;
 	AdminDao adminDao;
@@ -83,7 +87,7 @@ public class AnetObjectEngine {
 		orgDao = new OrganizationDao(dbHandle);
 		positionDao = new PositionDao(dbHandle);
 		asDao = new ApprovalStepDao(dbHandle);
-		approvalActionDao = new ApprovalActionDao(dbHandle);
+		reportActionDao = new ReportActionDao(dbHandle);
 		reportDao = new ReportDao(dbHandle);
 		commentDao = new CommentDao(dbHandle);
 		adminDao = new AdminDao(dbHandle);
@@ -122,8 +126,8 @@ public class AnetObjectEngine {
 		return orgDao;
 	}
 
-	public ApprovalActionDao getApprovalActionDao() {
-		return approvalActionDao;
+	public ReportActionDao getReportActionDao() {
+		return reportActionDao;
 	}
 
 	public PositionDao getPositionDao() {
@@ -187,13 +191,23 @@ public class AnetObjectEngine {
 	}
 
 	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
-		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(h -> processor.apply(input));
+		if (dbHandle.isInTransaction()) {
+			logger.debug("Already in transaction for {}", processor);
+			return processor.apply(input);
+		} else {
+			logger.debug("Wrapping a transaction around {}", processor);
+			return getDbHandle().inTransaction(h -> processor.apply(input));
+		}
 	}
 
 	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
-		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
+		if (dbHandle.isInTransaction()) {
+			logger.debug("Already in transaction for {}", processor);
+			return processor.apply(arg1, arg2);
+		} else {
+			logger.debug("Wrapping a transaction around {}", processor);
+			return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
+		}
 	}
 
 	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, String aoUuid) {
@@ -232,6 +246,15 @@ public class AnetObjectEngine {
 		return false;
 	}
 
+	public boolean canUserRejectStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
+		final Person p = personDao.getByUuid(userUuid);
+		//Admin users may reject any step
+		if (AuthUtils.isAdmin(p)) {
+			return true;
+		}
+		return canUserApproveStep(context, userUuid, approvalStepUuid);
+	}
+
 	/*
 	 * Helper function to build a map of organization UUIDs to their top level parent organization object.
 	 * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to get all orgs.
@@ -245,18 +268,34 @@ public class AnetObjectEngine {
 		return Utils.buildParentOrgMapping(orgs, null);
 	}
 	
-	/* Helper function to build a map or organization UUIDs to their top parent
+	/**
+	 * Helper function to build a map of organization UUIDs to their top parent
 	 * capped at a certain point in the hierarchy.
 	 * parentOrg will map to parentOrg, and all children will map to the highest
 	 * parent that is NOT the parentOrgUuid.
 	 */
-	public Map<String,Organization> buildTopLevelOrgHash(String parentOrgUuid) {
-		OrganizationSearchQuery query = new OrganizationSearchQuery();
+	public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
+		final OrganizationSearchQuery query = new OrganizationSearchQuery();
 		query.setParentOrgUuid(parentOrgUuid);
 		query.setParentOrgRecursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
-		List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+		final List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
 		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
+	}
+
+	/**
+	 * Helper function to build a map of task UUIDs to their top parent
+	 * capped at a certain point in the hierarchy.
+	 * parentTask will map to parentTask, and all children will map to the highest
+	 * parent that is NOT the parentTaskUuid.
+	 */
+	public Map<String, Task> buildTopLevelTaskHash(String parentTaskUuid) {
+		final TaskSearchQuery query = new TaskSearchQuery();
+		query.setCustomFieldRef1Uuid(parentTaskUuid);
+		query.setCustomFieldRef1Recursively(true);
+		query.setPageSize(Integer.MAX_VALUE);
+		final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+		return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
 	}
 	
 	public static AnetObjectEngine getInstance() { 

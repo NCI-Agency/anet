@@ -93,7 +93,7 @@ public class AuthUtils {
 
 	public static boolean isAdmin(Person user) {
 		Position position = user.loadPosition();
-		return position.getType() == PositionType.ADMINISTRATOR;
+		return (position != null) && (position.getType() == PositionType.ADMINISTRATOR);
 	}
 	
 }

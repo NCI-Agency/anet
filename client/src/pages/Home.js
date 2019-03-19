@@ -6,6 +6,7 @@ import {Grid, Row, FormControl, FormGroup, ControlLabel, Button} from 'react-boo
 import {Link} from 'react-router-dom'
 import moment from 'moment'
 import autobind from 'autobind-decorator'
+import GQL from 'graphqlapi'
 
 import Fieldset from 'components/Fieldset'
 import Messages from 'components/Messages'
@@ -50,7 +51,7 @@ class BaseHome extends Page {
 	}
 
 	adminQueries(currentUser) {
-		return [ this.allDraft(), this.allPending(), this.pendingMe(currentUser), this.allUpcoming(), this.mySensitiveInfo() ]
+		return [ this.allDraft(), this.allPending(), this.pendingMe(currentUser), this.allUpcoming(), this.mySensitiveInfo(), this.allApproved() ]
 	}
 
 	approverQueries(currentUser) {
@@ -96,6 +97,13 @@ class BaseHome extends Page {
 		}
 	}
 
+	allApproved() {
+		return {
+			title: "All approved reports",
+			query: { state: [Report.STATE.APPROVED], sortBy: 'UPDATED_AT', sortOrder: 'ASC' },
+		}
+	}
+
 	myOrgRecent(currentUser) {
 		if (!currentUser.position || !currentUser.position.organization) { return { query: {}} }
 		return {
@@ -104,7 +112,7 @@ class BaseHome extends Page {
 				orgUuid: currentUser.position.organization.uuid,
 				includeOrgChildren: false,
 				createdAtStart: LAST_WEEK,
-				state: [Report.STATE.RELEASED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
+				state: [Report.STATE.PUBLISHED, Report.STATE.CANCELLED, Report.STATE.PENDING_APPROVAL]
 			},
 		}
 	}
@@ -132,7 +140,7 @@ class BaseHome extends Page {
 	mySensitiveInfo() {
 		return {
 			title: "Reports with sensitive information",
-			query: { state: [Report.STATE.RELEASED], sensitiveInfo: true },
+			query: { state: [Report.STATE.PUBLISHED], sensitiveInfo: true },
 		}
 	}
 
@@ -147,42 +155,31 @@ class BaseHome extends Page {
 	}
 
 	fetchData(props) {
-		//If we don't have the currentUser yet (ie page is still loading, don't run these queries)
+		//If we don't have the currentUser yet (i.e. page is still loading, don't run these queries)
 		const { currentUser } = props
 		if (!currentUser || !currentUser._loaded) { return }
-		//queries will contain the five queries that will show up on the home tiles
+		//queries will contain the queries that will show up on the home tiles
 		//Based on the users role. They are all report searches
 		let queries = this.getQueriesForUser(currentUser)
-		//Run those five queries
-		let graphQL = /* GraphQL */`
-			tileOne: reportList(query:$queryOne) { totalCount},
-			tileTwo: reportList(query: $queryTwo) { totalCount},
-			tileThree: reportList(query: $queryThree) { totalCount },
-			tileFour: reportList(query: $queryFour) { totalCount },
-			tileFive: reportList(query: $queryFive) { totalCount },
-			savedSearches: mySearches {uuid, name, objectType, query}`
-		queries.forEach(q => {
+		let queryParts = []  // GQL query parts
+		queries.forEach((q, index) => {
 			q.query.pageNum = 0
 			q.query.pageSize = 1  // we're only interested in the totalCount, so just get at most one report
+			queryParts.push(
+				new GQL.Part(/* GraphQL */`tile${index}: reportList(query:$query${index}) { totalCount}`)
+				.addVariable("query" + index, "ReportSearchQueryInput", q.query)
+			)
 		})
-		let variables = {
-			queryOne: queries[0].query,
-			queryTwo: queries[1].query,
-			queryThree: queries[2].query,
-			queryFour: queries[3].query,
-			queryFive: queries[4].query
-		}
-		API.query(graphQL, variables,
-			"($queryOne: ReportSearchQueryInput, $queryTwo: ReportSearchQueryInput, $queryThree: ReportSearchQueryInput, $queryFour: ReportSearchQueryInput," +
-			"$queryFive: ReportSearchQueryInput)")
-		.then(data => {
+		queryParts.push(new GQL.Part(/* GraphQL */`
+			savedSearches: mySearches {uuid, name, objectType, query}`))
+		GQL.run(queryParts).then(data => {
 			let selectedSearch = data.savedSearches && data.savedSearches.length > 0 ? data.savedSearches[0] : null
 			this.setState({
-				tileCounts: [data.tileOne.totalCount, data.tileTwo.totalCount, data.tileThree.totalCount, data.tileFour.totalCount, data.tileFive.totalCount],
+				tileCounts: queries.map((q, index) => data['tile'+index].totalCount),
 				savedSearches: data.savedSearches,
 				selectedSearch: selectedSearch
 			})
-	})
+		})
 	}
 
 	render() {
@@ -191,7 +188,6 @@ class BaseHome extends Page {
 		const supportEmail = Settings.SUPPORT_EMAIL_ADDR
 		const supportEmailMessage = supportEmail ? `at ${supportEmail}` : ''
 		let queries = this.getQueriesForUser(currentUser)
-
 		return (
 			<div>
 				<div className="pull-right">

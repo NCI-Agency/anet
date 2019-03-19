@@ -33,14 +33,14 @@ function debugLog(...args) {
     }
 }
 
-let shortWaitMs = moment.duration(.5, 'seconds').asMilliseconds()
-
 // We use the before hook to put helpers on t.context and set up test scaffolding.
 test.beforeEach(t => {
     let builder = new webdriver.Builder()
     if (testEnv === 'local') {
+        let chrome = require('selenium-webdriver/chrome')
         builder = builder
             .forBrowser('chrome')
+            .setChromeOptions(new chrome.Options().headless())
     } else {
         capabilities.name = t.title.replace(/^beforeEach hook for /, '')
         builder = builder
@@ -49,9 +49,15 @@ test.beforeEach(t => {
     }
     t.context.driver = builder.build()
 
+    let shortWaitMs = moment.duration(1, 'seconds').asMilliseconds()
+    let mediumWaitMs = moment.duration(3, 'seconds').asMilliseconds()
+    let longWaitMs = moment.duration(9, 'seconds').asMilliseconds()
+
     t.context.By = By
     t.context.until = until
     t.context.shortWaitMs = shortWaitMs
+    t.context.mediumWaitMs = mediumWaitMs
+    t.context.longWaitMs = longWaitMs
     t.context.Key = Key
 
     // This method is a helper so we don't have to keep repeating the hostname.
@@ -90,7 +96,6 @@ test.beforeEach(t => {
         await t.context.driver.wait(() => {})
     }
 
-    let longWaitMs = moment.duration(10, 'seconds').asMilliseconds()
     t.context.$ = async (cssSelector, timeoutMs) => {
         debugLog(`Find element: $('${cssSelector}')`)
         let waitTimeoutMs = timeoutMs || longWaitMs

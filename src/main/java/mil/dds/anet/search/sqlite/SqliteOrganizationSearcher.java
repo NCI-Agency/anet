@@ -48,7 +48,7 @@ public class SqliteOrganizationSearcher implements IOrganizationSearcher {
 		}
 		
 		if (query.getParentOrgUuid() != null) {
-			if (query.getParentOrgRecursively() != null && query.getParentOrgRecursively()) { 
+			if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
 				whereClauses.add("(organizations.\"parentOrgUuid\" IN ("
 					+ "WITH RECURSIVE parent_orgs(uuid) AS ( "
 						+ "SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid "

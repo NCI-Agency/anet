@@ -5,7 +5,7 @@ import io.leangen.graphql.annotations.GraphQLQuery;
 public class RollupGraph {
 
 	Organization org;
-	int released;
+	int published;
 	int cancelled;
 	
 	@GraphQLQuery(name="org")
@@ -17,13 +17,13 @@ public class RollupGraph {
 		this.org = org;
 	}
 	
-	@GraphQLQuery(name="released")
-	public int getReleased() {
-		return released;
+	@GraphQLQuery(name="published")
+	public int getPublished() {
+		return published;
 	}
 	
-	public void setReleased(int released) {
-		this.released = released;
+	public void setPublished(int published) {
+		this.published = published;
 	}
 	
 	@GraphQLQuery(name="cancelled")

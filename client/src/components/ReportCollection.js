@@ -27,7 +27,7 @@ export const GQL_REPORT_FIELDS =  /* GraphQL */`
 	location { uuid, name, lat, lng },
 	tasks { uuid, shortName },
 	tags { uuid, name, description }
-	approvalStatus {
+	workflow {
 		type, createdAt
 		step { uuid, name
 			approvers { uuid, name, person { uuid, name, rank, role } }
