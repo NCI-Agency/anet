@@ -73,7 +73,7 @@
     "style-loader": "^0.23.1",
     "uuid": "^3.3.2",
     "wdio-chromedriver-service": "^5.0.1",
-    "webdriverio": "^5.7.2",
+    "webdriverio": "^5.7.4",
     "webpack": "^4.29.6",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.2.3",
