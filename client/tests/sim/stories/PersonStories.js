@@ -47,6 +47,7 @@ function randomPerson(role) {
 function modifiedPerson() {
     return {
         name: identity,
+        domainUsername: identity,
         status: identity,
         country: identity,
         rank: identity,
@@ -112,6 +113,7 @@ const updatePerson = async function (user) {
                         endOfTourDate
                         gender
                         name
+                        domainUsername
                         phoneNumber
                         rank
                         role
@@ -123,6 +125,7 @@ const updatePerson = async function (user) {
 
     populate(person, modifiedPerson())
         .name.rarely()
+        .domainUsername.never()
         .phoneNumber.sometimes()
         .rank.sometimes()
         .country.never()
