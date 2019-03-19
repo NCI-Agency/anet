@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.jdbi.v3.core.mapper.MapMapper;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -39,25 +40,49 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<ApprovalStep> {
+		private static final String sql =
+			"/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new ApprovalStepMapper());
+		}
+	}
+
 	@Override
 	public List<ApprovalStep> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getApprovalStepsByUuids */ SELECT * from \"approvalSteps\" where uuid IN ( <uuids> )";
-		final IdBatcher<ApprovalStep> idBatcher = new IdBatcher<ApprovalStep>(getDbHandle(), idBatcherSql, "uuids", new ApprovalStepMapper());
+		final IdBatcher<ApprovalStep> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
-	public List<List<Position>> getApprovers(List<String> foreignKeys) {
-		final String approversBatcherSql = "/* batch.getApproversForStep */ SELECT \"approvalStepUuid\", " + PositionDao.POSITIONS_FIELDS
+	static class PositionsBatcher extends ForeignKeyBatcher<Position> {
+		private static final String sql =
+			"/* batch.getApproversForStep */ SELECT \"approvalStepUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM approvers "
 				+ "LEFT JOIN positions ON \"positions\".\"uuid\" = approvers.\"positionUuid\" "
 				+ "WHERE \"approvalStepUuid\" IN ( <foreignKeys> )";
-		final ForeignKeyBatcher<Position> approversBatcher = new ForeignKeyBatcher<Position>(getDbHandle(), approversBatcherSql, "foreignKeys", new PositionMapper(), "approvalStepUuid");
+
+		public PositionsBatcher() {
+			super(sql, "foreignKeys", new PositionMapper(), "approvalStepUuid");
+		}
+	}
+
+	public List<List<Position>> getApprovers(List<String> foreignKeys) {
+		final ForeignKeyBatcher<Position> approversBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(PositionsBatcher.class);
 		return approversBatcher.getByForeignKeys(foreignKeys);
 	}
 
+	static class ApprovalStepsBatcher extends ForeignKeyBatcher<ApprovalStep> {
+		private static final String sql =
+			"/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> )";
+
+		public ApprovalStepsBatcher() {
+			super(sql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid");
+		}
+	}
+
 	public List<List<ApprovalStep>> getApprovalSteps(List<String> foreignKeys) {
-		final String organizationIdBatcherSql = "/* batch.getApprovalStepsByOrg */ SELECT * from \"approvalSteps\" WHERE \"advisorOrganizationUuid\" IN ( <foreignKeys> )";
-		final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher = new ForeignKeyBatcher<ApprovalStep>(getDbHandle(), organizationIdBatcherSql, "foreignKeys", new ApprovalStepMapper(), "advisorOrganizationUuid");
+		final ForeignKeyBatcher<ApprovalStep> organizationIdBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(ApprovalStepsBatcher.class);
 		return organizationIdBatcher.getByForeignKeys(foreignKeys);
 	}
 

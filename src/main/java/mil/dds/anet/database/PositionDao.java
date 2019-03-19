@@ -89,27 +89,51 @@ public class PositionDao extends AnetBaseDao<Position> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
-	@Override
-	public List<Position> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
+	static class SelfIdBatcher extends IdBatcher<Position> {
+		private static final String sql =
+			"/* batch.getPositionsByUuids */ SELECT " + POSITIONS_FIELDS
 				+ "FROM positions "
 				+ "WHERE positions.uuid IN ( <uuids> )";
-		final IdBatcher<Position> idBatcher = new IdBatcher<Position>(getDbHandle(), idBatcherSql, "uuids", new PositionMapper());
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new PositionMapper());
+		}
+	}
+
+	@Override
+	public List<Position> getByIds(List<String> uuids) {
+		final IdBatcher<Position> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
+	static class PersonPositionHistoryBatcher extends ForeignKeyBatcher<PersonPositionHistory> {
+		private static final String sql =
+				"/* batch.getPositionHistory */ SELECT * FROM \"peoplePositions\" "
+					+ "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";;
+
+		public PersonPositionHistoryBatcher() {
+			super(sql, "foreignKeys", new PersonPositionHistoryMapper(), "positionUuid");
+		}
+	}
+
 	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
-		final String personPositionHistoryBatcherSql = "/* batch.getPositionHistory */ SELECT * FROM \"peoplePositions\" "
-				+ "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(getDbHandle(), personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "positionUuid");
+		final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(PersonPositionHistoryBatcher.class);
 		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	public List<List<Position>> getCurrentPersonForPosition(List<String> foreignKeys) {
-		final String currentPositionForPersonBatcherSql = "/* batch.getCurrentPositionForPerson */ SELECT "
+	static class PositionsBatcher extends ForeignKeyBatcher<Position> {
+		private static final String sql =
+			"/* batch.getCurrentPositionForPerson */ SELECT "
 				+ POSITIONS_FIELDS + " FROM positions "
 				+ "WHERE positions.\"currentPersonUuid\" IN ( <foreignKeys> )";
-		final ForeignKeyBatcher<Position> currentPositionForPersonBatcher = new ForeignKeyBatcher<Position>(getDbHandle(), currentPositionForPersonBatcherSql, "foreignKeys", new PositionMapper(), "positions_currentPersonUuid");
+
+		public PositionsBatcher() {
+			super(sql, "foreignKeys", new PositionMapper(), "positions_currentPersonUuid");
+		}
+	}
+
+	public List<List<Position>> getCurrentPersonForPosition(List<String> foreignKeys) {
+		final ForeignKeyBatcher<Position> currentPositionForPersonBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(PositionsBatcher.class);
 		return currentPositionForPersonBatcher.getByForeignKeys(foreignKeys);
 	}
 

@@ -41,10 +41,18 @@ public class TaskDao extends AnetBaseDao<Task> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Task> {
+		private static final String sql =
+			"/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new TaskMapper());
+		}
+	}
+
 	@Override
 	public List<Task> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
-		final IdBatcher<Task> idBatcher = new IdBatcher<Task>(getDbHandle(), idBatcherSql, "uuids", new TaskMapper());
+		final IdBatcher<Task> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 

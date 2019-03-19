@@ -72,10 +72,11 @@ public class AnetObjectEngine {
 	private static AnetObjectEngine instance; 
 	
 	private final String dbUrl;
+	private final Injector injector;
 	
 	public AnetObjectEngine(String dbUrl, Application<?> application) {
 		this.dbUrl = dbUrl;
-		final Injector injector = InjectorLookup.getInjector(application).get();
+		injector = InjectorLookup.getInjector(application).get();
 		personDao = injector.getInstance(PersonDao.class);
 		taskDao = injector.getInstance(TaskDao.class);
 		locationDao =  injector.getInstance(LocationDao.class);
@@ -103,6 +104,10 @@ public class AnetObjectEngine {
 
 	public String getDbUrl() {
 		return dbUrl;
+	}
+
+	public Injector getInjector() {
+		return injector;
 	}
 
 	public PersonDao getPersonDao() { 

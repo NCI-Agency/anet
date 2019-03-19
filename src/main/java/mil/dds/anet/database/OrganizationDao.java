@@ -44,18 +44,34 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Organization> {
+		private static final String sql =
+			"/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new OrganizationMapper());
+		}
+	}
+
 	@Override
 	public List<Organization> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( <uuids> )";
-		final IdBatcher<Organization> idBatcher = new IdBatcher<Organization>(getDbHandle(), idBatcherSql, "uuids", new OrganizationMapper());
+		final IdBatcher<Organization> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
+	static class OrganizationsBatcher extends ForeignKeyBatcher<Organization> {
+		private static final String sql =
+				"/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", " + ORGANIZATION_FIELDS
+					+ "FROM organizations, positions WHERE "
+					+ "positions.\"currentPersonUuid\" IN ( <foreignKeys> ) AND positions.\"organizationUuid\" = organizations.uuid";
+
+		public OrganizationsBatcher() {
+			super(sql, "foreignKeys", new OrganizationMapper(), "personUuid");
+		}
+	}
+
 	public List<List<Organization>> getOrganizations(List<String> foreignKeys) {
-		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", " + ORGANIZATION_FIELDS
-				+ "FROM organizations, positions WHERE "
-				+ "positions.\"currentPersonUuid\" IN ( <foreignKeys> ) AND positions.\"organizationUuid\" = organizations.uuid";
-	final ForeignKeyBatcher<Organization> personIdBatcher = new ForeignKeyBatcher<Organization>(getDbHandle(), personIdBatcherSql, "foreignKeys", new OrganizationMapper(), "personUuid");
+		final ForeignKeyBatcher<Organization> personIdBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(OrganizationsBatcher.class);
 		return personIdBatcher.getByForeignKeys(foreignKeys);
 	}
 

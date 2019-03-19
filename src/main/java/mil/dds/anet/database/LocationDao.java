@@ -42,10 +42,18 @@ public class LocationDao extends AnetBaseDao<Location> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Location> {
+		private static final String sql =
+			"/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new LocationMapper());
+		}
+	}
+
 	@Override
 	public List<Location> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
-		final IdBatcher<Location>  idBatcher = new IdBatcher<Location>(getDbHandle(), idBatcherSql, "uuids", new LocationMapper());
+		final IdBatcher<Location>  idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 

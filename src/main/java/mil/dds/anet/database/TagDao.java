@@ -41,10 +41,18 @@ public class TagDao extends AnetBaseDao<Tag> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Tag> {
+		private static final String sql =
+			"/* batch.getTagsByUuids */ SELECT * from tags where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new TagMapper());
+		}
+	}
+
 	@Override
 	public List<Tag> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getTagsByUuids */ SELECT * from tags where uuid IN ( <uuids> )";
-		final IdBatcher<Tag> idBatcher = new IdBatcher<Tag>(getDbHandle(), idBatcherSql, "uuids", new TagMapper());
+		final IdBatcher<Tag> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
