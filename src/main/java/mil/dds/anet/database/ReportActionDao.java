@@ -4,28 +4,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jdbi.v3.core.Handle;
-
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
+@InTransaction
 public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
-	private final ForeignKeyBatcher<ReportAction> reportIdBatcher;
-
-	public ReportActionDao(Handle db) { 
-		super(db, "ReportActions", "reportActions", "*", null);
-		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
-				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		this.reportIdBatcher = new ForeignKeyBatcher<ReportAction>(db, reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
+	public ReportActionDao() {
+		super("ReportActions", "reportActions", "*", null);
 	}
 
 	@Override
 	public ReportAction insertInternal(ReportAction action) {
-		dbHandle.createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
+		getDbHandle().createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
 				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
 			.bind("approvalStepUuid", action.getStepUuid())
@@ -53,7 +48,7 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 	 */
 	public List<ReportAction> getFinalActionsForReport(String reportUuid) {
 		//TODO: test this. I don't think it works.... 
-		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM \"reportActions\" "
+		return getDbHandle().createQuery("/* getReportFinalActions */ SELECT * FROM \"reportActions\" "
 				+ "WHERE \"reportUuid\" = :reportUuid GROUP BY \"approvalStepUuid\" "
 				+ "ORDER BY \"createdAt\" DESC")
 			.bind("reportUuid", reportUuid)
@@ -86,6 +81,9 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 	}
 
 	public List<List<ReportAction>> getReportActions(List<String> foreignKeys) {
+		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
+				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
+		final ForeignKeyBatcher<ReportAction> reportIdBatcher = new ForeignKeyBatcher<ReportAction>(getDbHandle(), reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
 		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 }

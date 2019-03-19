@@ -59,7 +59,7 @@ public class ReportPublicationWorker implements Runnable {
 				if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(now)) {
 					//Publish the report
 					try {
-						final int numRows = AnetObjectEngine.getInstance().executeInTransaction(dao::publish, r, null);
+						final int numRows = dao.publish(r, null);
 						if (numRows == 0) {
 							logger.error("Couldn't process report publication for report {}", r.getUuid());
 						} else {

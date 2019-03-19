@@ -203,7 +203,7 @@ public class ReportResource {
 
 	private Report updateReportCommon(Person editor, Report r, Boolean sendEmail) {
 		// perform all modifications to the report and its tasks and steps in a single transaction, returning the original state of the report
-		final Report existing = engine.executeInTransaction(this::executeReportUpdates, editor, r);
+		final Report existing = executeReportUpdates(editor, r);
 
 		if (sendEmail && existing.getState() == ReportState.PENDING_APPROVAL) {
 			boolean canApprove = engine.canUserApproveStep(engine.getContext(), editor.getUuid(), existing.getApprovalStepUuid());
@@ -432,7 +432,7 @@ public class ReportResource {
 	@Path("/{uuid}/submit")
 	public Report submitReport(@Auth Person user, @PathParam("uuid") String uuid)
 			throws InterruptedException, ExecutionException, Exception {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::submitReportCommon, user, uuid);
+		return submitReportCommon(user, uuid);
 	}
 
 	private Report submitReportCommon(Person user, String uuid) {
@@ -519,7 +519,7 @@ public class ReportResource {
 	public Report submitReport(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="uuid") String uuid)
 			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something, we return the report
-		return AnetObjectEngine.getInstance().executeInTransaction(this::submitReportCommon, DaoUtils.getUserFromContext(context), uuid);
+		return submitReportCommon(DaoUtils.getUserFromContext(context), uuid);
 	}
 
 	/***
@@ -581,8 +581,7 @@ public class ReportResource {
 	@Path("/{uuid}/approve")
 	public Report approveReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment comment)
 			throws InterruptedException, ExecutionException, Exception {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::approveReportCommon, approver,
-				new ReportComment(uuid, comment));
+		return approveReportCommon(approver, new ReportComment(uuid, comment));
 	}
 
 	private Report approveReportCommon(Person approver, ReportComment reportComment) {
@@ -652,8 +651,7 @@ public class ReportResource {
 			@GraphQLArgument(name="comment") Comment comment)
 			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something
-		return AnetObjectEngine.getInstance().executeInTransaction(this::approveReportCommon, DaoUtils.getUserFromContext(context),
-				new ReportComment(uuid, comment));
+		return approveReportCommon(DaoUtils.getUserFromContext(context), new ReportComment(uuid, comment));
 	}
 
 	/**
@@ -668,8 +666,7 @@ public class ReportResource {
 	public Report rejectReport(@Auth Person approver, @PathParam("uuid") String uuid, Comment reason)
 			throws InterruptedException, ExecutionException, Exception {
 		new ReportComment(uuid, reason);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::rejectReportCommon, approver,
-				new ReportComment(uuid, reason));
+		return rejectReportCommon(approver, new ReportComment(uuid, reason));
 	}
 
 	private Report rejectReportCommon(Person approver, ReportComment reportComment) {
@@ -731,8 +728,7 @@ public class ReportResource {
 			@GraphQLArgument(name="comment") Comment reason)
 			throws InterruptedException, ExecutionException, Exception {
 		// GraphQL mutations *have* to return something
-		return AnetObjectEngine.getInstance().executeInTransaction(this::rejectReportCommon, DaoUtils.getUserFromContext(context),
-				new ReportComment(uuid, reason));
+		return rejectReportCommon(DaoUtils.getUserFromContext(context), new ReportComment(uuid, reason));
 	}
 
 	private void sendReportRejectEmail(Report r, Person rejector, Comment rejectionComment) {
@@ -760,7 +756,7 @@ public class ReportResource {
 	@Timed
 	@Path("/{uuid}/publish")
 	public Report publishReport(@Auth Person user, @PathParam("uuid") String uuid) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::publishReportCommon, user, uuid);
+		return publishReportCommon(user, uuid);
 	}
 
 	private Report publishReportCommon(Person user, String uuid) {
@@ -787,7 +783,7 @@ public class ReportResource {
 	public Report publishReport(@GraphQLRootContext Map<String, Object> context,
 			@GraphQLArgument(name="uuid") String uuid) {
 		// GraphQL mutations *have* to return something
-		return AnetObjectEngine.getInstance().executeInTransaction(this::publishReportCommon, DaoUtils.getUserFromContext(context), uuid);
+		return publishReportCommon(DaoUtils.getUserFromContext(context), uuid);
 	}
 
 	@POST
