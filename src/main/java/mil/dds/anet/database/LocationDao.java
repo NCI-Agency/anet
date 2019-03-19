@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
@@ -16,7 +15,6 @@ import mil.dds.anet.utils.DaoUtils;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-@RegisterRowMapper(LocationMapper.class)
 public class LocationDao extends AnetBaseDao<Location> {
 
 	public LocationDao() {

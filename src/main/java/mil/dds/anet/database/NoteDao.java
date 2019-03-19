@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
@@ -20,7 +19,6 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-@RegisterRowMapper(NoteMapper.class)
 public class NoteDao extends AnetBaseDao<Note> {
 
 	public NoteDao() {

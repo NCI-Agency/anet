@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -27,7 +26,6 @@ import mil.dds.anet.views.ForeignKeyFetcher;
 import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 @InTransaction
-@RegisterRowMapper(AuthorizationGroupMapper.class)
 public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 
 	public AuthorizationGroupDao() {
