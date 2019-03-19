@@ -2121,10 +2121,10 @@
     yargs "^11.1.0"
     yarn-install "^1.0.0"
 
-"@wdio/config@^5.7.2":
-  version "5.7.2"
-  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.7.2.tgz#d8998d1b1d60361bd3f79fad31b5459796d59957"
-  integrity sha512-CPkrj15A4Gyo7/nU2wBXtt5DrmIrkU1m+xIMt/eii/P+4UsfI7mr4cW0jtGK3arlxBdvsRyZam727L5LmKLIdw==
+"@wdio/config@^5.7.2", "@wdio/config@^5.7.3":
+  version "5.7.3"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.7.3.tgz#732317e2a2026e612832c809ff0e01fc299d26da"
+  integrity sha512-4RuR+VkfLXtyUkBr5AYMC5miOwRN8xQsWMAzHzaQJvwk3uUB+uFRtve2sS0byoieQBCVI4V5BVKdNvDYfrAXEA==
   dependencies:
     "@wdio/logger" "^5.7.0"
     deepmerge "^2.0.1"
@@ -2212,12 +2212,12 @@
     chalk "^2.3.2"
     pretty-ms "^3.1.0"
 
-"@wdio/sync@^5.7.2":
-  version "5.7.2"
-  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.7.2.tgz#8ee12a02232e4686510e4d82f31b5701bd87ac40"
-  integrity sha512-q4WmFYlfvNaEK73IBmWw8PzD2d7xEoY/nnqrsDIp8CHjWqCbMC7msSgggOtMIt6uQikFz52Wq/f+H8KCPw77UA==
+"@wdio/sync@^5.7.3":
+  version "5.7.3"
+  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.7.3.tgz#eb3456d69c44f2b93a255fe536a2fe0c6c650d95"
+  integrity sha512-WDlUGBVvwnfm0gYx395H2OZ6771q9s5yyCs5Q19gW+SarTVSvoKNKbbahifMTKmZAExMtSl8/Cm7jiW/U4E5Ew==
   dependencies:
-    "@wdio/config" "^5.7.2"
+    "@wdio/config" "^5.7.3"
     "@wdio/logger" "^5.7.0"
     fibers "^3.1.1"
 
