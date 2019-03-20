@@ -95,7 +95,7 @@ public class AnetObjectEngine {
 		authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
 		noteDao = injector.getInstance(NoteDao.class);
 		subscriptionDao = injector.getInstance(SubscriptionDao.class);
-		subscriptionUpdateDao = new SubscriptionUpdateDao(dbHandle);
+		subscriptionUpdateDao = injector.getInstance(SubscriptionUpdateDao.class);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
 		instance = this;
 	}
@@ -280,7 +280,7 @@ public class AnetObjectEngine {
 		query.setCustomFieldRef1Uuid(parentTaskUuid);
 		query.setCustomFieldRef1Recursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
-		final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+		final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query, null).getList();
 		return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
 	}
 	

@@ -109,8 +109,8 @@ public class TaskResource {
 	}
 
 	@GraphQLQuery(name="taskList")
-	public AnetBeanList<Task> search(@GraphQLArgument(name="query") TaskSearchQuery query) {
-		return dao.search(query);
+	public AnetBeanList<Task> search(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="query") TaskSearchQuery query) {
+		return dao.search(query, DaoUtils.getUserFromContext(context));
 	}
 
 	/**

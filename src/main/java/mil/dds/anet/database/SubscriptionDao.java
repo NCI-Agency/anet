@@ -120,42 +120,6 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 	}
 
 	public int updateSubscriptions(SubscriptionUpdateGroup subscriptionUpdate) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateSubscriptionsTransactional, subscriptionUpdate);
-	}
-
-	private int insertSubscriptionUpdates(SubscriptionUpdateGroup subscriptionUpdate) {
-		final StringBuilder sqlPre = new StringBuilder("/* insertSubscriptionUpdates */ INSERT INTO \"subscriptionUpdates\""
-				+ " (\"subscriptionUuid\", \"updatedObjectType\", \"updatedObjectUuid\", \"isNote\", \"createdAt\")"
-				+ " SELECT s.uuid, :updatedObjectType, :updatedObjectUuid, :isNote, :createdAt"
-				+ " FROM subscriptions s WHERE ");
-		final String paramObjectTypeTpl = "objectType%1$d";
-		final String stmtTpl = "( \"subscribedObjectType\" = :%1$s"
-					+ " AND \"subscribedObjectUuid\" IN ( %2$s ) )";
-		final List<String> stmts = new ArrayList<>();
-		final Map<String, Object> params = new HashMap<>();
-		final ListIterator<SubscriptionUpdateStatement> iter = subscriptionUpdate.stmts.listIterator();
-		while (iter.hasNext()) {
-			final String objectTypeParam = String.format(paramObjectTypeTpl, iter.nextIndex());
-			final SubscriptionUpdateStatement stmt = iter.next();
-			if (stmt != null && stmt.sql != null && stmt.objectType != null && stmt.params != null) {
-				stmts.add(String.format(stmtTpl, objectTypeParam, stmt.sql));
-				params.put(objectTypeParam, stmt.objectType);
-				params.putAll(stmt.params);
-			}
-		}
-		final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
-		logger.info("Inserting subscription updates: sql={}, createdAt={}, updatedObjectType={}, updatedObjectUuid={}, isNote={}, params={}",
-				sqlSuf, subscriptionUpdate.updatedAt, subscriptionUpdate.objectType, subscriptionUpdate.objectUuid, subscriptionUpdate.isNote, params);
-		return dbHandle.createUpdate(sqlPre + sqlSuf)
-				.bind("createdAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt))
-				.bind("updatedObjectType", subscriptionUpdate.objectType)
-				.bind("updatedObjectUuid", subscriptionUpdate.objectUuid)
-				.bind("isNote", subscriptionUpdate.isNote)
-				.bindMap(params)
-				.execute();
-	}
-
-	public int updateSubscriptionsTransactional(SubscriptionUpdateGroup subscriptionUpdate) {
 		if (subscriptionUpdate == null || !subscriptionUpdate.isValid()) {
 			return 0;
 		}
@@ -184,6 +148,38 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 				.execute();
 		insertSubscriptionUpdates(subscriptionUpdate);
 		return nRows;
+	}
+
+	private int insertSubscriptionUpdates(SubscriptionUpdateGroup subscriptionUpdate) {
+		final StringBuilder sqlPre = new StringBuilder("/* insertSubscriptionUpdates */ INSERT INTO \"subscriptionUpdates\""
+				+ " (\"subscriptionUuid\", \"updatedObjectType\", \"updatedObjectUuid\", \"isNote\", \"createdAt\")"
+				+ " SELECT s.uuid, :updatedObjectType, :updatedObjectUuid, :isNote, :createdAt"
+				+ " FROM subscriptions s WHERE ");
+		final String paramObjectTypeTpl = "objectType%1$d";
+		final String stmtTpl = "( \"subscribedObjectType\" = :%1$s"
+					+ " AND \"subscribedObjectUuid\" IN ( %2$s ) )";
+		final List<String> stmts = new ArrayList<>();
+		final Map<String, Object> params = new HashMap<>();
+		final ListIterator<SubscriptionUpdateStatement> iter = subscriptionUpdate.stmts.listIterator();
+		while (iter.hasNext()) {
+			final String objectTypeParam = String.format(paramObjectTypeTpl, iter.nextIndex());
+			final SubscriptionUpdateStatement stmt = iter.next();
+			if (stmt != null && stmt.sql != null && stmt.objectType != null && stmt.params != null) {
+				stmts.add(String.format(stmtTpl, objectTypeParam, stmt.sql));
+				params.put(objectTypeParam, stmt.objectType);
+				params.putAll(stmt.params);
+			}
+		}
+		final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
+		logger.info("Inserting subscription updates: sql={}, createdAt={}, updatedObjectType={}, updatedObjectUuid={}, isNote={}, params={}",
+				sqlSuf, subscriptionUpdate.updatedAt, subscriptionUpdate.objectType, subscriptionUpdate.objectUuid, subscriptionUpdate.isNote, params);
+		return getDbHandle().createUpdate(sqlPre + sqlSuf)
+				.bind("createdAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt))
+				.bind("updatedObjectType", subscriptionUpdate.objectType)
+				.bind("updatedObjectUuid", subscriptionUpdate.objectUuid)
+				.bind("isNote", subscriptionUpdate.isNote)
+				.bindMap(params)
+				.execute();
 	}
 
 	public boolean isSubscribedObject(Map<String, Object> context, String subscribedObjectUuid) {

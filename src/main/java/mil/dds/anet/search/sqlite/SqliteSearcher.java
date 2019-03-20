@@ -17,7 +17,7 @@ public class SqliteSearcher extends Searcher {
 			injector.getInstance(SqliteTagSearcher.class),
 			injector.getInstance(SqliteAuthorizationGroupSearcher.class),
 			injector.getInstance(SqliteSubscriptionSearcher.class),
-			new SqliteSubscriptionUpdateSearcher()
+			injector.getInstance(SqliteSubscriptionUpdateSearcher.class)
 		);
 	}
 

@@ -174,8 +174,8 @@ public class PersonResource {
 	}
 
 	@GraphQLQuery(name="personList")
-	public AnetBeanList<Person> search(@GraphQLArgument(name="query") PersonSearchQuery query) {
-		return dao.search(query);
+	public AnetBeanList<Person> search(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="query") PersonSearchQuery query) {
+		return dao.search(query, DaoUtils.getUserFromContext(context));
 	}
 
 	/** 

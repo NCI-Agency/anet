@@ -24,7 +24,7 @@ public class MssqlSearcher extends Searcher {
 			injector.getInstance(MssqlTagSearcher.class),
 			injector.getInstance(MssqlAuthorizationGroupSearcher.class),
 			injector.getInstance(MssqlSubscriptionSearcher.class),
-			new MssqlSubscriptionUpdateSearcher()
+			injector.getInstance(MssqlSubscriptionUpdateSearcher.class)
 		);
 	}
 
