@@ -51,7 +51,6 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
-import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation;
 import graphql.schema.GraphQLSchema;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.GraphQLSchemaGenerator;
@@ -193,7 +192,7 @@ public class GraphQLResource {
 				.build();
 
 		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
-				.instrumentation(new DataLoaderDispatcherInstrumentation())
+				//.instrumentation(new DataLoaderDispatcherInstrumentation()) — use our own dispatcher instead
 				.build();
 		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
 		final Runnable dispatcher = () -> {
