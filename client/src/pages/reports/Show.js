@@ -195,7 +195,7 @@ class BaseReportShow extends Page {
 					{canEdit && <LinkTo report={report} edit button="primary">Edit</LinkTo>}
 					{canSubmit && this.renderSubmitButton(isSubmitting || !isValid, () => setSubmitting(false))}
 				</div>
-				const subscriptionIcon = (report.isReleased() || report.isCancelled()) ? Page.getSubscriptionIcon(report.isSubscribed, this.toggleSubscription) : undefined
+				const subscriptionIcon = (report.isPublished() || report.isCancelled()) ? Page.getSubscriptionIcon(report.isSubscribed, this.toggleSubscription) : undefined
 				return <div className="report-show">
 					{this.renderEmailModal(values, setFieldValue)}
 
@@ -263,7 +263,7 @@ class BaseReportShow extends Page {
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={
 							<React.Fragment>
-								{(report.isReleased() || report.isCancelled()) && Page.getSubscriptionIcon(report.isSubscribed, this.toggleSubscription)} Report #{report.uuid}
+								{(report.isPublished() || report.isCancelled()) && Page.getSubscriptionIcon(report.isSubscribed, this.toggleSubscription)} Report #{report.uuid}
 							</React.Fragment>
 						} action={action} />
 						<Fieldset className="show-report-overview">
