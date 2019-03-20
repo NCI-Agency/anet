@@ -24,7 +24,7 @@ public class PostgresqlSearcher extends Searcher {
 			injector.getInstance(SqliteLocationSearcher.class),
 			injector.getInstance(SqliteTagSearcher.class),
 			injector.getInstance(SqliteAuthorizationGroupSearcher.class),
-			new SqliteSubscriptionSearcher()
+			injector.getInstance(SqliteSubscriptionSearcher.class)
 		);
 	}
 }

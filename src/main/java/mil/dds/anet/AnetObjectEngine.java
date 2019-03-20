@@ -92,7 +92,7 @@ public class AnetObjectEngine {
 		emailDao = injector.getInstance(EmailDao.class);
 		authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
 		noteDao = injector.getInstance(NoteDao.class);
-		subscriptionDao = new SubscriptionDao(dbHandle);
+		subscriptionDao = injector.getInstance(SubscriptionDao.class);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
 		instance = this;
 	}

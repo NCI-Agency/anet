@@ -3,17 +3,17 @@ package mil.dds.anet.database;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
-
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.SubscribableObject;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.AbstractAnetBean;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
+@InTransaction
 public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & SubscribableObject> extends AnetBaseDao<T> {
 
-	public AnetSubscribableObjectDao(Handle dbHandle, String entityTag, String tableName, String fieldList, String orderBy) {
-		super(dbHandle, entityTag, tableName, fieldList, orderBy);
+	public AnetSubscribableObjectDao(String entityTag, String tableName, String fieldList, String orderBy) {
+		super(entityTag, tableName, fieldList, orderBy);
 	}
 
 	public abstract SubscriptionUpdate getSubscriptionUpdate(T obj);
@@ -21,10 +21,6 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 	@Override
 	public int update(T obj) {
 		DaoUtils.setUpdateFields(obj);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateWithSubscriptions, obj);
-	}
-
-	private int updateWithSubscriptions(T obj) {
 		final int numRows = updateInternal(obj);
 		if (numRows > 0) {
 			final SubscriptionUpdate subscriptionUpdate = getSubscriptionUpdate(obj);
@@ -36,15 +32,6 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 
 	@Override
 	public int delete(String uuid) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::deleteWithSubscriptions, uuid);
-	}
-
-	/* override this method if you want to update subscriptions on delete */
-	protected T getObjectForSubscriptionDelete(String uuid) {
-		return null;
-	}
-
-	private int deleteWithSubscriptions(String uuid) {
 		final T obj = getObjectForSubscriptionDelete(uuid);
 		final int numRows = deleteInternal(uuid);
 		if (numRows > 0 && obj != null) {
@@ -55,6 +42,11 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 			subscriptionDao.updateSubscriptions(subscriptionUpdate);
 		}
 		return numRows;
+	}
+
+	/* override this method if you want to update subscriptions on delete */
+	protected T getObjectForSubscriptionDelete(String uuid) {
+		return null;
 	}
 
 	protected SubscriptionUpdate getCommonSubscriptionUpdate(AbstractAnetBean obj, String tableName, String paramName) {

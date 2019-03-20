@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.beans.Person;
@@ -14,13 +13,14 @@ import mil.dds.anet.beans.Subscription;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ISubscriptionSearcher;
 import mil.dds.anet.utils.DaoUtils;
 
-public class SqliteSubscriptionSearcher implements ISubscriptionSearcher {
+public class SqliteSubscriptionSearcher extends AbstractSearcherBase implements ISubscriptionSearcher {
 
 	@Override
-	public AnetBeanList<Subscription> runSearch(SubscriptionSearchQuery query, Handle dbHandle, Person user) {
+	public AnetBeanList<Subscription> runSearch(SubscriptionSearchQuery query, Person user) {
 		final Position position = user.loadPosition();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		args.put("positionUuid", DaoUtils.getUuid(position));
@@ -30,7 +30,7 @@ public class SqliteSubscriptionSearcher implements ISubscriptionSearcher {
 		sql.append(" LIMIT :limit OFFSET :offset)");
 		final AnetBeanList<Subscription> result = new AnetBeanList<>(query.getPageNum(), query.getPageSize(), new ArrayList<Subscription>());
 
-		final Query q = dbHandle.createQuery(sql.toString())
+		final Query q = getDbHandle().createQuery(sql.toString())
 			.bindMap(args)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize());

@@ -9,10 +9,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,23 +24,20 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 import mil.dds.anet.database.mappers.SubscriptionMapper;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@RegisterRowMapper(SubscriptionMapper.class)
+@InTransaction
 public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-	private final IdBatcher<Subscription> idBatcher;
-
-	public SubscriptionDao(Handle h) {
-		super(h, "Subscriptions", "subscriptions", "*", null);
-		final String idBatcherSql = "/* batch.getSubscriptionsByUuids */ SELECT * FROM subscriptions WHERE uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Subscription>(h, idBatcherSql, "uuids", new SubscriptionMapper());
+	public SubscriptionDao() {
+		super("Subscriptions", "subscriptions", "*", null);
 	}
 
 	public AnetBeanList<Subscription> getAll(int pageNum, int pageSize) {
 		final String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql()) {
 			sql = "/* getAllSubscriptions */ SELECT subscriptions.*, COUNT(*) OVER() AS totalCount "
 					+ "FROM subscriptions ORDER BY \"updatedAt\" DESC "
 					+ "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
@@ -51,7 +46,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 					+ "ORDER BY \"updatedAt\" DESC LIMIT :limit OFFSET :offset";
 		}
 
-		final Query query = dbHandle.createQuery(sql)
+		final Query query = getDbHandle().createQuery(sql)
 			.bind("limit", pageSize)
 			.bind("offset", pageSize * pageNum);
 		return new AnetBeanList<Subscription>(query, pageNum, pageSize, new SubscriptionMapper(), null);
@@ -68,17 +63,27 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 		if (updatedAt != null) {
 			obj.setUpdatedAt(updatedAt); // keep supplied value
 		}
-		return AnetObjectEngine.getInstance().executeInTransaction(this::insertInternal, obj);
+		return insertInternal(obj);
+	}
+
+	static class SelfIdBatcher extends IdBatcher<Subscription> {
+		private static final String sql =
+			"/* batch.getSubscriptionsByUuids */ SELECT * FROM subscriptions WHERE uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new SubscriptionMapper());
+		}
 	}
 
 	@Override
 	public List<Subscription> getByIds(List<String> uuids) {
+		final IdBatcher<Subscription> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
 	@Override
 	public Subscription insertInternal(Subscription s) {
-		dbHandle.createUpdate(
+		getDbHandle().createUpdate(
 				"/* insertSubscription */ INSERT INTO subscriptions (uuid, \"subscriberUuid\", \"subscribedObjectType\", \"subscribedObjectUuid\", \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :subscriberUuid, :subscribedObjectType, :subscribedObjectUuid, :createdAt, :updatedAt)")
 			.bindBean(s)
@@ -90,7 +95,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
 	@Override
 	public int updateInternal(Subscription s) {
-		return dbHandle.createUpdate("/* updateSubscription */ UPDATE subscriptions "
+		return getDbHandle().createUpdate("/* updateSubscription */ UPDATE subscriptions "
 					+ "SET \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(s)
 				.bind("updatedAt", DaoUtils.asLocalDateTime(s.getUpdatedAt()))
@@ -99,30 +104,22 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
 	@Override
 	public int deleteInternal(String uuid) {
-		return dbHandle.createUpdate("/* deleteSubscription */ DELETE FROM subscriptions WHERE uuid = :uuid")
+		return getDbHandle().createUpdate("/* deleteSubscription */ DELETE FROM subscriptions WHERE uuid = :uuid")
 			.bind("uuid", uuid)
 			.execute();
 	}
 
 	public int deleteObjectSubscription(Person user, String uuid) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::deleteObjectSubscriptionInternal, user, uuid);
-	}
-
-	private int deleteObjectSubscriptionInternal(Person user, String subscribedObjectUuid) {
 		final Position position = user.loadPosition();
-		return dbHandle.createUpdate("/* deleteObjectSubscription */ DELETE FROM subscriptions"
+		return getDbHandle().createUpdate("/* deleteObjectSubscription */ DELETE FROM subscriptions"
 				+ " WHERE \"subscriberUuid\" = :subscriberUuid"
 				+ " AND \"subscribedObjectUuid\" = :subscribedObjectUuid")
 			.bind("subscriberUuid", DaoUtils.getUuid(position))
-			.bind("subscribedObjectUuid", subscribedObjectUuid)
+			.bind("subscribedObjectUuid", uuid)
 			.execute();
 	}
 
 	public int updateSubscriptions(SubscriptionUpdate subscriptionUpdate) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateSubscriptionsTransactional, subscriptionUpdate);
-	}
-
-	public int updateSubscriptionsTransactional(SubscriptionUpdate subscriptionUpdate) {
 		if (subscriptionUpdate == null || subscriptionUpdate.updatedAt == null || subscriptionUpdate.stmts == null) {
 			return 0;
 		}
@@ -145,7 +142,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 		}
 		final String sqlSuf = "( " + Joiner.on(" OR ").join(stmts) + " )";
 		logger.info("Updating subscriptions: sql={}, updatedAt={}, params={}", sqlSuf, subscriptionUpdate.updatedAt, params);
-		return dbHandle.createUpdate(sqlPre + sqlSuf)
+		return getDbHandle().createUpdate(sqlPre + sqlSuf)
 				.bind("updatedAt", DaoUtils.asLocalDateTime(subscriptionUpdate.updatedAt))
 				.bindMap(params)
 				.execute();
@@ -158,7 +155,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 				+ " FROM subscriptions"
 				+ " WHERE \"subscriberUuid\" = :subscriberUuid"
 				+ " AND \"subscribedObjectUuid\" = :subscribedObjectUuid";
-		final List<Map<String, Object>> rs = dbHandle.createQuery(sql)
+		final List<Map<String, Object>> rs = getDbHandle().createQuery(sql)
 			.bind("subscriberUuid", DaoUtils.getUuid(position))
 			.bind("subscribedObjectUuid", subscribedObjectUuid)
 			.map(new MapMapper(false))
@@ -170,7 +167,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
 	public AnetBeanList<Subscription> search(Person user, SubscriptionSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher().getSubscriptionSearcher()
-				.runSearch(query, dbHandle, user);
+				.runSearch(query, user);
 	}
 
 }

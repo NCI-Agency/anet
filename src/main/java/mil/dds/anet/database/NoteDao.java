@@ -67,10 +67,6 @@ public class NoteDao extends AnetBaseDao<Note> {
 	@Override
 	public Note insert(Note obj) {
 		DaoUtils.setInsertFields(obj);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::insertWithSubscriptions, obj);
-	}
-
-	private Note insertWithSubscriptions(Note obj) {
 		final Note note = insertInternal(obj);
 		updateSubscriptions(1, note);
 		return note;
@@ -93,10 +89,6 @@ public class NoteDao extends AnetBaseDao<Note> {
 	@Override
 	public int update(Note obj) {
 		DaoUtils.setUpdateFields(obj);
-		return AnetObjectEngine.getInstance().executeInTransaction(this::updateWithSubscriptions, obj);
-	}
-
-	private int updateWithSubscriptions(Note obj) {
 		final int numRows = updateInternal(obj);
 		updateSubscriptions(numRows, obj);
 		return numRows;
@@ -115,10 +107,6 @@ public class NoteDao extends AnetBaseDao<Note> {
 
 	@Override
 	public int delete(String uuid) {
-		return AnetObjectEngine.getInstance().executeInTransaction(this::deleteWithSubscriptions, uuid);
-	}
-
-	private int deleteWithSubscriptions(String uuid) {
 		final Note note = getByUuid(uuid);
 		note.loadNoteRelatedObjects(AnetObjectEngine.getInstance().getContext()).join();
 		DaoUtils.setUpdateFields(note);
