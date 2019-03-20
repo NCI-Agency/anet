@@ -369,10 +369,7 @@ public class PositionDao extends AnetBaseDao<Position> {
 	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, String positionUuid) {
 		return new ForeignKeyFetcher<PersonPositionHistory>()
 				.load(context, "position.personPositionHistory", positionUuid)
-				.thenApply(l ->
-		{
-			return PersonPositionHistory.getDerivedHistory(l);
-		});
+				.thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
 	}
 
 	public CompletableFuture<Position> getCurrentPositionForPerson(Map<String, Object> context, String personUuid) {
