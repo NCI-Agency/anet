@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.google.common.base.Joiner;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import mil.dds.anet.beans.Tag;
@@ -17,13 +16,14 @@ import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.beans.search.TagSearchQuery.TagSearchSortBy;
 import mil.dds.anet.database.mappers.TagMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ITagSearcher;
 import mil.dds.anet.utils.Utils;
 
-public class MssqlTagSearcher implements ITagSearcher {
+public class MssqlTagSearcher extends AbstractSearcherBase implements ITagSearcher {
 
 	@Override
-	public AnetBeanList<Tag> runSearch(TagSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Tag> runSearch(TagSearchQuery query) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* MssqlTagSearch */ SELECT tags.*");
@@ -80,7 +80,7 @@ public class MssqlTagSearcher implements ITagSearcher {
 		sql.append(" ORDER BY ");
 		sql.append(Joiner.on(", ").join(orderByClauses));
 
-		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs);
 		return new AnetBeanList<Tag>(sqlQuery, query.getPageNum(), query.getPageSize(), new TagMapper(), null);
 	}
 

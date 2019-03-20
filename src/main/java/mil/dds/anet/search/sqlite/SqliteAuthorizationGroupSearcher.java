@@ -8,22 +8,21 @@ import java.util.Map;
 
 import com.google.common.base.Joiner;
 
-import org.jdbi.v3.core.Handle;
-
 import mil.dds.anet.beans.AuthorizationGroup;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery.AuthorizationGroupSearchSortBy;
 import mil.dds.anet.database.mappers.AuthorizationGroupMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IAuthorizationGroupSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSearcher {
+public class SqliteAuthorizationGroupSearcher extends AbstractSearcherBase implements IAuthorizationGroupSearcher {
 
 	@Override
-	public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final StringBuilder sql = new StringBuilder("/* SqliteAuthorizationGroupSearch */ SELECT * FROM \"authorizationGroups\"");
@@ -75,7 +74,7 @@ public class SqliteAuthorizationGroupSearcher implements IAuthorizationGroupSear
 
 		sql.append(" LIMIT :limit OFFSET :offset");
 
-		final List<AuthorizationGroup> list = dbHandle.createQuery(sql.toString())
+		final List<AuthorizationGroup> list = getDbHandle().createQuery(sql.toString())
 			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())

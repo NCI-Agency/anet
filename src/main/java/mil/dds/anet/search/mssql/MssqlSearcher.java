@@ -6,15 +6,25 @@ import java.util.Map;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
+import com.google.inject.Injector;
+
 import mil.dds.anet.beans.search.AbstractSearchQuery;
 import mil.dds.anet.search.Searcher;
 
 public class MssqlSearcher extends Searcher {
 
-	public MssqlSearcher() { 
-		super(new MssqlReportSearcher(), new MssqlPersonSearcher(), new MssqlOrganizationSearcher(),
-				new MssqlPositionSearcher(), new MssqlTaskSearcher(), new MssqlLocationSearcher(), new MssqlTagSearcher(),
-				new MssqlAuthorizationGroupSearcher(), new MssqlSubscriptionSearcher());
+	public MssqlSearcher(Injector injector) {
+		super(
+			injector.getInstance(MssqlReportSearcher.class),
+			injector.getInstance(MssqlPersonSearcher.class),
+			injector.getInstance(MssqlOrganizationSearcher.class),
+			injector.getInstance(MssqlPositionSearcher.class),
+			injector.getInstance(MssqlTaskSearcher.class),
+			injector.getInstance(MssqlLocationSearcher.class),
+			injector.getInstance(MssqlTagSearcher.class),
+			injector.getInstance(MssqlAuthorizationGroupSearcher.class),
+			new MssqlSubscriptionSearcher()
+		);
 	}
 
 	protected static Query addPagination(AbstractSearchQuery query,

@@ -25,12 +25,10 @@ public class ReportPublicationWorker implements Runnable {
 
 	private final ReportDao dao;
 	private final Integer nbOfHoursQuarantineApproved;
-	private final Map<String, Object> context;
 
 	public ReportPublicationWorker(ReportDao dao, AnetConfiguration config) {
 		this.dao = dao;
 		this.nbOfHoursQuarantineApproved = (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved");
-		this.context = AnetObjectEngine.getInstance().getContext();
 	}
 
 	@Override
@@ -51,6 +49,7 @@ public class ReportPublicationWorker implements Runnable {
 		query.setPageSize(Integer.MAX_VALUE);
 		query.setState(Collections.singletonList(ReportState.APPROVED));
 		final List<Report> reports = dao.search(query, null, true).getList();
+		final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
 		for (final Report r : reports) {
 			final List<ReportAction> workflow = r.loadWorkflow(context).join();
 			if (workflow.isEmpty()) {
@@ -59,7 +58,7 @@ public class ReportPublicationWorker implements Runnable {
 				if (workflow.get(workflow.size()-1).getCreatedAt().isBefore(now)) {
 					//Publish the report
 					try {
-						final int numRows = AnetObjectEngine.getInstance().executeInTransaction(dao::publish, r, null);
+						final int numRows = dao.publish(r, null);
 						if (numRows == 0) {
 							logger.error("Couldn't process report publication for report {}", r.getUuid());
 						} else {

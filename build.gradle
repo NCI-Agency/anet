@@ -49,8 +49,10 @@ dependencies {
 	compile group: 'io.dropwizard', name: 'dropwizard-auth', version: '1.3.9'
 	compile group: 'io.dropwizard', name: 'dropwizard-views-freemarker', version: '1.3.9'
 	compile group: 'io.dropwizard', name: 'dropwizard-assets', version: '1.3.9'
+	compile 'ru.vyarus.guicey:guicey-jdbi3:0.6.0'
+	compile 'com.google.guava:guava:27.1-jre' // Pick the non-Android version of Guice
 
-	compile 'org.xerial:sqlite-jdbc:3.25.2' //If using SQLite
+	compile 'org.xerial:sqlite-jdbc:3.27.2' //If using SQLite
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.1.4' // If using postgresql
 	compile group: 'org.liquibase', name: 'liquibase-core', version: '3.6.3' // or newer, for postgresql dropPrimaryKey fix [CORE-3129]
 
@@ -67,7 +69,7 @@ dependencies {
 	// Used for converting GraphQL request output to XML:
 	compile 'com.github.javadev:underscore-lodash:1.26'
 	// For JSON schema validation
-	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.0'
+	compile 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
 
 	compile 'com.microsoft.sqlserver:mssql-jdbc:7.2.1.jre8'
 
@@ -172,7 +174,7 @@ task dbInit(dependsOn: 'compileJava', type: JavaExec) {
 
 task dbStatus(dependsOn: 'compileJava', type: JavaExec) {
 	group = "database"
-	description = "Runs the ANET database status (Liquibase)command."
+	description = "Runs the ANET database status (Liquibase) command."
 	classpath = sourceSets.main.runtimeClasspath
 	environment(run.environment)
 	main = mainClassName
@@ -342,7 +344,7 @@ buildscript {
 	dependencies {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:4.6.2'
-		classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
 	}
 }
 

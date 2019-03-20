@@ -1,5 +1,7 @@
 package mil.dds.anet.search;
 
+import com.google.inject.Injector;
+
 import mil.dds.anet.search.mssql.MssqlSearcher;
 import mil.dds.anet.search.pg.PostgresqlSearcher;
 import mil.dds.anet.search.sqlite.SqliteSearcher;
@@ -17,11 +19,11 @@ public abstract class Searcher implements ISearcher {
 	private final IAuthorizationGroupSearcher authorizationGroupSearcher;
 	private final ISubscriptionSearcher subscriptionSearcher;
 
-	public static Searcher getSearcher(DaoUtils.DbType dbType) {
+	public static Searcher getSearcher(DaoUtils.DbType dbType, Injector injector) {
 		switch (dbType) {
-			case MSSQL: return new MssqlSearcher();
-			case SQLITE:	 return new SqliteSearcher();
-			case POSTGRESQL: return new PostgresqlSearcher();
+			case MSSQL: return new MssqlSearcher(injector);
+			case SQLITE:	 return new SqliteSearcher(injector);
+			case POSTGRESQL: return new PostgresqlSearcher(injector);
 			default: throw new RuntimeException("No searcher found for " + dbType);
 		}
 	}

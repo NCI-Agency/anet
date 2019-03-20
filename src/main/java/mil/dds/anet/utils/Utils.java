@@ -1,8 +1,10 @@
 package mil.dds.anet.utils;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,12 +18,17 @@ import javax.annotation.Nullable;
 import org.jsoup.Jsoup;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import mil.dds.anet.beans.Organization;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.ISearchQuery.SortOrder;
 import mil.dds.anet.views.AbstractAnetBean;
 
 public class Utils {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 	/**
 	 * Crude method to check whether a uuid is purely integer,
@@ -132,25 +139,67 @@ public class Utils {
 
 	/**
 	 * Given a list of organizations and a topParentUuid, this function maps all of the organizations to their highest parent
-	 * within this list excluding the topParent.  This is used to generate graphs/tables that bubble things up to their highest parent
+	 * within this list excluding the topParent. This can be used to check for loops, or to generate graphs/tables that bubble
+	 * things up to their highest parent.
 	 * This is used in the daily rollup graphs. 
 	 */
 	public static Map<String, Organization> buildParentOrgMapping(List<Organization> orgs, @Nullable String topParentUuid) {
 		final Map<String, Organization> result = new HashMap<>();
 		final Map<String, Organization> orgMap = new HashMap<>();
 
-		for (Organization o : orgs) {
+		for (final Organization o : orgs) {
 			orgMap.put(o.getUuid(), o);
 		}
 
-		for (Organization o : orgs) {
+		for (final Organization o : orgs) {
+			final Set<String> seenUuids = new HashSet<>();
 			String curr = o.getUuid();
+			seenUuids.add(curr);
 			String parentUuid = o.getParentOrgUuid();
-			while (Objects.equals(parentUuid,topParentUuid) == false && orgMap.containsKey(parentUuid)) {
+			while (!Objects.equals(parentUuid, topParentUuid) && orgMap.containsKey(parentUuid)) {
 				curr = parentUuid;
+				if (seenUuids.contains(curr)) {
+					final String errorMsg = String.format("Loop detected in organization hierarchy: %1$s is its own (grand…)parent!", curr);
+					logger.error(errorMsg);
+					throw new IllegalArgumentException(errorMsg);
+				}
+				seenUuids.add(curr);
 				parentUuid = orgMap.get(parentUuid).getParentOrgUuid();
 			}
 			result.put(o.getUuid(), orgMap.get(curr));
+		}
+
+		return result;
+	}
+
+	/**
+	 * Given a list of tasks and a topParentUuid, this function maps all of the tasks to their highest parent
+	 * within this list excluding the topParent. This can be used to check for loops.
+	 */
+	public static Map<String, Task> buildParentTaskMapping(List<Task> tasks, @Nullable String topParentUuid) {
+		final Map<String, Task> result = new HashMap<>();
+		final Map<String, Task> taskMap = new HashMap<>();
+
+		for (final Task t : tasks) {
+			taskMap.put(t.getUuid(), t);
+		}
+
+		for (final Task t : tasks) {
+			final Set<String> seenUuids = new HashSet<>();
+			String curr = t.getUuid();
+			seenUuids.add(curr);
+			String parentUuid = t.getCustomFieldRef1Uuid();
+			while (!Objects.equals(parentUuid, topParentUuid) && taskMap.containsKey(parentUuid)) {
+				curr = parentUuid;
+				if (seenUuids.contains(curr)) {
+					final String errorMsg = String.format("Loop detected in task hierarchy: %1$s is its own (grand…)parent!", curr);
+					logger.error(errorMsg);
+					throw new IllegalArgumentException(errorMsg);
+				}
+				seenUuids.add(curr);
+				parentUuid = taskMap.get(parentUuid).getCustomFieldRef1Uuid();
+			}
+			result.put(t.getUuid(), taskMap.get(curr));
 		}
 
 		return result;

@@ -138,7 +138,7 @@ class BaseNav extends Component {
 
 				<SidebarLink linkTo="/help" handleOnClick={resetPages}>Help</SidebarLink>
 
-				{(currentUser.isAdmin() || currentUser.isSuperUser()) &&
+				{(currentUser.isAdmin() /* FIXME: enable this again when nci-agency/anet#1463 is fixed: || currentUser.isSuperUser()*/) &&
 					<NavDropdown title="Insights" id="insights" active={inInsights}>
 						{INSIGHTS.map(insight =>
 							<Link to={"/insights/" + insight} key={insight} onClick={resetPages}>

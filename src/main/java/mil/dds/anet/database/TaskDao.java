@@ -4,9 +4,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
@@ -16,29 +14,26 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.mappers.TaskMapper;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@RegisterRowMapper(TaskMapper.class)
+@InTransaction
 public class TaskDao extends AnetSubscribableObjectDao<Task> {
 
 	private static final String tableName = "tasks";
 
-	private final IdBatcher<Task> idBatcher;
-
-	public TaskDao(Handle h) { 
-		super(h, "Tasks", tableName, "*", null);
-		final String idBatcherSql = "/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Task>(h, idBatcherSql, "uuids", new TaskMapper());
+	public TaskDao() {
+		super( "Tasks", tableName, "*", null);
 	}
 	
 	public AnetBeanList<Task> getAll(int pageNum, int pageSize) {
 		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
+		if (DaoUtils.isMsSql()) {
 			sql = "/* getAllTasks */ SELECT tasks.*, COUNT(*) OVER() AS totalCount "
 					+ "FROM tasks ORDER BY \"createdAt\" ASC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
 		} else { 
 			sql = "/* getAllTasks */ SELECT * from tasks ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
-		final Query query = dbHandle.createQuery(sql)
+		final Query query = getDbHandle().createQuery(sql)
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum);
 		return new AnetBeanList<Task>(query, pageNum, pageSize, new TaskMapper(), null);
@@ -48,14 +43,24 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Task> {
+		private static final String sql =
+			"/* batch.getTasksByUuids */ SELECT * from tasks where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new TaskMapper());
+		}
+	}
+
 	@Override
 	public List<Task> getByIds(List<String> uuids) {
+		final IdBatcher<Task> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
 	@Override
 	public Task insertInternal(Task p) {
-		dbHandle.createUpdate("/* insertTask */ INSERT INTO tasks "
+		getDbHandle().createUpdate("/* insertTask */ INSERT INTO tasks "
 				+ "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"organizationUuid\", \"createdAt\", \"updatedAt\", status, "
 				+ "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\") "
 				+ "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :responsibleOrgUuid, :createdAt, :updatedAt, :status, "
@@ -72,7 +77,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 
 	@Override
 	public int updateInternal(Task p) {
-		return dbHandle.createUpdate("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
+		return getDbHandle().createUpdate("/* updateTask */ UPDATE tasks set \"longName\" = :longName, \"shortName\" = :shortName, "
 				+ "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, \"updatedAt\" = :updatedAt, "
 				+ "\"organizationUuid\" = :responsibleOrgUuid, status = :status, "
 				+ "\"customField\" = :customField, \"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
@@ -92,7 +97,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 	}
 
 	public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {
-		return dbHandle.createUpdate("/* setReponsibleOrgForTask */ UPDATE tasks "
+		return getDbHandle().createUpdate("/* setReponsibleOrgForTask */ UPDATE tasks "
 				+ "SET \"organizationUuid\" = :orgUuid, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 			.bind("orgUuid", organizationUuid)
 			.bind("uuid", taskUuid)
@@ -101,19 +106,19 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 	}
 	
 	public List<Task> getTopLevelTasks() {
-		return dbHandle.createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
+		return getDbHandle().createQuery("/* getTopTasks */ SELECT * FROM tasks WHERE \"customFieldRef1Uuid\" IS NULL")
 			.map(new TaskMapper())
 			.list();
 	}
 
 	public AnetBeanList<Task> search(TaskSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
-				.getTaskSearcher().runSearch(query, dbHandle);
+				.getTaskSearcher().runSearch(query);
 	}
 	
 	public List<Task> getRecentTasks(Person author, int maxResults) {
 		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql()) {
 			sql = "/* getRecentTasks */ SELECT tasks.* FROM tasks WHERE tasks.status = :status AND tasks.uuid IN ("
 					+ "SELECT TOP(:maxResults) \"reportTasks\".\"taskUuid\" "
 					+ "FROM reports JOIN \"reportTasks\" ON reports.uuid = \"reportTasks\".\"reportUuid\" "
@@ -131,7 +136,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
-		return dbHandle.createQuery(sql)
+		return getDbHandle().createQuery(sql)
 				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.bind("status", DaoUtils.getEnumId(TaskStatus.ACTIVE))
@@ -140,7 +145,7 @@ public class TaskDao extends AnetSubscribableObjectDao<Task> {
 	}
 
 	public List<Task> getTasksByOrganizationUuid(String orgUuid) {
-		return dbHandle.createQuery("/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationUuid\" = :orgUuid")
+		return getDbHandle().createQuery("/* getTasksByOrg */ SELECT * from tasks WHERE \"organizationUuid\" = :orgUuid")
 			.bind("orgUuid", orgUuid)
 			.map(new TaskMapper())
 			.list();
