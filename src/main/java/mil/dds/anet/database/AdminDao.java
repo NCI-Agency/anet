@@ -4,11 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.jdbi.v3.core.Handle;
 
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.database.mappers.AdminSettingMapper;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
+@InTransaction
 public class AdminDao {
 
 	public static enum AdminSettingKeys { 
@@ -25,11 +30,12 @@ public class AdminDao {
 		GENERAL_BANNER_VISIBILITY,
 	}
 
-	private Handle dbHandle;
+	@Inject
+	private Provider<Handle> handle;
 	private Map<String,String> cachedSettings = null;
-	
-	public AdminDao(Handle db) { 
-		this.dbHandle = db;
+
+	protected Handle getDbHandle() {
+		return handle.get();
 	}
 
 	private void initCache() { 
@@ -44,9 +50,9 @@ public class AdminDao {
 		if (cachedSettings == null) { initCache(); } 
 		return cachedSettings.get(key.toString());
 	}
-	
+
 	public List<AdminSetting> getAllSettings() { 
-		return dbHandle.createQuery("/* getAllAdminSettings */ SELECT * FROM \"adminSettings\"")
+		return getDbHandle().createQuery("/* getAllAdminSettings */ SELECT * FROM \"adminSettings\"")
 				.map(new AdminSettingMapper())
 				.list();
 	}
@@ -63,7 +69,7 @@ public class AdminDao {
 			sql = "/* insertAdminSetting */ INSERT INTO \"adminSettings\" (\"key\", value) VALUES (:key, :value)";
 		}
 		cachedSettings.put(setting.getKey(), setting.getValue());
-		return dbHandle.createUpdate(sql)
+		return getDbHandle().createUpdate(sql)
 			.bind("key", setting.getKey())
 			.bind("value", setting.getValue())
 			.execute();

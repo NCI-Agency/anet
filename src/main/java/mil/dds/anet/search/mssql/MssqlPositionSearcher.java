@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
@@ -18,14 +17,15 @@ import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IPositionSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class MssqlPositionSearcher implements IPositionSearcher {
+public class MssqlPositionSearcher extends AbstractSearcherBase implements IPositionSearcher {
 
 	@Override
-	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> sqlArgs = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
@@ -149,7 +149,7 @@ public class MssqlPositionSearcher implements IPositionSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, sqlArgs, listArgs);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, sqlArgs, listArgs);
 		return new AnetBeanList<Position>(sqlQuery, query.getPageNum(), query.getPageSize(), new PositionMapper(), null);
 	}
 

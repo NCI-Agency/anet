@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.jdbi.v3.core.statement.StatementContext;
+
 import org.jdbi.v3.core.mapper.RowMapper;
 
 public class ForeignKeyMapper<T> implements RowMapper<ForeignKeyTuple<T>> {

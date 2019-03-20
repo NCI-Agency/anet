@@ -2,19 +2,18 @@ package mil.dds.anet.search.sqlite;
 
 import java.util.ArrayList;
 
-import org.jdbi.v3.core.Handle;
-
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
 import mil.dds.anet.database.mappers.TagMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.ITagSearcher;
 import mil.dds.anet.utils.Utils;
 
-public class SqliteTagSearcher implements ITagSearcher {
+public class SqliteTagSearcher extends AbstractSearcherBase implements ITagSearcher {
 
 	@Override
-	public AnetBeanList<Tag> runSearch(TagSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Tag> runSearch(TagSearchQuery query) {
 		final AnetBeanList<Tag> result = new AnetBeanList<Tag>(query.getPageNum(), query.getPageSize(), new ArrayList<Tag>());
 		final String text = query.getText();
 		final boolean doFullTextSearch = (text != null && !text.trim().isEmpty());
@@ -22,7 +21,7 @@ public class SqliteTagSearcher implements ITagSearcher {
 			return result;
 		}
 
-		result.setList(dbHandle.createQuery("/* SqliteTagSearch */ SELECT * FROM tags "
+		result.setList(getDbHandle().createQuery("/* SqliteTagSearch */ SELECT * FROM tags "
 				+ "WHERE name LIKE '%' || :text || '%' "
 				+ "OR description LIKE '%' || :text || '%' "
 				+ "ORDER BY name ASC LIMIT :limit OFFSET :offset")
