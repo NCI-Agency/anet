@@ -25,12 +25,10 @@ public class ReportPublicationWorker implements Runnable {
 
 	private final ReportDao dao;
 	private final Integer nbOfHoursQuarantineApproved;
-	private final Map<String, Object> context;
 
 	public ReportPublicationWorker(ReportDao dao, AnetConfiguration config) {
 		this.dao = dao;
 		this.nbOfHoursQuarantineApproved = (Integer) config.getDictionaryEntry("reportWorkflow.nbOfHoursQuarantineApproved");
-		this.context = AnetObjectEngine.getInstance().getContext();
 	}
 
 	@Override
@@ -51,6 +49,7 @@ public class ReportPublicationWorker implements Runnable {
 		query.setPageSize(Integer.MAX_VALUE);
 		query.setState(Collections.singletonList(ReportState.APPROVED));
 		final List<Report> reports = dao.search(query, null, true).getList();
+		final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
 		for (final Report r : reports) {
 			final List<ReportAction> workflow = r.loadWorkflow(context).join();
 			if (workflow.isEmpty()) {
