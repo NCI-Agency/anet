@@ -701,38 +701,70 @@ public class ReportDao extends AnetBaseDao<Report> {
 		return result;
 	}
 
-	@Override
-	public List<Report> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
+	static class SelfIdBatcher extends IdBatcher<Report> {
+		private static final String sql =
+			"/* batch.getReportsByUuids */ SELECT " + REPORT_FIELDS
 				+ "FROM reports "
 				+ "WHERE reports.uuid IN ( <uuids> )";
-		final IdBatcher<Report> idBatcher = new IdBatcher<Report>(getDbHandle(), idBatcherSql, "uuids", new ReportMapper());
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new ReportMapper());
+		}
+	}
+
+	@Override
+	public List<Report> getByIds(List<String> uuids) {
+		final IdBatcher<Report> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
-	public List<List<ReportPerson>> getAttendees(List<String> foreignKeys) {
-		final String attendeesBatcherSql = "/* batch.getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS
+	static class ReportPeopleBatcher extends ForeignKeyBatcher<ReportPerson> {
+		private static final String sql =
+			"/* batch.getAttendeesForReport */ SELECT " + PersonDao.PERSON_FIELDS
 				+ ", \"reportPeople\".\"reportUuid\" , \"reportPeople\".\"isPrimary\" FROM \"reportPeople\" "
 				+ "LEFT JOIN people ON \"reportPeople\".\"personUuid\" = people.uuid "
 				+ "WHERE \"reportPeople\".\"reportUuid\" IN ( <foreignKeys> )";
-		final ForeignKeyBatcher<ReportPerson> attendeesBatcher = new ForeignKeyBatcher<ReportPerson>(getDbHandle(), attendeesBatcherSql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
+
+		public ReportPeopleBatcher() {
+			super(sql, "foreignKeys", new ReportPersonMapper(), "reportUuid");
+		}
+	}
+
+	public List<List<ReportPerson>> getAttendees(List<String> foreignKeys) {
+		final ForeignKeyBatcher<ReportPerson> attendeesBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(ReportPeopleBatcher.class);
 		return attendeesBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	public List<List<Tag>> getTags(List<String> foreignKeys) {
-		final String tagsBatcherSql = "/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
+	static class TagsBatcher extends ForeignKeyBatcher<Tag> {
+		private static final String sql =
+			"/* batch.getTagsForReport */ SELECT * FROM \"reportTags\" "
 				+ "INNER JOIN tags ON \"reportTags\".\"tagUuid\" = tags.uuid "
 				+ "WHERE \"reportTags\".\"reportUuid\" IN ( <foreignKeys> )"
 				+ "ORDER BY tags.name";
-		final ForeignKeyBatcher<Tag> tagsBatcher = new ForeignKeyBatcher<Tag>(getDbHandle(), tagsBatcherSql, "foreignKeys", new TagMapper(), "reportUuid");
+
+		public TagsBatcher() {
+			super(sql, "foreignKeys", new TagMapper(), "reportUuid");
+		}
+	}
+
+	public List<List<Tag>> getTags(List<String> foreignKeys) {
+		final ForeignKeyBatcher<Tag> tagsBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(TagsBatcher.class);
 		return tagsBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	public List<List<Task>> getTasks(List<String> foreignKeys) {
-		final String tasksBatcherSql = "/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
+	static class TasksBatcher extends ForeignKeyBatcher<Task> {
+		private static final String sql =
+			"/* batch.getTasksForReport */ SELECT * FROM tasks, \"reportTasks\" "
 				+ "WHERE \"reportTasks\".\"reportUuid\" IN ( <foreignKeys> ) "
 				+ "AND \"reportTasks\".\"taskUuid\" = tasks.uuid";
-		final ForeignKeyBatcher<Task> tasksBatcher = new ForeignKeyBatcher<Task>(getDbHandle(), tasksBatcherSql, "foreignKeys", new TaskMapper(), "reportUuid");
+
+		public TasksBatcher() {
+			super(sql, "foreignKeys", new TaskMapper(), "reportUuid");
+		}
+	}
+
+	public List<List<Task>> getTasks(List<String> foreignKeys) {
+		final ForeignKeyBatcher<Task> tasksBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(TasksBatcher.class);
 		return tasksBatcher.getByForeignKeys(foreignKeys);
 	}
 

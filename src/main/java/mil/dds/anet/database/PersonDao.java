@@ -45,17 +45,33 @@ public class PersonDao extends AnetBaseDao<Person> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Person> {
+		private static final String sql =
+			"/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new PersonMapper());
+		}
+	}
+
 	@Override
 	public List<Person> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getPeopleByUuids */ SELECT " + PERSON_FIELDS + " FROM people WHERE uuid IN ( <uuids> )";
-		final IdBatcher<Person> idBatcher = new IdBatcher<Person>(getDbHandle(), idBatcherSql, "uuids", new PersonMapper());
+		final IdBatcher<Person> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
+	static class PersonPositionHistoryBatcher extends ForeignKeyBatcher<PersonPositionHistory> {
+		private static final String sql =
+				"/* batch.getPersonPositionHistory */ SELECT * FROM \"peoplePositions\" "
+					+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
+
+		public PersonPositionHistoryBatcher() {
+			super(sql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
+		}
+	}
+
 	public List<List<PersonPositionHistory>> getPersonPositionHistory(List<String> foreignKeys) {
-		final String personPositionHistoryBatcherSql = "/* batch.getPersonPositionHistory */ SELECT * FROM \"peoplePositions\" "
-				+ "WHERE \"personUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher = new ForeignKeyBatcher<PersonPositionHistory>(getDbHandle(), personPositionHistoryBatcherSql, "foreignKeys", new PersonPositionHistoryMapper(), "personUuid");
+		final ForeignKeyBatcher<PersonPositionHistory> personPositionHistoryBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(PersonPositionHistoryBatcher.class);
 		return personPositionHistoryBatcher.getByForeignKeys(foreignKeys);
 	}
 
@@ -238,10 +254,7 @@ public class PersonDao extends AnetBaseDao<Person> {
 	public CompletableFuture<List<PersonPositionHistory>> getPositionHistory(Map<String, Object> context, String personUuid) {
 		return new ForeignKeyFetcher<PersonPositionHistory>()
 				.load(context, "person.personPositionHistory", personUuid)
-				.thenApply(l ->
-		{
-			return PersonPositionHistory.getDerivedHistory(l);
-		});
+				.thenApply(l -> PersonPositionHistory.getDerivedHistory(l));
 	}
 
 }

@@ -3,6 +3,7 @@ package mil.dds.anet.database;
 import java.util.Arrays;
 import java.util.List;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Comment;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.CommentMapper;
@@ -29,12 +30,20 @@ public class CommentDao extends AnetBaseDao<Comment> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
-	@Override
-	public List<Comment> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS
+	static class SelfIdBatcher extends IdBatcher<Comment> {
+		private static final String sql =
+			"/* batch.getCommentsByUuids */ SELECT " + COMMENT_FIELDS
 				+ "FROM comments "
 				+ "WHERE comments.uuid IN ( <uuids> )";
-		final IdBatcher<Comment> idBatcher = new IdBatcher<Comment>(getDbHandle(), idBatcherSql, "uuids", new CommentMapper());
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new CommentMapper());
+		}
+	}
+
+	@Override
+	public List<Comment> getByIds(List<String> uuids) {
+		final IdBatcher<Comment> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 

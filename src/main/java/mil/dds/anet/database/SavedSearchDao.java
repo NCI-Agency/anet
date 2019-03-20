@@ -3,6 +3,7 @@ package mil.dds.anet.database;
 import java.util.Arrays;
 import java.util.List;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.SavedSearch;
@@ -26,10 +27,18 @@ public class SavedSearchDao extends AnetBaseDao<SavedSearch> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<SavedSearch> {
+		private static final String sql =
+			"/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new SavedSearchMapper());
+		}
+	}
+
 	@Override
 	public List<SavedSearch> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getSavedSearchesByUuids */ SELECT * from \"savedSearches\" where uuid IN ( <uuids> )";
-		final IdBatcher<SavedSearch> idBatcher = new IdBatcher<SavedSearch>(getDbHandle(), idBatcherSql, "uuids", new SavedSearchMapper());
+		final IdBatcher<SavedSearch> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 

@@ -53,19 +53,35 @@ public class AuthorizationGroupDao extends AnetBaseDao<AuthorizationGroup> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<AuthorizationGroup> {
+		private static final String sql =
+			"/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new AuthorizationGroupMapper());
+		}
+	}
+
 	@Override
 	public List<AuthorizationGroup> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getAuthorizationGroupsByUuids */ SELECT * from \"authorizationGroups\" where uuid IN ( <uuids> )";
-		final IdBatcher<AuthorizationGroup> idBatcher = new IdBatcher<AuthorizationGroup>(getDbHandle(), idBatcherSql, "uuids", new AuthorizationGroupMapper());
+		final IdBatcher<AuthorizationGroup> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
-	public List<List<Position>> getPositions(List<String> foreignKeys) {
-		final String positionsBatcherSql = "/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupUuid\", " + PositionDao.POSITIONS_FIELDS
+	static class PositionsBatcher extends ForeignKeyBatcher<Position> {
+		private static final String sql =
+			"/* batch.getPositionsForAuthorizationGroup */ SELECT \"authorizationGroupUuid\", " + PositionDao.POSITIONS_FIELDS
 				+ " FROM positions, \"authorizationGroupPositions\" "
 				+ "WHERE \"authorizationGroupPositions\".\"authorizationGroupUuid\" IN ( <foreignKeys> ) "
 				+ "AND \"authorizationGroupPositions\".\"positionUuid\" = positions.uuid";
-		final ForeignKeyBatcher<Position> positionsBatcher = new ForeignKeyBatcher<Position>(getDbHandle(), positionsBatcherSql, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
+
+		public PositionsBatcher() {
+			super(sql, "foreignKeys", new PositionMapper(), "authorizationGroupUuid");
+		}
+	}
+
+	public List<List<Position>> getPositions(List<String> foreignKeys) {
+		final ForeignKeyBatcher<Position> positionsBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(PositionsBatcher.class);
 		return positionsBatcher.getByForeignKeys(foreignKeys);
 	}
 

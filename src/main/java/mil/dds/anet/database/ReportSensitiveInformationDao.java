@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import org.jdbi.v3.core.mapper.MapMapper;
 import org.jdbi.v3.core.statement.Query;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
 import mil.dds.anet.beans.ReportSensitiveInformation;
@@ -44,11 +45,19 @@ public class ReportSensitiveInformationDao extends AnetBaseDao<ReportSensitiveIn
 		throw new UnsupportedOperationException();
 	}
 
-	public List<List<ReportSensitiveInformation>> getReportSensitiveInformation(List<String> foreignKeys) {
-		final String reportIdBatcherSql = "/* batch.getReportSensitiveInformationsByReportUuids */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
+	static class ReportsSensitiveInformationBatcher extends ForeignKeyBatcher<ReportSensitiveInformation> {
+		private static final String sql =
+			"/* batch.getReportSensitiveInformationsByReportUuids */ SELECT " + REPORTS_SENSITIVE_INFORMATION_FIELDS
 				+ " FROM \"" + tableName + "\""
 				+ " WHERE \"reportUuid\" IN ( <foreignKeys> )";
-		final ForeignKeyBatcher<ReportSensitiveInformation> reportIdBatcher = new ForeignKeyBatcher<ReportSensitiveInformation>(getDbHandle(), reportIdBatcherSql, "foreignKeys", new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
+
+		public ReportsSensitiveInformationBatcher() {
+			super(sql, "foreignKeys", new ReportSensitiveInformationMapper(), "reportsSensitiveInformation_reportUuid");
+		}
+	}
+
+	public List<List<ReportSensitiveInformation>> getReportSensitiveInformation(List<String> foreignKeys) {
+		final ForeignKeyBatcher<ReportSensitiveInformation> reportIdBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(ReportsSensitiveInformationBatcher.class);
 		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 

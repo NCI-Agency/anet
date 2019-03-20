@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.jdbi.v3.core.statement.Query;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Note;
 import mil.dds.anet.beans.NoteRelatedObject;
 import mil.dds.anet.beans.lists.AnetBeanList;
@@ -46,10 +47,18 @@ public class NoteDao extends AnetBaseDao<Note> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Note> {
+		private static final String sql =
+			"/* batch.getNotesByUuids */ SELECT * FROM notes WHERE uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new NoteMapper());
+		}
+	}
+
 	@Override
 	public List<Note> getByIds(List<String> uuids) {
-		final String idBatcherSql = "/* batch.getNotesByUuids */ SELECT * FROM notes WHERE uuid IN ( <uuids> )";
-		final IdBatcher<Note> idBatcher = new IdBatcher<Note>(getDbHandle(), idBatcherSql, "uuids", new NoteMapper());
+		final IdBatcher<Note> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
@@ -91,19 +100,35 @@ public class NoteDao extends AnetBaseDao<Note> {
 				.load(context, "noteRelatedObject.notes", relatedObjectUuid);
 	}
 
-	public List<List<Note>> getNotes(List<String> foreignKeys) {
-		final String notesBatcherSql = "/* batch.getNotesForRelatedObject */ SELECT * FROM \"noteRelatedObjects\" "
+	static class NotesBatcher extends ForeignKeyBatcher<Note> {
+		private static final String sql =
+			"/* batch.getNotesForRelatedObject */ SELECT * FROM \"noteRelatedObjects\" "
 				+ "INNER JOIN notes ON \"noteRelatedObjects\".\"noteUuid\" = notes.uuid "
 				+ "WHERE \"noteRelatedObjects\".\"relatedObjectUuid\" IN ( <foreignKeys> ) "
 				+ "ORDER BY notes.\"updatedAt\" DESC";
-		final ForeignKeyBatcher<Note> notesBatcher = new ForeignKeyBatcher<Note>(getDbHandle(), notesBatcherSql, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
+
+		public NotesBatcher() {
+			super(sql, "foreignKeys", new NoteMapper(), "relatedObjectUuid");
+		}
+	}
+
+	public List<List<Note>> getNotes(List<String> foreignKeys) {
+		final ForeignKeyBatcher<Note> notesBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(NotesBatcher.class);
 		return notesBatcher.getByForeignKeys(foreignKeys);
 	}
 
-	public List<List<NoteRelatedObject>> getNoteRelatedObjects(List<String> foreignKeys) {
-		final String noteRelatedObjectsBatcherSql = "/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
+	static class NoteRelatedObjectsBatcher extends ForeignKeyBatcher<NoteRelatedObject> {
+		private static final String sql =
+			"/* batch.getNoteRelatedObjects */ SELECT * FROM \"noteRelatedObjects\" "
 				+ "WHERE \"noteUuid\" IN ( <foreignKeys> ) ORDER BY \"relatedObjectType\", \"relatedObjectuuid\" ASC";
-		final ForeignKeyBatcher<NoteRelatedObject> noteRelatedObjectsBatcher = new ForeignKeyBatcher<NoteRelatedObject>(getDbHandle(), noteRelatedObjectsBatcherSql, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
+
+		public NoteRelatedObjectsBatcher() {
+			super(sql, "foreignKeys", new NoteRelatedObjectMapper(), "noteUuid");
+		}
+	}
+
+	public List<List<NoteRelatedObject>> getNoteRelatedObjects(List<String> foreignKeys) {
+		final ForeignKeyBatcher<NoteRelatedObject> noteRelatedObjectsBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(NoteRelatedObjectsBatcher.class);
 		return noteRelatedObjectsBatcher.getByForeignKeys(foreignKeys);
 	}
 

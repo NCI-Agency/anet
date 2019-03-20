@@ -8,8 +8,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.dataloader.DataLoaderRegistry;
-
 import com.google.inject.Injector;
 
 import io.dropwizard.Application;
@@ -64,18 +62,18 @@ public class AnetObjectEngine {
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
 	private final NoteDao noteDao;
-	private final Map<String, Object> context;
+	private ThreadLocal<Map<String, Object>> context;
 
 	ISearcher searcher;
-	private final DataLoaderRegistry dataLoaderRegistry;
 
 	private static AnetObjectEngine instance; 
 	
 	private final String dbUrl;
+	private final Injector injector;
 	
 	public AnetObjectEngine(String dbUrl, Application<?> application) {
 		this.dbUrl = dbUrl;
-		final Injector injector = InjectorLookup.getInjector(application).get();
+		injector = InjectorLookup.getInjector(application).get();
 		personDao = injector.getInstance(PersonDao.class);
 		taskDao = injector.getInstance(TaskDao.class);
 		locationDao =  injector.getInstance(LocationDao.class);
@@ -93,16 +91,15 @@ public class AnetObjectEngine {
 		authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
 		noteDao = injector.getInstance(NoteDao.class);
 		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
-		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
-		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
-		context = new HashMap<>();
-		context.put("dataLoaderRegistry", dataLoaderRegistry);
-
 		instance = this;
 	}
 
 	public String getDbUrl() {
 		return dbUrl;
+	}
+
+	public Injector getInjector() {
+		return injector;
 	}
 
 	public PersonDao getPersonDao() { 
@@ -282,6 +279,12 @@ public class AnetObjectEngine {
 	}
 
 	public Map<String, Object> getContext() {
-		return context;
+		if (context == null) {
+			final Map<String, Object> ctx = new HashMap<>();
+			// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache?
+			ctx.put("dataLoaderRegistry", BatchingUtils.registerDataLoaders(this, false, false));
+			context = ThreadLocal.withInitial(() -> ctx);
+		}
+		return context.get();
 	}
 }

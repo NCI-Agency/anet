@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportActionMapper;
@@ -40,21 +41,6 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 		return new ForeignKeyFetcher<ReportAction>()
 				.load(context, "report.reportActions", reportUuid);
 	}
-
-	/**
-	 * Gets the approval actions for this report, but only returning the most recent
-	 * where there were multiple actions on the same step (ie a reject then an approval
-	 * will only return the approval).
-	 */
-	public List<ReportAction> getFinalActionsForReport(String reportUuid) {
-		//TODO: test this. I don't think it works.... 
-		return getDbHandle().createQuery("/* getReportFinalActions */ SELECT * FROM \"reportActions\" "
-				+ "WHERE \"reportUuid\" = :reportUuid GROUP BY \"approvalStepUuid\" "
-				+ "ORDER BY \"createdAt\" DESC")
-			.bind("reportUuid", reportUuid)
-			.map(new ReportActionMapper())
-			.list();
-	}
 	
 	@Override
 	public AnetBeanList<?> getAll(int pageNum, int pageSize) {
@@ -80,10 +66,18 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<List<ReportAction>> getReportActions(List<String> foreignKeys) {
-		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
+	static class ReportActionsBatcher extends ForeignKeyBatcher<ReportAction> {
+		private static final String sql =
+			"/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
 				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		final ForeignKeyBatcher<ReportAction> reportIdBatcher = new ForeignKeyBatcher<ReportAction>(getDbHandle(), reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
+
+		public ReportActionsBatcher() {
+			super(sql, "foreignKeys", new ReportActionMapper(), "reportUuid");
+		}
+	}
+
+	public List<List<ReportAction>> getReportActions(List<String> foreignKeys) {
+		final ForeignKeyBatcher<ReportAction> reportIdBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(ReportActionsBatcher.class);
 		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 }
