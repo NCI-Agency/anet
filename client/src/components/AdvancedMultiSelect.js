@@ -209,7 +209,7 @@ export default class AdvancedMultiSelect extends Component {
 		const { results } = this.state
 		const filterResults = results[filterType]
 		const fetchResults = _isEmpty(filterResults)
-		this.setState({	filterType,	isLoading: fetchResults }, () => {
+		this.setState({filterType, isLoading: fetchResults }, () => {
 			if (fetchResults) {
 				this.fetchResults()
 			}
