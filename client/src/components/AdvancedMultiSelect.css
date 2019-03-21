@@ -40,6 +40,6 @@
 
 .attendeesOverlayTable.table > tbody > tr > td,
 .advisorAttendeesTable.table > tbody > tr > td,
-.principlAttendeesTable.table > tbody > tr > td  {
+.principalAttendeesTable.table > tbody > tr > td  {
   vertical-align: middle;
 }
