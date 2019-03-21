@@ -1,9 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import './index.css'
 
-import 'core-js/shim'
-import 'locale-compare-polyfill'
-
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { BrowserRouter, Route } from 'react-router-dom'

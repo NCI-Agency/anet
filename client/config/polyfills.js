@@ -1,14 +1,10 @@
-if (typeof Promise === 'undefined') {
-  // Rejection tracking prevents a common issue where React gets into an
-  // inconsistent state due to an error, but it gets swallowed by a Promise,
-  // and the user has no idea what causes React's erratic future behavior.
-  require('promise/lib/rejection-tracking').enable()
-  window.Promise = require('promise/lib/es6-extensions.js')
-}
+import 'core-js/stable'
+import 'locale-compare-polyfill'
+
+// Unhandled rejection may affect REACT state. Making sure these are logged
+// TODO: log on server
+// TODO: move this to platform specfic api.js for web and add nodejs implementation
+window.addEventListener('unhandledrejection', e => console.log('(**) Unhandled rejection', e.reason, e.promise))
 
 // fetch() polyfill for making API calls.
 require('whatwg-fetch')
-
-// Object.assign() is commonly used with React.
-// It will use the native implementation if it's present and isn't buggy.
-Object.assign = require('object-assign')
