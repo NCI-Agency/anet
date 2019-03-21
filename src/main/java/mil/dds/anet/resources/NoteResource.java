@@ -21,7 +21,7 @@ import mil.dds.anet.utils.Utils;
 @PermitAll
 public class NoteResource {
 
-	private NoteDao dao;
+	private final NoteDao dao;
 
 	public NoteResource(AnetObjectEngine engine) {
 		this.dao = engine.getNoteDao();

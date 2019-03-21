@@ -557,6 +557,9 @@ class BaseReportForm extends Component {
 				.then(response => {
 					const newValues = _cloneDeep(this.autoSaveSettings.values)
 					Object.assign(newValues, response[operation])
+					if (newValues.reportSensitiveInformation === null) {
+						newValues.reportSensitiveInformation = {} // object must exist for Collapse children
+					}
 					// After successful autosave, reset the form with the new values in order to make sure the dirty
 					// prop is also reset (otherwise we would get a blocking navigation warning)
 					const touched = _cloneDeep(this.autoSaveSettings.touched) // save previous touched

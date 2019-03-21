@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ public class FutureEngagementWorker implements Runnable {
 		List<Report> reports = AnetObjectEngine.getInstance().getReportDao().search(query).getList();
 		
 		//send them all emails to let them know we updated their report. 
+		final Map<String, Object> context = AnetObjectEngine.getInstance().getContext();
 		for (Report r : reports) { 
 			try { 
 				AnetEmail email = new AnetEmail();
@@ -56,7 +58,7 @@ public class FutureEngagementWorker implements Runnable {
 				action.setReport(r);
 				email.setAction(action);
 				try {
-					email.addToAddress(r.loadAuthor(AnetObjectEngine.getInstance().getContext()).get().getEmailAddress());
+					email.addToAddress(r.loadAuthor(context).get().getEmailAddress());
 					AnetEmailWorker.sendEmailAsync(email);
 					dao.updateToDraftState(r);
 				} catch (InterruptedException | ExecutionException e) {

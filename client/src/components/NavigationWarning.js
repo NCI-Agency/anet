@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import autobind from 'autobind-decorator'
-import {withRouter} from 'react-router'
-import {Prompt} from 'react-router-dom'
+import { Prompt, withRouter } from 'react-router-dom'
 
 const LEAVE_WARNING = 'Are you sure you wish to navigate away from the page? You will lose unsaved changes.'
 
