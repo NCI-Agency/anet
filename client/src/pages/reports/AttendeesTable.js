@@ -5,6 +5,7 @@ import _isEmpty from 'lodash/isEmpty'
 
 import {Person} from 'models'
 import LinkTo from 'components/LinkTo'
+import './AttendeesTable.css'
 
 import REMOVE_ICON from 'resources/delete.png'
 
@@ -57,9 +58,9 @@ const TableContainer = props =>
 
 const RadioButton = ({ person, disabled, handleOnChange }) =>
 	<Radio name={`primaryAttendee${person.role}`}
+		className="primary"
 		checked={person.primary}
 		disabled={disabled}
-		style={{paddingTop: '3px', textAlign: 'center'}}
 		onChange={() => !disabled && handleOnChange(person)}>
 		{person.primary && 
 			<Label bsStyle="primary">Primary</Label>
