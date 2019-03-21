@@ -219,9 +219,6 @@ export default class AdvancedMultiSelect extends Component {
 	fetchResults = (pageNum = 0) => {
 		const { filterType, results } = this.state
 		const filterDefs = this.props.filterDefs[filterType]
-		if (pageNum === undefined) {
-			pageNum = results && results[filterType] ? results[filterType].pageNum : 0
-		}
 		if (filterDefs.list) {
 			// No need to fetch the data, it is already provided in the filter definition
 			this.setState({
