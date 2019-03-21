@@ -338,8 +338,8 @@ class BaseReportForm extends Component {
 								fieldName='location'
 								fieldLabel='Location'
 								placeholder="Search for the location where this happened..."
+								value={values.location}
 								selectedItems={locationAsList}
-								renderSelected={<LocationTable items={locationAsList} showDelete={true} />}
 								overlayColumns={['Location', 'Name']}
 								overlayRenderRow={this.renderLocationOverlayRow}
 								filterDefs={locationFilters}

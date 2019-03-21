@@ -19,6 +19,8 @@ export default class AdvancedSingleSelect extends Component {
 			{...this.props}
 			handleAddItem={this.handleAddItem}
 			handleRemoveItem={this.handleRemoveItem}
+			closeOverlayOnAdd={true}
+			searchTerms={this.props.value[this.props.valueKey]}
 		/>
 	}
 

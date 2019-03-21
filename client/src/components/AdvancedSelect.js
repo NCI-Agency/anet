@@ -6,6 +6,8 @@ import { Field } from 'formik'
 import _cloneDeep from 'lodash/cloneDeep'
 import _debounce from 'lodash/debounce'
 import _isEmpty from 'lodash/isEmpty'
+import _isEqual from 'lodash/isEqual'
+import _isEqualWith from 'lodash/isEqualWith'
 
 import { renderInputField } from 'components/FieldHelper'
 import UltimatePagination from 'components/UltimatePagination'
@@ -58,11 +60,12 @@ export const propTypes = {
 	fieldLabel: PropTypes.string,  // input field label
 	placeholder: PropTypes.string,  // input field placeholder
 	selectedItems: PropTypes.array.isRequired,  // already selected items
-	renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]).isRequired,  // how to render the selected items
+	renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),  // how to render the selected items
 	overlayTableClassName: PropTypes.string,
 	overlayTable: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),  // search results component for in the overlay
 	overlayColumns: PropTypes.array.isRequired,
 	overlayRenderRow: PropTypes.func.isRequired,
+	closeOverlayOnAdd: PropTypes.bool, // set to true if you want the overlay to be closed after an add action
 	filterDefs: PropTypes.object,  // config of the search filters
 	onChange: PropTypes.func.isRequired,
 	//Required: ANET Object Type (Person, Report, etc) to search for.
@@ -87,15 +90,29 @@ export default class AdvancedSelect extends Component {
 		shortcuts: [],
 		shortcutsTitle: 'Recents',
 		renderExtraCol: false,
+		closeOverlayOnAdd: false,
+		searchTerms: '',
 	}
 
 	state = {
-		searchTerms: '',
+		searchTerms: this.props.searchTerms,
 		filterType: Object.keys(this.props.filterDefs)[0], // per default use the first filter
 		results: {},
 		showOverlay: false,
 		inputFocused: false,
 		isLoading: false,
+	}
+
+	componentDidMount() {
+		this.setState({
+			searchTerms: this.props.searchTerms,
+		})
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!_isEqual(prevProps.searchTerms, this.props.searchTerms)) {
+			this.setState({searchTerms: this.props.searchTerms})
+		}
 	}
 
 	render() {
@@ -104,7 +121,7 @@ export default class AdvancedSelect extends Component {
 			renderExtraCol, addon, handleAddItem, handleRemoveItem, ...overlayProps } = this.props
 		const { overlayTableClassName, overlayTable, overlayColumns, overlayRenderRow, filterDefs } = overlayProps
 		const { results, filterType, isLoading } = this.state
-		const renderSelectedWithDelete = React.cloneElement(renderSelected, {onDelete: handleRemoveItem})
+		const renderSelectedWithDelete = renderSelected ? React.cloneElement(renderSelected, {onDelete: handleRemoveItem}) : null
 		const items = results && results[filterType] ? results[filterType].list : []
 		return (
 			<React.Fragment>
@@ -143,19 +160,19 @@ export default class AdvancedSelect extends Component {
 								}
 								</Col>
 								<Col sm={8} md={9} style={{ minHeight: '80px' }}>
-									<this.props.overlayTable
-										fieldName={fieldName}
-										items={items}
-										selectedItems={selectedItems}
-										handleAddItem={handleAddItem}
-										handleRemoveItem={handleRemoveItem}
-										objectType={objectType}
-										columns={overlayColumns}
-										renderRow={overlayRenderRow}
-										isLoading={isLoading}
-										loaderMessage={"No results found"}
-										tableClassName={overlayTableClassName}
-									/>
+								<this.props.overlayTable
+									fieldName={fieldName}
+									items={items}
+									selectedItems={selectedItems}
+									handleAddItem={(item) => {handleAddItem(item); if (this.props.closeOverlayOnAdd) {this.handleHideOverlay()}}}
+									handleRemoveItem={handleRemoveItem}
+									objectType={objectType}
+									columns={overlayColumns}
+									renderRow={overlayRenderRow}
+									isLoading={isLoading}
+									loaderMessage={"No results found"}
+									tableClassName={overlayTableClassName}
+								/>
 									<footer className="searchPagination">
 										{this.paginationFor(filterType)}
 									</footer>
@@ -184,6 +201,7 @@ export default class AdvancedSelect extends Component {
 		}
 		else {
 			this.setState({
+				searchTerms: "",
 				inputFocused: true,
 				showOverlay: true,
 				isLoading: true,
