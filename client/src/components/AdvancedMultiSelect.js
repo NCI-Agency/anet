@@ -162,14 +162,19 @@ export default class AdvancedMultiSelect extends Component {
 	}
 
 	handleInputFocus = () => {
-		if (this.state.inputFocused === true) {
-			return
+		if (this.state.showOverlay === true) {
+			// Overlay is already open and we do input focus, no need to fetch data
+			this.setState({
+				inputFocused: true,
+			})
 		}
-		this.setState({
-			inputFocused: true,
-			showOverlay: true,
-			isLoading: true,
-		}, this.fetchResults())
+		else {
+			this.setState({
+				inputFocused: true,
+				showOverlay: true,
+				isLoading: true,
+			}, this.fetchResults())
+		}
 	}
 
 	handleInputBlur = () => {
@@ -180,6 +185,7 @@ export default class AdvancedMultiSelect extends Component {
 
 	handleHideOverlay = () => {
 		if (this.state.inputFocused) {
+			// Do not hide the overlay when the trigger input has the focus
 			return
 		}
 		this.setState({
