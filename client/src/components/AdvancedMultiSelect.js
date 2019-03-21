@@ -126,30 +126,26 @@ export default class AdvancedMultiSelect extends Component {
 						<ContainerDimensions>
 							{({ width }) =>
 								<Row className="border-between">
-									<div className="sideBar">
-										<Col sm={4} md={3}>
-										{ width < MOBILE_WIDTH ?
-											<div>{console.log(width)}<SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
-											:
-											<div>{console.log(width)}<FilterList items={filterDefs} currentFilter={this.state.filterType} handleOnClick={this.changeFilterType}/></div>
-										}
-										</Col>
-									</div>
-									<div className="multiSelectContent" style={{ minHeight: '80px' }}>
-										<Col sm={8} md={9}>
-											<this.props.overlayComponent
-												items={items}
-												selectedItems={selectedItems}
-												addItem={this.addItem}
-												removeItem={this.removeItem}
-												isLoading={isLoading}
-												loaderMessage={"No results found"}
-											/>
-											<footer className="searchPagination">
-												{this.paginationFor(filterType)}
-											</footer>
-										</Col>
-									</div>
+									<Col sm={4} md={3}>
+									{ width < MOBILE_WIDTH ?
+										<div>{console.log(width)}<SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
+										:
+										<div>{console.log(width)}<FilterList items={filterDefs} currentFilter={this.state.filterType} handleOnClick={this.changeFilterType}/></div>
+									}
+									</Col>
+									<Col sm={8} md={9} style={{ minHeight: '80px' }}>
+										<this.props.overlayComponent
+											items={items}
+											selectedItems={selectedItems}
+											addItem={this.addItem}
+											removeItem={this.removeItem}
+											isLoading={isLoading}
+											loaderMessage={"No results found"}
+										/>
+										<footer className="searchPagination">
+											{this.paginationFor(filterType)}
+										</footer>
+									</Col>
 								</Row>
 							}
 						</ContainerDimensions>
