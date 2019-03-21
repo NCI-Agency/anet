@@ -128,9 +128,9 @@ export default class AdvancedMultiSelect extends Component {
 								<Row className="border-between">
 									<Col sm={4} md={3}>
 									{ width < MOBILE_WIDTH ?
-										<div>{console.log(width)}<SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
+										<div><SelectFilterInputField items={filterDefs} handleOnChange={this.handleOnChangeSelect}/></div>
 										:
-										<div>{console.log(width)}<FilterList items={filterDefs} currentFilter={this.state.filterType} handleOnClick={this.changeFilterType}/></div>
+										<div><FilterList items={filterDefs} currentFilter={this.state.filterType} handleOnClick={this.changeFilterType}/></div>
 									}
 									</Col>
 									<Col sm={8} md={9} style={{ minHeight: '80px' }}>
