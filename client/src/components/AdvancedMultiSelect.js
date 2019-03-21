@@ -208,9 +208,9 @@ export default class AdvancedMultiSelect extends Component {
 		// When changing the filter type, only fetch the results if they were not fetched before
 		const { results } = this.state
 		const filterResults = results[filterType]
-		const fetchResults = _isEmpty(filterResults)
-		this.setState({filterType, isLoading: fetchResults }, () => {
-			if (fetchResults) {
+		const doFetchResults = _isEmpty(filterResults)
+		this.setState({filterType, isLoading: doFetchResults }, () => {
+			if (doFetchResults) {
 				this.fetchResults()
 			}
 		})
