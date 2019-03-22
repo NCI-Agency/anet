@@ -6,7 +6,7 @@ import {Button, HelpBlock} from 'react-bootstrap'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
-import AdvancedSingleSelect from 'components/AdvancedSingleSelect'
+import AdvancedSingleSelect from 'components/advancedSelectWidget/AdvancedSingleSelect'
 import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import Messages from 'components/Messages'

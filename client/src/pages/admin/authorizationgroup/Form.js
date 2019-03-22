@@ -6,7 +6,7 @@ import {Button} from 'react-bootstrap'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
-import AdvancedMultiSelect from 'components/AdvancedMultiSelect'
+import AdvancedMultiSelect from 'components/advancedSelectWidget/AdvancedMultiSelect'
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
 import Messages from 'components/Messages'

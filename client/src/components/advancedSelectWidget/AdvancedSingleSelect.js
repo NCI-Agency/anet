@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
-import AdvancedSelect, {propTypes as advancedSelectPropTypes} from 'components/AdvancedSelect'
-import {AdvancedSingleSelectOverlayTable} from 'components/AdvancedSelectOverlayTable'
+import AdvancedSelect, {propTypes as advancedSelectPropTypes} from 'components/advancedSelectWidget/AdvancedSelect'
+import {AdvancedSingleSelectOverlayTable} from 'components/advancedSelectWidget/AdvancedSelectOverlayTable'
 import _cloneDeep from 'lodash/cloneDeep'
 
 
