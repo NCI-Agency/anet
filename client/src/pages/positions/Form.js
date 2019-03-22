@@ -193,8 +193,8 @@ class BasePositionForm extends Component {
 								fieldName="organization"
 								fieldLabel="Organization"
 								placeholder="Search the organization for this position..."
+								value={values.organization}
 								selectedItems={organizationAsList}
-								renderSelected={<OrganizationTable items={organizationAsList} showDelete={true} />}
 								overlayColumns={['Organization', 'Name']}
 								overlayRenderRow={this.renderOrganizationOverlayRow}
 								filterDefs={organizationFilters}
@@ -233,8 +233,8 @@ class BasePositionForm extends Component {
 								fieldName='location'
 								fieldLabel='Location'
 								placeholder="Search for the location where this Position will operate from..."
+								value={values.location}
 								selectedItems={locationAsList}
-								renderSelected={<LocationTable items={locationAsList} showDelete={true} />}
 								overlayColumns={['Location', 'Name']}
 								overlayRenderRow={this.renderLocationOverlayRow}
 								filterDefs={locationFilters}

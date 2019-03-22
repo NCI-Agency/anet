@@ -218,8 +218,8 @@ class BaseOrganizationForm extends Component {
 										fieldName='parentOrg'
 										fieldLabel={Settings.fields.organization.parentOrg}
 										placeholder="Search for a higher level organization..."
+										value={values.parentOrg}
 										selectedItems={parentOrgAsList}
-										renderSelected={<OrganizationTable items={parentOrgAsList} showDelete={true} />}
 										overlayColumns={['Parent Organization', 'Name']}
 										overlayRenderRow={this.renderOrganizationOverlayRow}
 										filterDefs={organizationFilters}
