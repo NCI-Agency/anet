@@ -151,7 +151,7 @@ class BasePositionForm extends Component {
 				}
 				const locationFilters = {
 					activeLocations: {
-						label: 'All',
+						label: 'All locations',
 						searchQuery: true,
 						queryVars: {status: Location.STATUS.ACTIVE},
 					},

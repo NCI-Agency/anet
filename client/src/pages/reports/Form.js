@@ -192,19 +192,24 @@ class BaseReportForm extends Component {
 				resetForm
 			}) => {
 				const locationFilters = {
+					activeLocations: {
+						label: 'All locations',
+						searchQuery: true,
+						queryVars: {status: Location.STATUS.ACTIVE},
+					},
 					recentLocations: {
 						label: 'Recent locations',
 						searchQuery: false,
 						listName: 'locationRecents',
 						listArgs: 'maxResults:6',
 					},
-					activeLocations: {
-						label: 'All',
-						searchQuery: true,
-						queryVars: {status: Location.STATUS.ACTIVE},
-					},
 				}
 				const attendeesFilters = {
+					all: {
+						label: 'All',
+						searchQuery: true,
+						queryVars: {matchPositionName: true},
+					},
 					recentContacts: {
 						label: 'Recent contacts',
 						searchQuery: false,
@@ -239,15 +244,15 @@ class BaseReportForm extends Component {
 					},
 				}
 				const tasksFilters = {
+					allTasks: {
+						label: 'All tasks',
+						searchQuery: true,
+					},
 					recentTasks: {
 						label: 'Recent tasks',
 						searchQuery: false,
 						listName: 'taskRecents',
 						listArgs: 'maxResults:6',
-					},
-					allTasks: {
-						label: 'All tasks',
-						searchQuery: true,
 					},
 					assignedToMyOrg: {
 						label: 'Assigned to my organization',
@@ -256,15 +261,15 @@ class BaseReportForm extends Component {
 					},
 				}
 				const authorizationGroupsFilters = {
+					allAuthorizationGroups: {
+						label: 'All authorization groups',
+						searchQuery: true,
+					},
 					recentAuthorizationGroups: {
 						label: 'Recent authorization groups',
 						searchQuery: false,
 						listName: 'authorizationGroupRecents',
 						listArgs: 'maxResults:6',
-					},
-					allAuthorizationGroups: {
-						label: 'All authorization groups',
-						searchQuery: true,
 					},
 				}
 				// need up-to-date copies of these in the autosave handler
