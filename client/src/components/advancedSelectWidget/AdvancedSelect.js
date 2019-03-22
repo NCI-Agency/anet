@@ -26,7 +26,6 @@ const FilterList = (props) => {
 	const { items, currentFilter, handleOnClick } = props
 	return <ul className="overlayFilters">
 		{Object.keys(items).map(filterType => (
-			!items[filterType].doNotDisplay &&
 			<li key={filterType} className={(currentFilter === filterType) ? 'active' : null}>
 				<Button bsStyle="link" onClick={() => handleOnClick(filterType)}>{items[filterType].label}</Button>
 			</li>
@@ -45,7 +44,6 @@ const SelectFilterInputField = (props) => {
 				style={{ marginLeft: '5px' }}
 			>
 				{Object.keys(items).map(filterType => (
-					!items[filterType].doNotDisplay &&
 					<option key={filterType} value={filterType}>
 						{items[filterType].label}
 					</option>

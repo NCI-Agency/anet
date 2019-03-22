@@ -140,31 +140,38 @@ class BaseOrganizationForm extends Component {
 					allTasks: {
 						label: 'All tasks',
 						searchQuery: true,
-					},
-					assignedToMyOrg: {
+					}
+				}
+				if (this.props.currentUser.position) {
+					tasksFilters.assignedToMyOrg = {
 						label: 'Assigned to my organization',
 						searchQuery: true,
 						queryVars: {responsibleOrgUuid: this.props.currentUser.position.organization.uuid},
-					},
+					}
 				}
+
 				const organizationFilters = {
 					allOrganizations: {
 						label: 'All organizations',
 						searchQuery: true,
 					},
 				}
+
 				const approversFilters = {
 					allAdvisorPositions: {
 						label: 'All advisor positions',
 						searchQuery: true,
 						queryVars: {type: Position.TYPE.ADVISOR, matchPersonName: true},
 					},
-					colleagues: {
-						label: 'Colleagues',
+				}
+				if (this.props.currentUser.position) {
+					approversFilters.myColleagues = {
+						label: 'My colleagues',
 						searchQuery: true,
 						queryVars: {type: Position.TYPE.ADVISOR, matchPersonName: true, organizationUuid: this.props.currentUser.position.organization.uuid},
-					},
+					}
 				}
+
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />

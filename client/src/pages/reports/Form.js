@@ -191,8 +191,6 @@ class BaseReportForm extends Component {
 				submitForm,
 				resetForm
 			}) => {
-				const primaryAdvisors = values.attendees.filter(a => (a.role === Person.ROLE.ADVISOR && a.primary === true))
-				const primaryAdvisor = primaryAdvisors.length ? primaryAdvisors[0] : null
 				const locationFilters = {
 					activeLocations: {
 						label: 'All locations',
@@ -206,6 +204,7 @@ class BaseReportForm extends Component {
 						listArgs: 'maxResults:6',
 					},
 				}
+
 				const attendeesFilters = {
 					all: {
 						label: 'All',
@@ -218,22 +217,6 @@ class BaseReportForm extends Component {
 						listName: 'personRecents',
 						listArgs: 'maxResults:6',
 					},
-					myColleagues: {
-						label: 'My colleagues',
-						searchQuery: true,
-						queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true, orgUuid: this.props.currentUser.position.organization.uuid},
-					},
-					myCounterparts: {
-						label: 'My counterparts',
-						searchQuery: false,
-						list: this.props.currentUser.position.associatedPositions.filter(ap => ap.person).map(ap => ap.person),
-					},
-					atLocation: {
-						label: 'At location',
-						searchQuery: true,
-						doNotDisplay: !(values.location && values.location.uuid),
-						queryVars: {locationUuid: (values.location && values.location.uuid ? values.location.uuid : null)},
-					},
 					activeAdvisors: {
 						label: 'All advisors',
 						searchQuery: true,
@@ -245,6 +228,26 @@ class BaseReportForm extends Component {
 						queryVars: {role: Person.ROLE.PRINCIPAL},
 					},
 				}
+				if (this.props.currentUser.position) {
+					attendeesFilters.myColleagues = {
+						label: 'My colleagues',
+						searchQuery: true,
+						queryVars: {role: Person.ROLE.ADVISOR, matchPositionName: true, orgUuid: this.props.currentUser.position.organization.uuid},
+					}
+					attendeesFilters.myCounterparts = {
+						label: 'My counterparts',
+						searchQuery: false,
+						list: this.props.currentUser.position.associatedPositions.filter(ap => ap.person).map(ap => ap.person),
+					}
+				}
+				if (values.location && values.location.uuid) {
+					attendeesFilters.atLocation = {
+						label: 'At location',
+						searchQuery: true,
+						queryVars: {locationUuid: (values.location && values.location.uuid ? values.location.uuid : null)},
+					}
+				}
+
 				const tasksFilters = {
 					allTasks: {
 						label: 'All tasks',
@@ -256,19 +259,24 @@ class BaseReportForm extends Component {
 						listName: 'taskRecents',
 						listArgs: 'maxResults:6',
 					},
-					assignedToMyOrg: {
+				}
+				if (this.props.currentUser.position) {
+					tasksFilters.assignedToMyOrg = {
 						label: 'Assigned to my organization',
 						searchQuery: true,
 						queryVars: {responsibleOrgUuid: this.props.currentUser.position.organization.uuid},
-					},
+					}
 				}
+				const primaryAdvisors = values.attendees.filter(a => (a.role === Person.ROLE.ADVISOR && a.primary === true))
+				const primaryAdvisor = primaryAdvisors.length ? primaryAdvisors[0] : null
 				if (primaryAdvisor && primaryAdvisor.position && primaryAdvisor.position.organization) {
-					tasksFilters['assignedToReportOrg'] = {
+					tasksFilters.assignedToReportOrg = {
 						label: 'Assigned to organization of report',
 						searchQuery: true,
 						queryVars: {responsibleOrgUuid: primaryAdvisor.position.organization.uuid},
 					}
 				}
+
 				const authorizationGroupsFilters = {
 					allAuthorizationGroups: {
 						label: 'All authorization groups',
