@@ -287,7 +287,6 @@ class BaseReportForm extends Component {
 				const action = <div>
 					<Button bsStyle="primary" type="button" onClick={() => this.onSubmit(values, {resetForm})} disabled={isSubmitting}>{submitText}</Button>
 				</div>
-				const locationAsList= values.location && values.location.uuid ? [values.location] : []
 				return <div className="report-form">
 					<NavigationWarning isBlocking={dirty} />
 					<ToastContainer />
@@ -344,7 +343,6 @@ class BaseReportForm extends Component {
 								fieldLabel='Location'
 								placeholder="Search for the location where this happened..."
 								value={values.location}
-								selectedItems={locationAsList}
 								overlayColumns={['Location', 'Name']}
 								overlayRenderRow={this.renderLocationOverlayRow}
 								filterDefs={locationFilters}
@@ -426,7 +424,7 @@ class BaseReportForm extends Component {
 								fieldName='attendees'
 								fieldLabel="Attendees"
 								placeholder="Search for attendees who attended the meeting..."
-								selectedItems={values.attendees}
+								value={values.attendees}
 								renderSelected={<AttendeesTable attendees={values.attendees} onChange={value => setFieldValue('attendees', value)} showDelete={true} />}
 								overlayColumns={['Attendee', 'Name', 'Position', 'Location', 'Organization']}
 								overlayRenderRow={this.renderAttendeeOverlayRow}
@@ -447,7 +445,7 @@ class BaseReportForm extends Component {
 								fieldName='tasks'
 								fieldLabel={Settings.fields.task.shortLabel}
 								placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
-								selectedItems={values.tasks}
+								value={values.tasks}
 								renderSelected={<TaskTable tasks={values.tasks} showDelete={true} showOrganization={true} />}
 								overlayColumns={['Task', 'Name', 'Organization']}
 								overlayRenderRow={this.renderTaskOverlayRow}
@@ -522,7 +520,7 @@ class BaseReportForm extends Component {
 											fieldName='authorizationGroups'
 											fieldLabel="Authorization Groups"
 											placeholder="Search for authorization groups..."
-											selectedItems={values.authorizationGroups}
+											value={values.authorizationGroups}
 											renderSelected={<AuthorizationGroupTable authorizationGroups={values.authorizationGroups} showDelete={true} />}
 											overlayColumns={['Authorization Group', 'Name', 'Description']}
 											overlayRenderRow={this.renderAuthorizationGroupOverlayRow}

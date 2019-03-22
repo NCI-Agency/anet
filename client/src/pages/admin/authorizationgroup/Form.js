@@ -111,7 +111,7 @@ class AuthorizationGroupForm extends Component {
 								fieldName="positions"
 								fieldLabel="Positions"
 								placeholder="Search for a position..."
-								selectedItems={values.positions}
+								value={values.positions}
 								renderSelected={<PositionTable positions={values.positions} showDelete={true} />}
 								overlayColumns={['', 'Name', 'Position']}
 								overlayRenderRow={this.renderPositionOverlayRow}

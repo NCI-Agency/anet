@@ -156,8 +156,6 @@ class BasePositionForm extends Component {
 						queryVars: {status: Location.STATUS.ACTIVE},
 					},
 				}
-				const organizationAsList= values.organization && values.organization.uuid ? [values.organization] : []
-				const locationAsList= values.location && values.location.uuid ? [values.location] : []
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />
@@ -194,7 +192,6 @@ class BasePositionForm extends Component {
 								fieldLabel="Organization"
 								placeholder="Search the organization for this position..."
 								value={values.organization}
-								selectedItems={organizationAsList}
 								overlayColumns={['Organization', 'Name']}
 								overlayRenderRow={this.renderOrganizationOverlayRow}
 								filterDefs={organizationFilters}
@@ -234,7 +231,6 @@ class BasePositionForm extends Component {
 								fieldLabel='Location'
 								placeholder="Search for the location where this Position will operate from..."
 								value={values.location}
-								selectedItems={locationAsList}
 								overlayColumns={['Location', 'Name']}
 								overlayRenderRow={this.renderLocationOverlayRow}
 								filterDefs={locationFilters}

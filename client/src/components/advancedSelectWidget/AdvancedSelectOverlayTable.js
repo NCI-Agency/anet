@@ -5,6 +5,7 @@ import { IconNames } from '@blueprintjs/icons'
 import classNames from 'classnames'
 import Checkbox from 'components/Checkbox'
 import LoaderHOC from 'HOC/LoaderHOC'
+import _isEmpty from 'lodash/isEmpty'
 
 const AdvancedSelectOverlayTable = ({
 		fieldName, objectType, items, selectedItems, handleAddItem, handleRemoveItem,
@@ -31,9 +32,11 @@ const AdvancedSelectOverlayTable = ({
 }
 
 const AdvancedSingleSelectOverlayTableBase = (props) => {
+	const {selectedItems, ...otherProps} = props
 	return (
 		<AdvancedSelectOverlayTable
-			{...props}
+			{...otherProps}
+			selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
 			selectItemComponent={
 				(fieldName, item, isSelected, handleAddItem, handleRemoveItem) => (
 					<td style={{ textAlign: "center" }}>

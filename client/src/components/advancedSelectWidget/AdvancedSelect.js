@@ -59,7 +59,7 @@ export const propTypes = {
 	fieldName: PropTypes.string.isRequired,  // input field name
 	fieldLabel: PropTypes.string,  // input field label
 	placeholder: PropTypes.string,  // input field placeholder
-	selectedItems: PropTypes.array.isRequired,  // already selected items
+	value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 	renderSelected: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),  // how to render the selected items
 	overlayTableClassName: PropTypes.string,
 	overlayTable: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),  // search results component for in the overlay
@@ -116,7 +116,7 @@ export default class AdvancedSelect extends Component {
 	}
 
 	render() {
-		const { fieldName, fieldLabel, placeholder, selectedItems, renderSelected,
+		const { fieldName, fieldLabel, placeholder, value, renderSelected,
 			onChange, objectType, queryParams, fields, shortcuts, shortcutsTitle,
 			renderExtraCol, addon, handleAddItem, handleRemoveItem, ...overlayProps } = this.props
 		const { overlayTableClassName, overlayTable, overlayColumns, overlayRenderRow, filterDefs } = overlayProps
@@ -163,7 +163,7 @@ export default class AdvancedSelect extends Component {
 								<this.props.overlayTable
 									fieldName={fieldName}
 									items={items}
-									selectedItems={selectedItems}
+									selectedItems={value}
 									handleAddItem={(item) => {handleAddItem(item); if (this.props.closeOverlayOnAdd) {this.handleHideOverlay()}}}
 									handleRemoveItem={handleRemoveItem}
 									objectType={objectType}

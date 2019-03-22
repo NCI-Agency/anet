@@ -165,7 +165,6 @@ class BaseOrganizationForm extends Component {
 						queryVars: {type: Position.TYPE.ADVISOR, matchPersonName: true, organizationUuid: this.props.currentUser.position.organization.uuid},
 					},
 				}
-				const parentOrgAsList= values.parentOrg && values.parentOrg.uuid ? [values.parentOrg] : []
 				return <div>
 					<NavigationWarning isBlocking={dirty} />
 					<Messages error={this.state.error} />
@@ -219,7 +218,6 @@ class BaseOrganizationForm extends Component {
 										fieldLabel={Settings.fields.organization.parentOrg}
 										placeholder="Search for a higher level organization..."
 										value={values.parentOrg}
-										selectedItems={parentOrgAsList}
 										overlayColumns={['Parent Organization', 'Name']}
 										overlayRenderRow={this.renderOrganizationOverlayRow}
 										filterDefs={organizationFilters}
@@ -310,7 +308,7 @@ class BaseOrganizationForm extends Component {
 											fieldName='tasks'
 											fieldLabel={Settings.fields.task.shortLabel}
 											placeholder={`Search for ${pluralize(Settings.fields.task.shortLabel)}...`}
-											selectedItems={values.tasks}
+											value={values.tasks}
 											renderSelected={<TaskTable tasks={values.tasks} showDelete={true} />}
 											overlayColumns={['Task', 'Name']}
 											overlayRenderRow={this.renderTaskOverlayRow}
@@ -362,7 +360,7 @@ class BaseOrganizationForm extends Component {
 				fieldName={`approvalSteps.${index}.approvers`}
 				fieldLabel="Add an approver"
 				placeholder="Search for the approver's position..."
-				selectedItems={approvers}
+				value={approvers}
 				renderSelected={<ApproverTable approvers={approvers} />}
 				overlayColumns={['Approver', 'Name', 'Position']}
 				overlayRenderRow={this.renderApproverOverlayRow}
