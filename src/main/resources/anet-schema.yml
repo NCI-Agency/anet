@@ -16,6 +16,10 @@ definitions:
         type: string
         title: The label for this field
         description: Used in the UI where a label for the field is shown.
+      color:
+        type: string
+        title: The color of the label, optional
+        description: Used in the UI where a label for the field is shown.
 
 # definition for fields that allow free-form entry
   inputField:
@@ -37,10 +41,13 @@ definitions:
           title: The placeholder for this field
           description: Used in the UI where a placeholder for the field is shown (example input).
           additionalProperties:
-            type: string
+            "$ref": "#/definitions/labeledField"
           examples: 
-            - black: Black
-              white: White
+            - RED:
+                label: Red
+                color: "#FF0000"
+              WHITE:
+                label: White
       required: [enum]
 
 #########################################################
@@ -48,7 +55,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery, dashboards]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -534,3 +541,6 @@ properties:
             options:
               type: object
               additionalProperties: true
+  dashboards:
+    type: object
+    additionalProperties: true

@@ -200,13 +200,22 @@ dictionary:
       customFieldEnum1:
         label: Project status
         enum:
-          OPEN: Open
-          CLOSED: Closed
+          GREEN:
+            label: Green
+            color: '#c2ffb3'
+          AMBER:
+            label: Amber
+            color: '#ffe396'
+          RED:
+            label: Red
+            color: '#ff8279'
       customFieldEnum2:
         label: Custom field enum 2
         enum:
-          CUSTOMVALUE1: Custom value 1
-          CUSTOMVALUE2: Custom value 2
+          CUSTOMVALUE1:
+            label: Custom value 1
+          CUSTOMVALUE2:
+            label: Custom value 2
       responsibleOrg: Responsible organization
 
     report:

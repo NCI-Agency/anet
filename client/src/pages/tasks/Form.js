@@ -229,7 +229,8 @@ class BaseTaskForm extends Component {
 				buttons.push({
 					id: key,
 					value: key,
-					label: list[key],
+					label: list[key].label,
+					color: list[key].color
 				})
 			}
 		}

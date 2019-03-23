@@ -161,15 +161,21 @@ export const renderButtonToggleGroup = ({
 		<ButtonGroup {...otherProps}>
 			{buttons.map((button, index) => {
 				if (!button) { return null }
-				const {label, ...props} = button
+				let {label, color, style, ...props} = button
+				const active = field.value === button.value
+				// TODO: possbily also show color hint when not active
+				if (active && color) {
+					style = { ...style, backgroundColor: color}
+				}
 				return (
 					<Button
 						{...props}
 						name={field.name}
 						key={button.value}
-						active={field.value === button.value}
+						active={active}
 						onBlur={field.onBlur}
 						onClick={field.onChange}
+						style = {style}
 					>
 							{label}
 					</Button>
