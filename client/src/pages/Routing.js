@@ -37,6 +37,9 @@ import TaskEdit from 'pages/tasks/Edit'
 
 import AdminIndex from 'pages/admin/Index'
 import MergePeople from 'pages/admin/MergePeople'
+
+import Kanban from 'pages/dashboards/Kanban'
+
 import AuthorizationGroups from 'pages/admin/AuthorizationGroups'
 import AuthorizationGroupShow from 'pages/admin/authorizationgroup/Show'
 import AuthorizationGroupEdit from 'pages/admin/authorizationgroup/Edit'
@@ -143,6 +146,14 @@ class BaseRouting extends Component {
 			render={({ match: { url } }) => (
 			<Switch>
 				<Route path={`${url}/:insight`} component={InsightsShow} />
+			</Switch>
+		)}
+		/>
+		<Route
+			path="/dashboards"
+			render={({ match: { url } }) => (
+			<Switch>
+				<Route path={`${url}/kanban`} component={Kanban} />
 			</Switch>
 		)}
 		/>

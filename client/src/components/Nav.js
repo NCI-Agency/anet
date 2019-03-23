@@ -75,6 +75,7 @@ class BaseNav extends Component {
 		const inAdmin = path.indexOf('/admin') === 0
 		const inOrg = path.indexOf('/organizations') === 0
 		const inInsights = path.indexOf('/insights') === 0
+		const inDashboards = path.indexOf('/dashboards') === 0
 
 		const myOrg = currentUser.position ? currentUser.position.organization : null
 		let orgUuid, myOrgUuid
@@ -147,6 +148,12 @@ class BaseNav extends Component {
 						}
 					</NavDropdown>
 				}
+
+				<NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
+					<Link to={"/dashboards/kanban"} key="dashboard-kanban" onClick={resetPages}>
+						<MenuItem>Priorities</MenuItem>
+					</Link>
+				</NavDropdown>
 			</BSNav>
 		)
 	}
