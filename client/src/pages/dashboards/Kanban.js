@@ -21,7 +21,7 @@ class Kanban extends Page {
 
 	constructor(props) {
 		super(props)
-		this.state = { 
+		this.state = {
 			tasks: []
 		}
 	}
@@ -29,14 +29,17 @@ class Kanban extends Page {
 	fetchData(props) {
 		const taskQuery = {
 			pageNum: 0,
-			pageSize: 0, 
+			pageSize: 0,
 			status: Task.STATUS.ACTIVE
 		}
 		const tasksPart = new GQL.Part(/* GraphQL */`
 			taskList(query: $taskQuery) {
 				list {
 					uuid, longName, shortName, customFieldEnum1, createdAt, updatedAt
-					responsibleOrg { uuid, shortName}			  
+					responsibleOrg { uuid, shortName}
+					allReports: reports {
+						totalCount
+					}
 				}
 			}`)
 			.addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
@@ -72,12 +75,11 @@ class Kanban extends Page {
 class Column extends React.Component {
 	render() {
 		const tasks = this.props.tasks.filter(task => this.props.taskUUIDs.indexOf(task.uuid) > -1)
-
 		const counters = tasks.reduce((counter,task) => {
 			counter[task.customFieldEnum1] = ++counter[task.customFieldEnum1] || 1
 			return counter
 		},{})
-			
+
 		return  (
 			<Panel style={{flex: '1 1 0%', margin: '4px'}}>
 				<Panel.Heading>
@@ -91,9 +93,9 @@ class Column extends React.Component {
 							</React.Fragment>	)
 						})}
 			   		</strong>
-				</Panel.Heading>            
+				</Panel.Heading>
 				<Panel.Body style={{padding: '4px'}}>
-					{tasks.map((task) => 
+					{tasks.map((task) =>
 						<Card task={task} key={task.uuid}/>)}
 				</Panel.Body>
 			</Panel >
@@ -107,11 +109,11 @@ class Card extends React.Component {
 
 		this.state = {open: false}
 	}
-	
+
 	render() {
 		const { open } = this.state
 		return (
-			<div
+			<Panel
 				onClick={() => this.setState({ open: !open })}
 				style={{
 					backgroundColor: this.props.task.customFieldEnum1 && // TODO: use optional chaining
@@ -119,9 +121,20 @@ class Card extends React.Component {
 									(Settings.fields.task.customFieldEnum1.enum[this.props.task.customFieldEnum1].color || '#f9f7f7'),
 					margin: '3px'
 				}}>
-				<div><LinkTo task={this.props.task} ><strong>{this.props.task.shortName}</strong></LinkTo> <small>{ this.props.task.longName }</small></div>
-				
+				<div>
+					<LinkTo task={this.props.task} ><strong>{this.props.task.shortName}</strong></LinkTo>
+					{' '}
+					<em><small>
+						(<strong>{this.props.task.allReports.totalCount}</strong> engagements)
+					</small></em><br/>
+					{/* TODO make a single line when collapsed <div style={this.state.open ? {} : {textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}> */}
+					<div>
+						<small>{ this.props.task.longName }</small>
+					</div>
+				</div>
+
 				{this.state.open &&
+				<Panel.Body>
 					<small>
 						<table cellPadding="4">
 							<tbody>
@@ -140,8 +153,9 @@ class Card extends React.Component {
 							</tbody>
 						</table>
 					</small>
+				</Panel.Body>
 				}
-			</div>)
+			</Panel>)
 	}
 }
 
