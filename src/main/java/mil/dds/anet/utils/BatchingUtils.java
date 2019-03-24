@@ -189,7 +189,13 @@ public final class BatchingUtils {
 				return CompletableFuture.supplyAsync(() -> engine.getTaskDao().getByIds(keys), dispatcherService);
 			}
 		}, dataLoaderOptions));
-	
+		dataLoaderRegistry.register("task.reports", new DataLoader<>(new BatchLoader<String, List<Report>>() {
+			@Override
+			public CompletionStage<List<List<Report>>> load(List<String> foreignKeys) {
+				return CompletableFuture.supplyAsync(() -> engine.getTaskDao().getReports(foreignKeys), dispatcherService);
+			}
+		}, dataLoaderOptions));
+
 		return dataLoaderRegistry;
 	}
 

@@ -1,5 +1,6 @@
 package mil.dds.anet.beans;
 
+import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
@@ -11,6 +12,9 @@ import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import mil.dds.anet.AnetObjectEngine;
+import mil.dds.anet.beans.lists.AnetBeanList;
+import mil.dds.anet.beans.search.ReportSearchQuery;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -21,15 +25,17 @@ public class Task extends AbstractAnetBean {
 
 	public enum TaskStatus { ACTIVE, INACTIVE }
 	
-	Instant plannedCompletion;
-	Instant projectedCompletion;
+	private Instant plannedCompletion;
+	private Instant projectedCompletion;
 
-	String shortName;
-	String longName;
-	String category;
-	String customField;
-	String customFieldEnum1;
-	String customFieldEnum2;
+	private String shortName;
+	private String longName;
+	private String category;
+	private String customField;
+	private String customFieldEnum1;
+	private String customFieldEnum2;
+
+	private AnetBeanList<Report> reports;
 
 	private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
 
@@ -176,6 +182,16 @@ public class Task extends AbstractAnetBean {
 	@GraphQLIgnore
 	public Organization getResponsibleOrg() {
 		return responsibleOrg.getForeignObject();
+	}
+
+	@GraphQLQuery(name="reports")
+	public CompletableFuture<AnetBeanList<Report>> loadReports(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="query") ReportSearchQuery query) {
+	// TODO: Use the query parameter 
+		if (reports != null) {
+			return CompletableFuture.completedFuture(reports);
+		}
+		return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid)
+				.thenApply(o -> { reports = new AnetBeanList<Report>(o); return reports; });
 	}
 
 	@Override
