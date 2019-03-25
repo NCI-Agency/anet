@@ -146,8 +146,9 @@ class BaseEditAssociatedPositionsModal extends Component {
 		return this.save(values, form)
 			.then(response => this.props.onSuccess())
 			.catch(error => {
-				this.setState({error})
-				// jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+				})
 			})
 	}
 

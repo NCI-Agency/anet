@@ -577,8 +577,10 @@ class BaseReportForm extends Component {
 		return this.save(values, true)
 			.then(response => this.onSubmitSuccess(response, values, form.resetForm))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 
