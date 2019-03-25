@@ -152,7 +152,7 @@
     "test-jest": "jest --testPathPattern='tests/(actions|reducers)'",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "graphql": "graphql",
-    "sim": "NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js ../anet.yml"
+    "sim": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js ../anet.yml"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 async function runGQL(user, query) {
-    const result = await fetch(`http://localhost:8080/graphql?user=${user.name}&pass=${user.password}`, {
+    const result = await fetch(`${process.env.SERVER_URL}/graphql?user=${user.name}&pass=${user.password}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(query),
