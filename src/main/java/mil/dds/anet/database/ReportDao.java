@@ -835,8 +835,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 
 		final SubscriptionUpdateGroup update = getCommonSubscriptionUpdate(obj, tableName, "reports.uuid");
 		// update author
-		final String authorUuid = isParam ? obj.getAuthorUuid() : null;
-		update.stmts.add(getCommonSubscriptionUpdateStatement(authorUuid, "people", "reports.authorUuid"));
+		update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getAuthorUuid(), "people", "reports.authorUuid"));
 		// update attendees
 		update.stmts.add(new SubscriptionUpdateStatement("people",
 				"SELECT \"personUuid\""
@@ -864,10 +863,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 				Collections.emptyMap()));
 		// update organizations
 		// TODO: is this correct?
-		final String advisorOrgUuid = isParam ? obj.getAdvisorOrgUuid() : null;
-		update.stmts.add(getCommonSubscriptionUpdateStatement(advisorOrgUuid, "organizations", "reports.advisorOrganizationUuid"));
-		final String principalOrgUuid = isParam ? obj.getPrincipalOrgUuid() : null;
-		update.stmts.add(getCommonSubscriptionUpdateStatement(principalOrgUuid, "organizations", "reports.principalOrganizationUuid"));
+		update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getAdvisorOrgUuid(), "organizations", "reports.advisorOrganizationUuid"));
+		update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getPrincipalOrgUuid(), "organizations", "reports.principalOrganizationUuid"));
 		// update tasks
 		update.stmts.add(new SubscriptionUpdateStatement("tasks",
 				"SELECT \"taskUuid\""
@@ -876,8 +873,7 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
 				// param is already added above
 				Collections.emptyMap()));
 		// update location
-		final String locationUuid = isParam ? obj.getLocationUuid() : null;
-		update.stmts.add(getCommonSubscriptionUpdateStatement(locationUuid, "locations", "reports.locationUuid"));
+		update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getLocationUuid(), "locations", "reports.locationUuid"));
 
 		return update;
 	}

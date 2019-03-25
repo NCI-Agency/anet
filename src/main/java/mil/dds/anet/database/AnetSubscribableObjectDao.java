@@ -57,7 +57,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 	protected SubscriptionUpdateGroup getCommonSubscriptionUpdate(AbstractAnetBean obj, String tableName, String paramName) {
 		final boolean isParam = (obj != null);
 		final String uuid = isParam ? obj.getUuid() : null;
-		final SubscriptionUpdateStatement update = getCommonSubscriptionUpdateStatement(uuid, tableName, paramName);
+		final SubscriptionUpdateStatement update = getCommonSubscriptionUpdateStatement(isParam, uuid, tableName, paramName);
 		if (update == null) {
 			return null;
 		}
@@ -65,8 +65,7 @@ public abstract class AnetSubscribableObjectDao<T extends AbstractAnetBean & Sub
 		return new SubscriptionUpdateGroup(tableName, uuid, updatedAt, update);
 	}
 
-	protected static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(String uuid, String tableName, String paramName) {
-		final boolean isParam = (uuid != null);
+	protected static SubscriptionUpdateStatement getCommonSubscriptionUpdateStatement(boolean isParam, String uuid, String tableName, String paramName) {
 		if ((isParam && uuid == null) || tableName == null || paramName == null) {
 			return null;
 		}

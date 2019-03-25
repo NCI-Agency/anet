@@ -196,7 +196,7 @@ public class NoteDao extends AnetBaseDao<Note> {
 		while (iter.hasNext()) {
 			final String param = String.format(paramTpl, iter.nextIndex());
 			final NoteRelatedObject nro = iter.next();
-			final SubscriptionUpdateStatement stmt = AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param);
+			final SubscriptionUpdateStatement stmt = AnetSubscribableObjectDao.getCommonSubscriptionUpdateStatement(true, nro.getRelatedObjectUuid(), nro.getRelatedObjectType(), param);
 			updates.add(new SubscriptionUpdateGroup(nro.getRelatedObjectType(), nro.getRelatedObjectUuid(), obj.getUpdatedAt(), stmt, true));
 		}
 		return updates;
