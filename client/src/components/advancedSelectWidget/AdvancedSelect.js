@@ -111,6 +111,12 @@ export default class AdvancedSelect extends Component {
 		if (!_isEqual(prevProps.searchTerms, this.props.searchTerms)) {
 			this.setState({searchTerms: this.props.searchTerms})
 		}
+		if (!_isEqual(prevState.showOverlay, this.state.showOverlay) &&
+					this.state.showOverlay === false &&
+					!_isEqual(this.props.searchTerms, this.state.searchTerms)) {
+			// When the overlay is being closed, update the searchTerms with the selected value
+			this.setState({searchTerms: this.props.searchTerms})
+		}
 	}
 
 	render() {
