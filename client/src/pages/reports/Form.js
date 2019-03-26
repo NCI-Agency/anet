@@ -523,6 +523,9 @@ class BaseReportForm extends Component {
 				.then(response => {
 					const newValues = _cloneDeep(this.autoSaveSettings.values)
 					Object.assign(newValues, response[operation])
+					if (newValues.reportSensitiveInformation === null) {
+						newValues.reportSensitiveInformation = {} // object must exist for Collapse children
+					}
 					// After successful autosave, reset the form with the new values in order to make sure the dirty
 					// prop is also reset (otherwise we would get a blocking navigation warning)
 					const touched = _cloneDeep(this.autoSaveSettings.touched) // save previous touched
@@ -574,8 +577,10 @@ class BaseReportForm extends Component {
 		return this.save(values, true)
 			.then(response => this.onSubmitSuccess(response, values, form.resetForm))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 
@@ -605,7 +610,6 @@ class BaseReportForm extends Component {
 			//They might have been set before the report has been marked as cancelled.
 			report.atmosphere = null
 			report.atmosphereDetails = ''
-			report.tasks = null
 			report.keyOutcomes = ''
 		}
 		//reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)

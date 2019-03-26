@@ -8,14 +8,14 @@ public class OrganizationSearchQuery extends AbstractSearchQuery {
 	public enum OrganizationSearchSortBy { CREATED_AT, NAME, TYPE }
 
 	private OrganizationStatus status;
-	OrganizationType type;
-	
-	//Search for organizations with a specific parent Org. 
-	String parentOrgUuid;
-	//Include descedants recursively from the specified parent. 
-	//If true will include all orgs in the tree of the parentOrg
-	// Including the parent Org. 
-	Boolean parentOrgRecursively;
+	private OrganizationType type;
+
+	// Search for organizations with a specific parent Org.
+	private String parentOrgUuid;
+	// Include descendants recursively from the specified parent.
+	// If true will include all orgs in the tree of the parentOrg
+	// Including the parent Org.
+	private Boolean parentOrgRecursively;
 
 	private OrganizationSearchSortBy sortBy;
 	private SortOrder sortOrder;

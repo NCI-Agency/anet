@@ -6,22 +6,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jdbi.v3.core.Handle;
-
 import com.google.common.base.Joiner;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.database.OrganizationDao;
 import mil.dds.anet.database.mappers.OrganizationMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IOrganizationSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class SqliteOrganizationSearcher implements IOrganizationSearcher {
+public class SqliteOrganizationSearcher extends AbstractSearcherBase implements IOrganizationSearcher {
 
 	@Override
-	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query) {
 		StringBuilder sql = new StringBuilder("/* SqliteOrganizationSearch */ SELECT " + OrganizationDao.ORGANIZATION_FIELDS
 				+ " FROM organizations WHERE organizations.uuid IN (SELECT organizations.uuid FROM organizations ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
@@ -48,7 +47,7 @@ public class SqliteOrganizationSearcher implements IOrganizationSearcher {
 		}
 		
 		if (query.getParentOrgUuid() != null) {
-			if (query.getParentOrgRecursively() != null && query.getParentOrgRecursively()) { 
+			if (Boolean.TRUE.equals(query.getParentOrgRecursively())) {
 				whereClauses.add("(organizations.\"parentOrgUuid\" IN ("
 					+ "WITH RECURSIVE parent_orgs(uuid) AS ( "
 						+ "SELECT uuid FROM organizations WHERE uuid = :parentOrgUuid "
@@ -67,7 +66,7 @@ public class SqliteOrganizationSearcher implements IOrganizationSearcher {
 		
 		sql.append(" LIMIT :limit OFFSET :offset)");
 		
-		List<Organization> list = dbHandle.createQuery(sql.toString())
+		List<Organization> list = getDbHandle().createQuery(sql.toString())
 			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize())

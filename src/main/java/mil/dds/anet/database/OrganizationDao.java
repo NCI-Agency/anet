@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.BindList;
@@ -22,25 +21,17 @@ import mil.dds.anet.database.mappers.OrganizationMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
+@InTransaction
 public class OrganizationDao extends AnetBaseDao<Organization> {
 
 	private static String[] fields = {"uuid", "shortName", "longName", "status", "identificationCode", "type", "createdAt", "updatedAt", "parentOrgUuid"};
 	private static String tableName = "organizations";
 	public static String ORGANIZATION_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 	
-	private final IdBatcher<Organization> idBatcher;
-	private final ForeignKeyBatcher<Organization> personIdBatcher;
-
-	public OrganizationDao(Handle dbHandle) { 
-		super(dbHandle, "Orgs", tableName, ORGANIZATION_FIELDS, null);
-		final String idBatcherSql = "/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Organization>(dbHandle, idBatcherSql, "uuids", new OrganizationMapper());
-
-		final String personIdBatcherSql = "/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", " + ORGANIZATION_FIELDS
-					+ "FROM organizations, positions WHERE "
-					+ "positions.\"currentPersonUuid\" IN ( <foreignKeys> ) AND positions.\"organizationUuid\" = organizations.uuid";
-		this.personIdBatcher = new ForeignKeyBatcher<Organization>(dbHandle, personIdBatcherSql, "foreignKeys", new OrganizationMapper(), "personUuid");
+	public OrganizationDao() {
+		super("Organizations", tableName, ORGANIZATION_FIELDS, null);
 	}
 	
 	public AnetBeanList<Organization> getAll(int pageNum, int pageSize) {
@@ -53,12 +44,34 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Organization> {
+		private static final String sql =
+			"/* batch.getOrgsByUuids */ SELECT " + ORGANIZATION_FIELDS + " from organizations where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new OrganizationMapper());
+		}
+	}
+
 	@Override
 	public List<Organization> getByIds(List<String> uuids) {
+		final IdBatcher<Organization> idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
+	static class OrganizationsBatcher extends ForeignKeyBatcher<Organization> {
+		private static final String sql =
+				"/* batch.getOrganizationForPerson */ SELECT positions.\"currentPersonUuid\" AS \"personUuid\", " + ORGANIZATION_FIELDS
+					+ "FROM organizations, positions WHERE "
+					+ "positions.\"currentPersonUuid\" IN ( <foreignKeys> ) AND positions.\"organizationUuid\" = organizations.uuid";
+
+		public OrganizationsBatcher() {
+			super(sql, "foreignKeys", new OrganizationMapper(), "personUuid");
+		}
+	}
+
 	public List<List<Organization>> getOrganizations(List<String> foreignKeys) {
+		final ForeignKeyBatcher<Organization> personIdBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(OrganizationsBatcher.class);
 		return personIdBatcher.getByForeignKeys(foreignKeys);
 	}
 
@@ -68,7 +81,7 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 	}
 
 	public List<Organization> getTopLevelOrgs(OrganizationType type) { 
-		return dbHandle.createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS
+		return getDbHandle().createQuery("/* getTopLevelOrgs */ SELECT " + ORGANIZATION_FIELDS
 				+ " FROM organizations "
 				+ "WHERE \"parentOrgUuid\" IS NULL "
 				+ "AND status = :status "
@@ -99,12 +112,12 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 		if (Utils.isEmptyOrNull(shortNames)) {
 			return Collections.emptyList();
 		}
-		return dbHandle.attach(OrgListQueries.class).getOrgsByShortNames(shortNames);
+		return getDbHandle().attach(OrgListQueries.class).getOrgsByShortNames(shortNames);
 	}
 
-	public Organization insert(Organization org) {
-		DaoUtils.setInsertFields(org);
-		dbHandle.createUpdate(
+	@Override
+	public Organization insertInternal(Organization org) {
+		getDbHandle().createUpdate(
 				"/* insertOrg */ INSERT INTO organizations (uuid, \"shortName\", \"longName\", status, \"identificationCode\", type, \"createdAt\", \"updatedAt\", \"parentOrgUuid\") "
 				+ "VALUES (:uuid, :shortName, :longName, :status, :identificationCode, :type, :createdAt, :updatedAt, :parentOrgUuid)")
 			.bindBean(org)
@@ -116,10 +129,10 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 			.execute();
 		return org;
 	}
-	
-	public int update(Organization org) {
-		DaoUtils.setUpdateFields(org);
-		int numRows = dbHandle.createUpdate("/* updateOrg */ UPDATE organizations "
+
+	@Override
+	public int updateInternal(Organization org) {
+		return getDbHandle().createUpdate("/* updateOrg */ UPDATE organizations "
 				+ "SET \"shortName\" = :shortName, \"longName\" = :longName, status = :status, \"identificationCode\" = :identificationCode, type = :type, "
 				+ "\"updatedAt\" = :updatedAt, \"parentOrgUuid\" = :parentOrgUuid where uuid = :uuid")
 				.bindBean(org)
@@ -128,12 +141,15 @@ public class OrganizationDao extends AnetBaseDao<Organization> {
 				.bind("type", DaoUtils.getEnumId(org.getType()))
 				.bind("parentOrgUuid", DaoUtils.getUuid(org.getParentOrg()))
 				.execute();
-			
-		return numRows;
+	}
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
 	}
 
 	public AnetBeanList<Organization> search(OrganizationSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher().getOrganizationSearcher()
-				.runSearch(query, dbHandle);
+				.runSearch(query);
 	}
 }

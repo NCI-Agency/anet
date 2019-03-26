@@ -6,23 +6,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.codahale.metrics.annotation.Timed;
-
-import io.dropwizard.auth.Auth;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
@@ -40,16 +26,13 @@ import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
-import mil.dds.anet.utils.ResponseUtils;
 import mil.dds.anet.utils.Utils;
 
-@Path("/old-api/people")
-@Produces(MediaType.APPLICATION_JSON)
 @PermitAll
 public class PersonResource {
 	
-	private PersonDao dao;
-	private AnetConfiguration config;
+	private final PersonDao dao;
+	private final AnetConfiguration config;
 	
 	public PersonResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.dao = engine.getPersonDao();
@@ -62,45 +45,26 @@ public class PersonResource {
 	 * @param pageSize Defaults to 100
 	 * @return List of People objects in the system
 	 */
-	@GET
-	@Timed
 	@GraphQLQuery(name="people")
-	@Path("/")
-	public AnetBeanList<Person> getAll(@DefaultValue("0") @QueryParam("pageNum") @GraphQLArgument(name="pageNum", defaultValue="0") int pageNum,
-			@DefaultValue("100") @QueryParam("pageSize") @GraphQLArgument(name="pageSize", defaultValue="100")  int pageSize) {
+	public AnetBeanList<Person> getAll(@GraphQLArgument(name="pageNum", defaultValue="0") int pageNum,
+			@GraphQLArgument(name="pageSize", defaultValue="100")  int pageSize) {
 		return dao.getAll(pageNum, pageSize);
 	}
 	
 	/**
 	 * Returns a single person entry based on UUID.
 	 */
-	@GET
-	@Timed
-	@Path("/{uuid}")
 	@GraphQLQuery(name="person")
-	public Person getByUuid(@PathParam("uuid") @GraphQLArgument(name="uuid") String uuid) {
+	public Person getByUuid(@GraphQLArgument(name="uuid") String uuid) {
 		Person p = dao.getByUuid(uuid);
 		if (p == null) { throw new WebApplicationException("No such person", Status.NOT_FOUND); }
 		return p;
 	}
-	
 
-	/**
-	 * Creates a new {@link Person} object as supplied in http entity. 
-	 * Optional: 
-	 * - position: If you provide a Position UUID number in the Position object,
-	 *     this person will be associated with that position (Potentially removing anybody currently in the position)
-	 * @return the same Person object with the UUID field filled in.
-	 */
-	@POST
-	@Timed
-	@Path("/new")
+	@GraphQLMutation(name="createPerson")
 	@RolesAllowed("SUPER_USER")
-	public Person createPerson(@Auth Person user, Person p) {
-		return createPersonCommon(user, p);
-	}
-
-	private Person createPersonCommon(Person user, Person p) {
+	public Person createPerson(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="person") Person p) {
+		Person user = DaoUtils.getUserFromContext(context);
 		if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
 			validateEmail(p.getEmailAddress());
 		}
@@ -112,22 +76,16 @@ public class PersonResource {
 			}
 			if (position.getType() == PositionType.ADMINISTRATOR) { AuthUtils.assertAdministrator(user); } 
 		}
-		
+
 		p.setBiography(Utils.sanitizeHtml(p.getBiography()));
 		Person created = dao.insert(p);
-		
+
 		if (created.getPosition() != null) { 
 			AnetObjectEngine.getInstance().getPositionDao().setPersonInPosition(created.getUuid(), created.getPosition().getUuid());
 		}
-		
+
 		AnetAuditLogger.log("Person {} created by {}", created, user);
 		return created;
-	}
-
-	@GraphQLMutation(name="createPerson")
-	@RolesAllowed("SUPER_USER")
-	public Person createPerson(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="person") Person p) {
-		return createPersonCommon(DaoUtils.getUserFromContext(context), p);
 	}
 
 	private boolean canUpdatePerson(Person editor, Person subject) {
@@ -150,28 +108,10 @@ public class PersonResource {
 		}
 		return false;
 	}
-	/**
-	 * Will update a person record with the {@link Person} entity provided in the http entity. 
-	 * All fields will be updated, so you must pass the complete Person object.
-	 * Optional:
-	 *  - position: If you provide a position on the Person, then this person will be updated to 
-	 *      be in that position (unless they already are in that position).  If position is an empty 
-	 *      object, the person will be REMOVED from their position.  
-	 * Must be 
-	 *   1) The person editing yourself
-	 *   2) A super user for the person's organization
-	 *   3) An administrator 
-	 * @return HTTP/200 on success, HTTP/404 on any error. 
-	 */
-	@POST
-	@Timed
-	@Path("/update")
-	public Response updatePerson(@Auth Person user, Person p) {
-		updatePersonCommon(user, p);
-		return Response.ok().build();
-	}
 
-	private int updatePersonCommon(Person user, Person p) {
+	@GraphQLMutation(name="updatePerson")
+	public Integer updatePerson(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="person") Person p) {
+		Person user = DaoUtils.getUserFromContext(context);
 		Person existing = dao.getByUuid(p.getUuid());
 		if (canUpdatePerson(user, existing) == false) {
 			throw new WebApplicationException("You do not have permissions to edit this person", Status.FORBIDDEN);
@@ -180,7 +120,7 @@ public class PersonResource {
 		if (p.getRole().equals(Role.ADVISOR) && !Utils.isEmptyOrNull(p.getEmailAddress())) {
 			validateEmail(p.getEmailAddress());
 		}
-		
+
 		//Swap the position first in order to do the authentication check.
 		if (p.getPosition() != null) {
 			//Maybe update position? 
@@ -222,97 +162,47 @@ public class PersonResource {
 				AnetObjectEngine.getInstance().getPositionDao().removePersonFromPosition(existingPos.getUuid());
 			}
 		}
-		
+
 		p.setBiography(Utils.sanitizeHtml(p.getBiography()));
 		final int numRows = dao.update(p);
 		if (numRows == 0) {
 			throw new WebApplicationException("Couldn't process person update", Status.NOT_FOUND);
 		}
 		AnetAuditLogger.log("Person {} updated by {}", p, user);
+		// GraphQL mutations *have* to return something, so we return the number of updated rows
 		return numRows;
 	}
 
-	@GraphQLMutation(name="updatePerson")
-	public Integer updatePerson(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="person") Person p) {
-		// GraphQL mutations *have* to return something, so we return the number of updated rows
-		return updatePersonCommon(DaoUtils.getUserFromContext(context), p);
-	}
-
-	/**
-	 * Searches people in the ANET database.
-	 * @param query the search term
-	 * @return a list of people objects
-	 */
-	@POST
-	@Timed
 	@GraphQLQuery(name="personList")
-	@Path("/search")
 	public AnetBeanList<Person> search(@GraphQLArgument(name="query") PersonSearchQuery query) {
 		return dao.search(query);
 	}
-	
-	@GET
-	@Timed
-	@Path("/search")
-	public AnetBeanList<Person> search(@Context HttpServletRequest request) {
-		try { 
-			return search(ResponseUtils.convertParamsToBean(request, PersonSearchQuery.class));
-		} catch (IllegalArgumentException e) { 
-			throw new WebApplicationException(e.getMessage(), e.getCause(), Status.BAD_REQUEST);
-		}
-	}
-	
-	/**
-	 * Fetches the current position that a given person  is in. 
-	 * @param uuid the UUID of the person whose position you want to lookup
-	 */
-	@GET
-	@Timed
-	@Path("/{uuid}/position")
-	public Position getPositionForPerson(@PathParam("uuid") String uuid) {
-		//TODO: it doesn't seem to be used
-		return AnetObjectEngine.getInstance().getPositionDao().getCurrentPositionForPerson(uuid);
-	}
-	
+
 	/** 
 	 * Returns the most recent people that this user listed as attendees in reports. 
 	 * @param maxResults maximum number of results to return, defaults to 3
 	 */
-	@GET
-	@Timed
 	@GraphQLQuery(name="personRecents")
-	@Path("/recents")
-	public AnetBeanList<Person> recents(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user,
-			@DefaultValue("3") @QueryParam("maxResults") @GraphQLArgument(name="maxResults", defaultValue="3") int maxResults) {
-		user = DaoUtils.getUser(context, user);
-		return new AnetBeanList<Person>(dao.getRecentPeople(user, maxResults));
+	public AnetBeanList<Person> recents(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="maxResults", defaultValue="3") int maxResults) {
+		return new AnetBeanList<Person>(dao.getRecentPeople(DaoUtils.getUserFromContext(context), maxResults));
 	}
-	
+
 	/**
 	 * Convenience method for API testing. 
 	 */
-	@GET
-	@Timed
 	@GraphQLQuery(name="me")
-	@Path("/me")
-	public Person getCurrentUser(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="_") @Auth Person user) {
-		user = DaoUtils.getUser(context, user);
-		return user;
+	public Person getCurrentUser(@GraphQLRootContext Map<String, Object> context) {
+		return DaoUtils.getUserFromContext(context);
 	}
 
-	@POST
-	@Timed
-	@Path("/merge")
+	@GraphQLMutation(name="mergePeople")
 	@RolesAllowed("ADMINISTRATOR")
-	public Response mergePeople(@Auth Person user,
-			@QueryParam("winner") String winnerUuid,
-			@QueryParam("loser") String loserUuid,
-			@QueryParam("copyPosition") @DefaultValue("false") Boolean copyPosition) {
-		mergePeopleCommon(user, winnerUuid, loserUuid, copyPosition);
-		return Response.ok().build();
-	}
-
-	private int mergePeopleCommon(Person user, String winnerUuid, String loserUuid, Boolean copyPosition) {
+	public Integer mergePeople(@GraphQLRootContext Map<String, Object> context,
+			@GraphQLArgument(name="winnerUuid") String winnerUuid,
+			@GraphQLArgument(name="loserUuid") String loserUuid,
+			@GraphQLArgument(name="copyPosition", defaultValue="false") boolean copyPosition) {
+		Person user = DaoUtils.getUserFromContext(context);
 		if (loserUuid.equals(winnerUuid)) {
 			throw new WebApplicationException("You selected the same person twice", Status.NOT_ACCEPTABLE);
 		}
@@ -341,9 +231,9 @@ public class PersonResource {
 				.removePersonFromPosition(loserPosition.getUuid());
 		}
 
-		int merged = dao.mergePeople(winner, loser, copyPosition);
+		int merged = dao.mergePeople(winner, loser);
 		AnetAuditLogger.log("Person {} merged into WINNER: {}  by {}", loser, winner, user);
-		
+
 		if (loserPosition != null && copyPosition) { 
 			AnetObjectEngine.getInstance().getPositionDao()
 				.setPersonInPosition(winner.getUuid(), loserPosition.getUuid());
@@ -355,18 +245,9 @@ public class PersonResource {
 			AnetObjectEngine.getInstance().getPositionDao()
 				.setPersonInPosition(winner.getUuid(), winner.getPosition().getUuid());
 		}
-		
-		return merged;
-	}
 
-	@GraphQLMutation(name="mergePeople")
-	@RolesAllowed("ADMINISTRATOR")
-	public Integer mergePeople(@GraphQLRootContext Map<String, Object> context,
-			@GraphQLArgument(name="winnerUuid") String winnerUuid,
-			@GraphQLArgument(name="loserUuid") String loserUuid,
-			@GraphQLArgument(name="copyPosition", defaultValue="false") boolean copyPosition) {
 		// GraphQL mutations *have* to return something, so we return the number of updated rows
-		return mergePeopleCommon(DaoUtils.getUserFromContext(context), winnerUuid, loserUuid, copyPosition);
+		return merged;
 	}
 
 	private void validateEmail(String emailInput) {

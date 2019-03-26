@@ -51,7 +51,6 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
-import graphql.execution.instrumentation.dataloader.DataLoaderDispatcherInstrumentation;
 import graphql.schema.GraphQLSchema;
 import io.dropwizard.auth.Auth;
 import io.leangen.graphql.GraphQLSchemaGenerator;
@@ -78,9 +77,10 @@ public class GraphQLResource {
 
 	private final AnetObjectEngine engine;
 	private final AnetConfiguration config;
-	private List<Object> resources;
-	private boolean developmentMode;
+	private final List<Object> resources;
+	private final boolean developmentMode;
 	private final MetricRegistry metricRegistry;
+
 	private GraphQLSchema graphqlSchema;
 
 	public GraphQLResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources, MetricRegistry metricRegistry, boolean developmentMode) {
@@ -192,7 +192,7 @@ public class GraphQLResource {
 				.build();
 
 		final GraphQL graphql = GraphQL.newGraphQL(graphqlSchema)
-				.instrumentation(new DataLoaderDispatcherInstrumentation())
+				//.instrumentation(new DataLoaderDispatcherInstrumentation()) — use our own dispatcher instead
 				.build();
 		final CompletableFuture<ExecutionResult> request = graphql.executeAsync(executionInput);
 		final Runnable dispatcher = () -> {
@@ -205,7 +205,7 @@ public class GraphQLResource {
 
 				// Dispatch all our data loaders until the request is done;
 				// we have data loaders at various depths (one dependent on another),
-				// e.g. in {@link Report#loadApprovalStatus}
+				// e.g. in {@link Report#loadWorkflow}
 				final CompletableFuture<?>[] dispatchersWithWork = dataLoaderRegistry.getDataLoaders()
 					.stream()
 					.filter(dl -> dl.dispatchDepth() > 0)

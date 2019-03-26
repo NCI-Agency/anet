@@ -166,29 +166,27 @@ table hr.attendee-divider {
 </style>
 
 <style type="text/css">
-/* minimal copies from ReportApprovals CSS: */
-fieldset.approval-fieldset .approval-details {
-  text-align: center;
-}
-fieldset.approval-fieldset .approval-action {
+/* minimal copies from ReportWorkflow CSS: */
+fieldset.workflow-fieldset .workflow-action {
   position: relative;
   display: inline-block;
   padding-right: 18px;
   margin-top: 3px;
   vertical-align: top;
+  text-align: center;
 }
-fieldset.approval-fieldset .approval-action .btn-pending {
+fieldset.workflow-fieldset .workflow-action .btn-pending {
   background-color: #969696;
   color: #fff;
 }
-fieldset.approval-fieldset .approval-action .btn-pending:hover {
+fieldset.workflow-fieldset .workflow-action .btn-pending:hover {
   background-color: #777;
   color: #fff;
 }
-fieldset.approval-fieldset .approval-action .btn {
+fieldset.workflow-fieldset .workflow-action .btn {
   border-radius: 30px;
 }
-fieldset.approval-fieldset .approval-action button::after {
+fieldset.workflow-fieldset .workflow-action button::after {
   position: relative;
   font-family: 'Glyphicons Halflings';
   font-style: normal;
@@ -202,18 +200,17 @@ fieldset.approval-fieldset .approval-action button::after {
   top: 3px;
   right: -26px;
 }
-fieldset.approval-fieldset :last-child button::after {
+fieldset.workflow-fieldset :last-child button::after {
   content: "";
 }
-fieldset.approval-fieldset.compact {
+fieldset.workflow-fieldset.compact {
   border: 0;
   border-bottom: 1px solid #ccc;
   margin-bottom: 1rem;
 }
-.approval-status {
+.action-status {
   text-transform: uppercase;
   font-weight: bold;
-  text-align: center;
 }
 </style>
 
@@ -470,41 +467,41 @@ ${sender.name} sent you a report from ANET:
     </div>
   </#if>
 
-  <#assign approvalStatus = report.loadApprovalStatus(context).get()>
-  <#if approvalStatus??>
+  <#assign workflow = report.loadWorkflow(context).get()>
+  <#if workflow??>
     <div id="approvals">
       <h2 class="legend">
-        <span class="title-text">Approval State</span>
+        <span class="title-text">Workflow</span>
       </h2>
-      <fieldset class="approval-fieldset">
-        <#list approvalStatus as approvalAction>
-          <#if !approvalAction.type??>
+      <fieldset class="workflow-fieldset">
+        <#list workflow as reportAction>
+          <#if !reportAction.type??>
             <#assign type = "Pending">
             <#assign styleClass = "btn-pending default">
-          <#elseif approvalAction.type == "APPROVE">
+          <#elseif reportAction.type == "APPROVE">
             <#assign type = "Approved">
             <#assign styleClass = "btn-success approved">
-          <#elseif approvalAction.type == "REJECT">
+          <#elseif reportAction.type == "REJECT">
             <#assign type = "Changes requested">
             <#assign styleClass = "btn-danger rejected">
           <#else>
             <#assign type = "Unknown">
             <#assign styleClass = "btn-pending default">
           </#if>
-          <div class="approval-action">
-            <div class="approval-status">
+          <div class="workflow-action">
+            <div class="action-status">
               ${type}
             </div>
-            <#if approvalAction.loadStep(context).get()??>
-              <#assign step = approvalAction.getStep()>
+            <#if reportAction.loadStep(context).get()??>
+              <#assign step = reportAction.getStep()>
               <button type="button" class="${styleClass} btn-sm btn btn-default">
                 <span>
                   ${(step.name)!}
                 </span>
               </button>
-              <#if approvalAction.loadPerson(context).get()??>
-                <#assign person = approvalAction.getPerson()>
-                <div class="approval-details">
+              <#if reportAction.loadPerson(context).get()??>
+                <#assign person = reportAction.getPerson()>
+                <div>
                   <span>By ${(person.name)!}</span><br>
                   <small>On ${(dateTimeFormatter.format(approvalAction.createdAt))!}</small>
                 </div>

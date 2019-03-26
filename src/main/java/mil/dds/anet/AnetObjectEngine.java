@@ -1,6 +1,5 @@
 package mil.dds.anet;
 
-import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,23 +7,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
-import org.dataloader.DataLoaderRegistry;
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.Handle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.inject.Injector;
 
+import io.dropwizard.Application;
 import mil.dds.anet.beans.ApprovalStep;
 import mil.dds.anet.beans.Organization;
 import mil.dds.anet.beans.Organization.OrganizationType;
+import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.search.OrganizationSearchQuery;
+import mil.dds.anet.beans.search.TaskSearchQuery;
 import mil.dds.anet.database.AdminDao;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
-import mil.dds.anet.database.ApprovalActionDao;
+import mil.dds.anet.database.ReportActionDao;
 import mil.dds.anet.database.ApprovalStepDao;
 import mil.dds.anet.database.AuthorizationGroupDao;
 import mil.dds.anet.database.CommentDao;
@@ -41,69 +38,68 @@ import mil.dds.anet.database.SavedSearchDao;
 import mil.dds.anet.database.TagDao;
 import mil.dds.anet.search.ISearcher;
 import mil.dds.anet.search.Searcher;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.BatchingUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
+import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
 public class AnetObjectEngine {
 
-	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-	PersonDao personDao;
-	TaskDao taskDao;
-	LocationDao locationDao;
-	OrganizationDao orgDao;
-	PositionDao positionDao;
-	ApprovalStepDao asDao;
-	ApprovalActionDao approvalActionDao;
-	ReportDao reportDao;
-	CommentDao commentDao;
-	AdminDao adminDao;
-	SavedSearchDao savedSearchDao;
-	private EmailDao emailDao;
+	private final PersonDao personDao;
+	private final TaskDao taskDao;
+	private final LocationDao locationDao;
+	private final OrganizationDao orgDao;
+	private final PositionDao positionDao;
+	private final ApprovalStepDao asDao;
+	private final ReportActionDao reportActionDao;
+	private final ReportDao reportDao;
+	private final CommentDao commentDao;
+	private final AdminDao adminDao;
+	private final SavedSearchDao savedSearchDao;
+	private final EmailDao emailDao;
 	private final TagDao tagDao;
 	private final ReportSensitiveInformationDao reportSensitiveInformationDao;
 	private final AuthorizationGroupDao authorizationGroupDao;
 	private final NoteDao noteDao;
-	private final Map<String, Object> context;
+	private ThreadLocal<Map<String, Object>> context;
 
 	ISearcher searcher;
-	private final DataLoaderRegistry dataLoaderRegistry;
 
 	private static AnetObjectEngine instance; 
 	
-	private final Handle dbHandle;
+	private final String dbUrl;
+	private final Injector injector;
 	
-	public AnetObjectEngine(Jdbi jdbi) {
-		dbHandle = jdbi.open();
-		
-		personDao = new PersonDao(dbHandle);
-		taskDao = new TaskDao(dbHandle);
-		locationDao =  new LocationDao(dbHandle);
-		orgDao = new OrganizationDao(dbHandle);
-		positionDao = new PositionDao(dbHandle);
-		asDao = new ApprovalStepDao(dbHandle);
-		approvalActionDao = new ApprovalActionDao(dbHandle);
-		reportDao = new ReportDao(dbHandle);
-		commentDao = new CommentDao(dbHandle);
-		adminDao = new AdminDao(dbHandle);
-		savedSearchDao = new SavedSearchDao(dbHandle);
-		tagDao = new TagDao(dbHandle);
-		reportSensitiveInformationDao = new ReportSensitiveInformationDao(dbHandle);
-		emailDao = new EmailDao(dbHandle);
-		authorizationGroupDao = new AuthorizationGroupDao(dbHandle);
-		noteDao = new NoteDao(dbHandle);
-		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbHandle));
-		// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache
-		dataLoaderRegistry = BatchingUtils.registerDataLoaders(this, false, false);
-		context = new HashMap<>();
-		context.put("dataLoaderRegistry", dataLoaderRegistry);
-
+	public AnetObjectEngine(String dbUrl, Application<?> application) {
+		this.dbUrl = dbUrl;
+		injector = InjectorLookup.getInjector(application).get();
+		personDao = injector.getInstance(PersonDao.class);
+		taskDao = injector.getInstance(TaskDao.class);
+		locationDao =  injector.getInstance(LocationDao.class);
+		orgDao = injector.getInstance(OrganizationDao.class);
+		positionDao = injector.getInstance(PositionDao.class);
+		asDao = injector.getInstance(ApprovalStepDao.class);
+		reportActionDao = injector.getInstance(ReportActionDao.class);
+		reportDao = injector.getInstance(ReportDao.class);
+		commentDao = injector.getInstance(CommentDao.class);
+		adminDao = injector.getInstance(AdminDao.class);
+		savedSearchDao = injector.getInstance(SavedSearchDao.class);
+		tagDao = injector.getInstance(TagDao.class);
+		reportSensitiveInformationDao = injector.getInstance(ReportSensitiveInformationDao.class);
+		emailDao = injector.getInstance(EmailDao.class);
+		authorizationGroupDao = injector.getInstance(AuthorizationGroupDao.class);
+		noteDao = injector.getInstance(NoteDao.class);
+		searcher = Searcher.getSearcher(DaoUtils.getDbType(dbUrl), injector);
 		instance = this;
 	}
 
-	public Handle getDbHandle() {
-		return dbHandle;
+	public String getDbUrl() {
+		return dbUrl;
+	}
+
+	public Injector getInjector() {
+		return injector;
 	}
 
 	public PersonDao getPersonDao() { 
@@ -122,8 +118,8 @@ public class AnetObjectEngine {
 		return orgDao;
 	}
 
-	public ApprovalActionDao getApprovalActionDao() {
-		return approvalActionDao;
+	public ReportActionDao getReportActionDao() {
+		return reportActionDao;
 	}
 
 	public PositionDao getPositionDao() {
@@ -186,16 +182,6 @@ public class AnetObjectEngine {
 				.thenApply(l -> l.isEmpty() ? null : l.get(0));
 	}
 
-	public <T, R> R executeInTransaction(Function<T, R> processor, T input) {
-		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(h -> processor.apply(input));
-	}
-
-	public <T, U, R> R executeInTransaction(BiFunction<T, U, R> processor, T arg1, U arg2) {
-		logger.debug("Wrapping a transaction around {}", processor);
-		return getDbHandle().inTransaction(h -> processor.apply(arg1, arg2));
-	}
-
 	public CompletableFuture<List<ApprovalStep>> getApprovalStepsForOrg(Map<String, Object> context, String aoUuid) {
 		return asDao.getByAdvisorOrganizationUuid(context, aoUuid)
 				.thenApply(unordered -> orderSteps(unordered));
@@ -232,6 +218,15 @@ public class AnetObjectEngine {
 		return false;
 	}
 
+	public boolean canUserRejectStep(Map<String, Object> context, String userUuid, String approvalStepUuid) {
+		final Person p = personDao.getByUuid(userUuid);
+		//Admin users may reject any step
+		if (AuthUtils.isAdmin(p)) {
+			return true;
+		}
+		return canUserApproveStep(context, userUuid, approvalStepUuid);
+	}
+
 	/*
 	 * Helper function to build a map of organization UUIDs to their top level parent organization object.
 	 * @param orgType: The Organzation Type (ADVISOR_ORG, or PRINCIPAL_ORG) to look for. pass NULL to get all orgs.
@@ -245,18 +240,34 @@ public class AnetObjectEngine {
 		return Utils.buildParentOrgMapping(orgs, null);
 	}
 	
-	/* Helper function to build a map or organization UUIDs to their top parent
+	/**
+	 * Helper function to build a map of organization UUIDs to their top parent
 	 * capped at a certain point in the hierarchy.
 	 * parentOrg will map to parentOrg, and all children will map to the highest
 	 * parent that is NOT the parentOrgUuid.
 	 */
-	public Map<String,Organization> buildTopLevelOrgHash(String parentOrgUuid) {
-		OrganizationSearchQuery query = new OrganizationSearchQuery();
+	public Map<String, Organization> buildTopLevelOrgHash(String parentOrgUuid) {
+		final OrganizationSearchQuery query = new OrganizationSearchQuery();
 		query.setParentOrgUuid(parentOrgUuid);
 		query.setParentOrgRecursively(true);
 		query.setPageSize(Integer.MAX_VALUE);
-		List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
+		final List<Organization> orgList = AnetObjectEngine.getInstance().getOrganizationDao().search(query).getList();
 		return Utils.buildParentOrgMapping(orgList, parentOrgUuid);
+	}
+
+	/**
+	 * Helper function to build a map of task UUIDs to their top parent
+	 * capped at a certain point in the hierarchy.
+	 * parentTask will map to parentTask, and all children will map to the highest
+	 * parent that is NOT the parentTaskUuid.
+	 */
+	public Map<String, Task> buildTopLevelTaskHash(String parentTaskUuid) {
+		final TaskSearchQuery query = new TaskSearchQuery();
+		query.setCustomFieldRef1Uuid(parentTaskUuid);
+		query.setCustomFieldRef1Recursively(true);
+		query.setPageSize(Integer.MAX_VALUE);
+		final List<Task> taskList = AnetObjectEngine.getInstance().getTaskDao().search(query).getList();
+		return Utils.buildParentTaskMapping(taskList, parentTaskUuid);
 	}
 	
 	public static AnetObjectEngine getInstance() { 
@@ -268,6 +279,12 @@ public class AnetObjectEngine {
 	}
 
 	public Map<String, Object> getContext() {
-		return context;
+		if (context == null) {
+			final Map<String, Object> ctx = new HashMap<>();
+			// FIXME: create this per Jersey (non-GraphQL) request, and make it batch and cache?
+			ctx.put("dataLoaderRegistry", BatchingUtils.registerDataLoaders(this, false, false));
+			context = ThreadLocal.withInitial(() -> ctx);
+		}
+		return context.get();
 	}
 }

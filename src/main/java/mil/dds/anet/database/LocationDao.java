@@ -3,9 +3,7 @@ package mil.dds.anet.database;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Location;
@@ -14,22 +12,18 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.database.mappers.LocationMapper;
 import mil.dds.anet.utils.DaoUtils;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
-@RegisterRowMapper(LocationMapper.class)
-public class LocationDao implements IAnetDao<Location> {
+@InTransaction
+public class LocationDao extends AnetBaseDao<Location> {
 
-	private final Handle dbHandle;
-	private final IdBatcher<Location> idBatcher;
-
-	public LocationDao(Handle h) { 
-		this.dbHandle = h;
-		final String idBatcherSql = "/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
-		this.idBatcher = new IdBatcher<Location>(h, idBatcherSql, "uuids", new LocationMapper());
+	public LocationDao() {
+		super("Locations", "locations", "*", null);
 	}
 	
 	public AnetBeanList<Location> getAll(int pageNum, int pageSize) {
 		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) { 
+		if (DaoUtils.isMsSql()) {
 			sql = "/* getAllLocations */ SELECT locations.*, COUNT(*) OVER() AS totalCount "
 					+ "FROM locations ORDER BY \"createdAt\" DESC "
 					+ "OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
@@ -38,7 +32,7 @@ public class LocationDao implements IAnetDao<Location> {
 					+ "ORDER BY \"createdAt\" ASC LIMIT :limit OFFSET :offset";
 		}
 		
-		final Query sqlQuery = dbHandle.createQuery(sql)
+		final Query sqlQuery = getDbHandle().createQuery(sql)
 				.bind("limit", pageSize)
 				.bind("offset", pageSize * pageNum);
 		return new AnetBeanList<Location>(sqlQuery, pageNum, pageSize, new LocationMapper(), null);
@@ -48,15 +42,24 @@ public class LocationDao implements IAnetDao<Location> {
 		return getByIds(Arrays.asList(uuid)).get(0);
 	}
 
+	static class SelfIdBatcher extends IdBatcher<Location> {
+		private static final String sql =
+			"/* batch.getLocationsByUuids */ SELECT * from locations where uuid IN ( <uuids> )";
+
+		public SelfIdBatcher() {
+			super(sql, "uuids", new LocationMapper());
+		}
+	}
+
 	@Override
 	public List<Location> getByIds(List<String> uuids) {
+		final IdBatcher<Location>  idBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(SelfIdBatcher.class);
 		return idBatcher.getByIds(uuids);
 	}
 
 	@Override
-	public Location insert(Location l) {
-		DaoUtils.setInsertFields(l);
-		dbHandle.createUpdate(
+	public Location insertInternal(Location l) {
+		getDbHandle().createUpdate(
 				"/* locationInsert */ INSERT INTO locations (uuid, name, status, lat, lng, \"createdAt\", \"updatedAt\") "
 					+ "VALUES (:uuid, :name, :status, :lat, :lng, :createdAt, :updatedAt)")
 			.bindBean(l)
@@ -66,20 +69,25 @@ public class LocationDao implements IAnetDao<Location> {
 			.execute();
 		return l;
 	}
-	
-	public int update(Location l) {
-		DaoUtils.setUpdateFields(l);
-		return dbHandle.createUpdate("/* updateLocation */ UPDATE locations "
+
+	@Override
+	public int updateInternal(Location l) {
+		return getDbHandle().createUpdate("/* updateLocation */ UPDATE locations "
 					+ "SET name = :name, status = :status, lat = :lat, lng = :lng, \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
 				.bindBean(l)
 				.bind("updatedAt", DaoUtils.asLocalDateTime(l.getUpdatedAt()))
 				.bind("status", DaoUtils.getEnumId(l.getStatus()))
 				.execute();
 	}
-	
+
+	@Override
+	public int deleteInternal(String uuid) {
+		throw new UnsupportedOperationException();
+	}
+
 	public List<Location> getRecentLocations(Person author, int maxResults) {
 		String sql;
-		if (DaoUtils.isMsSql(dbHandle)) {
+		if (DaoUtils.isMsSql()) {
 			sql = "/* recentLocations */ SELECT locations.* FROM locations WHERE uuid IN ( "
 					+ "SELECT TOP(:maxResults) reports.\"locationUuid\" "
 					+ "FROM reports "
@@ -97,7 +105,7 @@ public class LocationDao implements IAnetDao<Location> {
 					+ "LIMIT :maxResults"
 				+ ")";
 		}
-		return dbHandle.createQuery(sql)
+		return getDbHandle().createQuery(sql)
 				.bind("authorUuid", author.getUuid())
 				.bind("maxResults", maxResults)
 				.map(new LocationMapper())
@@ -106,7 +114,7 @@ public class LocationDao implements IAnetDao<Location> {
 
 	public AnetBeanList<Location> search(LocationSearchQuery query) {
 		return AnetObjectEngine.getInstance().getSearcher()
-				.getLocationSearcher().runSearch(query, dbHandle);
+				.getLocationSearcher().runSearch(query);
 	}
 	
 	//TODO: Don't delete any location if any references exist. 

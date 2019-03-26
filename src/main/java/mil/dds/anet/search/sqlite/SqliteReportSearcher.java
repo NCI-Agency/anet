@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
@@ -29,17 +28,18 @@ import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ReportSearchBuilder;
 import mil.dds.anet.search.ReportSearchBuilder.Comparison;
+import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class SqliteReportSearcher implements IReportSearcher {
+public class SqliteReportSearcher extends AbstractSearcherBase implements IReportSearcher {
 
 	private String isoDowFormat;
 	private String isoDowComparison;
-
 
 	public SqliteReportSearcher(String isoDowFormat) {
 		this.isoDowFormat = isoDowFormat;
@@ -50,7 +50,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		this("strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1");	// %w day of week 0-6 with Sunday==0
 	}
 
-	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user, boolean systemSearch) {
 		StringBuffer sql = new StringBuffer();
 		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
 		if (query.getIncludeEngagementDayOfWeek()) {
@@ -222,18 +222,28 @@ public class SqliteReportSearcher implements IReportSearcher {
 		if (whereClauses.size() == 0) {
 			return new AnetBeanList<Report>(query.getPageNum(), query.getPageSize(), new ArrayList<Report>());
 		}
-		
-		//Apply a filter to restrict access to other's draft reports
-		if (user == null) { 
-			whereClauses.add("reports.state != :draftState");
-			whereClauses.add("reports.state != :rejectedState");
-			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-		} else { 
-			whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorUuid\" = :userUuid))");
-			args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
-			args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
-			args.put("userUuid", user.getUuid());
+
+		if (!systemSearch) {
+			//Apply a filter to restrict access to other's draft, rejected or approved reports.
+			//When the search is performed by the system (for instance by a worker, systemSearch = true) do not apply this filter.
+			if (user == null) {
+				whereClauses.add("reports.state != :draftState");
+				whereClauses.add("reports.state != :rejectedState");
+				whereClauses.add("reports.state != :approvedState");
+				args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
+				args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+				args.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
+			} else {
+				whereClauses.add("((reports.state != :draftState AND reports.state != :rejectedState) OR (reports.\"authorUuid\" = :userUuid))");
+				args.put("draftState", DaoUtils.getEnumId(ReportState.DRAFT));
+				args.put("rejectedState", DaoUtils.getEnumId(ReportState.REJECTED));
+				args.put("userUuid", user.getUuid());
+				if (!AuthUtils.isAdmin(user)) {
+					//Admin users may access all approved reports, other users only owned approved reports
+					whereClauses.add("((reports.state != :approvedState) OR (reports.\"authorUuid\" = :userUuid))");
+					args.put("approvedState", DaoUtils.getEnumId(ReportState.APPROVED));
+				}
+			}
 		}
 		
 		sql.append(" WHERE ");
@@ -248,6 +258,9 @@ public class SqliteReportSearcher implements IReportSearcher {
 				break;
 			case RELEASED_AT:
 				sql.append("reports.\"releasedAt\"");
+				break;
+			case UPDATED_AT:
+				sql.append("reports.\"updatedAt\"");
 				break;
 			case CREATED_AT:
 			default:
@@ -277,7 +290,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 		
-		final Query sqlQuery = dbHandle.createQuery(sql.toString())
+		final Query sqlQuery = getDbHandle().createQuery(sql.toString())
 				.bindMap(args);
 		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
 			sqlQuery.bindList(listArg.getKey(), listArg.getValue());
