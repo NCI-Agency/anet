@@ -68,7 +68,7 @@
     "json-loader": "^0.5.7",
     "postcss-flexbugs-fixes": "^4.1.0",
     "postcss-loader": "^3.0.0",
-    "react-test-renderer": "^16.8.4",
+    "react-test-renderer": "^16.8.5",
     "selenium-webdriver": "^4.0.0-alpha.1",
     "style-loader": "^0.23.1",
     "uuid": "^3.3.2",
