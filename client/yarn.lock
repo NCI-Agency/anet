@@ -2121,10 +2121,10 @@
     yargs "^11.1.0"
     yarn-install "^1.0.0"
 
-"@wdio/config@^5.7.3":
-  version "5.7.3"
-  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.7.3.tgz#732317e2a2026e612832c809ff0e01fc299d26da"
-  integrity sha512-4RuR+VkfLXtyUkBr5AYMC5miOwRN8xQsWMAzHzaQJvwk3uUB+uFRtve2sS0byoieQBCVI4V5BVKdNvDYfrAXEA==
+"@wdio/config@^5.7.3", "@wdio/config@^5.7.6":
+  version "5.7.6"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.7.6.tgz#dd5a6d31dfcef39f57a0f560ee6531b995a3fc32"
+  integrity sha512-GUWadW6B9J2uGpY8UlfDlpOvg/SZnyY3Yp8N0bFBQ+VrrUr5Zv4Jp31cXkfDE25MsAHulyC3UoLnP3IDz8Xz7g==
   dependencies:
     "@wdio/logger" "^5.7.0"
     deepmerge "^2.0.1"
@@ -2167,13 +2167,13 @@
     loglevel-plugin-prefix "^0.5.3"
     strip-ansi "^4.0.0"
 
-"@wdio/mocha-framework@^5.7.3":
-  version "5.7.3"
-  resolved "https://registry.yarnpkg.com/@wdio/mocha-framework/-/mocha-framework-5.7.3.tgz#4497376b2964af136060678d0dc2cb049b4a418f"
-  integrity sha512-s9vqNEol0GPjxGO9Fvlbe+NwBYSV9+wvndDPRerg/cLD86VitXu0h1KMObKZ4/TQh6C+jq8l3L1CPVTF9nD4oQ==
+"@wdio/mocha-framework@^5.7.6":
+  version "5.7.6"
+  resolved "https://registry.yarnpkg.com/@wdio/mocha-framework/-/mocha-framework-5.7.6.tgz#8923d6822e82486eda0ed6c5afdffd8dd57aad06"
+  integrity sha512-6owmXwO0WpNfnfK1Qy9VRjjZ75vrW/ugZDf3sh0JSH7VYo2v9NZz7lxLCeffEJYdafBl5AANabP/TNsyzR7fkA==
   dependencies:
     "@types/mocha" "^5.2.5"
-    "@wdio/config" "^5.7.3"
+    "@wdio/config" "^5.7.6"
     "@wdio/logger" "^5.7.0"
     mocha "^6.0.0-1"
 
