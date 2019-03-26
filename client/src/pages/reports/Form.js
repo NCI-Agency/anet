@@ -100,6 +100,10 @@ class BaseReportForm extends Component {
 			value: 'CANCELLED_DUE_TO_THREAT',
 			label: 'Cancelled due to Threat',
 		},
+		{
+			value: 'CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS',
+			label: 'Cancelled due to Availability of Interpreter(s)',
+		},
 	]
 	// some autosave settings
 	defaultTimeout = moment.duration(30, 'seconds')
