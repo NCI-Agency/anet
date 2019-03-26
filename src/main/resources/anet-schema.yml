@@ -534,3 +534,12 @@ properties:
             options:
               type: object
               additionalProperties: true
+
+  automaticallyInactivateUsers:
+    emailReminders:
+      daysPrior: 
+        type: array
+    clearDomainUserName:
+      test:
+        type: array
+

@@ -330,3 +330,9 @@ dictionary:
         options:
           layers: GEBCO_LATEST
           format: "image/png"
+
+  automaticallyInactivateUsers:
+    emailReminders:
+      daysPrior: [15, 30, 45]
+    clearDomainUserName:
+      test: []

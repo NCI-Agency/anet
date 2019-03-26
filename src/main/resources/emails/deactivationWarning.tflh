@@ -1,0 +1,38 @@
+<html>
+<style type="text/css">
+body {
+	font-family: Arial, Helvetica, SourceSansPro-Regular;
+	color: #000000;
+	font-size: 11px
+}
+h1 {
+	font-size: 20px
+}
+h2 {
+	font-size: 16px;
+}
+
+a {
+	color:#0072BD;
+}
+</style>
+<body>
+<p style="color:red; font-size:12px; font-weight: bold;" align="center"><i>Classification: ${SECURITY_BANNER_TEXT}</i></p>
+
+<#assign name = person.getName()>
+Hi ${name},
+
+<#assign endDate = person.getEndOfTourDate()>
+<#assign daysRemaining = daysUntilEndOfTour>
+<p>Your end of tour date is planned on ${endDate}, at which point your ANET account will be deactivated (${daysRemaining} days remaining).</p>
+
+<#assign uuid = person.getUuid()>
+<p>If this is not correct, please modify your account by <a href="${serverUrl}/people/${uuid}">clicking here</a>.</p>
+
+ANET Support Team
+<#if SUPPORT_EMAIL_ADDR??>
+  <br><a href="mailto:${SUPPORT_EMAIL_ADDR}">${SUPPORT_EMAIL_ADDR}</a>
+</#if>
+
+</body>
+</html>

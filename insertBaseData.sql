@@ -931,3 +931,5 @@ UPDATE notes SET
     createdAt=cast(createdAt as datetime2(3)),
     updatedAt=cast(updatedAt as datetime2(3))
   ;
+UPDATE people SET
+   emailAddress = 'jose@west.nl';
