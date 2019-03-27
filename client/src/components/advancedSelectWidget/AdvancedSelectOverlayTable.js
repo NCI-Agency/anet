@@ -1,8 +1,5 @@
 import React, { Component } from 'react'
 import { Radio, Table } from 'react-bootstrap'
-import { Classes, Icon } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import classNames from 'classnames'
 import Checkbox from 'components/Checkbox'
 import LoaderHOC from 'HOC/LoaderHOC'
 import _isEmpty from 'lodash/isEmpty'
@@ -21,8 +18,9 @@ const AdvancedSelectOverlayTable = ({
 			<tbody>
 				{objectType.map(items, item => {
 					const isSelected = selectedItemsUuids.includes(item.uuid)
-					return <tr key={item.uuid}>
-						{selectItemComponent(fieldName, item, isSelected, handleAddItem, handleRemoveItem )}
+					const handleClick = () => (isSelected ? handleRemoveItem(item) : handleAddItem(item))
+					return <tr key={item.uuid}  onClick={handleClick}>
+						{selectItemComponent(fieldName, isSelected )}
 						{renderRow(item)}
 					</tr>
 				})}
@@ -38,13 +36,12 @@ const AdvancedSingleSelectOverlayTableBase = (props) => {
 			{...otherProps}
 			selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
 			selectItemComponent={
-				(fieldName, item, isSelected, handleAddItem, handleRemoveItem) => (
+				(fieldName, isSelected) => (
 					<td style={{ textAlign: "center" }}>
-						<Radio name={fieldName}
+						<Radio
+							name={fieldName}
 							checked={isSelected}
-							style={{paddingTop: '3px', textAlign: 'center'}}
-							onChange={() => handleAddItem(item)}>
-						</Radio>
+							style={{paddingTop: '3px', textAlign: 'center'}} />
 					</td>
 				)
 			}
@@ -57,13 +54,11 @@ const AdvancedMultiSelectOverlayTableBase = (props) => {
 		<AdvancedSelectOverlayTable
 			{...props}
 			selectItemComponent={
-				(fieldName, item, isSelected, handleAddItem, handleRemoveItem) => (
+				(fieldName, isSelected) => (
 					<td style={{ textAlign: "center" }}>
-					{isSelected ?
-						<Checkbox checked={isSelected} onChange={() => handleRemoveItem(item)} />
-					:
-						<Checkbox checked={isSelected} onChange={() => handleAddItem(item)} />
-					}
+						<Checkbox
+							name={fieldName}
+							checked={isSelected} />
 					</td>
 				)
 			}
