@@ -188,8 +188,8 @@ class AuthorizationGroupForm extends Component {
 	renderPositionOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td><LinkTo person={item.person} target="_blank" /></td>
-				<td><LinkTo position={item} target="_blank" /></td>
+				<td><LinkTo person={item.person} isLink={false} /></td>
+				<td><LinkTo position={item} isLink={false} /></td>
 			</React.Fragment>
 		)
 	}

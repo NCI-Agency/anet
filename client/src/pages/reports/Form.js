@@ -732,7 +732,7 @@ class BaseReportForm extends Component {
 	renderLocationOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td><LinkTo anetLocation={item} /></td>
+				<td><LinkTo anetLocation={item} isLink={false} /></td>
 			</React.Fragment>
 		)
 	}
@@ -741,11 +741,11 @@ class BaseReportForm extends Component {
 		return (
 			<React.Fragment key={item.uuid}>
 				<td>
-					<LinkTo person={item}/>
+					<LinkTo person={item} isLink={false} />
 				</td>
-				<td><LinkTo position={item.position} />{item.position && item.position.code ? `, ${item.position.code}`: ``}</td>
-				<td><LinkTo whenUnspecified="" anetLocation={item.position && item.position.location} /></td>
-				<td>{item.position && item.position.organization && <LinkTo organization={item.position.organization} />}</td>
+				<td><LinkTo position={item.position} isLink={false} />{item.position && item.position.code ? `, ${item.position.code}`: ``}</td>
+				<td><LinkTo whenUnspecified="" anetLocation={item.position && item.position.location} isLink={false} /></td>
+				<td>{item.position && item.position.organization && <LinkTo organization={item.position.organization} isLink={false} />}</td>
 			</React.Fragment>
 		)
 	}
@@ -753,8 +753,8 @@ class BaseReportForm extends Component {
 	renderTaskOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td className="taskName"><LinkTo task={item}>{item.shortName} - {item.longName}</LinkTo></td>
-				<td className="taskOrg" ><LinkTo organization={item.responsibleOrg} /></td>
+				<td className="taskName"><LinkTo task={item} isLink={false}>{item.shortName} - {item.longName}</LinkTo></td>
+				<td className="taskOrg" ><LinkTo organization={item.responsibleOrg} isLink={false} /></td>
 			</React.Fragment>
 		)
 	}

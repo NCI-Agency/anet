@@ -311,7 +311,7 @@ class BasePositionForm extends Component {
 	renderOrganizationOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td className="orgShortName"><LinkTo organization={item} /></td>
+				<td className="orgShortName"><LinkTo organization={item} isLink={false} /></td>
 			</React.Fragment>
 		)
 	}
@@ -319,7 +319,7 @@ class BasePositionForm extends Component {
 	renderLocationOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td><LinkTo anetLocation={item} /></td>
+				<td><LinkTo anetLocation={item} isLink={false} /></td>
 			</React.Fragment>
 		)
 	}

@@ -459,7 +459,7 @@ class BaseOrganizationForm extends Component {
 	renderTaskOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td className="taskName"><LinkTo task={item}>{item.shortName} - {item.longName}</LinkTo></td>
+				<td className="taskName"><LinkTo task={item} isLink={false}>{item.shortName} - {item.longName}</LinkTo></td>
 			</React.Fragment>
 		)
 	}
@@ -467,7 +467,7 @@ class BaseOrganizationForm extends Component {
 	renderOrganizationOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td className="orgShortName"><LinkTo organization={item} /></td>
+				<td className="orgShortName"><LinkTo organization={item} isLink={false} /></td>
 			</React.Fragment>
 		)
 	}
@@ -475,8 +475,8 @@ class BaseOrganizationForm extends Component {
 	renderApproverOverlayRow = (item) => {
 		return (
 			<React.Fragment key={item.uuid}>
-				<td><LinkTo person={item.person} target="_blank" /></td>
-				<td><LinkTo position={item} target="_blank" /></td>
+				<td><LinkTo person={item.person} isLink={false} /></td>
+				<td><LinkTo position={item} isLink={false} /></td>
 			</React.Fragment>
 		)
 	}
