@@ -46,7 +46,7 @@ const renderFieldNoLabel = (field, form, widgetElem, children) => {
 	)
 }
 
-const renderField = (field, label, form, widgetElem, children, extraColElem, addon, vertical) => {
+const renderField = (field, label, form, widgetElem, children, extraColElem, addon, vertical, extraAddon) => {
 	if (label === undefined) {
 		label = utils.sentenceCase(field.name) // name is a required prop of field
 	}
@@ -67,6 +67,7 @@ const renderField = (field, label, form, widgetElem, children, extraColElem, add
 		}
 		widget = <InputGroup>
 			{widgetElem}
+			{extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
 			<InputGroup.Addon onClick={focusElement}>{addon}</InputGroup.Addon>
 		</InputGroup>
 	}
@@ -107,9 +108,9 @@ export const renderInputField = ({
   form, // contains, touched, errors, values, setXXXX, handleXXXX, dirty, isValid, status, etc.
   ...props
 }) => {
-	const {label, children, extraColElem, addon, vertical, innerRef, ...otherProps} = props
+	const {label, children, extraColElem, addon, vertical, innerRef, extraAddon, ...otherProps} = props
 	const widgetElem = <FormControl {...field} ref={innerRef} {...otherProps} />
-	return renderField(field, label, form, widgetElem, children, extraColElem, addon, vertical)
+	return renderField(field, label, form, widgetElem, children, extraColElem, addon, vertical, extraAddon)
 }
 
 export const renderInputFieldNoLabel = ({

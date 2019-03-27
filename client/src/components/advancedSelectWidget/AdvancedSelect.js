@@ -76,6 +76,7 @@ export const propTypes = {
 	shortcutsTitle: PropTypes.string,
 	renderExtraCol: PropTypes.bool, // set to false if you want this column completely removed
 	addon: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]),
+	extraAddon: PropTypes.object,
 	handleAddItem: PropTypes.func,
 	handleRemoveItem: PropTypes.func,
 }
@@ -122,7 +123,7 @@ export default class AdvancedSelect extends Component {
 	render() {
 		const { fieldName, fieldLabel, placeholder, value, renderSelected,
 			onChange, objectType, queryParams, fields, shortcuts, shortcutsTitle,
-			renderExtraCol, addon, handleAddItem, handleRemoveItem, ...overlayProps } = this.props
+			renderExtraCol, addon, extraAddon, handleAddItem, handleRemoveItem, ...overlayProps } = this.props
 		const { overlayTableClassName, overlayTable, overlayColumns, overlayRenderRow, filterDefs } = overlayProps
 		const { results, filterType, isLoading } = this.state
 		const renderSelectedWithDelete = renderSelected ? React.cloneElement(renderSelected, {onDelete: handleRemoveItem}) : null
@@ -141,6 +142,7 @@ export default class AdvancedSelect extends Component {
 					innerRef={el => {this.overlayTarget = el}}
 					extraColElem={renderExtraCol ? this.renderShortcutsTitle() : ''}
 					addon={addon}
+					extraAddon={extraAddon}
 				/>
 				<Overlay
 					show={this.state.showOverlay}
