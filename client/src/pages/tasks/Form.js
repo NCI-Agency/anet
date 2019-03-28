@@ -9,8 +9,11 @@ import * as FieldHelper from 'components/FieldHelper'
 import Fieldset from 'components/Fieldset'
 import CustomDateInput from 'components/CustomDateInput'
 import Autocomplete from 'components/Autocomplete'
+import AdvancedMultiSelect from 'components/advancedSelectWidget/AdvancedMultiSelect'
+import AdvancedSingleSelect from 'components/advancedSelectWidget/AdvancedSingleSelect'
 import Messages from'components/Messages'
 import DictionaryField from '../../HOC/DictionaryField'
+import LinkTo from 'components/LinkTo'
 
 import API from 'api'
 import {Organization, Person, Task} from 'models'
@@ -75,6 +78,14 @@ class BaseTaskForm extends Component {
 				parentOrgRecursively: true,
 			})
 		}
+
+		const responsibleOrgFilters = {
+				allOrganizations: {
+					label: 'All organizations',
+					searchQuery: true,
+				},
+			}
+
 		return (
 			<Formik
 				enableReinitialize={true}
@@ -121,21 +132,20 @@ class BaseTaskForm extends Component {
 								buttons={this.statusButtons}
 							/>
 
-							<Field
-								name="responsibleOrg"
-								label={Settings.fields.task.responsibleOrg}
-								component={FieldHelper.renderSpecialField}
+							<AdvancedSingleSelect
+								fieldName='responsibleOrg'
+								fieldLabel={Settings.fields.task.responsibleOrg}
+								placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
+								value={values.responsibleOrg}
+								overlayColumns={['Responsible Organization', 'Name']}
+								overlayRenderRow={this.renderOrganizationOverlayRow}
+								filterDefs={responsibleOrgFilters}
 								onChange={value => setFieldValue('responsibleOrg', value)}
+								objectType={Organization}
+								fields={Organization.autocompleteQuery}
+								valueKey="shortName"
+								queryParams={orgSearchQuery}
 								addon={ORGANIZATIONS_ICON}
-								widget={
-									<Autocomplete
-										objectType={Organization}
-										valueKey="shortName"
-										fields={Organization.autocompleteQuery}
-										placeholder={`Select a responsible organization for this ${Settings.fields.task.shortLabel}`}
-										queryParams={orgSearchQuery}
-									/>
-								}
 							/>
 
 							{Settings.fields.task.customFieldRef1 &&
@@ -277,6 +287,15 @@ class BaseTaskForm extends Component {
 		const variableDef = '($task: TaskInput!)'
 		return API.mutation(graphql, variables, variableDef)
 	}
+
+	renderOrganizationOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td className="orgShortName"><LinkTo organization={item} isLink={false} /></td>
+			</React.Fragment>
+		)
+	}
+
 }
 
 const TaskForm = (props) => (
