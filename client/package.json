@@ -107,7 +107,7 @@
     "moment": "^2.24.0",
     "object-assign": "^4.1.1",
     "pluralize": "^7.0.0",
-    "promise": "^8.0.2",
+    "promise": "^8.0.3",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-autosuggest-ie11-compatible": "https://github.com/VassilIordanov/react-autosuggest-ie11-compatible/releases/download/v9.4.2/react-autosuggest-ie11-compatible.tar.gz",
