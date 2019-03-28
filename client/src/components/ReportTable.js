@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import {Table} from 'react-bootstrap'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 import LinkTo from 'components/LinkTo'
 import {Report} from 'models'
 

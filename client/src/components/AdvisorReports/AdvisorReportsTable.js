@@ -4,7 +4,7 @@ import { Table } from 'react-bootstrap'
 import AdvisorReportsTableHead from 'components/AdvisorReports/AdvisorReportsTableHead'
 import AdvisorReportsRow from 'components/AdvisorReports/AdvisorReportsRow'
 import _uniqueId from 'lodash/uniqueId'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 const AdvisorReportsTable = (props) => {
     let rows = props.data.map( (advisor) => {

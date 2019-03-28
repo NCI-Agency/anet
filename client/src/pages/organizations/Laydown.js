@@ -5,7 +5,7 @@ import autobind from 'autobind-decorator'
 
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import {Position, Person} from 'models'
 import AppContext from 'components/AppContext'

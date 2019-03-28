@@ -25,7 +25,7 @@ import OrganizationApprovals from './Approvals'
 
 import GQL from 'graphqlapi'
 import {Organization, Person, Position, Report, Task} from 'models'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import AppContext from 'components/AppContext'
 import { AnchorNavItem } from 'components/Nav'

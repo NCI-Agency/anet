@@ -1,4 +1,4 @@
-import Settings from 'Settings'
+import {Settings} from 'api'
 import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
