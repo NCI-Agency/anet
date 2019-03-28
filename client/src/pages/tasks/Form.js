@@ -54,7 +54,7 @@ class BaseTaskForm extends Component {
 			label: 'Inactive'
 		},
 	]
-	TaskCustomFieldRef1 = DictionaryField(Field)
+	TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
 	TaskCustomField = DictionaryField(Field)
 	PlannedCompletionField = DictionaryField(Field)
 	ProjectedCompletionField = DictionaryField(Field)
@@ -84,6 +84,14 @@ class BaseTaskForm extends Component {
 					label: 'All organizations',
 					searchQuery: true,
 				},
+			}
+
+		const tasksFilters = {
+				allTasks: {
+					label: 'All tasks',
+					searchQuery: true,
+					queryVars: {}
+				}
 			}
 
 		return (
@@ -151,20 +159,19 @@ class BaseTaskForm extends Component {
 							{Settings.fields.task.customFieldRef1 &&
 								<this.TaskCustomFieldRef1
 									dictProps={Settings.fields.task.customFieldRef1}
-									name="customFieldRef1"
-									component={FieldHelper.renderSpecialField}
+									fieldName='customFieldRef1'
+									fieldLabel={Settings.fields.task.customFieldRef1.label}
+									placeholder={Settings.fields.task.customFieldRef1.placeholder}
+									value={values.customFieldRef1}
+									overlayColumns={['', 'Name']}
+									overlayRenderRow={this.renderTaskOverlayRow}
+									filterDefs={tasksFilters}
 									onChange={value => setFieldValue('customFieldRef1', value)}
+									objectType={Task}
+									fields={Task.autocompleteQuery}
+									valueKey="shortName"
+									queryParams={{}}
 									addon={TASKS_ICON}
-									widget={
-										<Autocomplete
-											objectType={Task}
-											valueKey="shortName"
-											fields={Task.autocompleteQuery}
-											template={Task.autocompleteTemplate}
-											placeholder={Settings.fields.task.customFieldRef1.placeholder}
-											queryParams={{}}
-										/>
-									}
 								/>
 							}
 
@@ -296,6 +303,13 @@ class BaseTaskForm extends Component {
 		)
 	}
 
+	renderTaskOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td className="taskName"><LinkTo task={item} isLink={false}>{item.shortName} - {item.longName}</LinkTo></td>
+			</React.Fragment>
+		)
+	}
 }
 
 const TaskForm = (props) => (
