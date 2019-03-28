@@ -25,7 +25,7 @@ export default class AdvancedSingleSelect extends Component {
 			handleRemoveItem={this.handleRemoveItem}
 			closeOverlayOnAdd={true}
 			searchTerms={!_isEmpty(this.props.value) ? this.props.value[this.props.valueKey] : ''}
-			extraAddon={<img src={REMOVE_ICON} height={16} alt="" onClick={this.handleRemoveItem} />}
+			extraAddon={!_isEmpty(this.props.value) ? <img src={REMOVE_ICON} height={16} alt="" onClick={this.handleRemoveItem} /> : null }
 		/>
 	}
 

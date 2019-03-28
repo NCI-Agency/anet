@@ -121,7 +121,7 @@ export default class AdvancedSelect extends Component {
 	}
 
 	render() {
-		const { fieldName, fieldLabel, placeholder, value, renderSelected,
+		const { fieldName, fieldLabel, placeholder, value, vertical, renderSelected,
 			onChange, objectType, queryParams, fields, shortcuts, shortcutsTitle,
 			renderExtraCol, addon, extraAddon, handleAddItem, handleRemoveItem, ...overlayProps } = this.props
 		const { overlayTableClassName, overlayTable, overlayColumns, overlayRenderRow, filterDefs } = overlayProps
@@ -143,6 +143,7 @@ export default class AdvancedSelect extends Component {
 					extraColElem={renderExtraCol ? this.renderShortcutsTitle() : ''}
 					addon={addon}
 					extraAddon={extraAddon}
+					vertical={vertical}
 				/>
 				<Overlay
 					show={this.state.showOverlay}
