@@ -295,7 +295,9 @@ export default class AdvancedSelect extends Component {
 				if (filterDefs.queryVars) {
 					Object.assign(queryVars, filterDefs.queryVars)
 				}
-				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
+				if (this.state.searchTerms) {
+					Object.assign(queryVars, {text: this.state.searchTerms + "*"})
+				}
 				API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
 					const isLoading = data[listName].totalCount !== 0
 					this.setState({
