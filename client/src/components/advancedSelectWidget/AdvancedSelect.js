@@ -104,7 +104,7 @@ export default class AdvancedSelect extends Component {
 
 	componentDidMount() {
 		this.setState({
-			searchTerms: this.props.searchTerms,
+			searchTerms: this.props.searchTerms || '',
 		})
 	}
 
@@ -116,7 +116,7 @@ export default class AdvancedSelect extends Component {
 					this.state.showOverlay === false &&
 					!_isEqual(this.props.searchTerms, this.state.searchTerms)) {
 			// When the overlay is being closed, update the searchTerms with the selected value
-			this.setState({searchTerms: this.props.searchTerms})
+			this.setState({searchTerms: this.props.searchTerms || ''})
 		}
 	}
 
@@ -294,9 +294,7 @@ export default class AdvancedSelect extends Component {
 				if (filterDefs.queryVars) {
 					Object.assign(queryVars, filterDefs.queryVars)
 				}
-				if (this.state.searchTerms) {
-					Object.assign(queryVars, {text: this.state.searchTerms + "*"})
-				}
+				Object.assign(queryVars, {text: this.state.searchTerms + "*"})
 				API.query(graphQlQuery, {query: queryVars}, variableDef).then(data => {
 					const isLoading = data[listName].totalCount !== 0
 					this.setState({
