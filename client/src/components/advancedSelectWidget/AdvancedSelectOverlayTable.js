@@ -19,8 +19,9 @@ const AdvancedSelectOverlayTable = ({
 				{objectType.map(items, item => {
 					const isSelected = selectedItemsUuids.includes(item.uuid)
 					const handleClick = () => (isSelected ? handleRemoveItem(item) : handleAddItem(item))
-					return <tr key={item.uuid}  onClick={handleClick}>
-						{selectItemComponent(fieldName, isSelected )}
+					const renderSelectComponent = React.cloneElement(selectItemComponent, {name: fieldName, checked: isSelected, onChange: handleClick})
+					return <tr key={item.uuid} onClick={handleClick}>
+						<td style={{ textAlign: "center" }}>{renderSelectComponent}</td>
 						{renderRow(item)}
 					</tr>
 				})}
@@ -36,14 +37,8 @@ const AdvancedSingleSelectOverlayTableBase = (props) => {
 			{...otherProps}
 			selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
 			selectItemComponent={
-				(fieldName, isSelected) => (
-					<td style={{ textAlign: "center" }}>
-						<Radio
-							name={fieldName}
-							checked={isSelected}
-							style={{paddingTop: '3px', textAlign: 'center'}} />
-					</td>
-				)
+				<Radio
+					style={{paddingTop: '3px', textAlign: 'center'}} />
 			}
 		/>
 	)
@@ -53,15 +48,7 @@ const AdvancedMultiSelectOverlayTableBase = (props) => {
 	return (
 		<AdvancedSelectOverlayTable
 			{...props}
-			selectItemComponent={
-				(fieldName, isSelected) => (
-					<td style={{ textAlign: "center" }}>
-						<Checkbox
-							name={fieldName}
-							checked={isSelected} />
-					</td>
-				)
-			}
+			selectItemComponent={<Checkbox />}
 		/>
 	)
 }
