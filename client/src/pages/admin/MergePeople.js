@@ -267,9 +267,10 @@ class MergePeople extends Page {
 		return this.save(values, form)
 			.then(response => this.onSubmitSuccess(response, values, form))
 			.catch(error => {
-				this.setState({success: null, error: error})
-				jumpToTop()
-				console.error(error)
+				this.setState({success: null, error: error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 

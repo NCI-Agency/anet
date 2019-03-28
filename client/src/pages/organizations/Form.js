@@ -379,8 +379,10 @@ class BaseOrganizationForm extends Component {
 		return this.save(values, form)
 			.then(response => this.onSubmitSuccess(response, values, form))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 

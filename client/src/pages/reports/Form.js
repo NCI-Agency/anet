@@ -99,6 +99,10 @@ class BaseReportForm extends Component {
 			value: 'CANCELLED_DUE_TO_THREAT',
 			label: 'Cancelled due to Threat',
 		},
+		{
+			value: 'CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS',
+			label: 'Cancelled due to Availability of Interpreter(s)',
+		},
 	]
 	// some autosave settings
 	defaultTimeout = moment.duration(30, 'seconds')
@@ -576,8 +580,10 @@ class BaseReportForm extends Component {
 		return this.save(values, true)
 			.then(response => this.onSubmitSuccess(response, values, form.resetForm))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 

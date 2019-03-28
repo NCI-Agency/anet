@@ -563,6 +563,8 @@ class BaseRollupShow extends Page {
 					success: null,
 					error: error,
 					showEmailModal: false,
+				}, () => {
+					form.setSubmitting(false)
 				})
 			})
 	}
