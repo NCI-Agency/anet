@@ -3,6 +3,7 @@ package mil.dds.anet.threads;
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,17 +62,22 @@ public class AccountDeactivationWorker implements Runnable {
 
 		try {
 			// Send warnings
-			daysTillEndOfTourWarnings.forEach(x -> runInternal(x.intValue()));
+			Collections.sort(this.daysTillEndOfTourWarnings);
+			for (int i = 0; i < this.daysTillEndOfTourWarnings.size(); i++) {
+				int daysTillNextWarning = i == 0 ? -1
+						: this.daysTillEndOfTourWarnings.get(i) - this.daysTillEndOfTourWarnings.get(i - 1);
+				runInternal(this.daysTillEndOfTourWarnings.get(i), daysTillNextWarning);
+			}
 
 			// Deactivate accounts
-			runInternal(0);
+			runInternal(0, 0);
 		} catch (Throwable e) {
 			// Cannot let this thread die. Otherwise ANET will stop checking.
 			logger.error("Exception in run()", e);
 		}
 	}
 
-	private void runInternal(int daysUntilEndOfTour) {
+	private void runInternal(int daysUntilEndOfTour, int daysTillNextWarning) {
 		// Get a list of all people with a end of tour coming up
 		PersonSearchQuery query = new PersonSearchQuery();
 		query.setPageSize(Integer.MAX_VALUE);
@@ -79,6 +85,7 @@ public class AccountDeactivationWorker implements Runnable {
 		Instant warningDate = now.plus(daysUntilEndOfTour, ChronoUnit.DAYS);
 		query.setEndOfTourDateEnd(warningDate);
 		List<Person> persons = AnetObjectEngine.getInstance().getPersonDao().search(query).getList();
+		Instant nextReminder = daysTillNextWarning < 0 ? null : now.plus(daysTillNextWarning, ChronoUnit.DAYS);
 
 		// Send emails to let users know their account will soon be deactivated
 		// or deactivate accounts that reach the end-of-tour date
@@ -99,7 +106,7 @@ public class AccountDeactivationWorker implements Runnable {
 			// Send deactivation warning email
 			if (p.getEndOfTourDate().isBefore(warningDate)
 					&& p.getEndOfTourDate().isAfter(warningDate.minus(this.warningIntervalInMs, ChronoUnit.MILLIS))) {
-				sendDeactivationWarningEmail(p, daysUntilEndOfTour);
+				sendDeactivationWarningEmail(p, nextReminder);
 			}
 		}
 	}
@@ -140,12 +147,12 @@ public class AccountDeactivationWorker implements Runnable {
 		}
 	}
 
-	private void sendDeactivationWarningEmail(Person p, int daysUntilEndOfTour) {
+	private void sendDeactivationWarningEmail(Person p, Instant nextReminder) {
 		try {
 			AnetEmail email = new AnetEmail();
 			AccountDeactivationWarningEmail action = new AccountDeactivationWarningEmail();
 			action.setPerson(p);
-			action.setDaysUntilEndOfTour(daysUntilEndOfTour);
+			action.setNextReminder(nextReminder);
 			email.setAction(action);
 			email.addToAddress(p.getEmailAddress());
 			AnetEmailWorker.sendEmailAsync(email);

@@ -16,7 +16,7 @@ public class AccountDeactivationEmail implements AnetEmailAction {
 
 	@Override
 	public String getSubject(Map<String, Object> context) {
-		return "ANET Account Deactivation";
+		return "ANET Account Inactivation";
 	}
 
 	@Override
@@ -34,5 +34,4 @@ public class AccountDeactivationEmail implements AnetEmailAction {
 	public void setPerson(Person person) {
 		this.person = Person.createWithUuid(person.getUuid());
 	}
-
 }
