@@ -176,6 +176,7 @@ class BaseRollupShow extends Page {
 			this.fetchChartData(this.runChartQuery(...this.chartQueryParams())),
 			this.fetchReportData(true)
 		]).then(() => this.props.hideLoading())
+		.catch(error => this.setState({error}, this.props.hideLoading))
 	}
 
 	fetchReportData(includeAll) {
@@ -564,6 +565,8 @@ class BaseRollupShow extends Page {
 					success: null,
 					error: error,
 					showEmailModal: false,
+				}, () => {
+					form.setSubmitting(false)
 				})
 			})
 	}

@@ -495,8 +495,10 @@ class Search extends Page {
 					success: null,
 					error: error,
 					showSaveSearch: false,
+				}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
 				})
-				jumpToTop()
 			})
 	}
 

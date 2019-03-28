@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
@@ -18,14 +17,15 @@ import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.mappers.PositionMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IPositionSearcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class SqlitePositionSearcher implements IPositionSearcher {
-	
+public class SqlitePositionSearcher extends AbstractSearcherBase implements IPositionSearcher {
+
 	@Override
-	public AnetBeanList<Position> runSearch(PositionSearchQuery query, Handle dbHandle) {
+	public AnetBeanList<Position> runSearch(PositionSearchQuery query) {
 		StringBuilder sql = new StringBuilder("/* SqlitePositionSearch */ SELECT " + PositionDao.POSITIONS_FIELDS 
 				+ " FROM positions WHERE positions.uuid IN (SELECT positions.uuid FROM positions ");
 		Map<String,Object> sqlArgs = new HashMap<String,Object>();
@@ -128,7 +128,7 @@ public class SqlitePositionSearcher implements IPositionSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 		
-		final Query q = dbHandle.createQuery(sql.toString())
+		final Query q = getDbHandle().createQuery(sql.toString())
 			.bindMap(sqlArgs)
 			.bind("offset", query.getPageSize() * query.getPageNum())
 			.bind("limit", query.getPageSize());

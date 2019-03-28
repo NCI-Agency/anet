@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
@@ -29,6 +28,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ReportSearchBuilder;
 import mil.dds.anet.search.AbstractSearchBuilder.Comparison;
@@ -36,11 +36,10 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class SqliteReportSearcher implements IReportSearcher {
+public class SqliteReportSearcher extends AbstractSearcherBase implements IReportSearcher {
 
 	private String isoDowFormat;
 	private String isoDowComparison;
-
 
 	public SqliteReportSearcher(String isoDowFormat) {
 		this.isoDowFormat = isoDowFormat;
@@ -51,7 +50,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 		this("strftime('%%w', substr(reports.\"%s\", 1, 10)) + 1");	// %w day of week 0-6 with Sunday==0
 	}
 
-	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, boolean systemSearch) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user, boolean systemSearch) {
 		StringBuffer sql = new StringBuffer();
 		sql.append("/* SqliteReportSearch */ SELECT DISTINCT " + ReportDao.REPORT_FIELDS);
 		if (query.getIncludeEngagementDayOfWeek()) {
@@ -291,7 +290,7 @@ public class SqliteReportSearcher implements IReportSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 		
-		final Query sqlQuery = dbHandle.createQuery(sql.toString())
+		final Query sqlQuery = getDbHandle().createQuery(sql.toString())
 				.bindMap(args);
 		for (final Map.Entry<String, List<?>> listArg : listArgs.entrySet()) {
 			sqlQuery.bindList(listArg.getKey(), listArg.getValue());

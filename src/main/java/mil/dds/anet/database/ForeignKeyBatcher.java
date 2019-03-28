@@ -7,33 +7,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import mil.dds.anet.database.mappers.ForeignKeyMapper;
 import mil.dds.anet.database.mappers.ForeignKeyTuple;
 import mil.dds.anet.views.AbstractAnetBean;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.result.ResultIterable;
 import org.jdbi.v3.core.mapper.RowMapper;
 
+@InTransaction
 public class ForeignKeyBatcher<T extends AbstractAnetBean> {
 
 	private static final List<String> defaultIfEmpty = Arrays.asList("-1");
 
-	private final Handle dbHandle;
+	@Inject
+	private Provider<Handle> handle;
 	private final String sql;
 	private final String paramName;
 	private final ForeignKeyMapper<T> mapper;
 
-	public ForeignKeyBatcher(Handle dbHandle, String sql, String paramName, RowMapper<T> objectMapper, String foreignKeyName) {
-		this.dbHandle = dbHandle;
+	public ForeignKeyBatcher(String sql, String paramName, RowMapper<T> objectMapper, String foreignKeyName) {
 		this.sql = sql;
 		this.paramName = paramName;
 		this.mapper = new ForeignKeyMapper<>(foreignKeyName, objectMapper);
 	}
 
+	protected Handle getDbHandle() {
+		return handle.get();
+	}
+
 	public List<List<T>> getByForeignKeys(List<String> foreignKeys) {
 		final List<String> args = foreignKeys.isEmpty() ? defaultIfEmpty : foreignKeys;
-		final ResultIterable<ForeignKeyTuple<T>> query = dbHandle.createQuery(sql)
+		final ResultIterable<ForeignKeyTuple<T>> query = getDbHandle().createQuery(sql)
 				.bindList(paramName, args)
 				.map(mapper);
 		final Map<String, List<T>> map = query.collect(Collectors.toMap(

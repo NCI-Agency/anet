@@ -36,7 +36,8 @@ public class Report extends AbstractAnetBean {
 										CANCELLED_DUE_TO_FORCE_PROTECTION,
 										CANCELLED_DUE_TO_ROUTES,
 										CANCELLED_DUE_TO_THREAT,
-										NO_REASON_GIVEN }
+										NO_REASON_GIVEN,
+										CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS }
 
 	private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
 	ReportState state;
@@ -443,24 +444,29 @@ public class Report extends AbstractAnetBean {
 		}
 		AnetObjectEngine engine = AnetObjectEngine.getInstance();
 		return engine.getReportActionDao().getActionsForReport(context, uuid)
-				.thenApply(actions -> {
+				.thenCompose(actions -> {
 			//For reports which are not approved or published, make sure there
 			//is a report action for each approval step.
-			if (!(state == ReportState.APPROVED || state == ReportState.PUBLISHED)) {
-				final Organization ao = engine.getOrganizationForPerson(context, author.getForeignUuid()).join();
-				final String aoUuid = DaoUtils.getUuid(ao);
-				List<ApprovalStep> steps = getWorkflowForOrg(context, engine, aoUuid).join();
-				if (Utils.isEmptyOrNull(steps)) {
-					final String defaultOrgUuid = engine.getDefaultOrgUuid();
-					if (aoUuid == null || !Objects.equals(aoUuid, defaultOrgUuid)) {
-						steps = getDefaultWorkflow(context, engine, defaultOrgUuid).join();
-					}
-				}
-				final List<ReportAction> newApprovalStepsActions = createApprovalStepsActions(actions, steps);
-				actions.addAll(newApprovalStepsActions);
-				return actions;
+			if (state == ReportState.APPROVED || state == ReportState.PUBLISHED) {
+				workflow = actions;
+				return CompletableFuture.completedFuture(workflow);
 			} else {
-				return actions;
+				return getWorkflowForOrg(context, engine, getAdvisorOrgUuid())
+						.thenCompose(steps -> {
+					if (Utils.isEmptyOrNull(steps)) {
+						final String defaultOrgUuid = engine.getDefaultOrgUuid();
+						if (getAdvisorOrgUuid() == null || !Objects.equals(getAdvisorOrgUuid(), defaultOrgUuid)) {
+							return getDefaultWorkflow(context, engine, defaultOrgUuid);
+						}
+					}
+					return CompletableFuture.completedFuture(steps);
+				})
+						.thenCompose(steps -> {
+					final List<ReportAction> newApprovalStepsActions = createApprovalStepsActions(actions, steps);
+					actions.addAll(newApprovalStepsActions);
+					workflow = actions;
+					return CompletableFuture.completedFuture(workflow);
+				});
 			}
 		});
 	}

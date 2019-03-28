@@ -3,13 +3,10 @@ package mil.dds.anet;
 import java.util.List;
 import java.util.Scanner;
 
-import org.jdbi.v3.core.Jdbi;
-
 import com.google.common.collect.ImmutableList;
 
-import io.dropwizard.cli.ConfiguredCommand;
-import io.dropwizard.jdbi3.JdbiFactory;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.Application;
+import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
 import mil.dds.anet.beans.AdminSetting;
 import mil.dds.anet.beans.ApprovalStep;
@@ -23,30 +20,20 @@ import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import net.sourceforge.argparse4j.inf.Namespace;
-import net.sourceforge.argparse4j.inf.Subparser;
 
-public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> {
+public class InitializationCommand extends EnvironmentCommand<AnetConfiguration> {
 
-	public InitializationCommand() { 
-		super("init", "Initializes the ANET Database");
-	}
-	
-	@Override
-	public void configure(Subparser subparser) {
-		addFileArgument(subparser);
+	private final Application<AnetConfiguration> application;
+
+	protected InitializationCommand(Application<AnetConfiguration> application) {
+		super(application, "init", "Initializes the ANET Database");
+		this.application = application;
 	}
 
 	@Override
-	protected void run(Bootstrap<AnetConfiguration> bootstrap, Namespace namespace, AnetConfiguration configuration) throws Exception {
-		final JdbiFactory factory = new JdbiFactory();
-		final Environment environment = new Environment(bootstrap.getApplication().getName(),
-				bootstrap.getObjectMapper(),
-				bootstrap.getValidatorFactory().getValidator(),
-				bootstrap.getMetricRegistry(),
-				bootstrap.getClassLoader(),
-				bootstrap.getHealthCheckRegistry());
-		final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "mssql");
-		final AnetObjectEngine engine = new AnetObjectEngine(jdbi);
+	protected void run(Environment environment, Namespace namespace, AnetConfiguration configuration) throws Exception {
+		final String dbUrl = configuration.getDataSourceFactory().getUrl();
+		final AnetObjectEngine engine = new AnetObjectEngine(dbUrl, application);
 		
 		System.out.println("-------- WELCOME TO ANET! --------");
 		System.out.println("We're going to ask you a few questions to get ANET set up.");
@@ -57,6 +44,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		if (currPeople.size() > 0) { 
 			System.out.println("ERROR: Data detected in database");
 			System.out.println("\tThis task can only be run on an empty database");
+			System.exit(1);
 			return;
 		}
 		System.out.println("OK!");
@@ -139,6 +127,7 @@ public class InitializationCommand extends ConfiguredCommand<AnetConfiguration> 
 		System.out.println("All Done! You should be able to start the server now and log in");
 		
 		scanner.close();
+		System.exit(0);
 	}
 
 }

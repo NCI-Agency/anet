@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Query;
 
 import com.google.common.base.Joiner;
@@ -30,6 +29,7 @@ import mil.dds.anet.beans.search.ReportSearchQuery.ReportSearchSortBy;
 import mil.dds.anet.database.PositionDao;
 import mil.dds.anet.database.ReportDao;
 import mil.dds.anet.database.mappers.ReportMapper;
+import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IReportSearcher;
 import mil.dds.anet.search.ReportSearchBuilder;
 import mil.dds.anet.search.AbstractSearchBuilder.Comparison;
@@ -37,9 +37,9 @@ import mil.dds.anet.utils.AuthUtils;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
 
-public class MssqlReportSearcher implements IReportSearcher {
+public class MssqlReportSearcher extends AbstractSearcherBase implements IReportSearcher {
 
-	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Handle dbHandle, Person user, boolean systemSearch) {
+	public AnetBeanList<Report> runSearch(ReportSearchQuery query, Person user, boolean systemSearch) {
 		final List<String> whereClauses = new LinkedList<String>();
 		final Map<String,Object> args = new HashMap<String,Object>();
 		final Map<String,List<?>> listArgs = new HashMap<>();
@@ -313,7 +313,7 @@ public class MssqlReportSearcher implements IReportSearcher {
 			sql.insert(0, commonTableExpression);
 		}
 
-		final Query sqlQuery = MssqlSearcher.addPagination(query, dbHandle, sql, args, listArgs);
+		final Query sqlQuery = MssqlSearcher.addPagination(query, getDbHandle(), sql, args, listArgs);
 		return AnetBeanList.getReportList(user, sqlQuery, query.getPageNum(), query.getPageSize(), new ReportMapper());
 
 	}

@@ -8,16 +8,23 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 
 	public enum TaskSearchSortBy { CREATED_AT, NAME, CATEGORY }
 
-	String responsibleOrgUuid;
-	Boolean includeChildrenOrgs;
-	String category;
-	TaskStatus status;
+	private String responsibleOrgUuid;
+	private Boolean includeChildrenOrgs;
+	private String category;
+	private TaskStatus status;
 	private Instant plannedCompletionEnd;
 	private Instant plannedCompletionStart;
 	private Instant projectedCompletionEnd;
 	private Instant projectedCompletionStart;
 	private String projectStatus;
 	private String customField;
+
+	// Search for tasks with a specific parent Task.
+	private String customFieldRef1Uuid;
+	// Include descendants recursively from the specified parent.
+	// If true will include all tasks in the tree of the parent Task
+	// Including the parent Task.
+	private Boolean customFieldRef1Recursively;
 
 	private TaskSearchSortBy sortBy;
 	private SortOrder sortOrder;
@@ -100,6 +107,22 @@ public class TaskSearchQuery extends AbstractSearchQuery {
 
 	public void setCustomField(String customField) {
 		this.customField = customField;
+	}
+
+	public String getCustomFieldRef1Uuid() {
+		return customFieldRef1Uuid;
+	}
+
+	public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
+		this.customFieldRef1Uuid = customFieldRef1Uuid;
+	}
+
+	public Boolean getCustomFieldRef1Recursively() {
+		return customFieldRef1Recursively;
+	}
+
+	public void setCustomFieldRef1Recursively(Boolean customFieldRef1Recursively) {
+		this.customFieldRef1Recursively = customFieldRef1Recursively;
 	}
 
 	public TaskSearchSortBy getSortBy() {

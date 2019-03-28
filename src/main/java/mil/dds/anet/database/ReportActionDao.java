@@ -4,28 +4,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jdbi.v3.core.Handle;
-
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.ReportAction;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.database.mappers.ReportActionMapper;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.views.ForeignKeyFetcher;
+import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 
+@InTransaction
 public class ReportActionDao extends AnetBaseDao<ReportAction> {
 
-	private final ForeignKeyBatcher<ReportAction> reportIdBatcher;
-
-	public ReportActionDao(Handle db) { 
-		super(db, "ReportActions", "reportActions", "*", null);
-		final String reportIdBatcherSql = "/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
-				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
-		this.reportIdBatcher = new ForeignKeyBatcher<ReportAction>(db, reportIdBatcherSql, "foreignKeys", new ReportActionMapper(), "reportUuid");
+	public ReportActionDao() {
+		super("ReportActions", "reportActions", "*", null);
 	}
 
 	@Override
 	public ReportAction insertInternal(ReportAction action) {
-		dbHandle.createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
+		getDbHandle().createUpdate("/* insertReportAction */ INSERT INTO \"reportActions\" "
 				+ "(\"approvalStepUuid\", \"personUuid\", \"reportUuid\", \"createdAt\", type) "
 				+ "VALUES (:approvalStepUuid, :personUuid, :reportUuid, :createdAt, :type)")
 			.bind("approvalStepUuid", action.getStepUuid())
@@ -44,21 +40,6 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 	public CompletableFuture<List<ReportAction>> getActionsForReport(Map<String, Object> context, String reportUuid) {
 		return new ForeignKeyFetcher<ReportAction>()
 				.load(context, "report.reportActions", reportUuid);
-	}
-
-	/**
-	 * Gets the approval actions for this report, but only returning the most recent
-	 * where there were multiple actions on the same step (ie a reject then an approval
-	 * will only return the approval).
-	 */
-	public List<ReportAction> getFinalActionsForReport(String reportUuid) {
-		//TODO: test this. I don't think it works.... 
-		return dbHandle.createQuery("/* getReportFinalActions */ SELECT * FROM \"reportActions\" "
-				+ "WHERE \"reportUuid\" = :reportUuid GROUP BY \"approvalStepUuid\" "
-				+ "ORDER BY \"createdAt\" DESC")
-			.bind("reportUuid", reportUuid)
-			.map(new ReportActionMapper())
-			.list();
 	}
 	
 	@Override
@@ -85,7 +66,18 @@ public class ReportActionDao extends AnetBaseDao<ReportAction> {
 		throw new UnsupportedOperationException();
 	}
 
+	static class ReportActionsBatcher extends ForeignKeyBatcher<ReportAction> {
+		private static final String sql =
+			"/* batch.getReportApprovals */ SELECT * FROM \"reportActions\" "
+				+ "WHERE \"reportUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
+
+		public ReportActionsBatcher() {
+			super(sql, "foreignKeys", new ReportActionMapper(), "reportUuid");
+		}
+	}
+
 	public List<List<ReportAction>> getReportActions(List<String> foreignKeys) {
+		final ForeignKeyBatcher<ReportAction> reportIdBatcher = AnetObjectEngine.getInstance().getInjector().getInstance(ReportActionsBatcher.class);
 		return reportIdBatcher.getByForeignKeys(foreignKeys);
 	}
 }
