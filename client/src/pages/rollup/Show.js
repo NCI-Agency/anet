@@ -13,12 +13,10 @@ import ButtonToggleGroup from 'components/ButtonToggleGroup'
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 import Messages from 'components/Messages'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import {Organization, Report} from 'models'
 import utils from 'utils'
-
-import API from 'api'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -565,6 +563,8 @@ class BaseRollupShow extends Page {
 					success: null,
 					error: error,
 					showEmailModal: false,
+				}, () => {
+					form.setSubmitting(false)
 				})
 			})
 	}

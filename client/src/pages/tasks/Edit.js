@@ -5,9 +5,8 @@ import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObject
 
 import TaskForm from './Form'
 
-import API from 'api'
 import {Task} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import { PAGE_PROPS_NO_NAV } from 'actions'
 import { connect } from 'react-redux'

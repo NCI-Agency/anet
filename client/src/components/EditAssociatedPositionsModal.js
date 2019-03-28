@@ -5,8 +5,7 @@ import { Formik, Form } from 'formik'
 
 import {Modal, Button, Table} from 'react-bootstrap'
 import {Position,Person} from 'models'
-import API from 'api'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 import _isEqual from 'lodash/isEqual'
 
 import Messages from'components/Messages'
@@ -146,8 +145,9 @@ class BaseEditAssociatedPositionsModal extends Component {
 		return this.save(values, form)
 			.then(response => this.props.onSuccess())
 			.catch(error => {
-				this.setState({error})
-				// jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+				})
 			})
 	}
 

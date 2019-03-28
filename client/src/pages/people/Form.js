@@ -11,8 +11,7 @@ import Messages from 'components/Messages'
 import RichTextEditor from 'components/RichTextEditor'
 import OptionListModal from 'components/OptionListModal'
 
-import API from 'api'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 import {Person} from 'models'
 import utils from 'utils'
 import pluralize from 'pluralize'
@@ -425,8 +424,10 @@ class BasePersonForm extends Component {
 		this.save(values, form)
 			.then(response => this.onSubmitSuccess(response, values, form))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 

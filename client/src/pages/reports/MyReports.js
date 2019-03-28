@@ -130,7 +130,6 @@ class BaseMyReports extends Page {
 		GQL.run([part]).then( data => {
 			let stateChange = {}
 			stateChange[section] = data[section]
-			console.log(stateChange)
 			this.setState(stateChange, () => setPagination(section, pageNum))
 		})
 	}

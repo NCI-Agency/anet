@@ -6,7 +6,7 @@ import decodeQuery from 'querystring/decode'
 import _isEmpty from 'lodash/isEmpty'
 import encodeQuery from 'querystring/encode'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 const WILDCARD = '*'
 const domainNames = Settings.domainNames.map(d => d.toLowerCase())

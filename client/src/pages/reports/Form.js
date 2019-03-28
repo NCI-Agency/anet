@@ -11,7 +11,7 @@ import _isEmpty from 'lodash/isEmpty'
 import _cloneDeep from 'lodash/cloneDeep'
 import pluralize from 'pluralize'
 
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import AppContext from 'components/AppContext'
 import Autocomplete from 'components/Autocomplete'
@@ -33,7 +33,6 @@ import TASKS_ICON from 'resources/tasks.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
 
-import API from 'api'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'
@@ -99,6 +98,10 @@ class BaseReportForm extends Component {
 		{
 			value: 'CANCELLED_DUE_TO_THREAT',
 			label: 'Cancelled due to Threat',
+		},
+		{
+			value: 'CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS',
+			label: 'Cancelled due to Availability of Interpreter(s)',
 		},
 	]
 	// some autosave settings
@@ -577,8 +580,10 @@ class BaseReportForm extends Component {
 		return this.save(values, true)
 			.then(response => this.onSubmitSuccess(response, values, form.resetForm))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 

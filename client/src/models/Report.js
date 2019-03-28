@@ -1,4 +1,4 @@
-import Settings from 'Settings'
+import {Settings} from 'api'
 import Model, { yupDate } from 'components/Model'
 import moment from 'moment'
 import _isEmpty from 'lodash/isEmpty'
@@ -32,6 +32,7 @@ export default class Report extends Model {
 		CANCELLED_DUE_TO_FORCE_PROTECTION: 'CANCELLED_DUE_TO_FORCE_PROTECTION',
 		CANCELLED_DUE_TO_ROUTES: 'CANCELLED_DUE_TO_ROUTES',
 		CANCELLED_DUE_TO_THREAT: 'CANCELLED_DUE_TO_THREAT',
+		CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS: 'CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS',
 	}
 
 	static ATMOSPHERE = {

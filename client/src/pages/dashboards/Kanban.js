@@ -1,7 +1,7 @@
 import React from 'react'
 import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/Page'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import {Task} from 'models'
 

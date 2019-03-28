@@ -12,9 +12,8 @@ import Autocomplete from 'components/Autocomplete'
 import Messages from'components/Messages'
 import DictionaryField from '../../HOC/DictionaryField'
 
-import API from 'api'
 import {Organization, Person, Task} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 import TASKS_ICON from 'resources/tasks.png'
@@ -245,8 +244,10 @@ class BaseTaskForm extends Component {
 		return this.save(values, form)
 			.then(response => this.onSubmitSuccess(response, values, form))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 

@@ -13,9 +13,8 @@ import TaskTable from 'components/TaskTable'
 import LinkTo from 'components/LinkTo'
 import Messages from 'components/Messages'
 
-import API from 'api'
 import {Organization, Person, Position, Task} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import DictionaryField from '../../HOC/DictionaryField'
 
@@ -380,8 +379,10 @@ class BaseOrganizationForm extends Component {
 		return this.save(values, form)
 			.then(response => this.onSubmitSuccess(response, values, form))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 

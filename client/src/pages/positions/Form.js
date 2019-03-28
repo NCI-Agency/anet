@@ -10,9 +10,8 @@ import Fieldset from 'components/Fieldset'
 import Autocomplete from 'components/Autocomplete'
 import Messages from 'components/Messages'
 
-import API from 'api'
 import {Location, Organization, Person, Position} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'
@@ -251,8 +250,10 @@ class BasePositionForm extends Component {
 		return this.save(values, form)
 			.then(response => this.onSubmitSuccess(response, values, form))
 			.catch(error => {
-				this.setState({error})
-				jumpToTop()
+				this.setState({error}, () => {
+					form.setSubmitting(false)
+					jumpToTop()
+				})
 			})
 	}
 
