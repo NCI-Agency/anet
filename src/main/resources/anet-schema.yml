@@ -30,6 +30,10 @@ definitions:
           type: string
           title: The placeholder for this field
           description: Used in the UI where a placeholder for the field is shown (example input).
+        componentClass:
+          type: string
+          title: The bootstrap componet class
+          description: Used to determine how the user interface of this particular field looks.
 
 # definition for fields that present a choice to be selected from
   choiceField:
@@ -147,16 +151,14 @@ properties:
             description: Used in the UI where a short label for tasks is shown.
             examples: [Task]
           shortName:
-            type: string
-            examples: [Task number]
+            "$ref": "#/definitions/inputField"
           longLabel:
             type: string
             title: The long label for this field
             description: Used in the UI where a long label for tasks is shown.
             examples: [Tasks and Milestones]
           longName:
-            type: string
-            examples: [Tasks description]
+            "$ref": "#/definitions/inputField"
           projectedCompletion: 
             "$ref": "#/definitions/inputField"
           plannedCompletion:

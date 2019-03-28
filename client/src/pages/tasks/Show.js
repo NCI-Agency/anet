@@ -5,6 +5,7 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 import { Formik, Form, Field } from 'formik'
 import * as FieldHelper from 'components/FieldHelper'
 
+// import Calendar from 'components/Calendar'
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
 import Messages, {setMessages} from 'components/Messages'
@@ -29,6 +30,8 @@ class BaseTaskShow extends Page {
 
 	static modelName = 'Task'
 
+	ShortNameField = DictionaryField(Field)
+	LongNameField = DictionaryField(Field)
 	TaskCustomFieldRef1 = DictionaryField(Field)
 	TaskCustomField = DictionaryField(Field)
 	PlannedCompletionField = DictionaryField(Field)
@@ -105,16 +108,21 @@ class BaseTaskShow extends Page {
 					<Messages success={this.state.success} error={this.state.error} />
 					<Form className="form-horizontal" method="post">
 						<Fieldset title={`${Settings.fields.task.shortLabel} ${task.shortName}`} action={action} />
+						{/* <Calendar>
+
+						</Calendar> */}
 						<Fieldset>
-							<Field
+
+							<this.ShortNameField
+								dictProps={Settings.fields.task.shortName}
 								name="shortName"
-								label={Settings.fields.task.shortName}
 								component={FieldHelper.renderReadonlyField}
 							/>
 
+							{/* TODO: replace with a generic component, but do not use componentClass textarea */}
 							<Field
 								name="longName"
-								label={Settings.fields.task.longName}
+								label={Settings.fields.task.longName.label}
 								component={FieldHelper.renderReadonlyField}
 							/>
 

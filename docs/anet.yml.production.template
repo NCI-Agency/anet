@@ -174,9 +174,14 @@ dictionary:
 
     task:
       shortLabel: Task
-      shortName: Task number
+      shortName:
+        label: Task number
+        placeholder: Enter an effort name, example....
       longLabel: Tasks and Milestones
-      longName: Task description
+      longName:
+        label: Task description
+        placeholder: Enter an effort description, example ....
+        componentClass: textarea
       projectedCompletion:
         label: Projected Completion
       plannedCompletion:
