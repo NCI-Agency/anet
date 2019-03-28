@@ -36,7 +36,8 @@ public class Report extends AbstractAnetBean implements SubscribableObject {
 										CANCELLED_DUE_TO_FORCE_PROTECTION,
 										CANCELLED_DUE_TO_ROUTES,
 										CANCELLED_DUE_TO_THREAT,
-										NO_REASON_GIVEN }
+										NO_REASON_GIVEN,
+										CANCELLED_DUE_TO_AVAILABILITY_OF_INTERPRETERS }
 
 	private ForeignObjectHolder<ApprovalStep> approvalStep = new ForeignObjectHolder<>();
 	ReportState state;
