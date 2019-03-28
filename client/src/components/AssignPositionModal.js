@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import autobind from 'autobind-decorator'
-import Autocomplete from 'components/Autocomplete'
+
+import AdvancedSingleSelect from 'components/advancedSelectWidget/AdvancedSingleSelect'
 import {Modal, Button, Grid, Row, Col, Alert, Table} from 'react-bootstrap'
 import {Position, Person} from 'models'
 import LinkTo from 'components/LinkTo'
@@ -9,6 +10,8 @@ import Messages from 'components/Messages'
 import API from 'api'
 import _isEmpty from 'lodash/isEmpty'
 import AppContext from 'components/AppContext'
+
+import POSITIONS_ICON from 'resources/positions.png'
 
 class BaseAssignPositionModal extends Component {
 	static propTypes = {
@@ -53,6 +56,13 @@ class BaseAssignPositionModal extends Component {
 		} else if (person.role === Person.ROLE.PRINCIPAL) {
 			positionSearchQuery.type = [Position.TYPE.PRINCIPAL]
 		}
+		const positionsFilters = {
+			allAdvisorPositions: {
+				label: 'All',
+				searchQuery: true,
+				queryVars: positionSearchQuery,
+			}
+		}
 
 		return (
 			<Modal show={this.props.showModal} onHide={this.close}>
@@ -70,20 +80,21 @@ class BaseAssignPositionModal extends Component {
 					}
 					<Grid fluid>
 						<Row>
-							<Col md={2}>
-								<b>Select a position</b>
-							</Col>
 							<Col md={10}>
-								<Autocomplete valueKey="name"
+								<AdvancedSingleSelect
+									fieldName="position"
+									fieldLabel="Select a position"
 									placeholder="Select a position for this person"
-									objectType={Position}
-									fields={'uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role }'}
-									template={pos =>
-										<span>{[pos.name, pos.code].join(' - ')}</span>
-									}
-									queryParams={positionSearchQuery}
 									value={this.state.position}
+									overlayColumns={['', 'Name', 'Position']}
+									overlayRenderRow={this.renderPositionOverlayRow}
+									filterDefs={positionsFilters}
 									onChange={this.onPositionSelect}
+									objectType={Position}
+									valueKey="name"
+									fields={'uuid, name, code, type, organization { uuid, shortName, longName, identificationCode}, person { uuid, name, rank, role }'}
+									addon={POSITIONS_ICON}
+									vertical={true}
 								/>
 							</Col>
 						</Row>
@@ -145,21 +156,29 @@ class BaseAssignPositionModal extends Component {
 			})
 	}
 
+
 	@autobind
 	save() {
-		const operation = 'putPersonInPosition'
-		let graphql = operation + '(uuid: $uuid, person: $person)'
-		const variables = {
+		let graphql = 'putPersonInPosition(uuid: $uuid, person: $person)'
+		let variables = {
 			uuid: this.state.position.uuid,
 			person: {uuid: this.props.person.uuid}
 		}
-		const variableDef = '($uuid: String!, $person: PersonInput!)'
+		let variableDef = '($uuid: String!, $person: PersonInput!)'
+		if (this.state.position === null) {
+			graphql = 'deletePersonFromPosition(uuid: $uuid)'
+			variables = {
+				uuid: this.props.person.position.uuid,
+			}
+			variableDef = '($uuid: String!)'
+		}
+
 		API.mutation(graphql, variables, variableDef)
-			.then(
-				data => this.props.onSuccess()
-			).catch(error => {
-				this.setState({error: error})
-			})
+		.then(
+			data => this.props.onSuccess()
+		).catch(error => {
+			this.setState({error: error})
+		})
 	}
 
 	@autobind
@@ -171,7 +190,7 @@ class BaseAssignPositionModal extends Component {
 
 	@autobind
 	onPositionSelect(position) {
-		if (position.uuid) {
+		if (position && position.uuid) {
 			this.setState({position}, () => this.updateAlert())
 		}
 	}
@@ -184,6 +203,15 @@ class BaseAssignPositionModal extends Component {
 			error = {message: errorMessage}
 		}
 		this.setState({error: error})
+	}
+
+	renderPositionOverlayRow = (item) => {
+		return (
+			<React.Fragment key={item.uuid}>
+				<td><LinkTo person={item.person} isLink={false} /></td>
+				<td><LinkTo position={item} isLink={false} /></td>
+			</React.Fragment>
+		)
 	}
 
 }
