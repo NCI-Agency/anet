@@ -23,7 +23,6 @@ a {
 <#assign name = person.getName()>
 ${rank} ${name},
 
-<#assign endDate = person.getEndOfTourDate()>
 <p>Your ANET profile has been automatically inactivated by the system as your end of tour date has been reached. You will no longer be able to use ANET.</p>
 
 ANET Support Team
