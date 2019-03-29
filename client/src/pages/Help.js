@@ -4,9 +4,8 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 
 import Fieldset from 'components/Fieldset'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 import GQL from 'graphqlapi'
-import API from 'api'
 import {Person, Position} from 'models'
 
 import AppContext from 'components/AppContext'

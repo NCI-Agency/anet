@@ -11,6 +11,7 @@ import com.codahale.metrics.annotation.Timed;
 import io.dropwizard.auth.Auth;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.AdminDao.AdminSettingKeys;
 import mil.dds.anet.views.IndexView;
 
@@ -18,10 +19,12 @@ import mil.dds.anet.views.IndexView;
 @PermitAll
 public class HomeResource {
 
+	private final AnetConfiguration config;
 	private final AnetObjectEngine engine;
 	
-	public HomeResource(AnetObjectEngine engine) { 
+	public HomeResource(AnetObjectEngine engine, AnetConfiguration config) {
 		this.engine = engine;
+		this.config = config;
 	}
 	
 	/**
@@ -41,6 +44,7 @@ public class HomeResource {
 		
 		view.setSecurityBannerText(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_TEXT));
 		view.setSecurityBannerColor(engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
+		view.setDictionary(config.getDictionary());
 		
 		return view;
 	}

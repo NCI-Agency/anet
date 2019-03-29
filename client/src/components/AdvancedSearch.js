@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import {Button, DropdownButton, MenuItem, Row, Col, Form, FormGroup, FormControl, ControlLabel} from 'react-bootstrap'
 import autobind from 'autobind-decorator'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 import ButtonToggleGroup from 'components/ButtonToggleGroup'
 
 import searchFilters , { POSTITION_POSITION_TYPE_FILTER_KEY, POSTITION_ORGANIZATION_FILTER_KEY } from 'components/SearchFilters'

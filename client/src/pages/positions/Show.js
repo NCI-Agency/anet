@@ -18,9 +18,8 @@ import RelatedObjectNotes, {GRAPHQL_NOTES_FIELDS} from 'components/RelatedObject
 import GuidedTour from 'components/GuidedTour'
 import {positionTour} from 'pages/HopscotchTour'
 
-import API from 'api'
 import {Person, Position} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 import DictionaryField from 'HOC/DictionaryField'

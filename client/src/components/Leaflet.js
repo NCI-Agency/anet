@@ -15,7 +15,7 @@ import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
 import { MarkerClusterGroup } from 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import MARKER_ICON from 'resources/leaflet/marker-icon.png'
 import MARKER_ICON_2X from 'resources/leaflet/marker-icon-2x.png'

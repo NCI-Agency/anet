@@ -7,9 +7,12 @@ const webpack = require('webpack')
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin')
 const path = require('path')
 
-module.exports = merge(common, {
+const clientConfig = merge(common.clientConfig, {
   bail: true,
   devtool: 'source-map',
+  resolve: {
+    modules: [paths.appSrc, "node_modules", "platform/web"]
+  },
   output: {
     publicPath: '/assets/client/',
     filename: 'static/js/[name].[chunkhash:8].js',
@@ -55,3 +58,5 @@ module.exports = merge(common, {
         }
   }),
 ]})
+
+module.exports = clientConfig

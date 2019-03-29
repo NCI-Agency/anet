@@ -5,7 +5,7 @@ import {Table} from 'react-bootstrap'
 import UltimatePagination from 'components/UltimatePagination'
 import LinkTo from 'components/LinkTo'
 import {Task} from 'models'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import _get from 'lodash/get'
 import pluralize from 'pluralize'

@@ -17,8 +17,7 @@ import {userTour, superUserTour} from 'pages/HopscotchTour'
 
 import {Person, Report} from 'models'
 
-import API from 'api'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import ConfirmDelete from 'components/ConfirmDelete'
 

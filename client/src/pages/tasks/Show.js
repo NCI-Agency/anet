@@ -14,7 +14,7 @@ import DictionaryField from '../../HOC/DictionaryField'
 
 import GQL from 'graphqlapi'
 import {Person, Task} from 'models'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import moment from 'moment'
 

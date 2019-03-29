@@ -20,7 +20,7 @@ import GuidedTour from 'components/GuidedTour'
 import {personTour} from 'pages/HopscotchTour'
 
 import {Person, Position} from 'models'
-import Settings from 'Settings'
+import {Settings} from 'api'
 import GQL from 'graphqlapi'
 
 import AppContext from 'components/AppContext'

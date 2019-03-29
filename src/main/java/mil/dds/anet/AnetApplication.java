@@ -233,7 +233,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		}
 		scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
 		
-		//Create all of the HTTP Resources.  
+		//Create all of the HTTP Resources.
 		LoggingResource loggingResource = new LoggingResource();
 		PersonResource personResource = new PersonResource(engine, configuration);
 		TaskResource taskResource =  new TaskResource(engine, configuration);
@@ -242,7 +242,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
 		PositionResource positionResource = new PositionResource(engine);
 		ReportResource reportResource = new ReportResource(engine, configuration);
 		AdminResource adminResource = new AdminResource(engine, configuration);
-		HomeResource homeResource = new HomeResource(engine);
+		HomeResource homeResource = new HomeResource(engine, configuration);
 		SavedSearchResource savedSearchResource = new SavedSearchResource(engine);
 		final TagResource tagResource = new TagResource(engine);
 		final AuthorizationGroupResource authorizationGroupResource = new AuthorizationGroupResource(engine);
