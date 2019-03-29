@@ -16,9 +16,8 @@ import TaskTable from 'components/TaskTable'
 import LinkTo from 'components/LinkTo'
 import Messages from 'components/Messages'
 
-import API from 'api'
 import {Organization, Person, Position, Task} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import DictionaryField from '../../HOC/DictionaryField'
 

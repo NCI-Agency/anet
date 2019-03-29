@@ -15,9 +15,7 @@ import Messages from 'components/Messages'
 import PEOPLE_ICON from 'resources/people.png'
 
 import {Person} from 'models'
-import Settings from 'Settings'
-
-import API from 'api'
+import API, {Settings} from 'api'
 
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'

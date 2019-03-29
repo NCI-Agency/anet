@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { mapDispatchToProps, propTypes as pagePropTypes } from 'components/Page'
 import {Nav as BSNav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap'
 import {IndexLinkContainer as Link, LinkContainer} from 'react-router-bootstrap'
-import Settings from 'Settings'
+import {Settings} from 'api'
 import pluralize from 'pluralize'
 
 import {Organization, Person} from 'models'

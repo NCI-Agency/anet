@@ -13,9 +13,8 @@ import Messages from 'components/Messages'
 import LocationTable from 'components/LocationTable'
 import OrganizationTable from 'components/OrganizationTable'
 
-import API from 'api'
 import {Location, Organization, Person, Position} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import AppContext from 'components/AppContext'
 import { withRouter } from 'react-router-dom'

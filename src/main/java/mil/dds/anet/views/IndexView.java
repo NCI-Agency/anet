@@ -1,11 +1,19 @@
 package mil.dds.anet.views;
 
+import java.util.Map;
+
+import org.apache.commons.text.StringEscapeUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import mil.dds.anet.beans.Person;
 
 public class IndexView extends SimpleView {
 	private Person currentUser;
 	private String securityBannerText;
 	private String securityBannerColor;
+	private Map<String, Object> dictionary;
 
 	public IndexView(String path) {
 		super(path);
@@ -33,6 +41,21 @@ public class IndexView extends SimpleView {
 
 	public void setSecurityBannerColor(String securityBannerColor) {
 		this.securityBannerColor = securityBannerColor;
+	}
+
+	public Map<String, Object> getDictionary() {
+		return dictionary;
+	}
+
+	public void setDictionary(Map<String, Object> dictionary) {
+		this.dictionary = dictionary;
+	}
+
+	//TODO: should try to pass the dictionary to the client as literal JSON instead of serializing it to a string
+	public String getSerializedDictionary()
+			throws JsonProcessingException {
+		final ObjectMapper jsonMapper = new ObjectMapper();
+		return StringEscapeUtils.escapeEcmaScript(jsonMapper.writeValueAsString(dictionary));
 	}
 
 }

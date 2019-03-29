@@ -1,5 +1,5 @@
 import {Organization} from 'models'
-import Settings from 'Settings'
+import {Settings} from 'api'
 import pluralize from 'pluralize'
 
 const taskShortLabelSingular = Settings.fields.task.shortLabel

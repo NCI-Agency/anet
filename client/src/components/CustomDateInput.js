@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 import moment from 'moment'
 
 import { DateInput } from '@blueprintjs/datetime'

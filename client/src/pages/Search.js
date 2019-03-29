@@ -15,8 +15,7 @@ import ReportCollection from 'components/ReportCollection'
 import Messages from 'components/Messages'
 import PositionTable from 'components/PositionTable'
 
-import API from 'api'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 import GQL from 'graphqlapi'
 import {Person, Organization, Task} from 'models'
 

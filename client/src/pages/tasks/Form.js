@@ -15,9 +15,8 @@ import Messages from'components/Messages'
 import DictionaryField from '../../HOC/DictionaryField'
 import LinkTo from 'components/LinkTo'
 
-import API from 'api'
 import {Organization, Person, Task} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import ORGANIZATIONS_ICON from 'resources/organizations.png'
 import TASKS_ICON from 'resources/tasks.png'

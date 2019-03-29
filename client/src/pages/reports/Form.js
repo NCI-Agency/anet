@@ -11,7 +11,7 @@ import _isEmpty from 'lodash/isEmpty'
 import _cloneDeep from 'lodash/cloneDeep'
 import pluralize from 'pluralize'
 
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import AppContext from 'components/AppContext'
 import Autocomplete from 'components/Autocomplete'
@@ -36,7 +36,6 @@ import TASKS_ICON from 'resources/tasks.png'
 
 import {Report, Location, Person, Task, AuthorizationGroup} from 'models'
 
-import API from 'api'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import 'components/reactToastify.css'

@@ -7,7 +7,7 @@ import pluralize from 'pluralize'
 import UltimatePagination from 'components/UltimatePagination'
 import Fieldset from 'components/Fieldset'
 import LinkTo from 'components/LinkTo'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import {Person, Task} from 'models'
 import AppContext from 'components/AppContext'

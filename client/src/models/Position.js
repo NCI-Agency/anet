@@ -2,7 +2,7 @@ import React from 'react'
 
 import Model from 'components/Model'
 import utils from 'utils'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import * as yup from 'yup'
 
