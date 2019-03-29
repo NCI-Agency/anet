@@ -7,6 +7,6 @@ import mil.dds.anet.beans.search.SubscriptionSearchQuery;
 
 public interface ISubscriptionSearcher {
 
-	public AnetBeanList<Subscription> runSearch(SubscriptionSearchQuery query, Person user);
+  public AnetBeanList<Subscription> runSearch(SubscriptionSearchQuery query, Person user);
 
 }

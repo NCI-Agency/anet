@@ -7,6 +7,7 @@ import mil.dds.anet.beans.search.SubscriptionUpdateSearchQuery;
 
 public interface ISubscriptionUpdateSearcher {
 
-	public AnetBeanList<SubscriptionUpdate> runSearch(SubscriptionUpdateSearchQuery query, Person user);
+  public AnetBeanList<SubscriptionUpdate> runSearch(SubscriptionUpdateSearchQuery query,
+      Person user);
 
 }

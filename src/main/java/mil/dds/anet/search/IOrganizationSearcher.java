@@ -7,6 +7,6 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 
 public interface IOrganizationSearcher {
 
-	public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Person user);
-	
+  public AnetBeanList<Organization> runSearch(OrganizationSearchQuery query, Person user);
+
 }
