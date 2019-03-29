@@ -1,18 +1,14 @@
-import React from "react"
-import pluralize from "pluralize"
-
 import { Settings } from "api"
-
-import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
-import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
 import AutocompleteFilter from "components/advancedSearch/AutocompleteFilter"
+import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
+import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
 import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
 import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSearchFilter"
+import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
 import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
 import TextInputFilter from "components/advancedSearch/TextInputFilter"
-import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
-
-import { Location, Person, Task, Position, Organization, Tag } from "models"
+import { Location, Organization, Person, Position, Tag, Task } from "models"
+import pluralize from "pluralize"
 
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"

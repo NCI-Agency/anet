@@ -1,22 +1,18 @@
+import { Settings } from "api"
+import AppContext from "components/AppContext"
+import { mapDispatchToProps, propTypes as pagePropTypes } from "components/Page"
+import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
+import { Organization, Person } from "models"
+import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { mapDispatchToProps, propTypes as pagePropTypes } from "components/Page"
-import { Nav as BSNav, NavItem, NavDropdown, MenuItem } from "react-bootstrap"
+import { MenuItem, Nav as BSNav, NavDropdown, NavItem } from "react-bootstrap"
+import { connect } from "react-redux"
 import {
   IndexLinkContainer as Link,
   LinkContainer
 } from "react-router-bootstrap"
-import { Settings } from "api"
-import pluralize from "pluralize"
-
-import { Organization, Person } from "models"
-import { INSIGHTS, INSIGHT_DETAILS } from "pages/insights/Show"
-
-import AppContext from "components/AppContext"
-import { ResponsiveLayoutContext } from "components/ResponsiveLayout"
 import { withRouter } from "react-router-dom"
-import { connect } from "react-redux"
-
 import { ScrollLink, scrollSpy } from "react-scroll"
 
 export const AnchorNavItem = props => {

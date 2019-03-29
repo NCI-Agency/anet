@@ -1,29 +1,24 @@
-import PropTypes from "prop-types"
-import React from "react"
-import Page, {
-  mapDispatchToProps,
-  propTypes as pagePropTypes
-} from "components/Page"
-
-import { Formik, Form, Field } from "formik"
+import { Settings } from "api"
+import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
-
 // import Calendar from 'components/Calendar'
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages, { setMessages } from "components/Messages"
-import ReportCollection from "components/ReportCollection"
+import Page, {
+  mapDispatchToProps,
+  propTypes as pagePropTypes
+} from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-
+import ReportCollection from "components/ReportCollection"
+import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
 import { Person, Task } from "models"
-import { Settings } from "api"
-
 import moment from "moment"
-
-import AppContext from "components/AppContext"
+import PropTypes from "prop-types"
+import React from "react"
 import { connect } from "react-redux"
 import DictionaryField from "../../HOC/DictionaryField"
 

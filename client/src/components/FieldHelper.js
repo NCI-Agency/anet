@@ -1,15 +1,15 @@
 import React from "react"
-import utils from "utils"
 import {
-  FormGroup,
+  Button,
+  ButtonGroup,
   Col,
   ControlLabel,
   FormControl,
-  InputGroup,
+  FormGroup,
   HelpBlock,
-  ButtonGroup,
-  Button
+  InputGroup
 } from "react-bootstrap"
+import utils from "utils"
 
 const getFieldId = field => field.id || field.name // name property is required
 
