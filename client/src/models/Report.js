@@ -1,13 +1,11 @@
 import { Settings } from "api"
 import Model, { yupDate } from "components/Model"
-import moment from "moment"
 import _isEmpty from "lodash/isEmpty"
-import utils from "utils"
 import { Person, Position } from "models"
-
-import * as yup from "yup"
-
+import moment from "moment"
 import REPORTS_ICON from "resources/reports.png"
+import utils from "utils"
+import * as yup from "yup"
 
 export default class Report extends Model {
   static resourceName = "Report"
@@ -380,7 +378,6 @@ export default class Report extends Model {
       const lastApprovalStep = actions.pop()
       return !lastApprovalStep ? "" : lastApprovalStep.createdAt
     } else {
-
     }
   }
 }

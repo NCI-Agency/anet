@@ -1,15 +1,14 @@
-import React from "react"
-import PropTypes from "prop-types"
+import API from "api"
+import AppContext from "components/AppContext"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
 import ResponsiveLayout from "components/ResponsiveLayout"
-
-import API from "api"
-import { Person, Organization } from "models"
-import AppContext from "components/AppContext"
+import { Organization, Person } from "models"
 import Routing from "pages/Routing"
+import PropTypes from "prop-types"
+import React from "react"
 import { connect } from "react-redux"
 
 class App extends Page {

@@ -1,19 +1,16 @@
-import React from "react"
+import { PAGE_PROPS_NO_NAV } from "actions"
+import API from "api"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-
-import API from "api"
-import { Person, Report } from "models"
-
-import { withRouter } from "react-router-dom"
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { Report } from "models"
+import React from "react"
 import { connect } from "react-redux"
+import { withRouter } from "react-router-dom"
 import ReportForm from "./Form"
 
 class ReportEdit extends Page {

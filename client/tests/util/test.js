@@ -1,11 +1,11 @@
+let url = require("url")
+let path = require("path")
 let test = require("ava")
 let webdriver = require("selenium-webdriver")
 let { By, until, Key } = webdriver
 let moment = require("moment")
 let _includes = require("lodash/includes")
 let _isRegExp = require("lodash/isRegExp")
-let url = require("url")
-let path = require("path")
 let chalk = require("chalk")
 
 let capabilities = {}

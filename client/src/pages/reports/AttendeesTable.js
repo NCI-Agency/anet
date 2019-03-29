@@ -1,13 +1,9 @@
+import LinkTo from "components/LinkTo"
+import { Person } from "models"
 import React, { Component } from "react"
 import { Button, Label, Radio, Table } from "react-bootstrap"
-
-import _isEmpty from "lodash/isEmpty"
-
-import { Person } from "models"
-import LinkTo from "components/LinkTo"
-import "./AttendeesTable.css"
-
 import REMOVE_ICON from "resources/delete.png"
+import "./AttendeesTable.css"
 
 const RemoveIcon = () => (
   <img src={REMOVE_ICON} height={14} alt="Remove attendee" />

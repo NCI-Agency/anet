@@ -1,12 +1,9 @@
-import React from "react"
-
-import Model, { yupDate } from "components/Model"
-import utils from "utils"
 import { Settings } from "api"
-
-import * as yup from "yup"
-
+import Model, { yupDate } from "components/Model"
+import React from "react"
 import TASKS_ICON from "resources/tasks.png"
+import utils from "utils"
+import * as yup from "yup"
 
 export const {
   shortLabel,

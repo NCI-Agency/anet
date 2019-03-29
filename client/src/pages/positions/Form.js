@@ -1,32 +1,22 @@
+import API, { Settings } from "api"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AppContext from "components/AppContext"
+import * as FieldHelper from "components/FieldHelper"
+import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
+import Messages from "components/Messages"
+import NavigationWarning from "components/NavigationWarning"
+import { jumpToTop } from "components/Page"
+import { Field, Form, Formik } from "formik"
+import DictionaryField from "HOC/DictionaryField"
+import { Location, Organization, Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-
 import { Button, HelpBlock } from "react-bootstrap"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
-import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import Fieldset from "components/Fieldset"
-import Autocomplete from "components/Autocomplete"
-import Messages from "components/Messages"
-import LocationTable from "components/LocationTable"
-import OrganizationTable from "components/OrganizationTable"
-
-import { Location, Organization, Person, Position } from "models"
-import API, { Settings } from "api"
-
-import AppContext from "components/AppContext"
 import { withRouter } from "react-router-dom"
-import NavigationWarning from "components/NavigationWarning"
-import LinkTo from "components/LinkTo"
-import { jumpToTop } from "components/Page"
-import DictionaryField from "HOC/DictionaryField"
-import utils from "utils"
-
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
-import WARNING_ICON from "resources/warning.png"
+import utils from "utils"
 
 class BasePositionForm extends Component {
   static propTypes = {

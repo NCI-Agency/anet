@@ -1,16 +1,14 @@
-import PropTypes from "prop-types"
-import React, { Component } from "react"
+import API from "api"
 import autobind from "autobind-decorator"
-
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import { Modal, Button, Grid, Row, Col, Alert, Table } from "react-bootstrap"
-import { Position, Person } from "models"
+import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import API from "api"
 import _isEmpty from "lodash/isEmpty"
-import AppContext from "components/AppContext"
-
+import { Person, Position } from "models"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
 import POSITIONS_ICON from "resources/positions.png"
 
 class BaseAssignPositionModal extends Component {

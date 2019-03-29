@@ -1,5 +1,5 @@
-import { Organization } from "models"
 import { Settings } from "api"
+import { Organization } from "models"
 import pluralize from "pluralize"
 
 const taskShortLabelSingular = Settings.fields.task.shortLabel
@@ -203,7 +203,8 @@ const reportTour = (currentUser, history) => {
       },
       {
         title: "Sensitive information",
-        content: "If there's sensitive information from your meeting that you'd like to include, click on the \"Add sensitive information\" button. You will have additional space to record sensitive information, visible only to the groups that you authorize. This section does not display in the report summary.",
+        content:
+          "If there's sensitive information from your meeting that you'd like to include, click on the \"Add sensitive information\" button. You will have additional space to record sensitive information, visible only to the groups that you authorize. This section does not display in the report summary.",
         target: "#toggleSensitiveInfo",
         placement: "right"
       },

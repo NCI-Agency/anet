@@ -1,17 +1,14 @@
-import PropTypes from "prop-types"
-import React from "react"
+import { PAGE_PROPS_NO_NAV } from "actions"
+import AppContext from "components/AppContext"
+import GuidedTour from "components/GuidedTour"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-
-import GuidedTour from "components/GuidedTour"
-import { reportTour } from "pages/HopscotchTour"
-
 import { Person, Report } from "models"
-
-import AppContext from "components/AppContext"
-import { PAGE_PROPS_NO_NAV } from "actions"
+import { reportTour } from "pages/HopscotchTour"
+import PropTypes from "prop-types"
+import React from "react"
 import { connect } from "react-redux"
 import ReportForm from "./Form"
 

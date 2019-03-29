@@ -1,24 +1,18 @@
-import PropTypes from "prop-types"
-import React, { Component } from "react"
-
-import { Button } from "react-bootstrap"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
+import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import PositionTable from "components/PositionTable"
-import { jumpToTop } from "components/Page"
-
-import API from "api"
-import { AuthorizationGroup, Position } from "models"
-
-import { withRouter } from "react-router-dom"
 import NavigationWarning from "components/NavigationWarning"
-
+import { jumpToTop } from "components/Page"
+import PositionTable from "components/PositionTable"
+import { Field, Form, Formik } from "formik"
+import { AuthorizationGroup, Position } from "models"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { Button } from "react-bootstrap"
+import { withRouter } from "react-router-dom"
 import POSITIONS_ICON from "resources/positions.png"
 
 class AuthorizationGroupForm extends Component {
@@ -132,10 +126,7 @@ class AuthorizationGroupForm extends Component {
                     placeholder="Search for a position..."
                     value={values.positions}
                     renderSelected={
-                      <PositionTable
-                        positions={values.positions}
-                        showDelete
-                      />
+                      <PositionTable positions={values.positions} showDelete />
                     }
                     overlayColumns={["", "Name", "Position"]}
                     overlayRenderRow={this.renderPositionOverlayRow}

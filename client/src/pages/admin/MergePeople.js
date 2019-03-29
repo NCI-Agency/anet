@@ -1,28 +1,22 @@
-import React from "react"
+import API, { Settings } from "api"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import * as FieldHelper from "components/FieldHelper"
+import LinkTo from "components/LinkTo"
+import Messages from "components/Messages"
 import Page, {
-  mapDispatchToProps,
   jumpToTop,
+  mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-import * as yup from "yup"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
-import { Grid, Col, Row, Alert, Button, Checkbox } from "react-bootstrap"
-import Autocomplete from "components/Autocomplete"
-import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import LinkTo from "components/LinkTo"
-import moment from "moment"
-import Messages from "components/Messages"
-
-import PEOPLE_ICON from "resources/people.png"
-
+import { Field, Form, Formik } from "formik"
 import { Person } from "models"
-import API, { Settings } from "api"
-
-import { withRouter } from "react-router-dom"
+import moment from "moment"
+import React from "react"
+import { Alert, Button, Checkbox, Col, Grid, Row } from "react-bootstrap"
 import { connect } from "react-redux"
+import { withRouter } from "react-router-dom"
+import PEOPLE_ICON from "resources/people.png"
+import * as yup from "yup"
 
 class MergePeople extends Page {
   static propTypes = { ...pagePropTypes }

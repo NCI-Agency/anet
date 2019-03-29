@@ -1,5 +1,5 @@
-let moment = require("moment")
 let _includes = require("lodash/includes")
+let moment = require("moment")
 let test = require("../util/test")
 
 test("Draft and submit a report", async t => {

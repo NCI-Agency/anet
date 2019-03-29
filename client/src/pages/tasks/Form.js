@@ -1,29 +1,21 @@
-import PropTypes from "prop-types"
-import React, { Component } from "react"
-
-import { Button } from "react-bootstrap"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
-import Fieldset from "components/Fieldset"
-import CustomDateInput from "components/CustomDateInput"
-import Autocomplete from "components/Autocomplete"
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
-import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import Messages from "components/Messages"
-import LinkTo from "components/LinkTo"
-
-import { Organization, Person, Task } from "models"
 import API, { Settings } from "api"
-
-import ORGANIZATIONS_ICON from "resources/organizations.png"
-import TASKS_ICON from "resources/tasks.png"
-
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import { withRouter } from "react-router-dom"
+import CustomDateInput from "components/CustomDateInput"
+import * as FieldHelper from "components/FieldHelper"
+import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
+import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import { Field, Form, Formik } from "formik"
+import { Organization, Person, Task } from "models"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { Button } from "react-bootstrap"
+import { withRouter } from "react-router-dom"
+import ORGANIZATIONS_ICON from "resources/organizations.png"
+import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 import DictionaryField from "../../HOC/DictionaryField"
 
