@@ -14,7 +14,7 @@ import LoaderHOC, {mapDispatchToProps} from 'HOC/LoaderHOC'
 import ReportsVisualisation, {propTypes as rvPropTypes} from 'components/ReportsVisualisation'
 import ContainerDimensions from 'react-container-dimensions'
 import { IconNames } from '@blueprintjs/icons'
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 const d3 = require('d3')
 

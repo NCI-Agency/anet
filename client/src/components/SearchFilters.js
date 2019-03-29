@@ -1,7 +1,7 @@
 import React from 'react'
 import pluralize from 'pluralize'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 
 import ReportStateSearch from 'components/advancedSearch/ReportStateSearch'
 import DateRangeSearch from 'components/advancedSearch/DateRangeSearch'

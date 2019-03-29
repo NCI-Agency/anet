@@ -16,9 +16,8 @@ import AttendeesTable from './AttendeesTable'
 import {ReportCompactWorkflow} from 'components/ReportWorkflow'
 import Tag from 'components/Tag'
 
-import API from 'api'
 import {Report} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 import _isEmpty from 'lodash/isEmpty'
 
 import { PAGE_PROPS_MIN_HEAD } from 'actions'

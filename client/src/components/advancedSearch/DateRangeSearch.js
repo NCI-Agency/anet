@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import autobind from 'autobind-decorator'
 
-import Settings from 'Settings'
+import {Settings} from 'api'
 import CustomDateInput from 'components/CustomDateInput'
 import moment from 'moment'
 import _uniqueId from 'lodash/uniqueId'

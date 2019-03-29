@@ -3,9 +3,8 @@ import Page, {mapDispatchToProps, propTypes as pagePropTypes} from 'components/P
 
 import TaskForm from './Form'
 
-import API from 'api'
 import {Organization, Task} from 'models'
-import Settings from 'Settings'
+import API, {Settings} from 'api'
 
 import utils from 'utils'
 

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React, {Component} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import './ReportWorkflow.css'
-import Settings from 'Settings'
+import {Settings} from 'api'
 import LinkTo from 'components/LinkTo'
 
 import Fieldset from 'components/Fieldset'

@@ -1,13 +1,14 @@
+
 import querystring from 'querystring'
 
-const API = {
+const BaseAPI = {
 	_fetch(pathName, params, accept) {
 		params = params || {}
 		params.credentials = 'same-origin'
 
 		params.headers = params.headers || {}
 		params.headers.Accept = accept || 'application/json'
-		const authHeader = API._getAuthHeader()
+		const authHeader = BaseAPI._getAuthHeader()
 		if (authHeader) {
 			params.headers[authHeader[0]] = authHeader[1]
 		}
@@ -51,7 +52,7 @@ const API = {
 		params.headers = params.headers || {}
 		params.headers['Content-Type'] = 'application/json'
 
-		return API._fetch(url, params)
+		return BaseAPI._fetch(url, params)
 	},
 
 	_queryCommon(query, variables, variableDef, output, isMutation, params) {
@@ -60,19 +61,19 @@ const API = {
 		const queryType = isMutation ? 'mutation' : 'query'
 		query = queryType + ' ' + variableDef + ' { ' + query + ' }'
 		output = output || ''
-		return API._send('/graphql', {query, variables, output}, params)
+		return BaseAPI._send('/graphql', {query, variables, output}, params)
 	},
 
 	mutation(query, variables, variableDef, params) {
-		return API._queryCommon(query, variables, variableDef, undefined, true, params).then(json => json.data)
+		return BaseAPI._queryCommon(query, variables, variableDef, undefined, true, params).then(json => json.data)
 	},
 
 	query(query, variables, variableDef, params) {
-		return API._queryCommon(query, variables, variableDef, undefined, undefined, params).then(json => json.data)
+		return BaseAPI._queryCommon(query, variables, variableDef, undefined, undefined, params).then(json => json.data)
 	},
 
 	queryExport(query, variables, variableDef, output) {
-		return API._queryCommon(query, variables, variableDef, output).then(response => response.blob())
+		return BaseAPI._queryCommon(query, variables, variableDef, output).then(response => response.blob())
 	},
 
 	/**
@@ -84,28 +85,7 @@ const API = {
 	 */
 	logOnServer(severity, url, lineNr, message)
 	{
-		API._send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
-	},
-
-	loadFileAjaxSync(filePath, mimeType) {
-		let xmlhttp=new XMLHttpRequest()
-		xmlhttp.open("GET",filePath,false)
-		const authHeader = API._getAuthHeader()
-		if (authHeader) {
-			xmlhttp.setRequestHeader(authHeader[0], authHeader[1])
-		}
-		if (mimeType != null) {
-			if (xmlhttp.overrideMimeType) {
-				xmlhttp.overrideMimeType(mimeType)
-			}
-		}
-		xmlhttp.send()
-		if (xmlhttp.status===200) {
-			return xmlhttp.responseText
-		}
-		else {
-			throw new Error("unable to load " + filePath)
-		}
+		BaseAPI._send('/api/logging/log',[{severity: severity, url: url, lineNr: lineNr, message: message}])
 	},
 
 	_getAuthParams: function() {
@@ -120,7 +100,7 @@ const API = {
 	},
 
 	addAuthParams: function(url) {
-		const creds = API._getAuthParams()
+		const creds = BaseAPI._getAuthParams()
 		if (creds) {
 			url += "?" + querystring.stringify(creds)
 		}
@@ -128,7 +108,7 @@ const API = {
 	},
 
 	_getAuthHeader: function() {
-		const creds = API._getAuthParams()
+		const creds = BaseAPI._getAuthParams()
 		if (creds) {
 			return ['Authorization', 'Basic ' + Buffer.from(`${creds.user}:${creds.pass}`).toString('base64')]
 		}
@@ -136,4 +116,4 @@ const API = {
 	}
 }
 
-export default API
+export default BaseAPI
