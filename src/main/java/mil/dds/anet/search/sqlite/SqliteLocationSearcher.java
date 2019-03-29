@@ -53,8 +53,8 @@ public class SqliteLocationSearcher extends AbstractSearcherBase implements ILoc
         .map(new LocationMapper()).list();
 
     result.setList(list);
-    result.setTotalCount(result.getList().size()); // Sqlite cannot do true total counts, so this is
-                                                   // a crutch.
+    // Sqlite cannot do true total counts, so this is a crutch.
+    result.setTotalCount(result.getList().size());
     return result;
   }
 

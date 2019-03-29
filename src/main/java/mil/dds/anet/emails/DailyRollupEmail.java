@@ -31,9 +31,8 @@ public class DailyRollupEmail implements AnetEmailAction {
 
   private Instant startDate;
   private Instant endDate;
-  private OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG; // show the table based
-                                                                          // off this organization
-                                                                          // type.
+  // show the table based off this organization type.
+  private OrganizationType chartOrgType = OrganizationType.PRINCIPAL_ORG;
   private String advisorOrganizationUuid;
   private String principalOrganizationUuid;
   private String comment;

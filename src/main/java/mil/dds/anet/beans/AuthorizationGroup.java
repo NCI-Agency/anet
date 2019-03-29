@@ -76,7 +76,8 @@ public class AuthorizationGroup extends AbstractAnetBean {
     this.status = status;
   }
 
-  @GraphQLQuery(name = "reports") // TODO: batch load? (appears to be unused)
+  // TODO: batch load? (appears to be unused)
+  @GraphQLQuery(name = "reports")
   public AnetBeanList<Report> fetchReports(@GraphQLArgument(name = "pageNum") int pageNum,
       @GraphQLArgument(name = "pageSize") int pageSize) {
     ReportSearchQuery query = new ReportSearchQuery();
@@ -86,7 +87,8 @@ public class AuthorizationGroup extends AbstractAnetBean {
     return AnetObjectEngine.getInstance().getReportDao().search(query);
   }
 
-  @GraphQLQuery(name = "paginatedPositions") // TODO: batch load? (appears to be unused)
+  // TODO: batch load? (appears to be unused)
+  @GraphQLQuery(name = "paginatedPositions")
   public AnetBeanList<Position> fetchPositions(@GraphQLArgument(name = "pageNum") int pageNum,
       @GraphQLArgument(name = "pageSize") int pageSize) {
     PositionSearchQuery query = new PositionSearchQuery();

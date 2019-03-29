@@ -19,8 +19,8 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Organization extends AbstractAnetBean {
 
-  public static final String DUMMY_ORG_UUID = "-1"; // pseudo uuid to represent all/top-level
-                                                    // organization(s)
+  // pseudo uuid to represent all/top-level organization(s)
+  public static final String DUMMY_ORG_UUID = "-1";
 
   public static enum OrganizationStatus {
     ACTIVE, INACTIVE
@@ -122,7 +122,8 @@ public class Organization extends AbstractAnetBean {
     this.type = type;
   }
 
-  @GraphQLQuery(name = "positions") // TODO: batch load? (used in organizations/Show.js)
+  // TODO: batch load? (used in organizations/Show.js)
+  @GraphQLQuery(name = "positions")
   public synchronized List<Position> loadPositions() {
     if (positions == null) {
       positions = AnetObjectEngine.getInstance().getPositionDao().getByOrganization(uuid);
@@ -151,7 +152,8 @@ public class Organization extends AbstractAnetBean {
     this.approvalSteps = steps;
   }
 
-  @GraphQLQuery(name = "childrenOrgs") // TODO: batch load? (used in organizations/Show.js)
+  // TODO: batch load? (used in organizations/Show.js)
+  @GraphQLQuery(name = "childrenOrgs")
   public synchronized List<Organization> loadChildrenOrgs() {
     if (childrenOrgs == null) {
       OrganizationSearchQuery query = new OrganizationSearchQuery();
@@ -163,8 +165,8 @@ public class Organization extends AbstractAnetBean {
     return childrenOrgs;
   }
 
-  @GraphQLQuery(name = "allDescendantOrgs") // TODO: batch load? (used in App.js for me → position →
-                                            // organization)
+  // TODO: batch load? (used in App.js for me → position → organization)
+  @GraphQLQuery(name = "allDescendantOrgs")
   public synchronized List<Organization> loadAllDescendants() {
     if (descendants == null) {
       OrganizationSearchQuery query = new OrganizationSearchQuery();
@@ -176,7 +178,8 @@ public class Organization extends AbstractAnetBean {
     return descendants;
   }
 
-  @GraphQLQuery(name = "tasks") // TODO: batch load? (used in organizations/Edit.js)
+  // TODO: batch load? (used in organizations/Edit.js)
+  @GraphQLQuery(name = "tasks")
   public synchronized List<Task> loadTasks() {
     if (tasks == null) {
       tasks =
@@ -194,7 +197,8 @@ public class Organization extends AbstractAnetBean {
     this.tasks = tasks;
   }
 
-  @GraphQLQuery(name = "reports") // TODO: batch load? (appears to be unused)
+  // TODO: batch load? (appears to be unused)
+  @GraphQLQuery(name = "reports")
   public AnetBeanList<Report> fetchReports(@GraphQLArgument(name = "pageNum") int pageNum,
       @GraphQLArgument(name = "pageSize") int pageSize) {
     ReportSearchQuery query = new ReportSearchQuery();

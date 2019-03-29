@@ -437,7 +437,8 @@ public class Report extends AbstractAnetBean {
     this.principalOrg = new ForeignObjectHolder<>(principalOrg);
   }
 
-  @GraphQLQuery(name = "comments") // TODO: batch load? (used in reports/{Minimal,Show}.js
+  // TODO: batch load? (used in reports/{Minimal,Show}.js
+  @GraphQLQuery(name = "comments")
   public synchronized List<Comment> loadComments() {
     if (comments == null) {
       comments = AnetObjectEngine.getInstance().getCommentDao().getCommentsForReport(uuid);
@@ -598,7 +599,8 @@ public class Report extends AbstractAnetBean {
     this.user = user;
   }
 
-  @GraphQLQuery(name = "authorizationGroups") // TODO: batch load? (used in reports/{Edit,Show}.js)
+  // TODO: batch load? (used in reports/{Edit,Show}.js)
+  @GraphQLQuery(name = "authorizationGroups")
   public synchronized List<AuthorizationGroup> loadAuthorizationGroups() {
     if (authorizationGroups == null && uuid != null) {
       authorizationGroups =

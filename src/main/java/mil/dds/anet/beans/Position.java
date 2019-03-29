@@ -137,9 +137,8 @@ public class Position extends AbstractAnetBean {
     return person.getForeignObject();
   }
 
-  @GraphQLQuery(name = "associatedPositions") // TODO: batch load? (used in
-                                              // positions/{Edit,Show}.js,
-                                              // {organizations,people}/Show.js)
+  // TODO: batch load? (used in positions/{Edit,Show}.js, {organizations,people}/Show.js)
+  @GraphQLQuery(name = "associatedPositions")
   public synchronized List<Position> loadAssociatedPositions() {
     if (associatedPositions == null) {
       associatedPositions =

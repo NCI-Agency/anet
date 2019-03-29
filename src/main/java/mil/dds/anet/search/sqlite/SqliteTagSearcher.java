@@ -28,8 +28,8 @@ public class SqliteTagSearcher extends AbstractSearcherBase implements ITagSearc
         .bind("text", Utils.getSqliteFullTextQuery(text))
         .bind("offset", query.getPageSize() * query.getPageNum()).bind("limit", query.getPageSize())
         .map(new TagMapper()).list());
-    result.setTotalCount(result.getList().size()); // Sqlite cannot do true total counts, so this is
-                                                   // a crutch.
+    // Sqlite cannot do true total counts, so this is a crutch.
+    result.setTotalCount(result.getList().size());
     return result;
   }
 
