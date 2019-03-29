@@ -169,15 +169,15 @@ public class AnetApplication extends Application<AnetConfiguration> {
       final UrlParamsAuthFilter<Person> urlParamsAuthFilter =
           new UrlParamsAuthFilter.Builder<Person>()
               .setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
-              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)) // Acting only as
-                                                                                   // Authz.
-              .setRealm("ANET").buildAuthFilter();
+              // Acting only as Authz.
+              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)).setRealm("ANET")
+              .buildAuthFilter();
       final BasicCredentialAuthFilter<Person> basicAuthFilter =
           new BasicCredentialAuthFilter.Builder<Person>()
               .setAuthenticator(new AnetDevAuthenticator(engine, metricRegistry))
-              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)) // Acting only as
-                                                                                   // Authz.
-              .setRealm("ANET").buildAuthFilter();
+              // Acting only as Authz.
+              .setAuthorizer(new AnetAuthenticationFilter(engine, metricRegistry)).setRealm("ANET")
+              .buildAuthFilter();
       environment.jersey().register(new AuthDynamicFeature(new ChainedAuthFilter<>(
           Arrays.asList(new AuthFilter[] {urlParamsAuthFilter, basicAuthFilter}))));
     } else {
