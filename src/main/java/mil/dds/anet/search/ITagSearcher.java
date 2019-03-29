@@ -6,6 +6,6 @@ import mil.dds.anet.beans.search.TagSearchQuery;
 
 public interface ITagSearcher {
 
-	public AnetBeanList<Tag> runSearch(TagSearchQuery query);
+  public AnetBeanList<Tag> runSearch(TagSearchQuery query);
 
 }
