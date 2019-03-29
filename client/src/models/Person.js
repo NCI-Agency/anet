@@ -1,5 +1,4 @@
 import { Settings } from "api"
-import LinkTo from "components/LinkTo"
 import Model, { yupDate } from "components/Model"
 import _isEmpty from "lodash/isEmpty"
 import { Organization, Position } from "models"
@@ -155,7 +154,7 @@ export default class Person extends Model {
           height={20}
           className="person-icon"
         />
-        <LinkTo person={person} isLink={false} />{" "}
+        {new Person(person).toString()}{" "}
         {person.position &&
           `- (${person.position.name}` +
             (person.position.code ? `, ${person.position.code}` : "") +
