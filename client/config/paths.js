@@ -1,5 +1,5 @@
-var path = require('path')
-var fs = require('fs')
+var path = require("path")
+var fs = require("fs")
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebookincubator/create-react-app/issues/637
@@ -19,22 +19,22 @@ function resolveApp(relativePath) {
 // It will then be used by Webpack configs.
 // Jest doesn’t need this because it already handles `NODE_PATH` out of the box.
 
-var nodePaths = (process.env.NODE_PATH || '')
-  .split(process.platform === 'win32' ? ';' : ':')
+var nodePaths = (process.env.NODE_PATH || "")
+  .split(process.platform === "win32" ? ";" : ":")
   .filter(Boolean)
   .map(resolveApp)
 
 // config after eject: we're in ./config/
 module.exports = {
-  appBuild: resolveApp('../build/resources/main/assets/client'),
-  appHtml: resolveApp('public/index.html'),
-  appIndexJs: resolveApp('src/index.js'),
-  appPackageJson: resolveApp('package.json'),
-  appSrc: resolveApp('src'),
-  clientBuild: resolveApp('build'),
-  testsSetup: resolveApp('src/setupTests.js'),
-  appNodeModules: resolveApp('node_modules'),
-  ownNodeModules: resolveApp('node_modules'),
+  appBuild: resolveApp("../build/resources/main/assets/client"),
+  appHtml: resolveApp("public/index.html"),
+  appIndexJs: resolveApp("src/index.js"),
+  appPackageJson: resolveApp("package.json"),
+  appSrc: resolveApp("src"),
+  clientBuild: resolveApp("build"),
+  testsSetup: resolveApp("src/setupTests.js"),
+  appNodeModules: resolveApp("node_modules"),
+  ownNodeModules: resolveApp("node_modules"),
   nodePaths: nodePaths
 }
 
