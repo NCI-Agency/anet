@@ -5,14 +5,14 @@ import java.util.Map;
 
 public class PersonSearchBuilder extends AbstractSearchBuilder {
 
-    private static final String DEFAULT_WHERE_FORMAT = "people.\"%s\" %s :%s";
+  private static final String DEFAULT_WHERE_FORMAT = "people.\"%s\" %s :%s";
 
-    public PersonSearchBuilder(Map<String, Object> args, List<String> whereClauses) {
-        super(args, whereClauses);
-    }
+  public PersonSearchBuilder(Map<String, Object> args, List<String> whereClauses) {
+    super(args, whereClauses);
+  }
 
-    @Override
-    protected String DefaultWhereFormat() {
-        return DEFAULT_WHERE_FORMAT;
-    }
+  @Override
+  protected String DefaultWhereFormat() {
+    return DEFAULT_WHERE_FORMAT;
+  }
 }

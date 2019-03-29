@@ -5,14 +5,14 @@ import java.util.Map;
 
 public class ReportSearchBuilder extends AbstractSearchBuilder {
 
-    private static final String DEFAULT_WHERE_FORMAT = "reports.\"%s\" %s :%s";
+  private static final String DEFAULT_WHERE_FORMAT = "reports.\"%s\" %s :%s";
 
-    public ReportSearchBuilder(Map<String, Object> args, List<String> whereClauses) {
-        super(args, whereClauses);
-    }
+  public ReportSearchBuilder(Map<String, Object> args, List<String> whereClauses) {
+    super(args, whereClauses);
+  }
 
-    @Override
-    protected String DefaultWhereFormat() {
-        return DEFAULT_WHERE_FORMAT;
-    }
+  @Override
+  protected String DefaultWhereFormat() {
+    return DEFAULT_WHERE_FORMAT;
+  }
 }

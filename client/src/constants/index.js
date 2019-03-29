@@ -1,1 +1,1 @@
-export const REPORT_DRAFT = 'REPORT_DRAFT'
+export const REPORT_DRAFT = "REPORT_DRAFT"

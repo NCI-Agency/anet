@@ -6,6 +6,6 @@ import mil.dds.anet.beans.search.AuthorizationGroupSearchQuery;
 
 public interface IAuthorizationGroupSearcher {
 
-	public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query);
+  public AnetBeanList<AuthorizationGroup> runSearch(AuthorizationGroupSearchQuery query);
 
 }

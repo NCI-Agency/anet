@@ -6,6 +6,6 @@ import mil.dds.anet.beans.search.LocationSearchQuery;
 
 public interface ILocationSearcher {
 
-	public AnetBeanList<Location> runSearch(LocationSearchQuery query);
-	
+  public AnetBeanList<Location> runSearch(LocationSearchQuery query);
+
 }
