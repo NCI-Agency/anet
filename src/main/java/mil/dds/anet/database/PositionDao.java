@@ -190,10 +190,8 @@ public class PositionDao extends AnetSubscribableObjectDao<Position> {
             + "(\"positionUuid\", \"personUuid\", \"createdAt\") "
             + "VALUES (:positionUuid, :personUuid, :createdAt)")
         .bind("positionUuid", positionUuid).bind("personUuid", personUuid)
-        .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))) // Need to ensure this
-                                                                        // timestamp is greater than
-                                                                        // previous INSERT.
-        .execute();
+        // Need to ensure this timestamp is greater than previous INSERT.
+        .bind("createdAt", DaoUtils.asLocalDateTime(now.plusMillis(1))).execute();
   }
 
   public int removePersonFromPosition(String positionUuid) {

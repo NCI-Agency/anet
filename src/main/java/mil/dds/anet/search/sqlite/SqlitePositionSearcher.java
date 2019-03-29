@@ -143,8 +143,8 @@ public class SqlitePositionSearcher extends AbstractSearcherBase implements IPos
     }
     final List<Position> list = q.map(new PositionMapper()).list();
     result.setList(list);
-    result.setTotalCount(result.getList().size()); // Sqlite cannot do true total counts, so this is
-                                                   // a crutch.
+    // Sqlite cannot do true total counts, so this is a crutch.
+    result.setTotalCount(result.getList().size());
     return result;
   }
 }

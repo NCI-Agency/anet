@@ -930,8 +930,8 @@ public class ReportResource {
 
     try {
       Configuration freemarkerConfig = new Configuration(Configuration.getVersion());
-      freemarkerConfig.setRecognizeStandardFileExtensions(true); // auto-escape HTML in our .ftlh
-                                                                 // templates
+      // auto-escape HTML in our .ftlh templates
+      freemarkerConfig.setRecognizeStandardFileExtensions(true);
       freemarkerConfig
           .setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.getVersion()).build());
       freemarkerConfig.loadBuiltInEncodingMap();

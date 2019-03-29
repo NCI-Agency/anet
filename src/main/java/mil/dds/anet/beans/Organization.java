@@ -19,8 +19,8 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Organization extends AbstractAnetBean implements SubscribableObject {
 
-  public static final String DUMMY_ORG_UUID = "-1"; // pseudo uuid to represent all/top-level
-                                                    // organization(s)
+  // pseudo uuid to represent all/top-level organization(s)
+  public static final String DUMMY_ORG_UUID = "-1";
 
   public static enum OrganizationStatus {
     ACTIVE, INACTIVE
@@ -164,8 +164,8 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
     return childrenOrgs;
   }
 
-  @GraphQLQuery(name = "allDescendantOrgs") // TODO: batch load? (used in App.js for me → position →
-                                            // organization)
+  // TODO: batch load? (used in App.js for me → position → organization)
+  @GraphQLQuery(name = "allDescendantOrgs")
   public synchronized List<Organization> loadAllDescendants() {
     if (descendants == null) {
       OrganizationSearchQuery query = new OrganizationSearchQuery();

@@ -82,8 +82,8 @@ public class SqliteTaskSearcher extends AbstractSearcherBase implements ITaskSea
     result.setList(getDbHandle().createQuery(sql.toString()).bindMap(args)
         .bind("offset", query.getPageSize() * query.getPageNum()).bind("limit", query.getPageSize())
         .map(new TaskMapper()).list());
-    result.setTotalCount(result.getList().size()); // Sqlite cannot do true total counts, so this is
-                                                   // a crutch.
+    // Sqlite cannot do true total counts, so this is a crutch.
+    result.setTotalCount(result.getList().size());
     return result;
   }
 
