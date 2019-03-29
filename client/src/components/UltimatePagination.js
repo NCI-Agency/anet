@@ -1,12 +1,14 @@
-import React from 'react'
-import Pagination from 'react-bootstrap/lib/Pagination'
-import { createUltimatePagination, ITEM_TYPES } from 'react-ultimate-pagination'
- 
+import React from "react"
+import Pagination from "react-bootstrap/lib/Pagination"
+import { createUltimatePagination, ITEM_TYPES } from "react-ultimate-pagination"
+
 export default createUltimatePagination({
   WrapperComponent: Pagination,
   itemTypeToComponent: {
-    [ITEM_TYPES.PAGE]: ({value, isActive, onClick}) => (
-      <Pagination.Item active={isActive} onClick={onClick}>{value}</Pagination.Item>
+    [ITEM_TYPES.PAGE]: ({ value, isActive, onClick }) => (
+      <Pagination.Item active={isActive} onClick={onClick}>
+        {value}
+      </Pagination.Item>
     ),
     [ITEM_TYPES.ELLIPSIS]: ({ isActive, onClick }) => (
       <Pagination.Ellipsis disabled={isActive} onClick={onClick} />
@@ -22,6 +24,6 @@ export default createUltimatePagination({
     ),
     [ITEM_TYPES.LAST_PAGE_LINK]: ({ isActive, onClick }) => (
       <Pagination.Last disabled={isActive} onClick={onClick} />
-    ),
-  },
+    )
+  }
 })

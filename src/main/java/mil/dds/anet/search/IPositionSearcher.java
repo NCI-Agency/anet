@@ -6,6 +6,6 @@ import mil.dds.anet.beans.search.PositionSearchQuery;
 
 public interface IPositionSearcher {
 
-	public AnetBeanList<Position> runSearch(PositionSearchQuery query);
-	
+  public AnetBeanList<Position> runSearch(PositionSearchQuery query);
+
 }
