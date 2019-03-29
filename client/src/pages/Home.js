@@ -1,43 +1,35 @@
-import PropTypes from "prop-types"
-
-import React from "react"
+import { SEARCH_OBJECT_TYPES } from "actions"
+import API, { Settings } from "api"
+import autobind from "autobind-decorator"
+import AppContext from "components/AppContext"
+import ConfirmDelete from "components/ConfirmDelete"
+import Fieldset from "components/Fieldset"
+import GuidedTour from "components/GuidedTour"
+import Messages from "components/Messages"
+import MySubscriptionUpdates from "components/MySubscriptionUpdates"
 import Page, {
-  mapDispatchToProps,
   jumpToTop,
+  mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-import {
-  Grid,
-  Row,
-  FormControl,
-  FormGroup,
-  ControlLabel,
-  Button
-} from "react-bootstrap"
-import autobind from "autobind-decorator"
-import GQL from "graphqlapi"
-
-import Fieldset from "components/Fieldset"
-import Messages from "components/Messages"
 import SavedSearchTable from "components/SavedSearchTable"
 import searchFilters from "components/SearchFilters"
-import MySubscriptionUpdates from "components/MySubscriptionUpdates"
-
-import GuidedTour from "components/GuidedTour"
-import { userTour, superUserTour } from "pages/HopscotchTour"
-
+import { LAST_WEEK } from "dateUtils"
+import GQL from "graphqlapi"
 import { Person, Report } from "models"
-
-import API, { Settings } from "api"
-
-import ConfirmDelete from "components/ConfirmDelete"
-
-import AppContext from "components/AppContext"
-import { withRouter } from "react-router-dom"
+import { superUserTour, userTour } from "pages/HopscotchTour"
+import PropTypes from "prop-types"
+import React from "react"
+import {
+  Button,
+  ControlLabel,
+  FormControl,
+  FormGroup,
+  Grid,
+  Row
+} from "react-bootstrap"
 import { connect } from "react-redux"
-
-import { SEARCH_OBJECT_TYPES } from "actions"
-import { LAST_WEEK, AFTER } from "dateUtils"
+import { withRouter } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
 
 class BaseHome extends Page {

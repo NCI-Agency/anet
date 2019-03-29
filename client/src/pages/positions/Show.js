@@ -1,38 +1,31 @@
-import PropTypes from "prop-types"
-import React from "react"
-import Page, {
-  mapDispatchToProps,
-  jumpToTop,
-  propTypes as pagePropTypes
-} from "components/Page"
-
-import { Formik, Form, Field } from "formik"
+import API, { Settings } from "api"
+import AppContext from "components/AppContext"
+import AssignPersonModal from "components/AssignPersonModal"
+import ConfirmDelete from "components/ConfirmDelete"
+import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import * as FieldHelper from "components/FieldHelper"
-
-import { Table, Button } from "react-bootstrap"
-import moment from "moment"
-
 import Fieldset from "components/Fieldset"
+import GuidedTour from "components/GuidedTour"
 import LinkTo from "components/LinkTo"
 import Messages, { setMessages } from "components/Messages"
-import AssignPersonModal from "components/AssignPersonModal"
-import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import Page, {
+  jumpToTop,
+  mapDispatchToProps,
+  propTypes as pagePropTypes
+} from "components/Page"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-
-import GuidedTour from "components/GuidedTour"
-import { positionTour } from "pages/HopscotchTour"
-
-import { Person, Position } from "models"
-import API, { Settings } from "api"
-
-import ConfirmDelete from "components/ConfirmDelete"
+import { Field, Form, Formik } from "formik"
 import DictionaryField from "HOC/DictionaryField"
-
-import AppContext from "components/AppContext"
-import { withRouter } from "react-router-dom"
+import { Person, Position } from "models"
+import moment from "moment"
+import { positionTour } from "pages/HopscotchTour"
+import PropTypes from "prop-types"
+import React from "react"
+import { Button, Table } from "react-bootstrap"
 import { connect } from "react-redux"
+import { withRouter } from "react-router-dom"
 
 class BasePositionShow extends Page {
   static propTypes = {
@@ -103,11 +96,7 @@ class BasePositionShow extends Page {
       (position.uuid && (!position.person || !position.person.uuid))
 
     return (
-      <Formik
-        enableReinitialize
-        initialValues={position}
-        {...myFormProps}
-      >
+      <Formik enableReinitialize initialValues={position} {...myFormProps}>
         {({ values }) => {
           const action = canEdit && (
             <LinkTo

@@ -1,16 +1,14 @@
+import { Settings } from "api"
+import autobind from "autobind-decorator"
+import AppContext from "components/AppContext"
+import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
+import UltimatePagination from "components/UltimatePagination"
+import { Person, Task } from "models"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Table } from "react-bootstrap"
-import autobind from "autobind-decorator"
-import pluralize from "pluralize"
-
-import UltimatePagination from "components/UltimatePagination"
-import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
-import { Settings } from "api"
-
-import { Person, Task } from "models"
-import AppContext from "components/AppContext"
 
 class BaseOrganizationTasks extends Component {
   static propTypes = {

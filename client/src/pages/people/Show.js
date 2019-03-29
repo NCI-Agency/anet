@@ -1,34 +1,29 @@
-import PropTypes from "prop-types"
-import React from "react"
+import { Settings } from "api"
+import AppContext from "components/AppContext"
+import AssignPositionModal from "components/AssignPositionModal"
+import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
+import * as FieldHelper from "components/FieldHelper"
+import Fieldset from "components/Fieldset"
+import GuidedTour from "components/GuidedTour"
+import LinkTo from "components/LinkTo"
+import Messages, { setMessages } from "components/Messages"
+import MySubscriptions from "components/MySubscriptions"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-import { Table, FormGroup, Col, ControlLabel, Button } from "react-bootstrap"
-import moment from "moment"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
-import Fieldset from "components/Fieldset"
-import ReportCollection from "components/ReportCollection"
-import LinkTo from "components/LinkTo"
-import Messages, { setMessages } from "components/Messages"
-import AssignPositionModal from "components/AssignPositionModal"
-import EditAssociatedPositionsModal from "components/EditAssociatedPositionsModal"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-import MySubscriptions from "components/MySubscriptions"
-
-import GuidedTour from "components/GuidedTour"
-import { personTour } from "pages/HopscotchTour"
-
-import { Person, Position } from "models"
-import { Settings } from "api"
+import ReportCollection from "components/ReportCollection"
+import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
-
-import AppContext from "components/AppContext"
+import { Person, Position } from "models"
+import moment from "moment"
+import { personTour } from "pages/HopscotchTour"
+import PropTypes from "prop-types"
+import React from "react"
+import { Button, Col, ControlLabel, FormGroup, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 
 class BasePersonShow extends Page {

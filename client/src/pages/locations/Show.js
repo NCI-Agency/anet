@@ -1,28 +1,24 @@
-import PropTypes from "prop-types"
-import React from "react"
+import AppContext from "components/AppContext"
+import * as FieldHelper from "components/FieldHelper"
+import Fieldset from "components/Fieldset"
+import Leaflet from "components/Leaflet"
+import LinkTo from "components/LinkTo"
+import Messages, { setMessages } from "components/Messages"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
-import Fieldset from "components/Fieldset"
-import Messages, { setMessages } from "components/Messages"
-import Leaflet from "components/Leaflet"
-import LinkTo from "components/LinkTo"
-import ReportCollection from "components/ReportCollection"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-
+import ReportCollection from "components/ReportCollection"
+import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
-import { Location, Person } from "models"
-
-import AppContext from "components/AppContext"
-import { connect } from "react-redux"
 import _escape from "lodash/escape"
+import { Location, Person } from "models"
+import PropTypes from "prop-types"
+import React from "react"
+import { connect } from "react-redux"
 
 class BaseLocationShow extends Page {
   static propTypes = {
@@ -91,11 +87,7 @@ class BaseLocationShow extends Page {
     }
 
     return (
-      <Formik
-        enableReinitialize
-        initialValues={location}
-        {...myFormProps}
-      >
+      <Formik enableReinitialize initialValues={location} {...myFormProps}>
         {({ values }) => {
           const marker = {
             id: location.uuid || 0,

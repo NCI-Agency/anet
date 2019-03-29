@@ -1,7 +1,7 @@
+import autobind from "autobind-decorator"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Checkbox } from "react-bootstrap"
-import autobind from "autobind-decorator"
 
 export default class CheckboxSearchFilter extends Component {
   static propTypes = {

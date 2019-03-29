@@ -1,32 +1,28 @@
+import { Icon } from "@blueprintjs/core"
+import { IconNames } from "@blueprintjs/icons"
+import {
+  clearSearchQuery,
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  resetPages,
+  setPageProps,
+  setPagination,
+  setSearchProps,
+  setSearchQuery
+} from "actions"
+import API from "api"
+import autobind from "autobind-decorator"
+import { setMessages } from "components/Messages"
+import NotFound from "components/NotFound"
+import _get from "lodash/get"
+import _isEmpty from "lodash/isEmpty"
+import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { OverlayTrigger, Tooltip } from "react-bootstrap"
-import _get from "lodash/get"
-import autobind from "autobind-decorator"
-
-import NotFound from "components/NotFound"
-import { setMessages } from "components/Messages"
-
-import _isEmpty from "lodash/isEmpty"
-import _isEqualWith from "lodash/isEqualWith"
-import utils from "utils"
-
-import API from "api"
-import { IconNames } from "@blueprintjs/icons"
-import { Icon } from "@blueprintjs/core"
-
-import { showLoading, hideLoading } from "react-redux-loading-bar"
+import { hideLoading, showLoading } from "react-redux-loading-bar"
 import { animateScroll, Link } from "react-scroll"
-import {
-  setPageProps,
-  setSearchProps,
-  setSearchQuery,
-  clearSearchQuery,
-  setPagination,
-  resetPages,
-  DEFAULT_PAGE_PROPS,
-  DEFAULT_SEARCH_PROPS
-} from "actions"
+import utils from "utils"
 
 export const mapDispatchToProps = (dispatch, ownProps) => ({
   showLoading: () => dispatch(showLoading()),

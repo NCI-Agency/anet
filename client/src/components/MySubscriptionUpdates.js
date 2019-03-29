@@ -1,19 +1,16 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
-import { Table } from "react-bootstrap"
-import GQL from "graphqlapi"
-
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Page from "components/Page"
 import UltimatePagination from "components/UltimatePagination"
-
-import { showLoading, hideLoading } from "react-redux-loading-bar"
-import { connect } from "react-redux"
+import GQL from "graphqlapi"
 import _get from "lodash/get"
-import _isEqual from "lodash/isEqual"
 import moment from "moment"
 import pluralize from "pluralize"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { Table } from "react-bootstrap"
+import { connect } from "react-redux"
+import { hideLoading, showLoading } from "react-redux-loading-bar"
 
 class BaseMySubscriptionUpdates extends Component {
   static propTypes = {

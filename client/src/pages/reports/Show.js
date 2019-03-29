@@ -1,43 +1,38 @@
-import PropTypes from "prop-types"
-import React from "react"
+import { SEARCH_OBJECT_TYPES } from "actions"
+import API, { Settings } from "api"
+import AppContext from "components/AppContext"
+import ConfirmDelete from "components/ConfirmDelete"
+import * as FieldHelper from "components/FieldHelper"
+import Fieldset from "components/Fieldset"
+import LinkTo from "components/LinkTo"
+import Messages, { setMessages } from "components/Messages"
 import Page, {
+  AnchorLink,
+  jumpToTop,
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
-import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
-import Confirm from "react-confirm-bootstrap"
-import moment from "moment"
-import utils from "utils"
-
-import Fieldset from "components/Fieldset"
-import Messages, { setMessages } from "components/Messages"
-import ConfirmDelete from "components/ConfirmDelete"
-import LinkTo from "components/LinkTo"
-import TaskTable from "components/TaskTable"
-import { ReportFullWorkflow } from "components/ReportWorkflow"
-import Tag from "components/Tag"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
-
-import API, { Settings } from "api"
-import { Report, Person, Comment, Position } from "models"
-import _isEmpty from "lodash/isEmpty"
+import { ReportFullWorkflow } from "components/ReportWorkflow"
+import Tag from "components/Tag"
+import TaskTable from "components/TaskTable"
+import { Field, Form, Formik } from "formik"
 import _concat from "lodash/concat"
-
-import AppContext from "components/AppContext"
-import { withRouter } from "react-router-dom"
+import _isEmpty from "lodash/isEmpty"
+import { Comment, Person, Position, Report } from "models"
+import moment from "moment"
+import PropTypes from "prop-types"
+import React from "react"
+import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
+import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
-import { jumpToTop, AnchorLink } from "components/Page"
-
-import { SEARCH_OBJECT_TYPES } from "actions"
+import { withRouter } from "react-router-dom"
 import { deserializeQueryParams } from "searchUtils"
-import AuthorizationGroupTable from "./AuthorizationGroupTable"
+import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
+import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
 class BaseReportShow extends Page {
   static propTypes = {
@@ -470,10 +465,7 @@ class BaseReportShow extends Page {
                 </Fieldset>
 
                 <Fieldset title="Meeting attendees">
-                  <AttendeesTable
-                    attendees={report.attendees}
-                    disabled
-                  />
+                  <AttendeesTable attendees={report.attendees} disabled />
                 </Fieldset>
 
                 <Fieldset title={Settings.fields.task.longLabel}>

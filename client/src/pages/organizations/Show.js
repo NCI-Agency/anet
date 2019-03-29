@@ -1,34 +1,28 @@
-import PropTypes from "prop-types"
-import React from "react"
+import { Settings } from "api"
+import AppContext from "components/AppContext"
+import * as FieldHelper from "components/FieldHelper"
+import Fieldset from "components/Fieldset"
+import GuidedTour from "components/GuidedTour"
+import LinkTo from "components/LinkTo"
+import Messages, { setMessages } from "components/Messages"
+import { AnchorNavItem } from "components/Nav"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-
-import { Formik, Form, Field } from "formik"
-import * as FieldHelper from "components/FieldHelper"
-
-import { ListGroup, ListGroupItem, Nav } from "react-bootstrap"
-import pluralize from "pluralize"
-
-import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
-import Messages, { setMessages } from "components/Messages"
-import ReportCollection from "components/ReportCollection"
 import RelatedObjectNotes, {
   GRAPHQL_NOTES_FIELDS
 } from "components/RelatedObjectNotes"
+import ReportCollection from "components/ReportCollection"
 import SubNav from "components/SubNav"
-
-import GuidedTour from "components/GuidedTour"
-import { orgTour } from "pages/HopscotchTour"
-
+import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
 import { Organization, Person, Position, Report, Task } from "models"
-import { Settings } from "api"
-
-import AppContext from "components/AppContext"
-import { AnchorNavItem } from "components/Nav"
+import { orgTour } from "pages/HopscotchTour"
+import pluralize from "pluralize"
+import PropTypes from "prop-types"
+import React from "react"
+import { ListGroup, ListGroupItem, Nav } from "react-bootstrap"
 import { connect } from "react-redux"
 import DictionaryField from "../../HOC/DictionaryField"
 import OrganizationApprovals from "./Approvals"
@@ -213,11 +207,7 @@ class BaseOrganizationShow extends Page {
       return <div className="loader" />
     }
     return (
-      <Formik
-        enableReinitialize
-        initialValues={organization}
-        {...myFormProps}
-      >
+      <Formik enableReinitialize initialValues={organization} {...myFormProps}>
         {({ values }) => {
           const action = (
             <div>
