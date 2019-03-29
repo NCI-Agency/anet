@@ -1,19 +1,19 @@
-import Model from 'components/Model'
+import Model from "components/Model"
 
 export default class Tag extends Model {
-	static resourceName = 'Tag'
-	static listName = 'tagList'
-	static getInstanceName = 'tag'
+  static resourceName = "Tag"
+  static listName = "tagList"
+  static getInstanceName = "tag"
 
-	static schema = {
-		name: '',
-		description: null,
-		...Model.schema,
-	}
+  static schema = {
+    name: "",
+    description: null,
+    ...Model.schema
+  }
 
-	static autocompleteQuery = "uuid, name"
+  static autocompleteQuery = "uuid, name"
 
-	toString() {
-		return this.name
-	}
+  toString() {
+    return this.name
+  }
 }

@@ -1,61 +1,71 @@
-import React, {Component} from 'react'
-import PropTypes from 'prop-types'
-import autobind from 'autobind-decorator'
-
-import ContainerDimensions from 'react-container-dimensions'
-import { createBalancedTreeFromLeaves, getLeaves, getNodeAtPath, getOtherDirection, getPathToCorner, updateTree,
-	Corner, Mosaic, MosaicWindow } from 'react-mosaic-component'
-import { Classes, Icon } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import classNames from 'classnames'
-import _dropRight from 'lodash/dropRight'
-import '@blueprintjs/core/lib/css/blueprint.css'
-import '@blueprintjs/icons/lib/css/blueprint-icons.css' // needed for the mosaic tile buttons (expand, close)
-import 'react-mosaic-component/react-mosaic-component.css'
-import './MosaicLayout.css'
+import { Classes, Icon } from "@blueprintjs/core"
+import "@blueprintjs/core/lib/css/blueprint.css"
+import { IconNames } from "@blueprintjs/icons"
+import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
+import autobind from "autobind-decorator"
+import classNames from "classnames"
+import _dropRight from "lodash/dropRight"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import {
+  Corner,
+  createBalancedTreeFromLeaves,
+  getLeaves,
+  getNodeAtPath,
+  getOtherDirection,
+  getPathToCorner,
+  Mosaic,
+  MosaicWindow,
+  updateTree
+} from "react-mosaic-component"
+import "react-mosaic-component/react-mosaic-component.css"
+import "./MosaicLayout.css"
 
 export default class MosaicLayout extends Component {
   static propTypes = {
-    visualizations: PropTypes.arrayOf(PropTypes.shape({
+    visualizations: PropTypes.arrayOf(
+      PropTypes.shape({
         id: PropTypes.string.isRequired,
         icons: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired, // icon names from @blueprintjs/icons IconNames
         title: PropTypes.string.isRequired,
-        renderer: PropTypes.func.isRequired,
+        renderer: PropTypes.func.isRequired
       })
     ).isRequired,
     initialNode: PropTypes.object, // FIXME: actually MosaicNode
     description: PropTypes.string,
-    style: PropTypes.object,
+    style: PropTypes.object
   }
 
   constructor(props) {
     super(props)
     this.state = {
-      currentNode: this.props.initialNode,
+      currentNode: this.props.initialNode
     }
   }
 
   render() {
-    return <div className="mosaic-box" style={this.props.style}>
-      <div className="mosaic-container">
-        {this.props.description &&
-          <p className="chart-description">{this.props.description}</p>
-        }
-        {this.renderNavBar()}
-        <Mosaic
-          value={this.state.currentNode}
-          onChange={this.updateCurrentNode}
-          renderTile={(id, path) => {
-            const viz = this.props.visualizations.find(viz => viz.id === id)
-            return <MosaicWindow
-              title={viz.title}
-              path={path}>
-              {viz.renderer(id)}
-            </MosaicWindow>
-          }}
-        />
+    return (
+      <div className="mosaic-box" style={this.props.style}>
+        <div className="mosaic-container">
+          {this.props.description && (
+            <p className="chart-description">{this.props.description}</p>
+          )}
+          {this.renderNavBar()}
+          <Mosaic
+            value={this.state.currentNode}
+            onChange={this.updateCurrentNode}
+            renderTile={(id, path) => {
+              const viz = this.props.visualizations.find(viz => viz.id === id)
+              return (
+                <MosaicWindow title={viz.title} path={path}>
+                  {viz.renderer(id)}
+                </MosaicWindow>
+              )
+            }}
+          />
+        </div>
       </div>
-    </div>
+    )
   }
 
   @autobind
@@ -89,7 +99,9 @@ export default class MosaicLayout extends Component {
             onClick={this.addChart.bind(this, viz.id)}
             title={viz.title}
           >
-            {viz.icons.map((icon, i) => <Icon key={i} icon={icon} />)}
+            {viz.icons.map((icon, i) => (
+              <Icon key={i} icon={icon} />
+            ))}
           </button>
         )
       }
@@ -107,18 +119,18 @@ export default class MosaicLayout extends Component {
     this.updateCurrentNode(createBalancedTreeFromLeaves(leaves))
   }
 
-  addChart = (viz) => {
+  addChart = viz => {
     let { currentNode } = this.state
     if (!currentNode) {
-     currentNode = viz
+      currentNode = viz
     } else {
       const path = getPathToCorner(currentNode, Corner.TOP_RIGHT)
       const parent = getNodeAtPath(currentNode, _dropRight(path))
       const destination = getNodeAtPath(currentNode, path)
-      const direction = parent ? getOtherDirection(parent.direction) : 'row'
+      const direction = parent ? getOtherDirection(parent.direction) : "row"
       let first
       let second
-      if (direction === 'row') {
+      if (direction === "row") {
         first = destination
         second = viz
       } else {
@@ -132,13 +144,12 @@ export default class MosaicLayout extends Component {
             $set: {
               direction,
               first,
-              second,
-            },
-          },
-        },
+              second
+            }
+          }
+        }
       ])
     }
     this.updateCurrentNode(currentNode)
   }
-
 }

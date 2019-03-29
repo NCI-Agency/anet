@@ -1,133 +1,134 @@
 package mil.dds.anet.beans.search;
 
 import java.util.List;
-
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
 
 public class PersonSearchQuery extends AbstractSearchQuery {
 
-	public enum PersonSearchSortBy { CREATED_AT, NAME, RANK }
+  public enum PersonSearchSortBy {
+    CREATED_AT, NAME, RANK
+  }
 
-	String orgUuid;
-	Role role;
-	List<PersonStatus> status;
-	Boolean includeChildOrgs;
-	String rank;
-	String country;
-	
-	//Filter to people in positions at a certain location
-	String locationUuid;
-	
-	//Also match on positions whose name or code matches text. 
-	Boolean matchPositionName;
-	
-	//Find people who are pending verification
-	Boolean pendingVerification;
-	
-	private PersonSearchSortBy sortBy;
-	private SortOrder sortOrder;
+  String orgUuid;
+  Role role;
+  List<PersonStatus> status;
+  Boolean includeChildOrgs;
+  String rank;
+  String country;
 
-	public PersonSearchQuery() {
-		this.setPageSize(100);
-		this.sortOrder = SortOrder.ASC;
-		this.sortBy = PersonSearchSortBy.NAME;
-	}
+  // Filter to people in positions at a certain location
+  String locationUuid;
 
-	public String getOrgUuid() {
-		return orgUuid;
-	}
+  // Also match on positions whose name or code matches text.
+  Boolean matchPositionName;
 
-	public void setOrgUuid(String orgUuid) {
-		this.orgUuid = orgUuid;
-	}
+  // Find people who are pending verification
+  Boolean pendingVerification;
 
-	public Role getRole() {
-		return role;
-	}
+  private PersonSearchSortBy sortBy;
+  private SortOrder sortOrder;
 
-	public void setRole(Role role) {
-		this.role = role;
-	}
+  public PersonSearchQuery() {
+    this.setPageSize(100);
+    this.sortOrder = SortOrder.ASC;
+    this.sortBy = PersonSearchSortBy.NAME;
+  }
 
-	public List<PersonStatus> getStatus() {
-		return status;
-	}
+  public String getOrgUuid() {
+    return orgUuid;
+  }
 
-	public void setStatus(List<PersonStatus> status) {
-		this.status = status;
-	}
+  public void setOrgUuid(String orgUuid) {
+    this.orgUuid = orgUuid;
+  }
 
-	public Boolean getIncludeChildOrgs() {
-		return includeChildOrgs;
-	}
+  public Role getRole() {
+    return role;
+  }
 
-	public void setIncludeChildOrgs(Boolean includeChildOrgs) {
-		this.includeChildOrgs = includeChildOrgs;
-	}
+  public void setRole(Role role) {
+    this.role = role;
+  }
 
-	public String getRank() {
-		return rank;
-	}
+  public List<PersonStatus> getStatus() {
+    return status;
+  }
 
-	public void setRank(String rank) {
-		this.rank = rank;
-	}
+  public void setStatus(List<PersonStatus> status) {
+    this.status = status;
+  }
 
-	public String getCountry() {
-		return country;
-	}
+  public Boolean getIncludeChildOrgs() {
+    return includeChildOrgs;
+  }
 
-	public void setCountry(String country) {
-		this.country = country;
-	}
+  public void setIncludeChildOrgs(Boolean includeChildOrgs) {
+    this.includeChildOrgs = includeChildOrgs;
+  }
 
-	public String getLocationUuid() {
-		return locationUuid;
-	}
+  public String getRank() {
+    return rank;
+  }
 
-	public void setLocationUuid(String locationUuid) {
-		this.locationUuid = locationUuid;
-	}
+  public void setRank(String rank) {
+    this.rank = rank;
+  }
 
-	public Boolean getMatchPositionName() {
-		return Boolean.TRUE.equals(matchPositionName);
-	}
+  public String getCountry() {
+    return country;
+  }
 
-	public void setMatchPositionName(Boolean matchPositionName) {
-		this.matchPositionName = matchPositionName;
-	}
+  public void setCountry(String country) {
+    this.country = country;
+  }
 
-	public Boolean getPendingVerification() {
-		return pendingVerification;
-	}
+  public String getLocationUuid() {
+    return locationUuid;
+  }
 
-	public void setPendingVerification(Boolean pendingVerification) {
-		this.pendingVerification = pendingVerification;
-	}
+  public void setLocationUuid(String locationUuid) {
+    this.locationUuid = locationUuid;
+  }
 
-	public PersonSearchSortBy getSortBy() {
-		return sortBy;
-	}
+  public Boolean getMatchPositionName() {
+    return Boolean.TRUE.equals(matchPositionName);
+  }
 
-	public void setSortBy(PersonSearchSortBy sortBy) {
-		this.sortBy = sortBy;
-	}
+  public void setMatchPositionName(Boolean matchPositionName) {
+    this.matchPositionName = matchPositionName;
+  }
 
-	public SortOrder getSortOrder() {
-		return sortOrder;
-	}
+  public Boolean getPendingVerification() {
+    return pendingVerification;
+  }
 
-	public void setSortOrder(SortOrder sortOrder) {
-		this.sortOrder = sortOrder;
-	}
+  public void setPendingVerification(Boolean pendingVerification) {
+    this.pendingVerification = pendingVerification;
+  }
 
-	public static PersonSearchQuery withText(String text, int pageNum, int pageSize) {
-		PersonSearchQuery query = new PersonSearchQuery();
-		query.setText(text);
-		query.setPageNum(pageNum);
-		query.setPageSize(pageSize);
-		return query;
-	}
+  public PersonSearchSortBy getSortBy() {
+    return sortBy;
+  }
+
+  public void setSortBy(PersonSearchSortBy sortBy) {
+    this.sortBy = sortBy;
+  }
+
+  public SortOrder getSortOrder() {
+    return sortOrder;
+  }
+
+  public void setSortOrder(SortOrder sortOrder) {
+    this.sortOrder = sortOrder;
+  }
+
+  public static PersonSearchQuery withText(String text, int pageNum, int pageSize) {
+    PersonSearchQuery query = new PersonSearchQuery();
+    query.setText(text);
+    query.setPageNum(pageNum);
+    query.setPageSize(pageSize);
+    return query;
+  }
 
 }

@@ -1,17 +1,14 @@
 package mil.dds.anet.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
-
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.ReportSearchQuery;
@@ -21,200 +18,215 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Task extends AbstractAnetBean {
 
-	public static final String DUMMY_TASK_UUID = "-1"; // pseudo uuid to represent 'no task'
+  public static final String DUMMY_TASK_UUID = "-1"; // pseudo uuid to represent 'no task'
 
-	public enum TaskStatus { ACTIVE, INACTIVE }
-	
-	private Instant plannedCompletion;
-	private Instant projectedCompletion;
+  public enum TaskStatus {
+    ACTIVE, INACTIVE
+  }
 
-	private String shortName;
-	private String longName;
-	private String category;
-	private String customField;
-	private String customFieldEnum1;
-	private String customFieldEnum2;
+  private Instant plannedCompletion;
+  private Instant projectedCompletion;
 
-	private AnetBeanList<Report> reports;
+  private String shortName;
+  private String longName;
+  private String category;
+  private String customField;
+  private String customFieldEnum1;
+  private String customFieldEnum2;
 
-	private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
+  private AnetBeanList<Report> reports;
 
-	TaskStatus status;
+  private ForeignObjectHolder<Task> customFieldRef1 = new ForeignObjectHolder<>();
 
-	private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
+  TaskStatus status;
 
-	public void setPlannedCompletion(Instant plannedCompletion) {
-		this.plannedCompletion = plannedCompletion;
-	}
+  private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
 
-	@GraphQLQuery(name="plannedCompletion")
-	public Instant getPlannedCompletion() {
-		return plannedCompletion;
-	}
+  public void setPlannedCompletion(Instant plannedCompletion) {
+    this.plannedCompletion = plannedCompletion;
+  }
 
-	public void setProjectedCompletion(Instant projectedCompletion) {
-		this.projectedCompletion = projectedCompletion;
-	}
+  @GraphQLQuery(name = "plannedCompletion")
+  public Instant getPlannedCompletion() {
+    return plannedCompletion;
+  }
 
-	@GraphQLQuery(name="projectedCompletion")
-	public Instant getProjectedCompletion() {
-		return projectedCompletion;
-	}
+  public void setProjectedCompletion(Instant projectedCompletion) {
+    this.projectedCompletion = projectedCompletion;
+  }
 
-	@GraphQLQuery(name="shortName")
-	public String getShortName() {
-		return shortName;
-	}
+  @GraphQLQuery(name = "projectedCompletion")
+  public Instant getProjectedCompletion() {
+    return projectedCompletion;
+  }
 
-	public void setShortName(String shortName) {
-		this.shortName = Utils.trimStringReturnNull(shortName);
-	}
+  @GraphQLQuery(name = "shortName")
+  public String getShortName() {
+    return shortName;
+  }
 
-	@GraphQLQuery(name="longName")
-	public String getLongName() {
-		return longName;
-	}
+  public void setShortName(String shortName) {
+    this.shortName = Utils.trimStringReturnNull(shortName);
+  }
 
-	public void setLongName(String longName) {
-		this.longName = Utils.trimStringReturnNull(longName);
-	}
+  @GraphQLQuery(name = "longName")
+  public String getLongName() {
+    return longName;
+  }
 
-	@GraphQLQuery(name="customField")
-	public String getCustomField() {
-		return customField;
-	}
+  public void setLongName(String longName) {
+    this.longName = Utils.trimStringReturnNull(longName);
+  }
 
-	public void setCustomField(String customField) {
-		this.customField = Utils.trimStringReturnNull(customField);
-	}
+  @GraphQLQuery(name = "customField")
+  public String getCustomField() {
+    return customField;
+  }
 
-	@GraphQLQuery(name="customFieldEnum1")
-	public String getCustomFieldEnum1() {
-		return customFieldEnum1;
-	}
+  public void setCustomField(String customField) {
+    this.customField = Utils.trimStringReturnNull(customField);
+  }
 
-	public void setCustomFieldEnum1(String customFieldEnum1) {
-		this.customFieldEnum1 = Utils.trimStringReturnNull(customFieldEnum1);
-	}
+  @GraphQLQuery(name = "customFieldEnum1")
+  public String getCustomFieldEnum1() {
+    return customFieldEnum1;
+  }
 
-	@GraphQLQuery(name="customFieldEnum2")
-	public String getCustomFieldEnum2() {
-		return customFieldEnum2;
-	}
+  public void setCustomFieldEnum1(String customFieldEnum1) {
+    this.customFieldEnum1 = Utils.trimStringReturnNull(customFieldEnum1);
+  }
 
-	public void setCustomFieldEnum2(String customFieldEnum2) {
-		this.customFieldEnum2 = Utils.trimStringReturnNull(customFieldEnum2);
-	}
+  @GraphQLQuery(name = "customFieldEnum2")
+  public String getCustomFieldEnum2() {
+    return customFieldEnum2;
+  }
 
-	@GraphQLQuery(name="category")
-	public String getCategory() {
-		return category;
-	}
+  public void setCustomFieldEnum2(String customFieldEnum2) {
+    this.customFieldEnum2 = Utils.trimStringReturnNull(customFieldEnum2);
+  }
 
-	public void setCategory(String category) {
-		this.category = Utils.trimStringReturnNull(category);
-	}
+  @GraphQLQuery(name = "category")
+  public String getCategory() {
+    return category;
+  }
 
-	@GraphQLQuery(name="customFieldRef1")
-	public CompletableFuture<Task> loadCustomFieldRef1(@GraphQLRootContext Map<String, Object> context) {
-		if (customFieldRef1.hasForeignObject()) {
-			return CompletableFuture.completedFuture(customFieldRef1.getForeignObject());
-		}
-		return new UuidFetcher<Task>().load(context, "tasks", customFieldRef1.getForeignUuid())
-				.thenApply(o -> { customFieldRef1.setForeignObject(o); return o; });
-	}
+  public void setCategory(String category) {
+    this.category = Utils.trimStringReturnNull(category);
+  }
 
-	@JsonIgnore
-	@GraphQLIgnore
-	public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
-		this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1Uuid);
-	}
+  @GraphQLQuery(name = "customFieldRef1")
+  public CompletableFuture<Task> loadCustomFieldRef1(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (customFieldRef1.hasForeignObject()) {
+      return CompletableFuture.completedFuture(customFieldRef1.getForeignObject());
+    }
+    return new UuidFetcher<Task>().load(context, "tasks", customFieldRef1.getForeignUuid())
+        .thenApply(o -> {
+          customFieldRef1.setForeignObject(o);
+          return o;
+        });
+  }
 
-	@JsonIgnore
-	@GraphQLIgnore
-	public String getCustomFieldRef1Uuid() {
-		return customFieldRef1.getForeignUuid();
-	}
+  @JsonIgnore
+  @GraphQLIgnore
+  public void setCustomFieldRef1Uuid(String customFieldRef1Uuid) {
+    this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1Uuid);
+  }
 
-	public void setCustomFieldRef1(Task customFieldRef1) {
-		this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1);
-	}
+  @JsonIgnore
+  @GraphQLIgnore
+  public String getCustomFieldRef1Uuid() {
+    return customFieldRef1.getForeignUuid();
+  }
 
-	@GraphQLIgnore
-	public Task getCustomFieldRef1() {
-		return customFieldRef1.getForeignObject();
-	}
+  public void setCustomFieldRef1(Task customFieldRef1) {
+    this.customFieldRef1 = new ForeignObjectHolder<>(customFieldRef1);
+  }
 
-	@GraphQLQuery(name="status")
-	public TaskStatus getStatus() {
-		return status;
-	}
+  @GraphQLIgnore
+  public Task getCustomFieldRef1() {
+    return customFieldRef1.getForeignObject();
+  }
 
-	public void setStatus(TaskStatus status) {
-		this.status = status;
-	}
+  @GraphQLQuery(name = "status")
+  public TaskStatus getStatus() {
+    return status;
+  }
 
-	@GraphQLQuery(name="responsibleOrg")
-	public CompletableFuture<Organization> loadResponsibleOrg(@GraphQLRootContext Map<String, Object> context) {
-		if (responsibleOrg.hasForeignObject()) {
-			return CompletableFuture.completedFuture(responsibleOrg.getForeignObject());
-		}
-		return new UuidFetcher<Organization>().load(context, "organizations", responsibleOrg.getForeignUuid())
-				.thenApply(o -> { responsibleOrg.setForeignObject(o); return o; });
-	}
+  public void setStatus(TaskStatus status) {
+    this.status = status;
+  }
 
-	@JsonIgnore
-	@GraphQLIgnore
-	public void setResponsibleOrgUuid(String responsibleOrgUuid) {
-		this.responsibleOrg = new ForeignObjectHolder<>(responsibleOrgUuid);
-	}
+  @GraphQLQuery(name = "responsibleOrg")
+  public CompletableFuture<Organization> loadResponsibleOrg(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (responsibleOrg.hasForeignObject()) {
+      return CompletableFuture.completedFuture(responsibleOrg.getForeignObject());
+    }
+    return new UuidFetcher<Organization>()
+        .load(context, "organizations", responsibleOrg.getForeignUuid()).thenApply(o -> {
+          responsibleOrg.setForeignObject(o);
+          return o;
+        });
+  }
 
-	@JsonIgnore
-	@GraphQLIgnore
-	public String getResponsibleOrgUuid() {
-		return responsibleOrg.getForeignUuid();
-	}
+  @JsonIgnore
+  @GraphQLIgnore
+  public void setResponsibleOrgUuid(String responsibleOrgUuid) {
+    this.responsibleOrg = new ForeignObjectHolder<>(responsibleOrgUuid);
+  }
 
-	public void setResponsibleOrg(Organization org) {
-		this.responsibleOrg = new ForeignObjectHolder<>(org);
-	}
+  @JsonIgnore
+  @GraphQLIgnore
+  public String getResponsibleOrgUuid() {
+    return responsibleOrg.getForeignUuid();
+  }
 
-	@GraphQLIgnore
-	public Organization getResponsibleOrg() {
-		return responsibleOrg.getForeignObject();
-	}
+  public void setResponsibleOrg(Organization org) {
+    this.responsibleOrg = new ForeignObjectHolder<>(org);
+  }
 
-	@GraphQLQuery(name="reports")
-	public CompletableFuture<AnetBeanList<Report>> loadReports(@GraphQLRootContext Map<String, Object> context, @GraphQLArgument(name="query") ReportSearchQuery query) {
-	// TODO: Use the query parameter 
-		if (reports != null) {
-			return CompletableFuture.completedFuture(reports);
-		}
-		return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid)
-				.thenApply(o -> { reports = new AnetBeanList<Report>(o); return reports; });
-	}
+  @GraphQLIgnore
+  public Organization getResponsibleOrg() {
+    return responsibleOrg.getForeignObject();
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null || o.getClass() != this.getClass()) {
-			return false;
-		}
-		Task other = (Task) o;
-		return Objects.equals(other.getUuid(), uuid)
-				&& Objects.equals(other.getShortName(), shortName)
-				&& Objects.equals(other.getLongName(), longName)
-				&& Objects.equals(other.getCategory(), category)
-				&& Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid());
-	}
+  @GraphQLQuery(name = "reports")
+  public CompletableFuture<AnetBeanList<Report>> loadReports(
+      @GraphQLRootContext Map<String, Object> context,
+      @GraphQLArgument(name = "query") ReportSearchQuery query) {
+    // TODO: Use the query parameter
+    if (reports != null) {
+      return CompletableFuture.completedFuture(reports);
+    }
+    return AnetObjectEngine.getInstance().getTaskDao().getReportsForTask(context, uuid)
+        .thenApply(o -> {
+          reports = new AnetBeanList<Report>(o);
+          return reports;
+        });
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || o.getClass() != this.getClass()) {
+      return false;
+    }
+    Task other = (Task) o;
+    return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
+        && Objects.equals(other.getLongName(), longName)
+        && Objects.equals(other.getCategory(), category)
+        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid());
+  }
 
-	@Override
-	public String toString() {
-		return String.format("[uuid:%s shortName:%s category:%s customFieldRef1:%s]", uuid, shortName, category, getCustomFieldRef1Uuid());
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("[uuid:%s shortName:%s category:%s customFieldRef1:%s]", uuid, shortName,
+        category, getCustomFieldRef1Uuid());
+  }
 
 }
