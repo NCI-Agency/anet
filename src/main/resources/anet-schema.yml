@@ -171,6 +171,8 @@ properties:
             "$ref": "#/definitions/choiceField"
           customFieldEnum2:
             "$ref": "#/definitions/choiceField"
+          assessment:
+            "$ref": "#/definitions/inputField"
           responsibleOrg:
             type: string
             title: The label for a task's responsible organization

@@ -38,6 +38,8 @@ class BaseTaskShow extends Page {
   ProjectedCompletionField = DictionaryField(Field)
   TaskCustomFieldEnum1 = DictionaryField(Field)
   TaskCustomFieldEnum2 = DictionaryField(Field)
+  TaskAssessmentField = DictionaryField(Field)
+
   state = {
     task: new Task(),
     reportsPageNum: 0,
@@ -73,7 +75,8 @@ class BaseTaskShow extends Page {
         customField, customFieldEnum1, customFieldEnum2,
         plannedCompletion, projectedCompletion,
         responsibleOrg { uuid, shortName, longName, identificationCode },
-        customFieldRef1 { uuid, shortName, longName }
+		customFieldRef1 { uuid, shortName, longName }
+		assessment
         ${GRAPHQL_NOTES_FIELDS}
       }
     `)
@@ -212,6 +215,13 @@ class BaseTaskShow extends Page {
                       component={FieldHelper.renderReadonlyField}
                     />
                   )}
+
+                  {/* TODO: replace with a generic component, but do not use componentClass textarea */}
+                  <Field
+                    name="assessment"
+                    label={Settings.fields.task.assessment.label}
+                    component={FieldHelper.renderReadonlyField}
+                  />
 
                   {Settings.fields.task.customFieldEnum2 && (
                     <this.TaskCustomFieldEnum2

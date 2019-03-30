@@ -13,7 +13,8 @@ export const {
   customFieldEnum1,
   customFieldEnum2,
   plannedCompletion,
-  projectedCompletion
+  projectedCompletion,
+  assessment
 } = Settings.fields.task
 
 export default class Task extends Model {
@@ -84,7 +85,12 @@ export default class Task extends Model {
       status: yup
         .string()
         .required()
-        .default(() => Task.STATUS.ACTIVE)
+		.default(() => Task.STATUS.ACTIVE),
+	  assessment: yup
+        .string()
+        .nullable()
+        .default("")
+        .label(assessment.label),
     })
     .concat(Model.yupSchema)
 

@@ -194,6 +194,9 @@ dictionary:
         label: Task description
         placeholder: Enter an effort description, example ....
         componentClass: textarea
+          style:
+          height: 400px
+
       customFieldRef1:
         label: Parent task
         placeholder: Start typing to search for a higher level task
@@ -220,6 +223,12 @@ dictionary:
           CUSTOMVALUE2:
             label: Custom value 2
       responsibleOrg: Responsible organization
+      assessment:
+        label: Assessment
+        placeholder: Fill in the assessment
+        componentClass: textarea
+        style:
+          height: 400px
 
     report:
       intent: Meeting goal (purpose)

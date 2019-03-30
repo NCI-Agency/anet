@@ -2270,4 +2270,11 @@
 		</sql>
 		<!-- Rolling back is not useful -->
 	</changeSet>
+
+	<changeSet id="add-assessment-to-Tasks" author="VassilIordanov">
+		<addColumn tableName="tasks">
+			<column name="assessment" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>
