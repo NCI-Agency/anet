@@ -1,63 +1,61 @@
 package mil.dds.anet.emails;
 
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Report;
+import org.apache.commons.lang3.StringUtils;
 
 public class ReportEmail implements AnetEmailAction {
-	private Report report;
-	private Person sender;
-	private String comment;
-	
-	@Override
-	public String getTemplateName() {
-		return "/emails/emailReport.ftlh";
-	}
+  private Report report;
+  private Person sender;
+  private String comment;
 
-	@Override
-	public String getSubject(Map<String, Object> context) {
-		return "Sharing a report in ANET";
-	}
+  @Override
+  public String getTemplateName() {
+    return "/emails/emailReport.ftlh";
+  }
 
-	@Override
-	public Map<String, Object> buildContext(Map<String, Object> context) {
-		Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
-		sender = AnetObjectEngine.getInstance().getPersonDao().getByUuid(sender.getUuid());
+  @Override
+  public String getSubject(Map<String, Object> context) {
+    return "Sharing a report in ANET";
+  }
 
-		context.put("report", r);
-		context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
-		context.put("sender", sender);
-		context.put("comment", comment);
+  @Override
+  public Map<String, Object> buildContext(Map<String, Object> context) {
+    Report r = AnetObjectEngine.getInstance().getReportDao().getByUuid(report.getUuid());
+    sender = AnetObjectEngine.getInstance().getPersonDao().getByUuid(sender.getUuid());
 
-		return context;
-	}
+    context.put("report", r);
+    context.put("reportIntent", StringUtils.abbreviate(r.getIntent(), MAX_REPORT_INTENT_LENGTH));
+    context.put("sender", sender);
+    context.put("comment", comment);
 
-	public Report getReport() {
-		return report;
-	}
+    return context;
+  }
 
-	public void setReport(Report report) {
-		this.report = Report.createWithUuid(report.getUuid());
-	}
+  public Report getReport() {
+    return report;
+  }
 
-	public Person getSender() {
-		return sender;
-	}
+  public void setReport(Report report) {
+    this.report = Report.createWithUuid(report.getUuid());
+  }
 
-	public void setSender(Person sender) {
-		this.sender = Person.createWithUuid(sender.getUuid());
-	}
+  public Person getSender() {
+    return sender;
+  }
 
-	public String getComment() {
-		return comment;
-	}
+  public void setSender(Person sender) {
+    this.sender = Person.createWithUuid(sender.getUuid());
+  }
 
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+  public String getComment() {
+    return comment;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
 
 }

@@ -6,7 +6,7 @@ import mil.dds.anet.beans.search.TaskSearchQuery;
 
 public interface ITaskSearcher {
 
-	public AnetBeanList<Task> runSearch(TaskSearchQuery query);
-	
-	
+  public AnetBeanList<Task> runSearch(TaskSearchQuery query);
+
+
 }

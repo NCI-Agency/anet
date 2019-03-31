@@ -1,229 +1,330 @@
-import React from 'react'
-
-import Model, { yupDate } from 'components/Model'
-import LinkTo from 'components/LinkTo'
-import utils from 'utils'
-import Settings from 'Settings'
-
-import {Position, Organization} from 'models'
-
-import PEOPLE_ICON from 'resources/people.png'
-import RS_ICON from 'resources/rs_small.png'
-import AFG_ICON from 'resources/afg_small.png'
-
-import _isEmpty from 'lodash/isEmpty'
-import * as yup from 'yup'
+import { Settings } from "api"
+import Model, { yupDate } from "components/Model"
+import _isEmpty from "lodash/isEmpty"
+import { Organization, Position } from "models"
+import React from "react"
+import AFG_ICON from "resources/afg_small.png"
+import PEOPLE_ICON from "resources/people.png"
+import RS_ICON from "resources/rs_small.png"
+import utils from "utils"
+import * as yup from "yup"
 
 export const advisorPerson = Settings.fields.advisor.person
 export const principalPerson = Settings.fields.principal.person
 
 export default class Person extends Model {
-	static resourceName = 'Person'
-	static listName = 'personList'
-	static getInstanceName = 'person'
-	static getModelNameLinkTo = 'person'
+  static resourceName = "Person"
+  static listName = "personList"
+  static getInstanceName = "person"
+  static getModelNameLinkTo = "person"
 
-	static STATUS = {
-		NEW_USER: 'NEW_USER',
-		ACTIVE: 'ACTIVE',
-		INACTIVE: 'INACTIVE'
-	}
+  static STATUS = {
+    NEW_USER: "NEW_USER",
+    ACTIVE: "ACTIVE",
+    INACTIVE: "INACTIVE"
+  }
 
-	static ROLE = {
-		ADVISOR: 'ADVISOR',
-		PRINCIPAL: 'PRINCIPAL'
-	}
+  static ROLE = {
+    ADVISOR: "ADVISOR",
+    PRINCIPAL: "PRINCIPAL"
+  }
 
-	static nameDelimiter = ','
+  static nameDelimiter = ","
 
-	static yupSchema = yup.object().shape({
-		name: yup.string().nullable().default(''),
-		// not actually in the database, but used for validation
-		firstName: yup.string().nullable()
-			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.firstName}`) : schema.nullable()
-			)).default('').label(Settings.fields.person.firstName),
-		// not actually in the database, but used for validation
-		lastName: yup.string().nullable().uppercase().required(`You must provide the ${Settings.fields.person.lastName}`).default('').label(Settings.fields.person.lastName),
-		domainUsername: yup.string().nullable().default('').label(Settings.fields.person.domainUsername),
-		emailAddress: yup.string().nullable().email()
-			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.emailAddress}`) : schema.nullable()
-			)).default('').label(Settings.fields.person.emailAddress),
-		country: yup.string().nullable().required(`You must provide the ${Settings.fields.person.country}`).default('').label(Settings.fields.person.country),
-		rank: yup.string().nullable().required(`You must provide the ${Settings.fields.person.rank} (Military rank, CIV and CTR values are available)`).default('').label(Settings.fields.person.rank),
-		gender: yup.string().nullable()
-			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.required(`You must provide the ${Settings.fields.person.gender}`) : schema.nullable()
-			)).default('').label(Settings.fields.person.gender),
-		phoneNumber: yup.string().nullable().default('').label(Settings.fields.person.phoneNumber),
-		endOfTourDate: yupDate.nullable()
-			.when('role', (role, schema) => (
-				Person.isAdvisor({role}) ? schema.nullable().required(`You must provide the ${Settings.fields.person.endOfTourDate}`) : schema.nullable()
-			)).default(null).label(Settings.fields.person.endOfTourDate),
-		biography: yup.string().nullable().default(''),
-		position: yup.object().nullable().default({}),
-		role: yup.string().nullable().default(() => Person.ROLE.PRINCIPAL),
-		status: yup.string().nullable().default(() => Person.STATUS.ACTIVE),
-	}).concat(Model.yupSchema)
+  static yupSchema = yup
+    .object()
+    .shape({
+      name: yup
+        .string()
+        .nullable()
+        .default(""),
+      // not actually in the database, but used for validation
+      firstName: yup
+        .string()
+        .nullable()
+        .when("role", (role, schema) =>
+          Person.isAdvisor({ role })
+            ? schema.required(
+              `You must provide the ${Settings.fields.person.firstName}`
+            )
+            : schema.nullable()
+        )
+        .default("")
+        .label(Settings.fields.person.firstName),
+      // not actually in the database, but used for validation
+      lastName: yup
+        .string()
+        .nullable()
+        .uppercase()
+        .required(`You must provide the ${Settings.fields.person.lastName}`)
+        .default("")
+        .label(Settings.fields.person.lastName),
+      domainUsername: yup
+        .string()
+        .nullable()
+        .default("")
+        .label(Settings.fields.person.domainUsername),
+      emailAddress: yup
+        .string()
+        .nullable()
+        .email()
+        .when("role", (role, schema) =>
+          Person.isAdvisor({ role })
+            ? schema.required(
+              `You must provide the ${Settings.fields.person.emailAddress}`
+            )
+            : schema.nullable()
+        )
+        .default("")
+        .label(Settings.fields.person.emailAddress),
+      country: yup
+        .string()
+        .nullable()
+        .required(`You must provide the ${Settings.fields.person.country}`)
+        .default("")
+        .label(Settings.fields.person.country),
+      rank: yup
+        .string()
+        .nullable()
+        .required(
+          `You must provide the ${
+            Settings.fields.person.rank
+          } (Military rank, CIV and CTR values are available)`
+        )
+        .default("")
+        .label(Settings.fields.person.rank),
+      gender: yup
+        .string()
+        .nullable()
+        .when("role", (role, schema) =>
+          Person.isAdvisor({ role })
+            ? schema.required(
+              `You must provide the ${Settings.fields.person.gender}`
+            )
+            : schema.nullable()
+        )
+        .default("")
+        .label(Settings.fields.person.gender),
+      phoneNumber: yup
+        .string()
+        .nullable()
+        .default("")
+        .label(Settings.fields.person.phoneNumber),
+      endOfTourDate: yupDate
+        .nullable()
+        .when("role", (role, schema) =>
+          Person.isAdvisor({ role })
+            ? schema
+              .nullable()
+              .required(
+                `You must provide the ${Settings.fields.person.endOfTourDate}`
+              )
+            : schema.nullable()
+        )
+        .default(null)
+        .label(Settings.fields.person.endOfTourDate),
+      biography: yup
+        .string()
+        .nullable()
+        .default(""),
+      position: yup
+        .object()
+        .nullable()
+        .default({}),
+      role: yup
+        .string()
+        .nullable()
+        .default(() => Person.ROLE.PRINCIPAL),
+      status: yup
+        .string()
+        .nullable()
+        .default(() => Person.STATUS.ACTIVE)
+    })
+    .concat(Model.yupSchema)
 
-	static autocompleteQuery = "uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, code, status, organization { uuid, shortName }, location {uuid, name} }"
+  static autocompleteQuery =
+    "uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, code, status, organization { uuid, shortName }, location {uuid, name} }"
 
-	static autocompleteTemplate(person) {
-		return <span>
-			<img src={(new Person(person)).iconUrl()} alt={person.role} height={20} className="person-icon" />
-			<LinkTo person={person} isLink={false}/> {person.position && (`- (${person.position.name}` + (person.position.code ? `, ${person.position.code}` : ``) + (person.position.location ? `, ${ person.position.location.name}` : ``) + `)` )}
-		</span>
-	}
+  static autocompleteTemplate(person) {
+    return (
+      <span>
+        <img
+          src={new Person(person).iconUrl()}
+          alt={person.role}
+          height={20}
+          className="person-icon"
+        />
+        {new Person(person).toString()}{" "}
+        {person.position &&
+          `- (${person.position.name}` +
+            (person.position.code ? `, ${person.position.code}` : "") +
+            (person.position.location
+              ? `, ${person.position.location.name}`
+              : "") +
+            ")"}
+      </span>
+    )
+  }
 
-	static humanNameOfRole(role) {
-		if (role === Person.ROLE.ADVISOR) {
-			return Settings.fields.advisor.person.name
-		}
-		if (role === Person.ROLE.PRINCIPAL) {
-			return principalPerson.name
-		}
-		throw new Error(`Unrecognized role: ${role}`)
-	}
+  static humanNameOfRole(role) {
+    if (role === Person.ROLE.ADVISOR) {
+      return Settings.fields.advisor.person.name
+    }
+    if (role === Person.ROLE.PRINCIPAL) {
+      return principalPerson.name
+    }
+    throw new Error(`Unrecognized role: ${role}`)
+  }
 
-	static humanNameOfStatus(status) {
-		return utils.sentenceCase(status)
-	}
+  static humanNameOfStatus(status) {
+    return utils.sentenceCase(status)
+  }
 
-	constructor(props) {
-		super(Model.fillObject(props, Person.yupSchema))
-	}
+  constructor(props) {
+    super(Model.fillObject(props, Person.yupSchema))
+  }
 
-	humanNameOfRole() {
-		return Person.humanNameOfRole(this.role)
-	}
+  humanNameOfRole() {
+    return Person.humanNameOfRole(this.role)
+  }
 
-	humanNameOfStatus() {
-		return Person.humanNameOfStatus(this.status)
-	}
+  humanNameOfStatus() {
+    return Person.humanNameOfStatus(this.status)
+  }
 
-	static isNewUser(person) {
-		return person.status === Person.STATUS.NEW_USER
-	}
+  static isNewUser(person) {
+    return person.status === Person.STATUS.NEW_USER
+  }
 
-	isNewUser() {
-		return Person.isNewUser(this)
-	}
+  isNewUser() {
+    return Person.isNewUser(this)
+  }
 
-	static isAdvisor(person) {
-		return person.role === Person.ROLE.ADVISOR
-	}
+  static isAdvisor(person) {
+    return person.role === Person.ROLE.ADVISOR
+  }
 
-	isAdvisor() {
-		return Person.isAdvisor(this)
-	}
+  isAdvisor() {
+    return Person.isAdvisor(this)
+  }
 
-	isPrincipal() {
-		return this.role === Person.ROLE.PRINCIPAL
-	}
+  isPrincipal() {
+    return this.role === Person.ROLE.PRINCIPAL
+  }
 
-	isAdmin() {
-		return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
-	}
+  isAdmin() {
+    return this.position && this.position.type === Position.TYPE.ADMINISTRATOR
+  }
 
-	isSuperUser() {
-		return this.position && (
-			this.position.type === Position.TYPE.SUPER_USER ||
-			this.position.type === Position.TYPE.ADMINISTRATOR
-		)
-	}
+  isSuperUser() {
+    return (
+      this.position &&
+      (this.position.type === Position.TYPE.SUPER_USER ||
+        this.position.type === Position.TYPE.ADMINISTRATOR)
+    )
+  }
 
-	hasAssignedPosition() {
-		// has a non-empty position with a non-zero uuid
-		return !_isEmpty(this.position) && !!this.position.uuid
-	}
+  hasAssignedPosition() {
+    // has a non-empty position with a non-zero uuid
+    return !_isEmpty(this.position) && !!this.position.uuid
+  }
 
-	hasActivePosition() {
-		return this.hasAssignedPosition() && this.position.status === Position.STATUS.ACTIVE
-	}
+  hasActivePosition() {
+    return (
+      this.hasAssignedPosition() &&
+      this.position.status === Position.STATUS.ACTIVE
+    )
+  }
 
-	//Checks if this user is a valid super user for a particular organization
-	//Must be either
-	// - An Administrator
-	// - A super user and this org is a PRINCIPAL_ORG
-	// - A super user for this organization
-	// - A super user for this orgs parents.
-	isSuperUserForOrg(org) {
-		if (!org) { return false }
-		if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) { return true }
-		if (this.position && this.position.type !== Position.TYPE.SUPER_USER) { return false }
-		if (org.type === Organization.TYPE.PRINCIPAL_ORG) { return true }
+  // Checks if this user is a valid super user for a particular organization
+  // Must be either
+  // - An Administrator
+  // - A super user and this org is a PRINCIPAL_ORG
+  // - A super user for this organization
+  // - A super user for this orgs parents.
+  isSuperUserForOrg(org) {
+    if (!org) {
+      return false
+    }
+    if (this.position && this.position.type === Position.TYPE.ADMINISTRATOR) {
+      return true
+    }
+    if (this.position && this.position.type !== Position.TYPE.SUPER_USER) {
+      return false
+    }
+    if (org.type === Organization.TYPE.PRINCIPAL_ORG) {
+      return true
+    }
 
-		if (!this.position || !this.position.organization) { return false }
-		let orgs = this.position.organization.allDescendantOrgs || []
-		orgs.push(this.position.organization)
-		let orgUuids = orgs.map(o => o.uuid)
+    if (!this.position || !this.position.organization) {
+      return false
+    }
+    let orgs = this.position.organization.allDescendantOrgs || []
+    orgs.push(this.position.organization)
+    let orgUuids = orgs.map(o => o.uuid)
 
-		return orgUuids.includes(org.uuid)
-	}
+    return orgUuids.includes(org.uuid)
+  }
 
-	iconUrl() {
-		if (this.isAdvisor()) {
-			return RS_ICON
-		} else if (this.isPrincipal()) {
-			return AFG_ICON
-		} else {
-			return PEOPLE_ICON
-		}
-	}
+  iconUrl() {
+    if (this.isAdvisor()) {
+      return RS_ICON
+    } else if (this.isPrincipal()) {
+      return AFG_ICON
+    } else {
+      return PEOPLE_ICON
+    }
+  }
 
-	toString() {
-		if (this.rank) {
-			return this.rank + " " + this.name
-		} else {
-			return this.name || this.uuid
-		}
-	}
+  toString() {
+    if (this.rank) {
+      return this.rank + " " + this.name
+    } else {
+      return this.name || this.uuid
+    }
+  }
 
-	static fullName(person, doTrim) {
-		if (person.lastName && person.firstName) {
-			return(`${Person.formattedLastName(person.lastName, doTrim)}${Person.nameDelimiter} ${Person.formattedFirstName(person.firstName, doTrim)}`)
-		}
-		else if (person.lastName) {
-			return Person.formattedLastName(person.lastName)
-		}
-		else {
-			return ''
-		}
-	}
+  static fullName(person, doTrim) {
+    if (person.lastName && person.firstName) {
+      return `${Person.formattedLastName(person.lastName, doTrim)}${
+        Person.nameDelimiter
+      } ${Person.formattedFirstName(person.firstName, doTrim)}`
+    } else if (person.lastName) {
+      return Person.formattedLastName(person.lastName)
+    } else {
+      return ""
+    }
+  }
 
-	static formattedLastName(lastName, doTrim) {
-		let r = lastName.toUpperCase()
-		if (doTrim) {
-			r = r.trim()
-		}
-		return r
-	}
+  static formattedLastName(lastName, doTrim) {
+    let r = lastName.toUpperCase()
+    if (doTrim) {
+      r = r.trim()
+    }
+    return r
+  }
 
-	static formattedFirstName(firstName, doTrim) {
-		let r = firstName
-		if (doTrim) {
-			r = r.trim()
-		}
-		return r
-	}
+  static formattedFirstName(firstName, doTrim) {
+    let r = firstName
+    if (doTrim) {
+      r = r.trim()
+    }
+    return r
+  }
 
-	static parseFullName(name) {
-		const delimiter = name.indexOf(Person.nameDelimiter)
-		let lastName = name
-		let firstName = ''
+  static parseFullName(name) {
+    const delimiter = name.indexOf(Person.nameDelimiter)
+    let lastName = name
+    let firstName = ""
 
-		if(delimiter > -1) {
-			lastName = name.substring(0, delimiter)
-			firstName = name.substring(delimiter + 1, name.length)
-		}
+    if (delimiter > -1) {
+      lastName = name.substring(0, delimiter)
+      firstName = name.substring(delimiter + 1, name.length)
+    }
 
-		return(
-			{
-				lastName: lastName.trim().toUpperCase(),
-				firstName: firstName.trim()
-			}
-		)
-	}
-
+    return {
+      lastName: lastName.trim().toUpperCase(),
+      firstName: firstName.trim()
+    }
+  }
 }
