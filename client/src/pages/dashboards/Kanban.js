@@ -8,7 +8,7 @@ import { Settings } from "api"
 
 import { Task } from "models"
 
-import { Panel } from "react-bootstrap"
+import { Panel, Button, Glyphicon } from "react-bootstrap"
 import LinkTo from "components/LinkTo"
 
 import GQL from "graphqlapi"
@@ -38,9 +38,6 @@ class Kanban extends Page {
         list {
           uuid, longName, shortName, customFieldEnum1, createdAt, updatedAt
           responsibleOrg { uuid, shortName}
-          allReports: reports {
-            totalCount
-          }
         }
       }`).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
     GQL.run([tasksPart]).then(data => {
@@ -75,7 +72,14 @@ class Kanban extends Page {
 }
 
 class Column extends React.Component {
+  constructor(props, context) {
+    super(props, context)
+
+    this.state = { open: false }
+  }
+
   render() {
+    const { open } = this.state
     const tasks = this.props.tasks.filter(
       task => this.props.taskUUIDs.indexOf(task.uuid) > -1
     )
@@ -89,27 +93,33 @@ class Column extends React.Component {
         <Panel.Heading>
           <strong>
             <em>{this.props.name} </em>
+          </strong>
+        </Panel.Heading>
+        <Panel.Body>
+          <strong>Status: </strong>
+          <span style={{ fontSize: "140%" }}>
             {Object.entries(Settings.fields.task.customFieldEnum1.enum).map(
               (entry, index) => {
                 return (
-                  <React.Fragment>
+                  <React.Fragment key={entry[1].label}>
                     {index !== 0 && "/"}
-                    <span
-                      key={entry[1].label}
-                      style={{ backgroundColor: entry[1].color }}
-                    >
+                    <span style={{ backgroundColor: entry[1].color }}>
                       {counters[entry[0]] || 0}
                     </span>
                   </React.Fragment>
                 )
               }
             )}
-          </strong>
-        </Panel.Heading>
-        <Panel.Body style={{ padding: "4px" }}>
-          {tasks.map(task => (
-            <Card task={task} key={task.uuid} />
-          ))}
+          </span>
+          <br />
+          <strong>{Settings.fields.task.longLabel}</strong>
+          {"  "}
+          <Button bsSize="xs" onClick={() => this.setState({ open: !open })}>
+            <Glyphicon glyph={open ? "triangle-top" : "triangle-bottom"} />
+          </Button>
+          <br />
+          {this.state.open &&
+            tasks.map(task => <Card task={task} key={task.uuid} />)}
         </Panel.Body>
       </Panel>
     )
@@ -144,13 +154,7 @@ class Card extends React.Component {
         <div>
           <LinkTo task={this.props.task}>
             <strong>{this.props.task.shortName}</strong>
-          </LinkTo>{" "}
-          <em>
-            <small>
-              (<strong>{this.props.task.allReports.totalCount}</strong>{" "}
-              engagements)
-            </small>
-          </em>
+          </LinkTo>
           <br />
           {/* TODO make a single line when collapsed <div style={this.state.open ? {} : {textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}> */}
           <div>
