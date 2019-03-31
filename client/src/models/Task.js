@@ -58,17 +58,17 @@ export default class Task extends Model {
         .object()
         .nullable()
         .default({})
-        .label(customFieldRef1.label),
+        .label(customFieldRef1 && customFieldRef1.label),
       customFieldEnum1: yup
         .string()
         .nullable()
         .default("")
-        .label(customFieldEnum1.label),
+        .label(customFieldEnum1 && customFieldEnum1.label),
       customFieldEnum2: yup
         .string()
         .nullable()
         .default("")
-        .label(customFieldEnum2.label),
+        .label(customFieldEnum2 && customFieldEnum2.label),
       customField: yup
         .string()
         .nullable()
@@ -85,12 +85,12 @@ export default class Task extends Model {
       status: yup
         .string()
         .required()
-		.default(() => Task.STATUS.ACTIVE),
-	  assessment: yup
+        .default(() => Task.STATUS.ACTIVE),
+      assessment: yup
         .string()
         .nullable()
         .default("")
-        .label(assessment.label),
+        .label(assessment.label)
     })
     .concat(Model.yupSchema)
 
