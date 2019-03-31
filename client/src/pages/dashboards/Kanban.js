@@ -1,21 +1,18 @@
-import React from "react"
+import { Settings } from "api"
+import LinkTo from "components/LinkTo"
 import Page, {
   mapDispatchToProps,
   propTypes as pagePropTypes
 } from "components/Page"
-
-import { Settings } from "api"
-
-import { Task } from "models"
-
-import { Panel, Button, Glyphicon } from "react-bootstrap"
-import LinkTo from "components/LinkTo"
-
+import * as d3 from "d3"
 import GQL from "graphqlapi"
+import { Task } from "models"
 import moment from "moment"
-
-import { withRouter } from "react-router-dom"
+import PropTypes from "prop-types"
+import React from "react"
+import { Button, Glyphicon, Panel } from "react-bootstrap"
 import { connect } from "react-redux"
+import { withRouter } from "react-router-dom"
 
 class Kanban extends Page {
   static propTypes = { ...pagePropTypes }
@@ -72,6 +69,12 @@ class Kanban extends Page {
 }
 
 class Column extends React.Component {
+  static propTypes = {
+    name: PropTypes.string.isRequired,
+    tasks: PropTypes.array.isRequired,
+    taskUUIDs: PropTypes.array.isRequired
+  }
+
   constructor(props, context) {
     super(props, context)
 
@@ -96,21 +99,19 @@ class Column extends React.Component {
           </strong>
         </Panel.Heading>
         <Panel.Body>
-          <strong>Status: </strong>
-          <span style={{ fontSize: "140%" }}>
-            {Object.entries(Settings.fields.task.customFieldEnum1.enum).map(
-              (entry, index) => {
-                return (
-                  <React.Fragment key={entry[1].label}>
-                    {index !== 0 && "/"}
-                    <span style={{ backgroundColor: entry[1].color }}>
-                      {counters[entry[0]] || 0}
-                    </span>
-                  </React.Fragment>
-                )
-              }
-            )}
-          </span>
+          <Pie
+            size={{ width: 70, height: 70 }}
+            data={counters}
+            text={tasks.length}
+            fill={entity => {
+              const matching = Object.entries(
+                Settings.fields.task.customFieldEnum1.enum
+              ).filter(candidate => {
+                return candidate[0] === entity.data.key
+              })
+              return matching.length > 0 ? matching[0][1].color : "#bbbbbb"
+            }}
+          />
           <br />
           <strong>{Settings.fields.task.longLabel}</strong>
           {"  "}
@@ -127,6 +128,10 @@ class Column extends React.Component {
 }
 
 class Card extends React.Component {
+  static propTypes = {
+    task: PropTypes.object.isRequired
+  }
+
   constructor(props, context) {
     super(props, context)
 
@@ -141,13 +146,8 @@ class Card extends React.Component {
         style={{
           backgroundColor:
             this.props.task.customFieldEnum1 && // TODO: use optional chaining
-            Settings.fields.task.customFieldEnum1.enum[
-              this.props.task.customFieldEnum1
-            ] &&
-            (Settings.fields.task.customFieldEnum1.enum[
-              this.props.task.customFieldEnum1
-            ].color ||
-              "#f9f7f7"),
+            Settings.fields.task.customFieldEnum1.enum[this.props.task.customFieldEnum1] &&
+            (Settings.fields.task.customFieldEnum1.enum[this.props.task.customFieldEnum1].color || "#f9f7f7"),
           margin: "3px"
         }}
       >
@@ -198,6 +198,72 @@ class Card extends React.Component {
           </Panel.Body>
         )}
       </Panel>
+    )
+  }
+}
+
+class Pie extends React.Component {
+  static propTypes = {
+    size: PropTypes.object.isRequired,
+    text: PropTypes.string.isRequired,
+    fill: PropTypes.func.isRequired
+  }
+
+  componentDidMount() {
+    this.canvas = this.svg
+      .append("g")
+      .attr(
+        "transform",
+        `translate(${this.props.size.width / 2}, ${this.props.size.height / 2})`
+      )
+    this.pie = d3.pie()
+    this.pie.value(function(d) {
+      return d.value
+    })
+
+    this.canvas
+      .append("text")
+      .attr("y", "6px")
+      .style("text-anchor", "middle")
+      .style("font-weight", "bold")
+      .style("font-size", "20")
+
+    this.update()
+  }
+
+  componentDidUpdate() {
+    this.update()
+  }
+
+  update() {
+    const radius =
+      Math.min(this.props.size.width, this.props.size.height) / 2 - 2
+    const selected = this.canvas
+      .selectAll("path")
+      .data(this.pie(d3.entries(this.props.data)), d => d)
+
+    selected
+      .enter()
+      .append("path")
+      .attr("d", d3.arc()
+                   .innerRadius(radius / 2)
+                   .outerRadius(radius))
+      .attr("fill", this.props.fill)
+      .attr("stroke", "grey")
+      .style("stroke-width", "1px")
+
+    selected.exit().remove()
+
+    this.canvas.select("text").text(this.props.text)
+  }
+
+  render() {
+    return (
+      <svg
+        width={this.props.size.width}
+        height={this.props.size.height}
+        ref={element => (this.svg = d3.select(element))}
+      />
     )
   }
 }
