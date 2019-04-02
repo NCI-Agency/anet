@@ -1,4 +1,5 @@
 import { expect } from "chai"
+import moment from "moment"
 import CreatePerson from "../pages/createNewPerson.page"
 
 const VALID_PERSON_PRINCIPAL = {
@@ -110,6 +111,27 @@ describe("Create new Person form page", () => {
       )
     })
 
+    it("Should not save if endOfTourDate is not in the future", () => {
+      CreatePerson.roleAdvisorButton.waitForExist()
+      CreatePerson.roleAdvisorButton.click()
+      CreatePerson.endOfTourDate.click()
+      CreatePerson.endOfTourDay.waitForExist()
+      // select a date
+      CreatePerson.endOfTourDay.click()
+      CreatePerson.lastName.click()
+      let errorMessage = CreatePerson.endOfTourDate
+        .$("..")
+        .$("..")
+        .$("..")
+        .$("..")
+        .$("span.help-block")
+      errorMessage.waitForExist()
+      errorMessage.waitForDisplayed()
+      expect(errorMessage.getText()).to.equal(
+        "The End of tour date must be set in the future"
+      )
+    })
+
     it("Should save with a valid email address in uppercase", () => {
       // Continue on the same page to prevent "Are you sure you wish to navigate away from the page" warning
       CreatePerson.lastName.setValue(VALID_PERSON_ADVISOR.lastName)
@@ -135,10 +157,13 @@ describe("Create new Person form page", () => {
         "value",
         CreatePerson.getRandomOption(CreatePerson.country)
       )
-      CreatePerson.endOfTourDate.click()
-      CreatePerson.endOfTourDay.waitForExist()
-      // select a date
-      CreatePerson.endOfTourDay.click()
+      const tomorrow = moment()
+        .add(1, "days")
+        .format("DD-MM-YYYY")
+
+      CreatePerson.endOfTourDate.setValue(
+        "\uE003".repeat(CreatePerson.endOfTourDate.getValue().length) + tomorrow
+      )
       CreatePerson.submitForm()
       CreatePerson.waitForAlertSuccessToLoad()
       const alertMessage = CreatePerson.alertSuccess.getText()

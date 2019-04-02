@@ -34,6 +34,7 @@ export default class Person extends Model {
   static yupSchema = yup
     .object()
     .shape({
+      uuid: yup.string().default(""),
       name: yup
         .string()
         .nullable()
@@ -128,6 +129,17 @@ export default class Person extends Model {
               )
             : schema.nullable()
         )
+        .when(["role", "status", "uuid"], (role, status, uuid, schema) =>
+          Person.isAdvisor({ role }) && Person.isNewFormUser({ status, uuid })
+            ? schema.test(
+                "end-of-tour-date",
+                `The ${
+                  Settings.fields.person.endOfTourDate
+                } date must be set in the future`,
+                endOfTourDate => endOfTourDate > Date.now()
+              )
+            : schema.nullable()
+        )
         .default(null)
         .label(Settings.fields.person.endOfTourDate),
       biography: yup
@@ -201,6 +213,10 @@ export default class Person extends Model {
 
   static isNewUser(person) {
     return person.status === Person.STATUS.NEW_USER
+  }
+
+  static isNewFormUser(person) {
+    return _isEmpty(person.uuid) || person.status === Person.STATUS.NEW_USER
   }
 
   isNewUser() {
