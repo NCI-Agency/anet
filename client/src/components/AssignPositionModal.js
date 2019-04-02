@@ -38,7 +38,7 @@ class BaseAssignPositionModal extends Component {
 
   render() {
     const { person, currentUser } = this.props
-    let newPosition = new Position(this.state.position)
+    let newPosition = this.state.position ? new Position(this.state.position) : new Position()
 
     let positionSearchQuery = { status: Position.STATUS.ACTIVE }
     if (person.role === Person.ROLE.ADVISOR) {
@@ -98,7 +98,7 @@ class BaseAssignPositionModal extends Component {
                   overlayColumns={["", "Name", "Position"]}
                   overlayRenderRow={this.renderPositionOverlayRow}
                   filterDefs={positionsFilters}
-                  onChange={this.onPositionSelect}
+                  onChange={this.handlePositionChange}
                   objectType={Position}
                   valueKey="name"
                   fields={
@@ -152,34 +152,26 @@ class BaseAssignPositionModal extends Component {
 
   @autobind
   remove() {
-    let graphql = "deletePersonFromPosition(uuid: $uuid)"
-    const variables = {
-      uuid: this.props.person.position.uuid
-    }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
-      .then(data => this.props.onSuccess())
-      .catch(error => {
-        this.setState({ error: error })
-      })
+    this.setState({ position: null }, () =>
+      this.save()
+    )
   }
 
   @autobind
   save() {
-    let graphql = "putPersonInPosition(uuid: $uuid, person: $person)"
+    let graphql = "deletePersonFromPosition(uuid: $uuid)"
     let variables = {
-      uuid: this.state.position.uuid,
-      person: { uuid: this.props.person.uuid }
+      uuid: this.props.person.position.uuid
     }
-    let variableDef = "($uuid: String!, $person: PersonInput!)"
-    if (this.state.position === null) {
-      graphql = "deletePersonFromPosition(uuid: $uuid)"
+    let variableDef = "($uuid: String!)"
+    if (this.state.position !== null) {
+      graphql = "putPersonInPosition(uuid: $uuid, person: $person)"
       variables = {
-        uuid: this.props.person.position.uuid
+        uuid: this.state.position.uuid,
+        person: { uuid: this.props.person.uuid }
       }
-      variableDef = "($uuid: String!)"
+      variableDef = "($uuid: String!, $person: PersonInput!)"
     }
-
     API.mutation(graphql, variables, variableDef)
       .then(data => this.props.onSuccess())
       .catch(error => {
@@ -197,10 +189,8 @@ class BaseAssignPositionModal extends Component {
   }
 
   @autobind
-  onPositionSelect(position) {
-    if (position && position.uuid) {
-      this.setState({ position }, () => this.updateAlert())
-    }
+  handlePositionChange(position) {
+    this.setState({ position }, () => this.updateAlert())
   }
 
   @autobind
@@ -236,6 +226,7 @@ class BaseAssignPositionModal extends Component {
     )
   }
 }
+
 const AssignPositionModal = props => (
   <AppContext.Consumer>
     {context => (
