@@ -89,7 +89,7 @@ class BaseAssignPositionModal extends Component {
           )}
           <Grid fluid>
             <Row>
-              <Col md={10}>
+              <Col md={12}>
                 <AdvancedSingleSelect
                   fieldName="position"
                   fieldLabel="Select a position"
