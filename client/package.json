@@ -49,7 +49,7 @@
     "cross-spawn": "^6.0.5",
     "css-loader": "^2.1.1",
     "dotenv": "^7.0.0",
-    "eslint": "^5.15.3",
+    "eslint": "^5.16.0",
     "eslint-config-react-app": "^3.0.8",
     "eslint-config-standard": "^12.0.0",
     "eslint-config-standard-react": "^7.0.2",
