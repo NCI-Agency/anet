@@ -1,19 +1,16 @@
-import PropTypes from "prop-types"
-import React, { Component } from "react"
-import { Button, Col, Row, Overlay, Popover } from "react-bootstrap"
-import ContainerDimensions from "react-container-dimensions"
+import API from "api"
+import { renderInputField } from "components/FieldHelper"
+import LinkTo from "components/LinkTo"
+import UltimatePagination from "components/UltimatePagination"
 import { Field } from "formik"
-import _cloneDeep from "lodash/cloneDeep"
 import _debounce from "lodash/debounce"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
-import _isEqualWith from "lodash/isEqualWith"
-
-import { renderInputField } from "components/FieldHelper"
-import UltimatePagination from "components/UltimatePagination"
-import LinkTo from "components/LinkTo"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { Button, Col, Overlay, Popover, Row } from "react-bootstrap"
+import ContainerDimensions from "react-container-dimensions"
 import "./AdvancedMultiSelect.css"
-import API from "api"
 
 const MOBILE_WIDTH = 733
 

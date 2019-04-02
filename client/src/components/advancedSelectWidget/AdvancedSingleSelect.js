@@ -1,13 +1,11 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
-
-import REMOVE_ICON from "resources/delete.png"
-
 import AdvancedSelect, {
   propTypes as advancedSelectPropTypes
 } from "components/advancedSelectWidget/AdvancedSelect"
 import { AdvancedSingleSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import _isEmpty from "lodash/isEmpty"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import REMOVE_ICON from "resources/delete.png"
 
 export default class AdvancedSingleSelect extends Component {
   static propTypes = {

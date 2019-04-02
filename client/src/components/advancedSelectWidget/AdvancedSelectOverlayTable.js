@@ -1,8 +1,8 @@
-import React, { Component } from "react"
-import { Radio, Table } from "react-bootstrap"
 import Checkbox from "components/Checkbox"
 import LoaderHOC from "HOC/LoaderHOC"
 import _isEmpty from "lodash/isEmpty"
+import React from "react"
+import { Radio, Table } from "react-bootstrap"
 
 const AdvancedSelectOverlayTable = ({
   fieldName,

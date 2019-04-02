@@ -1,11 +1,10 @@
-import React, { Component } from "react"
-import PropTypes from "prop-types"
-
 import AdvancedSelect, {
   propTypes as advancedSelectPropTypes
 } from "components/advancedSelectWidget/AdvancedSelect"
 import { AdvancedMultiSelectOverlayTable } from "components/advancedSelectWidget/AdvancedSelectOverlayTable"
 import _cloneDeep from "lodash/cloneDeep"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
 
 export default class AdvancedMultiSelect extends Component {
   static propTypes = {
