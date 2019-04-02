@@ -78,7 +78,13 @@ export default class AssignPersonModal extends Component {
                   fieldLabel="Select a person"
                   placeholder="Select a person for this position"
                   value={this.state.person}
-                  overlayColumns={["", "Name", "Person", "Location", "Organization"]}
+                  overlayColumns={[
+                    "",
+                    "Name",
+                    "Person",
+                    "Location",
+                    "Organization"
+                  ]}
                   overlayRenderRow={this.renderPersonOverlayRow}
                   filterDefs={personFilters}
                   onChange={this.handleChangePerson}
@@ -139,9 +145,7 @@ export default class AssignPersonModal extends Component {
 
   @autobind
   remove() {
-    this.setState({ person: null }, () =>
-      this.save()
-    )
+    this.setState({ person: null }, () => this.save())
   }
 
   @autobind

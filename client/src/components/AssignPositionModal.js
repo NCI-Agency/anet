@@ -38,7 +38,9 @@ class BaseAssignPositionModal extends Component {
 
   render() {
     const { person, currentUser } = this.props
-    let newPosition = this.state.position ? new Position(this.state.position) : new Position()
+    let newPosition = this.state.position
+      ? new Position(this.state.position)
+      : new Position()
 
     let positionSearchQuery = { status: Position.STATUS.ACTIVE }
     if (person.role === Person.ROLE.ADVISOR) {
@@ -152,9 +154,7 @@ class BaseAssignPositionModal extends Component {
 
   @autobind
   remove() {
-    this.setState({ position: null }, () =>
-      this.save()
-    )
+    this.setState({ position: null }, () => this.save())
   }
 
   @autobind
