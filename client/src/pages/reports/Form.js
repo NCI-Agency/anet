@@ -173,9 +173,7 @@ class BaseReportForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={Report.yupSchema}
-        isInitialValid={() =>
-          Report.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({

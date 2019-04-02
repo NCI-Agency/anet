@@ -105,9 +105,7 @@ class BaseOrganizationForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={Organization.yupSchema}
-        isInitialValid={() =>
-          Organization.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({
