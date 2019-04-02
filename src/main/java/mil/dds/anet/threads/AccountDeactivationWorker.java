@@ -39,12 +39,12 @@ public class AccountDeactivationWorker implements Runnable {
 
     @SuppressWarnings("unchecked")
     final List<Integer> daysTillWarning = (List<Integer>) config
-        .getDictionaryEntry("automaticallyInactivateUsers.emailReminders.daysPrior");
+        .getDictionaryEntry("automaticallyInactivateUsers.emailRemindersDaysPrior");
     this.daysTillEndOfTourWarnings = daysTillWarning;
 
     @SuppressWarnings("unchecked")
     List<String> domainsToIgnore = (List<String>) config
-        .getDictionaryEntry("automaticallyInactivateUsers.clearDomainUserName.test");
+        .getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
     this.ignoredDomains = domainsToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
 
     this.warningIntervalInMs = warningIntervalInMs;
@@ -94,7 +94,7 @@ public class AccountDeactivationWorker implements Runnable {
 
       // Skip inactive ANET users or users from ignored domains
       if (p.getStatus() == PersonStatus.INACTIVE
-          || this.ignoredDomains.stream().anyMatch(d -> p.getEmailAddress().endsWith(d))) {
+          || this.ignoredDomains.stream().anyMatch(d -> p.getEmailAddress().matches(".*@" + d))) {
         continue;
       }
 
