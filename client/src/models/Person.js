@@ -69,11 +69,18 @@ export default class Person extends Model {
         .nullable()
         .email()
         .when("role", (role, schema) =>
-          Person.isAdvisor({ role })
-            ? schema.required(
-              `You must provide the ${Settings.fields.person.emailAddress}`
-            )
-            : schema.nullable()
+          schema.test(
+            "emailAddress",
+            "emailAddress error",
+            // can't use arrow function here because of binding to 'this'
+            function(emailAddress) {
+              const r = utils.handleEmailValidation(
+                emailAddress,
+                role === Person.ROLE.ADVISOR
+              )
+              return r.isValid ? true : this.createError({ message: r.message })
+            }
+          )
         )
         .default("")
         .label(Settings.fields.person.emailAddress),
