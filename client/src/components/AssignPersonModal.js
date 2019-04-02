@@ -81,7 +81,7 @@ export default class AssignPersonModal extends Component {
                   overlayColumns={["", "Name", "Person", "Location", "Organization"]}
                   overlayRenderRow={this.renderPersonOverlayRow}
                   filterDefs={personFilters}
-                  onChange={this.onPersonSelect}
+                  onChange={this.handleChangePerson}
                   objectType={Person}
                   valueKey="name"
                   fields={
@@ -138,19 +138,26 @@ export default class AssignPersonModal extends Component {
   }
 
   @autobind
+  remove() {
+    this.setState({ person: null }, () =>
+      this.save()
+    )
+  }
+
+  @autobind
   save() {
-    let graphql = "putPersonInPosition(uuid: $uuid, person: $person)"
+    let graphql = "deletePersonFromPosition(uuid: $uuid)"
     let variables = {
-      uuid: this.props.position.uuid,
-      person: { uuid: this.state.person.uuid }
+      uuid: this.props.position.uuid
     }
-    let variableDef = "($uuid: String!, $person: PersonInput!)"
-    if (this.state.person === null) {
-      graphql = "deletePersonFromPosition(uuid: $uuid)"
+    let variableDef = "($uuid: String!)"
+    if (this.state.person !== null) {
+      graphql = "putPersonInPosition(uuid: $uuid, person: $person)"
       variables = {
-        uuid: this.props.position.uuid
+        uuid: this.props.position.uuid,
+        person: { uuid: this.state.person.uuid }
       }
-      variableDef = "($uuid: String!)"
+      variableDef = "($uuid: String!, $person: PersonInput!)"
     }
     API.mutation(graphql, variables, variableDef)
       .then(data => this.props.onSuccess())
@@ -169,10 +176,8 @@ export default class AssignPersonModal extends Component {
   }
 
   @autobind
-  onPersonSelect(person) {
-    if (person && person.uuid) {
-      this.setState({ person }, () => this.updateAlert())
-    }
+  handleChangePerson(person) {
+    this.setState({ person }, () => this.updateAlert())
   }
 
   @autobind
