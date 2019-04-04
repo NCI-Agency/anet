@@ -14,7 +14,8 @@ export default class AdvancedSingleSelect extends Component {
   }
 
   static defaultProps = {
-    overlayTable: AdvancedSingleSelectOverlayTable
+    overlayTable: AdvancedSingleSelectOverlayTable,
+    showRemoveButton: true  // whether to display a remove button in the input field to allow removing the selected value
   }
 
   render() {
@@ -30,7 +31,7 @@ export default class AdvancedSingleSelect extends Component {
             : ""
         }
         extraAddon={
-          !_isEmpty(this.props.value) ? (
+          this.props.showRemoveButton && !_isEmpty(this.props.value) ? (
             <img
               src={REMOVE_ICON}
               height={16}
