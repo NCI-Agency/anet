@@ -468,7 +468,7 @@ class BaseOrganizationForm extends Component {
       approvalStepInUse(uuid:"${step.uuid}")
     `
     ).then(data => {
-      if (data) {
+      if (data.approvalStepInUse) {
         this.setState({ showRemoveApprovalStepAlert: true })
       } else {
         arrayHelpers.remove(index)
