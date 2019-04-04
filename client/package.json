@@ -105,7 +105,7 @@
     "draft-js": "^0.10.5",
     "email-addresses": "^3.0.2",
     "file-saver": "^2.0.1",
-    "formik": "^1.5.1",
+    "formik": "^1.5.2",
     "graphiql": "^0.12.0",
     "graphql": "^0.13.2",
     "hopscotch": "^0.3.1",
