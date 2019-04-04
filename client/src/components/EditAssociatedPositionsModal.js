@@ -1,46 +1,51 @@
-import API, { Settings } from "api";
-import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect";
-import AppContext from "components/AppContext";
-import LinkTo from "components/LinkTo";
-import Messages from "components/Messages";
-import RemoveButton from "components/RemoveButton";
-import { Form, Formik } from "formik";
-import { Person, Position } from "models";
-import PropTypes from "prop-types";
-import React, { Component } from "react";
-import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap";
-import POSITIONS_ICON from "resources/positions.png";
+import API, { Settings } from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import AppContext from "components/AppContext"
+import LinkTo from "components/LinkTo"
+import Messages from "components/Messages"
+import RemoveButton from "components/RemoveButton"
+import { Form, Formik } from "formik"
+import { Person, Position } from "models"
+import PropTypes from "prop-types"
+import React, { Component } from "react"
+import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
+import POSITIONS_ICON from "resources/positions.png"
 
-const PositionTable = ({associatedPositions, onDelete}) => (
-    <Table striped condensed hover responsive>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Position</th>
-          <th>Organization</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        {Position.map(associatedPositions, relPos => {
-          const person = new Person(relPos.person)
-          return (
-            <tr key={relPos.uuid}>
-              <td><LinkTo person={person} isLink={false} /></td>
-              <td><LinkTo person={relPos} isLink={false} /></td>
-              <td><LinkTo organization={relPos.organization} isLink={false} /></td>
-              <td>
-                <RemoveButton
-                  title="Unassign person"
-                  handleOnClick={() => onDelete(relPos)}
-                />
-              </td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </Table>
-  )
+const PositionTable = ({ associatedPositions, onDelete }) => (
+  <Table striped condensed hover responsive>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Organization</th>
+        <th />
+      </tr>
+    </thead>
+    <tbody>
+      {Position.map(associatedPositions, relPos => {
+        const person = new Person(relPos.person)
+        return (
+          <tr key={relPos.uuid}>
+            <td>
+              <LinkTo person={person} isLink={false} />
+            </td>
+            <td>
+              <LinkTo person={relPos} isLink={false} />
+            </td>
+            <td>
+              <LinkTo organization={relPos.organization} isLink={false} />
+            </td>
+            <td>
+              <RemoveButton
+                title="Unassign person"
+                handleOnClick={() => onDelete(relPos)}
+              />
+            </td>
+          </tr>
+        )
+      })}
+    </tbody>
+  </Table>
 )
 
 class BaseEditAssociatedPositionsModal extends Component {
