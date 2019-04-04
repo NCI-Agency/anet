@@ -26,7 +26,6 @@ import {
   Radio
 } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
-import utils from "utils"
 
 class BasePersonForm extends Component {
   static propTypes = {
@@ -402,9 +401,6 @@ class BasePersonForm extends Component {
                     name="emailAddress"
                     label={Settings.fields.person.emailAddress}
                     type="email"
-                    validate={email =>
-                      this.handleEmailValidation(email, values)
-                    }
                     component={FieldHelper.renderInputField}
                   />
                   <Field
@@ -494,11 +490,6 @@ class BasePersonForm extends Component {
         }}
       </Formik>
     )
-  }
-
-  handleEmailValidation = (value, values) => {
-    const r = utils.handleEmailValidation(value, Person.isAdvisor(values))
-    return r.isValid ? null : r.message
   }
 
   handleLastNameOnKeyDown = event => {
