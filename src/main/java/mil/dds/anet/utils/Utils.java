@@ -343,4 +343,34 @@ public class Utils {
     }
     return groupedResults;
   }
+
+  /**
+   * Checks whether an email address is allowed according to a list of whitelisted domains
+   * 
+   * @param email The email address to check
+   * @param whitelistDomainNames The list of whitelisted domain names (wildcards allowed)
+   * @return Whether the email is whitelisted
+   */
+  public static boolean isEmailWhitelisted(String email, List<String> whitelistDomainNames) {
+    if (isEmptyOrNull(email)) {
+      return false;
+    }
+
+    final String WILDCARD = "*";
+    final String[] splittedEmail = email.split("@");
+    final String from = splittedEmail[0].trim();
+    final String domainName = splittedEmail[1].toLowerCase();
+
+    final List<String> wildcardDomainNames = whitelistDomainNames.stream()
+        .filter(domain -> String.valueOf(domain.charAt(0)).equals(WILDCARD))
+        .collect((Collectors.toList()));
+
+    final Boolean isWhitelistedEmail =
+        from.length() > 0 && whitelistDomainNames.indexOf(domainName) >= 0;
+    final Boolean isValidWildcardDomain =
+        wildcardDomainNames.stream().anyMatch(wildcardDomain -> domainName.charAt(0) != '.'
+            && domainName.endsWith(wildcardDomain.substring(1)));
+
+    return isWhitelistedEmail || isValidWildcardDomain;
+  }
 }

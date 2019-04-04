@@ -18,6 +18,7 @@ import mil.dds.anet.emails.AccountDeactivationEmail;
 import mil.dds.anet.emails.AccountDeactivationWarningEmail;
 import mil.dds.anet.utils.AnetAuditLogger;
 import mil.dds.anet.utils.DaoUtils;
+import mil.dds.anet.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +44,8 @@ public class AccountDeactivationWorker implements Runnable {
     this.daysTillEndOfTourWarnings = daysTillWarning;
 
     @SuppressWarnings("unchecked")
-    List<String> domainsToIgnore = (List<String>) config
-        .getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
+    List<String> domainsToIgnore =
+        (List<String>) config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
     this.ignoredDomains = domainsToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
 
     this.warningIntervalInMs = warningIntervalInMs;
@@ -94,7 +95,7 @@ public class AccountDeactivationWorker implements Runnable {
 
       // Skip inactive ANET users or users from ignored domains
       if (p.getStatus() == PersonStatus.INACTIVE
-          || this.ignoredDomains.stream().anyMatch(d -> p.getEmailAddress().matches(".*@" + d))) {
+          || Utils.isEmailWhitelisted(p.getEmailAddress(), this.ignoredDomains)) {
         continue;
       }
 
