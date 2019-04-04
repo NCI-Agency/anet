@@ -118,7 +118,7 @@ public class PersonResource {
         // Super Users can edit position-less people.
         return true;
       }
-      return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganizationUuid());
+      return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganizationUuid(), true);
     }
     return false;
   }

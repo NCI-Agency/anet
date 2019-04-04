@@ -130,7 +130,7 @@ public class OrganizationResource {
       throws InterruptedException, ExecutionException, Exception {
     Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
-    AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org));
+    AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);
 
     // Check for loops in the hierarchy
     final Map<String, Organization> children =

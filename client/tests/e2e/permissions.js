@@ -2,7 +2,7 @@ let uuidv4 = require("uuid/v4")
 let test = require("../util/test")
 
 test("checking super user permissions", async t => {
-  t.plan(12)
+  t.plan(7)
 
   let { pageHelpers, shortWaitMs } = t.context
 
@@ -318,48 +318,12 @@ async function getPrincipalOrgFromSearchResults(t, principalOrgName) {
 }
 
 async function validateSuperUserPrincipalOrgPermissions(t) {
-  let { $, assertElementNotPresent, shortWaitMs } = t.context
+  let { assertElementNotPresent, shortWaitMs } = t.context
 
-  let $editPrincipalOrgButton = await $("#editButton")
-  await t.context.driver.wait(
-    t.context.until.elementIsVisible($editPrincipalOrgButton)
-  )
-  await $editPrincipalOrgButton.click()
-  await t.context.driver.sleep(shortWaitMs) // wait for transition
   await assertElementNotPresent(
     t,
-    "#typeAdvisorButton",
-    "Field advisorOrgButton of a principal organization should be absent for super users",
-    shortWaitMs
-  )
-  await assertElementNotPresent(
-    t,
-    "#typePrincipalButton",
-    "Field principalOrgButton of a principal organization should be absent for super users",
-    shortWaitMs
-  )
-  await assertElementNotPresent(
-    t,
-    "#parentOrg",
-    "Field parentOrganization of a principal organization should be absent for super users",
-    shortWaitMs
-  )
-  await assertElementNotPresent(
-    t,
-    "#shortName",
-    "Field shortName of a principal organization should be absent for super users",
-    shortWaitMs
-  )
-  await assertElementNotPresent(
-    t,
-    "#longName",
-    "Field longName of a principal organization should be absent for super users",
-    shortWaitMs
-  )
-  await assertElementNotPresent(
-    t,
-    "#identificationCode",
-    "Field identificationCode of a principal organization should be absent for super users",
+    "#editButton",
+    "Super users should not be able to edit principal organizations",
     shortWaitMs
   )
 }
