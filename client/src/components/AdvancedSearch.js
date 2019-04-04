@@ -16,7 +16,6 @@ import {
   Col,
   ControlLabel,
   DropdownButton,
-  Form,
   FormControl,
   FormGroup,
   MenuItem,
@@ -26,6 +25,7 @@ import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
 import utils from "utils"
+import { Form, Formik } from "formik"
 
 function updateOrganizationFilterState(organizationFilter, positionType) {
   if (organizationFilter) {
@@ -132,7 +132,8 @@ class AdvancedSearch extends Component {
     const moreFiltersAvailable =
       existingKeys.length < Object.keys(filterDefs).length
     return (
-      <div className="advanced-search form-horizontal">
+      <Formik>
+        {() => <div className="advanced-search form-horizontal">
         <Form onSubmit={this.onSubmit}>
           <FormGroup>
             <Col xs={11} style={{ textAlign: "center" }}>
@@ -216,6 +217,8 @@ class AdvancedSearch extends Component {
           </Row>
         </Form>
       </div>
+        }
+      </Formik>
     )
   }
 
