@@ -185,7 +185,7 @@ dictionary:
   fields:
 
     task:
-      shortLabel: Task
+      shortLabel: Effort / Task
       shortName: Task number
       longLabel: Tasks and Milestones
       longName: Task description

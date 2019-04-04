@@ -1,3 +1,5 @@
+import { Settings } from "api"
+import pluralize from "pluralize"
 import * as types from "../constants/ActionTypes"
 
 export const DEFAULT_PAGE_PROPS = {
@@ -19,7 +21,7 @@ export const SEARCH_OBJECT_TYPES = {
   ORGANIZATIONS: "Organizations",
   POSITIONS: "Positions",
   LOCATIONS: "Locations",
-  TASKS: "Tasks"
+  TASKS: pluralize(Settings.fields.task.shortLabel)
 }
 
 export const DEFAULT_SEARCH_PROPS = {
