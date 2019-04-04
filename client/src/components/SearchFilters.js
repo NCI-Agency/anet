@@ -1,4 +1,5 @@
 import { Settings } from "api"
+import AdvancedSelectFilter from "components/advancedSearch/AdvancedSelectFilter"
 import AutocompleteFilter from "components/advancedSearch/AutocompleteFilter"
 import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
 import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
@@ -7,11 +8,16 @@ import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSear
 import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
 import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
 import TextInputFilter from "components/advancedSearch/TextInputFilter"
+import LinkTo from "components/LinkTo"
 import { Location, Organization, Person, Position, Tag, Task } from "models"
 import pluralize from "pluralize"
+import React from "react"
+import PEOPLE_ICON from "resources/people.png"
 
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
+
+
 
 const taskFilters = props => {
   const taskFiltersObj = {
@@ -76,18 +82,53 @@ const taskFilters = props => {
 export default {
   searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
     const filters = {}
+    const peopleFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: { role: Person.ROLE.ADVISOR }
+      }
+    }
+    const renderPersonOverlayRow = item => {
+      return (
+        <React.Fragment key={item.uuid}>
+          <td>
+            <LinkTo person={item} isLink={false} />
+          </td>
+          <td>
+            <LinkTo position={item.position} isLink={false} />
+            {item.position && item.position.code ? `, ${item.position.code}` : ""}
+          </td>
+          <td>
+            <LinkTo
+              whenUnspecified=""
+              anetLocation={item.position && item.position.location}
+              isLink={false}
+            />
+          </td>
+          <td>
+            {item.position && item.position.organization && (
+              <LinkTo organization={item.position.organization} isLink={false} />
+            )}
+          </td>
+        </React.Fragment>
+      )
+    }
     filters.Reports = {
       filters: {
         Author: {
-          component: AutocompleteFilter,
+          component: AdvancedSelectFilter,
           props: {
-            queryKey: "authorUuid",
+            fieldName: "author",
+            overlayColumns: ["Name", "Position", "Location", "Organization"],
+            overlayRenderRow: renderPersonOverlayRow,
+            filterDefs: peopleFilters,
             objectType: Person,
             valueKey: "name",
             fields: Person.autocompleteQuery,
-            template: Person.autocompleteTemplate,
-            queryParams: { role: Person.ROLE.ADVISOR },
-            placeholder: "Filter reports by author..."
+            placeholder: "Filter reports by author...",
+            addon: PEOPLE_ICON,
+            queryKey: "authorUuid"
           }
         },
         Attendee: {

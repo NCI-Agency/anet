@@ -10,8 +10,8 @@ export default class AdvancedSelectFilter extends Component {
   static propTypes = {
     // An AdvancedSingleSelect filter allows users to search the ANET database
     // for existing records and use that records ID as the search term.
-    // the queryKey property tells this filter what property to set on the
-    // search query. (ie authorUuid, organizationUuid, etc)
+    // The queryKey property tells this filter what property to set on the
+    // search query (ie authorUuid, organizationUuid, etc).
     queryKey: PropTypes.string.isRequired,
 
     // Passed by the SearchFilter row
@@ -20,7 +20,7 @@ export default class AdvancedSelectFilter extends Component {
     // Passed by the SearchFilterDisplay row
     asFormField: PropTypes.bool
 
-    // All other properties are passed directly to the AdvancedSingleSelect
+    // All other properties are passed directly to the AdvancedSelectFilter
   }
 
   static defaultProps = {
