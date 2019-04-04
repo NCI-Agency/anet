@@ -269,9 +269,16 @@ export default class AdvancedSelect extends Component {
           }}
         />
         <Row>
-          <Col sm={2} />
-          <Col sm={7}>{renderSelectedWithDelete}</Col>
-          <Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
+          {vertical
+            ?
+            <Col sm={12}>{renderSelectedWithDelete}</Col>
+            :
+            <React.Fragment>
+              <Col sm={2} />
+              <Col sm={7}>{renderSelectedWithDelete}</Col>
+              <Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
+            </React.Fragment>
+          }
         </Row>
       </React.Fragment>
     )
