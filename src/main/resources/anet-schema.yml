@@ -534,3 +534,22 @@ properties:
             options:
               type: object
               additionalProperties: true
+
+  automaticallyInactivateUsers:
+    title: Auto account deactivation and email warnings.
+    description: Automatically deactivate accounts which reach the end of tour date, and warn users in intervals prior to inactivation.
+    emailRemindersDaysPrior: 
+      type: array
+      items:
+        type: integer
+        title: The list of days prior to account inactivation. An email will be sent to the user with a warning.
+        description: Days to send a warning prior to account inactivation.
+        examples: [15, 30, 45]
+    ignoredDomainNames:
+      type: array
+      items:
+        type: string
+        title: The list of ignored (email) domain names. These will not be affected by auto-inactivation or be sent email warnings.
+        description: Valid email domain names for this ANET instance; may contain wildcards.
+        examples: ["*.nato.int", dds.mil]
+
