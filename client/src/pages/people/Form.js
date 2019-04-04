@@ -117,9 +117,7 @@ class BasePersonForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={Person.yupSchema}
-        isInitialValid={() =>
-          Person.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({
