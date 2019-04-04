@@ -48,7 +48,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery, automaticallyInactivateUsers]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
