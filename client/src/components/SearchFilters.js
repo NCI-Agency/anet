@@ -82,11 +82,18 @@ const taskFilters = props => {
 export default {
   searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
     const filters = {}
-    const peopleFilters = {
+    const authorFilters = {
       all: {
         label: "All",
         searchQuery: true,
         queryVars: { role: Person.ROLE.ADVISOR }
+      }
+    }
+    const attendeeFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
       }
     }
     const renderPersonOverlayRow = item => {
@@ -122,7 +129,7 @@ export default {
             fieldName: "author",
             overlayColumns: ["Name", "Position", "Location", "Organization"],
             overlayRenderRow: renderPersonOverlayRow,
-            filterDefs: peopleFilters,
+            filterDefs: authorFilters,
             objectType: Person,
             valueKey: "name",
             fields: Person.autocompleteQuery,
@@ -132,14 +139,18 @@ export default {
           }
         },
         Attendee: {
-          component: AutocompleteFilter,
+          component: AdvancedSelectFilter,
           props: {
-            queryKey: "attendeeUuid",
+            fieldName: "attendee",
+            overlayColumns: ["Name", "Position", "Location", "Organization"],
+            overlayRenderRow: renderPersonOverlayRow,
+            filterDefs: attendeeFilters,
             objectType: Person,
             valueKey: "name",
             fields: Person.autocompleteQuery,
-            template: Person.autocompleteTemplate,
-            placeholder: "Filter reports by attendee..."
+            placeholder: "Filter reports by attendee...",
+            addon: PEOPLE_ICON,
+            queryKey: "attendeeUuid"
           }
         },
         "Pending Approval Of": {
