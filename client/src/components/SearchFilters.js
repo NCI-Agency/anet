@@ -12,6 +12,7 @@ import LinkTo from "components/LinkTo"
 import { Location, Organization, Person, Position, Tag, Task } from "models"
 import pluralize from "pluralize"
 import React from "react"
+import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 
@@ -117,6 +118,16 @@ const renderPositionOverlayRow = item => {
   )
 }
 
+const renderLocationOverlayRow = item => {
+  return (
+    <React.Fragment key={item.uuid}>
+      <td>
+        <LinkTo anetLocation={item} isLink={false} />
+      </td>
+    </React.Fragment>
+  )
+}
+
 const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   overlayRenderRow: renderPersonOverlayRow,
@@ -132,6 +143,14 @@ const advancedSelectFilterPositionProps = {
   valueKey: "name",
   fields: Position.autocompleteQuery,
   addon: POSITIONS_ICON
+}
+const advancedSelectFilterLocationProps = {
+  overlayColumns: ["Location", "Name"],
+  overlayRenderRow: renderLocationOverlayRow,
+  objectType: Location,
+  valueKey: "name",
+  fields: Location.autocompleteQuery,
+  addon: LOCATIONS_ICON
 }
 
 export default {
@@ -166,6 +185,13 @@ export default {
       }
     }
     const attendeePositionFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+    const locationFilters = {
       all: {
         label: "All",
         searchQuery: true,
@@ -252,14 +278,13 @@ export default {
           }
         },
         Location: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "locationUuid",
-            objectType: Location,
-            valueKey: "name",
-            fields: Location.autocompleteQuery,
-            placeholder: "Filter reports by location..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterLocationProps, {
+            fieldName: "location",
+            filterDefs: locationFilters,
+            placeholder: "Filter reports by location...",
+            queryKey: "locationUuid"
+          })
         },
         State: {
           component: ReportStateSearch
@@ -305,6 +330,7 @@ export default {
 
     const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
     const ranks = Settings.fields.person.ranks || []
+
     filters.People = {
       filters: {
         Organization: {
@@ -337,14 +363,13 @@ export default {
           }
         },
         Location: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "locationUuid",
-            objectType: Location,
-            valueKey: "name",
-            fields: Location.autocompleteQuery,
-            placeholder: "Filter by location..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterLocationProps, {
+            fieldName: "location",
+            filterDefs: locationFilters,
+            placeholder: "Filter by location...",
+            queryKey: "locationUuid"
+          })
         },
         Rank: {
           component: SelectSearchFilter,
@@ -421,14 +446,13 @@ export default {
           }
         },
         Location: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "locationUuid",
-            objectType: Location,
-            valueKey: "name",
-            fields: Location.autocompleteQuery,
-            placeholder: "Filter by location..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterLocationProps, {
+            fieldName: "location",
+            filterDefs: locationFilters,
+            placeholder: "Filter by location...",
+            queryKey: "locationUuid"
+          })
         },
         "Is Filled?": {
           component: SelectSearchFilter,
