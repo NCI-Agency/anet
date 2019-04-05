@@ -13,11 +13,10 @@ import { Location, Organization, Person, Position, Tag, Task } from "models"
 import pluralize from "pluralize"
 import React from "react"
 import PEOPLE_ICON from "resources/people.png"
+import POSITIONS_ICON from "resources/positions.png"
 
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
-
-
 
 const taskFilters = props => {
   const taskFiltersObj = {
@@ -79,6 +78,62 @@ const taskFilters = props => {
   return taskFiltersObj
 }
 
+const renderPersonOverlayRow = item => {
+  return (
+    <React.Fragment key={item.uuid}>
+      <td>
+        <LinkTo person={item} isLink={false} />
+      </td>
+      <td>
+        <LinkTo position={item.position} isLink={false} />
+        {item.position && item.position.code ? `, ${item.position.code}` : ""}
+      </td>
+      <td>
+        <LinkTo
+          whenUnspecified=""
+          anetLocation={item.position && item.position.location}
+          isLink={false}
+        />
+      </td>
+      <td>
+        {item.position && item.position.organization && (
+          <LinkTo organization={item.position.organization} isLink={false} />
+        )}
+      </td>
+    </React.Fragment>
+  )
+}
+
+const renderPositionOverlayRow = item => {
+  return (
+    <React.Fragment key={item.uuid}>
+      <td>
+        <LinkTo person={item.person} isLink={false} />
+      </td>
+      <td>
+        <LinkTo position={item} isLink={false} />
+      </td>
+    </React.Fragment>
+  )
+}
+
+const advancedSelectFilterPersonProps = {
+  overlayColumns: ["Name", "Position", "Location", "Organization"],
+  overlayRenderRow: renderPersonOverlayRow,
+  objectType: Person,
+  valueKey: "name",
+  fields: Person.autocompleteQuery,
+  addon: PEOPLE_ICON
+}
+const advancedSelectFilterPositionProps = {
+  overlayColumns: ["Name", "Position", "Location", "Organization"],
+  overlayRenderRow: renderPositionOverlayRow,
+  objectType: Position,
+  valueKey: "name",
+  fields: Position.autocompleteQuery,
+  addon: POSITIONS_ICON
+}
+
 export default {
   searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
     const filters = {}
@@ -96,103 +151,74 @@ export default {
         queryVars: {}
       }
     }
-    const renderPersonOverlayRow = item => {
-      return (
-        <React.Fragment key={item.uuid}>
-          <td>
-            <LinkTo person={item} isLink={false} />
-          </td>
-          <td>
-            <LinkTo position={item.position} isLink={false} />
-            {item.position && item.position.code ? `, ${item.position.code}` : ""}
-          </td>
-          <td>
-            <LinkTo
-              whenUnspecified=""
-              anetLocation={item.position && item.position.location}
-              isLink={false}
-            />
-          </td>
-          <td>
-            {item.position && item.position.organization && (
-              <LinkTo organization={item.position.organization} isLink={false} />
-            )}
-          </td>
-        </React.Fragment>
-      )
+    const pendingApprovalOfFilters = authorFilters
+    const authorPositionFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {
+          type: [
+            Position.TYPE.ADVISOR,
+            Position.TYPE.SUPER_USER,
+            Position.TYPE.ADMINISTRATOR
+          ]
+        }
+      }
     }
+    const attendeePositionFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+
     filters.Reports = {
       filters: {
         Author: {
           component: AdvancedSelectFilter,
-          props: {
+          props: Object.assign({}, advancedSelectFilterPersonProps, {
             fieldName: "author",
-            overlayColumns: ["Name", "Position", "Location", "Organization"],
-            overlayRenderRow: renderPersonOverlayRow,
             filterDefs: authorFilters,
-            objectType: Person,
-            valueKey: "name",
-            fields: Person.autocompleteQuery,
             placeholder: "Filter reports by author...",
-            addon: PEOPLE_ICON,
             queryKey: "authorUuid"
-          }
+          })
         },
         Attendee: {
           component: AdvancedSelectFilter,
-          props: {
+          props: Object.assign({}, advancedSelectFilterPersonProps, {
             fieldName: "attendee",
-            overlayColumns: ["Name", "Position", "Location", "Organization"],
-            overlayRenderRow: renderPersonOverlayRow,
             filterDefs: attendeeFilters,
-            objectType: Person,
-            valueKey: "name",
-            fields: Person.autocompleteQuery,
             placeholder: "Filter reports by attendee...",
-            addon: PEOPLE_ICON,
             queryKey: "attendeeUuid"
-          }
+          })
         },
         "Pending Approval Of": {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "pendingApprovalOf",
-            objectType: Person,
-            valueKey: "name",
-            fields: Person.autocompleteQuery,
-            template: Person.autocompleteTemplate,
-            queryParams: { role: Person.ROLE.ADVISOR },
-            placeholder: "Filter reports pending approval of..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPersonProps, {
+            fieldName: "pendingApprovalOf",
+            filterDefs: pendingApprovalOfFilters,
+            placeholder: "Filter reports pending approval of...",
+            queryKey: "pendingApprovalOf"
+          })
         },
         "Author Position": {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "authorPositionUuid",
-            objectType: Position,
-            valueKey: "name",
-            fields: Position.autocompleteQuery,
-            template: Position.autocompleteTemplate,
-            queryParams: {
-              type: [
-                Position.TYPE.ADVISOR,
-                Position.TYPE.SUPER_USER,
-                Position.TYPE.ADMINISTRATOR
-              ]
-            },
-            placeholder: "Filter reports by author position..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPositionProps, {
+            fieldName: "authorPosition",
+            filterDefs: authorPositionFilters,
+            placeholder: "Filter reports by author position...",
+            queryKey: "authorPositionUuid"
+          })
         },
         "Attendee Position": {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "attendeePositionUuid",
-            objectType: Position,
-            valueKey: "name",
-            fields: Position.autocompleteQuery,
-            template: Position.autocompleteTemplate,
-            placeholder: "Filter reports by attendee position..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPositionProps, {
+            fieldName: "attendeePosition",
+            filterDefs: attendeePositionFilters,
+            placeholder: "Filter reports by attendee position...",
+            queryKey: "attendeePositionUuid"
+          })
         },
         Organization: {
           component: OrganizationFilter,
