@@ -1,5 +1,10 @@
 import API, { Settings } from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import {
+  ApproverOverlayRow,
+  OrganizationOverlayRow,
+  TaskSimpleOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
@@ -258,7 +263,7 @@ class BaseOrganizationForm extends Component {
                         placeholder="Search for a higher level organization..."
                         value={values.parentOrg}
                         overlayColumns={["Parent Organization", "Name"]}
-                        overlayRenderRow={this.renderOrganizationOverlayRow}
+                        overlayRenderRow={OrganizationOverlayRow}
                         filterDefs={organizationFilters}
                         onChange={value => setFieldValue("parentOrg", value)}
                         objectType={Organization}
@@ -392,7 +397,7 @@ class BaseOrganizationForm extends Component {
                             <TaskTable tasks={values.tasks} showDelete />
                           }
                           overlayColumns={["Task", "Name"]}
-                          overlayRenderRow={this.renderTaskOverlayRow}
+                          overlayRenderRow={TaskSimpleOverlayRow}
                           filterDefs={tasksFilters}
                           onChange={value => {
                             setFieldValue("tasks", value)
@@ -466,7 +471,7 @@ class BaseOrganizationForm extends Component {
           value={approvers}
           renderSelected={<ApproverTable approvers={approvers} />}
           overlayColumns={["Approver", "Name", "Position"]}
-          overlayRenderRow={this.renderApproverOverlayRow}
+          overlayRenderRow={ApproverOverlayRow}
           filterDefs={approversFilters}
           onChange={value =>
             setFieldValue(`approvalSteps.${index}.approvers`, value)
@@ -573,41 +578,6 @@ class BaseOrganizationForm extends Component {
     const variables = { organization: organization }
     const variableDef = "($organization: OrganizationInput!)"
     return API.mutation(graphql, variables, variableDef)
-  }
-
-  renderTaskOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td className="taskName">
-          <LinkTo task={item} isLink={false}>
-            {item.shortName} - {item.longName}
-          </LinkTo>
-        </td>
-      </React.Fragment>
-    )
-  }
-
-  renderOrganizationOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td className="orgShortName">
-          <LinkTo organization={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
-  }
-
-  renderApproverOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo person={item.person} isLink={false} />
-        </td>
-        <td>
-          <LinkTo position={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
   }
 }
 

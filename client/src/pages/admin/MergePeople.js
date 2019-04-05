@@ -1,4 +1,5 @@
 import API, { Settings } from "api"
+import { PersonOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
@@ -125,7 +126,7 @@ class MergePeople extends Page {
                             "Location",
                             "Organization"
                           ]}
-                          overlayRenderRow={this.renderPersonOverlayRow}
+                          overlayRenderRow={PersonOverlayRow}
                           filterDefs={peopleFilters}
                           onChange={value => {
                             setFieldValue("loser", value)
@@ -160,7 +161,7 @@ class MergePeople extends Page {
                             "Location",
                             "Organization"
                           ]}
-                          overlayRenderRow={this.renderPersonOverlayRow}
+                          overlayRenderRow={PersonOverlayRow}
                           filterDefs={peopleFilters}
                           onChange={value => {
                             setFieldValue("winner", value)
@@ -352,32 +353,6 @@ class MergePeople extends Page {
     const variableDef =
       "($winnerUuid: String!, $loserUuid: String!, $copyPosition: Boolean!)"
     return API.mutation(graphql, variables, variableDef)
-  }
-
-  renderPersonOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo person={item} isLink={false} />
-        </td>
-        <td>
-          <LinkTo position={item.position} isLink={false} />
-          {item.position && item.position.code ? `, ${item.position.code}` : ""}
-        </td>
-        <td>
-          <LinkTo
-            whenUnspecified=""
-            anetLocation={item.position && item.position.location}
-            isLink={false}
-          />
-        </td>
-        <td>
-          {item.position && item.position.organization && (
-            <LinkTo organization={item.position.organization} isLink={false} />
-          )}
-        </td>
-      </React.Fragment>
-    )
   }
 }
 

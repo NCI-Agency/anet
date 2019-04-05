@@ -1,5 +1,6 @@
 import API, { Settings } from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -127,7 +128,7 @@ class BaseEditAssociatedPositionsModal extends Component {
                             />
                           }
                           overlayColumns={["", "Person", "Position"]}
-                          overlayRenderRow={this.renderPositionOverlayRow}
+                          overlayRenderRow={PositionOverlayRow}
                           filterDefs={positionsFilters}
                           onChange={value =>
                             setFieldValue("associatedPositions", value)
@@ -184,19 +185,6 @@ class BaseEditAssociatedPositionsModal extends Component {
     const variables = { position: position }
     const variableDef = "($position: PositionInput!)"
     return API.mutation(graphql, variables, variableDef)
-  }
-
-  renderPositionOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo person={item.person} isLink={false} />
-        </td>
-        <td>
-          <LinkTo position={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
   }
 }
 

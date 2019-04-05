@@ -1,4 +1,8 @@
 import API, { Settings } from "api"
+import {
+  LocationOverlayRow,
+  OrganizationOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
@@ -222,7 +226,7 @@ class BasePositionForm extends Component {
                     placeholder="Search the organization for this position..."
                     value={values.organization}
                     overlayColumns={["Organization", "Name"]}
-                    overlayRenderRow={this.renderOrganizationOverlayRow}
+                    overlayRenderRow={OrganizationOverlayRow}
                     filterDefs={organizationFilters}
                     onChange={value => setFieldValue("organization", value)}
                     objectType={Organization}
@@ -261,7 +265,7 @@ class BasePositionForm extends Component {
                     placeholder="Search for the location where this Position will operate from..."
                     value={values.location}
                     overlayColumns={["Location", "Name"]}
-                    overlayRenderRow={this.renderLocationOverlayRow}
+                    overlayRenderRow={LocationOverlayRow}
                     filterDefs={locationFilters}
                     onChange={value => setFieldValue("location", value)}
                     objectType={Location}
@@ -350,26 +354,6 @@ class BasePositionForm extends Component {
     const variables = { position: position }
     const variableDef = "($position: PositionInput!)"
     return API.mutation(graphql, variables, variableDef)
-  }
-
-  renderOrganizationOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td className="orgShortName">
-          <LinkTo organization={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
-  }
-
-  renderLocationOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo anetLocation={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
   }
 }
 

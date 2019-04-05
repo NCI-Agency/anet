@@ -1,7 +1,7 @@
 import API from "api"
 import autobind from "autobind-decorator"
+import { OrganizationOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
-import LinkTo from "components/LinkTo"
 import _isEqualWith from "lodash/isEqualWith"
 import { Organization } from "models"
 import PropTypes from "prop-types"
@@ -99,7 +99,7 @@ export default class OrganizationFilter extends Component {
           showRemoveButton={false}
           filterDefs={organizationWidgetFilters}
           overlayColumns={["Name"]}
-          overlayRenderRow={this.renderOrganizationOverlayRow}
+          overlayRenderRow={OrganizationOverlayRow}
           objectType={Organization}
           valueKey="shortName"
           fields={Organization.autocompleteQuery}
@@ -184,15 +184,5 @@ export default class OrganizationFilter extends Component {
       })
     }
     return null
-  }
-
-  renderOrganizationOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td className="orgShortName">
-          <LinkTo organization={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
   }
 }

@@ -1,5 +1,6 @@
 import API from "api"
 import autobind from "autobind-decorator"
+import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import LinkTo from "components/LinkTo"
@@ -98,7 +99,7 @@ class BaseAssignPositionModal extends Component {
                   placeholder="Select a position for this person"
                   value={this.state.position}
                   overlayColumns={["", "Name", "Position"]}
-                  overlayRenderRow={this.renderPositionOverlayRow}
+                  overlayRenderRow={PositionOverlayRow}
                   filterDefs={positionsFilters}
                   onChange={this.handlePositionChange}
                   objectType={Position}
@@ -211,19 +212,6 @@ class BaseAssignPositionModal extends Component {
       error = { message: errorMessage }
     }
     this.setState({ error: error })
-  }
-
-  renderPositionOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo person={item.person} isLink={false} />
-        </td>
-        <td>
-          <LinkTo position={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
   }
 }
 

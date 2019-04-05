@@ -1,12 +1,17 @@
 import API, { Settings } from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import {
+  AuthorizationGroupOverlayRow,
+  LocationOverlayRow,
+  PersonOverlayRow,
+  TaskDetailedOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
@@ -417,11 +422,11 @@ class BaseReportForm extends Component {
                         .endOf("day")
                         .isBefore(values.engagementDate) && (
                         <HelpBlock>
-                        <span className="text-success">
+                          <span className="text-success">
                             This will create an upcoming engagement
                           </span>
-                      </HelpBlock>
-                    )}
+                        </HelpBlock>
+                      )}
                   </Field>
 
                   <AdvancedSingleSelect
@@ -430,7 +435,7 @@ class BaseReportForm extends Component {
                     placeholder="Search for the location where this happened..."
                     value={values.location}
                     overlayColumns={["Location", "Name"]}
-                    overlayRenderRow={this.renderLocationOverlayRow}
+                    overlayRenderRow={LocationOverlayRow}
                     filterDefs={locationFilters}
                     onChange={value => setFieldValue("location", value)}
                     objectType={Location}
@@ -542,7 +547,7 @@ class BaseReportForm extends Component {
                       "Location",
                       "Organization"
                     ]}
-                    overlayRenderRow={this.renderAttendeeOverlayRow}
+                    overlayRenderRow={PersonOverlayRow}
                     filterDefs={attendeesFilters}
                     onChange={value =>
                       this.updateAttendees(setFieldValue, "attendees", value)
@@ -578,7 +583,7 @@ class BaseReportForm extends Component {
                       />
                     }
                     overlayColumns={["Task", "Name", "Organization"]}
-                    overlayRenderRow={this.renderTaskOverlayRow}
+                    overlayRenderRow={TaskDetailedOverlayRow}
                     filterDefs={tasksFilters}
                     onChange={value => {
                       setFieldValue("tasks", value)
@@ -700,9 +705,7 @@ class BaseReportForm extends Component {
                             "Name",
                             "Description"
                           ]}
-                          overlayRenderRow={
-                            this.renderAuthorizationGroupOverlayRow
-                          }
+                          overlayRenderRow={AuthorizationGroupOverlayRow}
                           filterDefs={authorizationGroupsFilters}
                           onChange={value =>
                             setFieldValue("authorizationGroups", value)
@@ -948,66 +951,6 @@ class BaseReportForm extends Component {
       (edit ? ", $sendEditEmail: Boolean!" : "") +
       ")"
     return API.mutation(graphql, variables, variableDef)
-  }
-
-  renderLocationOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo anetLocation={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
-  }
-
-  renderAttendeeOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo person={item} isLink={false} />
-        </td>
-        <td>
-          <LinkTo position={item.position} isLink={false} />
-          {item.position && item.position.code ? `, ${item.position.code}` : ""}
-        </td>
-        <td>
-          <LinkTo
-            whenUnspecified=""
-            anetLocation={item.position && item.position.location}
-            isLink={false}
-          />
-        </td>
-        <td>
-          {item.position && item.position.organization && (
-            <LinkTo organization={item.position.organization} isLink={false} />
-          )}
-        </td>
-      </React.Fragment>
-    )
-  }
-
-  renderTaskOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td className="taskName">
-          <LinkTo task={item} isLink={false}>
-            {item.shortName} - {item.longName}
-          </LinkTo>
-        </td>
-        <td className="taskOrg">
-          <LinkTo organization={item.responsibleOrg} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
-  }
-
-  renderAuthorizationGroupOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>{item.name}</td>
-        <td>{item.description}</td>
-      </React.Fragment>
-    )
   }
 }
 

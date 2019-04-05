@@ -7,10 +7,15 @@ import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSear
 import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
 import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
 import TextInputFilter from "components/advancedSearch/TextInputFilter"
-import LinkTo from "components/LinkTo"
+import {
+  LocationOverlayRow,
+  PersonOverlayRow,
+  PositionOverlayRow,
+  TagOverlayRow,
+  TaskSimpleOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { Location, Organization, Person, Position, Tag, Task } from "models"
 import pluralize from "pluralize"
-import React from "react"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -79,80 +84,9 @@ const taskFilters = props => {
   return taskFiltersObj
 }
 
-const renderPersonOverlayRow = item => {
-  return (
-    <React.Fragment key={item.uuid}>
-      <td>
-        <LinkTo person={item} isLink={false} />
-      </td>
-      <td>
-        <LinkTo position={item.position} isLink={false} />
-        {item.position && item.position.code ? `, ${item.position.code}` : ""}
-      </td>
-      <td>
-        <LinkTo
-          whenUnspecified=""
-          anetLocation={item.position && item.position.location}
-          isLink={false}
-        />
-      </td>
-      <td>
-        {item.position && item.position.organization && (
-          <LinkTo organization={item.position.organization} isLink={false} />
-        )}
-      </td>
-    </React.Fragment>
-  )
-}
-
-const renderPositionOverlayRow = item => {
-  return (
-    <React.Fragment key={item.uuid}>
-      <td>
-        <LinkTo person={item.person} isLink={false} />
-      </td>
-      <td>
-        <LinkTo position={item} isLink={false} />
-      </td>
-    </React.Fragment>
-  )
-}
-
-const renderLocationOverlayRow = item => {
-  return (
-    <React.Fragment key={item.uuid}>
-      <td>
-        <LinkTo anetLocation={item} isLink={false} />
-      </td>
-    </React.Fragment>
-  )
-}
-
-const renderTaskOverlayRow = item => {
-  return (
-    <React.Fragment key={item.uuid}>
-      <td className="taskName">
-        <LinkTo task={item} isLink={false}>
-          {item.shortName} - {item.longName}
-        </LinkTo>
-      </td>
-    </React.Fragment>
-  )
-}
-
-const renderTagOverlayRow = item => {
-  return (
-    <React.Fragment key={item.uuid}>
-      <td>
-        <LinkTo tag={item} isLink={false} />
-      </td>
-    </React.Fragment>
-  )
-}
-
 const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
-  overlayRenderRow: renderPersonOverlayRow,
+  overlayRenderRow: PersonOverlayRow,
   objectType: Person,
   valueKey: "name",
   fields: Person.autocompleteQuery,
@@ -160,7 +94,7 @@ const advancedSelectFilterPersonProps = {
 }
 const advancedSelectFilterPositionProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
-  overlayRenderRow: renderPositionOverlayRow,
+  overlayRenderRow: PositionOverlayRow,
   objectType: Position,
   valueKey: "name",
   fields: Position.autocompleteQuery,
@@ -168,7 +102,7 @@ const advancedSelectFilterPositionProps = {
 }
 const advancedSelectFilterLocationProps = {
   overlayColumns: ["Location", "Name"],
-  overlayRenderRow: renderLocationOverlayRow,
+  overlayRenderRow: LocationOverlayRow,
   objectType: Location,
   valueKey: "name",
   fields: Location.autocompleteQuery,
@@ -176,7 +110,7 @@ const advancedSelectFilterLocationProps = {
 }
 const advancedSelectFilterTaskProps = {
   overlayColumns: ["Name"],
-  overlayRenderRow: renderTaskOverlayRow,
+  overlayRenderRow: TaskSimpleOverlayRow,
   objectType: Task,
   valueKey: "shortName",
   fields: Task.autocompleteQuery,
@@ -340,7 +274,7 @@ export default {
           component: AdvancedSelectFilter,
           props: {
             overlayColumns: ["Name"],
-            overlayRenderRow: renderTagOverlayRow,
+            overlayRenderRow: TagOverlayRow,
             objectType: Tag,
             valueKey: "name",
             fields: Tag.autocompleteQuery,

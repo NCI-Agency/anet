@@ -1,8 +1,8 @@
 import API from "api"
 import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
@@ -129,7 +129,7 @@ class AuthorizationGroupForm extends Component {
                       <PositionTable positions={values.positions} showDelete />
                     }
                     overlayColumns={["", "Name", "Position"]}
-                    overlayRenderRow={this.renderPositionOverlayRow}
+                    overlayRenderRow={PositionOverlayRow}
                     filterDefs={positionsFilters}
                     onChange={value => setFieldValue("positions", value)}
                     objectType={Position}
@@ -224,19 +224,6 @@ class AuthorizationGroupForm extends Component {
     const variables = { authorizationGroup: authGroup }
     const variableDef = "($authorizationGroup: AuthorizationGroupInput!)"
     return API.mutation(graphql, variables, variableDef)
-  }
-
-  renderPositionOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo person={item.person} isLink={false} />
-        </td>
-        <td>
-          <LinkTo position={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
   }
 }
 

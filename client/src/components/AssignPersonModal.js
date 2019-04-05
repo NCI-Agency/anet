@@ -1,5 +1,6 @@
 import API from "api"
 import autobind from "autobind-decorator"
+import { PersonOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -85,7 +86,7 @@ export default class AssignPersonModal extends Component {
                     "Location",
                     "Organization"
                   ]}
-                  overlayRenderRow={this.renderPersonOverlayRow}
+                  overlayRenderRow={PersonOverlayRow}
                   filterDefs={personFilters}
                   onChange={this.handleChangePerson}
                   objectType={Person}
@@ -202,31 +203,5 @@ export default class AssignPersonModal extends Component {
       error = { message: errorMessage }
     }
     this.setState({ error: error })
-  }
-
-  renderPersonOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td>
-          <LinkTo person={item} isLink={false} />
-        </td>
-        <td>
-          <LinkTo position={item.position} isLink={false} />
-          {item.position && item.position.code ? `, ${item.position.code}` : ""}
-        </td>
-        <td>
-          <LinkTo
-            whenUnspecified=""
-            anetLocation={item.position && item.position.location}
-            isLink={false}
-          />
-        </td>
-        <td>
-          {item.position && item.position.organization && (
-            <LinkTo organization={item.position.organization} isLink={false} />
-          )}
-        </td>
-      </React.Fragment>
-    )
   }
 }

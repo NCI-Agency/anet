@@ -1,10 +1,13 @@
 import API, { Settings } from "api"
+import {
+  OrganizationOverlayRow,
+  TaskSimpleOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
-import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
@@ -152,7 +155,7 @@ class BaseTaskForm extends Component {
                     }`}
                     value={values.responsibleOrg}
                     overlayColumns={["Responsible Organization", "Name"]}
-                    overlayRenderRow={this.renderOrganizationOverlayRow}
+                    overlayRenderRow={OrganizationOverlayRow}
                     filterDefs={responsibleOrgFilters}
                     onChange={value => setFieldValue("responsibleOrg", value)}
                     objectType={Organization}
@@ -172,7 +175,7 @@ class BaseTaskForm extends Component {
                       }
                       value={values.customFieldRef1}
                       overlayColumns={["", "Name"]}
-                      overlayRenderRow={this.renderTaskOverlayRow}
+                      overlayRenderRow={TaskSimpleOverlayRow}
                       filterDefs={tasksFilters}
                       onChange={value =>
                         setFieldValue("customFieldRef1", value)
@@ -334,28 +337,6 @@ class BaseTaskForm extends Component {
     const variables = { task: task }
     const variableDef = "($task: TaskInput!)"
     return API.mutation(graphql, variables, variableDef)
-  }
-
-  renderOrganizationOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td className="orgShortName">
-          <LinkTo organization={item} isLink={false} />
-        </td>
-      </React.Fragment>
-    )
-  }
-
-  renderTaskOverlayRow = item => {
-    return (
-      <React.Fragment key={item.uuid}>
-        <td className="taskName">
-          <LinkTo task={item} isLink={false}>
-            {item.shortName} - {item.longName}
-          </LinkTo>
-        </td>
-      </React.Fragment>
-    )
   }
 }
 
