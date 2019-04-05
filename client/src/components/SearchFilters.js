@@ -15,6 +15,7 @@ import React from "react"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
+import TASKS_ICON from "resources/tasks.png"
 
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
@@ -128,6 +129,18 @@ const renderLocationOverlayRow = item => {
   )
 }
 
+const renderTaskOverlayRow = item => {
+  return (
+    <React.Fragment key={item.uuid}>
+      <td className="taskName">
+        <LinkTo task={item} isLink={false}>
+          {item.shortName} - {item.longName}
+        </LinkTo>
+      </td>
+    </React.Fragment>
+  )
+}
+
 const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   overlayRenderRow: renderPersonOverlayRow,
@@ -152,26 +165,34 @@ const advancedSelectFilterLocationProps = {
   fields: Location.autocompleteQuery,
   addon: LOCATIONS_ICON
 }
+const advancedSelectFilterTaskProps = {
+  overlayColumns: ["Name"],
+  overlayRenderRow: renderTaskOverlayRow,
+  objectType: Task,
+  valueKey: "shortName",
+  fields: Task.autocompleteQuery,
+  addon: TASKS_ICON
+}
 
 export default {
   searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
     const filters = {}
-    const authorFilters = {
+    const authorWidgetFilters = {
       all: {
         label: "All",
         searchQuery: true,
         queryVars: { role: Person.ROLE.ADVISOR }
       }
     }
-    const attendeeFilters = {
+    const attendeeWidgetFilters = {
       all: {
         label: "All",
         searchQuery: true,
         queryVars: {}
       }
     }
-    const pendingApprovalOfFilters = authorFilters
-    const authorPositionFilters = {
+    const pendingApprovalOfWidgetFilters = authorWidgetFilters
+    const authorPositionWidgetFilters = {
       all: {
         label: "All",
         searchQuery: true,
@@ -184,14 +205,22 @@ export default {
         }
       }
     }
-    const attendeePositionFilters = {
+    const attendeePositionWidgetFilters = {
       all: {
         label: "All",
         searchQuery: true,
         queryVars: {}
       }
     }
-    const locationFilters = {
+    const locationWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+
+    const taskWidgetFilters = {
       all: {
         label: "All",
         searchQuery: true,
@@ -205,7 +234,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPersonProps, {
             fieldName: "author",
-            filterDefs: authorFilters,
+            filterDefs: authorWidgetFilters,
             placeholder: "Filter reports by author...",
             queryKey: "authorUuid"
           })
@@ -214,7 +243,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPersonProps, {
             fieldName: "attendee",
-            filterDefs: attendeeFilters,
+            filterDefs: attendeeWidgetFilters,
             placeholder: "Filter reports by attendee...",
             queryKey: "attendeeUuid"
           })
@@ -223,7 +252,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPersonProps, {
             fieldName: "pendingApprovalOf",
-            filterDefs: pendingApprovalOfFilters,
+            filterDefs: pendingApprovalOfWidgetFilters,
             placeholder: "Filter reports pending approval of...",
             queryKey: "pendingApprovalOf"
           })
@@ -232,7 +261,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPositionProps, {
             fieldName: "authorPosition",
-            filterDefs: authorPositionFilters,
+            filterDefs: authorPositionWidgetFilters,
             placeholder: "Filter reports by author position...",
             queryKey: "authorPositionUuid"
           })
@@ -241,7 +270,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPositionProps, {
             fieldName: "attendeePosition",
-            filterDefs: attendeePositionFilters,
+            filterDefs: attendeePositionWidgetFilters,
             placeholder: "Filter reports by attendee position...",
             queryKey: "attendeePositionUuid"
           })
@@ -281,7 +310,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterLocationProps, {
             fieldName: "location",
-            filterDefs: locationFilters,
+            filterDefs: locationWidgetFilters,
             placeholder: "Filter reports by location...",
             queryKey: "locationUuid"
           })
@@ -317,15 +346,13 @@ export default {
 
     const taskShortLabel = Settings.fields.task.shortLabel
     filters.Reports.filters[taskShortLabel] = {
-      component: AutocompleteFilter,
-      props: {
-        queryKey: "taskUuid",
-        objectType: Task,
-        valueKey: "shortName",
-        fields: Task.autocompleteQuery,
-        template: Task.autocompleteTemplate,
-        placeholder: `Filter reports by ${taskShortLabel}...`
-      }
+      component: AdvancedSelectFilter,
+      props: Object.assign({}, advancedSelectFilterTaskProps, {
+        fieldName: "task",
+        filterDefs: taskWidgetFilters,
+        placeholder: `Filter reports by ${taskShortLabel}...`,
+        queryKey: "taskUuid"
+      })
     }
 
     const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
@@ -366,7 +393,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterLocationProps, {
             fieldName: "location",
-            filterDefs: locationFilters,
+            filterDefs: locationWidgetFilters,
             placeholder: "Filter by location...",
             queryKey: "locationUuid"
           })
@@ -449,7 +476,7 @@ export default {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterLocationProps, {
             fieldName: "location",
-            filterDefs: locationFilters,
+            filterDefs: locationWidgetFilters,
             placeholder: "Filter by location...",
             queryKey: "locationUuid"
           })
