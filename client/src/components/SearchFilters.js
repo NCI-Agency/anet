@@ -1,6 +1,5 @@
 import { Settings } from "api"
 import AdvancedSelectFilter from "components/advancedSearch/AdvancedSelectFilter"
-import AutocompleteFilter from "components/advancedSearch/AutocompleteFilter"
 import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
 import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
 import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
@@ -141,6 +140,16 @@ const renderTaskOverlayRow = item => {
   )
 }
 
+const renderTagOverlayRow = item => {
+  return (
+    <React.Fragment key={item.uuid}>
+      <td>
+        <LinkTo tag={item} isLink={false} />
+      </td>
+    </React.Fragment>
+  )
+}
+
 const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
   overlayRenderRow: renderPersonOverlayRow,
@@ -221,6 +230,14 @@ export default {
     }
 
     const taskWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+
+    const tagWidgetFilters = {
       all: {
         label: "All",
         searchQuery: true,
@@ -320,13 +337,16 @@ export default {
           }
         },
         Tag: {
-          component: AutocompleteFilter,
+          component: AdvancedSelectFilter,
           props: {
-            queryKey: "tagUuid",
+            overlayColumns: ["Name"],
+            overlayRenderRow: renderTagOverlayRow,
             objectType: Tag,
             valueKey: "name",
             fields: Tag.autocompleteQuery,
-            placeholder: "Filter reports by tag..."
+            filterDefs: tagWidgetFilters,
+            placeholder: `Filter reports by tag...`,
+            queryKey: "tagUuid"
           }
         },
         "Sensitive Info": {
