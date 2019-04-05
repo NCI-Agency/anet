@@ -1,19 +1,21 @@
 import API from "api"
 import autobind from "autobind-decorator"
-import Autocomplete from "components/Autocomplete"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import LinkTo from "components/LinkTo"
 import _isEqualWith from "lodash/isEqualWith"
 import { Organization } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Checkbox } from "react-bootstrap"
+import ORGANIZATIONS_ICON from "resources/organizations.png"
 import utils from "utils"
 
 export default class OrganizationFilter extends Component {
   static propTypes = {
-    // An Autocomplete filter allows users to search the ANET database
-    // for existing records and use that records ID as the search term.
-    // the filterKey property tells this filter what property to set on the
-    // search query. (ie authorUuid, organizationUuid, etc)
+    // An OrganizationFilter filter allows users to search the ANET database
+    // for existing organizations and use that records ID as the search term.
+    // The queryKey property tells this filter what property to set on the
+    // search query (ie authorUuid, organizationUuid, etc).
     queryKey: PropTypes.string.isRequired,
     queryIncludeChildOrgsKey: PropTypes.string.isRequired,
 
@@ -24,7 +26,7 @@ export default class OrganizationFilter extends Component {
     // Passed by the SearchFilterDisplay row
     asFormField: PropTypes.bool
 
-    // All other properties are passed directly to the Autocomplete.
+    // All other properties are passed directly to the AdvancedSingleSelect.
   }
 
   static defaultProps = {
@@ -65,7 +67,7 @@ export default class OrganizationFilter extends Component {
   }
 
   render() {
-    let autocompleteProps = Object.without(
+    const advancedSelectProps = Object.without(
       this.props,
       "value",
       "queryKey",
@@ -77,19 +79,33 @@ export default class OrganizationFilter extends Component {
     if (msg && this.state.includeChildOrgs) {
       msg += ", including sub-organizations"
     }
+    const organizationWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: this.state.queryParams
+      }
+    }
 
     return !this.props.asFormField ? (
       <React.Fragment>{msg}</React.Fragment>
     ) : (
       <div>
-        <Autocomplete
+        <AdvancedSingleSelect
+          {...advancedSelectProps}
+          fieldName={this.props.queryKey}
+          fieldLabel={null}
+          vertical
+          showRemoveButton={false}
+          filterDefs={organizationWidgetFilters}
+          overlayColumns={["Name"]}
+          overlayRenderRow={this.renderOrganizationOverlayRow}
           objectType={Organization}
           valueKey="shortName"
           fields={Organization.autocompleteQuery}
           placeholder="Filter by organization..."
-          queryParams={this.state.queryParams}
-          {...autocompleteProps}
-          onChange={this.onAutocomplete}
+          addon={ORGANIZATIONS_ICON}
+          onChange={this.onChange}
           value={this.state.value}
         />
         <Checkbox
@@ -109,7 +125,7 @@ export default class OrganizationFilter extends Component {
   }
 
   @autobind
-  onAutocomplete(event) {
+  onChange(event) {
     if (typeof event === "object") {
       this.setState({ value: event }, this.updateFilter)
     }
@@ -168,5 +184,15 @@ export default class OrganizationFilter extends Component {
       })
     }
     return null
+  }
+
+  renderOrganizationOverlayRow = item => {
+    return (
+      <React.Fragment key={item.uuid}>
+        <td className="orgShortName">
+          <LinkTo organization={item} isLink={false} />
+        </td>
+      </React.Fragment>
+    )
   }
 }
