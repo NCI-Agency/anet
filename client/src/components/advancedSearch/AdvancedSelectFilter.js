@@ -20,7 +20,7 @@ export default class AdvancedSelectFilter extends Component {
     // Passed by the SearchFilterDisplay row
     asFormField: PropTypes.bool
 
-    // All other properties are passed directly to the AdvancedSelectFilter
+    // All other properties are passed directly to the AdvancedSingleSelect
   }
 
   static defaultProps = {
@@ -63,6 +63,7 @@ export default class AdvancedSelectFilter extends Component {
     ) : (
       <AdvancedSingleSelect
         {...advancedSelectProps}
+        fieldName={this.props.queryKey}
         fieldLabel={null}
         vertical
         showRemoveButton={false}

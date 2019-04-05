@@ -233,7 +233,6 @@ export default {
         Author: {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPersonProps, {
-            fieldName: "author",
             filterDefs: authorWidgetFilters,
             placeholder: "Filter reports by author...",
             queryKey: "authorUuid"
@@ -242,7 +241,6 @@ export default {
         Attendee: {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPersonProps, {
-            fieldName: "attendee",
             filterDefs: attendeeWidgetFilters,
             placeholder: "Filter reports by attendee...",
             queryKey: "attendeeUuid"
@@ -251,7 +249,6 @@ export default {
         "Pending Approval Of": {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPersonProps, {
-            fieldName: "pendingApprovalOf",
             filterDefs: pendingApprovalOfWidgetFilters,
             placeholder: "Filter reports pending approval of...",
             queryKey: "pendingApprovalOf"
@@ -260,7 +257,6 @@ export default {
         "Author Position": {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPositionProps, {
-            fieldName: "authorPosition",
             filterDefs: authorPositionWidgetFilters,
             placeholder: "Filter reports by author position...",
             queryKey: "authorPositionUuid"
@@ -269,7 +265,6 @@ export default {
         "Attendee Position": {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterPositionProps, {
-            fieldName: "attendeePosition",
             filterDefs: attendeePositionWidgetFilters,
             placeholder: "Filter reports by attendee position...",
             queryKey: "attendeePositionUuid"
@@ -309,7 +304,6 @@ export default {
         Location: {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterLocationProps, {
-            fieldName: "location",
             filterDefs: locationWidgetFilters,
             placeholder: "Filter reports by location...",
             queryKey: "locationUuid"
@@ -348,7 +342,6 @@ export default {
     filters.Reports.filters[taskShortLabel] = {
       component: AdvancedSelectFilter,
       props: Object.assign({}, advancedSelectFilterTaskProps, {
-        fieldName: "task",
         filterDefs: taskWidgetFilters,
         placeholder: `Filter reports by ${taskShortLabel}...`,
         queryKey: "taskUuid"
@@ -392,7 +385,6 @@ export default {
         Location: {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterLocationProps, {
-            fieldName: "location",
             filterDefs: locationWidgetFilters,
             placeholder: "Filter by location...",
             queryKey: "locationUuid"
@@ -475,7 +467,6 @@ export default {
         Location: {
           component: AdvancedSelectFilter,
           props: Object.assign({}, advancedSelectFilterLocationProps, {
-            fieldName: "location",
             filterDefs: locationWidgetFilters,
             placeholder: "Filter by location...",
             queryKey: "locationUuid"
