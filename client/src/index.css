@@ -153,15 +153,6 @@ fieldset.danger {
 	opacity: 0.5;
 }
 
-.react-autosuggest__container input {
-	padding-left: 3.2rem;
-}
-
-.react-autosuggest__suggestions-list {
-	max-height: 231px;
-	overflow-y: scroll;
-}
-
 .shortcut-list {
 	margin-top: -4px;
 }
