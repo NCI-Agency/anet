@@ -16,5 +16,5 @@ Fixes #
 -
 -
 
-[ ] - anet.yml needs change
-[ ] - db needs migration
+- [ ] anet.yml needs change
+- [ ] db needs migration
