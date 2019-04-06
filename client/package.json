@@ -155,12 +155,17 @@
     "test-all": "yarn run test-jest ; yarn run test-wdio ; yarn run test-e2e",
     "test-e2e": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; NODE_ENV=test node $(npm bin)/ava tests/e2e/**/*.js --serial --fail-fast --verbose",
     "test-wdio": "export SERVER_URL=${SERVER_URL:-'http://localhost:8180'} ; wdio --baseUrl ${SERVER_URL} ./config/wdio.config.js",
-    "test-jest": "jest --testPathPattern='tests/(actions|reducers)'",
+    "test-jest": "jest ../anet.yml --testPathPattern='tests/(actions|reducers)'",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "graphql": "graphql",
     "sim": "export SERVER_URL=${SERVER_URL:-'http://localhost:8080'} ; NODE_ENV=development webpack --mode development --config config/webpack.sim.dev.js && node build/anet.sim.dev.js ../anet.yml"
   },
   "jest": {
+    "moduleDirectories": [
+      "src",
+      "platform/node",
+      "node_modules"
+    ],
     "moduleFileExtensions": [
       "jsx",
       "js",
