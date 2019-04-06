@@ -130,7 +130,7 @@ public class OrganizationResource {
       throws InterruptedException, ExecutionException, Exception {
     Person user = DaoUtils.getUserFromContext(context);
     // Verify correct Organization
-    AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org));
+    AuthUtils.assertSuperUserForOrg(user, DaoUtils.getUuid(org), false);
 
     // Check for loops in the hierarchy
     final Map<String, Organization> children =
@@ -139,6 +139,17 @@ public class OrganizationResource {
       throw new WebApplicationException("Organization can not be its own (grand…)parent");
     }
 
+    // Load the existing org, so we can check for differences.
+    final Organization existing = dao.getByUuid(org.getUuid());
+    final int numRows = AuthUtils.isAdmin(user) ? doAdminUpdates(org, existing) : 1;
+    doSuperUserUpdates(org, existing);
+
+    AnetAuditLogger.log("Organization {} updated by {}", org, user);
+    // GraphQL mutations *have* to return something, so we return the number of updated rows
+    return numRows;
+  }
+
+  private int doAdminUpdates(Organization org, Organization existing) {
     final int numRows;
     try {
       numRows = dao.update(org);
@@ -150,51 +161,46 @@ public class OrganizationResource {
       throw new WebApplicationException("Couldn't process organization update", Status.NOT_FOUND);
     }
 
-    if (org.getTasks() != null || org.getApprovalSteps() != null) {
-      // Load the existing org, so we can check for differences.
-      Organization existing = dao.getByUuid(org.getUuid());
+    if (org.getTasks() != null) {
+      logger.debug("Editing tasks for {}", org);
+      Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
+          newTask -> engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(newTask),
+              DaoUtils.getUuid(existing)),
+          oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(oldTaskUuid, null));
+    }
 
-      if (org.getTasks() != null) {
-        logger.debug("Editing tasks for {}", org);
-        Utils.addRemoveElementsByUuid(existing.loadTasks(), org.getTasks(),
-            newTask -> engine.getTaskDao().setResponsibleOrgForTask(DaoUtils.getUuid(newTask),
-                DaoUtils.getUuid(existing)),
-            oldTaskUuid -> engine.getTaskDao().setResponsibleOrgForTask(oldTaskUuid, null));
+    return numRows;
+  }
+
+  private void doSuperUserUpdates(Organization org, Organization existing) {
+    if (org.getApprovalSteps() != null) {
+      logger.debug("Editing approval steps for {}", org);
+      for (ApprovalStep step : org.getApprovalSteps()) {
+        validateApprovalStep(step);
+        step.setAdvisorOrganizationUuid(org.getUuid());
       }
+      List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).join();
 
-      if (org.getApprovalSteps() != null) {
-        logger.debug("Editing approval steps for {}", org);
-        for (ApprovalStep step : org.getApprovalSteps()) {
-          validateApprovalStep(step);
-          step.setAdvisorOrganizationUuid(org.getUuid());
-        }
-        List<ApprovalStep> existingSteps = existing.loadApprovalSteps(engine.getContext()).join();
+      Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
+          newStep -> engine.getApprovalStepDao().insert(newStep),
+          oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
 
-        Utils.addRemoveElementsByUuid(existingSteps, org.getApprovalSteps(),
-            newStep -> engine.getApprovalStepDao().insert(newStep),
-            oldStepUuid -> engine.getApprovalStepDao().deleteStep(oldStepUuid));
-
-        for (int i = 0; i < org.getApprovalSteps().size(); i++) {
-          ApprovalStep curr = org.getApprovalSteps().get(i);
-          ApprovalStep next =
-              (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
-          curr.setNextStepUuid(DaoUtils.getUuid(next));
-          ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
-          // If this step didn't exist before, we still need to set the nextStepUuid on it, but
-          // don't need to do a deep update.
-          if (existingStep == null) {
-            engine.getApprovalStepDao().update(curr);
-          } else {
-            // Check for updates to name, nextStepUuid and approvers.
-            updateStep(curr, existingStep);
-          }
+      for (int i = 0; i < org.getApprovalSteps().size(); i++) {
+        ApprovalStep curr = org.getApprovalSteps().get(i);
+        ApprovalStep next =
+            (i == (org.getApprovalSteps().size() - 1)) ? null : org.getApprovalSteps().get(i + 1);
+        curr.setNextStepUuid(DaoUtils.getUuid(next));
+        ApprovalStep existingStep = Utils.getByUuid(existingSteps, curr.getUuid());
+        // If this step didn't exist before, we still need to set the nextStepUuid on it, but
+        // don't need to do a deep update.
+        if (existingStep == null) {
+          engine.getApprovalStepDao().update(curr);
+        } else {
+          // Check for updates to name, nextStepUuid and approvers.
+          updateStep(curr, existingStep);
         }
       }
     }
-
-    AnetAuditLogger.log("Organization {} updated by {}", org, user);
-    // GraphQL mutations *have* to return something, so we return the number of updated rows
-    return numRows;
   }
 
   @GraphQLQuery(name = "organizationList")

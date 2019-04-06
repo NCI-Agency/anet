@@ -53,6 +53,7 @@ import mil.dds.anet.resources.ReportResource;
 import mil.dds.anet.resources.SavedSearchResource;
 import mil.dds.anet.resources.TagResource;
 import mil.dds.anet.resources.TaskResource;
+import mil.dds.anet.threads.AccountDeactivationWorker;
 import mil.dds.anet.threads.AnetEmailWorker;
 import mil.dds.anet.threads.FutureEngagementWorker;
 import mil.dds.anet.threads.ReportPublicationWorker;
@@ -229,6 +230,16 @@ public class AnetApplication extends Application<AnetConfiguration> {
       scheduler.scheduleAtFixedRate(futureWorker, 0, 3, TimeUnit.HOURS);
     }
     scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
+
+    // Check for any accounts which are scheduled to be deactivated as they reach
+    // the end-of-tour date. Check every 24 hours.
+    if (configuration.getDictionaryEntry("automaticallyInactivateUsers") != null) {
+      int accountDeactivationWarningInterval = 24 * 60 * 60 * 1000;
+      AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
+          configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
+      scheduler.scheduleAtFixedRate(deactivationWarningWorker, 0,
+          accountDeactivationWarningInterval, TimeUnit.MILLISECONDS);
+    }
 
     // Create all of the HTTP Resources.
     LoggingResource loggingResource = new LoggingResource();

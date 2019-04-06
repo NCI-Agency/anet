@@ -171,7 +171,9 @@ dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
 
   dateFormats:
-    email: d MMMM yyyy
+    email:
+      short: d MMMM yyyy
+      withTime: d MMMM yyyy @ HH:mm
     excel: d MMMM yyyy
     forms:
       input: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
@@ -179,6 +181,9 @@ dictionary:
       short: D MMMM YYYY
       long: dddd, D MMMM YYYY
       withTime: D MMMM YYYY @ HH:mm
+
+  reportWorkflow:
+    nbOfHoursQuarantineApproved: 24
 
   fields:
 
@@ -342,6 +347,10 @@ dictionary:
         options:
           layers: GEBCO_LATEST
           format: "image/png"
+
+  automaticallyInactivateUsers:
+    emailRemindersDaysPrior: [15, 30, 45]
+    ignoredDomainNames: []
 ```
 As can be seen from the example above, the entries `pinned_ORGs`, `non_reporting_ORGs`, `countries`, `principa_countries`, `ranks` and `domainNames` are lists of values; the others are simple key/value pairs. The values in the `pinned_ORGs` and `non_reporting_ORGs` lists should match the shortName field of organizations in the database. The key/value pairs are mostly used as deployment-specific labels for fields in the user interface.
 

@@ -118,7 +118,7 @@ public class PersonResource {
         // Super Users can edit position-less people.
         return true;
       }
-      return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganizationUuid());
+      return AuthUtils.isSuperUserForOrg(editor, subjectPos.getOrganizationUuid(), true);
     }
     return false;
   }
@@ -281,34 +281,17 @@ public class PersonResource {
   }
 
   private void validateEmail(String emailInput) {
-    if (Utils.isEmptyOrNull(emailInput)) {
-      throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
-    }
-
-    final String WILDCARD = "*";
     final String[] splittedEmail = emailInput.split("@");
     if (splittedEmail.length < 2 || splittedEmail[1].length() == 0) {
       throw new WebApplicationException("Please provide a valid email address", Status.BAD_REQUEST);
     }
-    final String from = splittedEmail[0].trim();
-    final String domainName = splittedEmail[1].toLowerCase();
 
     @SuppressWarnings("unchecked")
     final List<String> whitelistDomainNames =
         ((List<String>) this.config.getDictionaryEntry("domainNames")).stream()
             .map(String::toLowerCase).collect(Collectors.toList());
 
-    final List<String> wildcardDomainNames = whitelistDomainNames.stream()
-        .filter(domain -> String.valueOf(domain.charAt(0)).equals(WILDCARD))
-        .collect((Collectors.toList()));
-
-    final Boolean isWhitelistedEmail =
-        from.length() > 0 && whitelistDomainNames.indexOf(domainName) >= 0;
-    final Boolean isValidWildcardDomain =
-        wildcardDomainNames.stream().anyMatch(wildcardDomain -> domainName.charAt(0) != '.'
-            && domainName.endsWith(wildcardDomain.substring(1)));
-
-    if (!isWhitelistedEmail && !isValidWildcardDomain) {
+    if (!Utils.isEmailWhitelisted(emailInput, whitelistDomainNames)) {
       throw new WebApplicationException(validateEmailErrorMessage(), Status.BAD_REQUEST);
     }
   }

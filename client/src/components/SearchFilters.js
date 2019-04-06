@@ -376,7 +376,7 @@ export default {
     }
 
     // Task filters
-    filters.Tasks = {
+    filters[pluralize(taskShortLabel)] = {
       filters: taskFilters()
     }
 
