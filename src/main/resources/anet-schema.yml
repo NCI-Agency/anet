@@ -48,7 +48,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery, automaticallyInactivateUsers]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -552,4 +552,3 @@ properties:
         title: The list of ignored (email) domain names. These will not be affected by auto-inactivation or be sent email warnings.
         description: Valid email domain names for this ANET instance; may contain wildcards.
         examples: ["*.nato.int", dds.mil]
-
