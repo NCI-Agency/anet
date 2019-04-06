@@ -58,9 +58,7 @@ class LocationForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={Location.yupSchema}
-        isInitialValid={() =>
-          Location.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({

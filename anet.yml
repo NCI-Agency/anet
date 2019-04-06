@@ -185,7 +185,7 @@ dictionary:
   fields:
 
     task:
-      shortLabel: Task
+      shortLabel: Effort / Task
       shortName: Task number
       longLabel: Tasks and Milestones
       longName: Task description
@@ -330,3 +330,7 @@ dictionary:
         options:
           layers: GEBCO_LATEST
           format: "image/png"
+
+  automaticallyInactivateUsers:
+    emailRemindersDaysPrior: [15, 30, 45]
+    ignoredDomainNames: []

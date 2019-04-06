@@ -101,9 +101,7 @@ class BasePositionForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={Position.yupSchema}
-        isInitialValid={() =>
-          Position.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({
