@@ -156,7 +156,7 @@ class BaseRouting extends Component {
           path="/dashboards"
           render={({ match: { url } }) => (
             <Switch>
-              <Route path={`${url}/kanban`} component={Kanban} />
+              <Route path={`${url}/:dashboard`} component={Kanban} />
             </Switch>
           )}
         />

@@ -53,7 +53,7 @@ class Kanban extends Page {
           flexDirection: "row"
         }}
       >
-        {Settings.dashboards.kanban.columns.map(column => {
+        {Settings.dashboards[this.props.match.params.dashboard].columns.map(column => {
           return (
             <Column
               name={column.name}
@@ -158,7 +158,7 @@ class Card extends React.Component {
           <br />
           {/* TODO make a single line when collapsed <div style={this.state.open ? {} : {textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}> */}
           <div>
-            <small>{this.props.task.longName}</small>
+            <small>{(this.state.open || this.props.task.longName.length < 100) ? this.props.task.longName : this.props.task.longName.substring(0, 100) + "..."}</small>
           </div>
         </div>
 

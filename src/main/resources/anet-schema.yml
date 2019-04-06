@@ -59,8 +59,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery, dashboards]
-
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -548,7 +547,6 @@ properties:
               additionalProperties: true
   dashboards:
     type: object
-    additionalProperties: true
 
   automaticallyInactivateUsers:
     title: Auto account deactivation and email warnings.

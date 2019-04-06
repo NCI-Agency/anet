@@ -189,15 +189,17 @@ class BaseNav extends Component {
           </NavDropdown>
         )}
 
-        <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
-          <Link
-            to={"/dashboards/kanban"}
-            key="dashboard-kanban"
-            onClick={resetPages}
-          >
-            <MenuItem>Priorities</MenuItem>
-          </Link>
-        </NavDropdown>
+        {Settings.dashboards && 
+          <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
+            {Object.entries(Settings.dashboards).map(dashboardEntry => (
+              <Link
+                to={"/dashboards/" + dashboardEntry[0]}
+                key={dashboardEntry[0]}
+                onClick={resetPages}
+              >
+                <MenuItem>{dashboardEntry[1].title}</MenuItem>
+              </Link>))}
+          </NavDropdown>}
       </BSNav>
     )
   }
