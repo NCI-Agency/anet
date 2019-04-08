@@ -25,7 +25,7 @@ test("Draft and submit a report", async t => {
 
   await pageHelpers.clickTodayButton()
 
-  let $locationAutocomplete = await pageHelpers.chooseAutocompleteOption(
+  let $locationAutocomplete = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
     "general hospita"
   )
@@ -39,7 +39,7 @@ test("Draft and submit a report", async t => {
   let $positiveAtmosphereButton = await $("#positiveAtmos")
   await $positiveAtmosphereButton.click()
 
-  let $attendeesAutocomplete = await pageHelpers.chooseAdvancedMultiSelectOption(
+  let $attendeesAutocomplete = await pageHelpers.chooseAdvancedSelectOption(
     "#attendees",
     "christopf topferness"
   )
@@ -70,7 +70,7 @@ test("Draft and submit a report", async t => {
   )
   await assertElementText(t, $principalOrg, "MoD")
 
-  let $tasksAutocomplete = await pageHelpers.chooseAutocompleteOption(
+  let $tasksAutocomplete = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
     "1.1.B"
   )
