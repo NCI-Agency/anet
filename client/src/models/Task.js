@@ -89,7 +89,7 @@ export default class Task extends Model {
     .concat(Model.yupSchema)
 
   static autocompleteQuery =
-    "uuid, shortName, longName, responsibleOrg { uuid, shortName}"
+    "uuid, shortName, longName, responsibleOrg { uuid, shortName }"
 
   static autocompleteTemplate(task) {
     return <span>{[task.shortName, task.longName].join(" - ")}</span>

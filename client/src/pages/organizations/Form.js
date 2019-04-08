@@ -111,9 +111,7 @@ class BaseOrganizationForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={Organization.yupSchema}
-        isInitialValid={() =>
-          Organization.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({
@@ -210,21 +208,12 @@ class BaseOrganizationForm extends Component {
                 <Fieldset title={title} action={action} />
                 <Fieldset>
                   {!isAdmin ? (
-                    <Field
-                      name="type"
-                      component={FieldHelper.renderReadonlyField}
-                      humanValue={Organization.humanNameOfType}
-                    />
-                  ) : (
-                    <Field
-                      name="type"
-                      component={FieldHelper.renderButtonToggleGroup}
-                      buttons={this.typeButtons}
-                    />
-                  )}
-
-                  {!isAdmin && isPrincipalOrg ? (
                     <React.Fragment>
+                      <Field
+                        name="type"
+                        component={FieldHelper.renderReadonlyField}
+                        humanValue={Organization.humanNameOfType}
+                      />
                       <Field
                         name="parentOrg"
                         component={FieldHelper.renderReadonlyField}
@@ -254,9 +243,19 @@ class BaseOrganizationForm extends Component {
                         component={FieldHelper.renderReadonlyField}
                         humanValue={Organization.humanNameOfStatus}
                       />
+                      <this.IdentificationCodeFieldWithLabel
+                        dictProps={orgSettings.identificationCode}
+                        name="identificationCode"
+                        component={FieldHelper.renderReadonlyField}
+                      />
                     </React.Fragment>
                   ) : (
                     <React.Fragment>
+                      <Field
+                        name="type"
+                        component={FieldHelper.renderButtonToggleGroup}
+                        buttons={this.typeButtons}
+                      />
                       <AdvancedSingleSelect
                         fieldName="parentOrg"
                         fieldLabel={Settings.fields.organization.parentOrg}
@@ -277,32 +276,26 @@ class BaseOrganizationForm extends Component {
                         component={FieldHelper.renderInputField}
                         label={Settings.fields.organization.shortName}
                         placeholder="e.g. EF1.1"
+                        disabled={!isAdmin}
                       />
                       <this.LongNameWithLabel
                         dictProps={orgSettings.longName}
                         name="longName"
                         component={FieldHelper.renderInputField}
+                        disabled={!isAdmin}
                       />
                       <Field
                         name="status"
                         component={FieldHelper.renderButtonToggleGroup}
                         buttons={this.statusButtons}
+                        disabled={!isAdmin}
+                      />
+                      <this.IdentificationCodeFieldWithLabel
+                        dictProps={orgSettings.identificationCode}
+                        name="identificationCode"
+                        component={FieldHelper.renderInputField}
                       />
                     </React.Fragment>
-                  )}
-
-                  {!isAdmin ? (
-                    <this.IdentificationCodeFieldWithLabel
-                      dictProps={orgSettings.identificationCode}
-                      name="identificationCode"
-                      component={FieldHelper.renderReadonlyField}
-                    />
-                  ) : (
-                    <this.IdentificationCodeFieldWithLabel
-                      dictProps={orgSettings.identificationCode}
-                      name="identificationCode"
-                      component={FieldHelper.renderInputField}
-                    />
                   )}
                 </Fieldset>
 
@@ -386,28 +379,29 @@ class BaseOrganizationForm extends Component {
                         title={Settings.fields.task.longLabel}
                         className="tasks-selector"
                       >
-                        <AdvancedMultiSelect
-                          fieldName="tasks"
-                          fieldLabel={Settings.fields.task.shortLabel}
-                          placeholder={`Search for ${pluralize(
-                            Settings.fields.task.shortLabel
-                          )}...`}
-                          value={values.tasks}
-                          renderSelected={
-                            <TaskTable tasks={values.tasks} showDelete />
-                          }
-                          overlayColumns={["Task", "Name"]}
-                          overlayRenderRow={TaskSimpleOverlayRow}
-                          filterDefs={tasksFilters}
-                          onChange={value => {
-                            setFieldValue("tasks", value)
-                            setFieldTouched("tasks", true)
-                          }}
-                          objectType={Task}
-                          queryParams={{ status: Task.STATUS.ACTIVE }}
-                          fields={Task.autocompleteQuery}
-                          addon={TASKS_ICON}
-                        />
+                        {!isAdmin ? (
+                          <TaskTable tasks={values.tasks} />
+                        ) : (
+                          <AdvancedMultiSelect
+                            fieldName="tasks"
+                            fieldLabel={Settings.fields.task.shortLabel}
+                            placeholder={`Search for ${pluralize(
+                              Settings.fields.task.shortLabel
+                            )}...`}
+                            value={values.tasks}
+                            renderSelected={
+                              <TaskTable tasks={values.tasks} showDelete />
+                            }
+                            overlayColumns={["Task", "Name"]}
+                            overlayRenderRow={TaskSimpleOverlayRow}
+                            filterDefs={tasksFilters}
+                            onChange={value => setFieldValue("tasks", value)}
+                            objectType={Task}
+                            queryParams={{ status: Task.STATUS.ACTIVE }}
+                            fields={Task.autocompleteQuery}
+                            addon={TASKS_ICON}
+                          />
+                        )}
                       </Fieldset>
                     )}
                   </div>
@@ -521,7 +515,7 @@ class BaseOrganizationForm extends Component {
 			approvalStepInUse(uuid:"${step.uuid}")
 		`
     ).then(data => {
-      if (data) {
+      if (data.approvalStepInUse) {
         this.setState({ showRemoveApprovalStepAlert: true })
       } else {
         arrayHelpers.remove(index)
