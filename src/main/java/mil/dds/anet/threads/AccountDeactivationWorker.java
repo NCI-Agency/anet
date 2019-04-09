@@ -85,7 +85,8 @@ public class AccountDeactivationWorker implements Runnable {
     Instant now = Instant.now().atZone(DaoUtils.getDefaultZoneId()).toInstant();
     Instant warningDate = now.plus(daysUntilEndOfTour, ChronoUnit.DAYS);
     query.setEndOfTourDateEnd(warningDate);
-    List<Person> persons = AnetObjectEngine.getInstance().getPersonDao().search(query).getList();
+    List<Person> persons =
+        AnetObjectEngine.getInstance().getPersonDao().search(query, null).getList();
     Instant nextReminder =
         daysTillNextWarning < 0 ? null : now.plus(daysTillNextWarning, ChronoUnit.DAYS);
 
