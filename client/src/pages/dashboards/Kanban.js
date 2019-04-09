@@ -206,7 +206,8 @@ class Pie extends React.Component {
   static propTypes = {
     size: PropTypes.object.isRequired,
     text: PropTypes.string.isRequired,
-    fill: PropTypes.func.isRequired
+    fill: PropTypes.func.isRequired,
+    data: PropTypes.array.isRequired
   }
 
   componentDidMount() {
@@ -226,7 +227,7 @@ class Pie extends React.Component {
       .attr("y", "6px")
       .style("text-anchor", "middle")
       .style("font-weight", "bold")
-      .style("font-size", "20")
+      .style("font-size", "17px")
 
     this.update()
   }
@@ -238,9 +239,11 @@ class Pie extends React.Component {
   update() {
     const radius =
       Math.min(this.props.size.width, this.props.size.height) / 2 - 2
+    const arcs = this.pie(d3.entries(this.props.data))
+    const arcForLabels = d3.arc().innerRadius(radius * 0.7).outerRadius(radius * 0.7)
     const selected = this.canvas
       .selectAll("path")
-      .data(this.pie(d3.entries(this.props.data)), d => d)
+      .data( arcs, d => d)
 
     selected
       .enter()
@@ -253,6 +256,18 @@ class Pie extends React.Component {
       .style("stroke-width", "1px")
 
     selected.exit().remove()
+
+    const labels = this.canvas.selectAll("text")
+      .data(arcs, d => d)
+      .enter().append("text")
+      .attr("transform", d => `translate(${arcForLabels.centroid(d)})`)
+      .attr("x", "-0.3em")
+      .attr("y", "0.35em")
+      .style("font-weight", "bold")
+      .style("font-size", "12px")
+      .text(d => d.data.value)
+
+    labels.exit().remove()
 
     this.canvas.select("text").text(this.props.text)
   }
