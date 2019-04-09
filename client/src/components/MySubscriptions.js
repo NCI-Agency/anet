@@ -62,13 +62,13 @@ class BaseMySubscriptions extends Component {
               <thead>
                 <tr>
                   <th />
-                  <th>Updated</th>
+                  <th>Subscribed</th>
                   <th>Subscription</th>
                 </tr>
               </thead>
               <tbody>
                 {subscriptions.map(subscription => {
-                  const updatedAt = moment(subscription.updatedAt).fromNow()
+                  const createdAt = moment(subscription.createdAt).fromNow()
                   let objectType = pluralize.singular(
                     subscription.subscribedObjectType
                   )
@@ -107,7 +107,7 @@ class BaseMySubscriptions extends Component {
                           )
                         )}
                       </td>
-                      <td>{updatedAt}</td>
+                      <td>{createdAt}</td>
                       <td>{linkTo}</td>
                     </tr>
                   )
