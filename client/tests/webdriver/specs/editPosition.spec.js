@@ -22,33 +22,35 @@ describe("Create position page", () => {
       expect(EditPosition.typeAdvisorButton.getAttribute("class")).to.include(
         "active"
       )
-      expect(EditPosition.organization.getValue()).to.equal("")
+      expect(EditPosition.organizationInput.getValue()).to.equal("")
 
-      EditPosition.organization.setValue(PRINCIPAL_ORG)
-      EditPosition.orgAutocomplete.waitForExist()
-      expect(EditPosition.orgAutocomplete.getText()).to.include(
+      EditPosition.organizationInput.click()
+      EditPosition.organizationInput.setValue(PRINCIPAL_ORG)
+      EditPosition.orgAdvancedSelectFirstItem.waitForExist()
+      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
         "No suggestions found"
       )
-      EditPosition.orgAutocomplete.click()
-      expect(EditPosition.organization.getValue()).to.equal("")
+      EditPosition.orgAdvancedSelectFirstItem.click()
+      expect(EditPosition.organizationInput.getValue()).to.equal("")
 
-      EditPosition.organization.setValue(ADVISOR_ORG)
-      EditPosition.orgAutocomplete.waitForExist()
-      expect(EditPosition.orgAutocomplete.getText()).to.include(
+      EditPosition.organizationInput.click()
+      EditPosition.organizationInput.setValue(ADVISOR_ORG)
+      EditPosition.orgAdvancedSelectFirstItem.waitForExist()
+      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
         ADVISOR_ORG_COMPLETE
       )
-      EditPosition.orgAutocomplete.click()
-      expect(EditPosition.organization.getValue()).to.equal(ADVISOR_ORG)
+      EditPosition.orgAdvancedSelectFirstItem.click()
+      expect(EditPosition.organizationInput.getValue()).to.equal(ADVISOR_ORG)
 
       EditPosition.typePrincipalButton.click()
-      expect(EditPosition.organization.getValue()).to.equal("")
-      EditPosition.organization.setValue(PRINCIPAL_ORG)
-      EditPosition.orgAutocomplete.waitForExist()
-      expect(EditPosition.orgAutocomplete.getText()).to.include(
+      expect(EditPosition.organizationInput.getValue()).to.equal("")
+      EditPosition.organizationInput.setValue(PRINCIPAL_ORG)
+      EditPosition.orgAdvancedSelectFirstItem.waitForExist()
+      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
         PRINCIPAL_ORG_COMPLETE
       )
-      EditPosition.orgAutocomplete.click()
-      expect(EditPosition.organization.getValue()).to.equal(PRINCIPAL_ORG)
+      EditPosition.orgAdvancedSelectFirstItem.click()
+      expect(EditPosition.organizationInput.getValue()).to.equal(PRINCIPAL_ORG)
       EditPosition.cancelButton.click()
     })
   })

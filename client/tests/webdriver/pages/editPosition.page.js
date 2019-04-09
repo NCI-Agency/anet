@@ -10,11 +10,11 @@ class EditPosition extends Page {
   get typePrincipalButton() {
     return browser.$("#typePrincipalButton")
   }
-  get organization() {
+  get organizationInput() {
     return browser.$("#organization")
   }
-  get orgAutocomplete() {
-    return browser.$("#react-autowhatever-1--item-0")
+  get orgAdvancedSelectFirstItem() {
+    return browser.$("#organization-popover tbody tr:first-child td:nth-child(2) span")
   }
   get alertSuccess() {
     return browser.$(".alert-success")

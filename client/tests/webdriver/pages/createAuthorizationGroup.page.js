@@ -21,11 +21,11 @@ class CreateAuthorizationGroup extends Page {
   get statusInactiveButton() {
     return browser.$("#statusInactiveButton")
   }
-  get positions() {
+  get positionsInput() {
     return browser.$("#positions")
   }
-  get positionsAutocomplete() {
-    return browser.$("#react-autowhatever-1--item-0")
+  get positionsAdvancedSelectFirstItem() {
+    return browser.$("#positions-popover tbody tr:first-child td:nth-child(2) span")
   }
   get submitButton() {
     return browser.$("#formBottomSubmit")
@@ -43,14 +43,14 @@ class CreateAuthorizationGroup extends Page {
     }
   }
 
-  waitForPositionsAutoCompleteToChange(value) {
-    this.positionsAutocomplete.waitForExist()
+  waitForPositionsAdvancedSelectToChange(value) {
+    this.positionsAdvancedSelectFirstItem.waitForExist()
     return browser.waitUntil(
       () => {
-        return this.positionsAutocomplete.getText() === value
+        return this.positionsAdvancedSelectFirstItem.getText() === value
       },
       5000,
-      'Expected autocomplete to contain "' + value + '" after 5s'
+      'Expected advanced select input to contain "' + value + '" after 5s'
     )
   }
 
