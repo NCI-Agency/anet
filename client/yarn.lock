@@ -2132,10 +2132,10 @@
     gaze "^1.1.2"
     webdriverio "^5.7.8"
 
-"@wdio/spec-reporter@^5.7.2":
-  version "5.7.8"
-  resolved "https://registry.yarnpkg.com/@wdio/spec-reporter/-/spec-reporter-5.7.8.tgz#65d3499f3bc88ee63611975c8d0252effb3abb37"
-  integrity sha512-x7z76yRYqP3/jsq7AtLQO5BT6y37SexKAh6q8pEjykR6rWxatp0EIdy5EycJ1IcA3v2GH6dSWW0tCzYeHtUQww==
+"@wdio/spec-reporter@^5.7.9":
+  version "5.7.9"
+  resolved "https://registry.yarnpkg.com/@wdio/spec-reporter/-/spec-reporter-5.7.9.tgz#bcc3f0394b8ec39a93ff8af61bfdaadff10ed713"
+  integrity sha512-/Mm/66xwV2Dw05O6BAmaLQD2a/8i4ubF2KkscYl3zlBHdksJQ801qElo5CEN6qZWjUfvEvSa5z2pY0Wls1/JuQ==
   dependencies:
     "@wdio/reporter" "^5.7.8"
     chalk "^2.3.2"
