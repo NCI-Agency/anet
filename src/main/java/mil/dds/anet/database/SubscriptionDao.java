@@ -91,10 +91,7 @@ public class SubscriptionDao extends AnetBaseDao<Subscription> {
 
   @Override
   public int updateInternal(Subscription s) {
-    return getDbHandle()
-        .createUpdate("/* updateSubscription */ UPDATE subscriptions "
-            + "SET \"updatedAt\" = :updatedAt WHERE uuid = :uuid")
-        .bindBean(s).bind("updatedAt", DaoUtils.asLocalDateTime(s.getUpdatedAt())).execute();
+    throw new UnsupportedOperationException();
   }
 
   @Override
