@@ -69,7 +69,15 @@ class AuthorizationGroupForm extends Component {
             allAdvisorPositions: {
               label: "All advisor positions",
               searchQuery: true,
-              queryVars: { type: Position.TYPE.ADVISOR, matchPersonName: true }
+              queryVars: {
+                status: Position.STATUS.ACTIVE,
+                type: [
+                  Position.TYPE.ADVISOR,
+                  Position.TYPE.SUPER_USER,
+                  Position.TYPE.ADMINISTRATOR
+                ],
+                matchPersonName: true
+              }
             }
           }
           const action = (
@@ -131,14 +139,6 @@ class AuthorizationGroupForm extends Component {
                     filterDefs={positionsFilters}
                     onChange={value => setFieldValue("positions", value)}
                     objectType={Position}
-                    queryParams={{
-                      status: Position.STATUS.ACTIVE,
-                      type: [
-                        Position.TYPE.ADVISOR,
-                        Position.TYPE.SUPER_USER,
-                        Position.TYPE.ADMINISTRATOR
-                      ]
-                    }}
                     fields={Position.autocompleteQuery}
                     addon={POSITIONS_ICON}
                   />
