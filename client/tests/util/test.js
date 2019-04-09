@@ -258,11 +258,12 @@ test.beforeEach(t => {
       await $todayButton.click()
     },
     async chooseAdvancedSelectOption(inputSelector, text) {
+      const popoverSelector = `${inputSelector}-popover`
       let $advancedSelectInput = await t.context.$(inputSelector)
       await $advancedSelectInput.sendKeys(text)
       await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
       let $advancedSelectSuggestion = await t.context.$(
-        `${inputSelector} tbody tr:first-child td input`
+        `${popoverSelector} tbody tr:first-child td input`
       )
       await $advancedSelectSuggestion.click()
       return $advancedSelectInput

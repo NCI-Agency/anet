@@ -25,29 +25,32 @@ test("Draft and submit a report", async t => {
 
   await pageHelpers.clickTodayButton()
 
-  let $locationAutocomplete = await pageHelpers.chooseAdvancedSelectOption(
+  let $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
     "general hospita"
   )
 
   t.is(
-    await $locationAutocomplete.getAttribute("value"),
+    await $locationAdvancedSelect.getAttribute("value"),
     "General Hospital",
-    "Clicking a location autocomplete suggestion populates the autocomplete field."
+    "Clicking a location advanced single select widget suggestion populates the input field."
   )
 
   let $positiveAtmosphereButton = await $("#positiveAtmos")
   await $positiveAtmosphereButton.click()
 
-  let $attendeesAutocomplete = await pageHelpers.chooseAdvancedSelectOption(
+  let $attendeesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#attendees",
     "christopf topferness"
   )
 
+  let $attendeesShortcutTitle = await $("#attendees-shortcut-title")
+  await $attendeesShortcutTitle.click()
+
   t.is(
-    await $attendeesAutocomplete.getText("value"),
+    await $attendeesAdvancedSelect.getAttribute("value"),
     "",
-    "Closing the advanced multi select empties the autocomplete field."
+    "Closing the attendees advanced multi select overlay empties the input field."
   )
 
   let [
@@ -70,15 +73,18 @@ test("Draft and submit a report", async t => {
   )
   await assertElementText(t, $principalOrg, "MoD")
 
-  let $tasksAutocomplete = await pageHelpers.chooseAdvancedSelectOption(
+  let $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
     "1.1.B"
   )
 
+  let $tasksShortcutTitle = await $("#tasks-shortcut-title")
+  await $tasksShortcutTitle.click()
+
   t.is(
-    await $tasksAutocomplete.getAttribute("value"),
+    await $tasksAdvancedSelect.getAttribute("value"),
     "",
-    "Clicking a Task autocomplete suggestion empties the autocomplete field."
+    "Closing the tasks advanced multi select overlay empties the input field."
   )
 
   let $newTaskRow = await $(".tasks-selector table tbody tr td")
@@ -414,7 +420,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   )
 
   let $locationShortcutButton = await $(
-    ".location-form-group.shortcut-list button"
+    "#location-shortcut-list button"
   )
   await $locationShortcutButton.click()
   t.is(
@@ -543,7 +549,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   await assertElementText(t, $advisorOrg, "EF 2.2")
 
   let $addAttendeeShortcutButtons = await $$(
-    "#attendance-fieldset .shortcut-list button"
+    "#attendees-shortcut-list button"
   )
   // Add all recent attendees
   await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))

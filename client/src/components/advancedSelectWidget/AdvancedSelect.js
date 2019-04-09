@@ -205,7 +205,7 @@ export default class AdvancedSelect extends Component {
           delayHide={200}
         >
           <Popover
-            id={fieldName}
+            id={`${fieldName}-popover`}
             title={null}
             placement="bottom"
             style={{
@@ -471,7 +471,7 @@ export default class AdvancedSelect extends Component {
 
   renderShortcutsTitle = () => {
     return (
-      <div className="shortcut-title">
+      <div id={`${this.props.fieldName}-shortcut-title`} className="shortcut-title">
         <h5>{this.props.shortcutsTitle}</h5>
       </div>
     )
@@ -482,7 +482,7 @@ export default class AdvancedSelect extends Component {
     return (
       shortcuts &&
       shortcuts.length > 0 && (
-        <div className="shortcut-list">
+        <div id={`${this.props.fieldName}-shortcut-list`} className="shortcut-list">
           {shortcuts.map(shortcut => {
             const shortcutLinkProps = {
               [this.props.objectType.getModelNameLinkTo]: shortcut,
