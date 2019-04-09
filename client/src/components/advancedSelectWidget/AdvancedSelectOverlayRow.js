@@ -19,7 +19,9 @@ export const LocationOverlayRow = item => (
 export const OrganizationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="orgShortName">
-      <LinkTo organization={item} isLink={false} />
+      <LinkTo organization={item} isLink={false}>
+        {item.shortName} - {item.longName} {item.identificationCode}
+      </LinkTo>
     </td>
   </React.Fragment>
 )
