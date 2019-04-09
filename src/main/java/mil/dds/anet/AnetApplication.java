@@ -231,9 +231,11 @@ public class AnetApplication extends Application<AnetConfiguration> {
     }
     scheduler.schedule(futureWorker, 10, TimeUnit.SECONDS);
 
-    // Check for any accounts which are scheduled to be deactivated as they reach
-    // the end-of-tour date. Check every 24 hours.
+    // Check whether the application is configured to auto-check for account
+    // deactivation
     if (configuration.getDictionaryEntry("automaticallyInactivateUsers") != null) {
+      // Check for any accounts which are scheduled to be deactivated as they reach
+      // the end-of-tour date. Check every 24 hours.
       int accountDeactivationWarningInterval = 24 * 60 * 60 * 1000;
       AccountDeactivationWorker deactivationWarningWorker = new AccountDeactivationWorker(
           configuration, engine.getPersonDao(), accountDeactivationWarningInterval);
