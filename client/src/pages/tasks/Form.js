@@ -73,9 +73,7 @@ class BaseTaskForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={Task.yupSchema}
-        isInitialValid={() =>
-          Task.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({

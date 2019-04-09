@@ -1,5 +1,6 @@
 package mil.dds.anet.beans.search;
 
+import java.time.Instant;
 import java.util.List;
 import mil.dds.anet.beans.Person.PersonStatus;
 import mil.dds.anet.beans.Person.Role;
@@ -16,6 +17,8 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery {
   Boolean includeChildOrgs;
   String rank;
   String country;
+  Instant endOfTourDateStart;
+  Instant endOfTourDateEnd;
 
   // Filter to people in positions at a certain location
   String locationUuid;
@@ -121,6 +124,22 @@ public class PersonSearchQuery extends SubscribableObjectSearchQuery {
 
   public void setSortOrder(SortOrder sortOrder) {
     this.sortOrder = sortOrder;
+  }
+
+  public Instant getEndOfTourDateStart() {
+    return endOfTourDateStart;
+  }
+
+  public void setEndOfTourDateStart(Instant endOfTourDateStart) {
+    this.endOfTourDateStart = endOfTourDateStart;
+  }
+
+  public Instant getEndOfTourDateEnd() {
+    return endOfTourDateEnd;
+  }
+
+  public void setEndOfTourDateEnd(Instant endOfTourDateEnd) {
+    this.endOfTourDateEnd = endOfTourDateEnd;
   }
 
   public static PersonSearchQuery withText(String text, int pageNum, int pageSize) {

@@ -15,8 +15,10 @@ import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.database.PersonDao;
 import mil.dds.anet.database.mappers.PersonMapper;
+import mil.dds.anet.search.AbstractSearchBuilder.Comparison;
 import mil.dds.anet.search.AbstractSearcherBase;
 import mil.dds.anet.search.IPersonSearcher;
+import mil.dds.anet.search.PersonSearchBuilder;
 import mil.dds.anet.search.Searcher;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.Utils;
@@ -80,6 +82,12 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
       sqlArgs.put("containsQuery", Utils.getSqlServerFullTextQuery(text));
       sqlArgs.put("freetextQuery", text);
     }
+
+    PersonSearchBuilder searchBuilder = new PersonSearchBuilder(sqlArgs, whereClauses);
+    searchBuilder.addDateClause(query.getEndOfTourDateStart(), Comparison.AFTER, "endOfTourDate",
+        "startDate");
+    searchBuilder.addDateClause(query.getEndOfTourDateEnd(), Comparison.BEFORE, "endOfTourDate",
+        "endDate");
 
     if (query.getRole() != null) {
       whereClauses.add(" people.role = :role ");

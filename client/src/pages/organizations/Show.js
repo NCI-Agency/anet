@@ -222,7 +222,7 @@ class BaseOrganizationShow extends Page {
                 </LinkTo>
               )}
 
-              {isSuperUser && (
+              {(isAdmin || (isSuperUser && isAdvisorOrg)) && (
                 <LinkTo
                   organization={organization}
                   edit

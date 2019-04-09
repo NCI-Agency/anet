@@ -395,8 +395,11 @@ public class GraphQLResource {
   private String getMapValueAsString(Map<?, ?> value) {
     final List<String> entriesAsString = new ArrayList<>();
     for (final Map.Entry<?, ?> entry : value.entrySet()) {
-      final Object repr = getValueRepr(entry.getValue());
-      entriesAsString.add(repr == null ? "" : String.valueOf(repr));
+      // TODO: solve this in a more robust way
+      if (!"uuid".equals(entry.getKey())) {
+        final Object repr = getValueRepr(entry.getValue());
+        entriesAsString.add(repr == null ? "" : String.valueOf(repr));
+      }
     }
     return Joiner.on(", ").useForNull("").join(entriesAsString);
   }

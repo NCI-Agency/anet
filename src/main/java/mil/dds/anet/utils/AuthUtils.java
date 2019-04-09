@@ -24,13 +24,14 @@ public class AuthUtils {
 
   public static void assertAdministrator(Person user) {
     logger.debug("Asserting admin status for {}", user);
-    if (user.loadPosition() != null && user.getPosition().getType() == PositionType.ADMINISTRATOR) {
+    if (isAdmin(user)) {
       return;
     }
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);
   }
 
-  public static boolean isSuperUserForOrg(final Person user, final String organizationUuid) {
+  public static boolean isSuperUserForOrg(final Person user, final String organizationUuid,
+      boolean allowPrincipalOrgs) {
     if (organizationUuid == null) {
       logger.error("Organization {} is null or has a null UUID in SuperUser check for {}",
           organizationUuid, user); // DANGER: possible log injection vector here?
@@ -54,7 +55,7 @@ public class AuthUtils {
     Organization loadedOrg =
         AnetObjectEngine.getInstance().getOrganizationDao().getByUuid(organizationUuid);
     if (loadedOrg.getType() == OrganizationType.PRINCIPAL_ORG) {
-      return true;
+      return allowPrincipalOrgs;
     }
 
     if (position.getOrganizationUuid() == null) {
@@ -77,10 +78,11 @@ public class AuthUtils {
     }
   }
 
-  public static void assertSuperUserForOrg(Person user, String organizationUuid) {
+  public static void assertSuperUserForOrg(Person user, String organizationUuid,
+      boolean allowPrincipalOrgs) {
     // log injection possibility here?
     logger.debug("Asserting superuser status for {} in {}", user, organizationUuid);
-    if (isSuperUserForOrg(user, organizationUuid)) {
+    if (isSuperUserForOrg(user, organizationUuid, allowPrincipalOrgs)) {
       return;
     }
     throw new WebApplicationException(UNAUTH_MESSAGE, Status.FORBIDDEN);

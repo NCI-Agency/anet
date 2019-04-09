@@ -65,7 +65,7 @@ public class PositionResource {
     if (pos.getType() == PositionType.ADMINISTRATOR || pos.getType() == PositionType.SUPER_USER) {
       AuthUtils.assertAdministrator(user);
     }
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid());
+    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
   }
 
   @GraphQLMutation(name = "createPosition")
@@ -91,7 +91,7 @@ public class PositionResource {
   public Integer updateAssociatedPosition(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "position") Position pos) {
     Person user = DaoUtils.getUserFromContext(context);
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid());
+    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
 
     final Position current = dao.getByUuid(pos.getUuid());
     if (current == null) {
@@ -172,7 +172,7 @@ public class PositionResource {
     if (pos == null) {
       throw new WebApplicationException("Position not found", Status.NOT_FOUND);
     }
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid());
+    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
 
     int numRows = dao.setPersonInPosition(DaoUtils.getUuid(person), positionUuid);
     AnetAuditLogger.log("Person {} put in Position {} by {}", person, pos, user);
@@ -187,7 +187,7 @@ public class PositionResource {
     if (pos == null) {
       throw new WebApplicationException("Position not found", Status.NOT_FOUND);
     }
-    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid());
+    AuthUtils.assertSuperUserForOrg(user, pos.getOrganizationUuid(), true);
 
     final int numRows = dao.removePersonFromPosition(positionUuid);
     if (numRows == 0) {

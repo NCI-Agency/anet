@@ -51,9 +51,7 @@ class AuthorizationGroupForm extends Component {
         enableReinitialize
         onSubmit={this.onSubmit}
         validationSchema={AuthorizationGroup.yupSchema}
-        isInitialValid={() =>
-          AuthorizationGroup.yupSchema.isValidSync(this.props.initialValues)
-        }
+        isInitialValid
         {...myFormProps}
       >
         {({
