@@ -1,48 +1,17 @@
 import { Settings } from "api"
 import LinkTo from "components/LinkTo"
-import Page, {
-  mapDispatchToProps,
-  propTypes as pagePropTypes
-} from "components/Page"
-import * as d3 from "d3"
-import GQL from "graphqlapi"
-import { Task } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { Button, Glyphicon, Panel } from "react-bootstrap"
-import { connect } from "react-redux"
-import { withRouter } from "react-router-dom"
+import Pie from "components/graphs/Pie"
 
-class Kanban extends Page {
-  static propTypes = { ...pagePropTypes }
+export default class Kanban extends React.Component {
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      tasks: []
-    }
-  }
-
-  fetchData(props) {
-    const taskQuery = {
-      pageNum: 0,
-      pageSize: 0,
-      status: Task.STATUS.ACTIVE
-    }
-    const tasksPart = new GQL.Part(/* GraphQL */ `
-      taskList(query: $taskQuery) {
-        list {
-          uuid, longName, shortName, customFieldEnum1, createdAt, updatedAt
-          responsibleOrg { uuid, shortName}
-        }
-      }`).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
-    GQL.run([tasksPart]).then(data => {
-      const tasks = data.taskList.list
-      this.setState({
-        tasks: tasks
-      })
-    })
+  static propTypes = {
+    tasks: PropTypes.array.isRequired,
+    title: PropTypes.string.isRequired,
+    columns: PropTypes.array.isRequired
   }
 
   render() {
@@ -53,16 +22,18 @@ class Kanban extends Page {
           flexDirection: "row"
         }}
       >
-        {Settings.dashboards[this.props.match.params.dashboard].columns.map(column => {
-          return (
-            <Column
-              name={column.name}
-              taskUUIDs={column.tasks}
-              key={column.name}
-              tasks={this.state.tasks}
-            />
-          )
-        })}
+        {this.props.columns.map(
+          column => {
+            return (
+              <Column
+                name={column.name}
+                taskUUIDs={column.tasks}
+                key={column.name}
+                tasks={this.props.tasks}
+              />
+            )
+          }
+        )}
       </div>
     )
   }
@@ -102,8 +73,8 @@ class Column extends React.Component {
           <Pie
             size={{ width: 70, height: 70 }}
             data={counters}
-            text={tasks.length}
-            fill={entity => {
+            label={`${tasks.length}`}
+            segmentFill={entity => {
               const matching = Object.entries(
                 Settings.fields.task.customFieldEnum1.enum
               ).filter(candidate => {
@@ -111,6 +82,7 @@ class Column extends React.Component {
               })
               return matching.length > 0 ? matching[0][1].color : "#bbbbbb"
             }}
+            segmentLabel={d => d.data.value}
           />
           <br />
           <strong>{Settings.fields.task.longLabel}</strong>
@@ -158,7 +130,11 @@ class Card extends React.Component {
           <br />
           {/* TODO make a single line when collapsed <div style={this.state.open ? {} : {textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden'}}> */}
           <div>
-            <small>{(this.state.open || this.props.task.longName.length < 100) ? this.props.task.longName : this.props.task.longName.substring(0, 100) + "..."}</small>
+            <small>
+              {this.state.open || this.props.task.longName.length < 100
+                ? this.props.task.longName
+                : this.props.task.longName.substring(0, 100) + "..."}
+            </small>
           </div>
         </div>
 
@@ -201,89 +177,3 @@ class Card extends React.Component {
     )
   }
 }
-
-class Pie extends React.Component {
-  static propTypes = {
-    size: PropTypes.object.isRequired,
-    text: PropTypes.string.isRequired,
-    fill: PropTypes.func.isRequired,
-    data: PropTypes.array.isRequired
-  }
-
-  componentDidMount() {
-    this.canvas = this.svg
-      .append("g")
-      .attr(
-        "transform",
-        `translate(${this.props.size.width / 2}, ${this.props.size.height / 2})`
-      )
-    this.pie = d3.pie()
-    this.pie.value(function(d) {
-      return d.value
-    })
-
-    this.canvas
-      .append("text")
-      .attr("y", "6px")
-      .style("text-anchor", "middle")
-      .style("font-weight", "bold")
-      .style("font-size", "17px")
-
-    this.update()
-  }
-
-  componentDidUpdate() {
-    this.update()
-  }
-
-  update() {
-    const radius =
-      Math.min(this.props.size.width, this.props.size.height) / 2 - 2
-    const arcs = this.pie(d3.entries(this.props.data))
-    const arcForLabels = d3.arc().innerRadius(radius * 0.7).outerRadius(radius * 0.7)
-    const selected = this.canvas
-      .selectAll("path")
-      .data( arcs, d => d)
-
-    selected
-      .enter()
-      .append("path")
-      .attr("d", d3.arc()
-                   .innerRadius(radius / 2)
-                   .outerRadius(radius))
-      .attr("fill", this.props.fill)
-      .attr("stroke", "grey")
-      .style("stroke-width", "1px")
-
-    selected.exit().remove()
-
-    const labels = this.canvas.selectAll("text")
-      .data(arcs, d => d)
-      .enter().append("text")
-      .attr("transform", d => `translate(${arcForLabels.centroid(d)})`)
-      .attr("x", "-0.3em")
-      .attr("y", "0.35em")
-      .style("font-weight", "bold")
-      .style("font-size", "12px")
-      .text(d => d.data.value)
-
-    labels.exit().remove()
-
-    this.canvas.select("text").text(this.props.text)
-  }
-
-  render() {
-    return (
-      <svg
-        width={this.props.size.width}
-        height={this.props.size.height}
-        ref={element => (this.svg = d3.select(element))}
-      />
-    )
-  }
-}
-
-export default connect(
-  null,
-  mapDispatchToProps
-)(withRouter(Kanban))

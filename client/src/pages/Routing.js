@@ -6,7 +6,7 @@ import AuthorizationGroupShow from "pages/admin/authorizationgroup/Show"
 import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
 import MergePeople from "pages/admin/MergePeople"
-import Kanban from "pages/dashboards/Kanban"
+import PrioritiesDashboard from "pages/dashboards/PrioritiesDashboard"
 import GraphiQL from "pages/GraphiQL"
 import Help from "pages/Help"
 import Home from "pages/Home"
@@ -156,7 +156,7 @@ class BaseRouting extends Component {
           path="/dashboards"
           render={({ match: { url } }) => (
             <Switch>
-              <Route path={`${url}/:dashboard`} component={Kanban} />
+              <Route path={`${url}/:dashboard`} component={PrioritiesDashboard} />
             </Switch>
           )}
         />
