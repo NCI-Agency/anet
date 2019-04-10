@@ -2026,13 +2026,12 @@
     browserstack-local "1.3.7"
     request "^2.85.0"
 
-"@wdio/cli@^5.7.6":
-  version "5.7.8"
-  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.7.8.tgz#20f60211e5d0008705bf0f5404398b5e8f6ebe1e"
-  integrity sha512-MvlxMyvRcE0TQvcW9pvf2bgwc/q+2tQW4ZhHnko8gXUVxqFk6rd+lqDeqEGZWsMETsfozHT0whsFtGdCg4dXqA==
+"@wdio/cli@^5.7.12":
+  version "5.7.12"
+  resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-5.7.12.tgz#9024cdcf9b29cc8a05281a050989d849a827413e"
+  integrity sha512-kvS8y6xtNA3zaQNwGblHgY6/S/UNBbApY4+NDhOrXDuwPIpWE+TErCLA7z/y+BD/Z89B+lEtzPhPAxpSvk53fQ==
   dependencies:
     "@wdio/config" "^5.7.8"
-    "@wdio/interface" "^5.7.8"
     "@wdio/logger" "^5.7.8"
     "@wdio/utils" "^5.7.8"
     async-exit-hook "^2.0.1"
@@ -2046,7 +2045,8 @@
     lodash.flattendeep "^4.4.0"
     lodash.pickby "^4.6.0"
     lodash.union "^4.6.0"
-    webdriverio "^5.7.8"
+    log-update "^2.3.0"
+    webdriverio "^5.7.12"
     yargs "^11.1.0"
     yarn-install "^1.0.0"
 
@@ -2066,15 +2066,6 @@
   dependencies:
     "@wdio/reporter" "^5.7.8"
     chalk "^2.3.0"
-
-"@wdio/interface@^5.7.8":
-  version "5.7.8"
-  resolved "https://registry.yarnpkg.com/@wdio/interface/-/interface-5.7.8.tgz#dd3d238045d12c55c68cbd03c7ac69fb2ba61b62"
-  integrity sha512-US3zcH0blPMVj8INIZG6Oi8NkbsHUeT6oZygt+n3/hO8TRjRABKFCMd1WexqkSuQnd53UHrKz2Fg7pWc8JHMbQ==
-  dependencies:
-    ansi-escapes "^3.0.0"
-    chalk "^2.3.2"
-    is-ci "^1.1.0"
 
 "@wdio/local-runner@^5.7.9":
   version "5.7.9"
@@ -4015,7 +4006,7 @@ cli-boxes@^1.0.0:
   resolved "https://registry.yarnpkg.com/cli-boxes/-/cli-boxes-1.0.0.tgz#4fa917c3e59c94a004cd61f8ee509da651687143"
   integrity sha1-T6kXw+WclKAEzWH47lCdplFocUM=
 
-cli-cursor@^2.1.0:
+cli-cursor@^2.0.0, cli-cursor@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-cursor/-/cli-cursor-2.1.0.tgz#b35dac376479facc3e94747d41d0d0f5238ffcb5"
   integrity sha1-s12sN2R5+sw+lHR9QdDQ9SOP/LU=
@@ -7873,7 +7864,7 @@ is-callable@^1.1.3, is-callable@^1.1.4:
   resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.1.4.tgz#1e1adf219e1eeb684d691f9d6a05ff0d30a24d75"
   integrity sha512-r5p9sxJjYnArLjObpjA4xu5EKI3CuKHkJXMhT7kwbpUyIFD1n5PMAsoPvWnvtZiNz7LjkYDRZhd7FlI0eMijEA==
 
-is-ci@^1.0.10, is-ci@^1.1.0:
+is-ci@^1.0.10:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/is-ci/-/is-ci-1.2.1.tgz#e3779c8ee17fccf428488f6e281187f2e632841c"
   integrity sha512-s6tfsaQaQi3JNciBH6shVqEDvhGut0SUXr31ag8Pd8BBbVVlcGfWhpPmEOoM6RJ5TFhbypvf5yyRw/VXW1IiWg==
@@ -9328,6 +9319,15 @@ log-symbols@2.2.0, log-symbols@^2.2.0:
   integrity sha512-VeIAFslyIerEJLXHziedo2basKbMKtTw3vfn5IzG0XTjhAVEJyNHnL2p7vc+wBDSdQuUpNw3M2u6xb9QsAY5Eg==
   dependencies:
     chalk "^2.0.1"
+
+log-update@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/log-update/-/log-update-2.3.0.tgz#88328fd7d1ce7938b29283746f0b1bc126b24708"
+  integrity sha1-iDKP19HOeTiykoN0bwsbwSayRwg=
+  dependencies:
+    ansi-escapes "^3.0.0"
+    cli-cursor "^2.0.0"
+    wrap-ansi "^3.0.1"
 
 loglevel-plugin-prefix@^0.5.3:
   version "0.5.3"
@@ -14036,7 +14036,7 @@ webdriver@^5.7.12:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@^5.7.12, webdriverio@^5.7.8, webdriverio@^5.7.9:
+webdriverio@^5.7.12, webdriverio@^5.7.9:
   version "5.7.12"
   resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.7.12.tgz#0b0fa04973ff9fcaf6249b2c74603ce245d50b84"
   integrity sha512-7jkM6sOzWoQhFXXv+OfNFYjnfUHtFKGWG25Xw9vdKsV79uXZJbR2H8snUvylodXUw/rX41Vy6APr+fUM/b35iQ==
@@ -14302,6 +14302,14 @@ wrap-ansi@^2.0.0:
   dependencies:
     string-width "^1.0.1"
     strip-ansi "^3.0.1"
+
+wrap-ansi@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-3.0.1.tgz#288a04d87eda5c286e060dfe8f135ce8d007f8ba"
+  integrity sha1-KIoE2H7aXChuBg3+jxNc6NAH+Lo=
+  dependencies:
+    string-width "^2.1.1"
+    strip-ansi "^4.0.0"
 
 wrappy@1:
   version "1.0.2"
