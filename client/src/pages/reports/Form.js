@@ -252,7 +252,7 @@ class BaseReportForm extends Component {
           }
           if (values.location && values.location.uuid) {
             attendeesFilters.atLocation = {
-              label: "At location",
+              label: `At ${values.location.name}`,
               searchQuery: true,
               queryVars: {
                 locationUuid:
