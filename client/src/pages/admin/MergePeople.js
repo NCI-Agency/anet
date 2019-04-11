@@ -119,7 +119,7 @@ class MergePeople extends Page {
                           fieldLabel="Loser"
                           placeholder="Select the duplicate person"
                           value={values.loser}
-                          overlayColumns={["Loser", "Name"]}
+                          overlayColumns={["Name"]}
                           overlayRenderRow={PersonSimpleOverlayRow}
                           filterDefs={peopleFilters}
                           onChange={value => {
@@ -148,7 +148,7 @@ class MergePeople extends Page {
                           fieldLabel="Winner"
                           placeholder="Select the OTHER duplicate person"
                           value={values.winner}
-                          overlayColumns={["Winner", "Name"]}
+                          overlayColumns={["Name"]}
                           overlayRenderRow={PersonSimpleOverlayRow}
                           filterDefs={peopleFilters}
                           onChange={value => {

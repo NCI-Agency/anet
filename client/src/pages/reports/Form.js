@@ -432,7 +432,7 @@ class BaseReportForm extends Component {
                     fieldLabel="Location"
                     placeholder="Search for the location where this happened..."
                     value={values.location}
-                    overlayColumns={["Location", "Name"]}
+                    overlayColumns={["Name"]}
                     overlayRenderRow={LocationOverlayRow}
                     filterDefs={locationFilters}
                     onChange={value => setFieldValue("location", value)}
@@ -539,7 +539,6 @@ class BaseReportForm extends Component {
                       />
                     }
                     overlayColumns={[
-                      "Attendee",
                       "Name",
                       "Position",
                       "Location",
@@ -580,7 +579,7 @@ class BaseReportForm extends Component {
                         showOrganization
                       />
                     }
-                    overlayColumns={["Task", "Name", "Organization"]}
+                    overlayColumns={["Name", "Organization"]}
                     overlayRenderRow={TaskDetailedOverlayRow}
                     filterDefs={tasksFilters}
                     onChange={value => {
@@ -698,11 +697,7 @@ class BaseReportForm extends Component {
                               showDelete
                             />
                           }
-                          overlayColumns={[
-                            "Authorization Group",
-                            "Name",
-                            "Description"
-                          ]}
+                          overlayColumns={["Name", "Description"]}
                           overlayRenderRow={AuthorizationGroupOverlayRow}
                           filterDefs={authorizationGroupsFilters}
                           onChange={value =>

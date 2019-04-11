@@ -248,7 +248,7 @@ export default class AdvancedSelect extends Component {
                       }}
                       handleRemoveItem={handleRemoveItem}
                       objectType={objectType}
-                      columns={overlayColumns}
+                      columns={[""].concat(overlayColumns)}
                       renderRow={overlayRenderRow}
                       isLoading={isLoading}
                       loaderMessage={"No results found"}

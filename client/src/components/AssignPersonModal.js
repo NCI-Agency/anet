@@ -79,7 +79,7 @@ export default class AssignPersonModal extends Component {
                   fieldLabel="Select a person"
                   placeholder="Select a person for this position"
                   value={this.state.person}
-                  overlayColumns={["", "Name"]}
+                  overlayColumns={["Name"]}
                   overlayRenderRow={PersonSimpleOverlayRow}
                   filterDefs={personFilters}
                   onChange={this.handleChangePerson}

@@ -261,7 +261,7 @@ class BaseOrganizationForm extends Component {
                         fieldLabel={Settings.fields.organization.parentOrg}
                         placeholder="Search for a higher level organization..."
                         value={values.parentOrg}
-                        overlayColumns={["Parent Organization", "Name"]}
+                        overlayColumns={["Name"]}
                         overlayRenderRow={OrganizationOverlayRow}
                         filterDefs={organizationFilters}
                         onChange={value => setFieldValue("parentOrg", value)}
@@ -392,7 +392,7 @@ class BaseOrganizationForm extends Component {
                             renderSelected={
                               <TaskTable tasks={values.tasks} showDelete />
                             }
-                            overlayColumns={["Task", "Name"]}
+                            overlayColumns={["Name"]}
                             overlayRenderRow={TaskSimpleOverlayRow}
                             filterDefs={tasksFilters}
                             onChange={value => setFieldValue("tasks", value)}
@@ -464,7 +464,7 @@ class BaseOrganizationForm extends Component {
           placeholder="Search for the approver's position..."
           value={approvers}
           renderSelected={<ApproverTable approvers={approvers} />}
-          overlayColumns={["Approver", "Name", "Position"]}
+          overlayColumns={["Name", "Position"]}
           overlayRenderRow={ApproverOverlayRow}
           filterDefs={approversFilters}
           onChange={value =>

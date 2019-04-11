@@ -152,7 +152,7 @@ class BaseTaskForm extends Component {
                       Settings.fields.task.shortLabel
                     }`}
                     value={values.responsibleOrg}
-                    overlayColumns={["Responsible Organization", "Name"]}
+                    overlayColumns={["Name"]}
                     overlayRenderRow={OrganizationOverlayRow}
                     filterDefs={responsibleOrgFilters}
                     onChange={value => setFieldValue("responsibleOrg", value)}
@@ -172,7 +172,7 @@ class BaseTaskForm extends Component {
                         Settings.fields.task.customFieldRef1.placeholder
                       }
                       value={values.customFieldRef1}
-                      overlayColumns={["", "Name"]}
+                      overlayColumns={["Name"]}
                       overlayRenderRow={TaskSimpleOverlayRow}
                       filterDefs={tasksFilters}
                       onChange={value =>

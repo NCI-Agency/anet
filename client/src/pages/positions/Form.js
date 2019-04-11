@@ -223,7 +223,7 @@ class BasePositionForm extends Component {
                     fieldLabel="Organization"
                     placeholder="Search the organization for this position..."
                     value={values.organization}
-                    overlayColumns={["Organization", "Name"]}
+                    overlayColumns={["Name"]}
                     overlayRenderRow={OrganizationOverlayRow}
                     filterDefs={organizationFilters}
                     onChange={value => setFieldValue("organization", value)}
@@ -262,7 +262,7 @@ class BasePositionForm extends Component {
                     fieldLabel="Location"
                     placeholder="Search for the location where this Position will operate from..."
                     value={values.location}
-                    overlayColumns={["Location", "Name"]}
+                    overlayColumns={["Name"]}
                     overlayRenderRow={LocationOverlayRow}
                     filterDefs={locationFilters}
                     onChange={value => setFieldValue("location", value)}
