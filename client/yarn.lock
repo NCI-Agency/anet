@@ -2133,10 +2133,10 @@
     chalk "^2.3.2"
     pretty-ms "^3.1.0"
 
-"@wdio/sync@^5.7.6":
-  version "5.7.8"
-  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.7.8.tgz#2553bdbbb04fcf09e21ff51b283b6a0730d1c82b"
-  integrity sha512-iLYNp1kgCxWQvkbdbsC2NETlaWp0NENnq3VnL8hJ/3Q4F1l8R/vi9nk9ZpmvFenfbscr0nG41mwuM7Oq67KoVQ==
+"@wdio/sync@^5.7.9":
+  version "5.7.9"
+  resolved "https://registry.yarnpkg.com/@wdio/sync/-/sync-5.7.9.tgz#185225c811ebfb40353b0f37109fe59440c3b9f6"
+  integrity sha512-ee3G5Uti3vGe5lSXjucRSbQO6Rm8wrieyt+Tfix5/fDclDaqc9+SoK/TtgMwagzObBUXdJTtgv0HDrngqIUkeA==
   dependencies:
     "@wdio/config" "^5.7.8"
     "@wdio/logger" "^5.7.8"
