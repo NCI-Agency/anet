@@ -33,12 +33,10 @@ describe("Create position page", () => {
 
       EditPosition.organizationInput.click()
       EditPosition.organizationInput.setValue(ADVISOR_ORG)
-      EditPosition.waitForOrgAdvancedSelectToChange(
+      EditPosition.waitForOrgAdvancedSelectToChange(ADVISOR_ORG_COMPLETE)
+      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
         ADVISOR_ORG_COMPLETE
       )
-      expect(
-        EditPosition.orgAdvancedSelectFirstItem.getText()
-      ).to.include(ADVISOR_ORG_COMPLETE)
 
       EditPosition.orgAdvancedSelectFirstItem.click()
       expect(EditPosition.organizationInput.getValue()).to.equal(ADVISOR_ORG)
@@ -48,12 +46,10 @@ describe("Create position page", () => {
 
       EditPosition.organizationInput.click()
       EditPosition.organizationInput.setValue(PRINCIPAL_ORG)
-      EditPosition.waitForOrgAdvancedSelectToChange(
+      EditPosition.waitForOrgAdvancedSelectToChange(PRINCIPAL_ORG_COMPLETE)
+      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
         PRINCIPAL_ORG_COMPLETE
       )
-      expect(
-        EditPosition.orgAdvancedSelectFirstItem.getText()
-      ).to.include(PRINCIPAL_ORG_COMPLETE)
 
       EditPosition.orgAdvancedSelectFirstItem.click()
       expect(EditPosition.organizationInput.getValue()).to.equal(PRINCIPAL_ORG)

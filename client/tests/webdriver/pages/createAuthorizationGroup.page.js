@@ -52,7 +52,9 @@ class CreateAuthorizationGroup extends Page {
         return this.positionsAdvancedSelectFirstItem.getText() === value
       },
       5000,
-      'Expected positions advanced select input to contain "' + value + '" after 5s'
+      'Expected positions advanced select input to contain "' +
+        value +
+        '" after 5s'
     )
   }
 
