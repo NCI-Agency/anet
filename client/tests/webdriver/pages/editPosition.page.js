@@ -14,7 +14,9 @@ class EditPosition extends Page {
     return browser.$("#organization")
   }
   get orgAdvancedSelectFirstItem() {
-    return browser.$("#organization-popover tbody tr:first-child td:nth-child(2) span")
+    return browser.$(
+      "#organization-popover tbody tr:first-child td:nth-child(2) span"
+    )
   }
   get alertSuccess() {
     return browser.$(".alert-success")

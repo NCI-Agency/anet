@@ -25,7 +25,9 @@ class CreateAuthorizationGroup extends Page {
     return browser.$("#positions")
   }
   get positionsAdvancedSelectFirstItem() {
-    return browser.$("#positions-popover tbody tr:first-child td:nth-child(2) span")
+    return browser.$(
+      "#positions-popover tbody tr:first-child td:nth-child(2) span"
+    )
   }
   get submitButton() {
     return browser.$("#formBottomSubmit")

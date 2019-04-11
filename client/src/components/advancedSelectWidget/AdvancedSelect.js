@@ -269,16 +269,15 @@ export default class AdvancedSelect extends Component {
           }}
         />
         <Row>
-          {vertical
-            ?
+          {vertical ? (
             <Col sm={12}>{renderSelectedWithDelete}</Col>
-            :
+          ) : (
             <React.Fragment>
               <Col sm={2} />
               <Col sm={7}>{renderSelectedWithDelete}</Col>
               <Col sm={3}>{renderExtraCol ? this.renderShortcuts() : null}</Col>
             </React.Fragment>
-          }
+          )}
         </Row>
       </React.Fragment>
     )
@@ -471,7 +470,10 @@ export default class AdvancedSelect extends Component {
 
   renderShortcutsTitle = () => {
     return (
-      <div id={`${this.props.fieldName}-shortcut-title`} className="shortcut-title">
+      <div
+        id={`${this.props.fieldName}-shortcut-title`}
+        className="shortcut-title"
+      >
         <h5>{this.props.shortcutsTitle}</h5>
       </div>
     )
@@ -482,7 +484,10 @@ export default class AdvancedSelect extends Component {
     return (
       shortcuts &&
       shortcuts.length > 0 && (
-        <div id={`${this.props.fieldName}-shortcut-list`} className="shortcut-list">
+        <div
+          id={`${this.props.fieldName}-shortcut-list`}
+          className="shortcut-list"
+        >
           {shortcuts.map(shortcut => {
             const shortcutLinkProps = {
               [this.props.objectType.getModelNameLinkTo]: shortcut,

@@ -419,9 +419,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Location field starts blank"
   )
 
-  let $locationShortcutButton = await $(
-    "#location-shortcut-list button"
-  )
+  let $locationShortcutButton = await $("#location-shortcut-list button")
   await $locationShortcutButton.click()
   t.is(
     await $locationInput.getAttribute("value"),
@@ -548,9 +546,7 @@ test("Verify that validation and other reports/new interactions work", async t =
   await assertElementText(t, $advisorPosition, "EF 2.2 Advisor D")
   await assertElementText(t, $advisorOrg, "EF 2.2")
 
-  let $addAttendeeShortcutButtons = await $$(
-    "#attendees-shortcut-list button"
-  )
+  let $addAttendeeShortcutButtons = await $$("#attendees-shortcut-list button")
   // Add all recent attendees
   await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
 

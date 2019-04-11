@@ -420,11 +420,11 @@ class BaseReportForm extends Component {
                         .endOf("day")
                         .isBefore(values.engagementDate) && (
                         <HelpBlock>
-                          <span className="text-success">
+                        <span className="text-success">
                             This will create an upcoming engagement
                           </span>
-                        </HelpBlock>
-                      )}
+                      </HelpBlock>
+                    )}
                   </Field>
 
                   <AdvancedSingleSelect

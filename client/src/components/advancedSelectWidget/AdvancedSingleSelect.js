@@ -15,7 +15,7 @@ export default class AdvancedSingleSelect extends Component {
 
   static defaultProps = {
     overlayTable: AdvancedSingleSelectOverlayTable,
-    showRemoveButton: true  // whether to display a remove button in the input field to allow removing the selected value
+    showRemoveButton: true // whether to display a remove button in the input field to allow removing the selected value
   }
 
   render() {
