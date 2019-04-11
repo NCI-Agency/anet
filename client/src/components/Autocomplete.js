@@ -58,6 +58,7 @@ export default class Autocomplete extends Component {
       stringValue: stringValue,
       originalStringValue: stringValue
     }
+    this.latestRequest = null
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -194,9 +195,17 @@ export default class Autocomplete extends Component {
     if (this.props.queryParams) {
       Object.assign(queryVars, this.props.queryParams)
     }
-    API.query(graphQlQuery, { query: queryVars }, variableDef).then(data => {
+    const thisRequest = (this.latestRequest = API.query(
+      graphQlQuery,
+      { query: queryVars },
+      variableDef
+    ).then(data => {
+      // If this is true there's a newer request happening, stop everything
+      if (thisRequest !== this.latestRequest) {
+        return
+      }
       this._setSuggestions(data[listName].list)
-    })
+    }))
   }
 
   @autobind
