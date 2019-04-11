@@ -19,9 +19,7 @@ export const LocationOverlayRow = item => (
 export const OrganizationOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="orgShortName">
-      <LinkTo organization={item} isLink={false}>
-        {item.shortName} - {item.longName} {item.identificationCode}
-      </LinkTo>
+      {item.shortName} - {item.longName} {item.identificationCode}
     </td>
   </React.Fragment>
 )
@@ -29,9 +27,7 @@ export const OrganizationOverlayRow = item => (
 export const TaskSimpleOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="taskName">
-      <LinkTo task={item} isLink={false}>
-        {item.shortName} - {item.longName}
-      </LinkTo>
+      {item.shortName} - {item.longName}
     </td>
   </React.Fragment>
 )
@@ -39,9 +35,7 @@ export const TaskSimpleOverlayRow = item => (
 export const TaskDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td className="taskName">
-      <LinkTo task={item} isLink={false}>
-        {item.shortName} - {item.longName}
-      </LinkTo>
+      {item.shortName} - {item.longName}
     </td>
     <td className="taskOrg">
       <LinkTo organization={item.responsibleOrg} isLink={false} />
@@ -52,10 +46,10 @@ export const TaskDetailedOverlayRow = item => (
 export const PositionOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
-      <LinkTo person={item.person} isLink={false} />
+      <LinkTo position={item} isLink={false} />
     </td>
     <td>
-      <LinkTo position={item} isLink={false} />
+      <LinkTo person={item.person} isLink={false} />
     </td>
   </React.Fragment>
 )

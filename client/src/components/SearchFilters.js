@@ -93,7 +93,7 @@ const advancedSelectFilterPersonProps = {
   addon: PEOPLE_ICON
 }
 const advancedSelectFilterPositionProps = {
-  overlayColumns: ["Name", "Position", "Location", "Organization"],
+  overlayColumns: ["Position", "Current Occupant"],
   overlayRenderRow: PositionOverlayRow,
   objectType: Position,
   valueKey: "name",
@@ -279,7 +279,7 @@ export default {
             valueKey: "name",
             fields: Tag.autocompleteQuery,
             filterDefs: tagWidgetFilters,
-            placeholder: `Filter reports by tag...`,
+            placeholder: "Filter reports by tag...",
             queryKey: "tagUuid"
           }
         },
