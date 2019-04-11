@@ -26,29 +26,35 @@ describe("Create position page", () => {
 
       EditPosition.organizationInput.click()
       EditPosition.organizationInput.setValue(PRINCIPAL_ORG)
-      EditPosition.orgAdvancedSelectFirstItem.waitForExist()
-      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
-        "No suggestions found"
-      )
-      EditPosition.orgAdvancedSelectFirstItem.click()
-      expect(EditPosition.organizationInput.getValue()).to.equal("")
+      EditPosition.orgAdvancedSelectFirstItem.waitForExist(1000, true) // element should *not* exist as no suggestion found
+
+      // Click outside the organization overlay to close the overlay
+      EditPosition.typeAdvisorButton.click()
 
       EditPosition.organizationInput.click()
       EditPosition.organizationInput.setValue(ADVISOR_ORG)
-      EditPosition.orgAdvancedSelectFirstItem.waitForExist()
-      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
+      EditPosition.waitForOrgAdvancedSelectToChange(
         ADVISOR_ORG_COMPLETE
       )
+      expect(
+        EditPosition.orgAdvancedSelectFirstItem.getText()
+      ).to.include(ADVISOR_ORG_COMPLETE)
+
       EditPosition.orgAdvancedSelectFirstItem.click()
       expect(EditPosition.organizationInput.getValue()).to.equal(ADVISOR_ORG)
 
       EditPosition.typePrincipalButton.click()
       expect(EditPosition.organizationInput.getValue()).to.equal("")
+
+      EditPosition.organizationInput.click()
       EditPosition.organizationInput.setValue(PRINCIPAL_ORG)
-      EditPosition.orgAdvancedSelectFirstItem.waitForExist()
-      expect(EditPosition.orgAdvancedSelectFirstItem.getText()).to.include(
+      EditPosition.waitForOrgAdvancedSelectToChange(
         PRINCIPAL_ORG_COMPLETE
       )
+      expect(
+        EditPosition.orgAdvancedSelectFirstItem.getText()
+      ).to.include(PRINCIPAL_ORG_COMPLETE)
+
       EditPosition.orgAdvancedSelectFirstItem.click()
       expect(EditPosition.organizationInput.getValue()).to.equal(PRINCIPAL_ORG)
       EditPosition.cancelButton.click()

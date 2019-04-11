@@ -39,6 +39,17 @@ class EditPosition extends Page {
     }
   }
 
+  waitForOrgAdvancedSelectToChange(value) {
+    this.orgAdvancedSelectFirstItem.waitForExist()
+    return browser.waitUntil(
+      () => {
+        return this.orgAdvancedSelectFirstItem.getText() === value
+      },
+      5000,
+      'Expected org advanced select input to contain "' + value + '" after 5s'
+    )
+  }
+
   submitForm() {
     this.submitButton.click()
   }
