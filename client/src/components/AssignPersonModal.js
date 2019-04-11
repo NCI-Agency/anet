@@ -1,6 +1,6 @@
 import API from "api"
 import autobind from "autobind-decorator"
-import { PersonOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
@@ -79,14 +79,8 @@ export default class AssignPersonModal extends Component {
                   fieldLabel="Select a person"
                   placeholder="Select a person for this position"
                   value={this.state.person}
-                  overlayColumns={[
-                    "",
-                    "Name",
-                    "Person",
-                    "Location",
-                    "Organization"
-                  ]}
-                  overlayRenderRow={PersonOverlayRow}
+                  overlayColumns={["", "Name"]}
+                  overlayRenderRow={PersonSimpleOverlayRow}
                   filterDefs={personFilters}
                   onChange={this.handleChangePerson}
                   objectType={Person}

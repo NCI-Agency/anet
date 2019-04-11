@@ -9,7 +9,7 @@ import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
 import TextInputFilter from "components/advancedSearch/TextInputFilter"
 import {
   LocationOverlayRow,
-  PersonOverlayRow,
+  PersonDetailedOverlayRow,
   PositionOverlayRow,
   TagOverlayRow,
   TaskSimpleOverlayRow
@@ -86,7 +86,7 @@ const taskFilters = props => {
 
 const advancedSelectFilterPersonProps = {
   overlayColumns: ["Name", "Position", "Location", "Organization"],
-  overlayRenderRow: PersonOverlayRow,
+  overlayRenderRow: PersonDetailedOverlayRow,
   objectType: Person,
   valueKey: "name",
   fields: Person.autocompleteQuery,

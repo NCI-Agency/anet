@@ -60,7 +60,15 @@ export const PositionOverlayRow = item => (
   </React.Fragment>
 )
 
-export const PersonOverlayRow = item => (
+export const PersonSimpleOverlayRow = item => (
+  <React.Fragment key={item.uuid}>
+    <td>
+      <LinkTo person={item} isLink={false} />
+    </td>
+  </React.Fragment>
+)
+
+export const PersonDetailedOverlayRow = item => (
   <React.Fragment key={item.uuid}>
     <td>
       <LinkTo person={item} isLink={false} />

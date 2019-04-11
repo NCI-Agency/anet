@@ -3,7 +3,7 @@ import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSe
 import {
   AuthorizationGroupOverlayRow,
   LocationOverlayRow,
-  PersonOverlayRow,
+  PersonDetailedOverlayRow,
   TaskDetailedOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
@@ -545,7 +545,7 @@ class BaseReportForm extends Component {
                       "Location",
                       "Organization"
                     ]}
-                    overlayRenderRow={PersonOverlayRow}
+                    overlayRenderRow={PersonDetailedOverlayRow}
                     filterDefs={attendeesFilters}
                     onChange={value =>
                       this.updateAttendees(setFieldValue, "attendees", value)

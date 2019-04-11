@@ -1,5 +1,5 @@
 import API, { Settings } from "api"
-import { PersonOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import * as FieldHelper from "components/FieldHelper"
 import LinkTo from "components/LinkTo"
@@ -119,14 +119,8 @@ class MergePeople extends Page {
                           fieldLabel="Loser"
                           placeholder="Select the duplicate person"
                           value={values.loser}
-                          overlayColumns={[
-                            "Loser",
-                            "Name",
-                            "Position",
-                            "Location",
-                            "Organization"
-                          ]}
-                          overlayRenderRow={PersonOverlayRow}
+                          overlayColumns={["Loser", "Name"]}
+                          overlayRenderRow={PersonSimpleOverlayRow}
                           filterDefs={peopleFilters}
                           onChange={value => {
                             setFieldValue("loser", value)
@@ -154,14 +148,8 @@ class MergePeople extends Page {
                           fieldLabel="Winner"
                           placeholder="Select the OTHER duplicate person"
                           value={values.winner}
-                          overlayColumns={[
-                            "Winner",
-                            "Name",
-                            "Position",
-                            "Location",
-                            "Organization"
-                          ]}
-                          overlayRenderRow={PersonOverlayRow}
+                          overlayColumns={["Winner", "Name"]}
+                          overlayRenderRow={PersonSimpleOverlayRow}
                           filterDefs={peopleFilters}
                           onChange={value => {
                             setFieldValue("winner", value)
