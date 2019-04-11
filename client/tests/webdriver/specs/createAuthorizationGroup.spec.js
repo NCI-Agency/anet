@@ -30,12 +30,15 @@ describe("Create authorization group form page", () => {
       expect($(".positions_table").isExisting()).to.equal(false)
       CreateAuthorizationGroup.positionsInput.click()
       CreateAuthorizationGroup.positionsInput.setValue(POSITION)
-      CreateAuthorizationGroup.waitForPositionsAdvancedSelectToChange(POSITION_COMPLETE)
-      console.log(CreateAuthorizationGroup.positionsAdvancedSelectFirstItem)
+      CreateAuthorizationGroup.waitForPositionsAdvancedSelectToChange(
+        POSITION_COMPLETE
+      )
       expect(
         CreateAuthorizationGroup.positionsAdvancedSelectFirstItem.getText()
       ).to.include(POSITION_COMPLETE)
       CreateAuthorizationGroup.positionsAdvancedSelectFirstItem.click()
+      // Click outside the positions overlay
+      CreateAuthorizationGroup.name.click()
       // Advanced select input gets empty, the position is added to a table underneath
       expect(CreateAuthorizationGroup.positionsInput.getValue()).to.equal("")
       // positions table exists now
