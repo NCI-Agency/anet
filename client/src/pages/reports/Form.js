@@ -197,7 +197,7 @@ class BaseReportForm extends Component {
         }) => {
           const locationFilters = {
             activeLocations: {
-              label: "All locations",
+              label: "Active locations",
               searchQuery: true,
               queryVars: { status: Location.STATUS.ACTIVE }
             },
