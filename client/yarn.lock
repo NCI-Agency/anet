@@ -1225,22 +1225,6 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@blueprintjs/core@^3.15.0":
-  version "3.15.0"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.15.0.tgz#49ba1dfee7dcefbb527d27c0f8d6bcf1086209d4"
-  integrity sha512-znXO0UaWBJO7Nm2qEvZzURCDuogsJ9DJlIw3N2XnIi+k/c8mQ1xlvtg0TT2pS88lMG9HUEKky3b0UQaSXBw4LA==
-  dependencies:
-    "@blueprintjs/icons" "^3.7.0"
-    "@types/dom4" "^2.0.1"
-    classnames "^2.2"
-    dom4 "^2.0.1"
-    normalize.css "^8.0.0"
-    popper.js "^1.14.1"
-    react-popper "^1.0.0"
-    react-transition-group "^2.2.1"
-    resize-observer-polyfill "^1.5.0"
-    tslib "^1.9.0"
-
 "@blueprintjs/core@^3.15.1":
   version "3.15.1"
   resolved "https://registry.yarnpkg.com/@blueprintjs/core/-/core-3.15.1.tgz#9792e9fb7e2e066dd5339fadeaf2f85b1485832a"
@@ -1265,14 +1249,6 @@
     "@blueprintjs/core" "^3.15.1"
     classnames "^2.2"
     react-day-picker "^7.3.0"
-    tslib "^1.9.0"
-
-"@blueprintjs/icons@^3.7.0":
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-3.7.0.tgz#2a1907a41913773792c828a6c3ef082a1f1ebb77"
-  integrity sha512-608lQx1okOo85LNp7LyvsXWlgJjoQAiu29wULcktGuAuMmVXgueaGbMEDpuEMbu+uRlg9yqDhmk1eWm7W7R5ag==
-  dependencies:
-    classnames "^2.2"
     tslib "^1.9.0"
 
 "@blueprintjs/icons@^3.8.0":
