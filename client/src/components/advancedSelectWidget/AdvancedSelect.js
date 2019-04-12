@@ -122,6 +122,8 @@ export default class AdvancedSelect extends Component {
     isLoading: false
   }
 
+  latestRequest = null
+
   componentDidMount() {
     this.setState({
       searchTerms: this.props.searchTerms || ""
@@ -376,16 +378,19 @@ export default class AdvancedSelect extends Component {
     const resourceName = this.props.objectType.resourceName
     const listName = filterDefs.listName || this.props.objectType.listName
     this.setState({ isLoading: true }, () => {
+      let graphQlQuery = ""
+      let variables = {}
+      let variableDef = ""
       if (filterDefs.searchQuery) {
         // GraphQL search type of query
-        const graphQlQuery =
+        graphQlQuery =
           listName +
           " (query: $query) { " +
           "pageNum, pageSize, totalCount, list { " +
           this.props.fields +
           "}" +
           "}"
-        const variableDef = "($query: " + resourceName + "SearchQueryInput)"
+        variableDef = "($query: " + resourceName + "SearchQueryInput)"
         let queryVars = { pageNum: pageNum, pageSize: 6 }
         if (this.props.queryParams) {
           Object.assign(queryVars, this.props.queryParams)
@@ -396,42 +401,37 @@ export default class AdvancedSelect extends Component {
         if (this.state.searchTerms) {
           Object.assign(queryVars, { text: this.state.searchTerms + "*" })
         }
-        API.query(graphQlQuery, { query: queryVars }, variableDef).then(
-          data => {
-            const isLoading = data[listName].totalCount !== 0
-            this.setState({
-              isLoading,
-              results: {
-                ...oldResults,
-                [filterType]: data[listName]
-              }
-            })
-          }
-        )
+        variables = { query: queryVars }
       } else {
         // GraphQL query other than search type
-        API.query(
-          /* GraphQL */ `
-						` +
-            listName +
-            "(" +
-            filterDefs.listArgs +
-            `) {
-					pageNum, pageSize, totalCount, list { ` +
-            this.props.fields +
-            ` }
-						}`
-        ).then(data => {
-          const isLoading = data[listName].totalCount !== 0
-          this.setState({
-            isLoading,
-            results: {
-              ...oldResults,
-              [filterType]: data[listName]
-            }
-          })
-        })
+        graphQlQuery =
+          listName +
+          "(" +
+          filterDefs.listArgs +
+          ") { " +
+          "pageNum, pageSize, totalCount, list { " +
+          this.props.fields +
+          "}" +
+          "}"
       }
+      let thisRequest = (this.latestRequest = API.query(
+        graphQlQuery,
+        variables,
+        variableDef
+      ).then(data => {
+        // If this is true there's a newer request happening, stop everything
+        if (thisRequest !== this.latestRequest) {
+          return
+        }
+        const isLoading = data[listName].totalCount !== 0
+        this.setState({
+          isLoading,
+          results: {
+            ...oldResults,
+            [filterType]: data[listName]
+          }
+        })
+      }))
     })
   }
 
