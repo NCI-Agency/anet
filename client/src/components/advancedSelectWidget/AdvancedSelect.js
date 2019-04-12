@@ -99,7 +99,8 @@ export const propTypes = {
   ]),
   extraAddon: PropTypes.object,
   handleAddItem: PropTypes.func,
-  handleRemoveItem: PropTypes.func
+  handleRemoveItem: PropTypes.func,
+  smallOverlay: PropTypes.bool // set to true if you want to display the filters on top
 }
 
 export default class AdvancedSelect extends Component {
@@ -110,7 +111,8 @@ export default class AdvancedSelect extends Component {
     shortcutsTitle: "Recents",
     renderExtraCol: false,
     closeOverlayOnAdd: false,
-    searchTerms: ""
+    searchTerms: "",
+    smallOverlay: false
   }
 
   state = {
@@ -170,7 +172,8 @@ export default class AdvancedSelect extends Component {
       overlayTable,
       overlayColumns,
       overlayRenderRow,
-      filterDefs
+      filterDefs,
+      smallOverlay
     } = overlayProps
     const { results, filterType, isLoading } = this.state
     const renderSelectedWithDelete = renderSelected
@@ -217,51 +220,63 @@ export default class AdvancedSelect extends Component {
             }}
           >
             <ContainerDimensions>
-              {({ width }) => (
-                <Row className="border-between">
-                  <Col sm={4} md={3}>
-                    {width < MOBILE_WIDTH ? (
-                      <div>
-                        <SelectFilterInputField
-                          items={filterDefs}
-                          handleOnChange={this.handleOnChangeSelect}
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <FilterList
-                          items={filterDefs}
-                          currentFilter={this.state.filterType}
-                          handleOnClick={this.changeFilterType}
-                        />
-                      </div>
+              {({ width }) => {
+                const hasLeftNav =
+                  width >= MOBILE_WIDTH &&
+                  Object.keys(this.props.filterDefs).length > 1
+                const hasTopNav = width < MOBILE_WIDTH || smallOverlay
+                return (
+                  <Row className="border-between">
+                    {hasLeftNav && (
+                      <Col sm={4} md={3}>
+                        <div>
+                          <FilterList
+                            items={filterDefs}
+                            currentFilter={this.state.filterType}
+                            handleOnClick={this.changeFilterType}
+                          />
+                        </div>
+                      </Col>
                     )}
-                  </Col>
-                  <Col sm={8} md={9} style={{ minHeight: "80px" }}>
-                    <this.props.overlayTable
-                      fieldName={fieldName}
-                      items={items}
-                      selectedItems={value}
-                      handleAddItem={item => {
-                        handleAddItem(item)
-                        if (this.props.closeOverlayOnAdd) {
-                          this.handleHideOverlay()
-                        }
-                      }}
-                      handleRemoveItem={handleRemoveItem}
-                      objectType={objectType}
-                      columns={[""].concat(overlayColumns)}
-                      renderRow={overlayRenderRow}
-                      isLoading={isLoading}
-                      loaderMessage={"No results found"}
-                      tableClassName={overlayTableClassName}
-                    />
-                    <footer className="searchPagination">
-                      {this.paginationFor(filterType)}
-                    </footer>
-                  </Col>
-                </Row>
-              )}
+
+                    <Col
+                      sm={hasLeftNav ? 8 : 12}
+                      md={hasLeftNav ? 9 : 12}
+                      style={{ minHeight: "80px" }}
+                    >
+                      {hasTopNav && (
+                        <div>
+                          <SelectFilterInputField
+                            items={filterDefs}
+                            handleOnChange={this.handleOnChangeSelect}
+                          />
+                        </div>
+                      )}
+                      <this.props.overlayTable
+                        fieldName={fieldName}
+                        items={items}
+                        selectedItems={value}
+                        handleAddItem={item => {
+                          handleAddItem(item)
+                          if (this.props.closeOverlayOnAdd) {
+                            this.handleHideOverlay()
+                          }
+                        }}
+                        handleRemoveItem={handleRemoveItem}
+                        objectType={objectType}
+                        columns={[""].concat(overlayColumns)}
+                        renderRow={overlayRenderRow}
+                        isLoading={isLoading}
+                        loaderMessage={"No results found"}
+                        tableClassName={overlayTableClassName}
+                      />
+                      <footer className="searchPagination">
+                        {this.paginationFor(filterType)}
+                      </footer>
+                    </Col>
+                  </Row>
+                )
+              }}
             </ContainerDimensions>
           </Popover>
         </Overlay>
