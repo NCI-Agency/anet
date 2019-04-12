@@ -247,7 +247,7 @@ class BasePersonShow extends Page {
                     humanValue={
                       person.endOfTourDate &&
                       moment(person.endOfTourDate).format(
-                        Settings.dateFormats.forms.short
+                        Settings.dateFormats.forms.displayShort.date
                       )
                     }
                   />
@@ -375,12 +375,12 @@ class BasePersonShow extends Page {
                           </td>
                           <td>
                             {moment(pp.startTime).format(
-                              Settings.dateFormats.forms.short
+                              Settings.dateFormats.forms.displayShort.date
                             )}{" "}
                             - &nbsp;
                             {pp.endTime &&
                               moment(pp.endTime).format(
-                                Settings.dateFormats.forms.short
+                                Settings.dateFormats.forms.displayShort.date
                               )}
                           </td>
                         </tr>

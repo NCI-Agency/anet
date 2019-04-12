@@ -2270,4 +2270,11 @@
 		</sql>
 		<!-- Rolling back is not useful -->
 	</changeSet>
+
+	<changeSet id="add-reports-duration-column" author="gjvoosten">
+		<addColumn tableName="reports">
+			<column name="duration" type="int" />
+		</addColumn>
+	</changeSet>
+
 </databaseChangeLog>

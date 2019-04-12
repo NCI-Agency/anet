@@ -29,7 +29,9 @@ const ApprovalStepModalStatus = ({ action }) => {
         {actionType.text} by <LinkTo person={action.person} isLink={false} /> on
         <small>
           {" "}
-          {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}
+          {moment(action.createdAt).format(
+            Settings.dateFormats.forms.displayShort.withTime
+          )}
         </small>
       </span>
     )
@@ -119,7 +121,9 @@ const ActionDetails = ({ action }) => {
         <br />
         <small>
           On{" "}
-          {moment(action.createdAt).format(Settings.dateFormats.forms.withTime)}
+          {moment(action.createdAt).format(
+            Settings.dateFormats.forms.displayShort.withTime
+          )}
         </small>
       </div>
     )

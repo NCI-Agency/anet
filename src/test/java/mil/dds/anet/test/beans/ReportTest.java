@@ -32,6 +32,7 @@ public class ReportTest extends BeanTester<Report> {
     r.setAtmosphere(Atmosphere.POSITIVE);
     r.setAtmosphereDetails("This was a great meeting!!!");
     r.setEngagementDate(Instant.ofEpochMilli(1453753380000L));
+    r.setDuration(90);
 
     r.setAuthor(PersonTest.getJackJacksonStub());
 

@@ -40,6 +40,7 @@ public class Report extends AbstractAnetBean {
 
   Instant engagementDate;
   private Integer engagementDayOfWeek;
+  private Integer duration;
   private ForeignObjectHolder<Location> location = new ForeignObjectHolder<>();
   String intent;
   String exsum; // can be null to autogenerate
@@ -142,6 +143,15 @@ public class Report extends AbstractAnetBean {
 
   public void setEngagementDayOfWeek(Integer engagementDayOfWeek) {
     this.engagementDayOfWeek = engagementDayOfWeek;
+  }
+
+  @GraphQLQuery(name = "duration")
+  public Integer getDuration() {
+    return duration;
+  }
+
+  public void setDuration(Integer duration) {
+    this.duration = duration;
   }
 
   @GraphQLQuery(name = "location")
@@ -629,6 +639,7 @@ public class Report extends AbstractAnetBean {
         && Objects.equals(r.getCreatedAt(), createdAt)
         && Objects.equals(r.getUpdatedAt(), updatedAt)
         && Objects.equals(r.getEngagementDate(), engagementDate)
+        && Objects.equals(r.getDuration(), duration)
         && Objects.equals(r.getLocationUuid(), getLocationUuid())
         && Objects.equals(r.getIntent(), intent) && Objects.equals(r.getExsum(), exsum)
         && Objects.equals(r.getAtmosphere(), atmosphere)
@@ -646,7 +657,7 @@ public class Report extends AbstractAnetBean {
   public int hashCode() {
     return Objects.hash(uuid, state, approvalStep, createdAt, updatedAt, location, intent, exsum,
         attendees, tasks, reportText, nextSteps, author, comments, atmosphere, atmosphereDetails,
-        engagementDate, tags, reportSensitiveInformation, authorizationGroups);
+        engagementDate, duration, tags, reportSensitiveInformation, authorizationGroups);
   }
 
   public static Report createWithUuid(String uuid) {

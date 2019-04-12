@@ -177,7 +177,7 @@ class BaseTaskShow extends Page {
                       humanValue={
                         task.plannedCompletion &&
                         moment(task.plannedCompletion).format(
-                          Settings.dateFormats.forms.short
+                          Settings.dateFormats.forms.displayShort.date
                         )
                       }
                     />
@@ -191,7 +191,7 @@ class BaseTaskShow extends Page {
                       humanValue={
                         task.projectedCompletion &&
                         moment(task.projectedCompletion).format(
-                          Settings.dateFormats.forms.short
+                          Settings.dateFormats.forms.displayShort.date
                         )
                       }
                     />

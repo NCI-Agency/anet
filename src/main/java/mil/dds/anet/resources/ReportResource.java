@@ -80,14 +80,22 @@ public class ReportResource {
 
   private final RollupGraphComparator rollupGraphComparator;
   private final DateTimeFormatter dtf;
+  private final boolean engagementsIncludeTimeAndDuration;
+  private final DateTimeFormatter edtf;
 
   public ReportResource(AnetObjectEngine engine, AnetConfiguration config) {
     this.engine = engine;
     this.dao = engine.getReportDao();
     this.config = config;
     this.dtf = DateTimeFormatter
-        .ofPattern((String) this.config.getDictionaryEntry("dateFormats.email.short"))
+        .ofPattern((String) this.config.getDictionaryEntry("dateFormats.email.date"))
         .withZone(DaoUtils.getDefaultZoneId());
+    engagementsIncludeTimeAndDuration = Boolean.TRUE
+        .equals((Boolean) this.config.getDictionaryEntry("engagementsIncludeTimeAndDuration"));
+    final String edtfPattern = (String) this.config
+        .getDictionaryEntry(engagementsIncludeTimeAndDuration ? "dateFormats.email.withTime"
+            : "dateFormats.email.date");
+    this.edtf = DateTimeFormatter.ofPattern(edtfPattern).withZone(DaoUtils.getDefaultZoneId());
     @SuppressWarnings("unchecked")
     List<String> pinnedOrgNames = (List<String>) this.config.getDictionaryEntry("pinned_ORGs");
     this.rollupGraphComparator = new RollupGraphComparator(pinnedOrgNames);
@@ -926,6 +934,8 @@ public class ReportResource {
         engine.getAdminSetting(AdminSettingKeys.SECURITY_BANNER_COLOR));
     context.put(DailyRollupEmail.SHOW_REPORT_TEXT_FLAG, showReportText);
     context.put("dateFormatter", dtf);
+    context.put("engagementsIncludeTimeAndDuration", engagementsIncludeTimeAndDuration);
+    context.put("engagementDateFormatter", edtf);
     context.put("fields", fields);
 
     try {

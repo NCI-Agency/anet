@@ -287,7 +287,12 @@ class BaseReportForm extends Component {
                       setFieldValue("engagementDate", value)
                     }
                     onBlur={() => setFieldTouched("engagementDate", true)}
-                    widget={<CustomDateInput id="engagementDate" />}
+                    widget={
+                      <CustomDateInput
+                        id="engagementDate"
+                        withTime={Settings.engagementsIncludeTimeAndDuration}
+                      />
+                    }
                   >
                     {values.engagementDate &&
                       moment()
@@ -300,6 +305,14 @@ class BaseReportForm extends Component {
                       </HelpBlock>
                     )}
                   </Field>
+
+                  {Settings.engagementsIncludeTimeAndDuration && (
+                    <Field
+                      name="duration"
+                      label="Duration (minutes)"
+                      component={FieldHelper.renderInputField}
+                    />
+                  )}
 
                   <Field
                     name="location"
@@ -618,7 +631,7 @@ class BaseReportForm extends Component {
                       <div>
                         Last autosaved at{" "}
                         {this.state.autoSavedAt.format(
-                          Settings.dateFormats.forms.withTime
+                          Settings.dateFormats.forms.displayShort.withTime
                         )}
                       </div>
                     )}

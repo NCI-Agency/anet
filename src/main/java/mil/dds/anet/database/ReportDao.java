@@ -54,9 +54,9 @@ import ru.vyarus.guicey.jdbi3.tx.InTransaction;
 public class ReportDao extends AnetBaseDao<Report> {
 
   private static final String[] fields = {"uuid", "state", "createdAt", "updatedAt",
-      "engagementDate", "locationUuid", "approvalStepUuid", "intent", "exsum", "atmosphere",
-      "cancelledReason", "advisorOrganizationUuid", "principalOrganizationUuid", "releasedAt",
-      "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "authorUuid"};
+      "engagementDate", "duration", "locationUuid", "approvalStepUuid", "intent", "exsum",
+      "atmosphere", "cancelledReason", "advisorOrganizationUuid", "principalOrganizationUuid",
+      "releasedAt", "atmosphereDetails", "text", "keyOutcomes", "nextSteps", "authorUuid"};
   private static final String tableName = "reports";
   public static final String REPORT_FIELDS = DaoUtils.buildFieldAliases(tableName, fields, true);
 
@@ -113,7 +113,7 @@ public class ReportDao extends AnetBaseDao<Report> {
     StringBuilder sql = new StringBuilder("/* insertReport */ INSERT INTO reports "
         + "(uuid, state, \"createdAt\", \"updatedAt\", \"locationUuid\", intent, exsum, "
         + "text, \"keyOutcomes\", \"nextSteps\", \"authorUuid\", "
-        + "\"engagementDate\", \"releasedAt\", atmosphere, \"cancelledReason\", "
+        + "\"engagementDate\", \"releasedAt\", duration, atmosphere, \"cancelledReason\", "
         + "\"atmosphereDetails\", \"advisorOrganizationUuid\", "
         + "\"principalOrganizationUuid\") VALUES "
         + "(:uuid, :state, :createdAt, :updatedAt, :locationUuid, :intent, "
@@ -124,7 +124,7 @@ public class ReportDao extends AnetBaseDao<Report> {
       sql.append(":engagementDate, :releasedAt, ");
     }
     sql.append(
-        ":atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
+        ":duration, :atmosphere, :cancelledReason, :atmosphereDetails, :advisorOrgUuid, :principalOrgUuid)");
 
     getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("createdAt", DaoUtils.asLocalDateTime(r.getCreatedAt()))
@@ -247,10 +247,11 @@ public class ReportDao extends AnetBaseDao<Report> {
     } else {
       sql.append("\"engagementDate\" = :engagementDate, \"releasedAt\" = :releasedAt, ");
     }
-    sql.append("atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
-        + "\"cancelledReason\" = :cancelledReason, "
-        + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
-        + "WHERE uuid = :uuid");
+    sql.append(
+        "duration = :duration, atmosphere = :atmosphere, \"atmosphereDetails\" = :atmosphereDetails, "
+            + "\"cancelledReason\" = :cancelledReason, "
+            + "\"principalOrganizationUuid\" = :principalOrgUuid, \"advisorOrganizationUuid\" = :advisorOrgUuid "
+            + "WHERE uuid = :uuid");
 
     return getDbHandle().createUpdate(sql.toString()).bindBean(r)
         .bind("updatedAt", DaoUtils.asLocalDateTime(r.getUpdatedAt()))

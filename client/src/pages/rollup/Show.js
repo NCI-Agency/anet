@@ -66,12 +66,14 @@ class BaseRollupShow extends Page {
   get dateStr() {
     if (this.state.startDate.isSame(this.state.endDate, "day")) {
       return `for ${this.state.startDate.format(
-        Settings.dateFormats.forms.short
+        Settings.dateFormats.forms.displayShort.date
       )}`
     } else {
       return `from ${this.state.startDate.format(
-        Settings.dateFormats.forms.short
-      )} to ${this.state.endDate.format(Settings.dateFormats.forms.short)}`
+        Settings.dateFormats.forms.displayShort.date
+      )} to ${this.state.endDate.format(
+        Settings.dateFormats.forms.displayShort.date
+      )}`
     }
   }
   get rollupStart() {
@@ -454,7 +456,7 @@ class BaseRollupShow extends Page {
       flex: "1 1 auto",
       height: "100%"
     }
-    const inputFormat = Settings.dateFormats.forms.input[0]
+    const inputFormat = Settings.dateFormats.forms.input.date[0]
     const style = { width: "7em", fontSize: "1em" }
 
     return (
@@ -487,7 +489,11 @@ class BaseRollupShow extends Page {
                   onChange={this.changeRollupDate}
                   formatDate={date => moment(date).format(inputFormat)}
                   parseDate={str =>
-                    moment(str, Settings.dateFormats.forms.input, true).toDate()
+                    moment(
+                      str,
+                      Settings.dateFormats.forms.input.date,
+                      true
+                    ).toDate()
                   }
                   placeholder={inputFormat}
                   maxDate={moment().toDate()}
