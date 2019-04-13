@@ -352,7 +352,7 @@ public class Utils {
    * @return Whether the email is whitelisted
    */
   public static boolean isEmailWhitelisted(String email, List<String> whitelistDomainNames) {
-    if (isEmptyOrNull(email)) {
+    if (isEmptyOrNull(email) || isEmptyOrNull(whitelistDomainNames)) {
       return false;
     }
 
@@ -365,9 +365,9 @@ public class Utils {
         .filter(domain -> String.valueOf(domain.charAt(0)).equals(WILDCARD))
         .collect((Collectors.toList()));
 
-    final Boolean isWhitelistedEmail =
+    final boolean isWhitelistedEmail =
         from.length() > 0 && whitelistDomainNames.indexOf(domainName) >= 0;
-    final Boolean isValidWildcardDomain =
+    final boolean isValidWildcardDomain =
         wildcardDomainNames.stream().anyMatch(wildcardDomain -> domainName.charAt(0) != '.'
             && domainName.endsWith(wildcardDomain.substring(1)));
 

@@ -38,7 +38,7 @@ definitions:
           description: Used in the UI where a placeholder for the field is shown (example input).
           additionalProperties:
             type: string
-          examples: 
+          examples:
             - black: Black
               white: White
       required: [enum]
@@ -48,7 +48,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery, automaticallyInactivateUsers]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -157,7 +157,7 @@ properties:
           longName:
             type: string
             examples: [Tasks description]
-          projectedCompletion: 
+          projectedCompletion:
             "$ref": "#/definitions/inputField"
           plannedCompletion:
             "$ref": "#/definitions/inputField"
@@ -291,7 +291,7 @@ properties:
       advisor:
         type: object
         additionalProperties: false
-        required: [person, position, org]        
+        required: [person, position, org]
         properties:
 
           person:
@@ -530,7 +530,7 @@ properties:
           additionalProperties: false
           required: [name, type]
           properties:
-            name: 
+            name:
               type: string
             default:
               type: boolean
@@ -543,20 +543,24 @@ properties:
               additionalProperties: true
 
   automaticallyInactivateUsers:
+    type: object
+    required: [emailRemindersDaysPrior]
+    additionalProperties: false
     title: Auto account deactivation and email warnings.
     description: Automatically deactivate accounts which reach the end of tour date, and warn users in intervals prior to inactivation.
-    emailRemindersDaysPrior: 
-      type: array
-      items:
-        type: integer
-        title: The list of days prior to account inactivation. An email will be sent to the user with a warning.
-        description: Days to send a warning prior to account inactivation.
-        examples: [15, 30, 45]
-    ignoredDomainNames:
-      type: array
-      items:
-        type: string
-        title: The list of ignored (email) domain names. These will not be affected by auto-inactivation or be sent email warnings.
-        description: Valid email domain names for this ANET instance; may contain wildcards.
-        examples: ["*.nato.int", dds.mil]
-
+    properties:
+      emailRemindersDaysPrior:
+        type: array
+        minItems: 1
+        items:
+          type: integer
+          title: The list of days prior to account inactivation. An email will be sent to the user with a warning.
+          description: Days to send a warning prior to account inactivation.
+          examples: [15, 30, 45]
+      ignoredDomainNames:
+        type: array
+        items:
+          type: string
+          title: The list of ignored (email) domain names. These will not be affected by auto-inactivation or be sent email warnings.
+          description: Valid email domain names for this ANET instance; may contain wildcards.
+          examples: ["*.nato.int", dds.mil]
