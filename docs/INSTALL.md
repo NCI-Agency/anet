@@ -185,6 +185,8 @@ dictionary:
   reportWorkflow:
     nbOfHoursQuarantineApproved: 24
 
+  maxTextFieldLength: 250
+
   fields:
 
     task:
