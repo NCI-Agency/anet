@@ -59,7 +59,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -134,6 +134,13 @@ properties:
         description: Used in the UI of an approved report to show how many hours are left till publication.
         examples: [24]
 
+  maxTextFieldLength:
+    type: integer
+    minimum: 0
+    title: The maximum number of characters allowed in selected text fields
+    description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
+    examples: [250]
+
   fields:
     type: object
     additionalProperties: false
@@ -158,14 +165,8 @@ properties:
             description: Used in the UI where a long label for tasks is shown.
             examples: [Tasks and Milestones]
           longName:
-<<<<<<< HEAD
             "$ref": "#/definitions/inputField"
           projectedCompletion: 
-=======
-            type: string
-            examples: [Tasks description]
-          projectedCompletion:
->>>>>>> 264d62348720d203fb8ebc8df9118a5888e76afc
             "$ref": "#/definitions/inputField"
           plannedCompletion:
             "$ref": "#/definitions/inputField"
