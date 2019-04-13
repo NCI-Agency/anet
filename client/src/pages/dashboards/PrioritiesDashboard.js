@@ -15,7 +15,7 @@ class PrioritiesDashboard extends Page {
 
   constructor(props) {
     super(props)
-    this.state = { tasks: [], ...Settings.dashboards[this.props.match.params.dashboard] }
+    this.state = { tasks: [] }
   }
 
   fetchData(props) {
@@ -40,7 +40,7 @@ class PrioritiesDashboard extends Page {
   }
 
   render() {
-    return <Kanban {...this.state} />
+    return <Kanban {...{ ...Settings.dashboards[this.props.match.params.dashboard], ...this.state }} />
   }
 }
 
