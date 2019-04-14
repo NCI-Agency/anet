@@ -6,6 +6,17 @@
 #########################################################
 definitions:
 
+# base definition for a value with a description
+  describedValue:
+    type: object
+    additionalProperties: true
+    required: [value,description]
+    properties:
+      value:
+        type: string
+      description:
+        type: string
+
 # base definition for all Fields. Every field is assumed to have a label
   labeledField:
     type: object
@@ -251,10 +262,7 @@ properties:
             uniqueItems: true
             minItems: 1
             items:
-              type: string
-              title: The list of possible ranks
-              description: Used in the UI where a rank can be selected for a person.
-              examples: [CIV, CTR, OF-1, OF-2, OF-3]
+              "$ref": "#/definitions/describedValue"
           gender:
             type: string
             title: The label for a person's gender
