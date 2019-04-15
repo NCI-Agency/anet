@@ -390,14 +390,19 @@ class BaseReportForm extends Component {
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
                     placeholder="What is the engagement supposed to achieve?"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("intentCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "intentCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="intentCharsLeft">
-                          {250 - this.props.initialValues.intent.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.intent.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>
@@ -612,14 +617,19 @@ class BaseReportForm extends Component {
                       label={Settings.fields.report.keyOutcomes}
                       component={FieldHelper.renderInputField}
                       componentClass="textarea"
-                      maxLength={250}
+                      maxLength={Settings.maxTextFieldLength}
                       onKeyUp={event =>
-                        this.countCharsLeft("keyOutcomesCharsLeft", 250, event)
+                        this.countCharsLeft(
+                          "keyOutcomesCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )
                       }
                       extraColElem={
                         <React.Fragment>
                           <span id="keyOutcomesCharsLeft">
-                            {250 - this.props.initialValues.keyOutcomes.length}
+                            {Settings.maxTextFieldLength -
+                              this.props.initialValues.keyOutcomes.length}
                           </span>{" "}
                           characters remaining
                         </React.Fragment>
@@ -632,14 +642,19 @@ class BaseReportForm extends Component {
                     label={Settings.fields.report.nextSteps}
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("nextStepsCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "nextStepsCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="nextStepsCharsLeft">
-                          {250 - this.props.initialValues.nextSteps.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>

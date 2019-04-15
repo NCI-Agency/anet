@@ -48,7 +48,7 @@ definitions:
 #########################################################
 type: object
 additionalProperties: false
-required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
+required: [SUPPORT_EMAIL_ADDR, dateFormats, reportWorkflow, maxTextFieldLength, fields, pinned_ORGs, non_reporting_ORGs, domainNames, imagery]
 properties:
   SUPPORT_EMAIL_ADDR:
     type: string
@@ -122,6 +122,13 @@ properties:
         title: The number of hours between the approval of the report and the automatic publication
         description: Used in the UI of an approved report to show how many hours are left till publication.
         examples: [24]
+
+  maxTextFieldLength:
+    type: integer
+    minimum: 0
+    title: The maximum number of characters allowed in selected text fields
+    description: Used in the UI for report intent, report key outcomes, report next steps, authorization group description
+    examples: [250]
 
   fields:
     type: object
