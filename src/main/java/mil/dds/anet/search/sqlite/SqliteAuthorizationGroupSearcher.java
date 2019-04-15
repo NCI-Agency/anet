@@ -50,12 +50,10 @@ public class SqliteAuthorizationGroupSearcher extends AbstractSearcherBase
     final AnetBeanList<AuthorizationGroup> result = new AnetBeanList<AuthorizationGroup>(
         query.getPageNum(), query.getPageSize(), new ArrayList<AuthorizationGroup>());
 
-    if (whereClauses.isEmpty()) {
-      return result;
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
     }
-
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();

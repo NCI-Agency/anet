@@ -18,6 +18,7 @@ import UltimatePagination from "components/UltimatePagination"
 import FileSaver from "file-saver"
 import { Field, Form, Formik } from "formik"
 import GQL from "graphqlapi"
+import _isEmpty from "lodash/isEmpty"
 import { Organization, Person, Task } from "models"
 import pluralize from "pluralize"
 import PropTypes from "prop-types"
@@ -101,19 +102,20 @@ class Search extends Page {
       toastId: this.successToastId
     })
   }
+  noResults = {
+    reports: null,
+    people: null,
+    organizations: null,
+    positions: null,
+    locations: null,
+    tasks: null
+  }
   state = {
     success: null,
     error: null,
     didSearch: false,
     query: this.props.searchQuery.text || null,
-    results: {
-      reports: null,
-      people: null,
-      organizations: null,
-      positions: null,
-      locations: null,
-      tasks: null
-    },
+    results: this.noResults,
     showSaveSearch: false
   }
 
@@ -163,12 +165,20 @@ class Search extends Page {
       ? { [searchQuery.objectType]: {} }
       : SEARCH_CONFIG
     const query = this.getSearchQuery(props)
-    const parts = Object.keys(queryTypes).map(type => {
-      const paginatedPart = this.getPaginated(type)
-      const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
-      return this.getSearchPart(type, query, goToPageNum, pageSize)
-    })
-    return callback(parts)
+    if (!_isEmpty(query)) {
+      const parts = Object.keys(queryTypes).map(type => {
+        const paginatedPart = this.getPaginated(type)
+        const goToPageNum = this.getPaginatedNum(paginatedPart, pageNum)
+        return this.getSearchPart(type, query, goToPageNum, pageSize)
+      })
+      return callback(parts)
+    } else {
+      this.setState({
+        didSearch: false,
+        results: this.noResults,
+        error: { message: "You did not enter any search criteria." }
+      })
+    }
   }
 
   @autobind
@@ -278,13 +288,15 @@ class Search extends Page {
               />
             </Button>
           )}
-          <Button
-            onClick={this.openSaveModal}
-            id="saveSearchButton"
-            style={{ marginRight: 12 }}
-          >
-            Save search
-          </Button>
+          {this.state.didSearch && (
+            <Button
+              onClick={this.openSaveModal}
+              id="saveSearchButton"
+              style={{ marginRight: 12 }}
+            >
+              Save search
+            </Button>
+          )}
         </div>
         <Messages error={error} /> {/* success is shown through toast */}
         {this.state.query && (

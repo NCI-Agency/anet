@@ -19,6 +19,7 @@ import Page, {
 import PendingApprovalReports from "components/PendingApprovalReports"
 import ReportsByDayOfWeek from "components/ReportsByDayOfWeek"
 import ReportsByTask from "components/ReportsByTask"
+import _isEmpty from "lodash/isEmpty"
 import { Report } from "models"
 import moment from "moment"
 import PropTypes from "prop-types"
@@ -238,16 +239,22 @@ class BaseInsightsShow extends Page {
     return (
       <div style={flexStyle}>
         <Messages error={this.state.error} success={this.state.success} />
-        <Fieldset
-          id={this.props.match.params.insight}
-          title={insightConfig.title}
-          style={flexStyle}
-        >
-          <InsightComponent
-            style={mosaicLayoutStyle}
-            queryParams={queryParams}
+        {!_isEmpty(queryParams) ? (
+          <Fieldset
+            id={this.props.match.params.insight}
+            title={insightConfig.title}
+            style={flexStyle}
+          >
+            <InsightComponent
+              style={mosaicLayoutStyle}
+              queryParams={queryParams}
+            />
+          </Fieldset>
+        ) : (
+          <Messages
+            error={{ message: "You did not enter any search criteria." }}
           />
-        </Fieldset>
+        )}
       </div>
     )
   }
