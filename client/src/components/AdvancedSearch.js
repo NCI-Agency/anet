@@ -1,4 +1,4 @@
-import { resetPagination, setSearchQuery } from "actions"
+import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import searchFilters, {
@@ -144,7 +144,7 @@ class AdvancedSearch extends Component {
                   type =>
                     this.props.searchObjectTypes.indexOf(type) !== -1 && (
                       <Button key={type} value={type}>
-                        {type}
+                        {SEARCH_OBJECT_LABELS[type]}
                       </Button>
                     )
                 )}
