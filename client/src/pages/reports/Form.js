@@ -9,7 +9,6 @@ import Messages from "components/Messages"
 import MultiSelector from "components/MultiSelector"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import "components/reactToastify.css"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
@@ -22,8 +21,7 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
-import { toast, ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -223,7 +221,6 @@ class BaseReportForm extends Component {
           return (
             <div className="report-form">
               <NavigationWarning isBlocking={dirty} />
-              <ToastContainer />
               <Messages error={this.state.error} />
 
               {showAssignedPositionWarning && (
