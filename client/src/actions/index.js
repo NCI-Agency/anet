@@ -15,13 +15,23 @@ export const PAGE_PROPS_MIN_HEAD = {
   minimalHeader: true
 }
 
+// Map the object types enum as it comes from the server one-to-one to the types we use client-side
 export const SEARCH_OBJECT_TYPES = {
-  REPORTS: "Reports",
-  PEOPLE: "People",
-  ORGANIZATIONS: "Organizations",
-  POSITIONS: "Positions",
-  LOCATIONS: "Locations",
-  TASKS: pluralize(Settings.fields.task.shortLabel)
+  REPORTS: "REPORTS",
+  PEOPLE: "PEOPLE",
+  ORGANIZATIONS: "ORGANIZATIONS",
+  POSITIONS: "POSITIONS",
+  LOCATIONS: "LOCATIONS",
+  TASKS: "TASKS"
+}
+
+export const SEARCH_OBJECT_LABELS = {
+  [SEARCH_OBJECT_TYPES.REPORTS]: "Reports",
+  [SEARCH_OBJECT_TYPES.PEOPLE]: "People",
+  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: "Organizations",
+  [SEARCH_OBJECT_TYPES.POSITIONS]: "Positions",
+  [SEARCH_OBJECT_TYPES.LOCATIONS]: "Locations",
+  [SEARCH_OBJECT_TYPES.TASKS]: pluralize(Settings.fields.task.shortLabel)
 }
 
 export const DEFAULT_SEARCH_PROPS = {
