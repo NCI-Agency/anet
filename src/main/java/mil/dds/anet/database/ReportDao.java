@@ -590,8 +590,7 @@ public class ReportDao extends AnetBaseDao<Report> {
    * 
    * @param orgType the type of organization to be looking for
    * @param orgs the list of orgs for whose reports to find, null means all
-   * @param missingOrgReports true if we want to look for reports specifically with NULL org
-   *        uuid's
+   * @param missingOrgReports true if we want to look for reports specifically with NULL org uuid's
    */
   private List<Map<String, Object>> rollupQuery(Instant start, Instant end,
       OrganizationType orgType, List<Organization> orgs, boolean missingOrgReports) {

@@ -839,12 +839,12 @@ public class ReportResource {
    * 
    * @param start Start timestamp for the rollup period
    * @param end end timestamp for the rollup period
-   * @param orgType If both advisorOrgUuid and principalOrgUuid are NULL then the type of organization (ADVISOR_ORG or PRINCIPAL_ORG)
-   *        that the chart should filter on
-   * @param advisorOrgUuid if set then the parent advisor org to create the graph off of. All reports
-   *        will be by/about this org or a child org.
-   * @param principalOrgUuid if set then the parent principal org to create the graph off of. All reports
-   *        will be by/about this org or a child org.
+   * @param orgType If both advisorOrgUuid and principalOrgUuid are NULL then the type of
+   *        organization (ADVISOR_ORG or PRINCIPAL_ORG) that the chart should filter on
+   * @param advisorOrgUuid if set then the parent advisor org to create the graph off of. All
+   *        reports will be by/about this org or a child org.
+   * @param principalOrgUuid if set then the parent principal org to create the graph off of. All
+   *        reports will be by/about this org or a child org.
    */
   @GraphQLQuery(name = "rollupGraph")
   public List<RollupGraph> getDailyRollupGraph(@GraphQLArgument(name = "startDate") Long start,
