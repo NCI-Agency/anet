@@ -1,10 +1,11 @@
-import { resetPagination, setSearchQuery } from "actions"
+import { resetPagination, SEARCH_OBJECT_LABELS, setSearchQuery } from "actions"
 import autobind from "autobind-decorator"
 import ButtonToggleGroup from "components/ButtonToggleGroup"
 import searchFilters, {
   POSTITION_ORGANIZATION_FILTER_KEY,
   POSTITION_POSITION_TYPE_FILTER_KEY
 } from "components/SearchFilters"
+import { Form, Formik } from "formik"
 import _cloneDeep from "lodash/cloneDeep"
 import _isEqual from "lodash/isEqual"
 import _isEqualWith from "lodash/isEqualWith"
@@ -25,7 +26,6 @@ import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
 import REMOVE_ICON from "resources/delete.png"
 import utils from "utils"
-import { Form, Formik } from "formik"
 
 function updateOrganizationFilterState(organizationFilter, positionType) {
   if (organizationFilter) {
@@ -146,7 +146,7 @@ class AdvancedSearch extends Component {
                       type =>
                         this.props.searchObjectTypes.indexOf(type) !== -1 && (
                           <Button key={type} value={type}>
-                            {type}
+                            {SEARCH_OBJECT_LABELS[type]}
                           </Button>
                         )
                     )}

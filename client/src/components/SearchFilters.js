@@ -1,3 +1,4 @@
+import { SEARCH_OBJECT_TYPES } from "actions"
 import { Settings } from "api"
 import AdvancedSelectFilter from "components/advancedSearch/AdvancedSelectFilter"
 import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
@@ -15,7 +16,6 @@ import {
   TaskSimpleOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { Location, Organization, Person, Position, Tag, Task } from "models"
-import pluralize from "pluralize"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
@@ -179,7 +179,7 @@ export default {
       }
     }
 
-    filters.Reports = {
+    filters[SEARCH_OBJECT_TYPES.REPORTS] = {
       filters: {
         Author: {
           component: AdvancedSelectFilter,
@@ -293,7 +293,7 @@ export default {
     }
 
     const taskShortLabel = Settings.fields.task.shortLabel
-    filters.Reports.filters[taskShortLabel] = {
+    filters[SEARCH_OBJECT_TYPES.REPORTS].filters[taskShortLabel] = {
       component: AdvancedSelectFilter,
       props: Object.assign({}, advancedSelectFilterTaskProps, {
         filterDefs: taskWidgetFilters,
@@ -304,8 +304,7 @@ export default {
 
     const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
     const ranks = Settings.fields.person.ranks || []
-
-    filters.People = {
+    filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
       filters: {
         Organization: {
           component: OrganizationFilter,
@@ -363,7 +362,7 @@ export default {
       }
     }
 
-    filters.Organizations = {
+    filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
       filters: {
         Status: {
           component: SelectSearchFilter,
@@ -389,7 +388,7 @@ export default {
       }
     }
 
-    filters.Positions = {
+    filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
       filters: {
         [POSTITION_POSITION_TYPE_FILTER_KEY]: {
           component: PositionTypeSearchFilter,
@@ -437,7 +436,7 @@ export default {
       }
     }
 
-    filters.Locations = {
+    filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
       filters: {
         Status: {
           component: SelectSearchFilter,
@@ -450,7 +449,7 @@ export default {
     }
 
     // Task filters
-    filters[pluralize(taskShortLabel)] = {
+    filters[SEARCH_OBJECT_TYPES.TASKS] = {
       filters: taskFilters()
     }
 
@@ -459,7 +458,10 @@ export default {
   // filters not being displayed in the advanced search but being used in the search
   extraFilters: function(positionTypeFilterRef, organizationFilterRef) {
     const filters = {}
-    filters.Reports = ["includeEngagementDayOfWeek", "sortOrder"]
+    filters[SEARCH_OBJECT_TYPES.REPORTS] = [
+      "includeEngagementDayOfWeek",
+      "sortOrder"
+    ]
     return filters
   }
 }

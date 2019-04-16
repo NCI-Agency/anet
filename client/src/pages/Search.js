@@ -1,3 +1,4 @@
+import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import API, { Settings } from "api"
 import autobind from "autobind-decorator"
 import * as FieldHelper from "components/FieldHelper"
@@ -38,14 +39,14 @@ import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
 
 const SEARCH_CONFIG = {
-  reports: {
+  [SEARCH_OBJECT_TYPES.REPORTS]: {
     listName: "reports: reportList",
     sortBy: "ENGAGEMENT_DATE",
     sortOrder: "DESC",
     variableType: "ReportSearchQueryInput",
     fields: ReportCollection.GQL_REPORT_FIELDS
   },
-  people: {
+  [SEARCH_OBJECT_TYPES.PEOPLE]: {
     listName: "people: personList",
     sortBy: "NAME",
     sortOrder: "ASC",
@@ -53,7 +54,7 @@ const SEARCH_CONFIG = {
     fields:
       "uuid, name, rank, role, emailAddress, position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
   },
-  positions: {
+  [SEARCH_OBJECT_TYPES.POSITIONS]: {
     listName: "positions: positionList",
     sortBy: "NAME",
     sortOrder: "ASC",
@@ -61,21 +62,21 @@ const SEARCH_CONFIG = {
     fields:
       "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role }"
   },
-  tasks: {
+  [SEARCH_OBJECT_TYPES.TASKS]: {
     listName: "tasks: taskList",
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "TaskSearchQueryInput",
     fields: "uuid, shortName, longName"
   },
-  locations: {
+  [SEARCH_OBJECT_TYPES.LOCATIONS]: {
     listName: "locations: locationList",
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "LocationSearchQueryInput",
     fields: "uuid, name, lat, lng"
   },
-  organizations: {
+  [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: {
     listName: "organizations: organizationList",
     sortBy: "NAME",
     sortOrder: "ASC",
@@ -129,8 +130,8 @@ class Search extends Page {
 
   getPaginated = type => {
     const { pagination } = this.props
-    const typeLower = type.toLowerCase()
-    const pageLabel = this.pageLabel(typeLower)
+    const searchType = SEARCH_OBJECT_TYPES[type]
+    const pageLabel = this.pageLabel(type)
     return pagination[pageLabel]
   }
 
@@ -139,11 +140,11 @@ class Search extends Page {
   }
 
   getSearchPart(type, query, pageNum = 0, pageSize = 10) {
-    const typeLower = type.toLowerCase()
+    const searchType = SEARCH_OBJECT_TYPES[type]
     let subQuery = Object.assign({}, query)
     subQuery.pageNum = pageNum
     subQuery.pageSize = pageSize
-    let config = SEARCH_CONFIG[typeLower]
+    let config = SEARCH_CONFIG[searchType]
     if (config.sortBy) {
       subQuery.sortBy = config.sortBy
     }
@@ -151,10 +152,10 @@ class Search extends Page {
       subQuery.sortOrder = config.sortOrder
     }
     let gqlPart = new GQL.Part(/* GraphQL */ `
-      ${config.listName} (query:$${typeLower}Query) {
+      ${config.listName} (query:$${searchType}Query) {
         pageNum, pageSize, totalCount, list { ${config.fields} }
       }
-      `).addVariable(typeLower + "Query", config.variableType, subQuery)
+      `).addVariable(searchType + "Query", config.variableType, subQuery)
     return gqlPart
   }
 
@@ -162,7 +163,7 @@ class Search extends Page {
   _dataFetcher(props, callback, pageNum, pageSize) {
     const { searchQuery } = props
     const queryTypes = searchQuery.objectType
-      ? { [searchQuery.objectType]: {} }
+      ? { [SEARCH_OBJECT_TYPES[searchQuery.objectType]]: {} }
       : SEARCH_CONFIG
     const query = this.getSearchQuery(props)
     if (!_isEmpty(query)) {
@@ -248,27 +249,32 @@ class Search extends Page {
             </AnchorNavItem>
 
             <AnchorNavItem to="people" disabled={!numPeople}>
-              <img src={PEOPLE_ICON} alt="" /> People
+              <img src={PEOPLE_ICON} alt="" />{" "}
+              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.PEOPLE]}
               {numPeople > 0 && <Badge pullRight>{numPeople}</Badge>}
             </AnchorNavItem>
 
             <AnchorNavItem to="positions" disabled={!numPositions}>
-              <img src={POSITIONS_ICON} alt="" /> Positions
+              <img src={POSITIONS_ICON} alt="" />{" "}
+              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.POSITIONS]}
               {numPositions > 0 && <Badge pullRight>{numPositions}</Badge>}
             </AnchorNavItem>
 
             <AnchorNavItem to="tasks" disabled={!numTasks}>
-              <img src={TASKS_ICON} alt="" /> {pluralize(taskShortLabel)}
+              <img src={TASKS_ICON} alt="" />{" "}
+              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.TASKS]}
               {numTasks > 0 && <Badge pullRight>{numTasks}</Badge>}
             </AnchorNavItem>
 
             <AnchorNavItem to="locations" disabled={!numLocations}>
-              <img src={LOCATIONS_ICON} alt="" /> Locations
+              <img src={LOCATIONS_ICON} alt="" />{" "}
+              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.LOCATIONS]}
               {numLocations > 0 && <Badge pullRight>{numLocations}</Badge>}
             </AnchorNavItem>
 
             <AnchorNavItem to="reports" disabled={!numReports}>
-              <img src={REPORTS_ICON} alt="" /> Reports
+              <img src={REPORTS_ICON} alt="" />{" "}
+              {SEARCH_OBJECT_LABELS[SEARCH_OBJECT_TYPES.REPORTS]}
               {numReports > 0 && <Badge pullRight>{numReports}</Badge>}
             </AnchorNavItem>
           </Nav>
@@ -390,13 +396,14 @@ class Search extends Page {
     const { results } = this.state
     const { pagination } = this.props
     const reports = results.reports
-    const paginatedPart = pagination[this.pageLabel("reports")]
+    const paginatedPart =
+      pagination[this.pageLabel(SEARCH_OBJECT_TYPES.REPORTS)]
     const goToPageNum = this.getPaginatedNum(paginatedPart)
     const paginatedReports = Object.assign(reports, { pageNum: goToPageNum })
     return (
       <ReportCollection
         paginatedReports={paginatedReports}
-        goToPage={this.goToPage.bind(this, "reports")}
+        goToPage={this.goToPage.bind(this, SEARCH_OBJECT_TYPES.REPORTS)}
       />
     )
   }
@@ -612,7 +619,8 @@ class Search extends Page {
       query: JSON.stringify(this.getSearchQuery())
     }
     if (this.props.searchQuery.objectType) {
-      savedSearch.objectType = this.props.searchQuery.objectType.toUpperCase()
+      savedSearch.objectType =
+        SEARCH_OBJECT_TYPES[this.props.searchQuery.objectType]
     }
     const operation = "createSavedSearch"
     let graphql = operation + "(savedSearch: $savedSearch) { uuid }"
