@@ -124,22 +124,23 @@ export default class Person extends Model {
       endOfTourDate: yupDate
         .nullable()
         .when(["role", "status", "uuid"], (role, status, uuid, schema) => {
-          Person.isAdvisor({ role })
-            ? schema
-              .nullable()
-              .required(
-                `You must provide the ${Settings.fields.person.endOfTourDate}`
-              )
-            : schema.nullable()
-          Person.isAdvisor({ role }) && Person.isNewFormUser({ status, uuid })
-            ? schema.test(
-              "end-of-tour-date",
-              `The ${
-                Settings.fields.person.endOfTourDate
-              } date must be in the future`,
-              endOfTourDate => endOfTourDate > Date.now()
+          if (Person.isPrincipal({ role })) {
+            return schema
+          } else {
+            schema = schema.required(
+              `You must provide the ${Settings.fields.person.endOfTourDate}`
             )
-            : schema.nullable()
+            if (Person.isNewFormUser({ status, uuid })) {
+              schema = schema.test(
+                "end-of-tour-date",
+                `The ${
+                  Settings.fields.person.endOfTourDate
+                } date must be in the future`,
+                endOfTourDate => endOfTourDate > Date.now()
+              )
+            }
+            return schema
+          }
         })
         .default(null)
         .label(Settings.fields.person.endOfTourDate),
@@ -232,8 +233,12 @@ export default class Person extends Model {
     return Person.isAdvisor(this)
   }
 
+  static isPrincipal(person) {
+    return person.role === Person.ROLE.PRINCIPAL
+  }
+
   isPrincipal() {
-    return this.role === Person.ROLE.PRINCIPAL
+    return Person.isPrincipal(this)
   }
 
   isAdmin() {
