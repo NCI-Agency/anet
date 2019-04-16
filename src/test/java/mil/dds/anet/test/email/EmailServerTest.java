@@ -12,25 +12,25 @@ import org.junit.Test;
  */
 public class EmailServerTest {
 
-    @Test
-    public void runTest() throws Exception {
-        FakeSmtpServer emailServer = new FakeSmtpServer();
+  @Test
+  public void runTest() throws Exception {
+    FakeSmtpServer emailServer = new FakeSmtpServer();
 
-        emailServer.clearEmailServer();
+    emailServer.clearEmailServer();
 
-        emailServer.sendEmail("to@example.com", "from@example.com", null, null, "Test subject",
-                "Hello there!", null);
-        List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
+    emailServer.sendEmail("to@example.com", "from@example.com", null, null, "Test subject",
+        "Hello there!", null);
+    List<EmailResponse> emails = emailServer.requestAllEmailsFromServer();
 
-        assertEquals(1, emails.size());
+    assertEquals(1, emails.size());
 
-        // Test first email
-        EmailResponse email1 = emails.get(0);
-        assertEquals("from@example.com", email1.from.text);
-        assertEquals("to@example.com", email1.to.text);
-        assertNull(email1.cc);
-        assertNull(email1.replyTo);
-        assertEquals("Test subject", email1.subject);
-        assertEquals("Hello there!\n", email1.text); // <--Automatically inserts a new line!
-    }
+    // Test first email
+    EmailResponse email1 = emails.get(0);
+    assertEquals("from@example.com", email1.from.text);
+    assertEquals("to@example.com", email1.to.text);
+    assertNull(email1.cc);
+    assertNull(email1.replyTo);
+    assertEquals("Test subject", email1.subject);
+    assertEquals("Hello there!\n", email1.text); // <--Automatically inserts a new line!
+  }
 }
