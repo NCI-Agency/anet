@@ -1,5 +1,5 @@
-import 'core-js/stable'
-import 'locale-compare-polyfill'
+import "core-js/stable"
+import "locale-compare-polyfill"
 
 // fetch() polyfill for making API calls.
-require('whatwg-fetch')
+require("whatwg-fetch")

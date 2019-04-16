@@ -300,6 +300,7 @@ test("Publish report chain", async t => {
 
   let $$rollupDateRange = await $$(".rollupDateRange .bp3-input")
   await $$rollupDateRange[0].click()
+  await t.context.driver.sleep(shortWaitMs) // wait for datepicker to show
   let $todayButton = await t.context.driver.findElement(
     By.xpath('//a/div[text()="Today"]')
   )

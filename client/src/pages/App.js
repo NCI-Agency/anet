@@ -10,6 +10,9 @@ import Routing from "pages/Routing"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import "../components/reactToastify.css"
 
 class App extends Page {
   static propTypes = {
@@ -105,6 +108,7 @@ class App extends Page {
           location={location}
           sidebarData={organizations}
         >
+          <ToastContainer />
           <Routing />
         </ResponsiveLayout>
       </AppContext.Provider>
