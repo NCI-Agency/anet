@@ -51,10 +51,12 @@ class SearchBar extends Component {
   }
 
   render() {
-    const filterDefs = this.props.query.objectType
-      ? this.ALL_FILTERS[SEARCH_OBJECT_TYPES[this.props.query.objectType]]
+    const filterDefs =
+      this.props.query.objectType &&
+      SEARCH_OBJECT_TYPES[this.props.query.objectType]
+        ? this.ALL_FILTERS[SEARCH_OBJECT_TYPES[this.props.query.objectType]]
           .filters
-      : {}
+        : {}
     const filters = this.props.query.filters.filter(f => filterDefs[f.key])
     const placeholder = this.props.query.objectType
       ? "Filter " + SEARCH_OBJECT_LABELS[this.props.query.objectType]
