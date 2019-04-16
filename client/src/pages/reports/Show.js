@@ -29,6 +29,7 @@ import { Alert, Button, Col, HelpBlock, Modal } from "react-bootstrap"
 import Confirm from "react-confirm-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
+import { toast } from "react-toastify"
 import { deserializeQueryParams } from "searchUtils"
 import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
@@ -864,11 +865,9 @@ class BaseReportShow extends Page {
       filters: filters,
       text: text
     })
+    toast.success(message, { toastId: "success-message" })
     this.props.history.push({
-      pathname: "/search",
-      state: {
-        success: message
-      }
+      pathname: "/search"
     })
   }
 
