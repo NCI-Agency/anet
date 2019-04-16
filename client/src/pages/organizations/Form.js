@@ -184,12 +184,14 @@ class BaseOrganizationForm extends Component {
             allAdvisorPositions: {
               label: "All advisor positions",
               searchQuery: true,
-              queryVars: { type: [
-                Position.TYPE.ADVISOR,
-                Position.TYPE.SUPER_USER,
-                Position.TYPE.ADMINISTRATOR
-              ],
-              matchPersonName: true }
+              queryVars: {
+                type: [
+                  Position.TYPE.ADVISOR,
+                  Position.TYPE.SUPER_USER,
+                  Position.TYPE.ADMINISTRATOR
+                ],
+                matchPersonName: true
+              }
             }
           }
           if (this.props.currentUser.position) {
