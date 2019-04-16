@@ -26,6 +26,8 @@ run.environment("ANET_DB_PORT", "1433")
 run.environment("ANET_DB_EXPOSED_PORT", isTestEnv ? "1434" : "1433")
 run.environment("ANET_PORT", isTestEnv ? "8180" : "8080")
 run.environment("ANET_ADMIN_PORT", isTestEnv ? "8181" : "8081")
+run.environment("ANET_SMTP_PORT", isTestEnv ? "1025" : "25")
+run.environment("ANET_SMTP_DISABLE", isTestEnv ? "false" : "true")
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
@@ -310,6 +312,22 @@ task dockerWaitForDB(type: com.bmuschko.gradle.docker.tasks.container.DockerExec
 	description = "Waiting until the " + dbContainerName + " DB has started."
 	targetContainerId { dbContainerName }
 	commands = [ ["/opt/waitTillServiceStarted.sh"] ]
+}
+
+task startFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "database container"
+	description = "Starts the fake SMTP email server."
+	targetContainerId { dbContainerName }
+	commands = [ ["fake-smtp-server", "--headers", 
+			"--smtp-ip", "0.0.0.0", "--smtp-port", "1025", 
+			"--http-ip", "0.0.0.0", "--http-port", "1080"] ]
+}
+
+task stopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
+	group = "database container"
+	description = "Stops the fake SMTP email server."
+	targetContainerId { dbContainerName }
+	commands = [ ["pkill", "-f", "fake-smtp-server"] ]
 }
 
 classes.dependsOn buildClient

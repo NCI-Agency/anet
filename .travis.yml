@@ -37,6 +37,7 @@ install: true
 
 script:
   - ./gradlew -PtestEnv dockerCreateDB dockerStartDB dockerWaitForDB dbMigrate dbLoad
+  - ./gradlew -PtestEnv startFakeSmtpServer &
   - ./gradlew -PtestEnv jar check test jacocoTestReport
   - |
     ./gradlew -PtestEnv run &
