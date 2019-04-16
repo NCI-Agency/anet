@@ -120,7 +120,7 @@ export default class Person extends Model {
         .label(Settings.fields.person.phoneNumber),
       endOfTourDate: yupDate
         .nullable()
-        .when("role", (role, schema) =>
+        .when(["role", "status", "uuid"], (role, status, uuid, schema) => {
           Person.isAdvisor({ role })
             ? schema
               .nullable()
@@ -128,8 +128,6 @@ export default class Person extends Model {
                 `You must provide the ${Settings.fields.person.endOfTourDate}`
               )
             : schema.nullable()
-        )
-        .when(["role", "status", "uuid"], (role, status, uuid, schema) =>
           Person.isAdvisor({ role }) && Person.isNewFormUser({ status, uuid })
             ? schema.test(
               "end-of-tour-date",
@@ -139,7 +137,7 @@ export default class Person extends Model {
               endOfTourDate => endOfTourDate > Date.now()
             )
             : schema.nullable()
-        )
+        })
         .default(null)
         .label(Settings.fields.person.endOfTourDate),
       biography: yup
