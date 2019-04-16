@@ -132,12 +132,12 @@ export default class Person extends Model {
         .when(["role", "status", "uuid"], (role, status, uuid, schema) =>
           Person.isAdvisor({ role }) && Person.isNewFormUser({ status, uuid })
             ? schema.test(
-                "end-of-tour-date",
-                `The ${
-                  Settings.fields.person.endOfTourDate
-                } date must be in the future`,
-                endOfTourDate => endOfTourDate > Date.now()
-              )
+              "end-of-tour-date",
+              `The ${
+                Settings.fields.person.endOfTourDate
+              } date must be in the future`,
+              endOfTourDate => endOfTourDate > Date.now()
+            )
             : schema.nullable()
         )
         .default(null)
