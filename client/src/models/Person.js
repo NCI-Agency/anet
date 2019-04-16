@@ -135,7 +135,7 @@ export default class Person extends Model {
                 "end-of-tour-date",
                 `The ${
                   Settings.fields.person.endOfTourDate
-                } date must be set in the future`,
+                } date must be in the future`,
                 endOfTourDate => endOfTourDate > Date.now()
               )
             : schema.nullable()

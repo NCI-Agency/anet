@@ -128,7 +128,7 @@ describe("Create new Person form page", () => {
       errorMessage.waitForExist()
       errorMessage.waitForDisplayed()
       expect(errorMessage.getText()).to.equal(
-        "The End of tour date must be set in the future"
+        "The End of tour date must be in the future"
       )
     })
 
