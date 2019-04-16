@@ -200,12 +200,6 @@ class BaseReportForm extends Component {
               label: "Active locations",
               searchQuery: true,
               queryVars: { status: Location.STATUS.ACTIVE }
-            },
-            recentLocations: {
-              label: "Recent locations",
-              searchQuery: false,
-              listName: "locationRecents",
-              listArgs: "maxResults:6"
             }
           }
 
@@ -214,12 +208,6 @@ class BaseReportForm extends Component {
               label: "All",
               searchQuery: true,
               queryVars: { matchPositionName: true }
-            },
-            recentContacts: {
-              label: "Recent contacts",
-              searchQuery: false,
-              listName: "personRecents",
-              listArgs: "maxResults:6"
             },
             activeAdvisors: {
               label: "All advisors",
@@ -267,12 +255,6 @@ class BaseReportForm extends Component {
             allTasks: {
               label: "All tasks",
               searchQuery: true
-            },
-            recentTasks: {
-              label: "Recent tasks",
-              searchQuery: false,
-              listName: "taskRecents",
-              listArgs: "maxResults:6"
             }
           }
           if (this.props.currentUser.position) {
@@ -309,12 +291,6 @@ class BaseReportForm extends Component {
             allAuthorizationGroups: {
               label: "All authorization groups",
               searchQuery: true
-            },
-            recentAuthorizationGroups: {
-              label: "Recent authorization groups",
-              searchQuery: false,
-              listName: "authorizationGroupRecents",
-              listArgs: "maxResults:6"
             }
           }
           // need up-to-date copies of these in the autosave handler
