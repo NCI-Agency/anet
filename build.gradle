@@ -77,8 +77,8 @@ dependencies {
 	compile 'com.microsoft.sqlserver:mssql-jdbc:7.2.1.jre8'
 
 	// used for writing Excel documents
-	compile group: 'org.apache.poi', name: 'poi', version: '4.0.1'
-	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.0.1'
+	compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
 
 	// For parsing HTML to check for 'empty' input
 	compile 'org.jsoup:jsoup:1.11.3'
@@ -371,7 +371,7 @@ buildscript {
 		classpath "org.kordamp:markdown-gradle-plugin:1.2.0"
 		classpath 'com.bmuschko:gradle-docker-plugin:4.6.2'
 		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
-		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.20.0"
+		classpath "com.diffplug.spotless:spotless-plugin-gradle:3.21.1"
 	}
 }
 

@@ -170,6 +170,8 @@ dictionary:
   reportWorkflow:
     nbOfHoursQuarantineApproved: 24
 
+  maxTextFieldLength: 250
+
   fields:
 
     task:
@@ -318,3 +320,7 @@ dictionary:
         options:
           layers: GEBCO_LATEST
           format: "image/png"
+
+  automaticallyInactivateUsers:
+    emailRemindersDaysPrior: [15, 30, 45]
+    ignoredDomainNames: []

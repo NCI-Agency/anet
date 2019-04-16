@@ -1,4 +1,4 @@
-import API from "api"
+import API, { Settings } from "api"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
@@ -90,14 +90,19 @@ class AuthorizationGroupForm extends Component {
                     name="description"
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("descriptionCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "descriptionCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="descriptionCharsLeft">
-                          {250 - this.props.initialValues.description.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.description.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>
