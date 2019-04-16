@@ -84,7 +84,7 @@
     "threads": "^0.12.0",
     "uuid": "^3.3.2",
     "wdio-chromedriver-service": "^5.0.1",
-    "webdriverio": "^5.7.12",
+    "webdriverio": "^5.7.13",
     "webpack": "^4.29.6",
     "webpack-cleanup-plugin": "^0.5.1",
     "webpack-cli": "^3.3.0",
