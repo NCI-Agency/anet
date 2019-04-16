@@ -34,7 +34,10 @@ export default class Person extends Model {
   static yupSchema = yup
     .object()
     .shape({
-      uuid: yup.string().nullable().default(null),
+      uuid: yup
+        .string()
+        .nullable()
+        .default(null),
       name: yup
         .string()
         .nullable()
