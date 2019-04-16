@@ -224,7 +224,9 @@ export default class AdvancedSelect extends Component {
                 const hasLeftNav =
                   width >= MOBILE_WIDTH &&
                   Object.keys(this.props.filterDefs).length > 1
-                const hasTopNav = width < MOBILE_WIDTH || smallOverlay
+                const hasTopNav =
+                  (width < MOBILE_WIDTH || smallOverlay) &&
+                  Object.keys(this.props.filterDefs).length > 1
                 return (
                   <Row className="border-between">
                     {hasLeftNav && (
