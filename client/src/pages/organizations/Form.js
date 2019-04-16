@@ -184,7 +184,12 @@ class BaseOrganizationForm extends Component {
             allAdvisorPositions: {
               label: "All advisor positions",
               searchQuery: true,
-              queryVars: { type: Position.TYPE.ADVISOR, matchPersonName: true }
+              queryVars: { type: [
+                Position.TYPE.ADVISOR,
+                Position.TYPE.SUPER_USER,
+                Position.TYPE.ADMINISTRATOR
+              ],
+              matchPersonName: true }
             }
           }
           if (this.props.currentUser.position) {
@@ -192,7 +197,6 @@ class BaseOrganizationForm extends Component {
               label: "My colleagues",
               searchQuery: true,
               queryVars: {
-                type: Position.TYPE.ADVISOR,
                 matchPersonName: true,
                 organizationUuid: this.props.currentUser.position.organization
                   .uuid
