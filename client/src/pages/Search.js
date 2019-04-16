@@ -12,7 +12,6 @@ import Page, {
   propTypes as pagePropTypes
 } from "components/Page"
 import PositionTable from "components/PositionTable"
-import "components/reactToastify.css"
 import ReportCollection from "components/ReportCollection"
 import SubNav from "components/SubNav"
 import UltimatePagination from "components/UltimatePagination"
@@ -27,8 +26,7 @@ import React from "react"
 import { Alert, Badge, Button, Modal, Nav, Table } from "react-bootstrap"
 import { connect } from "react-redux"
 import { withRouter } from "react-router-dom"
-import { toast, ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { toast } from "react-toastify"
 import DOWNLOAD_ICON from "resources/download.png"
 import LOCATIONS_ICON from "resources/locations.png"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
@@ -111,8 +109,8 @@ class Search extends Page {
     locations: null,
     tasks: null
   }
+
   state = {
-    success: null,
     error: null,
     didSearch: false,
     query: this.props.searchQuery.text || null,
@@ -187,29 +185,20 @@ class Search extends Page {
     return GQL.run(parts)
       .then(data => {
         this.setState({
-          success: null,
           error: null,
           results: data,
           didSearch: true
         })
       })
-      .catch(error =>
-        this.setState({ success: null, error: error, didSearch: true })
-      )
+      .catch(error => this.setState({ error: error, didSearch: true }))
   }
 
   fetchData(props) {
     return this._dataFetcher(props, this._fetchDataCallback)
   }
 
-  componentDidMount() {
-    super.componentDidMount()
-    const { success } = this.state
-    this.notify(success)
-  }
-
   render() {
-    const { results, success, error } = this.state
+    const { results, error } = this.state
     const numReports = results.reports ? results.reports.totalCount : 0
     const numPeople = results.people ? results.people.totalCount : 0
     const numPositions = results.positions ? results.positions.totalCount : 0
@@ -233,7 +222,6 @@ class Search extends Page {
     const taskShortLabel = Settings.fields.task.shortLabel
     return (
       <div>
-        <ToastContainer />
         <SubNav subnavElemId="search-nav">
           <div>
             <Button onClick={this.props.history.goBack} bsStyle="link">
@@ -389,7 +377,7 @@ class Search extends Page {
           setPagination(this.pageLabel(type), pageNum)
         )
       })
-      .catch(error => this.setState({ success: null, error: error }))
+      .catch(error => this.setState({ error: error }))
   }
 
   renderReports() {
@@ -590,7 +578,6 @@ class Search extends Page {
       .catch(error => {
         this.setState(
           {
-            success: null,
             error: error,
             showSaveSearch: false
           },
@@ -604,12 +591,11 @@ class Search extends Page {
 
   onSubmitSaveSearchSuccess = (response, values, form) => {
     if (response.createSavedSearch.uuid) {
+      toast.success("Search saved")
       this.setState({
-        success: "Search saved",
         error: null,
         showSaveSearch: false
       })
-      jumpToTop()
     }
   }
 
@@ -645,7 +631,7 @@ class Search extends Page {
       .then(blob => {
         FileSaver.saveAs(blob, "anet_export.xlsx")
       })
-      .catch(error => this.setState({ success: null, error: error }))
+      .catch(error => this.setState({ error: error }))
   }
 
   @autobind

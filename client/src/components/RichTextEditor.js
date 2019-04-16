@@ -7,6 +7,7 @@ import {
   Editor,
   EditorState,
   getDefaultKeyBinding,
+  Modifier,
   RichUtils
 } from "draft-js"
 import "draft-js/dist/Draft.css"
@@ -88,12 +89,13 @@ class RichTextEditor extends Component {
   }
 
   pushEditorState = contentState => {
-    const editorState = EditorState.push(
-      this.state.editorState,
-      contentState,
-      "change-block-data"
+    const { editorState } = this.state
+    const newState = Modifier.replaceWithFragment(
+      editorState.getCurrentContent(),
+      editorState.getSelection(),
+      contentState.getBlockMap()
     )
-    this.onChange(editorState)
+    this.onChange(EditorState.push(editorState, newState, "insert-fragment"))
   }
 
   handlePastedText = (text, html) => {
