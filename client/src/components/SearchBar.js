@@ -1,4 +1,10 @@
-import { resetPages, resetPagination, setSearchQuery } from "actions"
+import {
+  resetPages,
+  resetPagination,
+  SEARCH_OBJECT_LABELS,
+  SEARCH_OBJECT_TYPES,
+  setSearchQuery
+} from "actions"
 import autobind from "autobind-decorator"
 import AdvancedSearch from "components/AdvancedSearch"
 import searchFilters from "components/SearchFilters"
@@ -45,13 +51,19 @@ class SearchBar extends Component {
   }
 
   render() {
-    const filterDefs = this.props.query.objectType
-      ? this.ALL_FILTERS[this.props.query.objectType].filters
-      : {}
+    const filterDefs =
+      this.props.query.objectType &&
+      SEARCH_OBJECT_TYPES[this.props.query.objectType]
+        ? this.ALL_FILTERS[SEARCH_OBJECT_TYPES[this.props.query.objectType]]
+          .filters
+        : {}
     const filters = this.props.query.filters.filter(f => filterDefs[f.key])
     const placeholder = this.props.query.objectType
-      ? "Filter " + this.props.query.objectType
-      : "Search for " + this.props.searchObjectTypes.join(", ")
+      ? "Filter " + SEARCH_OBJECT_LABELS[this.props.query.objectType]
+      : "Search for " +
+        this.props.searchObjectTypes
+          .map(type => SEARCH_OBJECT_LABELS[type])
+          .join(", ")
     return (
       <div>
         <Form onSubmit={this.onSubmit}>
@@ -84,7 +96,7 @@ class SearchBar extends Component {
           <span className="asLink">
             {this.props.query.objectType ? (
               <React.Fragment>
-                <b>{this.props.query.objectType}</b>
+                <b>{SEARCH_OBJECT_LABELS[this.props.query.objectType]}</b>
                 {filters.length > 0 ? (
                   <React.Fragment>
                     <React.Fragment> filtered on </React.Fragment>
