@@ -172,7 +172,7 @@ public class ApprovalStepDao extends AnetBaseDao<ApprovalStep> {
   }
 
   /**
-   * Check whether the Approval Step is being by a report
+   * Check whether the Approval Step is being by a report.
    */
   public boolean isStepInUse(String uuid) {
     List<Map<String, Object>> rs = getDbHandle().select(

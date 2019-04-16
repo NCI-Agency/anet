@@ -221,11 +221,6 @@ public class ReportDao extends AnetBaseDao<Report> {
     return updateInternal(r, null);
   }
 
-  /**
-   * @param r the report to update, in its updated state
-   * @param user the user attempting the update, for authorization purposes
-   * @return the number of rows updated by the final update call (should be 1 in all cases).
-   */
   public int updateInternal(Report r, Person user) {
     // Write sensitive information (if allowed)
     ReportSensitiveInformation rsi = r.getReportSensitiveInformation();
@@ -593,17 +588,17 @@ public class ReportDao extends AnetBaseDao<Report> {
    * Helper method that builds and executes the daily rollup query Handles both MsSql and Sqlite
    * Searching for just all reports and for reports in certain organizations.
    * 
-   * @param orgType: the type of organization to be looking for
-   * @param orgs: the list of orgs for whose reports to find, null means all
-   * @param missingOrgReports: true if we want to look for reports specifically with NULL org
-   *        uuid's.
+   * @param orgType the type of organization to be looking for
+   * @param orgs the list of orgs for whose reports to find, null means all
+   * @param missingOrgReports true if we want to look for reports specifically with NULL org
+   *        uuid's
    */
   private List<Map<String, Object>> rollupQuery(Instant start, Instant end,
       OrganizationType orgType, List<Organization> orgs, boolean missingOrgReports) {
     String orgColumn =
         String.format("\"%s\"", orgType == OrganizationType.ADVISOR_ORG ? "advisorOrganizationUuid"
             : "principalOrganizationUuid");
-    Map<String, Object> sqlArgs = new HashMap<String, Object>();
+    final Map<String, Object> sqlArgs = new HashMap<String, Object>();
     final Map<String, List<?>> listArgs = new HashMap<>();
 
     StringBuilder sql = new StringBuilder();
@@ -778,11 +773,6 @@ public class ReportDao extends AnetBaseDao<Report> {
     }
   }
 
-  /**
-   * @param r the report to update, in its updated state
-   * @param user the user attempting the update, for authorization purposes
-   * @return the number of rows updated by the final update call (should be 1 in all cases).
-   */
   public int publish(Report r, Person user) {
     // Write the publication action
     ReportAction action = new ReportAction();
