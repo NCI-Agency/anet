@@ -315,6 +315,12 @@ button.home-tile.btn {
 	text-align: center;
 }
 
+.popover-content .checkbox, .popover-content .radio {
+	padding: 0;
+	margin: 0;
+	text-align: center;
+}
+
 .loading .anet section {
 	visibility: hidden;
 }

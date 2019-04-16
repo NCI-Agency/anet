@@ -53,9 +53,7 @@ const AdvancedSingleSelectOverlayTableBase = props => {
     <AdvancedSelectOverlayTable
       {...otherProps}
       selectedItems={_isEmpty(selectedItems) ? [] : [selectedItems]}
-      selectItemComponent={
-        <Radio style={{ paddingTop: "3px", textAlign: "center" }} />
-      }
+      selectItemComponent={<Radio />}
     />
   )
 }
