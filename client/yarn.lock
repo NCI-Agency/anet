@@ -2017,10 +2017,10 @@
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-12.0.10.tgz#17a8ec65cd8e88f51b418ceb271af18d3137df67"
   integrity sha512-WsVzTPshvCSbHThUduGGxbmnwcpkgSctHGHTqzWyFg4lYAuV5qXlyFPOsP3OWqCINfmg/8VXP+zJaa4OxEsBQQ==
 
-"@wdio/browserstack-service@^5.7.6":
-  version "5.7.8"
-  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.7.8.tgz#8be936b020b95a826eb860755e2ea7ca28efdb2f"
-  integrity sha512-NcSBHJWtrRzvzBDuuV8Zpcfmt72y3udR2sL9N19elwcXDX0KCOQ4asxznxgUeHcMX8Nx2j2AhZ5W+ZPxUW3qig==
+"@wdio/browserstack-service@^5.7.13":
+  version "5.7.13"
+  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.7.13.tgz#e6069fb6ad4a58bb9762be03771994f87404f430"
+  integrity sha512-5Cyq6S85EmsidZyZs3yH0SmVLmD7qFk/PyKVN1mp3XciePCfoufnKtfBfA6js9RDJle7itUKnXK/JC5YDxRdTw==
   dependencies:
     "@wdio/logger" "^5.7.8"
     browserstack-local "1.3.7"
