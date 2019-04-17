@@ -2067,14 +2067,14 @@
     "@wdio/reporter" "^5.7.8"
     chalk "^2.3.0"
 
-"@wdio/local-runner@^5.7.9":
-  version "5.7.9"
-  resolved "https://registry.yarnpkg.com/@wdio/local-runner/-/local-runner-5.7.9.tgz#7114d039922a879be63e24df1a2dde3c03320f44"
-  integrity sha512-5VEV+FUour4sSrew4Y4oQsLIaDvwiFL1zlxMh1Qx638iK7puqE6w6hsaqRBW4EDxufmMwiI5Mxu5T7SwSl4n3Q==
+"@wdio/local-runner@^5.7.14":
+  version "5.7.14"
+  resolved "https://registry.yarnpkg.com/@wdio/local-runner/-/local-runner-5.7.14.tgz#49a8e37d8d9de415db25a97bc6f90306b781cfa6"
+  integrity sha512-SuxAxMbfHHT2uQBY0lapES5RX7Q7NrViPPscs6pGBMXnXmFIpS0ZaE7KpECU0sLhSlQ5iWCv20jRoqm1VpeZgw==
   dependencies:
     "@wdio/logger" "^5.7.8"
-    "@wdio/repl" "^5.7.9"
-    "@wdio/runner" "^5.7.9"
+    "@wdio/repl" "^5.7.13"
+    "@wdio/runner" "^5.7.14"
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
@@ -2105,13 +2105,6 @@
   dependencies:
     "@wdio/config" "^5.7.13"
 
-"@wdio/repl@^5.7.9":
-  version "5.7.9"
-  resolved "https://registry.yarnpkg.com/@wdio/repl/-/repl-5.7.9.tgz#5761fc40e0ed04d101bf3ec6a22a2a4a0675a658"
-  integrity sha512-P7QOnkaQjoBB0en+8zUqeAHaqEU7Az4CM0s3k82jKGlWOcNo/YYTzYeZBMKX3H+UuhBmiA9mvM9VYdVQk4Mfkw==
-  dependencies:
-    "@wdio/config" "^5.7.8"
-
 "@wdio/reporter@^5.7.8":
   version "5.7.8"
   resolved "https://registry.yarnpkg.com/@wdio/reporter/-/reporter-5.7.8.tgz#41a6efaeda7403050c15283a9b51e2bb4bad6f77"
@@ -2119,17 +2112,17 @@
   dependencies:
     fs-extra "^7.0.1"
 
-"@wdio/runner@^5.7.9":
-  version "5.7.9"
-  resolved "https://registry.yarnpkg.com/@wdio/runner/-/runner-5.7.9.tgz#8ba93fadb0dff54b57a3598c636ce3b7b496e870"
-  integrity sha512-nq/77E+63brKJOriBQp427ed6ezQUr2/CGGCiREG2H2Rz6tgdEXiDyxtQWu5tzf7xMvxs+CKzKv6M9/IIj92+w==
+"@wdio/runner@^5.7.14":
+  version "5.7.14"
+  resolved "https://registry.yarnpkg.com/@wdio/runner/-/runner-5.7.14.tgz#64742f773bf179f25ad6eb6376120d323d9899bf"
+  integrity sha512-ZsJua13DvTh7/gFPbywcZUThOBbouSLhSiOgbuIMRvJNhDSh2cRW+BeT5xMeEFoWKLJR0ts4QjH6YHX3DG1P6g==
   dependencies:
-    "@wdio/config" "^5.7.8"
+    "@wdio/config" "^5.7.13"
     "@wdio/logger" "^5.7.8"
     "@wdio/utils" "^5.7.8"
     deepmerge "^2.0.1"
     gaze "^1.1.2"
-    webdriverio "^5.7.9"
+    webdriverio "^5.7.14"
 
 "@wdio/spec-reporter@^5.7.13":
   version "5.7.13"
@@ -14053,7 +14046,7 @@ webdriver@^5.7.14:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@^5.7.12, webdriverio@^5.7.14, webdriverio@^5.7.9:
+webdriverio@^5.7.12, webdriverio@^5.7.14:
   version "5.7.14"
   resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.7.14.tgz#2e79597aa10c1bf64867e2c62b341f3bfed883ab"
   integrity sha512-rN91WR1g8ORqKI42cy8h7flvCYBKACUF4BxHGmHG0cQkterNahDTjHjRl+Ab3GqfzaBrzYMCA5AdpNNfvqxH9Q==
