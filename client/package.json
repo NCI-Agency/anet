@@ -25,7 +25,7 @@
     "@babel/register": "^7.4.0",
     "@babel/runtime": "^7.4.3",
     "@storybook/addon-actions": "^4.1.13",
-    "@storybook/react": "^4.1.13",
+    "@storybook/react": "^5.0.9",
     "@wdio/browserstack-service": "^5.7.13",
     "@wdio/cli": "^5.7.14",
     "@wdio/dot-reporter": "^5.7.2",
