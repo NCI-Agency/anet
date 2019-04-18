@@ -54,7 +54,7 @@ export default class CustomDateInput extends Component {
         precision: TimePrecision.MINUTE,
         selectAllOnFocus: true
         // FIXME: clicking a time arrow immediately closes the dialog;
-	// see https://github.com/palantir/blueprint/issues/3474
+        // see https://github.com/palantir/blueprint/issues/3474
         // showArrowButtons: true
       }
     return (
