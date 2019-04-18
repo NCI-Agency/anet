@@ -123,7 +123,6 @@ class BasePersonForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -174,7 +173,7 @@ class BasePersonForm extends Component {
                 bsStyle="primary"
                 type="button"
                 onClick={submitForm}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 {this.props.saveText}
               </Button>
@@ -476,7 +475,7 @@ class BasePersonForm extends Component {
                       bsStyle="primary"
                       type="button"
                       onClick={submitForm}
-                      disabled={isSubmitting || !isValid}
+                      disabled={isSubmitting}
                     >
                       {this.props.saveText}
                     </Button>

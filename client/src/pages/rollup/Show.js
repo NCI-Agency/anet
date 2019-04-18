@@ -604,7 +604,7 @@ class BaseRollupShow extends Page {
 
   @autobind
   renderEmailModal(formikProps) {
-    const { values, isSubmitting, isValid, submitForm } = formikProps
+    const { values, isSubmitting, submitForm } = formikProps
     return (
       <Modal show={this.state.showEmailModal} onHide={this.toggleEmailModal}>
         <Form>
@@ -653,7 +653,7 @@ class BaseRollupShow extends Page {
               bsStyle="primary"
               type="button"
               onClick={submitForm}
-              disabled={isSubmitting || !isValid}
+              disabled={isSubmitting}
             >
               Send email
             </Button>

@@ -92,7 +92,6 @@ class MergePeople extends Page {
         >
           {({
             isSubmitting,
-            isValid,
             setFieldValue,
             setFieldTouched,
             values,
@@ -195,7 +194,7 @@ class MergePeople extends Page {
                         bsSize="large"
                         block
                         onClick={submitForm}
-                        disabled={isSubmitting || !isValid}
+                        disabled={isSubmitting}
                       >
                         Merge People
                       </Button>

@@ -24,7 +24,7 @@ import mil.dds.anet.beans.search.OrganizationSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.beans.search.PersonSearchQuery.PersonSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
-import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.DaoUtils;
 import mil.dds.anet.utils.UtilsTest;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     final Person jack = getJackJackson();
 
     Person retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, jack.getUuid(),
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson).isEqualTo(jack);
     assertThat(retPerson.getUuid()).isEqualTo(jack.getUuid());
 
@@ -57,10 +57,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setEndOfTourDate(
         ZonedDateTime.of(2020, 4, 1, 0, 0, 0, 0, DaoUtils.getDefaultZoneId()).toInstant());
     String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
-        "PersonInput", newPerson, new TypeReference<GraphQLResponse<Person>>() {});
+        "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newPersonUuid).isNotNull();
     newPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPersonUuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newPerson.getUuid()).isNotNull();
     assertThat(newPerson.getName()).isEqualTo("testCreatePerson Person");
     // check that HTML of biography is sanitized after create
@@ -75,7 +75,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     retPerson = graphQLHelper.getObjectById(jack, "person", FIELDS, newPerson.getUuid(),
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson.getName()).isEqualTo(newPerson.getName());
     // check that HTML of biography is sanitized after update
     assertThat(retPerson.getBiography()).isEqualTo(UtilsTest.getCombinedTestCase().getOutput());
@@ -86,7 +86,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", "uuid shortName", query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().size()).isGreaterThan(0);
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
@@ -97,10 +97,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPos.setOrganization(org);
     newPos.setStatus(PositionStatus.ACTIVE);
     String newPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", newPos, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", newPos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newPosUuid).isNotNull();
     newPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, newPosUuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newPos.getUuid()).isNotNull();
 
     Person newPerson2 = new Person();
@@ -110,10 +110,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson2.setDomainUsername("namey_" + Instant.now().toEpochMilli());
     newPerson2.setPosition(newPos);
     String newPerson2Uuid = graphQLHelper.createObject(admin, "createPerson", "person",
-        "PersonInput", newPerson2, new TypeReference<GraphQLResponse<Person>>() {});
+        "PersonInput", newPerson2, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newPerson2Uuid).isNotNull();
     newPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2Uuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newPerson2.getUuid()).isNotNull();
     assertThat(newPerson2.loadPosition()).isNotNull();
     assertThat(newPerson2.getPosition().getUuid()).isEqualTo(newPos.getUuid());
@@ -126,10 +126,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPos2.setOrganization(org);
     newPos2.setStatus(PositionStatus.ACTIVE);
     String newPos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", newPos2, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", newPos2, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newPos2Uuid).isNotNull();
     newPos2 = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, newPos2Uuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newPos2.getUuid()).isNotNull();
 
     newPerson2.setName("Changey McChangeface");
@@ -146,7 +146,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2.getUuid(),
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson).isNotNull();
     assertThat(retPerson.getName()).isEqualTo(newPerson2.getName());
     assertThat(retPerson.loadPosition()).isNotNull();
@@ -168,7 +168,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, newPerson2.getUuid(),
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson.getBiography()).contains("<b>Hello world</b>");
     assertThat(retPerson.getBiography()).doesNotContain("<script>window.alert");
   }
@@ -182,7 +182,7 @@ public class PersonResourceTest extends AbstractResourceTest {
 
     AnetBeanList<Person> searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getTotalCount()).isGreaterThan(0);
     assertThat(searchResults.getList().stream().filter(p -> p.getName().equals("BOBTOWN, Bob"))
         .findFirst()).isNotEmpty();
@@ -192,7 +192,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", "uuid shortName", queryOrgs,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().size()).isGreaterThan(0);
     Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 1.1")).findFirst().get();
@@ -201,14 +201,14 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setOrgUuid(org.getUuid());
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
     query.setStatus(ImmutableList.of(PersonStatus.INACTIVE));
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList().stream().filter(p -> p.getStatus() == PersonStatus.INACTIVE)
         .count()).isEqualTo(searchResults.getList().size());
@@ -221,33 +221,33 @@ public class PersonResourceTest extends AbstractResourceTest {
     // First don't include child orgs and then increase the scope and verify results increase.
     final AnetBeanList<Person> parentOnlyResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
 
     query.setIncludeChildOrgs(true);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
     assertThat(searchResults.getList()).containsAll(parentOnlyResults.getList());
 
     query.setIncludeChildOrgs(true);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList()).isNotEmpty();
 
     query.setOrgUuid(null);
     query.setText("advisor"); // Search against biographies
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList().size()).isGreaterThan(1);
 
     query.setText(null);
     query.setRole(Role.ADVISOR);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(searchResults.getList().size()).isGreaterThan(1);
 
     query.setRole(null);
@@ -256,7 +256,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setSortOrder(SortOrder.DESC);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     String prevName = null;
     for (Person p : searchResults.getList()) {
       if (prevName != null) {
@@ -271,7 +271,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setRole(Role.ADVISOR);
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     long matchCount =
         searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
     assertThat(matchCount).isEqualTo(1);
@@ -280,7 +280,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setText("A Dvisor*");
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     matchCount =
         searchResults.getList().stream().filter(p -> p.getName().equals("DVISOR, A")).count();
     assertThat(matchCount).isEqualTo(1);
@@ -290,7 +290,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setText("hunter+arthur@dds.mil");
     searchResults =
         graphQLHelper.searchObjects(jack, "personList", "query", "PersonSearchQueryInput", FIELDS,
-            query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     matchCount = searchResults.getList().stream()
         .filter(p -> p.getEmailAddress().equals("hunter+arthur@dds.mil")).count();
     assertThat(matchCount).isEqualTo(1);
@@ -304,19 +304,19 @@ public class PersonResourceTest extends AbstractResourceTest {
     Person liz = getElizabethElizawell();
 
     AnetBeanList<Person> results = graphQLHelper.getAllObjects(liz, "people", FIELDS,
-        new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(results.getTotalCount()).isGreaterThan(0);
 
     AnetBeanList<Person> pageOne =
         graphQLHelper.getAllObjects(liz, "people (pageNum: 0, pageSize: 2)", FIELDS,
-            new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(pageOne.getTotalCount()).isEqualTo(results.getTotalCount());
     assertThat(pageOne.getList().size()).isEqualTo(2);
     assertThat(results.getList()).containsAll(pageOne.getList());
 
     AnetBeanList<Person> pageTwo =
         graphQLHelper.getAllObjects(liz, "people (pageNum: 1, pageSize: 2)", FIELDS,
-            new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+            new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
     assertThat(pageTwo.getTotalCount()).isEqualTo(results.getTotalCount());
     assertThat(pageTwo.getList().size()).isEqualTo(2);
     assertThat(results.getList()).containsAll(pageTwo.getList());
@@ -331,10 +331,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     loser.setRole(Role.ADVISOR);
     loser.setName("Loser for Merging");
     String loserUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        loser, new TypeReference<GraphQLResponse<Person>>() {});
+        loser, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(loserUuid).isNotNull();
     loser = graphQLHelper.getObjectById(admin, "person", FIELDS, loserUuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
 
     // Create a Position
     Position test = new Position();
@@ -345,14 +345,14 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Assign to an AO
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
         "OrganizationInput", OrganizationTest.getTestAO(true),
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     test.setOrganization(createOrganizationWithUuid(aoUuid));
 
     String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", test, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", test, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(createdUuid).isNotNull();
     Position created = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, createdUuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(created.getName()).isEqualTo(test.getName());
 
     // Assign the loser into the position
@@ -369,10 +369,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     winner.setRole(Role.ADVISOR);
     winner.setName("Winner for Merging");
     String winnerUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        winner, new TypeReference<GraphQLResponse<Person>>() {});
+        winner, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(winnerUuid).isNotNull();
     winner = graphQLHelper.getObjectById(admin, "person", FIELDS, winnerUuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
 
     variables = new HashMap<>();
     variables.put("winnerUuid", winnerUuid);
@@ -385,7 +385,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Assert that loser is gone.
     try {
       graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(),
-          new TypeReference<GraphQLResponse<Person>>() {});
+          new TypeReference<GraphQlResponse<Person>>() {});
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
@@ -393,7 +393,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Assert that the position is empty.
     Position winnerPos = graphQLHelper.getObjectById(admin, "position",
         POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(winnerPos.getPerson()).isNull();
 
     // Re-create loser and put into the position.
@@ -401,10 +401,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     loser.setRole(Role.ADVISOR);
     loser.setName("Loser for Merging");
     loserUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput", loser,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(loserUuid).isNotNull();
     loser = graphQLHelper.getObjectById(admin, "person", FIELDS, loserUuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
 
     variables = new HashMap<>();
     variables.put("uuid", created.getUuid());
@@ -426,7 +426,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Assert that loser is gone.
     try {
       graphQLHelper.getObjectById(admin, "person", FIELDS, loser.getUuid(),
-          new TypeReference<GraphQLResponse<Person>>() {});
+          new TypeReference<GraphQlResponse<Person>>() {});
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
@@ -434,7 +434,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     // Assert that the winner is in the position.
     winnerPos = graphQLHelper.getObjectById(admin, "position",
         POSITION_FIELDS + " person {" + PERSON_FIELDS + " }", created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(winnerPos.getPerson()).isEqualTo(winner);
 
 
@@ -448,7 +448,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     query.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", "uuid shortName", query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().size()).isGreaterThan(0);
     final Organization org = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("EF 6")).findFirst().get();
@@ -460,10 +460,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPos.setOrganization(org);
     newPos.setStatus(PositionStatus.ACTIVE);
     String retPosUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", newPos, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", newPos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(retPosUuid).isNotNull();
     Position retPos = graphQLHelper.getObjectById(admin, "position", POSITION_FIELDS, retPosUuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(retPos.getUuid()).isNotNull();
 
     final Person newPerson = new Person();
@@ -473,10 +473,10 @@ public class PersonResourceTest extends AbstractResourceTest {
     newPerson.setDomainUsername("namey_" + Instant.now().toEpochMilli());
     newPerson.setPosition(retPos);
     String retPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
-        "PersonInput", newPerson, new TypeReference<GraphQLResponse<Person>>() {});
+        "PersonInput", newPerson, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPersonUuid).isNotNull();
     Person retPerson = graphQLHelper.getObjectById(admin, "person", FIELDS, retPersonUuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson.getUuid()).isNotNull();
     assertThat(retPerson.getPosition()).isNotNull();
 
@@ -486,7 +486,7 @@ public class PersonResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     final Person retPerson2 = graphQLHelper.getObjectById(admin, "person", FIELDS,
-        retPerson.getUuid(), new TypeReference<GraphQLResponse<Person>>() {});
+        retPerson.getUuid(), new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(retPerson2.getDomainUsername()).isNull();
     assertThat(retPerson2.getPosition()).isNull();
   }

@@ -33,10 +33,6 @@ public class UrlParamsAuthFilter<P extends Principal> extends AuthFilter<BasicCr
     }
   }
 
-  /**
-   * @param queryParameters parameters from the request URI
-   * @return a username and a password as {@link BasicCredentials}
-   */
   @Nullable
   private BasicCredentials getCredentials(MultivaluedMap<String, String> queryParameters) {
     final String username = extractParam(queryParameters, PARAM_USERNAME);

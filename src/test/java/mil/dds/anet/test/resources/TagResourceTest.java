@@ -9,7 +9,7 @@ import javax.ws.rs.NotFoundException;
 import mil.dds.anet.beans.Tag;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TagSearchQuery;
-import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.junit.Test;
 
 public class TagResourceTest extends AbstractResourceTest {
@@ -24,10 +24,10 @@ public class TagResourceTest extends AbstractResourceTest {
 
     // Create
     final String tUuid = graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", t,
-        new TypeReference<GraphQLResponse<Tag>>() {});
+        new TypeReference<GraphQlResponse<Tag>>() {});
     assertThat(tUuid).isNotNull();
     final Tag created = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid,
-        new TypeReference<GraphQLResponse<Tag>>() {});
+        new TypeReference<GraphQlResponse<Tag>>() {});
     assertThat(created.getName()).isEqualTo(t.getName());
     assertThat(created.getDescription()).isEqualTo(t.getDescription());
     assertThat(created.getCreatedAt()).isNotNull();
@@ -41,7 +41,7 @@ public class TagResourceTest extends AbstractResourceTest {
 
     // Get
     final Tag updated = graphQLHelper.getObjectById(admin, "tag", FIELDS, tUuid,
-        new TypeReference<GraphQLResponse<Tag>>() {});
+        new TypeReference<GraphQlResponse<Tag>>() {});
     assertThat(updated).isEqualTo(created);
   }
 
@@ -50,7 +50,7 @@ public class TagResourceTest extends AbstractResourceTest {
     // Get with unknown uuid
     try {
       graphQLHelper.getObjectById(admin, "tag", FIELDS, "-1",
-          new TypeReference<GraphQLResponse<Tag>>() {});
+          new TypeReference<GraphQlResponse<Tag>>() {});
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
@@ -58,7 +58,7 @@ public class TagResourceTest extends AbstractResourceTest {
     // Create with empty name
     try {
       graphQLHelper.createObject(admin, "createTag", "tag", "TagInput", new Tag(),
-          new TypeReference<GraphQLResponse<Tag>>() {});
+          new TypeReference<GraphQlResponse<Tag>>() {});
       fail("Expected BadRequestException");
     } catch (BadRequestException expectedException) {
     }
@@ -68,7 +68,7 @@ public class TagResourceTest extends AbstractResourceTest {
   public void tagListTest() throws UnsupportedEncodingException {
     // All
     final AnetBeanList<Tag> tagList = graphQLHelper.getAllObjects(admin, "tags", FIELDS,
-        new TypeReference<GraphQLResponse<AnetBeanList<Tag>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Tag>>>() {});
     assertThat(tagList).isNotNull();
   }
 
@@ -79,7 +79,7 @@ public class TagResourceTest extends AbstractResourceTest {
     query.setText("bribery");
     final AnetBeanList<Tag> searchObjects =
         graphQLHelper.searchObjects(admin, "tagList", "query", "TagSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Tag>>>() {});
+            new TypeReference<GraphQlResponse<AnetBeanList<Tag>>>() {});
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
   }
