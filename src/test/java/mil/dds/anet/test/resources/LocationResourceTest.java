@@ -7,7 +7,7 @@ import mil.dds.anet.beans.Location;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.LocationSearchQuery;
 import mil.dds.anet.test.TestData;
-import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.junit.Test;
 
 public class LocationResourceTest extends AbstractResourceTest {
@@ -20,10 +20,10 @@ public class LocationResourceTest extends AbstractResourceTest {
     // Create
     final Location l = TestData.createLocation("The Boat Dock", 43.21, -87.65);
     final String lUuid = graphQLHelper.createObject(admin, "createLocation", "location",
-        "LocationInput", l, new TypeReference<GraphQLResponse<Location>>() {});
+        "LocationInput", l, new TypeReference<GraphQlResponse<Location>>() {});
     assertThat(lUuid).isNotNull();
     final Location created = graphQLHelper.getObjectById(admin, "location", FIELDS, lUuid,
-        new TypeReference<GraphQLResponse<Location>>() {});
+        new TypeReference<GraphQlResponse<Location>>() {});
     assertThat(created.getName()).isEqualTo(l.getName());
     assertThat(created).isNotEqualTo(l);
 
@@ -35,7 +35,7 @@ public class LocationResourceTest extends AbstractResourceTest {
     query.setText("Police");
     final AnetBeanList<Location> searchObjects = graphQLHelper.searchObjects(admin, "locationList",
         "query", "LocationSearchQueryInput", "uuid name lat lng", query,
-        new TypeReference<GraphQLResponse<AnetBeanList<Location>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Location>>>() {});
     assertThat(searchObjects).isNotNull();
     assertThat(searchObjects.getList()).isNotEmpty();
 
@@ -45,7 +45,7 @@ public class LocationResourceTest extends AbstractResourceTest {
         graphQLHelper.updateObject(admin, "updateLocation", "location", "LocationInput", created);
     assertThat(nrUpdated).isEqualTo(1);
     final Location updated = graphQLHelper.getObjectById(admin, "location", FIELDS, lUuid,
-        new TypeReference<GraphQLResponse<Location>>() {});
+        new TypeReference<GraphQlResponse<Location>>() {});
     assertThat(updated).isEqualTo(created);
   }
 

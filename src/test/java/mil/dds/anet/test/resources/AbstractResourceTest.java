@@ -17,8 +17,8 @@ import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.PersonSearchQuery;
 import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.test.beans.PersonTest;
-import mil.dds.anet.test.resources.utils.GraphQLHelper;
-import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.test.resources.utils.GraphQlHelper;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import mil.dds.anet.utils.BatchingUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -36,6 +36,7 @@ public abstract class AbstractResourceTest {
       new DropwizardAppRule<AnetConfiguration>(AnetApplication.class, "anet.yml");
 
   private static JerseyClientConfiguration config = new JerseyClientConfiguration();
+
   static {
     config.setTimeout(Duration.seconds(60L));
     config.setConnectionTimeout(Duration.seconds(30L));
@@ -43,14 +44,14 @@ public abstract class AbstractResourceTest {
   }
 
   protected static Client client;
-  protected static GraphQLHelper graphQLHelper;
+  protected static GraphQlHelper graphQLHelper;
   protected static Person admin;
   protected static Map<String, Object> context;
 
   @BeforeClass
   public static void setUp() {
     client = new JerseyClientBuilder(RULE.getEnvironment()).using(config).build("test client");
-    graphQLHelper = new GraphQLHelper(client, RULE.getLocalPort());
+    graphQLHelper = new GraphQlHelper(client, RULE.getLocalPort());
     admin = findOrPutPersonInDb(PersonTest.getArthurDmin());
     context = new HashMap<>();
     context.put("dataLoaderRegistry",
@@ -73,7 +74,7 @@ public abstract class AbstractResourceTest {
     if (stub.getDomainUsername() != null) {
       try {
         final Person user = graphQLHelper.getObject(stub, "me", fields,
-            new TypeReference<GraphQLResponse<Person>>() {});
+            new TypeReference<GraphQlResponse<Person>>() {});
         if (user != null) {
           return user;
         }
@@ -85,7 +86,7 @@ public abstract class AbstractResourceTest {
       query.setText(stub.getName());
       final AnetBeanList<Person> searchObjects = graphQLHelper.searchObjects(
           PersonTest.getJackJacksonStub(), "personList", "query", "PersonSearchQueryInput", fields,
-          query, new TypeReference<GraphQLResponse<AnetBeanList<Person>>>() {});
+          query, new TypeReference<GraphQlResponse<AnetBeanList<Person>>>() {});
       for (Person p : searchObjects.getList()) {
         if (p.getEmailAddress().equals(stub.getEmailAddress())) {
           return p;
@@ -95,9 +96,9 @@ public abstract class AbstractResourceTest {
 
     // Create insert into DB
     final String newPersonUuid = graphQLHelper.createObject(admin, "createPerson", "person",
-        "PersonInput", stub, new TypeReference<GraphQLResponse<Person>>() {});
+        "PersonInput", stub, new TypeReference<GraphQlResponse<Person>>() {});
     return graphQLHelper.getObjectById(admin, "person", fields, newPersonUuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
   }
 
   public Person getJackJackson() {

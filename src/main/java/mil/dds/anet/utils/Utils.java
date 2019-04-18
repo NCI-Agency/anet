@@ -250,6 +250,8 @@ public class Utils {
   }
 
   /**
+   * Check for empty HTML.
+   * 
    * @param s string
    * @return true if string renders to 'empty' HTML, i.e. just whitespace
    */
@@ -263,6 +265,8 @@ public class Utils {
   }
 
   /**
+   * Check for empty or null string.
+   * 
    * @param s string
    * @return true if string is null or empty
    */
@@ -271,6 +275,8 @@ public class Utils {
   }
 
   /**
+   * Check for empty or null collection.
+   * 
    * @param c collection
    * @return true if collection is null or empty
    */
@@ -345,7 +351,7 @@ public class Utils {
   }
 
   /**
-   * Checks whether an email address is allowed according to a list of whitelisted domains
+   * Checks whether an email address is allowed according to a list of whitelisted domains.
    * 
    * @param email The email address to check
    * @param whitelistDomainNames The list of whitelisted domain names (wildcards allowed)
@@ -356,13 +362,13 @@ public class Utils {
       return false;
     }
 
-    final String WILDCARD = "*";
+    final String wildcard = "*";
     final String[] splittedEmail = email.split("@");
     final String from = splittedEmail[0].trim();
     final String domainName = splittedEmail[1].toLowerCase();
 
     final List<String> wildcardDomainNames = whitelistDomainNames.stream()
-        .filter(domain -> String.valueOf(domain.charAt(0)).equals(WILDCARD))
+        .filter(domain -> String.valueOf(domain.charAt(0)).equals(wildcard))
         .collect((Collectors.toList()));
 
     final boolean isWhitelistedEmail =

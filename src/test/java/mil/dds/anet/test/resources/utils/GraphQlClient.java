@@ -17,37 +17,37 @@ import javax.ws.rs.core.MediaType;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.database.mappers.MapperUtils;
 
-public class GraphQLClient {
+public class GraphQlClient {
 
   private final Client client;
   private final int localPort;
 
-  public GraphQLClient(Client client, int localPort) {
+  public GraphQlClient(Client client, int localPort) {
     this.client = client;
     this.localPort = localPort;
   }
 
-  public <T> T doGraphQLQuery(Person user, String query, String paramName, Object param,
-      TypeReference<GraphQLResponse<T>> responseType) {
+  public <T> T doGraphQlQuery(Person user, String query, String paramName, Object param,
+      TypeReference<GraphQlResponse<T>> responseType) {
     final Map<String, Object> variables = new HashMap<String, Object>();
     if (paramName != null) {
       variables.put(paramName, param);
     }
-    return doGraphQLQuery(user, query, variables, responseType);
+    return doGraphQlQuery(user, query, variables, responseType);
   }
 
-  public <T> T doGraphQLQuery(Person user, String query, Map<String, Object> variables,
-      TypeReference<GraphQLResponse<T>> responseType) {
-    final Map<String, Object> graphQLQuery = new HashMap<String, Object>();
-    graphQLQuery.put("query", query);
-    graphQLQuery.put("variables", variables);
+  public <T> T doGraphQlQuery(Person user, String query, Map<String, Object> variables,
+      TypeReference<GraphQlResponse<T>> responseType) {
+    final Map<String, Object> graphQlQuery = new HashMap<String, Object>();
+    graphQlQuery.put("query", query);
+    graphQlQuery.put("variables", variables);
     try {
       final ObjectMapper mapper = MapperUtils.getDefaultMapper();
-      final String jsonString = mapper.writeValueAsString(graphQLQuery);
+      final String jsonString = mapper.writeValueAsString(graphQlQuery);
       final Entity<String> jsonEntity = Entity.entity(jsonString, MediaType.APPLICATION_JSON_TYPE);
       final String response = httpQuery("/graphql", user).post(jsonEntity, String.class);
       assertThat(response).isNotNull();
-      final GraphQLResponse<T> data = mapper.readValue(response, responseType);
+      final GraphQlResponse<T> data = mapper.readValue(response, responseType);
       assertThat(data).isNotNull();
       return data.getData().getPayload();
     } catch (IOException e) {

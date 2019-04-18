@@ -106,7 +106,7 @@ public class PositionDao extends AnetBaseDao<Position> {
   static class PersonPositionHistoryBatcher extends ForeignKeyBatcher<PersonPositionHistory> {
     private static final String sql =
         "/* batch.getPositionHistory */ SELECT * FROM \"peoplePositions\" "
-            + "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";;
+            + "WHERE \"positionUuid\" IN ( <foreignKeys> ) ORDER BY \"createdAt\" ASC";
 
     public PersonPositionHistoryBatcher() {
       super(sql, "foreignKeys", new PersonPositionHistoryMapper(), "positionUuid");
@@ -280,17 +280,6 @@ public class PositionDao extends AnetBaseDao<Position> {
     return people;
   }
 
-  public Position getCurrentPositionForPerson(String personUuid) {
-    List<Position> positions = getDbHandle()
-        .createQuery("/* getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS
-            + " FROM positions " + "WHERE \"currentPersonUuid\" = :personUuid")
-        .bind("personUuid", personUuid).map(new PositionMapper()).list();
-    if (positions.size() == 0) {
-      return null;
-    }
-    return positions.get(0);
-  }
-
   public List<Position> getAssociatedPositions(String positionUuid) {
     return getDbHandle().createQuery("/* getAssociatedPositions */ SELECT " + POSITIONS_FIELDS
         + " FROM positions " + "WHERE positions.uuid IN "
@@ -359,6 +348,17 @@ public class PositionDao extends AnetBaseDao<Position> {
     return new ForeignKeyFetcher<Position>()
         .load(context, "position.currentPositionForPerson", personUuid)
         .thenApply(l -> l.isEmpty() ? null : l.get(0));
+  }
+
+  public Position getCurrentPositionForPerson(String personUuid) {
+    List<Position> positions = getDbHandle()
+        .createQuery("/* getCurrentPositionForPerson */ SELECT " + POSITIONS_FIELDS
+            + " FROM positions " + "WHERE \"currentPersonUuid\" = :personUuid")
+        .bind("personUuid", personUuid).map(new PositionMapper()).list();
+    if (positions.size() == 0) {
+      return null;
+    }
+    return positions.get(0);
   }
 
   public Boolean getIsApprover(String positionUuid) {
