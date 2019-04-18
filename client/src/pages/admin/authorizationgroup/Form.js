@@ -57,7 +57,6 @@ class AuthorizationGroupForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -71,7 +70,7 @@ class AuthorizationGroupForm extends Component {
                 bsStyle="primary"
                 type="button"
                 onClick={submitForm}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 Save Authorization Group
               </Button>
@@ -149,7 +148,7 @@ class AuthorizationGroupForm extends Component {
                       bsStyle="primary"
                       type="button"
                       onClick={submitForm}
-                      disabled={isSubmitting || !isValid}
+                      disabled={isSubmitting}
                     >
                       Save Authorization Group
                     </Button>
