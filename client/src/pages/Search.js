@@ -375,6 +375,7 @@ class Search extends Page {
     return (
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.PEOPLE)}
+        <br />
         <Table responsive hover striped className="people-search-results">
           <thead>
             <tr>
@@ -419,6 +420,7 @@ class Search extends Page {
     return (
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.ORGANIZATIONS)}
+        <br />
         <Table responsive hover striped id="organizations-search-results">
           <thead>
             <tr>
@@ -449,6 +451,7 @@ class Search extends Page {
     return (
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.POSITIONS)}
+        <br />
         <PositionTable positions={this.state.results[SEARCH_OBJECT_TYPES.POSITIONS].list} />
       </div>
     )
@@ -458,6 +461,7 @@ class Search extends Page {
     return (
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.LOCATIONS)}
+        <br />
         <Table responsive hover striped>
           <thead>
             <tr>
@@ -482,6 +486,7 @@ class Search extends Page {
     return (
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.TASKS)}
+        <br />
         <Table responsive hover striped>
           <thead>
             <tr>
