@@ -229,7 +229,7 @@ public class PersonResource {
       @GraphQLArgument(name = "winnerUuid") String winnerUuid,
       @GraphQLArgument(name = "loserUuid") String loserUuid,
       @GraphQLArgument(name = "copyPosition", defaultValue = "false") boolean copyPosition) {
-    Person user = DaoUtils.getUserFromContext(context);
+    final Person user = DaoUtils.getUserFromContext(context);
     if (loserUuid.equals(winnerUuid)) {
       throw new WebApplicationException("You selected the same person twice",
           Status.NOT_ACCEPTABLE);

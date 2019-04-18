@@ -21,6 +21,7 @@ public class Person extends AbstractAnetBean implements Principal {
   public static enum PersonStatus {
     ACTIVE, INACTIVE, NEW_USER
   }
+
   public static enum Role {
     ADVISOR, PRINCIPAL
   }

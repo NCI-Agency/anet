@@ -41,7 +41,7 @@ import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.database.StatementLogger;
 import mil.dds.anet.resources.AdminResource;
 import mil.dds.anet.resources.AuthorizationGroupResource;
-import mil.dds.anet.resources.GraphQLResource;
+import mil.dds.anet.resources.GraphQlResource;
 import mil.dds.anet.resources.HomeResource;
 import mil.dds.anet.resources.LocationResource;
 import mil.dds.anet.resources.LoggingResource;
@@ -106,7 +106,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
         bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(false)));
 
     // Add the waitForDB command
-    bootstrap.addCommand(new WaitForDBCommand());
+    bootstrap.addCommand(new WaitForDbCommand());
 
     // Add the db migration commands
     bootstrap.addBundle(new MigrationsBundle<AnetConfiguration>() {
@@ -265,7 +265,7 @@ public class AnetApplication extends Application<AnetConfiguration> {
     environment.jersey().register(homeResource);
     environment.jersey().register(new ViewResponseFilter(configuration));
     environment.jersey()
-        .register(new GraphQLResource(engine, configuration,
+        .register(new GraphQlResource(engine, configuration,
             ImmutableList.of(reportResource, personResource, positionResource, locationResource,
                 orgResource, taskResource, adminResource, savedSearchResource, tagResource,
                 authorizationGroupResource, noteResource),

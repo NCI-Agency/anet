@@ -29,7 +29,7 @@ import mil.dds.anet.beans.search.PositionSearchQuery;
 import mil.dds.anet.beans.search.PositionSearchQuery.PositionSearchSortBy;
 import mil.dds.anet.test.beans.OrganizationTest;
 import mil.dds.anet.test.beans.PositionTest;
-import mil.dds.anet.test.resources.utils.GraphQLResponse;
+import mil.dds.anet.test.resources.utils.GraphQlResponse;
 import org.junit.Test;
 
 public class PositionResourceTest extends AbstractResourceTest {
@@ -56,14 +56,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     // Assign to an AO
     final String aoUuid = graphQLHelper.createObject(admin, "createOrganization", "organization",
         "OrganizationInput", OrganizationTest.getTestAO(true),
-        new TypeReference<GraphQLResponse<Organization>>() {});
+        new TypeReference<GraphQlResponse<Organization>>() {});
     test.setOrganization(createOrganizationWithUuid(aoUuid));
 
     String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", test, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", test, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(createdUuid).isNotNull();
     Position created = graphQLHelper.getObjectById(jack, "position", FIELDS, createdUuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(created.getName()).isEqualTo(test.getName());
     assertThat(created.getOrganizationUuid()).isEqualTo(aoUuid);
 
@@ -77,7 +77,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPersonUuid()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(jack.getUuid());
 
@@ -102,14 +102,14 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Verify that the new person is in the position
     currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(steve.getUuid());
 
     // Verify that the previous person is now no longer in a position
     Person returnedPerson = graphQLHelper.getObjectById(jack, "person",
         PERSON_FIELDS + " position { " + POSITION_FIELDS + " }", jack.getUuid(),
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(returnedPerson.getPosition()).isNull();
 
     // delete the person from this position
@@ -118,7 +118,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(nrDeleted).isEqualTo(1);
 
     currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNull();
 
     // Put steve back in his old position
@@ -131,14 +131,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos = graphQLHelper.getObjectById(jack, "position", FIELDS, stevesCurrentPosition.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(steve.getUuid());
 
     // pull for the person at a previous time.
     Position retPos = graphQLHelper.getObjectById(jack, "position",
         POSITION_FIELDS + " previousPeople { createdAt startTime endTime person { uuid name } }",
-        created.getUuid(), new TypeReference<GraphQLResponse<Position>>() {});
+        created.getUuid(), new TypeReference<GraphQlResponse<Position>>() {});
     final List<PersonPositionHistory> previousPeople = retPos.getPreviousPeople();
     assertThat(previousPeople).isNotEmpty();
     PersonPositionHistory last = null;
@@ -153,7 +153,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(last.getPersonUuid()).isEqualTo(jack.getUuid());
 
     created = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     List<PersonPositionHistory> history = created.loadPreviousPeople(context).get();
     assertThat(history.size()).isEqualTo(2);
     assertThat(history.get(0).getPositionUuid()).isEqualTo(created.getUuid());
@@ -173,7 +173,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     queryOrgs.setType(OrganizationType.PRINCIPAL_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(admin, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().size()).isGreaterThan(0);
 
     Position prinPos = new Position();
@@ -185,10 +185,10 @@ public class PositionResourceTest extends AbstractResourceTest {
     Person principal = getRogerRogwell();
     assertThat(principal.getUuid()).isNotNull();
     String tashkilUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", prinPos, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", prinPos, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(tashkilUuid).isNotNull();
     Position tashkil = graphQLHelper.getObjectById(admin, "position", FIELDS, tashkilUuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(tashkil.getUuid()).isNotNull();
 
     // put the principal in a tashkil
@@ -211,7 +211,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // verify that we can pull the tashkil from the position
     retPos = graphQLHelper.getObjectById(jack, "position",
         FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(retPos.getAssociatedPositions().size()).isEqualTo(1);
     assertThat(retPos.getAssociatedPositions()).contains(tashkil);
 
@@ -224,7 +224,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     // verify that it's now gone.
     retPos = graphQLHelper.getObjectById(jack, "position",
         FIELDS + " associatedPositions { " + FIELDS + " }", created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(retPos.getAssociatedPositions().size()).isEqualTo(0);
 
     // remove the principal from the tashkil
@@ -248,7 +248,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     try {
       graphQLHelper.getObjectById(jack, "position", FIELDS, tashkil.getUuid(),
-          new TypeReference<GraphQLResponse<Position>>() {});
+          new TypeReference<GraphQlResponse<Position>>() {});
       fail("Expected NotFoundException");
     } catch (NotFoundException expectedException) {
     }
@@ -263,7 +263,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, jacksOldPosition.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(jack.getUuid());
   }
@@ -281,16 +281,16 @@ public class PositionResourceTest extends AbstractResourceTest {
     queryOrgs.setType(OrganizationType.PRINCIPAL_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(admin, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().size()).isGreaterThan(0);
 
     test.setOrganization(orgs.getList().get(0));
 
     String createdUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", test, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", test, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(createdUuid).isNotNull();
     Position created = graphQLHelper.getObjectById(admin, "position", FIELDS, createdUuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(created.getName()).isEqualTo(test.getName());
     assertThat(created.getCode()).isEqualTo(test.getCode());
     assertThat(created.getUuid()).isNotNull();
@@ -301,7 +301,7 @@ public class PositionResourceTest extends AbstractResourceTest {
         graphQLHelper.updateObject(admin, "updatePosition", "position", "PositionInput", created);
     assertThat(nrUpdated).isEqualTo(1);
     Position returned = graphQLHelper.getObjectById(jack, "position", FIELDS, created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(returned.getName()).isEqualTo(created.getName());
     assertThat(returned.getCode()).isEqualTo(created.getCode());
 
@@ -319,7 +319,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     assertThat(nrUpdated).isEqualTo(1);
 
     Position principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS,
-        created.getUuid(), new TypeReference<GraphQLResponse<Position>>() {});
+        created.getUuid(), new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(principalPos.getPerson()).isNotNull();
     assertThat(principalPos.getPersonUuid()).isEqualTo(steve.getUuid());
 
@@ -334,7 +334,7 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Ensure the old position is now empty
     principalPos = graphQLHelper.getObjectById(admin, "position", FIELDS, created.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(principalPos.getPerson()).isNull();
   }
 
@@ -347,7 +347,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setText("Advisor");
     List<Position> searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isNotEmpty();
 
@@ -355,7 +355,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setIsFilled(false);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isNotEmpty();
     assertThat(
@@ -367,7 +367,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setType(ImmutableList.of(PositionType.ADVISOR));
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isNotEmpty();
     assertThat(searchResults.stream().filter(p -> (p.getPerson() != null))
@@ -378,14 +378,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setType(ImmutableList.of(PositionType.ADMINISTRATOR));
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isEmpty();
 
     query.setText("Administrator");
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isNotEmpty();
 
@@ -395,7 +395,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     queryOrgs.setType(OrganizationType.ADVISOR_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(jack, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().size()).isGreaterThan(0);
     Organization ef11 = orgs.getList().stream()
         .filter(o -> o.getShortName().equalsIgnoreCase("ef 1.1")).findFirst().get();
@@ -409,7 +409,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setOrganizationUuid(ef1.getUuid());
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults.stream().filter(p -> p.getOrganizationUuid() == ef1.getUuid())
         .collect(Collectors.toList())).hasSameElementsAs(searchResults);
@@ -417,7 +417,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setIncludeChildrenOrgs(true);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults).isNotEmpty();
 
@@ -427,7 +427,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setSortOrder(SortOrder.DESC);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     String prevName = null;
     for (Position p : searchResults) {
@@ -441,7 +441,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setSortOrder(SortOrder.ASC);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     String prevCode = null;
     for (Position p : searchResults) {
@@ -456,7 +456,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     query.setStatus(PositionStatus.INACTIVE);
     searchResults = graphQLHelper
         .searchObjects(jack, "positionList", "query", "PositionSearchQueryInput", FIELDS, query,
-            new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {})
+            new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {})
         .getList();
     assertThat(searchResults.size()).isGreaterThan(0);
     assertThat(
@@ -476,7 +476,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     do {
       list = graphQLHelper.getAllObjects(jack,
           "positions (pageNum: " + pageNum + ", pageSize: " + pageSize + ")", FIELDS,
-          new TypeReference<GraphQLResponse<AnetBeanList<Position>>>() {});
+          new TypeReference<GraphQlResponse<AnetBeanList<Position>>>() {});
       assertThat(list).isNotNull();
       assertThat(list.getPageNum()).isEqualTo(pageNum);
       assertThat(list.getPageSize()).isEqualTo(pageSize);
@@ -499,10 +499,10 @@ public class PositionResourceTest extends AbstractResourceTest {
     newb.setStatus(PersonStatus.ACTIVE);
 
     String newbUuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        newb, new TypeReference<GraphQLResponse<Person>>() {});
+        newb, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newbUuid).isNotNull();
     newb = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, newbUuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(newb.getUuid()).isNotNull();
 
     final OrganizationSearchQuery queryOrgs = new OrganizationSearchQuery();
@@ -510,7 +510,7 @@ public class PositionResourceTest extends AbstractResourceTest {
     queryOrgs.setType(OrganizationType.PRINCIPAL_ORG);
     final AnetBeanList<Organization> orgs = graphQLHelper.searchObjects(admin, "organizationList",
         "query", "OrganizationSearchQueryInput", ORGANIZATION_FIELDS, queryOrgs,
-        new TypeReference<GraphQLResponse<AnetBeanList<Organization>>>() {});
+        new TypeReference<GraphQlResponse<AnetBeanList<Organization>>>() {});
     assertThat(orgs.getList().size()).isGreaterThan(0);
 
     Position newbPosition = new Position();
@@ -521,15 +521,15 @@ public class PositionResourceTest extends AbstractResourceTest {
     newbPosition.setPerson(newb);
 
     String newbPositionUuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", newbPosition, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", newbPosition, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newbPositionUuid).isNotNull();
     newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPositionUuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(newbPosition.getUuid()).isNotNull();
 
     // Ensure that the position contains the person
     Position returned = graphQLHelper.getObjectById(admin, "position", FIELDS,
-        newbPosition.getUuid(), new TypeReference<GraphQLResponse<Position>>() {});
+        newbPosition.getUuid(), new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(returned.getUuid()).isNotNull();
     final Person returnedPerson = returned.getPerson();
     assertThat(returnedPerson).isNotNull();
@@ -544,10 +544,10 @@ public class PositionResourceTest extends AbstractResourceTest {
     prin2.setName("2nd Principal in PrincipalTest");
     prin2.setRole(Role.PRINCIPAL);
     String prin2Uuid = graphQLHelper.createObject(admin, "createPerson", "person", "PersonInput",
-        prin2, new TypeReference<GraphQLResponse<Person>>() {});
+        prin2, new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(prin2Uuid).isNotNull();
     prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2Uuid,
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(prin2.getUuid()).isNotNull();
     assertThat(prin2.loadPosition()).isNull();
 
@@ -560,14 +560,14 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Reload this person to check their position was set.
     prin2 = graphQLHelper.getObjectById(admin, "person", PERSON_FIELDS, prin2.getUuid(),
-        new TypeReference<GraphQLResponse<Person>>() {});
+        new TypeReference<GraphQlResponse<Person>>() {});
     assertThat(prin2).isNotNull();
     assertThat(prin2.loadPosition()).isNotNull();
     assertThat(prin2.getPosition().getUuid()).isEqualTo(newbPosition.getUuid());
 
     // Check with a different API endpoint.
     Position currPos = graphQLHelper.getObjectById(admin, "position", FIELDS,
-        newbPosition.getUuid(), new TypeReference<GraphQLResponse<Position>>() {});
+        newbPosition.getUuid(), new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPersonUuid()).isNotNull();
     assertThat(currPos.getPersonUuid()).isEqualTo(prin2.getUuid());
 
@@ -586,14 +586,14 @@ public class PositionResourceTest extends AbstractResourceTest {
     pos2.setPerson(Person.createWithUuid(prin2.getUuid()));
 
     String pos2Uuid = graphQLHelper.createObject(admin, "createPosition", "position",
-        "PositionInput", pos2, new TypeReference<GraphQLResponse<Position>>() {});
+        "PositionInput", pos2, new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(pos2Uuid).isNotNull();
     pos2 = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2Uuid,
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(pos2.getUuid()).isNotNull();
 
     returned = graphQLHelper.getObjectById(admin, "position", FIELDS, pos2.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(returned).isNotNull();
     assertThat(returned.getName()).isEqualTo(pos2.getName());
     final Person returnedPerson2 = returned.getPerson();
@@ -602,12 +602,12 @@ public class PositionResourceTest extends AbstractResourceTest {
 
     // Make sure prin2 got moved out of newbPosition
     currPos = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     assertThat(currPos.getPerson()).isNull();
 
     // Pull the history of newbPosition
     newbPosition = graphQLHelper.getObjectById(admin, "position", FIELDS, newbPosition.getUuid(),
-        new TypeReference<GraphQLResponse<Position>>() {});
+        new TypeReference<GraphQlResponse<Position>>() {});
     List<PersonPositionHistory> history = newbPosition.loadPreviousPeople(context).get();
     assertThat(history.size()).isEqualTo(2);
     assertThat(history.get(0).getPersonUuid()).isEqualTo(newb.getUuid());

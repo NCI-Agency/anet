@@ -12,7 +12,7 @@ public class ReportSearchBuilder extends AbstractSearchBuilder {
   }
 
   @Override
-  protected String DefaultWhereFormat() {
+  protected String defaultWhereFormat() {
     return DEFAULT_WHERE_FORMAT;
   }
 }
