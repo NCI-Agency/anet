@@ -99,7 +99,6 @@ class BaseTaskForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -114,7 +113,7 @@ class BaseTaskForm extends Component {
                 bsStyle="primary"
                 type="button"
                 onClick={submitForm}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 Save {Settings.fields.task.shortLabel}
               </Button>
@@ -261,7 +260,7 @@ class BaseTaskForm extends Component {
                       bsStyle="primary"
                       type="button"
                       onClick={submitForm}
-                      disabled={isSubmitting || !isValid}
+                      disabled={isSubmitting}
                     >
                       Save {Settings.fields.task.shortLabel}
                     </Button>

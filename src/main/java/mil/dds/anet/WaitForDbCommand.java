@@ -9,10 +9,9 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.jdbi.v3.core.Jdbi;
 
+public class WaitForDbCommand extends ConfiguredCommand<AnetConfiguration> {
 
-public class WaitForDBCommand extends ConfiguredCommand<AnetConfiguration> {
-
-  public WaitForDBCommand() {
+  public WaitForDbCommand() {
     super("waitForDB", "Waits until DB is ready for connection");
   }
 
@@ -45,8 +44,9 @@ public class WaitForDBCommand extends ConfiguredCommand<AnetConfiguration> {
         jdbi.open().close();
         break;
       } catch (Exception exception) {
-        if (remainingTries == 0)
+        if (remainingTries == 0) {
           throw new RuntimeException(exception);
+        }
       }
       try {
         Thread.sleep(delay);

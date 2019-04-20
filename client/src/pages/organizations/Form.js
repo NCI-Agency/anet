@@ -117,7 +117,6 @@ class BaseOrganizationForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -150,7 +149,7 @@ class BaseOrganizationForm extends Component {
                 bsStyle="primary"
                 type="button"
                 onClick={submitForm}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 Save Organization
               </Button>
@@ -424,7 +423,7 @@ class BaseOrganizationForm extends Component {
                         bsStyle="primary"
                         type="button"
                         onClick={submitForm}
-                        disabled={isSubmitting || !isValid}
+                        disabled={isSubmitting}
                       >
                         Save Organization
                       </Button>

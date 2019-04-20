@@ -34,10 +34,10 @@ public abstract class AbstractSearchBuilder {
       String parameterName) {
     if (queryDate != null) {
       whereClauses
-          .add(String.format(DefaultWhereFormat(), fieldName, comp.getOperator(), parameterName));
+          .add(String.format(defaultWhereFormat(), fieldName, comp.getOperator(), parameterName));
       DaoUtils.addInstantAsLocalDateTime(args, parameterName, queryDate);
     }
   }
 
-  protected abstract String DefaultWhereFormat();
+  protected abstract String defaultWhereFormat();
 }

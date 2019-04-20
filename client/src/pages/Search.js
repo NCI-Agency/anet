@@ -38,14 +38,14 @@ import utils from "utils"
 
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
-    listName: "reports: reportList",
+    listName: `${SEARCH_OBJECT_TYPES.REPORTS}: reportList`,
     sortBy: "ENGAGEMENT_DATE",
     sortOrder: "DESC",
     variableType: "ReportSearchQueryInput",
     fields: ReportCollection.GQL_REPORT_FIELDS
   },
   [SEARCH_OBJECT_TYPES.PEOPLE]: {
-    listName: "people: personList",
+    listName: `${SEARCH_OBJECT_TYPES.PEOPLE}: personList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "PersonSearchQueryInput",
@@ -53,7 +53,7 @@ const SEARCH_CONFIG = {
       "uuid, name, rank, role, emailAddress, position { uuid, name, type, code, location { uuid, name }, organization { uuid, shortName} }"
   },
   [SEARCH_OBJECT_TYPES.POSITIONS]: {
-    listName: "positions: positionList",
+    listName: `${SEARCH_OBJECT_TYPES.POSITIONS}: positionList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "PositionSearchQueryInput",
@@ -61,21 +61,21 @@ const SEARCH_CONFIG = {
       "uuid , name, code, type, status, location { uuid, name }, organization { uuid, shortName}, person { uuid, name, rank, role }"
   },
   [SEARCH_OBJECT_TYPES.TASKS]: {
-    listName: "tasks: taskList",
+    listName: `${SEARCH_OBJECT_TYPES.TASKS}: taskList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "TaskSearchQueryInput",
     fields: "uuid, shortName, longName"
   },
   [SEARCH_OBJECT_TYPES.LOCATIONS]: {
-    listName: "locations: locationList",
+    listName: `${SEARCH_OBJECT_TYPES.LOCATIONS}: locationList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "LocationSearchQueryInput",
     fields: "uuid, name, lat, lng"
   },
   [SEARCH_OBJECT_TYPES.ORGANIZATIONS]: {
-    listName: "organizations: organizationList",
+    listName: `${SEARCH_OBJECT_TYPES.ORGANIZATIONS}: organizationList`,
     sortBy: "NAME",
     sortOrder: "ASC",
     variableType: "OrganizationSearchQueryInput",
@@ -102,7 +102,7 @@ class Search extends Page {
     })
   }
   noResults = {
-    reports: null,
+    [SEARCH_OBJECT_TYPES.REPORTS]: null,
     people: null,
     organizations: null,
     positions: null,
@@ -199,13 +199,13 @@ class Search extends Page {
 
   render() {
     const { results, error } = this.state
-    const numReports = results.reports ? results.reports.totalCount : 0
-    const numPeople = results.people ? results.people.totalCount : 0
-    const numPositions = results.positions ? results.positions.totalCount : 0
-    const numTasks = results.tasks ? results.tasks.totalCount : 0
-    const numLocations = results.locations ? results.locations.totalCount : 0
-    const numOrganizations = results.organizations
-      ? results.organizations.totalCount
+    const numReports = results[SEARCH_OBJECT_TYPES.REPORTS] ? results[SEARCH_OBJECT_TYPES.REPORTS].totalCount : 0
+    const numPeople = results[SEARCH_OBJECT_TYPES.PEOPLE] ? results[SEARCH_OBJECT_TYPES.PEOPLE].totalCount : 0
+    const numPositions = results[SEARCH_OBJECT_TYPES.POSITIONS] ? results[SEARCH_OBJECT_TYPES.POSITIONS].totalCount : 0
+    const numTasks = results[SEARCH_OBJECT_TYPES.TASKS] ? results[SEARCH_OBJECT_TYPES.TASKS].totalCount : 0
+    const numLocations = results[SEARCH_OBJECT_TYPES.LOCATIONS] ? results[SEARCH_OBJECT_TYPES.LOCATIONS].totalCount : 0
+    const numOrganizations = results[SEARCH_OBJECT_TYPES.ORGANIZATIONS]
+      ? results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].totalCount
       : 0
 
     const numResults =
@@ -216,8 +216,6 @@ class Search extends Page {
       numOrganizations +
       numTasks
     const noResults = numResults === 0
-
-    const qs = utils.parseQueryString(this.props.location.search)
 
     const taskShortLabel = Settings.fields.task.shortLabel
     return (
@@ -383,7 +381,7 @@ class Search extends Page {
   renderReports() {
     const { results } = this.state
     const { pagination } = this.props
-    const reports = results.reports
+    const reports = results[SEARCH_OBJECT_TYPES.REPORTS]
     const paginatedPart =
       pagination[this.pageLabel(SEARCH_OBJECT_TYPES.REPORTS)]
     const goToPageNum = this.getPaginatedNum(paginatedPart)
@@ -399,7 +397,8 @@ class Search extends Page {
   renderPeople() {
     return (
       <div>
-        {this.paginationFor("people")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.PEOPLE)}
+        <br />
         <Table responsive hover striped className="people-search-results">
           <thead>
             <tr>
@@ -410,7 +409,7 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Person.map(this.state.results.people.list, person => (
+            {Person.map(this.state.results[SEARCH_OBJECT_TYPES.PEOPLE].list, person => (
               <tr key={person.uuid}>
                 <td>
                   <LinkTo person={person} />
@@ -443,7 +442,8 @@ class Search extends Page {
   renderOrgs() {
     return (
       <div>
-        {this.paginationFor("organizations")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.ORGANIZATIONS)}
+        <br />
         <Table responsive hover striped id="organizations-search-results">
           <thead>
             <tr>
@@ -454,7 +454,7 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Organization.map(this.state.results.organizations.list, org => (
+            {Organization.map(this.state.results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].list, org => (
               <tr key={org.uuid}>
                 <td>
                   <LinkTo organization={org} />
@@ -473,8 +473,9 @@ class Search extends Page {
   renderPositions() {
     return (
       <div>
-        {this.paginationFor("positions")}
-        <PositionTable positions={this.state.results.positions.list} />
+        {this.paginationFor(SEARCH_OBJECT_TYPES.POSITIONS)}
+        <br />
+        <PositionTable positions={this.state.results[SEARCH_OBJECT_TYPES.POSITIONS].list} />
       </div>
     )
   }
@@ -482,7 +483,8 @@ class Search extends Page {
   renderLocations() {
     return (
       <div>
-        {this.paginationFor("locations")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.LOCATIONS)}
+        <br />
         <Table responsive hover striped>
           <thead>
             <tr>
@@ -490,7 +492,7 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {this.state.results.locations.list.map(loc => (
+            {this.state.results[SEARCH_OBJECT_TYPES.LOCATIONS].list.map(loc => (
               <tr key={loc.uuid}>
                 <td>
                   <LinkTo anetLocation={loc} />
@@ -506,7 +508,8 @@ class Search extends Page {
   renderTasks() {
     return (
       <div>
-        {this.paginationFor("tasks")}
+        {this.paginationFor(SEARCH_OBJECT_TYPES.TASKS)}
+        <br />
         <Table responsive hover striped>
           <thead>
             <tr>
@@ -514,7 +517,7 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Task.map(this.state.results.tasks.list, task => (
+            {Task.map(this.state.results[SEARCH_OBJECT_TYPES.TASKS].list, task => (
               <tr key={task.uuid}>
                 <td>
                   <LinkTo task={task}>

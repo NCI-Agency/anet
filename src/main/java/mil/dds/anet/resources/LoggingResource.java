@@ -24,22 +24,22 @@ public class LoggingResource {
   private static final Logger logger = Logger.getLogger(MethodHandles.lookup().lookupClass());
 
   static class LogEntry {
-    /** one of 'DEBUG','ERROR','FATAL','INFO','WARN' */
+    /** one of 'DEBUG','ERROR','FATAL','INFO','WARN'. */
     @JsonProperty
     String severity;
-    /** the context url */
+    /** the context url. */
     @JsonProperty
     String url;
-    /** line number of the error */
+    /** line number of the error. */
     @JsonProperty
     String lineNr;
-    /** the error/log message */
+    /** the error/log message. */
     @JsonProperty
     String message;
   }
 
   /**
-   * Create a log entry based on the following inputs:
+   * Create a log entry based on the input.
    * 
    * @param requestContext the HTTP request context (used for getting the remote address)
    * @param user the authenticated user logging the messages

@@ -183,7 +183,6 @@ class BaseReportForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
