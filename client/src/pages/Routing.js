@@ -7,6 +7,7 @@ import AuthorizationGroups from "pages/admin/AuthorizationGroups"
 import AdminIndex from "pages/admin/Index"
 import MergePeople from "pages/admin/MergePeople"
 import PrioritiesDashboard from "pages/dashboards/PrioritiesDashboard"
+import DecisivesDashboard from "pages/dashboards/DecisivesDashboard"
 import GraphiQL from "pages/GraphiQL"
 import Help from "pages/Help"
 import Home from "pages/Home"
@@ -157,6 +158,14 @@ class BaseRouting extends Component {
           render={({ match: { url } }) => (
             <Switch>
               <Route path={`${url}/:dashboard`} component={PrioritiesDashboard} />
+            </Switch>
+          )}
+        />
+        <Route
+          path="/decisives"
+          render={({ match: { url } }) => (
+            <Switch>
+              <Route path={`${url}/`} component={DecisivesDashboard} />
             </Switch>
           )}
         />

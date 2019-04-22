@@ -199,6 +199,12 @@ class BaseNav extends Component {
               >
                 <MenuItem>{dashboardEntry[1].title}</MenuItem>
               </Link>))}
+            <Link
+              to={"/decisives"}
+              onClick={resetPages}
+            >
+              <MenuItem>{"Decisives"}</MenuItem>
+            </Link>
           </NavDropdown>}
       </BSNav>
     )

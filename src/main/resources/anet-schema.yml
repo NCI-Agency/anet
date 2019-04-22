@@ -554,7 +554,10 @@ properties:
               additionalProperties: true
   dashboards:
     type: object
+  decisives:
+    type: array
 
+    
   automaticallyInactivateUsers:
     type: object
     required: [emailRemindersDaysPrior]
