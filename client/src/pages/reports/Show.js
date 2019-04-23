@@ -307,7 +307,10 @@ class BaseReportShow extends Page {
                     This report has been approved and will be automatically
                     published to the ANET community in{" "}
                     {moment(report.getReportApprovedAt())
-                      .add(24, "hours")
+                      .add(
+                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                        "hours"
+                      )
                       .toNow(true)}
                   </p>
                   {canPublish && (
