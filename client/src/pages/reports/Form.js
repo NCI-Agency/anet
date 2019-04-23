@@ -293,11 +293,11 @@ class BaseReportForm extends Component {
                         .endOf("day")
                         .isBefore(values.engagementDate) && (
                         <HelpBlock>
-                        <span className="text-success">
+                          <span className="text-success">
                             This will create an upcoming engagement
                           </span>
-                      </HelpBlock>
-                    )}
+                        </HelpBlock>
+                      )}
                   </Field>
 
                   <Field
@@ -399,13 +399,15 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
-                    widget={<ReportTags suggestions={tagSuggestions} />}
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderSpecialField}
+                      onChange={value => setFieldValue("reportTags", value)}
+                      widget={<ReportTags suggestions={tagSuggestions} />}
+                    />
+                  )}
                 </Fieldset>
 
                 <Fieldset

@@ -240,17 +240,19 @@ class ReportMinimal extends Page {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
-                    }
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderReadonlyField}
+                      humanValue={
+                        report.tags &&
+                        report.tags.map((tag, i) => (
+                          <Tag key={tag.uuid} tag={tag} />
+                        ))
+                      }
+                    />
+                  )}
 
                   <Field
                     name="author"
@@ -291,14 +293,14 @@ class ReportMinimal extends Page {
 
                 {report.reportSensitiveInformation &&
                   report.reportSensitiveInformation.text && (
-                  <Fieldset title="Sensitive information">
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: report.reportSensitiveInformation.text
-                      }}
-                    />
-                  </Fieldset>
-                )}
+                    <Fieldset title="Sensitive information">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: report.reportSensitiveInformation.text
+                        }}
+                      />
+                    </Fieldset>
+                  )}
 
                 {report.showWorkflow() && (
                   <ReportCompactWorkflow report={report} />

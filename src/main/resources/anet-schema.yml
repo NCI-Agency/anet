@@ -178,7 +178,7 @@ properties:
       report:
         type: object
         additionalProperties: false
-        required: [intent,atmosphere,atmosphereDetails,cancelled,reportTags,nextSteps,keyOutcomes,reportText]
+        required: [intent,atmosphere,atmosphereDetails,cancelled,nextSteps,keyOutcomes,reportText]
         properties:
           intent:
             type: string
