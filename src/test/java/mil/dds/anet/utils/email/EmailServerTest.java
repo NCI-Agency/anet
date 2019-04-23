@@ -1,4 +1,4 @@
-package mil.dds.anet.test.email;
+package mil.dds.anet.utils.email;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

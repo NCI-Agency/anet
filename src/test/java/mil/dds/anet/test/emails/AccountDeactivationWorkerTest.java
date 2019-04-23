@@ -1,4 +1,4 @@
-package mil.dds.anet.test.email;
+package mil.dds.anet.test.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +42,7 @@ public class AccountDeactivationWorkerTest {
   private static final int SCHEDULER_TIME_MS = 1 * 1000;
 
   @Before
-  public void setup() {
+  public void setup() throws Exception {
     config = PowerMockito.mock(AnetConfiguration.class, Mockito.RETURNS_MOCKS);
     personDao = PowerMockito.mock(PersonDao.class, Mockito.RETURNS_MOCKS);
     positionDao = PowerMockito.mock(PositionDao.class, Mockito.RETURNS_MOCKS);
@@ -56,10 +56,12 @@ public class AccountDeactivationWorkerTest {
     AnetObjectEngine instance = PowerMockito.mock(AnetObjectEngine.class);
     when(instance.getPersonDao()).thenReturn(personDao);
 
+    when(positionDao.removePersonFromPosition(Mockito.any())).thenReturn(1);
     when(instance.getPositionDao()).thenReturn(positionDao);
     when(AnetObjectEngine.getInstance()).thenReturn(instance);
 
     PowerMockito.mockStatic(AnetEmailWorker.class);
+    PowerMockito.doNothing().when(AnetEmailWorker.class, "sendEmailAsync", Mockito.any());
   }
 
   @Test
@@ -151,7 +153,6 @@ public class AccountDeactivationWorkerTest {
 
     Person testPerson15Ignored = createDummyPerson(Instant.now().plus(15, ChronoUnit.DAYS),
         "test15@ignored_domain.com", PersonStatus.ACTIVE, "ignored_domain", new Position());
-
 
     when(personDao.search(Mockito.any()))
         .thenReturn(new AnetBeanList<>(Arrays.asList(testPersonEotIgnored, testPerson15Ignored)));

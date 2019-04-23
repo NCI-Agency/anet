@@ -1,4 +1,4 @@
-package mil.dds.anet.test.email;
+package mil.dds.anet.utils.email;
 
 import java.time.Instant;
 import java.util.ArrayList;

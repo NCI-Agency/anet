@@ -1,4 +1,4 @@
-package mil.dds.anet.test.email;
+package mil.dds.anet.utils.email;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +17,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
-import mil.dds.anet.test.email.EmailResponse;
 
 /**
  * This class provides a wrapper for the fake SMTP server's API
@@ -88,13 +87,13 @@ public class FakeSmtpServer {
   /**
    * Sends an email to the server Warning: The server does not support the BCC field
    * 
-   * @param to      'To' address
-   * @param from    'From' address
+   * @param to 'To' address
+   * @param from 'From' address
    * @param replyTo 'ReplyTo' address
-   * @param cc      'CC' address
+   * @param cc 'CC' address
    * @param subject Email's subject
-   * @param msg     Email's message
-   * @param date    (Optional) Email's date
+   * @param msg Email's message
+   * @param date (Optional) Email's date
    * @throws MessagingException If formatting/sending the email fails
    */
   public void sendEmail(String to, String from, String replyTo, String cc, String subject,
