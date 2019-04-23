@@ -469,23 +469,23 @@ class BaseReportShow extends Page {
 
                 {report.reportSensitiveInformation &&
                   report.reportSensitiveInformation.text && (
-                    <Fieldset title="Sensitive information">
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: report.reportSensitiveInformation.text
-                        }}
-                      />
-                      {(report.authorizationGroups &&
+                  <Fieldset title="Sensitive information">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: report.reportSensitiveInformation.text
+                      }}
+                    />
+                    {(report.authorizationGroups &&
                         report.authorizationGroups.length > 0 && (
-                          <div>
-                            <h5>Authorized groups:</h5>
-                            <AuthorizationGroupTable
-                              authorizationGroups={values.authorizationGroups}
-                            />
-                          </div>
-                        )) || <h5>No groups are authorized!</h5>}
-                    </Fieldset>
-                  )}
+                        <div>
+                        <h5>Authorized groups:</h5>
+                        <AuthorizationGroupTable
+                            authorizationGroups={values.authorizationGroups}
+                        />
+                      </div>
+                    )) || <h5>No groups are authorized!</h5>}
+                  </Fieldset>
+                )}
 
                 {report.showWorkflow() && (
                   <ReportFullWorkflow report={report} />

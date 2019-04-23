@@ -293,14 +293,14 @@ class ReportMinimal extends Page {
 
                 {report.reportSensitiveInformation &&
                   report.reportSensitiveInformation.text && (
-                    <Fieldset title="Sensitive information">
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: report.reportSensitiveInformation.text
-                        }}
-                      />
-                    </Fieldset>
-                  )}
+                  <Fieldset title="Sensitive information">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: report.reportSensitiveInformation.text
+                      }}
+                    />
+                  </Fieldset>
+                )}
 
                 {report.showWorkflow() && (
                   <ReportCompactWorkflow report={report} />
