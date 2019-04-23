@@ -14567,10 +14567,10 @@ web-namespaces@^1.1.2:
   resolved "https://registry.yarnpkg.com/web-namespaces/-/web-namespaces-1.1.2.tgz#c8dc267ab639505276bae19e129dbd6ae72b22b4"
   integrity sha512-II+n2ms4mPxK+RnIxRPOw3zwF2jRscdJIUE9BfkKHm4FYEg9+biIoTMnaZF5MpemE3T+VhMLrhbyD4ilkPCSbg==
 
-webdriver@^5.7.14:
-  version "5.7.14"
-  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-5.7.14.tgz#612dd128c1eabf4b4a0fb573e513e95d471ca8fc"
-  integrity sha512-tqATZtxebsBB0dpwWvyTXmEbdfU/bK+AvYPUGTLzqsZ1uItJ4nEDuI0n3iDZfYBMR2b5FShF5RxMCwkLxaVDmw==
+webdriver@^5.7.15:
+  version "5.7.15"
+  resolved "https://registry.yarnpkg.com/webdriver/-/webdriver-5.7.15.tgz#c03bbbbddb17ffbdbd367e3a32da5645b5729306"
+  integrity sha512-lRH1yalNc/1ST4Nim7PUYfp/DSU1EAY4gEMK5+7Foh3XyUp7TUDnXNruBxglAK0lG2+ocfsHvFVx7e4rEo/1TQ==
   dependencies:
     "@wdio/config" "^5.7.13"
     "@wdio/logger" "^5.7.8"
@@ -14578,10 +14578,10 @@ webdriver@^5.7.14:
     lodash.merge "^4.6.1"
     request "^2.83.0"
 
-webdriverio@^5.7.12, webdriverio@^5.7.14:
-  version "5.7.14"
-  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.7.14.tgz#2e79597aa10c1bf64867e2c62b341f3bfed883ab"
-  integrity sha512-rN91WR1g8ORqKI42cy8h7flvCYBKACUF4BxHGmHG0cQkterNahDTjHjRl+Ab3GqfzaBrzYMCA5AdpNNfvqxH9Q==
+webdriverio@^5.7.14, webdriverio@^5.7.15:
+  version "5.7.15"
+  resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-5.7.15.tgz#511d27d2963e5e24c565d56a06d589364d2e4192"
+  integrity sha512-Dg/azrry/qVZhmUfT3Sn5ODssYeCnXjhd9zUAvZIihNC2T2QrRCz7XSAhLuY4PTfY2vQfzP1zC0f8XiHIotX6A==
   dependencies:
     "@wdio/config" "^5.7.13"
     "@wdio/logger" "^5.7.8"
@@ -14594,7 +14594,7 @@ webdriverio@^5.7.12, webdriverio@^5.7.14:
     lodash.zip "^4.2.0"
     rgb2hex "^0.1.0"
     serialize-error "^3.0.0"
-    webdriver "^5.7.14"
+    webdriver "^5.7.15"
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
