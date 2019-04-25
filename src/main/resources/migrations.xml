@@ -2277,4 +2277,12 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-notes-type-column" author="gjvoosten">
+		<!-- Create a new type column for notes and fill it with the the default value of 0 -->
+		<addColumn tableName="notes">
+			<column name="type" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

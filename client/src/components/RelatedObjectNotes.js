@@ -7,7 +7,7 @@ import AppContext from "components/AppContext"
 import ConfirmDelete from "components/ConfirmDelete"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import Model from "components/Model"
+import Model, { NOTE_TYPE } from "components/Model"
 import RelatedObjectNoteModal from "components/RelatedObjectNoteModal"
 import _isEmpty from "lodash/isEmpty"
 import _isEqual from "lodash/isEqual"
@@ -164,7 +164,10 @@ class BaseRelatedObjectNotes extends Component {
             <Icon icon={IconNames.ADD} />
           </button>
           <RelatedObjectNoteModal
-            note={{ noteRelatedObjects: [{ ...this.props.relatedObject }] }}
+            note={{
+              type: NOTE_TYPE.FREE_TEXT,
+              noteRelatedObjects: [{ ...this.props.relatedObject }]
+            }}
             showModal={this.state.showRelatedObjectNoteModal === "new"}
             onCancel={this.cancelRelatedObjectNoteModal}
             onSuccess={this.hideNewRelatedObjectNoteModal}

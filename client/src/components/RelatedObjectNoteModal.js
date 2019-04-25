@@ -2,7 +2,7 @@ import API from "api"
 import AppContext from "components/AppContext"
 import * as FieldHelper from "components/FieldHelper"
 import Messages from "components/Messages"
-import Model, { GRAPHQL_NOTE_FIELDS } from "components/Model"
+import Model, { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Person } from "models"
@@ -20,6 +20,10 @@ class BaseRelatedObjectNoteModal extends Component {
     onSuccess: PropTypes.func.isRequired
   }
   yupSchema = yup.object().shape({
+    type: yup
+      .string()
+      .required()
+      .default(NOTE_TYPE.FREE_TEXT),
     text: yup
       .string()
       .required()
