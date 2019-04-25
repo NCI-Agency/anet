@@ -5,8 +5,10 @@ import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
+import { GRAPHQL_NOTE_FIELDS, NOTE_TYPE } from "components/Model"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
+import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
 import { Organization, Person, Task } from "models"
 import PropTypes from "prop-types"
@@ -55,7 +57,14 @@ class BaseTaskForm extends Component {
   }
 
   render() {
-    const { currentUser, edit, title, ...myFormProps } = this.props
+    const {
+      currentUser,
+      edit,
+      title,
+      initialValues,
+      ...myFormProps
+    } = this.props
+    initialValues.reason_customFieldEnum1 = ""
 
     const orgSearchQuery = {
       status: Organization.STATUS.ACTIVE,
@@ -74,6 +83,7 @@ class BaseTaskForm extends Component {
         onSubmit={this.onSubmit}
         validationSchema={Task.yupSchema}
         isInitialValid
+        initialValues={initialValues}
         {...myFormProps}
       >
         {({
@@ -203,20 +213,37 @@ class BaseTaskForm extends Component {
                   )}
 
                   {Settings.fields.task.customFieldEnum1 && (
-                    <this.TaskCustomFieldEnum1
-                      dictProps={Object.without(
-                        Settings.fields.task.customFieldEnum1,
-                        "enum"
+                    <React.Fragment>
+                      <this.TaskCustomFieldEnum1
+                        dictProps={Object.without(
+                          Settings.fields.task.customFieldEnum1,
+                          "enum"
+                        )}
+                        name="customFieldEnum1"
+                        component={FieldHelper.renderButtonToggleGroup}
+                        buttons={this.customEnumButtons(
+                          Settings.fields.task.customFieldEnum1.enum
+                        )}
+                        onChange={value =>
+                          setFieldValue("customFieldEnum1", value)
+                        }
+                      />
+                      {edit &&
+                        this.props.initialValues.customFieldEnum1 !==
+                          values.customFieldEnum1 && (
+                          <Field
+                          name="reason_customFieldEnum1"
+                          label={`Reason for updating ${
+                            Settings.fields.task.customFieldEnum1.label
+                          }`}
+                          component={FieldHelper.renderSpecialField}
+                          onChange={value =>
+                            setFieldValue("reason_customFieldEnum1", value)
+                          }
+                          widget={<RichTextEditor className="textField" />}
+                        />
                       )}
-                      name="customFieldEnum1"
-                      component={FieldHelper.renderButtonToggleGroup}
-                      buttons={this.customEnumButtons(
-                        Settings.fields.task.customFieldEnum1.enum
-                      )}
-                      onChange={value =>
-                        setFieldValue("customFieldEnum1", value)
-                      }
-                    />
+                    </React.Fragment>
                   )}
 
                   {Settings.fields.task.customFieldEnum2 && (
@@ -311,7 +338,7 @@ class BaseTaskForm extends Component {
   }
 
   save = (values, form) => {
-    const task = new Task(values)
+    const task = Object.without(new Task(values), "reason_customFieldEnum1")
     task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     const { edit } = this.props
@@ -319,7 +346,31 @@ class BaseTaskForm extends Component {
     let graphql = operation + "(task: $task)"
     graphql += edit ? "" : " { uuid }"
     const variables = { task: task }
-    const variableDef = "($task: TaskInput!)"
+    let variableDef = "($task: TaskInput!"
+    if (
+      edit &&
+      this.props.initialValues.customFieldEnum1 !== values.customFieldEnum1
+    ) {
+      // Add an additional mutation to create a change record
+      graphql += ` createNote(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
+      variables.note = {
+        type: NOTE_TYPE.CHANGE_RECORD,
+        noteRelatedObjects: [
+          {
+            relatedObjectType: "tasks",
+            relatedObjectUuid: this.props.initialValues.uuid
+          }
+        ],
+        text: JSON.stringify({
+          text: values.reason_customFieldEnum1,
+          changedField: "customFieldEnum1",
+          oldValue: this.props.initialValues.customFieldEnum1,
+          newValue: values.customFieldEnum1
+        })
+      }
+      variableDef += ", $note: NoteInput!"
+    }
+    variableDef += ")"
     return API.mutation(graphql, variables, variableDef)
   }
 }
