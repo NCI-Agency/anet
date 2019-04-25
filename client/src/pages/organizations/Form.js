@@ -203,6 +203,7 @@ class BaseOrganizationForm extends Component {
                         name="type"
                         component={FieldHelper.renderButtonToggleGroup}
                         buttons={this.typeButtons}
+                        onChange={value => setFieldValue("type", value)}
                       />
                       <Field
                         name="parentOrg"
@@ -238,6 +239,7 @@ class BaseOrganizationForm extends Component {
                         name="status"
                         component={FieldHelper.renderButtonToggleGroup}
                         buttons={this.statusButtons}
+                        onChange={value => setFieldValue("status", value)}
                         disabled={!isAdmin}
                       />
                       <this.IdentificationCodeFieldWithLabel

@@ -281,10 +281,7 @@ class BaseReportForm extends Component {
                   <Field
                     name="engagementDate"
                     component={FieldHelper.renderSpecialField}
-                    value={values.engagementDate}
-                    onChange={(value, formattedValue) =>
-                      setFieldValue("engagementDate", value)
-                    }
+                    onChange={value => setFieldValue("engagementDate", value)}
                     onBlur={() => setFieldTouched("engagementDate", true)}
                     widget={
                       <CustomDateInput
@@ -397,6 +394,7 @@ class BaseReportForm extends Component {
                       label={Settings.fields.report.atmosphere}
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={this.atmosphereButtons}
+                      onChange={value => setFieldValue("atmosphere", value)}
                       className="atmosphere-form-group"
                     />
                   )}

@@ -122,6 +122,7 @@ class BaseTaskForm extends Component {
                     name="status"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={this.statusButtons}
+                    onChange={value => setFieldValue("status", value)}
                   />
 
                   <Field
@@ -178,7 +179,6 @@ class BaseTaskForm extends Component {
                       dictProps={Settings.fields.task.plannedCompletion}
                       name="plannedCompletion"
                       component={FieldHelper.renderSpecialField}
-                      value={values.plannedCompletion}
                       onChange={(value, formattedValue) =>
                         setFieldValue("plannedCompletion", value)
                       }
@@ -192,7 +192,6 @@ class BaseTaskForm extends Component {
                       dictProps={Settings.fields.task.projectedCompletion}
                       name="projectedCompletion"
                       component={FieldHelper.renderSpecialField}
-                      value={values.projectedCompletion}
                       onChange={(value, formattedValue) =>
                         setFieldValue("projectedCompletion", value)
                       }
@@ -214,6 +213,9 @@ class BaseTaskForm extends Component {
                       buttons={this.customEnumButtons(
                         Settings.fields.task.customFieldEnum1.enum
                       )}
+                      onChange={value =>
+                        setFieldValue("customFieldEnum1", value)
+                      }
                     />
                   )}
 
@@ -228,6 +230,9 @@ class BaseTaskForm extends Component {
                       buttons={this.customEnumButtons(
                         Settings.fields.task.customFieldEnum2.enum
                       )}
+                      onChange={value =>
+                        setFieldValue("customFieldEnum2", value)
+                      }
                     />
                   )}
                 </Fieldset>

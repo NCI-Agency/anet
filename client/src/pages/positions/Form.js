@@ -181,6 +181,7 @@ class BasePositionForm extends Component {
                       name="type"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={this.typeButtons}
+                      onChange={value => setFieldValue("type", value)}
                     />
                   )}
 
@@ -188,6 +189,7 @@ class BasePositionForm extends Component {
                     name="status"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={this.statusButtons}
+                    onChange={value => setFieldValue("status", value)}
                   >
                     {willAutoKickPerson && (
                       <HelpBlock>
@@ -235,6 +237,7 @@ class BasePositionForm extends Component {
                       name="permissions"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={permissionsButtons}
+                      onChange={value => setFieldValue("permissions", value)}
                     />
                   )}
                 </Fieldset>

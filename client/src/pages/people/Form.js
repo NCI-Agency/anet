@@ -326,9 +326,8 @@ class BasePersonForm extends Component {
                       name="role"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={roleButtons}
-                      onClick={event => {
-                        const role = event.target.value
-                        const roleCountries = this.countries(role)
+                      onChange={value => {
+                        const roleCountries = this.countries(value)
                         // Reset country value on role change
                         if (roleCountries.length === 1) {
                           // Assign default country if there's only one
@@ -336,7 +335,7 @@ class BasePersonForm extends Component {
                         } else {
                           setFieldValue("country", "")
                         }
-                        setFieldValue("role", role)
+                        setFieldValue("role", value)
                       }}
                     >
                       {!edit && isAdvisor && (
@@ -367,6 +366,7 @@ class BasePersonForm extends Component {
                       name="status"
                       component={FieldHelper.renderButtonToggleGroup}
                       buttons={this.statusButtons}
+                      onChange={value => setFieldValue("status", value)}
                     >
                       {willAutoKickPosition && (
                         <HelpBlock>
