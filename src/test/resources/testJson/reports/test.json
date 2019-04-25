@@ -5,6 +5,7 @@
 	"createdAt": 1453753380000,
 	"updatedAt": 1453753380000,
 	"engagementDate" : 1453753380000,
+	"duration": 90,
 	"location": {
 		"uuid": null,
 		"name": "The Boat Dock",

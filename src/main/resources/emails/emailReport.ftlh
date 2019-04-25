@@ -262,10 +262,21 @@ ${sender.name} sent you a report from ANET:
         <label for="engagementDate" class="col-sm-2 control-label">Engagement Date</label>
         <div class="col-sm-7">
           <div id="engagementDate" class="form-control-static">
-            ${(dateFormatter.format(report.engagementDate))!}
+            ${(engagementDateFormatter.format(report.engagementDate))!}
           </div>
         </div>
       </div>
+
+      <#if engagementsIncludeTimeAndDuration>
+        <div class="form-group">
+          <label for="duration" class="col-sm-2 control-label">Duration (minutes)</label>
+          <div class="col-sm-7">
+            <div id="duration" class="form-control-static">
+              ${duration!}
+            </div>
+          </div>
+        </div>
+      </#if>
 
       <div class="form-group">
         <label for="location" class="col-sm-2 control-label">Location</label>

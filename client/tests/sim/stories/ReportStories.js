@@ -88,6 +88,7 @@ const populateReport = async function(report, user) {
   const template = {
     intent: () => faker.lorem.paragraph(),
     engagementDate: () => faker.date.recent().toISOString(),
+    duration: () => faker.random.number({ min: 1, max: 480 }),
     cancelledReason: () =>
       faker.random.arrayElement([
         "CANCELLED_BY_ADVISOR",
@@ -142,6 +143,7 @@ const populateReport = async function(report, user) {
   populate(report, template)
     .intent.always()
     .engagementDate.always()
+    .duration.often()
     .cancelledReason.often()
     .atmosphere.always()
     .atmosphereDetails.always()
@@ -178,7 +180,7 @@ const updateDraftReport = async function(user) {
   user.person.uuid
 }"}) {
                   list {
-                    uuid, intent, engagementDate, keyOutcomes, nextSteps, cancelledReason
+                    uuid, intent, engagementDate, duration, keyOutcomes, nextSteps, cancelledReason
                     atmosphere, atmosphereDetails
                     attendees {
                         uuid, primary

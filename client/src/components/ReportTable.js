@@ -1,4 +1,3 @@
-import { Settings } from "api"
 import LinkTo from "components/LinkTo"
 import { Report } from "models"
 import moment from "moment"
@@ -44,7 +43,7 @@ export default class ReportTable extends Component {
               {showStatus && <td>{report.state}</td>}
               <td>
                 {moment(report.engagementDate).format(
-                  Settings.dateFormats.forms.short
+                  Report.getEngagementDateFormat()
                 )}
               </td>
             </tr>

@@ -165,17 +165,25 @@ logging:
 dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
 
+  engagementsIncludeTimeAndDuration: true
+
   dateFormats:
     email:
-      short: d MMMM yyyy
+      date: d MMMM yyyy
       withTime: d MMMM yyyy @ HH:mm
     excel: d MMMM yyyy
     forms:
-      input: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
-              DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
-      short: D MMMM YYYY
-      long: dddd, D MMMM YYYY
-      withTime: D MMMM YYYY @ HH:mm
+      input:
+        date: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
+               DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
+        withTime: [DD-MM-YYYY HH:mm, DD-MM-YY HH:mm, DD/MM/YYYY HH:mm, DD/MM/YY HH:mm, DD MM YYYY HH:mm, DD MM YY HH:mm,
+                   DD.MM.YYYY HH:mm, DD.MM.YY HH:mm, DDMMYYYY HH:mm, DDMMYY HH:mm, D MMMM YYYY HH:mm]
+      displayShort:
+        date: D MMMM YYYY
+        withTime: D MMMM YYYY @ HH:mm
+      displayLong:
+        date: dddd, D MMMM YYYY
+        withTime: dddd, D MMMM YYYY @ HH:mm
 
   reportWorkflow:
     nbOfHoursQuarantineApproved: 24

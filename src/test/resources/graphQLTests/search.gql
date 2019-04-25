@@ -1,5 +1,5 @@
 reportList (query:{text:"${searchQuery}",pageNum:0,pageSize:0}) {
-	list { uuid, intent, engagementDate, keyOutcomes, nextSteps
+	list { uuid, intent, engagementDate, duration, keyOutcomes, nextSteps
         primaryAdvisor { uuid, name, position { organization { uuid, shortName, longName}}},
         primaryPrincipal { uuid, name, position { organization { uuid, shortName, longName}}},
         advisorOrg { uuid, shortName, longName},
