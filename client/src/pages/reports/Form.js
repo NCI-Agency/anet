@@ -308,20 +308,44 @@ class BaseReportForm extends Component {
                     extraColElem={
                       recents.locations &&
                       recents.locations.length > 0 && (
-                        <div className="location-form-group shortcut-list">
-                          <h5>Recent Locations</h5>
-                          {recents.locations.map(location => (
-                            <Button
-                              key={location.uuid}
-                              bsStyle="link"
-                              onClick={() =>
-                                setFieldValue("location", location)
-                              }
+                        <React.Fragment>
+                          <div
+                            className="hidden-xs"
+                            style={{ position: "relative" }}
+                          >
+                            <div
+                              style={{ position: "absolute", top: 0, left: 0 }}
+                              className="location-form-group shortcut-list"
                             >
-                              Add {location.name}
-                            </Button>
-                          ))}
-                        </div>
+                              <h5>Recent Locations</h5>
+                              {recents.locations.map(location => (
+                                <Button
+                                  key={location.uuid}
+                                  bsStyle="link"
+                                  onClick={() =>
+                                    setFieldValue("location", location)
+                                  }
+                                >
+                                  Add {location.name}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="visible-xs location-form-group shortcut-list">
+                            <h5>Recent Locations</h5>
+                            {recents.locations.map(location => (
+                              <Button
+                                key={location.uuid}
+                                bsStyle="link"
+                                onClick={() =>
+                                  setFieldValue("location", location)
+                                }
+                              >
+                                Add {location.name}
+                              </Button>
+                            ))}
+                          </div>
+                        </React.Fragment>
                       )
                     }
                     widget={
