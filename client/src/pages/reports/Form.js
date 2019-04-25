@@ -412,13 +412,15 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
-                    widget={<ReportTags suggestions={tagSuggestions} />}
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderSpecialField}
+                      onChange={value => setFieldValue("reportTags", value)}
+                      widget={<ReportTags suggestions={tagSuggestions} />}
+                    />
+                  )}
                 </Fieldset>
 
                 <Fieldset

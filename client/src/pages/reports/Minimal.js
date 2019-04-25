@@ -248,17 +248,19 @@ class ReportMinimal extends Page {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
-                    }
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderReadonlyField}
+                      humanValue={
+                        report.tags &&
+                        report.tags.map((tag, i) => (
+                          <Tag key={tag.uuid} tag={tag} />
+                        ))
+                      }
+                    />
+                  )}
 
                   <Field
                     name="author"
