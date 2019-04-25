@@ -133,9 +133,7 @@ logging:
     "io.dropwizard.assets.*" : TRACE
     "waffle.servlet.NegotiateSecurityFilter" : TRACE
     "mil.dds.anet.auth.AnetAuthenticationFilter" : TRACE
-    "mil.dds.anet.threads.AnetEmailWorker" : DEBUG
-    "mil.dds.anet.threads.FutureEngagementWorker" : DEBUG
-    "mil.dds.anet.threads.ReportPublicationWorker" : DEBUG
+    "mil.dds.anet.threads" : DEBUG
     "mil.dds.anet.resources.TestingResource" :
       level: INFO
       appenders:
