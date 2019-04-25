@@ -404,9 +404,34 @@ test("Verify that validation and other reports/new interactions work", async t =
 
   await pageHelpers.clickTodayButton()
 
+  // set time as well
+  let $hourInput = await $("input.bp3-timepicker-input.bp3-timepicker-hour")
+  // clear field, enter data, fire blur event
+  await $hourInput.sendKeys(
+    t.context.Key.END +
+      t.context.Key.BACK_SPACE.repeat(2) +
+      "23" +
+      t.context.Key.TAB
+  )
+  let $minuteInput = await $("input.bp3-timepicker-input.bp3-timepicker-minute")
+  // clear field, enter data, fire blur event
+  await $minuteInput.sendKeys(
+    t.context.Key.END +
+      t.context.Key.BACK_SPACE.repeat(2) +
+      "45" +
+      t.context.Key.TAB
+  )
+
+  // check date and time
+  let dateTimeFormat = "DD-MM-YYYY HH:mm"
+  let dateTimeValue = await $engagementDate.getAttribute("value")
+  let expectedDateTime = moment()
+    .hour(23)
+    .minute(45)
+    .format(dateTimeFormat)
   t.is(
-    await $engagementDate.getAttribute("value"),
-    moment().format("DD-MM-YYYY"),
+    dateTimeValue,
+    expectedDateTime,
     'Clicking the "today" button puts the current date in the engagement field'
   )
 

@@ -7,7 +7,6 @@ import { Button, Glyphicon, Panel } from "react-bootstrap"
 import Pie from "components/graphs/Pie"
 
 export default class Kanban extends React.Component {
-
   static propTypes = {
     tasks: PropTypes.array.isRequired,
     title: PropTypes.string.isRequired,
@@ -22,18 +21,16 @@ export default class Kanban extends React.Component {
           flexDirection: "row"
         }}
       >
-        {this.props.columns.map(
-          column => {
-            return (
-              <Column
-                name={column.name}
-                taskUUIDs={column.tasks}
-                key={column.name}
-                tasks={this.props.tasks}
-              />
-            )
-          }
-        )}
+        {this.props.columns.map(column => {
+          return (
+            <Column
+              name={column.name}
+              taskUUIDs={column.tasks}
+              key={column.name}
+              tasks={this.props.tasks}
+            />
+          )
+        })}
       </div>
     )
   }
@@ -118,8 +115,13 @@ class Card extends React.Component {
         style={{
           backgroundColor:
             this.props.task.customFieldEnum1 && // TODO: use optional chaining
-            Settings.fields.task.customFieldEnum1.enum[this.props.task.customFieldEnum1] &&
-            (Settings.fields.task.customFieldEnum1.enum[this.props.task.customFieldEnum1].color || "#f9f7f7"),
+            Settings.fields.task.customFieldEnum1.enum[
+              this.props.task.customFieldEnum1
+            ] &&
+            (Settings.fields.task.customFieldEnum1.enum[
+              this.props.task.customFieldEnum1
+            ].color ||
+              "#f9f7f7"),
           margin: "3px"
         }}
       >

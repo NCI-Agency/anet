@@ -19,6 +19,7 @@ public class ReportMapper implements RowMapper<Report> {
 
     r.setState(MapperUtils.getEnumIdx(rs, "reports_state", ReportState.class));
     r.setEngagementDate(DaoUtils.getInstantAsLocalDateTime(rs, "reports_engagementDate"));
+    r.setDuration(DaoUtils.getOptionalInt(rs, "reports_duration"));
     r.setReleasedAt(DaoUtils.getInstantAsLocalDateTime(rs, "reports_releasedAt"));
     r.setLocationUuid(rs.getString("reports_locationUuid"));
     r.setApprovalStepUuid(rs.getString("reports_approvalStepUuid"));

@@ -11,7 +11,7 @@ person(uuid:"${personUuid}") {
     },
     authoredReports(pageNum:0,pageSize:10) { list { 
         uuid,
-        engagementDate,
+        engagementDate, duration,
         advisorOrg { uuid, shortName, longName }
         intent,
         author {
@@ -21,7 +21,7 @@ person(uuid:"${personUuid}") {
     }},
     attendedReports(pageNum:0, pageSize:10) { list { 
         uuid,
-        engagementDate,
+        engagementDate, duration,
         advisorOrg { uuid, shortName, longName }
         intent,
         author {

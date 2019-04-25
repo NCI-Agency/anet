@@ -49,9 +49,13 @@ export default class Pie extends SVGCanvas {
     selected
       .enter()
       .append("path")
-      .attr("d", d3.arc()
-                   .innerRadius(radius / 2)
-                   .outerRadius(radius))
+      .attr(
+        "d",
+        d3
+          .arc()
+          .innerRadius(radius / 2)
+          .outerRadius(radius)
+      )
       .attr("fill", this.props.segmentFill)
       .attr("stroke", "grey")
       .style("stroke-width", "1px")

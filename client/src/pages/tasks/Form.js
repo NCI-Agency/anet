@@ -220,13 +220,15 @@ class BaseTaskForm extends Component {
                         Settings.fields.task.customFieldEnum1.enum
                       )}
                     />
-				  )}
+                  )}
 
-				  {Settings.fields.task.assessment && (<this.TaskAssessmentField
-                    dictProps={Settings.fields.task.assessment}
-                    name="assessment"
-                    component={FieldHelper.renderInputField}
-                  />)}
+                  {Settings.fields.task.assessment && (
+                    <this.TaskAssessmentField
+                      dictProps={Settings.fields.task.assessment}
+                      name="assessment"
+                      component={FieldHelper.renderInputField}
+                    />
+                  )}
 
                   {Settings.fields.task.customFieldEnum2 && (
                     <this.TaskCustomFieldEnum2

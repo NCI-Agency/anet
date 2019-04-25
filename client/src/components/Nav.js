@@ -189,7 +189,7 @@ class BaseNav extends Component {
           </NavDropdown>
         )}
 
-        {Settings.dashboards && 
+        {Settings.dashboards && (
           <NavDropdown title="Dashboards" id="dashboards" active={inDashboards}>
             {Object.entries(Settings.dashboards).map(dashboardEntry => (
               <Link
@@ -198,14 +198,13 @@ class BaseNav extends Component {
                 onClick={resetPages}
               >
                 <MenuItem>{dashboardEntry[1].title}</MenuItem>
-              </Link>))}
-            <Link
-              to={"/decisives"}
-              onClick={resetPages}
-            >
+              </Link>
+            ))}
+            <Link to={"/decisives"} onClick={resetPages}>
               <MenuItem>{"Decisives"}</MenuItem>
             </Link>
-          </NavDropdown>}
+          </NavDropdown>
+        )}
       </BSNav>
     )
   }

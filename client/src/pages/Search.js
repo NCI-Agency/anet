@@ -178,11 +178,21 @@ class Search extends Page {
 
   render() {
     const { results, error } = this.state
-    const numReports = results[SEARCH_OBJECT_TYPES.REPORTS] ? results[SEARCH_OBJECT_TYPES.REPORTS].totalCount : 0
-    const numPeople = results[SEARCH_OBJECT_TYPES.PEOPLE] ? results[SEARCH_OBJECT_TYPES.PEOPLE].totalCount : 0
-    const numPositions = results[SEARCH_OBJECT_TYPES.POSITIONS] ? results[SEARCH_OBJECT_TYPES.POSITIONS].totalCount : 0
-    const numTasks = results[SEARCH_OBJECT_TYPES.TASKS] ? results[SEARCH_OBJECT_TYPES.TASKS].totalCount : 0
-    const numLocations = results[SEARCH_OBJECT_TYPES.LOCATIONS] ? results[SEARCH_OBJECT_TYPES.LOCATIONS].totalCount : 0
+    const numReports = results[SEARCH_OBJECT_TYPES.REPORTS]
+      ? results[SEARCH_OBJECT_TYPES.REPORTS].totalCount
+      : 0
+    const numPeople = results[SEARCH_OBJECT_TYPES.PEOPLE]
+      ? results[SEARCH_OBJECT_TYPES.PEOPLE].totalCount
+      : 0
+    const numPositions = results[SEARCH_OBJECT_TYPES.POSITIONS]
+      ? results[SEARCH_OBJECT_TYPES.POSITIONS].totalCount
+      : 0
+    const numTasks = results[SEARCH_OBJECT_TYPES.TASKS]
+      ? results[SEARCH_OBJECT_TYPES.TASKS].totalCount
+      : 0
+    const numLocations = results[SEARCH_OBJECT_TYPES.LOCATIONS]
+      ? results[SEARCH_OBJECT_TYPES.LOCATIONS].totalCount
+      : 0
     const numOrganizations = results[SEARCH_OBJECT_TYPES.ORGANIZATIONS]
       ? results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].totalCount
       : 0
@@ -386,30 +396,33 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Person.map(this.state.results[SEARCH_OBJECT_TYPES.PEOPLE].list, person => (
-              <tr key={person.uuid}>
-                <td>
-                  <LinkTo person={person} />
-                </td>
-                <td>
-                  <LinkTo position={person.position} />
-                  {person.position && person.position.code
-                    ? `, ${person.position.code}`
-                    : ""}
-                </td>
-                <td>
-                  <LinkTo
-                    whenUnspecified=""
-                    anetLocation={person.position && person.position.location}
-                  />
-                </td>
-                <td>
-                  {person.position && person.position.organization && (
-                    <LinkTo organization={person.position.organization} />
-                  )}
-                </td>
-              </tr>
-            ))}
+            {Person.map(
+              this.state.results[SEARCH_OBJECT_TYPES.PEOPLE].list,
+              person => (
+                <tr key={person.uuid}>
+                  <td>
+                    <LinkTo person={person} />
+                  </td>
+                  <td>
+                    <LinkTo position={person.position} />
+                    {person.position && person.position.code
+                      ? `, ${person.position.code}`
+                      : ""}
+                  </td>
+                  <td>
+                    <LinkTo
+                      whenUnspecified=""
+                      anetLocation={person.position && person.position.location}
+                    />
+                  </td>
+                  <td>
+                    {person.position && person.position.organization && (
+                      <LinkTo organization={person.position.organization} />
+                    )}
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </Table>
       </div>
@@ -431,16 +444,19 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Organization.map(this.state.results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].list, org => (
-              <tr key={org.uuid}>
-                <td>
-                  <LinkTo organization={org} />
-                </td>
-                <td>{org.longName}</td>
-                <td>{org.identificationCode}</td>
-                <td>{org.humanNameOfType()}</td>
-              </tr>
-            ))}
+            {Organization.map(
+              this.state.results[SEARCH_OBJECT_TYPES.ORGANIZATIONS].list,
+              org => (
+                <tr key={org.uuid}>
+                  <td>
+                    <LinkTo organization={org} />
+                  </td>
+                  <td>{org.longName}</td>
+                  <td>{org.identificationCode}</td>
+                  <td>{org.humanNameOfType()}</td>
+                </tr>
+              )
+            )}
           </tbody>
         </Table>
       </div>
@@ -452,7 +468,9 @@ class Search extends Page {
       <div>
         {this.paginationFor(SEARCH_OBJECT_TYPES.POSITIONS)}
         <br />
-        <PositionTable positions={this.state.results[SEARCH_OBJECT_TYPES.POSITIONS].list} />
+        <PositionTable
+          positions={this.state.results[SEARCH_OBJECT_TYPES.POSITIONS].list}
+        />
       </div>
     )
   }
@@ -494,15 +512,18 @@ class Search extends Page {
             </tr>
           </thead>
           <tbody>
-            {Task.map(this.state.results[SEARCH_OBJECT_TYPES.TASKS].list, task => (
-              <tr key={task.uuid}>
-                <td>
-                  <LinkTo task={task}>
-                    {task.shortName} {task.longName}
-                  </LinkTo>
-                </td>
-              </tr>
-            ))}
+            {Task.map(
+              this.state.results[SEARCH_OBJECT_TYPES.TASKS].list,
+              task => (
+                <tr key={task.uuid}>
+                  <td>
+                    <LinkTo task={task}>
+                      {task.shortName} {task.longName}
+                    </LinkTo>
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </Table>
       </div>

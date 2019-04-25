@@ -1,8 +1,15 @@
-import { DEFAULT_PAGE_PROPS, DEFAULT_SEARCH_PROPS, SEARCH_OBJECT_TYPES } from "actions"
+import {
+  DEFAULT_PAGE_PROPS,
+  DEFAULT_SEARCH_PROPS,
+  SEARCH_OBJECT_TYPES
+} from "actions"
 import { Settings } from "api"
 import autobind from "autobind-decorator"
 import LinkTo from "components/LinkTo"
-import Page, { mapDispatchToProps, propTypes as pagePropTypes } from "components/Page"
+import Page, {
+  mapDispatchToProps,
+  propTypes as pagePropTypes
+} from "components/Page"
 import GQL from "graphqlapi"
 import { Report } from "models"
 import moment from "moment"
@@ -140,7 +147,7 @@ class DecisivesDashboard extends Page {
   }
 
   fetchStaticData() {
-    //TODO: replace this with a way ask graphql for the content of a set of UUIDs
+    // TODO: replace this with a way ask graphql for the content of a set of UUIDs
     const dataPart = new GQL.Part(/* GraphQL */ `
       positionList(query: $positionQuery) {
         list {
@@ -178,20 +185,22 @@ class DecisivesDashboard extends Page {
 
     GQL.run([dataPart]).then(data => {
       this.setState({
-        decisives: Settings.decisives && Settings.decisives.map(decisive => {
-          return {
-            label: decisive.label,
-            positions: data.positionList.list.filter(item =>
-              decisive.positions.includes(item.uuid)
-            ),
-            tasks: data.taskList.list.filter(item =>
-              decisive.locations.includes(item.uuid)
-            ),
-            locations: data.locationList.list.filter(item =>
-              decisive.locations.includes(item.uuid)
-            )
-          }
-        }),
+        decisives:
+          Settings.decisives &&
+          Settings.decisives.map(decisive => {
+            return {
+              label: decisive.label,
+              positions: data.positionList.list.filter(item =>
+                decisive.positions.includes(item.uuid)
+              ),
+              tasks: data.taskList.list.filter(item =>
+                decisive.locations.includes(item.uuid)
+              ),
+              locations: data.locationList.list.filter(item =>
+                decisive.locations.includes(item.uuid)
+              )
+            }
+          }),
         isLoading: !this.state.reports
       })
     })
@@ -213,9 +222,7 @@ class DecisivesDashboard extends Page {
                 data={decisive.positions}
                 contentData={this.state.positionStats}
                 prevContentData={this.state.prevPositionStats}
-                itemLabel={item => <LinkTo position={item}>
-                {item.name}
-              </LinkTo>}
+                itemLabel={item => <LinkTo position={item}>{item.name}</LinkTo>}
               />
             ))}
           </Panel.Body>
@@ -232,9 +239,9 @@ class DecisivesDashboard extends Page {
                 data={decisive.locations}
                 contentData={this.state.locationStats}
                 prevContentData={this.state.prevLocationStats}
-                itemLabel={item => <LinkTo anetLocation={item}>
-                {item.name}
-              </LinkTo>}
+                itemLabel={item => (
+                  <LinkTo anetLocation={item}>{item.name}</LinkTo>
+                )}
               />
             ))}
           </Panel.Body>

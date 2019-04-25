@@ -61,7 +61,7 @@ class BaseReportShow extends Page {
     return API.query(
       /* GraphQL */ `
       report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, atmosphere, atmosphereDetails
+        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
         keyOutcomes, reportText, nextSteps, cancelledReason
 
         state
@@ -246,7 +246,7 @@ class BaseReportShow extends Page {
                     This report has been approved and published to the ANET
                     community on{" "}
                     {moment(report.releasedAt).format(
-                      Settings.dateFormats.forms.withTime
+                      Settings.dateFormats.forms.displayShort.withTime
                     )}
                   </p>
                 </Fieldset>
@@ -307,7 +307,10 @@ class BaseReportShow extends Page {
                     This report has been approved and will be automatically
                     published to the ANET community in{" "}
                     {moment(report.getReportApprovedAt())
-                      .add(24, "hours")
+                      .add(
+                        Settings.reportWorkflow.nbOfHoursQuarantineApproved,
+                        "hours"
+                      )
                       .toNow(true)}
                   </p>
                   {canPublish && (
@@ -374,10 +377,18 @@ class BaseReportShow extends Page {
                     humanValue={
                       report.engagementDate &&
                       moment(report.engagementDate).format(
-                        Settings.dateFormats.forms.long
+                        Report.getEngagementDateFormat()
                       )
                     }
                   />
+
+                  {Settings.engagementsIncludeTimeAndDuration && (
+                    <Field
+                      name="duration"
+                      label="Duration (minutes)"
+                      component={FieldHelper.renderReadonlyField}
+                    />
+                  )}
 
                   <Field
                     name="location"
@@ -413,17 +424,19 @@ class BaseReportShow extends Page {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
-                    }
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderReadonlyField}
+                      humanValue={
+                        report.tags &&
+                        report.tags.map((tag, i) => (
+                          <Tag key={tag.uuid} tag={tag} />
+                        ))
+                      }
+                    />
+                  )}
 
                   <Field
                     name="author"
@@ -524,7 +537,7 @@ class BaseReportShow extends Page {
                         <LinkTo person={comment.author} />,
                         <span
                           title={createdAt.format(
-                            Settings.dateFormats.forms.withTime
+                            Settings.dateFormats.forms.displayShort.withTime
                           )}
                         >
                           {" "}

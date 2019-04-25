@@ -157,7 +157,10 @@ class BaseRouting extends Component {
           path="/dashboards"
           render={({ match: { url } }) => (
             <Switch>
-              <Route path={`${url}/:dashboard`} component={PrioritiesDashboard} />
+              <Route
+                path={`${url}/:dashboard`}
+                component={PrioritiesDashboard}
+              />
             </Switch>
           )}
         />

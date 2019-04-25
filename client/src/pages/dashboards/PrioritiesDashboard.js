@@ -40,7 +40,14 @@ class PrioritiesDashboard extends Page {
   }
 
   render() {
-    return <Kanban {...{ ...Settings.dashboards[this.props.match.params.dashboard], ...this.state }} />
+    return (
+      <Kanban
+        {...{
+          ...Settings.dashboards[this.props.match.params.dashboard],
+          ...this.state
+        }}
+      />
+    )
   }
 }
 
