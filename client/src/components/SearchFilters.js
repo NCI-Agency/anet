@@ -226,7 +226,7 @@ export default {
     }
 
     const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
-    const ranks = Settings.fields.person.ranks || []
+    const ranks = (Settings.fields.person.ranks || []).map(f => f.value)
     filters[SEARCH_OBJECT_TYPES.PEOPLE] = {
       filters: {
         Organization: {
