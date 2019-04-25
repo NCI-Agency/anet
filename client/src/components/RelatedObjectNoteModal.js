@@ -45,6 +45,9 @@ class BaseRelatedObjectNoteModal extends Component {
           initialValues={note}
         >
           {({ isSubmitting, isValid, setFieldValue, values, submitForm }) => {
+            const isJson = note.type !== NOTE_TYPE.FREE_TEXT
+            const jsonFields = isJson ? JSON.parse(note.text) : {}
+            const noteText = isJson ? jsonFields.text : note.text
             return (
               <Form>
                 <Modal.Header closeButton>
@@ -56,6 +59,7 @@ class BaseRelatedObjectNoteModal extends Component {
                   <Messages error={this.state.error} />
                   <Field
                     name="text"
+                    value={noteText}
                     component={FieldHelper.renderSpecialField}
                     onChange={value => setFieldValue("text", value)}
                     widget={<RichTextEditor className="textField" />}
@@ -102,7 +106,14 @@ class BaseRelatedObjectNoteModal extends Component {
     const edit = !!this.props.note.uuid
     const operation = edit ? "updateNote" : "createNote"
     const graphql = operation + `(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
-    const variables = { note: values }
+    const newNote = values
+    const isJson = newNote.type !== NOTE_TYPE.FREE_TEXT
+    if (isJson) {
+      const jsonFields = JSON.parse(this.props.note.text)
+      jsonFields.text = newNote.text
+      newNote.text = JSON.stringify(jsonFields)
+    }
+    const variables = { note: newNote }
     const variableDef = "($note: NoteInput!)"
     return API.mutation(graphql, variables, variableDef)
   }

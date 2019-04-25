@@ -193,6 +193,9 @@ class BaseRelatedObjectNotes extends Component {
           const byMe = Person.isEqual(currentUser, note.author)
           const author = byMe ? "me" : <LinkTo person={note.author} />
           const canEdit = byMe || currentUser.isAdmin()
+          const isJson = note.type !== NOTE_TYPE.FREE_TEXT
+          const jsonFields = isJson ? JSON.parse(note.text) : {}
+          const noteText = isJson ? jsonFields.text : note.text
           return (
             <div key={note.uuid} style={noteDivStyle}>
               <span style={{ float: "left" }}>
@@ -229,15 +232,33 @@ class BaseRelatedObjectNotes extends Component {
                   </ConfirmDelete>
                 </span>
               )}
-              <div
-                style={{
-                  clear: "both",
-                  backgroundColor: "white",
-                  overflowWrap: "break-word",
-                  /* IE: */ wordWrap: "break-word"
-                }}
-                dangerouslySetInnerHTML={{ __html: note.text }}
-              />
+              {isJson ? (
+                <div
+                  style={{
+                    clear: "both",
+                    backgroundColor: "white",
+                    overflowWrap: "break-word",
+                    /* IE: */ wordWrap: "break-word"
+                  }}
+                >
+                  <span>
+                    Field <b>{jsonFields.changedField}</b> was changed from{" "}
+                    <em>'{jsonFields.oldValue}'</em> to{" "}
+                    <em>'{jsonFields.newValue}'</em>:
+                  </span>
+                  <div dangerouslySetInnerHTML={{ __html: noteText }} />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    clear: "both",
+                    backgroundColor: "white",
+                    overflowWrap: "break-word",
+                    /* IE: */ wordWrap: "break-word"
+                  }}
+                  dangerouslySetInnerHTML={{ __html: noteText }}
+                />
+              )}
             </div>
           )
         })}
