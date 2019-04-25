@@ -374,7 +374,7 @@ public class GraphQlResource {
       return (Integer) value;
     } else if (value instanceof Long) {
       // FIXME: For now, assume that this is really an Instant in disguise!
-      return Instant.ofEpochMilli((Long) value);
+      return Date.from(Instant.ofEpochMilli((Long) value));
     } else if (value instanceof Number) {
       return (Number) value;
     } else {
