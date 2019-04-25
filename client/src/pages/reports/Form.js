@@ -29,6 +29,48 @@ import utils from "utils"
 import AttendeesTable from "./AttendeesTable"
 import AuthorizationGroupTable from "./AuthorizationGroupTable"
 
+const RecentLocationButtons = ({ locations, handleOnClick }) =>
+  locations.map(location => (
+    <Button
+      key={location.uuid}
+      bsStyle="link"
+      onClick={() => handleOnClick("location", location)}
+    >
+      Add {location.name}
+    </Button>
+  ))
+
+const RecentLocationsFormGroup = ({ children }) => (
+  <div className="location-form-group shortcut-list">
+    <h5>Recent Locations</h5>
+    {children}
+  </div>
+)
+
+const RecentLocations = ({ children }) => (
+  <React.Fragment>
+    <div className="hidden-xs" style={{ position: "relative" }}>
+      <div style={{ position: "absolute", top: 0, left: 0 }}>{children}</div>
+    </div>
+    <div className="visible-xs" style={{ paddingTop: "15px" }}>
+      {children}
+    </div>
+  </React.Fragment>
+)
+
+RecentLocationButtons.propTypes = {
+  locations: PropTypes.array.isRequired,
+  handleOnClick: PropTypes.func.isRequired
+}
+
+RecentLocationsFormGroup.propTypes = {
+  children: PropTypes.instanceOf(Object)
+}
+
+RecentLocations.propTypes = {
+  children: PropTypes.instanceOf(Object)
+}
+
 class BaseReportForm extends Component {
   static propTypes = {
     initialValues: PropTypes.object,
@@ -309,42 +351,14 @@ class BaseReportForm extends Component {
                       recents.locations &&
                       recents.locations.length > 0 && (
                         <React.Fragment>
-                          <div
-                            className="hidden-xs"
-                            style={{ position: "relative" }}
-                          >
-                            <div
-                              style={{ position: "absolute", top: 0, left: 0 }}
-                              className="location-form-group shortcut-list"
-                            >
-                              <h5>Recent Locations</h5>
-                              {recents.locations.map(location => (
-                                <Button
-                                  key={location.uuid}
-                                  bsStyle="link"
-                                  onClick={() =>
-                                    setFieldValue("location", location)
-                                  }
-                                >
-                                  Add {location.name}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="visible-xs location-form-group shortcut-list">
-                            <h5>Recent Locations</h5>
-                            {recents.locations.map(location => (
-                              <Button
-                                key={location.uuid}
-                                bsStyle="link"
-                                onClick={() =>
-                                  setFieldValue("location", location)
-                                }
-                              >
-                                Add {location.name}
-                              </Button>
-                            ))}
-                          </div>
+                          <RecentLocations>
+                            <RecentLocationsFormGroup>
+                              <RecentLocationButtons
+                                locations={recents.locations}
+                                handleOnClick={setFieldValue}
+                              />
+                            </RecentLocationsFormGroup>
+                          </RecentLocations>
                         </React.Fragment>
                       )
                     }
