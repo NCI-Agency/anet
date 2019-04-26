@@ -80,7 +80,7 @@ export default class TaskTable extends Component {
                     )}
                     {this.props.showDelete && (
                       <td
-                        onClick={this.props.onDelete.bind(this, task)}
+                        onClick={() => this.props.onDelete(task)}
                         id={"taskDelete_" + task.uuid}
                       >
                         <span style={{ cursor: "pointer" }}>

@@ -221,7 +221,6 @@ class BaseInsightsShow extends Page {
   render() {
     const insightConfig = INSIGHT_DETAILS[this.props.match.params.insight]
     const InsightComponent = insightConfig.component
-    const insightPath = "/insights/" + this.props.match.params.insight
     const queryParams = this.getSearchQuery()
     const flexStyle = {
       display: "flex",

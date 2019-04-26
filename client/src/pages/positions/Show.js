@@ -232,8 +232,8 @@ class BasePositionShow extends Page {
                   <AssignPersonModal
                     position={position}
                     showModal={this.state.showAssignPersonModal}
-                    onCancel={this.hideAssignPersonModal.bind(this, false)}
-                    onSuccess={this.hideAssignPersonModal.bind(this, true)}
+                    onCancel={() => this.hideAssignPersonModal(false)}
+                    onSuccess={() => this.hideAssignPersonModal(true)}
                   />
                 </Fieldset>
 
@@ -272,14 +272,8 @@ class BasePositionShow extends Page {
                     <EditAssociatedPositionsModal
                       position={position}
                       showModal={this.state.showAssociatedPositionModal}
-                      onCancel={this.hideAssociatedPositionsModal.bind(
-                        this,
-                        false
-                      )}
-                      onSuccess={this.hideAssociatedPositionsModal.bind(
-                        this,
-                        true
-                      )}
+                      onCancel={() => this.hideAssociatedPositionsModal(false)}
+                      onSuccess={() => this.hideAssociatedPositionsModal(true)}
                     />
                   )}
                 </Fieldset>
