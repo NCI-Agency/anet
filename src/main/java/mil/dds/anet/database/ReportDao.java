@@ -824,8 +824,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
     final SubscriptionUpdateGroup update =
         getCommonSubscriptionUpdate(obj, tableName, "reports.uuid");
     // update author
-    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getAuthorUuid(), "people",
-        "reports.authorUuid"));
+    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
+        isParam ? obj.getAuthorUuid() : null, "people", "reports.authorUuid"));
     // update attendees
     update.stmts.add(new SubscriptionUpdateStatement("people",
         "SELECT \"personUuid\"" + " FROM \"reportPeople\"" + " WHERE \"reportUuid\" = "
@@ -847,10 +847,12 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
         Collections.emptyMap()));
     // update organizations
     // TODO: is this correct?
-    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getAdvisorOrgUuid(),
-        "organizations", "reports.advisorOrganizationUuid"));
-    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getPrincipalOrgUuid(),
-        "organizations", "reports.principalOrganizationUuid"));
+    update.stmts
+        .add(getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getAdvisorOrgUuid() : null,
+            "organizations", "reports.advisorOrganizationUuid"));
+    update.stmts.add(
+        getCommonSubscriptionUpdateStatement(isParam, isParam ? obj.getPrincipalOrgUuid() : null,
+            "organizations", "reports.principalOrganizationUuid"));
     // update tasks
     update.stmts.add(new SubscriptionUpdateStatement("tasks",
         "SELECT \"taskUuid\"" + " FROM \"reportTasks\"" + " WHERE \"reportUuid\" = "
@@ -858,8 +860,8 @@ public class ReportDao extends AnetSubscribableObjectDao<Report> {
         // param is already added above
         Collections.emptyMap()));
     // update location
-    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam, obj.getLocationUuid(),
-        "locations", "reports.locationUuid"));
+    update.stmts.add(getCommonSubscriptionUpdateStatement(isParam,
+        isParam ? obj.getLocationUuid() : null, "locations", "reports.locationUuid"));
 
     return update;
   }
