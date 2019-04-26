@@ -76,15 +76,17 @@ const taskFilters = props => {
 export default {
   searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
     const filters = {}
-    const subscriptionFilterLabel = "Subscribed"
     const subscriptionFilter = {
-      component: CheckboxSearchFilter,
-      props: {
-        queryKey: "subscribed",
-        msg: "By me"
+      Subscribed: {
+        component: CheckboxSearchFilter,
+        props: {
+          queryKey: "subscribed",
+          msg: "By me"
+        }
       }
     }
 
+    const taskShortLabel = Settings.fields.task.shortLabel
     filters[SEARCH_OBJECT_TYPES.REPORTS] = {
       filters: {
         Author: {
@@ -217,23 +219,21 @@ export default {
           props: {
             queryKey: "sensitiveInfo"
           }
-        }
+        },
+        [taskShortLabel]: {
+          component: AutocompleteFilter,
+          props: {
+            queryKey: "taskUuid",
+            objectType: Task,
+            valueKey: "shortName",
+            fields: Task.autocompleteQuery,
+            template: Task.autocompleteTemplate,
+            placeholder: `Filter reports by ${taskShortLabel}...`
+          }
+        },
+        ...subscriptionFilter
       }
     }
-
-    const taskShortLabel = Settings.fields.task.shortLabel
-    filters[SEARCH_OBJECT_TYPES.REPORTS].filters[taskShortLabel] = {
-      component: AutocompleteFilter,
-      props: {
-        queryKey: "taskUuid",
-        objectType: Task,
-        valueKey: "shortName",
-        fields: Task.autocompleteQuery,
-        template: Task.autocompleteTemplate,
-        placeholder: `Filter reports by ${taskShortLabel}...`
-      }
-    }
-    filters.Reports.filters[subscriptionFilterLabel] = subscriptionFilter
 
     const countries = Settings.fields.advisor.person.countries || [] // TODO: make search also work with principal countries
     const ranks = (Settings.fields.person.ranks || []).map(f => f.value)
@@ -293,10 +293,10 @@ export default {
             values: countries,
             labels: countries
           }
-        }
+        },
+        ...subscriptionFilter
       }
     }
-    filters.People.filters[subscriptionFilterLabel] = subscriptionFilter
 
     filters[SEARCH_OBJECT_TYPES.ORGANIZATIONS] = {
       filters: {
@@ -320,10 +320,10 @@ export default {
               Settings.fields.principal.org.name
             ]
           }
-        }
+        },
+        ...subscriptionFilter
       }
     }
-    filters.Organizations.filters[subscriptionFilterLabel] = subscriptionFilter
 
     filters[SEARCH_OBJECT_TYPES.POSITIONS] = {
       filters: {
@@ -371,10 +371,10 @@ export default {
             values: ["true", "false"],
             labels: ["Yes", "No"]
           }
-        }
+        },
+        ...subscriptionFilter
       }
     }
-    filters.Positions.filters[subscriptionFilterLabel] = subscriptionFilter
 
     filters[SEARCH_OBJECT_TYPES.LOCATIONS] = {
       filters: {
@@ -384,18 +384,18 @@ export default {
             queryKey: "status",
             values: [Location.STATUS.ACTIVE, Location.STATUS.INACTIVE]
           }
-        }
+        },
+        ...subscriptionFilter
       }
     }
-    filters.Locations.filters[subscriptionFilterLabel] = subscriptionFilter
 
     // Task filters
     filters[SEARCH_OBJECT_TYPES.TASKS] = {
-      filters: taskFilters()
+      filters: {
+        ...taskFilters(),
+        ...subscriptionFilter
+      }
     }
-    filters[pluralize(taskShortLabel)].filters[
-      subscriptionFilterLabel
-    ] = subscriptionFilter
 
     return filters
   },
