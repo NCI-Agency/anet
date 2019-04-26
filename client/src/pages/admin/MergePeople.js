@@ -92,7 +92,6 @@ class MergePeople extends Page {
         >
           {({
             isSubmitting,
-            isValid,
             setFieldValue,
             setFieldTouched,
             values,
@@ -195,7 +194,7 @@ class MergePeople extends Page {
                         bsSize="large"
                         block
                         onClick={submitForm}
-                        disabled={isSubmitting || !isValid}
+                        disabled={isSubmitting}
                       >
                         Merge People
                       </Button>
@@ -260,7 +259,9 @@ class MergePeople extends Page {
           component={FieldHelper.renderReadonlyField}
           humanValue={
             person.createdAt &&
-            moment(person.createdAt).format(Settings.dateFormats.forms.withTime)
+            moment(person.createdAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )
           }
           vertical
         />

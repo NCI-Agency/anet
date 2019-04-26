@@ -2271,6 +2271,12 @@
 		<!-- Rolling back is not useful -->
 	</changeSet>
 
+	<changeSet id="add-reports-duration-column" author="gjvoosten">
+		<addColumn tableName="reports">
+			<column name="duration" type="int" />
+		</addColumn>
+	</changeSet>
+
 	<changeSet id="add_subscriptions" author="gjvoosten">
 		<createTable tableName="subscriptions">
 			<column name="uuid" type="${uuid_type}">
@@ -2322,5 +2328,4 @@
 			referencedTableName="subscriptions" referencedColumnNames="uuid"
 			onDelete="CASCADE" onUpdate="NO ACTION" />
 	</changeSet>
-
 </databaseChangeLog>

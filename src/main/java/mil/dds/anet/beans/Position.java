@@ -18,6 +18,7 @@ public class Position extends AbstractAnetBean implements SubscribableObject {
   public static enum PositionType {
     ADVISOR, PRINCIPAL, SUPER_USER, ADMINISTRATOR
   }
+
   public static enum PositionStatus {
     ACTIVE, INACTIVE
   }

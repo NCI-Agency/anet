@@ -43,7 +43,7 @@ class ReportMinimal extends Page {
     return API.query(
       /* GraphQL */ `
       report(uuid:"${props.match.params.uuid}") {
-        uuid, intent, engagementDate, atmosphere, atmosphereDetails
+        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
         keyOutcomes, reportText, nextSteps, cancelledReason
 
         state
@@ -201,10 +201,18 @@ class ReportMinimal extends Page {
                     humanValue={
                       report.engagementDate &&
                       moment(report.engagementDate).format(
-                        Settings.dateFormats.forms.short
+                        Report.getEngagementDateFormat()
                       )
                     }
                   />
+
+                  {Settings.engagementsIncludeTimeAndDuration && (
+                    <Field
+                      name="duration"
+                      label="Duration (minutes)"
+                      component={FieldHelper.renderReadonlyField}
+                    />
+                  )}
 
                   <Field
                     name="location"
@@ -240,17 +248,19 @@ class ReportMinimal extends Page {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderReadonlyField}
-                    humanValue={
-                      report.tags &&
-                      report.tags.map((tag, i) => (
-                        <Tag key={tag.uuid} tag={tag} />
-                      ))
-                    }
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderReadonlyField}
+                      humanValue={
+                        report.tags &&
+                        report.tags.map((tag, i) => (
+                          <Tag key={tag.uuid} tag={tag} />
+                        ))
+                      }
+                    />
+                  )}
 
                   <Field
                     name="author"
@@ -312,7 +322,7 @@ class ReportMinimal extends Page {
                         <LinkTo person={comment.author} />,
                         <span
                           title={createdAt.format(
-                            Settings.dateFormats.forms.withTime
+                            Settings.dateFormats.forms.displayShort.withTime
                           )}
                         >
                           {" "}

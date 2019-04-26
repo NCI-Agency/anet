@@ -25,6 +25,7 @@ public class Organization extends AbstractAnetBean implements SubscribableObject
   public static enum OrganizationStatus {
     ACTIVE, INACTIVE
   }
+
   public static enum OrganizationType {
     ADVISOR_ORG, PRINCIPAL_ORG
   }

@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GraphQLResourceTest extends AbstractResourceTest {
+public class GraphQlResourceTest extends AbstractResourceTest {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

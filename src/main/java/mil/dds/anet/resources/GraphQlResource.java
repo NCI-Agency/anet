@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 @Path("/graphql")
 @Produces(MediaType.APPLICATION_JSON)
 @PermitAll
-public class GraphQLResource {
+public class GraphQlResource {
 
   private static final Logger logger =
       LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -81,7 +81,7 @@ public class GraphQLResource {
 
   private GraphQLSchema graphqlSchema;
 
-  public GraphQLResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
+  public GraphQlResource(AnetObjectEngine engine, AnetConfiguration config, List<Object> resources,
       MetricRegistry metricRegistry, boolean developmentMode) {
     this.engine = engine;
     this.config = config;
@@ -166,7 +166,7 @@ public class GraphQLResource {
       final String xml = ResponseUtils.toPrettyString($.toXml(result), 2);
       return Response.ok(xml, MediaType.APPLICATION_XML).build();
     } else if (OUTPUT_XLSX.equals(output)) {
-      return Response.ok(new XSSFWorkbookStreamingOutput(createWorkbook(result)), MEDIATYPE_XLSX)
+      return Response.ok(new XssfWorkbookStreamingOutput(createWorkbook(result)), MEDIATYPE_XLSX)
           .header("Content-Disposition", "attachment; filename=" + "anet_export.xslx").build();
     } else {
       return Response.ok(result, MediaType.APPLICATION_JSON).build();
@@ -374,7 +374,7 @@ public class GraphQLResource {
       return (Integer) value;
     } else if (value instanceof Long) {
       // FIXME: For now, assume that this is really an Instant in disguise!
-      return Instant.ofEpochMilli((Long) value);
+      return Date.from(Instant.ofEpochMilli((Long) value));
     } else if (value instanceof Number) {
       return (Number) value;
     } else {
@@ -408,7 +408,7 @@ public class GraphQLResource {
    * {@link StreamingOutput} implementation that uses a {@link XSSFWorkbook} as the source of the
    * stream to be written.
    */
-  public static class XSSFWorkbookStreamingOutput implements StreamingOutput {
+  public static class XssfWorkbookStreamingOutput implements StreamingOutput {
 
     private final XSSFWorkbook workbook;
 
@@ -417,7 +417,7 @@ public class GraphQLResource {
      * 
      * @param workbook the workbook
      */
-    public XSSFWorkbookStreamingOutput(final XSSFWorkbook workbook) {
+    public XssfWorkbookStreamingOutput(final XSSFWorkbook workbook) {
       this.workbook = workbook;
     }
 

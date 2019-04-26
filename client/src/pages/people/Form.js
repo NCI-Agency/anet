@@ -123,7 +123,6 @@ class BasePersonForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -174,7 +173,7 @@ class BasePersonForm extends Component {
                 bsStyle="primary"
                 type="button"
                 onClick={submitForm}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting}
               >
                 {this.props.saveText}
               </Button>
@@ -414,8 +413,9 @@ class BasePersonForm extends Component {
                       <Field component="select" className="form-control">
                         <option />
                         {ranks.map(rank => (
-                          <option key={rank} value={rank}>
-                            {rank}
+                          <option key={rank.value} value={rank.value}>
+                            {rank.value}{" "}
+                            {rank.description && ` - ( ${rank.description} )`}
                           </option>
                         ))}
                       </Field>
@@ -476,7 +476,7 @@ class BasePersonForm extends Component {
                       bsStyle="primary"
                       type="button"
                       onClick={submitForm}
-                      disabled={isSubmitting || !isValid}
+                      disabled={isSubmitting}
                     >
                       {this.props.saveText}
                     </Button>

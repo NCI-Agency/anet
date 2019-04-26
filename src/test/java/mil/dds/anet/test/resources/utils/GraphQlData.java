@@ -1,6 +1,6 @@
 package mil.dds.anet.test.resources.utils;
 
-public class GraphQLData<T> {
+public class GraphQlData<T> {
   private T payload;
 
   public T getPayload() {

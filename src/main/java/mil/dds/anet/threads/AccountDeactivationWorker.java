@@ -46,7 +46,8 @@ public class AccountDeactivationWorker implements Runnable {
     @SuppressWarnings("unchecked")
     List<String> domainsToIgnore =
         (List<String>) config.getDictionaryEntry("automaticallyInactivateUsers.ignoredDomainNames");
-    this.ignoredDomains = domainsToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
+    this.ignoredDomains = domainsToIgnore == null ? domainsToIgnore
+        : domainsToIgnore.stream().map(x -> x.trim()).collect(Collectors.toList());
 
     this.warningIntervalInMs = warningIntervalInMs;
   }
@@ -54,12 +55,6 @@ public class AccountDeactivationWorker implements Runnable {
   @Override
   public void run() {
     logger.debug("Deactivation Warning Worker waking up to check for Future Account Deactivations");
-
-    // Check whether the application is configured to auto-check for account
-    // deactivation
-    if (this.daysTillEndOfTourWarnings == null) {
-      return;
-    }
 
     try {
       // Send warnings

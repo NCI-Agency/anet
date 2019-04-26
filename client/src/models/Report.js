@@ -63,6 +63,12 @@ export default class Report extends Model {
             )
         )
         .default(null),
+      duration: yup
+        .number()
+        .integer()
+        .nullable()
+        .positive()
+        .default(null),
       // not actually in the database, but used for validation:
       cancelled: yup
         .boolean()
@@ -370,6 +376,12 @@ export default class Report extends Model {
 
   static getPrimaryAttendee(attendees, role) {
     return attendees.find(el => el.role === role && el.primary)
+  }
+
+  static getEngagementDateFormat() {
+    return Settings.engagementsIncludeTimeAndDuration
+      ? Settings.dateFormats.forms.displayLong.withTime
+      : Settings.dateFormats.forms.displayLong.date
   }
 
   getReportApprovedAt() {

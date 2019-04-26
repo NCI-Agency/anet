@@ -9,7 +9,6 @@ import Messages from "components/Messages"
 import MultiSelector from "components/MultiSelector"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
-import "components/reactToastify.css"
 import ReportTags from "components/ReportTags"
 import RichTextEditor from "components/RichTextEditor"
 import TaskTable from "components/TaskTable"
@@ -22,8 +21,7 @@ import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Checkbox, Collapse, HelpBlock } from "react-bootstrap"
 import { withRouter } from "react-router-dom"
-import { toast, ToastContainer } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { toast } from "react-toastify"
 import LOCATIONS_ICON from "resources/locations.png"
 import PEOPLE_ICON from "resources/people.png"
 import TASKS_ICON from "resources/tasks.png"
@@ -179,7 +177,6 @@ class BaseReportForm extends Component {
         {({
           handleSubmit,
           isSubmitting,
-          isValid,
           dirty,
           errors,
           setFieldValue,
@@ -223,7 +220,6 @@ class BaseReportForm extends Component {
           return (
             <div className="report-form">
               <NavigationWarning isBlocking={dirty} />
-              <ToastContainer />
               <Messages error={this.state.error} />
 
               {showAssignedPositionWarning && (
@@ -262,14 +258,19 @@ class BaseReportForm extends Component {
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
                     placeholder="What is the engagement supposed to achieve?"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("intentCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "intentCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="intentCharsLeft">
-                          {250 - this.props.initialValues.intent.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.intent.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>
@@ -285,7 +286,12 @@ class BaseReportForm extends Component {
                       setFieldValue("engagementDate", value)
                     }
                     onBlur={() => setFieldTouched("engagementDate", true)}
-                    widget={<CustomDateInput id="engagementDate" />}
+                    widget={
+                      <CustomDateInput
+                        id="engagementDate"
+                        withTime={Settings.engagementsIncludeTimeAndDuration}
+                      />
+                    }
                   >
                     {values.engagementDate &&
                       moment()
@@ -298,6 +304,14 @@ class BaseReportForm extends Component {
                       </HelpBlock>
                     )}
                   </Field>
+
+                  {Settings.engagementsIncludeTimeAndDuration && (
+                    <Field
+                      name="duration"
+                      label="Duration (minutes)"
+                      component={FieldHelper.renderInputField}
+                    />
+                  )}
 
                   <Field
                     name="location"
@@ -398,13 +412,15 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <Field
-                    name="reportTags"
-                    label={Settings.fields.report.reportTags}
-                    component={FieldHelper.renderSpecialField}
-                    onChange={value => setFieldValue("reportTags", value)}
-                    widget={<ReportTags suggestions={tagSuggestions} />}
-                  />
+                  {Settings.fields.report.reportTags && (
+                    <Field
+                      name="reportTags"
+                      label={Settings.fields.report.reportTags}
+                      component={FieldHelper.renderSpecialField}
+                      onChange={value => setFieldValue("reportTags", value)}
+                      widget={<ReportTags suggestions={tagSuggestions} />}
+                    />
+                  )}
                 </Fieldset>
 
                 <Fieldset
@@ -494,14 +510,19 @@ class BaseReportForm extends Component {
                       label={Settings.fields.report.keyOutcomes}
                       component={FieldHelper.renderInputField}
                       componentClass="textarea"
-                      maxLength={250}
+                      maxLength={Settings.maxTextFieldLength}
                       onKeyUp={event =>
-                        this.countCharsLeft("keyOutcomesCharsLeft", 250, event)
+                        this.countCharsLeft(
+                          "keyOutcomesCharsLeft",
+                          Settings.maxTextFieldLength,
+                          event
+                        )
                       }
                       extraColElem={
                         <React.Fragment>
                           <span id="keyOutcomesCharsLeft">
-                            {250 - this.props.initialValues.keyOutcomes.length}
+                            {Settings.maxTextFieldLength -
+                              this.props.initialValues.keyOutcomes.length}
                           </span>{" "}
                           characters remaining
                         </React.Fragment>
@@ -514,14 +535,19 @@ class BaseReportForm extends Component {
                     label={Settings.fields.report.nextSteps}
                     component={FieldHelper.renderInputField}
                     componentClass="textarea"
-                    maxLength={250}
+                    maxLength={Settings.maxTextFieldLength}
                     onKeyUp={event =>
-                      this.countCharsLeft("nextStepsCharsLeft", 250, event)
+                      this.countCharsLeft(
+                        "nextStepsCharsLeft",
+                        Settings.maxTextFieldLength,
+                        event
+                      )
                     }
                     extraColElem={
                       <React.Fragment>
                         <span id="nextStepsCharsLeft">
-                          {250 - this.props.initialValues.nextSteps.length}
+                          {Settings.maxTextFieldLength -
+                            this.props.initialValues.nextSteps.length}
                         </span>{" "}
                         characters remaining
                       </React.Fragment>
@@ -606,7 +632,7 @@ class BaseReportForm extends Component {
                       <div>
                         Last autosaved at{" "}
                         {this.state.autoSavedAt.format(
-                          Settings.dateFormats.forms.withTime
+                          Settings.dateFormats.forms.displayShort.withTime
                         )}
                       </div>
                     )}

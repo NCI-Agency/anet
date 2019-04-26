@@ -265,7 +265,7 @@ class FutureEngagementsByLocation extends ReportsVisualisation {
         graphData.data = groupedData
         graphData.categoryLabels = allCategories.reduce(function(prev, curr) {
           prev[curr.key] = moment(curr.key).format(
-            Settings.dateFormats.forms.short
+            Settings.dateFormats.forms.displayShort.date
           )
           return prev
         }, {})
