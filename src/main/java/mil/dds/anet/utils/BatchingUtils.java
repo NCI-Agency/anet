@@ -42,7 +42,7 @@ public final class BatchingUtils {
         .setMaxBatchSize(1000);
     final DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
     // Give each registry its own thread pool
-    final ExecutorService dispatcherService = Executors.newCachedThreadPool();
+    final ExecutorService dispatcherService = Executors.newFixedThreadPool(3);
 
     dataLoaderRegistry.register("approvalSteps",
         new DataLoader<>(new BatchLoader<String, ApprovalStep>() {
