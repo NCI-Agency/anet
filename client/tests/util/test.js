@@ -257,15 +257,16 @@ test.beforeEach(t => {
       )
       await $todayButton.click()
     },
-    async chooseAutocompleteOption(autocompleteSelector, text) {
-      let $autocompleteTextbox = await t.context.$(autocompleteSelector)
-      await $autocompleteTextbox.sendKeys(text)
-      await t.context.driver.sleep(shortWaitMs) // give the autocomplete some time to send the request (debounce!)
-      let $autocompleteSuggestion = await t.context.$(
-        "#react-autowhatever-1--item-0"
+    async chooseAdvancedSelectOption(inputSelector, text) {
+      const popoverSelector = `${inputSelector}-popover`
+      let $advancedSelectInput = await t.context.$(inputSelector)
+      await $advancedSelectInput.sendKeys(text)
+      await t.context.driver.sleep(shortWaitMs) // give the advanced select some time to send the request (debounce!)
+      let $advancedSelectSuggestion = await t.context.$(
+        `${popoverSelector} tbody tr:first-child td input`
       )
-      await $autocompleteSuggestion.click()
-      return $autocompleteTextbox
+      await $advancedSelectSuggestion.click()
+      return $advancedSelectInput
     },
     async writeInForm(inputSelector, text) {
       let $meetingGoalInput = await t.context.$(inputSelector)

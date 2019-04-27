@@ -112,13 +112,10 @@ public class MssqlPositionSearcher extends AbstractSearcherBase implements IPosi
       sqlArgs.put("authorizationGroupUuid", query.getAuthorizationGroupUuid());
     }
 
-    if (whereClauses.isEmpty()) {
-      return new AnetBeanList<Position>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<Position>());
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
     }
-
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();

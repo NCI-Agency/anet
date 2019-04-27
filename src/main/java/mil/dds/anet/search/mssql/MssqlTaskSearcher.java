@@ -117,12 +117,11 @@ public class MssqlTaskSearcher extends AbstractSearcherBase implements ITaskSear
       args.put("customFieldRef1Uuid", query.getCustomFieldRef1Uuid());
     }
 
-    if (whereClauses.isEmpty()) {
-      return new AnetBeanList<Task>(query.getPageNum(), query.getPageSize(), new ArrayList<Task>());
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
     }
 
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
     if (doFullTextSearch && query.getSortBy() == null) {

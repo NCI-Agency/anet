@@ -57,7 +57,8 @@ const renderField = (
   children,
   extraColElem,
   addon,
-  vertical
+  vertical,
+  extraAddon
 ) => {
   if (label === undefined) {
     label = utils.sentenceCase(field.name) // name is a required prop of field
@@ -80,6 +81,7 @@ const renderField = (
     widget = (
       <InputGroup>
         {widgetElem}
+        {extraAddon && <InputGroup.Addon>{extraAddon}</InputGroup.Addon>}
         <InputGroup.Addon onClick={focusElement}>{addon}</InputGroup.Addon>
       </InputGroup>
     )
@@ -132,9 +134,11 @@ export const renderInputField = ({
     extraColElem,
     addon,
     vertical,
+    innerRef,
+    extraAddon,
     ...otherProps
   } = props
-  const widgetElem = <FormControl {...field} {...otherProps} />
+  const widgetElem = <FormControl {...field} ref={innerRef} {...otherProps} />
   return renderField(
     field,
     label,
@@ -143,7 +147,8 @@ export const renderInputField = ({
     children,
     extraColElem,
     addon,
-    vertical
+    vertical,
+    extraAddon
   )
 }
 

@@ -271,7 +271,7 @@ export default class Report extends Model {
           _isEmpty(reportSensitiveInformationText)
             ? schema.nullable()
             : schema.required(`You should provide authorization groups who can access the sensitive information.
-            If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
+						If you do not do so, you will remain the only one authorized to see the sensitive information you have entered`)
       )
   })
 
@@ -391,31 +391,5 @@ export default class Report extends Model {
       return !lastApprovalStep ? "" : lastApprovalStep.createdAt
     } else {
     }
-  }
-
-  addAttendee(newAttendee) {
-    if (!newAttendee || !newAttendee.uuid) {
-      return
-    }
-
-    let attendees = this.attendees
-
-    if (attendees.find(attendee => attendee.uuid === newAttendee.uuid)) {
-      return
-    }
-
-    let person = new Person(newAttendee)
-    person.primary = false
-
-    if (
-      !attendees.find(
-        attendee => attendee.role === person.role && attendee.primary
-      )
-    ) {
-      person.primary = true
-    }
-
-    this.attendees.push(person)
-    return true
   }
 }

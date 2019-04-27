@@ -157,21 +157,8 @@ fieldset.danger {
 	width: 10em;
 }
 
-.react-autosuggest__container input {
-	padding-left: 3.2rem;
-}
-
-.react-autosuggest__suggestions-list {
-	max-height: 231px;
-	overflow-y: scroll;
-}
-
 .shortcut-list {
 	margin-top: -4px;
-}
-
-.shortcut-list h5 {
-	margin: 3px 0 4px 0;
 }
 
 .shortcut-list .btn-link {
@@ -327,6 +314,12 @@ button.home-tile.btn {
 }
 
 .primary-attendee .checkbox {
+	padding: 0;
+	margin: 0;
+	text-align: center;
+}
+
+.popover-content .checkbox, .popover-content .radio {
 	padding: 0;
 	margin: 0;
 	text-align: center;
