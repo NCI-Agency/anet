@@ -193,7 +193,7 @@ public class GraphQlResource {
         // Wait a while, giving other threads the chance to do some work
         try {
           Thread.yield();
-          Thread.sleep(25);
+          Thread.sleep(50);
         } catch (InterruptedException ignored) {
         }
 
