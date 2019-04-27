@@ -2274,11 +2274,12 @@
 	<changeSet id="add-assessment-to-Tasks" author="VassilIordanov">
 		<addColumn tableName="tasks">
 			<column name="assessment" type="${long_text_type}" />
-			
+		</addColumn>
+	</changeSet>
+
 	<changeSet id="add-reports-duration-column" author="gjvoosten">
 		<addColumn tableName="reports">
 			<column name="duration" type="int" />
-
 		</addColumn>
 	</changeSet>
 

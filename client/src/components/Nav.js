@@ -14,6 +14,7 @@ import {
 } from "react-router-bootstrap"
 import { withRouter } from "react-router-dom"
 import { ScrollLink, scrollSpy } from "react-scroll"
+import utils from "utils"
 
 export const AnchorNavItem = props => {
   const { to, ...remainingProps } = props
@@ -25,11 +26,13 @@ export const AnchorNavItem = props => {
           activeClass="active"
           to={to}
           spy
-          hashSpy
           smooth
           duration={500}
           containerId="main-viewport"
-          onClick={() => context.showFloatingMenu(false)}
+          onClick={() => {
+            context.showFloatingMenu(false)
+            utils.pushHash(to)
+          }}
           // TODO: fix the need for offset
           offset={-context.topbarOffset}
           {...remainingProps}
