@@ -47,11 +47,6 @@ const barColors = {
   verified: "#337AB7"
 }
 
-const calendarButtonCss = {
-  marginLeft: "20px",
-  marginTop: "-8px"
-}
-
 const legendCss = {
   width: "14px",
   height: "14px",
@@ -312,7 +307,7 @@ class BaseRollupShow extends Page {
   @autobind
   fetchChartData(chartQuery) {
     return Promise.all([chartQuery]).then(values => {
-      const pinned_ORGs = Settings.pinned_ORGs
+      const pinnedOrgs = Settings.pinned_ORGs
       this.setState({
         isLoading: false,
         updateChart: true, // update chart after fetching the data
@@ -322,17 +317,17 @@ class BaseRollupShow extends Page {
             return d
           })
           .sort((a, b) => {
-            let a_index = pinned_ORGs.indexOf(a.org.shortName)
-            let b_index = pinned_ORGs.indexOf(b.org.shortName)
-            if (a_index < 0) {
+            let aIndex = pinnedOrgs.indexOf(a.org.shortName)
+            let bIndex = pinnedOrgs.indexOf(b.org.shortName)
+            if (aIndex < 0) {
               let nameOrder = a.org.shortName.localeCompare(b.org.shortName)
-              return b_index < 0
+              return bIndex < 0
                 ? nameOrder === 0
                   ? a.org.uuid - b.org.uuid
                   : nameOrder
                 : 1
             } else {
-              return b_index < 0 ? -1 : a_index - b_index
+              return bIndex < 0 ? -1 : aIndex - bIndex
             }
           })
       })
@@ -610,7 +605,7 @@ class BaseRollupShow extends Page {
 
   @autobind
   renderEmailModal(formikProps) {
-    const { values, isSubmitting, submitForm } = formikProps
+    const { isSubmitting, submitForm } = formikProps
     return (
       <Modal show={this.state.showEmailModal} onHide={this.toggleEmailModal}>
         <Form>

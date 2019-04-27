@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const Page_URL = "/rollup"
+const PAGE_URL = "/rollup"
 
 class Rollup extends Page {
   get printButton() {
@@ -8,7 +8,7 @@ class Rollup extends Page {
   }
 
   open() {
-    super.open(Page_URL)
+    super.open(PAGE_URL)
   }
 }
 

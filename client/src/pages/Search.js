@@ -1,6 +1,5 @@
 import { SEARCH_OBJECT_LABELS, SEARCH_OBJECT_TYPES } from "actions"
 import API, { Settings } from "api"
-import autobind from "autobind-decorator"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -33,7 +32,6 @@ import PEOPLE_ICON from "resources/people.png"
 import POSITIONS_ICON from "resources/positions.png"
 import REPORTS_ICON from "resources/reports.png"
 import TASKS_ICON from "resources/tasks.png"
-import utils from "utils"
 
 const SEARCH_CONFIG = {
   [SEARCH_OBJECT_TYPES.REPORTS]: {
@@ -115,7 +113,6 @@ class Search extends Page {
 
   getPaginated = type => {
     const { pagination } = this.props
-    const searchType = SEARCH_OBJECT_TYPES[type]
     const pageLabel = this.pageLabel(type)
     return pagination[pageLabel]
   }
@@ -144,8 +141,7 @@ class Search extends Page {
     return gqlPart
   }
 
-  @autobind
-  _dataFetcher(props, callback, pageNum, pageSize) {
+  _dataFetcher = (props, callback, pageNum, pageSize) => {
     const { searchQuery } = props
     const queryTypes = searchQuery.objectType
       ? { [SEARCH_OBJECT_TYPES[searchQuery.objectType]]: {} }
@@ -159,8 +155,7 @@ class Search extends Page {
     return callback(parts)
   }
 
-  @autobind
-  _fetchDataCallback(parts) {
+  _fetchDataCallback = parts => {
     return GQL.run(parts)
       .then(data => {
         this.setState({
@@ -323,8 +318,7 @@ class Search extends Page {
     )
   }
 
-  @autobind
-  paginationFor(type) {
+  paginationFor = type => {
     const { pageSize, totalCount } = this.state.results[type]
     const paginatedPart = this.getPaginated(type)
     const goToPage = this.getPaginatedNum(paginatedPart)
@@ -349,8 +343,7 @@ class Search extends Page {
     )
   }
 
-  @autobind
-  goToPage(type, pageNum) {
+  goToPage = (type, pageNum) => {
     const { setPagination } = this.props
     const query = this.getSearchQuery()
     const part = this.getSearchPart(type, query, pageNum)
@@ -376,7 +369,7 @@ class Search extends Page {
     return (
       <ReportCollection
         paginatedReports={paginatedReports}
-        goToPage={this.goToPage.bind(this, SEARCH_OBJECT_TYPES.REPORTS)}
+        goToPage={value => this.goToPage(SEARCH_OBJECT_TYPES.REPORTS, value)}
       />
     )
   }
@@ -616,18 +609,15 @@ class Search extends Page {
     return API.mutation(graphql, variables, variableDef)
   }
 
-  @autobind
-  openSaveModal() {
+  openSaveModal = () => {
     this.setState({ showSaveSearch: true })
   }
 
-  @autobind
-  closeSaveModal() {
+  closeSaveModal = () => {
     this.setState({ showSaveSearch: false })
   }
 
-  @autobind
-  _exportSearchResultsCallback(parts) {
+  _exportSearchResultsCallback = parts => {
     GQL.runExport(parts, "xlsx")
       .then(blob => {
         FileSaver.saveAs(blob, "anet_export.xlsx")
@@ -635,8 +625,7 @@ class Search extends Page {
       .catch(error => this.setState({ error: error }))
   }
 
-  @autobind
-  exportSearchResults() {
+  exportSearchResults = () => {
     this._dataFetcher(this.props, this._exportSearchResultsCallback, 0, 0)
   }
 }
