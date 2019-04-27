@@ -4,6 +4,7 @@ import _map from "lodash/map"
 import { Report } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
+import { FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 const STATE_LABELS = {
@@ -83,7 +84,7 @@ export default class ReportStateSearch extends Component {
     return !this.props.asFormField ? (
       stateDisplay
     ) : (
-      <div>
+      <FormGroup>
         <select value={value.state} onChange={this.changeState} multiple>
           {Object.keys(STATE_LABELS).map(key => (
             <option key={key} value={key}>
@@ -107,7 +108,7 @@ export default class ReportStateSearch extends Component {
             </select>
           </span>
         )}
-      </div>
+      </FormGroup>
     )
   }
 

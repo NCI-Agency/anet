@@ -65,13 +65,10 @@ public class MssqlAuthorizationGroupSearcher extends AbstractSearcherBase
       sqlArgs.put("positionUuid", query.getPositionUuid());
     }
 
-    if (whereClauses.isEmpty()) {
-      return new AnetBeanList<AuthorizationGroup>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<AuthorizationGroup>());
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
     }
-
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();

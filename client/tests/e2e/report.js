@@ -25,44 +25,44 @@ test("Draft and submit a report", async t => {
 
   await pageHelpers.clickTodayButton()
 
-  let $locationAutocomplete = await pageHelpers.chooseAutocompleteOption(
+  let $locationAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#location",
     "general hospita"
   )
 
   t.is(
-    await $locationAutocomplete.getAttribute("value"),
+    await $locationAdvancedSelect.getAttribute("value"),
     "General Hospital",
-    "Clicking a location autocomplete suggestion populates the autocomplete field."
+    "Clicking a location advanced single select widget suggestion populates the input field."
   )
 
   let $positiveAtmosphereButton = await $("#positiveAtmos")
   await $positiveAtmosphereButton.click()
 
-  let $attendeesAutocomplete = await pageHelpers.chooseAutocompleteOption(
+  let $attendeesAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#attendees",
     "christopf topferness"
   )
 
+  let $attendeesShortcutTitle = await $("#attendees-shortcut-title")
+  await $attendeesShortcutTitle.click()
+
   t.is(
-    await $attendeesAutocomplete.getAttribute("value"),
+    await $attendeesAdvancedSelect.getAttribute("value"),
     "",
-    "Clicking an attendee autocomplete suggestion empties the autocomplete field."
+    "Closing the attendees advanced multi select overlay empties the input field."
   )
 
   let [
-    $principalPrimaryCheckbox,
+    $principalPrimaryInput,
     $principalName,
     $principalPosition,
     $principalLocation,
     $principalOrg
-  ] = await $$("#attendeesTable tbody tr:last-child td")
+  ] = await $$(".principalAttendeesTable tbody tr:last-child td")
 
-  t.is(
-    await $principalPrimaryCheckbox
-      .findElement(By.css("input"))
-      .getAttribute("value"),
-    "on",
+  t.true(
+    await $principalPrimaryInput.findElement(By.css("input")).isSelected(),
     "Principal primary attendee checkbox should be checked"
   )
   await assertElementText(t, $principalName, "CIV TOPFERNESS, Christopf")
@@ -73,15 +73,18 @@ test("Draft and submit a report", async t => {
   )
   await assertElementText(t, $principalOrg, "MoD")
 
-  let $tasksAutocomplete = await pageHelpers.chooseAutocompleteOption(
+  let $tasksAdvancedSelect = await pageHelpers.chooseAdvancedSelectOption(
     "#tasks",
     "1.1.B"
   )
 
+  let $tasksShortcutTitle = await $("#tasks-shortcut-title")
+  await $tasksShortcutTitle.click()
+
   t.is(
-    await $tasksAutocomplete.getAttribute("value"),
+    await $tasksAdvancedSelect.getAttribute("value"),
     "",
-    "Clicking a Task autocomplete suggestion empties the autocomplete field."
+    "Closing the tasks advanced multi select overlay empties the input field."
   )
 
   let $newTaskRow = await $(".tasks-selector table tbody tr td")
@@ -324,7 +327,7 @@ test("Publish report chain", async t => {
 })
 
 test("Verify that validation and other reports/new interactions work", async t => {
-  t.plan(28)
+  t.plan(29)
 
   let {
     assertElementText,
@@ -442,9 +445,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Location field starts blank"
   )
 
-  let $locationShortcutButton = await $(
-    ".location-form-group.shortcut-list button"
-  )
+  let $locationShortcutButton = await $("#location-shortcut-list button")
   await $locationShortcutButton.click()
   t.is(
     await $locationInput.getAttribute("value"),
@@ -538,8 +539,19 @@ test("Verify that validation and other reports/new interactions work", async t =
     "Meeting attendance fieldset should have correct title for a cancelled enagement"
   )
 
-  let $attendeesRows = await $$("#attendeesTable tbody tr")
-  t.is($attendeesRows.length, 2, "Attendees table starts with 2 body rows")
+  let $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
+  t.is(
+    $advisorAttendeesRows.length,
+    1,
+    "Advisor attendees table starts with 1 body rows"
+  )
+
+  let $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
+  t.is(
+    $principalAttendeesRows.length,
+    1,
+    "Principal attendees table starts with 1 body rows"
+  )
 
   let [
     $advisorPrimaryCheckbox,
@@ -547,7 +559,7 @@ test("Verify that validation and other reports/new interactions work", async t =
     $advisorPosition,
     $advisorLocation,
     $advisorOrg
-  ] = await $$("#attendeesTable tbody tr:first-child td")
+  ] = await $$(".advisorAttendeesTable tbody tr:first-child td")
 
   t.is(
     await $advisorPrimaryCheckbox
@@ -560,16 +572,15 @@ test("Verify that validation and other reports/new interactions work", async t =
   await assertElementText(t, $advisorPosition, "EF 2.2 Advisor D")
   await assertElementText(t, $advisorOrg, "EF 2.2")
 
-  $attendeesRows = await $$("#attendeesTable tbody tr")
-  let $addAttendeeShortcutButtons = await $$(
-    "#attendance-fieldset .shortcut-list button"
-  )
+  let $addAttendeeShortcutButtons = await $$("#attendees-shortcut-list button")
   // Add all recent attendees
   await Promise.all($addAttendeeShortcutButtons.map($button => $button.click()))
 
+  $advisorAttendeesRows = await $$(".advisorAttendeesTable tbody tr")
+  $principalAttendeesRows = await $$(".principalAttendeesTable tbody tr")
   t.is(
-    (await $$("#attendeesTable tbody tr")).length,
-    $attendeesRows.length + $addAttendeeShortcutButtons.length,
+    $advisorAttendeesRows.length + $principalAttendeesRows.length,
+    4,
     "Clicking the shortcut buttons adds rows to the table"
   )
 

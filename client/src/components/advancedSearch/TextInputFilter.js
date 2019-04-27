@@ -2,7 +2,7 @@ import autobind from "autobind-decorator"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
-import { FormControl } from "react-bootstrap"
+import { FormControl, FormGroup } from "react-bootstrap"
 import utils from "utils"
 
 export default class TextInputFilter extends Component {
@@ -47,7 +47,9 @@ export default class TextInputFilter extends Component {
     return !this.props.asFormField ? (
       <React.Fragment>{this.state.value.value}</React.Fragment>
     ) : (
-      <FormControl value={this.state.value.value} onChange={this.onChange} />
+      <FormGroup>
+        <FormControl value={this.state.value.value} onChange={this.onChange} />
+      </FormGroup>
     )
   }
 
