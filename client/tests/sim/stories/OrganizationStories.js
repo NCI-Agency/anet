@@ -73,7 +73,7 @@ async function createHiearchy(user, grow) {
       shortName.green
     })`
   )
-  return await createSubOrg(undefined, [])
+  return createSubOrg(undefined, [])
 
   /**
    * Compute a random number of sub organizations to create for a certain level in the organization
@@ -166,7 +166,7 @@ async function gqlCreateOrganization(user, org) {
       }
     }
   } else {
-    return await runGQL(user, {
+    return runGQL(user, {
       query:
         "mutation($organization: OrganizationInput!) { createOrganization(organization: $organization) { uuid } }",
       variables: { organization: org }

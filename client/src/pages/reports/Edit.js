@@ -31,22 +31,22 @@ class ReportEdit extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-			report(uuid:"${props.match.params.uuid}") {
-				uuid, intent, engagementDate, atmosphere, atmosphereDetails, state
-				keyOutcomes, reportText, nextSteps, cancelledReason,
-				author { uuid, name, rank, role },
-				location { uuid, name },
-				attendees {
-					uuid, name, rank, role, primary, status, endOfTourDate
-					position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
-				}
-				tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-				tags { uuid, name, description }
-				reportSensitiveInformation { uuid, text }
-				authorizationGroups { uuid, name, description }
-				${GRAPHQL_NOTES_FIELDS}
-			}
-		`
+      report(uuid:"${props.match.params.uuid}") {
+        uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails, state
+        keyOutcomes, reportText, nextSteps, cancelledReason,
+        author { uuid, name, rank, role },
+        location { uuid, name },
+        attendees {
+          uuid, name, rank, role, primary, status, endOfTourDate
+          position { uuid, name, type, code, status, organization { uuid, shortName}, location {uuid, name} }
+        }
+        tasks { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
+        tags { uuid, name, description }
+        reportSensitiveInformation { uuid, text }
+        authorizationGroups { uuid, name, description }
+        ${GRAPHQL_NOTES_FIELDS}
+      }
+    `
     ).then(data => {
       data.report.cancelled = !!data.report.cancelledReason
       data.report.reportTags = (data.report.tags || []).map(tag => ({

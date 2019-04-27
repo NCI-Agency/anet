@@ -170,17 +170,25 @@ Currently, the recognized entries in the dictionary (and suggested values for ea
 dictionary:
   SUPPORT_EMAIL_ADDR: support@example.com
 
+  engagementsIncludeTimeAndDuration: true
+
   dateFormats:
     email:
-      short: d MMMM yyyy
+      date: d MMMM yyyy
       withTime: d MMMM yyyy @ HH:mm
     excel: d MMMM yyyy
     forms:
-      input: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
-              DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
-      short: D MMMM YYYY
-      long: dddd, D MMMM YYYY
-      withTime: D MMMM YYYY @ HH:mm
+      input:
+        date: [DD-MM-YYYY, DD-MM-YY, DD/MM/YYYY, DD/MM/YY, DD MM YYYY, DD MM YY,
+               DD.MM.YYYY, DD.MM.YY, DDMMYYYY, DDMMYY, D MMMM YYYY]
+        withTime: [DD-MM-YYYY HH:mm, DD-MM-YY HH:mm, DD/MM/YYYY HH:mm, DD/MM/YY HH:mm, DD MM YYYY HH:mm, DD MM YY HH:mm,
+                   DD.MM.YYYY HH:mm, DD.MM.YY HH:mm, DDMMYYYY HH:mm, DDMMYY HH:mm, D MMMM YYYY HH:mm]
+      displayShort:
+        date: D MMMM YYYY
+        withTime: D MMMM YYYY @ HH:mm
+      displayLong:
+        date: dddd, D MMMM YYYY
+        withTime: dddd, D MMMM YYYY @ HH:mm
 
   reportWorkflow:
     nbOfHoursQuarantineApproved: 24
@@ -234,7 +242,57 @@ dictionary:
       phoneNumber: Phone
       country: Nationality
       rank: Rank
-      ranks: [CIV, CTR, OR-1, OR-2, OR-3, OR-4, OR-5, OR-6, OR-7, OR-8, OR-9, WO-1, WO-2, WO-3, WO-4, WO-5, OF-1, OF-2, OF-3, OF-4, OF-5, OF-6, OF-7, OF-8, OF-9, OF-10]
+      ranks:
+        - value: CIV
+          description: the rank of CIV
+        - value: CTR
+          description: the rank of CTR
+        - value: OR-1
+          description: the rank of OR-1
+        - value: OR-2
+          description: the rank of OR-2
+        - value: OR-3
+          description: the rank of OR-3
+        - value: OR-4
+          description: the rank of OR-4
+        - value: OR-5
+          description: the rank of OR-5
+        - value: OR-6
+          description: the rank of OR-6
+        - value: OR-7
+          description: the rank of OR-7
+        - value: OR-8
+          description: the rank of OR-8
+        - value: OR-9
+          description: the rank of OR-9
+        - value: WO-1
+          description: the rank of WO-1
+        - value: WO-2
+          description: the rank of WO-2
+        - value: WO-3
+          description: the rank of WO-3
+        - value: WO-4
+          description: the rank of WO-4
+        - value: WO-5
+          description: the rank of WO-5
+        - value: OF-1
+          description: the rank of OF-1
+        - value: OF-2
+          description: the rank of OF-2
+        - value: OF-3
+          description: the rank of OF-3
+        - value: OF-4
+          description: the rank of OF-4
+        - value: OF-5
+          description: the rank of OF-5
+        - value: OF-6
+          description: the rank of OF-6
+        - value: OF-7
+          description: the rank of OF-7
+        - value: OF-8
+          description: the rank of OF-8
+        - value: OF-9
+          description: the rank of OF-9
       gender: Gender
       endOfTourDate: End of tour
 

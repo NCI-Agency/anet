@@ -153,6 +153,10 @@ fieldset.danger {
 	opacity: 0.5;
 }
 
+#duration {
+	width: 10em;
+}
+
 .shortcut-list {
 	margin-top: -4px;
 }

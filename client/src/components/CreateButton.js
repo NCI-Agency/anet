@@ -1,4 +1,3 @@
-import autobind from "autobind-decorator"
 import AppContext from "components/AppContext"
 import * as Models from "models"
 import PropTypes from "prop-types"
@@ -50,7 +49,7 @@ class BaseCreateButton extends Component {
       return (
         <Button
           bsStyle="primary"
-          onClick={this.onSelect.bind(this, modelClass)}
+          onClick={() => this.onSelect(modelClass)}
           id="createButton"
         >
           New{" "}
@@ -60,8 +59,7 @@ class BaseCreateButton extends Component {
     }
   }
 
-  @autobind
-  onSelect(modelClass) {
+  onSelect = modelClass => {
     this.props.history.push(modelClass.pathForNew())
   }
 }

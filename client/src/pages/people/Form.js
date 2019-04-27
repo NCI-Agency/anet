@@ -254,8 +254,12 @@ class BasePersonForm extends Component {
                         <OptionListModal
                           title={modalTitle}
                           showModal={this.state.showWrongPersonModal}
-                          onCancel={this.hideWrongPersonModal.bind(this)}
-                          onSuccess={this.hideWrongPersonModal.bind(this)}
+                          onCancel={optionValue =>
+                            this.hideWrongPersonModal(optionValue)
+                          }
+                          onSuccess={optionValue =>
+                            this.hideWrongPersonModal(optionValue)
+                          }
                         >
                           {(isSelf && (
                             <div>
@@ -413,8 +417,9 @@ class BasePersonForm extends Component {
                       <Field component="select" className="form-control">
                         <option />
                         {ranks.map(rank => (
-                          <option key={rank} value={rank}>
-                            {rank}
+                          <option key={rank.value} value={rank.value}>
+                            {rank.value}{" "}
+                            {rank.description && ` - ( ${rank.description} )`}
                           </option>
                         ))}
                       </Field>

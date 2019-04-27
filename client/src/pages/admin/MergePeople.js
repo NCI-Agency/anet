@@ -31,9 +31,9 @@ class MergePeople extends Page {
       .object()
       .nullable()
       .default({})
-      // eslint-disable-next-line no-template-curly-in-string
       .test(
         "required-object",
+        // eslint-disable-next-line no-template-curly-in-string
         "You must select a ${path}",
         value => value && value.uuid
       ),
@@ -41,9 +41,9 @@ class MergePeople extends Page {
       .object()
       .nullable()
       .default({})
-      // eslint-disable-next-line no-template-curly-in-string
       .test(
         "required-object",
+        // eslint-disable-next-line no-template-curly-in-string
         "You must select a ${path}",
         value => value && value.uuid
       )
@@ -264,7 +264,9 @@ class MergePeople extends Page {
           component={FieldHelper.renderReadonlyField}
           humanValue={
             person.createdAt &&
-            moment(person.createdAt).format(Settings.dateFormats.forms.withTime)
+            moment(person.createdAt).format(
+              Settings.dateFormats.forms.displayShort.withTime
+            )
           }
           vertical
         />

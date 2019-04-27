@@ -1,6 +1,6 @@
 import Page from "./page"
 
-const Page_URL = "/admin/authorizationGroups/new"
+const PAGE_URL = "/admin/authorizationGroups/new"
 
 class CreateAuthorizationGroup extends Page {
   get form() {
@@ -35,7 +35,7 @@ class CreateAuthorizationGroup extends Page {
 
   open() {
     // Only admin users can create authorization groups
-    super.openAsAdminUser(Page_URL)
+    super.openAsAdminUser(PAGE_URL)
   }
 
   waitForAlertSuccessToLoad() {

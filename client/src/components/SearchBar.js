@@ -126,7 +126,6 @@ class SearchBar extends Component {
           onHide={() => this.setState({ showAdvancedSearch: false })}
           placement="bottom"
           target={this.advancedSearchLink}
-          rootClose
         >
           <Popover id="advanced-search" placement="bottom" title="Filters">
             <AdvancedSearch

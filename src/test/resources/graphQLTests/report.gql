@@ -1,5 +1,5 @@
 report(uuid:"${reportUuid}") {
-    uuid, intent, engagementDate, atmosphere, atmosphereDetails
+    uuid, intent, engagementDate, duration, atmosphere, atmosphereDetails
     keyOutcomes, nextSteps, reportText, 
 
     state

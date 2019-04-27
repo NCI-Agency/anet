@@ -30,7 +30,7 @@ class BaseRelatedObjectNoteModal extends Component {
   }
 
   render() {
-    const { showModal, note, currentUser } = this.props
+    const { showModal, note } = this.props
     return (
       <Modal show={showModal} onHide={this.close}>
         <Formik

@@ -1,5 +1,5 @@
-let url = require("url")
 let path = require("path")
+let { URL } = require("url")
 let test = require("ava")
 let webdriver = require("selenium-webdriver")
 let { By, until, Key } = webdriver
@@ -123,7 +123,7 @@ test.beforeEach(t => {
       waitTimeoutMs,
       `Could not find element by css selector ${cssSelector} within ${waitTimeoutMs} milliseconds`
     )
-    return await t.context.driver.findElement(locator)
+    return t.context.driver.findElement(locator)
   }
   t.context.$$ = async(cssSelector, timeoutMs) => {
     debugLog(`Find elements: $$('${cssSelector}')`)
@@ -241,7 +241,7 @@ test.beforeEach(t => {
 
   t.context.getCurrentPathname = async() => {
     let currentUrl = await t.context.driver.getCurrentUrl()
-    return url.parse(currentUrl).pathname
+    return new URL(currentUrl).pathname
   }
 
   t.context.pageHelpers = {
@@ -297,7 +297,7 @@ test.beforeEach(t => {
       )
       for (let $row of $supportedPositionsRows) {
         let [$billetCell, $advisorCell] = await $row.findElements(By.css("td"))
-        let billetText = await $billetCell.getText()
+        await $billetCell.getText()
         let advisorText = await $advisorCell.getText()
 
         if (advisorText === personName) {

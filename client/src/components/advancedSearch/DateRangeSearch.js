@@ -115,7 +115,7 @@ export default class DateRangeSearch extends Component {
     let dateRangeDisplay = RANGE_TYPE_LABELS[value.relative].concat(" ")
     if (value.relative === BETWEEN || value.relative === AFTER) {
       dateRangeDisplay = dateRangeDisplay.concat(
-        moment(value.start).format(Settings.dateFormats.forms.short)
+        moment(value.start).format(Settings.dateFormats.forms.displayShort.date)
       )
     }
     if (value.relative === BETWEEN) {
@@ -123,7 +123,7 @@ export default class DateRangeSearch extends Component {
     }
     if (value.relative === BETWEEN || value.relative === BEFORE) {
       dateRangeDisplay = dateRangeDisplay.concat(
-        moment(value.end).format(Settings.dateFormats.forms.short)
+        moment(value.end).format(Settings.dateFormats.forms.displayShort.date)
       )
     }
     const dateStart = value.start && moment(value.start).toDate()
