@@ -311,7 +311,7 @@
       "react/jsx-indent-props": "warn",
       "react/jsx-no-bind": "warn",
       "react/jsx-tag-spacing": "warn",
-      "react/no-did-update-set-state": "warn",
+      "react/no-did-update-set-state": "off",
       "react/no-unused-prop-types": "warn",
       "react/prop-types": "warn",
       "react/self-closing-comp": "warn",

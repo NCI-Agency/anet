@@ -106,15 +106,15 @@ const populateReport = async function(report, user) {
     },
     attendees: () => {
       const attendees = new Set()
-      const nb_of_advisors = faker.random.number({ min: 1, max: 5 })
-      for (let i = 0; i < nb_of_advisors; i++) {
+      const nbOfAdvisors = faker.random.number({ min: 1, max: 5 })
+      for (let i = 0; i < nbOfAdvisors; i++) {
         const advisor = faker.random.arrayElement(assignedAdvisors)
         advisor.primary = i === 0
         attendees.add(advisor)
       }
 
-      const nb_of_principals = faker.random.number({ min: 1, max: 5 })
-      for (let i = 0; i < nb_of_principals; i++) {
+      const nbOfPrincipals = faker.random.number({ min: 1, max: 5 })
+      for (let i = 0; i < nbOfPrincipals; i++) {
         const principal = faker.random.arrayElement(assignedPrincipals)
         principal.primary = i === 0
         attendees.add(principal)
@@ -124,9 +124,9 @@ const populateReport = async function(report, user) {
     },
     tasks: () => {
       const reportTasks = new Set()
-      const nb_of_tasks = faker.random.number({ min: 1, max: 3 })
+      const nbOfTasks = faker.random.number({ min: 1, max: 3 })
 
-      for (let i = 0; i < nb_of_tasks; i++) {
+      for (let i = 0; i < nbOfTasks; i++) {
         reportTasks.add(faker.random.arrayElement(activeTasks))
       }
 
@@ -165,7 +165,7 @@ const createReport = async function(user) {
   if (await populateReport(report, user)) {
     const { reportTags, cancelled, ...reportStripped } = report // TODO: we need to do this more generically
 
-    return await runGQL(user, {
+    return runGQL(user, {
       query:
         "mutation($report: ReportInput!) { createReport(report: $report) { uuid } }",
       variables: { report: reportStripped }
@@ -196,7 +196,7 @@ const updateDraftReport = async function(user) {
   }
 
   if (await populateReport(report, user)) {
-    return await runGQL(user, {
+    return runGQL(user, {
       query:
         "mutation($report: ReportInput!) { updateReport(report: $report) { uuid } }",
       variables: { report: report }
@@ -222,7 +222,7 @@ const submitDraftReport = async function(user) {
     return
   }
 
-  return await runGQL(user, {
+  return runGQL(user, {
     query: "mutation($uuid: String!) { submitReport(uuid: $uuid) { uuid } }",
     variables: { uuid: report.uuid }
   })
@@ -246,7 +246,7 @@ const approveReport = async function(user) {
     return
   }
 
-  return await runGQL(user, {
+  return runGQL(user, {
     query: "mutation ($uuid: String!) { approveReport(uuid: $uuid) { uuid } }",
     variables: { uuid: report.uuid }
   })

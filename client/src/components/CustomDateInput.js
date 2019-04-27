@@ -1,5 +1,5 @@
 import "@blueprintjs/core/lib/css/blueprint.css"
-import { DateInput, TimePicker, TimePrecision } from "@blueprintjs/datetime"
+import { DateInput, TimePrecision } from "@blueprintjs/datetime"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 import { Settings } from "api"
 import moment from "moment"
