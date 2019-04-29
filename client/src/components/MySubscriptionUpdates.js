@@ -171,69 +171,69 @@ class BaseMySubscriptionUpdates extends Component {
       pageSize: 10
     }
     const subscriptionUpdatesPart = new GQL.Part(/* GraphQL */ `
-			mySubscriptionUpdates(query: $subscriptionUpdatesQuery) {
-				pageNum pageSize totalCount list {
-					createdAt
-					updatedObjectType
-					updatedObjectUuid
-					updatedObject {
-						... on Location {
-							name
-						}
-						... on Organization {
-							shortName
-						}
-						... on Person {
-							role
-							rank
-							name
-						}
-						... on Position {
-							type
-							name
-						}
-						... on Report {
-							intent
-						}
-						... on Task {
-							shortName
-							longName
-						}
-					}
-					isNote
-					subscription {
-						uuid
-						createdAt
-						updatedAt
-						subscribedObjectType
-						subscribedObjectUuid
-						subscribedObject {
-							... on Location {
-								name
-							}
-							... on Organization {
-								shortName
-							}
-							... on Person {
-								role
-								rank
-								name
-							}
-							... on Position {
-								type
-								name
-							}
-							... on Report {
-								intent
-							}
-							... on Task {
-								shortName
-								longName
-							}
-						}
-					}
-				}
-			}`).addVariable(
+      mySubscriptionUpdates(query: $subscriptionUpdatesQuery) {
+        pageNum pageSize totalCount list {
+          createdAt
+          updatedObjectType
+          updatedObjectUuid
+          updatedObject {
+            ... on Location {
+              name
+            }
+            ... on Organization {
+              shortName
+            }
+            ... on Person {
+              role
+              rank
+              name
+            }
+            ... on Position {
+              type
+              name
+            }
+            ... on Report {
+              intent
+            }
+            ... on Task {
+              shortName
+              longName
+            }
+          }
+          isNote
+          subscription {
+            uuid
+            createdAt
+            updatedAt
+            subscribedObjectType
+            subscribedObjectUuid
+            subscribedObject {
+              ... on Location {
+                name
+              }
+              ... on Organization {
+                shortName
+              }
+              ... on Person {
+                role
+                rank
+                name
+              }
+              ... on Position {
+                type
+                name
+              }
+              ... on Report {
+                intent
+              }
+              ... on Task {
+                shortName
+                longName
+              }
+            }
+          }
+        }
+      }`).addVariable(
       "subscriptionUpdatesQuery",
       "SubscriptionUpdateSearchQueryInput",
       subscriptionUpdatesQuery

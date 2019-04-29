@@ -135,39 +135,39 @@ class BaseMySubscriptions extends Component {
       pageSize: 10
     }
     const subscriptionsPart = new GQL.Part(/* GraphQL */ `
-			mySubscriptions(query: $subscriptionsQuery) {
-				pageNum pageSize totalCount list {
-					uuid
-					createdAt
-					updatedAt
-					subscribedObjectType
-					subscribedObjectUuid
-					subscribedObject {
-						... on Location {
-							name
-						}
-						... on Organization {
-							shortName
-						}
-						... on Person {
-							role
-							rank
-							name
-						}
-						... on Position {
-							type
-							name
-						}
-						... on Report {
-							intent
-						}
-						... on Task {
-							shortName
-							longName
-						}
-					}
-				}
-			}`).addVariable(
+      mySubscriptions(query: $subscriptionsQuery) {
+        pageNum pageSize totalCount list {
+          uuid
+          createdAt
+          updatedAt
+          subscribedObjectType
+          subscribedObjectUuid
+          subscribedObject {
+            ... on Location {
+              name
+            }
+            ... on Organization {
+              shortName
+            }
+            ... on Person {
+              role
+              rank
+              name
+            }
+            ... on Position {
+              type
+              name
+            }
+            ... on Report {
+              intent
+            }
+            ... on Task {
+              shortName
+              longName
+            }
+          }
+        }
+      }`).addVariable(
       "subscriptionsQuery",
       "SubscriptionSearchQueryInput",
       subscriptionsQuery
