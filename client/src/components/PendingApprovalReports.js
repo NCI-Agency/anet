@@ -193,7 +193,7 @@ class PendingApprovalReports extends ReportsVisualisation {
   @autobind
   fetchChartData(chartQuery) {
     return Promise.all([chartQuery]).then(values => {
-      const pinned_ORGs = Settings.pinned_ORGs
+      const pinnedOrgs = Settings.pinned_ORGs
       const noAdvisorOrg = {
         uuid: "-1",
         shortName: `No ${this.advisorOrgLabel}`
@@ -220,14 +220,14 @@ class PendingApprovalReports extends ReportsVisualisation {
             return d
           })
           .sort((a, b) => {
-            let a_index = pinned_ORGs.indexOf(a.advisorOrg.shortName)
-            let b_index = pinned_ORGs.indexOf(b.advisorOrg.shortName)
-            if (a_index < 0) {
-              return b_index < 0
+            let aIndex = pinnedOrgs.indexOf(a.advisorOrg.shortName)
+            let bIndex = pinnedOrgs.indexOf(b.advisorOrg.shortName)
+            if (aIndex < 0) {
+              return bIndex < 0
                 ? a.advisorOrg.shortName.localeCompare(b.advisorOrg.shortName)
                 : 1
             } else {
-              return b_index < 0 ? -1 : a_index - b_index
+              return bIndex < 0 ? -1 : aIndex - bIndex
             }
           })
       })

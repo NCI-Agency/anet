@@ -1,12 +1,18 @@
 import API, { Settings } from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import {
+  AuthorizationGroupOverlayRow,
+  LocationOverlayRow,
+  PersonDetailedOverlayRow,
+  TaskDetailedOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import Autocomplete from "components/Autocomplete"
 import ConfirmDelete from "components/ConfirmDelete"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import MultiSelector from "components/MultiSelector"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import ReportTags from "components/ReportTags"
@@ -114,22 +120,22 @@ class BaseReportForm extends Component {
   componentDidMount() {
     API.query(
       /* GraphQL */ `
-      locationRecents(maxResults:6) {
-        list { uuid, name }
-      }
-      personRecents(maxResults:6) {
-        list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
-      }
-      taskRecents(maxResults:6) {
-        list { uuid, shortName, longName }
-      }
-      authorizationGroupRecents(maxResults:6) {
-        list { uuid, name, description }
-      }
-      tags {
-        list { uuid, name, description }
-      }
-    `
+			locationRecents(maxResults:6) {
+				list { uuid, name }
+			}
+			personRecents(maxResults:6) {
+				list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
+			}
+			taskRecents(maxResults:6) {
+				list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
+			}
+			authorizationGroupRecents(maxResults:6) {
+				list { uuid, name, description }
+			}
+			tags {
+				list { uuid, name, description }
+			}
+		`
     ).then(data => {
       const newState = {
         recents: {
@@ -186,6 +192,104 @@ class BaseReportForm extends Component {
           submitForm,
           resetForm
         }) => {
+          const locationFilters = {
+            activeLocations: {
+              label: "Active locations",
+              searchQuery: true,
+              queryVars: { status: Location.STATUS.ACTIVE }
+            }
+          }
+
+          const attendeesFilters = {
+            all: {
+              label: "All",
+              searchQuery: true,
+              queryVars: { matchPositionName: true }
+            },
+            activeAdvisors: {
+              label: "All advisors",
+              searchQuery: true,
+              queryVars: { role: Person.ROLE.ADVISOR, matchPositionName: true }
+            },
+            activePrincipals: {
+              label: "All principals",
+              searchQuery: true,
+              queryVars: { role: Person.ROLE.PRINCIPAL }
+            }
+          }
+          if (this.props.currentUser.position) {
+            attendeesFilters.myColleagues = {
+              label: "My colleagues",
+              searchQuery: true,
+              queryVars: {
+                role: Person.ROLE.ADVISOR,
+                matchPositionName: true,
+                orgUuid: this.props.currentUser.position.organization.uuid
+              }
+            }
+            attendeesFilters.myCounterparts = {
+              label: "My counterparts",
+              searchQuery: false,
+              list: this.props.currentUser.position.associatedPositions
+                .filter(ap => ap.person)
+                .map(ap => ap.person)
+            }
+          }
+          if (values.location && values.location.uuid) {
+            attendeesFilters.atLocation = {
+              label: `At ${values.location.name}`,
+              searchQuery: true,
+              queryVars: {
+                locationUuid:
+                  values.location && values.location.uuid
+                    ? values.location.uuid
+                    : null
+              }
+            }
+          }
+
+          const tasksFilters = {
+            allTasks: {
+              label: "All tasks",
+              searchQuery: true
+            }
+          }
+          if (this.props.currentUser.position) {
+            tasksFilters.assignedToMyOrg = {
+              label: "Assigned to my organization",
+              searchQuery: true,
+              queryVars: {
+                responsibleOrgUuid: this.props.currentUser.position.organization
+                  .uuid
+              }
+            }
+          }
+          const primaryAdvisors = values.attendees.filter(
+            a => a.role === Person.ROLE.ADVISOR && a.primary === true
+          )
+          const primaryAdvisor = primaryAdvisors.length
+            ? primaryAdvisors[0]
+            : null
+          if (
+            primaryAdvisor &&
+            primaryAdvisor.position &&
+            primaryAdvisor.position.organization
+          ) {
+            tasksFilters.assignedToReportOrg = {
+              label: "Assigned to organization of report",
+              searchQuery: true,
+              queryVars: {
+                responsibleOrgUuid: primaryAdvisor.position.organization.uuid
+              }
+            }
+          }
+
+          const authorizationGroupsFilters = {
+            allAuthorizationGroups: {
+              label: "All authorization groups",
+              searchQuery: true
+            }
+          }
           // need up-to-date copies of these in the autosave handler
           this.autoSaveSettings.dirty = dirty
           this.autoSaveSettings.values = values
@@ -310,39 +414,22 @@ class BaseReportForm extends Component {
                     />
                   )}
 
-                  <Field
-                    name="location"
-                    component={FieldHelper.renderSpecialField}
+                  <AdvancedSingleSelect
+                    fieldName="location"
+                    fieldLabel="Location"
+                    placeholder="Search for the location where this happened..."
+                    value={values.location}
+                    overlayColumns={["Name"]}
+                    overlayRenderRow={LocationOverlayRow}
+                    filterDefs={locationFilters}
                     onChange={value => setFieldValue("location", value)}
+                    objectType={Location}
+                    fields={Location.autocompleteQuery}
+                    valueKey="name"
                     addon={LOCATIONS_ICON}
-                    extraColElem={
-                      recents.locations &&
-                      recents.locations.length > 0 && (
-                        <div className="location-form-group shortcut-list">
-                          <h5>Recent Locations</h5>
-                          {recents.locations.map(location => (
-                            <Button
-                              key={location.uuid}
-                              bsStyle="link"
-                              onClick={() =>
-                                setFieldValue("location", location)
-                              }
-                            >
-                              Add {location.name}
-                            </Button>
-                          ))}
-                        </div>
-                      )
-                    }
-                    widget={
-                      <Autocomplete
-                        objectType={Location}
-                        valueKey="name"
-                        fields={Location.autocompleteQuery}
-                        placeholder="Start typing to search for the location where this happened..."
-                        queryParams={{ status: Location.STATUS.ACTIVE }}
-                      />
-                    }
+                    shortcutsTitle="Recent Locations"
+                    shortcuts={recents.locations}
+                    renderExtraCol
                   />
 
                   <Field
@@ -429,19 +516,11 @@ class BaseReportForm extends Component {
                   }
                   id="attendance-fieldset"
                 >
-                  <MultiSelector
-                    items={values.attendees}
-                    objectType={Person}
-                    queryParams={{
-                      status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER],
-                      matchPositionName: true
-                    }}
-                    placeholder="Start typing to search for people who attended the meeting..."
-                    fields={Person.autocompleteQuery}
-                    template={Person.autocompleteTemplate}
-                    addFieldName="attendees"
-                    addFieldLabel="Attendees"
-                    addon={PEOPLE_ICON}
+                  <AdvancedMultiSelect
+                    fieldName="attendees"
+                    fieldLabel="Attendees"
+                    placeholder="Search for attendees who attended the meeting..."
+                    value={values.attendees}
                     renderSelected={
                       <AttendeesTable
                         attendees={values.attendees}
@@ -449,10 +528,23 @@ class BaseReportForm extends Component {
                         showDelete
                       />
                     }
-                    onChange={value => {
+                    overlayColumns={[
+                      "Name",
+                      "Position",
+                      "Location",
+                      "Organization"
+                    ]}
+                    overlayRenderRow={PersonDetailedOverlayRow}
+                    filterDefs={attendeesFilters}
+                    onChange={value =>
                       this.updateAttendees(setFieldValue, "attendees", value)
-                      setFieldTouched("attendees", true)
+                    }
+                    objectType={Person}
+                    queryParams={{
+                      status: [Person.STATUS.ACTIVE, Person.STATUS.NEW_USER]
                     }}
+                    fields={Person.autocompleteQuery}
+                    addon={PEOPLE_ICON}
                     shortcutsTitle="Recent Attendees"
                     shortcuts={recents.persons}
                     renderExtraCol
@@ -463,18 +555,13 @@ class BaseReportForm extends Component {
                   title={Settings.fields.task.longLabel}
                   className="tasks-selector"
                 >
-                  <MultiSelector
-                    items={values.tasks}
-                    objectType={Task}
-                    queryParams={{ status: Task.STATUS.ACTIVE }}
-                    placeholder={`Start typing to search for ${pluralize(
+                  <AdvancedMultiSelect
+                    fieldName="tasks"
+                    fieldLabel={Settings.fields.task.shortLabel}
+                    placeholder={`Search for ${pluralize(
                       Settings.fields.task.shortLabel
                     )}...`}
-                    fields={Task.autocompleteQuery}
-                    template={Task.autocompleteTemplate}
-                    addFieldName="tasks"
-                    addFieldLabel={Settings.fields.task.shortLabel}
-                    addon={TASKS_ICON}
+                    value={values.tasks}
                     renderSelected={
                       <TaskTable
                         tasks={values.tasks}
@@ -482,10 +569,17 @@ class BaseReportForm extends Component {
                         showOrganization
                       />
                     }
+                    overlayColumns={["Name", "Organization"]}
+                    overlayRenderRow={TaskDetailedOverlayRow}
+                    filterDefs={tasksFilters}
                     onChange={value => {
                       setFieldValue("tasks", value)
                       setFieldTouched("tasks", true)
                     }}
+                    objectType={Task}
+                    queryParams={{ status: Task.STATUS.ACTIVE }}
+                    fields={Task.autocompleteQuery}
+                    addon={TASKS_ICON}
                     shortcutsTitle={`Recent ${pluralize(
                       Settings.fields.task.shortLabel
                     )}`}
@@ -592,26 +686,28 @@ class BaseReportForm extends Component {
                             <RichTextEditor className="reportSensitiveInformationField" />
                           }
                         />
-                        <MultiSelector
-                          items={values.authorizationGroups}
-                          objectType={AuthorizationGroup}
-                          queryParams={{
-                            status: AuthorizationGroup.STATUS.ACTIVE
-                          }}
-                          placeholder="Start typing to search for authorization groups..."
-                          fields={AuthorizationGroup.autocompleteQuery}
-                          template={AuthorizationGroup.autocompleteTemplate}
-                          addFieldName="authorizationGroups"
-                          addFieldLabel="Authorization Groups"
+                        <AdvancedMultiSelect
+                          fieldName="authorizationGroups"
+                          fieldLabel="Authorization Groups"
+                          placeholder="Search for authorization groups..."
+                          value={values.authorizationGroups}
                           renderSelected={
                             <AuthorizationGroupTable
                               authorizationGroups={values.authorizationGroups}
                               showDelete
                             />
                           }
+                          overlayColumns={["Name", "Description"]}
+                          overlayRenderRow={AuthorizationGroupOverlayRow}
+                          filterDefs={authorizationGroupsFilters}
                           onChange={value =>
                             setFieldValue("authorizationGroups", value)
                           }
+                          objectType={AuthorizationGroup}
+                          queryParams={{
+                            status: AuthorizationGroup.STATUS.ACTIVE
+                          }}
+                          fields={AuthorizationGroup.autocompleteQuery}
                           shortcutsTitle="Recent Authorization Groups"
                           shortcuts={recents.authorizationGroups}
                           renderExtraCol
@@ -805,11 +901,14 @@ class BaseReportForm extends Component {
   }
 
   save = (values, sendEmail) => {
-    const report = Object.without(
-      new Report(values),
+    let report = new Report(values)
+    const attendees = report.attendees
+    report = Object.without(
+      report,
       "cancelled",
       "reportTags",
-      "showSensitiveInfo"
+      "showSensitiveInfo",
+      "attendees"
     )
     if (!values.cancelled) {
       delete report.cancelledReason
@@ -823,7 +922,7 @@ class BaseReportForm extends Component {
     // reportTags contains id's instead of uuid's (as that is what the ReactTags component expects)
     report.tags = values.reportTags.map(tag => ({ uuid: tag.id }))
     // strip attendees fields not in data model
-    report.attendees = report.attendees.map(a =>
+    report.attendees = attendees.map(a =>
       Object.without(a, "firstName", "lastName", "position", "_loaded")
     )
     report.location = utils.getReference(report.location)

@@ -2,7 +2,6 @@ import { Classes, Icon } from "@blueprintjs/core"
 import "@blueprintjs/core/lib/css/blueprint.css"
 import { IconNames } from "@blueprintjs/icons"
 import "@blueprintjs/icons/lib/css/blueprint-icons.css" // needed for the mosaic tile buttons (expand, close)
-import autobind from "autobind-decorator"
 import classNames from "classnames"
 import _dropRight from "lodash/dropRight"
 import PropTypes from "prop-types"
@@ -68,8 +67,7 @@ export default class MosaicLayout extends Component {
     )
   }
 
-  @autobind
-  renderNavBar() {
+  renderNavBar = () => {
     return (
       <div className={classNames(Classes.NAVBAR)}>
         <div className={classNames(Classes.NAVBAR_GROUP, Classes.BUTTON_GROUP)}>
@@ -96,7 +94,7 @@ export default class MosaicLayout extends Component {
           <button
             key={viz.id}
             className={classNames(Classes.BUTTON)}
-            onClick={this.addChart.bind(this, viz.id)}
+            onClick={() => this.addChart(viz.id)}
             title={viz.title}
           >
             {viz.icons.map((icon, i) => (
@@ -109,8 +107,7 @@ export default class MosaicLayout extends Component {
     return buttons
   }
 
-  @autobind
-  updateCurrentNode(currentNode) {
+  updateCurrentNode = currentNode => {
     this.setState({ currentNode })
   }
 

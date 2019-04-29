@@ -9,7 +9,7 @@ import { fuzzy, identity, populate, runGQL } from "../simutils"
  * @param {*} uuid The uuid of the position to retrieve
  */
 async function getPosition(user, uuid) {
-  return await runGQL(user, {
+  return runGQL(user, {
     query: `query {
                 position(uuid: "${uuid}") {
                   uuid
@@ -153,7 +153,7 @@ const _createPosition = async function(user) {
   }
 
   console.debug(`Creating position ${position.name.green}`)
-  return await runGQL(user, {
+  return runGQL(user, {
     query: `mutation ($position: PositionInput!) {
                 createPosition(position: $position) {
                     uuid
@@ -199,7 +199,7 @@ const _deletePosition = async function(user) {
 
   if (position) {
     console.debug(`Removing position of ${position.name.green}`)
-    return await runGQL(user, {
+    return runGQL(user, {
       query: `mutation($uuid: String!) {
                     deletePosition(uuid: $uuid)
                 }`,
@@ -260,7 +260,7 @@ const _deactivatePosition = async function(user) {
     position.status = Position.STATUS.INACTIVE
 
     console.debug(`Removing position of ${position.name.green}`)
-    return await runGQL(user, {
+    return runGQL(user, {
       query: `mutation ($position: PositionInput!) {
                     updatePosition(position: $position)
                     }
@@ -323,7 +323,7 @@ const updatePosition = async function(user) {
       .organization.rarely()
       .code.sometimes()
 
-    return await runGQL(user, {
+    return runGQL(user, {
       query: `mutation ($position: PositionInput!) {
                     updatePosition(position: $position)
                     }
@@ -401,7 +401,7 @@ const putPersonInPosition = async function(user) {
     console.debug(
       `Putting ${person.name.green} in position of ${position.name.green}`
     )
-    return await runGQL(user, {
+    return runGQL(user, {
       query: `mutation($uuid: String!, $person: PersonInput!) {
                     putPersonInPosition(uuid: $uuid, person: $person)
                 }`,
@@ -445,7 +445,7 @@ const deletePersonFromPosition = async function(user) {
         position.name.green
       }`
     )
-    return await runGQL(user, {
+    return runGQL(user, {
       query: `mutation($uuid: String!) {
                     deletePersonFromPosition(uuid: $uuid)
                 }`,
@@ -514,7 +514,7 @@ const updateAssociatedPosition = async function(user) {
       uuid: principalPosition.uuid
     })
 
-    return await runGQL(user, {
+    return runGQL(user, {
       query: `mutation($position: PositionInput!) {
                     updateAssociatedPosition(position: $position)
                 }`,
@@ -585,7 +585,7 @@ const removeAssociatedPosition = async function(user) {
     // update the position associations
     position.associatedPositions.splice(index, 1)
 
-    return await runGQL(user, {
+    return runGQL(user, {
       query: `mutation($position: PositionInput!) {
                     updateAssociatedPosition(position: $position)
                 }`,
@@ -632,7 +632,7 @@ async function countPositions(user) {
 const createPosition = async function(user, grow) {
   const count = await countPositions(user)
   if (grow(count)) {
-    return await _createPosition(user)
+    return _createPosition(user)
   } else {
     console.debug("Skipping create position")
     return "(skipped)"
@@ -642,7 +642,7 @@ const createPosition = async function(user, grow) {
 const deletePosition = async function(user, grow) {
   const count = await countPositions(user)
   if (!grow(count)) {
-    return await _deactivatePosition(user)
+    return _deactivatePosition(user)
   } else {
     console.debug("Skipping delete position")
     return "(skipped)"

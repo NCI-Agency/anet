@@ -132,11 +132,6 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
       sqlArgs.put("locationUuid", query.getLocationUuid());
     }
 
-    if (whereClauses.isEmpty() && !doSoundex) {
-      return new AnetBeanList<Person>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<Person>());
-    }
-
     if (!whereClauses.isEmpty()) {
       sql.append(" WHERE ");
       sql.append(Joiner.on(" AND ").join(whereClauses));

@@ -96,7 +96,7 @@ export default class PositionTable extends Component {
                       <td>{utils.sentenceCase(pos.status)}</td>
                       {this.props.showDelete && (
                         <td
-                          onClick={this.props.onDelete.bind(this, pos)}
+                          onClick={() => this.props.onDelete(pos)}
                           id={"positionDelete_" + pos.uuid}
                         >
                           <span style={{ cursor: "pointer" }}>

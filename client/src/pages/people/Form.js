@@ -254,8 +254,12 @@ class BasePersonForm extends Component {
                         <OptionListModal
                           title={modalTitle}
                           showModal={this.state.showWrongPersonModal}
-                          onCancel={this.hideWrongPersonModal.bind(this)}
-                          onSuccess={this.hideWrongPersonModal.bind(this)}
+                          onCancel={optionValue =>
+                            this.hideWrongPersonModal(optionValue)
+                          }
+                          onSuccess={optionValue =>
+                            this.hideWrongPersonModal(optionValue)
+                          }
                         >
                           {(isSelf && (
                             <div>

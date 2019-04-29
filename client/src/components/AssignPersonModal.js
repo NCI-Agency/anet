@@ -1,6 +1,7 @@
 import API from "api"
 import autobind from "autobind-decorator"
-import Autocomplete from "components/Autocomplete"
+import { PersonSimpleOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
 import _isEmpty from "lodash/isEmpty"
@@ -8,6 +9,7 @@ import { Person, Position } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Col, Grid, Modal, Row, Table } from "react-bootstrap"
+import PEOPLE_ICON from "resources/people.png"
 
 export default class AssignPersonModal extends Component {
   static propTypes = {
@@ -45,7 +47,13 @@ export default class AssignPersonModal extends Component {
     } else {
       personSearchQuery.role = Person.ROLE.ADVISOR
     }
-
+    const personFilters = {
+      allPersons: {
+        label: "All",
+        searchQuery: true,
+        queryVars: personSearchQuery
+      }
+    }
     return (
       <Modal show={this.props.showModal} onHide={this.close}>
         <Modal.Header closeButton>
@@ -65,22 +73,23 @@ export default class AssignPersonModal extends Component {
           )}
           <Grid fluid>
             <Row>
-              <Col md={2}>
-                <b>Select a person</b>
-              </Col>
-              <Col md={10}>
-                <Autocomplete
-                  valueKey="name"
+              <Col md={12}>
+                <AdvancedSingleSelect
+                  fieldName="person"
+                  fieldLabel="Select a person"
                   placeholder="Select a person for this position"
+                  value={this.state.person}
+                  overlayColumns={["Name"]}
+                  overlayRenderRow={PersonSimpleOverlayRow}
+                  filterDefs={personFilters}
+                  onChange={this.handleChangePerson}
                   objectType={Person}
-                  className="select-person-autocomplete"
+                  valueKey="name"
                   fields={
                     "uuid, name, rank, role, position { uuid, name, type }"
                   }
-                  template={person => <LinkTo person={person} isLink={false} />}
-                  queryParams={personSearchQuery}
-                  value={this.state.person}
-                  onChange={this.onPersonSelect}
+                  addon={PEOPLE_ICON}
+                  vertical
                 />
               </Col>
             </Row>
@@ -131,27 +140,24 @@ export default class AssignPersonModal extends Component {
 
   @autobind
   remove() {
-    let graphql = "deletePersonFromPosition(uuid: $uuid)"
-    const variables = {
-      uuid: this.props.position.uuid
-    }
-    const variableDef = "($uuid: String!)"
-    API.mutation(graphql, variables, variableDef)
-      .then(data => this.props.onSuccess())
-      .catch(error => {
-        this.setState({ error: error })
-      })
+    this.setState({ person: null }, () => this.save())
   }
 
   @autobind
   save() {
-    const operation = "putPersonInPosition"
-    let graphql = operation + "(uuid: $uuid, person: $person)"
-    const variables = {
-      uuid: this.props.position.uuid,
-      person: { uuid: this.state.person.uuid }
+    let graphql = "deletePersonFromPosition(uuid: $uuid)"
+    let variables = {
+      uuid: this.props.position.uuid
     }
-    const variableDef = "($uuid: String!, $person: PersonInput!)"
+    let variableDef = "($uuid: String!)"
+    if (this.state.person !== null) {
+      graphql = "putPersonInPosition(uuid: $uuid, person: $person)"
+      variables = {
+        uuid: this.props.position.uuid,
+        person: { uuid: this.state.person.uuid }
+      }
+      variableDef = "($uuid: String!, $person: PersonInput!)"
+    }
     API.mutation(graphql, variables, variableDef)
       .then(data => this.props.onSuccess())
       .catch(error => {
@@ -169,7 +175,7 @@ export default class AssignPersonModal extends Component {
   }
 
   @autobind
-  onPersonSelect(person) {
+  handleChangePerson(person) {
     this.setState({ person }, () => this.updateAlert())
   }
 

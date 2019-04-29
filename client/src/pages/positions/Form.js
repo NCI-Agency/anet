@@ -1,6 +1,10 @@
 import API, { Settings } from "api"
+import {
+  LocationOverlayRow,
+  OrganizationOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import Autocomplete from "components/Autocomplete"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
@@ -163,6 +167,19 @@ class BasePositionForm extends Component {
               </Button>
             </div>
           )
+          const organizationFilters = {
+            allOrganizations: {
+              label: "All organizations",
+              searchQuery: true
+            }
+          }
+          const locationFilters = {
+            activeLocations: {
+              label: "All locations",
+              searchQuery: true,
+              queryVars: { status: Location.STATUS.ACTIVE }
+            }
+          }
           return (
             <div>
               <NavigationWarning isBlocking={dirty} />
@@ -202,21 +219,20 @@ class BasePositionForm extends Component {
                     )}
                   </Field>
 
-                  <Field
-                    name="organization"
-                    component={FieldHelper.renderSpecialField}
+                  <AdvancedSingleSelect
+                    fieldName="organization"
+                    fieldLabel="Organization"
+                    placeholder="Search the organization for this position..."
+                    value={values.organization}
+                    overlayColumns={["Name"]}
+                    overlayRenderRow={OrganizationOverlayRow}
+                    filterDefs={organizationFilters}
                     onChange={value => setFieldValue("organization", value)}
+                    objectType={Organization}
+                    fields={Organization.autocompleteQuery}
+                    queryParams={orgSearchQuery}
+                    valueKey="shortName"
                     addon={ORGANIZATIONS_ICON}
-                    widget={
-                      <Autocomplete
-                        objectType={Organization}
-                        valueKey="shortName"
-                        fields={Organization.autocompleteQuery}
-                        placeholder="Select the organization for this position"
-                        queryParams={orgSearchQuery}
-                        template={Organization.autocompleteTemplate}
-                      />
-                    }
                   />
 
                   <this.CodeFieldWithLabel
@@ -243,20 +259,20 @@ class BasePositionForm extends Component {
                 </Fieldset>
 
                 <Fieldset title="Additional information">
-                  <Field
-                    name="location"
-                    component={FieldHelper.renderSpecialField}
+                  <AdvancedSingleSelect
+                    fieldName="location"
+                    fieldLabel="Location"
+                    placeholder="Search for the location where this Position will operate from..."
+                    value={values.location}
+                    overlayColumns={["Name"]}
+                    overlayRenderRow={LocationOverlayRow}
+                    filterDefs={locationFilters}
                     onChange={value => setFieldValue("location", value)}
+                    objectType={Location}
+                    fields={Location.autocompleteQuery}
+                    queryParams={{ status: Location.STATUS.ACTIVE }}
+                    valueKey="name"
                     addon={LOCATIONS_ICON}
-                    widget={
-                      <Autocomplete
-                        objectType={Location}
-                        valueKey="name"
-                        fields={Location.autocompleteQuery}
-                        placeholder="Start typing to find a location where this Position will operate from..."
-                        queryParams={{ status: Location.STATUS.ACTIVE }}
-                      />
-                    }
                   />
                 </Fieldset>
 

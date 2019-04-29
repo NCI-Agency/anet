@@ -258,11 +258,6 @@ public class MssqlReportSearcher extends AbstractSearcherBase implements IReport
       args.put("userUuid", user.getUuid());
     }
 
-    if (whereClauses.isEmpty()) {
-      return new AnetBeanList<Report>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<Report>());
-    }
-
     if (!systemSearch) {
       // Apply a filter to restrict access to other's draft, rejected or approved reports.
       // When the search is performed by the system (for instance by a worker, systemSearch = true)
@@ -289,9 +284,11 @@ public class MssqlReportSearcher extends AbstractSearcherBase implements IReport
       }
     }
 
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
-    sql.append(" ) l");
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
+      sql.append(" ) l");
+    }
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();
