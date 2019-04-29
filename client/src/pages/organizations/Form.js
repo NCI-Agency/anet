@@ -517,8 +517,8 @@ class BaseOrganizationForm extends Component {
   removeApprovalStep = (arrayHelpers, index, step) => {
     return API.query(
       /* GraphQL */ `
-			approvalStepInUse(uuid:"${step.uuid}")
-		`
+      approvalStepInUse(uuid:"${step.uuid}")
+    `
     ).then(data => {
       if (data.approvalStepInUse) {
         this.setState({ showRemoveApprovalStepAlert: true })

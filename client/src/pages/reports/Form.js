@@ -120,22 +120,22 @@ class BaseReportForm extends Component {
   componentDidMount() {
     API.query(
       /* GraphQL */ `
-			locationRecents(maxResults:6) {
-				list { uuid, name }
-			}
-			personRecents(maxResults:6) {
-				list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
-			}
-			taskRecents(maxResults:6) {
-				list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
-			}
-			authorizationGroupRecents(maxResults:6) {
-				list { uuid, name, description }
-			}
-			tags {
-				list { uuid, name, description }
-			}
-		`
+      locationRecents(maxResults:6) {
+        list { uuid, name }
+      }
+      personRecents(maxResults:6) {
+        list { uuid, name, rank, role, status, endOfTourDate, position { uuid, name, type, status, organization {uuid, shortName}, location {uuid, name} } }
+      }
+      taskRecents(maxResults:6) {
+        list { uuid, shortName, longName, responsibleOrg { uuid, shortName} }
+      }
+      authorizationGroupRecents(maxResults:6) {
+        list { uuid, name, description }
+      }
+      tags {
+        list { uuid, name, description }
+      }
+    `
     ).then(data => {
       const newState = {
         recents: {
