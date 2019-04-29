@@ -84,8 +84,7 @@ public class TaskDao extends AnetBaseDao<Task> {
             + "\"organizationUuid\" = :responsibleOrgUuid, status = :status, "
             + "\"customField\" = :customField, \"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
             + "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion, "
-            + "assessment = :assessment "
-            + "WHERE uuid = :uuid")
+            + "assessment = :assessment " + "WHERE uuid = :uuid")
         .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
