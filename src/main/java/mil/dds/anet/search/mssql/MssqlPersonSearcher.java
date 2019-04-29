@@ -139,11 +139,6 @@ public class MssqlPersonSearcher extends AbstractSearcherBase implements IPerson
           AnetObjectEngine.getInstance().getPersonDao().getSubscriptionUpdate(null)));
     }
 
-    if (whereClauses.isEmpty() && !doSoundex) {
-      return new AnetBeanList<Person>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<Person>());
-    }
-
     if (!whereClauses.isEmpty()) {
       sql.append(" WHERE ");
       sql.append(Joiner.on(" AND ").join(whereClauses));

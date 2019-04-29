@@ -1,27 +1,26 @@
 import API from "api"
 import autobind from "autobind-decorator"
-import Autocomplete from "components/Autocomplete"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import _isEqualWith from "lodash/isEqualWith"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import utils from "utils"
 
-export default class AutocompleteFilter extends Component {
+export default class AdvancedSelectFilter extends Component {
   static propTypes = {
-    // An Autocomplete filter allows users to search the ANET database
+    // An AdvancedSingleSelect filter allows users to search the ANET database
     // for existing records and use that records ID as the search term.
-    // the filterKey property tells this filter what property to set on the
-    // search query. (ie authorUuid, organizationUuid, etc)
+    // The queryKey property tells this filter what property to set on the
+    // search query (ie authorUuid, organizationUuid, etc).
     queryKey: PropTypes.string.isRequired,
 
     // Passed by the SearchFilter row
-    // queryParams: PropTypes.any,
     onChange: PropTypes.func,
 
     // Passed by the SearchFilterDisplay row
     asFormField: PropTypes.bool
 
-    // All other properties are passed directly to the Autocomplete.
+    // All other properties are passed directly to the AdvancedSingleSelect
   }
 
   static defaultProps = {
@@ -30,7 +29,6 @@ export default class AutocompleteFilter extends Component {
 
   constructor(props) {
     super(props)
-
     this.state = {
       value: props.value || {}
     }
@@ -53,19 +51,25 @@ export default class AutocompleteFilter extends Component {
   }
 
   render() {
-    let autocompleteProps = Object.without(
+    let advancedSelectProps = Object.without(
       this.props,
       "value",
       "queryKey",
-      "asFormField"
+      "asFormField",
+      "onChange"
     )
     return !this.props.asFormField ? (
       <React.Fragment>{this.props.value[this.props.valueKey]}</React.Fragment>
     ) : (
-      <Autocomplete
-        {...autocompleteProps}
+      <AdvancedSingleSelect
+        {...advancedSelectProps}
+        fieldName={this.props.queryKey}
+        fieldLabel={null}
+        vertical
+        showRemoveButton={false}
         onChange={this.onChange}
         value={this.state.value}
+        smallOverlay
       />
     )
   }

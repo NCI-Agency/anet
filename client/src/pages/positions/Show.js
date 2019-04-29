@@ -52,20 +52,20 @@ class BasePositionShow extends Page {
   fetchData(props) {
     return API.query(
       /* GraphQL */ `
-			position(uuid:"${props.match.params.uuid}") {
-				uuid, name, type, status, isSubscribed, updatedAt, code,
-				organization { uuid, shortName, longName, identificationCode },
-				person { uuid, name, rank, role },
-				associatedPositions {
-					uuid, name, type
-					person { uuid, name, rank, role }
-					organization { uuid, shortName }
-				},
-				previousPeople { startTime, endTime, person { uuid, name, rank, role }}
-				location { uuid, name }
-				${GRAPHQL_NOTES_FIELDS}
-			}
-		`
+      position(uuid:"${props.match.params.uuid}") {
+        uuid, name, type, status, isSubscribed, updatedAt, code,
+        organization { uuid, shortName, longName, identificationCode },
+        person { uuid, name, rank, role },
+        associatedPositions {
+          uuid, name, type
+          person { uuid, name, rank, role }
+          organization { uuid, shortName }
+        },
+        previousPeople { startTime, endTime, person { uuid, name, rank, role }}
+        location { uuid, name }
+        ${GRAPHQL_NOTES_FIELDS}
+      }
+    `
     ).then(data => this.setState({ position: new Position(data.position) }))
   }
 
@@ -243,8 +243,8 @@ class BasePositionShow extends Page {
                   <AssignPersonModal
                     position={position}
                     showModal={this.state.showAssignPersonModal}
-                    onCancel={this.hideAssignPersonModal.bind(this, false)}
-                    onSuccess={this.hideAssignPersonModal.bind(this, true)}
+                    onCancel={() => this.hideAssignPersonModal(false)}
+                    onSuccess={() => this.hideAssignPersonModal(true)}
                   />
                 </Fieldset>
 
@@ -283,14 +283,8 @@ class BasePositionShow extends Page {
                     <EditAssociatedPositionsModal
                       position={position}
                       showModal={this.state.showAssociatedPositionModal}
-                      onCancel={this.hideAssociatedPositionsModal.bind(
-                        this,
-                        false
-                      )}
-                      onSuccess={this.hideAssociatedPositionsModal.bind(
-                        this,
-                        true
-                      )}
+                      onCancel={() => this.hideAssociatedPositionsModal(false)}
+                      onSuccess={() => this.hideAssociatedPositionsModal(true)}
                     />
                   )}
                 </Fieldset>

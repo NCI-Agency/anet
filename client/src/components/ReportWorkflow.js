@@ -7,11 +7,6 @@ import React, { Component } from "react"
 import { Button, Modal } from "react-bootstrap"
 import "./ReportWorkflow.css"
 
-const APPROVE = "APPROVE"
-const REJECT = "REJECT"
-const SUBMIT = "SUBMIT"
-const PUBLISH = "PUBLISH"
-
 const ACTION_TYPE_DETAILS = {
   APPROVE: { text: "Approved", cssClass: "btn-success approved" },
   REJECT: { text: "Changes requested", cssClass: "btn-danger rejected" },

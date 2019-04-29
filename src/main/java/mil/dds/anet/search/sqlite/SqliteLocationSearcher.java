@@ -40,12 +40,10 @@ public class SqliteLocationSearcher extends AbstractSearcherBase implements ILoc
     final AnetBeanList<Location> result = new AnetBeanList<Location>(query.getPageNum(),
         query.getPageSize(), new ArrayList<Location>());
 
-    if (whereClauses.isEmpty()) {
-      return result;
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
     }
-
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
 
     sql.append(" LIMIT :limit OFFSET :offset");
 

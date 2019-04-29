@@ -392,30 +392,4 @@ export default class Report extends Model {
     } else {
     }
   }
-
-  addAttendee(newAttendee) {
-    if (!newAttendee || !newAttendee.uuid) {
-      return
-    }
-
-    let attendees = this.attendees
-
-    if (attendees.find(attendee => attendee.uuid === newAttendee.uuid)) {
-      return
-    }
-
-    let person = new Person(newAttendee)
-    person.primary = false
-
-    if (
-      !attendees.find(
-        attendee => attendee.role === person.role && attendee.primary
-      )
-    ) {
-      person.primary = true
-    }
-
-    this.attendees.push(person)
-    return true
-  }
 }

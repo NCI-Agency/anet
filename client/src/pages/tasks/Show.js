@@ -49,12 +49,12 @@ class BaseTaskShow extends Page {
 
   getReportQueryPart(taskUuid) {
     return new GQL.Part(/* GraphQL */ `
-			reports: reportList(query: $reportsQuery) {
-				pageNum, pageSize, totalCount, list {
-					${ReportCollection.GQL_REPORT_FIELDS}
-				}
-			}
-		`).addVariable("reportsQuery", "ReportSearchQueryInput", {
+      reports: reportList(query: $reportsQuery) {
+        pageNum, pageSize, totalCount, list {
+          ${ReportCollection.GQL_REPORT_FIELDS}
+        }
+      }
+    `).addVariable("reportsQuery", "ReportSearchQueryInput", {
       pageSize: 10,
       pageNum: this.state.reportsPageNum,
       taskUuid
@@ -65,15 +65,15 @@ class BaseTaskShow extends Page {
     const reportsQuery = this.getReportQueryPart(props.match.params.uuid)
 
     const taskQuery = new GQL.Part(/* GraphQL */ `
-			task(uuid:"${props.match.params.uuid}") {
-				uuid, shortName, longName, status, isSubscribed, updatedAt,
-				customField, customFieldEnum1, customFieldEnum2,
-				plannedCompletion, projectedCompletion,
-				responsibleOrg { uuid, shortName, longName, identificationCode },
-				customFieldRef1 { uuid, shortName, longName }
-				${GRAPHQL_NOTES_FIELDS}
-			}
-		`)
+      task(uuid:"${props.match.params.uuid}") {
+        uuid, shortName, longName, status, isSubscribed, updatedAt,
+        customField, customFieldEnum1, customFieldEnum2,
+        plannedCompletion, projectedCompletion,
+        responsibleOrg { uuid, shortName, longName, identificationCode },
+        customFieldRef1 { uuid, shortName, longName }
+        ${GRAPHQL_NOTES_FIELDS}
+      }
+    `)
 
     return GQL.run([reportsQuery, taskQuery]).then(data => {
       this.setState({

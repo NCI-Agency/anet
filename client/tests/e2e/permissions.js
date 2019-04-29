@@ -4,7 +4,7 @@ let test = require("../util/test")
 test("checking super user permissions", async t => {
   t.plan(7)
 
-  let { pageHelpers, shortWaitMs } = t.context
+  let { pageHelpers } = t.context
 
   await t.context.get("/", "rebecca")
   await pageHelpers.clickMyOrgLink()
@@ -329,7 +329,7 @@ async function validateSuperUserPrincipalOrgPermissions(t) {
 }
 
 async function validateAdminPrincipalOrgPermissions(t) {
-  let { $, assertElementEnabled, shortWaitMs } = t.context
+  let { $, assertElementEnabled } = t.context
 
   let $editPrincipalOrgButton = await $("#editButton")
   await t.context.driver.wait(

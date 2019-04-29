@@ -218,7 +218,10 @@ export default class Page extends Component {
   @autobind
   getSearchQuery(props) {
     let { searchQuery } = props || this.props
-    let query = { text: searchQuery.text }
+    let query = {}
+    if (!_isEmpty(searchQuery.text)) {
+      query.text = searchQuery.text
+    }
     if (searchQuery.filters) {
       searchQuery.filters.forEach(filter => {
         if (filter.value) {

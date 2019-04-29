@@ -1,6 +1,6 @@
 import { SEARCH_OBJECT_TYPES } from "actions"
 import { Settings } from "api"
-import AutocompleteFilter from "components/advancedSearch/AutocompleteFilter"
+import AdvancedSelectFilter from "components/advancedSearch/AdvancedSelectFilter"
 import CheckboxSearchFilter from "components/advancedSearch/CheckboxSearchFilter"
 import DateRangeSearch from "components/advancedSearch/DateRangeSearch"
 import OrganizationFilter from "components/advancedSearch/OrganizationFilter"
@@ -8,7 +8,18 @@ import PositionTypeSearchFilter from "components/advancedSearch/PositionTypeSear
 import ReportStateSearch from "components/advancedSearch/ReportStateSearch"
 import SelectSearchFilter from "components/advancedSearch/SelectSearchFilter"
 import TextInputFilter from "components/advancedSearch/TextInputFilter"
+import {
+  LocationOverlayRow,
+  PersonDetailedOverlayRow,
+  PositionOverlayRow,
+  TagOverlayRow,
+  TaskSimpleOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import { Location, Organization, Person, Position, Tag, Task } from "models"
+import LOCATIONS_ICON from "resources/locations.png"
+import PEOPLE_ICON from "resources/people.png"
+import POSITIONS_ICON from "resources/positions.png"
+import TASKS_ICON from "resources/tasks.png"
 
 export const POSTITION_POSITION_TYPE_FILTER_KEY = "Position Type"
 export const POSTITION_ORGANIZATION_FILTER_KEY = "Organization"
@@ -73,6 +84,39 @@ const taskFilters = props => {
   return taskFiltersObj
 }
 
+const advancedSelectFilterPersonProps = {
+  overlayColumns: ["Name", "Position", "Location", "Organization"],
+  overlayRenderRow: PersonDetailedOverlayRow,
+  objectType: Person,
+  valueKey: "name",
+  fields: Person.autocompleteQuery,
+  addon: PEOPLE_ICON
+}
+const advancedSelectFilterPositionProps = {
+  overlayColumns: ["Position", "Current Occupant"],
+  overlayRenderRow: PositionOverlayRow,
+  objectType: Position,
+  valueKey: "name",
+  fields: Position.autocompleteQuery,
+  addon: POSITIONS_ICON
+}
+const advancedSelectFilterLocationProps = {
+  overlayColumns: ["Location", "Name"],
+  overlayRenderRow: LocationOverlayRow,
+  objectType: Location,
+  valueKey: "name",
+  fields: Location.autocompleteQuery,
+  addon: LOCATIONS_ICON
+}
+const advancedSelectFilterTaskProps = {
+  overlayColumns: ["Name"],
+  overlayRenderRow: TaskSimpleOverlayRow,
+  objectType: Task,
+  valueKey: "shortName",
+  fields: Task.autocompleteQuery,
+  addon: TASKS_ICON
+}
+
 export default {
   searchFilters: function(positionTypeFilterRef, organizationFilterRef) {
     const filters = {}
@@ -87,71 +131,106 @@ export default {
     }
 
     const taskShortLabel = Settings.fields.task.shortLabel
+    const authorWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: { role: Person.ROLE.ADVISOR }
+      }
+    }
+    const attendeeWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+    const pendingApprovalOfWidgetFilters = authorWidgetFilters
+    const authorPositionWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {
+          type: [
+            Position.TYPE.ADVISOR,
+            Position.TYPE.SUPER_USER,
+            Position.TYPE.ADMINISTRATOR
+          ]
+        }
+      }
+    }
+    const attendeePositionWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+    const locationWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+
+    const taskWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+
+    const tagWidgetFilters = {
+      all: {
+        label: "All",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+
     filters[SEARCH_OBJECT_TYPES.REPORTS] = {
       filters: {
         Author: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "authorUuid",
-            objectType: Person,
-            valueKey: "name",
-            fields: Person.autocompleteQuery,
-            template: Person.autocompleteTemplate,
-            queryParams: { role: Person.ROLE.ADVISOR },
-            placeholder: "Filter reports by author..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPersonProps, {
+            filterDefs: authorWidgetFilters,
+            placeholder: "Filter reports by author...",
+            queryKey: "authorUuid"
+          })
         },
         Attendee: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "attendeeUuid",
-            objectType: Person,
-            valueKey: "name",
-            fields: Person.autocompleteQuery,
-            template: Person.autocompleteTemplate,
-            placeholder: "Filter reports by attendee..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPersonProps, {
+            filterDefs: attendeeWidgetFilters,
+            placeholder: "Filter reports by attendee...",
+            queryKey: "attendeeUuid"
+          })
         },
         "Pending Approval Of": {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "pendingApprovalOf",
-            objectType: Person,
-            valueKey: "name",
-            fields: Person.autocompleteQuery,
-            template: Person.autocompleteTemplate,
-            queryParams: { role: Person.ROLE.ADVISOR },
-            placeholder: "Filter reports pending approval of..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPersonProps, {
+            filterDefs: pendingApprovalOfWidgetFilters,
+            placeholder: "Filter reports pending approval of...",
+            queryKey: "pendingApprovalOf"
+          })
         },
         "Author Position": {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "authorPositionUuid",
-            objectType: Position,
-            valueKey: "name",
-            fields: Position.autocompleteQuery,
-            template: Position.autocompleteTemplate,
-            queryParams: {
-              type: [
-                Position.TYPE.ADVISOR,
-                Position.TYPE.SUPER_USER,
-                Position.TYPE.ADMINISTRATOR
-              ]
-            },
-            placeholder: "Filter reports by author position..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPositionProps, {
+            filterDefs: authorPositionWidgetFilters,
+            placeholder: "Filter reports by author position...",
+            queryKey: "authorPositionUuid"
+          })
         },
         "Attendee Position": {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "attendeePositionUuid",
-            objectType: Position,
-            valueKey: "name",
-            fields: Position.autocompleteQuery,
-            template: Position.autocompleteTemplate,
-            placeholder: "Filter reports by attendee position..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterPositionProps, {
+            filterDefs: attendeePositionWidgetFilters,
+            placeholder: "Filter reports by attendee position...",
+            queryKey: "attendeePositionUuid"
+          })
         },
         Organization: {
           component: OrganizationFilter,
@@ -185,14 +264,12 @@ export default {
           }
         },
         Location: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "locationUuid",
-            objectType: Location,
-            valueKey: "name",
-            fields: Location.autocompleteQuery,
-            placeholder: "Filter reports by location..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterLocationProps, {
+            filterDefs: locationWidgetFilters,
+            placeholder: "Filter reports by location...",
+            queryKey: "locationUuid"
+          })
         },
         State: {
           component: ReportStateSearch
@@ -205,13 +282,16 @@ export default {
           }
         },
         Tag: {
-          component: AutocompleteFilter,
+          component: AdvancedSelectFilter,
           props: {
-            queryKey: "tagUuid",
+            overlayColumns: ["Name"],
+            overlayRenderRow: TagOverlayRow,
             objectType: Tag,
             valueKey: "name",
             fields: Tag.autocompleteQuery,
-            placeholder: "Filter reports by tag..."
+            filterDefs: tagWidgetFilters,
+            placeholder: "Filter reports by tag...",
+            queryKey: "tagUuid"
           }
         },
         "Sensitive Info": {
@@ -221,15 +301,12 @@ export default {
           }
         },
         [taskShortLabel]: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "taskUuid",
-            objectType: Task,
-            valueKey: "shortName",
-            fields: Task.autocompleteQuery,
-            template: Task.autocompleteTemplate,
-            placeholder: `Filter reports by ${taskShortLabel}...`
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterTaskProps, {
+            filterDefs: taskWidgetFilters,
+            placeholder: `Filter reports by ${taskShortLabel}...`,
+            queryKey: "taskUuid"
+          })
         },
         ...subscriptionFilter
       }
@@ -269,14 +346,12 @@ export default {
           }
         },
         Location: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "locationUuid",
-            objectType: Location,
-            valueKey: "name",
-            fields: Location.autocompleteQuery,
-            placeholder: "Filter by location..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterLocationProps, {
+            filterDefs: locationWidgetFilters,
+            placeholder: "Filter by location...",
+            queryKey: "locationUuid"
+          })
         },
         Rank: {
           component: SelectSearchFilter,
@@ -355,14 +430,12 @@ export default {
           }
         },
         Location: {
-          component: AutocompleteFilter,
-          props: {
-            queryKey: "locationUuid",
-            objectType: Location,
-            valueKey: "name",
-            fields: Location.autocompleteQuery,
-            placeholder: "Filter by location..."
-          }
+          component: AdvancedSelectFilter,
+          props: Object.assign({}, advancedSelectFilterLocationProps, {
+            filterDefs: locationWidgetFilters,
+            placeholder: "Filter by location...",
+            queryKey: "locationUuid"
+          })
         },
         "Is Filled?": {
           component: SelectSearchFilter,

@@ -56,13 +56,10 @@ public class MssqlLocationSearcher extends AbstractSearcherBase implements ILoca
           AnetObjectEngine.getInstance().getLocationDao().getSubscriptionUpdate(null)));
     }
 
-    if (whereClauses.isEmpty()) {
-      return new AnetBeanList<Location>(query.getPageNum(), query.getPageSize(),
-          new ArrayList<Location>());
+    if (!whereClauses.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(Joiner.on(" AND ").join(whereClauses));
     }
-
-    sql.append(" WHERE ");
-    sql.append(Joiner.on(" AND ").join(whereClauses));
 
     // Sort Ordering
     final List<String> orderByClauses = new LinkedList<>();

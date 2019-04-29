@@ -1,8 +1,9 @@
 import API, { Settings } from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import { PositionOverlayRow } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import Messages from "components/Messages"
-import MultiSelector from "components/MultiSelector"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import PositionTable from "components/PositionTable"
@@ -63,6 +64,21 @@ class AuthorizationGroupForm extends Component {
           values,
           submitForm
         }) => {
+          const positionsFilters = {
+            allAdvisorPositions: {
+              label: "All advisor positions",
+              searchQuery: true,
+              queryVars: {
+                status: Position.STATUS.ACTIVE,
+                type: [
+                  Position.TYPE.ADVISOR,
+                  Position.TYPE.SUPER_USER,
+                  Position.TYPE.ADMINISTRATOR
+                ],
+                matchPersonName: true
+              }
+            }
+          }
           const action = (
             <div>
               <Button
@@ -114,27 +130,21 @@ class AuthorizationGroupForm extends Component {
                     buttons={this.statusButtons}
                   />
 
-                  <MultiSelector
-                    items={values.positions}
-                    objectType={Position}
-                    queryParams={{
-                      status: Position.STATUS.ACTIVE,
-                      type: [
-                        Position.TYPE.ADVISOR,
-                        Position.TYPE.SUPER_USER,
-                        Position.TYPE.ADMINISTRATOR
-                      ]
-                    }}
-                    addFieldName="positions"
-                    addFieldLabel="Positions"
-                    addon={POSITIONS_ICON}
-                    placeholder="Start typing to search for a position..."
-                    fields={Position.autocompleteQuery}
-                    template={Position.autocompleteTemplate}
+                  <AdvancedMultiSelect
+                    fieldName="positions"
+                    fieldLabel="Positions"
+                    placeholder="Search for a position..."
+                    value={values.positions}
                     renderSelected={
                       <PositionTable positions={values.positions} showDelete />
                     }
+                    overlayColumns={["Position", "Current Occupant"]}
+                    overlayRenderRow={PositionOverlayRow}
+                    filterDefs={positionsFilters}
                     onChange={value => setFieldValue("positions", value)}
+                    objectType={Position}
+                    fields={Position.autocompleteQuery}
+                    addon={POSITIONS_ICON}
                   />
                 </Fieldset>
 

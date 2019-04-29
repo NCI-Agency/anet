@@ -1,16 +1,22 @@
 import API, { Settings } from "api"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
+import {
+  ApproverOverlayRow,
+  OrganizationOverlayRow,
+  TaskSimpleOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import Autocomplete from "components/Autocomplete"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
 import LinkTo from "components/LinkTo"
 import Messages from "components/Messages"
-import MultiSelector from "components/MultiSelector"
 import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import TaskTable from "components/TaskTable"
 import { Field, FieldArray, Form, Formik } from "formik"
 import { Organization, Person, Position, Task } from "models"
+import pluralize from "pluralize"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button, Modal, Table } from "react-bootstrap"
@@ -114,6 +120,7 @@ class BaseOrganizationForm extends Component {
           dirty,
           errors,
           setFieldValue,
+          setFieldTouched,
           values,
           submitForm
         }) => {
@@ -148,6 +155,56 @@ class BaseOrganizationForm extends Component {
               </Button>
             </div>
           )
+          const tasksFilters = {
+            allTasks: {
+              label: "All tasks",
+              searchQuery: true
+            }
+          }
+          if (this.props.currentUser.position) {
+            tasksFilters.assignedToMyOrg = {
+              label: "Assigned to my organization",
+              searchQuery: true,
+              queryVars: {
+                responsibleOrgUuid: this.props.currentUser.position.organization
+                  .uuid
+              }
+            }
+          }
+
+          const organizationFilters = {
+            allOrganizations: {
+              label: "All organizations",
+              searchQuery: true
+            }
+          }
+
+          const approversFilters = {
+            allAdvisorPositions: {
+              label: "All advisor positions",
+              searchQuery: true,
+              queryVars: {
+                type: [
+                  Position.TYPE.ADVISOR,
+                  Position.TYPE.SUPER_USER,
+                  Position.TYPE.ADMINISTRATOR
+                ],
+                matchPersonName: true
+              }
+            }
+          }
+          if (this.props.currentUser.position) {
+            approversFilters.myColleagues = {
+              label: "My colleagues",
+              searchQuery: true,
+              queryVars: {
+                matchPersonName: true,
+                organizationUuid: this.props.currentUser.position.organization
+                  .uuid
+              }
+            }
+          }
+
           return (
             <div>
               <NavigationWarning isBlocking={dirty} />
@@ -204,22 +261,20 @@ class BaseOrganizationForm extends Component {
                         component={FieldHelper.renderButtonToggleGroup}
                         buttons={this.typeButtons}
                       />
-                      <Field
-                        name="parentOrg"
-                        component={FieldHelper.renderSpecialField}
-                        label={Settings.fields.organization.parentOrg}
+                      <AdvancedSingleSelect
+                        fieldName="parentOrg"
+                        fieldLabel={Settings.fields.organization.parentOrg}
+                        placeholder="Search for a higher level organization..."
+                        value={values.parentOrg}
+                        overlayColumns={["Name"]}
+                        overlayRenderRow={OrganizationOverlayRow}
+                        filterDefs={organizationFilters}
                         onChange={value => setFieldValue("parentOrg", value)}
+                        objectType={Organization}
+                        fields={Organization.autocompleteQuery}
+                        queryParams={orgSearchQuery}
+                        valueKey="shortName"
                         addon={ORGANIZATIONS_ICON}
-                        widget={
-                          <Autocomplete
-                            objectType={Organization}
-                            valueKey="shortName"
-                            fields={Organization.autocompleteQuery}
-                            placeholder="Start typing to search for a higher level organization..."
-                            queryParams={orgSearchQuery}
-                            template={Organization.autocompleteTemplate}
-                          />
-                        }
                       />
                       <Field
                         name="shortName"
@@ -315,7 +370,8 @@ class BaseOrganizationForm extends Component {
                                 arrayHelpers,
                                 setFieldValue,
                                 step,
-                                index
+                                index,
+                                approversFilters
                               )
                             )}
                           </div>
@@ -331,22 +387,24 @@ class BaseOrganizationForm extends Component {
                         {!isAdmin ? (
                           <TaskTable tasks={values.tasks} />
                         ) : (
-                          <MultiSelector
-                            items={values.tasks}
-                            objectType={Task}
-                            queryParams={{ status: Task.STATUS.ACTIVE }}
-                            placeholder={`Start typing to search for ${
+                          <AdvancedMultiSelect
+                            fieldName="tasks"
+                            fieldLabel={Settings.fields.task.shortLabel}
+                            placeholder={`Search for ${pluralize(
                               Settings.fields.task.shortLabel
-                            }...`}
-                            fields={Task.autocompleteQuery}
-                            template={Task.autocompleteTemplate}
-                            addFieldName="tasks"
-                            addFieldLabel={Settings.fields.task.shortLabel}
-                            addon={TASKS_ICON}
+                            )}...`}
+                            value={values.tasks}
                             renderSelected={
                               <TaskTable tasks={values.tasks} showDelete />
                             }
+                            overlayColumns={["Name"]}
+                            overlayRenderRow={TaskSimpleOverlayRow}
+                            filterDefs={tasksFilters}
                             onChange={value => setFieldValue("tasks", value)}
+                            objectType={Task}
+                            queryParams={{ status: Task.STATUS.ACTIVE }}
+                            fields={Task.autocompleteQuery}
+                            addon={TASKS_ICON}
                           />
                         )}
                       </Fieldset>
@@ -380,7 +438,13 @@ class BaseOrganizationForm extends Component {
     )
   }
 
-  renderApprovalStep = (arrayHelpers, setFieldValue, step, index) => {
+  renderApprovalStep = (
+    arrayHelpers,
+    setFieldValue,
+    step,
+    index,
+    approversFilters
+  ) => {
     const approvers = step.approvers
 
     return (
@@ -399,8 +463,18 @@ class BaseOrganizationForm extends Component {
           label="Step name"
         />
 
-        <MultiSelector
-          items={approvers}
+        <AdvancedMultiSelect
+          fieldName={`approvalSteps.${index}.approvers`}
+          fieldLabel="Add an approver"
+          placeholder="Search for the approver's position..."
+          value={approvers}
+          renderSelected={<ApproverTable approvers={approvers} />}
+          overlayColumns={["Name", "Position"]}
+          overlayRenderRow={ApproverOverlayRow}
+          filterDefs={approversFilters}
+          onChange={value =>
+            setFieldValue(`approvalSteps.${index}.approvers`, value)
+          }
           objectType={Position}
           queryParams={{
             status: Position.STATUS.ACTIVE,
@@ -411,28 +485,8 @@ class BaseOrganizationForm extends Component {
             ],
             matchPersonName: true
           }}
-          placeholder="Search for the approver's position"
           fields="uuid, name, code, type, person { uuid, name, rank, role }"
-          template={position => (
-            <span>
-              {" "}
-              {position.person && (
-                <span>
-                  {" "}
-                  <LinkTo person={position.person} isLink={false} /> -{" "}
-                </span>
-              )}{" "}
-              <LinkTo position={position} isLink={false} />{" "}
-              {position.code && <span> - {position.code} </span>}{" "}
-            </span>
-          )}
-          addFieldName={`approvalSteps.${index}.approvers`}
-          addFieldLabel="Add an approver"
           addon={POSITIONS_ICON}
-          renderSelected={<ApproverTable approvers={approvers} />}
-          onChange={value =>
-            setFieldValue(`approvalSteps.${index}.approvers`, value)
-          }
         />
       </Fieldset>
     )

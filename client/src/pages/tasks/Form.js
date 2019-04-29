@@ -1,6 +1,10 @@
 import API, { Settings } from "api"
+import {
+  OrganizationOverlayRow,
+  TaskSimpleOverlayRow
+} from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
+import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
 import AppContext from "components/AppContext"
-import Autocomplete from "components/Autocomplete"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
 import Fieldset from "components/Fieldset"
@@ -44,7 +48,7 @@ class BaseTaskForm extends Component {
       label: "Inactive"
     }
   ]
-  TaskCustomFieldRef1 = DictionaryField(Field)
+  TaskCustomFieldRef1 = DictionaryField(AdvancedSingleSelect)
   TaskCustomField = DictionaryField(Field)
   PlannedCompletionField = DictionaryField(Field)
   ProjectedCompletionField = DictionaryField(Field)
@@ -68,6 +72,22 @@ class BaseTaskForm extends Component {
         parentOrgRecursively: true
       })
     }
+
+    const responsibleOrgFilters = {
+      allOrganizations: {
+        label: "All organizations",
+        searchQuery: true
+      }
+    }
+
+    const tasksFilters = {
+      allTasks: {
+        label: "All tasks",
+        searchQuery: true,
+        queryVars: {}
+      }
+    }
+
     return (
       <Formik
         enableReinitialize
@@ -124,46 +144,44 @@ class BaseTaskForm extends Component {
                     buttons={this.statusButtons}
                   />
 
-                  <Field
-                    name="responsibleOrg"
-                    label={Settings.fields.task.responsibleOrg}
-                    component={FieldHelper.renderSpecialField}
+                  <AdvancedSingleSelect
+                    fieldName="responsibleOrg"
+                    fieldLabel={Settings.fields.task.responsibleOrg}
+                    placeholder={`Select a responsible organization for this ${
+                      Settings.fields.task.shortLabel
+                    }`}
+                    value={values.responsibleOrg}
+                    overlayColumns={["Name"]}
+                    overlayRenderRow={OrganizationOverlayRow}
+                    filterDefs={responsibleOrgFilters}
                     onChange={value => setFieldValue("responsibleOrg", value)}
+                    objectType={Organization}
+                    fields={Organization.autocompleteQuery}
+                    valueKey="shortName"
+                    queryParams={orgSearchQuery}
                     addon={ORGANIZATIONS_ICON}
-                    widget={
-                      <Autocomplete
-                        objectType={Organization}
-                        valueKey="shortName"
-                        fields={Organization.autocompleteQuery}
-                        placeholder={`Select a responsible organization for this ${
-                          Settings.fields.task.shortLabel
-                        }`}
-                        queryParams={orgSearchQuery}
-                      />
-                    }
                   />
 
                   {Settings.fields.task.customFieldRef1 && (
                     <this.TaskCustomFieldRef1
                       dictProps={Settings.fields.task.customFieldRef1}
-                      name="customFieldRef1"
-                      component={FieldHelper.renderSpecialField}
+                      fieldName="customFieldRef1"
+                      fieldLabel={Settings.fields.task.customFieldRef1.label}
+                      placeholder={
+                        Settings.fields.task.customFieldRef1.placeholder
+                      }
+                      value={values.customFieldRef1}
+                      overlayColumns={["Name"]}
+                      overlayRenderRow={TaskSimpleOverlayRow}
+                      filterDefs={tasksFilters}
                       onChange={value =>
                         setFieldValue("customFieldRef1", value)
                       }
+                      objectType={Task}
+                      fields={Task.autocompleteQuery}
+                      valueKey="shortName"
+                      queryParams={{}}
                       addon={TASKS_ICON}
-                      widget={
-                        <Autocomplete
-                          objectType={Task}
-                          valueKey="shortName"
-                          fields={Task.autocompleteQuery}
-                          template={Task.autocompleteTemplate}
-                          placeholder={
-                            Settings.fields.task.customFieldRef1.placeholder
-                          }
-                          queryParams={{}}
-                        />
-                      }
                     />
                   )}
 

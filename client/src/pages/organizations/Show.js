@@ -83,11 +83,11 @@ class BaseOrganizationShow extends Page {
       state: this.reportsFilterIsSet() ? this.state.reportsFilter : null
     }
     let reportsPart = new GQL.Part(/* GraphQL */ `
-			reports: reportList(query:$reportQuery) {
-				pageNum, pageSize, totalCount, list {
-					${ReportCollection.GQL_REPORT_FIELDS}
-				}
-			}`).addVariable("reportQuery", "ReportSearchQueryInput", reportQuery)
+      reports: reportList(query:$reportQuery) {
+        pageNum, pageSize, totalCount, list {
+          ${ReportCollection.GQL_REPORT_FIELDS}
+        }
+      }`).addVariable("reportQuery", "ReportSearchQueryInput", reportQuery)
     return reportsPart
   }
 
@@ -99,33 +99,33 @@ class BaseOrganizationShow extends Page {
       responsibleOrgUuid: orgUuid
     }
     let taskPart = new GQL.Part(/* GraphQL */ `
-			tasks: taskList(query:$taskQuery) {
-				pageNum, pageSize, totalCount, list {
-					uuid, shortName, longName
-				}
-			}`).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
+      tasks: taskList(query:$taskQuery) {
+        pageNum, pageSize, totalCount, list {
+          uuid, shortName, longName
+        }
+      }`).addVariable("taskQuery", "TaskSearchQueryInput", taskQuery)
     return taskPart
   }
 
   fetchData(props) {
     let orgPart = new GQL.Part(/* GraphQL */ `
-			organization(uuid:"${props.match.params.uuid}") {
-				uuid, shortName, longName, status, isSubscribed, updatedAt, identificationCode, type
-				parentOrg { uuid, shortName, longName, identificationCode }
-				childrenOrgs { uuid, shortName, longName, identificationCode },
-				positions {
-					uuid, name, code, status, type,
-					person { uuid, name, status, rank, role }
-					associatedPositions {
-						uuid, name, type, code, status
-						person { uuid, name, status, rank, role }
-					}
-				},
-				approvalSteps {
-					uuid, name, approvers { uuid, name, person { uuid, name, rank, role }}
-				}
-				${GRAPHQL_NOTES_FIELDS}
-			}`)
+      organization(uuid:"${props.match.params.uuid}") {
+        uuid, shortName, longName, status, isSubscribed, updatedAt, identificationCode, type
+        parentOrg { uuid, shortName, longName, identificationCode }
+        childrenOrgs { uuid, shortName, longName, identificationCode },
+        positions {
+          uuid, name, code, status, type,
+          person { uuid, name, status, rank, role }
+          associatedPositions {
+            uuid, name, type, code, status
+            person { uuid, name, status, rank, role }
+          }
+        },
+        approvalSteps {
+          uuid, name, approvers { uuid, name, person { uuid, name, rank, role }}
+        }
+        ${GRAPHQL_NOTES_FIELDS}
+      }`)
     let reportsPart = this.getReportQueryPart(props.match.params.uuid)
     let tasksPart = this.getTaskQueryPart(props.match.params.uuid)
 

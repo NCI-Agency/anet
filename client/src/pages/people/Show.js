@@ -59,11 +59,11 @@ class BasePersonShow extends Page {
       authorUuid: personUuid
     }
     let part = new GQL.Part(/* GraphQL */ `
-			authoredReports: reportList(query: $authorQuery) {
-				pageNum, pageSize, totalCount, list {
-					${ReportCollection.GQL_REPORT_FIELDS}
-				}
-			}`).addVariable("authorQuery", "ReportSearchQueryInput", query)
+      authoredReports: reportList(query: $authorQuery) {
+        pageNum, pageSize, totalCount, list {
+          ${ReportCollection.GQL_REPORT_FIELDS}
+        }
+      }`).addVariable("authorQuery", "ReportSearchQueryInput", query)
     return part
   }
 
@@ -74,36 +74,36 @@ class BasePersonShow extends Page {
       attendeeUuid: personUuid
     }
     let part = new GQL.Part(/* GraphQL */ `
-			attendedReports: reportList(query: $attendeeQuery) {
-				pageNum, pageSize, totalCount, list {
-					${ReportCollection.GQL_REPORT_FIELDS}
-				}
-			}`).addVariable("attendeeQuery", "ReportSearchQueryInput", query)
+      attendedReports: reportList(query: $attendeeQuery) {
+        pageNum, pageSize, totalCount, list {
+          ${ReportCollection.GQL_REPORT_FIELDS}
+        }
+      }`).addVariable("attendeeQuery", "ReportSearchQueryInput", query)
     return part
   }
 
   fetchData(props) {
     let personPart = new GQL.Part(/* GraphQL */ `
-			person(uuid:"${props.match.params.uuid}") {
-				uuid,
-				name, rank, role, status, isSubscribed, updatedAt, emailAddress, phoneNumber, domainUsername,
-				biography, country, gender, endOfTourDate,
-				position {
-					uuid,
-					name,
-					type,
-					organization {
-						uuid, shortName
-					},
-					associatedPositions {
-						uuid, name, type
-						person { uuid, name, rank, role },
-						organization { uuid, shortName }
-					}
-				}
-				previousPositions { startTime, endTime, position { uuid, name }}
-				${GRAPHQL_NOTES_FIELDS}
-		}`)
+      person(uuid:"${props.match.params.uuid}") {
+        uuid,
+        name, rank, role, status, isSubscribed, updatedAt, emailAddress, phoneNumber, domainUsername,
+        biography, country, gender, endOfTourDate,
+        position {
+          uuid,
+          name,
+          type,
+          organization {
+            uuid, shortName
+          },
+          associatedPositions {
+            uuid, name, type
+            person { uuid, name, rank, role },
+            organization { uuid, shortName }
+          }
+        }
+        previousPositions { startTime, endTime, position { uuid, name }}
+        ${GRAPHQL_NOTES_FIELDS}
+    }`)
     let authoredReportsPart = this.getAuthoredReportsPart(
       props.match.params.uuid
     )
@@ -307,14 +307,8 @@ class BasePersonShow extends Page {
                       <AssignPositionModal
                         showModal={this.state.showAssignPositionModal}
                         person={person}
-                        onCancel={this.hideAssignPositionModal.bind(
-                          this,
-                          false
-                        )}
-                        onSuccess={this.hideAssignPositionModal.bind(
-                          this,
-                          true
-                        )}
+                        onCancel={() => this.hideAssignPositionModal(false)}
+                        onSuccess={() => this.hideAssignPositionModal(true)}
                       />
                     )}
                   </Fieldset>
@@ -335,14 +329,12 @@ class BasePersonShow extends Page {
                         <EditAssociatedPositionsModal
                           position={position}
                           showModal={this.state.showAssociatedPositionsModal}
-                          onCancel={this.hideAssociatedPositionsModal.bind(
-                            this,
-                            false
-                          )}
-                          onSuccess={this.hideAssociatedPositionsModal.bind(
-                            this,
-                            true
-                          )}
+                          onCancel={() =>
+                            this.hideAssociatedPositionsModal(false)
+                          }
+                          onSuccess={() =>
+                            this.hideAssociatedPositionsModal(true)
+                          }
                         />
                       )}
                     </Fieldset>

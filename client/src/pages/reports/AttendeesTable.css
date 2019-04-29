@@ -1,0 +1,14 @@
+div.radio.primary > label {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+div.radio.primary > label > input {
+  margin: 2px 0 0 -2px;
+}
+
+div.radio.primary > label > span {
+  padding-right: 25px;
+  padding-top: 4px;
+  line-height: normal;
+}
