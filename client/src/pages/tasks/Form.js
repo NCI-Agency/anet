@@ -207,7 +207,7 @@ class BaseTaskForm extends Component {
                       dictProps={Settings.fields.task.plannedCompletion}
                       name="plannedCompletion"
                       component={FieldHelper.renderSpecialField}
-                      onChange={(value, formattedValue) =>
+                      onChange={value =>
                         setFieldValue("plannedCompletion", value)
                       }
                       onBlur={() => setFieldTouched("plannedCompletion", true)}
@@ -220,7 +220,7 @@ class BaseTaskForm extends Component {
                       dictProps={Settings.fields.task.projectedCompletion}
                       name="projectedCompletion"
                       component={FieldHelper.renderSpecialField}
-                      onChange={(value, formattedValue) =>
+                      onChange={value =>
                         setFieldValue("projectedCompletion", value)
                       }
                       onBlur={() =>
