@@ -1,8 +1,10 @@
-package mil.dds.anet.utils.email;
+package mil.dds.anet.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import java.util.List;
+import mil.dds.anet.utils.EmailResponse;
+import mil.dds.anet.utils.FakeSmtpServer;
 import org.junit.Test;
 
 /**
@@ -10,7 +12,7 @@ import org.junit.Test;
  * query the email server and parse the response. Web-interface available at
  * http://<smtp_adress>:<stmp_port>
  */
-public class EmailServerTest {
+public class EmailServerIT {
 
   @Test
   public void runTest() throws Exception {

@@ -1,4 +1,4 @@
-package mil.dds.anet.utils.email;
+package mil.dds.anet.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

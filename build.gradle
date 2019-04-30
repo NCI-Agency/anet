@@ -15,6 +15,11 @@ sourceCompatibility = 1.8
 boolean isTestEnv = project.hasProperty("testEnv")
 String dbContainerName = isTestEnv ? "anet-mssql-test-server" : "anet-mssql-server"
 
+String fakeSmtpIp = "localhost"
+int fakeSmtpPort = 1025;
+String fakeSmtpHtmlIp = "localhost"
+int fakeSmtpHtmlPort = 1080;
+
 // Defaults for development variables
 run.environment("DB_DRIVER", "sqlserver")
 run.environment("ANET_DB_SERVER", "localhost")
@@ -26,14 +31,37 @@ run.environment("ANET_DB_PORT", "1433")
 run.environment("ANET_DB_EXPOSED_PORT", isTestEnv ? "1434" : "1433")
 run.environment("ANET_PORT", isTestEnv ? "8180" : "8080")
 run.environment("ANET_ADMIN_PORT", isTestEnv ? "8181" : "8081")
-run.environment("ANET_SMTP_PORT", isTestEnv ? "1025" : "25")
+run.environment("ANET_SMTP_PORT", isTestEnv ? fakeSmtpPort : "25")
 run.environment("ANET_SMTP_DISABLE", isTestEnv ? "false" : "true")
+
+if (isTestEnv) {
+	run.environment("ANET_SMTP_SERVER", "localhost")
+}
 
 // If defined, load alternatives for variables
 if (!isTestEnv && file('localSettings.gradle').exists()) {
 	apply from: 'localSettings.gradle'
 } else if (isTestEnv && file('localTestSettings.gradle').exists()) {
 	apply from: 'localTestSettings.gradle'
+}
+
+// Configures the classpath and the source and resource directories of the integrationTest task.
+sourceSets {
+    // Declaring this source set creates compile time and runtime configurations for it.
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources { 'src/integration-test/resources' }
+	}	
+}
+
+// Configures the compile and runtime configurations for our integration tests and includes the dependencies of the test task.
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
 }
 
 // In this section you declare where to find the dependencies of your project
@@ -324,9 +352,9 @@ task startFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.Docker
 	group = "database container"
 	description = "Starts the fake SMTP email server."
 	targetContainerId { dbContainerName }
-	commands = [ ["fake-smtp-server", "--headers", 
-			"--smtp-ip", "0.0.0.0", "--smtp-port", "1025", 
-			"--http-ip", "0.0.0.0", "--http-port", "1080"] ]
+	commands = [ ["d"], ["fake-smtp-server", "--headers", 
+			"--smtp-ip", fakeSmtpIp, "--smtp-port", fakeSmtpPort, 
+			"--http-ip", fakeSmtpHtmlIp, "--http-port", fakeSmtpHtmlPort ] ]
 }
 
 task stopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerExecContainer) {
@@ -334,6 +362,19 @@ task stopFakeSmtpServer(type: com.bmuschko.gradle.docker.tasks.container.DockerE
 	description = "Stops the fake SMTP email server."
 	targetContainerId { dbContainerName }
 	commands = [ ["pkill", "-f", "fake-smtp-server"] ]
+}
+
+// Create the task that runs the integration tests found from the configured source directory and uses the correct classpath.
+task integrationTest(type: Test) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    // If you want to ensure that integration tests are run every time when you invoke this task, uncomment the following line.
+    outputs.upToDateWhen { false }
+	environment(run.environment)
+
+	dependsOn dbDrop, dbMigrate, startFakeSmtpServer
+    finalizedBy stopFakeSmtpServer
 }
 
 classes.dependsOn buildClient

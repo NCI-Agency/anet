@@ -1,4 +1,4 @@
-package mil.dds.anet.test.emails;
+package mil.dds.anet.emails;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -14,8 +14,8 @@ import mil.dds.anet.config.AnetConfiguration;
 import mil.dds.anet.config.AnetConfiguration.SmtpConfiguration;
 import mil.dds.anet.database.EmailDao;
 import mil.dds.anet.threads.AnetEmailWorker;
-import mil.dds.anet.utils.email.EmailResponse;
-import mil.dds.anet.utils.email.FakeSmtpServer;
+import mil.dds.anet.utils.EmailResponse;
+import mil.dds.anet.utils.FakeSmtpServer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({EmailDao.class, AnetConfiguration.class, ScheduledExecutorService.class,
     AnetObjectEngine.class})
-public class AnetEmailWorkerTest {
+public class AnetEmailWorkerIT {
 
   AnetEmailWorker emailWorker;
   EmailDao emailDao;
@@ -36,11 +36,6 @@ public class AnetEmailWorkerTest {
 
   @Before
   public void setUp() throws Exception {
-    setupEmailWorker();
-  }
-
-  private void setupEmailWorker() {
-
     emailServer = new FakeSmtpServer();
 
     emailDao = PowerMockito.mock(EmailDao.class, Mockito.RETURNS_MOCKS);
