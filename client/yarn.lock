@@ -2355,12 +2355,12 @@
     yargs "^11.1.0"
     yarn-install "^1.0.0"
 
-"@wdio/config@^5.7.13":
-  version "5.7.13"
-  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.7.13.tgz#39f9c3d345bc4c3116ab5d411abcf8c6c12c30a2"
-  integrity sha512-/BiX8Ufgxixrm1+Nk06KVIScEWS95y5kGuwVG3CWieZX7LWi8LU9twRH5Dac8LjQVXp14cTJi00NFj8puOTiAQ==
+"@wdio/config@^5.7.13", "@wdio/config@^5.8.0":
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/@wdio/config/-/config-5.8.0.tgz#fe817cf8ebae84ceff6dacadd4f077e488d1d85d"
+  integrity sha512-U9MVi0cLw8Z5idvN91tRMTVwpi/RUnajyUJuK/NGUtwgq30VJT+UlZo+wovfyGgHj3Il/gMFvKLRoFmjOqlrTA==
   dependencies:
-    "@wdio/logger" "^5.7.8"
+    "@wdio/logger" "^5.8.0"
     deepmerge "^2.0.1"
     glob "^7.1.2"
 
@@ -2383,24 +2383,24 @@
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
-"@wdio/logger@^5.7.8":
-  version "5.7.8"
-  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.7.8.tgz#c2a58d971ce5b891d7dcd5aafa4ecc2d2d1ef7d5"
-  integrity sha512-cbX/fHoTQ7xZvl8X4r828UjWv/ccKhpzPuNGZGukK2DRC7vSOg8sAi8bKNyjvv8nedaZkCQKaSFmsuHHlbIJ7g==
+"@wdio/logger@^5.7.8", "@wdio/logger@^5.8.0":
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.8.0.tgz#9d69dec2eaaee011c03de0f9239f8c520dfe8260"
+  integrity sha512-YQ6fybKvWEZPBVf/rrhedohj6g4U1cb9w/6IkHOOhDYbiwwvmAVk7h7QTCsdVc1pxO7Y4/5gI46bmoASgPsrnw==
   dependencies:
     chalk "^2.3.0"
     loglevel "^1.6.0"
     loglevel-plugin-prefix "^0.5.3"
     strip-ansi "^4.0.0"
 
-"@wdio/mocha-framework@^5.7.14":
-  version "5.7.14"
-  resolved "https://registry.yarnpkg.com/@wdio/mocha-framework/-/mocha-framework-5.7.14.tgz#02df9fe02cf1f657a03fd3f024eca0cd15970ce0"
-  integrity sha512-A8NRuRul/S95hY3QVA/f0KT8I++lG5BAiSbWzOmYtglFLIMe+kEhlRy/HDPRI+HCuuHak0d2hzPE1xPTTEL1Qg==
+"@wdio/mocha-framework@^5.8.0":
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/@wdio/mocha-framework/-/mocha-framework-5.8.0.tgz#072b6a0dfd9f8fb1c7b70f1d299a1b0baa1d5d9c"
+  integrity sha512-6Fx9Gb+S71DpjerQQwS+nr0p+KeH43T6ydgHY3ynyE3jikmE7zLYfDR1o68HWNe7UL5juTuSnTsB9c0xagE8og==
   dependencies:
     "@types/mocha" "^5.2.5"
-    "@wdio/config" "^5.7.13"
-    "@wdio/logger" "^5.7.8"
+    "@wdio/config" "^5.8.0"
+    "@wdio/logger" "^5.8.0"
     mocha "^6.1.0"
 
 "@wdio/repl@^5.7.13":
