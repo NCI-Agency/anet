@@ -5,9 +5,11 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.utils.Utils;
 import mil.dds.anet.views.AbstractAnetBean;
 import mil.dds.anet.views.UuidFetcher;
@@ -35,6 +37,8 @@ public class Task extends AbstractAnetBean {
   TaskStatus status;
 
   private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
+
+  private List<Position> positions;
 
   public void setPlannedCompletion(Instant plannedCompletion) {
     this.plannedCompletion = plannedCompletion;
@@ -185,6 +189,15 @@ public class Task extends AbstractAnetBean {
     return responsibleOrg.getForeignObject();
   }
 
+  @GraphQLIgnore
+  public List<Position> getPositions() {
+    return positions;
+  }
+
+  public void setPositions(List<Position> positions) {
+    this.positions = positions;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || o.getClass() != this.getClass()) {
@@ -194,12 +207,13 @@ public class Task extends AbstractAnetBean {
     return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
-        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid());
+        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
+        && Objects.equals(other.getPositions(), positions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, positions);
   }
 
   @Override

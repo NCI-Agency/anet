@@ -2277,4 +2277,25 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add_task_positions" author="maradragan">
+		<createTable tableName="taskPositions">
+			<column name="taskUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="positionUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_task_positions_constraints" author="maradragan" dbms="mssql,postgresql">
+		<addUniqueConstraint tableName="taskPositions" columnNames="taskUuid, positionUuid" constraintName="uniqueTaskPositions" />
+		<addForeignKeyConstraint baseColumnNames="taskUuid" baseTableName="taskPositions"
+			constraintName="fk_taskPositions_task" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="uuid" referencedTableName="tasks" />
+		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="taskPositions"
+			constraintName="fk_taskPositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="uuid" referencedTableName="positions" />
+	</changeSet>
+
 </databaseChangeLog>
