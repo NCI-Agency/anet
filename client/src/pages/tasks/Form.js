@@ -68,7 +68,7 @@ class BaseTaskForm extends Component {
       initialValues,
       ...myFormProps
     } = this.props
-    initialValues.reason_customFieldEnum1 = ""
+    initialValues.assessment_customFieldEnum1 = ""
 
     const orgSearchQuery = {
       status: Organization.STATUS.ACTIVE,
@@ -246,17 +246,15 @@ class BaseTaskForm extends Component {
                           setFieldValue("customFieldEnum1", value)
                         }
                       />
-                      {edit &&
-                        this.props.initialValues.customFieldEnum1 !==
-                          values.customFieldEnum1 && (
-                          <Field
-                          name="reason_customFieldEnum1"
-                          label={`Reason for updating ${
+                      {edit && (
+                        <Field
+                          name="assessment_customFieldEnum1"
+                          label={`Assessment of ${
                             Settings.fields.task.customFieldEnum1.label
                           }`}
                           component={FieldHelper.renderSpecialField}
                           onChange={value =>
-                            setFieldValue("reason_customFieldEnum1", value)
+                            setFieldValue("assessment_customFieldEnum1", value)
                           }
                           widget={<RichTextEditor className="textField" />}
                         />
@@ -356,7 +354,7 @@ class BaseTaskForm extends Component {
   }
 
   save = (values, form) => {
-    const task = Object.without(new Task(values), "reason_customFieldEnum1")
+    const task = Object.without(new Task(values), "assessment_customFieldEnum1")
     task.responsibleOrg = utils.getReference(task.responsibleOrg)
     task.customFieldRef1 = utils.getReference(task.customFieldRef1)
     const { edit } = this.props
@@ -367,7 +365,8 @@ class BaseTaskForm extends Component {
     let variableDef = "($task: TaskInput!"
     if (
       edit &&
-      this.props.initialValues.customFieldEnum1 !== values.customFieldEnum1
+      (this.props.initialValues.customFieldEnum1 !== values.customFieldEnum1 ||
+        !utils.isEmptyHtml(values.assessment_customFieldEnum1))
     ) {
       // Add an additional mutation to create a change record
       graphql += ` createNote(note: $note) { ${GRAPHQL_NOTE_FIELDS} }`
@@ -380,7 +379,7 @@ class BaseTaskForm extends Component {
           }
         ],
         text: JSON.stringify({
-          text: values.reason_customFieldEnum1,
+          text: values.assessment_customFieldEnum1,
           changedField: "customFieldEnum1",
           oldValue: this.props.initialValues.customFieldEnum1,
           newValue: values.customFieldEnum1

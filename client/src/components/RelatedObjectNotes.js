@@ -196,6 +196,20 @@ class BaseRelatedObjectNotes extends Component {
           const isJson = note.type !== NOTE_TYPE.FREE_TEXT
           const jsonFields = isJson ? JSON.parse(note.text) : {}
           const noteText = isJson ? jsonFields.text : note.text
+          let msg = ""
+          if (isJson) {
+            if (jsonFields.oldValue === jsonFields.newValue) {
+              msg = `Field <b>${
+                jsonFields.changedField
+              }</b> was unchanged (<em>'${jsonFields.oldValue}'</em>)`
+            } else {
+              msg = `Field <b>${
+                jsonFields.changedField
+              }</b> was changed from <em>'${
+                jsonFields.oldValue
+              }'</em> to <em>'${jsonFields.newValue}'</em>`
+            }
+          }
           return (
             <div key={note.uuid} style={noteDivStyle}>
               <span style={{ float: "left" }}>
@@ -241,11 +255,18 @@ class BaseRelatedObjectNotes extends Component {
                     /* IE: */ wordWrap: "break-word"
                   }}
                 >
-                  <span>
-                    Field <b>{jsonFields.changedField}</b> was changed from{" "}
-                    <em>'{jsonFields.oldValue}'</em> to{" "}
-                    <em>'{jsonFields.newValue}'</em>:
-                  </span>
+                  {jsonFields.oldValue === jsonFields.newValue ? (
+                    <span>
+                      Field <b>{jsonFields.changedField}</b> was unchanged (
+                      <em>'{jsonFields.oldValue}'</em>):
+                    </span>
+                  ) : (
+                    <span>
+                      Field <b>{jsonFields.changedField}</b> was changed from{" "}
+                      <em>'{jsonFields.oldValue}'</em> to{" "}
+                      <em>'{jsonFields.newValue}'</em>:
+                    </span>
+                  )}
                   <div dangerouslySetInnerHTML={{ __html: noteText }} />
                 </div>
               ) : (
