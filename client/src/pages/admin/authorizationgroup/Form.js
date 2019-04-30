@@ -128,6 +128,7 @@ class AuthorizationGroupForm extends Component {
                     name="status"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={this.statusButtons}
+                    onChange={value => setFieldValue("status", value)}
                   />
 
                   <AdvancedMultiSelect

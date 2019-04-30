@@ -108,6 +108,7 @@ class LocationForm extends Component {
                     name="status"
                     component={FieldHelper.renderButtonToggleGroup}
                     buttons={this.statusButtons}
+                    onChange={value => setFieldValue("status", value)}
                   />
 
                   <Field
