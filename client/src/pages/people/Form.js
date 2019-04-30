@@ -451,7 +451,6 @@ class BasePersonForm extends Component {
                     name="endOfTourDate"
                     label={Settings.fields.person.endOfTourDate}
                     component={FieldHelper.renderSpecialField}
-                    value={values.endOfTourDate}
                     onChange={(value, formattedValue) =>
                       setFieldValue("endOfTourDate", value)
                     }
