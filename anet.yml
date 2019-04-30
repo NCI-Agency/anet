@@ -224,12 +224,6 @@ dictionary:
             label: Red
             color: '#ff8279'
       responsibleOrg: Responsible organization
-      assessment:
-        label: Assessment
-        placeholder: Fill in the assessment
-        componentClass: textarea
-        style:
-          height: 400px
 
     report:
       intent: Meeting goal (purpose)

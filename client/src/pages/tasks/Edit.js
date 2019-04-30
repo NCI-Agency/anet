@@ -36,7 +36,6 @@ class TaskEdit extends Page {
         plannedCompletion, projectedCompletion,
         responsibleOrg { uuid, shortName, longName, identificationCode },
         customFieldRef1 { uuid, shortName, longName }
-        assessment
         ${GRAPHQL_NOTES_FIELDS}
       }
     `

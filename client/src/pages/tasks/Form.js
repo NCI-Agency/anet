@@ -59,7 +59,6 @@ class BaseTaskForm extends Component {
   ProjectedCompletionField = DictionaryField(Field)
   TaskCustomFieldEnum1 = DictionaryField(Field)
   TaskCustomFieldEnum2 = DictionaryField(Field)
-  TaskAssessmentField = DictionaryField(Field)
 
   state = {
     error: null
@@ -265,14 +264,6 @@ class BaseTaskForm extends Component {
                         />
                       )}
                     </React.Fragment>
-                  )}
-
-                  {Settings.fields.task.assessment && (
-                    <this.TaskAssessmentField
-                      dictProps={Settings.fields.task.assessment}
-                      name="assessment"
-                      component={FieldHelper.renderInputField}
-                    />
                   )}
 
                   {Settings.fields.task.customFieldEnum2 && (

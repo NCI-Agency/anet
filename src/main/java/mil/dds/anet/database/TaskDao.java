@@ -65,9 +65,9 @@ public class TaskDao extends AnetBaseDao<Task> {
   public Task insertInternal(Task p) {
     getDbHandle().createUpdate("/* insertTask */ INSERT INTO tasks "
         + "(uuid, \"longName\", \"shortName\", category, \"customFieldRef1Uuid\", \"organizationUuid\", \"createdAt\", \"updatedAt\", status, "
-        + "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\", assessment) "
+        + "\"customField\", \"customFieldEnum1\", \"customFieldEnum2\", \"plannedCompletion\", \"projectedCompletion\") "
         + "VALUES (:uuid, :longName, :shortName, :category, :customFieldRef1Uuid, :responsibleOrgUuid, :createdAt, :updatedAt, :status, "
-        + ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion, :assessment)")
+        + ":customField, :customFieldEnum1, :customFieldEnum2, :plannedCompletion, :projectedCompletion)")
         .bindBean(p).bind("createdAt", DaoUtils.asLocalDateTime(p.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
@@ -83,8 +83,8 @@ public class TaskDao extends AnetBaseDao<Task> {
             + "category = :category, \"customFieldRef1Uuid\" = :customFieldRef1Uuid, \"updatedAt\" = :updatedAt, "
             + "\"organizationUuid\" = :responsibleOrgUuid, status = :status, "
             + "\"customField\" = :customField, \"customFieldEnum1\" = :customFieldEnum1, \"customFieldEnum2\" = :customFieldEnum2, "
-            + "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion, "
-            + "assessment = :assessment " + "WHERE uuid = :uuid")
+            + "\"plannedCompletion\" = :plannedCompletion, \"projectedCompletion\" = :projectedCompletion "
+            + "WHERE uuid = :uuid")
         .bindBean(p).bind("updatedAt", DaoUtils.asLocalDateTime(p.getUpdatedAt()))
         .bind("plannedCompletion", DaoUtils.asLocalDateTime(p.getPlannedCompletion()))
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))

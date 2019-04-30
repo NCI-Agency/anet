@@ -33,7 +33,6 @@ public class Task extends AbstractAnetBean {
   private String customField;
   private String customFieldEnum1;
   private String customFieldEnum2;
-  private String assessment;
 
   private AnetBeanList<Report> reports;
 
@@ -191,16 +190,6 @@ public class Task extends AbstractAnetBean {
   public Organization getResponsibleOrg() {
     return responsibleOrg.getForeignObject();
   }
-
-  @GraphQLQuery(name = "assessment")
-  public String getAssessment() {
-    return assessment;
-  }
-
-  public void setAssessment(String assessment) {
-    this.assessment = Utils.trimStringReturnNull(assessment);
-  }
-
 
   @GraphQLQuery(name = "reports")
   public CompletableFuture<AnetBeanList<Report>> loadReports(
