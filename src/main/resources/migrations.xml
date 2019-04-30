@@ -2319,8 +2319,7 @@
 					tasks.uuid,
 					JSON_MODIFY(JSON_MODIFY(JSON_MODIFY(JSON_MODIFY('{"oldValue":null,"newValue":null}', '$.text', tasks.assessment), '$.changedField', 'customFieldEnum1'), 'strict $.oldValue', tasks.customFieldEnum1), 'strict $.newValue', tasks.customFieldEnum1)
 				FROM tasks
-				WHERE tasks.assessment IS NOT NULL
-				AND TRIM(tasks.assessment) != '';
+				WHERE NOT (tasks.assessment IS NULL OR tasks.assessment = '');
 
 			INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
 				SELECT uuid, authorUuid, 1, text, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
