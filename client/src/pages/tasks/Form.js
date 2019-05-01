@@ -181,6 +181,23 @@ class BaseTaskForm extends Component {
                     addon={ORGANIZATIONS_ICON}
                   />
 
+                  <AdvancedMultiSelect
+                    fieldName="positions"
+                    fieldLabel="Responsible positions"
+                    placeholder="Search for a position..."
+                    value={values.positions}
+                    renderSelected={
+                      <PositionTable positions={values.positions} showDelete />
+                    }
+                    overlayColumns={["Position", "Current Occupant"]}
+                    overlayRenderRow={PositionOverlayRow}
+                    filterDefs={positionsFilters}
+                    onChange={value => setFieldValue("positions", value)}
+                    objectType={Position}
+                    fields={Position.autocompleteQuery}
+                    addon={POSITIONS_ICON}
+                  />
+
                   {Settings.fields.task.customFieldRef1 && (
                     <this.TaskCustomFieldRef1
                       dictProps={Settings.fields.task.customFieldRef1}
@@ -267,23 +284,6 @@ class BaseTaskForm extends Component {
                       )}
                     />
                   )}
-
-                  <AdvancedMultiSelect
-                    fieldName="positions"
-                    fieldLabel="Responsible positions"
-                    placeholder="Search for a position..."
-                    value={values.positions}
-                    renderSelected={
-                      <PositionTable positions={values.positions} showDelete />
-                    }
-                    overlayColumns={["Position", "Current Occupant"]}
-                    overlayRenderRow={PositionOverlayRow}
-                    filterDefs={positionsFilters}
-                    onChange={value => setFieldValue("positions", value)}
-                    objectType={Position}
-                    fields={Position.autocompleteQuery}
-                    addon={POSITIONS_ICON}
-                  />
                 </Fieldset>
 
                 <div className="submit-buttons">
