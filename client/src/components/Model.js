@@ -166,7 +166,7 @@ export default class Model {
 
   setState(props) {
     Object.forEach(props, (key, value) => {
-      if (value !== null) this[key] = value
+      this[key] = value
     })
 
     return this
