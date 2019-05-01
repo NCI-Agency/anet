@@ -189,6 +189,19 @@ public class Task extends AbstractAnetBean {
     return responsibleOrg.getForeignObject();
   }
 
+  @GraphQLQuery(name = "positions")
+  public CompletableFuture<List<Position>> loadPositions(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (positions != null) {
+      return CompletableFuture.completedFuture(positions);
+    }
+    return AnetObjectEngine.getInstance().getTaskDao().getPositionsForTask(context, uuid)
+        .thenApply(o -> {
+          positions = o;
+          return o;
+        });
+  }
+
   @GraphQLIgnore
   public List<Position> getPositions() {
     return positions;

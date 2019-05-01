@@ -4,14 +4,18 @@ import io.leangen.graphql.annotations.GraphQLArgument;
 import io.leangen.graphql.annotations.GraphQLMutation;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
+import mil.dds.anet.beans.Position;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -26,10 +30,12 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 @PermitAll
 public class TaskResource {
 
+  private final AnetObjectEngine engine;
   private final TaskDao dao;
   private final String duplicateTaskShortName;
 
   public TaskResource(AnetObjectEngine engine, AnetConfiguration config) {
+    this.engine = engine;
     this.dao = engine.getTaskDao();
     final String taskShortLabel = (String) config.getDictionaryEntry("fields.task.shortLabel");
     duplicateTaskShortName = String.format("Duplicate %s number", taskShortLabel);
@@ -76,37 +82,58 @@ public class TaskResource {
   @GraphQLMutation(name = "updateTask")
   @RolesAllowed("ADMIN")
   public Integer updateTask(@GraphQLRootContext Map<String, Object> context,
-      @GraphQLArgument(name = "task") Task p) {
+      @GraphQLArgument(name = "task") Task t) {
     Person user = DaoUtils.getUserFromContext(context);
     // Admins can edit all Tasks, SuperUsers can edit tasks within their EF.
     if (AuthUtils.isAdmin(user) == false) {
-      Task existing = dao.getByUuid(p.getUuid());
+      Task existing = dao.getByUuid(t.getUuid());
       AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrgUuid(), true);
 
       // If changing the Responsible Organization, Super Users must also have super user privileges
       // over the next org.
-      if (!Objects.equals(existing.getResponsibleOrgUuid(), p.getResponsibleOrgUuid())) {
-        if (p.getResponsibleOrgUuid() == null) {
+      if (!Objects.equals(existing.getResponsibleOrgUuid(), t.getResponsibleOrgUuid())) {
+        if (t.getResponsibleOrgUuid() == null) {
           throw new WebApplicationException("You must select a responsible organization",
               Status.FORBIDDEN);
         }
-        AuthUtils.assertSuperUserForOrg(user, p.getResponsibleOrgUuid(), true);
+        AuthUtils.assertSuperUserForOrg(user, t.getResponsibleOrgUuid(), true);
       }
     }
 
     // Check for loops in the hierarchy
     final Map<String, Task> children =
-        AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(p));
-    if (p.getCustomFieldRef1Uuid() != null && children.containsKey(p.getCustomFieldRef1Uuid())) {
+        AnetObjectEngine.getInstance().buildTopLevelTaskHash(DaoUtils.getUuid(t));
+    if (t.getCustomFieldRef1Uuid() != null && children.containsKey(t.getCustomFieldRef1Uuid())) {
       throw new WebApplicationException("Task can not be its own (grand…)parent");
     }
 
     try {
-      final int numRows = dao.update(p);
+      final int numRows = dao.update(t);
       if (numRows == 0) {
         throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
       }
-      AnetAuditLogger.log("Task {} updatedby {}", p, user);
+      // Update positions:
+      if (t.getPositions() != null) {
+        try {
+          final List<Position> existingPositions =
+              dao.getPositionsForTask(engine.getContext(), t.getUuid()).get();
+          for (final Position p : t.getPositions()) {
+            Optional<Position> existingPosition = existingPositions.stream()
+                .filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
+            if (existingPosition.isPresent()) {
+              existingPositions.remove(existingPosition.get());
+            } else {
+              dao.addPositionToTask(p, t);
+            }
+          }
+          for (final Position p : existingPositions) {
+            dao.removePositionFromTask(p, t);
+          }
+        } catch (InterruptedException | ExecutionException e) {
+          throw new WebApplicationException("failed to load Positions", e);
+        }
+      }
+      AnetAuditLogger.log("Task {} updatedby {}", t, user);
       // GraphQL mutations *have* to return something, so we return the number of updated rows
       return numRows;
     } catch (UnableToExecuteStatementException e) {
