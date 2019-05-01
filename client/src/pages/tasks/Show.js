@@ -20,6 +20,7 @@ import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
 import _isEmpty from "lodash/isEmpty"
+import PositionTable from "components/PositionTable"
 import DictionaryField from "../../HOC/DictionaryField"
 
 class BaseTaskShow extends Page {
@@ -229,6 +230,10 @@ class BaseTaskShow extends Page {
                   )}
                 </Fieldset>
               </Form>
+
+              <Fieldset title="Positions">
+                <PositionTable positions={task.positions} />
+              </Fieldset>
 
               <Fieldset
                 title={`Reports for this ${Settings.fields.task.shortLabel}`}
