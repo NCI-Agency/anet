@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 import mil.dds.anet.AnetObjectEngine;
 import mil.dds.anet.beans.Person;
 import mil.dds.anet.beans.Position;
+import mil.dds.anet.beans.Position.PositionType;
 import mil.dds.anet.beans.Task;
 import mil.dds.anet.beans.lists.AnetBeanList;
 import mil.dds.anet.beans.search.TaskSearchQuery;
@@ -79,26 +80,30 @@ public class TaskResource {
     }
   }
 
+  private void assertCanUpdateTask(Person user, Task t) {
+    String permError = "You do not have permission to edit this task.";
+
+    if (AuthUtils.isAdmin(user) == false) {
+      final Position userPosition = user.getPosition();
+      if (userPosition == null) {
+        throw new WebApplicationException(permError, Status.FORBIDDEN);
+      } else {
+        final List<Position> taskPositions =
+            dao.getPositionsForTask(engine.getContext(), t.getUuid()).join();
+        Optional<Position> existingPosition = taskPositions.stream()
+            .filter(el -> el.getUuid().equals(userPosition.getUuid())).findFirst();
+        if (!existingPosition.isPresent()) {
+          throw new WebApplicationException(permError, Status.FORBIDDEN);
+        }
+      }
+    }
+  }
+
   @GraphQLMutation(name = "updateTask")
-  @RolesAllowed("ADMIN")
   public Integer updateTask(@GraphQLRootContext Map<String, Object> context,
       @GraphQLArgument(name = "task") Task t) {
     Person user = DaoUtils.getUserFromContext(context);
-    // Admins can edit all Tasks, SuperUsers can edit tasks within their EF.
-    if (AuthUtils.isAdmin(user) == false) {
-      Task existing = dao.getByUuid(t.getUuid());
-      AuthUtils.assertSuperUserForOrg(user, existing.getResponsibleOrgUuid(), true);
-
-      // If changing the Responsible Organization, Super Users must also have super user privileges
-      // over the next org.
-      if (!Objects.equals(existing.getResponsibleOrgUuid(), t.getResponsibleOrgUuid())) {
-        if (t.getResponsibleOrgUuid() == null) {
-          throw new WebApplicationException("You must select a responsible organization",
-              Status.FORBIDDEN);
-        }
-        AuthUtils.assertSuperUserForOrg(user, t.getResponsibleOrgUuid(), true);
-      }
-    }
+    assertCanUpdateTask(user, t);
 
     // Check for loops in the hierarchy
     final Map<String, Task> children =
