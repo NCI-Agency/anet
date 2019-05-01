@@ -231,7 +231,7 @@ class BaseTaskShow extends Page {
                 </Fieldset>
               </Form>
 
-              <Fieldset title="Positions">
+              <Fieldset title="Responsible positions">
                 <PositionTable positions={task.positions} />
               </Fieldset>
 

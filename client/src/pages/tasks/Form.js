@@ -270,7 +270,7 @@ class BaseTaskForm extends Component {
 
                   <AdvancedMultiSelect
                     fieldName="positions"
-                    fieldLabel="Positions"
+                    fieldLabel="Responsible positions"
                     placeholder="Search for a position..."
                     value={values.positions}
                     renderSelected={
