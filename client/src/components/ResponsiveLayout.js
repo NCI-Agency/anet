@@ -31,7 +31,7 @@ const mainViewportContainer = {
 }
 const notesViewportContainer = {
   paddingTop: 18,
-  maxWidth: "20%",
+  maxWidth: "33%",
   overflow: "auto"
 }
 const sidebarContainer = {

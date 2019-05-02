@@ -2277,4 +2277,63 @@
 		</addColumn>
 	</changeSet>
 
+	<changeSet id="add-notes-type-column" author="gjvoosten">
+		<!-- Create a new type column for notes and fill it with the the default value of 0 -->
+		<addColumn tableName="notes">
+			<column name="type" type="int" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="add-assessment-to-Tasks" author="VassilIordanov">
+		<addColumn tableName="tasks">
+			<column name="assessment" type="${long_text_type}" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="migrate-tasks-assessments" author="gjvoosten" dbms="mssql">
+		<!-- Column tasks.assessment will never have existed in PostgreSQL or SQLite -->
+		<createTable tableName="tmpTasksAssessments">
+			<column name="uuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="authorUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="taskUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="text" type="${long_text_type}" />
+			<column name="createdAt" type="datetime" />
+			<column name="updatedAt" type="datetime" />
+		</createTable>
+		<!-- Requires at least SQL Server 2016: -->
+		<sql>
+			INSERT INTO PEOPLE (uuid, name, status, role, createdAt, updatedAt)
+			    VALUES (${uuid_function}, 'ANET Importer', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+			INSERT INTO tmpTasksAssessments (uuid, authorUuid, taskUuid, text)
+				SELECT ${uuid_function},
+					(SELECT uuid FROM people WHERE name = 'ANET Importer' AND status = 1 AND role = 0),
+					tasks.uuid,
+					JSON_MODIFY(JSON_MODIFY(JSON_MODIFY(JSON_MODIFY('{"oldValue":null,"newValue":null}', '$.text', tasks.assessment), '$.changedField', 'customFieldEnum1'), 'strict $.oldValue', tasks.customFieldEnum1), 'strict $.newValue', tasks.customFieldEnum1)
+				FROM tasks
+				WHERE NOT (tasks.assessment IS NULL OR tasks.assessment = '');
+
+			INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+				SELECT uuid, authorUuid, 1, text, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+				FROM tmpTasksAssessments;
+
+			INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
+				SELECT uuid, 'tasks', taskUuid
+				FROM tmpTasksAssessments;
+		</sql>
+		<dropTable tableName="tmpTasksAssessments" />
+	</changeSet>
+
+	<changeSet id="drop-assessment-from-Tasks" author="gjvoosten">
+		<dropColumn tableName="tasks" columnName="assessment" />
+	</changeSet>
+
 </databaseChangeLog>
