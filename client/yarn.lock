@@ -2322,12 +2322,12 @@
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-12.0.10.tgz#17a8ec65cd8e88f51b418ceb271af18d3137df67"
   integrity sha512-WsVzTPshvCSbHThUduGGxbmnwcpkgSctHGHTqzWyFg4lYAuV5qXlyFPOsP3OWqCINfmg/8VXP+zJaa4OxEsBQQ==
 
-"@wdio/browserstack-service@^5.7.13":
-  version "5.7.13"
-  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.7.13.tgz#e6069fb6ad4a58bb9762be03771994f87404f430"
-  integrity sha512-5Cyq6S85EmsidZyZs3yH0SmVLmD7qFk/PyKVN1mp3XciePCfoufnKtfBfA6js9RDJle7itUKnXK/JC5YDxRdTw==
+"@wdio/browserstack-service@^5.8.0":
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/@wdio/browserstack-service/-/browserstack-service-5.8.0.tgz#bde29ecf10679f1bb80199891b149359ed48dbd2"
+  integrity sha512-A2T5I4vqoDaNBT0h/zt+2e/3fogotnE3BTkCQ3HR55guD8VCbq2vrwqB0ZmgBeV4CFMTfRdfKm5KmAe19NhcnQ==
   dependencies:
-    "@wdio/logger" "^5.7.8"
+    "@wdio/logger" "^5.8.0"
     browserstack-local "1.3.7"
     request "^2.85.0"
 
@@ -2383,10 +2383,10 @@
     async-exit-hook "^2.0.1"
     stream-buffers "^3.0.2"
 
-"@wdio/logger@^5.7.8":
-  version "5.7.8"
-  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.7.8.tgz#c2a58d971ce5b891d7dcd5aafa4ecc2d2d1ef7d5"
-  integrity sha512-cbX/fHoTQ7xZvl8X4r828UjWv/ccKhpzPuNGZGukK2DRC7vSOg8sAi8bKNyjvv8nedaZkCQKaSFmsuHHlbIJ7g==
+"@wdio/logger@^5.7.8", "@wdio/logger@^5.8.0":
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/@wdio/logger/-/logger-5.8.0.tgz#9d69dec2eaaee011c03de0f9239f8c520dfe8260"
+  integrity sha512-YQ6fybKvWEZPBVf/rrhedohj6g4U1cb9w/6IkHOOhDYbiwwvmAVk7h7QTCsdVc1pxO7Y4/5gI46bmoASgPsrnw==
   dependencies:
     chalk "^2.3.0"
     loglevel "^1.6.0"
