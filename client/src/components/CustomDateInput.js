@@ -74,6 +74,7 @@ export default class CustomDateInput extends Component {
         showActionsBar
         closeOnSelection={!withTime}
         timePickerProps={timePickerProps}
+        popoverProps={{ usePortal: false }}
       />
     )
   }
