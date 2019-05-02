@@ -850,8 +850,8 @@ DECLARE @noteUuid varchar(36);
 
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'BECCABON, Rebecca');
 SET @noteUuid = lower(newid());
-INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
-	VALUES (@noteUuid, @authorUuid, 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'A really nice person to work with', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'people', p.uuid
 	FROM people p
@@ -859,8 +859,8 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'DMIN, Arthur');
 SET @noteUuid = lower(newid());
-INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
-	VALUES (@noteUuid, @authorUuid, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, '<em>This position should always be filled!</em>', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'positions', p.uuid
 	FROM positions p
@@ -868,16 +868,16 @@ INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 
 SET @authorUuid = (SELECT uuid FROM people WHERE name = 'ERINSON, Erin');
 SET @noteUuid = lower(newid());
-INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
-	VALUES (@noteUuid, @authorUuid, 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Check out this report, it is really positive', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'reports', r.uuid
 	FROM reports r
 	WHERE r.atmosphere = 0;
 
 SET @noteUuid = lower(newid());
-INSERT INTO notes (uuid, authorUuid, text, createdAt, updatedAt)
-	VALUES (@noteUuid, @authorUuid, 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO notes (uuid, authorUuid, type, text, createdAt, updatedAt)
+	VALUES (@noteUuid, @authorUuid, 0, 'Report text contains some valuable information, especially for the next meeting', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO noteRelatedObjects (noteUuid, relatedObjectType, relatedObjectUuid)
 	SELECT @noteUuid, 'reports', r.uuid
 	FROM reports r

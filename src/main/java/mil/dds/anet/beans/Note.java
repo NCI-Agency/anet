@@ -15,9 +15,23 @@ import mil.dds.anet.views.UuidFetcher;
 
 public class Note extends AbstractAnetBean {
 
+  public static enum NoteType {
+    FREE_TEXT, CHANGE_RECORD
+  }
+
+  private NoteType type;
   private String text;
   private ForeignObjectHolder<Person> author = new ForeignObjectHolder<>();
   private List<NoteRelatedObject> noteRelatedObjects;
+
+  @GraphQLQuery(name = "type")
+  public NoteType getType() {
+    return type;
+  }
+
+  public void setType(NoteType type) {
+    this.type = type;
+  }
 
   @GraphQLQuery(name = "text")
   public String getText() {
