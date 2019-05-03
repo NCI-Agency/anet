@@ -2277,8 +2277,8 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="add_task_positions" author="maradragan">
-		<createTable tableName="taskPositions">
+	<changeSet id="add_task_responsible_positions" author="maradragan">
+		<createTable tableName="taskResponsiblePositions">
 			<column name="taskUuid" type="${uuid_type}">
 				<constraints nullable="false" />
 			</column>
@@ -2289,12 +2289,12 @@
 	</changeSet>
 
 	<changeSet id="add_task_positions_constraints" author="maradragan" dbms="mssql,postgresql">
-		<addUniqueConstraint tableName="taskPositions" columnNames="taskUuid, positionUuid" constraintName="uniqueTaskPositions" />
-		<addForeignKeyConstraint baseColumnNames="taskUuid" baseTableName="taskPositions"
-			constraintName="fk_taskPositions_task" onDelete="NO ACTION" onUpdate="NO ACTION"
+		<addUniqueConstraint tableName="taskResponsiblePositions" columnNames="taskUuid, positionUuid" constraintName="uniquetaskResponsiblePositions" />
+		<addForeignKeyConstraint baseColumnNames="taskUuid" baseTableName="taskResponsiblePositions"
+			constraintName="fk_taskResponsiblePositions_task" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="uuid" referencedTableName="tasks" />
-		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="taskPositions"
-			constraintName="fk_taskPositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="taskResponsiblePositions"
+			constraintName="fk_taskResponsiblePositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="uuid" referencedTableName="positions" />
 	</changeSet>
 

@@ -38,7 +38,7 @@ public class Task extends AbstractAnetBean {
 
   private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
 
-  private List<Position> positions;
+  private List<Position> responsiblePositions;
 
   public void setPlannedCompletion(Instant plannedCompletion) {
     this.plannedCompletion = plannedCompletion;
@@ -189,26 +189,26 @@ public class Task extends AbstractAnetBean {
     return responsibleOrg.getForeignObject();
   }
 
-  @GraphQLQuery(name = "positions")
-  public CompletableFuture<List<Position>> loadPositions(
+  @GraphQLQuery(name = "responsiblePositions")
+  public CompletableFuture<List<Position>> loadResponsiblePositions(
       @GraphQLRootContext Map<String, Object> context) {
-    if (positions != null) {
-      return CompletableFuture.completedFuture(positions);
+    if (responsiblePositions != null) {
+      return CompletableFuture.completedFuture(responsiblePositions);
     }
-    return AnetObjectEngine.getInstance().getTaskDao().getPositionsForTask(context, uuid)
+    return AnetObjectEngine.getInstance().getTaskDao().getResponsiblePositionsForTask(context, uuid)
         .thenApply(o -> {
-          positions = o;
+          responsiblePositions = o;
           return o;
         });
   }
 
   @GraphQLIgnore
-  public List<Position> getPositions() {
-    return positions;
+  public List<Position> getResponsiblePositions() {
+    return responsiblePositions;
   }
 
-  public void setPositions(List<Position> positions) {
-    this.positions = positions;
+  public void setResponsiblePositions(List<Position> positions) {
+    this.responsiblePositions = positions;
   }
 
   @Override
@@ -221,12 +221,12 @@ public class Task extends AbstractAnetBean {
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
         && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
-        && Objects.equals(other.getPositions(), positions);
+        && Objects.equals(other.getResponsiblePositions(), responsiblePositions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, positions);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, responsiblePositions);
   }
 
   @Override

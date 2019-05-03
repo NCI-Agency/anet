@@ -63,21 +63,22 @@ public class TaskDao extends AnetBaseDao<Task> {
     return idBatcher.getByIds(uuids);
   }
 
-  static class PositionsBatcher extends ForeignKeyBatcher<Position> {
-    private static final String sql = "/* batch.getPositionsForTask */ SELECT \"taskUuid\", "
-        + PositionDao.POSITIONS_FIELDS + " FROM positions, \"taskPositions\" "
-        + "WHERE \"taskPositions\".\"taskUuid\" IN ( <foreignKeys> ) "
-        + "AND \"taskPositions\".\"positionUuid\" = positions.uuid";
+  static class ResponsiblePositionsBatcher extends ForeignKeyBatcher<Position> {
+    private static final String sql =
+        "/* batch.getResponsiblePositionsForTask */ SELECT \"taskUuid\", "
+            + PositionDao.POSITIONS_FIELDS + " FROM positions, \"taskResponsiblePositions\" "
+            + "WHERE \"taskResponsiblePositions\".\"taskUuid\" IN ( <foreignKeys> ) "
+            + "AND \"taskResponsiblePositions\".\"positionUuid\" = positions.uuid";
 
-    public PositionsBatcher() {
+    public ResponsiblePositionsBatcher() {
       super(sql, "foreignKeys", new PositionMapper(), "taskUuid");
     }
   }
 
-  public List<List<Position>> getPositions(List<String> foreignKeys) {
-    final ForeignKeyBatcher<Position> positionsBatcher =
-        AnetObjectEngine.getInstance().getInjector().getInstance(PositionsBatcher.class);
-    return positionsBatcher.getByForeignKeys(foreignKeys);
+  public List<List<Position>> getResponsiblePositions(List<String> foreignKeys) {
+    final ForeignKeyBatcher<Position> responsiblePositionsBatcher =
+        AnetObjectEngine.getInstance().getInjector().getInstance(ResponsiblePositionsBatcher.class);
+    return responsiblePositionsBatcher.getByForeignKeys(foreignKeys);
   }
 
   @Override
@@ -93,15 +94,16 @@ public class TaskDao extends AnetBaseDao<Task> {
         .bind("projectedCompletion", DaoUtils.asLocalDateTime(p.getProjectedCompletion()))
         .bind("status", DaoUtils.getEnumId(p.getStatus())).execute();
     final TaskBatch tb = getDbHandle().attach(TaskBatch.class);
-    if (p.getPositions() != null) {
-      tb.insertTaskPositions(p.getUuid(), p.getPositions());
+    if (p.getResponsiblePositions() != null) {
+      tb.inserttaskResponsiblePositions(p.getUuid(), p.getResponsiblePositions());
     }
     return p;
   }
 
   public interface TaskBatch {
-    @SqlBatch("INSERT INTO \"taskPositions\" (\"taskUuid\", \"positionUuid\") VALUES (:taskUuid, :uuid)")
-    void insertTaskPositions(@Bind("taskUuid") String taskUuid, @BindBean List<Position> positions);
+    @SqlBatch("INSERT INTO \"taskResponsiblePositions\" (\"taskUuid\", \"positionUuid\") VALUES (:taskUuid, :uuid)")
+    void inserttaskResponsiblePositions(@Bind("taskUuid") String taskUuid,
+        @BindBean List<Position> responsiblePositions);
   }
 
   @Override
@@ -126,21 +128,21 @@ public class TaskDao extends AnetBaseDao<Task> {
 
   public int addPositionToTask(Position p, Task t) {
     return getDbHandle().createUpdate(
-        "/* addPositionToTask */ INSERT INTO \"taskPositions\" (\"taskUuid\", \"positionUuid\") "
+        "/* addPositionToTask */ INSERT INTO \"taskResponsiblePositions\" (\"taskUuid\", \"positionUuid\") "
             + "VALUES (:taskUuid, :positionUuid)")
         .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
   }
 
   public int removePositionFromTask(Position p, Task t) {
     return getDbHandle()
-        .createUpdate("/* removePositionFromTask*/ DELETE FROM \"taskPositions\" "
+        .createUpdate("/* removePositionFromTask*/ DELETE FROM \"taskResponsiblePositions\" "
             + "WHERE \"taskUuid\" = :taskUuid AND \"positionUuid\" = :positionUuid")
         .bind("taskUuid", t.getUuid()).bind("positionUuid", p.getUuid()).execute();
   }
 
-  public CompletableFuture<List<Position>> getPositionsForTask(Map<String, Object> context,
-      String taskUuid) {
-    return new ForeignKeyFetcher<Position>().load(context, "task.positions", taskUuid);
+  public CompletableFuture<List<Position>> getResponsiblePositionsForTask(
+      Map<String, Object> context, String taskUuid) {
+    return new ForeignKeyFetcher<Position>().load(context, "task.responsiblePositions", taskUuid);
   }
 
   public int setResponsibleOrgForTask(String taskUuid, String organizationUuid) {

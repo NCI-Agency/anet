@@ -73,7 +73,7 @@ class BaseTaskShow extends Page {
         plannedCompletion, projectedCompletion,
         responsibleOrg { uuid, shortName, longName, identificationCode },
         customFieldRef1 { uuid, shortName, longName },
-        positions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
+        responsiblePositions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
         ${GRAPHQL_NOTES_FIELDS}
       }
     `)
@@ -95,7 +95,7 @@ class BaseTaskShow extends Page {
       currentUser.isAdmin() ||
       (currentUser.position &&
         !_isEmpty(
-          task.positions.filter(
+          task.responsiblePositions.filter(
             position => currentUser.position.uuid === position.uuid
           )
         ))
@@ -232,7 +232,7 @@ class BaseTaskShow extends Page {
               </Form>
 
               <Fieldset title="Responsible positions">
-                <PositionTable positions={task.positions} />
+                <PositionTable positions={task.responsiblePositions} />
               </Fieldset>
 
               <Fieldset

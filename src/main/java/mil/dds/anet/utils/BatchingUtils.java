@@ -234,12 +234,12 @@ public final class BatchingUtils {
             dispatcherService);
       }
     }, dataLoaderOptions));
-    dataLoaderRegistry.register("task.positions",
+    dataLoaderRegistry.register("task.responsiblePositions",
         new DataLoader<>(new BatchLoader<String, List<Position>>() {
           @Override
           public CompletionStage<List<List<Position>>> load(List<String> foreignKeys) {
             return CompletableFuture.supplyAsync(
-                () -> engine.getTaskDao().getPositions(foreignKeys), dispatcherService);
+                () -> engine.getTaskDao().getResponsiblePositions(foreignKeys), dispatcherService);
           }
         }, dataLoaderOptions));
     return dataLoaderRegistry;

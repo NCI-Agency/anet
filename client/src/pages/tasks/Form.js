@@ -182,17 +182,22 @@ class BaseTaskForm extends Component {
                   />
 
                   <AdvancedMultiSelect
-                    fieldName="positions"
+                    fieldName="responsiblePositions"
                     fieldLabel="Responsible positions"
                     placeholder="Search for a position..."
-                    value={values.positions}
+                    value={values.responsiblePositions}
                     renderSelected={
-                      <PositionTable positions={values.positions} showDelete />
+                      <PositionTable
+                        positions={values.responsiblePositions}
+                        showDelete
+                      />
                     }
                     overlayColumns={["Position", "Current Occupant"]}
                     overlayRenderRow={PositionOverlayRow}
                     filterDefs={positionsFilters}
-                    onChange={value => setFieldValue("positions", value)}
+                    onChange={value =>
+                      setFieldValue("responsiblePositions", value)
+                    }
                     objectType={Position}
                     fields={Position.autocompleteQuery}
                     addon={POSITIONS_ICON}

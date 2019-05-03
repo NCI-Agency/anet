@@ -88,9 +88,9 @@ public class TaskResource {
       if (userPosition == null) {
         throw new WebApplicationException(permError, Status.FORBIDDEN);
       } else {
-        final List<Position> taskPositions =
-            dao.getPositionsForTask(engine.getContext(), t.getUuid()).join();
-        Optional<Position> existingPosition = taskPositions.stream()
+        final List<Position> responsiblePositions =
+            dao.getResponsiblePositionsForTask(engine.getContext(), t.getUuid()).join();
+        Optional<Position> existingPosition = responsiblePositions.stream()
             .filter(el -> el.getUuid().equals(userPosition.getUuid())).findFirst();
         if (!existingPosition.isPresent()) {
           throw new WebApplicationException(permError, Status.FORBIDDEN);
@@ -118,24 +118,24 @@ public class TaskResource {
         throw new WebApplicationException("Couldn't process task update", Status.NOT_FOUND);
       }
       // Update positions:
-      if (t.getPositions() != null) {
+      if (t.getResponsiblePositions() != null) {
         try {
-          final List<Position> existingPositions =
-              dao.getPositionsForTask(engine.getContext(), t.getUuid()).get();
-          for (final Position p : t.getPositions()) {
-            Optional<Position> existingPosition = existingPositions.stream()
+          final List<Position> existingResponsiblePositions =
+              dao.getResponsiblePositionsForTask(engine.getContext(), t.getUuid()).get();
+          for (final Position p : t.getResponsiblePositions()) {
+            Optional<Position> existingPosition = existingResponsiblePositions.stream()
                 .filter(el -> el.getUuid().equals(p.getUuid())).findFirst();
             if (existingPosition.isPresent()) {
-              existingPositions.remove(existingPosition.get());
+              existingResponsiblePositions.remove(existingPosition.get());
             } else {
               dao.addPositionToTask(p, t);
             }
           }
-          for (final Position p : existingPositions) {
+          for (final Position p : existingResponsiblePositions) {
             dao.removePositionFromTask(p, t);
           }
         } catch (InterruptedException | ExecutionException e) {
-          throw new WebApplicationException("failed to load Positions", e);
+          throw new WebApplicationException("failed to load Responsible Positions", e);
         }
       }
       AnetAuditLogger.log("Task {} updatedby {}", t, user);
