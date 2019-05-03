@@ -1,9 +1,11 @@
 import API, { Settings } from "api"
 import {
   OrganizationOverlayRow,
-  TaskSimpleOverlayRow
+  TaskSimpleOverlayRow,
+  PositionOverlayRow
 } from "components/advancedSelectWidget/AdvancedSelectOverlayRow"
 import AdvancedSingleSelect from "components/advancedSelectWidget/AdvancedSingleSelect"
+import AdvancedMultiSelect from "components/advancedSelectWidget/AdvancedMultiSelect"
 import AppContext from "components/AppContext"
 import CustomDateInput from "components/CustomDateInput"
 import * as FieldHelper from "components/FieldHelper"
@@ -14,7 +16,7 @@ import NavigationWarning from "components/NavigationWarning"
 import { jumpToTop } from "components/Page"
 import RichTextEditor from "components/RichTextEditor"
 import { Field, Form, Formik } from "formik"
-import { Organization, Person, Task } from "models"
+import { Organization, Person, Position, Task } from "models"
 import PropTypes from "prop-types"
 import React, { Component } from "react"
 import { Button } from "react-bootstrap"
@@ -22,6 +24,8 @@ import { withRouter } from "react-router-dom"
 import ORGANIZATIONS_ICON from "resources/organizations.png"
 import TASKS_ICON from "resources/tasks.png"
 import utils from "utils"
+import PositionTable from "components/PositionTable"
+import POSITIONS_ICON from "resources/positions.png"
 import DictionaryField from "../../HOC/DictionaryField"
 
 class BaseTaskForm extends Component {
@@ -56,6 +60,7 @@ class BaseTaskForm extends Component {
   ProjectedCompletionField = DictionaryField(Field)
   TaskCustomFieldEnum1 = DictionaryField(Field)
   TaskCustomFieldEnum2 = DictionaryField(Field)
+  ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
   state = {
     error: null
   }
@@ -94,6 +99,21 @@ class BaseTaskForm extends Component {
         label: "All tasks",
         searchQuery: true,
         queryVars: {}
+      }
+    }
+    const positionsFilters = {
+      allAdvisorPositions: {
+        label: "All advisor positions",
+        searchQuery: true,
+        queryVars: {
+          status: Position.STATUS.ACTIVE,
+          type: [
+            Position.TYPE.ADVISOR,
+            Position.TYPE.SUPER_USER,
+            Position.TYPE.ADMINISTRATOR
+          ],
+          matchPersonName: true
+        }
       }
     }
 
@@ -171,6 +191,28 @@ class BaseTaskForm extends Component {
                     valueKey="shortName"
                     queryParams={orgSearchQuery}
                     addon={ORGANIZATIONS_ICON}
+                  />
+
+                  <this.ResponsiblePositonsMultiSelect
+                    fieldName="responsiblePositions"
+                    dictProps={Settings.fields.task.responsiblePositions}
+                    fieldLabel={Settings.fields.task.responsiblePositions.label}
+                    value={values.responsiblePositions}
+                    renderSelected={
+                      <PositionTable
+                        positions={values.responsiblePositions}
+                        showDelete
+                      />
+                    }
+                    overlayColumns={["Position", "Current Occupant"]}
+                    overlayRenderRow={PositionOverlayRow}
+                    filterDefs={positionsFilters}
+                    onChange={value =>
+                      setFieldValue("responsiblePositions", value)
+                    }
+                    objectType={Position}
+                    fields={Position.autocompleteQuery}
+                    addon={POSITIONS_ICON}
                   />
 
                   {Settings.fields.task.customFieldRef1 && (

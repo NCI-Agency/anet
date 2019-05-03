@@ -2336,4 +2336,25 @@
 		<dropColumn tableName="tasks" columnName="assessment" />
 	</changeSet>
 
+	<changeSet id="add_task_responsible_positions" author="maradragan">
+		<createTable tableName="taskResponsiblePositions">
+			<column name="taskUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="positionUuid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="add_task_positions_constraints" author="maradragan" dbms="mssql,postgresql">
+		<addUniqueConstraint tableName="taskResponsiblePositions" columnNames="taskUuid, positionUuid" constraintName="uniquetaskResponsiblePositions" />
+		<addForeignKeyConstraint baseColumnNames="taskUuid" baseTableName="taskResponsiblePositions"
+			constraintName="fk_taskResponsiblePositions_task" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="uuid" referencedTableName="tasks" />
+		<addForeignKeyConstraint baseColumnNames="positionUuid" baseTableName="taskResponsiblePositions"
+			constraintName="fk_taskResponsiblePositions_position" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="uuid" referencedTableName="positions" />
+	</changeSet>
+
 </databaseChangeLog>

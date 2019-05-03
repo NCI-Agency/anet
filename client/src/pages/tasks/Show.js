@@ -19,6 +19,8 @@ import moment from "moment"
 import PropTypes from "prop-types"
 import React from "react"
 import { connect } from "react-redux"
+import _isEmpty from "lodash/isEmpty"
+import PositionTable from "components/PositionTable"
 import DictionaryField from "../../HOC/DictionaryField"
 
 class BaseTaskShow extends Page {
@@ -70,7 +72,8 @@ class BaseTaskShow extends Page {
         customField, customFieldEnum1, customFieldEnum2,
         plannedCompletion, projectedCompletion,
         responsibleOrg { uuid, shortName, longName, identificationCode },
-        customFieldRef1 { uuid, shortName, longName }
+        customFieldRef1 { uuid, shortName, longName },
+        responsiblePositions { uuid, name, code, type, status, organization { uuid, shortName}, person { uuid, name, rank, role } }
         ${GRAPHQL_NOTES_FIELDS}
       }
     `)
@@ -87,8 +90,15 @@ class BaseTaskShow extends Page {
     const { task, reports } = this.state
     const { currentUser, ...myFormProps } = this.props
 
-    // Admins can edit tasks, or super users if this task is assigned to their org.
-    const canEdit = currentUser.isAdmin()
+    // Admins can edit tasks or users in positions related to the task
+    const canEdit =
+      currentUser.isAdmin() ||
+      (currentUser.position &&
+        !_isEmpty(
+          task.responsiblePositions.filter(
+            position => currentUser.position.uuid === position.uuid
+          )
+        ))
 
     return (
       <Formik enableReinitialize initialValues={task} {...myFormProps}>
@@ -220,6 +230,10 @@ class BaseTaskShow extends Page {
                   )}
                 </Fieldset>
               </Form>
+
+              <Fieldset title="Responsible positions">
+                <PositionTable positions={task.responsiblePositions} />
+              </Fieldset>
 
               <Fieldset
                 title={`Reports for this ${Settings.fields.task.shortLabel}`}
