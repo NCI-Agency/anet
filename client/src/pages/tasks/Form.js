@@ -60,6 +60,7 @@ class BaseTaskForm extends Component {
   ProjectedCompletionField = DictionaryField(Field)
   TaskCustomFieldEnum1 = DictionaryField(Field)
   TaskCustomFieldEnum2 = DictionaryField(Field)
+  ResponsiblePositonsMultiSelect = DictionaryField(AdvancedMultiSelect)
   state = {
     error: null
   }
@@ -192,10 +193,10 @@ class BaseTaskForm extends Component {
                     addon={ORGANIZATIONS_ICON}
                   />
 
-                  <AdvancedMultiSelect
+                  <this.ResponsiblePositonsMultiSelect
                     fieldName="responsiblePositions"
-                    fieldLabel="Responsible positions"
-                    placeholder="Search for a position..."
+                    dictProps={Settings.fields.task.responsiblePositions}
+                    fieldLabel={Settings.fields.task.responsiblePositions.label}
                     value={values.responsiblePositions}
                     renderSelected={
                       <PositionTable

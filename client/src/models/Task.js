@@ -89,6 +89,7 @@ export default class Task extends Model {
         .array()
         .nullable()
         .default([])
+        .label(Settings.fields.task.responsiblePositions.label)
     })
     .concat(Model.yupSchema)
 
