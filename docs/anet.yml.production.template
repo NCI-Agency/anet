@@ -222,6 +222,9 @@ dictionary:
           CUSTOMVALUE2:
             label: Custom value 2
       responsibleOrg: Responsible organization
+      responsiblePositions:
+        label: Responsible positions
+        placeholder: Search for a position...
 
     report:
       intent: Meeting goal (purpose)

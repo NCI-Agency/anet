@@ -194,7 +194,7 @@ properties:
       task:
         type: object
         additionalProperties: false
-        required: [shortLabel, shortName, longLabel, longName, responsibleOrg]
+        required: [shortLabel, shortName, longLabel, longName, responsibleOrg, responsiblePositions]
         properties:
           shortLabel:
             type: string
@@ -227,6 +227,8 @@ properties:
             title: The label for a task's responsible organization
             description: Used in the UI where a label for a task's responsible organization is shown.
             examples: [Responsible organization]
+          responsiblePositions:
+            "$ref": "#/definitions/inputField"
 
       report:
         type: object

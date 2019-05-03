@@ -6,6 +6,7 @@ import io.leangen.graphql.annotations.GraphQLIgnore;
 import io.leangen.graphql.annotations.GraphQLQuery;
 import io.leangen.graphql.annotations.GraphQLRootContext;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -41,6 +42,8 @@ public class Task extends AbstractAnetBean {
   TaskStatus status;
 
   private ForeignObjectHolder<Organization> responsibleOrg = new ForeignObjectHolder<>();
+
+  private List<Position> responsiblePositions;
 
   public void setPlannedCompletion(Instant plannedCompletion) {
     this.plannedCompletion = plannedCompletion;
@@ -206,6 +209,28 @@ public class Task extends AbstractAnetBean {
         });
   }
 
+  @GraphQLQuery(name = "responsiblePositions")
+  public CompletableFuture<List<Position>> loadResponsiblePositions(
+      @GraphQLRootContext Map<String, Object> context) {
+    if (responsiblePositions != null) {
+      return CompletableFuture.completedFuture(responsiblePositions);
+    }
+    return AnetObjectEngine.getInstance().getTaskDao().getResponsiblePositionsForTask(context, uuid)
+        .thenApply(o -> {
+          responsiblePositions = o;
+          return o;
+        });
+  }
+
+  @GraphQLIgnore
+  public List<Position> getResponsiblePositions() {
+    return responsiblePositions;
+  }
+
+  public void setResponsiblePositions(List<Position> positions) {
+    this.responsiblePositions = positions;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || o.getClass() != this.getClass()) {
@@ -215,12 +240,13 @@ public class Task extends AbstractAnetBean {
     return Objects.equals(other.getUuid(), uuid) && Objects.equals(other.getShortName(), shortName)
         && Objects.equals(other.getLongName(), longName)
         && Objects.equals(other.getCategory(), category)
-        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid());
+        && Objects.equals(other.getCustomFieldRef1Uuid(), getCustomFieldRef1Uuid())
+        && Objects.equals(other.getResponsiblePositions(), responsiblePositions);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, shortName, longName, category, customFieldRef1);
+    return Objects.hash(uuid, shortName, longName, category, customFieldRef1, responsiblePositions);
   }
 
   @Override

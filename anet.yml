@@ -224,6 +224,9 @@ dictionary:
             label: Red
             color: '#ff8279'
       responsibleOrg: Responsible organization
+      responsiblePositions:
+        label: Responsible positions
+        placeholder: Search for a position...
 
     report:
       intent: Meeting goal (purpose)
