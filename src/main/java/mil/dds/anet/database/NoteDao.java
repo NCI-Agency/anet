@@ -72,11 +72,12 @@ public class NoteDao extends AnetBaseDao<Note> {
   @Override
   public Note insertInternal(Note n) {
     getDbHandle().createUpdate(
-        "/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", text, \"createdAt\", \"updatedAt\") "
-            + "VALUES (:uuid, :authorUuid, :text, :createdAt, :updatedAt)")
+        "/* insertNote */ INSERT INTO notes (uuid, \"authorUuid\", type, text, \"createdAt\", \"updatedAt\") "
+            + "VALUES (:uuid, :authorUuid, :type, :text, :createdAt, :updatedAt)")
         .bindBean(n).bind("createdAt", DaoUtils.asLocalDateTime(n.getCreatedAt()))
         .bind("updatedAt", DaoUtils.asLocalDateTime(n.getUpdatedAt()))
-        .bind("authorUuid", n.getAuthorUuid()).execute();
+        .bind("authorUuid", n.getAuthorUuid()).bind("type", DaoUtils.getEnumId(n.getType()))
+        .execute();
     insertNoteRelatedObjects(DaoUtils.getUuid(n), n.getNoteRelatedObjects());
     return n;
   }

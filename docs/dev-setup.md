@@ -5,7 +5,7 @@ This section describes the recommended Developer Environment and how to set it u
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html).  This can also be either installed, or downloaded as a .zip.  If you do not use the installer, be sure to set the `JAVA_HOME` environment variable to the location of the JDK.
 - [Eclipse](http://www.eclipse.org/downloads/).  Eclipse is a Java IDE.  It can be downloaded as an installer or as a .zip file that does not require installation.
   - When the installer asks which version you'd like to install, choose "Eclipse IDE for Java Developers".
-- [node.js 8.x](https://nodejs.org/en/).
+- [node.js 10.x LTS](https://nodejs.org/en/).
 - [git](https://git-scm.com/).  While this is not required, it is highly recommended if you will be doing active development on ANET.
 
 ## Download ANET source code
@@ -229,7 +229,7 @@ The simulator can be started by running 'yarn run sim' in 'client'.
 
 ## React Frontend
 ### Initial Setup
-1. Make sure you have node.js v8.x installed: ( http://nodejs.org )
+1. Make sure you have node.js v10.x LTS installed: ( http://nodejs.org )
 1. `cd client/`
     - All of the frontend code is in the `client/` directory.
 1. Install the development dependencies: `yarn install`

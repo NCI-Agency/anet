@@ -1,13 +1,13 @@
 import React from "react"
 import {
-  Button,
-  ButtonGroup,
   Col,
   ControlLabel,
   FormControl,
   FormGroup,
   HelpBlock,
-  InputGroup
+  InputGroup,
+  ToggleButton,
+  ToggleButtonGroup
 } from "react-bootstrap"
 import utils from "utils"
 
@@ -248,26 +248,24 @@ export const renderButtonToggleGroup = ({
     ...otherProps
   } = props
   const widgetElem = (
-    <ButtonGroup {...otherProps}>
+    <ToggleButtonGroup
+      type="radio"
+      defaultValue={field.value}
+      {...field}
+      {...otherProps}
+    >
       {buttons.map((button, index) => {
         if (!button) {
           return null
         }
         const { label, ...props } = button
         return (
-          <Button
-            {...props}
-            name={field.name}
-            key={button.value}
-            active={field.value === button.value}
-            onBlur={field.onBlur}
-            onClick={field.onChange}
-          >
+          <ToggleButton {...props} key={button.value} value={button.value}>
             {label}
-          </Button>
+          </ToggleButton>
         )
       })}
-    </ButtonGroup>
+    </ToggleButtonGroup>
   )
   return renderField(
     field,
@@ -279,21 +277,6 @@ export const renderButtonToggleGroup = ({
     addon,
     vertical
   )
-}
-
-export const renderToggleButton = ({
-  field, // { name, value, onChange, onBlur }
-  form, // also values, setXXXX, handleXXXX, dirty, isValid, status, etc.
-  ...props
-}) => {
-  const { labels, children, ...otherProps } = props
-  delete field.onBlur // the onBlur would change the value from boolean to string
-  const widgetElem = (
-    <Button {...field} {...otherProps}>
-      {labels[field.value]}
-    </Button>
-  )
-  return renderFieldNoLabel(field, form, widgetElem, children)
 }
 
 export default renderField
