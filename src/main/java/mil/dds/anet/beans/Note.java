@@ -104,12 +104,12 @@ public class Note extends AbstractAnetBean {
     }
     final Note n = (Note) o;
     return Objects.equals(n.getUuid(), uuid) && Objects.equals(n.getAuthorUuid(), getAuthorUuid())
-        && Objects.equals(n.getText(), text);
+        && Objects.equals(n.getType(), type) && Objects.equals(n.getText(), text);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, text);
+    return Objects.hash(uuid, type, text);
   }
 
   @Override
