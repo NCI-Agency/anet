@@ -118,6 +118,10 @@ class BaseReportForm extends Component {
   }
 
   componentDidMount() {
+    const tagQuery = {
+      pageNum: 0,
+      pageSize: 0 // retrieve all
+    }
     API.query(
       /* GraphQL */ `
       locationRecents(maxResults:6) {
@@ -132,10 +136,11 @@ class BaseReportForm extends Component {
       authorizationGroupRecents(maxResults:6) {
         list { uuid, name, description }
       }
-      tags {
+      tagList(query:$tagQuery) {
         list { uuid, name, description }
-      }
-    `
+      }`,
+      { tagQuery },
+      "($tagQuery: TagSearchQueryInput)"
     ).then(data => {
       const newState = {
         recents: {
@@ -145,7 +150,7 @@ class BaseReportForm extends Component {
           authorizationGroups: data.authorizationGroupRecents.list
         },
         // ReactTags expects id and text properties
-        tagSuggestions: data.tags.list.map(tag => ({
+        tagSuggestions: data.tagList.list.map(tag => ({
           id: tag.uuid,
           text: tag.name
         }))
