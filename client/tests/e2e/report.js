@@ -628,11 +628,6 @@ function httpRequestSmtpServer(requestType) {
       if (xhttp.readyState === 4) {
         if (xhttp.status === 200) {
           resolve(xhttp.responseText)
-        } else {
-          reject({
-            status: request.status,
-            statusText: request.statusText
-          })
         }
       }
     }
